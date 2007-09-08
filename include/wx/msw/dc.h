@@ -78,14 +78,13 @@ public:
     virtual int GetDepth() const;
     virtual wxSize GetPPI() const;
 
-
     virtual void SetMapMode(int mode);
     virtual void SetUserScale(double x, double y);
+    virtual void SetSystemScale(double x, double y);
     virtual void SetLogicalScale(double x, double y);
     virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
     virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
     virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
-    
     virtual void SetLogicalFunction(int function);
 
     // implementation from now on
@@ -163,13 +162,11 @@ protected:
     // classes
     wxDC() { Init(); }
 
-    void RealizeScaleAndOrigin();
-
     virtual void DoGetTextExtent(const wxString& string,
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const;
+                                 wxFont *theFont = NULL) const;
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
 
     virtual bool DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
@@ -216,14 +213,6 @@ protected:
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
                         int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
-
-    virtual bool DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                               wxCoord dstWidth, wxCoord dstHeight,
-                               wxDC *source,
-                               wxCoord xsrc, wxCoord ysrc,
-                               wxCoord srcWidth, wxCoord srcHeight,
-                               int rop = wxCOPY, bool useMask = false,
-                               wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
 
     // this is gnarly - we can't even call this function DoSetClippingRegion()
     // because of virtual function hiding

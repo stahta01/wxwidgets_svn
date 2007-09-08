@@ -17,11 +17,10 @@
 
 #include "wx/fs_mem.h"
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/hash.h"
-    #include "wx/wxcrtvararg.h"
     #if wxUSE_GUI
         #include "wx/bitmap.h"
         #include "wx/image.h"
@@ -122,15 +121,26 @@ wxFSFile* wxMemoryFSHandlerBase::OpenFile(wxFileSystem& WXUNUSED(fs), const wxSt
     if (m_Hash)
     {
         MemFSHashObj *obj = (MemFSHashObj*) m_Hash -> Get(GetRightLocation(location));
-        if (obj == NULL)  return NULL;
-        else return new wxFSFile(new wxMemoryInputStream(obj -> m_Data, obj -> m_Len),
-                            location,
-                            obj->m_MimeType,
-                            GetAnchor(location)
+        if (obj == NULL)
+        {
+            return NULL;
+        }
+        else
+        {
+            wxString mime = obj->m_MimeType;
+            if ( mime.empty() )
+                mime = GetMimeTypeFromExt(location);
+            return new wxFSFile
+                       (
+                           new wxMemoryInputStream(obj -> m_Data, obj -> m_Len),
+                           location,
+                           mime,
+                           GetAnchor(location)
 #if wxUSE_DATETIME
-                            , obj -> m_Time
+                           , obj -> m_Time
 #endif // wxUSE_DATETIME
-                            );
+                           );
+        }
     }
     else return NULL;
 }

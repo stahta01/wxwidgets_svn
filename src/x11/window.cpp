@@ -807,11 +807,9 @@ void wxWindowX11::DoScreenToClient(int *x, int *y) const
     Window thisWindow = (Window) m_clientWindow;
 
     Window childWindow;
-    int xx = x ? *x : 0;
-    int yy = y ? *y : 0;
-    XTranslateCoordinates(display, rootWindow, thisWindow,
-                          xx, yy, x ? x : &xx, y ? y : &yy,
-                          &childWindow);
+    int xx = *x;
+    int yy = *y;
+    XTranslateCoordinates(display, rootWindow, thisWindow, xx, yy, x, y, &childWindow);
 }
 
 void wxWindowX11::DoClientToScreen(int *x, int *y) const
@@ -821,11 +819,9 @@ void wxWindowX11::DoClientToScreen(int *x, int *y) const
     Window thisWindow = (Window) m_clientWindow;
 
     Window childWindow;
-    int xx = x ? *x : 0;
-    int yy = y ? *y : 0;
-    XTranslateCoordinates(display, thisWindow, rootWindow,
-                          xx, yy, x ? x : &xx, y ? y : &yy,
-                          &childWindow);
+    int xx = *x;
+    int yy = *y;
+    XTranslateCoordinates(display, thisWindow, rootWindow, xx, yy, x, y, &childWindow);
 }
 
 
@@ -1122,7 +1118,7 @@ void wxWindowX11::GetTextExtent(const wxString& string,
     XCharStruct overall;
     int slen = string.length();
 
-    XTextExtents((XFontStruct*) pFontStruct, (const char*) string.c_str(), slen,
+    XTextExtents((XFontStruct*) pFontStruct, (char*) string.c_str(), slen,
                  &direction, &ascent, &descent2, &overall);
 
     if ( x )
@@ -1464,22 +1460,6 @@ bool wxTranslateMouseEvent(wxMouseEvent& wxevent, wxWindow *win, Window window, 
                 {
                     eventType = wxEVT_RIGHT_DOWN;
                     button = 3;
-                }
-                else if ( xevent->xbutton.button == Button4 ||
-                            xevent->xbutton.button == Button5 )
-                {
-                    // this is the same value as used under wxMSW
-                    static const int WHEEL_DELTA = 120;
-
-                    eventType = wxEVT_MOUSEWHEEL;
-                    button = xevent->xbutton.button;
-
-                    wxevent.m_linesPerAction = 3;
-                    wxevent.m_wheelDelta = WHEEL_DELTA;
-
-                    // Button 4 means mousewheel up, 5 means down
-                    wxevent.m_wheelRotation = button == Button4 ? WHEEL_DELTA
-                                                                : -WHEEL_DELTA;
                 }
 
                 // check for a double click

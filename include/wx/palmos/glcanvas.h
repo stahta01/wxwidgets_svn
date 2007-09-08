@@ -19,7 +19,7 @@
 
 #include <GL/gl.h>
 
-class WXDLLIMPEXP_FWD_GL wxGLCanvas;     /* forward reference */
+class WXDLLIMPEXP_GL wxGLCanvas;     /* forward reference */
 
 class WXDLLIMPEXP_GL wxGLContext: public wxObject
 {
@@ -35,7 +35,7 @@ public:
 
     void SetCurrent();
 
-    void SetColour(const wxString& colour);
+    void SetColour(const wxChar *colour);
 
     void SwapBuffers();
 
@@ -114,7 +114,13 @@ public:
 
     void SetupPalette(const wxPalette& palette);
 
+    wxPalette CreateDefaultPalette();
+
+    inline wxPalette* GetPalette() const { return (wxPalette *) &m_palette; }
+
 protected:
+    wxGLContext*   m_glContext;  // this is typedef-ed ptr, in fact
+    wxPalette      m_palette;
     WXHDC          m_hDC;
 
     DECLARE_EVENT_TABLE()

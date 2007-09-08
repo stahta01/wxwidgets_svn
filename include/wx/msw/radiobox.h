@@ -14,7 +14,7 @@
 
 #include "wx/statbox.h"
 
-class WXDLLIMPEXP_FWD_CORE wxSubwindows;
+class WXDLLEXPORT wxSubwindows;
 
 // ----------------------------------------------------------------------------
 // wxRadioBox
@@ -114,9 +114,6 @@ public:
     // we inherit a version always returning false from wxStaticBox, override
     // it to behave normally
     virtual bool AcceptsFocus() const { return wxControl::AcceptsFocus(); }
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
 
     void SetLabelFont(const wxFont& WXUNUSED(font)) {}
     void SetButtonFont(const wxFont& font) { SetFont(font); }

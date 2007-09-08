@@ -41,10 +41,6 @@ changes the behaviour of the latter.
 
 <wx/window.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Window styles}
 
 The following styles can apply to all windows, although they will not always make sense for a particular
@@ -68,18 +64,15 @@ events. Windows only.}
 the window wants to get all char/key events for all keys - even for
 keys like TAB or ENTER which are usually used for dialog navigation
 and which wouldn't be generated without this style.  If you need to
-use this style in order to get the arrows or etc., but would still like
-to have normal keyboard navigation take place, you should call
-\helpref{Navigate}{wxwindownavigate} in response to the key events for
-Tab and Shift-Tab.}
+use this style in order to get the arrows or etc., but would still like to have
+normal keyboard navigation take place, you should create and send a
+wxNavigationKeyEvent in response to the key events for Tab and
+Shift-Tab.}
 \twocolitem{\windowstyle{wxNO\_FULL\_REPAINT\_ON\_RESIZE}}{On Windows, this style used to disable repainting
 the window completely when its size is changed. Since this behaviour is now the default, the style is now obsolete
 and no longer has an effect.}
-\twocolitem{\windowstyle{wxVSCROLL}}{Use this style to enable a vertical
-scrollbar. Notice that this style cannot be used with native controls
-which don't support scrollbars nor with top-level windows in most ports.}
-\twocolitem{\windowstyle{wxHSCROLL}}{Use this style to enable a horizontal
-scrollbar. The same limitations as for wxVSCROLL apply to this style.}
+\twocolitem{\windowstyle{wxVSCROLL}}{Use this style to enable a vertical scrollbar.}
+\twocolitem{\windowstyle{wxHSCROLL}}{Use this style to enable a horizontal scrollbar.}
 \twocolitem{\windowstyle{wxALWAYS\_SHOW\_SB}}{If a window has scrollbars,
 disable them instead of hiding them when they are not needed (i.e. when the
 size of the window is big enough to not require the scrollbars to navigate it).
@@ -178,29 +171,6 @@ can delete a window only when it is safe to do so, in idle time.
 \helpref{Window deletion overview}{windowdeletionoverview},\rtfsp
 \helpref{wxWindow::Destroy}{wxwindowdestroy},\rtfsp
 \helpref{wxCloseEvent}{wxcloseevent}
-
-
-\membersection{wxWindow::AcceptsFocus}\label{wxwindowacceptsfocus}
-
-\constfunc{bool}{AcceptsFocus}{\void}
-
-This method may be overridden in the derived classes to return \false to
-indicate that this control doesn't accept input at all (i.e. behaves like e.g.
-\helpref{wxStaticText}{wxstatictext}) and so doesn't need focus.
-
-\wxheading{See also}
-
-\helpref{AcceptsFocusFromKeyboard}{wxwindowacceptsfocusfromkeyboard}
-
-
-\membersection{wxWindow::AcceptsFocusFromKeyboard}\label{wxwindowacceptsfocusfromkeyboard}
-
-\constfunc{bool}{AcceptsFocusFromKeyboard}{\void}
-
-This method may be overridden in the derived classes to return \false to
-indicate that while this control can, in principle, have focus if the user
-clicks it with the mouse, it shouldn't be included in the TAB traversal chain
-when using the keyboard.
 
 
 \membersection{wxWindow::AddChild}\label{wxwindowaddchild}
@@ -691,7 +661,7 @@ If no window with such name is found,
 \func{virtual void}{Fit}{\void}
 
 Sizes the window so that it fits around its subwindows. This function won't do
-anything if there are no subwindows and will only really work correctly if
+anything if there are no subwindows and will only really work correctly if the
 sizers are used for the subwindows layout. Also, if the window has exactly one
 subwindow it is better (faster and the result is more precise as Fit adds some
 margin to account for fuzziness of its calculations) to call
@@ -901,12 +871,9 @@ a 2-element list {\tt (width, height)}.}
 
 \constfunc{wxSize}{GetClientSize}{\void}
 
-Returns the size of the window `client area' in pixels. The client area is the
-area which may be drawn on by the programmer, excluding title bar, border,
-scrollbars, etc.
-
-Note that if this window is a top-level one and it is currently minimized, the
-return size is empty (both width and height are $0$).
+This gets the size of the window `client area' in pixels.
+The client area is the area which may be drawn on by the programmer,
+excluding title bar, border, scrollbars, etc.
 
 \wxheading{Parameters}
 
@@ -1203,7 +1170,7 @@ method:\par
 
 \constfunc{virtual wxRect}{GetRect}{\void}
 
-Returns the position and size of the window as a \helpref{wxRect}{wxrect} object.
+Returns the size and position of the window as a \helpref{wxRect}{wxrect} object.
 
 \wxheading{See also}
 
@@ -1234,7 +1201,7 @@ child window or a top level one.
 
 \constfunc{virtual wxRect}{GetScreenRect}{\void}
 
-Returns the position and size of the window on the screen as a 
+Returns the size and position of the window on the screen as a 
 \helpref{wxRect}{wxrect} object.
 
 \wxheading{See also}
@@ -1281,11 +1248,8 @@ Returns the built-in scrollbar thumb size.
 
 \constfunc{wxSize}{GetSize}{\void}
 
-Returns the size of the entire window in pixels, including title bar, border,
-scrollbars, etc.
-
-Note that if this window is a top-level one and it is currently minimized, the
-returned size is the restored window size, not the size of the window icon.
+This gets the size of the entire window in pixels,
+including title bar, border, scrollbars, etc.
 
 \wxheading{Parameters}
 
@@ -1326,25 +1290,20 @@ Return the sizer associated with the window by a previous call to
 
 \membersection{wxWindow::GetTextExtent}\label{wxwindowgettextextent}
 
-\constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{w}, \param{int* }{h},
+\constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{x}, \param{int* }{y},
  \param{int* }{descent = NULL}, \param{int* }{externalLeading = NULL},
  \param{const wxFont* }{font = NULL}, \param{bool}{ use16 = {\tt false}}}
 
-\constfunc{wxSize}{GetTextExtent}{\param{const wxString\& }{string}}
-
 Gets the dimensions of the string as it would be drawn on the
 window with the currently selected font.
-
-The text extent is returned in \arg{w} and \arg{h} pointers (first form) or as a 
-\helpref{wxSize}{wxsize} object (second form).
 
 \wxheading{Parameters}
 
 \docparam{string}{String whose extent is to be measured.}
 
-\docparam{w}{Return value for width.}
+\docparam{x}{Return value for width.}
 
-\docparam{h}{Return value for height.}
+\docparam{y}{Return value for height.}
 
 \docparam{descent}{Return value for descent (optional).}
 
@@ -1452,18 +1411,6 @@ Returns {\tt true} if this window has the current mouse capture.
 \helpref{wxWindow::ReleaseMouse}{wxwindowreleasemouse},
 \helpref{wxMouseCaptureLostEvent}{wxmousecapturelostevent}
 \helpref{wxMouseCaptureChangedEvent}{wxmousecapturechangedevent}
-
-
-\membersection{wxWindow::HasExtraStyle}\label{wxwindowhasextrastyle}
-
-\constfunc{bool}{HasExtraStyle}{\param{int }{exFlag}}
-
-Returns \texttt{true} if the window has the given \arg{exFlag} bit set in its
-extra styles.
-
-\wxheading{See also}
-
-\helpref{SetExtraStyle}{wxwindowsetextrastyle}
 
 
 \membersection{wxWindow::HasFlag}\label{wxwindowhasflag}
@@ -1576,13 +1523,7 @@ and transferred to the screen all at once later.
 
 \constfunc{virtual bool}{IsEnabled}{\void}
 
-Returns \true if the window is enabled, i.e. if it accepts user input, \false 
-otherwise.
-
-Notice that this method can return \false even if this window itself hadn't
-been explicitly disabled when one of its parent windows is disabled. To get the
-intrinsic status of this window, use 
-\helpref{IsThisEnabled}{wxwindowisthisenabled}
+Returns {\tt true} if the window is enabled for input, {\tt false} otherwise.
 
 \wxheading{See also}
 
@@ -1656,16 +1597,6 @@ is shown and all its parents up to the toplevel window are shown as well.
 \wxheading{See also}
 
 \helpref{wxWindow::IsShown}{wxwindowisshown}
-
-
-\membersection{wxWindow::IsThisEnabled}\label{wxwindowisthisenabled}
-
-\constfunc{bool}{IsThisEnabled}{\void}
-
-Returns \true if this window is intrinsically enabled, \false otherwise, i.e.
-if \helpref{Enable(false)}{wxwindowenable} had been called. This method is
-mostly used for wxWidgets itself, user code should normally use 
-\helpref{IsEnabled}{wxwindowisenabled} instead.
 
 
 \membersection{wxWindow::IsTopLevel}\label{wxwindowistoplevel}
@@ -1792,51 +1723,19 @@ it.
 
 \func{bool}{Navigate}{\param{int}{ flags = wxNavigationKeyEvent::IsForward}}
 
-Performs a keyboard navigation action starting from this window. This method is
-equivalent to calling \helpref{NavigateIn()}{wxwindownavigatein} method on the
-parent window.
+Does keyboard navigation from this window to another, by sending
+a wxNavigationKeyEvent.
 
 \wxheading{Parameters}
 
 \docparam{flags}{A combination of wxNavigationKeyEvent::IsForward and wxNavigationKeyEvent::WinChange.}
-
-\wxheading{Return value}
-
-Returns \true if the focus was moved to another window or \false if nothing
-changed.
 
 \wxheading{Remarks}
 
 You may wish to call this from a text control custom keypress handler to do the default
 navigation behaviour for the tab key, since the standard default behaviour for
 a multiline text control with the wxTE\_PROCESS\_TAB style is to insert a tab
-and not navigate to the next control. See also \helpref{wxNavigationKeyEvent}{wxnavigationkeyevent}.
-
-
-\membersection{wxWindow::NavigateIn}\label{wxwindownavigatein}
-
-\func{bool}{NavigateIn}{\param{int}{ flags = wxNavigationKeyEvent::IsForward}}
-
-Performs a keyboard navigation action inside this window.
-
-See \helpref{Navigate}{wxwindownavigate} for more information.
-
-
-\membersection{wxWindow::NextControlId}\label{wxwindownextcontrolid}
-
-\func{static int}{NextControlId}{\param{int }{winid}}
-
-If two controls are created consecutively using \texttt{wxID\_ANY} id, this
-function allows to retrieve the effective id of the latter control from the id
-of the former. This is useful for example to find the control following its 
-\helpref{wxStaticText}{wxstatictext} label if only the id of or pointer to the
-label is available to the caller but it is known that the two controls were
-created together.
-
-\wxheading{See also}
-
-\helpref{PrevControlId}{wxwindowprevcontrolid}
-
+and not navigate to the next control.
 
 %% VZ: wxWindow::OnXXX() functions should not be documented but I'm leaving
 %%     the old docs here in case we want to move any still needed bits to
@@ -2395,14 +2294,6 @@ implements the following methods:\par
 \twocolitem{{\bf PopupMenuXY(menu, x, y)}}{Specifies position with two integers (x, y)}
 \end{twocollist}}
 }
-
-
-\membersection{wxWindow::PrevControlId}\label{wxwindowprevcontrolid}
-
-\func{static int}{PrevControlId}{\param{int }{winid}}
-
-This is similar to \helpref{NextControlId}{wxwindownextcontrolid} but returns
-the id of the control created just before the one with the given \arg{winid}.
 
 
 \membersection{wxWindow::PushEventHandler}\label{wxwindowpusheventhandler}
@@ -3001,7 +2892,7 @@ can be overridden to do something in addition to this in the derived classes.
 
 \membersection{wxWindow::SetFont}\label{wxwindowsetfont}
 
-\func{bool}{SetFont}{\param{const wxFont\& }{font}}
+\func{void}{SetFont}{\param{const wxFont\& }{font}}
 
 Sets the font for this window. This function should not be called for the
 parent window if you don't want its font to be inherited by its children,
@@ -3019,11 +2910,6 @@ any standard controls for drawing their text as well as by
 
 \docparam{font}{Font to associate with this window, pass
 {\tt wxNullFont} to reset to the default font.}
-
-\wxheading{Return value}
-
-\true if the want was really changed, \false if it was already set to this 
-\arg{font} and so nothing was done.
 
 \wxheading{See also}
 
@@ -3351,7 +3237,7 @@ and usually the scrollbar will be automatically hidden.
 
 \func{virtual void}{SetSize}{\param{const wxRect\&}{ rect}}
 
-Sets the position and size of the window in pixels.
+Sets the size and position of the window in pixels.
 
 \func{virtual void}{SetSize}{\param{int}{ width}, \param{int}{ height}}
 
@@ -3448,7 +3334,7 @@ parameter if the {\it sizer}\/ is non-NULL and {\tt false} otherwise.
 \docparam{sizer}{The sizer to set. Pass NULL to disassociate and conditionally delete
 the window's sizer.  See below.}
 
-\docparam{deleteOld}{If true (the default), this will delete any pre-existing sizer.
+\docparam{deleteOld}{If true (the default), this will delete any prexisting sizer.
 Pass false if you wish to handle deleting the old sizer yourself.}
 
 \wxheading{Remarks}

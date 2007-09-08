@@ -17,9 +17,9 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxWindowDC;
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxClientDC;
+class WXDLLIMPEXP_CORE wxWindowDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxClientDC;
 
 //-----------------------------------------------------------------------------
 // wxWindowDC
@@ -74,7 +74,7 @@ protected:
                                 wxCoord *width, wxCoord *height,
                                 wxCoord *descent = (wxCoord *) NULL,
                                 wxCoord *externalLeading = (wxCoord *) NULL,
-                                const wxFont *theFont = (wxFont *) NULL) const;
+                                wxFont *theFont = (wxFont *) NULL) const;
 
 public:
     virtual wxCoord GetCharWidth() const;

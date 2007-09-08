@@ -606,7 +606,7 @@ wxChar *wxDDEConnection::Request(const wxString& item, int *size, wxIPCFormat fo
     return data;
 }
 
-bool wxDDEConnection::Poke(const wxString& item, const wxChar *data, int size, wxIPCFormat format)
+bool wxDDEConnection::Poke(const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
     DWORD result;
     if (size < 0)
@@ -670,7 +670,7 @@ bool wxDDEConnection::StopAdvise(const wxString& item)
 
 // Calls that SERVER can make
 bool wxDDEConnection::Advise(const wxString& item,
-                             const wxChar *data,
+                             wxChar *data,
                              int size,
                              wxIPCFormat format)
 {
@@ -805,10 +805,10 @@ _DDECallback(WORD wType,
                     wxString item_name = DDEStringFromAtom(hsz2);
 
                     int user_size = -1;
-                    const wxChar *data = connection->OnRequest(connection->m_topicName,
-                                                               item_name,
-                                                               &user_size,
-                                                               (wxIPCFormat)wFmt);
+                    wxChar *data = connection->OnRequest(connection->m_topicName,
+                                                       item_name,
+                                                       &user_size,
+                                                       (wxIPCFormat) wFmt);
                     if (data)
                     {
                         if (user_size < 0)
@@ -978,7 +978,7 @@ static HSZ DDEAtomFromString(const wxString& s)
 {
     wxASSERT_MSG( DDEIdInst, _T("DDE not initialized") );
 
-    HSZ hsz = DdeCreateStringHandle(DDEIdInst, (wxChar*)s.wx_str(), DDE_CP);
+    HSZ hsz = DdeCreateStringHandle(DDEIdInst, (wxChar*) s.c_str(), DDE_CP);
     if ( !hsz )
     {
         DDELogError(_("Failed to create DDE string"));

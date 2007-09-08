@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/gtk/menu.cpp
-// Purpose:     implementation of wxMenuBar and wxMenu classes for wxGTK
+// Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
@@ -9,8 +9,6 @@
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
-
-#if wxUSE_MENUS
 
 #include "wx/menu.h"
 
@@ -57,12 +55,14 @@ static wxString GetGtkHotKey( const wxMenuItem& item );
 
 static wxString wxReplaceUnderscore( const wxString& title )
 {
+    const wxChar *pc;
+
     // GTK 1.2 wants to have "_" instead of "&" for accelerators
     wxString str;
-
-    for ( wxString::const_iterator pc = title.begin(); pc != title.end(); ++pc )
+    pc = title;
+    while (*pc != wxT('\0'))
     {
-        if ((*pc == wxT('&')) && (pc+1 != title.end()) && (*(pc+1) == wxT('&')))
+        if ((*pc == wxT('&')) && (*(pc+1) == wxT('&')))
         {
             // "&" is doubled to indicate "&" instead of accelerator
             ++pc;
@@ -83,6 +83,7 @@ static wxString wxReplaceUnderscore( const wxString& title )
 
             str << *pc;
         }
+        ++pc;
     }
 
     // wxPrintf( wxT("before %s after %s\n"), title.c_str(), str.c_str() );
@@ -130,6 +131,9 @@ static wxString wxConvertFromGTKToWXLabel(const wxString& gtkLabel)
 
 static void DoCommonMenuCallbackCode(wxMenu *menu, wxMenuEvent& event)
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     event.SetEventObject( menu );
 
     wxEvtHandler* handler = menu->GetEventHandler();
@@ -173,11 +177,13 @@ IMPLEMENT_DYNAMIC_CLASS(wxMenuBar,wxWindow)
 
 void wxMenuBar::Init(size_t n, wxMenu *menus[], const wxString titles[], long style)
 {
+    // the parent window is known after wxFrame::SetMenu()
+    m_needParent = false;
     m_style = style;
-    m_invokingWindow = NULL;
+    m_invokingWindow = (wxWindow*) NULL;
 
-    if (!PreCreation( NULL, wxDefaultPosition, wxDefaultSize ) ||
-        !CreateBase( NULL, -1, wxDefaultPosition, wxDefaultSize, style, wxDefaultValidator, wxT("menubar") ))
+    if (!PreCreation( (wxWindow*) NULL, wxDefaultPosition, wxDefaultSize ) ||
+        !CreateBase( (wxWindow*) NULL, -1, wxDefaultPosition, wxDefaultSize, style, wxDefaultValidator, wxT("menubar") ))
     {
         wxFAIL_MSG( wxT("wxMenuBar creation failed") );
         return;
@@ -188,12 +194,12 @@ void wxMenuBar::Init(size_t n, wxMenu *menus[], const wxString titles[], long st
     if (style & wxMB_DOCKABLE)
     {
         m_widget = gtk_handle_box_new();
-        gtk_container_add(GTK_CONTAINER(m_widget), m_menubar);
-        gtk_widget_show(m_menubar);
+        gtk_container_add( GTK_CONTAINER(m_widget), GTK_WIDGET(m_menubar) );
+        gtk_widget_show( GTK_WIDGET(m_menubar) );
     }
     else
     {
-        m_widget = m_menubar;
+        m_widget = GTK_WIDGET(m_menubar);
     }
 
     PostCreation();
@@ -453,7 +459,7 @@ wxMenu *wxMenuBar::Remove(size_t pos)
 
 static int FindMenuItemRecursive( const wxMenu *menu, const wxString &menuString, const wxString &itemString )
 {
-    if (wxMenuItem::GetLabelText(wxConvertFromGTKToWXLabel(menu->GetTitle())) == wxMenuItem::GetLabelText(menuString))
+    if (wxMenuItem::GetLabelFromText(wxConvertFromGTKToWXLabel(menu->GetTitle())) == wxMenuItem::GetLabelFromText(menuString))
     {
         int res = menu->FindItem( itemString );
         if (res != wxNOT_FOUND)
@@ -538,7 +544,19 @@ void wxMenuBar::EnableTop( size_t pos, bool flag )
         gtk_widget_set_sensitive( menu->m_owner, flag );
 }
 
-wxString wxMenuBar::GetMenuLabel( size_t pos ) const
+wxString wxMenuBar::GetLabelTop( size_t pos ) const
+{
+    wxMenuList::compatibility_iterator node = m_menus.Item( pos );
+
+    wxCHECK_MSG( node, wxT("invalid"), wxT("menu not found") );
+
+    wxMenu* menu = node->GetData();
+
+    return wxStripMenuCodes(wxConvertFromGTKToWXLabel(menu->GetTitle()));
+}
+
+// Gets the original label at the top-level of the menubar
+wxString wxMenuBar::GetMenuLabel(size_t pos) const
 {
     wxMenuList::compatibility_iterator node = m_menus.Item( pos );
 
@@ -549,7 +567,7 @@ wxString wxMenuBar::GetMenuLabel( size_t pos ) const
     return wxConvertFromGTKToWXLabel(menu->GetTitle());
 }
 
-void wxMenuBar::SetMenuLabel( size_t pos, const wxString& label )
+void wxMenuBar::SetLabelTop( size_t pos, const wxString& label )
 {
     wxMenuList::compatibility_iterator node = m_menus.Item( pos );
 
@@ -572,6 +590,9 @@ void wxMenuBar::SetMenuLabel( size_t pos, const wxString& label )
 extern "C" {
 static void gtk_menu_clicked_callback( GtkWidget *widget, wxMenu *menu )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     int id = menu->FindMenuIdByMenuItem(widget);
 
     /* should find it for normal (not popup) menu */
@@ -646,6 +667,8 @@ static void gtk_menu_clicked_callback( GtkWidget *widget, wxMenu *menu )
 extern "C" {
 static void gtk_menu_hilight_callback( GtkWidget *widget, wxMenu *menu )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     int id = menu->FindMenuIdByMenuItem(widget);
 
     wxASSERT( id != -1 ); // should find it!
@@ -672,6 +695,8 @@ static void gtk_menu_hilight_callback( GtkWidget *widget, wxMenu *menu )
 extern "C" {
 static void gtk_menu_nolight_callback( GtkWidget *widget, wxMenu *menu )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     int id = menu->FindMenuIdByMenuItem(widget);
 
     wxASSERT( id != -1 ); // should find it!
@@ -746,8 +771,7 @@ wxMenuItem::~wxMenuItem()
 
 // return the menu item text without any menu accels
 /* static */
-
-wxString wxMenuItemBase::GetLabelText(const wxString& text)
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     // The argument to this function will now always be in wxWidgets standard label
     // format, not GTK+ format, so we do what the other ports do.
@@ -788,21 +812,13 @@ wxString wxMenuItemBase::GetLabelText(const wxString& text)
         label += *pc;
     }
 
-    // wxPrintf( wxT("GetLabelText(): text %s label %s\n"), text.c_str(), label.c_str() );
+    // wxPrintf( wxT("GetLabelFromText(): text %s label %s\n"), text.c_str(), label.c_str() );
 
     return label;
 #endif
 }
 
-wxString wxMenuItem::GetItemLabel() const
-{
-    wxString label = wxConvertFromGTKToWXLabel(m_text);
-    if (!m_hotKey.IsEmpty())
-        label = label + wxT("\t") + m_hotKey;
-    return label;
-}
-
-void wxMenuItem::SetItemLabel( const wxString& str )
+void wxMenuItem::SetText( const wxString& str )
 {
     // cache some data which must be used later
     bool isstock = wxIsStockID(GetId());
@@ -854,7 +870,7 @@ void wxMenuItem::SetItemLabel( const wxString& str )
         gtk_accelerator_parse( (const char*) oldbuf, &accel_key, &accel_mods);
         if (accel_key != 0)
         {
-            gtk_widget_remove_accelerator(m_menuItem,
+            gtk_widget_remove_accelerator( GTK_WIDGET(m_menuItem),
                                         m_parentMenu->m_accel,
                                         accel_key,
                                         accel_mods );
@@ -864,7 +880,7 @@ void wxMenuItem::SetItemLabel( const wxString& str )
     {
         // if the accelerator was taken from a stock ID, just get it back from GTK+ stock
         if (wxGetStockGtkAccelerator(stockid, &accel_mods, &accel_key))
-            gtk_widget_remove_accelerator( m_menuItem,
+            gtk_widget_remove_accelerator( GTK_WIDGET(m_menuItem),
                                            m_parentMenu->m_accel,
                                            accel_key,
                                            accel_mods );
@@ -877,7 +893,7 @@ void wxMenuItem::SetItemLabel( const wxString& str )
         gtk_accelerator_parse( (const char*) buf, &accel_key, &accel_mods);
         if (accel_key != 0)
         {
-            gtk_widget_add_accelerator( m_menuItem,
+            gtk_widget_add_accelerator( GTK_WIDGET(m_menuItem),
                                         "activate",
                                         m_parentMenu->m_accel,
                                         accel_key,
@@ -889,7 +905,7 @@ void wxMenuItem::SetItemLabel( const wxString& str )
     {
         // if the accelerator was taken from a stock ID, just get it back from GTK+ stock
         if (wxGetStockGtkAccelerator(stockid, &accel_mods, &accel_key))
-            gtk_widget_remove_accelerator( m_menuItem,
+            gtk_widget_remove_accelerator( GTK_WIDGET(m_menuItem),
                                            m_parentMenu->m_accel,
                                            accel_key,
                                            accel_mods );
@@ -897,29 +913,25 @@ void wxMenuItem::SetItemLabel( const wxString& str )
 }
 
 // NOTE: this function is different from the similar functions GTKProcessMnemonics()
-//       implemented in control.cpp and from wxMenuItemBase::GetLabelText...
+//       implemented in control.cpp and from wxMenuItemBase::GetLabelFromText...
 //       so there's no real code duplication
 wxString wxMenuItem::GTKProcessMenuItemLabel(const wxString& str, wxString *hotKey)
 {
     wxString text;
 
     // '\t' is the deliminator indicating a hot key
-    wxString::const_iterator pc = str.begin();
-    while ( pc != str.end() && *pc != wxT('\t') )
+    const wxChar *pc = str;
+    while ( (*pc != wxT('\0')) && (*pc != wxT('\t')) )
     {
-        if (*pc == wxT('&'))
+        if ((*pc == wxT('&')) && (*(pc+1) == wxT('&')))
         {
-            wxString::const_iterator next = pc + 1;
-            if (next != str.end() && *next == wxT('&'))
-            {
-                // "&" is doubled to indicate "&" instead of accelerator
-                ++pc;
-                text << wxT('&');
-            }
-            else
-            {
-                text << wxT('_');
-            }
+            // "&" is doubled to indicate "&" instead of accelerator
+            ++pc;
+            text << wxT('&');
+        }
+        else if (*pc == wxT('&'))
+        {
+            text << wxT('_');
         }
         else if ( *pc == wxT('_') )    // escape underscores
         {
@@ -938,7 +950,7 @@ wxString wxMenuItem::GTKProcessMenuItemLabel(const wxString& str, wxString *hotK
         if(*pc == wxT('\t'))
         {
             pc++;
-            hotKey->assign(pc, str.end());
+            *hotKey = pc;
         }
     }
 
@@ -1011,6 +1023,14 @@ bool wxMenuItem::IsChecked() const
     return ((GtkCheckMenuItem*)m_menuItem)->active != 0;
 }
 
+wxString wxMenuItem::GetItemLabel() const
+{
+    wxString label = wxConvertFromGTKToWXLabel(m_text);
+    if (!m_hotKey.IsEmpty())
+        label = label + wxT("\t") + m_hotKey;
+    return label;
+}
+
 //-----------------------------------------------------------------------------
 // wxMenu
 //-----------------------------------------------------------------------------
@@ -1056,7 +1076,6 @@ wxMenu::~wxMenu()
        // see wxMenu::Init
        gtk_widget_unref( m_menu );
        g_object_unref( m_accel );
-
        // if the menu is inserted in another menu at this time, there was
        // one more reference to it:
        if ( m_owner )
@@ -1081,7 +1100,7 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
     GtkWidget *menuItem;
 
     // cache some data used later
-    wxString text = mitem->wxMenuItemBase::GetItemLabel();
+    wxString text = mitem->GetText();
     int id = mitem->GetId();
     bool isstock = wxIsStockID(id);
     const char *stockid = NULL;
@@ -1147,7 +1166,7 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
     }
     else // a normal item
     {
-        // NB: 'text' variable has "_" instead of "&" after mitem->SetItemLabel()
+        // NB: 'text' variable has "_" instead of "&" after mitem->SetText()
         //     so don't use it
 
         switch ( mitem->GetKind() )
@@ -1195,13 +1214,13 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
     GdkModifierType accel_mods;
     wxCharBuffer buf = wxGTK_CONV_SYS( GetGtkHotKey(*mitem) );
 
-    // wxPrintf( wxT("item: %s hotkey %s\n"), mitem->GetItemLabel().c_str(), GetGtkHotKey(*mitem).c_str() );
+    // wxPrintf( wxT("item: %s hotkey %s\n"), mitem->GetText().c_str(), GetGtkHotKey(*mitem).c_str() );
     if (buf[(size_t)0] != '\0')
     {
         gtk_accelerator_parse( (const char*) buf, &accel_key, &accel_mods);
         if (accel_key != 0)
         {
-            gtk_widget_add_accelerator (menuItem,
+            gtk_widget_add_accelerator (GTK_WIDGET(menuItem),
                                         "activate",
                                         m_accel,
                                         accel_key,
@@ -1213,7 +1232,7 @@ bool wxMenu::GtkAppend(wxMenuItem *mitem, int pos)
     {
         // if the accelerator was taken from a stock ID, just get it back from GTK+ stock
         if (wxGetStockGtkAccelerator(stockid, &accel_mods, &accel_key))
-            gtk_widget_add_accelerator( menuItem,
+            gtk_widget_add_accelerator( GTK_WIDGET(menuItem),
                                         "activate",
                                         m_accel,
                                         accel_key,
@@ -1574,9 +1593,8 @@ static wxString GetGtkHotKey( const wxMenuItem& item )
             default:
                 if ( code < 127 )
                 {
-                    const wxString
-                        name = wxGTK_CONV_BACK_SYS(gdk_keyval_name((guint)code));
-                    if ( !name.empty() )
+                    wxString name = wxGTK_CONV_BACK( gdk_keyval_name((guint)code) );
+                    if ( name )
                     {
                         hotkey << name;
                         break;
@@ -1828,5 +1846,3 @@ bool wxGetStockGtkAccelerator(const char *id, GdkModifierType *mod, guint *key)
 }
 
 #endif // __WXGTK20__
-
-#endif // wxUSE_MENUS

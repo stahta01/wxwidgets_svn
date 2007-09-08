@@ -381,13 +381,8 @@ bool wxTCPConnection::Disconnect ()
       return true;
   // Send the the disconnect message to the peer.
   m_codeco->Write8(IPC_DISCONNECT);
-
-  if ( m_sock )
-  {
-      m_sock->Notify(false);
-      m_sock->Close();
-  }
-
+  m_sock->Notify(false);
+  m_sock->Close();
   SetConnected(false);
 
   return true;
@@ -443,7 +438,7 @@ wxChar *wxTCPConnection::Request (const wxString& item, int *size, wxIPCFormat f
   }
 }
 
-bool wxTCPConnection::Poke (const wxString& item, const wxChar *data, int size, wxIPCFormat format)
+bool wxTCPConnection::Poke (const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
   if (!m_sock->IsConnected())
     return false;
@@ -499,7 +494,7 @@ bool wxTCPConnection::StopAdvise (const wxString& item)
 
 // Calls that SERVER can make
 bool wxTCPConnection::Advise (const wxString& item,
-                              const wxChar *data, int size, wxIPCFormat format)
+                              wxChar *data, int size, wxIPCFormat format)
 {
   if (!m_sock->IsConnected())
     return false;
@@ -648,7 +643,7 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
     format = (wxIPCFormat)codeci->Read8();
 
     int user_size = -1;
-    const wxChar *user_data = connection->OnRequest (topic_name, item, &user_size, format);
+    wxChar *user_data = connection->OnRequest (topic_name, item, &user_size, format);
 
     if (user_data)
     {

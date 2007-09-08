@@ -268,8 +268,7 @@ defining the appropriate event table, and then call
 \rtfsp\helpref{wxWindow::SetEventHandler}{wxwindowseteventhandler} (or, preferably,
 \rtfsp\helpref{wxWindow::PushEventHandler}{wxwindowpusheventhandler}) to make this
 event handler the object that responds to events. This way, you can avoid
-a lot of class derivation, and use the same event handler class (but different
-objects as the same event handler object shouldn't be used more than once) to
+a lot of class derivation, and use the same event handler object to
 handle events from instances of different classes. If you ever have to call a window's event handler
 manually, use the GetEventHandler function to retrieve the window's event handler and use that
 to call the member function. By default, GetEventHandler returns a pointer to the window itself
@@ -450,7 +449,7 @@ DEFINE_EVENT_TYPE(name)
 \end{verbatim}
 
 You can ignore the {\it value} parameter of the DECLARE\_EVENT\_TYPE macro
-since it is used only for backwards compatibility with wxWidgets 2.0.x based
+since it used only for backwards compatibility with wxWidgets 2.0.x based
 applications where you have to give the event type ID an explicit value.
 
 See also the \helpref{event sample}{sampleevent} for an example of code
@@ -527,7 +526,9 @@ Under certain circumstances, it will be required to define your own event
 class e.g. for sending more complex data from one place to another. Apart
 from defining your event class, you will also need to define your own
 event table macro (which is quite long). Watch out to put in enough
-casts to the inherited event function. Here is an example:
+casts to the inherited event function. Here is an example, taken mostly
+from the {\it wxPlot} library, which is in the {\it contrib} section of
+the wxWidgets sources.
 
 {\small%
 \begin{verbatim}

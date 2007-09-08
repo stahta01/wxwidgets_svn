@@ -17,13 +17,13 @@
 
 WX_DECLARE_OBJC_HASHMAP(NSWindow);
 
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
-class WXDLLIMPEXP_FWD_CORE wxTopLevelWindowCocoa;
+class WXDLLEXPORT wxMenuBar;
+class WXDLLEXPORT wxTopLevelWindowCocoa;
 
 DECLARE_WXCOCOA_OBJC_CLASS(NSMenuItem);
 DECLARE_WXCOCOA_OBJC_CLASS(wxNSWindowDelegate);
 
-class WXDLLIMPEXP_CORE wxCocoaNSWindow
+class wxCocoaNSWindow
 {
 /* NSWindow is a rather special case and requires some extra attention */
     WX_DECLARE_OBJC_INTERFACE_HASHMAP(NSWindow)

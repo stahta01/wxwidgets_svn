@@ -35,7 +35,7 @@
 #endif
 
 #include "wx/msw/uxtheme.h"
-#include "wx/renderer.h"
+#include "wx/msw/private.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -51,6 +51,10 @@
 
 #ifndef BST_INDETERMINATE
     #define BST_INDETERMINATE 0x0002
+#endif
+
+#ifndef DFCS_HOT
+    #define DFCS_HOT 0x1000
 #endif
 
 #ifndef DT_HIDEPREFIX
@@ -445,20 +449,24 @@ bool wxCheckBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     const bool isFocused = m_isPressed || FindFocus() == this;
 
 
-    // draw the checkbox itself
-    wxDCTemp dc(hdc);
+    // draw the checkbox itself: note that this should really, really be in
+    // wxRendererNative but unfortunately we can't add a new virtual function
+    // to it without breaking backwards compatibility
 
-    int flags = 0;
+    // classic Win32 version -- this can be useful when we move this into
+    // wxRendererNative
+#if defined(__WXWINCE__) || !wxUSE_UXTHEME
+    UINT state = DFCS_BUTTONCHECK;
     if ( !IsEnabled() )
-        flags |= wxCONTROL_DISABLED;
+        state |= DFCS_INACTIVE;
     switch ( Get3StateValue() )
     {
         case wxCHK_CHECKED:
-            flags |= wxCONTROL_CHECKED;
+            state |= DFCS_CHECKED;
             break;
 
         case wxCHK_UNDETERMINED:
-            flags |= wxCONTROL_PRESSED;
+            state |= DFCS_PUSHED;
             break;
 
         default:
@@ -471,10 +479,62 @@ bool wxCheckBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     }
 
     if ( wxFindWindowAtPoint(wxGetMousePosition()) == this )
-        flags |= wxCONTROL_CURRENT;
+        state |= DFCS_HOT;
 
-    wxRendererNative::Get().
-        DrawCheckBox(this, dc, wxRectFromRECT(rectCheck), flags);
+    if ( !::DrawFrameControl(hdc, &rectCheck, DFC_BUTTON, state) )
+    {
+        wxLogLastError(_T("DrawFrameControl(DFC_BUTTON)"));
+    }
+#else // XP version
+    wxUxThemeEngine *themeEngine = wxUxThemeEngine::GetIfActive();
+    if ( !themeEngine )
+        return false;
+
+    wxUxThemeHandle theme(this, L"BUTTON");
+    if ( !theme )
+        return false;
+
+    int state;
+    switch ( Get3StateValue() )
+    {
+        case wxCHK_CHECKED:
+            state = CBS_CHECKEDNORMAL;
+            break;
+
+        case wxCHK_UNDETERMINED:
+            state = CBS_MIXEDNORMAL;
+            break;
+
+        default:
+            wxFAIL_MSG( _T("unexpected Get3StateValue() return value") );
+            // fall through
+
+        case wxCHK_UNCHECKED:
+            state = CBS_UNCHECKEDNORMAL;
+            break;
+    }
+
+    if ( !IsEnabled() )
+        state += CBS_DISABLED_OFFSET;
+    else if ( m_isPressed )
+        state += CBS_PRESSED_OFFSET;
+    else if ( m_isHot )
+        state += CBS_HOT_OFFSET;
+
+    HRESULT hr = themeEngine->DrawThemeBackground
+                              (
+                                theme,
+                                hdc,
+                                BP_CHECKBOX,
+                                state,
+                                &rectCheck,
+                                NULL
+                              );
+    if ( FAILED(hr) )
+    {
+        wxLogApiError(_T("DrawThemeBackground(BP_CHECKBOX)"), hr);
+    }
+#endif // 0/1
 
     // draw the text
     const wxString& label = GetLabel();
@@ -494,7 +554,7 @@ bool wxCheckBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     // around it
     if ( isFocused )
     {
-        if ( !::DrawText(hdc, label.wx_str(), label.length(), &rectLabel,
+        if ( !::DrawText(hdc, label, label.length(), &rectLabel,
                          fmt | DT_CALCRECT) )
         {
             wxLogLastError(_T("DrawText(DT_CALCRECT)"));
@@ -506,7 +566,7 @@ bool wxCheckBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
         ::SetTextColor(hdc, ::GetSysColor(COLOR_GRAYTEXT));
     }
 
-    if ( !::DrawText(hdc, label.wx_str(), label.length(), &rectLabel, fmt) )
+    if ( !::DrawText(hdc, label, label.length(), &rectLabel, fmt) )
     {
         wxLogLastError(_T("DrawText()"));
     }

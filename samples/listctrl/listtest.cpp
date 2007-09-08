@@ -105,6 +105,10 @@ BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
     EVT_LIST_END_LABEL_EDIT(LIST_CTRL, MyListCtrl::OnEndLabelEdit)
     EVT_LIST_DELETE_ITEM(LIST_CTRL, MyListCtrl::OnDeleteItem)
     EVT_LIST_DELETE_ALL_ITEMS(LIST_CTRL, MyListCtrl::OnDeleteAllItems)
+#if WXWIN_COMPATIBILITY_2_4
+    EVT_LIST_GET_INFO(LIST_CTRL, MyListCtrl::OnGetInfo)
+    EVT_LIST_SET_INFO(LIST_CTRL, MyListCtrl::OnSetInfo)
+#endif
     EVT_LIST_ITEM_SELECTED(LIST_CTRL, MyListCtrl::OnSelected)
     EVT_LIST_ITEM_DESELECTED(LIST_CTRL, MyListCtrl::OnDeselected)
     EVT_LIST_KEY_DOWN(LIST_CTRL, MyListCtrl::OnListKeyDown)
@@ -130,7 +134,7 @@ END_EVENT_TABLE()
 IMPLEMENT_APP(MyApp)
 
 // number of items in list/report view
-static const int NUM_ITEMS = 10;
+static const int NUM_ITEMS = 30;
 
 // number of items in icon/small icon view
 static const int NUM_ICONS = 9;
@@ -149,9 +153,6 @@ int wxCALLBACK MyCompareFunction(long item1, long item2, long WXUNUSED(sortData)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-      return false;
-
   // Create the main frame window
   MyFrame *frame = new MyFrame(wxT("wxListCtrl Test"));
 
@@ -165,11 +166,14 @@ bool MyApp::OnInit()
 
 // My frame constructor
 MyFrame::MyFrame(const wxChar *title)
-       : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(600, 500))
+       : wxFrame(NULL, wxID_ANY, title)
 {
     m_listCtrl = NULL;
     m_logWindow = NULL;
     m_smallVirtual = false;
+
+    if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_SMALL)
+        SetSize(wxSize(450, 340));
 
     // Give it an icon
     SetIcon( wxICON(mondrian) );
@@ -261,14 +265,14 @@ MyFrame::MyFrame(const wxChar *title)
     m_panel = new wxPanel(this, wxID_ANY);
     m_logWindow = new wxTextCtrl(m_panel, wxID_ANY, wxEmptyString,
                                  wxDefaultPosition, wxDefaultSize,
-                                 wxTE_READONLY | wxTE_MULTILINE | wxSUNKEN_BORDER);
+                                 wxTE_MULTILINE | wxSUNKEN_BORDER);
 
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_logWindow));
 
     RecreateList(wxLC_REPORT | wxLC_SINGLE_SEL);
 
 #if wxUSE_STATUSBAR
-    CreateStatusBar();
+    CreateStatusBar(3);
 #endif // wxUSE_STATUSBAR
 }
 
@@ -835,6 +839,41 @@ void MyListCtrl::OnDeleteAllItems(wxListEvent& event)
 {
     LogEvent(event, _T("OnDeleteAllItems"));
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+void MyListCtrl::OnGetInfo(wxListEvent& event)
+{
+    wxString msg;
+
+    msg << _T("OnGetInfo (") << event.m_item.m_itemId << _T(", ") << event.m_item.m_col << _T(")");
+    if ( event.m_item.m_mask & wxLIST_MASK_STATE )
+        msg << _T(" wxLIST_MASK_STATE");
+    if ( event.m_item.m_mask & wxLIST_MASK_TEXT )
+        msg << _T(" wxLIST_MASK_TEXT");
+    if ( event.m_item.m_mask & wxLIST_MASK_IMAGE )
+        msg << _T(" wxLIST_MASK_IMAGE");
+    if ( event.m_item.m_mask & wxLIST_MASK_DATA )
+        msg << _T(" wxLIST_MASK_DATA");
+    if ( event.m_item.m_mask & wxLIST_SET_ITEM )
+        msg << _T(" wxLIST_SET_ITEM");
+    if ( event.m_item.m_mask & wxLIST_MASK_WIDTH )
+        msg << _T(" wxLIST_MASK_WIDTH");
+    if ( event.m_item.m_mask & wxLIST_MASK_FORMAT )
+        msg << _T(" wxLIST_MASK_WIDTH");
+
+    if ( event.m_item.m_mask & wxLIST_MASK_TEXT )
+    {
+        event.m_item.m_text = _T("My callback text");
+    }
+
+    wxLogMessage(msg);
+}
+
+void MyListCtrl::OnSetInfo(wxListEvent& event)
+{
+    LogEvent(event, _T("OnSetInfo"));
+}
+#endif
 
 void MyListCtrl::OnSelected(wxListEvent& event)
 {

@@ -82,7 +82,8 @@ wxAnimation& wxAnimation::operator=(const wxAnimation& that)
 bool wxAnimation::LoadFile(const wxString &name, wxAnimationType WXUNUSED(type))
 {
     UnRef();
-    m_pixbuf = gdk_pixbuf_animation_new_from_file(name.fn_str(), NULL);
+    m_pixbuf = gdk_pixbuf_animation_new_from_file(
+        wxConvFileName->cWX2MB(name), NULL);
     return IsOk();
 }
 
@@ -198,6 +199,9 @@ bool wxAnimationCtrl::Create( wxWindow *parent, wxWindowID id,
                               long style,
                               const wxString& name)
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !base_type::CreateBase(parent, id, pos, size, style & wxWINDOW_STYLE_MASK,
                                wxDefaultValidator, name))
@@ -209,7 +213,7 @@ bool wxAnimationCtrl::Create( wxWindow *parent, wxWindowID id,
     SetWindowStyle(style);
 
     m_widget = gtk_image_new();
-    gtk_widget_show(m_widget);
+    gtk_widget_show( GTK_WIDGET(m_widget) );
 
     m_parent->DoAddChild( this );
 

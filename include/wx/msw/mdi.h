@@ -16,8 +16,8 @@
 
 extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
 
-class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+class WXDLLEXPORT wxMDIClientWindow;
+class WXDLLEXPORT wxMDIChildFrame;
 
 // ---------------------------------------------------------------------------
 // wxMDIParentFrame
@@ -92,9 +92,6 @@ public:
     virtual WXLRESULT MSWDefWindowProc(WXUINT, WXWPARAM, WXLPARAM);
     virtual bool MSWTranslateMessage(WXMSG* msg);
 
-    // override wxFrameBase function to also look in the active child menu bar
-    virtual const wxMenuItem *FindItemInMenuBar(int menuId) const;
-
 protected:
 #if wxUSE_MENUS_NATIVE
     virtual void InternalSetMenuBar();
@@ -114,7 +111,7 @@ protected:
     bool m_parentFrameActive;
 
 private:
-    friend class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+    friend class WXDLLEXPORT wxMDIChildFrame;
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)

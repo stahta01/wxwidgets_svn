@@ -13,8 +13,8 @@
 #define _WX_COLLAPSABLE_PANE_H_GENERIC_
 
 // forward declared
-class WXDLLIMPEXP_FWD_CORE wxButton;
-class WXDLLIMPEXP_FWD_CORE wxStaticLine;
+class WXDLLEXPORT wxButton;
+class WXDLLEXPORT wxStaticLine;
 
 // class name
 extern WXDLLIMPEXP_DATA_CORE(const wxChar) wxCollapsiblePaneNameStr[];

@@ -2,7 +2,7 @@
 %% Name:        list.tex
 %% Purpose:     wxList
 %% Author:      wxWidgets Team
-%% Modified by:
+%% Modified by: Robert Roebling
 %% Created:
 %% RCS-ID:      $Id$
 %% Copyright:   (c) wxWidgets Team
@@ -15,8 +15,8 @@ The wxList<T> class provides linked list functionality. It has been written
 to be type safe and to provide the full API of the STL std::list container and
 should be used like it. The exception is that wxList<T> actually stores
 pointers and therefore its iterators return pointers and not references
-to the actual objets in the list (see example below) and {\it value\_type} 
-is defined as {\it T*}.
+to the actual objets in the list (see example below). In other words
+{\it value\_type} is defined as {\it T*}.
 
 
 Unfortunately, the
@@ -101,8 +101,7 @@ it is not only unsafe but is also much less efficient than
 
 \wxheading{See also}
 
-\helpref{wxArray<T>}{wxarray},
-\helpref{wxVector<T>}{wxvector}
+\helpref{wxArray}{wxarray}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
@@ -335,31 +334,31 @@ Returns the first item in the list.
 
 Inserts an item (or several) at the given position.
 
-\membersection{wxList<T>::max\_size}\label{wxlistmaxsize}
+\membersection{wxList<T>::max\_size}\label{wxlistmax\_size}
 
 \constfunc{size\_type}{max\_size}{\void}
 
 Returns the largest possible size of the list.
 
-\membersection{wxList<T>::pop\_back}\label{wxlistpopback}
+\membersection{wxList<T>::pop\_back}\label{wxlistpop\_back}
 
 \func{void}{pop\_back}{\void}
 
-Removes the last item from the list.
+Removes the list item.
 
-\membersection{wxList<T>::pop\_front}\label{wxlistpopfront}
+\membersection{wxList<T>::pop\_front}\label{wxlistpop\_front}
 
 \func{void}{pop\_front}{\void}
 
-Removes the first item from the list.
+Removes the first item.
 
-\membersection{wxList<T>::push\_back}\label{wxlistpushback}
+\membersection{wxList<T>::push\_back}\label{wxlistpush\_back}
 
 \func{void}{push\_back}{\param{const\_reference }{v = value\_type()}}
 
 Adds an item to end of the list.
 
-\membersection{wxList<T>::push\_front}\label{wxlistpushfront}
+\membersection{wxList<T>::push\_front}\label{wxlistpush\_front}
 
 \func{void}{push\_front}{\param{const\_reference }{v = value\_type()}}
 
@@ -371,7 +370,7 @@ Adds an item to the front of the list.
 
 \constfunc{const\_reverse\_iterator}{rbegin}{\void}
 
-Returns a (const) reverse iterator pointing to the beginning of the
+Returns a (const) reverse iterator pointer to the beginning of the
 reversed list.
 
 \membersection{wxList<T>::remove}\label{wxlistremove}
@@ -386,7 +385,7 @@ Removes an item from the list.
 
 \constfunc{const\_reverse\_iterator}{rend}{\void}
 
-Returns a (const) reverse iterator pointing to the end of the
+Returns a (const) reverse iterator pointer to the end of the
 reversed list.
 
 \membersection{wxList<T>::resize}\label{wxlistresize}

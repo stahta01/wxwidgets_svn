@@ -16,7 +16,7 @@
 
 #if wxUSE_STACKWALKER
 
-class WXDLLIMPEXP_FWD_BASE wxStackFrame;
+class WXDLLIMPEXP_BASE wxStackFrame;
 
 // ----------------------------------------------------------------------------
 // wxStackFrame: a single stack level
@@ -135,7 +135,7 @@ public:
     // enumerate stack frames from the location of uncaught exception
     //
     // this version can only be called from wxApp::OnFatalException()
-    virtual void WalkFromException(size_t maxDepth = 200) = 0;
+    virtual void WalkFromException() = 0;
 
 protected:
     // this function must be overrided to process the given frame

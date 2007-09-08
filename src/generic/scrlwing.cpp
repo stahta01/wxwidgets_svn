@@ -235,17 +235,15 @@ bool wxScrollHelperEvtHandler::ProcessEvent(wxEvent& event)
         }
     }
 
+    // reset the skipped flag to false as it might have been set to true in
+    // ProcessEvent() above
+    event.Skip(false);
+
     if ( evType == wxEVT_PAINT )
     {
         m_scrollHelper->HandleOnPaint((wxPaintEvent &)event);
         return true;
     }
-
-    // reset the skipped flag (which might have been set to true in
-    // ProcessEvent() above) to be able to test it below
-    bool wasSkipped = event.GetSkipped();
-    if ( wasSkipped )
-        event.Skip(false);
 
     if ( evType == wxEVT_SCROLLWIN_TOP ||
          evType == wxEVT_SCROLLWIN_BOTTOM ||
@@ -256,16 +254,8 @@ bool wxScrollHelperEvtHandler::ProcessEvent(wxEvent& event)
          evType == wxEVT_SCROLLWIN_THUMBTRACK ||
          evType == wxEVT_SCROLLWIN_THUMBRELEASE )
     {
-        m_scrollHelper->HandleOnScroll((wxScrollWinEvent &)event);
-        if ( !event.GetSkipped() )
-        {
-            // it makes sense to indicate that we processed the message as we
-            // did scroll the window (and also notice that wxAutoScrollTimer
-            // relies on our return value to stop scrolling when we are at top
-            // or bottom already)
-            processed = true;
-            wasSkipped = false;
-        }
+            m_scrollHelper->HandleOnScroll((wxScrollWinEvent &)event);
+            return !event.GetSkipped();
     }
 
     if ( evType == wxEVT_ENTER_WINDOW )
@@ -277,29 +267,19 @@ bool wxScrollHelperEvtHandler::ProcessEvent(wxEvent& event)
         m_scrollHelper->HandleOnMouseLeave((wxMouseEvent &)event);
     }
 #if wxUSE_MOUSEWHEEL
-    // Use GTK's own scroll wheel handling in GtkScrolledWindow
-#ifndef __WXGTK20__
     else if ( evType == wxEVT_MOUSEWHEEL )
     {
         m_scrollHelper->HandleOnMouseWheel((wxMouseEvent &)event);
         return true;
     }
-#endif
 #endif // wxUSE_MOUSEWHEEL
     else if ( evType == wxEVT_CHAR )
     {
         m_scrollHelper->HandleOnChar((wxKeyEvent &)event);
-        if ( !event.GetSkipped() )
-        {
-            processed = true;
-            wasSkipped = false;
-        }
+        return !event.GetSkipped();
     }
 
-    if ( processed )
-        event.Skip(wasSkipped);
-
-    return processed;
+    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -488,6 +468,7 @@ void wxScrollHelper::HandleOnScroll(wxScrollWinEvent& event)
     }
 
     bool needsRefresh = false;
+
     int dx = 0,
         dy = 0;
     int orient = event.GetOrientation();
@@ -601,36 +582,49 @@ int wxScrollHelper::CalcScrollInc(wxScrollWinEvent& event)
 
     if (orient == wxHORIZONTAL)
     {
-        if ( m_xScrollPosition + nScrollInc < 0 )
+        if (m_xScrollPixelsPerLine > 0)
         {
-            // As -ve as we can go
-            nScrollInc = -m_xScrollPosition;
-        }
-        else // check for the other bound
-        {
-            const int posMax = m_xScrollLines - m_xScrollLinesPerPage;
-            if ( m_xScrollPosition + nScrollInc > posMax )
+            if ( m_xScrollPosition + nScrollInc < 0 )
             {
-                // As +ve as we can go
-                nScrollInc = posMax - m_xScrollPosition;
+                // As -ve as we can go
+                nScrollInc = -m_xScrollPosition;
+            }
+            else // check for the other bound
+            {
+                const int posMax = m_xScrollLines - m_xScrollLinesPerPage;
+                if ( m_xScrollPosition + nScrollInc > posMax )
+                {
+                    // As +ve as we can go
+                    nScrollInc = posMax - m_xScrollPosition;
+                }
             }
         }
+        else
+            m_targetWindow->Refresh(true, GetScrollRect());
     }
-    else // wxVERTICAL
+    else
     {
-        if ( m_yScrollPosition + nScrollInc < 0 )
+        if ( m_yScrollPixelsPerLine > 0 )
         {
-            // As -ve as we can go
-            nScrollInc = -m_yScrollPosition;
-        }
-        else // check for the other bound
-        {
-            const int posMax = m_yScrollLines - m_yScrollLinesPerPage;
-            if ( m_yScrollPosition + nScrollInc > posMax )
+            if ( m_yScrollPosition + nScrollInc < 0 )
             {
-                // As +ve as we can go
-                nScrollInc = posMax - m_yScrollPosition;
+                // As -ve as we can go
+                nScrollInc = -m_yScrollPosition;
             }
+            else // check for the other bound
+            {
+                const int posMax = m_yScrollLines - m_yScrollLinesPerPage;
+                if ( m_yScrollPosition + nScrollInc > posMax )
+                {
+                    // As +ve as we can go
+                    nScrollInc = posMax - m_yScrollPosition;
+                }
+            }
+        }
+        else
+        {
+            // VZ: why do we do this? (FIXME)
+            m_targetWindow->Refresh(true, GetScrollRect());
         }
     }
 
@@ -1316,7 +1310,7 @@ void wxScrollHelper::HandleOnMouseWheel(wxMouseEvent& event)
         wxScrollWinEvent newEvent;
 
         newEvent.SetPosition(0);
-        newEvent.SetOrientation( event.GetWheelAxis() == 0 ? wxVERTICAL : wxHORIZONTAL);
+        newEvent.SetOrientation(wxVERTICAL);
         newEvent.SetEventObject(m_win);
 
         if (event.IsPageScroll())
@@ -1367,13 +1361,7 @@ bool wxScrolledWindow::Create(wxWindow *parent,
     MacSetClipChildren( true ) ;
 #endif
 
-    // by default, we're scrollable in both directions (but if one of the
-    // styles is specified explicitly, we shouldn't add the other one
-    // automatically)
-    if ( !(style & (wxHSCROLL | wxVSCROLL)) )
-        style |= wxHSCROLL | wxVSCROLL;
-
-    bool ok = wxPanel::Create(parent, id, pos, size, style, name);
+    bool ok = wxPanel::Create(parent, id, pos, size, style|wxHSCROLL|wxVSCROLL, name);
 
     return ok;
 }

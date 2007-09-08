@@ -406,7 +406,7 @@ void wxVListBoxComboPopup::OnMouseMove(wxMouseEvent& event)
     const size_t lineMax = GetVisibleEnd();
     for ( size_t line = GetVisibleBegin(); line < lineMax; line++ )
     {
-        y -= OnGetRowHeight(line);
+        y -= OnGetLineHeight(line);
         if ( y < 0 )
         {
             // Only change selection if item is fully visible
@@ -471,8 +471,6 @@ void wxVListBoxComboPopup::Insert( const wxString& item, int pos )
     }
 
     m_strings.Insert(item,pos);
-    m_clientDatas.Insert(NULL, pos);
-
     m_widths.Insert(-1,pos);
     m_widthsDirty = true;
 
@@ -543,6 +541,7 @@ void wxVListBoxComboPopup::SetItemClientData( unsigned int n,
     // It should be sufficient to update this variable only here
     m_clientDataItemsType = clientDataItemsType;
 
+    m_clientDatas.SetCount(n+1,NULL);
     m_clientDatas[n] = clientData;
 
     ItemWidthChanged(n);
@@ -805,19 +804,7 @@ BEGIN_EVENT_TABLE(wxOwnerDrawnComboBox, wxComboCtrl)
 END_EVENT_TABLE()
 
 
-#if wxUSE_EXTENDED_RTTI
-IMPLEMENT_DYNAMIC_CLASS2_XTI(wxOwnerDrawnComboBox, wxComboCtrl, wxControlWithItems, "wx/odcombo.h")
-
-wxBEGIN_PROPERTIES_TABLE(wxOwnerDrawnComboBox)
-wxEND_PROPERTIES_TABLE()
-
-wxBEGIN_HANDLERS_TABLE(wxOwnerDrawnComboBox)
-wxEND_HANDLERS_TABLE()
-
-wxCONSTRUCTOR_5( wxOwnerDrawnComboBox , wxWindow* , Parent , wxWindowID , Id , wxString , Value , wxPoint , Position , wxSize , Size )
-#else
 IMPLEMENT_DYNAMIC_CLASS2(wxOwnerDrawnComboBox, wxComboCtrl, wxControlWithItems)
-#endif
 
 void wxOwnerDrawnComboBox::Init()
 {
@@ -924,7 +911,7 @@ void wxOwnerDrawnComboBox::DoSetPopupControl(wxComboPopup* popup)
 // wxOwnerDrawnComboBox item manipulation methods
 // ----------------------------------------------------------------------------
 
-void wxOwnerDrawnComboBox::DoClear()
+void wxOwnerDrawnComboBox::Clear()
 {
     EnsurePopupControl();
 
@@ -933,7 +920,7 @@ void wxOwnerDrawnComboBox::DoClear()
     SetValue(wxEmptyString);
 }
 
-void wxOwnerDrawnComboBox::DoDeleteOneItem(unsigned int n)
+void wxOwnerDrawnComboBox::Delete(unsigned int n)
 {
     wxCHECK_RET( IsValid(n), _T("invalid index in wxOwnerDrawnComboBox::Delete") );
 
@@ -1007,21 +994,24 @@ int wxOwnerDrawnComboBox::GetSelection() const
     return GetVListBoxComboPopup()->GetSelection();
 }
 
-int wxOwnerDrawnComboBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                                        unsigned int pos,
-                                        void **clientData,
-                                        wxClientDataType type)
+int wxOwnerDrawnComboBox::DoAppend(const wxString& item)
+{
+    EnsurePopupControl();
+    wxASSERT(m_popupInterface);
+
+    return GetVListBoxComboPopup()->Append(item);
+}
+
+int wxOwnerDrawnComboBox::DoInsert(const wxString& item, unsigned int pos)
 {
     EnsurePopupControl();
 
-    const unsigned int count = items.GetCount();
-    for( unsigned int i = 0; i < count; ++i, ++pos )
-    {
-        GetVListBoxComboPopup()->Insert(items[i], pos);
-        AssignNewItemClientData(pos, clientData, i, type);
-    }
+    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
+    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
 
-    return pos - 1;
+    GetVListBoxComboPopup()->Insert(item,pos);
+
+    return pos;
 }
 
 void wxOwnerDrawnComboBox::DoSetItemClientData(unsigned int n, void* clientData)
@@ -1037,6 +1027,16 @@ void* wxOwnerDrawnComboBox::DoGetItemClientData(unsigned int n) const
         return NULL;
 
     return GetVListBoxComboPopup()->GetItemClientData(n);
+}
+
+void wxOwnerDrawnComboBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+{
+    DoSetItemClientData(n, (void*) clientData);
+}
+
+wxClientData* wxOwnerDrawnComboBox::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData*) DoGetItemClientData(n);
 }
 
 // ----------------------------------------------------------------------------

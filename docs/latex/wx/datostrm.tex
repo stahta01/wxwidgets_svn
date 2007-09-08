@@ -21,17 +21,13 @@ None
 
 <wx/datstrm.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataOutputStream::wxDataOutputStream}\label{wxdataoutputstreamctor}
 
 \func{}{wxDataOutputStream}{\param{wxOutputStream\&}{ stream}}
 
-\func{}{wxDataOutputStream}{\param{wxOutputStream\&}{ stream}, \param{const wxMBConv\&}{ conv = wxConvAuto()}}
+\func{}{wxDataOutputStream}{\param{wxOutputStream\&}{ stream}, \param{wxMBConv\&}{ conv = wxMBConvUTF8}}
 
 Constructs a datastream object from an output stream. Only write methods will
 be available. The second form is only available in Unicode build of wxWidgets.

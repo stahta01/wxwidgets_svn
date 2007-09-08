@@ -31,7 +31,6 @@
     #include "wx/settings.h"
 #endif //WX_PRECOMP
 
-#include "wx/scopeguard.h"
 #include "wx/splitter.h"
 #include "wx/renderer.h"
 #include "wx/msw/private.h"
@@ -77,17 +76,8 @@
     #define HSAS_SORTEDDOWN     2
 #endif
 
-#if defined(__WXWINCE__)
-    #ifndef DFCS_FLAT
-        #define DFCS_FLAT 0
-    #endif
-    #ifndef DFCS_MONO
-        #define DFCS_MONO 0
-    #endif
-#endif
-
-#ifndef DFCS_HOT
-    #define DFCS_HOT 0x1000
+#if defined(__WXWINCE__) && !defined(DFCS_FLAT)
+    #define DFCS_FLAT 0
 #endif
 
 // ----------------------------------------------------------------------------
@@ -106,22 +96,10 @@ public:
                                         const wxRect& rect,
                                         int flags = 0);
 
-    virtual void DrawCheckBox(wxWindow *win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0);
-
     virtual void DrawPushButton(wxWindow *win,
                                 wxDC& dc,
                                 const wxRect& rect,
                                 int flags = 0);
-
-    virtual void DrawFocusRect(wxWindow* win,
-                               wxDC& dc,
-                               const wxRect& rect,
-                               int flags = 0);
-
-    virtual int GetHeaderButtonHeight(wxWindow *win);
 
 private:
     DECLARE_NO_COPY_CLASS(wxRendererMSW)
@@ -146,7 +124,8 @@ public:
                                   int flags = 0,
                                   wxHeaderSortIconType sortArrow = wxHDR_SORT_ICON_NONE,
                                   wxHeaderButtonParams* params = NULL);
-
+    virtual int GetHeaderButtonHeight(wxWindow *win);
+    
     virtual void DrawTreeItemButton(wxWindow *win,
                                     wxDC& dc,
                                     const wxRect& rect,
@@ -174,12 +153,6 @@ public:
                                 wxDC& dc,
                                 const wxRect& rect,
                                 int flags = 0);
-
-    virtual void DrawItemSelectionRect(wxWindow *win,
-                                       wxDC& dc,
-                                       const wxRect& rect,
-                                       int flags = 0 );
-
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 private:
@@ -219,7 +192,10 @@ wxRendererMSW::DrawComboBoxDropButton(wxWindow * WXUNUSED(win),
                                       int flags)
 {
     RECT r;
-    wxCopyRectToRECT(rect, r);
+    r.left = rect.GetLeft();
+    r.top = rect.GetTop();
+    r.bottom = rect.y + rect.height;
+    r.right = rect.x + rect.width;
 
     int style = DFCS_SCROLLCOMBOBOX;
     if ( flags & wxCONTROL_DISABLED )
@@ -228,30 +204,6 @@ wxRendererMSW::DrawComboBoxDropButton(wxWindow * WXUNUSED(win),
         style |= DFCS_PUSHED | DFCS_FLAT;
 
     ::DrawFrameControl(GetHdcOf(dc), &r, DFC_SCROLL, style);
-}
-
-void
-wxRendererMSW::DrawCheckBox(wxWindow * WXUNUSED(win),
-                            wxDC& dc,
-                            const wxRect& rect,
-                            int flags)
-{
-    RECT r;
-    wxCopyRectToRECT(rect, r);
-
-    int style = DFCS_BUTTONCHECK;
-    if ( flags & wxCONTROL_CHECKED )
-        style |= DFCS_CHECKED;
-    if ( flags & wxCONTROL_DISABLED )
-        style |= DFCS_INACTIVE;
-    if ( flags & wxCONTROL_FLAT )
-        style |= DFCS_MONO;
-    if ( flags & wxCONTROL_PRESSED )
-        style |= DFCS_PUSHED;
-    if ( flags & wxCONTROL_CURRENT )
-        style |= DFCS_HOT;
-
-    ::DrawFrameControl(GetHdcOf(dc), &r, DFC_BUTTON, style);
 }
 
 void
@@ -281,40 +233,6 @@ wxRendererMSW::DrawPushButton(wxWindow * WXUNUSED(win),
     wxCopyRectToRECT(rect, rc);
 
     ::DrawFrameControl(GetHdcOf(dc), &rc, DFC_BUTTON, style);
-}
-
-void wxRendererMSW::DrawFocusRect(wxWindow * WXUNUSED(win),
-                                  wxDC& dc,
-                                  const wxRect& rect,
-                                  int WXUNUSED(flags))
-{
-    RECT rc;
-    wxCopyRectToRECT(rect, rc);
-
-    ::DrawFocusRect(GetHdcOf(dc), &rc);
-}
-
-int wxRendererMSW::GetHeaderButtonHeight(wxWindow * WXUNUSED(win))
-{
-    // some "reasonable" value returned in case of error, it doesn't really
-    // correspond to anything but it's better than returning 0
-    static const int DEFAULT_HEIGHT = 20;
-
-
-    // create a temporary header window just to get its geometry
-    HWND hwndHeader = ::CreateWindow(WC_HEADER, NULL, NULL,
-                                     0, 0, 0, 0, NULL, NULL, NULL, NULL);
-    if ( !hwndHeader )
-        return DEFAULT_HEIGHT;
-
-    wxON_BLOCK_EXIT1( ::DestroyWindow, hwndHeader );
-
-    // initialize the struct filled with the values by Header_Layout()
-    RECT parentRect = { 0, 0, 100, 100 };
-    WINDOWPOS wp = { 0 };
-    HDLAYOUT hdl = { &parentRect, &wp };
-
-    return Header_Layout(hwndHeader, &hdl) ? wp.cy : DEFAULT_HEIGHT;
 }
 
 // ============================================================================
@@ -409,9 +327,34 @@ wxRendererXP::DrawHeaderButton(wxWindow *win,
     // NOTE: Using the theme to draw HP_HEADERSORTARROW doesn't do anything.
     // Why?  If this can be fixed then draw the sort arrows using the theme
     // and then clear those flags before calling DrawHeaderButtonContents.
-
+    
     // Add any extras that are specified in flags and params
     return DrawHeaderButtonContents(win, dc, rect, flags, sortArrow, params);
+}
+
+
+int
+wxRendererXP::GetHeaderButtonHeight(wxWindow *win)
+{
+    wxUxThemeHandle hTheme(win, L"HEADER");
+    if ( !hTheme )
+    {
+        return m_rendererNative.GetHeaderButtonHeight(win);
+    }
+    
+    HRESULT hr;
+    int value = -1;
+    
+    hr = wxUxThemeEngine::Get()->GetThemeMetric( hTheme,
+                                                 NULL,
+                                                 HP_HEADERITEM,
+                                                 HIS_NORMAL,
+                                                 TMT_HEIGHT,
+                                                 &value );
+    if ( hr == S_OK )
+        return value;
+    else
+        return 20;
 }
 
 
@@ -467,20 +410,13 @@ wxRendererXP::DrawCheckBox(wxWindow *win,
     else
         state = CBS_UNCHECKEDNORMAL;
 
-    // CBS_XXX is followed by CBX_XXXHOT, then CBS_XXXPRESSED and DISABLED
-    enum
-    {
-        CBS_HOT_OFFSET = 1,
-        CBS_PRESSED_OFFSET = 2,
-        CBS_DISABLED_OFFSET = 3
-    };
-
-    if ( flags & wxCONTROL_DISABLED )
-        state += CBS_DISABLED_OFFSET;
+    // CBS_XXX is followed by CBX_XXXGOT, then CBS_XXXPRESSED and DISABLED
+    if ( flags & wxCONTROL_CURRENT )
+        state += 1;
     else if ( flags & wxCONTROL_PRESSED )
-        state += CBS_PRESSED_OFFSET;
-    else if ( flags & wxCONTROL_CURRENT )
-        state += CBS_HOT_OFFSET;
+        state += 2;
+    else if ( flags & wxCONTROL_DISABLED )
+        state += 3;
 
     wxUxThemeEngine::Get()->DrawThemeBackground
                             (
@@ -532,40 +468,6 @@ wxRendererXP::DrawPushButton(wxWindow * win,
                             );
 
 }
-
-void
-wxRendererXP::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
-                                    wxDC& dc,
-                                    const wxRect& rect,
-                                    int flags)
-{
-    wxBrush brush;
-    if ( flags & wxCONTROL_SELECTED )
-    {
-        if ( flags & wxCONTROL_FOCUSED )
-        {
-            brush = wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
-        }
-        else // !focused
-        {
-            brush = wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW));
-        }
-    }
-    else // !selected
-    {
-        brush = *wxTRANSPARENT_BRUSH;
-    }
-
-    dc.SetBrush(brush);
-
-    // unlike for wxRendererGeneric, on windows we _never_ want to draw
-    // the outline of the rectangle:
-    dc.SetPen(*wxTRANSPARENT_PEN);
-
-    dc.DrawRectangle( rect );
-}
-
-
 
 // ----------------------------------------------------------------------------
 // splitter drawing

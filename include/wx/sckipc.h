@@ -49,8 +49,8 @@
  *
  */
 
-class WXDLLIMPEXP_FWD_NET wxTCPServer;
-class WXDLLIMPEXP_FWD_NET wxTCPClient;
+class WXDLLIMPEXP_NET wxTCPServer;
+class WXDLLIMPEXP_NET wxTCPClient;
 
 class WXDLLIMPEXP_NET wxTCPConnection: public wxConnectionBase
 {
@@ -64,12 +64,12 @@ public:
   // Calls that CLIENT can make
   virtual bool Execute(const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
   virtual wxChar *Request(const wxString& item, int *size = NULL, wxIPCFormat format = wxIPC_TEXT);
-  virtual bool Poke(const wxString& item, const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
+  virtual bool Poke(const wxString& item, wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
   virtual bool StartAdvise(const wxString& item);
   virtual bool StopAdvise(const wxString& item);
 
   // Calls that SERVER can make
-  virtual bool Advise(const wxString& item, const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
+  virtual bool Advise(const wxString& item, wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
 
   // Calls that both can make
   virtual bool Disconnect(void);
@@ -82,10 +82,8 @@ public:
   void Compress(bool on);
 
   // unhide the Execute overload from wxConnectionBase
-  // FIXME-UTF8: change Execute() to DoExecute() to avoid having to do this;
-  //             don't use c_str() below after removing ANSI build
   virtual bool Execute(const wxString& str)
-    { return Execute(str.c_str(), -1, wxIPC_TEXT); }
+    { return Execute(str, -1, wxIPC_TEXT); }
 
 protected:
   wxSocketBase       *m_sock;

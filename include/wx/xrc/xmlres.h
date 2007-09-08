@@ -17,7 +17,6 @@
 
 #include "wx/string.h"
 #include "wx/dynarray.h"
-#include "wx/arrstr.h"
 #include "wx/datetime.h"
 #include "wx/list.h"
 #include "wx/gdicmn.h"
@@ -30,17 +29,17 @@
 
 #include "wx/xml/xml.h"
 
-class WXDLLIMPEXP_FWD_CORE wxMenu;
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
-class WXDLLIMPEXP_FWD_CORE wxDialog;
-class WXDLLIMPEXP_FWD_CORE wxPanel;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxFrame;
-class WXDLLIMPEXP_FWD_CORE wxToolBar;
+class WXDLLEXPORT wxMenu;
+class WXDLLEXPORT wxMenuBar;
+class WXDLLEXPORT wxDialog;
+class WXDLLEXPORT wxPanel;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxToolBar;
 
-class WXDLLIMPEXP_FWD_XRC wxXmlResourceHandler;
-class WXDLLIMPEXP_FWD_XRC wxXmlSubclassFactory;
-class WXDLLIMPEXP_FWD_XRC wxXmlSubclassFactoriesList;
+class WXDLLIMPEXP_XRC wxXmlResourceHandler;
+class WXDLLIMPEXP_XRC wxXmlSubclassFactory;
+class WXDLLIMPEXP_XRC wxXmlSubclassFactoriesList;
 class wxXmlResourceModule;
 
 
@@ -114,7 +113,7 @@ public:
     //              don't check the modification time of the XRC files and
     //              reload them if they have changed on disk
     wxXmlResource(int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain = wxEmptyString);
+                  const wxString& domain=wxEmptyString);
 
     // Constructor.
     // Flags: wxXRC_USE_LOCALE
@@ -124,13 +123,13 @@ public:
     //              subclass property of object nodes will be ignored
     //              (useful for previews in XRC editors)
     wxXmlResource(const wxString& filemask, int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain = wxEmptyString);
+                  const wxString& domain=wxEmptyString);
 
     // Destructor.
     virtual ~wxXmlResource();
 
     wxXmlNode *GetFirstRoot();
-
+    
     // Loads resources from XML files that match given filemask.
     // This method understands VFS (see filesys.h).
     bool Load(const wxString& filemask);
@@ -226,11 +225,7 @@ public:
     // with a number. If value_if_not_found == wxID_NONE, the number is obtained via
     // wxWindow::NewControlId(). Otherwise value_if_not_found is used.
     // Macro XRCID(name) is provided for convenient use in event tables.
-    static int GetXRCID(const wxString& str_id, int value_if_not_found = wxID_NONE)
-        { return DoGetXRCID(str_id.mb_str(), value_if_not_found); }
-
-    // version for internal use only
-    static int DoGetXRCID(const char *str_id, int value_if_not_found = wxID_NONE);
+    static int GetXRCID(const wxChar *str_id, int value_if_not_found = wxID_NONE);
 
     // Returns version information (a.b.c.d = d+ 256*c + 256^2*b + 256^3*a).
     long GetVersion() const { return m_version; }
@@ -254,11 +249,10 @@ public:
     // Set flags after construction.
     void SetFlags(int flags) { m_flags = flags; }
 
-    // Get/Set the domain to be passed to the translation functions, defaults
-    // to empty string (no domain).
-    const wxString& GetDomain() const { return m_domain; }
-    void SetDomain(const wxString& domain);
-
+    // Get/Set the domain to be passed to the translation functions, defaults to NULL.
+    wxChar* GetDomain() const { return m_domain; }
+    void SetDomain(const wxChar* domain);
+    
 protected:
     // Scans the resources list for unloaded files and loads them. Also reloads
     // files that have been modified since last loading.
@@ -299,8 +293,8 @@ private:
 #endif
 
     // domain to pass to translation functions, if any.
-    wxString m_domain;
-
+    wxChar* m_domain;
+    
     friend class wxXmlResourceHandler;
     friend class wxXmlResourceModule;
 
@@ -323,7 +317,7 @@ private:
 //    END_EVENT_TABLE()
 
 #define XRCID(str_id) \
-    wxXmlResource::DoGetXRCID(str_id)
+    wxXmlResource::GetXRCID(wxT(str_id))
 
 
 // This macro returns pointer to particular control in dialog
@@ -523,6 +517,13 @@ public:
    Backward compatibility macros. Do *NOT* use, they may disappear in future
    versions of the XRC library!
    ------------------------------------------------------------------------- */
+#if WXWIN_COMPATIBILITY_2_4
+    #define ADD_STYLE         XRC_ADD_STYLE
+    #define wxTheXmlResource  wxXmlResource::Get()
+    #define XMLID             XRCID
+    #define XMLCTRL           XRCCTRL
+    #define GetXMLID          GetXRCID
+#endif
 
 #endif // wxUSE_XRC
 

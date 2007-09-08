@@ -51,7 +51,6 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     m_noStrings = n;
 
@@ -81,13 +80,16 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 
     SetValue(value);
 
+    ChangeFont(false);
+
     XtAddCallback (buttonWidget, XmNselectionCallback, (XtCallbackProc) wxComboBoxCallback,
         (XtPointer) this);
     XtAddCallback (buttonWidget, XmNvalueChangedCallback, (XtCallbackProc) wxComboBoxCallback,
         (XtPointer) this);
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -111,6 +113,8 @@ wxComboBox::~wxComboBox()
     DetachWidget((Widget) m_mainWidget); // Removes event handlers
     XtDestroyWidget((Widget) m_mainWidget);
     m_mainWidget = (WXWidget) 0;
+    if ( HasClientObjectData() )
+        m_clientDataDict.DestroyData();
 }
 
 void wxComboBox::DoSetSize(int x, int y,
@@ -136,12 +140,11 @@ wxString wxComboBox::GetValue() const
 
 void wxComboBox::SetValue(const wxString& value)
 {
+    m_inSetValue = true;
     if( !value.empty() )
-    {
-        m_inSetValue = true;
-        XmComboBoxSetString((Widget)m_mainWidget, value.char_str());
-        m_inSetValue = false;
-    }
+        XmComboBoxSetString( (Widget)m_mainWidget,
+                             wxConstCast(value.c_str(), char) );
+    m_inSetValue = false;
 }
 
 void wxComboBox::SetString(unsigned int WXUNUSED(n), const wxString& WXUNUSED(s))
@@ -149,29 +152,34 @@ void wxComboBox::SetString(unsigned int WXUNUSED(n), const wxString& WXUNUSED(s)
     wxFAIL_MSG( wxT("wxComboBox::SetString only implemented for Motif 2.0") );
 }
 
-// TODO auto-sorting is not supported by the code
-int wxComboBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData,
-                              wxClientDataType type)
+int wxComboBox::DoAppend(const wxString& item)
 {
-    const unsigned int numItems = items.GetCount();
+    wxXmString str( item.c_str() );
+    XmComboBoxAddItem((Widget) m_mainWidget, str(), 0);
+    m_stringList.Add(item);
+    m_noStrings ++;
 
-    AllocClientData(numItems);
-    for( unsigned int i = 0; i < numItems; ++i, ++pos )
-    {
-        wxXmString str( items[i].c_str() );
-        XmComboBoxAddItem((Widget) m_mainWidget, str(), GetMotifPosition(pos));
-        wxChar* copy = wxStrcpy(new wxChar[items[i].length() + 1], items[i].c_str());
-        m_stringList.Insert(pos, copy);
-        m_noStrings ++;
-        InsertNewItemClientData(pos, clientData, i, type);
-    }
-
-    return pos - 1;
+    return GetCount() - 1;
 }
 
-void wxComboBox::DoDeleteOneItem(unsigned int n)
+int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+{
+    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
+    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+
+    if (pos == GetCount())
+        return DoAppend(item);
+
+    wxXmString str( item.c_str() );
+    XmComboBoxAddItem((Widget) m_mainWidget, str(), pos+1);
+    wxChar* copy = wxStrcpy(new wxChar[item.length() + 1], item.c_str());
+    m_stringList.Insert(pos, copy);
+    m_noStrings ++;
+
+    return pos;
+}
+
+void wxComboBox::Delete(unsigned int n)
 {
     XmComboBoxDeletePos((Widget) m_mainWidget, n+1);
     wxStringList::Node *node = m_stringList.Item(n);
@@ -180,16 +188,17 @@ void wxComboBox::DoDeleteOneItem(unsigned int n)
         delete[] node->GetData();
         delete node;
     }
-    wxControlWithItems::DoDeleteOneItem(n);
+    m_clientDataDict.Delete(n, HasClientObjectData());
     m_noStrings--;
 }
 
-void wxComboBox::DoClear()
+void wxComboBox::Clear()
 {
     XmComboBoxDeleteAllItems((Widget) m_mainWidget);
     m_stringList.Clear();
 
-    wxControlWithItems::DoClear();
+    if ( HasClientObjectData() )
+        m_clientDataDict.DestroyData();
     m_noStrings = 0;
 }
 
@@ -282,7 +291,7 @@ void wxComboBox::Replace(long from, long to, const wxString& value)
 {
     XmComboBoxReplace ((Widget) m_mainWidget, (XmTextPosition) from,
                        (XmTextPosition) to,
-                       value.char_str());
+                       wxConstCast(value.c_str(), char));
 }
 
 void wxComboBox::Remove(long from, long to)

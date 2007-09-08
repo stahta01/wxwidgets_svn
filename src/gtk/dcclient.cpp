@@ -252,13 +252,9 @@ static void wxFreePoolGC( GdkGC *gc )
 // wxWindowDC
 //-----------------------------------------------------------------------------
 
-#if wxUSE_NEW_DC
-IMPLEMENT_DYNAMIC_CLASS(wxGTKWindowImplDC, wxGTKImplDC)
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
-#endif
 
-wxGTKWindowImplDC::wxGTKWindowImplDC()
+wxWindowDC::wxWindowDC()
 {
     m_penGC = (GdkGC *) NULL;
     m_brushGC = (GdkGC *) NULL;
@@ -273,9 +269,9 @@ wxGTKWindowImplDC::wxGTKWindowImplDC()
     m_fontdesc = (PangoFontDescription *)NULL;
 }
 
-wxGTKWindowImplDC::wxGTKWindowImplDC( wxWindow *window )
+wxWindowDC::wxWindowDC( wxWindow *window )
 {
-    wxASSERT_MSG( window, wxT("DC needs a window") );
+    wxCHECK_RET( window, wxT("DC needs a window") );
 
     m_penGC = (GdkGC *) NULL;
     m_brushGC = (GdkGC *) NULL;
@@ -328,7 +324,7 @@ wxGTKWindowImplDC::wxGTKWindowImplDC( wxWindow *window )
        standard (as e.g. wxStatusBar) */
 
     m_owner = window;
-
+    
     if (m_owner && m_owner->m_wxwindow && (m_owner->GetLayoutDirection() == wxLayout_RightToLeft))
     {
         // reverse sense
@@ -339,7 +335,7 @@ wxGTKWindowImplDC::wxGTKWindowImplDC( wxWindow *window )
     }
 }
 
-wxGTKWindowImplDC::~wxGTKWindowImplDC()
+wxWindowDC::~wxWindowDC()
 {
     Destroy();
 
@@ -349,7 +345,7 @@ wxGTKWindowImplDC::~wxGTKWindowImplDC()
         pango_font_description_free( m_fontdesc );
 }
 
-void wxGTKWindowImplDC::SetUpDC()
+void wxWindowDC::SetUpDC()
 {
     m_ok = true;
 
@@ -395,7 +391,7 @@ void wxGTKWindowImplDC::SetUpDC()
     gdk_gc_set_background( m_textGC, m_textBackgroundColour.GetColor() );
 
     gdk_gc_set_fill( m_textGC, GDK_SOLID );
-
+    
     gdk_gc_set_colormap( m_textGC, m_cmap );
 
     /* m_penGC */
@@ -441,29 +437,24 @@ void wxGTKWindowImplDC::SetUpDC()
     }
 }
 
-void wxGTKWindowImplDC::DoGetSize( int* width, int* height ) const
+void wxWindowDC::DoGetSize( int* width, int* height ) const
 {
     wxCHECK_RET( m_owner, _T("GetSize() doesn't work without window") );
 
     m_owner->GetSize(width, height);
 }
 
-bool wxGTKWindowImplDC::DoFloodFill(wxCoord x, wxCoord y,
+extern bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y,
+                          const wxColour & col, int style);
+
+bool wxWindowDC::DoFloodFill(wxCoord x, wxCoord y,
                              const wxColour& col, int style)
 {
-#if wxUSE_IMAGE
-    extern bool wxDoFloodFill(wxDC *dc, wxCoord x, wxCoord y,
-                              const wxColour & col, int style);
-
     return wxDoFloodFill(this, x, y, col, style);
-#else
-    return false;
-#endif
 }
 
-bool wxGTKWindowImplDC::DoGetPixel( wxCoord x1, wxCoord y1, wxColour *col ) const
+bool wxWindowDC::DoGetPixel( wxCoord x1, wxCoord y1, wxColour *col ) const
 {
-#if wxUSE_IMAGE
     // Generic (and therefore rather inefficient) method.
     // Could be improved.
     wxMemoryDC memdc;
@@ -475,12 +466,9 @@ bool wxGTKWindowImplDC::DoGetPixel( wxCoord x1, wxCoord y1, wxColour *col ) cons
     wxImage image = bitmap.ConvertToImage();
     col->Set(image.GetRed(0, 0), image.GetGreen(0, 0), image.GetBlue(0, 0));
     return true;
-#else // !wxUSE_IMAGE
-    return false;
-#endif // wxUSE_IMAGE/!wxUSE_IMAGE
 }
 
-void wxGTKWindowImplDC::DoDrawLine( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2 )
+void wxWindowDC::DoDrawLine( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2 )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -494,7 +482,7 @@ void wxGTKWindowImplDC::DoDrawLine( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord 
     }
 }
 
-void wxGTKWindowImplDC::DoCrossHair( wxCoord x, wxCoord y )
+void wxWindowDC::DoCrossHair( wxCoord x, wxCoord y )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -513,7 +501,7 @@ void wxGTKWindowImplDC::DoCrossHair( wxCoord x, wxCoord y )
     }
 }
 
-void wxGTKWindowImplDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2,
+void wxWindowDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2,
                             wxCoord xc, wxCoord yc )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
@@ -608,7 +596,7 @@ void wxGTKWindowImplDC::DoDrawArc( wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y
     CalcBoundingBox (x2, y2);
 }
 
-void wxGTKWindowImplDC::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord width, wxCoord height, double sa, double ea )
+void wxWindowDC::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord width, wxCoord height, double sa, double ea )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -670,7 +658,7 @@ void wxGTKWindowImplDC::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord width, 
     CalcBoundingBox (x + width, y + height);
 }
 
-void wxGTKWindowImplDC::DoDrawPoint( wxCoord x, wxCoord y )
+void wxWindowDC::DoDrawPoint( wxCoord x, wxCoord y )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -680,7 +668,7 @@ void wxGTKWindowImplDC::DoDrawPoint( wxCoord x, wxCoord y )
     CalcBoundingBox (x, y);
 }
 
-void wxGTKWindowImplDC::DoDrawLines( int n, wxPoint points[], wxCoord xoffset, wxCoord yoffset )
+void wxWindowDC::DoDrawLines( int n, wxPoint points[], wxCoord xoffset, wxCoord yoffset )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -714,7 +702,7 @@ void wxGTKWindowImplDC::DoDrawLines( int n, wxPoint points[], wxCoord xoffset, w
         delete[] gpts;
 }
 
-void wxGTKWindowImplDC::DoDrawPolygon( int n, wxPoint points[], wxCoord xoffset, wxCoord yoffset, int WXUNUSED(fillStyle) )
+void wxWindowDC::DoDrawPolygon( int n, wxPoint points[], wxCoord xoffset, wxCoord yoffset, int WXUNUSED(fillStyle) )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -800,7 +788,7 @@ void wxGTKWindowImplDC::DoDrawPolygon( int n, wxPoint points[], wxCoord xoffset,
         delete[] gdkpoints;
 }
 
-void wxGTKWindowImplDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
+void wxWindowDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -874,7 +862,7 @@ void wxGTKWindowImplDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wx
                     gdk_draw_rectangle( m_window, m_penGC, FALSE, xx, yy, ww-2, hh-2 );
                     gdk_draw_rectangle( m_window, m_penGC, FALSE, xx-1, yy-1, ww, hh );
                 }
-
+                
                 // reset
                 gdk_gc_set_line_attributes( m_penGC, 2, GDK_LINE_SOLID, GDK_CAP_ROUND, GDK_JOIN_ROUND );
             }
@@ -891,7 +879,7 @@ void wxGTKWindowImplDC::DoDrawRectangle( wxCoord x, wxCoord y, wxCoord width, wx
     CalcBoundingBox( x + width, y + height );
 }
 
-void wxGTKWindowImplDC::DoDrawRoundedRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord height, double radius )
+void wxWindowDC::DoDrawRoundedRectangle( wxCoord x, wxCoord y, wxCoord width, wxCoord height, double radius )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -1014,7 +1002,7 @@ void wxGTKWindowImplDC::DoDrawRoundedRectangle( wxCoord x, wxCoord y, wxCoord wi
     CalcBoundingBox( x + width, y + height );
 }
 
-void wxGTKWindowImplDC::DoDrawEllipse( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
+void wxWindowDC::DoDrawEllipse( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -1073,13 +1061,13 @@ void wxGTKWindowImplDC::DoDrawEllipse( wxCoord x, wxCoord y, wxCoord width, wxCo
     CalcBoundingBox( x + width, y + height );
 }
 
-void wxGTKWindowImplDC::DoDrawIcon( const wxIcon &icon, wxCoord x, wxCoord y )
+void wxWindowDC::DoDrawIcon( const wxIcon &icon, wxCoord x, wxCoord y )
 {
     // VZ: egcs 1.0.3 refuses to compile this without cast, no idea why
     DoDrawBitmap( (const wxBitmap&)icon, x, y, true );
 }
 
-void wxGTKWindowImplDC::DoDrawBitmap( const wxBitmap &bitmap,
+void wxWindowDC::DoDrawBitmap( const wxBitmap &bitmap,
                                wxCoord x, wxCoord y,
                                bool useMask )
 {
@@ -1095,10 +1083,10 @@ void wxGTKWindowImplDC::DoDrawBitmap( const wxBitmap &bitmap,
 
     int w = bitmap.GetWidth();
     int h = bitmap.GetHeight();
-
+    
     if (m_owner && m_owner->GetLayoutDirection() == wxLayout_RightToLeft)
         xx -= w;
-
+        
     CalcBoundingBox( x, y );
     CalcBoundingBox( x + w, y + h );
 
@@ -1121,12 +1109,13 @@ void wxGTKWindowImplDC::DoDrawBitmap( const wxBitmap &bitmap,
     if ((w != ww) || (h != hh))
         use_bitmap = use_bitmap.Rescale( 0, 0, ww, hh, ww, hh );
 
+#if !GTK_CHECK_VERSION(2,2,0)
     // NB: We can't render pixbufs with GTK+ < 2.2, we need to use pixmaps code.
     //     Pixbufs-based bitmaps with alpha channel don't have a mask, so we
     //     have to call GetPixmap() here -- it converts the pixbuf into pixmap
     //     and also creates the mask as a side-effect:
-    if (gtk_check_version(2,2,0))
-        use_bitmap.GetPixmap();
+    use_bitmap.GetPixmap();
+#endif
 
     // apply mask if any
     GdkBitmap *mask = (GdkBitmap *) NULL;
@@ -1210,7 +1199,7 @@ void wxGTKWindowImplDC::DoDrawBitmap( const wxBitmap &bitmap,
     }
 }
 
-bool wxGTKWindowImplDC::DoBlit( wxCoord xdest, wxCoord ydest,
+bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest,
                          wxCoord width, wxCoord height,
                          wxDC *source,
                          wxCoord xsrc, wxCoord ysrc,
@@ -1228,15 +1217,9 @@ bool wxGTKWindowImplDC::DoBlit( wxCoord xdest, wxCoord ydest,
     xsrc = source->LogicalToDeviceX(xsrc);
     ysrc = source->LogicalToDeviceY(ysrc);
 
-    wxBitmap selected;
     wxMemoryDC *memDC = wxDynamicCast(source, wxMemoryDC);
-    if ( memDC )
-    {
-        selected = memDC->GetSelectedBitmap();
-        if ( !selected.IsOk() )
-            return false;
-    }
-
+    wxBitmap selected = source->GetSelectedBitmap();
+    
     bool use_bitmap_method = false;
     bool is_mono = false;
 
@@ -1246,6 +1229,8 @@ bool wxGTKWindowImplDC::DoBlit( wxCoord xdest, wxCoord ydest,
         ysrcMask = ysrc;
     }
 
+    if (memDC && !selected.Ok()) return false;
+    
     if (selected.Ok())
     {
         is_mono = (selected.GetDepth() == 1);
@@ -1443,7 +1428,7 @@ bool wxGTKWindowImplDC::DoBlit( wxCoord xdest, wxCoord ydest,
             GdkWindow* window = source->GetGDKWindow();
             if ( !window )
                 return false;
-
+            
             // copy including child window contents
             gdk_gc_set_subwindow( m_penGC, GDK_INCLUDE_INFERIORS );
             gdk_draw_drawable( m_window, m_penGC,
@@ -1459,7 +1444,7 @@ bool wxGTKWindowImplDC::DoBlit( wxCoord xdest, wxCoord ydest,
     return true;
 }
 
-void wxGTKWindowImplDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
+void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -1483,11 +1468,11 @@ void wxGTKWindowImplDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
         return;
     size_t datalen = strlen(data);
 
-    // in Pango >= 1.16 the "underline of leading/trailing spaces" bug
-    // has been fixed and thus the hack implemented below should never be used
-    static bool pangoOk = !wx_pango_version_check(1, 16, 0);
-
-    bool needshack = underlined && !pangoOk;
+    // TODO: as soon as Pango provides a function to check at runtime its
+    //       version, we can use it to disable the underline hack for
+    //       Pango >= 1.16 as the "underline of leading/trailing spaces"
+    //       has been fixed there
+    bool needshack = underlined;
     char *hackstring = NULL;
 
     if (needshack)
@@ -1594,7 +1579,7 @@ void wxGTKWindowImplDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
             gdk_draw_rectangle(m_window, m_textGC, TRUE, x, y, w, h);
             gdk_gc_set_foreground(m_textGC, m_textForegroundColour.GetColor());
         }
-
+        
         // Draw layout.
         if (m_owner && m_owner->GetLayoutDirection() == wxLayout_RightToLeft)
             gdk_draw_layout( m_window, m_textGC, x-w, y, m_layout );
@@ -1625,9 +1610,8 @@ void wxGTKWindowImplDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 // a better approach here:
 //           http://www.daa.com.au/pipermail/pygtk/2003-April/005052.html
 
-void wxGTKWindowImplDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord y, double angle )
+void wxWindowDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord y, double angle )
 {
-#if wxUSE_IMAGE
     if (!m_window || text.empty())
         return;
 
@@ -1726,13 +1710,12 @@ void wxGTKWindowImplDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCo
     // update the bounding box
     CalcBoundingBox(x + minX, y + minY);
     CalcBoundingBox(x + maxX, y + maxY);
-#endif // wxUSE_IMAGE
 }
 
-void wxGTKWindowImplDC::DoGetTextExtent(const wxString &string,
+void wxWindowDC::DoGetTextExtent(const wxString &string,
                                  wxCoord *width, wxCoord *height,
                                  wxCoord *descent, wxCoord *externalLeading,
-                                 const wxFont *theFont) const
+                                 wxFont *theFont) const
 {
     if ( width )
         *width = 0;
@@ -1793,7 +1776,7 @@ void wxGTKWindowImplDC::DoGetTextExtent(const wxString &string,
 }
 
 
-bool wxGTKWindowImplDC::DoGetPartialTextExtents(const wxString& text,
+bool wxWindowDC::DoGetPartialTextExtents(const wxString& text,
                                          wxArrayInt& widths) const
 {
     const size_t len = text.length();
@@ -1813,7 +1796,7 @@ bool wxGTKWindowImplDC::DoGetPartialTextExtents(const wxString& text,
     }
 
     pango_layout_set_text( m_layout, dataUTF8, strlen(dataUTF8) );
-
+    
     // Calculate the position of each character based on the widths of
     // the previous characters
 
@@ -1836,7 +1819,7 @@ bool wxGTKWindowImplDC::DoGetPartialTextExtents(const wxString& text,
 }
 
 
-wxCoord wxGTKWindowImplDC::GetCharWidth() const
+wxCoord wxWindowDC::GetCharWidth() const
 {
     pango_layout_set_text( m_layout, "H", 1 );
     int w;
@@ -1844,7 +1827,7 @@ wxCoord wxGTKWindowImplDC::GetCharWidth() const
     return w;
 }
 
-wxCoord wxGTKWindowImplDC::GetCharHeight() const
+wxCoord wxWindowDC::GetCharHeight() const
 {
     PangoFontMetrics *metrics = pango_context_get_metrics (m_context, m_fontdesc, pango_context_get_language(m_context));
     wxCHECK_MSG( metrics, -1, _T("failed to get pango font metrics") );
@@ -1855,7 +1838,7 @@ wxCoord wxGTKWindowImplDC::GetCharHeight() const
     return h;
 }
 
-void wxGTKWindowImplDC::Clear()
+void wxWindowDC::Clear()
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -1893,7 +1876,7 @@ void wxGTKWindowImplDC::Clear()
 #endif // 0/1
 }
 
-void wxGTKWindowImplDC::SetFont( const wxFont &font )
+void wxWindowDC::SetFont( const wxFont &font )
 {
     m_font = font;
 
@@ -1927,7 +1910,7 @@ void wxGTKWindowImplDC::SetFont( const wxFont &font )
     }
 }
 
-void wxGTKWindowImplDC::SetPen( const wxPen &pen )
+void wxWindowDC::SetPen( const wxPen &pen )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2077,7 +2060,7 @@ void wxGTKWindowImplDC::SetPen( const wxPen &pen )
     gdk_gc_set_foreground( m_penGC, m_pen.GetColour().GetColor() );
 }
 
-void wxGTKWindowImplDC::SetBrush( const wxBrush &brush )
+void wxWindowDC::SetBrush( const wxBrush &brush )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2122,7 +2105,7 @@ void wxGTKWindowImplDC::SetBrush( const wxBrush &brush )
     }
 }
 
-void wxGTKWindowImplDC::SetBackground( const wxBrush &brush )
+void wxWindowDC::SetBackground( const wxBrush &brush )
 {
    /* CMB 21/7/98: Added SetBackground. Sets background brush
     * for Clear() and bg colour for shapes filled with cross-hatch brush */
@@ -2167,7 +2150,7 @@ void wxGTKWindowImplDC::SetBackground( const wxBrush &brush )
     }
 }
 
-void wxGTKWindowImplDC::SetLogicalFunction( int function )
+void wxWindowDC::SetLogicalFunction( int function )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2215,7 +2198,7 @@ void wxGTKWindowImplDC::SetLogicalFunction( int function )
     gdk_gc_set_function( m_textGC, mode );
 }
 
-void wxGTKWindowImplDC::SetTextForeground( const wxColour &col )
+void wxWindowDC::SetTextForeground( const wxColour &col )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2234,7 +2217,7 @@ void wxGTKWindowImplDC::SetTextForeground( const wxColour &col )
     }
 }
 
-void wxGTKWindowImplDC::SetTextBackground( const wxColour &col )
+void wxWindowDC::SetTextBackground( const wxColour &col )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2251,7 +2234,7 @@ void wxGTKWindowImplDC::SetTextBackground( const wxColour &col )
     }
 }
 
-void wxGTKWindowImplDC::SetBackgroundMode( int mode )
+void wxWindowDC::SetBackgroundMode( int mode )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2269,12 +2252,12 @@ void wxGTKWindowImplDC::SetBackgroundMode( int mode )
     }
 }
 
-void wxGTKWindowImplDC::SetPalette( const wxPalette& WXUNUSED(palette) )
+void wxWindowDC::SetPalette( const wxPalette& WXUNUSED(palette) )
 {
-    wxFAIL_MSG( wxT("wxGTKWindowImplDC::SetPalette not implemented") );
+    wxFAIL_MSG( wxT("wxWindowDC::SetPalette not implemented") );
 }
 
-void wxGTKWindowImplDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
+void wxWindowDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2311,7 +2294,7 @@ void wxGTKWindowImplDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width
     gdk_gc_set_clip_region( m_bgGC, m_currentClippingRegion.GetRegion() );
 }
 
-void wxGTKWindowImplDC::DoSetClippingRegionAsRegion( const wxRegion &region  )
+void wxWindowDC::DoSetClippingRegionAsRegion( const wxRegion &region  )
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2343,7 +2326,7 @@ void wxGTKWindowImplDC::DoSetClippingRegionAsRegion( const wxRegion &region  )
     gdk_gc_set_clip_region( m_bgGC, m_currentClippingRegion.GetRegion() );
 }
 
-void wxGTKWindowImplDC::DestroyClippingRegion()
+void wxWindowDC::DestroyClippingRegion()
 {
     wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
@@ -2374,7 +2357,7 @@ void wxGTKWindowImplDC::DestroyClippingRegion()
     }
 }
 
-void wxGTKWindowImplDC::Destroy()
+void wxWindowDC::Destroy()
 {
     if (m_penGC) wxFreePoolGC( m_penGC );
     m_penGC = (GdkGC*) NULL;
@@ -2386,26 +2369,26 @@ void wxGTKWindowImplDC::Destroy()
     m_bgGC = (GdkGC*) NULL;
 }
 
-void wxGTKWindowImplDC::SetDeviceOrigin( wxCoord x, wxCoord y )
+void wxWindowDC::SetDeviceOrigin( wxCoord x, wxCoord y )
 {
     m_deviceOriginX = x;
     m_deviceOriginY = y;
-
+    
     ComputeScaleAndOrigin();
 }
 
-void wxGTKWindowImplDC::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
+void wxWindowDC::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
 {
     m_signX = (xLeftRight ?  1 : -1);
     m_signY = (yBottomUp  ? -1 :  1);
-
+    
     if (m_owner && m_owner->m_wxwindow && (m_owner->GetLayoutDirection() == wxLayout_RightToLeft))
-        m_signX = -m_signX;
-
+        m_signX = -m_signX;        
+        
     ComputeScaleAndOrigin();
 }
 
-void wxGTKWindowImplDC::ComputeScaleAndOrigin()
+void wxWindowDC::ComputeScaleAndOrigin()
 {
     const wxRealPoint origScale(m_scaleX, m_scaleY);
 
@@ -2423,12 +2406,12 @@ void wxGTKWindowImplDC::ComputeScaleAndOrigin()
 }
 
 // Resolution in pixels per logical inch
-wxSize wxGTKWindowImplDC::GetPPI() const
+wxSize wxWindowDC::GetPPI() const
 {
     return wxSize( (int) (m_mm_to_pix_x * 25.4 + 0.5), (int) (m_mm_to_pix_y * 25.4 + 0.5));
 }
 
-int wxGTKWindowImplDC::GetDepth() const
+int wxWindowDC::GetDepth() const
 {
     return gdk_drawable_get_depth(m_window);
 }
@@ -2438,11 +2421,7 @@ int wxGTKWindowImplDC::GetDepth() const
 // wxPaintDC
 //-----------------------------------------------------------------------------
 
-#if wxUSE_NEW_DC
-IMPLEMENT_DYNAMIC_CLASS(wxGTKPaintImplDC, wxGTKClientImplDC)
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxClientDC)
-#endif
 
 // Limit the paint region to the window size. Sometimes
 // the paint region is too big, and this risks X11 errors
@@ -2463,10 +2442,13 @@ static void wxLimitRegionToSize(wxRegion& region, const wxSize& sz)
     }
 }
 
-wxGTKPaintImplDC::wxGTKPaintImplDC( wxWindow *win )
-         : wxGTKClientImplDC( win )
+wxPaintDC::wxPaintDC( wxWindow *win )
+         : wxClientDC( win )
 {
 #if USE_PAINT_REGION
+    if (!win)        // the base class already asserted...
+        return;
+    
     if (!win->m_clipPaintRegion)
         return;
 
@@ -2495,16 +2477,13 @@ wxGTKPaintImplDC::wxGTKPaintImplDC( wxWindow *win )
 // wxClientDC
 //-----------------------------------------------------------------------------
 
-#if wxUSE_NEW_DC
-IMPLEMENT_DYNAMIC_CLASS(wxGTKClientImplDC, wxGTKWindowImplDC)
-#else
 IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
-#endif
 
-wxGTKClientImplDC::wxGTKClientImplDC( wxWindow *win )
-          : wxGTKWindowImplDC( win )
+wxClientDC::wxClientDC( wxWindow *win )
+          : wxWindowDC( win )
 {
-    wxCHECK_RET( win, _T("NULL window in wxGTKClientImplDC::wxClientDC") );
+    if (!win)        // the base class already asserted...
+        return;
 
 #ifdef __WXUNIVERSAL__
     wxPoint ptOrigin = win->GetClientAreaOrigin();
@@ -2514,7 +2493,7 @@ wxGTKClientImplDC::wxGTKClientImplDC( wxWindow *win )
 #endif // __WXUNIVERSAL__
 }
 
-void wxGTKClientImplDC::DoGetSize(int *width, int *height) const
+void wxClientDC::DoGetSize(int *width, int *height) const
 {
     wxCHECK_RET( m_owner, _T("GetSize() doesn't work without window") );
 

@@ -10,10 +10,6 @@ wxJoystick allows an application to control one or more joysticks.
 
 <wx/joystick.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxJoystickEvent}{wxjoystickevent}
@@ -42,14 +38,6 @@ bit in the returned integer, with the first button being mapped to the least
 significant bit, and so on.
 A bitlist of wxJOY\_BUTTONn identifiers, where n is 1, 2, 3 or 4 
 is available for historical reasons.
-
-\constfunc{bool}{GetButtonState}{\param{unsigned}{ id}}
-
-Returns the state of the specified joystick button.
-
-\wxheading{Parameters}
-
-\docparam{id}{The button id to report, from 0 to \helpref{GetNumberButtons()}{wxjoystickgetnumberbuttons} - 1}
 
 \membersection{wxJoystick::GetManufacturerId}\label{wxjoystickgetmanufacturerid}
 
@@ -111,14 +99,6 @@ Returns the product name for the joystick.
 \constfunc{wxPoint}{GetPosition}{\void}
 
 Returns the x, y position of the joystick.
-
-\constfunc{int}{GetPosition}{\param{unsigned}{ axis}}
-
-Returns the position of the specified joystick axis.
-
-\wxheading{Parameters}
-
-\docparam{axis}{The joystick axis to report, from 0 to \helpref{GetNumberAxes()}{wxjoystickgetnumberaxes} - 1.}
 
 \membersection{wxJoystick::GetPOVPosition}\label{wxjoystickgetpovposition}
 

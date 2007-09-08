@@ -157,7 +157,7 @@ bool wxShell( const wxString& rCommand )
     SData.PgmName  = (char*)zShell;
 
     sInputs = _T("/C ") + rCommand;
-    SData.PgmInputs     = (BYTE*)sInputs.wx_str();
+    SData.PgmInputs     = (BYTE*)sInputs.c_str();
     SData.TermQ         = 0;
     SData.Environment   = 0;
     SData.InheritOpt    = SSF_INHERTOPT_SHELL;
@@ -238,10 +238,11 @@ bool wxGetEnv(const wxString& var, wxString *value)
     return true;
 }
 
-bool wxSetEnv(const wxString& variable, const char *value)
+bool wxSetEnv(const wxString& variable, const wxChar *value)
 {
 #if defined(HAVE_SETENV)
-    return setenv(variable.mb_str(), value, 1 /* overwrite */) == 0;
+    return setenv(variable.mb_str(), value ? wxString(value).mb_str()
+                                           : NULL, 1 /* overwrite */) == 0;
 #elif defined(HAVE_PUTENV)
     wxString s = variable;
     if ( value )
@@ -260,16 +261,6 @@ bool wxSetEnv(const wxString& variable, const char *value)
     wxUnusedVar(value);
     return false;
 #endif
-}
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.mb_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
 }
 
 void wxMilliSleep(

@@ -15,20 +15,15 @@
 #include "wx/string.h"
 #include "wx/platinfo.h"
 
-class WXDLLIMPEXP_FWD_BASE wxArrayString;
-class WXDLLIMPEXP_FWD_BASE wxConfigBase;
-class WXDLLIMPEXP_FWD_BASE wxEventLoopBase;
+class WXDLLIMPEXP_BASE wxObject;
+class WXDLLEXPORT wxAppTraits;
 #if wxUSE_FONTMAP
-    class WXDLLIMPEXP_FWD_CORE wxFontMapper;
+    class WXDLLEXPORT wxFontMapper;
 #endif // wxUSE_FONTMAP
-class WXDLLIMPEXP_FWD_BASE wxLog;
-class WXDLLIMPEXP_FWD_BASE wxMessageOutput;
-class WXDLLIMPEXP_FWD_BASE wxObject;
-class WXDLLIMPEXP_FWD_CORE wxRendererNative;
-class WXDLLIMPEXP_FWD_BASE wxStandardPathsBase;
-class WXDLLIMPEXP_FWD_BASE wxString;
-class WXDLLIMPEXP_FWD_BASE wxTimer;
-class WXDLLIMPEXP_FWD_BASE wxTimerImpl;
+class WXDLLIMPEXP_BASE wxLog;
+class WXDLLIMPEXP_BASE wxMessageOutput;
+class WXDLLEXPORT wxRendererNative;
+class WXDLLIMPEXP_BASE wxString;
 
 class GSocketGUIFunctionsTable;
 
@@ -37,21 +32,16 @@ class GSocketGUIFunctionsTable;
 // wxAppTraits: this class defines various configurable aspects of wxApp
 // ----------------------------------------------------------------------------
 
+class WXDLLIMPEXP_BASE wxStandardPathsBase;
+
 class WXDLLIMPEXP_BASE wxAppTraitsBase
 {
 public:
     // needed since this class declares virtual members
     virtual ~wxAppTraitsBase() { }
 
-    // hooks for working with the global objects, may be overridden by the user
+    // hooks for creating the global objects, may be overridden by the user
     // ------------------------------------------------------------------------
-
-#if wxUSE_CONFIG
-    // create the default configuration object (base class version is
-    // implemented in config.cpp and creates wxRegConfig for wxMSW and
-    // wxFileConfig for all the other platforms)
-    virtual wxConfigBase *CreateConfig();
-#endif // wxUSE_CONFIG
 
 #if wxUSE_LOG
     // create the default log target
@@ -73,16 +63,11 @@ public:
     // NB: returned pointer will be deleted by the caller
     virtual wxRendererNative *CreateRenderer() = 0;
 
+#if wxUSE_STDPATHS
     // wxStandardPaths object is normally the same for wxBase and wxGUI
     // except in the case of wxMac and wxCocoa
     virtual wxStandardPathsBase& GetStandardPaths();
-
-#if wxUSE_INTL
-    // called during wxApp initialization to set the locale to correspond to
-    // the user default (i.e. system locale under Windows, LC_ALL under Unix)
-    virtual void SetLocale();
-#endif // wxUSE_INTL
-
+#endif // wxUSE_STDPATHS
 
     // functions abstracting differences between GUI and console modes
     // ------------------------------------------------------------------------
@@ -125,17 +110,6 @@ public:
     virtual GSocketGUIFunctionsTable* GetSocketGUIFunctionsTable() = 0;
 #endif
 
-    // create a new, port specific, instance of the event loop used by wxApp
-    virtual wxEventLoopBase *CreateEventLoop() = 0;
-
-#if wxUSE_TIMER
-    // return platform and toolkit dependent wxTimer implementation
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer) = 0;
-#endif
-
-    // functions returning port-specific information
-    // ------------------------------------------------------------------------
-
     // return information about the (native) toolkit currently used and its
     // runtime (not compile-time) version.
     // returns wxPORT_BASE for console applications and one of the remaining
@@ -147,21 +121,7 @@ public:
 
     // return the name of the Desktop Environment such as
     // "KDE" or "GNOME". May return an empty string.
-    virtual wxString GetDesktopEnvironment() const = 0;
-
-    // returns a short string to identify the block of the standard command
-    // line options parsed automatically by current port: if this string is
-    // empty, there are no such options, otherwise the function also fills
-    // passed arrays with the names and the descriptions of those options.
-    virtual wxString GetStandardCmdLineOptions(wxArrayString& names,
-                                               wxArrayString& desc) const
-    {
-        wxUnusedVar(names);
-        wxUnusedVar(desc);
-
-        return wxEmptyString;
-    }
-
+    virtual wxString GetDesktopEnvironment() const { return wxEmptyString; }
 
 protected:
 #if wxUSE_STACKWALKER && defined( __WXDEBUG__ )
@@ -205,10 +165,6 @@ protected:
 class WXDLLIMPEXP_BASE wxConsoleAppTraitsBase : public wxAppTraits
 {
 public:
-#if !wxUSE_CONSOLE_EVENTLOOP
-    virtual wxEventLoopBase *CreateEventLoop() { return NULL; }
-#endif // !wxUSE_CONSOLE_EVENTLOOP
-
 #if wxUSE_LOG
     virtual wxLog *CreateLogTarget();
 #endif // wxUSE_LOG
@@ -241,7 +197,6 @@ public:
     }
 
     virtual bool IsUsingUniversalWidgets() const { return false; }
-    virtual wxString GetDesktopEnvironment() const { return wxEmptyString; }
 };
 
 // ----------------------------------------------------------------------------
@@ -281,8 +236,6 @@ public:
         return false;
     #endif
     }
-
-    virtual wxString GetDesktopEnvironment() const { return wxEmptyString; }
 };
 
 #endif // wxUSE_GUI

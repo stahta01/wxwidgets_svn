@@ -65,11 +65,11 @@
 
 // standard shared libraries extensions for different Unix versions
 #if defined(__HPUX__)
-    const wxString wxDynamicLibrary::ms_dllext(".sl");
+    const wxChar *wxDynamicLibrary::ms_dllext = _T(".sl");
 #elif defined(__DARWIN__)
-    const wxString wxDynamicLibrary::ms_dllext(".bundle");
+    const wxChar *wxDynamicLibrary::ms_dllext = _T(".bundle");
 #else
-    const wxString wxDynamicLibrary::ms_dllext(".so");
+    const wxChar *wxDynamicLibrary::ms_dllext = _T(".so");
 #endif
 
 // ============================================================================
@@ -271,12 +271,14 @@ void *wxDynamicLibrary::RawGetSymbol(wxDllType handle, const wxString& name)
 /* static */
 void wxDynamicLibrary::Error()
 {
-    wxString err(dlerror());
+#if wxUSE_UNICODE
+    wxWCharBuffer buffer = wxConvLocal.cMB2WC( dlerror() );
+    const wxChar *err = buffer;
+#else
+    const wxChar *err = dlerror();
+#endif
 
-    if ( err.empty() )
-        err = _("Unknown dynamic library error");
-
-    wxLogError(wxT("%s"), err);
+    wxLogError(wxT("%s"), err ? err : _("Unknown dynamic library error"));
 }
 
 #endif // wxHAVE_DYNLIB_ERROR

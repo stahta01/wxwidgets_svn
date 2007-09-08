@@ -41,8 +41,10 @@ using namespace std;
 #include <ctype.h>
 #include "tex2any.h"
 
+#if !WXWIN_COMPATIBILITY_2_4
 static inline wxChar* copystring(const wxChar* s)
     { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
+#endif
 
 wxHashTable TexReferences(wxKEY_STRING);
 wxList BibList(wxKEY_STRING);
@@ -207,7 +209,7 @@ wxChar *FindTopicName(TexChunk *chunk)
  *
  */
 
-void StartSimulateArgument(const wxChar *data)
+void StartSimulateArgument(wxChar *data)
 {
   wxStrcpy(currentArgData, data);
   haveArgData = true;
@@ -223,11 +225,8 @@ void EndSimulateArgument(void)
  *
  */
 
-int ParseUnitArgument(const wxChar *unitArg_)
+int ParseUnitArgument(wxChar *unitArg)
 {
-  wxWxCharBuffer unitBuf(unitArg_);
-  wxChar *unitArg = unitBuf.data();
-
   float conversionFactor = 1.0;
   float unitValue = 0.0;
   int len = wxStrlen(unitArg);
@@ -451,7 +450,7 @@ void ReadTexReferences(wxChar *filename)
         // were massive memory leaks
         TexReferences.DeleteContents(true);
         TexReferences.Put(
-            labelStr,
+            labelStr.c_str(),
             new TexRef(
                 labelStr.c_str(),
                 fileStr.c_str(),
@@ -473,7 +472,7 @@ void BibEatWhiteSpace(wxString& line)
 {
     while(!line.empty() && (line[0] == _T(' ') || line[0] == _T('\t') || line[0] == (wxChar)EOF))
     {
-        if (line[0] == '\r')
+        if (line[0] == 10)
             BibLine ++;
         line = line.substr(1);
     }
@@ -563,7 +562,7 @@ wxString BibReadToEOL(wxString& line)
     // If in quotes, read white space too. If not,
     // stop at white space or comment.
     while (!line.empty() && line[0] != _T('"') &&
-           (inQuotes || ((line[0] != _T(' ')) && (line[0] != '\t') &&
+           (inQuotes || ((line[0] != _T(' ')) && (line[0] != 9) &&
                           (line[0] != _T(';')) && (line[0] != _T('%')) && (line[0] != _T('#')))))
     {
         val << line[0];
@@ -707,7 +706,7 @@ void BibReadValue(wxSTD istream& istr, wxChar *buffer, bool ignoreBraces = true,
     wxUnusedVar(stopping);
 }
 
-bool ReadBib(const wxChar *filename)
+bool ReadBib(wxChar *filename)
 {
   if (!wxFileExists(filename))
       return false;
@@ -1159,7 +1158,7 @@ void ResolveBibReferences(void)
 }
 
 // Remember we need to resolve this citation
-void AddCitation(const wxChar *citeKey)
+void AddCitation(wxChar *citeKey)
 {
   if (!CitationList.Member(citeKey))
     CitationList.Add(citeKey);
@@ -1170,7 +1169,7 @@ void AddCitation(const wxChar *citeKey)
   }
 }
 
-TexRef *FindReference(const wxChar *key)
+TexRef *FindReference(wxChar *key)
 {
   return (TexRef *)TexReferences.Get(key);
 }
@@ -1526,7 +1525,7 @@ bool ReadCustomMacros(const wxString& filename)
                 macro->macroBody = copystring(macroBody.c_str());
 
             BibEatWhiteSpace(line);
-            CustomMacroList.Append(macroName, macro);
+            CustomMacroList.Append(macroName.c_str(), macro);
             AddMacroDef(ltCUSTOM_MACRO, macroName.c_str(), noArgs);
         }
 

@@ -191,18 +191,6 @@ void wxToolTip::SetDelay(long milliseconds)
                             TTDT_INITIAL, milliseconds);
 }
 
-void wxToolTip::SetAutoPop(long milliseconds)
-{
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_AUTOPOP, milliseconds);
-}
-
-void wxToolTip::SetReshow(long milliseconds)
-{
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_RESHOW, milliseconds);
-}
-
 // ---------------------------------------------------------------------------
 // implementation helpers
 // ---------------------------------------------------------------------------
@@ -303,7 +291,7 @@ void wxToolTip::Add(WXHWND hWnd)
     // NMTTDISPINFO struct -- and setting the tooltip here we can have tooltips
     // of any length
     ti.hwnd = hwnd;
-    ti.lpszText = (wxChar *)m_text.wx_str(); // const_cast
+    ti.lpszText = (wxChar *)m_text.c_str(); // const_cast
 
     if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, &ti) )
     {
@@ -351,7 +339,7 @@ void wxToolTip::Add(WXHWND hWnd)
                 while (token.length())
                 {
                     SIZE sz;
-                    if ( !::GetTextExtentPoint32(hdc, token.wx_str(), token.length(), &sz) )
+                    if ( !::GetTextExtentPoint32(hdc, token, token.length(), &sz) )
                     {
                         wxLogLastError(wxT("GetTextExtentPoint32"));
                     }
@@ -372,7 +360,7 @@ void wxToolTip::Add(WXHWND hWnd)
                 // replace the '\n's with spaces because otherwise they appear as
                 // unprintable characters in the tooltip string
                 m_text.Replace(_T("\n"), _T(" "));
-                ti.lpszText = (wxChar *)m_text.wx_str(); // const_cast
+                ti.lpszText = (wxChar *)m_text.c_str(); // const_cast
 
                 if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, &ti) )
                 {
@@ -446,7 +434,7 @@ void wxToolTip::SetTip(const wxString& tip)
     {
         // update the tip text shown by the control
         wxToolInfo ti(GetHwndOf(m_window));
-        ti.lpszText = (wxChar *)m_text.wx_str();
+        ti.lpszText = (wxChar *)m_text.c_str();
 
         (void)SendTooltipMessage(GetToolTipCtrl(), TTM_UPDATETIPTEXT, &ti);
     }

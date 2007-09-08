@@ -23,11 +23,6 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/window.h"
-    #include "wx/dcclient.h"
-#endif
-
 #include "wx/private/overlay.h"
 #include "wx/dfb/private.h"
 
@@ -101,7 +96,7 @@ void wxOverlayImpl::EndDrawing(wxWindowDC *dc)
 void wxOverlayImpl::Clear(wxWindowDC *dc)
 {
     wxASSERT_MSG( IsOk(),
-                  "You cannot Clear an overlay that is not initialized" );
+                  _T("You cannot Clear an overlay that is not initialized") );
 
     m_isEmpty = true;
 }

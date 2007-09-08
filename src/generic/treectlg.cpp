@@ -49,7 +49,7 @@
 // array types
 // -----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxGenericTreeItem;
+class WXDLLEXPORT wxGenericTreeItem;
 
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxGenericTreeItem *, wxArrayGenericTreeItems);
 
@@ -74,7 +74,7 @@ class WXDLLEXPORT wxTreeRenameTimer: public wxTimer
 public:
     // start editing the current item after half a second (if the mouse hasn't
     // been clicked/moved)
-    enum { DELAY = 500 };
+    enum { DELAY = 250 };
 
     wxTreeRenameTimer( wxGenericTreeCtrl *owner );
 
@@ -548,7 +548,7 @@ wxGenericTreeItem::~wxGenericTreeItem()
 
 void wxGenericTreeItem::DeleteChildren(wxGenericTreeCtrl *tree)
 {
-    size_t count = m_children.GetCount();
+    size_t count = m_children.Count();
     for ( size_t n = 0; n < count; n++ )
     {
         wxGenericTreeItem *child = m_children[n];
@@ -570,7 +570,7 @@ void wxGenericTreeItem::SetText( const wxString &text )
 
 size_t wxGenericTreeItem::GetChildrenCount(bool recursively) const
 {
-    size_t count = m_children.GetCount();
+    size_t count = m_children.Count();
     if ( !recursively )
         return count;
 
@@ -593,7 +593,7 @@ void wxGenericTreeItem::GetSize( int &x, int &y,
 
     if (IsExpanded())
     {
-        size_t count = m_children.GetCount();
+        size_t count = m_children.Count();
         for ( size_t n = 0; n < count; ++n )
         {
             m_children[n]->GetSize( x, y, theButton );
@@ -668,7 +668,7 @@ wxGenericTreeItem *wxGenericTreeItem::HitTest(const wxPoint& point,
     }
 
     // evaluate children
-    size_t count = m_children.GetCount();
+    size_t count = m_children.Count();
     for ( size_t n = 0; n < count; n++ )
     {
         wxGenericTreeItem *res = m_children[n]->HitTest( point,
@@ -1203,7 +1203,7 @@ wxTreeItemId wxGenericTreeCtrl::GetNextChild(const wxTreeItemId& item,
     // it's ok to cast cookie to size_t, we never have indices big enough to
     // overflow "void *"
     size_t *pIndex = (size_t *)&cookie;
-    if ( *pIndex < children.GetCount() )
+    if ( *pIndex < children.Count() )
     {
         return children.Item((*pIndex)++);
     }
@@ -1213,6 +1213,36 @@ wxTreeItemId wxGenericTreeCtrl::GetNextChild(const wxTreeItemId& item,
         return wxTreeItemId();
     }
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+
+wxTreeItemId wxGenericTreeCtrl::GetFirstChild(const wxTreeItemId& item,
+                                              long& cookie) const
+{
+    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
+
+    cookie = 0;
+    return GetNextChild(item, cookie);
+}
+
+wxTreeItemId wxGenericTreeCtrl::GetNextChild(const wxTreeItemId& item,
+                                             long& cookie) const
+{
+    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
+
+    wxArrayGenericTreeItems& children = ((wxGenericTreeItem*) item.m_pItem)->GetChildren();
+    if ( (size_t)cookie < children.Count() )
+    {
+        return children.Item((size_t)cookie++);
+    }
+    else
+    {
+        // there are no more of them
+        return wxTreeItemId();
+    }
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 wxTreeItemId wxGenericTreeCtrl::GetLastChild(const wxTreeItemId& item) const
 {
@@ -1239,7 +1269,7 @@ wxTreeItemId wxGenericTreeCtrl::GetNextSibling(const wxTreeItemId& item) const
     wxASSERT( index != wxNOT_FOUND ); // I'm not a child of my parent?
 
     size_t n = (size_t)(index + 1);
-    return n == siblings.GetCount() ? wxTreeItemId() : wxTreeItemId(siblings[n]);
+    return n == siblings.Count() ? wxTreeItemId() : wxTreeItemId(siblings[n]);
 }
 
 wxTreeItemId wxGenericTreeCtrl::GetPrevSibling(const wxTreeItemId& item) const
@@ -1482,7 +1512,7 @@ wxTreeItemId wxGenericTreeCtrl::DoInsertAfter(const wxTreeItemId& parentId,
 void wxGenericTreeCtrl::SendDeleteEvent(wxGenericTreeItem *item)
 {
     wxTreeEvent event(wxEVT_COMMAND_TREE_DELETE_ITEM, this, item);
-    GetEventHandler()->ProcessEvent( event );
+    ProcessEvent( event );
 }
 
 // Don't leave edit or selection on a child which is about to disappear
@@ -1577,7 +1607,7 @@ void wxGenericTreeCtrl::Delete(const wxTreeItemId& itemId)
 
     delete item;
 
-    InvalidateBestSize();
+    InvalidateBestSize();        
 }
 
 void wxGenericTreeCtrl::DeleteAllItems()
@@ -1604,7 +1634,7 @@ void wxGenericTreeCtrl::Expand(const wxTreeItemId& itemId)
 
     wxTreeEvent event(wxEVT_COMMAND_TREE_ITEM_EXPANDING, this, item);
 
-    if ( GetEventHandler()->ProcessEvent( event ) && !event.IsAllowed() )
+    if ( ProcessEvent( event ) && !event.IsAllowed() )
     {
         // cancelled by program
         return;
@@ -1616,7 +1646,7 @@ void wxGenericTreeCtrl::Expand(const wxTreeItemId& itemId)
     RefreshSubtree(item);
 
     event.SetEventType(wxEVT_COMMAND_TREE_ITEM_EXPANDED);
-    GetEventHandler()->ProcessEvent( event );
+    ProcessEvent( event );
 }
 
 void wxGenericTreeCtrl::Collapse(const wxTreeItemId& itemId)
@@ -1630,7 +1660,7 @@ void wxGenericTreeCtrl::Collapse(const wxTreeItemId& itemId)
         return;
 
     wxTreeEvent event(wxEVT_COMMAND_TREE_ITEM_COLLAPSING, this, item);
-    if ( GetEventHandler()->ProcessEvent( event ) && !event.IsAllowed() )
+    if ( ProcessEvent( event ) && !event.IsAllowed() )
     {
         // cancelled by program
         return;
@@ -1641,7 +1671,7 @@ void wxGenericTreeCtrl::Collapse(const wxTreeItemId& itemId)
 
 #if 0  // TODO why should items be collapsed recursively?
     wxArrayGenericTreeItems& children = item->GetChildren();
-    size_t count = children.GetCount();
+    size_t count = children.Count();
     for ( size_t n = 0; n < count; n++ )
     {
         Collapse(children[n]);
@@ -1653,7 +1683,7 @@ void wxGenericTreeCtrl::Collapse(const wxTreeItemId& itemId)
     RefreshSubtree(item);
 
     event.SetEventType(wxEVT_COMMAND_TREE_ITEM_COLLAPSED);
-    GetEventHandler()->ProcessEvent( event );
+    ProcessEvent( event );
 }
 
 void wxGenericTreeCtrl::CollapseAndReset(const wxTreeItemId& item)
@@ -1695,7 +1725,7 @@ void wxGenericTreeCtrl::UnselectAllChildren(wxGenericTreeItem *item)
     if (item->HasChildren())
     {
         wxArrayGenericTreeItems& children = item->GetChildren();
-        size_t count = children.GetCount();
+        size_t count = children.Count();
         for ( size_t n = 0; n < count; ++n )
         {
             UnselectAllChildren(children[n]);
@@ -1731,7 +1761,7 @@ bool wxGenericTreeCtrl::TagNextChildren(wxGenericTreeItem *crt_item, wxGenericTr
     int index = children.Index(crt_item);
     wxASSERT( index != wxNOT_FOUND ); // I'm not a child of my parent?
 
-    size_t count = children.GetCount();
+    size_t count = children.Count();
     for (size_t n=(size_t)(index+1); n<count; ++n)
     {
         if (TagAllChildrenUntilLast(children[n], last_item, select)) return true;
@@ -1751,7 +1781,7 @@ bool wxGenericTreeCtrl::TagAllChildrenUntilLast(wxGenericTreeItem *crt_item, wxG
     if (crt_item->HasChildren())
     {
         wxArrayGenericTreeItems& children = crt_item->GetChildren();
-        size_t count = children.GetCount();
+        size_t count = children.Count();
         for ( size_t n = 0; n < count; ++n )
         {
             if (TagAllChildrenUntilLast(children[n], last_item, select))
@@ -1913,7 +1943,7 @@ size_t wxGenericTreeCtrl::GetSelections(wxArrayTreeItemIds &array) const
     }
     //else: the tree is empty, so no selections
 
-    return array.GetCount();
+    return array.Count();
 }
 
 void wxGenericTreeCtrl::EnsureVisible(const wxTreeItemId& item)
@@ -2024,7 +2054,7 @@ void wxGenericTreeCtrl::SortChildren(const wxTreeItemId& itemId)
                  wxT("wxGenericTreeCtrl::SortChildren is not reentrant") );
 
     wxArrayGenericTreeItems& children = item->GetChildren();
-    if ( children.GetCount() > 1 )
+    if ( children.Count() > 1 )
     {
         m_dirty = true;
 
@@ -2148,7 +2178,7 @@ void wxGenericTreeCtrl::PaintItem(wxGenericTreeItem *item, wxDC& dc)
     else if (item->IsBold())
         dc.SetFont(m_boldFont);
 
-    wxCoord text_w = 0, text_h = 0;
+    long text_w = 0, text_h = 0;
     dc.GetTextExtent( item->GetText(), &text_w, &text_h );
 
     int image_h = 0, image_w = 0;
@@ -2193,8 +2223,7 @@ void wxGenericTreeCtrl::PaintItem(wxGenericTreeItem *item, wxDC& dc)
 
     if ( HasFlag(wxTR_FULL_ROW_HIGHLIGHT) )
     {
-        int x, w, h;
-        x=0;
+        int x = 0, w = 0, h = 0;
         GetVirtualSize(&w, &h);
         wxRect rect( x, item->GetY()+offset, w, total_h-offset);
 #if !defined(__WXGTK20__) && !defined(__WXMAC__)
@@ -2305,7 +2334,7 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
         // always expand hidden root
         int origY = y;
         wxArrayGenericTreeItems& children = item->GetChildren();
-        int count = children.GetCount();
+        int count = children.Count();
         if (count > 0)
         {
             int n = 0, oldY;
@@ -2453,7 +2482,7 @@ void wxGenericTreeCtrl::PaintLevel( wxGenericTreeItem *item, wxDC &dc, int level
     if (item->IsExpanded())
     {
         wxArrayGenericTreeItems& children = item->GetChildren();
-        int count = children.GetCount();
+        int count = children.Count();
         if (count > 0)
         {
             int n = 0, oldY;
@@ -3450,7 +3479,7 @@ void wxGenericTreeCtrl::CalculateLevel( wxGenericTreeItem *item, wxDC &dc, int l
 
   Recurse:
     wxArrayGenericTreeItems& children = item->GetChildren();
-    size_t n, count = children.GetCount();
+    size_t n, count = children.Count();
     ++level;
     for (n = 0; n < count; ++n )
         CalculateLevel( children[n], dc, level, y );  // recurse
@@ -3606,6 +3635,20 @@ wxGenericTreeCtrl::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
     return attr;
 #endif
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+
+int wxGenericTreeCtrl::GetItemSelectedImage(const wxTreeItemId& item) const
+{
+    return GetItemImage(item, wxTreeItemIcon_Selected);
+}
+
+void wxGenericTreeCtrl::SetItemSelectedImage(const wxTreeItemId& item, int image)
+{
+    SetItemImage(item, image, wxTreeItemIcon_Selected);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 void wxGenericTreeCtrl::DoDirtyProcessing()
 {

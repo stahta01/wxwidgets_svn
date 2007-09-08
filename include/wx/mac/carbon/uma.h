@@ -18,8 +18,8 @@ void UMAInitToolbox( UInt16 inMoreMastersCalls, bool isEmbedded) ;
 void UMACleanupToolbox() ;
 long UMAGetSystemVersion() ;
 
-WXDLLIMPEXP_BASE bool UMASystemIsInitialized();
-WXDLLIMPEXP_BASE void UMASetSystemIsInitialized(bool val);
+bool UMASystemIsInitialized() ;
+void UMASetSystemIsInitialized(bool val);
 
 // process manager
 
@@ -50,7 +50,7 @@ void            UMAShowArrowCursor() ;
 
 // window manager
 
-WXDLLIMPEXP_BASE GrafPtr UMAGetWindowPort( WindowRef inWindowRef ) ;
+GrafPtr        UMAGetWindowPort( WindowRef inWindowRef ) ;
 void             UMADisposeWindow( WindowRef inWindowRef ) ;
 void             UMASetWTitle( WindowRef inWindowRef , const wxString& title , wxFontEncoding encoding) ;
 
@@ -94,14 +94,7 @@ bool            UMAIsWindowModal( WindowRef inWindow ) ;
 
 void UMAHighlightAndActivateWindow( WindowRef inWindowRef , bool inActivate ) ;
 
-// Retrieves the Help menu handle. Warning: As a side-effect this functions also
-// creates the Help menu if it didn't exist yet.
 OSStatus UMAGetHelpMenu(
-  MenuRef *        outHelpMenu,
-  MenuItemIndex *  outFirstCustomItemIndex);      /* can be NULL */
-
-// Same as UMAGetHelpMenu, but doesn't create the Help menu if UMAGetHelpMenu hasn't been called yet.
-OSStatus UMAGetHelpMenuDontCreate(
   MenuRef *        outHelpMenu,
   MenuItemIndex *  outFirstCustomItemIndex);      /* can be NULL */
 
@@ -109,11 +102,12 @@ OSStatus UMAGetHelpMenuDontCreate(
 
 OSStatus UMADrawThemePlacard( const Rect *inRect , ThemeDrawState inState ) ;
 
-// Clipboard support
-
-OSStatus UMAPutScrap( Size size , OSType type , void *data ) ;
-
 #define GetWindowUpdateRgn( inWindow , updateRgn ) GetWindowRegion( inWindow , kWindowUpdateRgn, updateRgn )
+
+// Quartz 
+
+CGDataProviderRef UMACGDataProviderCreateWithCFData( CFDataRef data );
+CGDataConsumerRef UMACGDataConsumerCreateWithCFData( CFMutableDataRef data );
 
 #endif // wxUSE_GUI
 

@@ -132,7 +132,7 @@ AC_DEFUN([WX_CPP_NEW_HEADERS],
     AC_LANG_SAVE
     AC_LANG_CPLUSPLUS
 
-    AC_CHECK_HEADERS([iostream],,, [ ])
+    AC_CHECK_HEADERS(iostream,,, [ ])
 
     if test "$ac_cv_header_iostream" = "yes" ; then
       ifelse([$1], , :, [$1])
@@ -357,13 +357,10 @@ AC_DEFUN([WX_ARG_CACHE_NAME],)
 dnl this macro checks for a three-valued command line --with argument:
 dnl   possible arguments are 'yes', 'no', 'sys', or 'builtin'
 dnl usage: WX_ARG_SYS_WITH(option, helpmessage, variable-name)
-dnl
-dnl the default value (used if the option is not specified at all) is the value
-dnl of wxUSE_ALL_FEATURES (which is "yes" by default but can be changed by
-dnl giving configure --disable-all-features option)
 AC_DEFUN([WX_ARG_SYS_WITH],
         [
           AC_MSG_CHECKING([for --with-$1])
+          no_cache=0
           AC_ARG_WITH($1, [$2],
                       [
                         if test "$withval" = yes; then
@@ -377,23 +374,21 @@ AC_DEFUN([WX_ARG_SYS_WITH],
                         else
                           AC_MSG_ERROR([Invalid value for --with-$1: should be yes, no, sys, or builtin])
                         fi
-                        cache=yes
                       ],
                       [
-                        LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                        LINE=`grep "$3" ${wx_arg_cache_file}`
                         if test "x$LINE" != x ; then
-                            eval "DEFAULT_$LINE"
-                            cache=yes
+                          eval "DEFAULT_$LINE"
                         else
-                            cache=no
+                          no_cache=1
                         fi
 
-                        AS_TR_SH(wx_cv_use_$1)='$3=${'DEFAULT_$3":-$wxUSE_ALL_FEATURES}"
+                        AS_TR_SH(wx_cv_use_$1)='$3='$DEFAULT_$3
                       ])
 
           eval "$AS_TR_SH(wx_cv_use_$1)"
-          if test "x$cache" = xyes; then
-            echo "$3=$$3" >> ${wx_arg_cache_file}.tmp
+          if test "$no_cache" != 1; then
+            echo $AS_TR_SH(wx_cv_use_$1) >> ${wx_arg_cache_file}.tmp
           fi
 
           if test "$$3" = yes; then
@@ -414,15 +409,8 @@ dnl usage: WX_ARG_WITH(option, helpmessage, variable-name, [withstring])
 AC_DEFUN([WX_ARG_WITH],
         [
           withstring=$4
-          defaultval=$wxUSE_ALL_FEATURES
-          if test -z "$defaultval"; then
-              if test x"$withstring" = xwithout; then
-                  defaultval=yes
-              else
-                  defaultval=no
-              fi
-          fi
           AC_MSG_CHECKING([for --${withstring:-with}-$1])
+          no_cache=0
           AC_ARG_WITH($1, [$2],
                       [
                         if test "$withval" = yes; then
@@ -430,64 +418,41 @@ AC_DEFUN([WX_ARG_WITH],
                         else
                           AS_TR_SH(wx_cv_use_$1)='$3=no'
                         fi
-                        cache=yes
                       ],
                       [
-                        LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                        LINE=`grep "$3" ${wx_arg_cache_file}`
                         if test "x$LINE" != x ; then
-                            eval "DEFAULT_$LINE"
-                            cache=yes
+                          eval "DEFAULT_$LINE"
                         else
-                            cache=no
+                          no_cache=1
                         fi
 
-                        AS_TR_SH(wx_cv_use_$1)='$3=${'DEFAULT_$3":-$defaultval}"
+                        AS_TR_SH(wx_cv_use_$1)='$3='$DEFAULT_$3
                       ])
 
           eval "$AS_TR_SH(wx_cv_use_$1)"
-          if test "x$cache" = xyes; then
-            echo "$3=$$3" >> ${wx_arg_cache_file}.tmp
+          if test "$no_cache" != 1; then
+            echo $AS_TR_SH(wx_cv_use_$1) >> ${wx_arg_cache_file}.tmp
           fi
 
-          if test x"$withstring" = xwithout; then
-            if test $$3 = yes; then
-              result=no
-            else
-              result=yes
-            fi
+          if test "$$3" = yes; then
+            AC_MSG_RESULT(yes)
           else
-            result=$$3
+            AC_MSG_RESULT(no)
           fi
-
-          AC_MSG_RESULT($result)
         ])
 
-dnl same as WX_ARG_WITH but makes it clear that the option is enabled by default
-AC_DEFUN([WX_ARG_WITHOUT], [WX_ARG_WITH($1, [$2], $3, without)])
-
 dnl like WX_ARG_WITH but uses AC_ARG_ENABLE instead of AC_ARG_WITH
-dnl usage: WX_ARG_ENABLE(option, helpmessage, var, [enablestring], [default])
+dnl usage: WX_ARG_ENABLE(option, helpmessage, variable-name, enablestring)
 dnl
-dnl enablestring can be omitted or a literal string "disable" and allows to
-dnl show "checking for --disable-foo" message when running configure instead of
-dnl the default "checking for --enable-foo" one whih is useful for the options
-dnl enabled by default
-dnl
-dnl the "default" argument can be omitted or contain the default value to use
-dnl for the option if it's unspecified
+dnl enablestring is a hack and allows to show "checking for --disable-foo"
+dnl message when running configure instead of the default "checking for
+dnl --enable-foo" one whih is useful for the options enabled by default
 AC_DEFUN([WX_ARG_ENABLE],
         [
           enablestring=$4
-          defaultval=$5
-          if test -z "$defaultval"; then
-              if test x"$enablestring" = xdisable; then
-                  defaultval=yes
-              else
-                  defaultval=no
-              fi
-          fi
-
           AC_MSG_CHECKING([for --${enablestring:-enable}-$1])
+          no_cache=0
           AC_ARG_ENABLE($1, [$2],
                         [
                           if test "$enableval" = yes; then
@@ -495,44 +460,30 @@ AC_DEFUN([WX_ARG_ENABLE],
                           else
                             AS_TR_SH(wx_cv_use_$1)='$3=no'
                           fi
-                          cache=yes
                         ],
                         [
-                          LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                          LINE=`grep "$3" ${wx_arg_cache_file}`
                           if test "x$LINE" != x ; then
-                              eval "DEFAULT_$LINE"
-                              cache=yes
+                            eval "DEFAULT_$LINE"
                           else
-                              cache=no
+                            no_cache=1
                           fi
 
-                          AS_TR_SH(wx_cv_use_$1)='$3=${'DEFAULT_$3":-$defaultval}"
+                          AS_TR_SH(wx_cv_use_$1)='$3='$DEFAULT_$3
                         ])
 
           eval "$AS_TR_SH(wx_cv_use_$1)"
-          if test "x$cache" = xyes; then
-            echo "$3=$$3" >> ${wx_arg_cache_file}.tmp
+          if test "$no_cache" != 1; then
+            echo $AS_TR_SH(wx_cv_use_$1) >> ${wx_arg_cache_file}.tmp
           fi
 
-          if test x"$enablestring" = xdisable; then
-            if test $$3 = yes; then
-              result=no
-            else
-              result=yes
-            fi
+          if test "$$3" = yes; then
+            AC_MSG_RESULT(yes)
           else
-            result=$$3
+            AC_MSG_RESULT(no)
           fi
-
-          AC_MSG_RESULT($result)
         ])
 
-dnl the same as WX_ARG_ENABLE but makes it more clear that the option is
-dnl enabled by default
-AC_DEFUN([WX_ARG_DISABLE], [WX_ARG_ENABLE($1, [$2], $3, disable)])
-
-dnl same as WX_ARG_ENABLE but defaults to wxUSE_ALL_FEATURES instead of "yes"
-AC_DEFUN([WX_ARG_FEATURE], [WX_ARG_ENABLE($1, [$2], $3,, $wxUSE_ALL_FEATURES)])
 
 dnl Like WX_ARG_ENABLE but accepts a parameter.
 dnl
@@ -545,33 +496,31 @@ dnl
 dnl  --enable-foo       wxUSE_FOO=yes
 dnl  --disable-foo      wxUSE_FOO=no
 dnl  --enable-foo=bar   wxUSE_FOO=bar
-dnl  <not given>        value from configarg.cache or
-dnl                     wxUSE_FOO=$DEFAULT_wxUSE_FOO
+dnl  <not given>        value from configarg.cache or wxUSE_FOO=no
 dnl
 AC_DEFUN([WX_ARG_ENABLE_PARAM],
         [
           enablestring=$4
           AC_MSG_CHECKING([for --${enablestring:-enable}-$1])
+          no_cache=0
           AC_ARG_ENABLE($1, [$2],
                         [
                           wx_cv_use_$1="$3='$enableval'"
-                          cache=yes
                         ],
                         [
-                          LINE=`grep "^$3=" ${wx_arg_cache_file}`
+                          LINE=`grep "$3" ${wx_arg_cache_file}`
                           if test "x$LINE" != x ; then
                             eval "DEFAULT_$LINE"
-                            cache=yes
+                            wx_cv_use_$1='$3='$DEFAULT_$3
                           else
-                            cache=no
+                            no_cache=1
+                            wx_cv_use_$1="$3=no"
                           fi
-
-                          wx_cv_use_$1='$3='$DEFAULT_$3
                         ])
 
           eval "$wx_cv_use_$1"
-          if test "x$cache" = xyes; then
-            echo "$3=$$3" >> ${wx_arg_cache_file}.tmp
+          if test "$no_cache" != 1; then
+            echo $wx_cv_use_$1 >> ${wx_arg_cache_file}.tmp
           fi
 
           AC_MSG_RESULT([$$3])

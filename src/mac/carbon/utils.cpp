@@ -57,11 +57,8 @@
     #include <TextCommon.h>
     #include <TextEncodingConverter.h>
 #endif
-
-#include "wx/mac/private/timer.h"
 #endif // wxUSE_GUI
 
-#include "wx/evtloop.h"
 #include "wx/mac/private.h"
 
 #if defined(__MWERKS__) && wxUSE_UNICODE
@@ -306,13 +303,7 @@ WXDLLEXPORT bool wxGetEnv(const wxString& var, wxString *value)
 }
 
 // set the env var name to the given value, return true on success
-WXDLLEXPORT bool wxSetEnv(const wxString& var, const wxString& value)
-{
-    // TODO : under classic there is no environement support, under X yes
-    return false;
-}
-
-WXDLLEXPORT bool wxUnsetEnv(const wxString& var)
+WXDLLEXPORT bool wxSetEnv(const wxString& var, const wxChar *value)
 {
     // TODO : under classic there is no environement support, under X yes
     return false;
@@ -387,15 +378,83 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_MAC;
 }
 
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
+// Reading and writing resources (eg WIN.INI, .Xdefaults)
+#if wxUSE_RESOURCES
+bool wxWriteResource(const wxString& section, const wxString& entry, const wxString& value, const wxString& file)
 {
-    return new wxEventLoop;
+    // TODO
+    return false;
 }
 
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
+bool wxWriteResource(const wxString& section, const wxString& entry, float value, const wxString& file)
 {
-    return new wxCarbonTimerImpl(timer);
+    wxString buf;
+    buf.Printf(wxT("%.4f"), value);
+
+    return wxWriteResource(section, entry, buf, file);
 }
+
+bool wxWriteResource(const wxString& section, const wxString& entry, long value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%ld"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, int value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%d"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, char **value, const wxString& file)
+{
+    // TODO
+    return false;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, float *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = (float)strtod(s, NULL);
+        delete[] s;
+    }
+
+    return succ;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, long *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = strtol(s, NULL, 10);
+        delete[] s;
+    }
+
+    return succ;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, int *value, const wxString& file)
+{
+    char *s = NULL;
+    bool succ = wxGetResource(section, entry, (char **)&s, file);
+    if (succ)
+    {
+        *value = (int)strtol(s, NULL, 10);
+        delete[] s;
+    }
+
+    return succ;
+}
+#endif // wxUSE_RESOURCES
 
 int gs_wxBusyCursorCount = 0;
 extern wxCursor    gMacCurrentCursor;
@@ -943,6 +1002,7 @@ void wxMacControl::SuperChangedPosition()
 void wxMacControl::SetFont( const wxFont & font , const wxColour& foreground , long windowStyle )
 {
     m_font = font;
+#ifndef __LP64__
     ControlFontStyleRec fontStyle;
     if ( font.MacGetThemeFontID() != kThemeCurrentPortFont )
     {
@@ -993,6 +1053,7 @@ void wxMacControl::SetFont( const wxFont & font , const wxColour& foreground , l
     }
 
     ::SetControlFontStyle( m_controlRef , &fontStyle );
+#endif
 }
 
 void wxMacControl::SetBackground( const wxBrush &WXUNUSED(brush) )
@@ -2020,9 +2081,36 @@ void wxMacDataItemBrowserControl::MacDelete( unsigned int n )
     RemoveItem( wxMacDataBrowserRootContainer, item );
 }
 
-void wxMacDataItemBrowserControl::MacInsert( unsigned int n,
-                                             const wxArrayStringsAdapter& items,
-                                             int column )
+void wxMacDataItemBrowserControl::MacInsert( unsigned int n, const wxString& text, int column )
+{
+    wxMacDataItem* newItem = CreateItem();
+    newItem->SetLabel( text );
+    if ( column != -1 )
+        newItem->SetColumn( kMinColumnId + column );
+
+    if ( m_sortOrder == SortOrder_None )
+    {
+        // increase the order of the lines to be shifted
+        unsigned int lines = MacGetCount();
+        for ( unsigned int i = n; i < lines; ++i)
+        {
+            wxMacDataItem* iter = (wxMacDataItem*) GetItemFromLine(i);
+            iter->SetOrder( iter->GetOrder() + 1 );
+        }
+
+        SInt32 frontLineOrder = 0;
+        if ( n > 0 )
+        {
+            wxMacDataItem* iter = (wxMacDataItem*) GetItemFromLine(n-1);
+            frontLineOrder = iter->GetOrder();
+        }
+        newItem->SetOrder( frontLineOrder + 1 );
+    }
+
+    AddItem( wxMacDataBrowserRootContainer, newItem );
+}
+
+void wxMacDataItemBrowserControl::MacInsert( unsigned int n, const wxArrayString& items, int column )
 {
     size_t itemsCount = items.GetCount();
     if ( itemsCount == 0 )

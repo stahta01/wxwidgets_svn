@@ -501,8 +501,7 @@ wxCursor::wxCursor(const wxString& cursor_file, long flags, int hotSpotX, int ho
         {
             image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_X, hotSpotX ) ;
             image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_Y, hotSpotY ) ;
-            m_refData->DecRef() ;
-            m_refData = NULL ;
+            delete m_refData ;
             CreateFromImage( image ) ;
         }
 #endif

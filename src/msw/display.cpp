@@ -223,7 +223,7 @@ public:
 
     virtual unsigned GetCount() { return unsigned(m_displays.size()); }
     virtual int GetFromPoint(const wxPoint& pt);
-    virtual int GetFromWindow(const wxWindow *window);
+    virtual int GetFromWindow(wxWindow *window);
 
 protected:
     // ctor checks if the current system supports multimon API and dynamically
@@ -482,9 +482,7 @@ wxVideoMode wxDisplayImplWin32Base::GetCurrentMode() const
     // according to MSDN.  The version of GetName() we implement for Win95
     // returns an empty string.
     const wxString name = GetName();
-    const wxChar * const deviceName = name.empty()
-                                          ? (const wxChar*)NULL
-                                          : (const wxChar*)name.c_str();
+    const wxChar * const deviceName = name.empty() ? NULL : name.c_str();
 
     DEVMODE dm;
     dm.dmSize = sizeof(dm);
@@ -575,7 +573,7 @@ int wxDisplayFactoryWin32Base::GetFromPoint(const wxPoint& pt)
                                                        MONITOR_DEFAULTTONULL));
 }
 
-int wxDisplayFactoryWin32Base::GetFromWindow(const wxWindow *window)
+int wxDisplayFactoryWin32Base::GetFromWindow(wxWindow *window)
 {
     return FindDisplayFromHMONITOR(gs_MonitorFromWindow(GetHwndOf(window),
                                                         MONITOR_DEFAULTTONULL));
@@ -671,9 +669,7 @@ wxDisplayImplMultimon::GetModes(const wxVideoMode& modeMatch) const
     // according to MSDN.  The version of GetName() we implement for Win95
     // returns an empty string.
     const wxString name = GetName();
-    const wxChar * const deviceName = name.empty()
-                                            ? (const wxChar*)NULL
-                                            : (const wxChar*)name.c_str();
+    const wxChar * const deviceName = name.empty() ? NULL : name.c_str();
 
     DEVMODE dm;
     dm.dmSize = sizeof(dm);
@@ -768,11 +764,11 @@ bool wxDisplayImplMultimon::ChangeMode(const wxVideoMode& mode)
     // do change the mode
     switch ( pfnChangeDisplaySettingsEx
              (
-                GetName().wx_str(), // display name
-                pDevMode,           // dev mode or NULL to reset
-                NULL,               // reserved
+                GetName(),      // display name
+                pDevMode,       // dev mode or NULL to reset
+                NULL,           // reserved
                 flags,
-                NULL                // pointer to video parameters (not used)
+                NULL            // pointer to video parameters (not used)
              ) )
     {
         case DISP_CHANGE_SUCCESSFUL:

@@ -303,6 +303,7 @@ bool wxFontBase::SetNativeFontInfo(const wxString& info)
         return true;
     }
 
+    UnRef();
     return false;
 }
 
@@ -315,6 +316,7 @@ bool wxFontBase::SetNativeFontInfoUserDesc(const wxString& info)
         return true;
     }
 
+    UnRef();
     return false;
 }
 
@@ -388,17 +390,13 @@ wxString wxFontBase::GetWeightString() const
     }
 }
 
-bool wxFontBase::SetFaceName(const wxString& facename)
+bool wxFontBase::SetFaceName(const wxString &facename)
 {
-#if wxUSE_FONTENUM
     if (!wxFontEnumerator::IsValidFacename(facename))
     {
         UnRef();        // make Ok() return false
         return false;
     }
-#else // !wxUSE_FONTENUM
-    wxUnusedVar(facename);
-#endif // wxUSE_FONTENUM/!wxUSE_FONTENUM
 
     return true;
 }
@@ -409,9 +407,8 @@ bool wxFontBase::SetFaceName(const wxString& facename)
 // ----------------------------------------------------------------------------
 
 // Up to now, there are no native implementations of this function:
-void wxNativeFontInfo::SetFaceName(const wxArrayString& facenames)
+void wxNativeFontInfo::SetFaceName(const wxArrayString &facenames)
 {
-#if wxUSE_FONTENUM
     for (size_t i=0; i < facenames.GetCount(); i++)
     {
         if (wxFontEnumerator::IsValidFacename(facenames[i]))
@@ -425,9 +422,6 @@ void wxNativeFontInfo::SetFaceName(const wxArrayString& facenames)
     wxString validfacename = wxFontEnumerator::GetFacenames().Item(0);
     wxLogTrace(wxT("font"), wxT("Falling back to '%s'"), validfacename.c_str());
     SetFaceName(validfacename);
-#else // !wxUSE_FONTENUM
-    SetFaceName(facenames[0]);
-#endif // wxUSE_FONTENUM/!wxUSE_FONTENUM
 }
 
 
@@ -752,15 +746,9 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
             // NB: the check on the facename is implemented in wxFontBase::SetFaceName
             //     and not in wxNativeFontInfo::SetFaceName thus we need to explicitely
             //     call here wxFontEnumerator::IsValidFacename
-            if (
-#if wxUSE_FONTENUM
-                    !wxFontEnumerator::IsValidFacename(face) ||
-#endif // wxUSE_FONTENUM
-                    !SetFaceName(face) )
-            {
+            if (!wxFontEnumerator::IsValidFacename(face) ||
+                !SetFaceName(face))
                 SetFaceName(wxNORMAL_FONT->GetFaceName());
-            }
-
             face.clear();
         }
     }
@@ -771,14 +759,9 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
         // NB: the check on the facename is implemented in wxFontBase::SetFaceName
         //     and not in wxNativeFontInfo::SetFaceName thus we need to explicitely
         //     call here wxFontEnumerator::IsValidFacename
-        if (
-#if wxUSE_FONTENUM
-                !wxFontEnumerator::IsValidFacename(face) ||
-#endif // wxUSE_FONTENUM
-                !SetFaceName(face) )
-            {
-                SetFaceName(wxNORMAL_FONT->GetFaceName());
-            }
+        if (!wxFontEnumerator::IsValidFacename(face) ||
+            !SetFaceName(face))
+            SetFaceName(wxNORMAL_FONT->GetFaceName());
     }
 
     // set point size to default value if size was not given
@@ -799,26 +782,3 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
 }
 
 #endif // generic or wxMSW or wxOS2
-
-
-// wxFont <-> wxString utilities, used by wxConfig
-wxString wxToString(const wxFontBase& font)
-{
-    return font.IsOk() ? font.GetNativeFontInfoDesc()
-                       : wxString();
-}
-
-bool wxFromString(const wxString& str, wxFontBase *font)
-{
-    wxCHECK_MSG( font, false, _T("NULL output parameter") );
-
-    if ( str.empty() )
-    {
-        *font = wxNullFont;
-        return true;
-    }
-
-    return font->SetNativeFontInfo(str);
-}
-
-

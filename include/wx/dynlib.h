@@ -32,7 +32,7 @@
     #define wxHAVE_DYNLIB_ERROR
 #endif
 
-class WXDLLIMPEXP_FWD_BASE wxDynamicLibraryDetailsCreator;
+class WXDLLIMPEXP_BASE wxDynamicLibraryDetailsCreator;
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -105,27 +105,6 @@ enum wxPluginCategory
 #define wxDYNLIB_FUNCTION(type, name, dynlib) \
     type pfn ## name = (type)(dynlib).GetSymbol(_T(#name))
 
-
-// the following macros can be used to redirect a whole
-// library to a class and check at run-time if the the
-// library is present and contains all required methods.
-
-#define wxDL_METHOD_DEFINE( rettype, name, args, shortargs, defret ) \
-    typedef rettype (* name ## Type) args ; \
-    name ## Type pfn_ ## name; \
-    rettype name args \
-    { if (m_ok) return pfn_ ## name shortargs ; return defret; }
-
-#define wxDL_VOIDMETHOD_DEFINE( name, args, shortargs ) \
-    typedef void (* name ## Type) args ; \
-    name ## Type pfn_ ## name; \
-    void name args \
-    { if (m_ok) pfn_ ## name shortargs ; }
-    
-#define wxDL_METHOD_LOAD( lib, name, success ) \
-    pfn_ ## name = (name ## Type) lib->GetSymbol( wxT(#name), &success ); \
-    if (!success) return;
-
 // ----------------------------------------------------------------------------
 // wxDynamicLibraryDetails: contains details about a loaded wxDynamicLibrary
 // ----------------------------------------------------------------------------
@@ -191,7 +170,7 @@ public:
     static wxDllType         GetProgramHandle();
 
     // return the platform standard DLL extension (with leading dot)
-    static const wxString& GetDllExt() { return ms_dllext; }
+    static const wxChar *GetDllExt() { return ms_dllext; }
 
     wxDynamicLibrary() : m_handle(0) { }
     wxDynamicLibrary(const wxString& libname, int flags = wxDL_DEFAULT)
@@ -319,7 +298,7 @@ protected:
 
 
     // platform specific shared lib suffix.
-    static const wxString ms_dllext;
+    static const wxChar *ms_dllext;
 
     // the handle to DLL or NULL
     wxDllType m_handle;

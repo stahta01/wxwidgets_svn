@@ -25,13 +25,13 @@
     extern WXDLLEXPORT_DATA(const wxVideoMode) wxDefaultVideoMode;
 #endif // wxUSE_DISPLAY
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxPoint;
-class WXDLLIMPEXP_FWD_CORE wxRect;
-class WXDLLIMPEXP_FWD_BASE wxString;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxPoint;
+class WXDLLEXPORT wxRect;
+class WXDLLIMPEXP_BASE wxString;
 
-class WXDLLIMPEXP_FWD_CORE wxDisplayFactory;
-class WXDLLIMPEXP_FWD_CORE wxDisplayImpl;
+class WXDLLEXPORT wxDisplayFactory;
+class WXDLLEXPORT wxDisplayImpl;
 
 // ----------------------------------------------------------------------------
 // wxDisplay: represents a display/monitor attached to the system
@@ -62,7 +62,7 @@ public:
 
     // find the display where the given window lies, return wxNOT_FOUND if it
     // is not shown at all
-    static int GetFromWindow(const wxWindow *window);
+    static int GetFromWindow(wxWindow *window);
 
 
     // return true if the object was initialized successfully

@@ -14,7 +14,7 @@
 
 #include "wx/checkbox.h"
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // data
@@ -29,6 +29,8 @@ extern bool           g_blockEventsOnDrag;
 extern "C" {
 static void gtk_checkbox_toggled_callback(GtkWidget *widget, wxCheckBox *cb)
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!cb->m_hasVMT) return;
 
     if (g_blockEventsOnDrag) return;
@@ -107,6 +109,8 @@ bool wxCheckBox::Create(wxWindow *parent,
                         const wxValidator& validator,
                         const wxString &name )
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
     m_blockEvent = false;
 
     if (!PreCreation( parent, pos, size ) ||
@@ -199,9 +203,6 @@ wxCheckBoxState wxCheckBox::DoGet3StateValue() const
 void wxCheckBox::SetLabel( const wxString& label )
 {
     wxCHECK_RET( m_widgetLabel != NULL, wxT("invalid checkbox") );
-
-    // save the label inside m_label in case user calls GetLabel() later
-    wxControl::SetLabel(label);
 
     GTKSetLabelForLabel(GTK_LABEL(m_widgetLabel), label);
 }

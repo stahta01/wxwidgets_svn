@@ -15,14 +15,13 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/dynarray.h"
     #include "wx/brush.h"
     #include "wx/colour.h"
     #include "wx/dc.h"
     #include "wx/settings.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/html/htmlcell.h"
@@ -356,11 +355,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxHtmlWordCell, wxHtmlCell)
 wxHtmlWordCell::wxHtmlWordCell(const wxString& word, const wxDC& dc) : wxHtmlCell()
 {
     m_Word = word;
-    wxCoord w, h, d;
-    dc.GetTextExtent(m_Word, &w, &h, &d);
-    m_Width = w;
-    m_Height = h;
-    m_Descent = d;
+    dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
     SetCanLiveOnPagebreak(false);
     m_allowLinebreak = true;
 }

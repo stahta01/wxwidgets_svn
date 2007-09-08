@@ -87,7 +87,7 @@ gtk_pizza_get_type ()
 
     if (!pizza_type)
     {
-        const GTypeInfo pizza_info =
+        static const GTypeInfo pizza_info =
         {
             sizeof (GtkPizzaClass),
             NULL,           /* base_init */
@@ -196,7 +196,6 @@ gtk_pizza_child_type (GtkContainer     *container)
 static void
 gtk_pizza_init (GtkPizza *pizza)
 {
-    GTK_WIDGET_SET_FLAGS (pizza, GTK_CAN_FOCUS);
     GTK_WIDGET_UNSET_FLAGS (pizza, GTK_NO_WINDOW);
 
     pizza->children = NULL;
@@ -213,20 +212,6 @@ gtk_pizza_new ()
     GtkPizza *pizza;
 
     pizza = g_object_new (gtk_pizza_get_type (), NULL);
-    
-    pizza->m_noscroll = FALSE;
-
-    return GTK_WIDGET (pizza);
-}
-
-GtkWidget*
-gtk_pizza_new_no_scroll ()
-{
-    GtkPizza *pizza;
-
-    pizza = g_object_new (gtk_pizza_get_type (), NULL);
-
-    pizza->m_noscroll = TRUE;
 
     return GTK_WIDGET (pizza);
 }
@@ -271,11 +256,11 @@ gint       gtk_pizza_get_rtl_offset  (GtkPizza          *pizza)
 
     g_return_val_if_fail ( (pizza != NULL), 0 );
     g_return_val_if_fail ( (GTK_IS_PIZZA (pizza)), 0 );
-
+    
     if (!pizza->bin_window) return 0;
-
+    
     border = pizza->container.border_width;
-
+        
     return GTK_WIDGET(pizza)->allocation.width - border*2;
 }
 
@@ -406,7 +391,6 @@ gtk_pizza_realize (GtkWidget *widget)
     GtkPizzaChild *child;
     GList *children;
     int border;
-    int w, h;
 
     g_return_if_fail (widget != NULL);
     g_return_if_fail (GTK_IS_PIZZA (widget));
@@ -421,23 +405,15 @@ gtk_pizza_realize (GtkWidget *widget)
     attributes.width = widget->allocation.width;
     attributes.height = widget->allocation.height;
 
+    border = pizza->container.border_width;
+    attributes.x += border;
+    attributes.y += border;
+    attributes.width -= 2 * border;
+    attributes.height -= 2 * border;
+
     /* minimal size */
     if (attributes.width < 2) attributes.width = 2;
     if (attributes.height < 2) attributes.height = 2;
-
-    border = pizza->container.border_width;
-    w = attributes.width  - 2 * border;
-    h = attributes.height - 2 * border;
-    if (w < 2) w = 2;
-    if (h < 2) h = 2;
-
-    if (!pizza->m_noscroll)
-    {
-        attributes.x += border;
-        attributes.y += border;
-        attributes.width  = w;
-        attributes.height = h;
-    }
 
     attributes.wclass = GDK_INPUT_OUTPUT;
     attributes.visual = gtk_widget_get_visual (widget);
@@ -451,13 +427,6 @@ gtk_pizza_realize (GtkWidget *widget)
 
     attributes.x = 0;
     attributes.y = 0;
-    if (pizza->m_noscroll)
-    {
-        attributes.x = border;
-        attributes.y = border;
-        attributes.width  = w;
-        attributes.height = h;
-    }
 
     attributes.event_mask = gtk_widget_get_events (widget);
     attributes.event_mask |= GDK_EXPOSURE_MASK              |
@@ -572,38 +541,25 @@ gtk_pizza_size_allocate (GtkWidget     *widget,
                    (widget->allocation.y == allocation->y));
     widget->allocation = *allocation;
 
-    if (GTK_WIDGET_REALIZED(widget))
+    border = pizza->container.border_width;
+    
+    x = allocation->x + border;
+    y = allocation->y + border;
+    w = allocation->width - border*2;
+    h = allocation->height - border*2;
+    if (w < 0)
+        w = 0;
+    if (h < 0)
+        h = 0;
+
+    if (GTK_WIDGET_REALIZED (widget))
     {
-        border = pizza->container.border_width;
-
-        x = allocation->x + border;
-        y = allocation->y + border;
-        w = allocation->width - border*2;
-        h = allocation->height - border*2;
-        if (w < 0)
-            w = 0;
-        if (h < 0)
-            h = 0;
-
-        if (pizza->m_noscroll)
-        {
-            if (only_resize)
-                gdk_window_resize( widget->window, allocation->width, allocation->height );
-            else
-                gdk_window_move_resize( widget->window, allocation->x, allocation->y, 
-                                                        allocation->width, allocation->height );
-
-            gdk_window_move_resize( pizza->bin_window, border, border, w, h );
-        }
+        if (only_resize)
+            gdk_window_resize( widget->window, w, h );
         else
-        {
-            if (only_resize)
-                gdk_window_resize( widget->window, w, h );
-            else
-                gdk_window_move_resize( widget->window, x, y, w, h );
+            gdk_window_move_resize( widget->window, x, y, w, h );
 
-            gdk_window_resize( pizza->bin_window, w, h );
-        }
+        gdk_window_resize( pizza->bin_window, w, h );
     }
 
     children = pizza->children;
@@ -721,15 +677,15 @@ gtk_pizza_allocate_child (GtkPizza      *pizza,
     if (gtk_widget_get_direction( GTK_WIDGET(pizza) ) == GTK_TEXT_DIR_RTL)
     {
         /* reverse horizontal placement */
-        gint offset,border;
-
+        gint offset,border; 
+        
         offset = GTK_WIDGET(pizza)->allocation.width;
         border = pizza->container.border_width;
         offset -= border*2;
-
-        allocation.x = offset - child->x - allocation.width + pizza->m_xoffset;
+            
+        allocation.x = offset - child->x - allocation.width + pizza->m_xoffset; 
     }
-
+    
     gtk_widget_size_allocate (child->widget, &allocation);
 }
 

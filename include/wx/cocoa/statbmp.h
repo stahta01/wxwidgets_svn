@@ -47,7 +47,9 @@ public:
 // Cocoa specifics
 // ------------------------------------------------------------------------
     WX_NSImageView GetNSImageView() { return (WX_NSImageView)m_cocoaNSView; }
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     wxBitmap m_bitmap;
+#endif
 
 // ------------------------------------------------------------------------
 // Implementation

@@ -30,7 +30,7 @@
 #define wxMetaFile wxMetafile
 #define wxMetaFileDC wxMetafileDC
 
-class WXDLLIMPEXP_FWD_CORE wxMetafile;
+class WXDLLEXPORT wxMetafile;
 class wxMetafileRefData ;
 
 #define M_METAFILEDATA ((wxMetafileRefData *)m_refData)

@@ -199,7 +199,7 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
   msflags &= ~WS_HSCROLL;
 
   if ( !wxWindow::MSWCreate(wxMDIFrameClassName,
-                            title.wx_str(),
+                            title,
                             pos, size,
                             msflags,
                             exflags) )
@@ -313,17 +313,6 @@ void wxMDIParentFrame::DoMenuUpdates(wxMenu* menu)
     {
         wxFrameBase::DoMenuUpdates(menu);
     }
-}
-
-const wxMenuItem *wxMDIParentFrame::FindItemInMenuBar(int menuId) const
-{
-    const wxMenuItem *item = wxFrame::FindItemInMenuBar(menuId);
-    if ( !item && m_currentChild )
-    {
-        item = m_currentChild->FindItemInMenuBar(menuId);
-    }
-
-    return item;
 }
 
 void wxMDIParentFrame::UpdateClientSize()
@@ -484,6 +473,24 @@ WXLRESULT wxMDIParentFrame::MSWWindowProc(WXUINT message,
 
             // we erase background ourselves
             rc = true;
+            break;
+
+        case WM_MENUSELECT:
+            {
+                WXWORD item, flags;
+                WXHMENU hmenu;
+                UnpackMenuSelect(wParam, lParam, &item, &flags, &hmenu);
+
+                if ( m_parentFrameActive )
+                {
+                    processed = HandleMenuSelect(item, flags, hmenu);
+                }
+                else if (m_currentChild)
+                {
+                    processed = m_currentChild->
+                        HandleMenuSelect(item, flags, hmenu);
+                }
+            }
             break;
 
         case WM_SIZE:
@@ -711,7 +718,7 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
   mcs.szClass = style & wxFULL_REPAINT_ON_RESIZE
                     ? wxMDIChildFrameClassName
                     : wxMDIChildFrameClassNameNoRedraw;
-  mcs.szTitle = title.wx_str();
+  mcs.szTitle = title;
   mcs.hOwner = wxGetInstance();
   if (x != wxDefaultCoord)
       mcs.x = x;
@@ -1388,11 +1395,7 @@ static void MDISetMenu(wxWindow *win, HMENU hmenuFrame, HMENU hmenuWindow)
                             (WPARAM)hmenuFrame,
                             (LPARAM)hmenuWindow) )
         {
-#ifdef __WXDEBUG__
-            DWORD err = ::GetLastError();
-            if ( err )
-                wxLogApiError(_T("SendMessage(WM_MDISETMENU)"), err);
-#endif // __WXDEBUG__
+            wxLogLastError(_T("SendMessage(WM_MDISETMENU)"));
         }
     }
 
@@ -1430,14 +1433,14 @@ static void InsertWindowMenu(wxWindow *win, WXHMENU menu, HMENU subMenu)
             {
                 success = true;
                 ::InsertMenu(hmenu, i, MF_BYPOSITION | MF_POPUP | MF_STRING,
-                             (UINT)subMenu, _("&Window").wx_str());
+                             (UINT)subMenu, _("&Window"));
                 break;
             }
         }
 
         if ( !success )
         {
-            ::AppendMenu(hmenu, MF_POPUP, (UINT)subMenu, _("&Window").wx_str());
+            ::AppendMenu(hmenu, MF_POPUP, (UINT)subMenu, _("&Window"));
         }
     }
 

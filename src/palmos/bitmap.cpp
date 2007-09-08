@@ -331,6 +331,10 @@ wxDC *wxBitmap::GetSelectedInto() const
 
 #endif
 
+void wxBitmap::UseAlpha()
+{
+}
+
 bool wxBitmap::HasAlpha() const
 {
     return false;

@@ -16,66 +16,8 @@
 
 #if wxUSE_MSGDLG
 
-#include "wx/dialog.h"
-
-WXDLLEXPORT_DATA(extern const wxChar) wxMessageBoxCaptionStr[];
-
-class WXDLLEXPORT wxMessageDialogBase : public wxDialog
+class WXDLLEXPORT wxMessageDialogBase
 {
-public:
-    // ctors
-    wxMessageDialogBase() { m_dialogStyle = 0; }
-    wxMessageDialogBase(wxWindow *parent,
-                        const wxString& message,
-                        const wxString& caption,
-                        long style)
-        : m_message(message),
-          m_caption(caption)
-    {
-        m_parent = parent;
-        SetMessageDialogStyle(style);
-    }
-
-    // virtual dtor for the base class
-    virtual ~wxMessageDialogBase() { }
-
-
-    // methods for setting up more custom message dialogs -- all functions
-    // return false if they're not implemented
-    virtual bool SetYesNoLabels(const wxString& WXUNUSED(yes),
-                                const wxString& WXUNUSED(no))
-    {
-        return false;
-    }
-
-    virtual bool SetYesNoCancelLabels(const wxString& WXUNUSED(yes),
-                                      const wxString& WXUNUSED(no),
-                                      const wxString& WXUNUSED(cancel))
-    {
-        return false;
-    }
-
-    virtual bool SetOKLabel(const wxString& WXUNUSED(ok))
-    {
-        return false;
-    }
-
-    virtual bool SetOKCancelLabels(const wxString& WXUNUSED(ok),
-                                   const wxString& WXUNUSED(cancel))
-    {
-        return false;
-    }
-
-    virtual void SetMessage(const wxString& message)
-    {
-        m_message = message;
-    }
-
-    virtual void SetExtendedMessage(const wxString& extendedMessage)
-    {
-        m_extendedMessage = extendedMessage;
-    }
-
 protected:
     // common validation of wxMessageDialog style
     void SetMessageDialogStyle(long style)
@@ -88,46 +30,37 @@ protected:
 
         m_dialogStyle = style;
     }
-
-    long GetMessageDialogStyle() const { return m_dialogStyle; }
-
-
-    // for the platforms not supporting separate main and extended messages
-    // this function should be used to combine both of them in a single string
-    wxString GetFullMessage() const
+    inline long GetMessageDialogStyle() const
     {
-        wxString msg = m_message;
-        if ( !m_extendedMessage.empty() )
-            msg << "\n\n" << m_extendedMessage;
-
-        return msg;
+        return m_dialogStyle;
     }
 
-    wxString m_message,
-             m_extendedMessage,
-             m_caption;
+private:
     long m_dialogStyle;
 };
 
-#if defined(__WX_COMPILING_MSGDLGG_CPP__) || \
-    defined(__WXUNIVERSAL__) || defined(__WXGPE__) || \
-    defined(__WXCOCOA__) || \
-    (defined(__WXGTK__) && !defined(__WXGTK20__))
-    #include "wx/generic/msgdlgg.h"
-
-    #define wxMessageDialog wxGenericMessageDialog
+#if defined(__WX_COMPILING_MSGDLGG_CPP__)
+#include "wx/generic/msgdlgg.h"
+#elif defined(__WXUNIVERSAL__) || defined(__WXGPE__)
+#include "wx/generic/msgdlgg.h"
 #elif defined(__WXPALMOS__)
-    #include "wx/palmos/msgdlg.h"
+#include "wx/palmos/msgdlg.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/msgdlg.h"
+#include "wx/msw/msgdlg.h"
 #elif defined(__WXMOTIF__)
-    #include "wx/motif/msgdlg.h"
+#include "wx/motif/msgdlg.h"
 #elif defined(__WXGTK20__)
-    #include "wx/gtk/msgdlg.h"
+#include "wx/gtk/msgdlg.h"
+#elif defined(__WXGTK__)
+#include "wx/generic/msgdlgg.h"
+#elif defined(__WXGTK__)
+#include "wx/generic/msgdlgg.h"
 #elif defined(__WXMAC__)
-    #include "wx/mac/msgdlg.h"
+#include "wx/mac/msgdlg.h"
+#elif defined(__WXCOCOA__)
+#include "wx/generic/msgdlgg.h"
 #elif defined(__WXPM__)
-    #include "wx/os2/msgdlg.h"
+#include "wx/os2/msgdlg.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -142,4 +75,5 @@ int WXDLLEXPORT wxMessageBox(const wxString& message,
 
 #endif // wxUSE_MSGDLG
 
-#endif // _WX_MSGDLG_H_BASE_
+#endif
+    // _WX_MSGDLG_H_BASE_

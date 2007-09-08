@@ -14,16 +14,9 @@ For more information, please see \helpref{Programming with wxBoxSizer}{boxsizerp
 
 <wx/sizer.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxSizer}{wxsizer}, \helpref{Sizer overview}{sizeroverview}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxBoxSizer::wxBoxSizer}\label{wxboxsizerwxboxsizer}
 
@@ -39,7 +32,7 @@ or wxHORIZONTAL for creating either a column sizer or a row sizer.
 Implements the calculation of a box sizer's dimensions and then sets
 the size of its children (calling \helpref{wxWindow::SetSize}{wxwindowsetsize} 
 if the child is a window). It is used internally only and must not be called
-by the user (call Layout() if you want to resize). Documented for information.
+by the user. Documented for information.
 
 \membersection{wxBoxSizer::CalcMin}\label{wxboxsizercalcmin}
 

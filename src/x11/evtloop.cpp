@@ -26,14 +26,14 @@
     #include "wx/hash.h"
     #include "wx/app.h"
     #include "wx/window.h"
+    #include "wx/timer.h"
     #include "wx/module.h"
 #endif
 
-#include "wx/private/selectdispatcher.h"
+#include "wx/private/socketevtdispatch.h"
 #include "wx/unix/private.h"
 #include "wx/x11/private.h"
 #include "X11/Xlib.h"
-#include "wx/generic/private/timer.h"
 
 #if wxUSE_THREADS
     #include "wx/thread.h"
@@ -143,12 +143,12 @@ bool wxEventLoopImpl::SendIdleEvent()
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
@@ -165,7 +165,7 @@ int wxGUIEventLoop::Run()
         while ( ! Pending() )
         {
 #if wxUSE_TIMER
-            wxGenericTimerImpl::NotifyTimers(); // TODO: is this the correct place for it?
+            wxTimer::NotifyTimers(); // TODO: is this the correct place for it?
 #endif
             if (!m_impl->SendIdleEvent())
             {
@@ -191,7 +191,7 @@ int wxGUIEventLoop::Run()
     return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
     wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
@@ -203,13 +203,13 @@ void wxGUIEventLoop::Exit(int rc)
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     XFlush( wxGlobalDisplay() );
     return (XPending( wxGlobalDisplay() ) > 0);
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
     XEvent event;
 
@@ -253,7 +253,7 @@ bool wxGUIEventLoop::Dispatch()
             // An X11 event was pending, get it
             if (wxFD_ISSET( fd, &readset ))
                 XNextEvent( wxGlobalDisplay(), &event );
-        }
+        }    
 #endif
     }
     else
@@ -263,7 +263,7 @@ bool wxGUIEventLoop::Dispatch()
 
 #if wxUSE_SOCKETS
     // handle any pending socket events:
-    wxSelectDispatcher::DispatchPending();
+    wxSocketEventDispatcher::Get().RunLoop();
 #endif
 
     (void) m_impl->ProcessEvent( &event );

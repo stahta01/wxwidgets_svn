@@ -162,7 +162,7 @@ extern FILE *CurrentOutput2;
 void AddMacroDef(int the_id, const wxChar *name, int n, bool ignore = false, bool forbidden = false);
 void TexInitialize(int bufSize);
 void TexCleanUp(void);
-void TexOutput(const wxString& s, bool ordinaryText = false);
+void TexOutput(const wxChar *s, bool ordinaryText = false);
 wxChar *GetArgData(TexChunk *chunk);
 wxChar *GetArgData(void);             // Get the string for the current argument
 int GetNoArgs(void);                // Get the number of arguments for the current macro
@@ -356,10 +356,10 @@ void DefaultOnMacro(int macroId, int no_args, bool start);
 bool DefaultOnArgument(int macroId, int arg_no, bool start);
 
 // Called on error
-void OnError(const wxString& msg);
+void OnError(const wxChar *msg);
 
 // Called for information
-void OnInform(const wxString& msg);
+void OnInform(const wxChar *msg);
 
 // Special yield wrapper
 void Tex2RTFYield(bool force = false);
@@ -377,7 +377,7 @@ void ForceTopicName(const wxChar *name);
 void ResetTopicCounter(void);
 
 // Parse unit eg. 14, 12pt, 34cm and return value in points.
-int ParseUnitArgument(const wxChar *unitArg);
+int ParseUnitArgument(wxChar *unitArg);
 
 // Set small, large, normal etc. point sizes for reference size
 void SetFontSizes(int pointSize);
@@ -483,11 +483,11 @@ class BibEntry: public wxObject
 extern wxList BibList;
 extern wxStringList CitationList;
 
-bool ReadBib(const wxChar *filename);
+bool ReadBib(wxChar *filename);
 void OutputBib(void);
 void ResolveBibReferences(void);
-void AddCitation(const wxChar *citeKey);
-TexRef *FindReference(const wxChar *key);
+void AddCitation(wxChar *citeKey);
+TexRef *FindReference(wxChar *key);
 
 /*
  * Ability to customize, or at least suppress unknown macro errors

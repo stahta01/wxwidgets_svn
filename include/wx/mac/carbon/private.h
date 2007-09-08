@@ -49,6 +49,7 @@
 
 #ifdef __WXMAC_CARBON__
 #include "wx/mac/corefoundation/cfstring.h"
+#include "wx/mac/corefoundation/cfdataref.h"
 #endif
 
 #ifndef FixedToInt
@@ -202,16 +203,16 @@ bool wxMacConvertEventToRecord( EventRef event , EventRecord *rec);
 #endif // wxUSE_GUI
 
 // filefn.h
-WXDLLIMPEXP_BASE wxString wxMacFSSpec2MacFilename( const FSSpec *spec );
-WXDLLIMPEXP_BASE void wxMacFilename2FSSpec( const wxString &path , FSSpec *spec );
+WXDLLEXPORT wxString wxMacFSSpec2MacFilename( const FSSpec *spec );
+WXDLLEXPORT void wxMacFilename2FSSpec( const wxString &path , FSSpec *spec );
 
 // utils.h
-WXDLLIMPEXP_BASE wxString wxMacFindFolderNoSeparator(short vRefNum,
-                                                     OSType folderType,
-                                                     Boolean createFolder);
-WXDLLIMPEXP_BASE wxString wxMacFindFolder(short vRefNum,
-                                          OSType folderType,
-                                          Boolean createFolder);
+WXDLLEXPORT wxString wxMacFindFolderNoSeparator(short vRefNum,
+                                                OSType folderType,
+                                                Boolean createFolder);
+WXDLLEXPORT wxString wxMacFindFolder(short vRefNum,
+                                     OSType folderType,
+                                     Boolean createFolder);
 
 template<typename T> EventParamType wxMacGetEventParamType() { wxFAIL_MSG( wxT("Unknown Param Type") ); return 0; }
 template<> inline EventParamType wxMacGetEventParamType<RgnHandle>() { return typeQDRgnHandle; }
@@ -429,6 +430,11 @@ public :
 
     operator refType () const { return m_ref; }
 
+    wxMacCFRefHolder& operator=(refType r)
+    {
+        Set( r );
+        return *this;
+    }
 private :
     refType m_ref;
     bool m_release;
@@ -473,7 +479,7 @@ void wxMacNativeToRect( const Rect *n , wxRect* wx );
 void wxMacPointToNative( const wxPoint* wx , Point *n );
 void wxMacNativeToPoint( const Point *n , wxPoint* wx );
 
-wxWindow *              wxFindControlFromMacControl(ControlRef inControl );
+wxWindowMac *           wxFindControlFromMacControl(ControlRef inControl );
 wxTopLevelWindowMac*    wxFindWinFromMacWindow( WindowRef inWindow );
 wxMenu*                 wxFindMenuFromMacMenu(MenuRef inMenuRef);
 
@@ -483,7 +489,7 @@ wxMenu*                 wxFindMenuFromMacCommand( const HICommand &macCommandId 
 
 extern wxWindow* g_MacLastWindow;
 pascal OSStatus wxMacTopLevelMouseEventHandler( EventHandlerCallRef handler , EventRef event , void *data );
-Rect wxMacGetBoundsForControl( wxWindow* window , const wxPoint& pos , const wxSize &size , bool adjustForOrigin = true );
+Rect wxMacGetBoundsForControl( wxWindowMac* window , const wxPoint& pos , const wxSize &size , bool adjustForOrigin = true );
 
 ControlActionUPP GetwxMacLiveScrollbarActionProc();
 
@@ -824,7 +830,8 @@ class wxMacListControl
 {
 public:
     virtual void            MacDelete( unsigned int n ) = 0;
-    virtual void            MacInsert( unsigned int n, const wxArrayStringsAdapter& items, int column = -1 ) = 0;
+    virtual void            MacInsert( unsigned int n, const wxString& item, int column = -1 ) = 0;
+    virtual void            MacInsert( unsigned int n, const wxArrayString& items, int column = -1 ) = 0;
     // returns index of newly created line
     virtual int             MacAppend( const wxString& item ) = 0;
     virtual void            MacSetString( unsigned int n, const wxString& item ) = 0;
@@ -974,7 +981,8 @@ public :
     // add and remove
 
     virtual void            MacDelete( unsigned int n );
-    virtual void            MacInsert( unsigned int n, const wxArrayStringsAdapter& items, int column = -1 );
+    virtual void            MacInsert( unsigned int n, const wxString& item, int column = -1 );
+    virtual void            MacInsert( unsigned int n, const wxArrayString& items, int column = -1 );
     virtual int             MacAppend( const wxString& item );
     virtual void            MacClear();
 
@@ -1173,8 +1181,8 @@ void wxMacMemoryBufferReleaseProc(void *info, const void *data, size_t size);
 
 class WXDLLEXPORT wxBitmapRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxIcon;
-    friend class WXDLLIMPEXP_FWD_CORE wxCursor;
+    friend class WXDLLEXPORT wxIcon;
+    friend class WXDLLEXPORT wxCursor;
 public:
     wxBitmapRefData(int width , int height , int depth);
     wxBitmapRefData();
@@ -1225,9 +1233,13 @@ public:
 
     // returns a Pict from the bitmap content
     PicHandle     GetPictHandle();
+#if wxMAC_USE_CORE_GRAPHICS
+    CGContextRef  GetBitmapContext() const;
+#else
     GWorldPtr     GetHBITMAP(GWorldPtr * mask = NULL ) const;
     void          UpdateAlphaMask() const;
-
+#endif
+    int           GetBytesPerRow() const { return m_bytesPerRow; }
 private :
     bool Create(int width , int height , int depth);
     void Init();
@@ -1245,10 +1257,14 @@ private :
 #endif
     IconRef       m_iconRef;
     PicHandle     m_pictHandle;
+#if wxMAC_USE_CORE_GRAPHICS
+    CGContextRef  m_hBitmap;
+#else
     GWorldPtr     m_hBitmap;
     GWorldPtr     m_hMaskBitmap;
     wxMemoryBuffer m_maskMemBuf;
     int            m_maskBytesPerRow;
+#endif
 };
 
 class WXDLLEXPORT wxIconRefData : public wxGDIRefData
@@ -1275,6 +1291,16 @@ private :
 };
 
 // toplevel.cpp
+
+class wxMacDeferredWindowDeleter : public wxObject
+{
+public :
+    wxMacDeferredWindowDeleter( WindowRef windowRef );
+    virtual ~wxMacDeferredWindowDeleter();
+
+protected :
+    WindowRef m_macWindow ;
+} ;
 
 ControlRef wxMacFindControlUnderMouse( wxTopLevelWindowMac* toplevelWindow, const Point& location , WindowRef window , ControlPartCode *outPart );
 
@@ -1313,14 +1339,14 @@ UPP Get##x()                                \
 void wxMacSetupConverters();
 void wxMacCleanupConverters();
 
-WXDLLIMPEXP_BASE void wxMacStringToPascal( const wxString&from , StringPtr to );
-WXDLLIMPEXP_BASE wxString wxMacMakeStringFromPascal( ConstStringPtr from );
+void wxMacStringToPascal( const wxString&from , StringPtr to );
+wxString wxMacMakeStringFromPascal( ConstStringPtr from );
 
 // filefn.cpp
 
-WXDLLIMPEXP_BASE wxString wxMacFSRefToPath( const FSRef *fsRef , CFStringRef additionalPathComponent = NULL );
-WXDLLIMPEXP_BASE OSStatus wxMacPathToFSRef( const wxString&path , FSRef *fsRef );
-WXDLLIMPEXP_BASE wxString wxMacHFSUniStrToString( ConstHFSUniStr255Param uniname );
+wxString wxMacFSRefToPath( const FSRef *fsRef , CFStringRef additionalPathComponent = NULL );
+OSStatus wxMacPathToFSRef( const wxString&path , FSRef *fsRef );
+wxString wxMacHFSUniStrToString( ConstHFSUniStr255Param uniname );
 
 #if wxUSE_GUI
 
@@ -1330,6 +1356,21 @@ void wxMacLocalToGlobal( WindowRef window , Point*pt );
 void wxMacGlobalToLocal( WindowRef window , Point*pt );
 
 #endif
+
+//---------------------------------------------------------------------------
+// cocoa bridging utilities
+//---------------------------------------------------------------------------
+
+bool wxMacInitCocoa();
+
+class wxMacAutoreleasePool
+{
+public :
+    wxMacAutoreleasePool();
+    ~wxMacAutoreleasePool();
+private :
+    void* m_pool;
+};
 
 #endif
     // _WX_PRIVATE_H_

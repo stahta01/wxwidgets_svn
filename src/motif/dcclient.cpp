@@ -88,7 +88,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
 IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
 IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
 
-#define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#ifndef IS_HATCH
+    // IS_HATCH exists for WXWIN_COMPATIBILITY_2_4 only
+    // but wxMotif needs it for its internals here
+    #define IS_HATCH(s)    ((s)>=wxFIRST_HATCH && (s)<=wxLAST_HATCH)
+#endif
 
 // FIXME: left over after removal of wxDC::GetOptimization()
 #define GET_OPTIMIZATION false
@@ -179,16 +183,8 @@ wxWindowDC::wxWindowDC( wxWindow *window )
     gcvalues.graphics_exposures = False;
     gcvalues.subwindow_mode = IncludeInferiors;
     gcvalues.line_width = 1;
-#if !wxMOTIF_NEW_FONT_HANDLING
-    WXFontStructPtr pFontStruct = m_font.GetFontStruct(m_userScaleY*m_logicalScaleY, m_display);
-    gcvalues.font = ((XFontStruct*)pFontStruct)->fid;
-#endif
     m_gc = (WXGC) XCreateGC (display, RootWindow (display, DefaultScreen (display)),
-        GCForeground | GCBackground | GCGraphicsExposures | GCLineWidth | GCSubwindowMode
-#if !wxMOTIF_NEW_FONT_HANDLING
-        | GCFont
-#endif
-                             ,
+        GCForeground | GCBackground | GCGraphicsExposures | GCLineWidth | GCSubwindowMode,
         &gcvalues);
 
     if (m_window->GetBackingPixmap())
@@ -1134,11 +1130,11 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
 #if wxMOTIF_NEW_FONT_HANDLING
             XmbDrawString((Display*) m_display, (Pixmap) m_window->GetBackingPixmap(), fset, (GC) m_gcBacking,
             XLOG2DEV_2 (x), YLOG2DEV_2 (y) + ascent,
-                        text.mb_str(), slen);
+                        wxConstCast(text.c_str(), char), slen);
 #else
             XDrawString((Display*) m_display, (Pixmap) m_window->GetBackingPixmap(), (GC) m_gcBacking,
             XLOG2DEV_2 (x), YLOG2DEV_2 (y) + ascent,
-                        text.mb_str(), slen);
+                        wxConstCast(text.c_str(), char), slen);
 #endif
     }
 
@@ -1297,7 +1293,7 @@ bool wxWindowDC::CanGetTextExtent() const
 
 void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoord *height,
                                 wxCoord *descent, wxCoord *externalLeading,
-                                const wxFont *font ) const
+                                wxFont *font ) const
 {
     wxCHECK_RET( Ok(), "invalid dc" );
 
@@ -1693,7 +1689,7 @@ void wxWindowDC::SetPen( const wxPen &pen )
         if (m_window && m_window->GetBackingPixmap())
             XSetStipple ((Display*) m_display,(GC) m_gcBacking, myStipple);
     }
-    else if (m_currentStyle == wxSTIPPLE && m_currentStipple.Ok()
+    else if (m_currentStipple.Ok()
         && ((!m_currentStipple.IsSameAs(oldStipple)) || !GET_OPTIMIZATION))
     {
         XSetStipple ((Display*) m_display, (GC) m_gc, (Pixmap) m_currentStipple.GetDrawable());
@@ -2227,7 +2223,7 @@ install:
         XPutImage(dest_display, dest, destgc, destimage, 0, 0, destx, desty, w, h);
         XDestroyImage(destimage);
 
-        if (more && cache)
+        if (more)
             *cache = image;
         else
             XDestroyImage(image);

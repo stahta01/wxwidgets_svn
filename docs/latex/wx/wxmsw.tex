@@ -35,31 +35,20 @@ If you don't specify a border style for a wxTextCtrl in rich edit mode, wxWidget
 the control themed borders automatically, where previously they would take the Windows 95-style
 sunken border. Other native controls such as wxTextCtrl in non-rich edit mode, and wxComboBox,
 already paint themed borders where appropriate. To use themed borders on other windows, such
-as wxPanel, pass the wxBORDER\_THEME style, or pass no border style.
+as wxPanel, pass the wxBORDER\_THEME style.
 
 Note that in wxWidgets 2.9 and above, wxBORDER\_THEME is defined to be 0 and it is not necessary
 to pass the border style explicitly: wxWidgets will deduce the correct border style itself if there
 is none supplied. Because of the requirements of binary compatibility, this automatic border
-capability could not be put into wxWidgets 2.8 except for built-in, native controls. So in 2.8, the border
-must be specified for custom controls and windows.
+capability could not be put into wxWidgets 2.8 except for built-in, native controls. In 2.8, the border
+must be specified for custom controls and windows. However, to make it easier to decide
+what style should be passed, you can use (on Windows only) the function wxWindow::GetThemedBorderStyle()
+and it will return a suitable style for the current version of Windows. On Windows CE,
+wxBORDER\_SIMPLE will be returned; on Windows 95/98/NT/2K, wxBORDER\_SUNKEN will be
+returned, and on XP and above where theming is turned on, wxBORDER\_THEME will be returned.
+This function does not exist in wxWidgets 2.9 and is not part of the official API.
 
-Since specifying wxBORDER\_THEME is defined as 0 and is the equivalent of abstaining on the
-border style decision, on non-Windows platforms a suitable border style will be chosen.
-This is not to be confused with specifying wxBORDER\_NONE, which says that there should
-definitely be {\it no} border.
-
-\wxheading{More detail on border implementation}
-
-The way that wxMSW decides whether to apply a themed border is as follows.
-The theming code calls wxWindow::GetBorder() to obtain a border. If no border style has been
-passed to the window constructor, GetBorder() calls GetDefaultBorder() for this window.
-The implementation of wxWindow::GetDefaultBorder() on wxMSW calls wxWindow::CanApplyThemeBorder()
-which is a virtual function that tells wxWidgets whether a control can have a theme
-applied explicitly (some native controls already paint a theme in which case we should not
-apply it ourselves). Note that wxPanel is an exception to this rule because in many cases
-we wish to create a window with no border (for example, notebook pages). So wxPanel
-overrides GetDefaultBorder() in order to call the generic wxWindowBase::GetDefaultBorder(),
-returning wxBORDER\_NONE.
+wxBORDER\_THEME has no effect on platforms other than Windows.
 
 \subsection{wxWinCE}\label{wxwince}
 
@@ -304,7 +293,7 @@ tooltips are distinct controls, and it will be hard to add dynamic
 tooltip support.
 
 Control borders on PocketPC and Smartphone should normally be specified with
-wxBORDER\_SIMPLE instead of wxBORDER\_SUNKEN. Controls will usually adapt
+wxSIMPLE\_BORDER instead of wxSUNKEN\_BORDER. Controls will usually adapt
 appropriately by virtue of their GetDefaultBorder() function, but if you
 wish to specify a style explicitly you can use wxDEFAULT\_CONTROL\_BORDER
 which will give a simple border on PocketPC and Smartphone, and the sunken border on

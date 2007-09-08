@@ -857,7 +857,7 @@ wxString wxNativeFontInfo::ToString() const
                 fa.usCodePage,
                 fa.lMatch,
                 fn.usWeightClass,
-                (char *)fa.szFacename);
+                fa.szFacename);
     return sStr;
 } // end of wxNativeFontInfo::ToString
 

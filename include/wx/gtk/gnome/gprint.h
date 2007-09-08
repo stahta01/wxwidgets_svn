@@ -18,26 +18,10 @@
 #include "wx/print.h"
 #include "wx/printdlg.h"
 #include "wx/dc.h"
-#include "wx/module.h"
 
 typedef struct _GnomePrintJob GnomePrintJob;
 typedef struct _GnomePrintContext GnomePrintContext;
 typedef struct _GnomePrintConfig GnomePrintConfig;
-
-// ----------------------------------------------------------------------------
-// wxGnomePrintModule
-// ----------------------------------------------------------------------------
-
-class wxGnomePrintModule: public wxModule
-{
-public:
-    wxGnomePrintModule() {}
-    bool OnInit();
-    void OnExit();
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxGnomePrintModule)
-};
 
 //----------------------------------------------------------------------------
 // wxGnomePrintNativeData
@@ -270,7 +254,7 @@ protected:
     void DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
                      wxCoord *descent = (wxCoord *) NULL,
                      wxCoord *externalLeading = (wxCoord *) NULL,
-                     const wxFont *theFont = (wxFont *) NULL ) const;
+                     wxFont *theFont = (wxFont *) NULL ) const;
     void DoGetSize(int* width, int* height) const;
     void DoGetSizeMM(int *width, int *height) const;
 
@@ -289,14 +273,14 @@ private:
     unsigned char           m_currentRed;
     unsigned char           m_currentGreen;
     unsigned char           m_currentBlue;
-
+    
     int                     m_deviceOffsetY;
 
     GnomePrintContext      *m_gpc;
-    GnomePrintJob*          m_job;
+    GnomePrintJob*          m_job; // only used and destroyed when created with wxPrintData
 
     void makeEllipticalPath(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
-
+    
 private:
     wxCoord XDEV2LOG(wxCoord x) const
     {

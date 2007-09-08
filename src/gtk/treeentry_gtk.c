@@ -46,7 +46,7 @@ gtk_tree_entry_get_type ()
 
     if (!tree_entry_type)
     {
-        const GTypeInfo tree_entry_info =
+        static const GTypeInfo tree_entry_info =
         {
             sizeof (GtkTreeEntryClass),
             NULL,           /* base_init */

@@ -224,7 +224,8 @@ void wxMacCarbonPrinterDC::StartPage( wxPrinterDC* dc )
             CGContextTranslateCTM( pageContext , -paperRect.left , paperRect.bottom ) ;
             CGContextScaleCTM( pageContext , 1 , -1 ) ;
 #else
-            dc->SetDeviceLocalOrigin( (wxCoord) rPage.left, (wxCoord) rPage.top );
+            dc->m_macLocalOrigin.x = (int) rPage.left;
+            dc->m_macLocalOrigin.y = (int) rPage.top;
 #endif
         }
         // since this is a non-critical error, we set the flag back

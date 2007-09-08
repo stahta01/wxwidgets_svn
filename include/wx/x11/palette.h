@@ -15,7 +15,7 @@
 #include "wx/gdiobj.h"
 #include "wx/list.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPalette;
+class WXDLLEXPORT wxPalette;
 
 // Palette for one display
 class wxXPalette : public wxObject
@@ -34,7 +34,7 @@ public:
 
 class WXDLLEXPORT wxPaletteRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxPalette;
+    friend class WXDLLEXPORT wxPalette;
 public:
     wxPaletteRefData();
     virtual ~wxPaletteRefData();

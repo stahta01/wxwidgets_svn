@@ -233,9 +233,9 @@ void Game::DisplayScore(wxDC& dc)
     m_pack->GetTopCardPos(x, y);
     x += 12 * CardWidth - 105;
 
-    wxCoord w, h;
+    int w, h;
     {
-        wxCoord width, height;
+        long width, height;
         dc.GetTextExtent(_T("Average score:m_x"), &width, &height);
         w = width;
         h = height;

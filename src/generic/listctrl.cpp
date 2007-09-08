@@ -25,7 +25,7 @@
 
 #include "wx/listctrl.h"
 
-#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && !defined(__WXMAC__)
+#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && (!defined(__WXMAC__)|| defined(__WXUNIVERSAL__))
     // if we have a native version, its implementation file does all this
     IMPLEMENT_DYNAMIC_CLASS(wxListItem, wxObject)
     IMPLEMENT_DYNAMIC_CLASS(wxListView, wxListCtrl)
@@ -2462,9 +2462,9 @@ wxRect wxListMainWindow::GetLineLabelRect(size_t line) const
     }
 
     wxRect rect;
-    rect.x = HEADER_OFFSET_X;
+    rect.x = image_x + HEADER_OFFSET_X;
     rect.y = GetLineY(line);
-    rect.width = GetColumnWidth(0);
+    rect.width = GetColumnWidth(0) - image_x;
     rect.height = GetLineHeight();
 
     return rect;
@@ -4994,11 +4994,12 @@ bool wxGenericListCtrl::Create(wxWindow *parent,
         style = style | wxLC_LIST;
     }
 
-    if ( !wxControl::Create( parent, id, pos, size, style, validator, name ) )
+    // add more styles here that should only appear
+    // in the main window
+    unsigned long only_main_window_style = wxALWAYS_SHOW_SB;
+    
+    if ( !wxControl::Create( parent, id, pos, size, style & ~only_main_window_style, validator, name ) )
         return false;
-
-    // this window itself shouldn't get the focus, only m_mainWin should
-    SetCanFocus(false);
 
     // don't create the inner window with the border
     style &= ~wxBORDER_MASK;
@@ -5218,6 +5219,11 @@ bool wxGenericListCtrl::SetItemPtrData( long item, wxUIntPtr data )
     info.m_data = data;
     m_mainWin->SetItem( info );
     return true;
+}
+
+bool wxGenericListCtrl::SetItemData(long item, long data)
+{
+    return SetItemPtrData(item, data);
 }
 
 wxRect wxGenericListCtrl::GetViewRect() const

@@ -3,78 +3,21 @@
 
 wxDataViewModel is the base class for all data model to be
 displayed by a \helpref{wxDataViewCtrl}{wxdataviewctrl}. 
-All other models derive from it and must implement its
-pure virtual functions in order to define a complete
-data model. In detail, you need to override 
-\helpref{IsContainer}{wxdataviewmodeliscontainer},
-\helpref{GetParent}{wxdataviewmodelgetparent},
-\helpref{GetChildren}{wxdataviewmodelgetchildren},
-\helpref{GetColumnCount}{wxdataviewmodelgetcolumncount},
-\helpref{GetColumnType}{wxdataviewmodelgetcolumntype} and
-\helpref{GetValue}{wxdataviewmodelgetvalue} in order to
-define the data model which acts as an interface between 
-your actual data and the wxDataViewCtrl. Since you will
-usually also allow the wxDataViewCtrl to change your data
-through its graphical interface, you will also have to override
-\helpref{SetValue}{wxdataviewmodelsetvalue} which the
-wxDataViewCtrl will call when a change to some data has been
-commited.
-
-wxDataViewModel (as indeed the entire wxDataViewCtrl
-code) is using \helpref{wxVariant}{wxvariant} to store data and
-its type in a generic way. wxVariant can be extended to contain
-almost any data without changes to the original class.
-
-The data that is presented through this data model is expected
-to change at run-time. You need to inform the data model when
-a change happened. Depending on what happened you need to call
-one of the following methods: 
-\helpref{ValueChanged}{wxdataviewmodelvaluechanged},
-\helpref{ItemAdded}{wxdataviewmodelitemadded},
-\helpref{ItemDeleted}{wxdataviewmodelitemdeleted},
-\helpref{ItemChanged}{wxdataviewmodelitemchanged},
-\helpref{Cleared}{wxdataviewmodelcleared}.
-
-Note that wxDataViewModel does not define the position or
-index of any item in the control since several control might
-display the data differently, but wxDataViewModel does
-provide a \helpref{Compare}{wxdataviewmodelcompare} method
-which the wxDataViewCtrl may use to sort the data either
-in conjunction with a column header or without (see
-\helpref{HasDefaultCompare}{wxdataviewmodelhasdefaultcompare}.
-
-This class maintains a list of 
-\helpref{wxDataViewModelNotifier}{wxdataviewmodelnotifier}
-which link this class to the specific implementations on the
-supported platforms so that e.g. calling 
-\helpref{ValueChanged}{wxdataviewmodelvaluechanged}
-on this model will just call 
-\helpref{wxDataViewModelNotifier::ValueChanged}{wxdataviewmodelnotifiervaluechanged}
-for each notifier that has been added. You can also add 
-your own notifier in order to get informed about any changes 
-to the data in the list model.
-
-Currently wxWidgets provides the following models apart
-from the base model: 
-\helpref{wxDataViewIndexListModel}{wxdataviewindexlistmodel}. 
-It is planned to add helper classes for simple tree
-and list stores in the future.
+Currently, this class has no functionality at all and the
+only existing implementation of it is the 
+\helpref{wxDataViewListModel}{wxdataviewlistmodel}. The
+plan is to move all functionality of wxDataViewListModel
+and a to-be-written wxDataViewTreeModel into wxDataViewModel
+and make wxDataViewListModel and wxDataViewTreeModel subsets
+of the abstract wxDataViewModel.
 
 \wxheading{Derived from}
 
-\helpref{wxObjectRefData}{wxobjectrefdata}
+\helpref{wxObject}{wxobject}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
-
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewModel::wxDataViewModel}\label{wxdataviewmodelwxdataviewmodel}
 
@@ -86,132 +29,257 @@ Constructor.
 
 \func{}{\destruct{wxDataViewModel}}{\void}
 
-Destructor. This should not be called directly. Use DecRef() instead.
+Destructor.
+
+\section{\class{wxDataViewListModel}}\label{wxdataviewlistmodel}
+
+wxDataViewListModel is currently the only existing variant
+of a \helpref{wxDataViewModel}{wxdataviewmodel}. It allows
+to define a table like data model to be displayed by a
+\helpref{wxDataViewCtrl}{wxdataviewctrl}. You need to derive
+from this class to define your own data model.
+
+You need to override \helpref{GetNumberOfRows}{wxdataviewlistmodelgetnumberofrows},
+\helpref{GetNumberOfCols}{wxdataviewlistmodelgetnumberofcols},
+\helpref{GetColType}{wxdataviewlistmodelgetcoltype} and
+\helpref{GetValue}{wxdataviewlistmodelgetvalue} in order to
+define the data model (which acts as an interface between 
+your actual data and the wxDataViewCtrl). Since you will
+usually also allow the wxDataViewCtrl to change your data
+through its graphical interface, you will also have to override
+\helpref{SetValue}{wxdataviewlistmodelsetvalue} which the
+wxDataViewCtrl will call when a change to some data has been
+commited.
+
+The data that is presented through this data model is expected
+to change at run-time. You need to inform the data model that
+a change happens. Depending on what happened you need to call
+one of the following methods: 
+\helpref{ValueChanged}{wxdataviewlistmodelvaluechanged},
+\helpref{RowChanged}{wxdataviewlistmodelrowchanged},
+\helpref{RowAppended}{wxdataviewlistmodelrowappended},
+\helpref{RowPrepended}{wxdataviewlistmodelrowprepended},
+\helpref{RowInserted}{wxdataviewlistmodelrowinserted},
+\helpref{RowDeleted}{wxdataviewlistmodelrowdeleted},
+\helpref{RowsReordered}{wxdataviewlistmodelrowsreordered} or
+\helpref{RowsCleared}{wxdataviewlistmodelcleared}.
 
 
-\membersection{wxDataViewModel::AddNotifier}\label{wxdataviewmodeladdnotifier}
 
-\func{void}{AddNotifier}{\param{wxDataViewModelNotifier* }{notifier}}
+wxDataViewModel and this class (as indeed the entire wxDataViewCtrl
+code) is using \helpref{wxVariant}{wxvariant} to store data and
+its type in a generic way. wxVariant can be extended to contain
+almost any data without changes to the original class.
 
-Adds a \helpref{wxDataViewModelNotifier}{wxdataviewmodelnotifier}
-to the model.
+This class maintains a list of 
+\helpref{wxDataListViewListModelNotifier}{wxdataviewlistmodelnotifier}
+which link this class to the specific implementations on the
+supported platforms so that e.g. calling 
+\helpref{ValueChanged}{wxdataviewlistmodelvaluechanged}
+on this model will just call 
+\helpref{wxDataListViewListModelNotifier::ValueChanged}{wxdataviewlistmodelnotifiervaluechanged}
+for each notifier that has been added. This is used both for
+informing the native controls to redraw themselves and for informing
+e.g. the \helpref{wxDataViewSortedListModel}{wxdataviewsortedlistmodel}
+to resort itself. You can also add your own notifier in order
+to get informed about any changes to the data in the list model.
 
-\membersection{wxDataViewModel::Cleared}\label{wxdataviewmodelcleared}
+Additionally, this class maintains a list of all 
+\helpref{wxDataViewColumns}{wxdataviewcolumn} which
+display a certain column of this list model. This is
+mostly used internally.
 
-\func{virtual bool}{Cleared}{\void}
+\wxheading{Derived from}
 
-Called to inform the model that all data has been deleted.
+\helpref{wxDataViewModel}{wxdataviewmodel}\\
+\helpref{wxObject}{wxobject}
 
-\membersection{wxDataViewModel::Compare}\label{wxdataviewmodelcompare}
+\wxheading{Include files}
 
-\func{virtual int}{Compare}{\param{const wxDataViewItem\& }{item1}, \param{const wxDataViewItem\& }{item2}, \param{unsigned int }{column}, \param{bool }{ascending}}
+<wx/dataview.h>
 
-The compare function to be used by control. The default compare function
-sorts by container and other items separately and in ascending order.
-Override this for a different sorting behaviour.
 
-See also \helpref{HasDefaultCompare}{wxdataviewmodelhasdefaultcompare}.
+\membersection{wxDataViewListModel::wxDataViewListModel}\label{wxdataviewlistmodelwxdataviewlistmodel}
 
-\membersection{wxDataViewModel::GetColumnCount}\label{wxdataviewmodelgetcolumncount}
+\func{}{wxDataViewListModel}{\void}
 
-\constfunc{virtual unsigned int}{GetColumnCount}{\void}
+Constructor.
 
-Override this to indicate the number of columns in the model.
+\membersection{wxDataViewListModel::\destruct{wxDataViewListModel}}\label{wxdataviewlistmodeldtor}
 
-\membersection{wxDataViewModel::GetColumnType}\label{wxdataviewmodelgetcolumntype}
+\func{}{\destruct{wxDataViewListModel}}{\void}
 
-\constfunc{virtual wxString}{GetColumnType}{\param{unsigned int }{col}}
+Destructor.
+
+\membersection{wxDataViewListModel::AddNotifier}\label{wxdataviewlistmodeladdnotifier}
+
+\func{void}{AddNotifier}{\param{wxDataViewListModelNotifier* }{notifier}}
+
+Adds {\it notifier} to the internal list of notifers.
+
+See also \helpref{RemoveNotifier}{wxdataviewlistmodelremovenotifier}.
+
+\membersection{wxDataViewListModel::AddViewingColumn}\label{wxdataviewlistmodeladdviewingcolumn}
+
+\func{void}{AddViewingColumn}{\param{wxDataViewColumn* }{view\_column}, \param{unsigned int }{model\_column}}
+
+Used internally. Used for maintaining a list of
+\helpref{wxDataViewColumn}{wxdataviewcolumn} that
+display a certain column of this model.
+
+\membersection{wxDataViewListModel::Cleared}\label{wxdataviewlistmodelcleared}
+
+\func{bool}{virtual Cleared}{\void}
+
+Call this if all data in your model has been cleared.
+
+\membersection{wxDataViewListModel::GetColType}\label{wxdataviewlistmodelgetcoltype}
+
+\func{virtual wxString}{GetColType}{\param{unsigned int }{col}}
 
 Override this to indicate what type of data is stored in the
 column specified by {\it col}. This should return a string
 indicating the type of data as reported by \helpref{wxVariant}{wxvariant}.
 
-\membersection{wxDataViewModel::GetChildren}\label{wxdataviewmodelgetchildren}
+\membersection{wxDataViewListModel::GetNumberOfCols}\label{wxdataviewlistmodelgetnumberofcols}
 
-\constfunc{virtual unsigned int}{GetChildren}{\param{const wxDataViewItem\& }{item}, \param{wxDataViewItemArray\& }{children} }
+\func{virtual unsigned int}{GetNumberOfCols}{\void}
 
-Override this so the control can query the child items of
-an item. Returns the number of items.
+Override this to indicate, how many columns the list
+model has.
 
-\membersection{wxDataViewModel::GetParent}\label{wxdataviewmodelgetparent}
+\membersection{wxDataViewListModel::GetNumberOfRows}\label{wxdataviewlistmodelgetnumberofrows}
 
-\constfunc{virtual wxDataViewItem}{GetParent}{\param{const wxDataViewItem\& }{item}}
+\func{virtual unsigned int}{GetNumberOfRows}{\void}
 
-Override this to indicate which wxDataViewItem representing the parent
-of {\it item} or an invalid wxDataViewItem if {\it item} is the root item.
+Override this to indicate, how many rows the list
+model has.
 
-\membersection{wxDataViewModel::GetValue}\label{wxdataviewmodelgetvalue}
+\membersection{wxDataViewListModel::GetValue}\label{wxdataviewlistmodelgetvalue}
 
-\constfunc{virtual void}{GetValue}{\param{wxVariant\& }{variant}, \param{const wxDataViewItem\& }{item}, \param{unsigned int }{col}}
+\func{virtual void}{GetValue}{\param{wxVariant\& }{variant}, \param{unsigned int }{col}, \param{unsigned int }{row}}
 
-Override this to indicate the value of {\it item}
-A \helpref{wxVariant}{wxvariant} is used to store the data.
+Override this to indicate the value of a given value
+in the list model. A \helpref{wxVariant}{wxvariant}
+is used to store the data.
 
-\membersection{wxDataViewModel::HasDefaultCompare}\label{wxdataviewmodelhasdefaultcompare}
+\membersection{wxDataViewListModel::RemoveNotifier}\label{wxdataviewlistmodelremovenotifier}
 
-\constfunc{virtual bool}{HasDefaultCompare}{\void}
+\func{void}{RemoveNotifier}{\param{wxDataViewListModelNotifier* }{notifier}}
 
-Override this to indicate that the model provides a default compare
-function that the control should use if no wxDataViewColumn has been
-chosen for sorting. Usually, the user clicks on a column header for
-sorting, the data will be sorted alphanumerically. If any other
-order (e.g. by index or order of appearance) is required, then this
-should be used. See also \helpref{wxDataViewIndexListModel}{wxdataviewindexlistmodel}
-for a model which makes use of this.
+Removes the notifier from the list of notifiers.
 
-\membersection{wxDataViewModel::IsContainer}\label{wxdataviewmodeliscontainer}
+See also \helpref{AddNotifier}{wxdataviewlistmodeladdnotifier}.
 
-\constfunc{virtual bool}{IsContainer}{\param{const wxDataViewItem\& }{item}}
+\membersection{wxDataViewListModel::RemoveViewingColumn}\label{wxdataviewlistmodelremoveviewingcolumn}
 
-Override this to indicate of {\it item} is a container, i.e. if
-it can have child items.
+\func{void}{RemoveViewingColumn}{\param{wxDataViewColumn* }{column}}
 
-\membersection{wxDataViewModel::ItemAdded}\label{wxdataviewmodelitemadded}
+Used internally. Used for maintaining a list of
+\helpref{wxDataViewColumn}{wxdataviewcolumn} that
+display a certain column of this model.
 
-\func{virtual bool}{ItemAdded}{\param{const wxDataViewItem\& }{parent}, \param{const wxDataViewItem\& }{item}}
+\membersection{wxDataViewListModel::RowAppended}\label{wxdataviewlistmodelrowappended}
 
-Call this to inform the model that an item has been added
-to the data.
+\func{virtual bool}{RowAppended}{\void}
 
-\membersection{wxDataViewModel::ItemChanged}\label{wxdataviewmodelitemchanged}
+Call this if a row has been appended to the list model.
 
-\func{virtual bool}{ItemChanged}{\param{const wxDataViewItem\& }{item}}
+\membersection{wxDataViewListModel::RowChanged}\label{wxdataviewlistmodelrowchanged}
 
-Call this to inform the model that an item has changed.
+\func{virtual bool}{RowChanged}{\param{unsigned int }{row}}
 
-\membersection{wxDataViewModel::ItemDeleted}\label{wxdataviewmodelitemdeleted}
+Call this if the values of this row have been changed.
 
-\func{virtual bool}{ItemDeleted}{\param{const wxDataViewItem\& }{parent}, \param{const wxDataViewItem\& }{item}}
+\membersection{wxDataViewListModel::RowDeleted}\label{wxdataviewlistmodelrowdeleted}
 
-Call this to inform the model that an item has been deleted.
+\func{virtual bool}{RowDeleted}{\param{unsigned int }{row}}
 
-\membersection{wxDataViewModel::RemoveNotifier}\label{wxdataviewmodelremovenotifier}
+Call this if this row has been deleted.
 
-\func{void}{RemoveNotifier}{\param{wxDataViewModelNotifier* }{notifier}}
+\membersection{wxDataViewListModel::RowInserted}\label{wxdataviewlistmodelrowinserted}
 
-Remove the {\it notifier} from the list of notifiers.
+\func{virtual bool}{RowInserted}{\param{unsigned int }{before}}
 
-\membersection{wxDataViewModel::Resort}\label{wxdataviewmodelresort}
+Call this if a row has been inserted.
 
-\func{virtual void}{Resort}{\void}
+\membersection{wxDataViewListModel::RowPrepended}\label{wxdataviewlistmodelrowprepended}
 
-Call this to initiate a resort after the sort function has
-been changed.
+\func{virtual bool}{RowPrepended}{\void}
 
-\membersection{wxDataViewModel::SetValue}\label{wxdataviewmodelsetvalue}
+Call this if a row has been prepended.
 
-\func{virtual bool}{SetValue}{\param{const wxVariant\& }{variant}, \param{const wxDataViewItem\& }{item}, \param{unsigned int }{col}}
+\membersection{wxDataViewListModel::RowsReordered}\label{wxdataviewlistmodelrowsreordered}
 
-This gets called in order to set a value in the data model.
-The most common scenario is that the wxDataViewCtrl calls
-this method after the user changed some data in the view.
-Afterwards \helpref{ValueChanged}{wxdataviewmodelvaluechanged}
-has to be called!
+\func{virtual bool}{RowsReordered}{\param{unsigned int* }{new\_order}}
 
-\membersection{wxDataViewModel::ValueChanged}\label{wxdataviewmodelvaluechanged}
+Call this if the rows have been reorderd.
 
-\func{virtual bool}{ValueChanged}{\param{const wxDataViewItem\& }{item}, \param{unsigned int }{col}}
+\membersection{wxDataViewListModel::SetValue}\label{wxdataviewlistmodelsetvalue}
 
-Call this to inform this model that a value in
-the model has been changed.
+\func{virtual bool}{SetValue}{\param{wxVariant\& }{variant}, \param{unsigned int }{col}, \param{unsigned int }{row}}
+
+This method gets called by e.g. the wxDataViewCtrl class if a 
+value has been changed through its graphical interface. You
+need to override this method in order to update the data in
+the underlying data structur. Afterwards, 
+\helpref{ValueChanged}{wxdataviewlistmodelvaluechanged} is called.
+
+
+\membersection{wxDataViewListModel::ValueChanged}\label{wxdataviewlistmodelvaluechanged}
+
+\func{virtual bool}{ValueChanged}{\param{unsigned int }{col}, \param{unsigned int }{row}}
+
+Call this if a value in the model has been changed.
+
+
+\section{\class{wxDataViewSortedListModel}}\label{wxdataviewsortedlistmodel}
+
+This class is used for sorting data. It does not contain any
+data itself. Rather, it provides a sorted interface for 
+another list model.
+
+Currently, the sorting algorithm isn't thread safe. This needs
+to be fixed.
+
+\wxheading{Derived from}
+
+\helpref{wxDataViewListModel}{wxdataviewlistmodel}\\
+\helpref{wxDataViewModel}{wxdataviewmodel}\\
+\helpref{wxObject}{wxobject}
+
+\wxheading{Include files}
+
+<wx/dataview.h>
+
+\membersection{wxDataViewSortedListModel::wxDataViewSortedListModel}\label{wxdataviewsortedlistmodelwxdataviewsortedlistmodel}
+
+\func{}{wxDataViewSortedListModel}{\param{wxDataViewListModel* }{child}}
+
+Constructor. {\it child} is the child data model the data of
+which this model is supposed to present in a sorted way.
+
+\membersection{wxDataViewSortedListModel::\destruct{wxDataViewSortedListModel}}\label{wxdataviewsortedlistmodeldtor}
+
+\func{}{\destruct{wxDataViewSortedListModel}}{\void}
+
+Destructor.
+
+\membersection{wxDataViewSortedListModel::GetAscending}\label{wxdataviewsortedlistmodelgetascending}
+
+\func{bool}{GetAscending}{\void}
+
+Returns true if the data is sorted in ascending order.
+
+\membersection{wxDataViewSortedListModel::Resort}\label{wxdataviewsortedlistmodelresort}
+
+\func{void}{Resort}{\void}
+
+Tell the model to resort its data.
+
+\membersection{wxDataViewSortedListModel::SetAscending}\label{wxdataviewsortedlistmodelsetascending}
+
+\func{void}{SetAscending}{\param{bool }{ascending}}
+
+Set the sort order of the data.
 

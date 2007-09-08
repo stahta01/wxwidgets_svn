@@ -18,7 +18,7 @@ struct wxGtkIMData;
 // callback definition for inserting a window (internal)
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxWindowGTK;
+class WXDLLIMPEXP_CORE wxWindowGTK;
 typedef void (*wxInsertChildFunction)( wxWindowGTK*, wxWindowGTK* );
 
 //-----------------------------------------------------------------------------
@@ -57,7 +57,7 @@ public:
     virtual void Lower();
 
     virtual bool Show( bool show = true );
-    virtual void DoEnable( bool enable );
+    virtual bool Enable( bool enable = true );
 
     virtual void SetWindowStyleFlag( long style );
 
@@ -125,6 +125,11 @@ public:
 
     // For compatibility across platforms (not in event table)
     void OnIdle(wxIdleEvent& WXUNUSED(event)) {}
+
+    // wxGTK-specific: called recursively by Enable,
+    // to give widgets an opportunity to correct their colours after they
+    // have been changed by Enable
+    virtual void OnParentEnable( bool WXUNUSED(enable) ) {}
 
     // Used by all window classes in the widget creation process.
     bool PreCreation( wxWindowGTK *parent, const wxPoint &pos, const wxSize &size );

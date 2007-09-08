@@ -20,7 +20,7 @@
 
 #include "wx/dynarray.h"
 
-class WXDLLIMPEXP_FWD_CORE wxToolTip;
+class WXDLLEXPORT wxToolTip;
 
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxToolTip *, wxToolTipArray);
 
@@ -83,6 +83,14 @@ public:
         return wxNOT_FOUND;
     }
 
+
+    // deprecated functions
+    // --------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( int GetNumberOfRowsOrCols() const );
+    wxDEPRECATED( void SetNumberOfRowsOrCols(int n) );
+#endif // WXWIN_COMPATIBILITY_2_4
 
 protected:
     wxRadioBoxBase()

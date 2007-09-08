@@ -41,10 +41,9 @@ bool wxColourDialog::Create(wxWindow *parent, wxColourData *data)
     wxString title(_("Choose colour"));
     m_widget = gtk_color_selection_dialog_new(wxGTK_CONV(title));
 
-    m_parent = GetParentForModalDialog(parent);
-    if ( m_parent )
+    if (parent)
     {
-        GtkWindow* gtk_parent = GTK_WINDOW( gtk_widget_get_toplevel(m_parent->m_widget) );
+        GtkWindow* gtk_parent = GTK_WINDOW( gtk_widget_get_toplevel(parent->m_widget) );
         gtk_window_set_transient_for(GTK_WINDOW(m_widget),
                                      gtk_parent);
     }
@@ -118,7 +117,7 @@ void wxColourDialog::DialogToColourData()
 
     GdkColor clr;
     gtk_color_selection_get_current_color(sel, &clr);
-    m_data.SetColour(wxColour(clr));
+    m_data.SetColour(wxColour(clr.red >> 8, clr.green >> 8, clr.blue >> 8));
 
     // Extract custom palette:
 
@@ -132,7 +131,9 @@ void wxColourDialog::DialogToColourData()
     {
         for (int i = 0; i < wxMin(n_colors, 16); i++)
         {
-            m_data.SetCustomColour(i, wxColour(colors[i]));
+            m_data.SetCustomColour(i, wxColour(colors[i].red >> 8,
+                                               colors[i].green >> 8,
+                                               colors[i].blue >> 8));
         }
         g_free(colors);
     }

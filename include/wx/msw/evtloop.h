@@ -12,42 +12,30 @@
 #ifndef _WX_MSW_EVTLOOP_H_
 #define _WX_MSW_EVTLOOP_H_
 
-#if wxUSE_GUI
 #include "wx/window.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // wxEventLoop
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxMSWEventLoopBase : public wxEventLoopManual
+class WXDLLEXPORT wxEventLoop : public wxEventLoopManual
 {
 public:
-    wxMSWEventLoopBase();
+    wxEventLoop();
 
     // implement base class pure virtuals
     virtual bool Pending() const;
+    virtual bool Dispatch();
 
-protected:
-    // get the next message from queue and return true or return false if we
-    // got WM_QUIT or an error occurred
-    bool GetNextMessage(WXMSG *msg);
-};
-
-#if wxUSE_GUI
-
-class WXDLLIMPEXP_CORE wxGUIEventLoop : public wxMSWEventLoopBase
-{
-public:
-    wxGUIEventLoop() { }
-
-    // process a single message: calls PreProcessMessage() before dispatching
-    // it
-    virtual void ProcessMessage(WXMSG *msg);
+    // MSW-specific methods
+    // --------------------
 
     // preprocess a message, return true if processed (i.e. no further
     // dispatching required)
     virtual bool PreProcessMessage(WXMSG *msg);
+
+    // process a single message
+    virtual void ProcessMessage(WXMSG *msg);
 
     // set the critical window: this is the window such that all the events
     // except those to this window (and its children) stop to be processed
@@ -64,14 +52,11 @@ public:
         return !ms_winCritical || IsChildOfCriticalWindow(win);
     }
 
-    // override/implement base class virtuals
-    virtual bool Dispatch();
-    virtual void WakeUp();
-
 protected:
+    // override/implement base class virtuals
+    virtual void WakeUp();
     virtual void OnNextIteration();
 
-private:
     // check if the given window is a child of ms_winCritical (which must be
     // non NULL)
     static bool IsChildOfCriticalWindow(wxWindowMSW *win);
@@ -80,26 +65,5 @@ private:
     // critical window or NULL
     static wxWindowMSW *ms_winCritical;
 };
-
-#else // !wxUSE_GUI
-
-#if wxUSE_CONSOLE_EVENTLOOP
-
-class WXDLLIMPEXP_BASE wxConsoleEventLoop : public wxMSWEventLoopBase
-{
-public:
-    wxConsoleEventLoop() { }
-
-    // override/implement base class virtuals
-    virtual bool Dispatch();
-    virtual void WakeUp();
-
-protected:
-    virtual void OnNextIteration();
-};
-
-#endif // wxUSE_CONSOLE_EVENTLOOP
-
-#endif // wxUSE_GUI/!wxUSE_GUI
 
 #endif // _WX_MSW_EVTLOOP_H_

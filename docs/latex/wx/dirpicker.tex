@@ -28,10 +28,6 @@ It is only available if \texttt{wxUSE\_DIRPICKERCTRL} is set to $1$ (the default
 
 <wx/filepicker.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Window styles}
 
 \twocolwidtha{5cm}%
@@ -121,14 +117,6 @@ all the parameters.
 
 \true if the control was successfully created or \false if creation failed.
 
- 
-\membersection{wxFilePickerCtrl::GetDirName}\label{wxfilepickerctrlgetdirname}
-
-\constfunc{wxFileName}{GetDirName}{\void}
-
-Returns the absolute path of the currently selected directory as a \helpref{wxFileName}{wxfilename} object.
-This function is equivalent to \helpref{GetPath}{wxdirpickerctrlgetpath}
-
 
 \membersection{wxDirPickerCtrl::GetPath}\label{wxdirpickerctrlgetpath}
 
@@ -137,20 +125,11 @@ This function is equivalent to \helpref{GetPath}{wxdirpickerctrlgetpath}
 Returns the absolute path of the currently selected directory.
 
 
-\membersection{wxFilePickerCtrl::SetDirName}\label{wxfilepickerctrlsetdirname}
-
-\func{void}{SetDirName}{\param{const wxFileName \&}{dirname}}
-
-Just like \helpref{SetPath}{wxdirpickerctrlsetpath} but this function takes a
-\helpref{wxFileName}{wxfilename} object.
-
-
 \membersection{wxDirPickerCtrl::SetPath}\label{wxdirpickerctrlsetpath}
 
 \func{void}{SetPath}{\param{const wxString \&}{dirname}}
 
-Sets the absolute path of  (the default converter uses current locale's
-charset)the currently selected directory. This must be a valid directory if
+Sets the absolute path of the currently selected directory. This must be a valid directory if
 {\tt wxDIRP\_DIR\_MUST\_EXIST} style was given.
 
 

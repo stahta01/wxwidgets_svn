@@ -330,7 +330,7 @@ wxCoord wxDC::GetCharWidth() const
 
 void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
                            wxCoord *descent, wxCoord *externalLeading,
-                           const wxFont *font) const
+                           wxFont *font) const
 {
 }
 
@@ -371,42 +371,42 @@ void wxDC::SetDeviceOrigin(wxCoord x, wxCoord y)
 // coordinates transformations
 // ---------------------------------------------------------------------------
 
-wxCoord wxDC::DeviceToLogicalX(wxCoord x) const
+wxCoord wxDCBase::DeviceToLogicalX(wxCoord x) const
 {
     return 0;
 }
 
-wxCoord wxDC::DeviceToLogicalXRel(wxCoord x) const
+wxCoord wxDCBase::DeviceToLogicalXRel(wxCoord x) const
 {
     return 0;
 }
 
-wxCoord wxDC::DeviceToLogicalY(wxCoord y) const
+wxCoord wxDCBase::DeviceToLogicalY(wxCoord y) const
 {
     return 0;
 }
 
-wxCoord wxDC::DeviceToLogicalYRel(wxCoord y) const
+wxCoord wxDCBase::DeviceToLogicalYRel(wxCoord y) const
 {
     return 0;
 }
 
-wxCoord wxDC::LogicalToDeviceX(wxCoord x) const
+wxCoord wxDCBase::LogicalToDeviceX(wxCoord x) const
 {
     return 0;
 }
 
-wxCoord wxDC::LogicalToDeviceXRel(wxCoord x) const
+wxCoord wxDCBase::LogicalToDeviceXRel(wxCoord x) const
 {
     return 0;
 }
 
-wxCoord wxDC::LogicalToDeviceY(wxCoord y) const
+wxCoord wxDCBase::LogicalToDeviceY(wxCoord y) const
 {
     return 0;
 }
 
-wxCoord wxDC::LogicalToDeviceYRel(wxCoord y) const
+wxCoord wxDCBase::LogicalToDeviceYRel(wxCoord y) const
 {
     return 0;
 }

@@ -54,6 +54,8 @@ extern "C" {
 static gboolean
 gtk_button_press_event(GtkRange*, GdkEventButton*, wxScrollBar* win)
 {
+    // don't need to install idle handler, its done from "event" signal
+
     win->m_mouseButtonDown = true;
     return false;
 }
@@ -93,6 +95,8 @@ extern "C" {
 static gboolean
 gtk_button_release_event(GtkRange* range, GdkEventButton*, wxScrollBar* win)
 {
+    // don't need to install idle handler, its done from "event" signal
+
     win->m_mouseButtonDown = false;
     // If thumb tracking
     if (win->m_isScrolling)
@@ -126,6 +130,9 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
            const wxPoint& pos, const wxSize& size,
            long style, const wxValidator& validator, const wxString& name )
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -141,7 +148,7 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
 
     m_scrollBar[int(isVertical)] = (GtkRange*)m_widget;
 
-    g_signal_connect_after(m_widget, "value_changed",
+    g_signal_connect(m_widget, "value_changed",
                      G_CALLBACK(gtk_value_changed), this);
     g_signal_connect(m_widget, "button_press_event",
                      G_CALLBACK(gtk_button_press_event), this);
@@ -199,13 +206,13 @@ void wxScrollBar::SetThumbPosition( int viewStart )
         m_scrollPos[i] =
         adj->value = viewStart;
         
-        g_signal_handlers_block_by_func(m_widget,
-            (gpointer)gtk_value_changed, this);
+        g_signal_handlers_disconnect_by_func( m_widget,
+                              (gpointer)gtk_value_changed, this);
 
         gtk_adjustment_value_changed(adj);
-
-        g_signal_handlers_unblock_by_func(m_widget,
-            (gpointer)gtk_value_changed, this);
+        
+        g_signal_connect_after(m_widget, "value_changed",
+                     G_CALLBACK(gtk_value_changed), this);
     }
 }
 
@@ -242,7 +249,7 @@ void wxScrollBar::SetRange(int range)
 
 GdkWindow *wxScrollBar::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
 {
-    return m_widget->window;
+    return GTK_WIDGET(GTK_RANGE(m_widget))->window;
 }
 
 // static

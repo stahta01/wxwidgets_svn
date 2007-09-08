@@ -29,6 +29,12 @@
 #include "wx/filefn.h" // ::wxGetCwd
 
 //-----------------------------------------------------------------------------
+// idle system
+//-----------------------------------------------------------------------------
+
+extern void wxapp_install_idle_handler();
+
+//-----------------------------------------------------------------------------
 // "clicked" for OK-button
 //-----------------------------------------------------------------------------
 
@@ -50,7 +56,7 @@ static void gtk_filedialog_ok_callback(GtkWidget *widget, wxFileDialog *dialog)
 
             msg.Printf(
                 _("File '%s' already exists, do you really want to overwrite it?"),
-                wxString(filename, *wxConvFileName));
+                wxString(wxConvFileName->cMB2WX(filename)).c_str());
 
             wxMessageDialog dlg(dialog, msg, _("Confirm"),
                                wxYES_NO | wxICON_QUESTION);
@@ -69,7 +75,7 @@ static void gtk_filedialog_ok_callback(GtkWidget *widget, wxFileDialog *dialog)
             return;
         }
     }
-    
+
     // change to the directory where the user went if asked
     if (style & wxFD_CHANGE_DIR)
     {
@@ -102,6 +108,8 @@ static void gtk_filedialog_response_callback(GtkWidget *w,
                                              gint response,
                                              wxFileDialog *dialog)
 {
+    wxapp_install_idle_handler();
+
     if (response == GTK_RESPONSE_ACCEPT)
         gtk_filedialog_ok_callback(w, dialog);
     else    // GTK_RESPONSE_CANCEL or GTK_RESPONSE_NONE
@@ -163,7 +171,7 @@ wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
         return;
     }
 
-    parent = GetParentForModalDialog(parent);
+    m_needParent = false;
 
     if (!PreCreation(parent, pos, wxDefaultSize) ||
         !CreateBase(parent, wxID_ANY, pos, wxDefaultSize, style,
@@ -237,7 +245,6 @@ wxFileDialog::wxFileDialog(wxWindow *parent, const wxString& message,
         fn.AssignDir(defaultDir);
 
     // set the initial file name and/or directory
-    fn.MakeAbsolute(); // GTK+ needs absolute path
     const wxString dir = fn.GetPath();
     if ( !dir.empty() )
     {
@@ -319,7 +326,7 @@ wxString wxFileDialog::GetPath() const
     if (!gtk_check_version(2,4,0))
     {
         wxGtkString str(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(m_widget)));
-        return wxString(str, *wxConvFileName);
+        return wxConvFileName->cMB2WX(str);
     }
 
     return wxGenericFileDialog::GetPath();
@@ -351,7 +358,7 @@ void wxFileDialog::GetPaths(wxArrayString& paths) const
             GSList *gpaths = gpathsi;
             while (gpathsi)
             {
-                wxString file((gchar*) gpathsi->data, *wxConvFileName);
+                wxString file(wxConvFileName->cMB2WX((gchar*) gpathsi->data));
                 paths.Add(file);
                 g_free(gpathsi->data);
                 gpathsi = gpathsi->next;
@@ -383,7 +390,7 @@ void wxFileDialog::SetPath(const wxString& path)
     {
         if (path.empty()) return;
 
-        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(m_widget), path.fn_str());
+        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(m_widget), wxConvFileName->cWX2MB(path));
     }
     else
         wxGenericFileDialog::SetPath( path );
@@ -395,7 +402,7 @@ void wxFileDialog::SetDirectory(const wxString& dir)
     {
         if (wxDirExists(dir))
         {
-            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(m_widget), dir.fn_str());
+            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(m_widget), wxConvFileName->cWX2MB(dir));
         }
     }
     else
@@ -407,7 +414,7 @@ wxString wxFileDialog::GetDirectory() const
     if (!gtk_check_version(2,4,0))
     {
         wxGtkString str(gtk_file_chooser_get_current_folder(GTK_FILE_CHOOSER(m_widget)));
-        return wxString(str, *wxConvFileName);
+        return wxConvFileName->cMB2WX(str);
     }
 
     return wxGenericFileDialog::GetDirectory();

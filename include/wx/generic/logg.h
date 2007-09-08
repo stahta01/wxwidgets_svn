@@ -30,9 +30,7 @@ public:
 
 protected:
     // implement sink function
-    virtual void DoLogString(const wxString& szString, time_t t);
-
-    wxSUPPRESS_DOLOGSTRING_HIDE_WARNING()
+    virtual void DoLogString(const wxChar *szString, time_t t);
 
 private:
     // the control we use
@@ -59,9 +57,7 @@ public:
     virtual void Flush();
 
 protected:
-    virtual void DoLog(wxLogLevel level, const wxString& szString, time_t t);
-
-    wxSUPPRESS_DOLOG_HIDE_WARNING()
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
 
     // empty everything
     void Clear();
@@ -89,8 +85,8 @@ protected:
 class WXDLLEXPORT wxLogWindow : public wxLogPassThrough
 {
 public:
-    wxLogWindow(wxWindow *pParent,        // the parent frame (can be NULL)
-                const wxString& szTitle,  // the title of the frame
+    wxLogWindow(wxWindow *pParent,         // the parent frame (can be NULL)
+                const wxChar *szTitle,    // the title of the frame
                 bool bShow = true,        // show window immediately?
                 bool bPassToOld = true);  // pass messages to the old target?
 
@@ -116,11 +112,8 @@ public:
     virtual void OnFrameDelete(wxFrame *frame);
 
 protected:
-    virtual void DoLog(wxLogLevel level, const wxString& szString, time_t t);
-    virtual void DoLogString(const wxString& szString, time_t t);
-
-    wxSUPPRESS_DOLOG_HIDE_WARNING()
-    wxSUPPRESS_DOLOGSTRING_HIDE_WARNING()
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
+    virtual void DoLogString(const wxChar *szString, time_t t);
 
 private:
     wxLogFrame *m_pLogFrame;      // the log frame

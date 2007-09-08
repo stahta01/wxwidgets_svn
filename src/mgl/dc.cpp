@@ -1221,7 +1221,7 @@ wxCoord wxDC::GetCharWidth() const
 
 void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
                            wxCoord *descent, wxCoord *externalLeading,
-                           const wxFont *theFont) const
+                           wxFont *theFont) const
 {
     wxFont oldFont;
 
@@ -1237,7 +1237,7 @@ void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
     if ( x )
         // VS: YDEV is corrent, it should *not* be XDEV, because font's are
         //     only scaled according to m_scaleY
-        *x = YDEV2LOGREL(m_MGLDC->textWidth(string.wc_str()));
+        *x = YDEV2LOGREL(m_MGLDC->textWidth(string.c_str()));
     if ( y )
         *y = YDEV2LOGREL(m_MGLDC->textHeight());
     if ( descent )
@@ -1248,6 +1248,7 @@ void wxDC::DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
     if ( theFont != NULL )
         wxConstCast(this, wxDC)->SetFont(oldFont);
 }
+
 
 
 // ---------------------------------------------------------------------------
@@ -1268,6 +1269,114 @@ void wxDC::ComputeScaleAndOrigin()
 
     m_scaleX = newX, m_scaleY = newY;
 }
+
+void wxDC::SetMapMode(int mode)
+{
+    switch (mode)
+    {
+        case wxMM_TWIPS:
+          SetLogicalScale(twips2mm*m_mm_to_pix_x, twips2mm*m_mm_to_pix_y);
+          break;
+        case wxMM_POINTS:
+          SetLogicalScale(pt2mm*m_mm_to_pix_x, pt2mm*m_mm_to_pix_y);
+          break;
+        case wxMM_METRIC:
+          SetLogicalScale(m_mm_to_pix_x, m_mm_to_pix_y);
+          break;
+        case wxMM_LOMETRIC:
+          SetLogicalScale(m_mm_to_pix_x/10.0, m_mm_to_pix_y/10.0);
+          break;
+        default:
+        case wxMM_TEXT:
+          SetLogicalScale(1.0, 1.0);
+          break;
+    }
+    m_mappingMode = mode;
+}
+
+void wxDC::SetUserScale( double x, double y )
+{
+    // allow negative ? -> no
+    m_userScaleX = x;
+    m_userScaleY = y;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetLogicalScale( double x, double y )
+{
+    // allow negative ?
+    m_logicalScaleX = x;
+    m_logicalScaleY = y;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetLogicalOrigin( wxCoord x, wxCoord y )
+{
+    m_logicalOriginX = x * m_signX;   // is this still correct ?
+    m_logicalOriginY = y * m_signY;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetDeviceOrigin( wxCoord x, wxCoord y )
+{
+    // only wxPostScripDC has m_signX = -1, we override SetDeviceOrigin there
+    m_deviceOriginX = x;
+    m_deviceOriginY = y;
+    ComputeScaleAndOrigin();
+}
+
+void wxDC::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
+{
+    // only wxPostScripDC has m_signX = -1, we override SetAxisOrientation there
+    m_signX = (xLeftRight ?  1 : -1);
+    m_signY = (yBottomUp  ? -1 :  1);
+    ComputeScaleAndOrigin();
+}
+
+// ---------------------------------------------------------------------------
+// coordinates transformations
+// ---------------------------------------------------------------------------
+
+wxCoord wxDCBase::DeviceToLogicalX(wxCoord x) const
+{
+    return ((wxDC *)this)->XDEV2LOG(x);
+}
+
+wxCoord wxDCBase::DeviceToLogicalY(wxCoord y) const
+{
+    return ((wxDC *)this)->YDEV2LOG(y);
+}
+
+wxCoord wxDCBase::DeviceToLogicalXRel(wxCoord x) const
+{
+    return ((wxDC *)this)->XDEV2LOGREL(x);
+}
+
+wxCoord wxDCBase::DeviceToLogicalYRel(wxCoord y) const
+{
+    return ((wxDC *)this)->YDEV2LOGREL(y);
+}
+
+wxCoord wxDCBase::LogicalToDeviceX(wxCoord x) const
+{
+    return ((wxDC *)this)->XLOG2DEV(x);
+}
+
+wxCoord wxDCBase::LogicalToDeviceY(wxCoord y) const
+{
+    return ((wxDC *)this)->YLOG2DEV(y);
+}
+
+wxCoord wxDCBase::LogicalToDeviceXRel(wxCoord x) const
+{
+    return ((wxDC *)this)->XLOG2DEVREL(x);
+}
+
+wxCoord wxDCBase::LogicalToDeviceYRel(wxCoord y) const
+{
+    return ((wxDC *)this)->YLOG2DEVREL(y);
+}
+
 
 void wxDC::DoGetSize(int *w, int *h) const
 {

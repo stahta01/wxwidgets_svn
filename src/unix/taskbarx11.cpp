@@ -21,7 +21,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_TASKBARICON
+#ifdef wxHAS_TASK_BAR_ICON
 
 #include "wx/taskbar.h"
 
@@ -328,4 +328,4 @@ bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
     return true;
 }
 
-#endif // wxUSE_TASKBARICON
+#endif // wxHAS_TASK_BAR_ICON

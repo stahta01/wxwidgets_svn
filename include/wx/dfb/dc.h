@@ -50,8 +50,6 @@ public:
     virtual void SetPalette(const wxPalette& palette);
 #endif
 
-    virtual void SetLogicalFunction(int function);
-
     virtual void DestroyClippingRegion();
 
     virtual wxCoord GetCharHeight() const;
@@ -60,27 +58,63 @@ public:
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const;
+                                 wxFont *theFont = NULL) const;
 
     virtual bool CanDrawBitmap() const { return true; }
     virtual bool CanGetTextExtent() const { return true; }
     virtual int GetDepth() const;
     virtual wxSize GetPPI() const;
 
+    virtual void SetMapMode(int mode);
+    virtual void SetUserScale(double x, double y);
+    virtual void SetLogicalScale(double x, double y);
+    virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
+    virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
+    virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
+    virtual void SetLogicalFunction(int function);
+
+    // implementation from now on
+    // --------------------------
+
+    virtual void ComputeScaleAndOrigin();
+
+    wxCoord XDEV2LOG(wxCoord x) const
+    {
+        return wxRound((double)(x - m_deviceOriginX) / m_scaleX) * m_signX + m_logicalOriginX;
+    }
+    wxCoord XDEV2LOGREL(wxCoord x) const
+    {
+        return wxRound((double)(x) / m_scaleX);
+    }
+    wxCoord YDEV2LOG(wxCoord y) const
+    {
+        return wxRound((double)(y - m_deviceOriginY) / m_scaleY) * m_signY + m_logicalOriginY;
+    }
+    wxCoord YDEV2LOGREL(wxCoord y) const
+    {
+        return wxRound((double)(y) / m_scaleY);
+    }
+    wxCoord XLOG2DEV(wxCoord x) const
+    {
+        return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX;
+    }
+    wxCoord XLOG2DEVREL(wxCoord x) const
+    {
+        return wxRound((double)(x) * m_scaleX);
+    }
+    wxCoord YLOG2DEV(wxCoord y) const
+    {
+        return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY;
+    }
+    wxCoord YLOG2DEVREL(wxCoord y) const
+    {
+        return wxRound((double)(y) * m_scaleY);
+    }
+
     // Returns the surface (and increases its ref count)
     wxIDirectFBSurfacePtr GetDirectFBSurface() const { return m_surface; }
 
 protected:
-    // implementation
-    wxCoord XDEV2LOG(wxCoord x) const       { return DeviceToLogicalX(x); }
-    wxCoord XDEV2LOGREL(wxCoord x) const    { return DeviceToLogicalXRel(x); }
-    wxCoord YDEV2LOG(wxCoord y) const       { return DeviceToLogicalY(y); }
-    wxCoord YDEV2LOGREL(wxCoord y) const    { return DeviceToLogicalYRel(y); }
-    wxCoord XLOG2DEV(wxCoord x) const       { return LogicalToDeviceX(x); }
-    wxCoord XLOG2DEVREL(wxCoord x) const    { return LogicalToDeviceXRel(x); }
-    wxCoord YLOG2DEV(wxCoord y) const       { return LogicalToDeviceY(y); }
-    wxCoord YLOG2DEVREL(wxCoord y) const    { return LogicalToDeviceYRel(y); }
-    
     // initializes the DC from a surface, must be called if default ctor
     // was used
     void DFBInit(const wxIDirectFBSurfacePtr& surface);
@@ -156,7 +190,7 @@ protected:
 
     double            m_mm_to_pix_x, m_mm_to_pix_y;
 
-    friend class WXDLLIMPEXP_FWD_CORE wxOverlayImpl; // for Init
+    friend class WXDLLIMPEXP_CORE wxOverlayImpl; // for Init
 
     DECLARE_DYNAMIC_CLASS(wxDC)
 };

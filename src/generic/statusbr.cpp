@@ -251,7 +251,7 @@ void wxStatusBarGeneric::DrawFieldText(wxDC& dc, int i)
 
     wxString text(GetStatusText(i));
 
-    wxCoord x = 0, y = 0;
+    long x = 0, y = 0;
 
     dc.GetTextExtent(text, &x, &y);
 

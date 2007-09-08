@@ -38,8 +38,8 @@
  *
  */
 
-class WXDLLIMPEXP_FWD_BASE wxDDEServer;
-class WXDLLIMPEXP_FWD_BASE wxDDEClient;
+class WXDLLIMPEXP_BASE wxDDEServer;
+class WXDLLIMPEXP_BASE wxDDEClient;
 
 class WXDLLIMPEXP_BASE wxDDEConnection: public wxConnectionBase
 {
@@ -51,17 +51,14 @@ public:
 
   // Calls that CLIENT can make
   virtual bool Execute(const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
-  // FIXME-UTF8: change Execute() to DoExecute() to avoid having to do this;
-  //             don't use c_str() below after removing ANSI build
-  virtual bool Execute(const wxString& str)
-      { return Execute(str.c_str(), -1, wxIPC_TEXT); }
+  virtual bool Execute(const wxString& str) { return Execute(str, -1, wxIPC_TEXT); }
   virtual wxChar *Request(const wxString& item, int *size = NULL, wxIPCFormat format = wxIPC_TEXT);
-  virtual bool Poke(const wxString& item, const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
+  virtual bool Poke(const wxString& item, wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
   virtual bool StartAdvise(const wxString& item);
   virtual bool StopAdvise(const wxString& item);
 
   // Calls that SERVER can make
-  virtual bool Advise(const wxString& item, const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
+  virtual bool Advise(const wxString& item, wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT);
 
   // Calls that both can make
   virtual bool Disconnect(void);
@@ -75,9 +72,9 @@ public:
   wxDDEClient*  m_client;
 
   WXHCONV       m_hConv;
-  const wxChar* m_sendingData;
+  wxChar*       m_sendingData;
   int           m_dataSize;
-  wxIPCFormat   m_dataType;
+  wxIPCFormat  m_dataType;
 
     DECLARE_NO_COPY_CLASS(wxDDEConnection)
 };

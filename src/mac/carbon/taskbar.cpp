@@ -11,7 +11,7 @@
 
 #include "wx/wxprec.h"
 
-#if wxUSE_TASKBARICON
+#ifdef wxHAS_TASK_BAR_ICON
 
 #include "wx/taskbar.h"
 
@@ -290,7 +290,7 @@ wxMenu * wxDeepCopyMenu( wxMenu *menu )
             new wxMenuItem(
                 m_pMenu, // parent menu
                 theItem->GetId(), // id
-                theItem->GetItemLabel(), // text label
+                theItem->GetText(), // text label
                 theItem->GetHelp(), // status bar help string
                 theItem->GetKind(), // menu flags - checkable, separator, etc.
                 wxDeepCopyMenu(theItem->GetSubMenu()) )); // submenu
@@ -521,4 +521,4 @@ bool wxTaskBarIcon::RemoveIcon()
 bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
 { return m_impl->PopupMenu(menu); }
 
-#endif // wxUSE_TASKBARICON
+#endif // wxHAS_TASK_BAR_ICON

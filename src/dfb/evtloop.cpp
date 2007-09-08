@@ -26,12 +26,11 @@
 #endif
 
 #include "wx/thread.h"
-#include "wx/generic/private/timer.h"
-#include "wx/private/selectdispatcher.h"
+#include "wx/timer.h"
+#include "wx/private/socketevtdispatch.h"
 #include "wx/dfb/private.h"
-#include "wx/nonownedwnd.h"
 
-#define TRACE_EVENTS "events"
+#define TRACE_EVENTS _T("events")
 
 // ===========================================================================
 // implementation
@@ -41,28 +40,28 @@
 // wxEventLoop initialization
 //-----------------------------------------------------------------------------
 
-wxIDirectFBEventBufferPtr wxGUIEventLoop::ms_buffer;
+wxIDirectFBEventBufferPtr wxEventLoop::ms_buffer;
 
-wxGUIEventLoop::wxGUIEventLoop()
+wxEventLoop::wxEventLoop()
 {
     if ( !ms_buffer )
         InitBuffer();
 }
 
 /* static */
-void wxGUIEventLoop::InitBuffer()
+void wxEventLoop::InitBuffer()
 {
     ms_buffer = wxIDirectFB::Get()->CreateEventBuffer();
 }
 
 /* static */
-void wxGUIEventLoop::CleanUp()
+void wxEventLoop::CleanUp()
 {
     ms_buffer.Reset();
 }
 
 /* static */
-wxIDirectFBEventBufferPtr wxGUIEventLoop::GetDirectFBEventBuffer()
+wxIDirectFBEventBufferPtr wxEventLoop::GetDirectFBEventBuffer()
 {
     if ( !ms_buffer )
         InitBuffer();
@@ -74,16 +73,16 @@ wxIDirectFBEventBufferPtr wxGUIEventLoop::GetDirectFBEventBuffer()
 // events dispatch and loop handling
 //-----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
-    wxCHECK_MSG( ms_buffer, false, "invalid event buffer" );
+    wxCHECK_MSG( ms_buffer, false, _T("invalid event buffer") );
 
     return ms_buffer->HasEvent();
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
-    wxCHECK_MSG( ms_buffer, false, "invalid event buffer" );
+    wxCHECK_MSG( ms_buffer, false, _T("invalid event buffer") );
 
     // NB: we don't block indefinitely waiting for an event, but instead
     //     time out after a brief period in order to make sure that
@@ -126,26 +125,26 @@ bool wxGUIEventLoop::Dispatch()
     return true;
 }
 
-void wxGUIEventLoop::WakeUp()
+void wxEventLoop::WakeUp()
 {
-    wxCHECK_RET( ms_buffer, "invalid event buffer" );
+    wxCHECK_RET( ms_buffer, _T("invalid event buffer") );
 
     ms_buffer->WakeUp();
 }
 
-void wxGUIEventLoop::OnNextIteration()
+void wxEventLoop::OnNextIteration()
 {
 #if wxUSE_TIMER
-    wxGenericTimerImpl::NotifyTimers();
+    wxTimer::NotifyTimers();
 #endif
 
 #if wxUSE_SOCKETS
     // handle any pending socket events:
-    wxSelectDispatcher::DispatchPending();
+    wxSocketEventDispatcher::Get().RunLoop();
 #endif
 }
 
-void wxGUIEventLoop::Yield()
+void wxEventLoop::Yield()
 {
     // process all pending events:
     while ( Pending() )
@@ -160,14 +159,14 @@ void wxGUIEventLoop::Yield()
 // DirectFB -> wxWidgets events translation
 //-----------------------------------------------------------------------------
 
-void wxGUIEventLoop::HandleDFBEvent(const wxDFBEvent& event)
+void wxEventLoop::HandleDFBEvent(const wxDFBEvent& event)
 {
     switch ( event.GetClass() )
     {
         case DFEC_WINDOW:
         {
             wxDFBWindowEvent winevent(((const DFBEvent&)event).window);
-            wxNonOwnedWindow::HandleDFBWindowEvent(winevent);
+            wxTopLevelWindowDFB::HandleDFBWindowEvent(winevent);
             break;
         }
 
@@ -179,7 +178,7 @@ void wxGUIEventLoop::HandleDFBEvent(const wxDFBEvent& event)
 #endif
         {
             wxLogTrace(TRACE_EVENTS,
-                       "ignoring event of unsupported class %i",
+                       _T("ignoring event of unsupported class %i"),
                        (int)event.GetClass());
         }
     }

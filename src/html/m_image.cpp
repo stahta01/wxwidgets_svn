@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/dynarray.h"
     #include "wx/dc.h"
     #include "wx/scrolwin.h"

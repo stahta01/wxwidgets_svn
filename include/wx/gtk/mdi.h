@@ -63,7 +63,6 @@ public:
 
 protected:
     void Init();
-    virtual bool HasVisibleMenubar() const;
 
 private:
     friend class wxMDIChildFrame;
@@ -134,6 +133,8 @@ public:
 #endif // wxUSE_TOOLBAR
 
     // no icon
+    virtual void SetIcon(const wxIcon& icon)
+        { wxTopLevelWindowBase::SetIcon(icon); }
     virtual void SetIcons(const wxIconBundle& icons )
         { wxTopLevelWindowBase::SetIcons(icons); }
 
@@ -165,6 +166,8 @@ protected:
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
+    virtual void DoSetClientSize(int width, int height);
+    virtual void DoGetClientSize( int *width, int *height ) const;
 
 private:
     DECLARE_EVENT_TABLE()

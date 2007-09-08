@@ -15,7 +15,7 @@
 #include "wx/hashmap.h"
 #include "wx/cocoa/NSWindow.h"
 
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
+class WXDLLEXPORT wxMenuBar;
 
 // ========================================================================
 // wxTopLevelWindowCocoa
@@ -111,7 +111,8 @@ public:
     wxWindow *SetDefaultItem(wxWindow *win);
 
 // Things I may/may not do
-//    virtual void SetIcons(const wxIconBundle& icons);
+//    virtual void SetIcon(const wxIcon& icon);
+//    virtual void SetIcons(const wxIconBundle& icons) { SetIcon( icons.GetIcon( -1 ) ); }
 //    virtual void Clear() ;
 //    virtual void Raise();
 //    virtual void Lower();

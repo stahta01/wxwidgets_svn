@@ -12,19 +12,11 @@ when you're writing your own HTML help controller.
 
 \wxheading{Derived from}
 
-\helpref{wxFrame}{wxframe}\\
-\helpref{wxTopLevelWindow}{wxtoplevelwindow}\\
-\helpref{wxWindow}{wxwindow}\\
-\helpref{wxEvtHandler}{wxevthandler}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxFrame}{wxframe}
 
 \wxheading{Include files}
 
 <wx/html/helpdlg.h>
-
-\wxheading{Library}
-
-\helpref{wxHtml}{librarieslist}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
@@ -93,19 +85,11 @@ when you're writing your own HTML help controller.
 
 \wxheading{Derived from}
 
-\helpref{wxFrame}{wxframe}\\
-\helpref{wxTopLevelWindow}{wxtoplevelwindow}\\
-\helpref{wxWindow}{wxwindow}\\
-\helpref{wxEvtHandler}{wxevthandler}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxFrame}{wxframe}
 
 \wxheading{Include files}
 
 <wx/html/helpfrm.h>
-
-\wxheading{Library}
-
-\helpref{wxHtml}{librarieslist}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
@@ -181,7 +165,7 @@ For example:
     m_embeddedHtmlHelp.UseConfig(config, rootPath); // Set your own config object here
     m_embeddedHtmlHelp.SetHelpWindow(m_embeddedHelpWindow);    
     m_embeddedHelpWindow->Create(this,
-        wxID_ANY, wxDefaultPosition, GetClientSize(), wxTAB_TRAVERSAL|wxBORDER_NONE, wxHF_DEFAULT_STYLE);        
+        wxID_ANY, wxDefaultPosition, GetClientSize(), wxTAB_TRAVERSAL|wxNO_BORDER, wxHF_DEFAULT_STYLE);        
     m_embeddedHtmlHelp.AddBook(wxFileName(_T("doc.zip")));
 \end{verbatim}
 
@@ -190,17 +174,11 @@ the embedded window to be destroyed independently of the help controller.
 
 \wxheading{Derived from}
 
-\helpref{wxWindow}{wxwindow}\\
-\helpref{wxEvtHandler}{wxevthandler}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxWindow}{wxwindow}
 
 \wxheading{Include files}
 
 <wx/html/helpwnd.h>
-
-\wxheading{Library}
-
-\helpref{wxHtml}{librarieslist}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
@@ -208,7 +186,7 @@ the embedded window to be destroyed independently of the help controller.
 
 \func{}{wxHtmlHelpWindow}{\param{wxHtmlHelpData* }{data = NULL}}
 
-\func{}{wxHtmlHelpWindow}{\param{wxWindow* }{parent}, \param{int }{wxWindowID}, \param{const wxPoint\&}{ pos = wxDefaultPosition}, \param{const wxSize\&}{ pos = wxDefaultSize}, \param{int }{style = wxTAB\_TRAVERSAL|wxBORDER\_NONE}, \param{int }{helpStyle = wxHF\_DEFAULT\_STYLE}, \param{wxHtmlHelpData* }{data = NULL}}
+\func{}{wxHtmlHelpWindow}{\param{wxWindow* }{parent}, \param{int }{wxWindowID}, \param{const wxPoint\&}{ pos = wxDefaultPosition}, \param{const wxSize\&}{ pos = wxDefaultSize}, \param{int }{style = wxTAB\_TRAVERSAL|wxTAB\_wxNO\_BORDER}, \param{int }{helpStyle = wxHF\_DEFAULT\_STYLE}, \param{wxHtmlHelpData* }{data = NULL}}
 
 Constructor.
 
@@ -216,7 +194,7 @@ Constructor. For the values of {\it helpStyle}, please see the documentation for
 
 \membersection{wxHtmlHelpWindow::Create}\label{wxhtmlhelpwindowcreate}
 
-\func{bool}{Create}{\param{wxWindow* }{parent}, \param{wxWindowID }{id}, \param{const wxPoint\&}{ pos = wxDefaultPosition}, \param{const wxSize\&}{ pos = wxDefaultSize}, \param{int }{style = wxTAB\_TRAVERSAL|wxBORDER\_NONE}, \param{int }{helpStyle = wxHF\_DEFAULT\_STYLE}, \param{wxHtmlHelpData* }{data = NULL}}
+\func{bool}{Create}{\param{wxWindow* }{parent}, \param{wxWindowID }{id}, \param{const wxPoint\&}{ pos = wxDefaultPosition}, \param{const wxSize\&}{ pos = wxDefaultSize}, \param{int }{style = wxTAB\_TRAVERSAL|wxTAB\_wxNO\_BORDER}, \param{int }{helpStyle = wxHF\_DEFAULT\_STYLE}, \param{wxHtmlHelpData* }{data = NULL}}
 
 Creates the help window. See \helpref{the constructor}{wxhtmlhelpwindowwxhtmlhelpwindow}
 for a description of the parameters.
@@ -358,10 +336,6 @@ None
 \wxheading{Include files}
 
 <wx/html/helpctrl.h>
-
-\wxheading{Library}
-
-\helpref{wxHtml}{librarieslist}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 

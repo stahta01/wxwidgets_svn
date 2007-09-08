@@ -85,8 +85,8 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
            const wxString& name = wxComboBoxNameStr);
 
     // List functions
-    virtual void DoDeleteOneItem(unsigned int n);
-    virtual void DoClear();
+    virtual void Delete(unsigned int n);
+    virtual void Clear();
 
     virtual int GetSelection() const;
     virtual void SetSelection(int n);
@@ -135,16 +135,19 @@ protected:
     // common part of all ctors
     void Init();
 
+    void FreeData();
+
     // override the base class virtuals involved in geometry calculations
     virtual wxSize DoGetBestSize() const;
     virtual void DoMoveWindow(int x, int y, int width, int height);
 
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
 
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void * DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData * DoGetItemClientObject(unsigned int n) const;
 
     // the subcontrols
     wxComboBoxText*     m_text;

@@ -128,4 +128,9 @@ void GSocketGUIFunctionsTableConcrete::Disable_Events(GSocket *socket)
   Uninstall_Callback(socket, GSOCK_OUTPUT);
 }
 
-#endif // wxUSE_SOCKETS
+#else /* !wxUSE_SOCKETS */
+
+/* some compilers don't like having empty source files */
+static int wxDummyGsockVar = 0;
+
+#endif /* wxUSE_SOCKETS/!wxUSE_SOCKETS */

@@ -727,28 +727,18 @@ bool wxGCDC::CanDrawBitmap() const
 
 bool wxGCDC::DoBlit(
     wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
-    wxDC *source, wxCoord xsrc, wxCoord ysrc, int logical_func , bool useMask,
+    wxDC *source, wxCoord xsrc, wxCoord ysrc, int logical_func , bool WXUNUSED(useMask),
     wxCoord xsrcMask, wxCoord ysrcMask )
 {
-    return DoStretchBlit( xdest, ydest, width, height,
-        source, xsrc, ysrc, width, height, logical_func, useMask,
-        xsrcMask,ysrcMask );
-}
-
-bool wxGCDC::DoStretchBlit(
-    wxCoord xdest, wxCoord ydest, wxCoord dstWidth, wxCoord dstHeight,
-    wxDC *source, wxCoord xsrc, wxCoord ysrc, wxCoord srcWidth, wxCoord srcHeight,
-    int logical_func , bool WXUNUSED(useMask),
-    wxCoord xsrcMask, wxCoord ysrcMask )
-{
-    wxCHECK_MSG( Ok(), false, wxT("wxGCDC(cg)::DoStretchBlit - invalid DC") );
-    wxCHECK_MSG( source->Ok(), false, wxT("wxGCDC(cg)::DoStretchBlit - invalid source DC") );
+    wxCHECK_MSG( Ok(), false, wxT("wxGCDC(cg)::DoBlit - invalid DC") );
+    wxCHECK_MSG( source->Ok(), false, wxT("wxGCDC(cg)::DoBlit - invalid source DC") );
 
     if ( logical_func == wxNO_OP )
         return true;
-    else if ( logical_func != wxCOPY )
+    else if ( !m_graphicContext->SetLogicalFunction( logical_func ) )
+    
     {
-        wxFAIL_MSG( wxT("Blitting is only supported with wxCOPY logical operation.") );
+        wxFAIL_MSG( wxT("Logical function is not supported by the graphics context.") );
         return false;
     }
 
@@ -760,8 +750,8 @@ bool wxGCDC::DoStretchBlit(
 
     wxRect subrect(source->LogicalToDeviceX(xsrc),
                    source->LogicalToDeviceY(ysrc),
-                   source->LogicalToDeviceXRel(srcWidth),
-                   source->LogicalToDeviceYRel(srcHeight));
+                   source->LogicalToDeviceXRel(width),
+                   source->LogicalToDeviceYRel(height));
 
     // if needed clip the subrect down to the size of the source DC
     wxCoord sw, sh;
@@ -778,13 +768,17 @@ bool wxGCDC::DoStretchBlit(
     if ( blit.Ok() )
     {
         m_graphicContext->DrawBitmap( blit, xdest, ydest,
-                                      dstWidth, dstHeight);
+                                      wxMin(width, blit.GetWidth()),
+                                      wxMin(height, blit.GetHeight()));
     }
     else
     {
         wxFAIL_MSG( wxT("Cannot Blit. Unable to get contents of DC as bitmap.") );
         return false;
     }
+
+    // reset logical function
+    m_graphicContext->SetLogicalFunction( m_logicalFunction );
 
     return true;
 }
@@ -830,7 +824,7 @@ bool wxGCDC::CanGetTextExtent() const
 
 void wxGCDC::DoGetTextExtent( const wxString &str, wxCoord *width, wxCoord *height,
                               wxCoord *descent, wxCoord *externalLeading ,
-                              const wxFont *theFont ) const
+                              wxFont *theFont ) const
 {
     wxCHECK_RET( Ok(), wxT("wxGCDC(cg)::DoGetTextExtent - invalid DC") );
 

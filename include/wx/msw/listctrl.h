@@ -14,7 +14,7 @@
 
 #include "wx/textctrl.h"
 
-class WXDLLIMPEXP_FWD_CORE wxImageList;
+class WXDLLEXPORT wxImageList;
 
 /*
     The wxListCtrl can show lists of items in four different modes:
@@ -163,8 +163,10 @@ public:
     wxUIntPtr GetItemData(long item) const ;
 
     // Sets the item data
+#if wxABI_VERSION >= 20804
     bool SetItemPtrData(long item, wxUIntPtr data);
-    bool SetItemData(long item, long data) { return SetItemPtrData(item, data); }
+#endif // wxABI 2.8.4+
+    bool SetItemData(long item, long data);
 
     // Gets the item rectangle
     bool GetItemRect(long item, wxRect& rect, int code = wxLIST_RECT_BOUNDS) const ;

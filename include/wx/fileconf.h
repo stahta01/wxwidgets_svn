@@ -20,7 +20,6 @@
 #include "wx/textfile.h"
 #include "wx/string.h"
 #include "wx/confbase.h"
-#include "wx/filename.h"
 
 // ----------------------------------------------------------------------------
 // wxFileConfig
@@ -90,13 +89,13 @@
   (it's on by default, the current status can be retrieved with
    IsExpandingEnvVars function).
 */
-class WXDLLIMPEXP_FWD_BASE wxFileConfigGroup;
-class WXDLLIMPEXP_FWD_BASE wxFileConfigEntry;
-class WXDLLIMPEXP_FWD_BASE wxFileConfigLineList;
+class WXDLLIMPEXP_BASE wxFileConfigGroup;
+class WXDLLIMPEXP_BASE wxFileConfigEntry;
+class WXDLLIMPEXP_BASE wxFileConfigLineList;
 
 #if wxUSE_STREAMS
-class WXDLLIMPEXP_FWD_BASE wxInputStream;
-class WXDLLIMPEXP_FWD_BASE wxOutputStream;
+class WXDLLIMPEXP_BASE wxInputStream;
+class WXDLLIMPEXP_BASE wxOutputStream;
 #endif // wxUSE_STREAMS
 
 class WXDLLIMPEXP_BASE wxFileConfig : public wxConfigBase
@@ -112,18 +111,8 @@ public:
   //
   // where file is the basename of szFile, ext is its extension
   // or .conf (Unix) or .ini (Win) if it has none
-  static wxFileName GetGlobalFile(const wxString& szFile);
-  static wxFileName GetLocalFile(const wxString& szFile, int style = 0);
-
-  static wxString GetGlobalFileName(const wxString& szFile)
-  {
-      return GetGlobalFile(szFile).GetFullPath();
-  }
-
-  static wxString GetLocalFileName(const wxString& szFile, int style = 0)
-  {
-      return GetLocalFile(szFile, style).GetFullPath();
-  }
+  static wxString GetGlobalFileName(const wxChar *szFile);
+  static wxString GetLocalFileName(const wxChar *szFile);
 
   // ctor & dtor
     // New constructor: one size fits all. Specify wxCONFIG_USE_LOCAL_FILE or
@@ -194,20 +183,14 @@ public:
 protected:
   virtual bool DoReadString(const wxString& key, wxString *pStr) const;
   virtual bool DoReadLong(const wxString& key, long *pl) const;
-#if wxUSE_BASE64
-  virtual bool DoReadBinary(const wxString& key, wxMemoryBuffer* buf) const;
-#endif // wxUSE_BASE64
 
   virtual bool DoWriteString(const wxString& key, const wxString& szValue);
   virtual bool DoWriteLong(const wxString& key, long lValue);
-#if wxUSE_BASE64
-  virtual bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf);
-#endif // wxUSE_BASE64
 
 private:
   // GetXXXFileName helpers: return ('/' terminated) directory names
   static wxString GetGlobalDir();
-  static wxString GetLocalDir(int style = 0);
+  static wxString GetLocalDir();
 
   // common part of all ctors (assumes that m_str{Local|Global}File are already
   // initialized
@@ -237,8 +220,8 @@ private:
   wxFileConfigLineList *m_linesHead,    // head of the linked list
                        *m_linesTail;    // tail
 
-  wxFileName  m_fnLocalFile,            // local  file name passed to ctor
-              m_fnGlobalFile;           // global
+  wxString    m_strLocalFile,           // local  file name passed to ctor
+              m_strGlobalFile;          // global
   wxString    m_strPath;                // current path (not '/' terminated)
 
   wxFileConfigGroup *m_pRootGroup,      // the top (unnamed) group
@@ -253,7 +236,6 @@ private:
   bool m_isDirty;                       // if true, we have unsaved changes
 
   DECLARE_NO_COPY_CLASS(wxFileConfig)
-  DECLARE_ABSTRACT_CLASS(wxFileConfig)
 };
 
 #endif

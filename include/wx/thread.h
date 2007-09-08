@@ -38,7 +38,6 @@ enum wxMutexError
     wxMUTEX_DEAD_LOCK,      // mutex is already locked by the calling thread
     wxMUTEX_BUSY,           // mutex is already locked by another thread
     wxMUTEX_UNLOCKED,       // attempt to unlock a mutex which is not locked
-    wxMUTEX_TIMEOUT,        // LockTimeout() has timed out
     wxMUTEX_MISC_ERROR      // any other error
 };
 
@@ -110,11 +109,11 @@ enum wxMutexType
 };
 
 // forward declarations
-class WXDLLIMPEXP_FWD_BASE wxThreadHelper;
-class WXDLLIMPEXP_FWD_BASE wxConditionInternal;
-class WXDLLIMPEXP_FWD_BASE wxMutexInternal;
-class WXDLLIMPEXP_FWD_BASE wxSemaphoreInternal;
-class WXDLLIMPEXP_FWD_BASE wxThreadInternal;
+class WXDLLIMPEXP_BASE wxThreadHelper;
+class WXDLLIMPEXP_BASE wxConditionInternal;
+class WXDLLIMPEXP_BASE wxMutexInternal;
+class WXDLLIMPEXP_BASE wxSemaphoreInternal;
+class WXDLLIMPEXP_BASE wxThreadInternal;
 
 // ----------------------------------------------------------------------------
 // A mutex object is a synchronization object whose state is set to signaled
@@ -149,10 +148,6 @@ public:
     //
     // The caller must call Unlock() later if Lock() returned wxMUTEX_NO_ERROR.
     wxMutexError Lock();
-
-    // Same as Lock() but return wxMUTEX_TIMEOUT if the mutex can't be locked
-    // during the given number of milliseconds
-    wxMutexError LockTimeout(unsigned long ms);
 
     // Try to lock the mutex: if it is currently locked, return immediately
     // with an error. Otherwise the caller must call Unlock().
@@ -693,8 +688,8 @@ inline bool wxIsMainThread() { return wxThread::IsMain(); }
 #else // !wxUSE_THREADS
 
 // no thread support
-inline void wxMutexGuiEnter() { }
-inline void wxMutexGuiLeave() { }
+inline void WXDLLIMPEXP_BASE wxMutexGuiEnter() { }
+inline void WXDLLIMPEXP_BASE wxMutexGuiLeave() { }
 
 // macros for entering/leaving critical sections which may be used without
 // having to take them inside "#if wxUSE_THREADS"

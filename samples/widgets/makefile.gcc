@@ -13,11 +13,10 @@ include ../../build/msw/config.gcc
 ### Variables: ###
 
 CPPDEPS = -MT$@ -MF$@.d -MD
-WX_RELEASE_NODOT = 29
-COMPILER_PREFIX = gcc
+WX_RELEASE_NODOT = 28
 OBJS = \
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
-LIBDIRNAME = .\..\..\lib\$(COMPILER_PREFIX)_$(LIBTYPE_SUFFIX)$(CFG)
+	gcc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
+LIBDIRNAME = .\..\..\lib\gcc_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = \
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 WIDGETS_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG) \
@@ -31,7 +30,6 @@ WIDGETS_OBJECTS =  \
 	$(OBJS)\widgets_bmpcombobox.o \
 	$(OBJS)\widgets_button.o \
 	$(OBJS)\widgets_checkbox.o \
-	$(OBJS)\widgets_choice.o \
 	$(OBJS)\widgets_clrpicker.o \
 	$(OBJS)\widgets_combobox.o \
 	$(OBJS)\widgets_datepick.o \
@@ -41,7 +39,6 @@ WIDGETS_OBJECTS =  \
 	$(OBJS)\widgets_fontpicker.o \
 	$(OBJS)\widgets_gauge.o \
 	$(OBJS)\widgets_hyperlnk.o \
-	$(OBJS)\widgets_itemcontainer.o \
 	$(OBJS)\widgets_listbox.o \
 	$(OBJS)\widgets_notebook.o \
 	$(OBJS)\widgets_odcombobox.o \
@@ -265,9 +262,6 @@ $(OBJS)\widgets_button.o: ./button.cpp
 $(OBJS)\widgets_checkbox.o: ./checkbox.cpp
 	$(CXX) -c -o $@ $(WIDGETS_CXXFLAGS) $(CPPDEPS) $<
 
-$(OBJS)\widgets_choice.o: ./choice.cpp
-	$(CXX) -c -o $@ $(WIDGETS_CXXFLAGS) $(CPPDEPS) $<
-
 $(OBJS)\widgets_clrpicker.o: ./clrpicker.cpp
 	$(CXX) -c -o $@ $(WIDGETS_CXXFLAGS) $(CPPDEPS) $<
 
@@ -293,9 +287,6 @@ $(OBJS)\widgets_gauge.o: ./gauge.cpp
 	$(CXX) -c -o $@ $(WIDGETS_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\widgets_hyperlnk.o: ./hyperlnk.cpp
-	$(CXX) -c -o $@ $(WIDGETS_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\widgets_itemcontainer.o: ./itemcontainer.cpp
 	$(CXX) -c -o $@ $(WIDGETS_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\widgets_listbox.o: ./listbox.cpp

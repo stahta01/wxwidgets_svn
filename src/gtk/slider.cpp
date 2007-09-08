@@ -19,7 +19,7 @@
     #include "wx/math.h"
 #endif
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // data
@@ -124,6 +124,8 @@ extern "C" {
 static void
 gtk_value_changed(GtkRange* range, wxSlider* win)
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     GtkAdjustment* adj = gtk_range_get_adjustment (range);
     const int pos = wxRound(adj->value);
     const double oldPos = win->m_pos;
@@ -281,17 +283,14 @@ wxSlider::wxSlider()
     m_needThumbRelease = false;
 }
 
-bool wxSlider::Create(wxWindow *parent,
-                      wxWindowID id,
-                      int value,
-                      int minValue,
-                      int maxValue,
-                      const wxPoint& pos,
-                      const wxSize& size,
-                      long style,
-                      const wxValidator& validator,
-                      const wxString& name)
+bool wxSlider::Create(wxWindow *parent, wxWindowID id,
+        int value, int minValue, int maxValue,
+        const wxPoint& pos, const wxSize& size,
+        long style, const wxValidator& validator, const wxString& name )
 {
+    m_acceptsFocus = true;
+    m_needParent = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {

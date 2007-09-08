@@ -15,7 +15,7 @@
 #include "wx/colour.h"
 #include "wx/font.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxWindow;
 
 // possible values for wxSystemSettings::GetFont() parameter
 //
@@ -198,6 +198,13 @@ public:
     // Value
     static wxSystemScreenType ms_screen;
 
+#if WXWIN_COMPATIBILITY_2_4
+    // the backwards compatible versions of wxSystemSettingsNative functions,
+    // don't use these methods in the new code!
+    wxDEPRECATED(static wxColour GetSystemColour(int index));
+    wxDEPRECATED(static wxFont GetSystemFont(int index));
+    wxDEPRECATED(static int GetSystemMetric(int index));
+#endif
 };
 
 #endif

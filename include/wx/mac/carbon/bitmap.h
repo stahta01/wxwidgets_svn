@@ -15,15 +15,15 @@
 #include "wx/palette.h"
 
 // Bitmap
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
+class WXDLLEXPORT wxBitmap;
 class wxBitmapRefData ;
-class WXDLLIMPEXP_FWD_CORE wxBitmapHandler;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxCursor;
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxImage;
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxBitmapHandler;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxImage;
+class WXDLLEXPORT wxPixelDataBase;
 
 // A mask is a bitmap used for drawing bitmaps
 // Internally it is stored as a 8 bit deep memory chunk, 0 = black means the source will be drawn
@@ -89,7 +89,7 @@ class WXDLLEXPORT wxBitmap: public wxBitmapBase
 {
     DECLARE_DYNAMIC_CLASS(wxBitmap)
 
-    friend class WXDLLIMPEXP_FWD_CORE wxBitmapHandler;
+    friend class WXDLLEXPORT wxBitmapHandler;
 
 public:
     wxBitmap(); // Platform-specific
@@ -143,6 +143,13 @@ public:
     void SetHeight(int h);
     void SetDepth(int d);
     void SetOk(bool isOk);
+
+#if WXWIN_COMPATIBILITY_2_4
+    // these functions do nothing and are only there for backwards
+    // compatibility
+    wxDEPRECATED( int GetQuality() const );
+    wxDEPRECATED( void SetQuality(int quality) );
+#endif // WXWIN_COMPATIBILITY_2_4
 
 #if wxUSE_PALETTE
     wxPalette* GetPalette() const;

@@ -20,18 +20,11 @@
 
 #include "wx/utils.h"
 
-#define USE_PUTENV (!defined(HAVE_SETENV) && defined(HAVE_PUTENV))
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/app.h"
-    #include "wx/wxcrtvararg.h"
-    #if USE_PUTENV
-        #include "wx/module.h"
-        #include "wx/hashmap.h"
-    #endif
 #endif
 
 #include "wx/apptrait.h"
@@ -45,7 +38,6 @@
 #include "wx/unix/private.h"
 
 #include <pwd.h>
-#include <sys/wait.h>       // waitpid()
 
 #ifdef HAVE_SYS_SELECT_H
 #   include <sys/select.h>
@@ -919,10 +911,9 @@ wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
     // get OS version
     int major, minor;
     wxString release = wxGetCommandOutput(wxT("uname -r"));
-    if ( release.empty() ||
-         wxSscanf(release.c_str(), wxT("%d.%d"), &major, &minor) != 2 )
+    if ( !release.empty() && wxSscanf(release, wxT("%d.%d"), &major, &minor) != 2 )
     {
-        // failed to get version string or unrecognized format
+        // unrecognized uname string format
         major =
         minor = -1;
     }
@@ -998,12 +989,12 @@ wxMemorySize wxGetFreeMemory()
 
         return (wxMemorySize)memFree;
     }
+#elif defined(__SUN__) && defined(_SC_AVPHYS_PAGES)
+    return (wxMemorySize)(sysconf(_SC_AVPHYS_PAGES)*sysconf(_SC_PAGESIZE));
 #elif defined(__SGI__)
     struct rminfo realmem;
     if ( sysmp(MP_SAGET, MPSA_RMINFO, &realmem, sizeof realmem) == 0 )
         return ((wxMemorySize)realmem.physmem * sysconf(_SC_PAGESIZE));
-#elif defined(_SC_AVPHYS_PAGES)
-    return ((wxMemorySize)sysconf(_SC_AVPHYS_PAGES))*sysconf(_SC_PAGESIZE);
 //#elif defined(__FREEBSD__) -- might use sysctl() to find it out, probably
 #endif
 
@@ -1051,39 +1042,10 @@ bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspace
 // env vars
 // ----------------------------------------------------------------------------
 
-#if USE_PUTENV
-
-WX_DECLARE_STRING_HASH_MAP(char *, wxEnvVars);
-
-static wxEnvVars gs_envVars;
-
-class wxSetEnvModule : public wxModule
-{
-public:
-    virtual bool OnInit() { return true; }
-    virtual void OnExit()
-    {
-        for ( wxEnvVars::const_iterator i = gs_envVars.begin();
-              i != gs_envVars.end();
-              ++i )
-        {
-            free(i->second);
-        }
-
-        gs_envVars.clear();
-    }
-
-    DECLARE_DYNAMIC_CLASS(wxSetEnvModule)
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxSetEnvModule, wxModule)
-
-#endif // USE_PUTENV
-
 bool wxGetEnv(const wxString& var, wxString *value)
 {
     // wxGetenv is defined as getenv()
-    char *p = wxGetenv(var);
+    wxChar *p = wxGetenv(var);
     if ( !p )
         return false;
 
@@ -1095,7 +1057,7 @@ bool wxGetEnv(const wxString& var, wxString *value)
     return true;
 }
 
-static bool wxDoSetEnv(const wxString& variable, const char *value)
+bool wxSetEnv(const wxString& variable, const wxChar *value)
 {
 #if defined(HAVE_SETENV)
     if ( !value )
@@ -1106,11 +1068,13 @@ static bool wxDoSetEnv(const wxString& variable, const char *value)
         unsetenv(variable.mb_str());
         return true;
 #else
-        value = ""; // we can't pass NULL to setenv()
+        value = _T(""); // we can't pass NULL to setenv()
 #endif
     }
 
-    return setenv(variable.mb_str(), value, 1 /* overwrite */) == 0;
+    return setenv(variable.mb_str(),
+                  wxString(value).mb_str(),
+                  1 /* overwrite */) == 0;
 #elif defined(HAVE_PUTENV)
     wxString s = variable;
     if ( value )
@@ -1119,35 +1083,14 @@ static bool wxDoSetEnv(const wxString& variable, const char *value)
     // transform to ANSI
     const wxWX2MBbuf p = s.mb_str();
 
+    // the string will be free()d by libc
     char *buf = (char *)malloc(strlen(p) + 1);
     strcpy(buf, p);
-
-    // store the string to free() it later
-    wxEnvVars::iterator i = gs_envVars.find(variable);
-    if ( i != gs_envVars.end() )
-    {
-        free(i->second);
-        i->second = buf;
-    }
-    else // this variable hadn't been set before
-    {
-        gs_envVars[variable] = buf;
-    }
 
     return putenv(buf) == 0;
 #else // no way to set an env var
     return false;
 #endif
-}
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.mb_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
 }
 
 // ----------------------------------------------------------------------------
@@ -1301,93 +1244,55 @@ int wxGUIAppTraits::WaitForChild(wxExecuteData& execData)
     }
 
 
-    if ( !(flags & wxEXEC_NOEVENTS) )
-    {
 #if defined(__DARWIN__) && (defined(__WXMAC__) || defined(__WXCOCOA__))
-        endProcData->tag = wxAddProcessCallbackForPid(endProcData, execData.pid);
+    endProcData->tag = wxAddProcessCallbackForPid(endProcData, execData.pid);
 #else
-        endProcData->tag = wxAddProcessCallback
-                           (
-                             endProcData,
-                             execData.pipeEndProcDetect.Detach(wxPipe::Read)
-                           );
+    endProcData->tag = wxAddProcessCallback
+                (
+                    endProcData,
+                    execData.pipeEndProcDetect.Detach(wxPipe::Read)
+                );
 
-        execData.pipeEndProcDetect.Close();
+    execData.pipeEndProcDetect.Close();
 #endif // defined(__DARWIN__) && (defined(__WXMAC__) || defined(__WXCOCOA__))
-    }
 
     if ( flags & wxEXEC_SYNC )
     {
         wxBusyCursor bc;
-        int exitcode = 0;
+        wxWindowDisabler *wd = flags & wxEXEC_NODISABLE ? NULL
+                                                        : new wxWindowDisabler;
 
-        wxWindowDisabler *wd = flags & (wxEXEC_NODISABLE | wxEXEC_NOEVENTS)
-                                    ? NULL
-                                    : new wxWindowDisabler;
-
-        if ( flags & wxEXEC_NOEVENTS )
+        // endProcData->pid will be set to 0 from GTK_EndProcessDetector when the
+        // process terminates
+        while ( endProcData->pid != 0 )
         {
-            // just block waiting for the child to exit
-            int status = 0;
-
-            int result = waitpid(execData.pid, &status, 0);
-
-            if ( result == -1 )
-            {
-                wxLogLastError(_T("waitpid"));
-                exitcode = -1;
-            }
-            else
-            {
-                wxASSERT_MSG( result == execData.pid,
-                              _T("unexpected waitpid() return value") );
-
-                if ( WIFEXITED(status) )
-                {
-                    exitcode = WEXITSTATUS(status);
-                }
-                else // abnormal termination?
-                {
-                    wxASSERT_MSG( WIFSIGNALED(status),
-                                  _T("unexpected child wait status") );
-                    exitcode = -1;
-                }
-            }
-        }
-        else // !wxEXEC_NOEVENTS
-        {
-            // endProcData->pid will be set to 0 from GTK_EndProcessDetector when the
-            // process terminates
-            while ( endProcData->pid != 0 )
-            {
-                bool idle = true;
+            bool idle = true;
 
 #if HAS_PIPE_INPUT_STREAM
-                if ( execData.bufOut )
-                {
-                    execData.bufOut->Update();
-                    idle = false;
-                }
-
-                if ( execData.bufErr )
-                {
-                    execData.bufErr->Update();
-                    idle = false;
-                }
-#endif // HAS_PIPE_INPUT_STREAM
-
-                // don't consume 100% of the CPU while we're sitting in this
-                // loop
-                if ( idle )
-                    wxMilliSleep(1);
-
-                // give GTK+ a chance to call GTK_EndProcessDetector here and
-                // also repaint the GUI
-                wxYield();
+            if ( execData.bufOut )
+            {
+                execData.bufOut->Update();
+                idle = false;
             }
 
-            exitcode = endProcData->exitcode;
+            if ( execData.bufErr )
+            {
+                execData.bufErr->Update();
+                idle = false;
+            }
+#endif // HAS_PIPE_INPUT_STREAM
+
+            // don't consume 100% of the CPU while we're sitting in this
+            // loop
+            if ( idle )
+                wxMilliSleep(1);
+
+            // give GTK+ a chance to call GTK_EndProcessDetector here and
+            // also repaint the GUI
+            wxYield();
         }
+
+        int exitcode = endProcData->exitcode;
 
         delete wd;
         delete endProcData;

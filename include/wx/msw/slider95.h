@@ -12,7 +12,7 @@
 #ifndef _WX_SLIDER95_H_
 #define _WX_SLIDER95_H_
 
-class WXDLLIMPEXP_FWD_CORE wxSubwindows;
+class WXDLLEXPORT wxSubwindows;
 
 // Slider
 class WXDLLEXPORT wxSlider : public wxSliderBase
@@ -83,8 +83,6 @@ public:
     // we should let background show through the slider (and its labels)
     virtual bool HasTransparentBackground() { return true; }
 
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
 
     void Command(wxCommandEvent& event);
     virtual bool MSWOnScroll(int orientation, WXWORD wParam,

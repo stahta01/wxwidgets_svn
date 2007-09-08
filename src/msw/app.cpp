@@ -40,7 +40,7 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/log.h"
     #include "wx/module.h"
 #endif
@@ -52,7 +52,6 @@
 
 #include "wx/msw/private.h"
 #include "wx/msw/ole/oleutils.h"
-#include "wx/msw/private/timer.h"
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -78,7 +77,10 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "wx/msw/missing.h"
+// For MB_TASKMODAL
+#ifdef __WXWINCE__
+#include "wx/msw/wince/missing.h"
+#endif
 
 // instead of including <shlwapi.h> which is not part of the core SDK and not
 // shipped at all with other compilers, we always define the parts of it we
@@ -213,7 +215,7 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
 {
     // we should return false only if the app should exit, i.e. only if
     // Dispatch() determines that the main event loop should terminate
-    wxEventLoopBase * const evtLoop = wxEventLoop::GetActive();
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
     if ( !evtLoop || !evtLoop->Pending() )
     {
         // no events means no quit event
@@ -221,26 +223,6 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
     }
 
     return evtLoop->Dispatch();
-}
-
-DWORD wxGUIAppTraits::WaitForThread(WXHANDLE hThread)
-{
-    // if we don't have a running event loop, we shouldn't wait for the
-    // messages as we never remove them from the message queue and so we enter
-    // an infinite loop as MsgWaitForMultipleObjects() keeps returning
-    // WAIT_OBJECT_0 + 1
-    if ( !wxEventLoop::GetActive() )
-        return DoSimpleWaitForThread(hThread);
-
-    return ::MsgWaitForMultipleObjects
-             (
-               1,                   // number of objects to wait for
-               (HANDLE *)&hThread,  // the objects
-               false,               // wait for any objects, not all
-               INFINITE,            // no timeout
-               QS_ALLINPUT |        // return as soon as there are any events
-               QS_ALLPOSTMESSAGE
-             );
 }
 
 wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
@@ -264,20 +246,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
 #else
     return wxPORT_MSW;
 #endif
-}
-
-#if wxUSE_TIMER
-
-wxTimerImpl *wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxMSWTimerImpl(timer);
-}
-
-#endif // wxUSE_TIMER
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
 }
 
 // ===========================================================================
@@ -324,9 +292,9 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 #ifdef __WXWINCE__
     wxString tmp = GetAppName();
     tmp += wxT("ClassName");
-    wxCanvasClassName = wxStrdup( tmp.wc_str() );
+    wxCanvasClassName = wxStrdup( tmp.c_str() );
     tmp += wxT("NR");
-    wxCanvasClassNameNR = wxStrdup( tmp.wc_str() );
+    wxCanvasClassNameNR = wxStrdup( tmp.c_str() );
     HWND hWnd = FindWindow( wxCanvasClassNameNR, NULL );
     if (hWnd)
     {
@@ -552,8 +520,10 @@ wxApp::~wxApp()
 // wxApp idle handling
 // ----------------------------------------------------------------------------
 
-void wxApp::OnIdle(wxIdleEvent& WXUNUSED(event))
+void wxApp::OnIdle(wxIdleEvent& event)
 {
+    wxAppBase::OnIdle(event);
+
 #if wxUSE_DC_CACHEING
     // automated DC cache management: clear the cached DCs and bitmap
     // if it's likely that the app has finished with them, that is, we
@@ -782,3 +752,30 @@ terminate the program,\r\n\
 }
 
 #endif // wxUSE_EXCEPTIONS
+
+// ----------------------------------------------------------------------------
+// deprecated event loop functions
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxApp::DoMessage(WXMSG *pMsg)
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    if ( evtLoop )
+        evtLoop->ProcessMessage(pMsg);
+}
+
+bool wxApp::DoMessage()
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    return evtLoop ? evtLoop->Dispatch() : false;
+}
+
+bool wxApp::ProcessMessage(WXMSG* pMsg)
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    return evtLoop && evtLoop->PreProcessMessage(pMsg);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4

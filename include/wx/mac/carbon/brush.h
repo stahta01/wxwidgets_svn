@@ -16,7 +16,7 @@
 #include "wx/gdiobj.h"
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxBrush;
+class WXDLLEXPORT wxBrush;
 
 typedef enum
 {
@@ -64,7 +64,8 @@ public:
     // Useful helper: create the brush resource
     bool RealizeResource();
 
-private:
+    // When setting properties, we must make sure we're not changing
+    // another object
     void Unshare();
 };
 

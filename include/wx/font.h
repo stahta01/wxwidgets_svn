@@ -24,10 +24,10 @@
 // forward declarations
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxFontData;
-class WXDLLIMPEXP_FWD_CORE wxFontBase;
-class WXDLLIMPEXP_FWD_CORE wxFont;
-class WXDLLIMPEXP_FWD_CORE wxSize;
+class WXDLLEXPORT wxFontData;
+class WXDLLEXPORT wxFontBase;
+class WXDLLEXPORT wxFont;
+class WXDLLEXPORT wxSize;
 
 // ----------------------------------------------------------------------------
 // font constants
@@ -105,7 +105,7 @@ enum
 // wxFontBase represents a font object
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxNativeFontInfo;
+class WXDLLEXPORT wxNativeFontInfo;
 
 class WXDLLEXPORT wxFontBase : public wxGDIObject
 {
@@ -221,12 +221,6 @@ private:
     // specifying encoding parameter using this encoding
     static wxFontEncoding ms_encodingDefault;
 };
-
-// wxFontBase <-> wxString utilities, used by wxConfig
-WXDLLIMPEXP_CORE wxString wxToString(const wxFontBase& font);
-WXDLLIMPEXP_CORE bool wxFromString(const wxString& str, wxFontBase* font);
-
-
 
 // include the real class declaration
 #if defined(__WXPALMOS__)

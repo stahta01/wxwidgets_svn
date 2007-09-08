@@ -107,7 +107,7 @@ void wxInsertMenuItemsInMenu(wxMenu* menu, MenuRef wm, MenuItemIndex insertAfter
         else
         {
             wxAcceleratorEntry*
-                entry = wxAcceleratorEntry::Create( item->GetItemLabel() ) ;
+                entry = wxAcceleratorEntry::Create( item->GetText() ) ;
 
             MenuItemIndex winListPos = (MenuItemIndex)-1;
             OSStatus err = GetIndMenuItemWithCommandID(wm,
@@ -119,7 +119,7 @@ void wxInsertMenuItemsInMenu(wxMenu* menu, MenuRef wm, MenuItemIndex insertAfter
                 // a separator is to know if we've added menu items to the menu
                 // before the separator.
                 newItems = true;
-                UMAInsertMenuItem(wm, wxStripMenuCodes(item->GetItemLabel()) , wxFont::GetDefaultEncoding(), insertAfter, entry);
+                UMAInsertMenuItem(wm, wxStripMenuCodes(item->GetText()) , wxFont::GetDefaultEncoding(), insertAfter, entry);
                 SetMenuItemCommandID( wm , insertAfter+1 , wxIdToMacCommand ( item->GetId() ) ) ;
                 SetMenuItemRefCon( wm , insertAfter+1 , (URefCon) item ) ;
             }
@@ -227,9 +227,9 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
                 pSubMenu->MacBeforeDisplay( true ) ;
 
             if ( pos == (size_t)-1 )
-                UMAAppendSubMenuItem(MAC_WXHMENU(m_hMenu), wxStripMenuCodes(pItem->GetItemLabel()), wxFont::GetDefaultEncoding(), pSubMenu->m_macMenuId);
+                UMAAppendSubMenuItem(MAC_WXHMENU(m_hMenu), wxStripMenuCodes(pItem->GetText()), wxFont::GetDefaultEncoding(), pSubMenu->m_macMenuId);
             else
-                UMAInsertSubMenuItem(MAC_WXHMENU(m_hMenu), wxStripMenuCodes(pItem->GetItemLabel()), wxFont::GetDefaultEncoding(), pos, pSubMenu->m_macMenuId);
+                UMAInsertSubMenuItem(MAC_WXHMENU(m_hMenu), wxStripMenuCodes(pItem->GetText()), wxFont::GetDefaultEncoding(), pos, pSubMenu->m_macMenuId);
 
             pItem->UpdateItemBitmap() ;
             pItem->UpdateItemStatus() ;
@@ -661,18 +661,21 @@ void wxMenuBar::MacInstallMenuBar()
                 CFSTR("About..."), 0, 0, 0);
     MacInsertMenu( appleMenu , 0 ) ;
 
-    // if we have a mac help menu, clean it up before adding new items
-    MenuHandle helpMenuHandle ;
-    MenuItemIndex firstUserHelpMenuItem ;
+    // clean-up the help menu before adding new items
+    static MenuHandle mh = NULL ;
 
-    if ( UMAGetHelpMenuDontCreate( &helpMenuHandle , &firstUserHelpMenuItem) == noErr )
+    if ( mh != NULL )
     {
-        for ( int i = CountMenuItems( helpMenuHandle ) ; i >= firstUserHelpMenuItem ; --i )
-            DeleteMenuItem( helpMenuHandle , i ) ;
-    }
-    else
-    {
-        helpMenuHandle = NULL ;
+        MenuItemIndex firstUserHelpMenuItem ;
+        if ( UMAGetHelpMenu( &mh , &firstUserHelpMenuItem) == noErr )
+        {
+            for ( int i = CountMenuItems( mh ) ; i >= firstUserHelpMenuItem ; --i )
+                DeleteMenuItem( mh , i ) ;
+        }
+        else
+        {
+            mh = NULL ;
+        }
     }
 
 #if TARGET_CARBON
@@ -699,17 +702,14 @@ void wxMenuBar::MacInstallMenuBar()
     }
 #endif
 
-    wxString strippedHelpMenuTitle = wxStripMenuCodes( wxApp::s_macHelpMenuTitleName ) ;
-    wxString strippedTranslatedHelpMenuTitle = wxStripMenuCodes( wxString( _("&Help") ) ) ;
     wxMenuList::compatibility_iterator menuIter = m_menus.GetFirst();
     for (size_t i = 0; i < m_menus.GetCount(); i++, menuIter = menuIter->GetNext())
     {
         wxMenuItemList::compatibility_iterator node;
         wxMenuItem *item;
         wxMenu* menu = menuIter->GetData() , *subMenu = NULL ;
-        wxString strippedMenuTitle = wxStripMenuCodes(m_titles[i]);
 
-        if ( strippedMenuTitle == wxT("?") || strippedMenuTitle == strippedHelpMenuTitle || strippedMenuTitle == strippedTranslatedHelpMenuTitle )
+        if ( m_titles[i] == wxT("?") || m_titles[i] == wxT("&?")  || m_titles[i] == wxApp::s_macHelpMenuTitleName )
         {
             for (node = menu->GetMenuItems().GetFirst(); node; node = node->GetNext())
             {
@@ -723,13 +723,12 @@ void wxMenuBar::MacInstallMenuBar()
                 {
                     if ( item->GetId() != wxApp::s_macAboutMenuItemId )
                     {
-                        // we have found a user help menu and an item other than the about item,
-                        // so we can create the mac help menu now, if we haven't created it yet
-                        if ( helpMenuHandle == NULL )
+                        if ( mh == NULL )
                         {
-                            if ( UMAGetHelpMenu( &helpMenuHandle , &firstUserHelpMenuItem) != noErr )
+                            MenuItemIndex firstUserHelpMenuItem ;
+                            if ( UMAGetHelpMenu( &mh , &firstUserHelpMenuItem) != noErr )
                             {
-                                helpMenuHandle = NULL ;
+                                mh = NULL ;
                                 break ;
                             }
                         }
@@ -737,14 +736,14 @@ void wxMenuBar::MacInstallMenuBar()
 
                     if ( item->IsSeparator() )
                     {
-                        if ( helpMenuHandle )
-                            AppendMenuItemTextWithCFString( helpMenuHandle,
+                        if ( mh )
+                            AppendMenuItemTextWithCFString( mh,
                                 CFSTR(""), kMenuItemAttrSeparator, 0,NULL);
                     }
                     else
                     {
                         wxAcceleratorEntry*
-                            entry = wxAcceleratorEntry::Create( item->GetItemLabel() ) ;
+                            entry = wxAcceleratorEntry::Create( item->GetText() ) ;
 
                         if ( item->GetId() == wxApp::s_macAboutMenuItemId )
                         {
@@ -752,11 +751,13 @@ void wxMenuBar::MacInstallMenuBar()
                         }
                         else
                         {
-                            if ( helpMenuHandle )
+                            if ( mh )
                             {
-                                UMAAppendMenuItem(helpMenuHandle, wxStripMenuCodes(item->GetItemLabel()) , wxFont::GetDefaultEncoding(), entry);
-                                SetMenuItemCommandID( helpMenuHandle , CountMenuItems(helpMenuHandle) , wxIdToMacCommand ( item->GetId() ) ) ;
-                                SetMenuItemRefCon( helpMenuHandle , CountMenuItems(helpMenuHandle) , (URefCon) item ) ;
+                                UMAAppendMenuItem(mh, wxStripMenuCodes(item->GetText()) , wxFont::GetDefaultEncoding(), entry);
+                                MenuItemIndex position = CountMenuItems(mh);
+                                SetMenuItemCommandID( mh , position, wxIdToMacCommand ( item->GetId() ) );
+                                SetMenuItemRefCon( mh , position, (URefCon) item );
+                                item->DoUpdateItemBitmap( mh, position );
                             }
                         }
 
@@ -812,8 +813,8 @@ void wxMenuBar::MacInstallMenuBar()
         if ( aboutMenuItem )
         {
             wxAcceleratorEntry*
-                entry = wxAcceleratorEntry::Create( aboutMenuItem->GetItemLabel() ) ;
-            UMASetMenuItemText( GetMenuHandle( kwxMacAppleMenuId ) , 1 , wxStripMenuCodes ( aboutMenuItem->GetItemLabel() ) , wxFont::GetDefaultEncoding() );
+                entry = wxAcceleratorEntry::Create( aboutMenuItem->GetText() ) ;
+            UMASetMenuItemText( GetMenuHandle( kwxMacAppleMenuId ) , 1 , wxStripMenuCodes ( aboutMenuItem->GetText() ) , wxFont::GetDefaultEncoding() );
             UMAEnableMenuItem( GetMenuHandle( kwxMacAppleMenuId ) , 1 , true );
             SetMenuItemCommandID( GetMenuHandle( kwxMacAppleMenuId ) , 1 , kHICommandAbout ) ;
             SetMenuItemRefCon(GetMenuHandle( kwxMacAppleMenuId ) , 1 , (URefCon)aboutMenuItem ) ;
@@ -852,7 +853,7 @@ bool wxMenuBar::Enable(bool enable)
     return true;
 }
 
-void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
+void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)
 {
     wxCHECK_RET( pos < GetMenuCount(), wxT("invalid menu index") );
 
@@ -870,6 +871,15 @@ void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
     }
 }
 
+wxString wxMenuBar::GetLabelTop(size_t pos) const
+{
+    wxCHECK_MSG( pos < GetMenuCount(), wxEmptyString,
+                 wxT("invalid menu index in wxMenuBar::GetLabelTop") );
+
+    return wxStripMenuCodes(m_titles[pos]);
+}
+
+// Gets the original label at the top-level of the menubar
 wxString wxMenuBar::GetMenuLabel(size_t pos) const
 {
     wxCHECK_MSG( pos < GetMenuCount(), wxEmptyString,

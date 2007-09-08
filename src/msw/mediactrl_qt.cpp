@@ -171,6 +171,22 @@ enum
 //---------------------------------------------------------------------------
 //  QT Library
 //---------------------------------------------------------------------------
+#define wxDL_METHOD_DEFINE( rettype, name, args, shortargs, defret ) \
+    typedef rettype (* name ## Type) args ; \
+    name ## Type pfn_ ## name; \
+    rettype name args \
+    { if (m_ok) return pfn_ ## name shortargs ; return defret; }
+
+#define wxDL_VOIDMETHOD_DEFINE( name, args, shortargs ) \
+    typedef void (* name ## Type) args ; \
+    name ## Type pfn_ ## name; \
+    void name args \
+    { if (m_ok) pfn_ ## name shortargs ; }
+
+#define wxDL_METHOD_LOAD( lib, name, success ) \
+    pfn_ ## name = (name ## Type) lib.GetSymbol( wxT(#name), &success ); \
+    if (!success) return false
+
 
 class WXDLLIMPEXP_MEDIA wxQuickTimeLibrary
 {
@@ -413,7 +429,6 @@ public:
     wxTimer* m_timer;               // Load or Play timer
     wxQuickTimeLibrary m_lib;       // DLL to load functions from
     ComponentInstance m_pMC;        // Movie Controller
-    wxEvtHandler* m_evthandler;
 
     friend class wxQTMediaEvtHandler;
 
@@ -590,7 +605,6 @@ LRESULT CALLBACK wxQTMediaBackend::QTWndProc(HWND hWnd, UINT nMsg,
 wxQTMediaBackend::wxQTMediaBackend()
 : m_movie(NULL), m_bPlaying(false), m_timer(NULL), m_pMC(NULL)
 {
-    m_evthandler = NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -616,11 +630,7 @@ wxQTMediaBackend::~wxQTMediaBackend()
         }
 
         // destroy wxQTMediaEvtHandler we pushed on it
-        if (m_evthandler)
-        {
-            m_ctrl->RemoveEventHandler(m_evthandler);
-            delete m_evthandler;
-        }
+        m_ctrl->PopEventHandler(true);
 
         m_lib.DestroyPortAssociation(
             (CGrafPtr)m_lib.GetNativeWindowPort(m_ctrl->GetHWND()));
@@ -679,8 +689,7 @@ bool wxQTMediaBackend::CreateControl(wxControl* ctrl, wxWindow* parent,
 
     // Part of a suggestion from Greg Hazel
     // to repaint movie when idle
-    m_evthandler = new wxQTMediaEvtHandler(this, m_ctrl->GetHWND());
-    m_ctrl->PushEventHandler(m_evthandler);
+    m_ctrl->PushEventHandler(new wxQTMediaEvtHandler(this, m_ctrl->GetHWND()));
 
     // done
     return true;

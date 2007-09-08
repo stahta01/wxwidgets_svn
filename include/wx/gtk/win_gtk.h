@@ -32,8 +32,6 @@ struct _GtkPizza
     guint m_xoffset;
     guint m_yoffset;
     
-    gboolean m_noscroll;
-    
     GdkWindow *bin_window;
 };
 
@@ -41,8 +39,6 @@ WXDLLIMPEXP_CORE
 GtkType    gtk_pizza_get_type        (void);
 WXDLLIMPEXP_CORE
 GtkWidget* gtk_pizza_new             (void);
-WXDLLIMPEXP_CORE
-GtkWidget* gtk_pizza_new_no_scroll   (void);
 
 /* accessors */
 

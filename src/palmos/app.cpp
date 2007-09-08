@@ -39,7 +39,7 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/log.h"
     #include "wx/module.h"
 #endif
@@ -47,7 +47,6 @@
 #include "wx/apptrait.h"
 #include "wx/filename.h"
 #include "wx/dynlib.h"
-#include "wx/evtloop.h"
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -120,15 +119,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
     return wxPORT_PALMOS;
 }
 
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxPalmOSTimerImpl(timer);
-};
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
-}
 // ===========================================================================
 // wxApp implementation
 // ===========================================================================
@@ -142,6 +132,7 @@ int wxApp::m_nCmdShow = 0;
 IMPLEMENT_DYNAMIC_CLASS(wxApp, wxEvtHandler)
 
 BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxApp::OnIdle)
     EVT_END_SESSION(wxApp::OnEndSession)
     EVT_QUERY_END_SESSION(wxApp::OnQueryEndSession)
 END_EVENT_TABLE()
@@ -243,6 +234,11 @@ wxApp::~wxApp()
 // ----------------------------------------------------------------------------
 // wxApp idle handling
 // ----------------------------------------------------------------------------
+
+void wxApp::OnIdle(wxIdleEvent& event)
+{
+    wxAppBase::OnIdle(event);
+}
 
 void wxApp::WakeUpIdle()
 {

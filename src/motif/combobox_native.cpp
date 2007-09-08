@@ -80,7 +80,6 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -107,6 +106,8 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
 
     SetValue(value);
 
+    ChangeFont(false);
+
     XtAddCallback (buttonWidget, XmNselectionCallback,
                    (XtCallbackProc) wxComboBoxCallback,
                    (XtPointer) this);
@@ -118,9 +119,10 @@ bool wxComboBox::Create(wxWindow *parent, wxWindowID id,
     if( size.x != wxDefaultCoord ) best.x = size.x;
     if( size.y != wxDefaultCoord ) best.y = size.y;
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, best.x, best.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -161,6 +163,8 @@ wxComboBox::~wxComboBox()
     DetachWidget((Widget) m_mainWidget); // Removes event handlers
     XtDestroyWidget((Widget) m_mainWidget);
     m_mainWidget = (WXWidget) 0;
+    if ( HasClientObjectData() )
+        m_clientDataDict.DestroyData();
 }
 
 void wxComboBox::DoSetSize(int x, int y, int width, int WXUNUSED(height), int sizeFlags)
@@ -193,35 +197,42 @@ void wxComboBox::SetValue(const wxString& value)
 {
     m_inSetValue = true;
 
+    // Fix crash; probably an OpenMotif bug
+    const char* val = value.c_str() ? value.c_str() : "";
     XtVaSetValues( GetXmText(this),
-                   XmNvalue, (const char*)value.mb_str(),
+                   XmNvalue, wxConstCast(val, char),
                    NULL);
 
     m_inSetValue = false;
 }
 
-int wxComboBox::DoInsertItems(const wxArrayStringsAdapter & items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type)
+int wxComboBox::DoAppend(const wxString& item)
 {
-    const unsigned int numItems = items.GetCount();
-
-    AllocClientData(numItems);
-    for ( unsigned int i = 0; i < numItems; ++i, ++pos )
-    {
-        wxXmString str( items[i].c_str() );
-        XmComboBoxAddItem((Widget) m_mainWidget, str(),
-                          GetMotifPosition(pos), False);
-        m_noStrings ++;
-        InsertNewItemClientData(pos, clientData, i, type);
-    }
-
+    wxXmString str( item.c_str() );
+    XmComboBoxAddItem((Widget) m_mainWidget, str(), 0, False);
+    m_noStrings ++;
     AdjustDropDownListSize();
 
-    return pos - 1;
+    return GetCount() - 1;
 }
 
-void wxComboBox::DoDeleteOneItem(unsigned int n)
+int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+{
+    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
+    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+
+    if (pos == GetCount())
+        return DoAppend(item);
+
+    wxXmString str( item.c_str() );
+    XmComboBoxAddItem((Widget) m_mainWidget, str(), pos+1, False);
+    m_noStrings ++;
+    AdjustDropDownListSize();
+
+    return GetCount() - 1;
+}
+
+void wxComboBox::Delete(unsigned int n)
 {
 #ifdef LESSTIF_VERSION
     XmListDeletePos (GetXmList(this), n + 1);
@@ -229,13 +240,13 @@ void wxComboBox::DoDeleteOneItem(unsigned int n)
     XmComboBoxDeletePos((Widget) m_mainWidget, n+1);
 #endif
 
-    wxControlWithItems::DoDeleteOneItem(n);
+    m_clientDataDict.Delete(n, HasClientObjectData());
     m_noStrings--;
 
     AdjustDropDownListSize();
 }
 
-void wxComboBox::DoClear()
+void wxComboBox::Clear()
 {
 #ifdef LESSTIF_VERSION
     XmListDeleteAllItems (GetXmList(this));
@@ -246,7 +257,8 @@ void wxComboBox::DoClear()
     }
 #endif
 
-    wxControlWithItems::DoClear();
+    if ( HasClientObjectData() )
+        m_clientDataDict.DestroyData();
     m_noStrings = 0;
     AdjustDropDownListSize();
 }
@@ -333,7 +345,7 @@ wxTextPos wxComboBox::GetLastPosition() const
 void wxComboBox::Replace(long from, long to, const wxString& value)
 {
     XmTextReplace( GetXmText(this), (XmTextPosition)from, (XmTextPosition)to,
-                   value.char_str() );
+                   wxConstCast(value.c_str(), char) );
 }
 
 void wxComboBox::Remove(long from, long to)
@@ -397,7 +409,7 @@ void  wxComboBoxCallback (Widget WXUNUSED(w), XtPointer clientData,
 
 void wxComboBox::ChangeFont(bool keepOriginalSize)
 {
-    if( m_font.Ok() && m_mainWidget != NULL )
+    if( m_font.Ok() )
     {
         wxDoChangeFont( GetXmText(this), m_font );
         wxDoChangeFont( GetXmList(this), m_font );

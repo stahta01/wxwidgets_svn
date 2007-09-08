@@ -32,10 +32,10 @@
 #include "wx/html/helpwnd.h"
 #include "wx/html/htmprint.h"
 
-class WXDLLIMPEXP_FWD_CORE wxButton;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
-class WXDLLIMPEXP_FWD_CORE wxTreeEvent;
-class WXDLLIMPEXP_FWD_CORE wxTreeCtrl;
+class WXDLLIMPEXP_CORE wxButton;
+class WXDLLIMPEXP_CORE wxTextCtrl;
+class WXDLLIMPEXP_CORE wxTreeEvent;
+class WXDLLIMPEXP_CORE wxTreeCtrl;
 
 
 // style flags for the Help Frame
@@ -62,9 +62,9 @@ class WXDLLIMPEXP_FWD_CORE wxTreeCtrl;
 struct wxHtmlHelpMergedIndexItem;
 class wxHtmlHelpMergedIndex;
 
-class WXDLLIMPEXP_FWD_CORE wxHelpControllerBase;
-class WXDLLIMPEXP_FWD_HTML wxHtmlHelpController;
-class WXDLLIMPEXP_FWD_CORE wxHtmlHelpWindow;
+class WXDLLIMPEXP_CORE wxHelpControllerBase;
+class WXDLLIMPEXP_HTML wxHtmlHelpController;
+class WXDLLIMPEXP_CORE wxHtmlHelpWindow;
 
 class WXDLLIMPEXP_HTML wxHtmlHelpFrame : public wxFrame
 {
@@ -109,7 +109,7 @@ public:
 
     // we don't want to prevent the app from closing just because a help window
     // remains opened
-    virtual bool ShouldPreventAppExit() const;
+    virtual bool ShouldPreventAppExit() const { return false; }
 
 protected:
     void Init(wxHtmlHelpData* data = NULL);

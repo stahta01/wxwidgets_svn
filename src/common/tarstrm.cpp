@@ -289,10 +289,7 @@ bool wxTarHeaderBlock::SetPath(const wxString& name, wxMBConv& conv)
         size_t len = name.length();
         wxCharBuffer approx(len);
         for (size_t i = 0; i < len; i++)
-        {
-            wxChar c = name[i];
-            approx.data()[i] = c & ~0x7F ? '_' : c;
-        }
+            approx.data()[i] = name[i] & ~0x7F ? '_' : name[i];
         nameBuf = approx;
     }
 
@@ -829,8 +826,8 @@ wxTarNumber wxTarInputStream::GetHeaderNumber(int id) const
 
     if ((value = GetExtendedHeader(m_hdr->Name(id))) != wxEmptyString) {
         wxTarNumber n = 0;
-        wxString::const_iterator p = value.begin();
-        while (*p == ' ' && p != value.end())
+        const wxChar *p = value;
+        while (*p == ' ')
             p++;
         while (isdigit(*p))
             n = n * 10 + (*p++ - '0');
@@ -1268,7 +1265,7 @@ wxString wxTarOutputStream::PaxHeaderPath(const wxString& format,
         if (end == wxString::npos || end + 1 >= format.length())
             break;
         ret << format.substr(begin, end - begin);
-        switch ( format[end + 1].GetValue() ) {
+        switch (format[end + 1]) {
             case 'd': ret << d; break;
             case 'f': ret << f; break;
             case 'p': ret << wxGetProcessId(); break;
@@ -1362,16 +1359,11 @@ void wxTarOutputStream::SetExtendedHeader(const wxString& key,
                                           const wxString& value)
 {
     if (m_pax) {
-#if wxUSE_UNICODE
-        const wxCharBuffer utf_key = key.utf8_str();
-        const wxCharBuffer utf_value = value.utf8_str();
-#else
         const wxWX2WCbuf wide_key = key.wc_str(GetConv());
         const wxCharBuffer utf_key = wxConvUTF8.cWC2MB(wide_key);
 
         const wxWX2WCbuf wide_value = value.wc_str(GetConv());
         const wxCharBuffer utf_value = wxConvUTF8.cWC2MB(wide_value);
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
         // a small buffer to format the length field in
         char buf[32];

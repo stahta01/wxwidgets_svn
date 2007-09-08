@@ -12,12 +12,11 @@
 #define _WX_DFB_PRIVATE_OVERLAY_H_
 
 #include "wx/dfb/dfbptr.h"
-#include "wx/gdicmn.h"
 
 wxDFB_DECLARE_INTERFACE(IDirectFBSurface);
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxwindowDC;
+class WXDLLEXPORT wxWindow;
+
 
 class wxOverlayImpl
 {

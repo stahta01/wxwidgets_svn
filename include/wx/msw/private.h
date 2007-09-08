@@ -23,9 +23,9 @@
 
 #include "wx/log.h"
 
-class WXDLLIMPEXP_FWD_CORE wxFont;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxWindowBase;
+class WXDLLEXPORT wxFont;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxWindowBase;
 
 // ---------------------------------------------------------------------------
 // private constants
@@ -692,7 +692,7 @@ public:
     {
         if ( IsRegistered() )
         {
-            if ( !::UnregisterClass(m_clsname.wx_str(), wxhInstance) )
+            if ( !::UnregisterClass(m_clsname, wxhInstance) )
             {
                 wxLogLastError(_T("UnregisterClass"));
             }
@@ -824,8 +824,7 @@ enum wxWinVersion
     wxWinVersion_2003 = 0x0502,
 
     wxWinVersion_6 = 0x0600,
-    wxWinVersion_Vista = wxWinVersion_6,
-    wxWinVersion_NT6 = wxWinVersion_6
+    wxWinVersion_NT6 = 0x0600
 };
 
 WXDLLIMPEXP_BASE wxWinVersion wxGetWinVersion();

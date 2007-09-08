@@ -16,10 +16,6 @@ wxObject
 
 <wx/html/htmltag.h>
 
-\wxheading{Library}
-
-\helpref{wxHtml}{librarieslist}
-
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxHtmlTag::wxHtmlTag}\label{wxhtmltagwxhtmltag}
@@ -94,7 +90,7 @@ and name of {\tt </table>} is "TABLE")
 
 \membersection{wxHtmlTag::GetParam}\label{wxhtmltaggetparam}
 
-\constfunc{wxString}{GetParam}{\param{const wxString\& }{par}, \param{bool }{with\_quotes = false}}
+\constfunc{wxString}{GetParam}{\param{const wxString\& }{par}, \param{bool }{with\_commas = false}}
 
 Returns the value of the parameter. You should check whether the
 parameter exists or not (use \helpref{HasParam}{wxhtmltaghasparam}) first.
@@ -103,7 +99,7 @@ parameter exists or not (use \helpref{HasParam}{wxhtmltaghasparam}) first.
 
 \docparam{par}{The parameter's name.}
 
-\docparam{with\_quotes}{true if you want to get quotes as well. See example.}
+\docparam{with\_commas}{true if you want to get commas as well. See example.}
 
 \wxheading{Example}
 

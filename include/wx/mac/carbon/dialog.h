@@ -16,7 +16,7 @@
 
 WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
 
-class WXDLLIMPEXP_FWD_CORE wxMacToolTip ;
+class WXDLLEXPORT wxMacToolTip ;
 
 // Dialog boxes
 class WXDLLEXPORT wxDialog : public wxDialogBase

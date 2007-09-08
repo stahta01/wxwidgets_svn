@@ -425,9 +425,6 @@ enum
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame((wxFrame *) NULL,
             _T("Text wxWidgets sample"), 50, 50, 700, 550);
@@ -1068,9 +1065,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
         m_horizontal->AppendText(_T("Text in default encoding"));
     }
 
-    m_multitext = new MyTextCtrl( this, wxID_ANY,
-                                  _T("Multi line without vertical scrollbar."),
-      wxPoint(180,10), wxSize(200,70), wxTE_MULTILINE | wxTE_NO_VSCROLL );
+    m_multitext = new MyTextCtrl( this, wxID_ANY, _T("Multi line."),
+      wxPoint(180,10), wxSize(200,70), wxTE_MULTILINE );
     m_multitext->SetFont(*wxITALIC_FONT);
     (*m_multitext) << _T(" Appended.");
     m_multitext->SetInsertionPoint(0);

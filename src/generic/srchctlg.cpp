@@ -321,20 +321,17 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
             const wxValidator& validator,
             const wxString& name)
 {
-    // force border style for more native appearance
-    style &= ~wxBORDER_MASK;
-#ifdef __WXGTK__
-    style |= wxBORDER_SUNKEN;
-#elif defined(__WXMSW__)
-    // Don't set the style explicitly, let GetDefaultBorder() work it out, unless
-    // we will get a sunken border (e.g. on Windows 200) in which case we must
-    // override with a simple border.
-    if (GetDefaultBorder() == wxBORDER_SUNKEN)
-        style |= wxBORDER_SIMPLE;
-#else
-    style |= wxBORDER_SIMPLE;
+	int borderStyle = wxBORDER_SIMPLE;
+
+#if defined(__WXMSW__)
+    borderStyle = GetThemedBorderStyle();
+    if (borderStyle == wxBORDER_SUNKEN)
+        borderStyle = wxBORDER_SIMPLE;
+#elif defined(__WXGTK__)
+    borderStyle = wxBORDER_SUNKEN;
 #endif
-    if ( !wxTextCtrlBase::Create(parent, id, pos, size, style, validator, name) )
+
+    if ( !wxTextCtrlBase::Create(parent, id, pos, size, borderStyle | (style & ~wxBORDER_MASK), validator, name) )
     {
         return false;
     }
@@ -344,12 +341,8 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
 
     wxSize sizeText = m_text->GetBestSize();
 
-    m_searchButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,
-                                        m_searchBitmap);
-    m_cancelButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,
-                                        m_cancelBitmap);
+    m_searchButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,m_searchBitmap);
+    m_cancelButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,m_cancelBitmap);
 
     SetForegroundColour( m_text->GetForegroundColour() );
     m_searchButton->SetForegroundColour( m_text->GetForegroundColour() );

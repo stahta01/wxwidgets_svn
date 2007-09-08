@@ -21,11 +21,11 @@
 typedef struct __CFRunLoopSource * CFRunLoopSourceRef;
 #endif
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
-class WXDLLIMPEXP_FWD_CORE wxWindowMac;
-class WXDLLIMPEXP_FWD_CORE wxApp ;
-class WXDLLIMPEXP_FWD_CORE wxKeyEvent;
-class WXDLLIMPEXP_FWD_CORE wxLog;
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxWindowMac;
+class WXDLLEXPORT wxApp ;
+class WXDLLEXPORT wxKeyEvent;
+class WXDLLEXPORT wxLog;
 
 // Force an exit from main loop
 void WXDLLEXPORT wxExit();
@@ -78,6 +78,7 @@ public:
     // adding a CFType object to be released only at the end of the current event cycle (increases the
     // refcount of the object passed), needed in case we are in the middle of an event concering an object
     // we want to delete and cannot do it immediately
+    // TODO change semantics to be in line with cocoa (make autrelease NOT increase the count)
     void                  MacAddToAutorelease( void* cfrefobj );
 public:
     static wxWindow*      s_captureWindow ;
@@ -112,7 +113,6 @@ public:
     bool    MacSendCharEvent( wxWindow* focus , long keymessage , long modifiers , long when , short wherex , short wherey , wxChar uniChar ) ;
     void    MacCreateKeyEvent( wxKeyEvent& event, wxWindow* focus , long keymessage , long modifiers , long when , short wherex , short wherey , wxChar uniChar ) ;
     virtual short         MacHandleAEODoc(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
-    virtual short         MacHandleAEGURL(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEPDoc(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEOApp(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEQuit(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
@@ -120,8 +120,6 @@ public:
 
     // in response of an open-document apple event
     virtual void         MacOpenFile(const wxString &fileName) ;
-    // in response of a get-url apple event
-    virtual void         MacOpenURL(const wxString &url) ;
     // in response of a print-document apple event
     virtual void         MacPrintFile(const wxString &fileName) ;
     // in response of a open-application apple event

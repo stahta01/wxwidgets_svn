@@ -16,8 +16,8 @@
 #include "wx/sizer.h"
 #include "wx/containr.h"
 
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
-class WXDLLIMPEXP_FWD_CORE wxToolTip;
+class WXDLLIMPEXP_CORE wxTextCtrl;
+class WXDLLEXPORT wxToolTip;
 
 extern WXDLLEXPORT_DATA(const wxChar) wxButtonNameStr[];
 
@@ -37,7 +37,7 @@ class WXDLLIMPEXP_CORE wxPickerBase : public wxControl
 public:
     // ctor: text is the associated text control
     wxPickerBase() : m_text(NULL), m_picker(NULL), m_sizer(NULL)
-        { WX_INIT_CONTROL_CONTAINER(); }
+        { m_container.SetContainerWindow(this); }
     virtual ~wxPickerBase() {}
 
 

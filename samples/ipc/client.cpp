@@ -76,9 +76,6 @@ END_EVENT_TABLE()
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     m_frame = new MyFrame(NULL, _T("Client"));
     m_frame->Show(true);
@@ -337,8 +334,8 @@ void MyFrame::OnExecute(wxCommandEvent& WXUNUSED(event))
     {
         wxString s = _T("Date");
 
-        m_client->GetConnection()->Execute((const wxChar *)s.c_str());
-        m_client->GetConnection()->Execute((const wxChar *)s.c_str(), (s.Length() + 1) * sizeof(wxChar));
+        m_client->GetConnection()->Execute((wxChar *)s.c_str());
+        m_client->GetConnection()->Execute((wxChar *)s.c_str(), (s.Length() + 1) * sizeof(wxChar));
 #if wxUSE_DDE_FOR_IPC
         wxLogMessage(_T("DDE Execute can only be used to send text strings, not arbitrary data.\nThe type argument will be ignored, text truncated, converted to Unicode and null terminated."));
 #endif
@@ -353,9 +350,9 @@ void MyFrame::OnPoke(wxCommandEvent& WXUNUSED(event))
     if (m_client->IsConnected())
     {
         wxString s = wxDateTime::Now().Format();
-        m_client->GetConnection()->Poke(_T("Date"), (const wxChar *)s.c_str());
+        m_client->GetConnection()->Poke(_T("Date"), (wxChar *)s.c_str());
         s = wxDateTime::Now().FormatTime() + _T(" ") + wxDateTime::Now().FormatDate();
-        m_client->GetConnection()->Poke(_T("Date"), (const wxChar *)s.c_str(), (s.Length() + 1) * sizeof(wxChar));
+        m_client->GetConnection()->Poke(_T("Date"), (wxChar *)s.c_str(), (s.Length() + 1) * sizeof(wxChar));
         char bytes[3];
         bytes[0] = '1'; bytes[1] = '2'; bytes[2] = '3';
         m_client->GetConnection()->Poke(_T("bytes[3]"), (wxChar *)bytes, 3, wxIPC_PRIVATE);
@@ -417,7 +414,7 @@ MyClient::~MyClient()
 // ----------------------------------------------------------------------------
 
 void MyConnection::Log(const wxString& command, const wxString& topic,
-    const wxString& item, const wxChar *data, int size, wxIPCFormat format)
+    const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
     wxString s;
     if (topic.IsEmpty() && item.IsEmpty())
@@ -475,7 +472,7 @@ wxChar *MyConnection::Request(const wxString& item, int *size, wxIPCFormat forma
     return data;
 }
 
-bool MyConnection::Poke(const wxString& item, const wxChar *data, int size, wxIPCFormat format)
+bool MyConnection::Poke(const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
     Log(_T("Poke"), wxEmptyString, item, data, size, format);
     return wxConnection::Poke(item, data, size, format);

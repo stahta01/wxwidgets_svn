@@ -36,8 +36,8 @@
  * Forward declarations
  */
 
-class WXDLLIMPEXP_FWD_RICHTEXT wxRichTextCtrl;
-class WXDLLIMPEXP_FWD_RICHTEXT wxRichTextBuffer;
+class WXDLLIMPEXP_RICHTEXT wxRichTextCtrl;
+class WXDLLIMPEXP_RICHTEXT wxRichTextBuffer;
 
 /*!
  * wxRichTextStyleDefinition class declaration
@@ -580,7 +580,12 @@ public:
         m_value = -1;
     }
 
-    virtual bool Create( wxWindow* parent );
+    virtual bool Create( wxWindow* parent )
+    {
+        return wxRichTextStyleListBox::Create(parent, wxID_ANY,
+                                  wxPoint(0,0), wxDefaultSize,
+                                  wxSIMPLE_BORDER);
+    }
 
     virtual wxWindow *GetControl() { return this; }
 

@@ -59,11 +59,15 @@ BEGIN_EVENT_TABLE(wxTreebook, wxBookCtrlBase)
     EVT_TREE_SEL_CHANGED   (wxID_ANY, wxTreebook::OnTreeSelectionChange)
     EVT_TREE_ITEM_EXPANDED (wxID_ANY, wxTreebook::OnTreeNodeExpandedCollapsed)
     EVT_TREE_ITEM_COLLAPSED(wxID_ANY, wxTreebook::OnTreeNodeExpandedCollapsed)
+
+    WX_EVENT_TABLE_CONTROL_CONTAINER(wxTreebook)
 END_EVENT_TABLE()
 
 // ============================================================================
 // wxTreebook implementation
 // ============================================================================
+
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxTreebook, wxControl)
 
 // ----------------------------------------------------------------------------
 // wxTreebook creation
@@ -71,6 +75,8 @@ END_EVENT_TABLE()
 
 void wxTreebook::Init()
 {
+    m_container.SetContainerWindow(this);
+
     m_selection =
     m_actualSelection = wxNOT_FOUND;
 }

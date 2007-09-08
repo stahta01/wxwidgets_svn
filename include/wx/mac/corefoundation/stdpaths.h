@@ -42,7 +42,7 @@ public:
     virtual wxString GetPluginsDir() const;
     virtual wxString GetResourcesDir() const;
     virtual wxString
-    GetLocalizedResourcesDir(const wxString& lang,
+    GetLocalizedResourcesDir(const wxChar *lang,
                              ResourceCat category = ResourceCat_None) const;
     virtual wxString GetDocumentsDir() const;
 

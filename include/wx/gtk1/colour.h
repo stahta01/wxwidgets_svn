@@ -20,12 +20,12 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxWindow;
 
-class WXDLLIMPEXP_FWD_CORE wxColour;
+class WXDLLIMPEXP_CORE wxColour;
 
 //-----------------------------------------------------------------------------
 // wxColour
@@ -43,7 +43,7 @@ public:
 
     virtual ~wxColour();
 
-    virtual bool FromString(const wxString& str);
+    virtual bool FromString(const wxChar *str);
 
     bool Ok() const { return IsOk(); }
     bool IsOk() const { return m_refData != NULL; }

@@ -54,7 +54,7 @@
 
 #if wxUSE_DATETIME
 #include "wx/datetime.h"
-#endif // wxUSE_DATETIME
+#endif // wxUSE_TIMEDATE
 
 static void ClearVariant(VARIANTARG *pvarg) ;
 static void ReleaseVariant(VARIANTARG *pvarg) ;
@@ -498,7 +498,7 @@ bool wxAutomationObject::GetInstance(const wxString& classId) const
     CLSID clsId;
     IUnknown * pUnk = NULL;
 
-    wxBasicString unicodeName(classId);
+    wxBasicString unicodeName(classId.mb_str());
 
     if (FAILED(CLSIDFromProgID((BSTR) unicodeName, &clsId)))
     {
@@ -530,7 +530,7 @@ bool wxAutomationObject::CreateInstance(const wxString& classId) const
 
     CLSID clsId;
 
-    wxBasicString unicodeName(classId);
+    wxBasicString unicodeName(classId.mb_str());
 
     if (FAILED(CLSIDFromProgID((BSTR) unicodeName, &clsId)))
     {

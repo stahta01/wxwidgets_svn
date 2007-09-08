@@ -41,10 +41,6 @@ No base class
 
 <wx/file.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also:}
 
 \helpref{wxFile}{wxfile}\\
@@ -111,7 +107,7 @@ Write to the file, return {\tt true} on success, {\tt false} on failure.
 
 \membersection{wxTempFile::Write}\label{wxtempfilewrites}
 
-\func{bool}{Write}{\param{const wxString\& }{str}, \param{const wxMBConv\&}{ conv = wxConvUTF8}}
+\func{bool}{Write}{\param{const wxString\& }{str}, \param{wxMBConv\&}{ conv = wxConvLibc}}
 
 Write to the file, return {\tt true} on success, {\tt false} on failure.
 

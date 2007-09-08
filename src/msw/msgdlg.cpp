@@ -16,8 +16,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_MSGDLG
-
 #include "wx/msgdlg.h"
 
 #ifndef WX_PRECOMP
@@ -34,6 +32,18 @@
 #endif
 
 IMPLEMENT_CLASS(wxMessageDialog, wxDialog)
+
+wxMessageDialog::wxMessageDialog(wxWindow *parent,
+                                 const wxString& message,
+                                 const wxString& caption,
+                                 long style,
+                                 const wxPoint& WXUNUSED(pos))
+{
+    m_caption = caption;
+    m_message = message;
+    m_parent = parent;
+    SetMessageDialogStyle(style);
+}
 
 int wxMessageDialog::ShowModal()
 {
@@ -100,7 +110,7 @@ int wxMessageDialog::ShowModal()
     // per MSDN documentation for MessageBox() we can prefix the message with 2
     // right-to-left mark characters to tell the function to use RTL layout
     // (unfortunately this only works in Unicode builds)
-    wxString message = GetFullMessage();
+    wxString message = m_message;
 #if wxUSE_UNICODE
     if ( wxTheApp->GetLayoutDirection() == wxLayout_RightToLeft )
     {
@@ -111,7 +121,7 @@ int wxMessageDialog::ShowModal()
 #endif // wxUSE_UNICODE
 
     // do show the dialog
-    int msAns = MessageBox(hWnd, message.wx_str(), m_caption.wx_str(), msStyle);
+    int msAns = MessageBox(hWnd, message, m_caption, msStyle);
     int ans;
     switch (msAns)
     {
@@ -134,5 +144,3 @@ int wxMessageDialog::ShowModal()
     }
     return ans;
 }
-
-#endif // wxUSE_MSGDLG

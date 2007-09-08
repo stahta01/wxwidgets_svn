@@ -17,6 +17,7 @@
     #include "wx/log.h"
 #endif
 
+#include "wx/cocoa/string.h"
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
 #include "wx/cocoa/trackingrectmanager.h"
@@ -32,6 +33,7 @@
 {
 }
 
+- (id)initWithFrame: (NSRect)frameRect;
 - (void)drawRect: (NSRect)rect;
 - (void)mouseDown:(NSEvent *)theEvent;
 - (void)mouseDragged:(NSEvent *)theEvent;
@@ -52,6 +54,19 @@
 WX_DECLARE_GET_OBJC_CLASS(wxNonControlNSControl,NSControl)
 
 @implementation wxNonControlNSControl : NSControl
+
+- (id)initWithFrame: (NSRect)frameRect
+{
+    if( (self = [super initWithFrame:frameRect]) == nil)
+        return nil;
+    // NSControl by default has no cell as it is semi-abstract.
+    // Provide a normal NSCell for the sole purpose of making
+    // setStringValue/stringValue work for labels in 2.8.
+    NSCell *newCell = [[NSCell alloc] initTextCell:@""];
+    [self setCell:newCell];
+    [newCell release];
+    return self;
+}
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)theEvent
 {
@@ -162,15 +177,19 @@ WX_DECLARE_GET_OBJC_CLASS(wxNonControlNSControl,NSControl)
 
 - (void)viewDidMoveToWindow
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
     if( !win || !win->Cocoa_viewDidMoveToWindow() )
+#endif
         [super viewDidMoveToWindow];
 }
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
     if( !win || !win->Cocoa_viewWillMoveToWindow(newWindow) )
+#endif
         [super viewWillMoveToWindow:newWindow];
 }
 
@@ -202,8 +221,10 @@ bool wxControl::Create(wxWindow *parent, wxWindowID winid,
         m_parent->CocoaAddChild(this);
     SetInitialFrameRect(pos,size);
 
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     // Controls should have a viewable-area tracking rect by default
     m_visibleTrackingRectManager = new wxCocoaTrackingRectManager(this);
+#endif
 
     return true;
 }
@@ -258,5 +279,26 @@ void wxControl::CocoaSetEnabled(bool enable)
 /*static*/ void wxControl::CocoaSetLabelForObject(const wxString& label, struct objc_object *aView)
 {
     [aView setTitle:wxNSStringWithWxString(GetLabelText(label))];
+}
+
+wxString wxControl::GetLabel() const
+{
+    if([GetNSControl() isKindOfClass:[WX_GET_OBJC_CLASS(wxNonControlNSControl) class]])
+    {
+        return wxStringWithNSString([GetNSControl() stringValue]);
+    }
+    else
+        return wxControlBase::GetLabel();
+}
+
+void wxControl::SetLabel(const wxString& label)
+{
+    wxControlBase::SetLabel(label);
+    // wx 2.8 hack: we need somewhere to stuff the label for
+    // platform-independent subclasses of wxControl.
+    if([GetNSControl() isKindOfClass:[WX_GET_OBJC_CLASS(wxNonControlNSControl) class]])
+    {
+        [GetNSControl() setStringValue:wxNSStringWithWxString(label)];
+    }
 }
 

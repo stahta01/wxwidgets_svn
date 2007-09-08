@@ -959,6 +959,11 @@ bool wxListCtrl::SetItemPtrData(long item, wxUIntPtr data)
     return SetItem(info);
 }
 
+bool wxListCtrl::SetItemData(long item, long data)
+{
+    return SetItemPtrData(item, data);
+}
+
 wxRect wxListCtrl::GetViewRect() const
 {
     wxASSERT_MSG( !HasFlag(wxLC_REPORT | wxLC_LIST),
@@ -1424,7 +1429,7 @@ long wxListCtrl::FindItem(long start, const wxString& str, bool partial)
     findInfo.flags = LVFI_STRING;
     if ( partial )
         findInfo.flags |= LVFI_PARTIAL;
-    findInfo.psz = str.wx_str();
+    findInfo.psz = str;
 
     // ListView_FindItem() excludes the first item from search and to look
     // through all the items you need to start from -1 which is unnatural and
@@ -1769,50 +1774,6 @@ bool wxListCtrl::MSWCommand(WXUINT cmd, WXWORD id)
         return false;
 }
 
-// utility used by wxListCtrl::MSWOnNotify and by wxDataViewHeaderWindowMSW::MSWOnNotify
-int WXDLLIMPEXP_CORE wxMSWGetColumnClicked(NMHDR *nmhdr, POINT *ptClick)
-{
-    wxASSERT(nmhdr && ptClick);
-
-    // find the column clicked: we have to search for it
-    // ourselves as the notification message doesn't provide
-    // this info
-
-    // where did the click occur?
-#if defined(__WXWINCE__) && !defined(__HANDHELDPC__) && _WIN32_WCE < 400
-    if (nmhdr->code == GN_CONTEXTMENU)
-    {
-        *ptClick = ((NMRGINFO*)nmhdr)->ptAction;
-    }
-    else
-#endif //__WXWINCE__
-    if ( !::GetCursorPos(ptClick) )
-    {
-        wxLogLastError(_T("GetCursorPos"));
-    }
-
-    if ( !::ScreenToClient(nmhdr->hwndFrom, ptClick) )
-    {
-        wxLogLastError(_T("ScreenToClient(header)"));
-    }
-
-    int colCount = Header_GetItemCount(nmhdr->hwndFrom);
-
-    RECT rect;
-    for ( int col = 0; col < colCount; col++ )
-    {
-        if ( Header_GetItemRect(nmhdr->hwndFrom, col, &rect) )
-        {
-            if ( ::PtInRect(&rect, *ptClick) )
-            {
-                return col;
-            }
-        }
-    }
-
-    return wxNOT_FOUND;
-}
-
 bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 {
 
@@ -1880,12 +1841,47 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 #endif //__WXWINCE__
             case NM_RCLICK:
                 {
-                    POINT ptClick;
-
                     eventType = wxEVT_COMMAND_LIST_COL_RIGHT_CLICK;
-                    event.m_col = wxMSWGetColumnClicked(nmhdr, &ptClick);
+                    event.m_col = -1;
+
+                    // find the column clicked: we have to search for it
+                    // ourselves as the notification message doesn't provide
+                    // this info
+
+                    // where did the click occur?
+                    POINT ptClick;
+#if defined(__WXWINCE__) && !defined(__HANDHELDPC__) && _WIN32_WCE < 400
+                  if(nmhdr->code == GN_CONTEXTMENU) {
+                      ptClick = ((NMRGINFO*)nmhdr)->ptAction;
+                  } else
+#endif //__WXWINCE__
+                    if ( !::GetCursorPos(&ptClick) )
+                    {
+                        wxLogLastError(_T("GetCursorPos"));
+                    }
+
+                    if ( !::ScreenToClient(GetHwnd(), &ptClick) )
+                    {
+                        wxLogLastError(_T("ScreenToClient(listctrl header)"));
+                    }
+
                     event.m_pointDrag.x = ptClick.x;
                     event.m_pointDrag.y = ptClick.y;
+
+                    int colCount = Header_GetItemCount(hwndHdr);
+
+                    RECT rect;
+                    for ( int col = 0; col < colCount; col++ )
+                    {
+                        if ( Header_GetItemRect(hwndHdr, col, &rect) )
+                        {
+                            if ( ::PtInRect(&rect, ptClick) )
+                            {
+                                event.m_col = col;
+                                break;
+                            }
+                        }
+                    }
                 }
                 break;
 
@@ -1895,7 +1891,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 // parameters
                 //
                 // I have no idea what is the real cause of the bug (which is,
-                // just to make things interesting, impossible to reproduce
+                // just to make things interesting, is impossible to reproduce
                 // reliably) but ignoring all these messages does fix it and
                 // doesn't seem to have any negative consequences
                 return true;
@@ -2037,6 +2033,16 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 // delete the assoicated internal data
                 wxDeleteInternalData(this, iItem);
                 break;
+
+#if WXWIN_COMPATIBILITY_2_4
+            case LVN_SETDISPINFO:
+                {
+                    eventType = wxEVT_COMMAND_LIST_SET_INFO;
+                    LV_DISPINFO *info = (LV_DISPINFO *)lParam;
+                    wxConvertFromMSWListItem(GetHwnd(), event.m_item, info->item);
+                }
+                break;
+#endif
 
             case LVN_INSERTITEM:
                 eventType = wxEVT_COMMAND_LIST_INSERT_ITEM;
@@ -3067,7 +3073,7 @@ static void wxConvertToMSWListItem(const wxListCtrl *ctrl,
         else
         {
             // pszText is not const, hence the cast
-            lvItem.pszText = (wxChar *)info.m_text.wx_str();
+            lvItem.pszText = (wxChar *)info.m_text.c_str();
             if ( lvItem.pszText )
                 lvItem.cchTextMax = info.m_text.length();
             else
@@ -3088,7 +3094,7 @@ static void wxConvertToMSWListCol(HWND hwndList,
     if ( item.m_mask & wxLIST_MASK_TEXT )
     {
         lvCol.mask |= LVCF_TEXT;
-        lvCol.pszText = (wxChar *)item.m_text.wx_str(); // cast is safe
+        lvCol.pszText = (wxChar *)item.m_text.c_str(); // cast is safe
     }
 
     if ( item.m_mask & wxLIST_MASK_FORMAT )

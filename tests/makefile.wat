@@ -218,11 +218,10 @@ __GDIPLUS_LIB_p = gdiplus.lib
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 29
-COMPILER_PREFIX = wat
+WX_RELEASE_NODOT = 28
 OBJS = &
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
-LIBDIRNAME = .\..\lib\$(COMPILER_PREFIX)_$(LIBTYPE_SUFFIX)$(CFG)
+	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
+LIBDIRNAME = .\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = &
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 TEST_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
@@ -239,16 +238,14 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_ziptest.obj &
 	$(OBJS)\test_tartest.obj &
 	$(OBJS)\test_arrays.obj &
-	$(OBJS)\test_base64.obj &
-	$(OBJS)\test_fileconf.obj &
 	$(OBJS)\test_datetimetest.obj &
+	$(OBJS)\test_fileconftest.obj &
 	$(OBJS)\test_filekind.obj &
 	$(OBJS)\test_filenametest.obj &
 	$(OBJS)\test_filesystest.obj &
 	$(OBJS)\test_fontmaptest.obj &
 	$(OBJS)\test_formatconvertertest.obj &
 	$(OBJS)\test_hashes.obj &
-	$(OBJS)\test_intltest.obj &
 	$(OBJS)\test_lists.obj &
 	$(OBJS)\test_longlongtest.obj &
 	$(OBJS)\test_convautotest.obj &
@@ -259,9 +256,7 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_strings.obj &
 	$(OBJS)\test_stdstrings.obj &
 	$(OBJS)\test_tokenizer.obj &
-	$(OBJS)\test_unichar.obj &
 	$(OBJS)\test_unicode.obj &
-	$(OBJS)\test_vararg.obj &
 	$(OBJS)\test_crt.obj &
 	$(OBJS)\test_vsnprintf.obj &
 	$(OBJS)\test_bstream.obj &
@@ -276,9 +271,7 @@ TEST_OBJECTS =  &
 	$(OBJS)\test_textstreamtest.obj &
 	$(OBJS)\test_zlibstream.obj &
 	$(OBJS)\test_textfiletest.obj &
-	$(OBJS)\test_atomic.obj &
-	$(OBJS)\test_uris.obj &
-	$(OBJS)\test_vectors.obj
+	$(OBJS)\test_uris.obj
 TEST_GUI_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
@@ -291,8 +284,7 @@ TEST_GUI_OBJECTS =  &
 	$(OBJS)\test_gui_test.obj &
 	$(OBJS)\test_gui_rect.obj &
 	$(OBJS)\test_gui_size.obj &
-	$(OBJS)\test_gui_point.obj &
-	$(OBJS)\test_gui_config.obj
+	$(OBJS)\test_gui_point.obj
 PRINTFBENCH_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
@@ -311,7 +303,7 @@ $(OBJS) :
 
 ### Targets: ###
 
-all : .SYMBOLIC $(OBJS)\test.exe $(__test_gui___depname) data fr $(OBJS)\printfbench.exe
+all : .SYMBOLIC $(OBJS)\test.exe $(__test_gui___depname) data $(OBJS)\printfbench.exe
 
 clean : .SYMBOLIC 
 	-if exist $(OBJS)\*.obj del $(OBJS)\*.obj
@@ -353,10 +345,6 @@ data : .SYMBOLIC
 	if not exist $(OBJS) mkdir $(OBJS)
 	for %f in (testdata.fc) do if not exist $(OBJS)\%f copy .\%f $(OBJS)
 
-fr : .SYMBOLIC 
-	if not exist $(OBJS)\intl\fr mkdir $(OBJS)\intl\fr
-	for %f in (internat.po internat.mo) do if not exist $(OBJS)\intl\fr\%f copy .\intl\fr\%f $(OBJS)\intl\fr
-
 $(OBJS)\printfbench.exe :  $(PRINTFBENCH_OBJECTS)
 	@%create $(OBJS)\printfbench.lbc
 	@%append $(OBJS)\printfbench.lbc option quiet
@@ -387,13 +375,10 @@ $(OBJS)\test_tartest.obj :  .AUTODEPEND .\archive\tartest.cpp
 $(OBJS)\test_arrays.obj :  .AUTODEPEND .\arrays\arrays.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
-$(OBJS)\test_base64.obj :  .AUTODEPEND .\base64\base64.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_fileconf.obj :  .AUTODEPEND .\config\fileconf.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
 $(OBJS)\test_datetimetest.obj :  .AUTODEPEND .\datetime\datetimetest.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
+
+$(OBJS)\test_fileconftest.obj :  .AUTODEPEND .\fileconf\fileconftest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_filekind.obj :  .AUTODEPEND .\filekind\filekind.cpp
@@ -412,9 +397,6 @@ $(OBJS)\test_formatconvertertest.obj :  .AUTODEPEND .\formatconverter\formatconv
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_hashes.obj :  .AUTODEPEND .\hashes\hashes.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_intltest.obj :  .AUTODEPEND .\intl\intltest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_lists.obj :  .AUTODEPEND .\lists\lists.cpp
@@ -447,13 +429,7 @@ $(OBJS)\test_stdstrings.obj :  .AUTODEPEND .\strings\stdstrings.cpp
 $(OBJS)\test_tokenizer.obj :  .AUTODEPEND .\strings\tokenizer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
-$(OBJS)\test_unichar.obj :  .AUTODEPEND .\strings\unichar.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
 $(OBJS)\test_unicode.obj :  .AUTODEPEND .\strings\unicode.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_vararg.obj :  .AUTODEPEND .\strings\vararg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_crt.obj :  .AUTODEPEND .\strings\crt.cpp
@@ -498,13 +474,7 @@ $(OBJS)\test_zlibstream.obj :  .AUTODEPEND .\streams\zlibstream.cpp
 $(OBJS)\test_textfiletest.obj :  .AUTODEPEND .\textfile\textfiletest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
-$(OBJS)\test_atomic.obj :  .AUTODEPEND .\thread\atomic.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
 $(OBJS)\test_uris.obj :  .AUTODEPEND .\uris\uris.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
-
-$(OBJS)\test_vectors.obj :  .AUTODEPEND .\vectors\vectors.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_CXXFLAGS) $<
 
 $(OBJS)\test_gui_sample.res :  .AUTODEPEND .\..\samples\sample.rc
@@ -523,9 +493,6 @@ $(OBJS)\test_gui_size.obj :  .AUTODEPEND .\geometry\size.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_GUI_CXXFLAGS) $<
 
 $(OBJS)\test_gui_point.obj :  .AUTODEPEND .\geometry\point.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_GUI_CXXFLAGS) $<
-
-$(OBJS)\test_gui_config.obj :  .AUTODEPEND .\config\config.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(TEST_GUI_CXXFLAGS) $<
 
 $(OBJS)\printfbench_dummy.obj :  .AUTODEPEND .\dummy.cpp

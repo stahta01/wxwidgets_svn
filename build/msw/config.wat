@@ -41,7 +41,7 @@ WXUNIV = 0
 
 # Compile Unicode build of wxWidgets? [0,1]
 #   1 - Unicode
-UNICODE = 1
+UNICODE = 0
 
 # Type of compiled binaries [debug,release]
 BUILD = debug
@@ -79,9 +79,6 @@ USE_AUI = 1
 
 # Build wxRichTextCtrl library (USE_GUI must be 1)? [0,1]
 USE_RICHTEXT = 1
-
-# Build wxStyledTextCtrl library (USE_GUI must be 1)? [0,1]
-USE_STC = 1
 
 # Build OpenGL canvas library (USE_GUI must be 1)? [0,1]
 USE_OPENGL = 0

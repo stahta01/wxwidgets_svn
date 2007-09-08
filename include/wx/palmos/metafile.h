@@ -23,11 +23,11 @@
 // Metafile and metafile device context classes
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxMetafile;
+class WXDLLEXPORT wxMetafile;
 
 class WXDLLEXPORT wxMetafileRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxMetafile;
+    friend class WXDLLEXPORT wxMetafile;
 public:
     wxMetafileRefData();
     virtual ~wxMetafileRefData();
@@ -90,7 +90,7 @@ public:
     virtual void SetMapMode(int mode);
     virtual void GetTextExtent(const wxString& string, long *x, long *y,
             long *descent = NULL, long *externalLeading = NULL,
-            const wxFont *theFont = NULL, bool use16bit = FALSE) const;
+            wxFont *theFont = NULL, bool use16bit = FALSE) const;
 
     // Implementation
     wxMetafile *GetMetaFile() const { return m_metaFile; }

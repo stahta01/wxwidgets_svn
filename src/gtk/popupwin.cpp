@@ -20,8 +20,11 @@
     #include "wx/cursor.h"
 #endif // WX_PRECOMP
 
+#include <gdk/gdk.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 
+#include "wx/gtk/private.h" //for idle stuff
 #include "wx/gtk/win_gtk.h"
 
 //-----------------------------------------------------------------------------
@@ -63,12 +66,30 @@ static gint gtk_popup_button_press (GtkWidget *widget, GdkEvent *gdk_event, wxPo
 }
 
 //-----------------------------------------------------------------------------
+// "focus" from m_window
+//-----------------------------------------------------------------------------
+
+extern "C" {
+static gint gtk_dialog_focus_callback( GtkWidget *widget, GtkDirectionType WXUNUSED(d), wxWindow *WXUNUSED(win) )
+{
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
+    /* This disables GTK's tab traversal */
+    return TRUE;
+}
+}
+
+//-----------------------------------------------------------------------------
 // "delete_event"
 //-----------------------------------------------------------------------------
 
 extern "C" {
 bool gtk_dialog_delete_callback( GtkWidget *WXUNUSED(widget), GdkEvent *WXUNUSED(event), wxPopupWindow *win )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (win->IsEnabled())
         win->Close();
 
@@ -87,6 +108,9 @@ extern "C" {
 static gint
 gtk_dialog_realized_callback( GtkWidget * WXUNUSED(widget), wxPopupWindow *win )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     /* all this is for Motif Window Manager "hints" and is supposed to be
        recognized by other WM as well. not tested. */
     long decor = (long) GDK_DECOR_BORDER;
@@ -110,10 +134,10 @@ gtk_dialog_realized_callback( GtkWidget * WXUNUSED(widget), wxPopupWindow *win )
  * virtual function here as wxWidgets requires different ways to insert
  * a child in container classes. */
 
-static void wxInsertChildInPopupWin(wxWindowGTK* parent, wxWindowGTK* child)
+static void wxInsertChildInDialog( wxPopupWindow* parent, wxWindow* child )
 {
     gtk_pizza_put( GTK_PIZZA(parent->m_wxwindow),
-                   child->m_widget,
+                   GTK_WIDGET(child->m_widget),
                    child->m_x,
                    child->m_y,
                    child->m_width,
@@ -143,7 +167,7 @@ wxPopupWindow::~wxPopupWindow()
 
 bool wxPopupWindow::Create( wxWindow *parent, int style )
 {
-    m_sizeSet = false;
+    m_needParent = false;
 
     if (!PreCreation( parent, wxDefaultPosition, wxDefaultSize ) ||
         !CreateBase( parent, -1, wxDefaultPosition, wxDefaultSize, style, wxDefaultValidator, wxT("popup") ))
@@ -158,7 +182,7 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
     // All dialogs should really have this style
     m_windowStyle |= wxTAB_TRAVERSAL;
 
-    m_insertCallback = wxInsertChildInPopupWin;
+    m_insertCallback = (wxInsertChildFunction) wxInsertChildInDialog;
 
     m_widget = gtk_window_new( GTK_WINDOW_POPUP );
 
@@ -184,6 +208,10 @@ bool wxPopupWindow::Create( wxWindow *parent, int style )
         been realized, so we do this directly after realization */
     g_signal_connect (m_widget, "realize",
                       G_CALLBACK (gtk_dialog_realized_callback), this);
+
+    // disable native tab traversal
+    g_signal_connect (m_widget, "focus",
+                      G_CALLBACK (gtk_dialog_focus_callback), this);
 
     m_time = gtk_get_current_event_time();
 
@@ -239,7 +267,15 @@ void wxPopupWindow::DoSetSize( int x, int y, int width, int height, int sizeFlag
     }
 */
 
-    ConstrainSize();
+    int minWidth = GetMinWidth(),
+        minHeight = GetMinHeight(),
+        maxWidth = GetMaxWidth(),
+        maxHeight = GetMaxHeight();
+
+    if ((minWidth != -1) && (m_width < minWidth)) m_width = minWidth;
+    if ((minHeight != -1) && (m_height < minHeight)) m_height = minHeight;
+    if ((maxWidth != -1) && (m_width > maxWidth)) m_width = maxWidth;
+    if ((maxHeight != -1) && (m_height > maxHeight)) m_height = maxHeight;
 
     if ((m_x != -1) || (m_y != -1))
     {

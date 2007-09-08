@@ -42,14 +42,11 @@ inline void AdjustDimension(
     const int dimension = (size.*GetDimension)();
     const int minSize = (isTicksStyle) ? 23 : 20;
 
-    // prevent clipping of overly "thin" sliders
     if (dimension < minSize)
     {
         (size.*SetDimension)(minSize);
     }
 
-    // move the slider control to the middle of the dimension that is not
-    // being used to define its length
     pos += (dimension - (size.*GetDimension)() + 1) / 2;
 }
 
@@ -71,25 +68,17 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID winid,
         AdjustDimension(isTicksStyle, adjustedPos.x, adjustedSize, &wxSize::GetWidth, &wxSize::SetWidth);
     }
     
-    if(!CreateControl(parent,winid,adjustedPos,adjustedSize,style,validator,name))
+    if(!CreateControl(parent,winid,pos,size,style,validator,name))
         return false;
-    SetNSSlider([[WX_GET_OBJC_CLASS(WXNSSlider) alloc] initWithFrame: MakeDefaultNSRect(adjustedSize)]);
+    SetNSSlider([[WX_GET_OBJC_CLASS(WXNSSlider) alloc] initWithFrame: MakeDefaultNSRect(size)]);
     [m_cocoaNSView release];
     
     if(m_parent)
         m_parent->CocoaAddChild(this);
-    SetInitialFrameRect(adjustedPos,adjustedSize);
+    SetInitialFrameRect(pos,size);
     
     SetRange(minValue, maxValue);
     SetValue(value);
-    
-    // -1 default for wxSL_AUTOTICKS == false
-    int tickMarks = -1;
-    // minValue > maxValue not handled, tickMarks set to 0
-    if ( style & wxSL_AUTOTICKS )
-        tickMarks = ((maxValue - minValue >= 0) ? (maxValue - minValue) : 0);
-    // arg2 needed a value, doesnt do anything
-    SetTickFreq(tickMarks,1);
 
     return true;
 }
@@ -99,12 +88,17 @@ wxSlider::~wxSlider()
     DisassociateNSSlider(GetNSSlider());
 }
 
+// NOTE: We don't derive from wxCocoaNSSlider in 2.8 due to ABI
+
 void wxSlider::AssociateNSSlider(WX_NSSlider theSlider)
 {
-    wxCocoaNSSlider::AssociateNSSlider(theSlider);
     // Set the target/action.. we don't really need to unset these
     [theSlider setTarget:wxCocoaNSControl::sm_cocoaTarget];
     [theSlider setAction:@selector(wxNSControlAction:)];
+}
+
+void wxSlider::DisassociateNSSlider(WX_NSSlider theSlider)
+{
 }
 
 void wxSlider::ProcessEventType(wxEventType commandType)
@@ -130,8 +124,7 @@ static inline wxEventType wxSliderEventTypeForKeyFromEvent(NSEvent *theEvent)
             case NSPageDownFunctionKey:     return wxEVT_SCROLL_TOP;
         }
     }
-    // Overload wxEVT_ANY to mean we can't determine the event type.
-    return wxEVT_ANY;
+    return wxEVT_NULL;
 }
 
 void wxSlider::CocoaTarget_action()
@@ -155,7 +148,7 @@ void wxSlider::CocoaTarget_action()
     else
         // Don't generate an event.
         return;
-    if(sliderEventType != wxEVT_ANY)
+    if(sliderEventType != wxEVT_NULL)
         ProcessEventType(sliderEventType);
 }
 

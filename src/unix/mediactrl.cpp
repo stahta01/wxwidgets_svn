@@ -145,10 +145,8 @@
 #      define DEBUG_MAIN_THREAD
 #   endif // Debug
 
-#ifndef __WXGTK20__
 extern void wxapp_install_idle_handler();
 extern bool g_isIdle;
-#endif
 extern bool g_mainThreadLocked;
 #endif // wxGTK
 
@@ -325,10 +323,8 @@ static gint gtk_window_realize_callback(GtkWidget* theWidget,
 {
     DEBUG_MAIN_THREAD // TODO: Is this neccessary?
 
-#ifndef __WXGTK20__
     if (g_isIdle)   // FIXME: Why is needed? For wxYield? ??
         wxapp_install_idle_handler();
-#endif
 
     wxYield();    // FIXME: RN: X Server gets an error/crash if I don't do
                   //       this or a messagebox beforehand?!?!??

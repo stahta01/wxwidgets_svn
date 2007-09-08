@@ -20,10 +20,10 @@
 // This class is similar to wxScrollThumb.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxControlWithThumb;
-class WXDLLIMPEXP_FWD_CORE wxMouseEvent;
-class WXDLLIMPEXP_FWD_CORE wxRect;
-class WXDLLIMPEXP_FWD_CORE wxScrollTimer;
+class WXDLLEXPORT wxControlWithThumb;
+class WXDLLEXPORT wxMouseEvent;
+class WXDLLEXPORT wxRect;
+class WXDLLEXPORT wxScrollTimer;
 
 #include "wx/timer.h"
 
@@ -76,7 +76,7 @@ private:
     Shaft m_shaftPart;
 
     // the data for the mouse capture
-    struct WXDLLIMPEXP_FWD_CORE wxScrollThumbCaptureData *m_captureData;
+    struct WXDLLEXPORT wxScrollThumbCaptureData *m_captureData;
 };
 
 // ----------------------------------------------------------------------------

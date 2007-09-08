@@ -72,8 +72,6 @@ public:
                                        const wxRect& rect,
                                        int flags = 0);
 
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0);
-
 private:
     void DrawMacThemeButton(wxWindow *win,
                             wxDC& dc,
@@ -151,8 +149,13 @@ int wxRendererMac::DrawHeaderButton( wxWindow *win,
         CGContextTranslateCTM( cgContext, 0, bounds.bottom - bounds.top );
         CGContextScaleCTM( cgContext, 1, -1 );
 
-        HIShapeReplacePathInCGContext( HIShapeCreateWithQDRgn( (RgnHandle) dc.m_macCurrentClipRgn ), cgContext );
-        CGContextClip( cgContext );
+        HIShapeRef shape = HIShapeCreateWithQDRgn( (RgnHandle) dc.m_macCurrentClipRgn );
+        if ( shape != 0 )
+        {
+            HIShapeReplacePathInCGContext( shape , cgContext );
+            CFRelease( shape );
+            CGContextClip( cgContext );
+        }
         HIViewConvertRect( &headerRect, (HIViewRef) win->GetHandle(), (HIViewRef) win->MacGetTopLevelWindow()->GetHandle() );
 #endif
 
@@ -208,8 +211,8 @@ int wxRendererMac::DrawHeaderButton( wxWindow *win,
 
 int wxRendererMac::GetHeaderButtonHeight(wxWindow* WXUNUSED(win))
 {
-    SInt32      standardHeight;
-    OSStatus        errStatus;
+    SInt32		standardHeight;
+    OSStatus		errStatus;
 
     errStatus = GetThemeMetric( kThemeMetricListHeaderHeight, &standardHeight );
     if (errStatus == noErr)
@@ -372,16 +375,16 @@ wxRendererMac::DrawItemSelectionRect(wxWindow *win,
                                      const wxRect& rect,
                                      int flags )
 {
-    if ( !(flags & wxCONTROL_SELECTED) )
-        return;
-
     RGBColor selColor;
-    GetThemeBrushAsColor(flags & wxCONTROL_FOCUSED
-                            ? kThemeBrushAlternatePrimaryHighlightColor
-                            : kThemeBrushSecondaryHighlightColor,
-                         32, true, &selColor);
+    if (flags & wxCONTROL_SELECTED)
+    {
+        if (flags & wxCONTROL_FOCUSED)
+            GetThemeBrushAsColor(kThemeBrushAlternatePrimaryHighlightColor, 32, true, &selColor);
+        else
+            GetThemeBrushAsColor(kThemeBrushSecondaryHighlightColor, 32, true, &selColor);
+    }
 
-    wxBrush selBrush(selColor);
+    wxBrush selBrush = wxBrush( wxColour( selColor.red >> 8, selColor.green >> 8, selColor.blue >> 8 ), wxSOLID );
 
     dc.SetPen( *wxTRANSPARENT_PEN );
     dc.SetBrush( selBrush );
@@ -494,59 +497,17 @@ wxRendererMac::DrawPushButton(wxWindow *win,
                               int flags)
 {
     int kind;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_3
     if (win->GetWindowVariant() == wxWINDOW_VARIANT_SMALL || (win->GetParent() && win->GetParent()->GetWindowVariant() == wxWINDOW_VARIANT_SMALL))
         kind = kThemeBevelButtonSmall;
     // There is no kThemeBevelButtonMini, but in this case, use Small
     else if (win->GetWindowVariant() == wxWINDOW_VARIANT_MINI || (win->GetParent() && win->GetParent()->GetWindowVariant() == wxWINDOW_VARIANT_MINI))
         kind = kThemeBevelButtonSmall;
     else
+#endif
         kind = kThemeBevelButton;
 
     DrawMacThemeButton(win, dc, rect, flags,
                        kind, kThemeAdornmentNone);
-}
-
-void
-wxRendererMac::DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags)
-{
-    if (!win)
-    {
-        wxDelegateRendererNative::DrawFocusRect(win, dc, rect, flags);
-        return;
-    }
-
-#if wxMAC_USE_CORE_GRAPHICS
-    {
-        CGRect cgrect = CGRectMake( rect.x , rect.y , rect.width, rect.height ) ;
-
-        HIThemeFrameDrawInfo info ;
-        memset( &info, 0 , sizeof(info) ) ;
-
-        info.version = 0 ;
-        info.kind = 0 ;
-        info.state = kThemeStateActive;
-        info.isFocused = true ;
-
-        CGContextRef cgContext = (CGContextRef) win->MacGetCGContextRef() ;
-        wxASSERT( cgContext ) ;
-
-        HIThemeDrawFocusRect( &cgrect , true , cgContext , kHIThemeOrientationNormal ) ;
-    }
-#else
-    // FIXME: not yet working for !wxMAC_USE_CORE_GRAPHICS
-    {
-        Rect r;
-        r.left = rect.x; r.top = rect.y; r.right = rect.GetRight(); r.bottom = rect.GetBottom();
-        wxTopLevelWindowMac* top = win->MacGetTopLevelWindow();
-        if ( top )
-        {
-            wxPoint pt(0, 0) ;
-            wxMacControl::Convert( &pt , win->GetPeer() , top->GetPeer() ) ;
-            OffsetRect( &r , pt.x , pt.y ) ;
-        }
-
-        DrawThemeFocusRect( &r , true ) ;
-    }
-#endif
 }
 

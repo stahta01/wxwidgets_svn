@@ -22,9 +22,9 @@
     #define M_PI 3.1415926535897932384626433832795
 #endif
 
-/* Scaling factors for various unit conversions: 1 inch = 2.54 cm */
+/* Scaling factors for various unit conversions */
 #ifndef METRIC_CONVERSION_CONSTANT
-    #define METRIC_CONVERSION_CONSTANT (1./254)
+    #define METRIC_CONVERSION_CONSTANT 0.0393700787
 #endif
 
 #ifndef mm2inches
@@ -107,9 +107,6 @@
 
     inline int wxRound(double x)
     {
-        wxASSERT_MSG( x > INT_MIN - 0.5 && x < INT_MAX + 0.5,
-                      _T("argument out of supported range") );
-
         #if defined(HAVE_ROUND)
             return int(round(x));
         #else
@@ -132,15 +129,8 @@
     extern "C" {
 #endif
     /* functions from common/extended.c */
-    WXDLLEXPORT wxFloat64 wxConvertFromIeeeExtended(const wxInt8 *bytes);
-    WXDLLEXPORT void wxConvertToIeeeExtended(wxFloat64 num, wxInt8 *bytes);
-
-    /* use wxConvertFromIeeeExtended() and wxConvertToIeeeExtended() instead */
-#if WXWIN_COMPATIBILITY_2_8
-    wxDEPRECATED( WXDLLEXPORT wxFloat64 ConvertFromIeeeExtended(const wxInt8 *bytes) );
-    wxDEPRECATED( WXDLLEXPORT void ConvertToIeeeExtended(wxFloat64 num, wxInt8 *bytes) );
-#endif // WXWIN_COMPATIBILITY_2_8
-
+    extern wxFloat64 ConvertFromIeeeExtended(const wxInt8 *bytes);
+    extern void ConvertToIeeeExtended(wxFloat64 num, wxInt8 *bytes);
 #ifdef __cplusplus
     }
 #endif

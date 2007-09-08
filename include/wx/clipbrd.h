@@ -18,11 +18,11 @@
 
 
 #include "wx/object.h"
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 
-class WXDLLIMPEXP_FWD_CORE wxDataFormat;
-class WXDLLIMPEXP_FWD_CORE wxDataObject;
-class WXDLLIMPEXP_FWD_CORE wxClipboard;
+class WXDLLEXPORT wxDataFormat;
+class WXDLLEXPORT wxDataObject;
+class WXDLLEXPORT wxClipboard;
 
 // ----------------------------------------------------------------------------
 // wxClipboard represents the system clipboard. Normally, you should use
@@ -35,7 +35,7 @@ class WXDLLIMPEXP_FWD_CORE wxClipboard;
 class WXDLLEXPORT wxClipboardBase : public wxObject
 {
 public:
-    wxClipboardBase() { m_usePrimary = false; }
+    wxClipboardBase() {}
 
     // open the clipboard before Add/SetData() and GetData()
     virtual bool Open() = 0;
@@ -70,28 +70,11 @@ public:
     // eating memory), otherwise the clipboard will be emptied on exit
     virtual bool Flush() { return false; }
 
-    // this allows to choose whether we work with CLIPBOARD (default) or
-    // PRIMARY selection on X11-based systems
-    //
-    // on the other ones, working with primary selection does nothing: this
-    // allows to write code which sets the primary selection when something is
-    // selected without any ill effects (i.e. without overwriting the
-    // clipboard which would be wrong on the platforms without X11 PRIMARY)
-    virtual void UsePrimarySelection(bool usePrimary = false)
-    {
-        m_usePrimary = usePrimary;
-    }
-
-    // return true if we're using primary selection
-    bool IsUsingPrimarySelection() const { return m_usePrimary; }
+    // X11 has two clipboards which get selected by this call. Empty on MSW.
+    virtual void UsePrimarySelection( bool WXUNUSED(primary) = false ) { }
 
     // Returns global instance (wxTheClipboard) of the object:
     static wxClipboard *Get();
-
-
-    // don't use this directly, it is public for compatibility with some ports
-    // (wxX11, wxMotif, ...) only
-    bool m_usePrimary;
 };
 
 // ----------------------------------------------------------------------------

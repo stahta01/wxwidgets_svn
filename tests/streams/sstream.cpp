@@ -42,7 +42,6 @@ public:
         CPPUNIT_TEST(Input_Read);
         CPPUNIT_TEST(Input_Eof);
         CPPUNIT_TEST(Input_LastRead);
-        CPPUNIT_TEST(Input_CanRead);
         CPPUNIT_TEST(Input_SeekI);
         CPPUNIT_TEST(Input_TellI);
         CPPUNIT_TEST(Input_Peek);
@@ -75,7 +74,7 @@ strStream::strStream()
     m_str.reserve(LEN);
     for ( size_t n = 0; n < LEN; n++ )
     {
-        m_str += wxChar(_T('A') + n % (_T('Z') - _T('A') + 1));
+        m_str += _T('A') + n % (_T('Z') - _T('A') + 1);
     }
 }
 

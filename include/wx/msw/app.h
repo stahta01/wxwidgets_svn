@@ -15,11 +15,11 @@
 #include "wx/event.h"
 #include "wx/icon.h"
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxApp;
-class WXDLLIMPEXP_FWD_CORE wxKeyEvent;
-class WXDLLIMPEXP_FWD_BASE wxLog;
+class WXDLLIMPEXP_CORE wxFrame;
+class WXDLLIMPEXP_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxApp;
+class WXDLLIMPEXP_CORE wxKeyEvent;
+class WXDLLIMPEXP_BASE wxLog;
 
 // Represents the application. Derive OnInit and declare
 // a new App object to start application
@@ -49,6 +49,13 @@ public:
 #if wxUSE_EXCEPTIONS
     virtual bool OnExceptionInMainLoop();
 #endif // wxUSE_EXCEPTIONS
+
+    // deprecated functions, use wxEventLoop directly instead
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( void DoMessage(WXMSG *pMsg) );
+    wxDEPRECATED( bool DoMessage() );
+    wxDEPRECATED( bool ProcessMessage(WXMSG* pMsg) );
+#endif // WXWIN_COMPATIBILITY_2_4
 
 protected:
     int    m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
@@ -95,14 +102,6 @@ protected:
 #else
     typedef char *wxCmdLineArgType;
 #endif
-
-// wxMSW-only overloads of wxEntry() and wxEntryStart() which take the
-// parameters passed to WinMain() instead of those passed to main()
-extern bool WXDLLEXPORT
-wxEntryStart(HINSTANCE hInstance,
-             HINSTANCE hPrevInstance = NULL,
-             wxCmdLineArgType pCmdLine = NULL,
-             int nCmdShow = SW_SHOWNORMAL);
 
 extern int WXDLLEXPORT
 wxEntry(HINSTANCE hInstance,

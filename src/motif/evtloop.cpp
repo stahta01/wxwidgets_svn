@@ -17,13 +17,13 @@
 // headers
 // ----------------------------------------------------------------------------
 
-// For compilers that support precompilation, includes "wx.h".
-#include "wx/wxprec.h"
-
 #ifdef __VMS
 #define XtParent XTPARENT
 #define XtDisplay XTDISPLAY
 #endif
+
+// For compilers that support precompilation, includes "wx.h".
+#include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
     #include "wx/event.h"
@@ -101,12 +101,12 @@ bool wxEventLoopImpl::SendIdleMessage()
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
@@ -131,7 +131,7 @@ int wxGUIEventLoop::Run()
     return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
     wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
@@ -145,12 +145,12 @@ void wxGUIEventLoop::Exit(int rc)
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     return XtAppPending( (XtAppContext)wxTheApp->GetAppContext() ) != 0;
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
     XEvent event;
     XtAppContext context = (XtAppContext)wxTheApp->GetAppContext();
@@ -338,7 +338,7 @@ bool CheckForKeyUp(XEvent* event)
 // executes one main loop iteration (declared in include/wx/motif/private.h)
 // ----------------------------------------------------------------------------
 
-bool wxDoEventLoopIteration( wxGUIEventLoop& evtLoop )
+bool wxDoEventLoopIteration( wxEventLoop& evtLoop )
 {
     bool moreRequested, pendingEvents;
 

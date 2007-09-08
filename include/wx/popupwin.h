@@ -16,14 +16,14 @@
 
 #if wxUSE_POPUPWIN
 
-#include "wx/nonownedwnd.h"
+#include "wx/window.h"
 
 // ----------------------------------------------------------------------------
 // wxPopupWindow: a special kind of top level window used for popup menus,
 // combobox popups and such.
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxPopupWindowBase : public wxNonOwnedWindow
+class WXDLLEXPORT wxPopupWindowBase : public wxWindow
 {
 public:
     wxPopupWindowBase() { }
@@ -64,10 +64,10 @@ public:
     #include "wx/x11/popupwin.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/popupwin.h"
-#elif defined(__WXDFB__)
-    #include "wx/dfb/popupwin.h"
 #elif defined(__WXMGL__)
     #include "wx/mgl/popupwin.h"
+#elif defined(__WXMAC__)
+    #include "wx/mac/popupwin.h"
 #else
     #error "wxPopupWindow is not supported under this platform."
 #endif
@@ -77,8 +77,8 @@ public:
 // when the user clicks mouse outside it or if it loses focus in any other way
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxPopupWindowHandler;
-class WXDLLIMPEXP_FWD_CORE wxPopupFocusHandler;
+class WXDLLEXPORT wxPopupWindowHandler;
+class WXDLLEXPORT wxPopupFocusHandler;
 
 class WXDLLEXPORT wxPopupTransientWindow : public wxPopupWindow
 {
@@ -157,8 +157,8 @@ protected:
 // wxPopupComboWindow: wxPopupTransientWindow used by wxComboBox
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxComboBox;
-class WXDLLIMPEXP_FWD_CORE wxComboCtrl;
+class WXDLLEXPORT wxComboBox;
+class WXDLLEXPORT wxComboCtrl;
 
 class WXDLLEXPORT wxPopupComboWindow : public wxPopupTransientWindow
 {

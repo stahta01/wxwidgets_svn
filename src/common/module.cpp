@@ -50,20 +50,23 @@ void wxModule::UnregisterModule(wxModule* module)
 // and register them.
 void wxModule::RegisterModules()
 {
-    for (wxClassInfo::const_iterator it  = wxClassInfo::begin_classinfo(),
-                                     end = wxClassInfo::end_classinfo();
-         it != end; ++it)
-    {
-        const wxClassInfo* classInfo = *it;
+    wxHashTable::compatibility_iterator node;
+    wxClassInfo* classInfo;
 
+    wxClassInfo::sm_classTable->BeginFind();
+    node = wxClassInfo::sm_classTable->Next();
+    while (node)
+    {
+        classInfo = (wxClassInfo *)node->GetData();
         if ( classInfo->IsKindOf(CLASSINFO(wxModule)) &&
-             (classInfo != (& (wxModule::ms_classInfo))) )
+            (classInfo != (& (wxModule::ms_classInfo))) )
         {
             wxLogTrace(TRACE_MODULE, wxT("Registering module %s"),
                        classInfo->GetClassName());
             wxModule* module = (wxModule *)classInfo->CreateObject();
-            wxModule::RegisterModule(module);
+            RegisterModule(module);
         }
+        node = wxClassInfo::sm_classTable->Next();
     }
 }
 

@@ -18,10 +18,10 @@
 #include "wx/hash.h"
 #include "wx/fontenc.h"
 
-class WXDLLIMPEXP_FWD_BASE wxMBConv;
-class WXDLLIMPEXP_FWD_HTML wxHtmlParser;
-class WXDLLIMPEXP_FWD_HTML wxHtmlTagHandler;
-class WXDLLIMPEXP_FWD_HTML wxHtmlEntitiesParser;
+class WXDLLIMPEXP_BASE wxMBConv;
+class WXDLLIMPEXP_HTML wxHtmlParser;
+class WXDLLIMPEXP_HTML wxHtmlTagHandler;
+class WXDLLIMPEXP_HTML wxHtmlEntitiesParser;
 
 class wxHtmlTextPieces;
 class wxHtmlParserState;
@@ -73,8 +73,7 @@ public:
 
     // Parses the m_Source from begin_pos to end_pos-1.
     // (in noparams version it parses whole m_Source)
-    void DoParsing(const wxString::const_iterator& begin_pos,
-                   const wxString::const_iterator& end_pos);
+    void DoParsing(int begin_pos, int end_pos);
     void DoParsing();
 
     // Returns pointer to the tag at parser's current position
@@ -105,7 +104,7 @@ public:
     // Restores state before last call to PushTagHandler
     void PopTagHandler();
 
-    const wxString* GetSource() {return m_Source;}
+    wxString* GetSource() {return &m_Source;}
     void SetSource(const wxString& src);
 
     // Sets HTML source and remembers current parser's state so that it can
@@ -129,27 +128,20 @@ public:
     // Returns entity parser object, used to substitute HTML &entities;
     wxHtmlEntitiesParser *GetEntitiesParser() const { return m_entitiesParser; }
 
-    // Returns true if the tag starting at the given position is a comment tag
-    //
-    // p should point to '<' character and is modified to point to the closing
-    // '>' of the end comment tag if this is indeed a comment
-    static bool
-    SkipCommentTag(wxString::const_iterator& p, wxString::const_iterator end);
-
 protected:
     // DOM structure
     void CreateDOMTree();
     void DestroyDOMTree();
     void CreateDOMSubTree(wxHtmlTag *cur,
-                          const wxString::const_iterator& begin_pos,
-                          const wxString::const_iterator& end_pos,
+                          int begin_pos, int end_pos,
                           wxHtmlTagsCache *cache);
 
     // Adds text to the output.
     // This is called from Parse() and must be overriden in derived classes.
-    // txt is not guaranteed to be only one word. It is largest continuous part
-    // of text (= not broken by tags)
-    virtual void AddText(const wxString& txt) = 0;
+    // txt is not guaranteed to be only one word. It is largest continuous part of text
+    // (= not broken by tags)
+    // NOTE : using char* because of speed improvements
+    virtual void AddText(const wxChar* txt) = 0;
 
     // Adds tag and proceeds it. Parse() may (and usually is) called from this method.
     // This is called from Parse() and may be overriden.
@@ -165,7 +157,7 @@ protected:
     wxHtmlTextPieces *m_TextPieces;
     size_t m_CurTextPiece;
 
-    const wxString *m_Source;
+    wxString m_Source;
 
     wxHtmlParserState *m_SavedStates;
 
@@ -234,7 +226,7 @@ protected:
     // parses input between beginning and ending tag.
     // m_Parser must be set.
     void ParseInner(const wxHtmlTag& tag)
-        { m_Parser->DoParsing(tag.GetBeginIter(), tag.GetEndIter1()); }
+        { m_Parser->DoParsing(tag.GetBeginPos(), tag.GetEndPos1()); }
 
     // Parses given source as if it was tag's inner code (see
     // wxHtmlParser::GetInnerSource).  Unlike ParseInner(), this method lets
@@ -264,16 +256,16 @@ public:
 
     // Parses entities in input and replaces them with respective characters
     // (with respect to output encoding)
-    wxString Parse(const wxString& input) const;
+    wxString Parse(const wxString& input);
 
     // Returns character for given entity or 0 if the enity is unknown
-    wxChar GetEntityChar(const wxString& entity) const;
+    wxChar GetEntityChar(const wxString& entity);
 
     // Returns character that represents given Unicode code
 #if wxUSE_UNICODE
-    wxChar GetCharForCode(unsigned code) const { return (wxChar)code; }
+    wxChar GetCharForCode(unsigned code) { return (wxChar)code; }
 #else
-    wxChar GetCharForCode(unsigned code) const;
+    wxChar GetCharForCode(unsigned code);
 #endif
 
 protected:

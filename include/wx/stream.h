@@ -21,9 +21,9 @@
 #include "wx/string.h"
 #include "wx/filefn.h"  // for wxFileOffset, wxInvalidOffset and wxSeekMode
 
-class WXDLLIMPEXP_FWD_BASE wxStreamBase;
-class WXDLLIMPEXP_FWD_BASE wxInputStream;
-class WXDLLIMPEXP_FWD_BASE wxOutputStream;
+class WXDLLIMPEXP_BASE wxStreamBase;
+class WXDLLIMPEXP_BASE wxInputStream;
+class WXDLLIMPEXP_BASE wxOutputStream;
 
 typedef wxInputStream& (*__wxInputManip)(wxInputStream&);
 typedef wxOutputStream& (*__wxOutputManip)(wxOutputStream&);
@@ -52,7 +52,7 @@ const int wxEOF = -1;
 // wxStreamBase: common (but non virtual!) base for all stream classes
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxStreamBase : public wxObject
+class WXDLLIMPEXP_BASE wxStreamBase
 {
 public:
     wxStreamBase();
@@ -82,7 +82,6 @@ protected:
 
     friend class wxStreamBuffer;
 
-    DECLARE_ABSTRACT_CLASS(wxStreamBase)
     DECLARE_NO_COPY_CLASS(wxStreamBase)
 };
 
@@ -217,7 +216,6 @@ protected:
 
     friend class wxStreamBuffer;
 
-    DECLARE_ABSTRACT_CLASS(wxInputStream)
     DECLARE_NO_COPY_CLASS(wxInputStream)
 };
 
@@ -253,7 +251,6 @@ protected:
 
     friend class wxStreamBuffer;
 
-    DECLARE_ABSTRACT_CLASS(wxOutputStream)
     DECLARE_NO_COPY_CLASS(wxOutputStream)
 };
 
@@ -281,7 +278,6 @@ protected:
 
     size_t m_currentPos;
 
-    DECLARE_DYNAMIC_CLASS(wxCountingOutputStream)
     DECLARE_NO_COPY_CLASS(wxCountingOutputStream)
 };
 
@@ -307,7 +303,6 @@ protected:
     wxInputStream *m_parent_i_stream;
     bool m_owns;
 
-    DECLARE_ABSTRACT_CLASS(wxFilterInputStream)
     DECLARE_NO_COPY_CLASS(wxFilterInputStream)
 };
 
@@ -329,7 +324,6 @@ protected:
     wxOutputStream *m_parent_o_stream;
     bool m_owns;
 
-    DECLARE_ABSTRACT_CLASS(wxFilterOutputStream)
     DECLARE_NO_COPY_CLASS(wxFilterOutputStream)
 };
 
@@ -354,12 +348,12 @@ public:
     virtual const wxChar * const *GetProtocols(wxStreamProtocolType type
                                                = wxSTREAM_PROTOCOL) const = 0;
 
-    bool CanHandle(const wxString& protocol,
+    bool CanHandle(const wxChar *protocol,
                    wxStreamProtocolType type
                    = wxSTREAM_PROTOCOL) const;
 
 protected:
-    wxString::size_type FindExtension(const wxString& location) const;
+    wxString::size_type FindExtension(const wxChar *location) const;
 
     DECLARE_ABSTRACT_CLASS(wxFilterClassFactoryBase)
 };
@@ -374,7 +368,7 @@ public:
     virtual wxFilterInputStream  *NewStream(wxInputStream *stream)  const = 0;
     virtual wxFilterOutputStream *NewStream(wxOutputStream *stream) const = 0;
 
-    static const wxFilterClassFactory *Find(const wxString& protocol,
+    static const wxFilterClassFactory *Find(const wxChar *protocol,
                                             wxStreamProtocolType type
                                             = wxSTREAM_PROTOCOL);
 
@@ -434,7 +428,6 @@ public:
 
     // Buffer control
     void ResetBuffer();
-    void Truncate();
 
     // NB: the buffer must always be allocated with malloc() if takeOwn is
     //     true as it will be deallocated by free()

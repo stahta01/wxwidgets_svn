@@ -19,7 +19,7 @@
 // ----------------------------------------------------------------------------
 
 class wxIAccessible;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxWindow;
 
 // ----------------------------------------------------------------------------
 // macros

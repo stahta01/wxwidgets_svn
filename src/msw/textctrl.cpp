@@ -37,7 +37,6 @@
     #include "wx/menu.h"
     #include "wx/math.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/sysopt.h"
@@ -301,6 +300,15 @@ bool wxTextCtrl::Create(wxWindow *parent,
                         const wxValidator& validator,
                         const wxString& name)
 {
+#ifdef __WXWINCE__
+    if ((style & wxBORDER_MASK) == 0)
+        style |= wxBORDER_SIMPLE;
+#else
+    // Standard text control already handles theming
+    if ((style & (wxTE_RICH|wxTE_RICH2)) && ((style & wxBORDER_MASK) == wxBORDER_DEFAULT))
+        style |= wxBORDER_THEME;
+#endif
+
     // base initialization
     if ( !CreateControl(parent, id, pos, size, style, validator, name) )
         return false;
@@ -309,17 +317,6 @@ bool wxTextCtrl::Create(wxWindow *parent,
         return false;
 
     return true;
-}
-
-// returns true if the platform should explicitly apply a theme border
-bool wxTextCtrl::CanApplyThemeBorder() const
-{
-#ifdef __WXWINCE__
-    return false;
-#else
-    // Standard text control already handles theming
-    return ((GetWindowStyle() & (wxTE_RICH|wxTE_RICH2)) != 0);
-#endif
 }
 
 bool wxTextCtrl::MSWCreateText(const wxString& value,
@@ -452,7 +449,7 @@ bool wxTextCtrl::MSWCreateText(const wxString& value,
         valueWin = value;
     }
 
-    if ( !MSWCreateControl(windowClass.wx_str(), msStyle, pos, size, valueWin) )
+    if ( !MSWCreateControl(windowClass, msStyle, pos, size, valueWin) )
         return false;
 
 #if wxUSE_RICHEDIT
@@ -941,7 +938,7 @@ wxTextCtrl::StreamIn(const wxString& value,
 #else // !wxUSE_UNICODE_MSLU
     wxCSConv conv(encoding);
 
-    const size_t len = conv.MB2WC(NULL, value.mb_str(), value.length());
+    const size_t len = conv.MB2WC(NULL, value, value.length());
 
 #if wxUSE_WCHAR_T
     wxWCharBuffer wchBuf(len);
@@ -951,7 +948,7 @@ wxTextCtrl::StreamIn(const wxString& value,
     wchar_t *wpc = wchBuf;
 #endif
 
-    conv.MB2WC(wpc, value.mb_str(), value.length());
+    conv.MB2WC(wpc, value, value.length());
 #endif // wxUSE_UNICODE_MSLU
 
     // finally, stream it in the control
@@ -1130,7 +1127,7 @@ void wxTextCtrl::DoWriteText(const wxString& value, int flags)
 
         ::SendMessage(GetHwnd(), selectionOnly ? EM_REPLACESEL : WM_SETTEXT,
                       // EM_REPLACESEL takes 1 to indicate the operation should be redoable
-                      selectionOnly ? 1 : 0, (LPARAM)valueDos.wx_str());
+                      selectionOnly ? 1 : 0, (LPARAM)valueDos.c_str());
 
         if ( !ucf.GotUpdate() && (flags & SetValue_SendEvent) )
         {

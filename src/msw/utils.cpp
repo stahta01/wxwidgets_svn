@@ -25,10 +25,12 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h"     // CHARSET_HANGUL
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
+    #include "wx/timer.h"
 #endif  //WX_PRECOMP
 
 #include "wx/msw/registry.h"
@@ -40,7 +42,6 @@
 #include "wx/confbase.h"        // for wxExpandEnvVars()
 
 #include "wx/msw/private.h"     // includes <windows.h>
-#include "wx/msw/missing.h"     // for CHARSET_HANGUL
 
 #if defined(__CYGWIN__)
     //CYGWIN gives annoying warning about runtime stuff if we don't do this
@@ -158,7 +159,7 @@ bool wxGetHostName(wxChar *WXUNUSED_IN_WINCE(buf),
 // get full hostname (with domain name if possible)
 bool wxGetFullHostName(wxChar *buf, int maxSize)
 {
-#if !defined( __WXMICROWIN__) && wxUSE_DYNLIB_CLASS && wxUSE_SOCKETS
+#if !defined( __WXMICROWIN__) && wxUSE_DYNAMIC_LOADER && wxUSE_SOCKETS
     // TODO should use GetComputerNameEx() when available
 
     // we don't want to always link with Winsock DLL as we might not use it at
@@ -286,7 +287,7 @@ bool wxGetUserName(wxChar *buf, int maxSize)
 {
     wxCHECK_MSG( buf && ( maxSize > 0 ), false,
                     _T("empty buffer in wxGetUserName") );
-#if defined(__WXWINCE__) && wxUSE_REGKEY
+#if defined(__WXWINCE__)
     wxLogNull noLog;
     wxRegKey key(wxRegKey::HKCU, wxT("ControlPanel\\Owner"));
     if(!key.Open(wxRegKey::Read))
@@ -514,7 +515,7 @@ bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
         ULARGE_INTEGER bytesFree, bytesTotal;
 
         // may pass the path as is, GetDiskFreeSpaceEx() is smart enough
-        if ( !pGetDiskFreeSpaceEx(path.fn_str(),
+        if ( !pGetDiskFreeSpaceEx(path,
                                   &bytesFree,
                                   &bytesTotal,
                                   NULL) )
@@ -564,7 +565,7 @@ bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
 
         // FIXME: this is wrong, we should extract the root drive from path
         //        instead, but this is the job for wxFileName...
-        if ( !::GetDiskFreeSpace(path.fn_str(),
+        if ( !::GetDiskFreeSpace(path,
                                  &lSectorsPerCluster,
                                  &lBytesPerSector,
                                  &lNumberOfFreeClusters,
@@ -608,7 +609,7 @@ bool wxGetEnv(const wxString& WXUNUSED_IN_WINCE(var),
     return false;
 #else // Win32
     // first get the size of the buffer
-    DWORD dwRet = ::GetEnvironmentVariable(var.wx_str(), NULL, 0);
+    DWORD dwRet = ::GetEnvironmentVariable(var, NULL, 0);
     if ( !dwRet )
     {
         // this means that there is no such variable
@@ -617,8 +618,7 @@ bool wxGetEnv(const wxString& WXUNUSED_IN_WINCE(var),
 
     if ( value )
     {
-        (void)::GetEnvironmentVariable(var.wx_str(),
-                                       wxStringBuffer(*value, dwRet),
+        (void)::GetEnvironmentVariable(var, wxStringBuffer(*value, dwRet),
                                        dwRet);
     }
 
@@ -626,8 +626,8 @@ bool wxGetEnv(const wxString& WXUNUSED_IN_WINCE(var),
 #endif // WinCE/32
 }
 
-bool wxDoSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
-                const wxChar *WXUNUSED_IN_WINCE(value))
+bool wxSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
+              const wxChar *WXUNUSED_IN_WINCE(value))
 {
     // some compilers have putenv() or _putenv() or _wputenv() but it's better
     // to always use Win32 function directly instead of dealing with them
@@ -635,7 +635,7 @@ bool wxDoSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
     // no environment variables under CE
     return false;
 #else
-    if ( !::SetEnvironmentVariable(var.wx_str(), value) )
+    if ( !::SetEnvironmentVariable(var, value) )
     {
         wxLogLastError(_T("SetEnvironmentVariable"));
 
@@ -644,16 +644,6 @@ bool wxDoSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
 
     return true;
 #endif
-}
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.wx_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
 }
 
 // ----------------------------------------------------------------------------
@@ -1176,7 +1166,7 @@ bool wxIsPlatform64Bit()
 {
 #if defined(_WIN64)
     return true;  // 64-bit programs run only on Win64
-#elif wxUSE_DYNLIB_CLASS // Win32
+#else // Win32
     // 32-bit programs run on both 32-bit and 64-bit Windows so check
     typedef BOOL (WINAPI *IsWow64Process_t)(HANDLE, BOOL *);
 
@@ -1192,8 +1182,6 @@ bool wxIsPlatform64Bit()
     //else: running under a system without Win64 support
 
     return wow64 != FALSE;
-#else
-    return false;
 #endif // Win64/Win32
 }
 
@@ -1457,7 +1445,7 @@ extern WXDLLIMPEXP_BASE long wxEncodingToCodepage(wxFontEncoding encoding)
     return (long) ret;
 }
 
-extern long wxCharsetToCodepage(const char *name)
+extern long wxCharsetToCodepage(const wxChar *name)
 {
     // first get the font encoding for this charset
     if ( !name )
@@ -1476,14 +1464,13 @@ extern long wxCharsetToCodepage(const char *name)
 #include "wx/msw/registry.h"
 
 // this should work if Internet Exploiter is installed
-extern long wxCharsetToCodepage(const char *name)
+extern long wxCharsetToCodepage(const wxChar *name)
 {
     if (!name)
         return GetACP();
 
     long CP = -1;
 
-#if wxUSE_REGKEY
     wxString path(wxT("MIME\\Database\\Charset\\"));
     wxString cn(name);
 
@@ -1509,7 +1496,6 @@ extern long wxCharsetToCodepage(const char *name)
             !key.QueryValue(wxT("AliasForCharset"), cn))
             break;
     }
-#endif // wxUSE_REGKEY
 
     return CP;
 }

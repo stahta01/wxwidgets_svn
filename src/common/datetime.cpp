@@ -70,7 +70,6 @@
     #include "wx/intl.h"
     #include "wx/stopwatch.h"           // for wxGetLocalTimeMillis()
     #include "wx/module.h"
-    #include "wx/crt.h"
 #endif // WX_PRECOMP
 
 #include "wx/thread.h"
@@ -200,9 +199,6 @@ wxCUSTOM_TYPE_INFO(wxDateTime, wxToStringConverter<wxDateTime> , wxFromStringCon
             return timezone;
         }
         #define WX_TIMEZONE wxGetTimeZone()
-        #else
-        // Old method using _timezone: this symbol doesn't exist in the dynamic run-time library (i.e. using /MD)
-        #define WX_TIMEZONE _timezone
         #endif
     #else // unknown platform - try timezone
         #define WX_TIMEZONE timezone
@@ -483,7 +479,7 @@ static long GetTruncatedJDN(wxDateTime::wxDateTime_t day,
 #ifdef HAVE_STRFTIME
 
 // this function is a wrapper around strftime(3) adding error checking
-static wxString CallStrftime(const wxString& format, const tm* tm)
+static wxString CallStrftime(const wxChar *format, const tm* tm)
 {
     wxChar buf[4096];
     // Create temp wxString here to work around mingw/cygwin bug 1046059
@@ -2311,16 +2307,15 @@ wxDateTime& wxDateTime::MakeFromTimezone(const TimeZone& tz, bool noDST)
 // wxDateTime to/from text representations
 // ----------------------------------------------------------------------------
 
-wxString wxDateTime::Format(const wxString& format, const TimeZone& tz) const
+wxString wxDateTime::Format(const wxChar *format, const TimeZone& tz) const
 {
-    wxCHECK_MSG( !format.empty(), wxEmptyString,
-                 _T("NULL format in wxDateTime::Format") );
+    wxCHECK_MSG( format, wxEmptyString, _T("NULL format in wxDateTime::Format") );
+
+    time_t time = GetTicks();
 
     // we have to use our own implementation if the date is out of range of
     // strftime() or if we use non standard specificators
 #ifdef HAVE_STRFTIME
-    time_t time = GetTicks();
-
     if ( (time != (time_t)-1) && !wxStrstr(format, _T("%l")) )
     {
         // use strftime()
@@ -2382,7 +2377,7 @@ wxString wxDateTime::Format(const wxString& format, const TimeZone& tz) const
     tmTimeOnly.tm_isdst = 0;        // no DST, we adjust for tz ourselves
 
     wxString tmp, res, fmt;
-    for ( wxString::const_iterator p = format.begin(); p != format.end(); ++p )
+    for ( const wxChar *p = format; *p; p++ )
     {
         if ( *p != _T('%') )
         {
@@ -2393,7 +2388,7 @@ wxString wxDateTime::Format(const wxString& format, const TimeZone& tz) const
         }
 
         // set the default format
-        switch ( (*++p).GetValue() )
+        switch ( *++p )
         {
             case _T('Y'):               // year has 4 digits
                 fmt = _T("%04d");
@@ -2422,7 +2417,7 @@ wxString wxDateTime::Format(const wxString& format, const TimeZone& tz) const
             restart = false;
 
             // start of the format specification
-            switch ( (*p).GetValue() )
+            switch ( *p )
             {
                 case _T('a'):       // a weekday name
                 case _T('A'):
@@ -3170,10 +3165,10 @@ static wxString GetLocaleDateFormat()
 #endif // __WINDOWS__
 
 const wxChar *wxDateTime::ParseFormat(const wxChar *date,
-                                      const wxString& format,
+                                      const wxChar *format,
                                       const wxDateTime& dateDef)
 {
-    wxCHECK_MSG( date && !format.empty(), (wxChar *)NULL,
+    wxCHECK_MSG( date && format, (wxChar *)NULL,
                  _T("NULL pointer in wxDateTime::ParseFormat()") );
 
     wxString str;
@@ -3203,7 +3198,7 @@ const wxChar *wxDateTime::ParseFormat(const wxChar *date,
     int year = 0;
 
     const wxChar *input = date;
-    for ( wxString::const_iterator fmt = format.begin(); fmt != format.end(); ++fmt )
+    for ( const wxChar *fmt = format; *fmt; fmt++ )
     {
         if ( *fmt != _T('%') )
         {
@@ -3244,7 +3239,7 @@ const wxChar *wxDateTime::ParseFormat(const wxChar *date,
         // the default widths for the various fields
         if ( !width )
         {
-            switch ( (*fmt).GetValue() )
+            switch ( *fmt )
             {
                 case _T('Y'):               // year has 4 digits
                     width = 4;
@@ -3266,7 +3261,7 @@ const wxChar *wxDateTime::ParseFormat(const wxChar *date,
         }
 
         // then the format itself
-        switch ( (*fmt).GetValue() )
+        switch ( *fmt )
         {
             case _T('a'):       // a weekday name
             case _T('A'):
@@ -3835,7 +3830,7 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
     // some special cases
     static struct
     {
-        const char *str;
+        const wxChar *str;
         int dayDiffFromToday;
     } literalDates[] =
     {
@@ -4010,7 +4005,7 @@ const wxChar *wxDateTime::ParseDate(const wxChar *date)
                 else // not a valid weekday name
                 {
                     // try the ordinals
-                    static const char *ordinals[] =
+                    static const wxChar *ordinals[] =
                     {
                         wxTRANSLATE("first"),
                         wxTRANSLATE("second"),
@@ -4176,7 +4171,7 @@ const wxChar *wxDateTime::ParseTime(const wxChar *time)
     // first try some extra things
     static const struct
     {
-        const char *name;
+        const wxChar *name;
         wxDateTime_t  hour;
     } stdTimes[] =
     {
@@ -4303,13 +4298,12 @@ enum TimeSpanPart
 // And, to be better than MFC :-), we also have
 //  %E          number of wEeks
 //  %l          milliseconds (000 - 999)
-wxString wxTimeSpan::Format(const wxString& format) const
+wxString wxTimeSpan::Format(const wxChar *format) const
 {
-    wxCHECK_MSG( !format.empty(), wxEmptyString,
-                 _T("NULL format in wxTimeSpan::Format") );
+    wxCHECK_MSG( format, wxEmptyString, _T("NULL format in wxTimeSpan::Format") );
 
     wxString str;
-    str.Alloc(format.length());
+    str.Alloc(wxStrlen(format));
 
     // Suppose we have wxTimeSpan ts(1 /* hour */, 2 /* min */, 3 /* sec */)
     //
@@ -4327,7 +4321,7 @@ wxString wxTimeSpan::Format(const wxString& format) const
     // we remember the most important unit found so far
     TimeSpanPart partBiggest = Part_MSec;
 
-    for ( wxString::const_iterator pch = format.begin(); pch != format.end(); ++pch )
+    for ( const wxChar *pch = format; *pch; pch++ )
     {
         wxChar ch = *pch;
 

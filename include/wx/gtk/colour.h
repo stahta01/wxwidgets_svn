@@ -27,6 +27,7 @@ public:
 
     virtual ~wxColour();
 
+    bool Ok() const { return IsOk(); }
     bool IsOk() const { return m_refData != NULL; }
 
     bool operator == ( const wxColour& col ) const;
@@ -52,7 +53,7 @@ protected:
     virtual void
     InitRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
-    virtual bool FromString(const wxString& str);
+    virtual bool FromString(const wxChar *str);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxColour)

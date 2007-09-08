@@ -87,7 +87,7 @@ wxBEGIN_FLAGS( wxComboBoxStyle )
 
 wxEND_FLAGS( wxComboBoxStyle )
 
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxComboBox, wxChoice,"wx/combobox.h")
+IMPLEMENT_DYNAMIC_CLASS_XTI(wxComboBox, wxControl,"wx/combobox.h")
 
 wxBEGIN_PROPERTIES_TABLE(wxComboBox)
     wxEVENT_PROPERTY( Select , wxEVT_COMMAND_COMBOBOX_SELECTED , wxCommandEvent )
@@ -108,7 +108,7 @@ wxCONSTRUCTOR_5( wxComboBox , wxWindow* , Parent , wxWindowID , Id , wxString , 
 
 #else
 
-IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxChoice)
+IMPLEMENT_DYNAMIC_CLASS(wxComboBox, wxControl)
 
 #endif
 
@@ -326,7 +326,7 @@ bool wxComboBox::MSWCommand(WXUINT param, WXWORD id)
             // this string is going to become the new combobox value soon but
             // we need it to be done right now, otherwise the event handler
             // could get a wrong value when it calls our GetValue()
-            ::SetWindowText(GetHwnd(), value.wx_str());
+            ::SetWindowText(GetHwnd(), value);
 
             {
                 wxCommandEvent event(wxEVT_COMMAND_COMBOBOX_SELECTED, GetId());
@@ -680,7 +680,7 @@ void wxComboBox::Replace(long from, long to, const wxString& value)
     Remove(from, to);
 
     // Now replace with 'value', by pasting.
-    wxSetClipboardData(wxDF_TEXT, (wxObject *)value.wx_str(), 0, 0);
+    wxSetClipboardData(wxDF_TEXT, (wxObject *)(const wxChar *)value, 0, 0);
 
     // Paste into edit control
     SendMessage(GetHwnd(), WM_PASTE, (WPARAM)0, (LPARAM)0L);

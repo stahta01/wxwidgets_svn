@@ -116,10 +116,7 @@ wxPrinterDC::wxPrinterDC(const wxString& driver_name,
     {
         if ( !driver_name.empty() && !device_name.empty() && !file.empty() )
         {
-            m_hDC = (WXHDC) CreateDC(driver_name.wx_str(),
-                                     device_name.wx_str(),
-                                     file.fn_str(),
-                                     NULL);
+            m_hDC = (WXHDC) CreateDC(driver_name, device_name, file, NULL);
         }
         else // we don't have all parameters, ask the user
         {
@@ -181,14 +178,14 @@ bool wxPrinterDC::StartDoc(const wxString& message)
 {
     DOCINFO docinfo;
     docinfo.cbSize = sizeof(DOCINFO);
-    docinfo.lpszDocName = message.wx_str();
+    docinfo.lpszDocName = (const wxChar*)message;
 
     wxString filename(m_printData.GetFilename());
 
     if (filename.empty())
         docinfo.lpszOutput = NULL;
     else
-        docinfo.lpszOutput = filename.wx_str();
+        docinfo.lpszOutput = (const wxChar *) filename;
 
     docinfo.lpszDatatype = NULL;
     docinfo.fwType = 0;
@@ -196,13 +193,15 @@ bool wxPrinterDC::StartDoc(const wxString& message)
     if (!m_hDC)
         return false;
 
-    if ( ::StartDoc(GetHdc(), &docinfo) <= 0 )
+    int ret = ::StartDoc(GetHdc(), &docinfo);
+
+    if (ret <= 0)
     {
-        wxLogLastError(wxT("StartDoc"));
-        return false;
+        DWORD lastError = GetLastError();
+        wxLogDebug(wxT("wxDC::StartDoc failed with error: %ld\n"), lastError);
     }
 
-    return true;
+    return (ret > 0);
 }
 
 void wxPrinterDC::EndDoc()
@@ -326,7 +325,7 @@ WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
 
     DEVMODE *lpDevMode = hDevMode ? (DEVMODE *)::GlobalLock(hDevMode) : NULL;
 
-    HDC hDC = ::CreateDC(NULL, deviceName.wx_str(), NULL, lpDevMode);
+    HDC hDC = ::CreateDC(NULL, deviceName, NULL, lpDevMode);
     if ( !hDC )
         wxLogLastError(_T("CreateDC(printer)"));
 

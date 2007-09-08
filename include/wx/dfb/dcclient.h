@@ -13,7 +13,7 @@
 
 #include "wx/dc.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxWindow;
 
 //-----------------------------------------------------------------------------
 // wxWindowDC

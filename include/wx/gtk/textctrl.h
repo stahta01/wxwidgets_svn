@@ -155,7 +155,7 @@ public:
     // wxGTK-specific: called recursively by Enable,
     // to give widgets an oppprtunity to correct their colours after they
     // have been changed by Enable
-    virtual void OnEnabled( bool enable ) ;
+    virtual void OnParentEnable( bool enable ) ;
 
     // tell the control to ignore next text changed signal
     void IgnoreNextTextUpdate(int n = 1) { m_countUpdatesToIgnore = n; }
@@ -212,17 +212,7 @@ private:
     // encoding
     wxFontEncoding GetTextEncoding() const;
 
-    // returns either m_text or m_buffer depending on whether the control is
-    // single- or multi-line; convenient for the GTK+ functions which work with
-    // both
-    void *GetTextObject() const
-    {
-        return IsMultiLine() ? wx_static_cast(void *, m_buffer)
-                             : wx_static_cast(void *, m_text);
-    }
 
-
-    // the widget used for single line controls
     GtkWidget  *m_text;
 
     bool        m_modified:1;

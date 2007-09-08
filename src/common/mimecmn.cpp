@@ -35,7 +35,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/module.h"
-    #include "wx/crt.h"
 #endif //WX_PRECOMP
 
 #include "wx/file.h"
@@ -112,16 +111,18 @@ wxString wxMimeTypeCommands::GetVerbCmd(size_t n) const
 // wxFileTypeInfo
 // ----------------------------------------------------------------------------
 
-void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
-                                  const wxString& openCmd,
-                                  const wxString& printCmd,
-                                  const wxString& desc,
-                                  va_list argptr)
+wxFileTypeInfo::wxFileTypeInfo(const wxChar *mimeType,
+                               const wxChar *openCmd,
+                               const wxChar *printCmd,
+                               const wxChar *desc,
+                               ...)
+              : m_mimeType(mimeType),
+                m_openCmd(openCmd),
+                m_printCmd(printCmd),
+                m_desc(desc)
 {
-    m_mimeType = mimeType;
-    m_openCmd = openCmd;
-    m_printCmd = printCmd;
-    m_desc = desc;
+    va_list argptr;
+    va_start(argptr, desc);
 
     for ( ;; )
     {
@@ -131,7 +132,7 @@ void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
     #pragma warning(disable: 1684)
 #endif
 
-        wxArgNormalizedString ext(WX_VA_ARG_STRING(argptr));
+        const wxChar *ext = va_arg(argptr, const wxChar *);
 
 #ifdef __INTELC__
     #pragma warning(pop)
@@ -142,20 +143,8 @@ void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
             break;
         }
 
-        m_exts.Add(ext.GetString());
+        m_exts.Add(ext);
     }
-}
-
-void wxFileTypeInfo::VarArgInit(const wxString *mimeType,
-                                const wxString *openCmd,
-                                const wxString *printCmd,
-                                const wxString *desc,
-                                ...)
-{
-    va_list argptr;
-    va_start(argptr, desc);
-
-    DoVarArgInit(*mimeType, *openCmd, *printCmd, *desc, argptr);
 
     va_end(argptr);
 }

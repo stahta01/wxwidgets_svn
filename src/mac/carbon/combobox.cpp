@@ -230,6 +230,9 @@ END_EVENT_TABLE()
 
 wxComboBox::~wxComboBox()
 {
+    // delete client objects
+    FreeData();
+
     // delete the controls now, don't leave them alive even though they would
     // still be eventually deleted by our parent - but it will be too late, the
     // user code expects them to be gone now
@@ -331,7 +334,7 @@ void wxComboBox::DelegateChoice( const wxString& value )
 
 void wxComboBox::Init()
 {
-    WX_INIT_CONTROL_CONTAINER();
+    m_container.SetContainerWindow(this);
 }
 
 bool wxComboBox::Create(wxWindow *parent,
@@ -344,8 +347,10 @@ bool wxComboBox::Create(wxWindow *parent,
     const wxValidator& validator,
     const wxString& name)
 {
-    return Create( parent, id, value, pos, size, 0, NULL,
-                   style, validator, name );
+    wxCArrayString chs( choices );
+
+    return Create( parent, id, value, pos, size, chs.GetCount(),
+                   chs.GetStrings(), style, validator, name );
 }
 
 bool wxComboBox::Create(wxWindow *parent,
@@ -383,7 +388,10 @@ bool wxComboBox::Create(wxWindow *parent,
 
     DoSetSize(pos.x, pos.y, csize.x, csize.y);
 
-    Append( n, choices );
+    for ( int i = 0 ; i < n ; i++ )
+    {
+        m_choice->DoAppend( choices[ i ] );
+    }
 
     // Needed because it is a wxControlWithItems
     SetInitialSize(size);
@@ -502,48 +510,59 @@ void wxComboBox::SetSelection(long from, long to)
         m_text->SetSelection(from,to);
 }
 
-int wxComboBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData,
-                              wxClientDataType type)
+int wxComboBox::DoAppend(const wxString& item)
 {
-    // wxItemContainer should probably be doing it itself but usually this is
-    // not necessary as the derived class DoInsertItems() calls
-    // AssignNewItemClientData() which initializes m_clientDataItemsType
-    // correctly; however as we just forward everything to wxChoice, we need to
-    // do it ourselves
-    //
-    // also notice that we never use wxClientData_Object with wxChoice as we
-    // don't want it to delete the data -- we will
-    int rc = m_choice->DoInsertItems(items, pos, clientData,
-                                     clientData ? wxClientData_Void
-                                                : wxClientData_None) ;
-    if ( rc != wxNOT_FOUND )
-    {
-        if ( !HasClientData() && type != wxClientData_None )
-            m_clientDataItemsType = type;
-    }
+    return m_choice->DoAppend( item ) ;
+}
 
-    return rc;
+int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+{
+    return m_choice->DoInsert( item , pos ) ;
 }
 
 void wxComboBox::DoSetItemClientData(unsigned int n, void* clientData)
 {
-    return m_choice->SetClientData( n , clientData ) ;
+    return m_choice->DoSetItemClientData( n , clientData ) ;
 }
 
 void* wxComboBox::DoGetItemClientData(unsigned int n) const
 {
-    return m_choice->GetClientData( n ) ;
+    return m_choice->DoGetItemClientData( n ) ;
 }
 
-void wxComboBox::DoDeleteOneItem(unsigned int n)
+void wxComboBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
 {
+    return m_choice->DoSetItemClientObject(n, clientData);
+}
+
+wxClientData* wxComboBox::DoGetItemClientObject(unsigned int n) const
+{
+    return m_choice->DoGetItemClientObject( n ) ;
+}
+
+void wxComboBox::FreeData()
+{
+    if ( HasClientObjectData() )
+    {
+        unsigned int count = GetCount();
+        for ( unsigned int n = 0; n < count; n++ )
+        {
+            SetClientObject( n, NULL );
+        }
+    }
+}
+
+void wxComboBox::Delete(unsigned int n)
+{
+    // force client object deletion
+    if( HasClientObjectData() )
+        SetClientObject( n, NULL );
     m_choice->Delete( n );
 }
 
-void wxComboBox::DoClear()
+void wxComboBox::Clear()
 {
+    FreeData();
     m_choice->Clear();
 }
 

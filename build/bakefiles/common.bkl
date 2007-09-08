@@ -155,9 +155,6 @@
     <set var="WXLIB_RICHTEXT">
         <if cond="MONOLITHIC=='0'">$(mk.evalExpr(wxwin.mkLibName('richtext')))</if>
     </set>
-    <set var="WXLIB_STC">
-        <if cond="MONOLITHIC=='0'">$(mk.evalExpr(wxwin.mkLibName('stc')))</if>
-    </set>
 
     <set var="WXLIB_MONO">
         <if cond="MONOLITHIC=='1'">$(mk.evalExpr(wxwin.mkLibName('mono')))</if>
@@ -183,13 +180,13 @@
         <set var="CFG_NAME_PART">
             $(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
         </set>
-
-        <!-- NB: this is make_var so that it can be overriden on command line
-                 like this: nmake -f makefile.vc COMPILER_PREFIX=vc6 -->
-        <set var="COMPILER_PREFIX" make_var="1">$(COMPILER)</set>
-
         <set var="OBJS" make_var="1">
-            $(COMPILER_PREFIX)_$(CFG_NAME_PART)$(DIR_SUFFIX_CPU)
+            <if cond="FORMAT!='cbuilderx'">
+                $(COMPILER)_$(CFG_NAME_PART)$(DIR_SUFFIX_CPU)
+            </if>
+            <!-- FIXME: waiting for removal after CBX has better ../ dirs
+                 support -->
+            <if cond="FORMAT=='cbuilderx'">build_cbx_$(CFG_NAME_PART)</if>
         </set>
 
         <set var="BUILDDIR">$(OBJS)</set>
@@ -205,7 +202,7 @@
     <set var="LIBDIRNAME" make_var="1">
         <if cond="FORMAT=='autoconf'">$(wx_top_builddir)/lib</if>
         <if cond="FORMAT!='autoconf'">
-            $(nativePaths(TOP_SRCDIR))lib$(DIRSEP)$(COMPILER_PREFIX)$(DIR_SUFFIX_CPU)_$(LIBTYPE_SUFFIX)$(CFG)
+            $(nativePaths(TOP_SRCDIR))lib$(DIRSEP)$(COMPILER)$(DIR_SUFFIX_CPU)_$(LIBTYPE_SUFFIX)$(CFG)
         </if>
     </set>
 
@@ -449,7 +446,6 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
     <include file="tiff.bkl"/>
     <include file="odbc.bkl"/>
     <include file="expat.bkl"/>
-    <include file="scintilla.bkl"/>
 
 
     <!-- =============================================================== -->
@@ -494,9 +490,7 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
             <lib-path>$(MGLLIBPATH)</lib-path>
             <lib-path>$(MGLLIBPATH)/$(MGLPMLIBPATH)</lib-path>
         </if>
-
         <warnings>max</warnings>
-        <cxxflags cond="FORMAT=='autoconf'">$(CXXWARNINGS)</cxxflags>
         <cppflags-watcom>
             -wcd=549 <!-- 'sizeof' operand contains compiler generated information -->
             -wcd=656 <!-- define this function inside its class definition (may improve code quality) -->
@@ -598,8 +592,6 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
         <set var="WXLIBNAME">$(wxwin.mkLibName(wxid))</set>
         <libname>$(WXLIBNAME)</libname>
 
-        <define>WXBUILDING</define>
-
         <if cond="WX_DISABLE_PRECOMP_HEADERS=='0'">
             <if cond="FORMAT!='autoconf' and TOOLKIT in ['MSW','MGL','PM','WINCE']">
                 <sources>$(WXTOPDIR)src/common/dummy.cpp</sources>
@@ -661,7 +653,6 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
         <depends>wxtiff</depends>
         <depends>wxjpeg</depends>
         <depends>wxpng</depends>
-        <depends>wxscintilla</depends>
     </template>
 
     <template id="wx_3rdparty_dependencies"

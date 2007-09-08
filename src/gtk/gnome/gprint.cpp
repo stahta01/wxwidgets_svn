@@ -49,6 +49,16 @@ wxFORCE_LINK_THIS_MODULE(gnome_print)
 // wxGnomePrintLibrary
 //----------------------------------------------------------------------------
 
+#define wxDL_METHOD_DEFINE( rettype, name, args, shortargs, defret ) \
+    typedef rettype (* name ## Type) args ; \
+    name ## Type pfn_ ## name; \
+    rettype name args \
+    { if (m_ok) return pfn_ ## name shortargs ; return defret; }
+
+#define wxDL_METHOD_LOAD( lib, name, success ) \
+    pfn_ ## name = (name ## Type) lib->GetSymbol( wxT(#name), &success ); \
+    if (!success) return;
+
 class wxGnomePrintLibrary
 {
 public:
@@ -967,8 +977,8 @@ wxGnomePrintDC::wxGnomePrintDC( const wxPrintData& data )
     m_currentGreen = 0;
 
     m_signX =  1;  // default x-axis left to right
-    m_signY = -1;  // default y-axis bottom up -> top down
-
+    m_signY = -1;  // default y-axis bottom up -> top down    
+    
     GetSize( NULL, &m_deviceOffsetY );
 }
 
@@ -1502,15 +1512,17 @@ void wxGnomePrintDC::DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord 
 
     bool underlined = m_font.Ok() && m_font.GetUnderlined();
 
-    // FIXME-UTF8: wouldn't be needed if utf8_str() always returned a buffer
-#if wxUSE_UNICODE_UTF8
-    const char *data = text.utf8_str();
+#if wxUSE_UNICODE
+    const wxCharBuffer data = wxConvUTF8.cWC2MB( text );
 #else
-    const wxCharBuffer data = text.utf8_str();
+    const wxWCharBuffer wdata = wxConvLocal.cMB2WC( text );
+    if ( !wdata )
+        return;
+    const wxCharBuffer data = wxConvUTF8.cWC2MB( wdata );
 #endif
 
-    size_t datalen = strlen(data);
-    pango_layout_set_text( m_layout, data, datalen);
+    size_t datalen = strlen((const char*)data);
+    pango_layout_set_text( m_layout, (const char*) data, datalen);
 
     if (underlined)
     {
@@ -1821,7 +1833,7 @@ wxCoord wxGnomePrintDC::GetCharWidth() const
 void wxGnomePrintDC::DoGetTextExtent(const wxString& string, wxCoord *width, wxCoord *height,
                      wxCoord *descent,
                      wxCoord *externalLeading,
-                     const wxFont *theFont ) const
+                     wxFont *theFont ) const
 {
     if ( width )
         *width = 0;
@@ -1838,13 +1850,26 @@ void wxGnomePrintDC::DoGetTextExtent(const wxString& string, wxCoord *width, wxC
     }
 
     // Set layout's text
-
-    // FIXME-UTF8: wouldn't be needed if utf8_str() always returned a buffer
-#if wxUSE_UNICODE_UTF8
-    const char *dataUTF8 = string.utf8_str();
+#if wxUSE_UNICODE
+    const wxCharBuffer data = wxConvUTF8.cWC2MB( string );
+    const char *dataUTF8 = (const char *)data;
 #else
-    const wxCharBuffer dataUTF8 = string.utf8_str();
+    const wxWCharBuffer wdata = wxConvLocal.cMB2WC( string );
+    if ( !wdata )
+    {
+        if (width) (*width) = 0;
+        if (height) (*height) = 0;
+        return;
+    }
+    const wxCharBuffer data = wxConvUTF8.cWC2MB( wdata );
+    const char *dataUTF8 = (const char *)data;
 #endif
+
+    if ( !dataUTF8 )
+    {
+        // hardly ideal, but what else can we do if conversion failed?
+        return;
+    }
 
     PangoFontDescription *desc = (theFont) ? theFont->GetNativeFontInfo()->description : m_fontdesc;
 
@@ -1962,9 +1987,17 @@ int wxGnomePrintDC::GetResolution()
     return 72;
 }
 
-// ----------------------------------------------------------------------------
-// wxGnomePrintModule
-// ----------------------------------------------------------------------------
+
+class wxGnomePrintModule: public wxModule
+{
+public:
+    wxGnomePrintModule() {}
+    bool OnInit();
+    void OnExit();
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxGnomePrintModule)
+};
 
 bool wxGnomePrintModule::OnInit()
 {
@@ -2042,7 +2075,7 @@ void wxGnomePrintPreview::DetermineScaling()
         m_previewPrintout->SetPPIPrinter(wxGnomePrintDC::GetResolution(), wxGnomePrintDC::GetResolution());
 
         wxSize sizeDevUnits(paper->GetSizeDeviceUnits());
-
+        
         // TODO: get better resolution information from wxGnomePrintDC, if possible.
 
         sizeDevUnits.x = (wxCoord)((float)sizeDevUnits.x * wxGnomePrintDC::GetResolution() / 72.0);

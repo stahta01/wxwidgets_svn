@@ -43,15 +43,12 @@ capabilities for the various virtual methods.}
 
 \wxheading{Derived from}
 
-\helpref{wxObject}{wxobject}
+\helpref{wxObject}{wxobject}\\
+\helpref{wxClientDataContainer}{wxclientdatacontainer}
 
 \wxheading{Include files}
 
 <wx/sizer.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{See also}
 
@@ -243,8 +240,6 @@ windows which manage it.
 
 
 \membersection{wxSizer::GetChildren}\label{wxsizergetchildren}
-
-\constfunc{const wxSizerItemList\&}{GetChildren}{\void}
 
 \func{wxSizerItemList\&}{GetChildren}{\void}
 
@@ -560,7 +555,7 @@ allows you to specify all parameters using the named methods instead. For
 example, instead of
 
 \begin{verbatim}
-    sizer->Add(ctrl, 0, wxEXPAND | wxALL, 10);
+    sizer->Add(ctrl, 0, wxEXPAND | wxBORDER, 10);
 \end{verbatim}
 
 you can now write
@@ -583,23 +578,6 @@ Note that by specification, all methods of wxSizerFlags return the wxSizerFlags
 object itself to allowing chaining multiple methods calls like in the examples
 above.
 
-\wxheading{See also}
-
-\helpref{wxSizer}{wxsizer}
-
-\wxheading{Derived from}
-
-No base class
-
-\wxheading{Include files}
-
-<wx/sizer.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxSizerFlags::wxSizerFlags}\label{wxsizerflagsctor}
 
@@ -618,10 +596,8 @@ Note that if this method is not called, the wxSizerFlags has no specified alignm
 
 \wxheading{See also}
 
-\helpref{Top}{wxsizerflagstop},\\
 \helpref{Left}{wxsizerflagsleft},\\
 \helpref{Right}{wxsizerflagsright},\\
-\helpref{Bottom}{wxsizerflagsbottom},\\
 \helpref{Centre}{wxsizerflagscentre}
 
 
@@ -637,17 +613,6 @@ Sets the wxSizerFlags to have a border of a number of pixels specified by
 In the overloaded version without \arg{borderinpixels} parameter, the border of
 default size, as returned by \helpref{GetDefaultBorder}{wxsizerflagsgetdefaultborder},
 is used.
-
-
-\membersection{wxSizerFlags::Bottom}\label{wxsizerflagsbottom}
-
-\func{wxSizerFlags\& }{Bottom}{\void}
-
-Aligns the object to the bottom, shortcut for \texttt{Align(wxALIGN\_BOTTOM)}
-
-\wxheading{See also}
-
-\helpref{Align}{wxsizerflagsalign}
 
 
 \membersection{wxSizerFlags::Center}\label{wxsizerflagscenter}
@@ -737,17 +702,6 @@ Aligns the object to the right, shortcut for \texttt{Align(wxALIGN\_RIGHT)}
 
 Set the \texttt{wx\_SHAPED} flag which indicates that the elements should
 always keep the fixed width to height ratio equal to its original value.
-
-
-\membersection{wxSizerFlags::Top}\label{wxsizerflagstop}
-
-\func{wxSizerFlags\& }{Top}{\void}
-
-Aligns the object to the top, shortcut for \texttt{Align(wxALIGN\_TOP)}
-
-\wxheading{See also}
-
-\helpref{Align}{wxsizerflagsalign}
 
 
 \membersection{wxSizerFlags::TripleBorder}\label{wxsizerflagstriplebleborder}

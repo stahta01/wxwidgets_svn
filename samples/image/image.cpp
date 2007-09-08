@@ -135,44 +135,16 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
-// ----------------------------------------------------------------------------
-// Frame used for showing a standalone image
-// ----------------------------------------------------------------------------
-
-enum
-{
-    ID_ROTATE_LEFT = 100,
-    ID_ROTATE_RIGHT,
-    ID_RESIZE
-};
-
 class MyImageFrame : public wxFrame
 {
 public:
-    MyImageFrame(wxFrame *parent, const wxString& desc, const wxBitmap& bitmap)
-        : wxFrame(parent, wxID_ANY,
-                  wxString::Format(_T("Image from %s"), desc.c_str()),
+    MyImageFrame(wxFrame *parent, const wxBitmap& bitmap)
+        : wxFrame(parent, wxID_ANY, _T("Double click to save"),
                   wxDefaultPosition, wxDefaultSize,
-                  wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT_ON_RESIZE),
+                  wxCAPTION | wxSYSTEM_MENU | wxCLOSE_BOX),
                   m_bitmap(bitmap)
     {
-        wxMenu *menu = new wxMenu;
-        menu->Append(wxID_SAVE);
-        menu->AppendSeparator();
-        menu->Append(ID_RESIZE, _T("&Fit to window\tCtrl-F"));
-        menu->AppendSeparator();
-        menu->Append(ID_ROTATE_LEFT, _T("Rotate &left\tCtrl-L"));
-        menu->Append(ID_ROTATE_RIGHT, _T("Rotate &right\tCtrl-R"));
-
-        wxMenuBar *mbar = new wxMenuBar;
-        mbar->Append(menu, _T("&Image"));
-        SetMenuBar(mbar);
-
-        CreateStatusBar();
-
         SetClientSize(bitmap.GetWidth(), bitmap.GetHeight());
-
-        UpdateStatusBar();
     }
 
     void OnEraseBackground(wxEraseEvent& WXUNUSED(event))
@@ -182,15 +154,11 @@ public:
 
     void OnPaint(wxPaintEvent& WXUNUSED(event))
     {
-        wxPaintDC dc(this);
-        const wxSize size = GetClientSize();
-        dc.DrawBitmap(m_bitmap,
-                      (size.x - m_bitmap.GetWidth())/2,
-                      (size.y - m_bitmap.GetHeight())/2,
-                      true /* use mask */);
+        wxPaintDC dc( this );
+        dc.DrawBitmap( m_bitmap, 0, 0, true /* use mask */ );
     }
 
-    void OnSave(wxCommandEvent& WXUNUSED(event))
+    void OnSave(wxMouseEvent& WXUNUSED(event))
     {
 #if wxUSE_FILEDLG
         wxImage image = m_bitmap.ConvertToImage();
@@ -316,46 +284,7 @@ public:
 #endif // wxUSE_FILEDLG
     }
 
-    void OnResize(wxCommandEvent& WXUNUSED(event))
-    {
-        wxImage img(m_bitmap.ConvertToImage());
-
-        const wxSize size = GetClientSize();
-        img.Rescale(size.x, size.y, wxIMAGE_QUALITY_HIGH);
-        m_bitmap = wxBitmap(img);
-
-        UpdateStatusBar();
-        Refresh();
-    }
-
-    void OnRotate(wxCommandEvent& event)
-    {
-        double angle = 5;
-        if ( event.GetId() == ID_ROTATE_LEFT )
-            angle = -angle;
-
-        wxImage img(m_bitmap.ConvertToImage());
-        img = img.Rotate(angle, wxPoint(img.GetWidth() / 2, img.GetHeight() / 2));
-        if ( !img.Ok() )
-        {
-            wxLogWarning(_T("Rotation failed"));
-            return;
-        }
-
-        m_bitmap = wxBitmap(img);
-
-        UpdateStatusBar();
-        Refresh();
-    }
-
 private:
-    void UpdateStatusBar()
-    {
-        wxLogStatus(this, _T("Image size: (%d, %d)"),
-                    m_bitmap.GetWidth(),
-                    m_bitmap.GetHeight());
-    }
-
     wxBitmap m_bitmap;
 
     DECLARE_EVENT_TABLE()
@@ -397,6 +326,7 @@ public:
                 wxLogError(_T("Failed to gain raw access to bitmap data"));
                 return;
             }
+            data.UseAlpha();
             wxAlphaPixelData::Iterator p(data);
             for ( int y = 0; y < SIZE; ++y )
             {
@@ -420,6 +350,7 @@ public:
             return;
         }
 
+        data.UseAlpha();
         wxAlphaPixelData::Iterator p(data);
 
         for ( int y = 0; y < REAL_SIZE; ++y )
@@ -517,10 +448,7 @@ IMPLEMENT_APP(MyApp)
 BEGIN_EVENT_TABLE(MyImageFrame, wxFrame)
     EVT_ERASE_BACKGROUND(MyImageFrame::OnEraseBackground)
     EVT_PAINT(MyImageFrame::OnPaint)
-
-    EVT_MENU(wxID_SAVE, MyImageFrame::OnSave)
-    EVT_MENU_RANGE(ID_ROTATE_LEFT, ID_ROTATE_RIGHT, MyImageFrame::OnRotate)
-    EVT_MENU(ID_RESIZE, MyImageFrame::OnResize)
+    EVT_LEFT_DCLICK(MyImageFrame::OnSave)
 END_EVENT_TABLE()
 
 #ifdef wxHAVE_RAW_BITMAP
@@ -1186,7 +1114,7 @@ void MyFrame::OnNewFrame( wxCommandEvent &WXUNUSED(event) )
         return;
     }
 
-    (new MyImageFrame(this, filename, wxBitmap(image)))->Show();
+    (new MyImageFrame(this, wxBitmap(image)))->Show();
 #endif // wxUSE_FILEDLG
 }
 
@@ -1227,7 +1155,7 @@ void MyFrame::OnPaste(wxCommandEvent& WXUNUSED(event))
     }
     else
     {
-        (new MyImageFrame(this, _T("Clipboard"), dobjBmp.GetBitmap()))->Show();
+        (new MyImageFrame(this, dobjBmp.GetBitmap()))->Show();
     }
     wxTheClipboard->Close();
 }
@@ -1240,9 +1168,6 @@ void MyFrame::OnPaste(wxCommandEvent& WXUNUSED(event))
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxInitAllImageHandlers();
 
     wxFrame *frame = new MyFrame();

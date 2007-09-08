@@ -42,10 +42,6 @@ should be very rarely needed.
 
 <wx/wizard.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxWizard}{wxwizard}, \helpref{wxWizard sample}{samplewizard}
@@ -54,7 +50,7 @@ should be very rarely needed.
 
 \membersection{wxWizardPage::wxWizardPage}\label{wxwizardpagewxwizardpage}
 
-\func{}{wxWizardPage}{\param{wxWizard* }{parent}, \param{const wxBitmap\& }{bitmap = wxNullBitmap}}
+\func{}{wxWizardPage}{\param{wxWizard* }{parent}, \param{const wxBitmap\& }{bitmap = wxNullBitmap}, \param{const wxChar }{*resource = NULL}}
 
 Constructor accepts an optional bitmap which will be used for this page
 instead of the default one for this wizard (note that all bitmaps used should
@@ -67,6 +63,7 @@ wizard will resize and reposition the page anyhow.
 
 \docparam{bitmap}{The page-specific bitmap if different from the global one}
 
+\docparam{resource}{Load the page from the specified resource if non-NULL}
 
 \membersection{wxWizardPage::GetPrev}\label{wxwizardpagegetprev}
 
@@ -132,10 +129,6 @@ instead.
 \wxheading{Include files}
 
 <wx/wizard.h>
-
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
 
 \wxheading{See also}
 

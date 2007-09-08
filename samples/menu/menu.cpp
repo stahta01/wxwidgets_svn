@@ -344,9 +344,6 @@ IMPLEMENT_APP(MyApp)
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame* frame = new MyFrame;
 
@@ -546,7 +543,7 @@ MyFrame::MyFrame()
                                 wxTE_MULTILINE);
     m_textctrl->SetEditable(false);
 
-    wxLog::DisableTimestamp();
+    wxLog::SetTimestamp(NULL);
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_textctrl));
 
     wxLogMessage(_T("Brief explanations: the commands or the \"Menu\" menu ")
@@ -719,7 +716,7 @@ void MyFrame::OnGetLabelMenu(wxCommandEvent& WXUNUSED(event))
     wxCHECK_RET( count, _T("no last menu?") );
 
     wxLogMessage(_T("The label of the last menu item is '%s'"),
-                 mbar->GetMenuLabel(count - 1).c_str());
+                 mbar->GetLabelTop(count - 1).c_str());
 }
 
 #if wxUSE_TEXTDLG
@@ -734,13 +731,13 @@ void MyFrame::OnSetLabelMenu(wxCommandEvent& WXUNUSED(event))
                      (
                         _T("Enter new label: "),
                         _T("Change last menu text"),
-                        mbar->GetMenuLabel(count - 1),
+                        mbar->GetLabelTop(count - 1),
                         this
                      );
 
     if ( !label.empty() )
     {
-        mbar->SetMenuLabel(count - 1, label);
+        mbar->SetLabelTop(count - 1, label);
     }
 }
 
@@ -858,9 +855,8 @@ void MyFrame::OnGetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
 
     if ( item )
     {
-        wxString label = item->GetItemLabel();
         wxLogMessage(_T("The label of the last menu item is '%s'"),
-                     label.c_str());
+                     item->GetLabel().c_str());
     }
 }
 
@@ -875,14 +871,14 @@ void MyFrame::OnSetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
                          (
                             _T("Enter new label: "),
                             _T("Change last menu item text"),
-                            item->GetItemLabel(),
+                            item->GetLabel(),
                             this
                          );
         label.Replace( _T("\\t"), _T("\t") );
 
         if ( !label.empty() )
         {
-            item->SetItemLabel(label);
+            item->SetText(label);
         }
     }
 }

@@ -14,7 +14,7 @@
 
 DECLARE_WXCOCOA_OBJC_CLASS(NSAffineTransform);
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
+class WXDLLEXPORT wxDC;
 WX_DECLARE_LIST(wxDC, wxCocoaDCStack);
 
 //=========================================================================
@@ -98,7 +98,7 @@ public:
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const;
+                                 wxFont *theFont = NULL) const;
 
     virtual bool CanDrawBitmap() const;
     virtual bool CanGetTextExtent() const;

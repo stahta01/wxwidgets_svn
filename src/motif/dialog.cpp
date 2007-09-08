@@ -75,6 +75,7 @@ wxDialog::wxDialog()
 {
     m_modalShowing = false;
     m_eventLoop = NULL;
+    m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
 }
 
 bool wxDialog::Create(wxWindow *parent, wxWindowID id,
@@ -93,9 +94,15 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     m_modalShowing = false;
     m_eventLoop = NULL;
 
+    m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
+    m_foregroundColour = *wxBLACK;
+
     Widget dialogShell = (Widget) m_mainWidget;
 
     SetTitle( title );
+
+    m_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+    ChangeFont(false);
 
     // Can't remember what this was about... but I think it's necessary.
 #if wxUSE_INVISIBLE_RESIZE
@@ -128,7 +135,7 @@ bool wxDialog::Create(wxWindow *parent, wxWindowID id,
     XtAddEventHandler(dialogShell,ExposureMask,False,
         wxUniversalRepaintProc, (XtPointer) this);
 
-    PostCreation();
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -155,7 +162,7 @@ bool wxDialog::XmDoCreateTLW(wxWindow* parent,
     XtSetArg (args[1], XmNautoUnmanage, False);
     Widget dialogShell =
         XmCreateBulletinBoardDialog( parentWidget,
-                                     name.char_str(),
+                                     wxConstCast(name.c_str(), char),
                                      args, 2);
     m_mainWidget = (WXWidget) dialogShell;
 
@@ -236,9 +243,9 @@ void wxDialog::SetTitle(const wxString& title)
     {
         wxXmString str( title );
         XtVaSetValues( (Widget)m_mainWidget,
-                       XmNtitle, (const char*)title.mb_str(),
-                       XmNdialogTitle, str(),
-                       XmNiconName, (const char*)title.mb_str(),
+                       XmNtitle, title.c_str(),
+                       XmNdialogTitle, str(), // Roberto Cocchi
+                       XmNiconName, title.c_str(),
                        NULL );
     }
 }

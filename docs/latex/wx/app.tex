@@ -26,10 +26,6 @@ a reference to your application object) to be visible to other files.
 
 <wx/app.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxApp overview}{wxappoverview}
@@ -242,7 +238,7 @@ to do it.
 Returns \true if the main event loop is currently running, i.e. if the
 application is inside \helpref{OnRun}{wxapponrun}.
 
-This can be useful to test whether events can be dispatched. For example,
+This can be useful to test whether the events can be dispatched. For example,
 if this function returns \false, non-blocking sockets cannot be used because
 the events from them would never be processed.
 
@@ -523,13 +519,10 @@ should return $0$ in case of successful termination.
 
 This function is called when an unhandled C++ exception occurs inside 
 \helpref{OnRun()}{wxapponrun} (the exceptions which occur during the program
-startup and shutdown might not be caught at all). Notice that by now the main
-event loop has been terminated and the program will exit, if you want to
-prevent this from happening (i.e. continue running after catching an exception)
-you need to override \helpref{OnExceptionInMainLoop}{wxapponexceptioninmainloop}.
-
-The default implementation shows information about the exception in debug build
-but does nothing in the release build.
+startup and shutdown might not be caught at all).
+Note that the exception type is lost by now, so if you want to really handle
+the exception you should override \helpref{OnRun()}{wxapponrun} and put a
+try/catch clause around the call to the base class version there.
 
 
 \membersection{wxApp::ProcessMessage}\label{wxappprocessmessage}

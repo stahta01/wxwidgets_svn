@@ -17,15 +17,15 @@
 #include "wx/palette.h"
 #include "wx/gdiobj.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxPixelDataBase;
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxMask;
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxImage;
+class WXDLLIMPEXP_CORE wxMask;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxImage;
 
 //-----------------------------------------------------------------------------
 // wxMask
@@ -130,6 +130,7 @@ public:
     void UngetRawData(wxPixelDataBase& data);
 
     bool HasAlpha() const;
+    void UseAlpha();
 
 protected:
     bool CreateFromImage(const wxImage& image, int depth);

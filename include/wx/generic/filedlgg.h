@@ -21,16 +21,16 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxBitmapButton;
-class WXDLLIMPEXP_FWD_CORE wxCheckBox;
-class WXDLLIMPEXP_FWD_CORE wxChoice;
-class WXDLLIMPEXP_FWD_CORE wxFileData;
-class WXDLLIMPEXP_FWD_CORE wxFileCtrl;
-class WXDLLIMPEXP_FWD_CORE wxGenericFileDialog;
-class WXDLLIMPEXP_FWD_CORE wxListEvent;
-class WXDLLIMPEXP_FWD_CORE wxListItem;
-class WXDLLIMPEXP_FWD_CORE wxStaticText;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+class WXDLLEXPORT wxBitmapButton;
+class WXDLLEXPORT wxCheckBox;
+class WXDLLEXPORT wxChoice;
+class WXDLLEXPORT wxFileData;
+class WXDLLEXPORT wxFileCtrl;
+class WXDLLEXPORT wxGenericFileDialog;
+class WXDLLEXPORT wxListEvent;
+class WXDLLEXPORT wxListItem;
+class WXDLLEXPORT wxStaticText;
+class WXDLLEXPORT wxTextCtrl;
 
 //-------------------------------------------------------------------------
 // wxGenericFileDialog
@@ -124,7 +124,7 @@ private:
     static bool ms_lastShowHidden;    // did we show hidden files?
 };
 
-#ifdef wxHAS_GENERIC_FILEDIALOG
+#ifdef wxUSE_GENERIC_FILEDIALOG
 
 class WXDLLEXPORT wxFileDialog: public wxGenericFileDialog
 {
@@ -146,7 +146,7 @@ private:
      DECLARE_DYNAMIC_CLASS(wxFileDialog)
 };
 
-#endif // wxHAS_GENERIC_FILEDIALOG
+#endif // wxUSE_GENERIC_FILEDIALOG
 
 //-----------------------------------------------------------------------------
 //  wxFileData - a class to hold the file info for the wxFileCtrl

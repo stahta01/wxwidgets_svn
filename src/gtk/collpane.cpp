@@ -202,6 +202,8 @@ bool wxCollapsiblePane::Create(wxWindow *parent,
         return wxGenericCollapsiblePane::Create(parent, id, label,
                                                 pos, size, style, val, name);
 
+    m_needParent = true;
+    m_acceptsFocus = true;
     m_bIgnoreNextChange = false;
 
     if ( !PreCreation( parent, pos, size ) ||
@@ -228,7 +230,7 @@ bool wxCollapsiblePane::Create(wxWindow *parent,
     m_pPane = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                            wxTAB_TRAVERSAL|wxNO_BORDER);
 
-    gtk_widget_show(m_widget);
+    gtk_widget_show( GTK_WIDGET(m_widget) );
     m_parent->DoAddChild( this );
 
     PostCreation(size);

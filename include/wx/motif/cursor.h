@@ -15,7 +15,7 @@
 #include "wx/object.h"
 #include "wx/gdicmn.h"
 
-class WXDLLIMPEXP_FWD_CORE wxImage;
+class WXDLLEXPORT wxImage;
 
 // Cursor
 class WXDLLEXPORT wxCursor: public wxObject

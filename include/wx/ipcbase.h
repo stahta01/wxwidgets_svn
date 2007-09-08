@@ -38,8 +38,8 @@ enum wxIPCFormat
   wxIPC_PRIVATE =          20
 };
 
-class WXDLLIMPEXP_FWD_BASE wxServerBase;
-class WXDLLIMPEXP_FWD_BASE wxClientBase;
+class WXDLLIMPEXP_BASE wxServerBase;
+class WXDLLIMPEXP_BASE wxClientBase;
 
 class WXDLLIMPEXP_BASE wxConnectionBase: public wxObject
 {
@@ -56,17 +56,14 @@ public:
 
   // Calls that CLIENT can make
   virtual bool Execute(const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT ) = 0;
-  // FIXME-UTF8: review this code for compatibility implications, update
-  //             accordingly, don' use c_str() below
-  virtual bool Execute(const wxString& str)
-    { return Execute(str.c_str(), -1, wxIPC_TEXT); }
+  virtual bool Execute(const wxString& str) { return Execute(str, -1, wxIPC_TEXT); }
   virtual wxChar *Request(const wxString& item, int *size = (int *) NULL, wxIPCFormat format = wxIPC_TEXT) = 0;
-  virtual bool Poke(const wxString& item, const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT) = 0;
+  virtual bool Poke(const wxString& item, wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT) = 0;
   virtual bool StartAdvise(const wxString& item) = 0;
   virtual bool StopAdvise(const wxString& item) = 0;
 
   // Calls that SERVER can make
-  virtual bool Advise(const wxString& item, const wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT) = 0;
+  virtual bool Advise(const wxString& item, wxChar *data, int size = -1, wxIPCFormat format = wxIPC_TEXT) = 0;
 
   // Calls that both can make
   virtual bool Disconnect(void) = 0;
@@ -78,11 +75,11 @@ public:
                                wxIPCFormat WXUNUSED(format) )
                              { return false; }
 
-  virtual const wxChar *OnRequest ( const wxString& WXUNUSED(topic),
-                                    const wxString& WXUNUSED(item),
-                                    int *WXUNUSED(size),
-                                    wxIPCFormat WXUNUSED(format) )
-                                  { return (wxChar *) NULL; }
+  virtual wxChar *OnRequest    ( const wxString& WXUNUSED(topic),
+                               const wxString& WXUNUSED(item),
+                               int *WXUNUSED(size),
+                               wxIPCFormat WXUNUSED(format) )
+                             { return (wxChar *) NULL; }
 
   virtual bool OnPoke        ( const wxString& WXUNUSED(topic),
                                const wxString& WXUNUSED(item),

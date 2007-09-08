@@ -137,7 +137,7 @@ void wxMenuItem::Check(bool bDoCheck)
 }
 
 /* static */
-wxString wxMenuItemBase::GetLabelText(const wxString& text)
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }
@@ -308,7 +308,7 @@ void wxMenuItem::DestroyItem(bool full)
     }
 }
 
-void wxMenuItem::SetItemLabel(const wxString& label)
+void wxMenuItem::SetText(const wxString& label)
 {
     char mnem = wxFindMnemonic (label);
     wxString label2 = wxStripMenuCodes(label);

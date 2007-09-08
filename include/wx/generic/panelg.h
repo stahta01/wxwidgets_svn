@@ -19,7 +19,7 @@
 #include "wx/window.h"
 #include "wx/containr.h"
 
-class WXDLLIMPEXP_FWD_CORE wxControlContainer;
+class WXDLLEXPORT wxControlContainer;
 
 extern WXDLLEXPORT_DATA(const wxChar) wxPanelNameStr[];
 
@@ -79,8 +79,6 @@ public:
     virtual bool IsCanvasWindow() const { return true; }
 #endif
 
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxWindowBase::GetDefaultBorder(); }
 
     WX_DECLARE_CONTROL_CONTAINER();
 

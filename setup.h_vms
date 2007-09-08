@@ -3,7 +3,7 @@
  * Template for the set.h file for VMS                                       *
  * Created from setup.h_in                                                   *
  * Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                            *
- * Date : 3 July 2007                                                        *
+ * Date : 19 December 2006                                                   *
  *                                                                           *
  *****************************************************************************/
 
@@ -88,9 +88,6 @@
 /* Define this if your version of GTK+ is greater than 2.6 */
 #define __WXGTK26__ 1
 
-/* Define this if your version of GTK+ is greater than 2.10 */
-#define __WXGTK210__ 1
-
 #include <types.h>
 typedef pid_t GPid;
 
@@ -167,9 +164,9 @@ typedef pid_t GPid;
 #endif
 
 
-#define WXWIN_COMPATIBILITY_2_6 0
+#define WXWIN_COMPATIBILITY_2_4 1
 
-#define WXWIN_COMPATIBILITY_2_8 1
+#define WXWIN_COMPATIBILITY_2_6 1
 
 #define wxDIALOG_UNIT_COMPATIBILITY   1
 
@@ -191,7 +188,7 @@ typedef pid_t GPid;
 
 
 #ifndef wxUSE_UNICODE
-    #define wxUSE_UNICODE 1
+    #define wxUSE_UNICODE 0
 #endif
 
 #define wxUSE_WCHAR_T 1
@@ -242,7 +239,6 @@ typedef pid_t GPid;
 #define wxUSE_TEXTFILE      1
 
 #define wxUSE_INTL          1
-#include <locale.h>
 
 #define wxUSE_DATETIME      1
 
@@ -261,7 +257,6 @@ typedef pid_t GPid;
 #define wxUSE_DYNAMIC_LOADER  0
 
 #define wxUSE_SOCKETS       1
-#include <socket.h>
 
 #define wxUSE_FILESYSTEM    1
 
@@ -329,8 +324,6 @@ typedef pid_t GPid;
 
 #define wxUSE_TIPWINDOW    1
 
-#define wxUSE_STC 1
-
 #define wxUSE_ANIMATIONCTRL 1
 #define wxUSE_BUTTON       1
 #define wxUSE_BMPBUTTON    1
@@ -344,7 +337,6 @@ typedef pid_t GPid;
 #define wxUSE_DATAVIEWCTRL   1
 #define wxUSE_DATEPICKCTRL 1
 #define wxUSE_DIRPICKERCTRL 1
-#define wxUSE_EDITABLELISTBOX 1
 #define wxUSE_FILEPICKERCTRL 1
 #define wxUSE_FONTPICKERCTRL 1
 #define wxUSE_GAUGE        1
@@ -503,6 +495,13 @@ typedef pid_t GPid;
 
 #define wxUSE_WXHTML_HELP 1
 
+#define wxUSE_RESOURCES   1
+
+/*
+ * Use Prolog IO
+ */
+#define wxUSE_PROLOGIO 1
+
 #define wxUSE_CONSTRAINTS 1
 
 
@@ -583,10 +582,6 @@ typedef pid_t GPid;
 #define wxUSE_INKEDIT 1
 
 #define wxUSE_UNICODE_MSLU 0
-
-#define wxUSE_UNICODE_UTF8 0
-
-#define wxUSE_UTF8_LOCALE_ONLY 0
 
 #define wxUSE_DC_CACHEING 1
 
@@ -670,11 +665,6 @@ typedef pid_t GPid;
 #undef HAVE_GNU_CXX_HASH_MAP
 
 /*
- * Define if the compiler supports simple visibility declarations.
- */
-#undef HAVE_VISIBILITY
-
-/*
  * The built-in regex supports advanced REs in additional to POSIX's basic
  * and extended. Your system regex probably won't support this, and in this
  * case WX_NO_REGEX_ADVANCED should be defined.
@@ -689,10 +679,6 @@ typedef pid_t GPid;
  * Use SDL for audio (Unix)
  */
 #define wxUSE_LIBSDL 0
-/*
- * Use GTK print for printing under GTK+ 2.0
- */
-#define wxUSE_GTKPRINT 0
 /*
  * Use GNOME print for printing under GTK+ 2.0
  */
@@ -710,6 +696,10 @@ typedef pid_t GPid;
  */
 #define wxUSE_BUILTIN_IODBC 0
 /*
+ * Use freetype
+ */
+#define wxUSE_FREETYPE 1
+/*
  * Have glibc2
  */
 #define wxHAVE_GLIBC2 0
@@ -721,8 +711,14 @@ typedef pid_t GPid;
  * Define if you have pthread_cleanup_push/pop()
  */
 #define wxHAVE_PTHREAD_CLEANUP 1
+/*
+ * Use consistent PostScript fonts for AFM and printing (!)
+ */
+#define wxUSE_NORMALIZED_PS_FONTS 1
 
 /* compatibility */
+#define WX_NORMALIZED_PS_FONTS wxUSE_NORMALIZED_PS_FONTS
+
 /*
  * Use OpenGL
  */
@@ -734,6 +730,32 @@ typedef pid_t GPid;
 /* #define wxUSE_UXTHEME 1 */
 
 /*
+ *  Set to 1 to auto-adapt to MS Windows XP themes where possible
+ * (notably, wxNotebook pages)
+ */
+/* #define wxUSE_UXTHEME_AUTO 1*/
+
+/*
+ * Work around a bug in GNU libc 5.x wcstombs() implementation.
+ *
+ * Note that you must link your programs with libc.a if you enable this and you
+ * have libc 5 (you should enable this for libc6 where wcsrtombs() is
+ * thread-safe version of wcstombs()).
+ */
+#define wxUSE_WCSRTOMBS 0
+
+/*
+ * Use the new experimental implementation of wxString::Printf()?
+ *
+ * Warning: enabling this may cause internal compiler errors with gcc!
+ */
+#define wxUSE_EXPERIMENTAL_PRINTF 0
+
+/*
+ * Use wxGetResource & wxWriteResource (change .Xdefaults)
+ */
+#define wxUSE_X_RESOURCES 1
+/*
  * Use OLE and OLE Automation (MSW only)
  */
 #define wxUSE_OLE 0
@@ -741,6 +763,8 @@ typedef pid_t GPid;
 #define wxUSE_ACTIVEX 0
 
 /* for compatibility */
+#define wxUSE_WX_RESOURCES wxUSE_RESOURCES
+
 /*
  * Use wxWindows help facility
  */
@@ -767,11 +791,6 @@ typedef pid_t GPid;
  * wxWebKitCtrl
  */
 #define wxUSE_WEBKIT 1
-
-/*
- * Objective-C class name uniquifying
- */
-#define wxUSE_OBJC_UNIQUIFYING 0
 
 /*
  * The const keyword is being introduced more in wxWindows.
@@ -829,9 +848,6 @@ typedef pid_t GPid;
 /* Define if fsync() is available */
 #define HAVE_FSYNC 1
 
-/* Define if round() is available */
-/* #undef HAVE_ROUND */
-
 /* Define if you have ftime() */
 #define HAVE_FTIME
 
@@ -862,9 +878,6 @@ typedef pid_t GPid;
 
 /* Define if you have pthread_cancel */
 #define HAVE_PTHREAD_CANCEL 1
-
-/* Define if you have pthread_mutex_timedlock */
-#undef HAVE_PTHREAD_MUTEX_TIMEDLOCK
 
 /* Define if you have pthread_attr_setstacksize */
 #define HAVE_PTHREAD_ATTR_SETSTACKSIZE 1
@@ -962,14 +975,14 @@ typedef pid_t GPid;
 /* Define if you have wcslen function  */
 #define HAVE_WCSLEN 1
 
-/* Define if you have wcsdup function  */
-#define HAVE_WCSDUP 0
-
 /* Define if you have wcstoull() and wcstoll() */
 #undef HAVE_WCSTOULL
 
 /* define if you have vsscanf function */
 #undef HAVE_VSSCANF
+
+/* The number of bytes in a char.  */
+#define SIZEOF_CHAR 1
 
 /* The number of bytes in a wchar_t.  */
 #define SIZEOF_WCHAR_T 4
@@ -997,9 +1010,6 @@ typedef pid_t GPid;
 
 /* Define if size_t on your machine is the same type as unsigned long. */
 #undef wxSIZE_T_IS_ULONG
-
-/* Define if wchar_t is distinct type in your compiler. */
-#define wxWCHAR_T_IS_REAL_TYPE 1
 
 /* Define if you have the dlopen function.  */
 #define HAVE_DLOPEN 1
@@ -1167,7 +1177,7 @@ typedef pid_t GPid;
 #define HAVE_WPUTCHAR 1
 
 /* Define this if you have putws() */
-#undef HAVE_PUTWS
+#define HAVE_PUTWS 1
 
 /* Define this if you have fputws() */
 #define HAVE_FPUTWS 1
@@ -1215,9 +1225,6 @@ typedef pid_t GPid;
 
 /* Define if you have Pango xft support */
 #undef HAVE_PANGO_XFT
-
-/* Define if you have the <sys/epoll.h> header file.  */
-#undef HAVE_SYS_EPOLL_H
 
 /* Define if fdopen is available.  */
 #define HAVE_FDOPEN 1

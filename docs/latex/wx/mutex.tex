@@ -41,7 +41,7 @@ because during a new node addition the list integrity is temporarily broken
         s_mutexProtectingTheGlobalList->Unlock();
     }
 
-    // return true if the given number is greater than all array elements
+    // return true the given number is greater than all array elements
     bool MyThread::IsGreater(int num)
     {
         // before using the list we must acquire the mutex
@@ -86,10 +86,6 @@ None.
 
 <wx/thread.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxThread}{wxthread}, \helpref{wxCondition}{wxcondition}, 
@@ -97,13 +93,11 @@ None.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
 \membersection{wxMutex::wxMutex}\label{wxmutexctor}
 
 \func{}{wxMutex}{\param{wxMutexType }{type = {\tt wxMUTEX\_DEFAULT}}}
 
 Default constructor.
-
 
 \membersection{wxMutex::\destruct{wxMutex}}\label{wxmutexdtor}
 
@@ -111,13 +105,11 @@ Default constructor.
 
 Destroys the wxMutex object.
 
-
 \membersection{wxMutex::Lock}\label{wxmutexlock}
 
 \func{wxMutexError}{Lock}{\void}
 
-Locks the mutex object. This is equivalent to 
-\helpref{LockTimeout}{wxmutexlocktimeout} with infinite timeout.
+Locks the mutex object.
 
 \wxheading{Return value}
 
@@ -128,25 +120,6 @@ One of:
 \twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{There was no error.}
 \twocolitem{{\bf wxMUTEX\_DEAD\_LOCK}}{A deadlock situation was detected.}
 \end{twocollist}
-
-
-\membersection{wxMutex::LockTimeout}\label{wxmutexlocktimeout}
-
-\func{wxMutexError}{LockTimeout}{\param{unsigned long}{ msec}}
-
-Try to lock the mutex object during the specified time interval.
-
-\wxheading{Return value}
-
-One of:
-
-\twocolwidtha{7cm}
-\begin{twocollist}\itemsep=0pt
-\twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{Mutex successfully locked.}
-\twocolitem{{\bf wxMUTEX\_TIMEOUT}}{Mutex couldn't be acquired before timeout expiration.}
-\twocolitem{{\bf wxMUTEX\_DEAD\_LOCK}}{A deadlock situation was detected.}
-\end{twocollist}
-
 
 \membersection{wxMutex::TryLock}\label{wxmutextrylock}
 
@@ -163,7 +136,6 @@ One of:
 \twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{There was no error.}
 \twocolitem{{\bf wxMUTEX\_BUSY}}{The mutex is already locked by another thread.}
 \end{twocollist}
-
 
 \membersection{wxMutex::Unlock}\label{wxmutexunlock}
 

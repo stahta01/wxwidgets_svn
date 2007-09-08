@@ -23,7 +23,7 @@
 #endif
 
 
-class WXDLLIMPEXP_FWD_CORE wxPrintNativeDataBase;
+class WXDLLEXPORT wxPrintNativeDataBase;
 
 
 class WXDLLEXPORT wxColourData: public wxObject
@@ -220,6 +220,29 @@ public:
     void SetPrivData( char *privData, int len );
 
 
+#if WXWIN_COMPATIBILITY_2_4
+    // PostScript-specific data
+    wxString GetPrinterCommand() const;
+    wxString GetPrinterOptions() const;
+    wxString GetPreviewCommand() const;
+    wxString GetFontMetricPath() const;
+    double GetPrinterScaleX() const;
+    double GetPrinterScaleY() const;
+    long GetPrinterTranslateX() const;
+    long GetPrinterTranslateY() const;
+
+    void SetPrinterCommand(const wxString& command);
+    void SetPrinterOptions(const wxString& options);
+    void SetPreviewCommand(const wxString& command);
+    void SetFontMetricPath(const wxString& path);
+    void SetPrinterScaleX(double x);
+    void SetPrinterScaleY(double y);
+    void SetPrinterScaling(double x, double y);
+    void SetPrinterTranslateX(long x);
+    void SetPrinterTranslateY(long y);
+    void SetPrinterTranslation(long x, long y);
+#endif
+
     // Convert between wxPrintData and native data
     void ConvertToNative();
     void ConvertFromNative();
@@ -278,7 +301,9 @@ public:
     bool GetSelection() const { return m_printSelection; }
     bool GetCollate() const { return m_printCollate; }
     bool GetPrintToFile() const { return m_printToFile; }
-
+#if WXWIN_COMPATIBILITY_2_4
+    bool GetSetupDialog() const { return m_printSetupDialog; }
+#endif
     void SetFromPage(int v) { m_printFromPage = v; }
     void SetToPage(int v) { m_printToPage = v; }
     void SetMinPage(int v) { m_printMinPage = v; }
@@ -288,7 +313,9 @@ public:
     void SetSelection(bool flag) { m_printSelection = flag; }
     void SetCollate(bool flag) { m_printCollate = flag; }
     void SetPrintToFile(bool flag) { m_printToFile = flag; }
-
+#if WXWIN_COMPATIBILITY_2_4
+    void SetSetupDialog(bool flag) { m_printSetupDialog = flag; }
+#endif
     void EnablePrintToFile(bool flag) { m_printEnablePrintToFile = flag; }
     void EnableSelection(bool flag) { m_printEnableSelection = flag; }
     void EnablePageNumbers(bool flag) { m_printEnablePageNumbers = flag; }
@@ -323,6 +350,9 @@ private:
     bool            m_printEnablePageNumbers;
     bool            m_printEnableHelp;
     bool            m_printEnablePrintToFile;
+#if WXWIN_COMPATIBILITY_2_4
+    bool            m_printSetupDialog;
+#endif
     wxPrintData     m_printData;
 
 private:

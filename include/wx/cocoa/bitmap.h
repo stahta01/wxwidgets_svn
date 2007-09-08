@@ -15,11 +15,11 @@
 #include "wx/palette.h"
 
 // Bitmap
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxCursor;
-class WXDLLIMPEXP_FWD_CORE wxImage;
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxImage;
+class WXDLLEXPORT wxPixelDataBase;
 
 // ========================================================================
 // wxMask
@@ -131,6 +131,7 @@ public:
     // raw bitmap access support functions
     void *GetRawData(wxPixelDataBase& data, int bpp);
     void UngetRawData(wxPixelDataBase& data);
+    void UseAlpha();
 
     wxPalette* GetPalette() const;
     void SetPalette(const wxPalette& palette);

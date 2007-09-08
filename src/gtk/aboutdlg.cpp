@@ -31,30 +31,31 @@
 #include "wx/gtk/private.h"
 
 // ----------------------------------------------------------------------------
-// GtkArray: temporary array of GTK strings
+// GtkStr: temporary GTK string
 // ----------------------------------------------------------------------------
 
-namespace
+class GtkStr : public wxGtkString
 {
+public:
+    GtkStr(const wxString& s)
+        : wxGtkString(wx_const_cast(char *, wxGTK_CONV_SYS(s).release()))
+    {
+    }
+};
+
+// ----------------------------------------------------------------------------
+// GtkArray: temporary array of GTK strings
+// ----------------------------------------------------------------------------
 
 class GtkArray
 {
 public:
-    // Create GtkArray from wxArrayString. Note that the created object is
-    // only valid as long as 'a' is!
     GtkArray(const wxArrayString& a)
     {
         m_count = a.size();
         m_strings = new const gchar *[m_count + 1];
-
         for ( size_t n = 0; n < m_count; n++ )
-        {
-#if wxUSE_UNICODE_UTF8
-            m_strings[n] = a[n].utf8_str();
-#else
             m_strings[n] = wxGTK_CONV_SYS(a[n]).release();
-#endif
-        }
 
         // array must be NULL-terminated
         m_strings[m_count] = NULL;
@@ -64,10 +65,8 @@ public:
 
     ~GtkArray()
     {
-#if !wxUSE_UNICODE_UTF8
         for ( size_t n = 0; n < m_count; n++ )
             free(wx_const_cast(gchar *, m_strings[n]));
-#endif
 
         delete [] m_strings;
     }
@@ -78,8 +77,6 @@ private:
 
     DECLARE_NO_COPY_CLASS(GtkArray)
 };
-
-} // anonymous namespace
 
 // ============================================================================
 // implementation
@@ -96,7 +93,7 @@ wxGtkAboutDialogOnLink(GtkAboutDialog * WXUNUSED(about),
                        const gchar *link,
                        gpointer WXUNUSED(data))
 {
-    wxLaunchDefaultBrowser(wxGTK_CONV_BACK_SYS(link));
+    wxLaunchDefaultBrowser(wxGTK_CONV_BACK(link));
 }
 
 void wxAboutBox(const wxAboutDialogInfo& info)
@@ -104,15 +101,15 @@ void wxAboutBox(const wxAboutDialogInfo& info)
     if ( !gtk_check_version(2,6,0) )
     {
         GtkAboutDialog * const dlg = GTK_ABOUT_DIALOG(gtk_about_dialog_new());
-        gtk_about_dialog_set_name(dlg, wxGTK_CONV_SYS(info.GetName()));
+        gtk_about_dialog_set_name(dlg, GtkStr(info.GetName()));
         if ( info.HasVersion() )
-            gtk_about_dialog_set_version(dlg, wxGTK_CONV_SYS(info.GetVersion()));
+            gtk_about_dialog_set_version(dlg, GtkStr(info.GetVersion()));
         if ( info.HasCopyright() )
-            gtk_about_dialog_set_copyright(dlg, wxGTK_CONV_SYS(info.GetCopyright()));
+            gtk_about_dialog_set_copyright(dlg, GtkStr(info.GetCopyright()));
         if ( info.HasDescription() )
-            gtk_about_dialog_set_comments(dlg, wxGTK_CONV_SYS(info.GetDescription()));
+            gtk_about_dialog_set_comments(dlg, GtkStr(info.GetDescription()));
         if ( info.HasLicence() )
-            gtk_about_dialog_set_license(dlg, wxGTK_CONV_SYS(info.GetLicence()));
+            gtk_about_dialog_set_license(dlg, GtkStr(info.GetLicence()));
 
         wxIcon icon = info.GetIcon();
         if ( icon.Ok() )
@@ -125,11 +122,11 @@ void wxAboutBox(const wxAboutDialogInfo& info)
             //     this...)
             gtk_about_dialog_set_url_hook(wxGtkAboutDialogOnLink, NULL, NULL);
 
-            gtk_about_dialog_set_website(dlg, wxGTK_CONV_SYS(info.GetWebSiteURL()));
+            gtk_about_dialog_set_website(dlg, GtkStr(info.GetWebSiteURL()));
             gtk_about_dialog_set_website_label
             (
                 dlg,
-                wxGTK_CONV_SYS(info.GetWebSiteDescription())
+                GtkStr(info.GetWebSiteDescription())
             );
         }
 
@@ -166,7 +163,7 @@ void wxAboutBox(const wxAboutDialogInfo& info)
         }
 
         if ( !transCredits.empty() )
-            gtk_about_dialog_set_translator_credits(dlg, wxGTK_CONV_SYS(transCredits));
+            gtk_about_dialog_set_translator_credits(dlg, GtkStr(transCredits));
 
         g_signal_connect(dlg, "response",
                             G_CALLBACK(wxGtkAboutDialogOnClose), NULL);

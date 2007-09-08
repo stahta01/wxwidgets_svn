@@ -129,7 +129,7 @@ public:
                                     ,wxCoord*        pY
                                     ,wxCoord*        pDescent = NULL
                                     ,wxCoord*        pExternalLeading = NULL
-                                    ,const wxFont*   pTheFont = NULL
+                                    ,wxFont*         pTheFont = NULL
                                    ) const;
     virtual bool    CanDrawBitmap(void) const;
     virtual bool    CanGetTextExtent(void) const;
@@ -140,6 +140,9 @@ public:
     virtual void    SetUserScale( double dX
                                  ,double dY
                                 );
+    virtual void    SetSystemScale( double dX
+                                   ,double dY
+                                  );
     virtual void    SetLogicalScale( double dX
                                     ,double dY
                                    );

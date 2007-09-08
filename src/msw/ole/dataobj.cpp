@@ -28,7 +28,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/dataobj.h"
@@ -137,9 +136,9 @@ private:
 // wxDataFormat
 // ----------------------------------------------------------------------------
 
-void wxDataFormat::SetId(const wxString& format)
+void wxDataFormat::SetId(const wxChar *format)
 {
-    m_format = (wxDataFormat::NativeFormat)::RegisterClipboardFormat(format.wx_str());
+    m_format = (wxDataFormat::NativeFormat)::RegisterClipboardFormat(format);
     if ( !m_format )
     {
         wxLogError(_("Couldn't register clipboard format '%s'."), format);
@@ -1082,7 +1081,7 @@ size_t wxFileDataObject::GetDataSize() const
         size_t len;
 #if wxUSE_UNICODE_MSLU
         if ( sizeOfChar == sizeof(char) )
-            len = strlen(m_filenames[i].mb_str(*wxConvFileName));
+            len = strlen(wxConvFileName->cWC2MB(m_filenames[i]));
         else
 #endif // wxUSE_UNICODE_MSLU
             len = m_filenames[i].length();
@@ -1131,7 +1130,7 @@ bool wxFileDataObject::GetDataHere(void *WXUNUSED_IN_WINCE(pData)) const
 #if wxUSE_UNICODE_MSLU
         if ( sizeOfChar == sizeof(char) )
         {
-            wxCharBuffer buf(m_filenames[i].mb_str(*wxConvFileName));
+            wxCharBuffer buf(wxConvFileName->cWC2MB(m_filenames[i]));
             len = strlen(buf);
             memcpy(pbuf, buf, len*sizeOfChar);
         }
@@ -1216,9 +1215,9 @@ public:
 
 wxURLDataObject::wxURLDataObject(const wxString& url)
 {
-    // we support CF_TEXT and CFSTR_SHELLURL formats which are basically the
-    // same but it seems that some browsers only provide one of them so we have
-    // to support both
+    // we support CF_TEXT and CFSTR_SHELLURL formats which are basicly the same
+    // but it seems that some browsers only provide one of them so we have to
+    // support both
     Add(new wxTextDataObject);
     Add(new CFSTR_SHELLURLDataObject());
 
@@ -1255,15 +1254,13 @@ wxString wxURLDataObject::GetURL() const
 
 void wxURLDataObject::SetURL(const wxString& url)
 {
-    wxCharBuffer urlMB(url.mb_str());
-    if ( urlMB )
-    {
-        const size_t len = strlen(urlMB) + 1; // size with trailing NUL
-        SetData(wxDF_TEXT, len, urlMB);
-        SetData(wxDataFormat(CFSTR_SHELLURL), len, urlMB);
-    }
+    SetData(wxDataFormat(wxUSE_UNICODE ? wxDF_UNICODETEXT : wxDF_TEXT),
+            url.Length()+1, url.c_str());
 
-    SetData(wxDF_UNICODETEXT, url.length() + 1, url.wc_str());
+    // CFSTR_SHELLURL is always supposed to be ANSI...
+    wxWX2MBbuf urlA = (wxWX2MBbuf)url.mbc_str();
+    size_t len = strlen(urlA);
+    SetData(wxDataFormat(CFSTR_SHELLURL), len+1, (const char*)urlA);
 }
 
 // ----------------------------------------------------------------------------
