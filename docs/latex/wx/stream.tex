@@ -8,10 +8,6 @@ None
 
 <wx/stream.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxStreamBase}{wxstreambase}
@@ -188,17 +184,6 @@ the beginning of the stream. Otherwise, it returns wxInvalidOffset.
 
 Resets to the initial state variables concerning the buffer.
 
-
-\membersection{wxStreamBuffer::Truncate}\label{wxstreambuffertruncate}
-
-\func{void}{Truncate}{\void}
-
-Truncates the buffer to the current position.
-
-Note: Truncate() cannot be used to enlarge the buffer. This is
-usually not needed since the buffer expands automatically.
-
-
 \membersection{wxStreamBuffer::SetBufferIO}\label{wxstreambuffersetbufferio}
 
 \func{void}{SetBufferIO}{\param{char*}{ buffer\_start}, \param{char*}{ buffer\_end}}
@@ -310,12 +295,6 @@ Flushes the IO buffer.
 \func{bool}{FillBuffer}{\void}
 
 Fill the IO buffer.
-
-\membersection{wxStreamBuffer::GetBufferSize}\label{wxstreambuffergetbuffersize}
-
-\constfunc{size\_t}{GetBufferSize}{\void}
-
-Returns the size of the buffer.
 
 \membersection{wxStreamBuffer::GetDataLeft}\label{wxstreambuffergetdataleft}
 

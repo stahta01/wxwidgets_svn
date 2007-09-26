@@ -30,11 +30,19 @@
 
 #include "wx/aui/tabmdi.h"
 #include "wx/dcbuffer.h"
+#include "wx/log.h"
 
-#include "wx/renderer.h"
+#ifdef __WXMSW__
+#include  "wx/msw/private.h"
+#endif
 
 #ifdef __WXMAC__
 #include "wx/mac/carbon/private.h"
+#endif
+
+#ifdef __WXGTK__
+#include <gtk/gtk.h>
+#include "wx/gtk/win_gtk.h"
 #endif
 
 #include "wx/arrimpl.cpp"
@@ -57,10 +65,10 @@ DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_DOWN)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_UP)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_DOWN)
 
+
 IMPLEMENT_CLASS(wxAuiNotebook, wxControl)
 IMPLEMENT_CLASS(wxAuiTabCtrl, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxAuiNotebookEvent, wxEvent)
-
 
 
 
@@ -112,6 +120,123 @@ static void IndentPressedBitmap(wxRect* rect, int button_state)
     }
 }
 
+static void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags)
+{
+#ifdef __WXMSW__
+    wxUnusedVar(win);
+    wxUnusedVar(flags);
+
+    RECT rc;
+    wxCopyRectToRECT(rect, rc);
+
+    ::DrawFocusRect(GetHdcOf(dc), &rc);
+
+#elif defined(__WXGTK20__)
+    GdkWindow* gdk_window = dc.GetGDKWindow();
+    wxASSERT_MSG( gdk_window,
+                  wxT("cannot draw focus rectangle on wxDC of this type") );
+
+    GtkStateType state;
+    //if (flags & wxCONTROL_SELECTED)
+    //    state = GTK_STATE_SELECTED;
+    //else
+        state = GTK_STATE_NORMAL;
+
+    gtk_paint_focus( win->m_widget->style,
+                     gdk_window,
+                     state,
+                     NULL,
+                     win->m_wxwindow,
+                     NULL,
+                     dc.LogicalToDeviceX(rect.x),
+                     dc.LogicalToDeviceY(rect.y),
+                     rect.width,
+                     rect.height );
+#elif (defined(__WXMAC__))
+
+#if wxMAC_USE_CORE_GRAPHICS 
+    {
+        CGRect cgrect = CGRectMake( rect.x , rect.y , rect.width, rect.height ) ;
+
+#if 0
+        Rect bounds ;
+        win->GetPeer()->GetRect( &bounds ) ;
+
+        wxLogDebug(wxT("Focus rect %d, %d, %d, %d"), rect.x, rect.y, rect.width, rect.height);
+        wxLogDebug(wxT("Peer rect %d, %d, %d, %d"), bounds.left, bounds.top, bounds.right - bounds.left, bounds.bottom - bounds.top);
+#endif
+
+        HIThemeFrameDrawInfo info ;
+        memset( &info, 0 , sizeof(info) ) ;
+
+        info.version = 0 ;
+        info.kind = 0 ;
+        info.state = kThemeStateActive;
+        info.isFocused = true ;
+
+        CGContextRef cgContext = (CGContextRef) win->MacGetCGContextRef() ;
+        wxASSERT( cgContext ) ;
+
+        HIThemeDrawFocusRect( &cgrect , true , cgContext , kHIThemeOrientationNormal ) ;
+    }
+ #else
+    {
+        Rect r;
+        r.left = rect.x; r.top = rect.y; r.right = rect.GetRight(); r.bottom = rect.GetBottom();
+        wxTopLevelWindowMac* top = win->MacGetTopLevelWindow();
+        if ( top )
+        {
+            wxPoint pt(0, 0) ;
+            wxMacControl::Convert( &pt , win->GetPeer() , top->GetPeer() ) ;
+            OffsetRect( &r , pt.x , pt.y ) ;
+        }
+
+        DrawThemeFocusRect( &r , true ) ;
+    }
+#endif
+#else
+    wxUnusedVar(win);
+    wxUnusedVar(flags);
+
+    // draw the pixels manually because the "dots" in wxPen with wxDOT style
+    // may be short traits and not really dots
+    //
+    // note that to behave in the same manner as DrawRect(), we must exclude
+    // the bottom and right borders from the rectangle
+    wxCoord x1 = rect.GetLeft(),
+            y1 = rect.GetTop(),
+            x2 = rect.GetRight(),
+            y2 = rect.GetBottom();
+
+    dc.SetPen(*wxBLACK_PEN);
+
+#ifdef __WXMAC__
+    dc.SetLogicalFunction(wxCOPY);
+#else
+    // this seems to be closer than what Windows does than wxINVERT although
+    // I'm still not sure if it's correct
+    dc.SetLogicalFunction(wxAND_REVERSE);
+#endif
+
+    wxCoord z;
+    for ( z = x1 + 1; z < x2; z += 2 )
+        dc.DrawPoint(z, rect.GetTop());
+
+    wxCoord shift = z == x2 ? 0 : 1;
+    for ( z = y1 + shift; z < y2; z += 2 )
+        dc.DrawPoint(x2, z);
+
+    shift = z == y2 ? 0 : 1;
+    for ( z = x2 - shift; z > x1; z -= 2 )
+        dc.DrawPoint(z, y2);
+
+    shift = z == x1 ? 0 : 1;
+    for ( z = y2 - shift; z > y1; z -= 2 )
+        dc.DrawPoint(x1, z);
+
+    dc.SetLogicalFunction(wxCOPY);
+#endif
+}
 
 
 // -- GUI helper classes and functions --
@@ -287,10 +412,9 @@ void wxAuiDefaultTabArt::DrawBackground(wxDC& dc,
                                         const wxRect& rect)
 {
     // draw background
-
-    wxColor top_color       = wxAuiStepColour(m_base_colour, 90);
-    wxColor bottom_color   = wxAuiStepColour(m_base_colour, 170);
-    wxRect r;
+   wxColor top_color       = wxAuiStepColour(m_base_colour, 90);
+   wxColor bottom_color   = wxAuiStepColour(m_base_colour, 170);
+   wxRect r;
 
    if (m_flags &wxAUI_NB_BOTTOM)
        r = wxRect(rect.x, rect.y, rect.width+2, rect.height);
@@ -298,12 +422,9 @@ void wxAuiDefaultTabArt::DrawBackground(wxDC& dc,
    // TODO: else if (m_flags &wxAUI_NB_RIGHT) {}
    else //for wxAUI_NB_TOP
        r = wxRect(rect.x, rect.y, rect.width+2, rect.height-3);
-
     dc.GradientFillLinear(r, top_color, bottom_color, wxSOUTH);
 
-
    // draw base lines
-
    dc.SetPen(m_border_pen);
    int y = rect.GetHeight();
    int w = rect.GetWidth();
@@ -343,7 +464,7 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
 {
     wxCoord normal_textx, normal_texty;
     wxCoord selected_textx, selected_texty;
-    wxCoord texty;
+    wxCoord textx, texty;
 
     // if the caption is empty, measure some temporary text
     wxString caption = page.caption;
@@ -379,11 +500,13 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
     if (page.active)
     {
         dc.SetFont(m_selected_font);
+        textx = selected_textx;
         texty = selected_texty;
     }
-    else
+     else
     {
         dc.SetFont(m_normal_font);
+        textx = normal_textx;
         texty = normal_texty;
     }
 
@@ -418,21 +541,21 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
     wxPoint border_points[6];
     if (m_flags &wxAUI_NB_BOTTOM)
     {
-        border_points[0] = wxPoint(tab_x,             tab_y);
-        border_points[1] = wxPoint(tab_x,             tab_y+tab_height-6);
-        border_points[2] = wxPoint(tab_x+2,           tab_y+tab_height-4);
-        border_points[3] = wxPoint(tab_x+tab_width-2, tab_y+tab_height-4);
-        border_points[4] = wxPoint(tab_x+tab_width,   tab_y+tab_height-6);
-        border_points[5] = wxPoint(tab_x+tab_width,   tab_y);
+       border_points[0] = wxPoint(tab_x,             tab_y);
+       border_points[1] = wxPoint(tab_x,             tab_y+tab_height-6);
+       border_points[2] = wxPoint(tab_x+2,           tab_y+tab_height-4);
+       border_points[3] = wxPoint(tab_x+tab_width-2, tab_y+tab_height-4);
+       border_points[4] = wxPoint(tab_x+tab_width,   tab_y+tab_height-6);
+       border_points[5] = wxPoint(tab_x+tab_width,   tab_y);
     }
     else //if (m_flags & wxAUI_NB_TOP) {}
     {
-        border_points[0] = wxPoint(tab_x,             tab_y+tab_height-4);
-        border_points[1] = wxPoint(tab_x,             tab_y+2);
-        border_points[2] = wxPoint(tab_x+2,           tab_y);
-        border_points[3] = wxPoint(tab_x+tab_width-2, tab_y);
-        border_points[4] = wxPoint(tab_x+tab_width,   tab_y+2);
-        border_points[5] = wxPoint(tab_x+tab_width,   tab_y+tab_height-4);
+       border_points[0] = wxPoint(tab_x,             tab_y+tab_height-4);
+       border_points[1] = wxPoint(tab_x,             tab_y+2);
+       border_points[2] = wxPoint(tab_x+2,           tab_y);
+       border_points[3] = wxPoint(tab_x+tab_width-2, tab_y);
+       border_points[4] = wxPoint(tab_x+tab_width,   tab_y+2);
+       border_points[5] = wxPoint(tab_x+tab_width,   tab_y+tab_height-4);
     }
     // TODO: else if (m_flags &wxAUI_NB_LEFT) {}
     // TODO: else if (m_flags &wxAUI_NB_RIGHT) {}
@@ -473,7 +596,7 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
         wxColor bottom_color = m_base_colour;
         dc.GradientFillLinear(r, bottom_color, top_color, wxNORTH);
     }
-    else
+     else
     {
         // draw inactive tab
 
@@ -511,12 +634,12 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
     // this gets rid of the top one of those lines in the tab control
     if (page.active)
     {
-        if (m_flags &wxAUI_NB_BOTTOM)
-            dc.SetPen(wxPen(wxColour(wxAuiStepColour(m_base_colour, 170))));
-        // TODO: else if (m_flags &wxAUI_NB_LEFT) {}
-        // TODO: else if (m_flags &wxAUI_NB_RIGHT) {}
-        else //for wxAUI_NB_TOP
-            dc.SetPen(m_base_colour_pen);
+       if (m_flags &wxAUI_NB_BOTTOM)
+           dc.SetPen(wxPen(wxColour(wxAuiStepColour(m_base_colour, 170))));
+       // TODO: else if (m_flags &wxAUI_NB_LEFT) {}
+       // TODO: else if (m_flags &wxAUI_NB_RIGHT) {}
+       else //for wxAUI_NB_TOP
+           dc.SetPen(m_base_colour_pen);
         dc.DrawLine(border_points[0].x+1,
                     border_points[0].y,
                     border_points[5].x,
@@ -531,6 +654,7 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
         close_button_width = m_active_close_bmp.GetWidth();
     }
 
+
     int bitmap_offset = 0;
     if (page.bitmap.IsOk())
     {
@@ -544,9 +668,8 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
 
         text_offset = bitmap_offset + page.bitmap.GetWidth();
         text_offset += 3; // bitmap padding
-
     }
-    else
+     else
     {
         text_offset = tab_x + 8;
     }
@@ -560,31 +683,6 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
     dc.DrawText(draw_text,
                 text_offset,
                 drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1);
-
-    // draw focus rectangle
-    if (page.active && (wnd->FindFocus() == wnd))
-    {
-        wxRect focusRectText(text_offset, (drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1),
-            selected_textx, selected_texty);
-
-        wxRect focusRect;
-        wxRect focusRectBitmap;
-
-        if (page.bitmap.IsOk())
-            focusRectBitmap = wxRect(bitmap_offset, drawn_tab_yoff + (drawn_tab_height/2) - (page.bitmap.GetHeight()/2),
-                                            page.bitmap.GetWidth(), page.bitmap.GetHeight());
-
-        if (page.bitmap.IsOk() && draw_text.IsEmpty())
-            focusRect = focusRectBitmap;
-        else if (!page.bitmap.IsOk() && !draw_text.IsEmpty())
-            focusRect = focusRectText;
-        else if (page.bitmap.IsOk() && !draw_text.IsEmpty())
-            focusRect = focusRectText.Union(focusRectBitmap);
-
-        focusRect.Inflate(2, 2);
-
-        wxRendererNative::Get().DrawFocusRect(wnd, dc, focusRect, 0);
-    }
 
     // draw close button if necessary
     if (close_button_state != wxAUI_BUTTON_STATE_HIDDEN)
@@ -608,6 +706,33 @@ void wxAuiDefaultTabArt::DrawTab(wxDC& dc,
     }
 
     *out_tab_rect = wxRect(tab_x, tab_y, tab_width, tab_height);
+
+#ifndef __WXMAC__
+    // draw focus rectangle
+    if (page.active && (wnd->FindFocus() == wnd))
+    {
+        wxRect focusRectText(text_offset, (drawn_tab_yoff + (drawn_tab_height)/2 - (texty/2) - 1),
+            selected_textx, selected_texty);
+
+        wxRect focusRect;
+        wxRect focusRectBitmap;
+
+        if (page.bitmap.IsOk())
+            focusRectBitmap = wxRect(bitmap_offset, drawn_tab_yoff + (drawn_tab_height/2) - (page.bitmap.GetHeight()/2),
+                                            page.bitmap.GetWidth(), page.bitmap.GetHeight());
+
+        if (page.bitmap.IsOk() && draw_text.IsEmpty())
+            focusRect = focusRectBitmap;
+        else if (!page.bitmap.IsOk() && !draw_text.IsEmpty())
+            focusRect = focusRectText;
+        else if (page.bitmap.IsOk() && !draw_text.IsEmpty())
+            focusRect = focusRectText.Union(focusRectBitmap);
+
+        focusRect.Inflate(2, 2);
+
+        DrawFocusRect(wnd, dc, focusRect, 0);
+    }
+#endif
 
     dc.DestroyClippingRegion();
 }
@@ -679,25 +804,25 @@ void wxAuiDefaultTabArt::DrawButton(wxDC& dc,
         case wxAUI_BUTTON_CLOSE:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_close_bmp;
-            else
+                 else
                 bmp = m_active_close_bmp;
             break;
         case wxAUI_BUTTON_LEFT:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_left_bmp;
-            else
+                 else
                 bmp = m_active_left_bmp;
             break;
         case wxAUI_BUTTON_RIGHT:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_right_bmp;
-            else
+                 else
                 bmp = m_active_right_bmp;
             break;
         case wxAUI_BUTTON_WINDOWLIST:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_windowlist_bmp;
-            else
+                 else
                 bmp = m_active_windowlist_bmp;
             break;
     }
@@ -715,7 +840,7 @@ void wxAuiDefaultTabArt::DrawButton(wxDC& dc,
         rect.SetWidth(bmp.GetWidth());
         rect.SetHeight(bmp.GetHeight());
     }
-    else
+     else
     {
         rect = wxRect(in_rect.x + in_rect.width - bmp.GetWidth(),
                       ((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2),
@@ -727,6 +852,7 @@ void wxAuiDefaultTabArt::DrawButton(wxDC& dc,
 
     *out_rect = rect;
 }
+
 
 int wxAuiDefaultTabArt::ShowDropDown(wxWindow* wnd,
                                      const wxAuiNotebookPageArray& pages,
@@ -800,7 +926,7 @@ int wxAuiDefaultTabArt::GetBestTabCtrlSize(wxWindow* wnd,
         wxBitmap bmp;
         if (measure_bmp.IsOk())
             bmp = measure_bmp;
-        else
+             else
             bmp = page.bitmap;
 
         // we don't use the caption text because we don't
@@ -993,7 +1119,7 @@ void wxAuiSimpleTabArt::DrawTab(wxDC& dc,
         textx = selected_textx;
         texty = selected_texty;
     }
-    else
+     else
     {
         dc.SetPen(m_normal_bkpen);
         dc.SetBrush(m_normal_bkbrush);
@@ -1038,7 +1164,7 @@ void wxAuiSimpleTabArt::DrawTab(wxDC& dc,
         close_button_width = m_active_close_bmp.GetWidth();
         text_offset = tab_x + (tab_height/2) + ((tab_width-close_button_width)/2) - (textx/2);
     }
-    else
+     else
     {
         text_offset = tab_x + (tab_height/3) + (tab_width/2) - (textx/2);
     }
@@ -1058,6 +1184,7 @@ void wxAuiSimpleTabArt::DrawTab(wxDC& dc,
                  (tab_y + tab_height)/2 - (texty/2) + 1);
 
 
+#ifndef __WXMAC__
     // draw focus rectangle
     if (page.active && (wnd->FindFocus() == wnd))
     {
@@ -1066,8 +1193,9 @@ void wxAuiSimpleTabArt::DrawTab(wxDC& dc,
 
         focusRect.Inflate(2, 2);
 
-        wxRendererNative::Get().DrawFocusRect(wnd, dc, focusRect, 0);
+        DrawFocusRect(wnd, dc, focusRect, 0);
     }
+#endif
 
     // draw close button if necessary
     if (close_button_state != wxAUI_BUTTON_STATE_HIDDEN)
@@ -1075,7 +1203,7 @@ void wxAuiSimpleTabArt::DrawTab(wxDC& dc,
         wxBitmap bmp;
         if (page.active)
             bmp = m_active_close_bmp;
-        else
+             else
             bmp = m_disabled_close_bmp;
 
         wxRect rect(tab_x + tab_width - close_button_width - 1,
@@ -1144,25 +1272,25 @@ void wxAuiSimpleTabArt::DrawButton(wxDC& dc,
         case wxAUI_BUTTON_CLOSE:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_close_bmp;
-            else
+                 else
                 bmp = m_active_close_bmp;
             break;
         case wxAUI_BUTTON_LEFT:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_left_bmp;
-            else
+                 else
                 bmp = m_active_left_bmp;
             break;
         case wxAUI_BUTTON_RIGHT:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_right_bmp;
-            else
+                 else
                 bmp = m_active_right_bmp;
             break;
         case wxAUI_BUTTON_WINDOWLIST:
             if (button_state & wxAUI_BUTTON_STATE_DISABLED)
                 bmp = m_disabled_windowlist_bmp;
-            else
+                 else
                 bmp = m_active_windowlist_bmp;
             break;
     }
@@ -1179,7 +1307,7 @@ void wxAuiSimpleTabArt::DrawButton(wxDC& dc,
         rect.SetWidth(bmp.GetWidth());
         rect.SetHeight(bmp.GetHeight());
     }
-    else
+     else
     {
         rect = wxRect(in_rect.x + in_rect.width - bmp.GetWidth(),
                       ((in_rect.y + in_rect.height)/2) - (bmp.GetHeight()/2),
@@ -1191,6 +1319,7 @@ void wxAuiSimpleTabArt::DrawButton(wxDC& dc,
 
     *out_rect = rect;
 }
+
 
 int wxAuiSimpleTabArt::ShowDropDown(wxWindow* wnd,
                                     const wxAuiNotebookPageArray& pages,
@@ -1217,7 +1346,7 @@ int wxAuiSimpleTabArt::ShowDropDown(wxWindow* wnd,
     pt = wnd->ScreenToClient(pt);
     if (pt.x < 100)
         pt.x = 0;
-    else
+         else
         pt.x -= 100;
 
     // find out the screen coordinate at the bottom of the tab ctrl
@@ -1409,7 +1538,7 @@ bool wxAuiTabContainer::InsertPage(wxWindow* page,
 
     if (idx >= m_pages.GetCount())
         m_pages.Add(page_info);
-    else
+         else
         m_pages.Insert(page_info, idx);
 
     // let the art provider know how many pages we have
@@ -1476,7 +1605,7 @@ bool wxAuiTabContainer::SetActivePage(wxWindow* wnd)
             page.active = true;
             found = true;
         }
-        else
+         else
         {
             page.active = false;
         }
@@ -1526,14 +1655,14 @@ wxWindow* wxAuiTabContainer::GetWindowFromIdx(size_t idx) const
 
 int wxAuiTabContainer::GetIdxFromWindow(wxWindow* wnd) const
 {
-    const size_t page_count = m_pages.GetCount();
-    for ( size_t i = 0; i < page_count; ++i )
+    size_t i, page_count = m_pages.GetCount();
+    for (i = 0; i < page_count; ++i)
     {
         wxAuiNotebookPage& page = m_pages.Item(i);
         if (page.window == wnd)
             return i;
     }
-    return wxNOT_FOUND;
+    return -1;
 }
 
 wxAuiNotebookPage& wxAuiTabContainer::GetPage(size_t idx)
@@ -1629,6 +1758,7 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
     // afforded on screen
     int total_width = 0;
     int visible_width = 0;
+
     for (i = 0; i < page_count; ++i)
     {
         wxAuiNotebookPage& page = m_pages.Item(i);
@@ -1655,14 +1785,14 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
 
         if (i+1 < page_count)
             total_width += x_extent;
-        else
+             else
             total_width += size.x;
 
         if (i >= m_tab_offset)
         {
             if (i+1 < page_count)
                 visible_width += x_extent;
-            else
+                 else
                 visible_width += size.x;
         }
     }
@@ -1680,7 +1810,7 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
             }
         }
     }
-    else
+     else
     {
         // hide left/right buttons
         for (i = 0; i < button_count; ++i)
@@ -1702,14 +1832,14 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
         {
             if (m_tab_offset == 0)
                 button.cur_state |= wxAUI_BUTTON_STATE_DISABLED;
-            else
+                 else
                 button.cur_state &= ~wxAUI_BUTTON_STATE_DISABLED;
         }
         if (button.id == wxAUI_BUTTON_RIGHT)
         {
             if (visible_width < m_rect.GetWidth() - ((int)button_count*16))
                 button.cur_state |= wxAUI_BUTTON_STATE_DISABLED;
-            else
+                 else
                 button.cur_state &= ~wxAUI_BUTTON_STATE_DISABLED;
         }
     }
@@ -1815,6 +1945,7 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
     size_t active = 999;
     int active_offset = 0;
     wxRect active_rect;
+    wxRect active_focus_rect;
 
     int x_extent = 0;
     wxRect rect = m_rect;
@@ -1827,9 +1958,11 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
         wxAuiTabContainerButton& tab_button = m_tab_close_buttons.Item(i);
 
         // determine if a close button is on this tab
+        bool close_button = false;
         if ((m_flags & wxAUI_NB_CLOSE_ON_ALL_TABS) != 0 ||
             ((m_flags & wxAUI_NB_CLOSE_ON_ACTIVE_TAB) != 0 && page.active))
         {
+            close_button = true;
             if (tab_button.cur_state == wxAUI_BUTTON_STATE_HIDDEN)
             {
                 tab_button.id = wxAUI_BUTTON_CLOSE;
@@ -1837,7 +1970,7 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
                 tab_button.location = wxCENTER;
             }
         }
-        else
+         else
         {
             tab_button.cur_state = wxAUI_BUTTON_STATE_HIDDEN;
         }
@@ -1862,6 +1995,8 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
             active = i;
             active_offset = offset;
             active_rect = rect;
+            active_focus_rect = rect;
+            active_focus_rect.width = x_extent;
         }
 
         offset += x_extent;
@@ -1882,6 +2017,14 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
 
         wxAuiTabContainerButton& tab_button = m_tab_close_buttons.Item(active);
 
+        // determine if a close button is on this tab
+        bool close_button = false;
+        if ((m_flags & wxAUI_NB_CLOSE_ON_ALL_TABS) != 0 ||
+            ((m_flags & wxAUI_NB_CLOSE_ON_ACTIVE_TAB) != 0 && page.active))
+        {
+            close_button = true;
+        }
+
         rect.x = active_offset;
         m_art->DrawTab(dc,
                        wnd,
@@ -1897,6 +2040,16 @@ void wxAuiTabContainer::Render(wxDC* raw_dc, wxWindow* wnd)
     raw_dc->Blit(m_rect.x, m_rect.y,
                  m_rect.GetWidth(), m_rect.GetHeight(),
                  &dc, 0, 0);
+
+#ifdef __WXMAC__
+    // On Mac, need to draw the focus rect directly to the window
+    if (wnd && (wnd->FindFocus() == wnd) && (active >= m_tab_offset && active < m_pages.GetCount()))
+    {
+        wxRect focusRect(active_focus_rect);
+        focusRect.Inflate(-6, -6);
+        DrawFocusRect(wnd, * raw_dc, focusRect, 0);
+    }
+#endif
 }
 
 // Is the tab visible?
@@ -2197,7 +2350,6 @@ wxAuiTabCtrl::wxAuiTabCtrl(wxWindow* parent,
                            const wxSize& size,
                            long style) : wxControl(parent, id, pos, size, style)
 {
-    SetName(wxT("wxAuiTabCtrl"));
     m_click_pt = wxDefaultPosition;
     m_is_dragging = false;
     m_hover_button = NULL;
@@ -2406,7 +2558,7 @@ void wxAuiTabCtrl::OnMotion(wxMouseEvent& evt)
             return;
         }
     }
-    else
+     else
     {
         if (m_hover_button)
         {
@@ -2474,14 +2626,14 @@ void wxAuiTabCtrl::OnButton(wxAuiNotebookEvent& event)
                 Update();
             }
         }
-        else
+         else
         {
             SetTabOffset(GetTabOffset()+1);
             Refresh();
             Update();
         }
     }
-    else if (button == wxAUI_BUTTON_WINDOWLIST)
+     else if (button == wxAUI_BUTTON_WINDOWLIST)
     {
         int idx = GetArtProvider()->ShowDropDown(this, m_pages, GetActivePage());
 
@@ -2494,7 +2646,7 @@ void wxAuiTabCtrl::OnButton(wxAuiNotebookEvent& event)
             GetEventHandler()->ProcessEvent(e);
         }
     }
-    else
+     else
     {
         event.Skip();
     }
@@ -2650,7 +2802,6 @@ public:
         m_tab_ctrl_height = h;
     }
 
-protected:
     void DoSetSize(int x, int y,
                    int width, int height,
                    int WXUNUSED(sizeFlags = wxSIZE_AUTO))
@@ -2665,7 +2816,6 @@ protected:
         *y = m_rect.height;
     }
 
-public:
     bool Show( bool WXUNUSED(show = true) ) { return false; }
 
     void DoSizing()
@@ -2673,7 +2823,6 @@ public:
         if (!m_tabs)
             return;
 
-        m_tab_rect = wxRect(m_rect.x, m_rect.y, m_rect.width, m_tab_ctrl_height);
         if (m_tabs->GetFlags() & wxAUI_NB_BOTTOM)
         {
             m_tab_rect = wxRect (m_rect.x, m_rect.y + m_rect.height - m_tab_ctrl_height, m_rect.width, m_tab_ctrl_height);
@@ -2700,13 +2849,13 @@ public:
             wxAuiNotebookPage& page = pages.Item(i);
             if (m_tabs->GetFlags() & wxAUI_NB_BOTTOM)
             {
-                page.window->SetSize(m_rect.x, m_rect.y,
-                                     m_rect.width, m_rect.height - m_tab_ctrl_height);
+               page.window->SetSize(m_rect.x, m_rect.y,
+                                    m_rect.width, m_rect.height - m_tab_ctrl_height);
             }
             else //TODO: if (GetFlags() & wxAUI_NB_TOP)
             {
                 page.window->SetSize(m_rect.x, m_rect.y + m_tab_ctrl_height,
-                                  m_rect.width, m_rect.height - m_tab_ctrl_height);
+                                    m_rect.width, m_rect.height - m_tab_ctrl_height);
             }
             // TODO: else if (GetFlags() & wxAUI_NB_LEFT){}
             // TODO: else if (GetFlags() & wxAUI_NB_RIGHT){}
@@ -2721,7 +2870,6 @@ public:
         }
     }
 
-protected:
     void DoGetSize(int* x, int* y) const
     {
         if (x)
@@ -2730,11 +2878,12 @@ protected:
             *y = m_rect.GetHeight();
     }
 
-public:
     void Update()
     {
         // does nothing
     }
+
+public:
 
     wxRect m_rect;
     wxRect m_tab_rect;
@@ -2750,7 +2899,7 @@ const int wxAuiBaseTabCtrlId = 5380;
 
 BEGIN_EVENT_TABLE(wxAuiNotebook, wxControl)
     EVT_SIZE(wxAuiNotebook::OnSize)
-    EVT_CHILD_FOCUS(wxAuiNotebook::OnChildFocusNotebook)
+    EVT_CHILD_FOCUS(wxAuiNotebook::OnChildFocus)
     EVT_COMMAND_RANGE(wxAuiBaseTabCtrlId, wxAuiBaseTabCtrlId+500,
                       wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGING,
                       wxAuiNotebook::OnTabClicked)
@@ -2781,17 +2930,8 @@ BEGIN_EVENT_TABLE(wxAuiNotebook, wxControl)
     EVT_COMMAND_RANGE(wxAuiBaseTabCtrlId, wxAuiBaseTabCtrlId+500,
                       wxEVT_COMMAND_AUINOTEBOOK_BG_DCLICK,
                       wxAuiNotebook::OnTabBgDClick)
-    EVT_NAVIGATION_KEY(wxAuiNotebook::OnNavigationKeyNotebook)
-
-#ifdef wxHAS_NATIVE_TAB_TRAVERSAL
-    WX_EVENT_TABLE_CONTROL_CONTAINER(wxAuiNotebook)
-#else
-    // Avoid clash with container event handler functions
-    EVT_SET_FOCUS(wxAuiNotebook::OnFocus)
-#endif
+    EVT_NAVIGATION_KEY(wxAuiNotebook::OnNavigationKey)
 END_EVENT_TABLE()
-
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxAuiNotebook, wxControl)
 
 wxAuiNotebook::wxAuiNotebook()
 {
@@ -2833,10 +2973,6 @@ bool wxAuiNotebook::Create(wxWindow* parent,
 // code called by all constructors
 void wxAuiNotebook::InitNotebook(long style)
 {
-    WX_INIT_CONTROL_CONTAINER();
-    // SetCanFocus(false);
-
-    SetName(wxT("wxAuiNotebook"));
     m_curpage = -1;
     m_tab_id_counter = wxAuiBaseTabCtrlId;
     m_dummy_wnd = NULL;
@@ -2867,7 +3003,7 @@ wxAuiNotebook::~wxAuiNotebook()
 {
     // Indicate we're deleting pages
     m_isBeingDeleted = true;
-
+    
     while ( GetPageCount() > 0 )
         DeletePage(0);
 
@@ -2989,7 +3125,7 @@ wxSize wxAuiNotebook::CalculateNewSplitSize()
         new_split_size.x /= 2;
         new_split_size.y /= 2;
     }
-    else
+     else
     {
         // this is in place of a more complicated calculation
         // that needs to be implemented
@@ -3089,7 +3225,7 @@ bool wxAuiNotebook::InsertPage(size_t page_idx,
     wxAuiTabCtrl* active_tabctrl = GetActiveTabCtrl();
     if (page_idx >= active_tabctrl->GetPageCount())
         active_tabctrl->AddPage(page, info);
-    else
+         else
         active_tabctrl->InsertPage(page, info, page_idx);
 
     UpdateTabCtrlHeight();
@@ -3102,7 +3238,10 @@ bool wxAuiNotebook::InsertPage(size_t page_idx,
 
     if (select)
     {
-        SetSelectionToWindow(page);
+        int idx = m_tabs.GetIdxFromWindow(page);
+        wxASSERT_MSG(idx != -1, wxT("Invalid Page index returned on wxAuiNotebook::InsertPage()"));
+
+        SetSelection(idx);
     }
 
     return true;
@@ -3120,13 +3259,14 @@ bool wxAuiNotebook::DeletePage(size_t page_idx)
 
     // hide the window in advance, as this will
     // prevent flicker
-    ShowWnd(wnd, false);
+	if ( !IsBeingDeleted() )
+        ShowWnd(wnd, false);
 
     if (!RemovePage(page_idx))
         return false;
 
-#if wxUSE_MDI
     // actually destroy the window now
+#if wxUSE_MDI
     if (wnd->IsKindOf(CLASSINFO(wxAuiMDIChildFrame)))
     {
         // delete the child frame with pending delete, as is
@@ -3200,7 +3340,7 @@ bool wxAuiNotebook::RemovePage(size_t page_idx)
             }
         }
     }
-    else
+     else
     {
         // we are not deleting the active page, so keep it the same
         new_active = active_wnd;
@@ -3228,10 +3368,10 @@ bool wxAuiNotebook::RemovePage(size_t page_idx)
     RemoveEmptyTabFrames();
 
     // set new active pane
+    m_curpage = -1;
     if (new_active && !m_isBeingDeleted)
     {
-        m_curpage = -1;
-        SetSelectionToWindow(new_active);
+        SetSelection(m_tabs.GetIdxFromWindow(new_active));
     }
 
     return true;
@@ -3382,7 +3522,7 @@ size_t wxAuiNotebook::SetSelection(size_t new_page)
                 wxAuiTabCtrl* tabctrl = ((wxTabFrame*)pane.window)->m_tabs;
                 if (tabctrl != ctrl)
                     tabctrl->SetSelectedFont(m_normal_font);
-                else
+                     else
                     tabctrl->SetSelectedFont(m_selected_font);
                 tabctrl->Refresh();
             }
@@ -3397,14 +3537,6 @@ size_t wxAuiNotebook::SetSelection(size_t new_page)
     }
 
     return m_curpage;
-}
-
-void wxAuiNotebook::SetSelectionToWindow(wxWindow *win)
-{
-    const int idx = m_tabs.GetIdxFromWindow(win);
-    wxCHECK_RET( idx != wxNOT_FOUND, _T("invalid notebook page") );
-
-    SetSelection(idx);
 }
 
 // GetPageCount() returns the total number of
@@ -3539,7 +3671,7 @@ void wxAuiNotebook::Split(size_t page, int direction)
     {
         split_size = CalculateNewSplitSize();
     }
-    else
+     else
     {
         // because there are two panes, always split them
         // equally
@@ -3572,17 +3704,17 @@ void wxAuiNotebook::Split(size_t page, int direction)
         pane_info.Left();
         mouse_pt = wxPoint(0, cli_size.y/2);
     }
-    else if (direction == wxRIGHT)
+     else if (direction == wxRIGHT)
     {
         pane_info.Right();
         mouse_pt = wxPoint(cli_size.x, cli_size.y/2);
     }
-    else if (direction == wxTOP)
+     else if (direction == wxTOP)
     {
         pane_info.Top();
         mouse_pt = wxPoint(cli_size.x/2, 0);
     }
-    else if (direction == wxBOTTOM)
+     else if (direction == wxBOTTOM)
     {
         pane_info.Bottom();
         mouse_pt = wxPoint(cli_size.x/2, cli_size.y);
@@ -3619,7 +3751,7 @@ void wxAuiNotebook::Split(size_t page, int direction)
     m_curpage = -1;
 
     // set the active page to the one we just split off
-    SetSelectionToPage(page_info);
+    SetSelection(m_tabs.GetIdxFromWindow(page_info.window));
 
     UpdateHintWindowSize();
 }
@@ -3642,7 +3774,10 @@ void wxAuiNotebook::OnTabClicked(wxCommandEvent& command_evt)
     wxWindow* wnd = ctrl->GetWindowFromIdx(evt.GetSelection());
     wxASSERT(wnd != NULL);
 
-    SetSelectionToWindow(wnd);
+    int idx = m_tabs.GetIdxFromWindow(wnd);
+    wxASSERT(idx != -1);
+
+    SetSelection(idx);
 }
 
 void wxAuiNotebook::OnTabBgDClick(wxCommandEvent& WXUNUSED(evt))
@@ -3748,7 +3883,7 @@ void wxAuiNotebook::OnTabDragMotion(wxCommandEvent& evt)
                 }
             }
         }
-        else
+         else
         {
             if (!dest_tabs)
             {
@@ -3781,7 +3916,7 @@ void wxAuiNotebook::OnTabDragMotion(wxCommandEvent& evt)
         ClientToScreen(&hint_rect.x, &hint_rect.y);
         m_mgr.ShowHint(hint_rect);
     }
-    else
+     else
     {
         m_mgr.DrawHintRect(m_dummy_wnd, client_pt, zero);
     }
@@ -3797,9 +3932,12 @@ void wxAuiNotebook::OnTabEndDrag(wxCommandEvent& command_evt)
 
 
     wxAuiTabCtrl* src_tabs = (wxAuiTabCtrl*)evt.GetEventObject();
-    wxCHECK_RET( src_tabs, _T("no source object?") );
-
-    src_tabs->SetCursor(wxCursor(wxCURSOR_ARROW));
+    wxAuiTabCtrl* dest_tabs = NULL;
+    if (src_tabs)
+    {
+        // set cursor back to an arrow
+        src_tabs->SetCursor(wxCursor(wxCURSOR_ARROW));
+    }
 
     // get the mouse position, which will be used to determine the drop point
     wxPoint mouse_screen_pt = ::wxGetMousePosition();
@@ -3860,11 +3998,9 @@ void wxAuiNotebook::OnTabEndDrag(wxCommandEvent& command_evt)
 
                 // get main index of the page
                 int main_idx = m_tabs.GetIdxFromWindow(src_page);
-                wxCHECK_RET( main_idx != wxNOT_FOUND, _T("no source page?") );
-
 
                 // make a copy of the page info
-                wxAuiNotebookPage page_info = m_tabs.GetPage(main_idx);
+                wxAuiNotebookPage page_info = m_tabs.GetPage((size_t)main_idx);
 
                 // remove the page from the source notebook
                 RemovePage(main_idx);
@@ -3897,7 +4033,7 @@ void wxAuiNotebook::OnTabEndDrag(wxCommandEvent& command_evt)
                 dest_tabs->Refresh();
 
                 // set the selection in the destination tab control
-                nb->SetSelectionToPage(page_info);
+                nb->SetSelection(nb->m_tabs.GetIdxFromWindow(page_info.window));
 
                 // notify owner that the tab has been dragged
                 wxAuiNotebookEvent e2(wxEVT_COMMAND_AUINOTEBOOK_DRAG_DONE, m_windowId);
@@ -3915,8 +4051,6 @@ void wxAuiNotebook::OnTabEndDrag(wxCommandEvent& command_evt)
 
 
     // only perform a tab split if it's allowed
-    wxAuiTabCtrl* dest_tabs = NULL;
-
     if ((m_flags & wxAUI_NB_TAB_SPLIT) && m_tabs.GetPageCount() >= 2)
     {
         // If the pointer is in an existing tab frame, do a tab insert
@@ -4003,7 +4137,7 @@ void wxAuiNotebook::OnTabEndDrag(wxCommandEvent& command_evt)
         m_curpage = -1;
 
         // set the active page to the one we just split off
-        SetSelectionToPage(page_info);
+        SetSelection(m_tabs.GetIdxFromWindow(page_info.window));
 
         UpdateHintWindowSize();
     }
@@ -4111,7 +4245,7 @@ void wxAuiNotebook::RemoveEmptyTabFrames()
         m_mgr.Update();
 }
 
-void wxAuiNotebook::OnChildFocusNotebook(wxChildFocusEvent& evt)
+void wxAuiNotebook::OnChildFocus(wxChildFocusEvent& evt)
 {
     // if we're dragging a tab, don't change the current selection.
     // This code prevents a bug that used to happen when the hint window
@@ -4141,7 +4275,7 @@ void wxAuiNotebook::OnChildFocusNotebook(wxChildFocusEvent& evt)
     }
 }
 
-void wxAuiNotebook::OnNavigationKeyNotebook(wxNavigationKeyEvent& event)
+void wxAuiNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
 {
     if ( event.IsWindowChange() ) {
         // change pages
@@ -4240,7 +4374,6 @@ void wxAuiNotebook::OnTabButton(wxCommandEvent& command_evt)
 
             // ask owner if it's ok to close the tab
             wxAuiNotebookEvent e(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, m_windowId);
-            e.SetSelection(m_tabs.GetIdxFromWindow(close_wnd));
             const int idx = m_tabs.GetIdxFromWindow(close_wnd);
             e.SetSelection(idx);
             e.SetOldSelection(evt.GetSelection());
@@ -4259,8 +4392,6 @@ void wxAuiNotebook::OnTabButton(wxCommandEvent& command_evt)
 #endif
             {
                 int main_idx = m_tabs.GetIdxFromWindow(close_wnd);
-                wxCHECK_RET( main_idx != wxNOT_FOUND, _T("no page to delete?") );
-
                 DeletePage(main_idx);
             }
 
@@ -4272,7 +4403,6 @@ void wxAuiNotebook::OnTabButton(wxCommandEvent& command_evt)
         }
     }
 }
-
 
 void wxAuiNotebook::OnTabMiddleDown(wxCommandEvent& evt)
 {
@@ -4336,6 +4466,8 @@ void wxAuiNotebook::OnTabRightUp(wxCommandEvent& evt)
     e.SetEventObject(this);
     GetEventHandler()->ProcessEvent(e);
 }
+
+
 
 // Sets the normal font
 void wxAuiNotebook::SetNormalFont(const wxFont& font)

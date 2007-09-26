@@ -139,10 +139,6 @@ public:
 
     // Implementation from now on
     // --------------------------
- 
-#if wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
-    virtual void SetDropTarget(wxDropTarget *dropTarget);
-#endif // wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
 
     virtual void SetWindowStyleFlag(long style);
 
@@ -173,9 +169,6 @@ public:
     virtual void AdoptAttributesFromHWND();
 
     virtual bool AcceptsFocus() const;
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const;
 
     // callbacks
     void OnDropFiles(wxDropFilesEvent& event);

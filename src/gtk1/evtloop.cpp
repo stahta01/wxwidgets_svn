@@ -52,19 +52,19 @@ private:
 };
 
 // ============================================================================
-// wxGUIEventLoop implementation
+// wxEventLoop implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// wxGUIEventLoop running and exiting
+// wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
@@ -84,7 +84,7 @@ int wxGUIEventLoop::Run()
     return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
     wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
@@ -97,7 +97,7 @@ void wxGUIEventLoop::Exit(int rc)
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     if (wxTheApp)
     {
@@ -109,7 +109,7 @@ bool wxGUIEventLoop::Pending() const
     return gtk_events_pending();
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
     wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
 

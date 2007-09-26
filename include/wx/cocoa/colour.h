@@ -35,9 +35,8 @@ public:
               ChannelType alpha = wxALPHA_OPAQUE )
         { Init(); Set(red, green, blue, alpha); }
     wxColour(unsigned long colRGB) { Init(); Set(colRGB); }
-    wxColour(const wxString& colourName) { Init(); Set(colourName); }
-    wxColour(const char *colourName) { Init(); Set(colourName); }
-    wxColour(const wchar_t *colourName) { Init(); Set(colourName); }
+    wxColour(const wxString &colourName) { Init(); Set(colourName); }
+    wxColour(const wxChar *colourName) { Init(); Set(colourName); }
 
     // initialization using existing NSColor
     wxColour( WX_NSColor aColor );
@@ -50,6 +49,7 @@ public:
     virtual ~wxColour();
 
     // accessors
+    bool Ok() const { return IsOk(); }
     bool IsOk() const { return m_cocoaNSColor; }
     WX_NSColor GetNSColor() { return m_cocoaNSColor; }
 
@@ -79,6 +79,9 @@ public:
              unsigned char blue,
              unsigned char alpha = wxALPHA_OPAQUE)
         { wxColourBase::Set(red, green, blue, alpha); }
+
+    bool Set(const wxChar *str)
+        { return wxColourBase::Set(str); }
 
     bool Set(const wxString &str)
         { return wxColourBase::Set(str); }

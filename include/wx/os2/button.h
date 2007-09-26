@@ -17,7 +17,7 @@
 // Pushbutton
 class WXDLLEXPORT wxButton: public wxButtonBase
 {
-public:
+ public:
     inline wxButton() {}
     inline wxButton( wxWindow*          pParent
                     ,wxWindowID         vId
@@ -49,11 +49,10 @@ public:
                 ,const wxValidator& rValidator = wxDefaultValidator
                 ,const wxString&    rsName = wxButtonNameStr
                );
-
+    
     virtual ~wxButton();
 
-    virtual wxWindow *SetDefault();
-
+    virtual void     SetDefault(void);
     static wxSize    GetDefaultSize(void);
     virtual void     Command(wxCommandEvent& rEvent);
     virtual bool     OS2Command( WXUINT uParam

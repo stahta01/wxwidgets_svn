@@ -28,6 +28,9 @@ extern bool      g_blockEventsOnDrag;
 extern "C" {
 static void gtk_togglebutton_clicked_callback(GtkWidget *WXUNUSED(widget), wxToggleButton *cb)
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (!cb->m_hasVMT || g_blockEventsOnDrag)
         return;
 
@@ -55,6 +58,9 @@ bool wxToggleBitmapButton::Create(wxWindow *parent, wxWindowID id,
                             const wxValidator& validator,
                             const wxString &name)
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     m_blockEvent = false;
 
     if (!PreCreation(parent, pos, size) ||
@@ -195,6 +201,9 @@ bool wxToggleButton::Create(wxWindow *parent, wxWindowID id,
                             const wxValidator& validator,
                             const wxString &name)
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     m_blockEvent = false;
 
     if (!PreCreation(parent, pos, size) ||

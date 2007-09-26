@@ -193,9 +193,7 @@ void wxTreeCtrlBase::ExpandAllChildren(const wxTreeItemId& item)
 {
     // expand this item first, this might result in its children being added on
     // the fly
-    if ( item != GetRootItem() || !HasFlag(wxTR_HIDE_ROOT) )
-        Expand(item);
-    //else: expanding hidden root item is unsupported and unnecessary
+    Expand(item);
 
     // then (recursively) expand all the children
     wxTreeItemIdValue cookie;

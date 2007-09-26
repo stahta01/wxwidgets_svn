@@ -22,7 +22,6 @@ use the \helpref{notebook sample}{samplenotebook} to see wxListbook in action.
 
 \wxheading{Derived from}
 
-wxBookCtrlBase (see \helpref{wxBookCtrl overview}{wxbookctrloverview})\\
 \helpref{wxControl}{wxcontrol}\\
 \helpref{wxWindow}{wxwindow}\\
 \helpref{wxEvtHandler}{wxevthandler}\\
@@ -31,10 +30,6 @@ wxBookCtrlBase (see \helpref{wxBookCtrl overview}{wxbookctrloverview})\\
 \wxheading{Include files}
 
 <wx/listbook.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{Window styles}
 
@@ -51,27 +46,7 @@ it is top).}
 
 \end{twocollist}
 
-\input listbevt.inc
-
 \wxheading{See also}
 
 \helpref{wxBookCtrl}{wxbookctrloverview}, \helpref{wxNotebook}{wxnotebook}, \helpref{notebook sample}{samplenotebook}
 
-\latexignore{\rtfignore{\wxheading{Members}}}
-
-\membersection{wxListbook::wxListbook}\label{wxlistbookctor}
-
-\func{}{wxListbook}{\void}
-
-Default constructor.
-
-\func{}{wxListbook}{\param{wxWindow*}{ parent}, \param{wxWindowID }{id}, \param{const wxPoint\&}{ pos = wxDefaultPosition},
- \param{const wxSize\&}{ size = wxDefaultSize}, \param{long}{ style = 0}, \param{const wxString\& }{name = wxEmptyStr}}
-
-Constructs a listbook control.
-
-\membersection{wxListbook::GetListView}\label{wxlistbookgetlistview}
-
-\constfunc{wxListView *}{GetListView}{\void}
-
-Returns the \helpref{wxListView}{wxlistview} associated with the control.

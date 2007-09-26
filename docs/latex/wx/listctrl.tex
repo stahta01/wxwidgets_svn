@@ -55,10 +55,6 @@ mac.listctrl.always\_use\_generic \helpref{wxSystemOption}{wxsystemoptions} to
 
 <wx/listctrl.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Window styles}
 
 \twocolwidtha{7cm}
@@ -260,7 +256,7 @@ Ensures this item is visible.
 
 \membersection{wxListCtrl::FindItem}\label{wxlistctrlfinditem}
 
-\func{long}{FindItem}{\param{long }{start}, \param{const wxString\& }{str}, \param{bool }{partial = false}}
+\func{long}{FindItem}{\param{long }{start}, \param{const wxString\& }{str}, \param{const bool }{partial = false}}
 
 Find an item whose label matches this string, starting from {\it start} or
 the beginning if {\it start} is -1. The string comparison is case
@@ -1028,7 +1024,7 @@ The colour can be retrieved using
 
 \membersection{wxListCtrl::SetSingleStyle}\label{wxlistctrlsetsinglestyle}
 
-\func{void}{SetSingleStyle}{\param{long }{style}, \param{bool }{add = true}}
+\func{void}{SetSingleStyle}{\param{long }{style}, \param{const bool }{add = true}}
 
 Adds or removes a single window style.
 

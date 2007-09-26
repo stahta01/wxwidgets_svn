@@ -92,7 +92,7 @@ __monodll___depname =
 !ifeq MONOLITHIC 1
 !ifeq SHARED 1
 __monodll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
 !endif
 !endif
 ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =
@@ -176,7 +176,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_xh_slidr.obj &
 	$(OBJS)\monodll_xh_spin.obj &
 	$(OBJS)\monodll_xh_split.obj &
-	$(OBJS)\monodll_xh_srchctrl.obj &
 	$(OBJS)\monodll_xh_statbar.obj &
 	$(OBJS)\monodll_xh_stbmp.obj &
 	$(OBJS)\monodll_xh_stbox.obj &
@@ -204,10 +203,7 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_richtextformatdlg.obj &
 	$(OBJS)\monodll_richtextsymboldlg.obj &
 	$(OBJS)\monodll_richtextstyledlg.obj &
-	$(OBJS)\monodll_richtextprint.obj &
-	$(OBJS)\monodll_stc.obj &
-	$(OBJS)\monodll_PlatWX.obj &
-	$(OBJS)\monodll_ScintillaWX.obj
+	$(OBJS)\monodll_richtextprint.obj
 !endif
 ____CORE_SRC_FILENAMES_OBJECTS =
 !ifeq USE_GUI 1
@@ -230,12 +226,12 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dib.obj &
 	$(OBJS)\monodll_display.obj &
 	$(OBJS)\monodll_enhmeta.obj &
+	$(OBJS)\monodll_evtloop.obj &
 	$(OBJS)\monodll_font.obj &
 	$(OBJS)\monodll_fontenum.obj &
 	$(OBJS)\monodll_fontutil.obj &
 	$(OBJS)\monodll_gdiimage.obj &
 	$(OBJS)\monodll_gdiobj.obj &
-	$(OBJS)\monodll_gdiplus.obj &
 	$(OBJS)\monodll_graphics.obj &
 	$(OBJS)\monodll_gsockmsw.obj &
 	$(OBJS)\monodll_icon.obj &
@@ -253,6 +249,7 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_region.obj &
 	$(OBJS)\monodll_renderer.obj &
 	$(OBJS)\monodll_settings.obj &
+	$(OBJS)\monodll_timer.obj &
 	$(OBJS)\monodll_tooltip.obj &
 	$(OBJS)\monodll_toplevel.obj &
 	$(OBJS)\monodll_utilsgui.obj &
@@ -310,7 +307,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_checklst.obj &
 	$(OBJS)\monodll_fdrepdlg.obj &
 	$(OBJS)\monodll_fontdlg.obj &
-	$(OBJS)\monodll_accelcmn.obj &
 	$(OBJS)\monodll_accesscmn.obj &
 	$(OBJS)\monodll_anidecod.obj &
 	$(OBJS)\monodll_appcmn.obj &
@@ -318,8 +314,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_artstd.obj &
 	$(OBJS)\monodll_bmpbase.obj &
 	$(OBJS)\monodll_bookctrl.obj &
-	$(OBJS)\monodll_btncmn.obj &
-	$(OBJS)\monodll_cairo.obj &
 	$(OBJS)\monodll_choiccmn.obj &
 	$(OBJS)\monodll_clipcmn.obj &
 	$(OBJS)\monodll_clrpickercmn.obj &
@@ -335,7 +329,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dcbase.obj &
 	$(OBJS)\monodll_dcbufcmn.obj &
 	$(OBJS)\monodll_dcgraph.obj &
-	$(OBJS)\monodll_dcsvg.obj &
 	$(OBJS)\monodll_dlgcmn.obj &
 	$(OBJS)\monodll_dndcmn.obj &
 	$(OBJS)\monodll_dobjcmn.obj &
@@ -344,15 +337,14 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dpycmn.obj &
 	$(OBJS)\monodll_dseldlg.obj &
 	$(OBJS)\monodll_effects.obj &
+	$(OBJS)\monodll_evtloopcmn.obj &
 	$(OBJS)\monodll_fddlgcmn.obj &
-	$(OBJS)\monodll_filectrlcmn.obj &
 	$(OBJS)\monodll_filepickercmn.obj &
 	$(OBJS)\monodll_fontpickercmn.obj &
 	$(OBJS)\monodll_fldlgcmn.obj &
 	$(OBJS)\monodll_fontcmn.obj &
 	$(OBJS)\monodll_fontenumcmn.obj &
 	$(OBJS)\monodll_fontmap.obj &
-	$(OBJS)\monodll_fontutilcmn.obj &
 	$(OBJS)\monodll_framecmn.obj &
 	$(OBJS)\monodll_gaugecmn.obj &
 	$(OBJS)\monodll_gbsizer.obj &
@@ -394,11 +386,10 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_sizer.obj &
 	$(OBJS)\monodll_srchcmn.obj &
 	$(OBJS)\monodll_statbar.obj &
-	$(OBJS)\monodll_stattextcmn.obj &
 	$(OBJS)\monodll_stockitem.obj &
 	$(OBJS)\monodll_tbarbase.obj &
 	$(OBJS)\monodll_textcmn.obj &
-	$(OBJS)\monodll_textentrycmn.obj &
+	$(OBJS)\monodll_timercmn.obj &
 	$(OBJS)\monodll_toplvcmn.obj &
 	$(OBJS)\monodll_treebase.obj &
 	$(OBJS)\monodll_valgen.obj &
@@ -416,7 +407,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dcpsg.obj &
 	$(OBJS)\monodll_dirctrlg.obj &
 	$(OBJS)\monodll_dragimgg.obj &
-	$(OBJS)\monodll_filectrlg.obj &
 	$(OBJS)\monodll_filepickerg.obj &
 	$(OBJS)\monodll_fontpickerg.obj &
 	$(OBJS)\monodll_listbkg.obj &
@@ -460,12 +450,12 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dib.obj &
 	$(OBJS)\monodll_display.obj &
 	$(OBJS)\monodll_enhmeta.obj &
+	$(OBJS)\monodll_evtloop.obj &
 	$(OBJS)\monodll_font.obj &
 	$(OBJS)\monodll_fontenum.obj &
 	$(OBJS)\monodll_fontutil.obj &
 	$(OBJS)\monodll_gdiimage.obj &
 	$(OBJS)\monodll_gdiobj.obj &
-	$(OBJS)\monodll_gdiplus.obj &
 	$(OBJS)\monodll_graphics.obj &
 	$(OBJS)\monodll_gsockmsw.obj &
 	$(OBJS)\monodll_icon.obj &
@@ -483,6 +473,7 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_region.obj &
 	$(OBJS)\monodll_renderer.obj &
 	$(OBJS)\monodll_settings.obj &
+	$(OBJS)\monodll_timer.obj &
 	$(OBJS)\monodll_tooltip.obj &
 	$(OBJS)\monodll_toplevel.obj &
 	$(OBJS)\monodll_utilsgui.obj &
@@ -543,7 +534,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_metal.obj &
 	$(OBJS)\monodll_mono.obj &
 	$(OBJS)\monodll_win32.obj &
-	$(OBJS)\monodll_accelcmn.obj &
 	$(OBJS)\monodll_accesscmn.obj &
 	$(OBJS)\monodll_anidecod.obj &
 	$(OBJS)\monodll_appcmn.obj &
@@ -551,8 +541,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_artstd.obj &
 	$(OBJS)\monodll_bmpbase.obj &
 	$(OBJS)\monodll_bookctrl.obj &
-	$(OBJS)\monodll_btncmn.obj &
-	$(OBJS)\monodll_cairo.obj &
 	$(OBJS)\monodll_choiccmn.obj &
 	$(OBJS)\monodll_clipcmn.obj &
 	$(OBJS)\monodll_clrpickercmn.obj &
@@ -568,7 +556,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dcbase.obj &
 	$(OBJS)\monodll_dcbufcmn.obj &
 	$(OBJS)\monodll_dcgraph.obj &
-	$(OBJS)\monodll_dcsvg.obj &
 	$(OBJS)\monodll_dlgcmn.obj &
 	$(OBJS)\monodll_dndcmn.obj &
 	$(OBJS)\monodll_dobjcmn.obj &
@@ -577,15 +564,14 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dpycmn.obj &
 	$(OBJS)\monodll_dseldlg.obj &
 	$(OBJS)\monodll_effects.obj &
+	$(OBJS)\monodll_evtloopcmn.obj &
 	$(OBJS)\monodll_fddlgcmn.obj &
-	$(OBJS)\monodll_filectrlcmn.obj &
 	$(OBJS)\monodll_filepickercmn.obj &
 	$(OBJS)\monodll_fontpickercmn.obj &
 	$(OBJS)\monodll_fldlgcmn.obj &
 	$(OBJS)\monodll_fontcmn.obj &
 	$(OBJS)\monodll_fontenumcmn.obj &
 	$(OBJS)\monodll_fontmap.obj &
-	$(OBJS)\monodll_fontutilcmn.obj &
 	$(OBJS)\monodll_framecmn.obj &
 	$(OBJS)\monodll_gaugecmn.obj &
 	$(OBJS)\monodll_gbsizer.obj &
@@ -627,11 +613,10 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_sizer.obj &
 	$(OBJS)\monodll_srchcmn.obj &
 	$(OBJS)\monodll_statbar.obj &
-	$(OBJS)\monodll_stattextcmn.obj &
 	$(OBJS)\monodll_stockitem.obj &
 	$(OBJS)\monodll_tbarbase.obj &
 	$(OBJS)\monodll_textcmn.obj &
-	$(OBJS)\monodll_textentrycmn.obj &
+	$(OBJS)\monodll_timercmn.obj &
 	$(OBJS)\monodll_toplvcmn.obj &
 	$(OBJS)\monodll_treebase.obj &
 	$(OBJS)\monodll_valgen.obj &
@@ -649,7 +634,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_dcpsg.obj &
 	$(OBJS)\monodll_dirctrlg.obj &
 	$(OBJS)\monodll_dragimgg.obj &
-	$(OBJS)\monodll_filectrlg.obj &
 	$(OBJS)\monodll_filepickerg.obj &
 	$(OBJS)\monodll_fontpickerg.obj &
 	$(OBJS)\monodll_listbkg.obj &
@@ -678,19 +662,17 @@ ____ADVANCED_SRC_FILENAMES_OBJECTS =
 ____ADVANCED_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_animatecmn.obj &
 	$(OBJS)\monodll_datavcmn.obj &
-	$(OBJS)\monodll_hyperlnkcmn.obj &
 	$(OBJS)\monodll_aboutdlgg.obj &
 	$(OBJS)\monodll_animateg.obj &
 	$(OBJS)\monodll_bmpcboxg.obj &
 	$(OBJS)\monodll_calctrl.obj &
 	$(OBJS)\monodll_datavgen.obj &
 	$(OBJS)\monodll_datectlg.obj &
-	$(OBJS)\monodll_editlbox.obj &
 	$(OBJS)\monodll_grid.obj &
 	$(OBJS)\monodll_gridctrl.obj &
 	$(OBJS)\monodll_gridsel.obj &
 	$(OBJS)\monodll_helpext.obj &
-	$(OBJS)\monodll_hyperlinkg.obj &
+	$(OBJS)\monodll_hyperlink.obj &
 	$(OBJS)\monodll_laywin.obj &
 	$(OBJS)\monodll_odcombo.obj &
 	$(OBJS)\monodll_propdlg.obj &
@@ -709,19 +691,17 @@ ____ADVANCED_SRC_FILENAMES_OBJECTS =  &
 ____ADVANCED_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_animatecmn.obj &
 	$(OBJS)\monodll_datavcmn.obj &
-	$(OBJS)\monodll_hyperlnkcmn.obj &
 	$(OBJS)\monodll_aboutdlgg.obj &
 	$(OBJS)\monodll_animateg.obj &
 	$(OBJS)\monodll_bmpcboxg.obj &
 	$(OBJS)\monodll_calctrl.obj &
 	$(OBJS)\monodll_datavgen.obj &
 	$(OBJS)\monodll_datectlg.obj &
-	$(OBJS)\monodll_editlbox.obj &
 	$(OBJS)\monodll_grid.obj &
 	$(OBJS)\monodll_gridctrl.obj &
 	$(OBJS)\monodll_gridsel.obj &
 	$(OBJS)\monodll_helpext.obj &
-	$(OBJS)\monodll_hyperlinkg.obj &
+	$(OBJS)\monodll_hyperlink.obj &
 	$(OBJS)\monodll_laywin.obj &
 	$(OBJS)\monodll_odcombo.obj &
 	$(OBJS)\monodll_propdlg.obj &
@@ -734,10 +714,6 @@ ____ADVANCED_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_sound.obj &
 	$(OBJS)\monodll_taskbar.obj &
 	$(OBJS)\monodll_joystick.obj
-!endif
-__wxscintilla_library_link_DEP =
-!ifeq USE_STC 1
-__wxscintilla_library_link_DEP = $(__wxscintilla)
 !endif
 __monolib___depname =
 !ifeq MONOLITHIC 1
@@ -827,7 +803,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_xh_slidr.obj &
 	$(OBJS)\monolib_xh_spin.obj &
 	$(OBJS)\monolib_xh_split.obj &
-	$(OBJS)\monolib_xh_srchctrl.obj &
 	$(OBJS)\monolib_xh_statbar.obj &
 	$(OBJS)\monolib_xh_stbmp.obj &
 	$(OBJS)\monolib_xh_stbox.obj &
@@ -855,10 +830,7 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_richtextformatdlg.obj &
 	$(OBJS)\monolib_richtextsymboldlg.obj &
 	$(OBJS)\monolib_richtextstyledlg.obj &
-	$(OBJS)\monolib_richtextprint.obj &
-	$(OBJS)\monolib_stc.obj &
-	$(OBJS)\monolib_PlatWX.obj &
-	$(OBJS)\monolib_ScintillaWX.obj
+	$(OBJS)\monolib_richtextprint.obj
 !endif
 ____CORE_SRC_FILENAMES_1_OBJECTS =
 !ifeq USE_GUI 1
@@ -881,12 +853,12 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dib.obj &
 	$(OBJS)\monolib_display.obj &
 	$(OBJS)\monolib_enhmeta.obj &
+	$(OBJS)\monolib_evtloop.obj &
 	$(OBJS)\monolib_font.obj &
 	$(OBJS)\monolib_fontenum.obj &
 	$(OBJS)\monolib_fontutil.obj &
 	$(OBJS)\monolib_gdiimage.obj &
 	$(OBJS)\monolib_gdiobj.obj &
-	$(OBJS)\monolib_gdiplus.obj &
 	$(OBJS)\monolib_graphics.obj &
 	$(OBJS)\monolib_gsockmsw.obj &
 	$(OBJS)\monolib_icon.obj &
@@ -904,6 +876,7 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_region.obj &
 	$(OBJS)\monolib_renderer.obj &
 	$(OBJS)\monolib_settings.obj &
+	$(OBJS)\monolib_timer.obj &
 	$(OBJS)\monolib_tooltip.obj &
 	$(OBJS)\monolib_toplevel.obj &
 	$(OBJS)\monolib_utilsgui.obj &
@@ -961,7 +934,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_checklst.obj &
 	$(OBJS)\monolib_fdrepdlg.obj &
 	$(OBJS)\monolib_fontdlg.obj &
-	$(OBJS)\monolib_accelcmn.obj &
 	$(OBJS)\monolib_accesscmn.obj &
 	$(OBJS)\monolib_anidecod.obj &
 	$(OBJS)\monolib_appcmn.obj &
@@ -969,8 +941,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_artstd.obj &
 	$(OBJS)\monolib_bmpbase.obj &
 	$(OBJS)\monolib_bookctrl.obj &
-	$(OBJS)\monolib_btncmn.obj &
-	$(OBJS)\monolib_cairo.obj &
 	$(OBJS)\monolib_choiccmn.obj &
 	$(OBJS)\monolib_clipcmn.obj &
 	$(OBJS)\monolib_clrpickercmn.obj &
@@ -986,7 +956,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dcbase.obj &
 	$(OBJS)\monolib_dcbufcmn.obj &
 	$(OBJS)\monolib_dcgraph.obj &
-	$(OBJS)\monolib_dcsvg.obj &
 	$(OBJS)\monolib_dlgcmn.obj &
 	$(OBJS)\monolib_dndcmn.obj &
 	$(OBJS)\monolib_dobjcmn.obj &
@@ -995,15 +964,14 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dpycmn.obj &
 	$(OBJS)\monolib_dseldlg.obj &
 	$(OBJS)\monolib_effects.obj &
+	$(OBJS)\monolib_evtloopcmn.obj &
 	$(OBJS)\monolib_fddlgcmn.obj &
-	$(OBJS)\monolib_filectrlcmn.obj &
 	$(OBJS)\monolib_filepickercmn.obj &
 	$(OBJS)\monolib_fontpickercmn.obj &
 	$(OBJS)\monolib_fldlgcmn.obj &
 	$(OBJS)\monolib_fontcmn.obj &
 	$(OBJS)\monolib_fontenumcmn.obj &
 	$(OBJS)\monolib_fontmap.obj &
-	$(OBJS)\monolib_fontutilcmn.obj &
 	$(OBJS)\monolib_framecmn.obj &
 	$(OBJS)\monolib_gaugecmn.obj &
 	$(OBJS)\monolib_gbsizer.obj &
@@ -1045,11 +1013,10 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_sizer.obj &
 	$(OBJS)\monolib_srchcmn.obj &
 	$(OBJS)\monolib_statbar.obj &
-	$(OBJS)\monolib_stattextcmn.obj &
 	$(OBJS)\monolib_stockitem.obj &
 	$(OBJS)\monolib_tbarbase.obj &
 	$(OBJS)\monolib_textcmn.obj &
-	$(OBJS)\monolib_textentrycmn.obj &
+	$(OBJS)\monolib_timercmn.obj &
 	$(OBJS)\monolib_toplvcmn.obj &
 	$(OBJS)\monolib_treebase.obj &
 	$(OBJS)\monolib_valgen.obj &
@@ -1067,7 +1034,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dcpsg.obj &
 	$(OBJS)\monolib_dirctrlg.obj &
 	$(OBJS)\monolib_dragimgg.obj &
-	$(OBJS)\monolib_filectrlg.obj &
 	$(OBJS)\monolib_filepickerg.obj &
 	$(OBJS)\monolib_fontpickerg.obj &
 	$(OBJS)\monolib_listbkg.obj &
@@ -1111,12 +1077,12 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dib.obj &
 	$(OBJS)\monolib_display.obj &
 	$(OBJS)\monolib_enhmeta.obj &
+	$(OBJS)\monolib_evtloop.obj &
 	$(OBJS)\monolib_font.obj &
 	$(OBJS)\monolib_fontenum.obj &
 	$(OBJS)\monolib_fontutil.obj &
 	$(OBJS)\monolib_gdiimage.obj &
 	$(OBJS)\monolib_gdiobj.obj &
-	$(OBJS)\monolib_gdiplus.obj &
 	$(OBJS)\monolib_graphics.obj &
 	$(OBJS)\monolib_gsockmsw.obj &
 	$(OBJS)\monolib_icon.obj &
@@ -1134,6 +1100,7 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_region.obj &
 	$(OBJS)\monolib_renderer.obj &
 	$(OBJS)\monolib_settings.obj &
+	$(OBJS)\monolib_timer.obj &
 	$(OBJS)\monolib_tooltip.obj &
 	$(OBJS)\monolib_toplevel.obj &
 	$(OBJS)\monolib_utilsgui.obj &
@@ -1194,7 +1161,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_metal.obj &
 	$(OBJS)\monolib_mono.obj &
 	$(OBJS)\monolib_win32.obj &
-	$(OBJS)\monolib_accelcmn.obj &
 	$(OBJS)\monolib_accesscmn.obj &
 	$(OBJS)\monolib_anidecod.obj &
 	$(OBJS)\monolib_appcmn.obj &
@@ -1202,8 +1168,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_artstd.obj &
 	$(OBJS)\monolib_bmpbase.obj &
 	$(OBJS)\monolib_bookctrl.obj &
-	$(OBJS)\monolib_btncmn.obj &
-	$(OBJS)\monolib_cairo.obj &
 	$(OBJS)\monolib_choiccmn.obj &
 	$(OBJS)\monolib_clipcmn.obj &
 	$(OBJS)\monolib_clrpickercmn.obj &
@@ -1219,7 +1183,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dcbase.obj &
 	$(OBJS)\monolib_dcbufcmn.obj &
 	$(OBJS)\monolib_dcgraph.obj &
-	$(OBJS)\monolib_dcsvg.obj &
 	$(OBJS)\monolib_dlgcmn.obj &
 	$(OBJS)\monolib_dndcmn.obj &
 	$(OBJS)\monolib_dobjcmn.obj &
@@ -1228,15 +1191,14 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dpycmn.obj &
 	$(OBJS)\monolib_dseldlg.obj &
 	$(OBJS)\monolib_effects.obj &
+	$(OBJS)\monolib_evtloopcmn.obj &
 	$(OBJS)\monolib_fddlgcmn.obj &
-	$(OBJS)\monolib_filectrlcmn.obj &
 	$(OBJS)\monolib_filepickercmn.obj &
 	$(OBJS)\monolib_fontpickercmn.obj &
 	$(OBJS)\monolib_fldlgcmn.obj &
 	$(OBJS)\monolib_fontcmn.obj &
 	$(OBJS)\monolib_fontenumcmn.obj &
 	$(OBJS)\monolib_fontmap.obj &
-	$(OBJS)\monolib_fontutilcmn.obj &
 	$(OBJS)\monolib_framecmn.obj &
 	$(OBJS)\monolib_gaugecmn.obj &
 	$(OBJS)\monolib_gbsizer.obj &
@@ -1278,11 +1240,10 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_sizer.obj &
 	$(OBJS)\monolib_srchcmn.obj &
 	$(OBJS)\monolib_statbar.obj &
-	$(OBJS)\monolib_stattextcmn.obj &
 	$(OBJS)\monolib_stockitem.obj &
 	$(OBJS)\monolib_tbarbase.obj &
 	$(OBJS)\monolib_textcmn.obj &
-	$(OBJS)\monolib_textentrycmn.obj &
+	$(OBJS)\monolib_timercmn.obj &
 	$(OBJS)\monolib_toplvcmn.obj &
 	$(OBJS)\monolib_treebase.obj &
 	$(OBJS)\monolib_valgen.obj &
@@ -1300,7 +1261,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_dcpsg.obj &
 	$(OBJS)\monolib_dirctrlg.obj &
 	$(OBJS)\monolib_dragimgg.obj &
-	$(OBJS)\monolib_filectrlg.obj &
 	$(OBJS)\monolib_filepickerg.obj &
 	$(OBJS)\monolib_fontpickerg.obj &
 	$(OBJS)\monolib_listbkg.obj &
@@ -1329,19 +1289,17 @@ ____ADVANCED_SRC_FILENAMES_1_OBJECTS =
 ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_animatecmn.obj &
 	$(OBJS)\monolib_datavcmn.obj &
-	$(OBJS)\monolib_hyperlnkcmn.obj &
 	$(OBJS)\monolib_aboutdlgg.obj &
 	$(OBJS)\monolib_animateg.obj &
 	$(OBJS)\monolib_bmpcboxg.obj &
 	$(OBJS)\monolib_calctrl.obj &
 	$(OBJS)\monolib_datavgen.obj &
 	$(OBJS)\monolib_datectlg.obj &
-	$(OBJS)\monolib_editlbox.obj &
 	$(OBJS)\monolib_grid.obj &
 	$(OBJS)\monolib_gridctrl.obj &
 	$(OBJS)\monolib_gridsel.obj &
 	$(OBJS)\monolib_helpext.obj &
-	$(OBJS)\monolib_hyperlinkg.obj &
+	$(OBJS)\monolib_hyperlink.obj &
 	$(OBJS)\monolib_laywin.obj &
 	$(OBJS)\monolib_odcombo.obj &
 	$(OBJS)\monolib_propdlg.obj &
@@ -1360,19 +1318,17 @@ ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  &
 ____ADVANCED_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_animatecmn.obj &
 	$(OBJS)\monolib_datavcmn.obj &
-	$(OBJS)\monolib_hyperlnkcmn.obj &
 	$(OBJS)\monolib_aboutdlgg.obj &
 	$(OBJS)\monolib_animateg.obj &
 	$(OBJS)\monolib_bmpcboxg.obj &
 	$(OBJS)\monolib_calctrl.obj &
 	$(OBJS)\monolib_datavgen.obj &
 	$(OBJS)\monolib_datectlg.obj &
-	$(OBJS)\monolib_editlbox.obj &
 	$(OBJS)\monolib_grid.obj &
 	$(OBJS)\monolib_gridctrl.obj &
 	$(OBJS)\monolib_gridsel.obj &
 	$(OBJS)\monolib_helpext.obj &
-	$(OBJS)\monolib_hyperlinkg.obj &
+	$(OBJS)\monolib_hyperlink.obj &
 	$(OBJS)\monolib_laywin.obj &
 	$(OBJS)\monolib_odcombo.obj &
 	$(OBJS)\monolib_propdlg.obj &
@@ -1390,7 +1346,7 @@ __basedll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 __basedll___depname = &
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
 !endif
 !endif
 __baselib___depname =
@@ -1400,19 +1356,11 @@ __baselib___depname = &
 	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
 !endif
 !endif
-____wxbase_namedll_DEP =
-!ifeq SHARED 1
-____wxbase_namedll_DEP = $(__basedll___depname)
-!endif
-____wxbase_namelib_DEP =
-!ifeq SHARED 0
-____wxbase_namelib_DEP = $(__baselib___depname)
-!endif
 __netdll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 __netdll___depname = &
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll
 !endif
 !endif
 __netlib___depname =
@@ -1422,20 +1370,12 @@ __netlib___depname = &
 	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib
 !endif
 !endif
-____wxnet_namedll_DEP =
-!ifeq SHARED 1
-____wxnet_namedll_DEP = $(__netdll___depname)
-!endif
-____wxnet_namelib_DEP =
-!ifeq SHARED 0
-____wxnet_namelib_DEP = $(__netlib___depname)
-!endif
 __coredll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 __coredll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -1460,12 +1400,12 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dib.obj &
 	$(OBJS)\coredll_display.obj &
 	$(OBJS)\coredll_enhmeta.obj &
+	$(OBJS)\coredll_evtloop.obj &
 	$(OBJS)\coredll_font.obj &
 	$(OBJS)\coredll_fontenum.obj &
 	$(OBJS)\coredll_fontutil.obj &
 	$(OBJS)\coredll_gdiimage.obj &
 	$(OBJS)\coredll_gdiobj.obj &
-	$(OBJS)\coredll_gdiplus.obj &
 	$(OBJS)\coredll_graphics.obj &
 	$(OBJS)\coredll_gsockmsw.obj &
 	$(OBJS)\coredll_icon.obj &
@@ -1483,6 +1423,7 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_region.obj &
 	$(OBJS)\coredll_renderer.obj &
 	$(OBJS)\coredll_settings.obj &
+	$(OBJS)\coredll_timer.obj &
 	$(OBJS)\coredll_tooltip.obj &
 	$(OBJS)\coredll_toplevel.obj &
 	$(OBJS)\coredll_utilsgui.obj &
@@ -1540,7 +1481,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_checklst.obj &
 	$(OBJS)\coredll_fdrepdlg.obj &
 	$(OBJS)\coredll_fontdlg.obj &
-	$(OBJS)\coredll_accelcmn.obj &
 	$(OBJS)\coredll_accesscmn.obj &
 	$(OBJS)\coredll_anidecod.obj &
 	$(OBJS)\coredll_appcmn.obj &
@@ -1548,8 +1488,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_artstd.obj &
 	$(OBJS)\coredll_bmpbase.obj &
 	$(OBJS)\coredll_bookctrl.obj &
-	$(OBJS)\coredll_btncmn.obj &
-	$(OBJS)\coredll_cairo.obj &
 	$(OBJS)\coredll_choiccmn.obj &
 	$(OBJS)\coredll_clipcmn.obj &
 	$(OBJS)\coredll_clrpickercmn.obj &
@@ -1565,7 +1503,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dcbase.obj &
 	$(OBJS)\coredll_dcbufcmn.obj &
 	$(OBJS)\coredll_dcgraph.obj &
-	$(OBJS)\coredll_dcsvg.obj &
 	$(OBJS)\coredll_dlgcmn.obj &
 	$(OBJS)\coredll_dndcmn.obj &
 	$(OBJS)\coredll_dobjcmn.obj &
@@ -1574,15 +1511,14 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dpycmn.obj &
 	$(OBJS)\coredll_dseldlg.obj &
 	$(OBJS)\coredll_effects.obj &
+	$(OBJS)\coredll_evtloopcmn.obj &
 	$(OBJS)\coredll_fddlgcmn.obj &
-	$(OBJS)\coredll_filectrlcmn.obj &
 	$(OBJS)\coredll_filepickercmn.obj &
 	$(OBJS)\coredll_fontpickercmn.obj &
 	$(OBJS)\coredll_fldlgcmn.obj &
 	$(OBJS)\coredll_fontcmn.obj &
 	$(OBJS)\coredll_fontenumcmn.obj &
 	$(OBJS)\coredll_fontmap.obj &
-	$(OBJS)\coredll_fontutilcmn.obj &
 	$(OBJS)\coredll_framecmn.obj &
 	$(OBJS)\coredll_gaugecmn.obj &
 	$(OBJS)\coredll_gbsizer.obj &
@@ -1624,11 +1560,10 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_sizer.obj &
 	$(OBJS)\coredll_srchcmn.obj &
 	$(OBJS)\coredll_statbar.obj &
-	$(OBJS)\coredll_stattextcmn.obj &
 	$(OBJS)\coredll_stockitem.obj &
 	$(OBJS)\coredll_tbarbase.obj &
 	$(OBJS)\coredll_textcmn.obj &
-	$(OBJS)\coredll_textentrycmn.obj &
+	$(OBJS)\coredll_timercmn.obj &
 	$(OBJS)\coredll_toplvcmn.obj &
 	$(OBJS)\coredll_treebase.obj &
 	$(OBJS)\coredll_valgen.obj &
@@ -1646,7 +1581,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dcpsg.obj &
 	$(OBJS)\coredll_dirctrlg.obj &
 	$(OBJS)\coredll_dragimgg.obj &
-	$(OBJS)\coredll_filectrlg.obj &
 	$(OBJS)\coredll_filepickerg.obj &
 	$(OBJS)\coredll_fontpickerg.obj &
 	$(OBJS)\coredll_listbkg.obj &
@@ -1690,12 +1624,12 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dib.obj &
 	$(OBJS)\coredll_display.obj &
 	$(OBJS)\coredll_enhmeta.obj &
+	$(OBJS)\coredll_evtloop.obj &
 	$(OBJS)\coredll_font.obj &
 	$(OBJS)\coredll_fontenum.obj &
 	$(OBJS)\coredll_fontutil.obj &
 	$(OBJS)\coredll_gdiimage.obj &
 	$(OBJS)\coredll_gdiobj.obj &
-	$(OBJS)\coredll_gdiplus.obj &
 	$(OBJS)\coredll_graphics.obj &
 	$(OBJS)\coredll_gsockmsw.obj &
 	$(OBJS)\coredll_icon.obj &
@@ -1713,6 +1647,7 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_region.obj &
 	$(OBJS)\coredll_renderer.obj &
 	$(OBJS)\coredll_settings.obj &
+	$(OBJS)\coredll_timer.obj &
 	$(OBJS)\coredll_tooltip.obj &
 	$(OBJS)\coredll_toplevel.obj &
 	$(OBJS)\coredll_utilsgui.obj &
@@ -1773,7 +1708,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_metal.obj &
 	$(OBJS)\coredll_mono.obj &
 	$(OBJS)\coredll_win32.obj &
-	$(OBJS)\coredll_accelcmn.obj &
 	$(OBJS)\coredll_accesscmn.obj &
 	$(OBJS)\coredll_anidecod.obj &
 	$(OBJS)\coredll_appcmn.obj &
@@ -1781,8 +1715,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_artstd.obj &
 	$(OBJS)\coredll_bmpbase.obj &
 	$(OBJS)\coredll_bookctrl.obj &
-	$(OBJS)\coredll_btncmn.obj &
-	$(OBJS)\coredll_cairo.obj &
 	$(OBJS)\coredll_choiccmn.obj &
 	$(OBJS)\coredll_clipcmn.obj &
 	$(OBJS)\coredll_clrpickercmn.obj &
@@ -1798,7 +1730,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dcbase.obj &
 	$(OBJS)\coredll_dcbufcmn.obj &
 	$(OBJS)\coredll_dcgraph.obj &
-	$(OBJS)\coredll_dcsvg.obj &
 	$(OBJS)\coredll_dlgcmn.obj &
 	$(OBJS)\coredll_dndcmn.obj &
 	$(OBJS)\coredll_dobjcmn.obj &
@@ -1807,15 +1738,14 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dpycmn.obj &
 	$(OBJS)\coredll_dseldlg.obj &
 	$(OBJS)\coredll_effects.obj &
+	$(OBJS)\coredll_evtloopcmn.obj &
 	$(OBJS)\coredll_fddlgcmn.obj &
-	$(OBJS)\coredll_filectrlcmn.obj &
 	$(OBJS)\coredll_filepickercmn.obj &
 	$(OBJS)\coredll_fontpickercmn.obj &
 	$(OBJS)\coredll_fldlgcmn.obj &
 	$(OBJS)\coredll_fontcmn.obj &
 	$(OBJS)\coredll_fontenumcmn.obj &
 	$(OBJS)\coredll_fontmap.obj &
-	$(OBJS)\coredll_fontutilcmn.obj &
 	$(OBJS)\coredll_framecmn.obj &
 	$(OBJS)\coredll_gaugecmn.obj &
 	$(OBJS)\coredll_gbsizer.obj &
@@ -1857,11 +1787,10 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_sizer.obj &
 	$(OBJS)\coredll_srchcmn.obj &
 	$(OBJS)\coredll_statbar.obj &
-	$(OBJS)\coredll_stattextcmn.obj &
 	$(OBJS)\coredll_stockitem.obj &
 	$(OBJS)\coredll_tbarbase.obj &
 	$(OBJS)\coredll_textcmn.obj &
-	$(OBJS)\coredll_textentrycmn.obj &
+	$(OBJS)\coredll_timercmn.obj &
 	$(OBJS)\coredll_toplvcmn.obj &
 	$(OBJS)\coredll_treebase.obj &
 	$(OBJS)\coredll_valgen.obj &
@@ -1879,7 +1808,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_dcpsg.obj &
 	$(OBJS)\coredll_dirctrlg.obj &
 	$(OBJS)\coredll_dragimgg.obj &
-	$(OBJS)\coredll_filectrlg.obj &
 	$(OBJS)\coredll_filepickerg.obj &
 	$(OBJS)\coredll_fontpickerg.obj &
 	$(OBJS)\coredll_listbkg.obj &
@@ -1933,12 +1861,12 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dib.obj &
 	$(OBJS)\corelib_display.obj &
 	$(OBJS)\corelib_enhmeta.obj &
+	$(OBJS)\corelib_evtloop.obj &
 	$(OBJS)\corelib_font.obj &
 	$(OBJS)\corelib_fontenum.obj &
 	$(OBJS)\corelib_fontutil.obj &
 	$(OBJS)\corelib_gdiimage.obj &
 	$(OBJS)\corelib_gdiobj.obj &
-	$(OBJS)\corelib_gdiplus.obj &
 	$(OBJS)\corelib_graphics.obj &
 	$(OBJS)\corelib_gsockmsw.obj &
 	$(OBJS)\corelib_icon.obj &
@@ -1956,6 +1884,7 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_region.obj &
 	$(OBJS)\corelib_renderer.obj &
 	$(OBJS)\corelib_settings.obj &
+	$(OBJS)\corelib_timer.obj &
 	$(OBJS)\corelib_tooltip.obj &
 	$(OBJS)\corelib_toplevel.obj &
 	$(OBJS)\corelib_utilsgui.obj &
@@ -2013,7 +1942,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_checklst.obj &
 	$(OBJS)\corelib_fdrepdlg.obj &
 	$(OBJS)\corelib_fontdlg.obj &
-	$(OBJS)\corelib_accelcmn.obj &
 	$(OBJS)\corelib_accesscmn.obj &
 	$(OBJS)\corelib_anidecod.obj &
 	$(OBJS)\corelib_appcmn.obj &
@@ -2021,8 +1949,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_artstd.obj &
 	$(OBJS)\corelib_bmpbase.obj &
 	$(OBJS)\corelib_bookctrl.obj &
-	$(OBJS)\corelib_btncmn.obj &
-	$(OBJS)\corelib_cairo.obj &
 	$(OBJS)\corelib_choiccmn.obj &
 	$(OBJS)\corelib_clipcmn.obj &
 	$(OBJS)\corelib_clrpickercmn.obj &
@@ -2038,7 +1964,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dcbase.obj &
 	$(OBJS)\corelib_dcbufcmn.obj &
 	$(OBJS)\corelib_dcgraph.obj &
-	$(OBJS)\corelib_dcsvg.obj &
 	$(OBJS)\corelib_dlgcmn.obj &
 	$(OBJS)\corelib_dndcmn.obj &
 	$(OBJS)\corelib_dobjcmn.obj &
@@ -2047,15 +1972,14 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dpycmn.obj &
 	$(OBJS)\corelib_dseldlg.obj &
 	$(OBJS)\corelib_effects.obj &
+	$(OBJS)\corelib_evtloopcmn.obj &
 	$(OBJS)\corelib_fddlgcmn.obj &
-	$(OBJS)\corelib_filectrlcmn.obj &
 	$(OBJS)\corelib_filepickercmn.obj &
 	$(OBJS)\corelib_fontpickercmn.obj &
 	$(OBJS)\corelib_fldlgcmn.obj &
 	$(OBJS)\corelib_fontcmn.obj &
 	$(OBJS)\corelib_fontenumcmn.obj &
 	$(OBJS)\corelib_fontmap.obj &
-	$(OBJS)\corelib_fontutilcmn.obj &
 	$(OBJS)\corelib_framecmn.obj &
 	$(OBJS)\corelib_gaugecmn.obj &
 	$(OBJS)\corelib_gbsizer.obj &
@@ -2097,11 +2021,10 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_sizer.obj &
 	$(OBJS)\corelib_srchcmn.obj &
 	$(OBJS)\corelib_statbar.obj &
-	$(OBJS)\corelib_stattextcmn.obj &
 	$(OBJS)\corelib_stockitem.obj &
 	$(OBJS)\corelib_tbarbase.obj &
 	$(OBJS)\corelib_textcmn.obj &
-	$(OBJS)\corelib_textentrycmn.obj &
+	$(OBJS)\corelib_timercmn.obj &
 	$(OBJS)\corelib_toplvcmn.obj &
 	$(OBJS)\corelib_treebase.obj &
 	$(OBJS)\corelib_valgen.obj &
@@ -2119,7 +2042,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dcpsg.obj &
 	$(OBJS)\corelib_dirctrlg.obj &
 	$(OBJS)\corelib_dragimgg.obj &
-	$(OBJS)\corelib_filectrlg.obj &
 	$(OBJS)\corelib_filepickerg.obj &
 	$(OBJS)\corelib_fontpickerg.obj &
 	$(OBJS)\corelib_listbkg.obj &
@@ -2163,12 +2085,12 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dib.obj &
 	$(OBJS)\corelib_display.obj &
 	$(OBJS)\corelib_enhmeta.obj &
+	$(OBJS)\corelib_evtloop.obj &
 	$(OBJS)\corelib_font.obj &
 	$(OBJS)\corelib_fontenum.obj &
 	$(OBJS)\corelib_fontutil.obj &
 	$(OBJS)\corelib_gdiimage.obj &
 	$(OBJS)\corelib_gdiobj.obj &
-	$(OBJS)\corelib_gdiplus.obj &
 	$(OBJS)\corelib_graphics.obj &
 	$(OBJS)\corelib_gsockmsw.obj &
 	$(OBJS)\corelib_icon.obj &
@@ -2186,6 +2108,7 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_region.obj &
 	$(OBJS)\corelib_renderer.obj &
 	$(OBJS)\corelib_settings.obj &
+	$(OBJS)\corelib_timer.obj &
 	$(OBJS)\corelib_tooltip.obj &
 	$(OBJS)\corelib_toplevel.obj &
 	$(OBJS)\corelib_utilsgui.obj &
@@ -2246,7 +2169,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_metal.obj &
 	$(OBJS)\corelib_mono.obj &
 	$(OBJS)\corelib_win32.obj &
-	$(OBJS)\corelib_accelcmn.obj &
 	$(OBJS)\corelib_accesscmn.obj &
 	$(OBJS)\corelib_anidecod.obj &
 	$(OBJS)\corelib_appcmn.obj &
@@ -2254,8 +2176,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_artstd.obj &
 	$(OBJS)\corelib_bmpbase.obj &
 	$(OBJS)\corelib_bookctrl.obj &
-	$(OBJS)\corelib_btncmn.obj &
-	$(OBJS)\corelib_cairo.obj &
 	$(OBJS)\corelib_choiccmn.obj &
 	$(OBJS)\corelib_clipcmn.obj &
 	$(OBJS)\corelib_clrpickercmn.obj &
@@ -2271,7 +2191,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dcbase.obj &
 	$(OBJS)\corelib_dcbufcmn.obj &
 	$(OBJS)\corelib_dcgraph.obj &
-	$(OBJS)\corelib_dcsvg.obj &
 	$(OBJS)\corelib_dlgcmn.obj &
 	$(OBJS)\corelib_dndcmn.obj &
 	$(OBJS)\corelib_dobjcmn.obj &
@@ -2280,15 +2199,14 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dpycmn.obj &
 	$(OBJS)\corelib_dseldlg.obj &
 	$(OBJS)\corelib_effects.obj &
+	$(OBJS)\corelib_evtloopcmn.obj &
 	$(OBJS)\corelib_fddlgcmn.obj &
-	$(OBJS)\corelib_filectrlcmn.obj &
 	$(OBJS)\corelib_filepickercmn.obj &
 	$(OBJS)\corelib_fontpickercmn.obj &
 	$(OBJS)\corelib_fldlgcmn.obj &
 	$(OBJS)\corelib_fontcmn.obj &
 	$(OBJS)\corelib_fontenumcmn.obj &
 	$(OBJS)\corelib_fontmap.obj &
-	$(OBJS)\corelib_fontutilcmn.obj &
 	$(OBJS)\corelib_framecmn.obj &
 	$(OBJS)\corelib_gaugecmn.obj &
 	$(OBJS)\corelib_gbsizer.obj &
@@ -2330,11 +2248,10 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_sizer.obj &
 	$(OBJS)\corelib_srchcmn.obj &
 	$(OBJS)\corelib_statbar.obj &
-	$(OBJS)\corelib_stattextcmn.obj &
 	$(OBJS)\corelib_stockitem.obj &
 	$(OBJS)\corelib_tbarbase.obj &
 	$(OBJS)\corelib_textcmn.obj &
-	$(OBJS)\corelib_textentrycmn.obj &
+	$(OBJS)\corelib_timercmn.obj &
 	$(OBJS)\corelib_toplvcmn.obj &
 	$(OBJS)\corelib_treebase.obj &
 	$(OBJS)\corelib_valgen.obj &
@@ -2352,7 +2269,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_dcpsg.obj &
 	$(OBJS)\corelib_dirctrlg.obj &
 	$(OBJS)\corelib_dragimgg.obj &
-	$(OBJS)\corelib_filectrlg.obj &
 	$(OBJS)\corelib_filepickerg.obj &
 	$(OBJS)\corelib_fontpickerg.obj &
 	$(OBJS)\corelib_listbkg.obj &
@@ -2376,20 +2292,12 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_vscroll.obj
 !endif
 !endif
-____wxcore_namedll_DEP =
-!ifeq SHARED 1
-____wxcore_namedll_DEP = $(__coredll___depname)
-!endif
-____wxcore_namelib_DEP =
-!ifeq SHARED 0
-____wxcore_namelib_DEP = $(__corelib___depname)
-!endif
 __advdll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 __advdll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2398,19 +2306,17 @@ ____ADVANCED_SRC_FILENAMES_2_OBJECTS =
 ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\advdll_animatecmn.obj &
 	$(OBJS)\advdll_datavcmn.obj &
-	$(OBJS)\advdll_hyperlnkcmn.obj &
 	$(OBJS)\advdll_aboutdlgg.obj &
 	$(OBJS)\advdll_animateg.obj &
 	$(OBJS)\advdll_bmpcboxg.obj &
 	$(OBJS)\advdll_calctrl.obj &
 	$(OBJS)\advdll_datavgen.obj &
 	$(OBJS)\advdll_datectlg.obj &
-	$(OBJS)\advdll_editlbox.obj &
 	$(OBJS)\advdll_grid.obj &
 	$(OBJS)\advdll_gridctrl.obj &
 	$(OBJS)\advdll_gridsel.obj &
 	$(OBJS)\advdll_helpext.obj &
-	$(OBJS)\advdll_hyperlinkg.obj &
+	$(OBJS)\advdll_hyperlink.obj &
 	$(OBJS)\advdll_laywin.obj &
 	$(OBJS)\advdll_odcombo.obj &
 	$(OBJS)\advdll_propdlg.obj &
@@ -2429,19 +2335,17 @@ ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  &
 ____ADVANCED_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\advdll_animatecmn.obj &
 	$(OBJS)\advdll_datavcmn.obj &
-	$(OBJS)\advdll_hyperlnkcmn.obj &
 	$(OBJS)\advdll_aboutdlgg.obj &
 	$(OBJS)\advdll_animateg.obj &
 	$(OBJS)\advdll_bmpcboxg.obj &
 	$(OBJS)\advdll_calctrl.obj &
 	$(OBJS)\advdll_datavgen.obj &
 	$(OBJS)\advdll_datectlg.obj &
-	$(OBJS)\advdll_editlbox.obj &
 	$(OBJS)\advdll_grid.obj &
 	$(OBJS)\advdll_gridctrl.obj &
 	$(OBJS)\advdll_gridsel.obj &
 	$(OBJS)\advdll_helpext.obj &
-	$(OBJS)\advdll_hyperlinkg.obj &
+	$(OBJS)\advdll_hyperlink.obj &
 	$(OBJS)\advdll_laywin.obj &
 	$(OBJS)\advdll_odcombo.obj &
 	$(OBJS)\advdll_propdlg.obj &
@@ -2469,19 +2373,17 @@ ____ADVANCED_SRC_FILENAMES_3_OBJECTS =
 ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\advlib_animatecmn.obj &
 	$(OBJS)\advlib_datavcmn.obj &
-	$(OBJS)\advlib_hyperlnkcmn.obj &
 	$(OBJS)\advlib_aboutdlgg.obj &
 	$(OBJS)\advlib_animateg.obj &
 	$(OBJS)\advlib_bmpcboxg.obj &
 	$(OBJS)\advlib_calctrl.obj &
 	$(OBJS)\advlib_datavgen.obj &
 	$(OBJS)\advlib_datectlg.obj &
-	$(OBJS)\advlib_editlbox.obj &
 	$(OBJS)\advlib_grid.obj &
 	$(OBJS)\advlib_gridctrl.obj &
 	$(OBJS)\advlib_gridsel.obj &
 	$(OBJS)\advlib_helpext.obj &
-	$(OBJS)\advlib_hyperlinkg.obj &
+	$(OBJS)\advlib_hyperlink.obj &
 	$(OBJS)\advlib_laywin.obj &
 	$(OBJS)\advlib_odcombo.obj &
 	$(OBJS)\advlib_propdlg.obj &
@@ -2500,19 +2402,17 @@ ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  &
 ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\advlib_animatecmn.obj &
 	$(OBJS)\advlib_datavcmn.obj &
-	$(OBJS)\advlib_hyperlnkcmn.obj &
 	$(OBJS)\advlib_aboutdlgg.obj &
 	$(OBJS)\advlib_animateg.obj &
 	$(OBJS)\advlib_bmpcboxg.obj &
 	$(OBJS)\advlib_calctrl.obj &
 	$(OBJS)\advlib_datavgen.obj &
 	$(OBJS)\advlib_datectlg.obj &
-	$(OBJS)\advlib_editlbox.obj &
 	$(OBJS)\advlib_grid.obj &
 	$(OBJS)\advlib_gridctrl.obj &
 	$(OBJS)\advlib_gridsel.obj &
 	$(OBJS)\advlib_helpext.obj &
-	$(OBJS)\advlib_hyperlinkg.obj &
+	$(OBJS)\advlib_hyperlink.obj &
 	$(OBJS)\advlib_laywin.obj &
 	$(OBJS)\advlib_odcombo.obj &
 	$(OBJS)\advlib_propdlg.obj &
@@ -2526,21 +2426,13 @@ ____ADVANCED_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\advlib_taskbar.obj &
 	$(OBJS)\advlib_joystick.obj
 !endif
-____wxadv_namedll_DEP =
-!ifeq SHARED 1
-____wxadv_namedll_DEP = $(__advdll___depname)
-!endif
-____wxadv_namelib_DEP =
-!ifeq SHARED 0
-____wxadv_namelib_DEP = $(__advlib___depname)
-!endif
 __mediadll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_MEDIA 1
 __mediadll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2556,20 +2448,12 @@ __medialib___depname = &
 !endif
 !endif
 !endif
-____wxmedia_namedll_DEP =
-!ifeq SHARED 1
-____wxmedia_namedll_DEP = $(__mediadll___depname)
-!endif
-____wxmedia_namelib_DEP =
-!ifeq SHARED 0
-____wxmedia_namelib_DEP = $(__medialib___depname)
-!endif
 __odbcdll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_ODBC 1
 __odbcdll___depname = &
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2588,7 +2472,7 @@ __dbgriddll___depname =
 !ifeq USE_GUI 1
 !ifeq USE_ODBC 1
 __dbgriddll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2604,21 +2488,13 @@ __dbgridlib___depname = &
 !endif
 !endif
 !endif
-____wxdbgrid_namedll_DEP =
-!ifeq SHARED 1
-____wxdbgrid_namedll_DEP = $(__dbgriddll___depname)
-!endif
-____wxdbgrid_namelib_DEP =
-!ifeq SHARED 0
-____wxdbgrid_namelib_DEP = $(__dbgridlib___depname)
-!endif
 __htmldll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_HTML 1
 __htmldll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2634,21 +2510,13 @@ __htmllib___depname = &
 !endif
 !endif
 !endif
-____wxhtml_namedll_DEP =
-!ifeq SHARED 1
-____wxhtml_namedll_DEP = $(__htmldll___depname)
-!endif
-____wxhtml_namelib_DEP =
-!ifeq SHARED 0
-____wxhtml_namelib_DEP = $(__htmllib___depname)
-!endif
 __qadll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_QA 1
 __qadll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2664,19 +2532,11 @@ __qalib___depname = &
 !endif
 !endif
 !endif
-____wxqa_namedll_DEP =
-!ifeq SHARED 1
-____wxqa_namedll_DEP = $(__qadll___depname)
-!endif
-____wxqa_namelib_DEP =
-!ifeq SHARED 0
-____wxqa_namelib_DEP = $(__qalib___depname)
-!endif
 __xmldll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 __xmldll___depname = &
-	$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll
 !endif
 !endif
 __xmllib___depname =
@@ -2686,20 +2546,12 @@ __xmllib___depname = &
 	$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib
 !endif
 !endif
-____wxxml_namedll_DEP =
-!ifeq SHARED 1
-____wxxml_namedll_DEP = $(__xmldll___depname)
-!endif
-____wxxml_namelib_DEP =
-!ifeq SHARED 0
-____wxxml_namelib_DEP = $(__xmllib___depname)
-!endif
 __xrcdll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_XRC 1
 __xrcdll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2712,20 +2564,12 @@ __xrclib___depname = &
 !endif
 !endif
 !endif
-____wxxrc_namedll_DEP =
-!ifeq SHARED 1
-____wxxrc_namedll_DEP = $(__xrcdll___depname)
-!endif
-____wxxrc_namelib_DEP =
-!ifeq SHARED 0
-____wxxrc_namelib_DEP = $(__xrclib___depname)
-!endif
 __auidll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_AUI 1
 __auidll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2738,20 +2582,12 @@ __auilib___depname = &
 !endif
 !endif
 !endif
-____wxaui_namedll_DEP =
-!ifeq SHARED 1
-____wxaui_namedll_DEP = $(__auidll___depname)
-!endif
-____wxaui_namelib_DEP =
-!ifeq SHARED 0
-____wxaui_namelib_DEP = $(__auilib___depname)
-!endif
 __richtextdll___depname =
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_RICHTEXT 1
 __richtextdll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2764,46 +2600,12 @@ __richtextlib___depname = &
 !endif
 !endif
 !endif
-____wxrichtext_namedll_DEP =
-!ifeq SHARED 1
-____wxrichtext_namedll_DEP = $(__richtextdll___depname)
-!endif
-____wxrichtext_namelib_DEP =
-!ifeq SHARED 0
-____wxrichtext_namelib_DEP = $(__richtextlib___depname)
-!endif
-__stcdll___depname =
-!ifeq MONOLITHIC 0
-!ifeq SHARED 1
-!ifeq USE_STC 1
-__stcdll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll
-!endif
-!endif
-!endif
-__stclib___depname =
-!ifeq MONOLITHIC 0
-!ifeq SHARED 0
-!ifeq USE_STC 1
-__stclib___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib
-!endif
-!endif
-!endif
-____wxstc_namedll_DEP =
-!ifeq SHARED 1
-____wxstc_namedll_DEP = $(__stcdll___depname)
-!endif
-____wxstc_namelib_DEP =
-!ifeq SHARED 0
-____wxstc_namelib_DEP = $(__stclib___depname)
-!endif
 __gldll___depname =
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_OPENGL 1
 __gldll___depname = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll
+	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll
 !endif
 !endif
 !endif
@@ -2828,39 +2630,6 @@ __gllib___depname =
 !ifeq USE_OPENGL 1
 __gllib___depname = &
 	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib
-!endif
-!endif
-!endif
-____wxgl_namedll_DEP =
-!ifeq SHARED 1
-____wxgl_namedll_DEP = $(__gldll___depname)
-!endif
-____wxgl_namelib_DEP =
-!ifeq SHARED 0
-____wxgl_namelib_DEP = $(__gllib___depname)
-!endif
-__wxscintilla =
-!ifeq USE_STC 1
-__wxscintilla = $(LIBDIRNAME)\wxscintilla$(WXDEBUGFLAG).lib
-!endif
-__htmldll_library_link_DEP =
-!ifeq MONOLITHIC 0
-!ifeq SHARED 1
-!ifeq USE_GUI 1
-!ifeq USE_HTML 1
-__htmldll_library_link_DEP = $(__htmldll___depname)
-!endif
-!endif
-!endif
-!endif
-__htmldll_library_link_LIBR =
-!ifeq MONOLITHIC 0
-!ifeq SHARED 1
-!ifeq USE_GUI 1
-!ifeq USE_HTML 1
-__htmldll_library_link_LIBR = &
-	$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib
-!endif
 !endif
 !endif
 !endif
@@ -2998,20 +2767,18 @@ MAKEARGS = CC="$(CC)" CXX="$(CXX)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" &
 	DEBUG_INFO="$(DEBUG_INFO)" DEBUG_FLAG="$(DEBUG_FLAG)" &
 	MONOLITHIC="$(MONOLITHIC)" USE_GUI="$(USE_GUI)" USE_HTML="$(USE_HTML)" &
 	USE_MEDIA="$(USE_MEDIA)" USE_XRC="$(USE_XRC)" USE_AUI="$(USE_AUI)" &
-	USE_RICHTEXT="$(USE_RICHTEXT)" USE_STC="$(USE_STC)" &
-	USE_OPENGL="$(USE_OPENGL)" USE_ODBC="$(USE_ODBC)" USE_QA="$(USE_QA)" &
+	USE_RICHTEXT="$(USE_RICHTEXT)" USE_OPENGL="$(USE_OPENGL)" &
+	USE_ODBC="$(USE_ODBC)" USE_QA="$(USE_QA)" &
 	USE_EXCEPTIONS="$(USE_EXCEPTIONS)" USE_RTTI="$(USE_RTTI)" &
 	USE_THREADS="$(USE_THREADS)" USE_GDIPLUS="$(USE_GDIPLUS)" &
 	OFFICIAL_BUILD="$(OFFICIAL_BUILD)" VENDOR="$(VENDOR)" &
 	WX_FLAVOUR="$(WX_FLAVOUR)" WX_LIB_FLAVOUR="$(WX_LIB_FLAVOUR)" CFG="$(CFG)" &
 	CPPUNIT_CFLAGS="$(CPPUNIT_CFLAGS)" CPPUNIT_LIBS="$(CPPUNIT_LIBS)" &
 	RUNTIME_LIBS="$(RUNTIME_LIBS)"
-WX_RELEASE_NODOT = 29
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
-COMPILER_PREFIX = wat
+WX_RELEASE_NODOT = 28
 OBJS = &
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
-LIBDIRNAME = ..\..\lib\$(COMPILER_PREFIX)_$(LIBTYPE_SUFFIX)$(CFG)
+	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
+LIBDIRNAME = ..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = &
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 WXREGEX_CFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
@@ -3107,8 +2874,8 @@ WXJPEG_OBJECTS =  &
 	$(OBJS)\wxjpeg_jquant2.obj &
 	$(OBJS)\wxjpeg_jdmerge.obj
 WXTIFF_CFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
-	$(__RUNTIME_LIBS) -i=..\..\src\zlib -i=..\..\src\jpeg &
-	-i=..\..\src\tiff\libtiff -wcd=124 $(CPPFLAGS) $(CFLAGS)
+	$(__RUNTIME_LIBS) -i=..\..\src\zlib -i=..\..\src\jpeg -wcd=124 $(CPPFLAGS) &
+	$(CFLAGS)
 WXTIFF_OBJECTS =  &
 	$(OBJS)\wxtiff_tif_win32.obj &
 	$(OBJS)\wxtiff_tif_aux.obj &
@@ -3125,21 +2892,20 @@ WXTIFF_OBJECTS =  &
 	$(OBJS)\wxtiff_tif_extension.obj &
 	$(OBJS)\wxtiff_tif_fax3.obj &
 	$(OBJS)\wxtiff_tif_fax3sm.obj &
-	$(OBJS)\wxtiff_tif_flush.obj &
 	$(OBJS)\wxtiff_tif_getimage.obj &
 	$(OBJS)\wxtiff_tif_jpeg.obj &
-	$(OBJS)\wxtiff_tif_luv.obj &
+	$(OBJS)\wxtiff_tif_flush.obj &
 	$(OBJS)\wxtiff_tif_lzw.obj &
+	$(OBJS)\wxtiff_tif_luv.obj &
 	$(OBJS)\wxtiff_tif_next.obj &
-	$(OBJS)\wxtiff_tif_ojpeg.obj &
 	$(OBJS)\wxtiff_tif_open.obj &
 	$(OBJS)\wxtiff_tif_packbits.obj &
 	$(OBJS)\wxtiff_tif_pixarlog.obj &
 	$(OBJS)\wxtiff_tif_predict.obj &
 	$(OBJS)\wxtiff_tif_print.obj &
 	$(OBJS)\wxtiff_tif_read.obj &
-	$(OBJS)\wxtiff_tif_strip.obj &
 	$(OBJS)\wxtiff_tif_swab.obj &
+	$(OBJS)\wxtiff_tif_strip.obj &
 	$(OBJS)\wxtiff_tif_thunder.obj &
 	$(OBJS)\wxtiff_tif_tile.obj &
 	$(OBJS)\wxtiff_tif_version.obj &
@@ -3152,119 +2918,28 @@ WXEXPAT_OBJECTS =  &
 	$(OBJS)\wxexpat_xmlparse.obj &
 	$(OBJS)\wxexpat_xmlrole.obj &
 	$(OBJS)\wxexpat_xmltok.obj
-WXSCINTILLA_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
-	$(__RUNTIME_LIBS) -i=..\..\src\stc\scintilla\include &
-	-i=..\..\src\stc\scintilla\src -d__WX__ -dSCI_LEXER -dLINK_LEXERS &
-	$(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
-WXSCINTILLA_OBJECTS =  &
-	$(OBJS)\wxscintilla_AutoComplete.obj &
-	$(OBJS)\wxscintilla_CallTip.obj &
-	$(OBJS)\wxscintilla_CellBuffer.obj &
-	$(OBJS)\wxscintilla_CharClassify.obj &
-	$(OBJS)\wxscintilla_ContractionState.obj &
-	$(OBJS)\wxscintilla_Document.obj &
-	$(OBJS)\wxscintilla_DocumentAccessor.obj &
-	$(OBJS)\wxscintilla_Editor.obj &
-	$(OBJS)\wxscintilla_ExternalLexer.obj &
-	$(OBJS)\wxscintilla_Indicator.obj &
-	$(OBJS)\wxscintilla_KeyMap.obj &
-	$(OBJS)\wxscintilla_KeyWords.obj &
-	$(OBJS)\wxscintilla_LexAPDL.obj &
-	$(OBJS)\wxscintilla_LexAU3.obj &
-	$(OBJS)\wxscintilla_LexAVE.obj &
-	$(OBJS)\wxscintilla_LexAda.obj &
-	$(OBJS)\wxscintilla_LexAsm.obj &
-	$(OBJS)\wxscintilla_LexAsn1.obj &
-	$(OBJS)\wxscintilla_LexBaan.obj &
-	$(OBJS)\wxscintilla_LexBash.obj &
-	$(OBJS)\wxscintilla_LexBasic.obj &
-	$(OBJS)\wxscintilla_LexBullant.obj &
-	$(OBJS)\wxscintilla_LexCLW.obj &
-	$(OBJS)\wxscintilla_LexCPP.obj &
-	$(OBJS)\wxscintilla_LexCSS.obj &
-	$(OBJS)\wxscintilla_LexCaml.obj &
-	$(OBJS)\wxscintilla_LexCsound.obj &
-	$(OBJS)\wxscintilla_LexConf.obj &
-	$(OBJS)\wxscintilla_LexCrontab.obj &
-	$(OBJS)\wxscintilla_LexEScript.obj &
-	$(OBJS)\wxscintilla_LexEiffel.obj &
-	$(OBJS)\wxscintilla_LexErlang.obj &
-	$(OBJS)\wxscintilla_LexFlagship.obj &
-	$(OBJS)\wxscintilla_LexForth.obj &
-	$(OBJS)\wxscintilla_LexFortran.obj &
-	$(OBJS)\wxscintilla_LexGui4Cli.obj &
-	$(OBJS)\wxscintilla_LexHTML.obj &
-	$(OBJS)\wxscintilla_LexHaskell.obj &
-	$(OBJS)\wxscintilla_LexInno.obj &
-	$(OBJS)\wxscintilla_LexKix.obj &
-	$(OBJS)\wxscintilla_LexLisp.obj &
-	$(OBJS)\wxscintilla_LexLout.obj &
-	$(OBJS)\wxscintilla_LexLua.obj &
-	$(OBJS)\wxscintilla_LexMMIXAL.obj &
-	$(OBJS)\wxscintilla_LexMPT.obj &
-	$(OBJS)\wxscintilla_LexMSSQL.obj &
-	$(OBJS)\wxscintilla_LexMatlab.obj &
-	$(OBJS)\wxscintilla_LexMetapost.obj &
-	$(OBJS)\wxscintilla_LexNsis.obj &
-	$(OBJS)\wxscintilla_LexOpal.obj &
-	$(OBJS)\wxscintilla_LexOthers.obj &
-	$(OBJS)\wxscintilla_LexPB.obj &
-	$(OBJS)\wxscintilla_LexPOV.obj &
-	$(OBJS)\wxscintilla_LexPS.obj &
-	$(OBJS)\wxscintilla_LexPascal.obj &
-	$(OBJS)\wxscintilla_LexPerl.obj &
-	$(OBJS)\wxscintilla_LexPython.obj &
-	$(OBJS)\wxscintilla_LexRebol.obj &
-	$(OBJS)\wxscintilla_LexRuby.obj &
-	$(OBJS)\wxscintilla_LexSQL.obj &
-	$(OBJS)\wxscintilla_LexSmalltalk.obj &
-	$(OBJS)\wxscintilla_LexTADS3.obj &
-	$(OBJS)\wxscintilla_LexScriptol.obj &
-	$(OBJS)\wxscintilla_LexSpecman.obj &
-	$(OBJS)\wxscintilla_LexSpice.obj &
-	$(OBJS)\wxscintilla_LexTCL.obj &
-	$(OBJS)\wxscintilla_LexTeX.obj &
-	$(OBJS)\wxscintilla_LexVB.obj &
-	$(OBJS)\wxscintilla_LexVHDL.obj &
-	$(OBJS)\wxscintilla_LexVerilog.obj &
-	$(OBJS)\wxscintilla_LexYAML.obj &
-	$(OBJS)\wxscintilla_LineMarker.obj &
-	$(OBJS)\wxscintilla_PropSet.obj &
-	$(OBJS)\wxscintilla_RESearch.obj &
-	$(OBJS)\wxscintilla_ScintillaBase.obj &
-	$(OBJS)\wxscintilla_Style.obj &
-	$(OBJS)\wxscintilla_StyleContext.obj &
-	$(OBJS)\wxscintilla_UniConversion.obj &
-	$(OBJS)\wxscintilla_ViewStyle.obj &
-	$(OBJS)\wxscintilla_WindowAccessor.obj &
-	$(OBJS)\wxscintilla_XPM.obj
 MONODLL_CFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
-	-i=..\..\src\expat\lib -dwxUSE_BASE=1 -dWXMAKINGDLL &
-	-i=..\..\src\stc\scintilla\include -i=..\..\src\stc\scintilla\src -d__WX__ &
-	-dSCI_LEXER -dLINK_LEXERS $(CPPFLAGS) $(CFLAGS)
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-i=..\..\src\expat\lib -dwxUSE_BASE=1 -dWXMAKINGDLL $(CPPFLAGS) $(CFLAGS)
 MONODLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_BASE=1 -dWXMAKINGDLL &
-	-i=..\..\src\stc\scintilla\include -i=..\..\src\stc\scintilla\src -d__WX__ &
-	-dSCI_LEXER -dLINK_LEXERS /fh=$(OBJS)\wxprec_monodll.pch $(__RTTIFLAG) &
-	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
+	/fh=$(OBJS)\wxprec_monodll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
+	$(CPPFLAGS) $(CXXFLAGS)
 MONODLL_OBJECTS =  &
 	$(OBJS)\monodll_dummy.obj &
 	$(OBJS)\monodll_appbase.obj &
 	$(OBJS)\monodll_arcall.obj &
 	$(OBJS)\monodll_arcfind.obj &
 	$(OBJS)\monodll_archive.obj &
-	$(OBJS)\monodll_arrstr.obj &
-	$(OBJS)\monodll_base64.obj &
 	$(OBJS)\monodll_clntdata.obj &
 	$(OBJS)\monodll_cmdline.obj &
 	$(OBJS)\monodll_config.obj &
@@ -3276,7 +2951,6 @@ MONODLL_OBJECTS =  &
 	$(OBJS)\monodll_dynlib.obj &
 	$(OBJS)\monodll_dynload.obj &
 	$(OBJS)\monodll_encconv.obj &
-	$(OBJS)\monodll_evtloopcmn.obj &
 	$(OBJS)\monodll_extended.obj &
 	$(OBJS)\monodll_ffile.obj &
 	$(OBJS)\monodll_file.obj &
@@ -3313,23 +2987,16 @@ MONODLL_OBJECTS =  &
 	$(OBJS)\monodll_strconv.obj &
 	$(OBJS)\monodll_stream.obj &
 	$(OBJS)\monodll_string.obj &
-	$(OBJS)\monodll_stringimpl.obj &
-	$(OBJS)\monodll_stringops.obj &
-	$(OBJS)\monodll_strvararg.obj &
 	$(OBJS)\monodll_sysopt.obj &
 	$(OBJS)\monodll_tarstrm.obj &
 	$(OBJS)\monodll_textbuf.obj &
 	$(OBJS)\monodll_textfile.obj &
-	$(OBJS)\monodll_timercmn.obj &
-	$(OBJS)\monodll_timerimpl.obj &
 	$(OBJS)\monodll_tokenzr.obj &
 	$(OBJS)\monodll_txtstrm.obj &
-	$(OBJS)\monodll_unichar.obj &
 	$(OBJS)\monodll_uri.obj &
 	$(OBJS)\monodll_variant.obj &
 	$(OBJS)\monodll_wfstream.obj &
-	$(OBJS)\monodll_wxcrt.obj &
-	$(OBJS)\monodll_wxprintf.obj &
+	$(OBJS)\monodll_wxchar.obj &
 	$(OBJS)\monodll_xti.obj &
 	$(OBJS)\monodll_xtistrm.obj &
 	$(OBJS)\monodll_zipstrm.obj &
@@ -3348,14 +3015,12 @@ MONODLL_OBJECTS =  &
 	$(OBJS)\monodll_stackwalk.obj &
 	$(OBJS)\monodll_stdpaths.obj &
 	$(OBJS)\monodll_thread.obj &
-	$(OBJS)\monodll_timer.obj &
 	$(OBJS)\monodll_utils.obj &
 	$(OBJS)\monodll_utilsexc.obj &
 	$(OBJS)\monodll_event.obj &
 	$(OBJS)\monodll_fs_mem.obj &
 	$(OBJS)\monodll_msgout.obj &
 	$(OBJS)\monodll_utilscmn.obj &
-	$(OBJS)\monodll_evtloop.obj &
 	$(OBJS)\monodll_main.obj &
 	$(OBJS)\monodll_mslu.obj &
 	$(OBJS)\monodll_volume.obj &
@@ -3378,29 +3043,23 @@ MONOLIB_CFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
-	-i=..\..\src\expat\lib -dwxUSE_BASE=1 -i=..\..\src\stc\scintilla\include &
-	-i=..\..\src\stc\scintilla\src -d__WX__ -dSCI_LEXER -dLINK_LEXERS &
-	$(CPPFLAGS) $(CFLAGS)
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-i=..\..\src\expat\lib -dwxUSE_BASE=1 $(CPPFLAGS) $(CFLAGS)
 MONOLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
-	-i=..\..\src\expat\lib -dwxUSE_BASE=1 -i=..\..\src\stc\scintilla\include &
-	-i=..\..\src\stc\scintilla\src -d__WX__ -dSCI_LEXER -dLINK_LEXERS &
-	/fh=$(OBJS)\wxprec_monolib.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
-	$(CPPFLAGS) $(CXXFLAGS)
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-i=..\..\src\expat\lib -dwxUSE_BASE=1 /fh=$(OBJS)\wxprec_monolib.pch &
+	$(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 MONOLIB_OBJECTS =  &
 	$(OBJS)\monolib_dummy.obj &
 	$(OBJS)\monolib_appbase.obj &
 	$(OBJS)\monolib_arcall.obj &
 	$(OBJS)\monolib_arcfind.obj &
 	$(OBJS)\monolib_archive.obj &
-	$(OBJS)\monolib_arrstr.obj &
-	$(OBJS)\monolib_base64.obj &
 	$(OBJS)\monolib_clntdata.obj &
 	$(OBJS)\monolib_cmdline.obj &
 	$(OBJS)\monolib_config.obj &
@@ -3412,7 +3071,6 @@ MONOLIB_OBJECTS =  &
 	$(OBJS)\monolib_dynlib.obj &
 	$(OBJS)\monolib_dynload.obj &
 	$(OBJS)\monolib_encconv.obj &
-	$(OBJS)\monolib_evtloopcmn.obj &
 	$(OBJS)\monolib_extended.obj &
 	$(OBJS)\monolib_ffile.obj &
 	$(OBJS)\monolib_file.obj &
@@ -3449,23 +3107,16 @@ MONOLIB_OBJECTS =  &
 	$(OBJS)\monolib_strconv.obj &
 	$(OBJS)\monolib_stream.obj &
 	$(OBJS)\monolib_string.obj &
-	$(OBJS)\monolib_stringimpl.obj &
-	$(OBJS)\monolib_stringops.obj &
-	$(OBJS)\monolib_strvararg.obj &
 	$(OBJS)\monolib_sysopt.obj &
 	$(OBJS)\monolib_tarstrm.obj &
 	$(OBJS)\monolib_textbuf.obj &
 	$(OBJS)\monolib_textfile.obj &
-	$(OBJS)\monolib_timercmn.obj &
-	$(OBJS)\monolib_timerimpl.obj &
 	$(OBJS)\monolib_tokenzr.obj &
 	$(OBJS)\monolib_txtstrm.obj &
-	$(OBJS)\monolib_unichar.obj &
 	$(OBJS)\monolib_uri.obj &
 	$(OBJS)\monolib_variant.obj &
 	$(OBJS)\monolib_wfstream.obj &
-	$(OBJS)\monolib_wxcrt.obj &
-	$(OBJS)\monolib_wxprintf.obj &
+	$(OBJS)\monolib_wxchar.obj &
 	$(OBJS)\monolib_xti.obj &
 	$(OBJS)\monolib_xtistrm.obj &
 	$(OBJS)\monolib_zipstrm.obj &
@@ -3484,14 +3135,12 @@ MONOLIB_OBJECTS =  &
 	$(OBJS)\monolib_stackwalk.obj &
 	$(OBJS)\monolib_stdpaths.obj &
 	$(OBJS)\monolib_thread.obj &
-	$(OBJS)\monolib_timer.obj &
 	$(OBJS)\monolib_utils.obj &
 	$(OBJS)\monolib_utilsexc.obj &
 	$(OBJS)\monolib_event.obj &
 	$(OBJS)\monolib_fs_mem.obj &
 	$(OBJS)\monolib_msgout.obj &
 	$(OBJS)\monolib_utilscmn.obj &
-	$(OBJS)\monolib_evtloop.obj &
 	$(OBJS)\monolib_main.obj &
 	$(OBJS)\monolib_mslu.obj &
 	$(OBJS)\monolib_volume.obj &
@@ -3514,16 +3163,16 @@ BASEDLL_CFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXMAKINGDLL_BASE -dwxUSE_BASE=1 &
 	$(CPPFLAGS) $(CFLAGS)
 BASEDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXMAKINGDLL_BASE -dwxUSE_BASE=1 &
 	/fh=$(OBJS)\wxprec_basedll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -3533,8 +3182,6 @@ BASEDLL_OBJECTS =  &
 	$(OBJS)\basedll_arcall.obj &
 	$(OBJS)\basedll_arcfind.obj &
 	$(OBJS)\basedll_archive.obj &
-	$(OBJS)\basedll_arrstr.obj &
-	$(OBJS)\basedll_base64.obj &
 	$(OBJS)\basedll_clntdata.obj &
 	$(OBJS)\basedll_cmdline.obj &
 	$(OBJS)\basedll_config.obj &
@@ -3546,7 +3193,6 @@ BASEDLL_OBJECTS =  &
 	$(OBJS)\basedll_dynlib.obj &
 	$(OBJS)\basedll_dynload.obj &
 	$(OBJS)\basedll_encconv.obj &
-	$(OBJS)\basedll_evtloopcmn.obj &
 	$(OBJS)\basedll_extended.obj &
 	$(OBJS)\basedll_ffile.obj &
 	$(OBJS)\basedll_file.obj &
@@ -3583,23 +3229,16 @@ BASEDLL_OBJECTS =  &
 	$(OBJS)\basedll_strconv.obj &
 	$(OBJS)\basedll_stream.obj &
 	$(OBJS)\basedll_string.obj &
-	$(OBJS)\basedll_stringimpl.obj &
-	$(OBJS)\basedll_stringops.obj &
-	$(OBJS)\basedll_strvararg.obj &
 	$(OBJS)\basedll_sysopt.obj &
 	$(OBJS)\basedll_tarstrm.obj &
 	$(OBJS)\basedll_textbuf.obj &
 	$(OBJS)\basedll_textfile.obj &
-	$(OBJS)\basedll_timercmn.obj &
-	$(OBJS)\basedll_timerimpl.obj &
 	$(OBJS)\basedll_tokenzr.obj &
 	$(OBJS)\basedll_txtstrm.obj &
-	$(OBJS)\basedll_unichar.obj &
 	$(OBJS)\basedll_uri.obj &
 	$(OBJS)\basedll_variant.obj &
 	$(OBJS)\basedll_wfstream.obj &
-	$(OBJS)\basedll_wxcrt.obj &
-	$(OBJS)\basedll_wxprintf.obj &
+	$(OBJS)\basedll_wxchar.obj &
 	$(OBJS)\basedll_xti.obj &
 	$(OBJS)\basedll_xtistrm.obj &
 	$(OBJS)\basedll_zipstrm.obj &
@@ -3618,14 +3257,12 @@ BASEDLL_OBJECTS =  &
 	$(OBJS)\basedll_stackwalk.obj &
 	$(OBJS)\basedll_stdpaths.obj &
 	$(OBJS)\basedll_thread.obj &
-	$(OBJS)\basedll_timer.obj &
 	$(OBJS)\basedll_utils.obj &
 	$(OBJS)\basedll_utilsexc.obj &
 	$(OBJS)\basedll_event.obj &
 	$(OBJS)\basedll_fs_mem.obj &
 	$(OBJS)\basedll_msgout.obj &
 	$(OBJS)\basedll_utilscmn.obj &
-	$(OBJS)\basedll_evtloop.obj &
 	$(OBJS)\basedll_main.obj &
 	$(OBJS)\basedll_mslu.obj &
 	$(OBJS)\basedll_volume.obj
@@ -3633,15 +3270,15 @@ BASELIB_CFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 -dwxUSE_BASE=1 $(CPPFLAGS) $(CFLAGS)
 BASELIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 -dwxUSE_BASE=1 &
 	/fh=$(OBJS)\wxprec_baselib.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -3651,8 +3288,6 @@ BASELIB_OBJECTS =  &
 	$(OBJS)\baselib_arcall.obj &
 	$(OBJS)\baselib_arcfind.obj &
 	$(OBJS)\baselib_archive.obj &
-	$(OBJS)\baselib_arrstr.obj &
-	$(OBJS)\baselib_base64.obj &
 	$(OBJS)\baselib_clntdata.obj &
 	$(OBJS)\baselib_cmdline.obj &
 	$(OBJS)\baselib_config.obj &
@@ -3664,7 +3299,6 @@ BASELIB_OBJECTS =  &
 	$(OBJS)\baselib_dynlib.obj &
 	$(OBJS)\baselib_dynload.obj &
 	$(OBJS)\baselib_encconv.obj &
-	$(OBJS)\baselib_evtloopcmn.obj &
 	$(OBJS)\baselib_extended.obj &
 	$(OBJS)\baselib_ffile.obj &
 	$(OBJS)\baselib_file.obj &
@@ -3701,23 +3335,16 @@ BASELIB_OBJECTS =  &
 	$(OBJS)\baselib_strconv.obj &
 	$(OBJS)\baselib_stream.obj &
 	$(OBJS)\baselib_string.obj &
-	$(OBJS)\baselib_stringimpl.obj &
-	$(OBJS)\baselib_stringops.obj &
-	$(OBJS)\baselib_strvararg.obj &
 	$(OBJS)\baselib_sysopt.obj &
 	$(OBJS)\baselib_tarstrm.obj &
 	$(OBJS)\baselib_textbuf.obj &
 	$(OBJS)\baselib_textfile.obj &
-	$(OBJS)\baselib_timercmn.obj &
-	$(OBJS)\baselib_timerimpl.obj &
 	$(OBJS)\baselib_tokenzr.obj &
 	$(OBJS)\baselib_txtstrm.obj &
-	$(OBJS)\baselib_unichar.obj &
 	$(OBJS)\baselib_uri.obj &
 	$(OBJS)\baselib_variant.obj &
 	$(OBJS)\baselib_wfstream.obj &
-	$(OBJS)\baselib_wxcrt.obj &
-	$(OBJS)\baselib_wxprintf.obj &
+	$(OBJS)\baselib_wxchar.obj &
 	$(OBJS)\baselib_xti.obj &
 	$(OBJS)\baselib_xtistrm.obj &
 	$(OBJS)\baselib_zipstrm.obj &
@@ -3736,14 +3363,12 @@ BASELIB_OBJECTS =  &
 	$(OBJS)\baselib_stackwalk.obj &
 	$(OBJS)\baselib_stdpaths.obj &
 	$(OBJS)\baselib_thread.obj &
-	$(OBJS)\baselib_timer.obj &
 	$(OBJS)\baselib_utils.obj &
 	$(OBJS)\baselib_utilsexc.obj &
 	$(OBJS)\baselib_event.obj &
 	$(OBJS)\baselib_fs_mem.obj &
 	$(OBJS)\baselib_msgout.obj &
 	$(OBJS)\baselib_utilscmn.obj &
-	$(OBJS)\baselib_evtloop.obj &
 	$(OBJS)\baselib_main.obj &
 	$(OBJS)\baselib_mslu.obj &
 	$(OBJS)\baselib_volume.obj
@@ -3751,8 +3376,8 @@ NETDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_NET &
 	/fh=$(OBJS)\wxprec_netdll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
 	$(CXXFLAGS)
@@ -3774,8 +3399,8 @@ NETLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 /fh=$(OBJS)\wxprec_netlib.pch &
 	$(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 NETLIB_OBJECTS =  &
@@ -3796,8 +3421,8 @@ COREDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_CORE -dwxUSE_BASE=0 &
 	/fh=$(OBJS)\wxprec_coredll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -3807,7 +3432,6 @@ COREDLL_OBJECTS =  &
 	$(OBJS)\coredll_fs_mem.obj &
 	$(OBJS)\coredll_msgout.obj &
 	$(OBJS)\coredll_utilscmn.obj &
-	$(OBJS)\coredll_evtloop.obj &
 	$(OBJS)\coredll_main.obj &
 	$(OBJS)\coredll_mslu.obj &
 	$(OBJS)\coredll_volume.obj &
@@ -3816,8 +3440,8 @@ CORELIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_BASE=0 /fh=$(OBJS)\wxprec_corelib.pch &
 	$(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 CORELIB_OBJECTS =  &
@@ -3826,7 +3450,6 @@ CORELIB_OBJECTS =  &
 	$(OBJS)\corelib_fs_mem.obj &
 	$(OBJS)\corelib_msgout.obj &
 	$(OBJS)\corelib_utilscmn.obj &
-	$(OBJS)\corelib_evtloop.obj &
 	$(OBJS)\corelib_main.obj &
 	$(OBJS)\corelib_mslu.obj &
 	$(OBJS)\corelib_volume.obj &
@@ -3835,8 +3458,8 @@ ADVDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_ADV &
 	/fh=$(OBJS)\wxprec_advdll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
 	$(CXXFLAGS)
@@ -3847,8 +3470,8 @@ ADVLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_advlib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 ADVLIB_OBJECTS =  &
@@ -3858,8 +3481,8 @@ MEDIADLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_MEDIA &
 	/fh=$(OBJS)\wxprec_mediadll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -3874,8 +3497,8 @@ MEDIALIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_medialib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 MEDIALIB_OBJECTS =  &
@@ -3889,8 +3512,8 @@ ODBCDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_ODBC &
 	/fh=$(OBJS)\wxprec_odbcdll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -3902,8 +3525,8 @@ ODBCLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 /fh=$(OBJS)\wxprec_odbclib.pch &
 	$(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 ODBCLIB_OBJECTS =  &
@@ -3914,8 +3537,8 @@ DBGRIDDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_DBGRID &
 	/fh=$(OBJS)\wxprec_dbgriddll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -3926,8 +3549,8 @@ DBGRIDLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_dbgridlib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 DBGRIDLIB_OBJECTS =  &
@@ -3937,8 +3560,8 @@ HTMLDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_HTML &
 	/fh=$(OBJS)\wxprec_htmldll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -3972,8 +3595,8 @@ HTMLLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_htmllib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 HTMLLIB_OBJECTS =  &
@@ -4006,8 +3629,8 @@ QADLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_QA &
 	/fh=$(OBJS)\wxprec_qadll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
 	$(CXXFLAGS)
@@ -4019,8 +3642,8 @@ QALIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_qalib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 QALIB_OBJECTS =  &
@@ -4031,8 +3654,8 @@ XMLDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_XML &
 	/fh=$(OBJS)\wxprec_xmldll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
 	$(CXXFLAGS)
@@ -4044,8 +3667,8 @@ XMLLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dwxUSE_GUI=0 /fh=$(OBJS)\wxprec_xmllib.pch &
 	$(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 XMLLIB_OBJECTS =  &
@@ -4056,8 +3679,8 @@ XRCDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_XRC &
 	/fh=$(OBJS)\wxprec_xrcdll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
 	$(CXXFLAGS)
@@ -4105,7 +3728,6 @@ XRCDLL_OBJECTS =  &
 	$(OBJS)\xrcdll_xh_slidr.obj &
 	$(OBJS)\xrcdll_xh_spin.obj &
 	$(OBJS)\xrcdll_xh_split.obj &
-	$(OBJS)\xrcdll_xh_srchctrl.obj &
 	$(OBJS)\xrcdll_xh_statbar.obj &
 	$(OBJS)\xrcdll_xh_stbmp.obj &
 	$(OBJS)\xrcdll_xh_stbox.obj &
@@ -4124,8 +3746,8 @@ XRCLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_xrclib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 XRCLIB_OBJECTS =  &
@@ -4172,7 +3794,6 @@ XRCLIB_OBJECTS =  &
 	$(OBJS)\xrclib_xh_slidr.obj &
 	$(OBJS)\xrclib_xh_spin.obj &
 	$(OBJS)\xrclib_xh_split.obj &
-	$(OBJS)\xrclib_xh_srchctrl.obj &
 	$(OBJS)\xrclib_xh_statbar.obj &
 	$(OBJS)\xrclib_xh_stbmp.obj &
 	$(OBJS)\xrclib_xh_stbox.obj &
@@ -4191,8 +3812,8 @@ AUIDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_AUI &
 	/fh=$(OBJS)\wxprec_auidll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
 	$(CXXFLAGS)
@@ -4207,8 +3828,8 @@ AUILIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_auilib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 AUILIB_OBJECTS =  &
@@ -4222,8 +3843,8 @@ RICHTEXTDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_RICHTEXT &
 	/fh=$(OBJS)\wxprec_richtextdll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) &
 	$(CPPFLAGS) $(CXXFLAGS)
@@ -4242,8 +3863,8 @@ RICHTEXTLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_richtextlib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 RICHTEXTLIB_OBJECTS =  &
@@ -4257,60 +3878,28 @@ RICHTEXTLIB_OBJECTS =  &
 	$(OBJS)\richtextlib_richtextsymboldlg.obj &
 	$(OBJS)\richtextlib_richtextstyledlg.obj &
 	$(OBJS)\richtextlib_richtextprint.obj
-STCDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
-	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
-	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
-	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
-	-i=..\..\src\expat\lib -i=..\..\src\stc\scintilla\include &
-	-i=..\..\src\stc\scintilla\src -d__WX__ -dSCI_LEXER -dLINK_LEXERS &
-	-dWXUSINGDLL -dWXMAKINGDLL_STC /fh=$(OBJS)\wxprec_stcdll.pch $(__RTTIFLAG) &
-	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
-STCDLL_OBJECTS =  &
-	$(OBJS)\stcdll_dummy.obj &
-	$(OBJS)\stcdll_stc.obj &
-	$(OBJS)\stcdll_PlatWX.obj &
-	$(OBJS)\stcdll_ScintillaWX.obj
-STCLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
-	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
-	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
-	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
-	-i=..\..\src\expat\lib -i=..\..\src\stc\scintilla\include &
-	-i=..\..\src\stc\scintilla\src -d__WX__ -dSCI_LEXER -dLINK_LEXERS &
-	/fh=$(OBJS)\wxprec_stclib.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
-	$(CXXFLAGS)
-STCLIB_OBJECTS =  &
-	$(OBJS)\stclib_dummy.obj &
-	$(OBJS)\stclib_stc.obj &
-	$(OBJS)\stclib_PlatWX.obj &
-	$(OBJS)\stclib_ScintillaWX.obj
 GLDLL_CXXFLAGS = -bd $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_GL &
 	/fh=$(OBJS)\wxprec_gldll.pch $(__RTTIFLAG) $(__EXCEPTIONSFLAG) $(CPPFLAGS) &
 	$(CXXFLAGS)
 GLDLL_OBJECTS =  &
 	$(OBJS)\gldll_dummy.obj &
-	$(OBJS)\gldll_glcmn.obj &
 	$(OBJS)\gldll_glcanvas.obj
 GLLIB_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG) $(__THREADSFLAG) &
 	$(__RUNTIME_LIBS) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) &
 	$(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include &
-	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -dWXBUILDING -i=..\..\src\tiff\libtiff &
-	-i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
+	-wx -wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=..\..\src\tiff -i=..\..\src\jpeg &
+	-i=..\..\src\png -i=..\..\src\zlib -i=..\..\src\regex &
 	-i=..\..\src\expat\lib /fh=$(OBJS)\wxprec_gllib.pch $(__RTTIFLAG) &
 	$(__EXCEPTIONSFLAG) $(CPPFLAGS) $(CXXFLAGS)
 GLLIB_OBJECTS =  &
 	$(OBJS)\gllib_dummy.obj &
-	$(OBJS)\gllib_glcmn.obj &
 	$(OBJS)\gllib_glcanvas.obj
 BUILD_CFG_FILE = $(SETUPHDIR)\build.cfg
 
@@ -4321,7 +3910,7 @@ $(OBJS) :
 
 ### Targets: ###
 
-all : .SYMBOLIC setup_h $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(__wxpng___depname) $(__wxjpeg___depname) $(__wxtiff___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(__wxscintilla) $(__monodll___depname) $(__monolib___depname) $(__basedll___depname) $(__baselib___depname) $(__netdll___depname) $(__netlib___depname) $(__coredll___depname) $(__corelib___depname) $(__advdll___depname) $(__advlib___depname) $(__mediadll___depname) $(__medialib___depname) $(__odbcdll___depname) $(__odbclib___depname) $(__dbgriddll___depname) $(__dbgridlib___depname) $(__htmldll___depname) $(__htmllib___depname) $(__qadll___depname) $(__qalib___depname) $(__xmldll___depname) $(__xmllib___depname) $(__xrcdll___depname) $(__xrclib___depname) $(__auidll___depname) $(__auilib___depname) $(__richtextdll___depname) $(__richtextlib___depname) $(__stcdll___depname) $(__stclib___depname) $(__gldll___depname) $(__gllib___depname) build_cfg_file
+all : .SYMBOLIC setup_h $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(__wxpng___depname) $(__wxjpeg___depname) $(__wxtiff___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(__monodll___depname) $(__monolib___depname) $(__basedll___depname) $(__baselib___depname) $(__netdll___depname) $(__netlib___depname) $(__coredll___depname) $(__corelib___depname) $(__advdll___depname) $(__advlib___depname) $(__mediadll___depname) $(__medialib___depname) $(__odbcdll___depname) $(__odbclib___depname) $(__dbgriddll___depname) $(__dbgridlib___depname) $(__htmldll___depname) $(__htmllib___depname) $(__qadll___depname) $(__qalib___depname) $(__xmldll___depname) $(__xmllib___depname) $(__xrcdll___depname) $(__xrclib___depname) $(__auidll___depname) $(__auilib___depname) $(__richtextdll___depname) $(__richtextlib___depname) $(__gldll___depname) $(__gllib___depname) build_cfg_file
 
 clean : .SYMBOLIC 
 	-if exist $(OBJS)\*.obj del $(OBJS)\*.obj
@@ -4335,53 +3924,49 @@ clean : .SYMBOLIC
 	-if exist $(LIBDIRNAME)\wxjpeg$(WXDEBUGFLAG).lib del $(LIBDIRNAME)\wxjpeg$(WXDEBUGFLAG).lib
 	-if exist $(LIBDIRNAME)\wxtiff$(WXDEBUGFLAG).lib del $(LIBDIRNAME)\wxtiff$(WXDEBUGFLAG).lib
 	-if exist $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib del $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib
-	-if exist $(LIBDIRNAME)\wxscintilla$(WXDEBUGFLAG).lib del $(LIBDIRNAME)\wxscintilla$(WXDEBUGFLAG).lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media.lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa.lib
-	-if exist $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib
 	-if exist $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib del $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib
-	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll
+	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib
 	-if exist $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib del $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl.lib
 	cd ..\..\samples
@@ -4426,23 +4011,16 @@ $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib :  $(WXEXPAT_OBJECTS)
 	@for %i in ($(WXEXPAT_OBJECTS)) do @%append $(OBJS)\wxexpat.lbc +%i
 	wlib -q -p4096 -n -b $^@ @$(OBJS)\wxexpat.lbc
 
-!ifeq USE_STC 1
-$(LIBDIRNAME)\wxscintilla$(WXDEBUGFLAG).lib :  $(WXSCINTILLA_OBJECTS)
-	@%create $(OBJS)\wxscintilla.lbc
-	@for %i in ($(WXSCINTILLA_OBJECTS)) do @%append $(OBJS)\wxscintilla.lbc +%i
-	wlib -q -p4096 -n -b $^@ @$(OBJS)\wxscintilla.lbc
-!endif
-
 !ifeq MONOLITHIC 1
 !ifeq SHARED 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll :  $(MONODLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\monodll_version.res $(__wxscintilla_library_link_DEP)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll :  $(MONODLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\monodll_version.res
 	@%create $(OBJS)\monodll.lbc
 	@%append $(OBJS)\monodll.lbc option quiet
 	@%append $(OBJS)\monodll.lbc name $^@
 	@%append $(OBJS)\monodll.lbc option caseexact
 	@%append $(OBJS)\monodll.lbc $(LDFLAGS) $(__DEBUGINFO_3)  libpath $(LIBDIRNAME)
 	@for %i in ($(MONODLL_OBJECTS)) do @%append $(OBJS)\monodll.lbc file %i
-	@for %i in ( $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib     $(__wxscintilla)) do @%append $(OBJS)\monodll.lbc library %i
+	@for %i in ( $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib    ) do @%append $(OBJS)\monodll.lbc library %i
 	@%append $(OBJS)\monodll.lbc option resource=$(OBJS)\monodll_version.res
 	@%append $(OBJS)\monodll.lbc system nt_dll
 	wlink @$(OBJS)\monodll.lbc
@@ -4461,7 +4039,7 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 
 !ifeq MONOLITHIC 0
 !ifeq SHARED 1
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll :  $(BASEDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\basedll_version.res
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG).dll :  $(BASEDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\basedll_version.res
 	@%create $(OBJS)\basedll.lbc
 	@%append $(OBJS)\basedll.lbc option quiet
 	@%append $(OBJS)\basedll.lbc name $^@
@@ -4486,12 +4064,8 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !endif
 
 !ifeq MONOLITHIC 0
-wxbase : .SYMBOLIC $(____wxbase_namedll_DEP) $(____wxbase_namelib_DEP)
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll :  $(NETDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\netdll_version.res $(__basedll___depname)
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG).dll :  $(NETDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\netdll_version.res $(__basedll___depname)
 	@%create $(OBJS)\netdll.lbc
 	@%append $(OBJS)\netdll.lbc option quiet
 	@%append $(OBJS)\netdll.lbc name $^@
@@ -4516,13 +4090,9 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !endif
 
 !ifeq MONOLITHIC 0
-wxnet : .SYMBOLIC $(____wxnet_namedll_DEP) $(____wxnet_namelib_DEP)
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll :  $(COREDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\coredll_version.res $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG).dll :  $(COREDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\coredll_version.res $(__basedll___depname)
 	@%create $(OBJS)\coredll.lbc
 	@%append $(OBJS)\coredll.lbc option quiet
 	@%append $(OBJS)\coredll.lbc name $^@
@@ -4550,15 +4120,9 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_GUI 1
-wxcore : .SYMBOLIC $(____wxcore_namedll_DEP) $(____wxcore_namelib_DEP)
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll :  $(ADVDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\advdll_version.res $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG).dll :  $(ADVDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\advdll_version.res $(__coredll___depname) $(__basedll___depname)
 	@%create $(OBJS)\advdll.lbc
 	@%append $(OBJS)\advdll.lbc option quiet
 	@%append $(OBJS)\advdll.lbc name $^@
@@ -4586,16 +4150,10 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_GUI 1
-wxadv : .SYMBOLIC $(____wxadv_namedll_DEP) $(____wxadv_namelib_DEP)
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_MEDIA 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll :  $(MEDIADLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\mediadll_version.res $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG).dll :  $(MEDIADLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\mediadll_version.res $(__coredll___depname) $(__basedll___depname)
 	@%create $(OBJS)\mediadll.lbc
 	@%append $(OBJS)\mediadll.lbc option quiet
 	@%append $(OBJS)\mediadll.lbc name $^@
@@ -4626,17 +4184,9 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_GUI 1
-!ifeq USE_MEDIA 1
-wxmedia : .SYMBOLIC $(____wxmedia_namedll_DEP) $(____wxmedia_namelib_DEP)
-!endif
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_ODBC 1
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll :  $(ODBCDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\odbcdll_version.res $(__basedll___depname)
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG).dll :  $(ODBCDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\odbcdll_version.res $(__basedll___depname)
 	@%create $(OBJS)\odbcdll.lbc
 	@%append $(OBJS)\odbcdll.lbc option quiet
 	@%append $(OBJS)\odbcdll.lbc name $^@
@@ -4667,7 +4217,7 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_ODBC 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll :  $(DBGRIDDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\dbgriddll_version.res $(__advdll___depname) $(__odbcdll___depname) $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG).dll :  $(DBGRIDDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\dbgriddll_version.res $(__advdll___depname) $(__odbcdll___depname) $(__coredll___depname) $(__basedll___depname)
 	@%create $(OBJS)\dbgriddll.lbc
 	@%append $(OBJS)\dbgriddll.lbc option quiet
 	@%append $(OBJS)\dbgriddll.lbc name $^@
@@ -4698,18 +4248,10 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_GUI 1
-!ifeq USE_ODBC 1
-wxdbgrid : .SYMBOLIC $(____wxdbgrid_namedll_DEP) $(____wxdbgrid_namelib_DEP)
-!endif
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_HTML 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll :  $(HTMLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\htmldll_version.res $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG).dll :  $(HTMLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\htmldll_version.res $(__coredll___depname) $(__basedll___depname)
 	@%create $(OBJS)\htmldll.lbc
 	@%append $(OBJS)\htmldll.lbc option quiet
 	@%append $(OBJS)\htmldll.lbc name $^@
@@ -4740,16 +4282,10 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_HTML 1
-wxhtml : .SYMBOLIC $(____wxhtml_namedll_DEP) $(____wxhtml_namelib_DEP)
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_QA 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll :  $(QADLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\qadll_version.res $(__coredll___depname) $(__basedll___depname) $(__xmldll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG).dll :  $(QADLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\qadll_version.res $(__coredll___depname) $(__basedll___depname) $(__xmldll___depname)
 	@%create $(OBJS)\qadll.lbc
 	@%append $(OBJS)\qadll.lbc option quiet
 	@%append $(OBJS)\qadll.lbc name $^@
@@ -4780,14 +4316,8 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_QA 1
-wxqa : .SYMBOLIC $(____wxqa_namedll_DEP) $(____wxqa_namelib_DEP)
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
-$(LIBDIRNAME)\wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll :  $(XMLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\xmldll_version.res $(__basedll___depname)
+$(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG).dll :  $(XMLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\xmldll_version.res $(__basedll___depname)
 	@%create $(OBJS)\xmldll.lbc
 	@%append $(OBJS)\xmldll.lbc option quiet
 	@%append $(OBJS)\xmldll.lbc name $^@
@@ -4812,20 +4342,16 @@ $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FL
 !endif
 
 !ifeq MONOLITHIC 0
-wxxml : .SYMBOLIC $(____wxxml_namedll_DEP) $(____wxxml_namelib_DEP)
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_XRC 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll :  $(XRCDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\xrcdll_version.res $(__htmldll_library_link_DEP) $(__advdll___depname) $(__coredll___depname) $(__xmldll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG).dll :  $(XRCDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\xrcdll_version.res $(__htmldll___depname) $(__advdll___depname) $(__coredll___depname) $(__xmldll___depname) $(__basedll___depname)
 	@%create $(OBJS)\xrcdll.lbc
 	@%append $(OBJS)\xrcdll.lbc option quiet
 	@%append $(OBJS)\xrcdll.lbc name $^@
 	@%append $(OBJS)\xrcdll.lbc option caseexact
 	@%append $(OBJS)\xrcdll.lbc $(LDFLAGS) $(__DEBUGINFO_3)  libpath $(LIBDIRNAME)
 	@for %i in ($(XRCDLL_OBJECTS)) do @%append $(OBJS)\xrcdll.lbc file %i
-	@for %i in ( $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib $(__htmldll_library_link_LIBR) $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib) do @%append $(OBJS)\xrcdll.lbc library %i
+	@for %i in ( $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib) do @%append $(OBJS)\xrcdll.lbc library %i
 	@%append $(OBJS)\xrcdll.lbc option resource=$(OBJS)\xrcdll_version.res
 	@%append $(OBJS)\xrcdll.lbc system nt_dll
 	wlink @$(OBJS)\xrcdll.lbc
@@ -4846,15 +4372,9 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_XRC 1
-wxxrc : .SYMBOLIC $(____wxxrc_namedll_DEP) $(____wxxrc_namelib_DEP)
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_AUI 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll :  $(AUIDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\auidll_version.res $(__advdll___depname) $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG).dll :  $(AUIDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\auidll_version.res $(__advdll___depname) $(__coredll___depname) $(__basedll___depname)
 	@%create $(OBJS)\auidll.lbc
 	@%append $(OBJS)\auidll.lbc option quiet
 	@%append $(OBJS)\auidll.lbc name $^@
@@ -4882,22 +4402,16 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 
 !ifeq MONOLITHIC 0
-!ifeq USE_AUI 1
-wxaui : .SYMBOLIC $(____wxaui_namedll_DEP) $(____wxaui_namelib_DEP)
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
 !ifeq SHARED 1
 !ifeq USE_RICHTEXT 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll :  $(RICHTEXTDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\richtextdll_version.res $(__advdll___depname) $(__htmldll_library_link_DEP) $(__xmldll___depname) $(__coredll___depname) $(__basedll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG).dll :  $(RICHTEXTDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\richtextdll_version.res $(__advdll___depname) $(__htmldll___depname) $(__xmldll___depname) $(__coredll___depname) $(__basedll___depname)
 	@%create $(OBJS)\richtextdll.lbc
 	@%append $(OBJS)\richtextdll.lbc option quiet
 	@%append $(OBJS)\richtextdll.lbc name $^@
 	@%append $(OBJS)\richtextdll.lbc option caseexact
 	@%append $(OBJS)\richtextdll.lbc $(LDFLAGS) $(__DEBUGINFO_3)  libpath $(LIBDIRNAME)
 	@for %i in ($(RICHTEXTDLL_OBJECTS)) do @%append $(OBJS)\richtextdll.lbc file %i
-	@for %i in ( $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib $(__htmldll_library_link_LIBR) $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib) do @%append $(OBJS)\richtextdll.lbc library %i
+	@for %i in ( $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib) do @%append $(OBJS)\richtextdll.lbc library %i
 	@%append $(OBJS)\richtextdll.lbc option resource=$(OBJS)\richtextdll_version.res
 	@%append $(OBJS)\richtextdll.lbc system nt_dll
 	wlink @$(OBJS)\richtextdll.lbc
@@ -4917,52 +4431,10 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 !endif
 !endif
 
-!ifeq MONOLITHIC 0
-!ifeq USE_RICHTEXT 1
-wxrichtext : .SYMBOLIC $(____wxrichtext_namedll_DEP) $(____wxrichtext_namelib_DEP)
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
-!ifeq SHARED 1
-!ifeq USE_STC 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG).dll :  $(STCDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(__wxscintilla) $(OBJS)\stcdll_version.res $(__coredll___depname) $(__basedll___depname)
-	@%create $(OBJS)\stcdll.lbc
-	@%append $(OBJS)\stcdll.lbc option quiet
-	@%append $(OBJS)\stcdll.lbc name $^@
-	@%append $(OBJS)\stcdll.lbc option caseexact
-	@%append $(OBJS)\stcdll.lbc $(LDFLAGS) $(__DEBUGINFO_3)  libpath $(LIBDIRNAME)
-	@for %i in ($(STCDLL_OBJECTS)) do @%append $(OBJS)\stcdll.lbc file %i
-	@for %i in ( $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib $(LIBDIRNAME)\wxscintilla$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core.lib $(LIBDIRNAME)\wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR).lib) do @%append $(OBJS)\stcdll.lbc library %i
-	@%append $(OBJS)\stcdll.lbc option resource=$(OBJS)\stcdll_version.res
-	@%append $(OBJS)\stcdll.lbc system nt_dll
-	wlink @$(OBJS)\stcdll.lbc
-	wlib -q -n -b $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib +$^@
-!endif
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
-!ifeq SHARED 0
-!ifeq USE_STC 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc.lib :  $(STCLIB_OBJECTS) $(__wxscintilla)
-	@%create $(OBJS)\stclib.lbc
-	@for %i in ($(STCLIB_OBJECTS)) do @%append $(OBJS)\stclib.lbc +%i
-	wlib -q -p4096 -n -b $^@ @$(OBJS)\stclib.lbc
-!endif
-!endif
-!endif
-
-!ifeq MONOLITHIC 0
-!ifeq USE_STC 1
-wxstc : .SYMBOLIC $(____wxstc_namedll_DEP) $(____wxstc_namelib_DEP)
-!endif
-!endif
-
 !ifeq SHARED 1
 !ifeq USE_GUI 1
 !ifeq USE_OPENGL 1
-$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll :  $(GLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(__wxscintilla) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\gldll_version.res $(__basedll___depname) $(__coredll___depname)
+$(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG).dll :  $(GLDLL_OBJECTS) $(__wxtiff___depname) $(__wxjpeg___depname) $(__wxpng___depname) $(LIBDIRNAME)\wxexpat$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxzlib$(WXDEBUGFLAG).lib $(LIBDIRNAME)\wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib $(OBJS)\gldll_version.res $(__basedll___depname) $(__coredll___depname)
 	@%create $(OBJS)\gldll.lbc
 	@%append $(OBJS)\gldll.lbc option quiet
 	@%append $(OBJS)\gldll.lbc name $^@
@@ -4986,12 +4458,6 @@ $(LIBDIRNAME)\wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXD
 	@for %i in ($(GLLIB_OBJECTS)) do @%append $(OBJS)\gllib.lbc +%i
 	wlib -q -p4096 -n -b $^@ @$(OBJS)\gllib.lbc
 !endif
-!endif
-!endif
-
-!ifeq USE_GUI 1
-!ifeq USE_OPENGL 1
-wxgl : .SYMBOLIC $(____wxgl_namedll_DEP) $(____wxgl_namelib_DEP)
 !endif
 !endif
 
@@ -5023,8 +4489,8 @@ $(SETUPHDIR)\wx\msw\rcdefs.h :  $(SETUPHDIR)\wx\msw ..\..\include\wx\msw\genrcde
 
 build_cfg_file : .SYMBOLIC $(SETUPHDIR)
 	@echo WXVER_MAJOR=2 >$(BUILD_CFG_FILE)
-	@echo WXVER_MINOR=9 >>$(BUILD_CFG_FILE)
-	@echo WXVER_RELEASE=0 >>$(BUILD_CFG_FILE)
+	@echo WXVER_MINOR=8 >>$(BUILD_CFG_FILE)
+	@echo WXVER_RELEASE=6 >>$(BUILD_CFG_FILE)
 	@echo BUILD=$(BUILD) >>$(BUILD_CFG_FILE)
 	@echo MONOLITHIC=$(MONOLITHIC) >>$(BUILD_CFG_FILE)
 	@echo SHARED=$(SHARED) >>$(BUILD_CFG_FILE)
@@ -5291,112 +4757,109 @@ $(OBJS)\wxjpeg_jquant2.obj :  .AUTODEPEND ..\..\src\jpeg\jquant2.c
 $(OBJS)\wxjpeg_jdmerge.obj :  .AUTODEPEND ..\..\src\jpeg\jdmerge.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXJPEG_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_win32.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_win32.c
+$(OBJS)\wxtiff_tif_win32.obj :  .AUTODEPEND ..\..\src\tiff\tif_win32.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_aux.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_aux.c
+$(OBJS)\wxtiff_tif_aux.obj :  .AUTODEPEND ..\..\src\tiff\tif_aux.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_close.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_close.c
+$(OBJS)\wxtiff_tif_close.obj :  .AUTODEPEND ..\..\src\tiff\tif_close.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_codec.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_codec.c
+$(OBJS)\wxtiff_tif_codec.obj :  .AUTODEPEND ..\..\src\tiff\tif_codec.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_color.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_color.c
+$(OBJS)\wxtiff_tif_color.obj :  .AUTODEPEND ..\..\src\tiff\tif_color.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_compress.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_compress.c
+$(OBJS)\wxtiff_tif_compress.obj :  .AUTODEPEND ..\..\src\tiff\tif_compress.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_dir.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_dir.c
+$(OBJS)\wxtiff_tif_dir.obj :  .AUTODEPEND ..\..\src\tiff\tif_dir.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_dirinfo.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_dirinfo.c
+$(OBJS)\wxtiff_tif_dirinfo.obj :  .AUTODEPEND ..\..\src\tiff\tif_dirinfo.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_dirread.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_dirread.c
+$(OBJS)\wxtiff_tif_dirread.obj :  .AUTODEPEND ..\..\src\tiff\tif_dirread.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_dirwrite.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_dirwrite.c
+$(OBJS)\wxtiff_tif_dirwrite.obj :  .AUTODEPEND ..\..\src\tiff\tif_dirwrite.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_dumpmode.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_dumpmode.c
+$(OBJS)\wxtiff_tif_dumpmode.obj :  .AUTODEPEND ..\..\src\tiff\tif_dumpmode.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_error.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_error.c
+$(OBJS)\wxtiff_tif_error.obj :  .AUTODEPEND ..\..\src\tiff\tif_error.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_extension.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_extension.c
+$(OBJS)\wxtiff_tif_extension.obj :  .AUTODEPEND ..\..\src\tiff\tif_extension.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_fax3.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_fax3.c
+$(OBJS)\wxtiff_tif_fax3.obj :  .AUTODEPEND ..\..\src\tiff\tif_fax3.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_fax3sm.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_fax3sm.c
+$(OBJS)\wxtiff_tif_fax3sm.obj :  .AUTODEPEND ..\..\src\tiff\tif_fax3sm.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_flush.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_flush.c
+$(OBJS)\wxtiff_tif_getimage.obj :  .AUTODEPEND ..\..\src\tiff\tif_getimage.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_getimage.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_getimage.c
+$(OBJS)\wxtiff_tif_jpeg.obj :  .AUTODEPEND ..\..\src\tiff\tif_jpeg.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_jpeg.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_jpeg.c
+$(OBJS)\wxtiff_tif_flush.obj :  .AUTODEPEND ..\..\src\tiff\tif_flush.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_luv.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_luv.c
+$(OBJS)\wxtiff_tif_lzw.obj :  .AUTODEPEND ..\..\src\tiff\tif_lzw.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_lzw.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_lzw.c
+$(OBJS)\wxtiff_tif_luv.obj :  .AUTODEPEND ..\..\src\tiff\tif_luv.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_next.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_next.c
+$(OBJS)\wxtiff_tif_next.obj :  .AUTODEPEND ..\..\src\tiff\tif_next.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_ojpeg.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_ojpeg.c
+$(OBJS)\wxtiff_tif_open.obj :  .AUTODEPEND ..\..\src\tiff\tif_open.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_open.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_open.c
+$(OBJS)\wxtiff_tif_packbits.obj :  .AUTODEPEND ..\..\src\tiff\tif_packbits.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_packbits.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_packbits.c
+$(OBJS)\wxtiff_tif_pixarlog.obj :  .AUTODEPEND ..\..\src\tiff\tif_pixarlog.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_pixarlog.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_pixarlog.c
+$(OBJS)\wxtiff_tif_predict.obj :  .AUTODEPEND ..\..\src\tiff\tif_predict.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_predict.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_predict.c
+$(OBJS)\wxtiff_tif_print.obj :  .AUTODEPEND ..\..\src\tiff\tif_print.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_print.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_print.c
+$(OBJS)\wxtiff_tif_read.obj :  .AUTODEPEND ..\..\src\tiff\tif_read.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_read.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_read.c
+$(OBJS)\wxtiff_tif_swab.obj :  .AUTODEPEND ..\..\src\tiff\tif_swab.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_strip.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_strip.c
+$(OBJS)\wxtiff_tif_strip.obj :  .AUTODEPEND ..\..\src\tiff\tif_strip.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_swab.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_swab.c
+$(OBJS)\wxtiff_tif_thunder.obj :  .AUTODEPEND ..\..\src\tiff\tif_thunder.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_thunder.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_thunder.c
+$(OBJS)\wxtiff_tif_tile.obj :  .AUTODEPEND ..\..\src\tiff\tif_tile.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_tile.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_tile.c
+$(OBJS)\wxtiff_tif_version.obj :  .AUTODEPEND ..\..\src\tiff\tif_version.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_version.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_version.c
+$(OBJS)\wxtiff_tif_warning.obj :  .AUTODEPEND ..\..\src\tiff\tif_warning.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_warning.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_warning.c
+$(OBJS)\wxtiff_tif_write.obj :  .AUTODEPEND ..\..\src\tiff\tif_write.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
-$(OBJS)\wxtiff_tif_write.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_write.c
-	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
-
-$(OBJS)\wxtiff_tif_zip.obj :  .AUTODEPEND ..\..\src\tiff\libtiff\tif_zip.c
+$(OBJS)\wxtiff_tif_zip.obj :  .AUTODEPEND ..\..\src\tiff\tif_zip.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXTIFF_CFLAGS) $<
 
 $(OBJS)\wxexpat_xmlparse.obj :  .AUTODEPEND ..\..\src\expat\lib\xmlparse.c
@@ -5408,251 +4871,11 @@ $(OBJS)\wxexpat_xmlrole.obj :  .AUTODEPEND ..\..\src\expat\lib\xmlrole.c
 $(OBJS)\wxexpat_xmltok.obj :  .AUTODEPEND ..\..\src\expat\lib\xmltok.c
 	$(CC) -bt=nt -zq -fo=$^@ $(WXEXPAT_CFLAGS) $<
 
-$(OBJS)\wxscintilla_AutoComplete.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\AutoComplete.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_CallTip.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\CallTip.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_CellBuffer.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\CellBuffer.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_CharClassify.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\CharClassify.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_ContractionState.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\ContractionState.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_Document.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\Document.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_DocumentAccessor.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\DocumentAccessor.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_Editor.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\Editor.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_ExternalLexer.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\ExternalLexer.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_Indicator.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\Indicator.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_KeyMap.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\KeyMap.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_KeyWords.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\KeyWords.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexAPDL.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexAPDL.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexAU3.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexAU3.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexAVE.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexAVE.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexAda.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexAda.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexAsm.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexAsm.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexAsn1.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexAsn1.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexBaan.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexBaan.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexBash.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexBash.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexBasic.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexBasic.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexBullant.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexBullant.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexCLW.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexCLW.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexCPP.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexCPP.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexCSS.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexCSS.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexCaml.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexCaml.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexCsound.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexCsound.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexConf.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexConf.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexCrontab.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexCrontab.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexEScript.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexEScript.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexEiffel.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexEiffel.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexErlang.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexErlang.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexFlagship.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexFlagship.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexForth.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexForth.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexFortran.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexFortran.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexGui4Cli.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexGui4Cli.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexHTML.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexHTML.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexHaskell.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexHaskell.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexInno.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexInno.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexKix.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexKix.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexLisp.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexLisp.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexLout.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexLout.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexLua.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexLua.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexMMIXAL.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexMMIXAL.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexMPT.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexMPT.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexMSSQL.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexMSSQL.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexMatlab.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexMatlab.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexMetapost.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexMetapost.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexNsis.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexNsis.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexOpal.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexOpal.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexOthers.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexOthers.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexPB.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexPB.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexPOV.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexPOV.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexPS.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexPS.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexPascal.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexPascal.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexPerl.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexPerl.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexPython.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexPython.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexRebol.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexRebol.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexRuby.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexRuby.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexSQL.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexSQL.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexSmalltalk.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexSmalltalk.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexTADS3.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexTADS3.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexScriptol.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexScriptol.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexSpecman.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexSpecman.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexSpice.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexSpice.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexTCL.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexTCL.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexTeX.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexTeX.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexVB.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexVB.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexVHDL.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexVHDL.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexVerilog.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexVerilog.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LexYAML.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LexYAML.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_LineMarker.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\LineMarker.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_PropSet.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\PropSet.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_RESearch.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\RESearch.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_ScintillaBase.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\ScintillaBase.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_Style.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\Style.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_StyleContext.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\StyleContext.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_UniConversion.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\UniConversion.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_ViewStyle.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\ViewStyle.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_WindowAccessor.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\WindowAccessor.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
-$(OBJS)\wxscintilla_XPM.obj :  .AUTODEPEND ..\..\src\stc\scintilla\src\XPM.cxx
-	$(CXX) -bt=nt -zq -fo=$^@ $(WXSCINTILLA_CXXFLAGS) $<
-
 $(OBJS)\monodll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
+
+$(OBJS)\monodll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_BASE=1 -dWXMAKINGDLL $<
 
 $(OBJS)\monodll_appbase.obj :  .AUTODEPEND ..\..\src\common\appbase.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
@@ -5664,12 +4887,6 @@ $(OBJS)\monodll_arcfind.obj :  .AUTODEPEND ..\..\src\common\arcfind.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_archive.obj :  .AUTODEPEND ..\..\src\common\archive.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_arrstr.obj :  .AUTODEPEND ..\..\src\common\arrstr.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_base64.obj :  .AUTODEPEND ..\..\src\common\base64.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_clntdata.obj :  .AUTODEPEND ..\..\src\common\clntdata.cpp
@@ -5703,9 +4920,6 @@ $(OBJS)\monodll_dynload.obj :  .AUTODEPEND ..\..\src\common\dynload.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_encconv.obj :  .AUTODEPEND ..\..\src\common\encconv.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_extended.obj :  .AUTODEPEND ..\..\src\common\extended.c
@@ -5816,15 +5030,6 @@ $(OBJS)\monodll_stream.obj :  .AUTODEPEND ..\..\src\common\stream.cpp
 $(OBJS)\monodll_string.obj :  .AUTODEPEND ..\..\src\common\string.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_stringimpl.obj :  .AUTODEPEND ..\..\src\common\stringimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_stringops.obj :  .AUTODEPEND ..\..\src\common\stringops.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_strvararg.obj :  .AUTODEPEND ..\..\src\common\strvararg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_sysopt.obj :  .AUTODEPEND ..\..\src\common\sysopt.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
@@ -5837,19 +5042,10 @@ $(OBJS)\monodll_textbuf.obj :  .AUTODEPEND ..\..\src\common\textbuf.cpp
 $(OBJS)\monodll_textfile.obj :  .AUTODEPEND ..\..\src\common\textfile.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_timerimpl.obj :  .AUTODEPEND ..\..\src\common\timerimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_tokenzr.obj :  .AUTODEPEND ..\..\src\common\tokenzr.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_txtstrm.obj :  .AUTODEPEND ..\..\src\common\txtstrm.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_unichar.obj :  .AUTODEPEND ..\..\src\common\unichar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_uri.obj :  .AUTODEPEND ..\..\src\common\uri.cpp
@@ -5861,10 +5057,7 @@ $(OBJS)\monodll_variant.obj :  .AUTODEPEND ..\..\src\common\variant.cpp
 $(OBJS)\monodll_wfstream.obj :  .AUTODEPEND ..\..\src\common\wfstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_wxcrt.obj :  .AUTODEPEND ..\..\src\common\wxcrt.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_wxprintf.obj :  .AUTODEPEND ..\..\src\common\wxprintf.cpp
+$(OBJS)\monodll_wxchar.obj :  .AUTODEPEND ..\..\src\common\wxchar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xti.obj :  .AUTODEPEND ..\..\src\common\xti.cpp
@@ -5921,9 +5114,6 @@ $(OBJS)\monodll_stdpaths.obj :  .AUTODEPEND ..\..\src\msw\stdpaths.cpp
 $(OBJS)\monodll_thread.obj :  .AUTODEPEND ..\..\src\msw\thread.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_utils.obj :  .AUTODEPEND ..\..\src\msw\utils.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
@@ -5940,9 +5130,6 @@ $(OBJS)\monodll_msgout.obj :  .AUTODEPEND ..\..\src\common\msgout.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_utilscmn.obj :  .AUTODEPEND ..\..\src\common\utilscmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_main.obj :  .AUTODEPEND ..\..\src\msw\main.cpp
@@ -6362,9 +5549,6 @@ $(OBJS)\monodll_xh_spin.obj :  .AUTODEPEND ..\..\src\xrc\xh_spin.cpp
 $(OBJS)\monodll_xh_split.obj :  .AUTODEPEND ..\..\src\xrc\xh_split.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_xh_srchctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_srchctrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_xh_statbar.obj :  .AUTODEPEND ..\..\src\xrc\xh_statbar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
@@ -6447,15 +5631,6 @@ $(OBJS)\monodll_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtexts
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_richtextprint.obj :  .AUTODEPEND ..\..\src\richtext\richtextprint.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_stc.obj :  .AUTODEPEND ..\..\src\stc\stc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_PlatWX.obj :  .AUTODEPEND ..\..\src\stc\PlatWX.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_ScintillaWX.obj :  .AUTODEPEND ..\..\src\stc\ScintillaWX.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
@@ -6550,6 +5725,11 @@ $(OBJS)\monodll_enhmeta.obj :  .AUTODEPEND ..\..\src\msw\enhmeta.cpp
 !endif
 
 !ifeq USE_GUI 1
+$(OBJS)\monodll_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
 $(OBJS)\monodll_font.obj :  .AUTODEPEND ..\..\src\msw\font.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
@@ -6571,11 +5751,6 @@ $(OBJS)\monodll_gdiimage.obj :  .AUTODEPEND ..\..\src\msw\gdiimage.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monodll_gdiobj.obj :  .AUTODEPEND ..\..\src\msw\gdiobj.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monodll_gdiplus.obj :  .AUTODEPEND ..\..\src\msw\gdiplus.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -6661,6 +5836,11 @@ $(OBJS)\monodll_renderer.obj :  .AUTODEPEND ..\..\src\msw\renderer.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monodll_settings.obj :  .AUTODEPEND ..\..\src\msw\settings.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
+$(OBJS)\monodll_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -7065,11 +6245,6 @@ $(OBJS)\monodll_fdrepdlg.obj :  .AUTODEPEND ..\..\src\generic\fdrepdlg.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_accelcmn.obj :  .AUTODEPEND ..\..\src\common\accelcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monodll_accesscmn.obj :  .AUTODEPEND ..\..\src\common\accesscmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
@@ -7101,16 +6276,6 @@ $(OBJS)\monodll_bmpbase.obj :  .AUTODEPEND ..\..\src\common\bmpbase.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monodll_bookctrl.obj :  .AUTODEPEND ..\..\src\common\bookctrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monodll_btncmn.obj :  .AUTODEPEND ..\..\src\common\btncmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monodll_cairo.obj :  .AUTODEPEND ..\..\src\common\cairo.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -7190,11 +6355,6 @@ $(OBJS)\monodll_dcgraph.obj :  .AUTODEPEND ..\..\src\common\dcgraph.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_dcsvg.obj :  .AUTODEPEND ..\..\src\common\dcsvg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monodll_dlgcmn.obj :  .AUTODEPEND ..\..\src\common\dlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
@@ -7235,12 +6395,12 @@ $(OBJS)\monodll_effects.obj :  .AUTODEPEND ..\..\src\common\effects.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
+$(OBJS)\monodll_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_filectrlcmn.obj :  .AUTODEPEND ..\..\src\common\filectrlcmn.cpp
+$(OBJS)\monodll_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -7271,11 +6431,6 @@ $(OBJS)\monodll_fontenumcmn.obj :  .AUTODEPEND ..\..\src\common\fontenumcmn.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monodll_fontmap.obj :  .AUTODEPEND ..\..\src\common\fontmap.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monodll_fontutilcmn.obj :  .AUTODEPEND ..\..\src\common\fontutilcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -7485,11 +6640,6 @@ $(OBJS)\monodll_statbar.obj :  .AUTODEPEND ..\..\src\common\statbar.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_stattextcmn.obj :  .AUTODEPEND ..\..\src\common\stattextcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monodll_stockitem.obj :  .AUTODEPEND ..\..\src\common\stockitem.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
@@ -7505,7 +6655,7 @@ $(OBJS)\monodll_textcmn.obj :  .AUTODEPEND ..\..\src\common\textcmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_textentrycmn.obj :  .AUTODEPEND ..\..\src\common\textentrycmn.cpp
+$(OBJS)\monodll_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -7591,11 +6741,6 @@ $(OBJS)\monodll_dirctrlg.obj :  .AUTODEPEND ..\..\src\generic\dirctrlg.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monodll_dragimgg.obj :  .AUTODEPEND ..\..\src\generic\dragimgg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monodll_filectrlg.obj :  .AUTODEPEND ..\..\src\generic\filectrlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -7715,11 +6860,6 @@ $(OBJS)\monodll_datavcmn.obj :  .AUTODEPEND ..\..\src\common\datavcmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_hyperlnkcmn.obj :  .AUTODEPEND ..\..\src\common\hyperlnkcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monodll_aboutdlgg.obj :  .AUTODEPEND ..\..\src\generic\aboutdlgg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
@@ -7750,11 +6890,6 @@ $(OBJS)\monodll_datectlg.obj :  .AUTODEPEND ..\..\src\generic\datectlg.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_editlbox.obj :  .AUTODEPEND ..\..\src\generic\editlbox.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monodll_grid.obj :  .AUTODEPEND ..\..\src\generic\grid.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
@@ -7775,7 +6910,7 @@ $(OBJS)\monodll_helpext.obj :  .AUTODEPEND ..\..\src\generic\helpext.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_hyperlinkg.obj :  .AUTODEPEND ..\..\src\generic\hyperlinkg.cpp
+$(OBJS)\monodll_hyperlink.obj :  .AUTODEPEND ..\..\src\generic\hyperlink.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
@@ -7839,9 +6974,6 @@ $(OBJS)\monodll_joystick.obj :  .AUTODEPEND ..\..\src\msw\joystick.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
 
-$(OBJS)\monodll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_BASE=1 -dWXMAKINGDLL -i=..\..\src\stc\scintilla\include -i=..\..\src\stc\scintilla\src -d__WX__ -dSCI_LEXER -dLINK_LEXERS $<
-
 $(OBJS)\monolib_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -7855,12 +6987,6 @@ $(OBJS)\monolib_arcfind.obj :  .AUTODEPEND ..\..\src\common\arcfind.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_archive.obj :  .AUTODEPEND ..\..\src\common\archive.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_arrstr.obj :  .AUTODEPEND ..\..\src\common\arrstr.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_base64.obj :  .AUTODEPEND ..\..\src\common\base64.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_clntdata.obj :  .AUTODEPEND ..\..\src\common\clntdata.cpp
@@ -7894,9 +7020,6 @@ $(OBJS)\monolib_dynload.obj :  .AUTODEPEND ..\..\src\common\dynload.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_encconv.obj :  .AUTODEPEND ..\..\src\common\encconv.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_extended.obj :  .AUTODEPEND ..\..\src\common\extended.c
@@ -8007,15 +7130,6 @@ $(OBJS)\monolib_stream.obj :  .AUTODEPEND ..\..\src\common\stream.cpp
 $(OBJS)\monolib_string.obj :  .AUTODEPEND ..\..\src\common\string.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_stringimpl.obj :  .AUTODEPEND ..\..\src\common\stringimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_stringops.obj :  .AUTODEPEND ..\..\src\common\stringops.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_strvararg.obj :  .AUTODEPEND ..\..\src\common\strvararg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_sysopt.obj :  .AUTODEPEND ..\..\src\common\sysopt.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -8028,19 +7142,10 @@ $(OBJS)\monolib_textbuf.obj :  .AUTODEPEND ..\..\src\common\textbuf.cpp
 $(OBJS)\monolib_textfile.obj :  .AUTODEPEND ..\..\src\common\textfile.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_timerimpl.obj :  .AUTODEPEND ..\..\src\common\timerimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_tokenzr.obj :  .AUTODEPEND ..\..\src\common\tokenzr.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_txtstrm.obj :  .AUTODEPEND ..\..\src\common\txtstrm.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_unichar.obj :  .AUTODEPEND ..\..\src\common\unichar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_uri.obj :  .AUTODEPEND ..\..\src\common\uri.cpp
@@ -8052,10 +7157,7 @@ $(OBJS)\monolib_variant.obj :  .AUTODEPEND ..\..\src\common\variant.cpp
 $(OBJS)\monolib_wfstream.obj :  .AUTODEPEND ..\..\src\common\wfstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_wxcrt.obj :  .AUTODEPEND ..\..\src\common\wxcrt.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_wxprintf.obj :  .AUTODEPEND ..\..\src\common\wxprintf.cpp
+$(OBJS)\monolib_wxchar.obj :  .AUTODEPEND ..\..\src\common\wxchar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xti.obj :  .AUTODEPEND ..\..\src\common\xti.cpp
@@ -8112,9 +7214,6 @@ $(OBJS)\monolib_stdpaths.obj :  .AUTODEPEND ..\..\src\msw\stdpaths.cpp
 $(OBJS)\monolib_thread.obj :  .AUTODEPEND ..\..\src\msw\thread.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_utils.obj :  .AUTODEPEND ..\..\src\msw\utils.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -8131,9 +7230,6 @@ $(OBJS)\monolib_msgout.obj :  .AUTODEPEND ..\..\src\common\msgout.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_utilscmn.obj :  .AUTODEPEND ..\..\src\common\utilscmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_main.obj :  .AUTODEPEND ..\..\src\msw\main.cpp
@@ -8553,9 +7649,6 @@ $(OBJS)\monolib_xh_spin.obj :  .AUTODEPEND ..\..\src\xrc\xh_spin.cpp
 $(OBJS)\monolib_xh_split.obj :  .AUTODEPEND ..\..\src\xrc\xh_split.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_xh_srchctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_srchctrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_xh_statbar.obj :  .AUTODEPEND ..\..\src\xrc\xh_statbar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -8638,15 +7731,6 @@ $(OBJS)\monolib_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richtexts
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_richtextprint.obj :  .AUTODEPEND ..\..\src\richtext\richtextprint.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_stc.obj :  .AUTODEPEND ..\..\src\stc\stc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_PlatWX.obj :  .AUTODEPEND ..\..\src\stc\PlatWX.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_ScintillaWX.obj :  .AUTODEPEND ..\..\src\stc\ScintillaWX.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
@@ -8741,6 +7825,11 @@ $(OBJS)\monolib_enhmeta.obj :  .AUTODEPEND ..\..\src\msw\enhmeta.cpp
 !endif
 
 !ifeq USE_GUI 1
+$(OBJS)\monolib_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
 $(OBJS)\monolib_font.obj :  .AUTODEPEND ..\..\src\msw\font.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
@@ -8762,11 +7851,6 @@ $(OBJS)\monolib_gdiimage.obj :  .AUTODEPEND ..\..\src\msw\gdiimage.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monolib_gdiobj.obj :  .AUTODEPEND ..\..\src\msw\gdiobj.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monolib_gdiplus.obj :  .AUTODEPEND ..\..\src\msw\gdiplus.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -8852,6 +7936,11 @@ $(OBJS)\monolib_renderer.obj :  .AUTODEPEND ..\..\src\msw\renderer.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monolib_settings.obj :  .AUTODEPEND ..\..\src\msw\settings.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
+$(OBJS)\monolib_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -9256,11 +8345,6 @@ $(OBJS)\monolib_fdrepdlg.obj :  .AUTODEPEND ..\..\src\generic\fdrepdlg.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_accelcmn.obj :  .AUTODEPEND ..\..\src\common\accelcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monolib_accesscmn.obj :  .AUTODEPEND ..\..\src\common\accesscmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
@@ -9292,16 +8376,6 @@ $(OBJS)\monolib_bmpbase.obj :  .AUTODEPEND ..\..\src\common\bmpbase.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monolib_bookctrl.obj :  .AUTODEPEND ..\..\src\common\bookctrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monolib_btncmn.obj :  .AUTODEPEND ..\..\src\common\btncmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monolib_cairo.obj :  .AUTODEPEND ..\..\src\common\cairo.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -9381,11 +8455,6 @@ $(OBJS)\monolib_dcgraph.obj :  .AUTODEPEND ..\..\src\common\dcgraph.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_dcsvg.obj :  .AUTODEPEND ..\..\src\common\dcsvg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monolib_dlgcmn.obj :  .AUTODEPEND ..\..\src\common\dlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
@@ -9426,12 +8495,12 @@ $(OBJS)\monolib_effects.obj :  .AUTODEPEND ..\..\src\common\effects.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
+$(OBJS)\monolib_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_filectrlcmn.obj :  .AUTODEPEND ..\..\src\common\filectrlcmn.cpp
+$(OBJS)\monolib_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -9462,11 +8531,6 @@ $(OBJS)\monolib_fontenumcmn.obj :  .AUTODEPEND ..\..\src\common\fontenumcmn.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monolib_fontmap.obj :  .AUTODEPEND ..\..\src\common\fontmap.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monolib_fontutilcmn.obj :  .AUTODEPEND ..\..\src\common\fontutilcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -9676,11 +8740,6 @@ $(OBJS)\monolib_statbar.obj :  .AUTODEPEND ..\..\src\common\statbar.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_stattextcmn.obj :  .AUTODEPEND ..\..\src\common\stattextcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monolib_stockitem.obj :  .AUTODEPEND ..\..\src\common\stockitem.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
@@ -9696,7 +8755,7 @@ $(OBJS)\monolib_textcmn.obj :  .AUTODEPEND ..\..\src\common\textcmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_textentrycmn.obj :  .AUTODEPEND ..\..\src\common\textentrycmn.cpp
+$(OBJS)\monolib_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -9782,11 +8841,6 @@ $(OBJS)\monolib_dirctrlg.obj :  .AUTODEPEND ..\..\src\generic\dirctrlg.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\monolib_dragimgg.obj :  .AUTODEPEND ..\..\src\generic\dragimgg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\monolib_filectrlg.obj :  .AUTODEPEND ..\..\src\generic\filectrlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -9906,11 +8960,6 @@ $(OBJS)\monolib_datavcmn.obj :  .AUTODEPEND ..\..\src\common\datavcmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_hyperlnkcmn.obj :  .AUTODEPEND ..\..\src\common\hyperlnkcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monolib_aboutdlgg.obj :  .AUTODEPEND ..\..\src\generic\aboutdlgg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
@@ -9941,11 +8990,6 @@ $(OBJS)\monolib_datectlg.obj :  .AUTODEPEND ..\..\src\generic\datectlg.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_editlbox.obj :  .AUTODEPEND ..\..\src\generic\editlbox.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monolib_grid.obj :  .AUTODEPEND ..\..\src\generic\grid.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
@@ -9966,7 +9010,7 @@ $(OBJS)\monolib_helpext.obj :  .AUTODEPEND ..\..\src\generic\helpext.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_hyperlinkg.obj :  .AUTODEPEND ..\..\src\generic\hyperlinkg.cpp
+$(OBJS)\monolib_hyperlink.obj :  .AUTODEPEND ..\..\src\generic\hyperlink.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
 
@@ -10034,7 +9078,7 @@ $(OBJS)\basedll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXMAKINGDLL_BASE -dwxUSE_BASE=1 $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXMAKINGDLL_BASE -dwxUSE_BASE=1 $<
 
 $(OBJS)\basedll_appbase.obj :  .AUTODEPEND ..\..\src\common\appbase.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
@@ -10046,12 +9090,6 @@ $(OBJS)\basedll_arcfind.obj :  .AUTODEPEND ..\..\src\common\arcfind.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_archive.obj :  .AUTODEPEND ..\..\src\common\archive.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_arrstr.obj :  .AUTODEPEND ..\..\src\common\arrstr.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_base64.obj :  .AUTODEPEND ..\..\src\common\base64.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_clntdata.obj :  .AUTODEPEND ..\..\src\common\clntdata.cpp
@@ -10085,9 +9123,6 @@ $(OBJS)\basedll_dynload.obj :  .AUTODEPEND ..\..\src\common\dynload.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_encconv.obj :  .AUTODEPEND ..\..\src\common\encconv.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_extended.obj :  .AUTODEPEND ..\..\src\common\extended.c
@@ -10198,15 +9233,6 @@ $(OBJS)\basedll_stream.obj :  .AUTODEPEND ..\..\src\common\stream.cpp
 $(OBJS)\basedll_string.obj :  .AUTODEPEND ..\..\src\common\string.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
-$(OBJS)\basedll_stringimpl.obj :  .AUTODEPEND ..\..\src\common\stringimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_stringops.obj :  .AUTODEPEND ..\..\src\common\stringops.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_strvararg.obj :  .AUTODEPEND ..\..\src\common\strvararg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
 $(OBJS)\basedll_sysopt.obj :  .AUTODEPEND ..\..\src\common\sysopt.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
@@ -10219,19 +9245,10 @@ $(OBJS)\basedll_textbuf.obj :  .AUTODEPEND ..\..\src\common\textbuf.cpp
 $(OBJS)\basedll_textfile.obj :  .AUTODEPEND ..\..\src\common\textfile.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
-$(OBJS)\basedll_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_timerimpl.obj :  .AUTODEPEND ..\..\src\common\timerimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
 $(OBJS)\basedll_tokenzr.obj :  .AUTODEPEND ..\..\src\common\tokenzr.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_txtstrm.obj :  .AUTODEPEND ..\..\src\common\txtstrm.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_unichar.obj :  .AUTODEPEND ..\..\src\common\unichar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_uri.obj :  .AUTODEPEND ..\..\src\common\uri.cpp
@@ -10243,10 +9260,7 @@ $(OBJS)\basedll_variant.obj :  .AUTODEPEND ..\..\src\common\variant.cpp
 $(OBJS)\basedll_wfstream.obj :  .AUTODEPEND ..\..\src\common\wfstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
-$(OBJS)\basedll_wxcrt.obj :  .AUTODEPEND ..\..\src\common\wxcrt.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_wxprintf.obj :  .AUTODEPEND ..\..\src\common\wxprintf.cpp
+$(OBJS)\basedll_wxchar.obj :  .AUTODEPEND ..\..\src\common\wxchar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_xti.obj :  .AUTODEPEND ..\..\src\common\xti.cpp
@@ -10303,9 +9317,6 @@ $(OBJS)\basedll_stdpaths.obj :  .AUTODEPEND ..\..\src\msw\stdpaths.cpp
 $(OBJS)\basedll_thread.obj :  .AUTODEPEND ..\..\src\msw\thread.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
-$(OBJS)\basedll_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
 $(OBJS)\basedll_utils.obj :  .AUTODEPEND ..\..\src\msw\utils.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
@@ -10322,9 +9333,6 @@ $(OBJS)\basedll_msgout.obj :  .AUTODEPEND ..\..\src\common\msgout.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_utilscmn.obj :  .AUTODEPEND ..\..\src\common\utilscmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
-$(OBJS)\basedll_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
 $(OBJS)\basedll_main.obj :  .AUTODEPEND ..\..\src\msw\main.cpp
@@ -10349,12 +9357,6 @@ $(OBJS)\baselib_arcfind.obj :  .AUTODEPEND ..\..\src\common\arcfind.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_archive.obj :  .AUTODEPEND ..\..\src\common\archive.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_arrstr.obj :  .AUTODEPEND ..\..\src\common\arrstr.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_base64.obj :  .AUTODEPEND ..\..\src\common\base64.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_clntdata.obj :  .AUTODEPEND ..\..\src\common\clntdata.cpp
@@ -10388,9 +9390,6 @@ $(OBJS)\baselib_dynload.obj :  .AUTODEPEND ..\..\src\common\dynload.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_encconv.obj :  .AUTODEPEND ..\..\src\common\encconv.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_extended.obj :  .AUTODEPEND ..\..\src\common\extended.c
@@ -10501,15 +9500,6 @@ $(OBJS)\baselib_stream.obj :  .AUTODEPEND ..\..\src\common\stream.cpp
 $(OBJS)\baselib_string.obj :  .AUTODEPEND ..\..\src\common\string.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
-$(OBJS)\baselib_stringimpl.obj :  .AUTODEPEND ..\..\src\common\stringimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_stringops.obj :  .AUTODEPEND ..\..\src\common\stringops.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_strvararg.obj :  .AUTODEPEND ..\..\src\common\strvararg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
 $(OBJS)\baselib_sysopt.obj :  .AUTODEPEND ..\..\src\common\sysopt.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
@@ -10522,19 +9512,10 @@ $(OBJS)\baselib_textbuf.obj :  .AUTODEPEND ..\..\src\common\textbuf.cpp
 $(OBJS)\baselib_textfile.obj :  .AUTODEPEND ..\..\src\common\textfile.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
-$(OBJS)\baselib_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_timerimpl.obj :  .AUTODEPEND ..\..\src\common\timerimpl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
 $(OBJS)\baselib_tokenzr.obj :  .AUTODEPEND ..\..\src\common\tokenzr.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_txtstrm.obj :  .AUTODEPEND ..\..\src\common\txtstrm.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_unichar.obj :  .AUTODEPEND ..\..\src\common\unichar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_uri.obj :  .AUTODEPEND ..\..\src\common\uri.cpp
@@ -10546,10 +9527,7 @@ $(OBJS)\baselib_variant.obj :  .AUTODEPEND ..\..\src\common\variant.cpp
 $(OBJS)\baselib_wfstream.obj :  .AUTODEPEND ..\..\src\common\wfstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
-$(OBJS)\baselib_wxcrt.obj :  .AUTODEPEND ..\..\src\common\wxcrt.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_wxprintf.obj :  .AUTODEPEND ..\..\src\common\wxprintf.cpp
+$(OBJS)\baselib_wxchar.obj :  .AUTODEPEND ..\..\src\common\wxchar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_xti.obj :  .AUTODEPEND ..\..\src\common\xti.cpp
@@ -10606,9 +9584,6 @@ $(OBJS)\baselib_stdpaths.obj :  .AUTODEPEND ..\..\src\msw\stdpaths.cpp
 $(OBJS)\baselib_thread.obj :  .AUTODEPEND ..\..\src\msw\thread.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
-$(OBJS)\baselib_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
 $(OBJS)\baselib_utils.obj :  .AUTODEPEND ..\..\src\msw\utils.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
@@ -10627,9 +9602,6 @@ $(OBJS)\baselib_msgout.obj :  .AUTODEPEND ..\..\src\common\msgout.cpp
 $(OBJS)\baselib_utilscmn.obj :  .AUTODEPEND ..\..\src\common\utilscmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
-$(OBJS)\baselib_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
 $(OBJS)\baselib_main.obj :  .AUTODEPEND ..\..\src\msw\main.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
@@ -10643,7 +9615,7 @@ $(OBJS)\netdll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(NETDLL_CXXFLAGS) $<
 
 $(OBJS)\netdll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_NET $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_net_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_NET $<
 
 $(OBJS)\netdll_fs_inet.obj :  .AUTODEPEND ..\..\src\common\fs_inet.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(NETDLL_CXXFLAGS) $<
@@ -10724,7 +9696,7 @@ $(OBJS)\coredll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 
 $(OBJS)\coredll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_CORE -dwxUSE_BASE=0 $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_core_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_CORE -dwxUSE_BASE=0 $<
 
 $(OBJS)\coredll_event.obj :  .AUTODEPEND ..\..\src\common\event.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
@@ -10736,9 +9708,6 @@ $(OBJS)\coredll_msgout.obj :  .AUTODEPEND ..\..\src\common\msgout.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 
 $(OBJS)\coredll_utilscmn.obj :  .AUTODEPEND ..\..\src\common\utilscmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-
-$(OBJS)\coredll_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 
 $(OBJS)\coredll_main.obj :  .AUTODEPEND ..\..\src\msw\main.cpp
@@ -10977,6 +9946,11 @@ $(OBJS)\coredll_enhmeta.obj :  .AUTODEPEND ..\..\src\msw\enhmeta.cpp
 !endif
 
 !ifeq USE_GUI 1
+$(OBJS)\coredll_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
 $(OBJS)\coredll_font.obj :  .AUTODEPEND ..\..\src\msw\font.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
@@ -10998,11 +9972,6 @@ $(OBJS)\coredll_gdiimage.obj :  .AUTODEPEND ..\..\src\msw\gdiimage.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\coredll_gdiobj.obj :  .AUTODEPEND ..\..\src\msw\gdiobj.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\coredll_gdiplus.obj :  .AUTODEPEND ..\..\src\msw\gdiplus.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
@@ -11088,6 +10057,11 @@ $(OBJS)\coredll_renderer.obj :  .AUTODEPEND ..\..\src\msw\renderer.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\coredll_settings.obj :  .AUTODEPEND ..\..\src\msw\settings.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
+$(OBJS)\coredll_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
@@ -11492,11 +10466,6 @@ $(OBJS)\coredll_fdrepdlg.obj :  .AUTODEPEND ..\..\src\generic\fdrepdlg.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_accelcmn.obj :  .AUTODEPEND ..\..\src\common\accelcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\coredll_accesscmn.obj :  .AUTODEPEND ..\..\src\common\accesscmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
@@ -11528,16 +10497,6 @@ $(OBJS)\coredll_bmpbase.obj :  .AUTODEPEND ..\..\src\common\bmpbase.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\coredll_bookctrl.obj :  .AUTODEPEND ..\..\src\common\bookctrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\coredll_btncmn.obj :  .AUTODEPEND ..\..\src\common\btncmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\coredll_cairo.obj :  .AUTODEPEND ..\..\src\common\cairo.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
@@ -11617,11 +10576,6 @@ $(OBJS)\coredll_dcgraph.obj :  .AUTODEPEND ..\..\src\common\dcgraph.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_dcsvg.obj :  .AUTODEPEND ..\..\src\common\dcsvg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\coredll_dlgcmn.obj :  .AUTODEPEND ..\..\src\common\dlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
@@ -11662,12 +10616,12 @@ $(OBJS)\coredll_effects.obj :  .AUTODEPEND ..\..\src\common\effects.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
+$(OBJS)\coredll_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_filectrlcmn.obj :  .AUTODEPEND ..\..\src\common\filectrlcmn.cpp
+$(OBJS)\coredll_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
@@ -11698,11 +10652,6 @@ $(OBJS)\coredll_fontenumcmn.obj :  .AUTODEPEND ..\..\src\common\fontenumcmn.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\coredll_fontmap.obj :  .AUTODEPEND ..\..\src\common\fontmap.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\coredll_fontutilcmn.obj :  .AUTODEPEND ..\..\src\common\fontutilcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
@@ -11912,11 +10861,6 @@ $(OBJS)\coredll_statbar.obj :  .AUTODEPEND ..\..\src\common\statbar.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_stattextcmn.obj :  .AUTODEPEND ..\..\src\common\stattextcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\coredll_stockitem.obj :  .AUTODEPEND ..\..\src\common\stockitem.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
@@ -11932,7 +10876,7 @@ $(OBJS)\coredll_textcmn.obj :  .AUTODEPEND ..\..\src\common\textcmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_textentrycmn.obj :  .AUTODEPEND ..\..\src\common\textentrycmn.cpp
+$(OBJS)\coredll_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
@@ -12018,11 +10962,6 @@ $(OBJS)\coredll_dirctrlg.obj :  .AUTODEPEND ..\..\src\generic\dirctrlg.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\coredll_dragimgg.obj :  .AUTODEPEND ..\..\src\generic\dragimgg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\coredll_filectrlg.obj :  .AUTODEPEND ..\..\src\generic\filectrlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
 
@@ -12144,9 +11083,6 @@ $(OBJS)\corelib_msgout.obj :  .AUTODEPEND ..\..\src\common\msgout.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 
 $(OBJS)\corelib_utilscmn.obj :  .AUTODEPEND ..\..\src\common\utilscmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-
-$(OBJS)\corelib_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 
 $(OBJS)\corelib_main.obj :  .AUTODEPEND ..\..\src\msw\main.cpp
@@ -12385,6 +11321,11 @@ $(OBJS)\corelib_enhmeta.obj :  .AUTODEPEND ..\..\src\msw\enhmeta.cpp
 !endif
 
 !ifeq USE_GUI 1
+$(OBJS)\corelib_evtloop.obj :  .AUTODEPEND ..\..\src\msw\evtloop.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
 $(OBJS)\corelib_font.obj :  .AUTODEPEND ..\..\src\msw\font.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
@@ -12406,11 +11347,6 @@ $(OBJS)\corelib_gdiimage.obj :  .AUTODEPEND ..\..\src\msw\gdiimage.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\corelib_gdiobj.obj :  .AUTODEPEND ..\..\src\msw\gdiobj.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\corelib_gdiplus.obj :  .AUTODEPEND ..\..\src\msw\gdiplus.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
@@ -12496,6 +11432,11 @@ $(OBJS)\corelib_renderer.obj :  .AUTODEPEND ..\..\src\msw\renderer.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\corelib_settings.obj :  .AUTODEPEND ..\..\src\msw\settings.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
+!endif
+
+!ifeq USE_GUI 1
+$(OBJS)\corelib_timer.obj :  .AUTODEPEND ..\..\src\msw\timer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
@@ -12900,11 +11841,6 @@ $(OBJS)\corelib_fdrepdlg.obj :  .AUTODEPEND ..\..\src\generic\fdrepdlg.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\corelib_accelcmn.obj :  .AUTODEPEND ..\..\src\common\accelcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\corelib_accesscmn.obj :  .AUTODEPEND ..\..\src\common\accesscmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
@@ -12936,16 +11872,6 @@ $(OBJS)\corelib_bmpbase.obj :  .AUTODEPEND ..\..\src\common\bmpbase.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\corelib_bookctrl.obj :  .AUTODEPEND ..\..\src\common\bookctrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\corelib_btncmn.obj :  .AUTODEPEND ..\..\src\common\btncmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\corelib_cairo.obj :  .AUTODEPEND ..\..\src\common\cairo.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
@@ -13025,11 +11951,6 @@ $(OBJS)\corelib_dcgraph.obj :  .AUTODEPEND ..\..\src\common\dcgraph.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\corelib_dcsvg.obj :  .AUTODEPEND ..\..\src\common\dcsvg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\corelib_dlgcmn.obj :  .AUTODEPEND ..\..\src\common\dlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
@@ -13070,12 +11991,12 @@ $(OBJS)\corelib_effects.obj :  .AUTODEPEND ..\..\src\common\effects.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\corelib_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
+$(OBJS)\corelib_evtloopcmn.obj :  .AUTODEPEND ..\..\src\common\evtloopcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\corelib_filectrlcmn.obj :  .AUTODEPEND ..\..\src\common\filectrlcmn.cpp
+$(OBJS)\corelib_fddlgcmn.obj :  .AUTODEPEND ..\..\src\common\fddlgcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
@@ -13106,11 +12027,6 @@ $(OBJS)\corelib_fontenumcmn.obj :  .AUTODEPEND ..\..\src\common\fontenumcmn.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\corelib_fontmap.obj :  .AUTODEPEND ..\..\src\common\fontmap.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\corelib_fontutilcmn.obj :  .AUTODEPEND ..\..\src\common\fontutilcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
@@ -13320,11 +12236,6 @@ $(OBJS)\corelib_statbar.obj :  .AUTODEPEND ..\..\src\common\statbar.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\corelib_stattextcmn.obj :  .AUTODEPEND ..\..\src\common\stattextcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\corelib_stockitem.obj :  .AUTODEPEND ..\..\src\common\stockitem.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
@@ -13340,7 +12251,7 @@ $(OBJS)\corelib_textcmn.obj :  .AUTODEPEND ..\..\src\common\textcmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\corelib_textentrycmn.obj :  .AUTODEPEND ..\..\src\common\textentrycmn.cpp
+$(OBJS)\corelib_timercmn.obj :  .AUTODEPEND ..\..\src\common\timercmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
@@ -13426,11 +12337,6 @@ $(OBJS)\corelib_dirctrlg.obj :  .AUTODEPEND ..\..\src\generic\dirctrlg.cpp
 
 !ifeq USE_GUI 1
 $(OBJS)\corelib_dragimgg.obj :  .AUTODEPEND ..\..\src\generic\dragimgg.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
-$(OBJS)\corelib_filectrlg.obj :  .AUTODEPEND ..\..\src\generic\filectrlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
 
@@ -13543,7 +12449,7 @@ $(OBJS)\advdll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
 
 $(OBJS)\advdll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_ADV $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_ADV $<
 
 $(OBJS)\advdll_datectrl.obj :  .AUTODEPEND ..\..\src\msw\datectrl.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
@@ -13552,9 +12458,6 @@ $(OBJS)\advdll_animatecmn.obj :  .AUTODEPEND ..\..\src\common\animatecmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
 
 $(OBJS)\advdll_datavcmn.obj :  .AUTODEPEND ..\..\src\common\datavcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
-
-$(OBJS)\advdll_hyperlnkcmn.obj :  .AUTODEPEND ..\..\src\common\hyperlnkcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
 
 $(OBJS)\advdll_aboutdlgg.obj :  .AUTODEPEND ..\..\src\generic\aboutdlgg.cpp
@@ -13575,9 +12478,6 @@ $(OBJS)\advdll_datavgen.obj :  .AUTODEPEND ..\..\src\generic\datavgen.cpp
 $(OBJS)\advdll_datectlg.obj :  .AUTODEPEND ..\..\src\generic\datectlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
 
-$(OBJS)\advdll_editlbox.obj :  .AUTODEPEND ..\..\src\generic\editlbox.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
-
 $(OBJS)\advdll_grid.obj :  .AUTODEPEND ..\..\src\generic\grid.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
 
@@ -13590,7 +12490,7 @@ $(OBJS)\advdll_gridsel.obj :  .AUTODEPEND ..\..\src\generic\gridsel.cpp
 $(OBJS)\advdll_helpext.obj :  .AUTODEPEND ..\..\src\generic\helpext.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
 
-$(OBJS)\advdll_hyperlinkg.obj :  .AUTODEPEND ..\..\src\generic\hyperlinkg.cpp
+$(OBJS)\advdll_hyperlink.obj :  .AUTODEPEND ..\..\src\generic\hyperlink.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVDLL_CXXFLAGS) $<
 
 $(OBJS)\advdll_laywin.obj :  .AUTODEPEND ..\..\src\generic\laywin.cpp
@@ -13641,9 +12541,6 @@ $(OBJS)\advlib_animatecmn.obj :  .AUTODEPEND ..\..\src\common\animatecmn.cpp
 $(OBJS)\advlib_datavcmn.obj :  .AUTODEPEND ..\..\src\common\datavcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
 
-$(OBJS)\advlib_hyperlnkcmn.obj :  .AUTODEPEND ..\..\src\common\hyperlnkcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
-
 $(OBJS)\advlib_aboutdlgg.obj :  .AUTODEPEND ..\..\src\generic\aboutdlgg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
 
@@ -13662,9 +12559,6 @@ $(OBJS)\advlib_datavgen.obj :  .AUTODEPEND ..\..\src\generic\datavgen.cpp
 $(OBJS)\advlib_datectlg.obj :  .AUTODEPEND ..\..\src\generic\datectlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
 
-$(OBJS)\advlib_editlbox.obj :  .AUTODEPEND ..\..\src\generic\editlbox.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
-
 $(OBJS)\advlib_grid.obj :  .AUTODEPEND ..\..\src\generic\grid.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
 
@@ -13677,7 +12571,7 @@ $(OBJS)\advlib_gridsel.obj :  .AUTODEPEND ..\..\src\generic\gridsel.cpp
 $(OBJS)\advlib_helpext.obj :  .AUTODEPEND ..\..\src\generic\helpext.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
 
-$(OBJS)\advlib_hyperlinkg.obj :  .AUTODEPEND ..\..\src\generic\hyperlinkg.cpp
+$(OBJS)\advlib_hyperlink.obj :  .AUTODEPEND ..\..\src\generic\hyperlink.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ADVLIB_CXXFLAGS) $<
 
 $(OBJS)\advlib_laywin.obj :  .AUTODEPEND ..\..\src\generic\laywin.cpp
@@ -13720,7 +12614,7 @@ $(OBJS)\mediadll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MEDIADLL_CXXFLAGS) $<
 
 $(OBJS)\mediadll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_MEDIA $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_media_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_MEDIA $<
 
 $(OBJS)\mediadll_mediactrlcmn.obj :  .AUTODEPEND ..\..\src\common\mediactrlcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MEDIADLL_CXXFLAGS) $<
@@ -13759,7 +12653,7 @@ $(OBJS)\odbcdll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ODBCDLL_CXXFLAGS) $<
 
 $(OBJS)\odbcdll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_ODBC $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_odbc_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_ODBC $<
 
 $(OBJS)\odbcdll_db.obj :  .AUTODEPEND ..\..\src\common\db.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(ODBCDLL_CXXFLAGS) $<
@@ -13780,7 +12674,7 @@ $(OBJS)\dbgriddll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(DBGRIDDLL_CXXFLAGS) $<
 
 $(OBJS)\dbgriddll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_DBGRID $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_dbgrid_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_DBGRID $<
 
 $(OBJS)\dbgriddll_dbgrid.obj :  .AUTODEPEND ..\..\src\common\dbgrid.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(DBGRIDDLL_CXXFLAGS) $<
@@ -13795,7 +12689,7 @@ $(OBJS)\htmldll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(HTMLDLL_CXXFLAGS) $<
 
 $(OBJS)\htmldll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_HTML $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_HTML $<
 
 $(OBJS)\htmldll_helpbest.obj :  .AUTODEPEND ..\..\src\msw\helpbest.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(HTMLDLL_CXXFLAGS) $<
@@ -13948,7 +12842,7 @@ $(OBJS)\qadll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(QADLL_CXXFLAGS) $<
 
 $(OBJS)\qadll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_QA $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_qa_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_QA $<
 
 $(OBJS)\qadll_debugrpt.obj :  .AUTODEPEND ..\..\src\common\debugrpt.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(QADLL_CXXFLAGS) $<
@@ -13969,7 +12863,7 @@ $(OBJS)\xmldll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XMLDLL_CXXFLAGS) $<
 
 $(OBJS)\xmldll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wxbase$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_XML $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dwxUSE_GUI=0 -dWXUSINGDLL -dWXMAKINGDLL_XML $<
 
 $(OBJS)\xmldll_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XMLDLL_CXXFLAGS) $<
@@ -13990,7 +12884,7 @@ $(OBJS)\xrcdll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_XRC $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xrc_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_XRC $<
 
 $(OBJS)\xrcdll_xh_animatctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_animatctrl.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
@@ -14116,9 +13010,6 @@ $(OBJS)\xrcdll_xh_spin.obj :  .AUTODEPEND ..\..\src\xrc\xh_spin.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_xh_split.obj :  .AUTODEPEND ..\..\src\xrc\xh_split.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
-
-$(OBJS)\xrcdll_xh_srchctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_srchctrl.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_xh_statbar.obj :  .AUTODEPEND ..\..\src\xrc\xh_statbar.cpp
@@ -14292,9 +13183,6 @@ $(OBJS)\xrclib_xh_spin.obj :  .AUTODEPEND ..\..\src\xrc\xh_spin.cpp
 $(OBJS)\xrclib_xh_split.obj :  .AUTODEPEND ..\..\src\xrc\xh_split.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
-$(OBJS)\xrclib_xh_srchctrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_srchctrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
-
 $(OBJS)\xrclib_xh_statbar.obj :  .AUTODEPEND ..\..\src\xrc\xh_statbar.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
@@ -14341,7 +13229,7 @@ $(OBJS)\auidll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(AUIDLL_CXXFLAGS) $<
 
 $(OBJS)\auidll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_AUI $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_aui_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_AUI $<
 
 $(OBJS)\auidll_framemanager.obj :  .AUTODEPEND ..\..\src\aui\framemanager.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(AUIDLL_CXXFLAGS) $<
@@ -14380,7 +13268,7 @@ $(OBJS)\richtextdll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTDLL_CXXFLAGS) $<
 
 $(OBJS)\richtextdll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_RICHTEXT $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_richtext_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_RICHTEXT $<
 
 $(OBJS)\richtextdll_richtextctrl.obj :  .AUTODEPEND ..\..\src\richtext\richtextctrl.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTDLL_CXXFLAGS) $<
@@ -14439,49 +13327,16 @@ $(OBJS)\richtextlib_richtextstyledlg.obj :  .AUTODEPEND ..\..\src\richtext\richt
 $(OBJS)\richtextlib_richtextprint.obj :  .AUTODEPEND ..\..\src\richtext\richtextprint.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(RICHTEXTLIB_CXXFLAGS) $<
 
-$(OBJS)\stcdll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stcdll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_stc_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -i=..\..\src\stc\scintilla\include -i=..\..\src\stc\scintilla\src -d__WX__ -dSCI_LEXER -dLINK_LEXERS -dWXUSINGDLL -dWXMAKINGDLL_STC $<
-
-$(OBJS)\stcdll_stc.obj :  .AUTODEPEND ..\..\src\stc\stc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stcdll_PlatWX.obj :  .AUTODEPEND ..\..\src\stc\PlatWX.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stcdll_ScintillaWX.obj :  .AUTODEPEND ..\..\src\stc\ScintillaWX.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCDLL_CXXFLAGS) $<
-
-$(OBJS)\stclib_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
-$(OBJS)\stclib_stc.obj :  .AUTODEPEND ..\..\src\stc\stc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
-$(OBJS)\stclib_PlatWX.obj :  .AUTODEPEND ..\..\src\stc\PlatWX.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
-$(OBJS)\stclib_ScintillaWX.obj :  .AUTODEPEND ..\..\src\stc\ScintillaWX.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(STCLIB_CXXFLAGS) $<
-
 $(OBJS)\gldll_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(GLDLL_CXXFLAGS) $<
 
 $(OBJS)\gldll_version.res :  .AUTODEPEND ..\..\src\msw\version.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXBUILDING -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_VERSION_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG)  -i=..\..\src\tiff\libtiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_GL $<
-
-$(OBJS)\gldll_glcmn.obj :  .AUTODEPEND ..\..\src\common\glcmn.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(GLDLL_CXXFLAGS) $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=..\..\include -dWXDLLNAME=wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_gl_wat$(VENDORTAG) -i=..\..\src\tiff -i=..\..\src\jpeg -i=..\..\src\png -i=..\..\src\zlib  -i=..\..\src\regex -i=..\..\src\expat\lib -dWXUSINGDLL -dWXMAKINGDLL_GL $<
 
 $(OBJS)\gldll_glcanvas.obj :  .AUTODEPEND ..\..\src\msw\glcanvas.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(GLDLL_CXXFLAGS) $<
 
 $(OBJS)\gllib_dummy.obj :  .AUTODEPEND ..\..\src\common\dummy.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(GLLIB_CXXFLAGS) $<
-
-$(OBJS)\gllib_glcmn.obj :  .AUTODEPEND ..\..\src\common\glcmn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(GLLIB_CXXFLAGS) $<
 
 $(OBJS)\gllib_glcanvas.obj :  .AUTODEPEND ..\..\src\msw\glcanvas.cpp

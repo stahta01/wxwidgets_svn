@@ -100,9 +100,6 @@ typedef struct {
 
 typedef wx_source_mgr * wx_src_ptr;
 
-extern "C"
-{
-
 CPP_METHODDEF(void) wx_init_source ( j_decompress_ptr WXUNUSED(cinfo) )
 {
 }
@@ -209,8 +206,6 @@ void wx_jpeg_io_src( j_decompress_ptr cinfo, wxInputStream& infile )
     src->pub.term_source = wx_term_source;
 }
 
-} // extern "C"
-
 static inline void wx_cmyk_to_rgb(unsigned char* rgb, const unsigned char* cmyk)
 {
     register int k = 255 - cmyk[3];
@@ -310,17 +305,6 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
         }
     }
 
-    // set up resolution if available: it's part of optional JFIF APP0 chunk
-    if ( cinfo.saw_JFIF_marker )
-    {
-        image->SetOption(wxIMAGE_OPTION_RESOLUTIONX, cinfo.X_density);
-        image->SetOption(wxIMAGE_OPTION_RESOLUTIONY, cinfo.Y_density);
-
-        // we use the same values for this option as libjpeg so we don't need
-        // any conversion here
-        image->SetOption(wxIMAGE_OPTION_RESOLUTIONUNIT, cinfo.density_unit);
-    }
-
     jpeg_finish_decompress( &cinfo );
     jpeg_destroy_decompress( &cinfo );
     return true;
@@ -336,9 +320,6 @@ typedef struct {
 typedef wx_destination_mgr * wx_dest_ptr;
 
 #define OUTPUT_BUF_SIZE  4096    /* choose an efficiently fwrite'able size */
-
-extern "C"
-{
 
 CPP_METHODDEF(void) wx_init_destination (j_compress_ptr cinfo)
 {
@@ -388,8 +369,6 @@ GLOBAL(void) wx_jpeg_io_dest (j_compress_ptr cinfo, wxOutputStream& outfile)
     dest->stream = &outfile;
 }
 
-} // extern "C"
-
 bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbose )
 {
     struct jpeg_compress_struct cinfo;
@@ -435,16 +414,37 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
         jpeg_set_quality(&cinfo, image->GetOptionInt(wxIMAGE_OPTION_QUALITY), TRUE);
 
     // set the resolution fields in the output file
-    int resX, resY;
-    wxImageResolution res = GetResolutionFromOptions(*image, &resX, &resY);
-    if ( res != wxIMAGE_RESOLUTION_NONE )
+    UINT16 resX,
+           resY;
+    if ( image->HasOption(wxIMAGE_OPTION_RESOLUTIONX) &&
+         image->HasOption(wxIMAGE_OPTION_RESOLUTIONY) )
+    {
+        resX = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONX);
+        resY = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONY);
+    }
+    else if ( image->HasOption(wxIMAGE_OPTION_RESOLUTION) )
+    {
+        resX =
+        resY = (UINT16)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTION);
+    }
+    else
+    {
+        resX =
+        resY = 0;
+    }
+
+    if ( resX && resY )
     {
         cinfo.X_density = resX;
         cinfo.Y_density = resY;
+    }
 
-        // it so happens that wxIMAGE_RESOLUTION_INCHES/CM values are the same
-        // ones as used by libjpeg, so we can assign them directly
-        cinfo.density_unit = res;
+    // sets the resolution unit field in the output file
+    // wxIMAGE_RESOLUTION_INCHES for inches
+    // wxIMAGE_RESOLUTION_CM for centimeters
+    if ( image->HasOption(wxIMAGE_OPTION_RESOLUTIONUNIT) )
+    {
+        cinfo.density_unit = (UINT8)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONUNIT);
     }
 
     jpeg_start_compress(&cinfo, TRUE);

@@ -114,6 +114,10 @@ void wxBitmapButton::DrawButtonDisable( WXHDC dc, int left, int top, int right,
 {
 }
 
+void wxBitmapButton::SetDefault()
+{
+}
+
 wxSize wxBitmapButton::DoGetBestSize() const
 {
     wxSize best;

@@ -20,7 +20,7 @@
 
 #if wxUSE_CMDLINE_PARSER
 
-class WXDLLIMPEXP_FWD_BASE wxDateTime;
+class WXDLLIMPEXP_BASE wxDateTime;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -64,16 +64,12 @@ enum wxCmdLineEntryType
 struct wxCmdLineEntryDesc
 {
     wxCmdLineEntryType kind;
-    const char *shortName;
-    const char *longName;
-    const char *description;
+    const wxChar *shortName;
+    const wxChar *longName;
+    const wxChar *description;
     wxCmdLineParamType type;
     int flags;
 };
-
-// the list of wxCmdLineEntryDesc objects should be terminated with this one
-#define wxCMD_LINE_DESC_END \
-        { wxCMD_LINE_NONE, NULL, NULL, NULL, wxCMD_LINE_VAL_NONE, 0x0 }
 
 // ----------------------------------------------------------------------------
 // wxCmdLineParser is a class for parsing command line.
@@ -213,7 +209,7 @@ public:
     void Reset();
 
     // break down the command line in arguments
-    static wxArrayString ConvertStringToArgs(const wxString& cmdline);
+    static wxArrayString ConvertStringToArgs(const wxChar *cmdline);
 
 private:
     // get usage string
@@ -234,7 +230,7 @@ private:
 class WXDLLIMPEXP_BASE wxCmdLineParser
 {
 public:
-    static wxArrayString ConvertStringToArgs(const wxString& cmdline);
+    static wxArrayString ConvertStringToArgs(const wxChar *cmdline);
 };
 
 #endif // wxUSE_CMDLINE_PARSER/!wxUSE_CMDLINE_PARSER

@@ -72,6 +72,8 @@ static void gtk_dirdialog_response_callback(GtkWidget *w,
                                              gint response,
                                              wxDirDialog *dialog)
 {
+    wxapp_install_idle_handler();
+
     if (response == GTK_RESPONSE_ACCEPT)
         gtk_dirdialog_ok_callback(w, dialog);
     else // GTK_RESPONSE_CANCEL or GTK_RESPONSE_NONE
@@ -97,8 +99,7 @@ wxDirDialog::wxDirDialog(wxWindow* parent, const wxString& title,
     if (!gtk_check_version(2,4,0))
     {
         m_message = title;
-
-        parent = GetParentForModalDialog(parent);
+        m_needParent = false;
 
         if (!PreCreation(parent, pos, wxDefaultSize) ||
             !CreateBase(parent, wxID_ANY, pos, wxDefaultSize, style,
@@ -142,7 +143,7 @@ wxDirDialog::wxDirDialog(wxWindow* parent, const wxString& title,
 
         if ( !defaultPath.empty() )
             gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(m_widget),
-                    defaultPath.fn_str() );
+                    wxConvFileName->cWX2MB(defaultPath) );
     }
     else
         wxGenericDirDialog::Create(parent, title, defaultPath, style, pos, sz, name);
@@ -186,8 +187,7 @@ void wxDirDialog::SetPath(const wxString& dir)
     {
         if (wxDirExists(dir))
         {
-            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(m_widget),
-                                                dir.fn_str());
+            gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(m_widget), wxConvFileName->cWX2MB(dir));
         }
     }
     else
@@ -199,7 +199,7 @@ wxString wxDirDialog::GetPath() const
     if (!gtk_check_version(2,4,0))
     {
         wxGtkString str(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(m_widget)));
-        return wxString(str, *wxConvFileName);
+        return wxConvFileName->cMB2WX(str);
     }
 
     return wxGenericDirDialog::GetPath();

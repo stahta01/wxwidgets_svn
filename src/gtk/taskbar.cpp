@@ -12,11 +12,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_TASKBARICON
-
-#include <gtk/gtkversion.h>
-#if GTK_CHECK_VERSION(2, 1, 0)
-
 #include "wx/gtk/taskbarpriv.h"
 
 #ifndef WX_PRECOMP
@@ -25,8 +20,13 @@
     #include "wx/menu.h"
 #endif
 
-#include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+
+#ifdef __WXGTK20__
+#include <gtk/gtkversion.h>
+#if GTK_CHECK_VERSION(2, 1, 0)
+
+#include "gtk/gtk.h"
 
 #include "eggtrayicon.h"
 
@@ -69,13 +69,6 @@ bool wxTaskBarIconAreaBase::IsProtocolSupported()
     }
 
     return (bool)s_supported;
-}
-
-bool wxTaskBarIconAreaBase::IsDecorCacheable() const
-{
-    // Apparently, WM frame extents extend to full width of screen when window
-    // is in the tray. Don't cache, it's not useful for other windows.
-    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -148,7 +141,7 @@ bool wxTaskBarIconAreaBase::DoPopupMenu( wxMenu *menu, int x, int y )
 
     return true;
 }
-
 #endif // wxUSE_MENUS_NATIVE
+
+#endif // __WXGTK20__
 #endif // GTK_CHECK_VERSION(2, 1, 0)
-#endif // wxUSE_TASKBARICON

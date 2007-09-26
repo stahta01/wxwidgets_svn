@@ -12,8 +12,8 @@
 #ifndef _WX_RADIOBOX_H_
 #define _WX_RADIOBOX_H_
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxRadioButton;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxRadioButton;
 
 // ----------------------------------------------------------------------------
 // wxRadioBox

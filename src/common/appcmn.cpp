@@ -32,14 +32,15 @@
     #include "wx/msgdlg.h"
     #include "wx/confbase.h"
     #include "wx/utils.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/apptrait.h"
 #include "wx/cmdline.h"
+#include "wx/evtloop.h"
 #include "wx/msgout.h"
 #include "wx/thread.h"
 #include "wx/vidmode.h"
+#include "wx/ptr_scpd.h"
 
 #ifdef __WXDEBUG__
     #if wxUSE_STACKWALKER
@@ -49,6 +50,10 @@
 
 #if defined(__WXMSW__)
     #include  "wx/msw/private.h"  // includes windows.h for LOGFONT
+#endif
+
+#if defined(__WXMAC__)
+    #include "wx/mac/private.h"
 #endif
 
 #if wxUSE_FONTMAP
@@ -61,6 +66,13 @@ WX_CHECK_BUILD_OPTIONS("wxCore")
 
 WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
 
+// ----------------------------------------------------------------------------
+// wxEventLoopPtr
+// ----------------------------------------------------------------------------
+
+// this defines wxEventLoopPtr
+wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoop)
+
 // ============================================================================
 // wxAppBase implementation
 // ============================================================================
@@ -72,11 +84,13 @@ WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
 wxAppBase::wxAppBase()
 {
     m_topWindow = (wxWindow *)NULL;
-
+    
     m_useBestVisual = false;
     m_forceTrueColour = false;
-
+    
     m_isActive = true;
+
+    m_mainLoop = NULL;
 
     // We don't want to exit the app if the user code shows a dialog from its
     // OnInit() -- but this is what would happen if we set m_exitOnFrameDelete
@@ -97,6 +111,10 @@ bool wxAppBase::Initialize(int& argcOrig, wxChar **argvOrig)
 {
     if ( !wxAppConsole::Initialize(argcOrig, argvOrig) )
         return false;
+
+#if wxUSE_THREADS
+    wxPendingEventsLocker = new wxCriticalSection;
+#endif
 
     wxInitializeStockLists();
 
@@ -138,14 +156,18 @@ void wxAppBase::CleanUp()
     delete wxTheColourDatabase;
     wxTheColourDatabase = NULL;
 
+    delete wxPendingEvents;
+    wxPendingEvents = NULL;
+
 #if wxUSE_THREADS
+    delete wxPendingEventsLocker;
+    wxPendingEventsLocker = NULL;
+
     #if wxUSE_VALIDATORS
         // If we don't do the following, we get an apparent memory leak.
         ((wxEvtHandler&) wxDefaultValidator).ClearEventLocker();
     #endif // wxUSE_VALIDATORS
 #endif // wxUSE_THREADS
-
-    wxAppConsole::CleanUp();
 }
 
 // ----------------------------------------------------------------------------
@@ -189,8 +211,8 @@ wxLayoutDirection wxAppBase::GetLayoutDirection() const
 // GUI-specific command line options handling
 // ----------------------------------------------------------------------------
 
-#define OPTION_THEME   "theme"
-#define OPTION_MODE    "mode"
+#define OPTION_THEME   _T("theme")
+#define OPTION_MODE    _T("mode")
 
 void wxAppBase::OnInitCmdLine(wxCmdLineParser& parser)
 {
@@ -203,7 +225,7 @@ void wxAppBase::OnInitCmdLine(wxCmdLineParser& parser)
 #ifdef __WXUNIVERSAL__
         {
             wxCMD_LINE_OPTION,
-            NULL,
+            wxEmptyString,
             OPTION_THEME,
             gettext_noop("specify the theme to use"),
             wxCMD_LINE_VAL_STRING,
@@ -217,7 +239,7 @@ void wxAppBase::OnInitCmdLine(wxCmdLineParser& parser)
         //     and not mgl/app.cpp
         {
             wxCMD_LINE_OPTION,
-            NULL,
+            wxEmptyString,
             OPTION_MODE,
             gettext_noop("specify display mode to use (e.g. 640x480-16)"),
             wxCMD_LINE_VAL_STRING,
@@ -226,7 +248,14 @@ void wxAppBase::OnInitCmdLine(wxCmdLineParser& parser)
 #endif // __WXMGL__
 
         // terminator
-        wxCMD_LINE_DESC_END
+        {
+            wxCMD_LINE_NONE,
+            wxEmptyString,
+            wxEmptyString,
+            wxEmptyString,
+            wxCMD_LINE_VAL_NONE,
+            0x0
+        }
     };
 
     parser.SetDesc(cmdLineGUIDesc);
@@ -273,6 +302,45 @@ bool wxAppBase::OnCmdLineParsed(wxCmdLineParser& parser)
 #endif // wxUSE_CMDLINE_PARSER
 
 // ----------------------------------------------------------------------------
+// main event loop implementation
+// ----------------------------------------------------------------------------
+
+int wxAppBase::MainLoop()
+{
+    wxEventLoopTiedPtr mainLoop(&m_mainLoop, new wxEventLoop);
+
+    return m_mainLoop->Run();
+}
+
+void wxAppBase::ExitMainLoop()
+{
+    // we should exit from the main event loop, not just any currently active
+    // (e.g. modal dialog) event loop
+    if ( m_mainLoop && m_mainLoop->IsRunning() )
+    {
+        m_mainLoop->Exit(0);
+    }
+}
+
+bool wxAppBase::Pending()
+{
+    // use the currently active message loop here, not m_mainLoop, because if
+    // we're showing a modal dialog (with its own event loop) currently the
+    // main event loop is not running anyhow
+    wxEventLoop * const loop = wxEventLoop::GetActive();
+
+    return loop && loop->Pending();
+}
+
+bool wxAppBase::Dispatch()
+{
+    // see comment in Pending()
+    wxEventLoop * const loop = wxEventLoop::GetActive();
+
+    return loop && loop->Dispatch();
+}
+
+// ----------------------------------------------------------------------------
 // OnXXX() hooks
 // ----------------------------------------------------------------------------
 
@@ -296,7 +364,7 @@ int wxAppBase::OnRun()
     }
     //else: it has been changed, assume the user knows what he is doing
 
-    return wxAppConsole::OnRun();
+    return MainLoop();
 }
 
 int wxAppBase::OnExit()
@@ -306,6 +374,11 @@ int wxAppBase::OnExit()
 #endif // __WXUNIVERSAL__
 
     return wxAppConsole::OnExit();
+}
+
+void wxAppBase::Exit()
+{
+    ExitMainLoop();
 }
 
 wxAppTraits *wxAppBase::CreateTraits()
@@ -372,7 +445,9 @@ bool wxAppBase::ProcessIdle()
         node = node->GetNext();
     }
 
-    if (wxAppConsole::ProcessIdle())
+    event.SetEventObject(this);
+    (void) ProcessEvent(event);
+    if (event.MoreRequested())
         needMore = true;
 
     // 'Garbage' collection of windows deleted with Close().
@@ -395,9 +470,7 @@ bool wxAppBase::SendIdleEvents(wxWindow* win, wxIdleEvent& event)
 
     win->OnInternalIdle();
 
-    // should we send idle event to this window?
-    if ( wxIdleEvent::GetMode() == wxIDLE_PROCESS_ALL ||
-            win->HasExtraStyle(wxWS_EX_PROCESS_IDLE) )
+    if (wxIdleEvent::CanSend(win))
     {
         event.SetEventObject(win);
         win->GetEventHandler()->ProcessEvent(event);
@@ -418,6 +491,28 @@ bool wxAppBase::SendIdleEvents(wxWindow* win, wxIdleEvent& event)
     return needMore;
 }
 
+void wxAppBase::OnIdle(wxIdleEvent& WXUNUSED(event))
+{
+}
+
+// ----------------------------------------------------------------------------
+// exceptions support
+// ----------------------------------------------------------------------------
+
+#if wxUSE_EXCEPTIONS
+
+bool wxAppBase::OnExceptionInMainLoop()
+{
+    throw;
+
+    // some compilers are too stupid to know that we never return after throw
+#if defined(__DMC__) || (defined(_MSC_VER) && _MSC_VER < 1200)
+    return false;
+#endif
+}
+
+#endif // wxUSE_EXCEPTIONS
+
 // ----------------------------------------------------------------------------
 // wxGUIAppTraitsBase
 // ----------------------------------------------------------------------------
@@ -426,9 +521,7 @@ bool wxAppBase::SendIdleEvents(wxWindow* win, wxIdleEvent& event)
 
 wxLog *wxGUIAppTraitsBase::CreateLogTarget()
 {
-// DE: One day I'll remove this but right now the generic dialog used for this
-// just doesn't work right at all on wxCocoa.
-#if wxUSE_LOGGUI && !defined(__WXCOCOA__)
+#if wxUSE_LOGGUI
     return new wxLogGui;
 #else
     // we must have something!
@@ -451,10 +544,8 @@ wxMessageOutput *wxGUIAppTraitsBase::CreateMessageOutput()
     // wxMessageOutputMessageBox doesn't work under Motif
     #ifdef __WXMOTIF__
         return new wxMessageOutputLog;
-    #elif wxUSE_MSGDLG
-        return new wxMessageOutputMessageBox;
     #else
-        return new wxMessageOutputStderr;
+        return new wxMessageOutputMessageBox;
     #endif
 #endif // __UNIX__/!__UNIX__
 }
@@ -503,6 +594,28 @@ bool wxGUIAppTraitsBase::ShowAssertDialog(const wxString& msg)
               wxT("You can also choose [Cancel] to suppress ")
               wxT("further warnings.");
 
+#ifdef __WXMAC__
+    // in order to avoid reentrancy problems, use the lowest alert API available
+    CFOptionFlags exitButton;
+    wxMacCFStringHolder cfText(msgDlg);
+    OSStatus err = CFUserNotificationDisplayAlert(
+            0, kAlertStopAlert, NULL, NULL, NULL, CFSTR("wxWidgets Debug Alert"), cfText,
+            CFSTR("Yes"), CFSTR("No"), CFSTR("Cancel"), &exitButton );
+    if ( err == noErr )
+    {
+        switch( exitButton )
+        {
+            case 0 : // yes
+                wxTrap();
+                break;
+            case 2 : // cancel
+                // no more asserts
+                return true;
+            case 1 : // no -> nothing to do
+                break ;
+        }
+    }
+#else
     switch ( wxMessageBox(msgDlg, wxT("wxWidgets Debug Alert"),
                           wxYES_NO | wxCANCEL | wxICON_STOP ) )
     {
@@ -516,7 +629,7 @@ bool wxGUIAppTraitsBase::ShowAssertDialog(const wxString& msg)
 
         //case wxNO: nothing to do
     }
-
+#endif
     return false;
 #endif // !wxUSE_MSGDLG/wxUSE_MSGDLG
 }

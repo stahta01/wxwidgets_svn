@@ -353,9 +353,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     MyFrame *frame = new MyFrame(_T("wxWizard Sample"));
 
     // and show it (the frames, unlike simple controls, are not shown when

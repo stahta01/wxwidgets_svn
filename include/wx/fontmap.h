@@ -25,13 +25,13 @@
 #endif // wxUSE_GUI
 
 #if wxUSE_CONFIG && wxUSE_FILECONFIG
-    class WXDLLIMPEXP_FWD_BASE wxConfigBase;
+    class WXDLLIMPEXP_BASE wxConfigBase;
 #endif // wxUSE_CONFIG
 
-class WXDLLIMPEXP_FWD_CORE wxFontMapper;
+class WXDLLIMPEXP_CORE wxFontMapper;
 
 #if wxUSE_GUI
-    class WXDLLIMPEXP_FWD_CORE wxWindow;
+    class WXDLLIMPEXP_CORE wxWindow;
 #endif // wxUSE_GUI
 
 // ============================================================================
@@ -50,7 +50,7 @@ class WXDLLIMPEXP_FWD_CORE wxFontMapper;
 class WXDLLIMPEXP_BASE wxFontMapperBase
 {
 public:
-    // constructor and such
+    // constructtor and such
     // ---------------------
 
     // default ctor
@@ -122,7 +122,7 @@ public:
     void SetConfigPath(const wxString& prefix);
 
     // return default config path
-    static const wxString& GetDefaultConfigPath();
+    static const wxChar *GetDefaultConfigPath();
 #endif // wxUSE_CONFIG
 
 

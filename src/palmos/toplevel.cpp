@@ -234,6 +234,10 @@ wxString wxTopLevelWindowPalm::GetTitle() const
     return wxEmptyString;
 }
 
+void wxTopLevelWindowPalm::SetIcon(const wxIcon& icon)
+{
+}
+
 void wxTopLevelWindowPalm::SetIcons(const wxIconBundle& icons)
 {
 }

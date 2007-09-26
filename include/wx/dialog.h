@@ -13,10 +13,11 @@
 #define _WX_DIALOG_H_BASE_
 
 #include "wx/defs.h"
+#include "wx/containr.h"
 #include "wx/toplevel.h"
 
-class WXDLLIMPEXP_FWD_CORE wxSizer;
-class WXDLLIMPEXP_FWD_CORE wxStdDialogButtonSizer;
+class WXDLLEXPORT wxSizer;
+class WXDLLEXPORT wxStdDialogButtonSizer;
 
 #define wxDIALOG_NO_PARENT      0x0001  // Don't make owned by apps top window
 
@@ -62,10 +63,6 @@ public:
     // wxID_CANCEL if present and GetAffirmativeId() otherwise
     void SetEscapeId(int escapeId);
     int GetEscapeId() const { return m_escapeId; }
-
-    // Returns the parent to use for modal dialogs if the user did not specify it
-    // explicitly
-    wxWindow *GetParentForModalDialog(wxWindow *parent = NULL) const;
 
 #if wxUSE_STATTEXT // && wxUSE_TEXTCTRL
     // splits text up at newlines and places the
@@ -140,6 +137,7 @@ private:
 
     DECLARE_NO_COPY_CLASS(wxDialogBase)
     DECLARE_EVENT_TABLE()
+    WX_DECLARE_CONTROL_CONTAINER();
 };
 
 

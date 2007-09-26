@@ -18,8 +18,8 @@
 // fwd declarations
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxWindowDC;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxWindowDC;
+class WXDLLEXPORT wxWindow;
 
 // Under Windows, wxClientDC, wxPaintDC and wxWindowDC are implemented
 // differently. On many platforms, however, they will be the same.
@@ -63,7 +63,7 @@ public:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     virtual bool CanDrawBitmap() const;
     virtual bool CanGetTextExtent() const;

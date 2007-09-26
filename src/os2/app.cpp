@@ -28,7 +28,7 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/log.h"
     #include "wx/module.h"
 #endif
@@ -483,6 +483,8 @@ void wxApp::OnIdle( wxIdleEvent& rEvent )
         return;
 
     gbInOnIdle = true;
+
+    wxAppBase::OnIdle(rEvent);
 
 #if wxUSE_DC_CACHEING
     // automated DC cache management: clear the cached DCs and bitmap

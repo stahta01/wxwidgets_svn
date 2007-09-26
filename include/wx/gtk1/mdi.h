@@ -22,9 +22,9 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxMDIParentFrame;
-class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+class WXDLLIMPEXP_CORE wxMDIParentFrame;
+class WXDLLIMPEXP_CORE wxMDIClientWindow;
+class WXDLLIMPEXP_CORE wxMDIChildFrame;
 
 //-----------------------------------------------------------------------------
 // global data
@@ -155,6 +155,8 @@ public:
 #endif // wxUSE_TOOLBAR
 
     // no icon
+    virtual void SetIcon(const wxIcon& icon)
+        { wxTopLevelWindowBase::SetIcon(icon); }
     virtual void SetIcons(const wxIconBundle& icons )
         { wxTopLevelWindowBase::SetIcons(icons); }
 

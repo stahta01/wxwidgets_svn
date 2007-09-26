@@ -120,7 +120,7 @@ static struct
 {
     int m_low, m_high;
     wxUnicodeSubsetCodes m_subset;
-    const wxChar* m_name;
+    wxChar* m_name;
 } g_UnicodeSubsetTable[] =
 {
   { 0x0000, 0x007E,
@@ -391,7 +391,7 @@ void wxSymbolPickerDialog::CreateControls()
     itemBoxSizer4->Add(itemBoxSizer5, 1, wxGROW, 5);
 
     wxStaticText* itemStaticText6 = new wxStaticText( itemDialog1, wxID_STATIC, _("&Font:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxADJUST_MINSIZE, 5);
 
     wxString* m_fontCtrlStrings = NULL;
     m_fontCtrl = new wxComboBox( itemDialog1, ID_SYMBOLPICKERDIALOG_FONT, wxEmptyString, wxDefaultPosition, wxSize(240, -1), 0, m_fontCtrlStrings, wxCB_READONLY );
@@ -404,7 +404,7 @@ void wxSymbolPickerDialog::CreateControls()
 
 #if defined(__UNICODE__)
     wxStaticText* itemStaticText9 = new wxStaticText( itemDialog1, wxID_STATIC, _("&Subset:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(itemStaticText9, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemBoxSizer5->Add(itemStaticText9, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxADJUST_MINSIZE, 5);
 
 #endif
 
@@ -425,12 +425,12 @@ void wxSymbolPickerDialog::CreateControls()
     itemBoxSizer3->Add(itemBoxSizer12, 0, wxGROW, 5);
 
     m_symbolStaticCtrl = new wxStaticText( itemDialog1, wxID_STATIC, _("xxxx"), wxDefaultPosition, wxSize(40, -1), wxALIGN_CENTRE );
-    itemBoxSizer12->Add(m_symbolStaticCtrl, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemBoxSizer12->Add(m_symbolStaticCtrl, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxADJUST_MINSIZE, 5);
 
     itemBoxSizer12->Add(5, 5, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText15 = new wxStaticText( itemDialog1, wxID_STATIC, _("&Character code:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer12->Add(itemStaticText15, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemBoxSizer12->Add(itemStaticText15, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxADJUST_MINSIZE, 5);
 
     m_characterCodeCtrl = new wxTextCtrl( itemDialog1, ID_SYMBOLPICKERDIALOG_CHARACTERCODE, wxEmptyString, wxDefaultPosition, wxSize(140, -1), wxTE_READONLY|wxTE_CENTRE );
     m_characterCodeCtrl->SetHelpText(_("The character code."));
@@ -442,7 +442,7 @@ void wxSymbolPickerDialog::CreateControls()
 
 #if defined(__UNICODE__)
     wxStaticText* itemStaticText18 = new wxStaticText( itemDialog1, wxID_STATIC, _("&From:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer12->Add(itemStaticText18, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemBoxSizer12->Add(itemStaticText18, 0, wxALIGN_CENTER_VERTICAL|wxALL|wxADJUST_MINSIZE, 5);
 
 #endif
 
@@ -832,7 +832,7 @@ bool wxSymbolListCtrl::DoSetCurrent(int current)
     }
 
     if ( m_current != wxNOT_FOUND )
-        RefreshRow(SymbolValueToLineNumber(m_current));
+        RefreshLine(SymbolValueToLineNumber(m_current));
 
     m_current = current;
 
@@ -844,19 +844,19 @@ bool wxSymbolListCtrl::DoSetCurrent(int current)
         // don't need to refresh it -- it will be redrawn anyhow
         if ( !IsVisible(lineNo) )
         {
-            ScrollToRow(lineNo);
+            ScrollToLine(lineNo);
         }
         else // line is at least partly visible
         {
             // it is, indeed, only partly visible, so scroll it into view to
             // make it entirely visible
-            while ( (unsigned)lineNo + 1 == GetVisibleEnd() &&
-                    ScrollToRow(GetVisibleBegin() + 1) )
+            while ( unsigned(lineNo) == GetLastVisibleLine() &&
+                    ScrollToLine(GetVisibleBegin()+1) )
                 ;
 
             // but in any case refresh it as even if it was only partly visible
             // before we need to redraw it entirely as its background changed
-            RefreshRow(lineNo);
+            RefreshLine(lineNo);
         }
     }
 
@@ -904,7 +904,7 @@ void wxSymbolListCtrl::SetSelectionBackground(const wxColour& col)
 // wxSymbolListCtrl painting
 // ----------------------------------------------------------------------------
 
-wxCoord wxSymbolListCtrl::OnGetRowHeight(size_t WXUNUSED(line)) const
+wxCoord wxSymbolListCtrl::OnGetLineHeight(size_t WXUNUSED(line)) const
 {
     return m_cellSize.y + 2*m_ptMargins.y + 1 /* for divider */ ;
 }
@@ -985,8 +985,8 @@ void wxSymbolListCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
     dc.SetFont(GetFont());
 
     // the bounding rectangle of the current line
-    wxRect rectRow;
-    rectRow.width = clientSize.x;
+    wxRect rectLine;
+    rectLine.width = clientSize.x;
 
     dc.SetPen(wxPen(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT)));
     dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
@@ -994,25 +994,25 @@ void wxSymbolListCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     // iterate over all visible lines
     const size_t lineMax = GetVisibleEnd();
-    for ( size_t line = GetVisibleBegin(); line < lineMax; line++ )
+    for ( size_t line = GetFirstVisibleLine(); line < lineMax; line++ )
     {
-        const wxCoord hRow = OnGetRowHeight(line);
+        const wxCoord hLine = OnGetLineHeight(line);
 
-        rectRow.height = hRow;
+        rectLine.height = hLine;
 
         // and draw the ones which intersect the update rect
-        if ( rectRow.Intersects(rectUpdate) )
+        if ( rectLine.Intersects(rectUpdate) )
         {
             // don't allow drawing outside of the lines rectangle
-            wxDCClipper clip(dc, rectRow);
+            wxDCClipper clip(dc, rectLine);
 
-            wxRect rect = rectRow;
+            wxRect rect = rectLine;
             rect.Deflate(m_ptMargins.x, m_ptMargins.y);
             OnDrawItem(dc, rect, line);
         }
         else // no intersection
         {
-            if ( rectRow.GetTop() > rectUpdate.GetBottom() )
+            if ( rectLine.GetTop() > rectUpdate.GetBottom() )
             {
                 // we are already below the update rect, no need to continue
                 // further
@@ -1021,7 +1021,7 @@ void wxSymbolListCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
             //else: the next line may intersect the update rect
         }
 
-        rectRow.y += hRow;
+        rectLine.y += hLine;
     }
 }
 
@@ -1200,12 +1200,12 @@ void wxSymbolListCtrl::SetupCtrl(bool scrollToSelection)
     m_symbolsPerLine = sz.x/(m_cellSize.x+m_ptMargins.x);
     int noLines = (1 + SymbolValueToLineNumber(m_maxSymbolValue));
 
-    SetRowCount(noLines);
+    SetLineCount(noLines);
     Refresh();
 
     if (scrollToSelection && m_current != wxNOT_FOUND && m_current >= m_minSymbolValue && m_current <= m_maxSymbolValue)
     {
-        ScrollToRow(SymbolValueToLineNumber(m_current));
+        ScrollToLine(SymbolValueToLineNumber(m_current));
     }
 }
 
@@ -1214,7 +1214,7 @@ void wxSymbolListCtrl::EnsureVisible(int item)
 {
     if (item != wxNOT_FOUND && item >= m_minSymbolValue && item <= m_maxSymbolValue)
     {
-        ScrollToRow(SymbolValueToLineNumber(item));
+        ScrollToLine(SymbolValueToLineNumber(item));
     }
 }
 
@@ -1222,7 +1222,7 @@ void wxSymbolListCtrl::EnsureVisible(int item)
 // hit testing
 int wxSymbolListCtrl::HitTest(const wxPoint& pt)
 {
-    wxCoord lineHeight = OnGetRowHeight(0);
+    wxCoord lineHeight = OnGetLineHeight(0);
 
     int atLine = GetVisibleBegin() + (pt.y/lineHeight);
     int symbol = (atLine*m_symbolsPerLine) + (pt.x/(m_cellSize.x+1));

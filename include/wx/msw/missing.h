@@ -138,8 +138,38 @@
 #define LWA_ALPHA 2
 #endif
 
-#ifndef QS_ALLPOSTMESSAGE
-#define QS_ALLPOSTMESSAGE 0
+#if defined __VISUALC__ && __VISUALC__ <= 1200 && !defined MIIM_BITMAP
+#define MIIM_STRING      0x00000040
+#define MIIM_BITMAP      0x00000080
+#define MIIM_FTYPE       0x00000100
+#define HBMMENU_CALLBACK            ((HBITMAP) -1)
+typedef struct tagMENUINFO
+{
+    DWORD   cbSize;
+    DWORD   fMask;
+    DWORD   dwStyle;
+    UINT    cyMax;
+    HBRUSH  hbrBack;
+    DWORD   dwContextHelpID;
+    DWORD   dwMenuData;
+}   MENUINFO, FAR *LPMENUINFO;
+struct wxMENUITEMINFO_
+{
+    UINT cbSize;
+    UINT fMask;
+    UINT fType;
+    UINT fState;
+    UINT wID;
+    HMENU hSubMenu;
+    HBITMAP hbmpChecked;
+    HBITMAP hbmpUnchecked;
+    DWORD dwItemData;
+    LPTSTR dwTypeData;
+    UINT cch;
+    HBITMAP hbmpItem;
+};
+#else
+#define wxMENUITEMINFO_ MENUITEMINFO
 #endif
 
 /*
@@ -229,10 +259,6 @@ typedef struct wxtagNMLVCUSTOMDRAW_ {
 
 #ifndef HDN_GETDISPINFOW
     #define HDN_GETDISPINFOW (HDN_FIRST-29)
-#endif
-
-#ifndef HDS_HOTTRACK
-    #define HDS_HOTTRACK 4
 #endif
 
  /*
@@ -339,30 +365,6 @@ typedef struct _OSVERSIONINFOEX {
 
 #ifndef LVM_GETHEADER
     #define LVM_GETHEADER (LVM_FIRST+31)
-#endif
-
-#ifndef HDLAYOUT
-    #define HDLAYOUT HD_LAYOUT
-#endif
-
-#ifndef HDITEM
-    #define HDITEM HD_ITEM
-#endif
-
-#ifndef NMHEADER
-    #define NMHEADER HD_NOTIFY
-#endif
-
-#ifndef HDS_FULLDRAG
-    #define HDS_FULLDRAG 128
-#endif
-
-#ifndef HDN_BEGINDRAG
-    #define HDN_BEGINDRAG (HDN_FIRST - 11)
-#endif
-
-#ifndef HDN_ENDDRAG
-    #define HDN_ENDDRAG (HDN_FIRST - 10)
 #endif
 
 #ifndef LVSICF_NOSCROLL

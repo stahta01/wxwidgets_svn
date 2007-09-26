@@ -27,9 +27,9 @@ extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIParentFrame;
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIChildFrame;
+class WXDLLEXPORT wxGenericMDIParentFrame;
+class WXDLLEXPORT wxGenericMDIClientWindow;
+class WXDLLEXPORT wxGenericMDIChildFrame;
 
 //-----------------------------------------------------------------------------
 // wxGenericMDIParentFrame
@@ -170,7 +170,8 @@ public:
 #endif
 
     // no icon
-    virtual void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
+    void SetIcon( const wxIcon& WXUNUSED(icon) ) { }
+    void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
 
     // no maximize etc
     virtual void Maximize( bool WXUNUSED(maximize) = true) { /* Has no effect */ }

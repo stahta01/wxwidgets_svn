@@ -19,7 +19,7 @@
     #include "wx/math.h"
 #endif
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // data
@@ -124,6 +124,8 @@ extern "C" {
 static void
 gtk_value_changed(GtkRange* range, wxSlider* win)
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     GtkAdjustment* adj = gtk_range_get_adjustment (range);
     const int pos = wxRound(adj->value);
     const double oldPos = win->m_pos;
@@ -231,9 +233,9 @@ gtk_event_after(GtkRange* range, GdkEvent* event, wxSlider* win)
             ProcessScrollEvent(win, wxEVT_SCROLL_THUMBRELEASE);
         }
         // Keep slider at an integral position
-        win->m_blockScrollEvent = true;
+        win->BlockScrollEvent();
         gtk_range_set_value(GTK_RANGE (win->m_widget), win->GetValue());
-        win->m_blockScrollEvent = false;
+        win->UnblockScrollEvent();
     }
 }
 }
@@ -279,26 +281,26 @@ wxSlider::wxSlider()
     m_pos = 0;
     m_scrollEventType = 0;
     m_needThumbRelease = false;
-    m_blockScrollEvent = false;
 }
 
-bool wxSlider::Create(wxWindow *parent,
-                      wxWindowID id,
-                      int value,
-                      int minValue,
-                      int maxValue,
-                      const wxPoint& pos,
-                      const wxSize& size,
-                      long style,
-                      const wxValidator& validator,
-                      const wxString& name)
+bool wxSlider::Create(wxWindow *parent, wxWindowID id,
+        int value, int minValue, int maxValue,
+        const wxPoint& pos, const wxSize& size,
+        long style, const wxValidator& validator, const wxString& name )
 {
+    m_acceptsFocus = true;
+    m_needParent = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxSlider creation failed") );
         return false;
     }
+
+    m_pos = 0;
+    m_scrollEventType = 0;
+    m_needThumbRelease = false;
 
     if (style & wxSL_VERTICAL)
         m_widget = gtk_vscale_new( (GtkAdjustment *) NULL );
@@ -341,18 +343,18 @@ void wxSlider::SetValue( int value )
 {
     if (GetValue() != value)
     {
-        m_blockScrollEvent = true;
+        BlockScrollEvent();
         gtk_range_set_value(GTK_RANGE (m_widget), value);
-        m_blockScrollEvent = false;
+        UnblockScrollEvent();
     }
 }
 
 void wxSlider::SetRange( int minValue, int maxValue )
 {
-    m_blockScrollEvent = true;
+    BlockScrollEvent();
     gtk_range_set_range(GTK_RANGE (m_widget), minValue, maxValue);
     gtk_range_set_increments(GTK_RANGE (m_widget), 1, (maxValue - minValue + 9) / 10);
-    m_blockScrollEvent = false;
+    UnblockScrollEvent();
 }
 
 int wxSlider::GetMin() const
@@ -367,9 +369,9 @@ int wxSlider::GetMax() const
 
 void wxSlider::SetPageSize( int pageSize )
 {
-    m_blockScrollEvent = true;
+    BlockScrollEvent();
     gtk_range_set_increments(GTK_RANGE (m_widget), GetLineSize(), pageSize);
-    m_blockScrollEvent = false;
+    UnblockScrollEvent();
 }
 
 int wxSlider::GetPageSize() const
@@ -389,9 +391,9 @@ int wxSlider::GetThumbLength() const
 
 void wxSlider::SetLineSize( int lineSize )
 {
-    m_blockScrollEvent = true;
+    BlockScrollEvent();
     gtk_range_set_increments(GTK_RANGE (m_widget), lineSize, GetPageSize());
-    m_blockScrollEvent = false;
+    UnblockScrollEvent();
 }
 
 int wxSlider::GetLineSize() const

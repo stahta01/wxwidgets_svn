@@ -52,9 +52,10 @@ public:
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
     virtual bool IsIconized() const;
+    virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons );
     virtual void Restore();
-
+    
     virtual void SetLayoutDirection(wxLayoutDirection dir);
 
 #ifndef __WXWINCE__
@@ -75,7 +76,7 @@ public:
     virtual bool SetTransparent(wxByte alpha);
     virtual bool CanSetTransparent();
 
-
+    
     // implementation from now on
     // --------------------------
 
@@ -107,9 +108,6 @@ public:
     // window proc for the frames
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
-
 protected:
     // common part of all ctors
     void Init();
@@ -128,14 +126,6 @@ protected:
 
     // common part of Iconize(), Maximize() and Restore()
     void DoShowWindow(int nShowCmd);
-
-    // override those to return the normal window coordinates even when the
-    // window is minimized
-#ifndef __WXWINCE__
-    virtual void DoGetPosition(int *x, int *y) const;
-    virtual void DoGetSize(int *width, int *height) const;
-#endif // __WXWINCE__
-
 
     // is the window currently iconized?
     bool m_iconized;

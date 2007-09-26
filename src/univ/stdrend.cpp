@@ -199,7 +199,7 @@ void wxStdRenderer::DrawButtonSurface(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 void
-wxStdRenderer::DrawFocusRect(wxWindow* WXUNUSED(win), wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
+wxStdRenderer::DrawFocusRect(wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
 {
     // draw the pixels manually because the "dots" in wxPen with wxDOT style
     // may be short traits and not really dots
@@ -290,7 +290,7 @@ void wxStdRenderer::DrawButtonLabel(wxDC& dc,
     {
         rectLabel.Inflate(-1);
 
-        DrawFocusRect(NULL, dc, rectLabel);
+        DrawFocusRect(dc, rectLabel);
     }
 }
 
@@ -412,15 +412,18 @@ void wxStdRenderer::DrawBorder(wxDC& dc,
 
     switch ( border )
     {
+        case wxBORDER_THEME:
         case wxBORDER_SUNKEN:
             DrawSunkenBorder(dc, &rect);
             break;
 
+        // wxBORDER_DOUBLE is no longer supported since wxBORDER_THEME takes on the same value
+#if 0
         case wxBORDER_DOUBLE:
             DrawAntiSunkenBorder(dc, &rect);
             DrawExtraBorder(dc, &rect);
             break;
-
+#endif
         case wxBORDER_STATIC:
             DrawStaticBorder(dc, &rect);
             break;
@@ -632,7 +635,7 @@ void wxStdRenderer::DrawItem(wxDC& dc,
 
     if ( flags & wxCONTROL_FOCUSED )
     {
-        DrawFocusRect(NULL, dc, rect, flags);
+        DrawFocusRect(dc, rect, flags);
     }
 }
 

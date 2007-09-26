@@ -16,11 +16,6 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/utils.h"
-    #include "wx/log.h"
-#endif
-
 #include "wx/fileconf.h"
 #include "wx/filename.h"
 #include "wx/tokenzr.h"
@@ -36,11 +31,6 @@
 // ----------------------------------------------------------------------------
 // wxFontInstance
 // ----------------------------------------------------------------------------
-
-// This is a fake "filename" for DirectFB's builtin font (which isn't loaded
-// from a file); we can't use empty string, because that's already used for
-// "this face is not available" by wxFontsManagerBase
-#define BUILTIN_DFB_FONT_FILENAME   "/dev/null"
 
 wxFontInstance::wxFontInstance(float ptSize, bool aa,
                                const wxString& filename)
@@ -60,13 +50,9 @@ wxFontInstance::wxFontInstance(float ptSize, bool aa,
                     DFDESC_ATTRIBUTES | DFDESC_FRACT_HEIGHT);
     desc.attributes = aa ? DFFA_NONE : DFFA_MONOCHROME;
     desc.fract_height = pixSize;
+    m_font = wxIDirectFB::Get()->CreateFont(filename.fn_str(), &desc);
 
-    if ( filename == BUILTIN_DFB_FONT_FILENAME )
-        m_font = wxIDirectFB::Get()->CreateFont(NULL, &desc);
-    else
-        m_font = wxIDirectFB::Get()->CreateFont(filename.fn_str(), &desc);
-
-    wxASSERT_MSG( m_font, "cannot create font instance" );
+    wxASSERT_MSG( m_font, _T("cannot create font instance") );
 }
 
 // ----------------------------------------------------------------------------
@@ -145,7 +131,7 @@ wxFontBundle::wxFontBundle(const wxString& name,
 void wxFontsManager::AddAllFonts()
 {
     wxString path;
-    if ( !wxGetEnv("WXDFB_FONTPATH", &path) )
+    if ( !wxGetEnv(_T("WXDFB_FONTPATH"), &path) )
         path = _T(wxINSTALL_PREFIX "/share/wx/fonts");
 
     wxStringTokenizer tkn(path, wxPATH_SEP);
@@ -153,14 +139,8 @@ void wxFontsManager::AddAllFonts()
     {
         wxString dir = tkn.GetNextToken();
 
-        if ( !wxDir::Exists(dir) )
-        {
-            wxLogDebug("font directory %s doesn't exist", dir);
-            continue;
-        }
-
         wxArrayString indexFiles;
-        if ( !wxDir::GetAllFiles(dir, &indexFiles, "FontsIndex") )
+        if ( !wxDir::GetAllFiles(dir, &indexFiles, _T("FontsIndex")) )
             continue;
 
         for ( wxArrayString::const_iterator i = indexFiles.begin();
@@ -172,23 +152,8 @@ void wxFontsManager::AddAllFonts()
 
     if ( GetBundles().empty() )
     {
-        // We can fall back to the builtin default font if no other fonts are
-        // defined:
-        wxLogTrace("font",
-                   _("no fonts found in %s, using builtin font"), path);
-
-        AddBundle
-        (
-          new wxFontBundle
-              (
-                _("Default font"),
-                BUILTIN_DFB_FONT_FILENAME,
-                wxEmptyString,
-                wxEmptyString,
-                wxEmptyString,
-                false // IsFixed
-              )
-        );
+        // wxDFB is unusable without fonts, so terminate the app
+        wxLogFatalError(_("No fonts found in %s."), path.c_str());
     }
 }
 
@@ -204,7 +169,7 @@ void wxFontsManager::AddFontsFromDir(const wxString& indexFile)
         return;
     }
 
-    wxLogTrace("font", "adding fonts from %s", dir.c_str());
+    wxLogTrace(_T("font"), _T("adding fonts from %s"), dir.c_str());
 
     wxFileConfig cfg(wxEmptyString, wxEmptyString,
                      indexFile, wxEmptyString,
@@ -231,27 +196,27 @@ ReadFilePath(const wxString& name, const wxString& dir, wxFileConfig& cfg)
     if ( p.empty() || wxFileName(p).IsAbsolute() )
         return p;
 
-    return dir + "/" + p;
+    return dir + _T("/") + p;
 }
 
 void wxFontsManager::AddFont(const wxString& dir,
                              const wxString& name,
                              wxFileConfig& cfg)
 {
-    wxLogTrace("font", "adding font '%s'", name.c_str());
+    wxLogTrace(_T("font"), _T("adding font '%s'"), name.c_str());
 
-    wxConfigPathChanger ch(&cfg, wxString::Format("/%s/", name.c_str()));
+    wxConfigPathChanger ch(&cfg, wxString::Format(_T("/%s/"), name.c_str()));
 
     AddBundle
     (
       new wxFontBundle
           (
             name,
-            ReadFilePath("Regular", dir, cfg),
-            ReadFilePath("Italic", dir, cfg),
-            ReadFilePath("Bold", dir, cfg),
-            ReadFilePath("BoldItalic", dir, cfg),
-            cfg.Read("IsFixed", (long)false)
+            ReadFilePath(_T("Regular"), dir, cfg),
+            ReadFilePath(_T("Italic"), dir, cfg),
+            ReadFilePath(_T("Bold"), dir, cfg),
+            ReadFilePath(_T("BoldItalic"), dir, cfg),
+            cfg.Read(_T("IsFixed"), (long)false)
           )
     );
 }
@@ -260,7 +225,7 @@ void wxFontsManager::SetDefaultFonts(wxFileConfig& cfg)
 {
     wxString name;
 
-    if ( cfg.Read("Default", &name) )
+    if ( cfg.Read(_T("Default"), &name) )
     {
         m_defaultFacenames[wxFONTFAMILY_DECORATIVE] =
         m_defaultFacenames[wxFONTFAMILY_ROMAN] =
@@ -270,16 +235,16 @@ void wxFontsManager::SetDefaultFonts(wxFileConfig& cfg)
         m_defaultFacenames[wxFONTFAMILY_TELETYPE] = name;
     }
 
-    if ( cfg.Read("DefaultDecorative", &name) )
+    if ( cfg.Read(_T("DefaultDecorative"), &name) )
         m_defaultFacenames[wxFONTFAMILY_DECORATIVE] = name;
-    if ( cfg.Read("DefaultRoman", &name) )
+    if ( cfg.Read(_T("DefaultRoman"), &name) )
         m_defaultFacenames[wxFONTFAMILY_ROMAN] = name;
-    if ( cfg.Read("DefaultScript", &name) )
+    if ( cfg.Read(_T("DefaultScript"), &name) )
         m_defaultFacenames[wxFONTFAMILY_SCRIPT] = name;
-    if ( cfg.Read("DefaultSwiss", &name) )
+    if ( cfg.Read(_T("DefaultSwiss"), &name) )
         m_defaultFacenames[wxFONTFAMILY_SWISS] = name;
-    if ( cfg.Read("DefaultModern", &name) )
+    if ( cfg.Read(_T("DefaultModern"), &name) )
         m_defaultFacenames[wxFONTFAMILY_MODERN] = name;
-    if ( cfg.Read("DefaultTeletype", &name) )
+    if ( cfg.Read(_T("DefaultTeletype"), &name) )
         m_defaultFacenames[wxFONTFAMILY_TELETYPE] = name;
 }

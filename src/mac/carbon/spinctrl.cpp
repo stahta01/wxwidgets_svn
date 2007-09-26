@@ -202,7 +202,7 @@ void wxSpinCtrl::Init()
 {
     m_text = NULL;
     m_btn = NULL;
-    WX_INIT_CONTROL_CONTAINER();
+    m_container.SetContainerWindow(this);
 }
 
 bool wxSpinCtrl::Create(wxWindow *parent,

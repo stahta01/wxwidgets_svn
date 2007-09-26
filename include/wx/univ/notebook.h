@@ -14,7 +14,7 @@
 
 #include "wx/arrstr.h"
 
-class WXDLLIMPEXP_FWD_CORE wxSpinButton;
+class WXDLLEXPORT wxSpinButton;
 
 // ----------------------------------------------------------------------------
 // the actions supported by this control

@@ -30,27 +30,27 @@
 
 #include "wx/renderer.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxCheckListBox;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxCheckListBox;
 
 #if wxUSE_LISTBOX
-    class WXDLLIMPEXP_FWD_CORE wxListBox;
+    class WXDLLEXPORT wxListBox;
 #endif // wxUSE_LISTBOX
 
 #if wxUSE_MENUS
-   class WXDLLIMPEXP_FWD_CORE wxMenu;
-   class WXDLLIMPEXP_FWD_CORE wxMenuGeometryInfo;
+   class WXDLLEXPORT wxMenu;
+   class WXDLLEXPORT wxMenuGeometryInfo;
 #endif // wxUSE_MENUS
 
-class WXDLLIMPEXP_FWD_CORE wxScrollBar;
+class WXDLLEXPORT wxScrollBar;
 
 #if wxUSE_TEXTCTRL
-    class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+    class WXDLLEXPORT wxTextCtrl;
 #endif
 
 #if wxUSE_GAUGE
-    class WXDLLIMPEXP_FWD_CORE wxGauge;
+    class WXDLLEXPORT wxGauge;
 #endif // wxUSE_GAUGE
 
 #include "wx/string.h"
@@ -89,6 +89,12 @@ public:
                                    const wxColour& col,
                                    const wxRect& rect,
                                    int flags) = 0;
+
+
+    // draw the focus rectangle around the label contained in the given rect
+    //
+    // only wxCONTROL_SELECTED makes sense in flags here
+    virtual void DrawFocusRect(wxDC& dc, const wxRect& rect, int flags = 0) = 0;
 
     // draw the label inside the given rectangle with the specified alignment
     // and optionally emphasize the character with the given index
@@ -509,8 +515,8 @@ public:
                                    const wxRect& rect,
                                    int flags)
         { m_renderer->DrawButtonSurface(dc, col, rect, flags); }
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0)
-        { m_renderer->DrawFocusRect(win, dc, rect, flags); }
+    virtual void DrawFocusRect(wxDC& dc, const wxRect& rect, int flags = 0)
+        { m_renderer->DrawFocusRect(dc, rect, flags); }
     virtual void DrawLabel(wxDC& dc,
                            const wxString& label,
                            const wxRect& rect,

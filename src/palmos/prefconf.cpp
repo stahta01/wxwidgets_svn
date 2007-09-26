@@ -82,7 +82,6 @@ know structures of Preferences of other non wxW applications.
 // ----------------------------------------------------------------------------
 // ctor/dtor
 // ----------------------------------------------------------------------------
-IMPLEMENT_ABSTRACT_CLASS(wxPrefConfig, wxConfigBase)
 
 wxPrefConfig::wxPrefConfig(const wxString& appName, const wxString& vendorName,
                            const wxString& strLocal, const wxString& strGlobal,
@@ -178,12 +177,6 @@ bool wxPrefConfig::DoReadLong(const wxString& key, long *plResult) const
     return false;
 }
 
-bool DoReadBinary(const wxString& key, wxMemoryBuffer *buf) const
-{
-    /* TODO */
-    return false;
-}
-
 bool wxPrefConfig::DoWriteString(const wxString& key, const wxString& szValue)
 {
     /* TODO */
@@ -191,12 +184,6 @@ bool wxPrefConfig::DoWriteString(const wxString& key, const wxString& szValue)
 }
 
 bool wxPrefConfig::DoWriteLong(const wxString& key, long lValue)
-{
-    /* TODO */
-    return false;
-}
-
-bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf)
 {
     /* TODO */
     return false;

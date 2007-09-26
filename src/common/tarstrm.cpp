@@ -28,10 +28,12 @@
 #include "wx/datetime.h"
 #include "wx/ptr_scpd.h"
 #include "wx/filename.h"
+#include "wx/thread.h"
 
 #include <ctype.h>
 
 #ifdef __UNIX__
+#include <pwd.h>
 #include <grp.h>
 #endif
 
@@ -289,10 +291,7 @@ bool wxTarHeaderBlock::SetPath(const wxString& name, wxMBConv& conv)
         size_t len = name.length();
         wxCharBuffer approx(len);
         for (size_t i = 0; i < len; i++)
-        {
-            wxChar c = name[i];
-            approx.data()[i] = c & ~0x7F ? '_' : c;
-        }
+            approx.data()[i] = name[i] & ~0x7F ? '_' : name[i];
         nameBuf = approx;
     }
 
@@ -344,32 +343,99 @@ static wxFileOffset RoundUpSize(wxFileOffset size, int factor = 1)
     return ((size + chunk - 1) / chunk) * chunk;
 }
 
-static wxString GroupName()
-{
 #ifdef __UNIX__
-    group *gr;
-    if ((gr = getgrgid(getgid())) != NULL)
-        return wxString(gr->gr_name, wxConvLibc);
+
+static wxString wxTarUserName(int uid)
+{
+    struct passwd *ppw;
+
+#ifdef HAVE_GETPWUID_R
+#if defined HAVE_SYSCONF && defined _SC_GETPW_R_SIZE_MAX
+    long pwsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+    size_t bufsize(wxMin(wxMax(1024l, pwsize), 32768l));
+#else
+    size_t bufsize = 1024;
+#endif
+    wxCharBuffer buf(bufsize);
+    struct passwd pw;
+
+    if (getpwuid_r(uid, &pw, buf.data(), bufsize, &ppw) == 0)
+        return wxString(ppw->pw_name, wxConvLibc);
+#else
+    if ((ppw = getpwuid(uid)) != NULL)
+        return wxString(ppw->pw_name, wxConvLibc);
 #endif
     return _("unknown");
 }
 
-static inline int UserId()
+static wxString wxTarGroupName(int gid)
 {
-#ifdef __UNIX__
-    return getuid();
+    struct group *pgr;
+#ifdef HAVE_GETGRGID_R
+#if defined HAVE_SYSCONF && defined _SC_GETGR_R_SIZE_MAX
+    long grsize = sysconf(_SC_GETGR_R_SIZE_MAX);
+    size_t bufsize(wxMin(wxMax(1024l, grsize), 32768l));
 #else
-    return 0;
+    size_t bufsize = 1024;
 #endif
+    wxCharBuffer buf(bufsize);
+    struct group gr;
+
+    if (getgrgid_r(gid, &gr, buf.data(), bufsize, &pgr) == 0)
+        return wxString(pgr->gr_name, wxConvLibc);
+#else
+    if ((pgr = getgrgid(gid)) != NULL)
+        return wxString(pgr->gr_name, wxConvLibc);
+#endif
+    return _("unknown");
 }
 
-static inline int GroupId()
+#endif  // __UNIX__
+
+// Cache the user and group names since getting them can be expensive,
+// get both names and ids at the same time.
+//
+struct wxTarUser
+{
+    wxTarUser();
+    ~wxTarUser() { delete [] uname; delete [] gname; }
+
+    int uid;
+    int gid;
+
+    wxChar *uname;
+    wxChar *gname;
+};
+
+wxTarUser::wxTarUser()
 {
 #ifdef __UNIX__
-    return getgid();
+    uid = getuid();
+    gid = getgid();
+    wxString usr = wxTarUserName(uid);
+    wxString grp = wxTarGroupName(gid);
 #else
-    return 0;
+    uid = 0;
+    gid = 0;
+    wxString usr = wxGetUserId();
+    wxString grp = _("unknown");
 #endif
+
+    uname = new wxChar[usr.length() + 1];
+    wxStrcpy(uname, usr.c_str());
+
+    gname = new wxChar[grp.length() + 1];
+    wxStrcpy(gname, grp.c_str());
+}
+
+static const wxTarUser& wxGetTarUser()
+{
+#if wxUSE_THREADS
+    static wxCriticalSection cs;
+    wxCriticalSectionLocker lock(cs);
+#endif
+    static wxTarUser tu;
+    return tu;
 }
 
 // ignore the size field for entry types 3, 4, 5 and 6
@@ -397,14 +463,14 @@ wxTarEntry::wxTarEntry(const wxString& name /*=wxEmptyString*/,
                        wxFileOffset size    /*=0*/)
   : m_Mode(0644),
     m_IsModeSet(false),
-    m_UserId(UserId()),
-    m_GroupId(GroupId()),
+    m_UserId(wxGetTarUser().uid),
+    m_GroupId(wxGetTarUser().gid),
     m_Size(size),
     m_Offset(wxInvalidOffset),
     m_ModifyTime(dt),
     m_TypeFlag(wxTAR_REGTYPE),
-    m_UserName(wxGetUserId()),
-    m_GroupName(GroupName()),
+    m_UserName(wxGetTarUser().uname),
+    m_GroupName(wxGetTarUser().gname),
     m_DevMajor(~0),
     m_DevMinor(~0)
 {
@@ -829,8 +895,8 @@ wxTarNumber wxTarInputStream::GetHeaderNumber(int id) const
 
     if ((value = GetExtendedHeader(m_hdr->Name(id))) != wxEmptyString) {
         wxTarNumber n = 0;
-        wxString::const_iterator p = value.begin();
-        while (*p == ' ' && p != value.end())
+        const wxChar *p = value;
+        while (*p == ' ')
             p++;
         while (isdigit(*p))
             n = n * 10 + (*p++ - '0');
@@ -1268,7 +1334,7 @@ wxString wxTarOutputStream::PaxHeaderPath(const wxString& format,
         if (end == wxString::npos || end + 1 >= format.length())
             break;
         ret << format.substr(begin, end - begin);
-        switch ( format[end + 1].GetValue() ) {
+        switch (format[end + 1]) {
             case 'd': ret << d; break;
             case 'f': ret << f; break;
             case 'p': ret << wxGetProcessId(); break;
@@ -1362,16 +1428,11 @@ void wxTarOutputStream::SetExtendedHeader(const wxString& key,
                                           const wxString& value)
 {
     if (m_pax) {
-#if wxUSE_UNICODE
-        const wxCharBuffer utf_key = key.utf8_str();
-        const wxCharBuffer utf_value = value.utf8_str();
-#else
         const wxWX2WCbuf wide_key = key.wc_str(GetConv());
         const wxCharBuffer utf_key = wxConvUTF8.cWC2MB(wide_key);
 
         const wxWX2WCbuf wide_value = value.wc_str(GetConv());
         const wxCharBuffer utf_value = wxConvUTF8.cWC2MB(wide_value);
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
         // a small buffer to format the length field in
         char buf[32];

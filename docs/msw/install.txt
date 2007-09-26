@@ -303,27 +303,10 @@ recompile wxWidgets. The same applies if compiling using the IDE.
 Note (3): If you wish debug messages to be sent to the console in
 debug mode, edit makefile.bcc and change /aa to /Tpe in link commands.
 
-Using the Debugger and IDE in BDS or Turbo Explorer
----------------------------------------------------
-
-
-Doubleclick / open samples\minimal\borland.bdsproj. The current version 
-is to be used with a dynamic build of wxWidgets-made by running
-make -f Makefile.bcc -DBUILD=debug -DSHARED=1
-in wxWidgets\build\msw. You also need the wxWidgets\lib\bcc_dll
-directory in your PATH. The debugger tracks your source and aslo
-travces into the wxWidgets sources.
-
-To use this to debug other samples, copy the borland_ide.cpp
-and borland.bdsproj files, then replace all occurences of
-"minimal" with the name of the new project files
-
-Compilation succeeds with CBuilderX personal edition and CBuilder6, but 
+Cmpilation succeeds with CBuilderX personal edition and CBuilder6, but 
 you may have to copy make.exe from the 5.5 download to the new bin directory.
-
 Compiling using the IDE files for Borland C++ 5.0 and using CBuilder IDE 
 (v1-v6): not supported 
-
 
 
 ** REMEMBER **
@@ -702,9 +685,9 @@ SHARED=1
   Build shared libraries (DLLs). By default, DLLs are not built
   (SHARED=0).
 
-UNICODE=0
-  To build ANSI versions of the libraries, add UNICODE=0 to make invocation
-  (default is UNICODE=1). If you want to be able to use Unicode version on
+UNICODE=1
+  To build Unicode versions of the libraries, add UNICODE=1 to make invocation
+  (default is UNICODE=0). If you want to be able to use Unicode version on
   Windows9x, you will need to set MSLU=1 as well.
 
   This option affect name of the library ('u' is appended) and the directory
@@ -778,31 +761,19 @@ DEBUG_INFO=1
   Same as DEBUG_FLAG in behaviour, this option affects whether debugging
   information is included in the executable or not.
 
-TARGET_CPU=AMD64|IA64
-  (VC++ only.) Set this variable to build for x86_64 systems. If unset, x86
-  build is performed.
-
 VENDOR=<your company name>
   Set this to a short string identifying your company if you are planning to
   distribute wxWidgets DLLs with your application. Default value is 'custom'.
   This string is included as part of DLL name. wxWidgets DLLs contain compiler
   name, version information and vendor name in them. For example
-  wxmsw280_core_bcc_custom.dll is one of DLLs build using Borland C++ with
+  wxmsw283_core_bcc_custom.dll is one of DLLs build using Borland C++ with
   default settings. If you set VENDOR=mycorp, the name will change to
-  wxmsw280_core_bcc_mycorp.dll.
+  wxmsw283_core_bcc_mycorp.dll.
 
 CFG=<configuration name>
   Sets configuration name so that you can have multiple wxWidgets builds with
   different setup.h settings coexisting in same tree. See "Object and library
   directories" below for more information.
-
-COMPILER_PREFIX=<string>
-  If you build with multiple versions of the same compiler, you can put
-  their outputs into directories like "vc6_lib", "vc8_lib" etc. instead of
-  "vc_lib" by setting this variable to e.g. "vc6". This is merely a
-  convenience variable, you can achieve the same effect (but different dir
-  names) with the CFG option.
-
 
 Compiler specific options
 ----------------------------------------------------------------

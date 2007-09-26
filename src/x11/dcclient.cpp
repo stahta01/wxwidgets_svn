@@ -41,8 +41,7 @@
 // local defines
 //-----------------------------------------------------------------------------
 
-// VZ: what is this for exactly??
-#define USE_PAINT_REGION 0
+#define USE_PAINT_REGION 1
 
 //-----------------------------------------------------------------------------
 // local data
@@ -1277,8 +1276,8 @@ bool wxWindowDC::DoBlit( wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord he
     if (!m_window) return false;
 
     // transform the source DC coords to the device ones
-    xsrc = source->LogicalToDeviceX(xsrc);
-    ysrc = source->LogicalToDeviceY(ysrc);
+    xsrc = source->XLOG2DEV(xsrc);
+    ysrc = source->YLOG2DEV(ysrc);
 
     wxClientDC *srcDC = (wxClientDC*)source;
     wxMemoryDC *memDC = (wxMemoryDC*)source;
@@ -1564,7 +1563,7 @@ void wxWindowDC::DoDrawText( const wxString &text, wxCoord x, wxCoord y )
         slen = strlen(text);
         XCharStruct overall_return;
 
-        (void)XTextExtents(xfont, (const char*) text.c_str(), slen, &direction,
+        (void)XTextExtents(xfont, (char*) text.c_str(), slen, &direction,
                                  &ascent, &descent, &overall_return);
 
         cx = overall_return.width;
@@ -1613,7 +1612,7 @@ void wxWindowDC::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord y, 
 
 void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoord *height,
                                 wxCoord *descent, wxCoord *externalLeading,
-                                const wxFont *font ) const
+                                wxFont *font ) const
 {
     wxCHECK_RET( Ok(), wxT("invalid dc") );
 
@@ -1662,7 +1661,7 @@ void wxWindowDC::DoGetTextExtent( const wxString &string, wxCoord *width, wxCoor
     int direction, ascent, descent2;
     XCharStruct overall;
 
-    XTextExtents( xfont, (const char*) string.c_str(), string.length(), &direction,
+    XTextExtents( xfont, (char*) string.c_str(), string.length(), &direction,
         &ascent, &descent2, &overall);
 
     if (width)
@@ -2172,13 +2171,13 @@ void wxWindowDC::DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoo
     rect.width = XLOG2DEVREL(width);
     rect.height = YLOG2DEVREL(height);
 
-    if (!m_currentClippingRegion.IsEmpty())
+    if (!m_currentClippingRegion.IsNull())
         m_currentClippingRegion.Intersect( rect );
     else
-        m_currentClippingRegion = rect;
+        m_currentClippingRegion.Union( rect );
 
 #if USE_PAINT_REGION
-    if (!m_paintClippingRegion.IsEmpty())
+    if (!m_paintClippingRegion.IsNull())
         m_currentClippingRegion.Intersect( m_paintClippingRegion );
 #endif
 
@@ -2204,13 +2203,13 @@ void wxWindowDC::DoSetClippingRegionAsRegion( const wxRegion& region )
 
     if (!m_window) return;
 
-    if (!m_currentClippingRegion.IsEmpty())
+    if (!m_currentClippingRegion.IsNull())
         m_currentClippingRegion.Intersect( region );
     else
-        m_currentClippingRegion = region;
+        m_currentClippingRegion.Union( region );
 
 #if USE_PAINT_REGION
-    if (!m_paintClippingRegion.IsEmpty())
+    if (!m_paintClippingRegion.IsNull())
         m_currentClippingRegion.Intersect( m_paintClippingRegion );
 #endif
 

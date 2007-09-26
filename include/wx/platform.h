@@ -20,15 +20,7 @@
     are included
 */
 #ifdef __MWERKS__
-#   include <stddef.h>
-#endif
-
-/*
-    This header must be included before anything else under VMS
- */
-#ifdef __VMS
-#   include <vms_jackets.h>
-#   undef ConnectionNumber
+#    include <stddef.h>
 #endif
 
 /*
@@ -281,6 +273,43 @@
 #endif
 
 /*
+   check the consistency of the settings in setup.h: note that this must be
+   done after setting wxUSE_UNICODE correctly as it is used in wx/chkconf.h
+ */
+#include "wx/chkconf.h"
+
+
+/*
+   some compilers don't support iostream.h any longer, while some of theme
+   are not updated with <iostream> yet, so override the users setting here
+   in such case.
+ */
+#if defined(_MSC_VER) && (_MSC_VER >= 1310)
+#    undef wxUSE_IOSTREAMH
+#    define wxUSE_IOSTREAMH 0
+#elif defined(__DMC__) || defined(__WATCOMC__)
+#    undef wxUSE_IOSTREAMH
+#    define wxUSE_IOSTREAMH 1
+#elif defined(__MINGW32__)
+#    undef wxUSE_IOSTREAMH
+#    define wxUSE_IOSTREAMH 0
+#endif /* compilers with/without iostream.h */
+
+/*
+   old C++ headers (like <iostream.h>) declare classes in the global namespace
+   while the new, standard ones (like <iostream>) do it in std:: namespace,
+   unless it's an old gcc version.
+
+   using this macro allows constuctions like "wxSTD iostream" to work in
+   either case
+ */
+#if !wxUSE_IOSTREAMH && (!defined(__GNUC__) || ( __GNUC__ > 2 ) || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+#    define wxSTD std::
+#else
+#    define wxSTD
+#endif
+
+/*
    OS: first of all, test for MS-DOS platform. We must do this before testing
        for Unix, because DJGPP compiler defines __unix__ under MS-DOS
  */
@@ -328,11 +357,13 @@
 #       endif
 #    endif  /* SGI */
 
-#    if defined(__SUNPRO_CC)
-#       ifndef __SUNCC__
-#           define __SUNCC__ __SUNPRO_CC
-#       endif /* Sun CC */
-#    endif /* Sun CC */
+#    if defined(sun) || defined(__SUN__)
+#        ifndef __GNUG__
+#            ifndef __SUNCC__
+#                define __SUNCC__
+#            endif /* Sun CC */
+#        endif
+#    endif /* Sun */
 
 #    ifdef __EMX__
 #        define OS2EMX_PLAIN_CHAR
@@ -527,18 +558,6 @@
 #    define wxCHECK_W32API_VERSION(maj, min) (0)
 #endif
 
-/**
-    This is similar to wxCHECK_GCC_VERSION but for Sun CC compiler.
- */
-#ifdef __SUNCC__
-    /*
-       __SUNCC__ is 0xVRP where V is major version, R release and P patch level
-     */
-    #define wxCHECK_SUNCC_VERSION(maj, min) (__SUNCC__ >= (((maj)<<8) | ((min)<<4)))
-#else
-    #define wxCHECK_SUNCC_VERSION(maj, min) (0)
-#endif
-
 #if defined (__WXMSW__)
 #    if !defined(__WATCOMC__)
 #        define wxHAVE_RAW_BITMAP
@@ -551,44 +570,6 @@
 #    else
 #        undef WORDS_BIGENDIAN
 #    endif
-#endif
-
-/*
-   check the consistency of the settings in setup.h: note that this must be
-   done after setting wxUSE_UNICODE correctly as it is used in wx/chkconf.h
-   and after defining the compiler macros which are used in it too
- */
-#include "wx/chkconf.h"
-
-
-/*
-   some compilers don't support iostream.h any longer, while some of theme
-   are not updated with <iostream> yet, so override the users setting here
-   in such case.
- */
-#if defined(_MSC_VER) && (_MSC_VER >= 1310)
-#    undef wxUSE_IOSTREAMH
-#    define wxUSE_IOSTREAMH 0
-#elif defined(__DMC__) || defined(__WATCOMC__)
-#    undef wxUSE_IOSTREAMH
-#    define wxUSE_IOSTREAMH 1
-#elif defined(__MINGW32__)
-#    undef wxUSE_IOSTREAMH
-#    define wxUSE_IOSTREAMH 0
-#endif /* compilers with/without iostream.h */
-
-/*
-   old C++ headers (like <iostream.h>) declare classes in the global namespace
-   while the new, standard ones (like <iostream>) do it in std:: namespace,
-   unless it's an old gcc version.
-
-   using this macro allows constuctions like "wxSTD iostream" to work in
-   either case
- */
-#if !wxUSE_IOSTREAMH && (!defined(__GNUC__) || ( __GNUC__ > 2 ) || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
-#    define wxSTD std::
-#else
-#    define wxSTD
 #endif
 
 /* Choose which method we will use for updating menus

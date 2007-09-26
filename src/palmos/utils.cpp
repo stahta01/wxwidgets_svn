@@ -90,7 +90,7 @@ bool wxGetUserName(wxChar *buf, int maxSize)
         return false;
     }
 
-    wxStrncpy (buf, wxSafeConvertMB2WX(id), maxSize - 1);
+    wxStrncpy (buf, wxConvertMB2WX(id), maxSize - 1);
 
     // free the buffer
     MemPtrUnlock(id);
@@ -123,11 +123,6 @@ bool wxGetEnv(const wxString& var, wxString *value)
 }
 
 bool wxSetEnv(const wxString& var, const wxChar *value)
-{
-    return false;
-}
-
-bool wxUnsetEnv(const wxString& var)
 {
     return false;
 }

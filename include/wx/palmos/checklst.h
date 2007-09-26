@@ -16,8 +16,8 @@
   #error  "wxCheckListBox class requires owner-drawn functionality."
 #endif
 
-class WXDLLIMPEXP_FWD_CORE wxOwnerDrawn;
-class WXDLLIMPEXP_FWD_CORE wxCheckListBoxItem; // fwd decl, defined in checklst.cpp
+class WXDLLEXPORT wxOwnerDrawn;
+class WXDLLEXPORT wxCheckListBoxItem; // fwd decl, defined in checklst.cpp
 
 class WXDLLEXPORT wxCheckListBox : public wxCheckListBoxBase
 {

@@ -17,8 +17,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TASKBARICON
-
 #ifndef WX_PRECOMP
     #include "wx/window.h"
     #include "wx/frame.h"
@@ -26,15 +24,32 @@
     #include "wx/menu.h"
 #endif
 
-#include "wx/msw/wrapshl.h"
+#include "wx/msw/private.h"
+#include "wx/msw/winundef.h"
 
 #include <string.h>
 #include "wx/taskbar.h"
-#include "wx/dynlib.h"
+
+#ifdef __WXWINCE__
+    #include <winreg.h>
+    #include <shellapi.h>
+#endif
 
 // initialized on demand
-static UINT gs_msgTaskbar = 0;
-static UINT gs_msgRestartTaskbar = 0;
+UINT   gs_msgTaskbar = 0;
+UINT   gs_msgRestartTaskbar = 0;
+
+#if WXWIN_COMPATIBILITY_2_4
+BEGIN_EVENT_TABLE(wxTaskBarIcon, wxTaskBarIconBase)
+    EVT_TASKBAR_MOVE         (wxTaskBarIcon::_OnMouseMove)
+    EVT_TASKBAR_LEFT_DOWN    (wxTaskBarIcon::_OnLButtonDown)
+    EVT_TASKBAR_LEFT_UP      (wxTaskBarIcon::_OnLButtonUp)
+    EVT_TASKBAR_RIGHT_DOWN   (wxTaskBarIcon::_OnRButtonDown)
+    EVT_TASKBAR_RIGHT_UP     (wxTaskBarIcon::_OnRButtonUp)
+    EVT_TASKBAR_LEFT_DCLICK  (wxTaskBarIcon::_OnLButtonDClick)
+    EVT_TASKBAR_RIGHT_DCLICK (wxTaskBarIcon::_OnRButtonDClick)
+END_EVENT_TABLE()
+#endif
 
 
 IMPLEMENT_DYNAMIC_CLASS(wxTaskBarIcon, wxEvtHandler)
@@ -42,38 +57,6 @@ IMPLEMENT_DYNAMIC_CLASS(wxTaskBarIcon, wxEvtHandler)
 // ============================================================================
 // implementation
 // ============================================================================
-
-// wrapper around Shell_NotifyIcon(): this function is not present in Win95
-// shell32.dll so load it dynamically to allow programs using wxTaskBarIcon to
-// start under this OS
-static BOOL wxShellNotifyIcon(DWORD dwMessage, NOTIFYICONDATA *pData)
-{
-#if wxUSE_DYNLIB_CLASS
-    typedef BOOL (WINAPI *Shell_NotifyIcon_t)(DWORD, NOTIFYICONDATA *);
-
-    static Shell_NotifyIcon_t s_pfnShell_NotifyIcon = NULL;
-    static bool s_initialized = false;
-    if ( !s_initialized )
-    {
-        s_initialized = true;
-
-        wxLogNull noLog;
-        wxDynamicLibrary dllShell("shell32.dll");
-        if ( dllShell.IsLoaded() )
-        {
-            wxDL_INIT_FUNC_AW(s_pfn, Shell_NotifyIcon, dllShell);
-        }
-
-        // NB: it's ok to destroy dllShell here, we link to shell32.dll
-        //     implicitly so it won't be unloaded
-    }
-
-    return s_pfnShell_NotifyIcon ? (*s_pfnShell_NotifyIcon)(dwMessage, pData)
-                                 : FALSE;
-#else // !wxUSE_DYNLIB_CLASS
-    return Shell_NotifyIcon(dwMessage, pData);
-#endif // wxUSE_DYNLIB_CLASS/!wxUSE_DYNLIB_CLASS
-}
 
 // ----------------------------------------------------------------------------
 // wxTaskBarIconWindow: helper window
@@ -180,8 +163,8 @@ bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
         wxStrncpy(notifyData.szTip, tooltip.c_str(), WXSIZEOF(notifyData.szTip));
     }
 
-    bool ok = wxShellNotifyIcon(m_iconAdded ? NIM_MODIFY
-                                            : NIM_ADD, &notifyData) != 0;
+    bool ok = Shell_NotifyIcon(m_iconAdded ? NIM_MODIFY
+                                           : NIM_ADD, &notifyData) != 0;
 
     if ( !m_iconAdded && ok )
         m_iconAdded = true;
@@ -198,10 +181,9 @@ bool wxTaskBarIcon::RemoveIcon()
 
     NotifyIconData notifyData(GetHwndOf(m_win));
 
-    return wxShellNotifyIcon(NIM_DELETE, &notifyData) != 0;
+    return Shell_NotifyIcon(NIM_DELETE, &notifyData) != 0;
 }
 
-#if wxUSE_MENUS
 bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
 {
     wxASSERT_MSG( m_win != NULL, _T("taskbar icon not initialized") );
@@ -237,7 +219,32 @@ bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
 
     return rval;
 }
-#endif // wxUSE_MENUS
+
+#if WXWIN_COMPATIBILITY_2_4
+// Overridables
+void wxTaskBarIcon::OnMouseMove(wxEvent& e)         { e.Skip(); }
+void wxTaskBarIcon::OnLButtonDown(wxEvent& e)       { e.Skip(); }
+void wxTaskBarIcon::OnLButtonUp(wxEvent& e)         { e.Skip(); }
+void wxTaskBarIcon::OnRButtonDown(wxEvent& e)       { e.Skip(); }
+void wxTaskBarIcon::OnRButtonUp(wxEvent& e)         { e.Skip(); }
+void wxTaskBarIcon::OnLButtonDClick(wxEvent& e)     { e.Skip(); }
+void wxTaskBarIcon::OnRButtonDClick(wxEvent& e)     { e.Skip(); }
+
+void wxTaskBarIcon::_OnMouseMove(wxTaskBarIconEvent& e)
+    { OnMouseMove(e);     }
+void wxTaskBarIcon::_OnLButtonDown(wxTaskBarIconEvent& e)
+    { OnLButtonDown(e);   }
+void wxTaskBarIcon::_OnLButtonUp(wxTaskBarIconEvent& e)
+    { OnLButtonUp(e);     }
+void wxTaskBarIcon::_OnRButtonDown(wxTaskBarIconEvent& e)
+    { OnRButtonDown(e);   }
+void wxTaskBarIcon::_OnRButtonUp(wxTaskBarIconEvent& e)
+    { OnRButtonUp(e);     }
+void wxTaskBarIcon::_OnLButtonDClick(wxTaskBarIconEvent& e)
+    { OnLButtonDClick(e); }
+void wxTaskBarIcon::_OnRButtonDClick(wxTaskBarIconEvent& e)
+    { OnRButtonDClick(e); }
+#endif
 
 void wxTaskBarIcon::RegisterWindowMessages()
 {
@@ -317,6 +324,3 @@ long wxTaskBarIcon::WindowProc(unsigned int msg,
 
     return 0;
 }
-
-#endif // wxUSE_TASKBARICON
-

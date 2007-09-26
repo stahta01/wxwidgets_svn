@@ -24,15 +24,15 @@
     #include "wx/print.h"
 #endif
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxDocument;
-class WXDLLIMPEXP_FWD_CORE wxView;
-class WXDLLIMPEXP_FWD_CORE wxDocTemplate;
-class WXDLLIMPEXP_FWD_CORE wxDocManager;
-class WXDLLIMPEXP_FWD_CORE wxPrintInfo;
-class WXDLLIMPEXP_FWD_CORE wxCommandProcessor;
-class WXDLLIMPEXP_FWD_CORE wxFileHistory;
-class WXDLLIMPEXP_FWD_CORE wxConfigBase;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxDocument;
+class WXDLLEXPORT wxView;
+class WXDLLEXPORT wxDocTemplate;
+class WXDLLEXPORT wxDocManager;
+class WXDLLEXPORT wxPrintInfo;
+class WXDLLEXPORT wxCommandProcessor;
+class WXDLLEXPORT wxFileHistory;
+class WXDLLEXPORT wxConfigBase;
 
 #if wxUSE_STD_IOSTREAM
   #include "wx/iosfwrap.h"
@@ -140,17 +140,22 @@ public:
     virtual wxDocTemplate *GetDocumentTemplate() const { return m_documentTemplate; }
     virtual void SetDocumentTemplate(wxDocTemplate *temp) { m_documentTemplate = temp; }
 
-    // Get the document name to be shown to the user: the title if there is
-    // any, otherwise the filename if the document was saved and, finally,
-    // "unnamed" otherwise
-    virtual wxString GetUserReadableName() const;
+    // Get title, or filename if no title, else [unnamed]
+    //
+    // NB: this method will be deprecated in wxWidgets 3.0, you still need to
+    //     override it if you need to modify the existing behaviour in this
+    //     version but use GetUserReadableName() below if you just need to call
+    //     it
+    virtual bool GetPrintableName(wxString& buf) const;
 
-#if WXWIN_COMPATIBILITY_2_8
-    // use GetUserReadableName() instead
-    wxDEPRECATED_BUT_USED_INTERNALLY(
-        virtual bool GetPrintableName(wxString& buf) const
-    );
-#endif // WXWIN_COMPATIBILITY_2_8
+#if wxABI_VERSION >= 20805
+    wxString GetUserReadableName() const
+    {
+        wxString s;
+        GetPrintableName(s);
+        return s;
+    }
+#endif // wxABI 2.8.5+
 
     // Returns a window that can be used as a parent for document-related
     // dialogs. Override if necessary.
@@ -172,9 +177,6 @@ protected:
     // behavior.
     virtual bool DoSaveDocument(const wxString& file);
     virtual bool DoOpenDocument(const wxString& file);
-
-    // the default implementation of GetUserReadableName()
-    wxString DoGetUserReadableName() const;
 
 private:
     DECLARE_ABSTRACT_CLASS(wxDocument)
@@ -244,7 +246,7 @@ private:
 class WXDLLEXPORT wxDocTemplate: public wxObject
 {
 
-friend class WXDLLIMPEXP_FWD_CORE wxDocManager;
+friend class WXDLLEXPORT wxDocManager;
 
 public:
     // Associate document and view types. They're for identifying what view is
@@ -405,9 +407,8 @@ public:
     wxList& GetDocuments() { return m_docs; }
     wxList& GetTemplates() { return m_templates; }
 
-    // Return the default name for a new document (by default returns strings
-    // in the form "unnamed <counter>" but can be overridden)
-    virtual wxString MakeNewDocumentName();
+    // Make a default document name
+    virtual bool MakeDefaultName(wxString& buf);
 
     // Make a frame title (override this to do something different)
     virtual wxString MakeFrameTitle(wxDocument* doc);
@@ -435,13 +436,6 @@ public:
 
     // Get the current document manager
     static wxDocManager* GetDocumentManager() { return sm_docManager; }
-
-#if WXWIN_COMPATIBILITY_2_8
-    // deprecated, override GetDefaultName() instead
-    wxDEPRECATED_BUT_USED_INTERNALLY(
-        virtual bool MakeDefaultName(wxString& buf)
-    );
-#endif
 
 #if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetHistoryFilesCount() instead
@@ -609,14 +603,16 @@ public:
     virtual void AddFilesToMenu(wxMenu* menu); // Single menu
 
     // Accessors
-    virtual wxString GetHistoryFile(size_t i) const { return m_fileHistory[i]; }
-    virtual size_t GetCount() const { return m_fileHistory.GetCount(); }
+    virtual wxString GetHistoryFile(size_t i) const;
+    virtual size_t GetCount() const { return m_fileHistoryN; }
 
     const wxList& GetMenus() const { return m_fileMenus; }
 
+#if wxABI_VERSION >= 20802
     // Set/get base id
     void SetBaseId(wxWindowID baseId) { m_idBase = baseId; }
     wxWindowID GetBaseId() const { return m_idBase; }
+#endif // wxABI 2.8.2+
 
 #if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetCount() instead
@@ -625,11 +621,11 @@ public:
 
 protected:
     // Last n files
-    wxArrayString     m_fileHistory;
-
+    wxChar**          m_fileHistory;
+    // Number of files saved
+    size_t            m_fileHistoryN;
     // Menus to maintain (may need several for an MDI app)
     wxList            m_fileMenus;
-
     // Max files to maintain
     size_t            m_fileMaxFiles;
 
@@ -644,7 +640,7 @@ private:
 #if WXWIN_COMPATIBILITY_2_6
 inline size_t wxFileHistory::GetNoHistoryFiles() const
 {
-    return m_fileHistory.GetCount();
+    return m_fileHistoryN;
 }
 #endif // WXWIN_COMPATIBILITY_2_6
 

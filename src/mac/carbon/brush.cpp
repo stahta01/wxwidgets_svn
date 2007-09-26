@@ -23,7 +23,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxBrush, wxGDIObject)
 
 class WXDLLEXPORT wxBrushRefData: public wxGDIRefData
 {
-    friend class wxBrush;
+    friend class WXDLLEXPORT wxBrush;
 
 public:
     wxBrushRefData();
@@ -185,7 +185,7 @@ void wxBrush::MacSetTheme(ThemeBrush macThemeBrush)
 
     RGBColor color ;
     GetThemeBrushAsColor( macThemeBrush , 32, true, &color );
-    M_BRUSHDATA->m_colour = color;
+    M_BRUSHDATA->m_colour.Set( color.red >> 8 , color.green >> 8 , color.blue >> 8 );
 
     RealizeResource();
 }

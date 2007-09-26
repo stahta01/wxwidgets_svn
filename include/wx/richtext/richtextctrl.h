@@ -27,7 +27,7 @@
 #define wxRICHTEXT_BUFFERED_PAINTING 0
 #endif
 
-class WXDLLIMPEXP_FWD_RICHTEXT wxRichTextStyleDefinition;
+class WXDLLIMPEXP_RICHTEXT wxRichTextStyleDefinition;
 
 /*!
  * Styles and flags
@@ -84,8 +84,7 @@ class WXDLLIMPEXP_FWD_RICHTEXT wxRichTextStyleDefinition;
  * wxRichTextCtrl class declaration
  */
 
-class WXDLLIMPEXP_RICHTEXT wxRichTextCtrl : public wxControl,
-                                            public wxTextCtrlIface,
+class WXDLLIMPEXP_RICHTEXT wxRichTextCtrl : public wxTextCtrlBase,
                                             public wxScrollHelper
 {
     DECLARE_CLASS( wxRichTextCtrl )

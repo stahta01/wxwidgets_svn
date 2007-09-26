@@ -55,9 +55,8 @@ public:
     bool    Updateable;                         // Specifies whether this column is updateable
     bool    InsertAllowed;                      // Specifies whether this column should be included in an INSERT statement
     bool    DerivedCol;                         // Specifies whether this column is a derived value
-    SQLLEN  CbValue;                            // Internal use only!!! For parameter bindings
+    SQLLEN  CbValue;                            // Internal use only!!!
     bool    Null;                               // NOT FULLY IMPLEMENTED - Allows NULL values in Inserts and Updates
-    SQLLEN  CbValueCol;                         // Internal use only!!! For column bindings
 
     wxDbColDef();
 
@@ -180,6 +179,14 @@ public:
     wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
               const wxString &qryTblName=wxEmptyString, bool qryOnly = !wxDB_QUERY_ONLY,
               const wxString &tblPath=wxEmptyString);
+
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED(
+        wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
+                  const wxChar *qryTblName, bool qryOnly,
+                  const wxString &tblPath)
+    );
+#endif // WXWIN_COMPATIBILITY_2_4
 
     virtual ~wxDbTable();
 

@@ -15,8 +15,8 @@
 
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxSearchButton;
-class WXDLLIMPEXP_FWD_CORE wxSearchTextCtrl;
+class WXDLLEXPORT wxSearchButton;
+class WXDLLEXPORT wxSearchTextCtrl;
 
 // ----------------------------------------------------------------------------
 // wxSearchCtrl is a combination of wxTextCtrl and wxSearchButton
@@ -62,9 +62,11 @@ public:
     virtual void ShowCancelButton( bool show );
     virtual bool IsCancelButtonVisible() const;
 
+#if wxABI_VERSION >= 20802
     // TODO: In 2.9 these should probably be virtual, and declared in the base class...
     void SetDescriptiveText(const wxString& text);
     wxString GetDescriptiveText() const;
+#endif
 
     // accessors
     // ---------
@@ -203,9 +205,7 @@ public:
 #endif // wxUSE_MENUS
 
 protected:
-    virtual void DoSetValue(const wxString& value, int flags);
-    virtual bool DoLoadFile(const wxString& file, int fileType);
-    virtual bool DoSaveFile(const wxString& file, int fileType);
+    virtual void DoSetValue(const wxString& value, int flags = 0);
 
     // override the base class virtuals involved into geometry calculations
     virtual wxSize DoGetBestSize() const;

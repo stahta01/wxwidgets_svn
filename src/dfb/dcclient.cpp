@@ -27,12 +27,11 @@
 
 #ifndef WX_PRECOMP
     #include "wx/window.h"
-    #include "wx/nonownedwnd.h"
 #endif
 
 #include "wx/dfb/private.h"
 
-#define TRACE_PAINT  "paint"
+#define TRACE_PAINT  _T("paint")
 
 // ===========================================================================
 // implementation
@@ -59,11 +58,6 @@ static wxRect GetUncoveredWindowArea(wxWindow *win)
     // coordinates; this will remove parts of 'r' that are outside of the
     // parent's area:
     wxRect rp(GetUncoveredWindowArea(parent));
-
-    // normal windows cannot extend out of its parent's client area:
-    if ( !win->CanBeOutsideClientArea() )
-        rp.Intersect(parent->GetClientRect());
-
     rp.Offset(-win->GetPosition());
     rp.Offset(-parent->GetClientAreaOrigin());
     r.Intersect(rp);
@@ -77,14 +71,9 @@ static wxRect GetUncoveredWindowArea(wxWindow *win)
 static
 wxIDirectFBSurfacePtr CreateDummySurface(wxWindow *win, const wxRect *rect)
 {
-    wxLogTrace(TRACE_PAINT, "%p ('%s'): creating dummy DC surface",
+    wxLogTrace(TRACE_PAINT, _T("%p ('%s'): creating dummy DC surface"),
                win, win->GetName().c_str());
     wxSize size(rect ? rect->GetSize() : win->GetSize());
-
-    // we can't create a surface of 0 size but the size of the window may be 0,
-    // so ensure that we have at least a single pixel to draw on
-    size.IncTo(wxSize(1, 1));
-
     return win->GetDfbSurface()->CreateCompatible
            (
              size,
@@ -105,7 +94,7 @@ wxWindowDC::wxWindowDC(wxWindow *win)
 
 void wxWindowDC::InitForWin(wxWindow *win, const wxRect *rect)
 {
-    wxCHECK_RET( win, "invalid window" );
+    wxCHECK_RET( win, _T("invalid window") );
 
     m_win = win;
 
@@ -131,7 +120,7 @@ void wxWindowDC::InitForWin(wxWindow *win, const wxRect *rect)
         if ( win->GetTLW()->IsPainting() && !updateRegion.IsEmpty() )
         {
             r.Intersect(updateRegion.AsRect());
-            wxCHECK_RET( !r.IsEmpty(), "invalid painting rectangle" );
+            wxCHECK_RET( !r.IsEmpty(), _T("invalid painting rectangle") );
 
             // parent TLW will flip the entire surface when painting is done
             m_shouldFlip = false;
@@ -184,7 +173,7 @@ void wxWindowDC::InitForWin(wxWindow *win, const wxRect *rect)
         return;
 
     wxLogTrace(TRACE_PAINT,
-               "%p ('%s'): creating DC for area [%i,%i,%i,%i], clipped to [%i,%i,%i,%i], origin [%i,%i]",
+               _T("%p ('%s'): creating DC for area [%i,%i,%i,%i], clipped to [%i,%i,%i,%i], origin [%i,%i]"),
                win, win->GetName().c_str(),
                rectOrig.x, rectOrig.y, rectOrig.GetRight(), rectOrig.GetBottom(),
                r.x, r.y, r.GetRight(), r.GetBottom(),
@@ -234,7 +223,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
 
 wxClientDC::wxClientDC(wxWindow *win)
 {
-    wxCHECK_RET( win, "invalid window" );
+    wxCHECK_RET( win, _T("invalid window") );
 
     wxRect rect = win->GetClientRect();
     InitForWin(win, &rect);

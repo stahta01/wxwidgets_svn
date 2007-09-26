@@ -129,9 +129,14 @@ wxRichTextCtrl::wxRichTextCtrl(wxWindow* parent,
 bool wxRichTextCtrl::Create( wxWindow* parent, wxWindowID id, const wxString& value, const wxPoint& pos, const wxSize& size, long style,
                              const wxValidator& validator, const wxString& name)
 {
-    if (!wxControl::Create(parent, id, pos, size,
-                           style|wxFULL_REPAINT_ON_RESIZE,
-                           validator, name))
+#ifdef __WXMSW__
+    if ((style & wxBORDER_MASK) == wxBORDER_DEFAULT)
+        style |= wxBORDER_THEME;
+#endif
+
+    if (!wxTextCtrlBase::Create(parent, id, pos, size,
+                                style|wxFULL_REPAINT_ON_RESIZE,
+                                validator, name))
         return false;
 
     if (!GetFont().Ok())
@@ -233,6 +238,7 @@ void wxRichTextCtrl::Thaw()
             LayoutContent();
         else
             SetupScrollbars();
+
         Refresh(false);
     }
 }
@@ -252,8 +258,7 @@ void wxRichTextCtrl::Clear()
         LayoutContent();
         Refresh(false);
     }
-
-    wxTextCtrl::SendTextUpdatedEvent(this);
+    SendTextUpdatedEvent();
 }
 
 /// Painting
@@ -394,39 +399,30 @@ void wxRichTextCtrl::OnLeftUp(wxMouseEvent& event)
 
         if (hit != wxRICHTEXT_HITTEST_NONE)
         {
-            wxRichTextEvent cmdEvent(
-                wxEVT_COMMAND_RICHTEXT_LEFT_CLICK,
-                GetId());
-            cmdEvent.SetEventObject(this);
-            cmdEvent.SetPosition(m_caretPosition+1);
-
-            if (!GetEventHandler()->ProcessEvent(cmdEvent))
+            wxTextAttrEx attr;
+            if (GetStyle(position, attr))
             {
-                wxTextAttrEx attr;
-                if (GetStyle(position, attr))
+                if (attr.HasFlag(wxTEXT_ATTR_URL))
                 {
-                    if (attr.HasFlag(wxTEXT_ATTR_URL))
+                    wxString urlTarget = attr.GetURL();
+                    if (!urlTarget.IsEmpty())
                     {
-                        wxString urlTarget = attr.GetURL();
-                        if (!urlTarget.IsEmpty())
+                        wxMouseEvent mouseEvent(event);
+
+                        long startPos = 0, endPos = 0;
+                        wxRichTextObject* obj = GetBuffer().GetLeafObjectAtPosition(position);
+                        if (obj)
                         {
-                            wxMouseEvent mouseEvent(event);
-
-                            long startPos = 0, endPos = 0;
-                            wxRichTextObject* obj = GetBuffer().GetLeafObjectAtPosition(position);
-                            if (obj)
-                            {
-                                startPos = obj->GetRange().GetStart();
-                                endPos = obj->GetRange().GetEnd();
-                            }
-
-                            wxTextUrlEvent urlEvent(GetId(), mouseEvent, startPos, endPos);
-                            InitCommandEvent(urlEvent);
-
-                            urlEvent.SetString(urlTarget);
-
-                            GetEventHandler()->ProcessEvent(urlEvent);
+                            startPos = obj->GetRange().GetStart();
+                            endPos = obj->GetRange().GetEnd();
                         }
+
+                        wxTextUrlEvent urlEvent(GetId(), mouseEvent, startPos, endPos);
+                        InitCommandEvent(urlEvent);
+
+                        urlEvent.SetString(urlTarget);
+
+                        GetEventHandler()->ProcessEvent(urlEvent);
                     }
                 }
             }
@@ -506,45 +502,23 @@ void wxRichTextCtrl::OnMoveMouse(wxMouseEvent& event)
 }
 
 /// Right-click
-void wxRichTextCtrl::OnRightClick(wxMouseEvent& WXUNUSED(event))
+void wxRichTextCtrl::OnRightClick(wxMouseEvent& event)
 {
     SetFocus();
-
-    wxRichTextEvent cmdEvent(
-        wxEVT_COMMAND_RICHTEXT_RIGHT_CLICK,
-        GetId());
-    cmdEvent.SetEventObject(this);
-    cmdEvent.SetPosition(m_caretPosition+1);
-
-    GetEventHandler()->ProcessEvent(cmdEvent);
+    event.Skip();
 }
 
 /// Left-double-click
-void wxRichTextCtrl::OnLeftDClick(wxMouseEvent& WXUNUSED(event))
+void wxRichTextCtrl::OnLeftDClick(wxMouseEvent& event)
 {
-    wxRichTextEvent cmdEvent(
-        wxEVT_COMMAND_RICHTEXT_LEFT_DCLICK,
-        GetId());
-    cmdEvent.SetEventObject(this);
-    cmdEvent.SetPosition(m_caretPosition+1);
-
-    if (!GetEventHandler()->ProcessEvent(cmdEvent))
-    {
-        SelectWord(GetCaretPosition()+1);
-    }
+    SelectWord(GetCaretPosition()+1);
+    event.Skip();
 }
 
 /// Middle-click
 void wxRichTextCtrl::OnMiddleClick(wxMouseEvent& event)
 {
-    wxRichTextEvent cmdEvent(
-        wxEVT_COMMAND_RICHTEXT_MIDDLE_CLICK,
-        GetId());
-    cmdEvent.SetEventObject(this);
-    cmdEvent.SetPosition(m_caretPosition+1);
-
-    if (!GetEventHandler()->ProcessEvent(cmdEvent))
-        event.Skip();
+    event.Skip();
 }
 
 /// Key press
@@ -1880,7 +1854,7 @@ bool wxRichTextCtrl::DoLoadFile(const wxString& filename, int fileType)
     PositionCaret();
     SetupScrollbars(true);
     Refresh(false);
-    wxTextCtrl::SendTextUpdatedEvent(this);
+    SendTextUpdatedEvent();
 
     if (success)
         return true;
@@ -2079,7 +2053,7 @@ void wxRichTextCtrl::DoSetValue(const wxString& value, int flags)
     {
         // still send an event for consistency
         if (flags & SetValue_SendEvent)
-            wxTextCtrl::SendTextUpdatedEvent(this);
+            SendTextUpdatedEvent();
     }
     DiscardEdits();
 }
@@ -2096,7 +2070,7 @@ void wxRichTextCtrl::DoWriteText(const wxString& value, int flags)
     GetBuffer().InsertTextWithUndo(m_caretPosition+1, valueUnix, this, wxRICHTEXT_INSERT_WITH_PREVIOUS_PARAGRAPH_STYLE);
 
     if ( flags & SetValue_SendEvent )
-        wxTextCtrl::SendTextUpdatedEvent(this);
+        SendTextUpdatedEvent();
 }
 
 void wxRichTextCtrl::AppendText(const wxString& text)

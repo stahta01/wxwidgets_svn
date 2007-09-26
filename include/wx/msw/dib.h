@@ -12,8 +12,8 @@
 #ifndef _WX_MSW_DIB_H_
 #define _WX_MSW_DIB_H_
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxPalette;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxPalette;
 
 #include "wx/msw/private.h"
 

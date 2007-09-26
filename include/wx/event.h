@@ -30,24 +30,22 @@
 // forward declarations
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_BASE wxList;
+class WXDLLIMPEXP_BASE wxList;
 
 #if wxUSE_GUI
-    class WXDLLIMPEXP_FWD_CORE wxDC;
-    class WXDLLIMPEXP_FWD_CORE wxMenu;
-    class WXDLLIMPEXP_FWD_CORE wxWindow;
-    class WXDLLIMPEXP_FWD_CORE wxWindowBase;
+    class WXDLLIMPEXP_CORE wxDC;
+    class WXDLLIMPEXP_CORE wxMenu;
+    class WXDLLIMPEXP_CORE wxWindow;
+    class WXDLLIMPEXP_CORE wxWindowBase;
 #endif // wxUSE_GUI
 
-class WXDLLIMPEXP_FWD_BASE wxEvtHandler;
+class WXDLLIMPEXP_BASE wxEvtHandler;
 
 // ----------------------------------------------------------------------------
 // Event types
 // ----------------------------------------------------------------------------
 
 typedef int wxEventType;
-
-#define wxEVT_ANY           ((wxEventType)-1)
 
 // this is used to make the event table entry type safe, so that for an event
 // handler only a function with proper parameter list can be given.
@@ -155,12 +153,9 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_TOOL_ENTER, 17)
     DECLARE_EVENT_TYPE(wxEVT_COMMAND_SPINCTRL_UPDATED, 18)
 
-    // Toolbar dropdown arrows
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, 19)
-
         // Sockets and timers send events, too
     DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_SOCKET, 50)
-    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_TIMER , 80)
+    DECLARE_EVENT_TYPE(wxEVT_TIMER , 80)
 
         // Mouse event types
     DECLARE_EVENT_TYPE(wxEVT_LEFT_DOWN, 100)
@@ -179,12 +174,6 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_KILL_FOCUS, 113)
     DECLARE_EVENT_TYPE(wxEVT_CHILD_FOCUS, 114)
     DECLARE_EVENT_TYPE(wxEVT_MOUSEWHEEL, 115)
-    DECLARE_EVENT_TYPE(wxEVT_AUX1_DOWN, 116)
-    DECLARE_EVENT_TYPE(wxEVT_AUX1_UP, 117)
-    DECLARE_EVENT_TYPE(wxEVT_AUX1_DCLICK, 118)
-    DECLARE_EVENT_TYPE(wxEVT_AUX2_DOWN, 119)
-    DECLARE_EVENT_TYPE(wxEVT_AUX2_UP, 120)
-    DECLARE_EVENT_TYPE(wxEVT_AUX2_DCLICK, 121)
 
         // Non-client mouse events
     DECLARE_EVENT_TYPE(wxEVT_NC_LEFT_DOWN, 200)
@@ -275,15 +264,13 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_UPDATE_UI, 440)
     DECLARE_EVENT_TYPE(wxEVT_SIZING, 441)
     DECLARE_EVENT_TYPE(wxEVT_MOVING, 442)
-    DECLARE_EVENT_TYPE(wxEVT_MOVE_START, 443)
-    DECLARE_EVENT_TYPE(wxEVT_MOVE_END, 444)
-    DECLARE_EVENT_TYPE(wxEVT_HIBERNATE, 445)
+    DECLARE_EVENT_TYPE(wxEVT_HIBERNATE, 443)
     // more power events follow -- see wx/power.h
 
         // Clipboard events
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TEXT_COPY, 446)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TEXT_CUT, 447)
-    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TEXT_PASTE, 448)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TEXT_COPY, 444)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TEXT_CUT, 445)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TEXT_PASTE, 446)
 
         // Generic command events
         // Note: a click is a higher-level event than button down/up
@@ -395,7 +382,11 @@ public:
         m_propagationLevel = propagationLevel;
     }
 
+#if WXWIN_COMPATIBILITY_2_4
+public:
+#else
 protected:
+#endif
     wxObject*         m_eventObject;
     wxEventType       m_eventType;
     long              m_timeStamp;
@@ -413,13 +404,17 @@ protected:
     // backwards compatibility as it is new
     int               m_propagationLevel;
 
+#if WXWIN_COMPATIBILITY_2_4
+public:
+#else
 protected:
+#endif
     bool              m_skipped;
     bool              m_isCommandEvent;
 
 private:
     // it needs to access our m_propagationLevel
-    friend class WXDLLIMPEXP_FWD_BASE wxPropagateOnce;
+    friend class WXDLLIMPEXP_BASE wxPropagateOnce;
 
     DECLARE_ABSTRACT_CLASS(wxEvent)
 };
@@ -472,7 +467,6 @@ private:
     DECLARE_NO_COPY_CLASS(wxPropagateOnce)
 };
 
-
 #if wxUSE_GUI
 
 
@@ -495,6 +489,26 @@ private:
  wxEVT_COMMAND_TOGGLEBUTTON_CLICKED
 */
 
+#if WXWIN_COMPATIBILITY_2_4
+// Backwards compatibility for wxCommandEvent::m_commandString, will lead to compilation errors in some cases of usage
+class WXDLLIMPEXP_CORE wxCommandEvent;
+
+class WXDLLIMPEXP_CORE wxCommandEventStringHelper
+{
+public:
+    wxCommandEventStringHelper(wxCommandEvent * evt)
+        : m_evt(evt)
+        { }
+
+    void operator=(const wxString &str);
+    operator wxString();
+    const wxChar* c_str() const;
+
+private:
+    wxCommandEvent* m_evt;
+};
+#endif
+
 class WXDLLIMPEXP_CORE wxCommandEvent : public wxEvent
 {
 public:
@@ -502,6 +516,9 @@ public:
 
     wxCommandEvent(const wxCommandEvent& event)
         : wxEvent(event),
+#if WXWIN_COMPATIBILITY_2_4
+          m_commandString(this),
+#endif
           m_cmdString(event.m_cmdString),
           m_commandInt(event.m_commandInt),
           m_extraLong(event.m_extraLong),
@@ -538,7 +555,12 @@ public:
 
     virtual wxEvent *Clone() const { return new wxCommandEvent(*this); }
 
+#if WXWIN_COMPATIBILITY_2_4
+public:
+    wxCommandEventStringHelper m_commandString;
+#else
 protected:
+#endif
     wxString          m_cmdString;     // String event argument
     int               m_commandInt;
     long              m_extraLong;     // Additional information (e.g. select/deselect)
@@ -548,6 +570,23 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxCommandEvent)
 };
+
+#if WXWIN_COMPATIBILITY_2_4
+inline void wxCommandEventStringHelper::operator=(const wxString &str)
+{
+    m_evt->SetString(str);
+}
+
+inline wxCommandEventStringHelper::operator wxString()
+{
+    return m_evt->GetString();
+}
+
+inline const wxChar* wxCommandEventStringHelper::c_str() const
+{
+    return m_evt->GetString().c_str();
+}
+#endif
 
 // this class adds a possibility to react (from the user) code to a control
 // notification: allow or veto the operation being reported.
@@ -640,7 +679,11 @@ public:
 
     virtual wxEvent *Clone() const { return new wxScrollWinEvent(*this); }
 
+#if WXWIN_COMPATIBILITY_2_4
+public:
+#else
 protected:
+#endif
     int               m_commandInt;
     long              m_extraLong;
 
@@ -684,10 +727,7 @@ enum
     wxMOUSE_BTN_NONE    = 0,
     wxMOUSE_BTN_LEFT    = 1,
     wxMOUSE_BTN_MIDDLE  = 2,
-    wxMOUSE_BTN_RIGHT   = 3,
-    wxMOUSE_BTN_AUX1    = 4,
-    wxMOUSE_BTN_AUX2    = 5,
-    wxMOUSE_BTN_MAX
+    wxMOUSE_BTN_RIGHT   = 3
 };
 
 class WXDLLIMPEXP_CORE wxMouseEvent : public wxEvent
@@ -736,28 +776,20 @@ public:
     bool LeftDown() const { return (m_eventType == wxEVT_LEFT_DOWN); }
     bool MiddleDown() const { return (m_eventType == wxEVT_MIDDLE_DOWN); }
     bool RightDown() const { return (m_eventType == wxEVT_RIGHT_DOWN); }
-    bool Aux1Down() const { return (m_eventType == wxEVT_AUX1_DOWN); }
-    bool Aux2Down() const { return (m_eventType == wxEVT_AUX2_DOWN); }
 
     bool LeftUp() const { return (m_eventType == wxEVT_LEFT_UP); }
     bool MiddleUp() const { return (m_eventType == wxEVT_MIDDLE_UP); }
     bool RightUp() const { return (m_eventType == wxEVT_RIGHT_UP); }
-    bool Aux1Up() const { return (m_eventType == wxEVT_AUX1_UP); }
-    bool Aux2Up() const { return (m_eventType == wxEVT_AUX2_UP); }
 
     bool LeftDClick() const { return (m_eventType == wxEVT_LEFT_DCLICK); }
     bool MiddleDClick() const { return (m_eventType == wxEVT_MIDDLE_DCLICK); }
     bool RightDClick() const { return (m_eventType == wxEVT_RIGHT_DCLICK); }
-    bool Aux1DClick() const { return (m_eventType == wxEVT_AUX1_UP); }
-    bool Aux2DClick() const { return (m_eventType == wxEVT_AUX2_UP); }
 
     // Find the current state of the mouse buttons (regardless
     // of current event type)
     bool LeftIsDown() const { return m_leftDown; }
     bool MiddleIsDown() const { return m_middleDown; }
     bool RightIsDown() const { return m_rightDown; }
-    bool Aux1IsDown() const { return m_aux1Down; }
-    bool Aux2IsDown() const { return m_aux2Down; }
 
     // True if a button is down and the mouse is moving
     bool Dragging() const
@@ -820,11 +852,6 @@ public:
     // should occur for each delta.
     int GetWheelDelta() const { return m_wheelDelta; }
 
-    // Gets the axis the wheel operation concerns, 0 being the y axis as on
-    // most mouse wheels, 1 is the x axis for things like MightyMouse scrolls
-    // or horizontal trackpad scrolling
-    int GetWheelAxis() const { return m_wheelAxis; }
-
     // Returns the configured number of lines (or whatever) to be scrolled per
     // wheel action.  Defaults to one.
     int GetLinesPerAction() const { return m_linesPerAction; }
@@ -842,15 +869,12 @@ public:
     bool          m_leftDown;
     bool          m_middleDown;
     bool          m_rightDown;
-    bool          m_aux1Down;
-    bool          m_aux2Down;
 
     bool          m_controlDown;
     bool          m_shiftDown;
     bool          m_altDown;
     bool          m_metaDown;
 
-    int           m_wheelAxis;
     int           m_wheelRotation;
     int           m_wheelDelta;
     int           m_linesPerAction;
@@ -1115,7 +1139,11 @@ public:
 
     virtual wxEvent *Clone() const { return new wxMoveEvent(*this); }
 
+#if WXWIN_COMPATIBILITY_2_4
+public:
+#else
 protected:
+#endif
     wxPoint m_pos;
     wxRect m_rect;
 
@@ -1203,7 +1231,11 @@ public:
 
     virtual wxEvent *Clone() const { return new wxEraseEvent(*this); }
 
+#if WXWIN_COMPATIBILITY_2_4
+public:
+#else
 protected:
+#endif
     wxDC *m_dc;
 
 private:
@@ -1489,7 +1521,11 @@ enum
 
 class WXDLLIMPEXP_CORE wxJoystickEvent : public wxEvent
 {
+#if WXWIN_COMPATIBILITY_2_4
+public:
+#else
 protected:
+#endif
     wxPoint   m_pos;
     int       m_zPosition;
     int       m_buttonChange;   // Which button changed?
@@ -2089,8 +2125,6 @@ private:
     DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxContextMenuEvent)
 };
 
-#endif // wxUSE_GUI
-
 // Idle event
 /*
  wxEVT_IDLE
@@ -2110,7 +2144,7 @@ enum wxIdleMode
     wxIDLE_PROCESS_SPECIFIED
 };
 
-class WXDLLIMPEXP_BASE wxIdleEvent : public wxEvent
+class WXDLLIMPEXP_CORE wxIdleEvent : public wxEvent
 {
 public:
     wxIdleEvent()
@@ -2135,6 +2169,9 @@ public:
     // Returns the idle event mode
     static wxIdleMode GetMode() { return sm_idleMode; }
 
+    // Can we send an idle event?
+    static bool CanSend(wxWindow* win);
+
 protected:
     bool m_requestMore;
     static wxIdleMode sm_idleMode;
@@ -2142,6 +2179,8 @@ protected:
 private:
     DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxIdleEvent)
 };
+
+#endif // wxUSE_GUI
 
 /* TODO
  wxEVT_MOUSE_CAPTURE_CHANGED,
@@ -2306,10 +2345,10 @@ public:
     // Clear table
     void Clear();
 
-#if defined(__WXDEBUG__) && wxUSE_MEMORY_TRACING
     // Clear all tables
     static void ClearAll();
-#endif // __WXDEBUG__ && wxUSE_MEMORY_TRACING
+    // Rebuild all tables
+    static void ReconstructAll();
 
 protected:
     // Init the hash table with the entries of the static event table.
@@ -2358,12 +2397,12 @@ public:
     virtual bool ProcessEvent(wxEvent& event);
 
     // add an event to be processed later
-    virtual void AddPendingEvent(const wxEvent& event);
+    void AddPendingEvent(wxEvent& event);
 
     void ProcessPendingEvents();
 
 #if wxUSE_THREADS
-    bool ProcessThreadEvent(const wxEvent& event);
+    bool ProcessThreadEvent(wxEvent& event);
 #endif
 
     // Dynamic association of a member function handler with the event handler,
@@ -2519,7 +2558,7 @@ private:
 
 // Post a message to the given eventhandler which will be processed during the
 // next event loop iteration
-inline void wxPostEvent(wxEvtHandler *dest, const wxEvent& event)
+inline void wxPostEvent(wxEvtHandler *dest, wxEvent& event)
 {
     wxCHECK_RET( dest, wxT("need an object to post event to in wxPostEvent") );
 
@@ -2532,30 +2571,6 @@ typedef void (wxEvtHandler::*wxEventFunction)(wxEvent&);
     (wxObjectEventFunction)wxStaticCastEvent(wxEventFunction, &func)
 
 #if wxUSE_GUI
-
-// ----------------------------------------------------------------------------
-// wxEventBlocker: helper class to temporarily disable event handling for a window
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_CORE wxEventBlocker : public wxEvtHandler
-{
-public:
-    wxEventBlocker(wxWindow *win, wxEventType type = wxEVT_ANY);
-    virtual ~wxEventBlocker();
-
-    void Block(wxEventType type)
-    {
-        m_eventsToBlock.push_back(type);
-    }
-
-    virtual bool ProcessEvent(wxEvent& event);
-
-protected:
-    wxArrayInt m_eventsToBlock;
-    wxWindow *m_window;
-
-    DECLARE_NO_COPY_CLASS(wxEventBlocker)
-};
 
 typedef void (wxEvtHandler::*wxCommandEventFunction)(wxCommandEvent&);
 typedef void (wxEvtHandler::*wxScrollEventFunction)(wxScrollEvent&);
@@ -2594,6 +2609,13 @@ typedef void (wxEvtHandler::*wxContextMenuEventFunction)(wxContextMenuEvent&);
 typedef void (wxEvtHandler::*wxMouseCaptureChangedEventFunction)(wxMouseCaptureChangedEvent&);
 typedef void (wxEvtHandler::*wxMouseCaptureLostEventFunction)(wxMouseCaptureLostEvent&);
 typedef void (wxEvtHandler::*wxClipboardTextEventFunction)(wxClipboardTextEvent&);
+
+// these typedefs don't have the same name structure as the others, keep for
+// backwards compatibility only
+#if WXWIN_COMPATIBILITY_2_4
+    typedef wxSysColourChangedEventFunction wxSysColourChangedFunction;
+    typedef wxDisplayChangedEventFunction wxDisplayChangedFunction;
+#endif // WXWIN_COMPATIBILITY_2_4
 
 
 #define wxCommandEventHandler(func) \
@@ -2848,8 +2870,6 @@ typedef void (wxEvtHandler::*wxClipboardTextEventFunction)(wxClipboardTextEvent&
 #define EVT_SIZING(func)  wx__DECLARE_EVT0(wxEVT_SIZING, wxSizeEventHandler(func))
 #define EVT_MOVE(func)  wx__DECLARE_EVT0(wxEVT_MOVE, wxMoveEventHandler(func))
 #define EVT_MOVING(func)  wx__DECLARE_EVT0(wxEVT_MOVING, wxMoveEventHandler(func))
-#define EVT_MOVE_START(func)  wx__DECLARE_EVT0(wxEVT_MOVE_START, wxMoveEventHandler(func))
-#define EVT_MOVE_END(func)  wx__DECLARE_EVT0(wxEVT_MOVE_END, wxMoveEventHandler(func))
 #define EVT_CLOSE(func)  wx__DECLARE_EVT0(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(func))
 #define EVT_END_SESSION(func)  wx__DECLARE_EVT0(wxEVT_END_SESSION, wxCloseEventHandler(func))
 #define EVT_QUERY_END_SESSION(func)  wx__DECLARE_EVT0(wxEVT_QUERY_END_SESSION, wxCloseEventHandler(func))
@@ -2905,31 +2925,19 @@ typedef void (wxEvtHandler::*wxClipboardTextEventFunction)(wxClipboardTextEvent&
 #define EVT_LEAVE_WINDOW(func) wx__DECLARE_EVT0(wxEVT_LEAVE_WINDOW, wxMouseEventHandler(func))
 #define EVT_ENTER_WINDOW(func) wx__DECLARE_EVT0(wxEVT_ENTER_WINDOW, wxMouseEventHandler(func))
 #define EVT_MOUSEWHEEL(func) wx__DECLARE_EVT0(wxEVT_MOUSEWHEEL, wxMouseEventHandler(func))
-#define EVT_MOUSE_AUX1_DOWN(func) wx__DECLARE_EVT0(wxEVT_AUX1_DOWN, wxMouseEventHandler(func))
-#define EVT_MOUSE_AUX1_UP(func) wx__DECLARE_EVT0(wxEVT_AUX1_UP, wxMouseEventHandler(func))
-#define EVT_MOUSE_AUX1_DCLICK(func) wx__DECLARE_EVT0(wxEVT_AUX1_DCLICK, wxMouseEventHandler(func))
-#define EVT_MOUSE_AUX2_DOWN(func) wx__DECLARE_EVT0(wxEVT_AUX2_DOWN, wxMouseEventHandler(func))
-#define EVT_MOUSE_AUX2_UP(func) wx__DECLARE_EVT0(wxEVT_AUX2_UP, wxMouseEventHandler(func))
-#define EVT_MOUSE_AUX2_DCLICK(func) wx__DECLARE_EVT0(wxEVT_AUX2_DCLICK, wxMouseEventHandler(func))
 
 // All mouse events
 #define EVT_MOUSE_EVENTS(func) \
     EVT_LEFT_DOWN(func) \
     EVT_LEFT_UP(func) \
-    EVT_LEFT_DCLICK(func) \
     EVT_MIDDLE_DOWN(func) \
     EVT_MIDDLE_UP(func) \
-    EVT_MIDDLE_DCLICK(func) \
     EVT_RIGHT_DOWN(func) \
     EVT_RIGHT_UP(func) \
-    EVT_RIGHT_DCLICK(func) \
-    EVT_MOUSE_AUX1_DOWN(func) \
-    EVT_MOUSE_AUX1_UP(func) \
-    EVT_MOUSE_AUX1_DCLICK(func) \
-    EVT_MOUSE_AUX2_DOWN(func) \
-    EVT_MOUSE_AUX2_UP(func) \
-    EVT_MOUSE_AUX2_DCLICK(func) \
     EVT_MOTION(func) \
+    EVT_LEFT_DCLICK(func) \
+    EVT_MIDDLE_DCLICK(func) \
+    EVT_RIGHT_DCLICK(func) \
     EVT_LEAVE_WINDOW(func) \
     EVT_ENTER_WINDOW(func) \
     EVT_MOUSEWHEEL(func)
@@ -3025,7 +3033,6 @@ typedef void (wxEvtHandler::*wxClipboardTextEventFunction)(wxClipboardTextEvent&
 #define EVT_VLBOX(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_VLBOX_SELECTED, winid, wxCommandEventHandler(func))
 #define EVT_COMBOBOX(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_COMBOBOX_SELECTED, winid, wxCommandEventHandler(func))
 #define EVT_TOOL(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_TOOL_CLICKED, winid, wxCommandEventHandler(func))
-#define EVT_TOOL_DROPDOWN(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_TOOL_DROPDOWN_CLICKED, winid, wxCommandEventHandler(func))
 #define EVT_TOOL_RANGE(id1, id2, func) wx__DECLARE_EVT2(wxEVT_COMMAND_TOOL_CLICKED, id1, id2, wxCommandEventHandler(func))
 #define EVT_TOOL_RCLICKED(winid, func) wx__DECLARE_EVT1(wxEVT_COMMAND_TOOL_RCLICKED, winid, wxCommandEventHandler(func))
 #define EVT_TOOL_RCLICKED_RANGE(id1, id2, func) wx__DECLARE_EVT2(wxEVT_COMMAND_TOOL_RCLICKED, id1, id2, wxCommandEventHandler(func))
@@ -3047,6 +3054,12 @@ typedef void (wxEvtHandler::*wxClipboardTextEventFunction)(wxClipboardTextEvent&
 #define EVT_JOY_BUTTON_UP(func) wx__DECLARE_EVT0(wxEVT_JOY_BUTTON_UP, wxJoystickEventHandler(func))
 #define EVT_JOY_MOVE(func) wx__DECLARE_EVT0(wxEVT_JOY_MOVE, wxJoystickEventHandler(func))
 #define EVT_JOY_ZMOVE(func) wx__DECLARE_EVT0(wxEVT_JOY_ZMOVE, wxJoystickEventHandler(func))
+
+// These are obsolete, see _BUTTON_ events
+#if WXWIN_COMPATIBILITY_2_4
+    #define EVT_JOY_DOWN(func) EVT_JOY_BUTTON_DOWN(func)
+    #define EVT_JOY_UP(func) EVT_JOY_BUTTON_UP(func)
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // All joystick events
 #define EVT_JOYSTICK_EVENTS(func) \

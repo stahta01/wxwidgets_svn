@@ -18,7 +18,7 @@
 
 typedef WXDWORD wxMSWDash;
 
-class WXDLLIMPEXP_FWD_CORE wxPen;
+class WXDLLEXPORT wxPen;
 
 // VZ: this class should be made private
 class WXDLLEXPORT wxPenRefData : public wxGDIRefData
@@ -54,7 +54,7 @@ protected:
     WXHPEN        m_hPen;
 
 private:
-    friend class WXDLLIMPEXP_FWD_CORE wxPen;
+    friend class WXDLLEXPORT wxPen;
 
     // Cannot use
     //  DECLARE_NO_COPY_CLASS(wxPenRefData)

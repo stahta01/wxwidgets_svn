@@ -35,7 +35,6 @@
     #include "wx/window.h"
 
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
 
     #include "wx/button.h"
     #include "wx/bmpbuttn.h"
@@ -2053,7 +2052,7 @@ void wxWin32Renderer::DrawSliderShaft(wxDC& dc,
     */
 
     if (flags & wxCONTROL_FOCUSED) {
-        DrawFocusRect(NULL, dc, rectOrig);
+        DrawFocusRect(dc, rectOrig);
     }
 
     wxRect rect = GetSliderShaftRect(rectOrig, lenThumb, orient, style);
@@ -2505,7 +2504,7 @@ wxMenuGeometryInfo *wxWin32Renderer::GetMenuGeometry(wxWindow *win,
             h = heightText;
 
             wxCoord widthLabel;
-            dc.GetTextExtent(item->GetItemLabelText(), &widthLabel, NULL);
+            dc.GetTextExtent(item->GetLabel(), &widthLabel, NULL);
             if ( widthLabel > widthLabelMax )
             {
                 widthLabelMax = widthLabel;
@@ -3196,9 +3195,10 @@ bool wxWin32InputHandler::HandleMouse(wxInputConsumer *control,
     // clicking on the control gives it focus
     if ( event.ButtonDown() )
     {
-        wxWindow * const win = control->GetInputWindow();
+        wxWindow *win = control->GetInputWindow();
 
-        if ( win->CanAcceptFocus() && wxWindow::FindFocus() != win )
+        if ( (wxWindow::FindFocus() != control->GetInputWindow()) &&
+             win->AcceptsFocus() )
         {
             win->SetFocus();
 

@@ -19,10 +19,6 @@
 class WXDLLIMPEXP_BASE wxConsoleAppTraits : public wxConsoleAppTraitsBase
 {
 public:
-    virtual wxEventLoopBase *CreateEventLoop();
-#if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer) { return NULL; };
-#endif
 };
 
 #if wxUSE_GUI
@@ -30,10 +26,6 @@ public:
 class WXDLLIMPEXP_CORE wxGUIAppTraits : public wxGUIAppTraitsBase
 {
 public:
-    virtual wxEventLoopBase *CreateEventLoop();
-#if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer);
-#endif
     virtual wxPortId GetToolkitVersion(int *majVer, int *minVer) const;
 
     // wxThread helpers

@@ -746,13 +746,14 @@ bool wxDebugContext::PrintClasses(void)
   }
 
   int n = 0;
-  const wxClassInfo *info;
+  wxHashTable::compatibility_iterator node;
+  wxClassInfo *info;
 
-  for (wxClassInfo::const_iterator node = wxClassInfo::begin_classinfo(),
-                                    end = wxClassInfo::end_classinfo();
-       node != end; ++node)
+  wxClassInfo::sm_classTable->BeginFind();
+  node = wxClassInfo::sm_classTable->Next();
+  while (node)
   {
-    info = *node;
+    info = (wxClassInfo *)node->GetData();
     if (info->GetClassName())
     {
         wxString msg(info->GetClassName());
@@ -775,6 +776,7 @@ bool wxDebugContext::PrintClasses(void)
 
         wxLogMessage(msg);
     }
+    node = wxClassInfo::sm_classTable->Next();
     n ++;
   }
   wxLogMessage(wxEmptyString);

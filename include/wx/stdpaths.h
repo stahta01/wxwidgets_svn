@@ -14,6 +14,8 @@
 
 #include "wx/defs.h"
 
+#if wxUSE_STDPATHS
+
 #include "wx/string.h"
 #include "wx/filefn.h"
 
@@ -21,8 +23,6 @@
 // wxStandardPaths returns the standard locations in the file system
 // ----------------------------------------------------------------------------
 
-// NB: This is always compiled in, wxUSE_STDPATHS=0 only disables native
-//     wxStandardPaths class, but a minimal version is always available
 class WXDLLIMPEXP_BASE wxStandardPathsBase
 {
 public:
@@ -109,7 +109,7 @@ public:
     // different under Unix for message catalog category (namely the standard
     // prefix/share/locale/lang/LC_MESSAGES)
     virtual wxString
-    GetLocalizedResourcesDir(const wxString& lang,
+    GetLocalizedResourcesDir(const wxChar *lang,
                              ResourceCat WXUNUSED(category)
                                 = ResourceCat_None) const
     {
@@ -135,34 +135,23 @@ protected:
     static wxString AppendAppName(const wxString& dir);
 };
 
-#if wxUSE_STDPATHS
-    #if defined(__WXMSW__)
-        #include "wx/msw/stdpaths.h"
-        #define wxHAS_NATIVE_STDPATHS
-    // We want CoreFoundation paths on both CarbonLib and Darwin (for all ports)
-    #elif defined(__WXMAC__) || defined(__DARWIN__)
-        #include "wx/mac/corefoundation/stdpaths.h"
-        #define wxHAS_NATIVE_STDPATHS
-    #elif defined(__OS2__)
-        #include "wx/os2/stdpaths.h"
-        #define wxHAS_NATIVE_STDPATHS
-    #elif defined(__UNIX__)
-        #include "wx/unix/stdpaths.h"
-        #define wxHAS_NATIVE_STDPATHS
-    #elif defined(__PALMOS__)
-        #include "wx/palmos/stdpaths.h"
-        #define wxHAS_NATIVE_STDPATHS
-    #endif
-#endif
+#if defined(__WXMSW__)
+    #include "wx/msw/stdpaths.h"
+// We want CoreFoundation paths on both CarbonLib and Darwin (for all ports)
+#elif defined(__WXMAC__) || defined(__DARWIN__)
+    #include "wx/mac/corefoundation/stdpaths.h"
+#elif defined(__OS2__)
+    #include "wx/os2/stdpaths.h"
+#elif defined(__UNIX__)
+    #include "wx/unix/stdpaths.h"
+#elif defined(__PALMOS__)
+    #include "wx/palmos/stdpaths.h"
+#else
 
 // ----------------------------------------------------------------------------
 // Minimal generic implementation
 // ----------------------------------------------------------------------------
 
-// NB: Note that this minimal implementation is compiled in even if
-//     wxUSE_STDPATHS=0, so that our code can still use wxStandardPaths.
-
-#ifndef wxHAS_NATIVE_STDPATHS
 class WXDLLIMPEXP_BASE wxStandardPaths : public wxStandardPathsBase
 {
 public:
@@ -181,7 +170,10 @@ public:
 private:
     wxString m_prefix;
 };
-#endif // !wxHAS_NATIVE_STDPATHS
+
+#endif
+
+#endif // wxUSE_STDPATHS
 
 #endif // _WX_STDPATHS_H_
 

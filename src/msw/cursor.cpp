@@ -27,6 +27,7 @@
 #include "wx/cursor.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h" // IDC_HAND
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/bitmap.h"
@@ -38,7 +39,6 @@
 #endif
 
 #include "wx/msw/private.h"
-#include "wx/msw/missing.h" // IDC_HAND
 
 // define functions missing in MicroWin
 #ifdef __WXMICROWIN__
@@ -208,7 +208,6 @@ wxCursor::wxCursor(const wxImage& image)
 
     HCURSOR hcursor = wxBitmapToHCURSOR( wxBitmap(imageSized),
                                          hotSpotX, hotSpotY );
-
     if ( !hcursor )
     {
         wxLogWarning(_("Failed to create cursor."));
@@ -252,12 +251,12 @@ wxCursor::wxCursor(const wxString& filename,
     switch ( kind )
     {
         case wxBITMAP_TYPE_CUR_RESOURCE:
-            hcursor = ::LoadCursor(wxGetInstance(), filename.fn_str());
+            hcursor = ::LoadCursor(wxGetInstance(), filename);
             break;
 
 #ifndef __WXWINCE__
         case wxBITMAP_TYPE_CUR:
-            hcursor = ::LoadCursorFromFile(filename.fn_str());
+            hcursor = ::LoadCursorFromFile(filename);
             break;
 #endif
 

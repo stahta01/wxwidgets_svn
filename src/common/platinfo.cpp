@@ -324,11 +324,11 @@ wxArchitecture wxPlatformInfo::GetArch(const wxString &arch)
 
 wxEndianness wxPlatformInfo::GetEndianness(const wxString& end)
 {
-    const wxString endl(end.Lower());
-    if ( endl.StartsWith(wxT("little")) )
+    wxString endl(end.Lower());
+    if ( end.StartsWith(wxT("little")) )
         return wxENDIAN_LITTLE;
 
-    if ( endl.StartsWith(wxT("big")) )
+    if ( end.StartsWith(wxT("big")) )
         return wxENDIAN_BIG;
 
     return wxENDIAN_INVALID;

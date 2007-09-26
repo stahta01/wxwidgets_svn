@@ -13,7 +13,7 @@
 #define _WX_INIT_H_
 
 #include "wx/defs.h"
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 
 // ----------------------------------------------------------------------------
 // wxEntry helper functions which allow to have more fine grained control

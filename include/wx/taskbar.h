@@ -14,11 +14,11 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_TASKBARICON
+#ifdef wxHAS_TASK_BAR_ICON
 
 #include "wx/event.h"
 
-class WXDLLIMPEXP_FWD_ADV wxTaskBarIconEvent;
+class WXDLLIMPEXP_ADV wxTaskBarIconEvent;
 
 // ----------------------------------------------------------------------------
 // wxTaskBarIconBase: define wxTaskBarIcon interface
@@ -34,9 +34,6 @@ public:
                          const wxString& tooltip = wxEmptyString) = 0;
     virtual bool RemoveIcon() = 0;
     virtual bool PopupMenu(wxMenu *menu) = 0;
-
-    // delayed destruction (similarly to wxWindow::Destroy())
-    void Destroy();
 
 protected:
     // creates menu to be displayed when user clicks on the icon
@@ -122,6 +119,6 @@ END_DECLARE_EVENT_TYPES()
 #endif
 #define EVT_TASKBAR_CLICK(fn)        wx__DECLARE_TASKBAREVT(CLICK, fn)
 
-#endif // wxUSE_TASKBARICON
+#endif // wxHAS_TASK_BAR_ICON
 
 #endif // _WX_TASKBAR_H_BASE_

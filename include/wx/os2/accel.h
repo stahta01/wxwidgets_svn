@@ -14,7 +14,7 @@
 
 #include "wx/object.h"
 
-class WXDLLIMPEXP_FWD_CORE wxAcceleratorTable;
+class WXDLLEXPORT wxAcceleratorTable;
 
 // Hold Ctrl key down
 #define wxACCEL_ALT     0x01

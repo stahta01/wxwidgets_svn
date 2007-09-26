@@ -25,8 +25,8 @@
 
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxWindow *, wxArrayPages);
 
-class WXDLLIMPEXP_FWD_CORE wxImageList;
-class WXDLLIMPEXP_FWD_CORE wxBookCtrlBaseEvent;
+class WXDLLEXPORT wxImageList;
+class WXDLLEXPORT wxBookCtrlBaseEvent;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -159,7 +159,6 @@ public:
     // returns the sizer containing the control, if any
     wxSizer* GetControlSizer() const { return m_controlSizer; }
 
-
     // operations
     // ----------
 
@@ -230,11 +229,6 @@ public:
     // we do have multiple pages
     virtual bool HasMultiplePages() const { return true; }
 
-    // we don't want focus for ourselves
-    virtual bool AcceptsFocus() const { return false; }
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
 
 protected:
     // flags for DoSetSelection()

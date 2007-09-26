@@ -28,13 +28,13 @@
 #ifdef __BORLANDC__
     #pragma warn -8022
 #endif
-
+ 
 ///////////////////////////////////////////////////////////////////////////////
 // Set the default format for the errors, which can be used by an IDE to jump
 // to the error location. This default gets overridden by the cppunit headers
 // for some compilers (e.g. VC++).
 
-#ifndef CPPUNIT_COMPILER_LOCATION_FORMAT
+#ifndef CPPUNIT_COMPILER_LOCATION_FORMAT 
     #define CPPUNIT_COMPILER_LOCATION_FORMAT "%p:%l:"
 #endif
 
@@ -77,11 +77,6 @@
 #define WXTEST_FAIL_WITH_CONDITION(suiteName, Condition, testMethod) \
     WXTEST_ANY_WITH_CONDITION(suiteName, Condition, testMethod, CPPUNIT_TEST_FAIL(testMethod))
 
-// Use this macro to compare a wxString with a literal string.
-#define WX_ASSERT_STR_EQUAL(p, s) CPPUNIT_ASSERT_EQUAL(wxString(p), s)
-
-// Use this macro to compare a size_t with a literal integer
-#define WX_ASSERT_SIZET_EQUAL(n, m) CPPUNIT_ASSERT_EQUAL(((size_t)n), m)
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream inserter for wxString
@@ -91,7 +86,7 @@
 
 inline std::ostream& operator<<(std::ostream& o, const wxString& s)
 {
-    return o << (const char *)wxSafeConvertWX2MB(s);
+    return o << s.mb_str();
 }
 
 

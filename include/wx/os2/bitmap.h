@@ -17,15 +17,15 @@
 #include "wx/gdicmn.h"
 #include "wx/palette.h"
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxBitmapHandler;
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxMask;
-class WXDLLIMPEXP_FWD_CORE wxCursor;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxImage;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxBitmapHandler;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxMask;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxImage;
 
 // ----------------------------------------------------------------------------
 // Bitmap data

@@ -7,26 +7,18 @@ render the individual cells. One instance of a renderer class is
 owned by \helpref{wxDataViewColumn}{wxdataviewcolumn}. There is
 a number of ready-to-use renderers provided:
 \helpref{wxDataViewTextRenderer}{wxdataviewtextrenderer},
-\helpref{wxDataViewIconTextRenderer}{wxdataviewicontextrenderer},
 \helpref{wxDataViewToggleRenderer}{wxdataviewtogglerenderer},
 \helpref{wxDataViewProgressRenderer}{wxdataviewprogressrenderer},
 \helpref{wxDataViewBitmapRenderer}{wxdataviewbitmaprenderer},
 \helpref{wxDataViewDateRenderer}{wxdataviewdaterenderer}.
 
+
 Additionally, the user can write own renderers by deriving from
 \helpref{wxDataViewCustomRenderer}{wxdataviewcustomrenderer}.
 
-The {\it wxDataViewCellMode} flag controls, what actions
-the cell data allows. {\it wxDATAVIEW\_CELL\_ACTIVATABLE}
-indicates that the user can double click the cell and
-something will happen (e.g. a window for editing a date
-will pop up). {\it wxDATAVIEW\_CELL\_EDITABLE} indicates
-that the user can edit the data in-place, i.e. an control
-will show up after a slow click on the cell. This behaviour
-is best known from changing the filename in most file 
-managers etc.
-
-
+These flags control the behaviour of the renderer and they
+are used for controlling in what mode the renderer shall
+render its contents:
 
 {\small
 \begin{verbatim}
@@ -36,14 +28,7 @@ enum wxDataViewCellMode
     wxDATAVIEW_CELL_ACTIVATABLE,
     wxDATAVIEW_CELL_EDITABLE
 };
-\end{verbatim}
-}
 
-The {\it wxDataViewCellRenderState} flag controls how the
-the renderer should display its contents in a cell:
-
-{\small
-\begin{verbatim}
 enum wxDataViewCellRenderState
 {
     wxDATAVIEW_CELL_SELECTED    = 1,
@@ -63,13 +48,6 @@ enum wxDataViewCellRenderState
 
 <wx/dataview.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewRenderer::wxDataViewRenderer}\label{wxdataviewrendererwxdataviewrenderer}
 
@@ -123,39 +101,22 @@ The internal code will then render this cell with this data.
 
 \func{virtual bool}{Validate}{\param{wxVariant\& }{value}}
 
-Before data is committed to the data model, it is passed to this
-method where it can be checked for validity. This can also be
-used for checking a valid range or limiting the user input in
-a certain aspect (e.g. max number of characters or only alphanumeric
-input, ASCII only etc.). Return {\it false} if the value is
-not valid.
-
-Please note that due to implementation limitations, this validation
-is done after the editing control already is destroyed and the
-editing process finished.
+To be implemented.
 
 
 \section{\class{wxDataViewTextRenderer}}\label{wxdataviewtextrenderer}
 
-wxDataViewTextRenderer is used for rendering text. It supports
-in-place editing if desired.
+wxDataViewTextRenderer
 
 
 \wxheading{Derived from}
 
-\helpref{wxDataViewRenderer}{wxdataviewrenderer}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxDataViewRenderer}{wxdataviewrenderer}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewTextRenderer::wxDataViewTextRenderer}\label{wxdataviewtextrendererwxdataviewtextrenderer}
 
@@ -170,100 +131,17 @@ wxDataViewProgressRenderer
 
 \wxheading{Derived from}
 
-\helpref{wxDataViewRenderer}{wxdataviewrenderer}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxDataViewRenderer}{wxdataviewrenderer}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewProgressRenderer::wxDataViewProgressRenderer}\label{wxdataviewprogressrendererwxdataviewprogressrenderer}
 
 \func{}{wxDataViewProgressRenderer}{\param{const wxString\& }{label = wxEmptyString}, \param{const wxString\& }{varianttype = wxT("long")}, \param{wxDataViewCellMode }{mode = wxDATAVIEW\_CELL\_INERT}}
 
-
-\section{\class{wxDataViewIconText}}\label{wxdataviewicontext}
-
-wxDataViewIconText is used by 
-\helpref{wxDataViewIconTextRenderer}{wxdataviewicontextrenderer}
-for data transfer. This class can be converted to a from
-a \helpref{wxVariant}{wxvariant}.
-
-\wxheading{Derived from}
-
-\helpref{wxObject}{wxobject}
-
-\wxheading{Include files}
-
-<dataview.h>
-
-\membersection{wxDataViewIconText::wxDataViewIconText}\label{wxdataviewicontextwxdataviewicontext}
-
-\func{}{wxDataViewIconText}{\param{const wxString\& }{text = wxEmptyString}, \param{const wxIcon\& }{icon = wxNullIcon}}
-
-\func{}{wxDataViewIconText}{\param{const wxDataViewIconText\& }{other}}
-
-Constructor.
-
-\membersection{wxDataViewIconText::GetIcon}\label{wxdataviewicontextgeticon}
-
-\constfunc{const wxIcon\&}{GetIcon}{\void}
-
-Gets the icon.
-
-\membersection{wxDataViewIconText::GetText}\label{wxdataviewicontextgettext}
-
-\constfunc{wxString}{GetText}{\void}
-
-Gets the text.
-
-\membersection{wxDataViewIconText::SetIcon}\label{wxdataviewicontextseticon}
-
-\func{void}{SetIcon}{\param{const wxIcon\& }{icon}}
-
-Set the icon.
-
-\membersection{wxDataViewIconText::SetText}\label{wxdataviewicontextsettext}
-
-\func{void}{SetText}{\param{const wxString\& }{text}}
-
-Set the text.
-
-\section{\class{wxDataViewIconTextRenderer}}\label{wxdataviewicontextrenderer}
-
-The wxDataViewIconTextRenderer class is used to display text with
-a small icon next to it as it is typically done in a file manager.
-This classes uses the \helpref{wxDataViewIconText}{wxdataviewicontext}
-helper class to store its data. wxDataViewIonText can be converted
-to a from a \helpref{wxVariant}{wxvariant} using the left shift
-operator.
-
-\wxheading{Derived from}
-
-\helpref{wxDataViewRenderer}{wxdataviewrenderer}\\
-\helpref{wxObject}{wxobject}
-
-\wxheading{Include files}
-
-<wx/dataview.h>
-
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
-
-\membersection{wxDataViewIconTextRenderer::wxDataViewIconTextRenderer}\label{wxdataviewtogglerendererwxdataviewicontextrenderer}
-
-\func{}{wxDataViewIconTextRenderer}{\param{const wxString\& }{varianttype = wxT("wxDataViewIconText")}, \param{wxDataViewCellMode }{mode = wxDATAVIEW\_CELL\_INERT}}
 
 
 \section{\class{wxDataViewToggleRenderer}}\label{wxdataviewtogglerenderer}
@@ -272,19 +150,12 @@ wxDataViewToggleRenderer
 
 \wxheading{Derived from}
 
-\helpref{wxDataViewRenderer}{wxdataviewrenderer}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxDataViewRenderer}{wxdataviewrenderer}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewToggleRenderer::wxDataViewToggleRenderer}\label{wxdataviewtogglerendererwxdataviewtogglerenderer}
 
@@ -297,19 +168,12 @@ wxDataViewBitmapRenderer
 
 \wxheading{Derived from}
 
-\helpref{wxDataViewRenderer}{wxdataviewrenderer}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxDataViewRenderer}{wxdataviewrenderer}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewBitmapRenderer::wxDataViewBitmapRenderer}\label{wxdataviewbitmaprendererwxdataviewbitmaprenderer}
 
@@ -323,19 +187,11 @@ wxDataViewDateRenderer
 
 \wxheading{Derived from}
 
-\helpref{wxDataViewRenderer}{wxdataviewrenderer}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxDataViewRenderer}{wxdataviewrenderer}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
-
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewDateRenderer::wxDataViewDateRenderer}\label{wxdataviewdaterendererwxdataviewdaterenderer}
 
@@ -344,37 +200,15 @@ wxDataViewDateRenderer
 
 \section{\class{wxDataViewCustomRenderer}}\label{wxdataviewcustomrenderer}
 
-You need to derive a new class from wxDataViewCustomRenderer in
-order to write a new renderer. You need to override at least 
-\helpref{SetValue}{wxdataviewrenderersetvalue},
-\helpref{GetValue}{wxdataviewrenderergetvalue}, 
-\helpref{GetSize}{wxdataviewcustomrenderergetsize}
-and \helpref{Render}{wxdataviewcustomrendererrender}.
-
-If you want your renderer to support in-place editing then you
-also need to override 
-\helpref{HasEditorCtrl}{wxdataviewcustomrendererhaseditorctrl},
-\helpref{CreateEditorCtrl}{wxdataviewcustomrenderercreateeditorctrl}
-and \helpref{GetValueFromEditorCtrl}{wxdataviewcustomrenderergetvaluefromeditorctrl}.
-Note that a special event handler will be pushed onto that
-editor control which handles <ENTER> and focus out events
-in order to end the editing.
+wxDataViewCustomRenderer
 
 \wxheading{Derived from}
 
-\helpref{wxDataViewRenderer}{wxdataviewrenderer}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxDataViewRenderer}{wxdataviewrenderer}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
-
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewCustomRenderer::wxDataViewCustomRenderer}\label{wxdataviewcustomrendererwxdataviewcustomrenderer}
 
@@ -388,54 +222,9 @@ Constructor.
 
 Destructor.
 
-
-\membersection{wxDataViewCustomRenderer::HasEditorCtrl}\label{wxdataviewcustomrendererhaseditorctrl}
-
-\func{virtual bool}{HasEditorCtrl}{\void}
-
-Override this and make it return {\it true} in order to
-indicate that this renderer supports in-place editing.
-
-\membersection{wxDataViewCustomRenderer::CreateEditorCtrl}\label{wxdataviewcustomrenderercreateeditorctrl}
-
-\func{virtual wxControl*}{CreateEditorCtrl}{\param{wxWindow *}{parent}, \param{wxRect }{labelRect}, \param{const wxVariant \& }{value}}
-
-Override this to create the actual editor control once editing
-is about to start. {\it parent} is the parent of the editor
-control, {\it labelRect} indicates the position and
-size of the editor control and {\it value} is its initial value:
-
-{\small
-\begin{verbatim}
-{ 
-    long l = value;
-    return new wxSpinCtrl( parent, wxID_ANY, wxEmptyString, 
-                 labelRect.GetTopLeft(), labelRect.GetSize(), 0, 0, 100, l );
-}
-\end{verbatim}
-}
-
-\membersection{wxDataViewCustomRenderer::GetValueFromEditorCtrl}\label{wxdataviewcustomrenderergetvaluefromeditorctrl}
-
-\func{virtual bool}{GetValueFromEditorCtrl}{\param{wxControl* }{editor}, \param{wxVariant \& }{value}}
-
-Overrride this so that the renderer can get the value 
-from the editor control (pointed to by {\it editor}):
-
-{\small
-\begin{verbatim}
-{ 
-    wxSpinCtrl *sc = (wxSpinCtrl*) editor;
-    long l = sc->GetValue();
-    value = l;
-    return true;
-}
-\end{verbatim}
-}
-
 \membersection{wxDataViewCustomRenderer::Activate}\label{wxdataviewcustomrendereractivate}
 
-\func{virtual bool}{Activate}{\param{wxRect }{cell}, \param{wxDataViewModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
+\func{virtual bool}{Activate}{\param{wxRect }{cell}, \param{wxDataViewListModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
 
 Override this to react to double clicks or <ENTER>.
 
@@ -455,7 +244,7 @@ Return size required to show content.
 
 \membersection{wxDataViewCustomRenderer::LeftClick}\label{wxdataviewcustomrendererleftclick}
 
-\func{virtual bool}{LeftClick}{\param{wxPoint }{cursor}, \param{wxRect }{cell}, \param{wxDataViewModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
+\func{virtual bool}{LeftClick}{\param{wxPoint }{cursor}, \param{wxRect }{cell}, \param{wxDataViewListModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
 
 Overrride this to react to a left click.
 
@@ -469,13 +258,13 @@ so that this instance knows what to render.
 
 \membersection{wxDataViewCustomRenderer::RightClick}\label{wxdataviewcustomrendererrightclick}
 
-\func{virtual bool}{RightClick}{\param{wxPoint }{cursor}, \param{wxRect }{cell}, \param{wxDataViewModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
+\func{virtual bool}{RightClick}{\param{wxPoint }{cursor}, \param{wxRect }{cell}, \param{wxDataViewListModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
 
 Overrride this to react to a right click.
 
 \membersection{wxDataViewCustomRenderer::StartDrag}\label{wxdataviewcustomrendererstartdrag}
 
-\func{virtual bool}{StartDrag}{\param{wxPoint }{cursor}, \param{wxRect }{cell}, \param{wxDataViewModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
+\func{virtual bool}{StartDrag}{\param{wxPoint }{cursor}, \param{wxRect }{cell}, \param{wxDataViewListModel* }{model}, \param{unsigned int }{col}, \param{unsigned int }{row}}
 
 Overrride this to start a drag operation.
 

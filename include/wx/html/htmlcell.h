@@ -20,10 +20,10 @@
 #include "wx/window.h"
 
 
-class WXDLLIMPEXP_FWD_HTML wxHtmlWindowInterface;
-class WXDLLIMPEXP_FWD_HTML wxHtmlLinkInfo;
-class WXDLLIMPEXP_FWD_HTML wxHtmlCell;
-class WXDLLIMPEXP_FWD_HTML wxHtmlContainerCell;
+class WXDLLIMPEXP_HTML wxHtmlWindowInterface;
+class WXDLLIMPEXP_HTML wxHtmlLinkInfo;
+class WXDLLIMPEXP_HTML wxHtmlCell;
+class WXDLLIMPEXP_HTML wxHtmlContainerCell;
 
 
 // wxHtmlSelection is data holder with information about text selection.
@@ -458,7 +458,9 @@ public:
                                    const wxMouseEvent& event);
 
     virtual wxHtmlCell* GetFirstChild() const { return m_Cells; }
-
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( wxHtmlCell* GetFirstCell() const );
+#endif
     // returns last child cell:
     wxHtmlCell* GetLastChild() const { return m_LastCell; }
 
@@ -516,6 +518,12 @@ protected:
     DECLARE_ABSTRACT_CLASS(wxHtmlContainerCell)
     DECLARE_NO_COPY_CLASS(wxHtmlContainerCell)
 };
+
+#if WXWIN_COMPATIBILITY_2_4
+inline wxHtmlCell* wxHtmlContainerCell::GetFirstCell() const
+    { return GetFirstChild(); }
+#endif
+
 
 
 

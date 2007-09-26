@@ -21,7 +21,6 @@ public:
     wxRegion(const wxRect& rect);
     wxRegion(WXHRGN hRegion); // Hangs on to this region
     wxRegion(size_t n, const wxPoint *points, int fillStyle = wxODDEVEN_RULE );
-#if wxUSE_IMAGE
     wxRegion( const wxBitmap& bmp)
     {
         Union(bmp);
@@ -31,7 +30,6 @@ public:
     {
         Union(bmp, transColour, tolerance);
     }
-#endif // wxUSE_IMAGE
 
     virtual ~wxRegion();
 
@@ -54,7 +52,7 @@ protected:
     virtual bool DoOffset(wxCoord x, wxCoord y);
     virtual bool DoCombine(const wxRegion& region, wxRegionOp op);
 
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIterator;
+    friend class WXDLLEXPORT wxRegionIterator;
 
     DECLARE_DYNAMIC_CLASS(wxRegion)
 };

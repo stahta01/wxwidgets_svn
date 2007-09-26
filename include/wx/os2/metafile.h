@@ -30,11 +30,11 @@
 #define wxMetaFile wxMetafile
 #define wxMetaFileDC wxMetafileDC
 
-class WXDLLIMPEXP_FWD_CORE wxMetafile;
+class WXDLLEXPORT wxMetafile;
 
 class WXDLLEXPORT wxMetafileRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxMetafile;
+    friend class WXDLLEXPORT wxMetafile;
 public:
     wxMetafileRefData(void);
     virtual ~wxMetafileRefData(void);
@@ -88,7 +88,7 @@ public:
     virtual void SetMapMode(int mode);
     virtual void GetTextExtent(const wxString& string, long *x, long *y,
                                long *descent = NULL, long *externalLeading = NULL,
-                               const wxFont *theFont = NULL, bool use16bit = false) const;
+                               wxFont *theFont = NULL, bool use16bit = false) const;
 
     // Implementation
     inline wxMetafile *GetMetaFile(void) const { return m_metaFile; }

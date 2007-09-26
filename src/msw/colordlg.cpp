@@ -69,7 +69,7 @@ wxColourDialogHookProc(HWND hwnd,
         CHOOSECOLOR *pCC = (CHOOSECOLOR *)lParam;
         wxColourDialog *dialog = (wxColourDialog *)pCC->lCustData;
 
-        ::SetWindowText(hwnd, dialog->GetTitle().wx_str());
+        ::SetWindowText(hwnd, dialog->GetTitle());
 
         wxPoint pos = dialog->GetPosition();
         if ( pos != wxDefaultPosition )

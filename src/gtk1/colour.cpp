@@ -225,10 +225,10 @@ GdkColor *wxColour::GetColor() const
     return &M_COLDATA->m_color;
 }
 
-bool wxColour::FromString(const wxString& str)
+bool wxColour::FromString(const wxChar *str)
 {
     GdkColor colGDK;
-    if ( gdk_color_parse( wxGTK_CONV(str), &colGDK ) )
+    if ( gdk_color_parse( str, &colGDK ) )
     {
         UnRef();
 

@@ -49,39 +49,26 @@
     #define wxUSE_MENUS_NATIVE wxUSE_MENUS
 #endif // __WXUNIVERSAL__/!__WXUNIVERSAL__
 
-
-// Define this macro if the corresponding operating system handles the state
-// of children windows automatically when the parent is enabled/disabled.
-// Otherwise wx itself must ensure that when the parent is disabled its
-// children are disabled too, and their initial state is restored when the
-// parent is enabled back.
-#if defined(__WXMSW__) || defined(__WXPM__)
-    // must do everything ourselves
-    #undef wxHAS_NATIVE_ENABLED_MANAGEMENT
-#else
-    #define wxHAS_NATIVE_ENABLED_MANAGEMENT
-#endif
-
 // ----------------------------------------------------------------------------
 // forward declarations
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxCaret;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxCursor;
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxDropTarget;
-class WXDLLIMPEXP_FWD_CORE wxItemResource;
-class WXDLLIMPEXP_FWD_CORE wxLayoutConstraints;
-class WXDLLIMPEXP_FWD_CORE wxResourceTable;
-class WXDLLIMPEXP_FWD_CORE wxSizer;
-class WXDLLIMPEXP_FWD_CORE wxToolTip;
-class WXDLLIMPEXP_FWD_CORE wxWindowBase;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxScrollHelper;
+class WXDLLEXPORT wxCaret;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxDropTarget;
+class WXDLLEXPORT wxItemResource;
+class WXDLLEXPORT wxLayoutConstraints;
+class WXDLLEXPORT wxResourceTable;
+class WXDLLEXPORT wxSizer;
+class WXDLLEXPORT wxToolTip;
+class WXDLLEXPORT wxWindowBase;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxScrollHelper;
 
 #if wxUSE_ACCESSIBILITY
-class WXDLLIMPEXP_FWD_CORE wxAccessible;
+class WXDLLEXPORT wxAccessible;
 #endif
 
 // ----------------------------------------------------------------------------
@@ -379,7 +366,7 @@ public:
     void SetInitialSize(const wxSize& size=wxDefaultSize);
     wxDEPRECATED( void SetBestFittingSize(const wxSize& size=wxDefaultSize) );  // replaced by SetInitialSize
 
-
+    
         // the generic centre function - centers the window on parent by`
         // default or on screen if it doesn't have parent or
         // wxCENTER_ON_SCREEN flag is given
@@ -402,7 +389,7 @@ public:
         // and it is therefore overridden in wxTLW to do that.
         // In wxWindow(Base), it has (unfortunately) been abused
         // to mean the same as SetMinSize() and SetMaxSize().
-
+        
     virtual void SetSizeHints( int minW, int minH,
                                int maxW = wxDefaultCoord, int maxH = wxDefaultCoord,
                                int incW = wxDefaultCoord, int incH = wxDefaultCoord )
@@ -429,14 +416,14 @@ public:
     }
 
 
-        // Call these to override what GetBestSize() returns. This
+        // Call these to override what GetBestSize() returns. This 
         // method is only virtual because it is overriden in wxTLW
         // as a different API for SetSizeHints().
     virtual void SetMinSize(const wxSize& minSize) { m_minWidth = minSize.x; m_minHeight = minSize.y; }
     virtual void SetMaxSize(const wxSize& maxSize) { m_maxWidth = maxSize.x; m_maxHeight = maxSize.y; }
 
         // Override these methods to impose restrictions on min/max size.
-        // The easier way is to call SetMinSize() and SetMaxSize() which
+        // The easier way is to call SetMinSize() and SetMaxSize() which  
         // will have the same effect. Doing both is non-sense.
     virtual wxSize GetMinSize() const { return wxSize(m_minWidth, m_minHeight); }
     virtual wxSize GetMaxSize() const { return wxSize(m_maxWidth, m_maxHeight); }
@@ -504,21 +491,7 @@ public:
     bool Disable() { return Enable(false); }
 
     virtual bool IsShown() const { return m_isShown; }
-        // returns true if the window is really enabled and false otherwise,
-        // whether because it had been explicitly disabled itself or because
-        // its parent is currently disabled -- then this method returns false
-        // whatever is the intrinsic state of this window, use IsThisEnabled(0
-        // to retrieve it. In other words, this relation always holds:
-        //
-        //   IsEnabled() == IsThisEnabled() && parent.IsEnabled()
-        //
-    bool IsEnabled() const;
-
-        // returns the internal window state independently of the parent(s)
-        // state, i.e. the state in which the window would be if all its
-        // parents were enabled (use IsEnabled() above to get the effective
-        // window state)
-    bool IsThisEnabled() const { return m_isEnabled; }
+    virtual bool IsEnabled() const { return m_isEnabled; }
 
     // returns true if the window is visible, i.e. IsShown() returns true
     // if called on it and all its parents up to the first TLW
@@ -546,8 +519,6 @@ public:
     virtual void SetExtraStyle(long exStyle) { m_exStyle = exStyle; }
     long GetExtraStyle() const { return m_exStyle; }
 
-    bool HasExtraStyle(int exFlag) const { return (m_exStyle & exFlag) != 0; }
-
         // make the window modal (all other windows unresponsive)
     virtual void MakeModal(bool modal = true);
 
@@ -573,56 +544,16 @@ public:
 
     static wxWindow *DoFindFocus() /* = 0: implement in derived classes */;
 
-        // can this window have focus in principle?
-        //
-        // the difference between AcceptsFocus[FromKeyboard]() and CanAcceptFocus
-        // [FromKeyboard]() is that the former functions are meant to be
-        // overridden in the derived classes to simply return false if the
-        // control can't have focus, while the latter are meant to be used by
-        // this class clients and take into account the current window state
-    virtual bool AcceptsFocus() const { return true; }
-
-        // can this window or one of its children accept focus?
-        //
-        // usually it's the same as AcceptsFocus() but is overridden for
-        // container windows
-    virtual bool AcceptsFocusRecursively() const { return AcceptsFocus(); }
+        // can this window have focus?
+    virtual bool AcceptsFocus() const { return IsShown() && IsEnabled(); }
 
         // can this window be given focus by keyboard navigation? if not, the
         // only way to give it focus (provided it accepts it at all) is to
         // click it
     virtual bool AcceptsFocusFromKeyboard() const { return AcceptsFocus(); }
 
-
-        // this is mostly a helper for the various functions using it below
-    bool CanBeFocused() const { return IsShown() && IsEnabled(); }
-
-        // can this window itself have focus?
-    bool IsFocusable() const { return AcceptsFocus() && CanBeFocused(); }
-
-        // can this window have focus right now?
-        //
-        // if this method returns true, it means that calling SetFocus() will
-        // put focus either to this window or one of its children, if you need
-        // to know whether this window accepts focus itself, use IsFocusable()
-    bool CanAcceptFocus() const
-        { return AcceptsFocusRecursively() && CanBeFocused(); }
-
-        // can this window be assigned focus from keyboard right now?
-    bool CanAcceptFocusFromKeyboard() const
-        { return AcceptsFocusFromKeyboard() && CanBeFocused(); }
-
-        // call this when the return value of AcceptsFocus() changes
-    virtual void SetCanFocus(bool WXUNUSED(canFocus)) { }
-
-        // navigates inside this window
-    bool NavigateIn(int flags = wxNavigationKeyEvent::IsForward)
-        { return DoNavigateIn(flags); }
-
-        // navigates in the specified direction from this window, this is
-        // equivalent to GetParent()->NavigateIn()
-    bool Navigate(int flags = wxNavigationKeyEvent::IsForward)
-        { return m_parent && ((wxWindowBase *)m_parent)->DoNavigateIn(flags); }
+        // navigates in the specified direction by sending a wxNavigationKeyEvent
+    virtual bool Navigate(int flags = wxNavigationKeyEvent::IsForward);
 
         // move this window just before/after the specified one in tab order
         // (the other window must be our sibling!)
@@ -658,11 +589,6 @@ public:
         // implementation mostly
     virtual void AddChild( wxWindowBase *child );
     virtual void RemoveChild( wxWindowBase *child );
-
-    // returns true if the child is in the client area of the window, i.e. is
-    // not scrollbar, toolbar etc.
-    virtual bool IsClientAreaChild(const wxWindow *WXUNUSED(child)) const
-        { return true; }
 
     // looking for windows
     // -------------------
@@ -930,13 +856,6 @@ public:
                                const wxFont *theFont = (const wxFont *) NULL)
                                const = 0;
 
-    wxSize GetTextExtent(const wxString& string) const
-    {
-        wxCoord w, h;
-        GetTextExtent(string, &w, &h);
-        return wxSize(w, h);
-    }
-
     // client <-> screen coords
     // ------------------------
 
@@ -988,19 +907,10 @@ public:
     virtual void DoUpdateWindowUI(wxUpdateUIEvent& event) ;
 
 #if wxUSE_MENUS
-    // show popup menu at the given position, generate events for the items
-    // selected in it
     bool PopupMenu(wxMenu *menu, const wxPoint& pos = wxDefaultPosition)
         { return DoPopupMenu(menu, pos.x, pos.y); }
     bool PopupMenu(wxMenu *menu, int x, int y)
         { return DoPopupMenu(menu, x, y); }
-
-    // simply return the id of the selected item or wxID_NONE without
-    // generating any events
-    int GetPopupMenuSelectionFromUser(wxMenu& menu, const wxPoint& pos)
-        { return DoGetPopupMenuSelectionFromUser(menu, pos.x, pos.y); }
-    int GetPopupMenuSelectionFromUser(wxMenu& menu, int x, int y)
-        { return DoGetPopupMenuSelectionFromUser(menu, x, y); }
 #endif // wxUSE_MENUS
 
     // override this method to return true for controls having multiple pages
@@ -1226,13 +1136,6 @@ public:
     // behaviour in the most common case
     virtual bool ShouldInheritColours() const { return false; }
 
-    // returns true if the window can be positioned outside of parent's client
-    // area (normal windows can't, but e.g. menubar or statusbar can):
-    virtual bool CanBeOutsideClientArea() const { return false; }
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return true; }
-
 protected:
     // event handling specific to wxWindow
     virtual bool TryValidator(wxEvent& event);
@@ -1245,10 +1148,6 @@ protected:
         MoveAfter       // insert after the given window
     };
     virtual void DoMoveInTabOrder(wxWindow *win, MoveKind move);
-
-    // implementation of Navigate() and NavigateIn()
-    virtual bool DoNavigateIn(int flags);
-
 
 #if wxUSE_CONSTRAINTS
     // satisfy the constraints for the windows but don't set the window sizes
@@ -1263,18 +1162,6 @@ protected:
     // windows
     virtual wxWindow *GetMainWindowOfCompositeControl()
         { return (wxWindow*)this; }
-
-    // this method should be implemented to use operating system specific code
-    // to really enable/disable the widget, it will only be called when we
-    // really need to enable/disable window and so no additional checks on the
-    // widgets state are necessary
-    virtual void DoEnable(bool WXUNUSED(enable)) { }
-
-    // called when the on-screen widget state changes and provides an
-    // an opportunity for the widget to update its visual state (colours,
-    // fonts, anything else) as necessary
-    virtual void OnEnabled(bool WXUNUSED(enabled)) { }
-
 
     // the window id - a number which uniquely identifies a window among
     // its siblings unless it is wxID_ANY
@@ -1393,11 +1280,6 @@ protected:
     // specified) border for the window class
     virtual wxBorder GetDefaultBorder() const;
 
-    // this allows you to implement standard control borders without
-    // repeating the code in different classes that are not derived from
-    // wxControl
-    virtual wxBorder GetDefaultBorderForControl() const { return wxBORDER_SUNKEN; }
-
     // Get the default size for the new window if no explicit size given. TLWs
     // have their own default size so this is just for non top-level windows.
     static int WidthDefault(int w) { return w == wxDefaultCoord ? 20 : w; }
@@ -1501,24 +1383,11 @@ protected:
     static void NotifyCaptureLost();
 
 private:
-    // recursively call our own and our children OnEnabled() when the
-    // enabled/disabled status changed because a parent window had been
-    // enabled/disabled
-    void NotifyWindowOnEnableChange(bool enabled);
-
-#if wxUSE_MENUS
-    // temporary event handler used by GetPopupMenuSelectionFromUser()
-    void InternalOnPopupMenu(wxCommandEvent& event);
-
-    // implementation of the public GetPopupMenuSelectionFromUser() method
-    int DoGetPopupMenuSelectionFromUser(wxMenu& menu, int x, int y);
-#endif // wxUSE_MENUS
-
     // contains the last id generated by NewControlId
     static int ms_lastControlId;
 
     // the stack of windows which have captured the mouse
-    static struct WXDLLIMPEXP_FWD_CORE wxWindowNext *ms_winCaptureNext;
+    static struct WXDLLEXPORT wxWindowNext *ms_winCaptureNext;
     // the window that currently has mouse capture
     static wxWindow *ms_winCaptureCurrent;
     // indicates if execution is inside CaptureMouse/ReleaseMouse

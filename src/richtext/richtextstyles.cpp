@@ -822,7 +822,7 @@ bool wxRichTextStyleListCtrl::Create(wxWindow* parent, wxWindowID id, const wxPo
 
     bool showSelector = ((style & wxRICHTEXTSTYLELIST_HIDE_TYPE_SELECTOR) == 0);
 
-    m_styleListBox = new wxRichTextStyleListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, showSelector ? wxBORDER_DEFAULT : wxBORDER_NONE);
+    m_styleListBox = new wxRichTextStyleListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, showSelector ? wxSIMPLE_BORDER : wxNO_BORDER);
 
     wxBoxSizer* boxSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -837,7 +837,7 @@ bool wxRichTextStyleListCtrl::Create(wxWindow* parent, wxWindowID id, const wxPo
         m_styleChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, choices);
 
         boxSizer->Add(m_styleListBox, 1, wxALL|wxEXPAND, 5);
-        boxSizer->Add(m_styleChoice, 0, wxLEFT|wxRIGHT|wxBOTTOM|wxEXPAND, 5);
+        boxSizer->Add(m_styleChoice, 0, wxALL|wxEXPAND, 5);
     }
     else
     {
@@ -955,10 +955,8 @@ wxRichTextCtrl* wxRichTextStyleListCtrl::GetRichTextCtrl() const
 /// Set/get the style type to display
 void wxRichTextStyleListCtrl::SetStyleType(wxRichTextStyleListBox::wxRichTextStyleType styleType)
 {
-    if ( !m_styleListBox )
-        return;
-
-    m_styleListBox->SetStyleType(styleType);
+    if (m_styleListBox)
+        m_styleListBox->SetStyleType(styleType);
 
     m_dontUpdate = true;
 
@@ -997,17 +995,6 @@ BEGIN_EVENT_TABLE(wxRichTextStyleComboPopup, wxRichTextStyleListBox)
     EVT_MOTION(wxRichTextStyleComboPopup::OnMouseMove)
     EVT_LEFT_DOWN(wxRichTextStyleComboPopup::OnMouseClick)
 END_EVENT_TABLE()
-
-bool wxRichTextStyleComboPopup::Create( wxWindow* parent )
-{
-	int borderStyle = GetDefaultBorder();
-	if (borderStyle == wxBORDER_SUNKEN)
-	    borderStyle = wxBORDER_SIMPLE;
-
-    return wxRichTextStyleListBox::Create(parent, wxID_ANY,
-                                  wxPoint(0,0), wxDefaultSize,
-                                  borderStyle);
-}
 
 void wxRichTextStyleComboPopup::SetStringValue( const wxString& s )
 {
@@ -1099,19 +1086,9 @@ bool wxRichTextStyleComboCtrl::Create(wxWindow* parent, wxWindowID id, const wxP
 
 void wxRichTextStyleComboCtrl::OnIdle(wxIdleEvent& event)
 {
-    event.Skip();
-
-    if ( !m_stylePopup )
-        return;
-
-    wxRichTextCtrl * const richtext = GetRichTextCtrl();
-    if ( !richtext )
-        return;
-
-    if ( !IsPopupShown() && wxWindow::FindFocus() != this )
+    if (GetRichTextCtrl() && !IsPopupShown() && m_stylePopup && wxWindow::FindFocus() != this)
     {
-        wxString styleName =
-            wxRichTextStyleListBox::GetStyleToShowInIdleTime(richtext, m_stylePopup->GetStyleType());
+        wxString styleName = wxRichTextStyleListBox::GetStyleToShowInIdleTime(GetRichTextCtrl(), m_stylePopup->GetStyleType());
 
         wxString currentValue = GetValue();
         if (!styleName.IsEmpty())
@@ -1125,6 +1102,7 @@ void wxRichTextStyleComboCtrl::OnIdle(wxIdleEvent& event)
         else if (!currentValue.IsEmpty())
             SetValue(wxEmptyString);
     }
+    event.Skip();
 }
 
 #endif

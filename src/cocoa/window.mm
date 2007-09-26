@@ -277,7 +277,9 @@ protected:
     wxWindowCocoa *m_owner;
     WX_NSView m_dummyNSView;
     virtual void Cocoa_FrameChanged(void);
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     virtual void Cocoa_synthesizeMouseMoved(void) {}
+#endif
 #ifdef WXCOCOA_FILL_DUMMY_VIEW
     virtual bool Cocoa_drawRect(const NSRect& rect);
 #endif //def WXCOCOA_FILL_DUMMY_VIEW
@@ -303,7 +305,9 @@ protected:
     wxWindowCocoa *m_owner;
     WX_NSScrollView m_cocoaNSScrollView;
     virtual void Cocoa_FrameChanged(void);
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     virtual void Cocoa_synthesizeMouseMoved(void) {}
+#endif
 private:
     wxWindowCocoaScrollView();
 };
@@ -486,7 +490,10 @@ void wxWindowCocoa::Init()
     m_wxCocoaScrollView = NULL;
     m_isBeingDeleted = false;
     m_isInPaint = false;
+    m_shouldBeEnabled = true;
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     m_visibleTrackingRectManager = NULL;
+#endif
 }
 
 // Constructor
@@ -550,9 +557,11 @@ void wxWindowCocoa::CocoaRemoveFromParent(void)
 
 void wxWindowCocoa::SetNSView(WX_NSView cocoaNSView)
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     // Clear the visible area tracking rect if we have one.
     delete m_visibleTrackingRectManager;
     m_visibleTrackingRectManager = NULL;
+#endif
 
     bool need_debug = cocoaNSView || m_cocoaNSView;
     if(need_debug) wxLogTrace(wxTRACE_COCOA_RetainRelease,wxT("wxWindowCocoa=%p::SetNSView [m_cocoaNSView=%p retainCount]=%d"),this,m_cocoaNSView,[m_cocoaNSView retainCount]);
@@ -699,6 +708,7 @@ void wxWindowCocoa::Cocoa_synthesizeMouseMoved()
 
 bool wxWindowCocoa::Cocoa_mouseEntered(WX_NSEvent theEvent)
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     if(m_visibleTrackingRectManager != NULL && m_visibleTrackingRectManager->IsOwnerOfEvent(theEvent))
     {
         m_visibleTrackingRectManager->BeginSynthesizingEvents();
@@ -715,11 +725,13 @@ bool wxWindowCocoa::Cocoa_mouseEntered(WX_NSEvent theEvent)
         return GetEventHandler()->ProcessEvent(event);
     }
     else
+#endif
         return false;
 }
 
 bool wxWindowCocoa::Cocoa_mouseExited(WX_NSEvent theEvent)
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     if(m_visibleTrackingRectManager != NULL && m_visibleTrackingRectManager->IsOwnerOfEvent(theEvent))
     {
         m_visibleTrackingRectManager->StopSynthesizingEvents();
@@ -730,6 +742,7 @@ bool wxWindowCocoa::Cocoa_mouseExited(WX_NSEvent theEvent)
         return GetEventHandler()->ProcessEvent(event);
     }
     else
+#endif
         return false;
 }
 
@@ -801,38 +814,13 @@ bool wxWindowCocoa::Cocoa_otherMouseUp(WX_NSEvent theEvent)
 void wxWindowCocoa::Cocoa_FrameChanged(void)
 {
     wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::Cocoa_FrameChanged"),this);
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     if(m_visibleTrackingRectManager != NULL)
         m_visibleTrackingRectManager->RebuildTrackingRect();
+#endif
     wxSizeEvent event(GetSize(), m_windowId);
     event.SetEventObject(this);
     GetEventHandler()->ProcessEvent(event);
-}
-
-bool wxWindowCocoa::Cocoa_resetCursorRects()
-{
-    wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::Cocoa_resetCursorRects"),this);
-
-    // When we are called there may be a queued tracking rect event (mouse entered or exited) and
-    // we won't know it.  A specific example is wxGenericHyperlinkCtrl changing the cursor from its
-    // mouse exited event.  If the control happens to share the edge with its parent window which is
-    // also tracking mouse events then Cocoa receives two mouse exited events from the window server.
-    // The first one will cause wxGenericHyperlinkCtrl to call wxWindow::SetCursor which will
-    // invaildate the cursor rect causing Cocoa to schedule cursor rect reset with the run loop
-    // which willl in turn call us before exiting for the next user event.
-
-    // If we are the parent window then rebuilding our tracking rectangle will cause us to miss
-    // our mouse exited event because the already queued event will have the old tracking rect
-    // tag.  The simple solution is to only rebuild our tracking rect if we need to.
-
-    if(m_visibleTrackingRectManager != NULL)
-        m_visibleTrackingRectManager->RebuildTrackingRectIfNeeded();
-
-    if(!m_cursor.GetNSCursor())
-        return false;
-
-    [GetNSView() addCursorRect: [GetNSView() visibleRect]  cursor: m_cursor.GetNSCursor()];
-
-    return true;
 }
 
 bool wxWindowCocoa::SetCursor(const wxCursor &cursor)
@@ -852,6 +840,36 @@ bool wxWindowCocoa::SetCursor(const wxCursor &cursor)
     return true;
 }
 
+bool wxWindowCocoa::Cocoa_resetCursorRects()
+{
+    wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::Cocoa_resetCursorRects"),this);
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
+
+    // When we are called there may be a queued tracking rect event (mouse entered or exited) and
+    // we won't know it.  A specific example is wxGenericHyperlinkCtrl changing the cursor from its
+    // mouse exited event.  If the control happens to share the edge with its parent window which is
+    // also tracking mouse events then Cocoa receives two mouse exited events from the window server.
+    // The first one will cause wxGenericHyperlinkCtrl to call wxWindow::SetCursor which will
+    // invaildate the cursor rect causing Cocoa to schedule cursor rect reset with the run loop
+    // which willl in turn call us before exiting for the next user event.
+
+    // If we are the parent window then rebuilding our tracking rectangle will cause us to miss
+    // our mouse exited event because the already queued event will have the old tracking rect
+    // tag.  The simple solution is to only rebuild our tracking rect if we need to.
+
+    if(m_visibleTrackingRectManager != NULL)
+        m_visibleTrackingRectManager->RebuildTrackingRectIfNeeded();
+#endif
+
+    if(!m_cursor.GetNSCursor())
+        return false;
+
+    [GetNSView() addCursorRect: [GetNSView() visibleRect]  cursor: m_cursor.GetNSCursor()];
+
+    return true;
+}
+
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
 bool wxWindowCocoa::Cocoa_viewDidMoveToWindow()
 {
     wxLogTrace(wxTRACE_COCOA,wxT("wxWindow=%p::viewDidMoveToWindow"),this);
@@ -869,6 +887,7 @@ bool wxWindowCocoa::Cocoa_viewWillMoveToWindow(WX_NSWindow newWindow)
         m_visibleTrackingRectManager->ClearTrackingRect();
     return false;
 }
+#endif
 
 bool wxWindow::Close(bool force)
 {
@@ -882,9 +901,32 @@ void wxWindow::CocoaReplaceView(WX_NSView oldView, WX_NSView newView)
     [[oldView superview] replaceSubview:oldView with:newView];
 }
 
-void wxWindow::DoEnable(bool enable)
+bool wxWindow::EnableSelfAndChildren(bool enable)
 {
-	CocoaSetEnabled(enable);
+    // If the state isn't changing, don't do anything
+    if(!wxWindowBase::Enable(enable && m_shouldBeEnabled))
+        return false;
+    // Set the state of the Cocoa window
+    CocoaSetEnabled(m_isEnabled);
+    // Disable all children or (if enabling) return them to their proper state
+    for(wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
+        node; node = node->GetNext())
+    {
+        node->GetData()->EnableSelfAndChildren(enable);
+    }
+    return true;
+}
+
+bool wxWindow::Enable(bool enable)
+{
+    // Keep track of what the window SHOULD be doing
+    m_shouldBeEnabled = enable;
+    // If the parent is disabled for any reason, then this window will be too.
+    if(!IsTopLevel() && GetParent())
+    {
+        enable = enable && GetParent()->IsEnabled();
+    }
+    return EnableSelfAndChildren(enable);
 }
 
 bool wxWindow::Show(bool show)
@@ -1157,7 +1199,7 @@ void wxWindow::SetLabel(const wxString& WXUNUSED(label))
 
 wxString wxWindow::GetLabel() const
 {
-    // General Get/Set of labels is implemented in wxControlBase
+    // General Get/Set of labels is NOT implemented in wxControlBase until trunk (2.9).
     wxLogDebug(wxT("wxWindow::GetLabel: Should be overridden if needed."));
     return wxEmptyString;
 }
@@ -1165,13 +1207,13 @@ wxString wxWindow::GetLabel() const
 int wxWindow::GetCharHeight() const
 {
     // TODO
-    return 10;
+    return 0;
 }
 
 int wxWindow::GetCharWidth() const
 {
     // TODO
-    return 5;
+    return 0;
 }
 
 void wxWindow::GetTextExtent(const wxString& string, int *x, int *y,
@@ -1517,27 +1559,7 @@ void wxCocoaMouseMovedEventSynthesizer::AddRunLoopObserver()
     ,   NULL
     ,   NULL
     };
-
-    // The kCFRunLoopExit observation point is used such that we hook the run loop after it has already decided that
-    // it is going to exit which is generally for the purpose of letting the event loop process the next Cocoa event.
-
-    // Executing our procedure within the run loop (e.g. kCFRunLoopBeforeWaiting which was used before) results
-    // in our observer procedure being called before the run loop has decided that it is going to return control to
-    // the Cocoa event loop.  One major problem is uncovered by the wxGenericHyperlinkCtrl (consider this to be "user
-    // code") which changes the window's cursor and thus causes the cursor rectangle's to be invalidated.
-
-    // Cocoa implements this invalidation using a delayed notification scheme whereby the resetCursorRects method
-    // won't be called until the CFRunLoop gets around to it.  If the CFRunLoop has not yet exited then it will get
-    // around to it before letting the event loop do its work.  This has some very odd effects on the way the
-    // newly created tracking rects function.  In particular, we will often miss the mouseExited: message if the
-    // user flicks the mouse quickly enough such that the mouse is already outside of the tracking rect by the
-    // time the new one is built.
-
-    // Observing from the kCFRunLoopExit point gives Cocoa's event loop an opportunity to chew some events before it cedes
-    // control back to the CFRunLoop, thus causing the delayed notifications to fire at an appropriate time and
-    // the mouseExited: message to be sent properly.
-
-    m_runLoopObserver.reset(CFRunLoopObserverCreate(kCFAllocatorDefault, kCFRunLoopExit, TRUE, 0, SynthesizeMouseMovedEvent, &observerContext));
+    m_runLoopObserver.reset(CFRunLoopObserverCreate(kCFAllocatorDefault, kCFRunLoopBeforeWaiting, TRUE, 0, SynthesizeMouseMovedEvent, &observerContext));
     CFRunLoopAddObserver([[NSRunLoop currentRunLoop] getCFRunLoop], m_runLoopObserver, kCFRunLoopCommonModes);
     wxLogTrace(wxTRACE_COCOA_TrackingRect, wxT("Added tracking rect run loop observer"));
 }
@@ -1551,6 +1573,7 @@ void wxCocoaMouseMovedEventSynthesizer::RemoveRunLoopObserver()
 
 void wxCocoaMouseMovedEventSynthesizer::SynthesizeMouseMovedEvent()
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     NSPoint screenMouseLocation = [NSEvent mouseLocation];
     // Checking the last mouse location is done for a few reasons:
     // 1. We are observing every iteration of the event loop so we'd be sending out a lot of extraneous events
@@ -1568,6 +1591,7 @@ void wxCocoaMouseMovedEventSynthesizer::SynthesizeMouseMovedEvent()
             (*i)->Cocoa_synthesizeMouseMoved();
         }
     }
+#endif
 }
 
 // Singleton used for all views:

@@ -70,7 +70,7 @@ wxBEGIN_FLAGS( wxChoiceStyle )
 
 wxEND_FLAGS( wxChoiceStyle )
 
-IMPLEMENT_DYNAMIC_CLASS_XTI(wxChoice, wxControlWithItems,"wx/choice.h")
+IMPLEMENT_DYNAMIC_CLASS_XTI(wxChoice, wxControl,"wx/choice.h")
 
 wxBEGIN_PROPERTIES_TABLE(wxChoice)
     wxEVENT_PROPERTY( Select , wxEVT_COMMAND_CHOICE_SELECTED , wxCommandEvent )
@@ -86,7 +86,7 @@ wxEND_HANDLERS_TABLE()
 
 wxCONSTRUCTOR_4( wxChoice , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size )
 #else
-IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControlWithItems)
+IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
 #endif
 /*
     TODO PROPERTIES
@@ -211,55 +211,60 @@ WXDWORD wxChoice::MSWGetStyle(long style, WXDWORD *exstyle) const
 
 wxChoice::~wxChoice()
 {
-    Clear();
+    Free();
 }
 
 // ----------------------------------------------------------------------------
 // adding/deleting items to/from the list
 // ----------------------------------------------------------------------------
 
-int wxChoice::DoInsertItems(const wxArrayStringsAdapter& items,
-                            unsigned int pos,
-                            void **clientData, wxClientDataType type)
+int wxChoice::DoAppend(const wxString& item)
 {
-    MSWAllocStorage(items, CB_INITSTORAGE);
-
-    const bool append = pos == GetCount();
-
-    // use CB_ADDSTRING when appending at the end to make sure the control is
-    // resorted if it has wxCB_SORT style
-    const unsigned msg = append ? CB_ADDSTRING : CB_INSERTSTRING;
-
-    if ( append )
-        pos = 0;
-
-    int n = wxNOT_FOUND;
-    const unsigned numItems = items.GetCount();
-    for ( unsigned i = 0; i < numItems; ++i )
+    int n = (int)SendMessage(GetHwnd(), CB_ADDSTRING, 0, (LPARAM)item.c_str());
+    if ( n == CB_ERR )
     {
-        n = MSWInsertOrAppendItem(pos, items[i], msg);
-        if ( n == wxNOT_FOUND )
-            return n;
-
-        if ( !append )
-            pos++;
-
-        AssignNewItemClientData(n, clientData, i, type);
+        wxLogLastError(wxT("SendMessage(CB_ADDSTRING)"));
+    }
+    else // ok
+    {
+        // we need to refresh our size in order to have enough space for the
+        // newly added items
+        if ( !IsFrozen() )
+            UpdateVisibleHeight();
     }
 
-    // we need to refresh our size in order to have enough space for the
-    // newly added items
-    if ( !IsFrozen() )
-        UpdateVisibleHeight();
-
     InvalidateBestSize();
-
     return n;
 }
 
-void wxChoice::DoDeleteOneItem(unsigned int n)
+int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+{
+    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into sorted list"));
+    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+
+    int n = (int)SendMessage(GetHwnd(), CB_INSERTSTRING, pos, (LPARAM)item.c_str());
+    if ( n == CB_ERR )
+    {
+        wxLogLastError(wxT("SendMessage(CB_INSERTSTRING)"));
+    }
+    else // ok
+    {
+        if ( !IsFrozen() )
+            UpdateVisibleHeight();
+    }
+
+    InvalidateBestSize();
+    return n;
+}
+
+void wxChoice::Delete(unsigned int n)
 {
     wxCHECK_RET( IsValid(n), wxT("invalid item index in wxChoice::Delete") );
+
+    if ( HasClientObjectData() )
+    {
+        delete GetClientObject(n);
+    }
 
     SendMessage(GetHwnd(), CB_DELETESTRING, n, 0);
 
@@ -269,14 +274,28 @@ void wxChoice::DoDeleteOneItem(unsigned int n)
     InvalidateBestSize();
 }
 
-void wxChoice::DoClear()
+void wxChoice::Clear()
 {
+    Free();
+
     SendMessage(GetHwnd(), CB_RESETCONTENT, 0, 0);
 
     if ( !IsFrozen() )
         UpdateVisibleHeight();
 
     InvalidateBestSize();
+}
+
+void wxChoice::Free()
+{
+    if ( HasClientObjectData() )
+    {
+        unsigned int count = GetCount();
+        for ( unsigned int n = 0; n < count; n++ )
+        {
+            delete GetClientObject(n);
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -349,7 +368,7 @@ int wxChoice::FindString(const wxString& s, bool bCase) const
    else
    {
        int pos = (int)SendMessage(GetHwnd(), CB_FINDSTRINGEXACT,
-                                  (WPARAM)-1, (LPARAM)s.wx_str());
+                                  (WPARAM)-1, (LPARAM)s.c_str());
 
        return pos == LB_ERR ? wxNOT_FOUND : pos;
    }
@@ -363,22 +382,25 @@ void wxChoice::SetString(unsigned int n, const wxString& s)
     // we have to delete and add back the string as there is no way to change a
     // string in place
 
-    // we need to preserve the client data manually
-    void *oldData = NULL;
-    wxClientData *oldObjData = NULL;
-    if ( HasClientUntypedData() )
-        oldData = GetClientData(n);
-    else if ( HasClientObjectData() )
-        oldObjData = GetClientObject(n);
+    // we need to preserve the client data
+    void *data;
+    if ( m_clientDataItemsType != wxClientData_None )
+    {
+        data = DoGetItemClientData(n);
+    }
+    else // no client data
+    {
+        data = NULL;
+    }
 
     ::SendMessage(GetHwnd(), CB_DELETESTRING, n, 0);
-    ::SendMessage(GetHwnd(), CB_INSERTSTRING, n, (LPARAM)s.wx_str() );
+    ::SendMessage(GetHwnd(), CB_INSERTSTRING, n, (LPARAM)s.c_str() );
 
-    // restore the client data
-    if ( oldData )
-        SetClientData(n, oldData);
-    else if ( oldObjData )
-        SetClientObject(n, oldObjData);
+    if ( data )
+    {
+        DoSetItemClientData(n, data);
+    }
+    //else: it's already NULL by default
 
     InvalidateBestSize();
 }
@@ -432,6 +454,16 @@ void* wxChoice::DoGetItemClientData(unsigned int n) const
     return (void *)rc;
 }
 
+void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+{
+    DoSetItemClientData(n, clientData);
+}
+
+wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData *)DoGetItemClientData(n);
+}
+
 // ----------------------------------------------------------------------------
 // wxMSW specific helpers
 // ----------------------------------------------------------------------------
@@ -474,7 +506,7 @@ void wxChoice::DoSetSize(int x, int y,
                          int sizeFlags)
 {
     int heightOrig = height;
-
+    
     // the height which we must pass to Windows should be the total height of
     // the control including the drop down list while the height given to us
     // is, of course, just the height of the permanently visible part of it

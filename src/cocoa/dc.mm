@@ -230,7 +230,7 @@ void wxDC::DoDrawLine(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2)
     [bezpath stroke];
 }
 
-void wxDC::DoGetTextExtent(const wxString& text, wxCoord *x, wxCoord *y, wxCoord *descent, wxCoord *externalLeading, const wxFont *theFont) const
+void wxDC::DoGetTextExtent(const wxString& text, wxCoord *x, wxCoord *y, wxCoord *descent, wxCoord *externalLeading, wxFont *theFont) const
 {
     wxAutoNSAutoreleasePool pool;
 // FIXME: Cache this so it can be used for DoDrawText
@@ -335,6 +335,47 @@ void wxDC::DoDrawText(const wxString& text, wxCoord x, wxCoord y)
         containerOrigin:underlineLocation];
 
     [context restoreGraphicsState];
+}
+
+// wxDCBase functions
+int wxDCBase::DeviceToLogicalX(int x) const
+{
+    return x;
+}
+
+int wxDCBase::DeviceToLogicalY(int y) const
+{
+    return y;
+}
+
+int wxDCBase::DeviceToLogicalXRel(int x) const
+{
+    return x;
+}
+
+int wxDCBase::DeviceToLogicalYRel(int y) const
+{
+    return y;
+}
+
+int wxDCBase::LogicalToDeviceX(int x) const
+{
+    return x;
+}
+
+int wxDCBase::LogicalToDeviceY(int y) const
+{
+    return y;
+}
+
+int wxDCBase::LogicalToDeviceXRel(int x) const
+{
+    return x;
+}
+
+int wxDCBase::LogicalToDeviceYRel(int y) const
+{
+    return y;
 }
 
 ///////////////////////////////////////////////////////////////////////////

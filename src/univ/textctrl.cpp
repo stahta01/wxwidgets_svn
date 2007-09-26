@@ -790,23 +790,21 @@ wxTextCtrl::~wxTextCtrl()
 
 void wxTextCtrl::DoSetValue(const wxString& value, int flags)
 {
-    if ( value != GetValue() )
+    if ( IsSingleLine() && (value == GetValue()) )
     {
-        EventsSuppressor noeventsIf(this, !(flags & SetValue_SendEvent));
-
-        Replace(0, GetLastPosition(), value);
-
-        if ( IsSingleLine() )
-        {
-            SetInsertionPoint(0);
-        }
+        // nothing changed
+        return;
     }
-    else // nothing changed
+
+    Replace(0, GetLastPosition(), value);
+
+    if ( IsSingleLine() )
     {
-        // still send event for consistency
-        if ( flags & SetValue_SendEvent )
-            SendTextUpdatedEvent();
+        SetInsertionPoint(0);
     }
+
+    if ( flags & SetValue_SendEvent )
+        SendTextUpdatedEvent();
 }
 
 const wxArrayString& wxTextCtrl::GetLines() const
@@ -1266,9 +1264,6 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
 
     // now call it to do the rest (not related to refreshing)
     ClearSelection();
-
-    if ( EventsAllowed() )
-        SendTextUpdatedEvent();
 }
 
 void wxTextCtrl::Remove(wxTextPos from, wxTextPos to)
@@ -1970,7 +1965,7 @@ void wxTextCtrl::ShowPosition(wxTextPos pos)
                 {
                     // finding the last line is easy if each line has exactly
                     // one row
-                    yEnd = yStart + rectText.height / GetLineHeight();
+                    yEnd = yStart + rectText.height / GetLineHeight() - 1;
                 }
 
                 if ( yEnd < y )
@@ -2423,7 +2418,7 @@ void wxTextCtrl::UpdateTextRect()
             WData().m_rowFirstInvalid = 0;
 
             // increase timestamp: this means that the lines which had been
-            // laid out before will be relaid out the next time LayoutLines()
+            // laid out before will be relayd out the next time LayoutLines()
             // is called because their timestamp will be smaller than the
             // current one
             WData().m_timestamp++;
@@ -4202,7 +4197,6 @@ void wxTextCtrl::DoDraw(wxControlRenderer *renderer)
     // FIXME: is this really a bug in wxMSW?
     rectTextArea.width--;
 #endif // __WXMSW__
-    dc.DestroyClippingRegion();
     dc.SetClippingRegion(rectTextArea);
 
     // adjust for scrolling

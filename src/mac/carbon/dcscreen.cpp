@@ -18,6 +18,10 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 
+// TODO : for the Screenshot use case, which doesn't work in Quartz
+// we should do a GetAsBitmap using something like
+// http://www.cocoabuilder.com/archive/message/cocoa/2005/8/13/144256
+
 // Create a DC representing the whole screen
 wxScreenDC::wxScreenDC()
 {
@@ -43,8 +47,8 @@ wxScreenDC::wxScreenDC()
     Point pt = { 0,0 } ;
     LocalToGlobal( &pt ) ;
     SetPort( port ) ;
-    m_deviceLocalOriginX = -pt.h ;
-    m_deviceLocalOriginY = -pt.v ;
+    m_macLocalOrigin.x = -pt.h ;
+    m_macLocalOrigin.y = -pt.v ;
 
     BitMap screenBits;
     GetQDGlobalsScreenBits( &screenBits );
@@ -58,7 +62,7 @@ wxScreenDC::wxScreenDC()
     m_maxY = screenBits.bounds.bottom ;
 
     MacSetRectRgn( (RgnHandle) m_macBoundaryClipRgn , m_minX , m_minY , m_maxX , m_maxY ) ;
-    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_deviceLocalOriginX , m_deviceLocalOriginY ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
     CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
 #endif
     m_ok = true ;

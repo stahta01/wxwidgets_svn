@@ -18,7 +18,7 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
+class WXDLLEXPORT wxDC;
 
 //-----------------------------------------------------------------------------
 // constants
@@ -79,28 +79,58 @@ public:
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const;
+                                 wxFont *theFont = NULL) const;
 
     virtual bool CanDrawBitmap() const;
     virtual bool CanGetTextExtent() const;
     virtual int GetDepth() const;
     virtual wxSize GetPPI() const;
 
+    virtual void SetMapMode(int mode);
+    virtual void SetUserScale(double x, double y);
+    virtual void SetLogicalScale(double x, double y);
+    virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
+    virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
+    virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
     virtual void SetLogicalFunction(int function);
 
     // implementation from now on
     // --------------------------
 
     virtual void ComputeScaleAndOrigin();
-    
-    wxCoord XDEV2LOG(wxCoord x) const       { return DeviceToLogicalX(x); }
-    wxCoord XDEV2LOGREL(wxCoord x) const    { return DeviceToLogicalXRel(x); }
-    wxCoord YDEV2LOG(wxCoord y) const       { return DeviceToLogicalY(y); }
-    wxCoord YDEV2LOGREL(wxCoord y) const    { return DeviceToLogicalYRel(y); }
-    wxCoord XLOG2DEV(wxCoord x) const       { return LogicalToDeviceX(x); }
-    wxCoord XLOG2DEVREL(wxCoord x) const    { return LogicalToDeviceXRel(x); }
-    wxCoord YLOG2DEV(wxCoord y) const       { return LogicalToDeviceY(y); }
-    wxCoord YLOG2DEVREL(wxCoord y) const    { return LogicalToDeviceYRel(y); }
+
+    wxCoord XDEV2LOG(wxCoord x) const
+    {
+        return wxRound((double)(x - m_deviceOriginX) / m_scaleX) * m_signX + m_logicalOriginX;
+    }
+    wxCoord XDEV2LOGREL(wxCoord x) const
+    {
+        return wxRound((double)(x) / m_scaleX);
+    }
+    wxCoord YDEV2LOG(wxCoord y) const
+    {
+        return wxRound((double)(y - m_deviceOriginY) / m_scaleY) * m_signY + m_logicalOriginY;
+    }
+    wxCoord YDEV2LOGREL(wxCoord y) const
+    {
+        return wxRound((double)(y) / m_scaleY);
+    }
+    wxCoord XLOG2DEV(wxCoord x) const
+    {
+        return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX;
+    }
+    wxCoord XLOG2DEVREL(wxCoord x) const
+    {
+        return wxRound((double)(x) * m_scaleX);
+    }
+    wxCoord YLOG2DEV(wxCoord y) const
+    {
+        return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY;
+    }
+    wxCoord YLOG2DEVREL(wxCoord y) const
+    {
+        return wxRound((double)(y) * m_scaleY);
+    }
 
     MGLDevCtx *GetMGLDC() const { return m_MGLDC; }
     void SetMGLDC(MGLDevCtx *mgldc, bool OwnsMGLDC = false);

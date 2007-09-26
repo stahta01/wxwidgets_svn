@@ -295,6 +295,7 @@ void wxWindowOS2::Init()
     m_bUseCtl3D             = false;
     m_bMouseInWindow        = false;
     m_bLastKeydownProcessed = false;
+    m_pChildrenDisabled     = NULL;
 
     //
     // wxWnd
@@ -356,6 +357,7 @@ wxWindowOS2::~wxWindowOS2()
         //
         wxRemoveHandleAssociation(this);
     }
+    delete m_pChildrenDisabled;
 } // end of wxWindowOS2::~wxWindowOS2
 
 // real construction (Init() must have been called before!)
@@ -477,12 +479,70 @@ wxWindow* wxWindowBase::DoFindFocus()
     return NULL;
 } // wxWindowBase::DoFindFocus
 
-void wxWindowOS2::DoEnable( bool bEnable )
+bool wxWindowOS2::Enable( bool bEnable )
 {
+    if (!wxWindowBase::Enable(bEnable))
+        return false;
+
     HWND                            hWnd = GetHwnd();
+
     if ( hWnd )
         ::WinEnableWindow(hWnd, (BOOL)bEnable);
-}
+
+    //
+    // The logic below doesn't apply to the top level windows -- otherwise
+    // showing a modal dialog would result in total greying out (and ungreying
+    // out later) of everything which would be really ugly
+    //
+    if (IsTopLevel())
+        return true;
+
+    wxWindowList::compatibility_iterator     node = GetChildren().GetFirst();
+
+    while (node)
+    {
+        wxWindow*                   pChild = node->GetData();
+
+        if (bEnable)
+        {
+            //
+            // Enable the child back unless it had been disabled before us
+            //
+            if (!m_pChildrenDisabled || !m_pChildrenDisabled->Find(pChild))
+                pChild->Enable();
+        }
+        else // we're being disabled
+        {
+            if (pChild->IsEnabled())
+            {
+                //
+                // Disable it as children shouldn't stay enabled while the
+                // parent is not
+                //
+                pChild->Disable();
+            }
+            else // child already disabled, remember it
+            {
+                //
+                // Have we created the list of disabled children already?
+                //
+                if (!m_pChildrenDisabled)
+                    m_pChildrenDisabled = new wxWindowList;
+                m_pChildrenDisabled->Append(pChild);
+            }
+        }
+        node = node->GetNext();
+    }
+    if (bEnable && m_pChildrenDisabled)
+    {
+        //
+        // We don't need this list any more, don't keep unused memory
+        //
+        delete m_pChildrenDisabled;
+        m_pChildrenDisabled = NULL;
+    }
+    return true;
+} // end of wxWindowOS2::Enable
 
 bool wxWindowOS2::Show( bool bShow )
 {
@@ -512,7 +572,7 @@ void wxWindowOS2::Lower()
 
 void wxWindowOS2::SetLabel( const wxString& label )
 {
-    ::WinSetWindowText(GetHwnd(), label.c_str());
+    ::WinSetWindowText(GetHwnd(), (PSZ)label.c_str());
 } // end of wxWindowOS2::SetLabel
 
 wxString wxWindowOS2::GetLabel() const
@@ -1673,6 +1733,7 @@ void wxWindowOS2::GetTextExtent( const wxString& rString,
     int         l;
     FONTMETRICS vFM; // metrics structure
     BOOL        bRc = FALSE;
+    char*       pStr;
     HPS         hPS;
 
     hPS = ::WinGetPS(GetHwnd());
@@ -1680,12 +1741,14 @@ void wxWindowOS2::GetTextExtent( const wxString& rString,
     l = rString.length();
     if (l > 0L)
     {
+        pStr = (PCH)rString.c_str();
+
         //
         // In world coordinates.
         //
         bRc = ::GpiQueryTextBox( hPS,
                                  l,
-                                 (char*) rString.wx_str(),
+                                 pStr,
                                  TXTBOX_COUNT,// return maximum information
                                  avPoint      // array of coordinates points
                                 );
@@ -2355,7 +2418,7 @@ MRESULT wxWindowOS2::OS2WindowProc( WXUINT uMsg,
                                                                   );
                     if (!pWin->IsOfStandardClass())
                     {
-                        if (uMsg == WM_BUTTON1DOWN && pWin->CanAcceptFocus() )
+                        if (uMsg == WM_BUTTON1DOWN && pWin->AcceptsFocus() )
                             pWin->SetFocus();
                     }
                     bProcessed = pWin->HandleMouseEvent( uMsg
@@ -2968,8 +3031,8 @@ bool wxWindowOS2::OS2Create( PSZ            zClass,
         sClassName += wxT("NR");
     }
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)OS2GetParent()
-                                       ,sClassName.c_str()
-                                       ,(zTitle ? zTitle : wxEmptyString)
+                                       ,(PSZ)sClassName.c_str()
+                                       ,(PSZ)(zTitle ? zTitle : wxEmptyString)
                                        ,(ULONG)dwStyle
                                        ,(LONG)0L
                                        ,(LONG)0L

@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver  2.9.0
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.6
+%define ver2 2.8
+%define rel  0
 
 %define portname   motif
 %define name       wx-%{portname}
@@ -116,12 +116,9 @@ wx/apptrait.h
 wx/archive.h
 wx/arrimpl.cpp
 wx/arrstr.h
-wx/atomic.h
-wx/base64.h
 wx/beforestd.h
 wx/buffer.h
 wx/build.h
-wx/chartype.h
 wx/chkconf.h
 wx/clntdata.h
 wx/cmdline.h
@@ -130,7 +127,6 @@ wx/config.h
 wx/convauto.h
 wx/containr.h
 wx/cpp.h
-wx/crt.h
 wx/datetime.h
 wx/datstrm.h
 wx/dde.h
@@ -145,7 +141,6 @@ wx/encconv.h
 wx/event.h
 wx/except.h
 wx/features.h
-wx/flags.h
 wx/ffile.h
 wx/file.h
 wx/fileconf.h
@@ -203,9 +198,6 @@ wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/stringimpl.h
-wx/stringops.h
-wx/strvararg.h
 wx/sysopt.h
 wx/tarstrm.h
 wx/textbuf.h
@@ -216,7 +208,6 @@ wx/timer.h
 wx/tokenzr.h
 wx/txtstrm.h
 wx/types.h
-wx/unichar.h
 wx/uri.h
 wx/utils.h
 wx/variant.h
@@ -226,22 +217,14 @@ wx/volume.h
 wx/wfstream.h
 wx/wx.h
 wx/wxchar.h
-wx/wxcrt.h
-wx/wxcrtbase.h
-wx/wxcrtvararg.h
 wx/wxprec.h
 wx/xti.h
 wx/xtistrm.h
 wx/zipstrm.h
 wx/zstream.h
-wx/private/fdiodispatcher.h
-wx/private/selectdispatcher.h
-wx/unix/app.h
 wx/unix/apptbase.h
 wx/unix/apptrait.h
-wx/unix/chkconf.h
 wx/unix/execute.h
-wx/unix/evtloop.h
 wx/unix/mimetype.h
 wx/unix/pipe.h
 wx/unix/private.h

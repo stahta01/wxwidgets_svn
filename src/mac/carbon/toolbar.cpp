@@ -84,8 +84,8 @@ public:
         const wxString& shortHelp,
         const wxString& longHelp );
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         Init();
         if (control != NULL)
@@ -124,7 +124,7 @@ public:
             m_controlHandle = NULL ;
         }
         m_control = NULL;
-
+        
 #if wxMAC_USE_NATIVE_TOOLBAR
         if ( m_toolbarItemRef )
         {
@@ -190,7 +190,7 @@ public:
                 enc = f.GetEncoding();
             else
                 enc = wxFont::GetDefaultEncoding();
-
+            
             HIToolbarItemSetHelpText(
                 m_toolbarItemRef,
                 wxMacCFStringHolder( GetShortHelp(), enc ),
@@ -476,12 +476,15 @@ void wxToolBarTool::UpdateToggleImage( bool toggle )
         dc.DrawBitmap( m_bmpNormal, 0, 0, true );
         dc.SelectObject( wxNullBitmap );
         ControlButtonContentInfo info;
-        wxMacCreateBitmapButton( &info, bmp, kControlContentIconRef );
+        wxMacCreateBitmapButton( &info, bmp );
         SetControlData( m_controlHandle, 0, kControlIconContentTag, sizeof(info), (Ptr)&info );
 #if wxMAC_USE_NATIVE_TOOLBAR
         if (m_toolbarItemRef != NULL)
         {
-            HIToolbarItemSetIconRef( m_toolbarItemRef, info.u.iconRef );
+            ControlButtonContentInfo info2;
+            wxMacCreateBitmapButton( &info2, bmp, kControlContentCGImageRef);
+            HIToolbarItemSetImage( m_toolbarItemRef, info2.u.imageRef );
+            wxMacReleaseBitmapButton( &info2 );
         }
 #endif
         wxMacReleaseBitmapButton( &info );
@@ -489,12 +492,15 @@ void wxToolBarTool::UpdateToggleImage( bool toggle )
     else
     {
         ControlButtonContentInfo info;
-        wxMacCreateBitmapButton( &info, m_bmpNormal, kControlContentIconRef );
+        wxMacCreateBitmapButton( &info, m_bmpNormal );
         SetControlData( m_controlHandle, 0, kControlIconContentTag, sizeof(info), (Ptr)&info );
 #if wxMAC_USE_NATIVE_TOOLBAR
         if (m_toolbarItemRef != NULL)
         {
-            HIToolbarItemSetIconRef( m_toolbarItemRef, info.u.iconRef );
+            ControlButtonContentInfo info2;
+            wxMacCreateBitmapButton( &info2, m_bmpNormal, kControlContentCGImageRef);
+            HIToolbarItemSetImage( m_toolbarItemRef, info2.u.imageRef );
+            wxMacReleaseBitmapButton( &info2 );
         }
 #endif
         wxMacReleaseBitmapButton( &info );
@@ -547,10 +553,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(
         clientData, shortHelp, longHelp );
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase * wxToolBar::CreateTool( wxControl *control )
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool( this, control );
 }
 
 void wxToolBar::Init()
@@ -568,26 +573,26 @@ void wxToolBar::Init()
 
 #define kControlToolbarItemClassID      CFSTR( "org.wxwidgets.controltoolbaritem" )
 
-const EventTypeSpec kEvents[] =
+const EventTypeSpec kEvents[] = 
 {
     { kEventClassHIObject, kEventHIObjectConstruct },
     { kEventClassHIObject, kEventHIObjectInitialize },
     { kEventClassHIObject, kEventHIObjectDestruct },
-
+    
     { kEventClassToolbarItem, kEventToolbarItemCreateCustomView }
 };
 
-const EventTypeSpec kViewEvents[] =
-{
-    { kEventClassControl, kEventControlGetSizeConstraints }
+const EventTypeSpec kViewEvents[] = 
+{ 
+    { kEventClassControl, kEventControlGetSizeConstraints } 
 };
 
-struct ControlToolbarItem
-{
-    HIToolbarItemRef    toolbarItem;
+struct ControlToolbarItem 
+{ 
+    HIToolbarItemRef    toolbarItem; 
     HIViewRef           viewRef;
     wxSize              lastValidSize ;
-};
+}; 
 
 static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef, EventRef inEvent, void* inUserData )
 {
@@ -603,21 +608,21 @@ static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef,
                     {
                         HIObjectRef         toolbarItem;
                         ControlToolbarItem* item;
-
+                        
                         GetEventParameter( inEvent, kEventParamHIObjectInstance, typeHIObjectRef, NULL,
                             sizeof( HIObjectRef ), NULL, &toolbarItem );
-
+                        
                         item = (ControlToolbarItem*) malloc(sizeof(ControlToolbarItem)) ;
                         item->toolbarItem = toolbarItem ;
                         item->lastValidSize = wxSize(-1,-1);
                         item->viewRef = NULL ;
-
+                        
                         SetEventParameter( inEvent, kEventParamHIObjectInstance, typeVoidPtr, sizeof( void * ), &item );
-
+                        
                         result = noErr ;
                     }
                     break;
-
+ 
                 case kEventHIObjectInitialize:
                     result = CallNextEventHandler( inCallRef, inEvent );
                     if ( result == noErr )
@@ -625,12 +630,12 @@ static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef,
                         CFDataRef           data;
                         GetEventParameter( inEvent, kEventParamToolbarItemConfigData, typeCFTypeRef, NULL,
                             sizeof( CFTypeRef ), NULL, &data );
-
+                    
                         HIViewRef viewRef ;
-
+                        
                         wxASSERT_MSG( CFDataGetLength( data ) == sizeof( viewRef ) , wxT("Illegal Data passed") ) ;
                         memcpy( &viewRef , CFDataGetBytePtr( data ) , sizeof( viewRef ) ) ;
-
+                    
                         object->viewRef = (HIViewRef) viewRef ;
                         // make sure we keep that control during our lifetime
                         CFRetain( object->viewRef ) ;
@@ -648,7 +653,7 @@ static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef,
                         {
                             // depending whether the wxControl corresponding to this HIView has already been destroyed or
                             // not, ref counts differ, so we cannot assert a special value
-                            CFIndex count =  CFGetRetainCount( viewRef ) ;
+                            CFIndex count =  CFGetRetainCount( viewRef ) ; 
                             wxASSERT_MSG( count >=1 , wxT("Reference Count of native tool was illegal before removal") );
                             if ( count >= 1 )
                                 CFRelease( viewRef ) ;
@@ -659,14 +664,14 @@ static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef,
                     break;
             }
             break;
-
+        
         case kEventClassToolbarItem:
             switch ( GetEventKind( inEvent ) )
-            {
+            {               
                 case kEventToolbarItemCreateCustomView:
                 {
                     HIViewRef viewRef = object->viewRef ;
-                    HIViewRemoveFromSuperview( viewRef ) ;
+               		HIViewRemoveFromSuperview( viewRef ) ;
                     HIViewSetVisible(viewRef, true) ;
                     CFRetain( viewRef ) ;
                     result = SetEventParameter( inEvent, kEventParamControlRef, typeControlRef, sizeof( HIViewRef ), &viewRef );
@@ -674,7 +679,7 @@ static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef,
                 break;
             }
             break;
-
+        
         case kEventClassControl:
             switch ( GetEventKind( inEvent ) )
             {
@@ -698,17 +703,17 @@ static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef,
                             else
                                 sz = wxSize(0,0) ;
                         }
-
+                            
                         // Extra width to avoid edge of combobox being cut off
                         sz.x += 3;
                         
                         HISize min, max;
                         min.width = max.width = sz.x ;
                         min.height = max.height = sz.y ;
-
+                        
                         result = SetEventParameter( inEvent, kEventParamMinimumSize, typeHISize,
                                                         sizeof( HISize ), &min );
-
+                        
                         result = SetEventParameter( inEvent, kEventParamMaximumSize, typeHISize,
                                                         sizeof( HISize ), &max );
                         result = noErr ;
@@ -718,19 +723,19 @@ static pascal OSStatus ControlToolbarItemHandler( EventHandlerCallRef inCallRef,
             }
             break;
     }
-
+    
     return result;
 }
 
 void RegisterControlToolbarItemClass()
 {
     static bool sRegistered;
-
+    
     if ( !sRegistered )
     {
         HIObjectRegisterSubclass( kControlToolbarItemClassID, kHIToolbarItemClassID, 0,
                 ControlToolbarItemHandler, GetEventTypeCount( kEvents ), kEvents, 0, NULL );
-
+        
         sRegistered = true;
     }
 }
@@ -738,26 +743,26 @@ void RegisterControlToolbarItemClass()
 HIToolbarItemRef CreateControlToolbarItem(CFStringRef inIdentifier, CFTypeRef inConfigData)
 {
     RegisterControlToolbarItemClass();
-
+    
     OSStatus            err;
     EventRef            event;
     UInt32              options = kHIToolbarItemAllowDuplicates;
     HIToolbarItemRef    result = NULL;
-
+    
     err = CreateEvent( NULL, kEventClassHIObject, kEventHIObjectInitialize, GetCurrentEventTime(), 0, &event );
     require_noerr( err, CantCreateEvent );
-
+    
     SetEventParameter( event, kEventParamAttributes, typeUInt32, sizeof( UInt32 ), &options );
     SetEventParameter( event, kEventParamToolbarItemIdentifier, typeCFStringRef, sizeof( CFStringRef ), &inIdentifier );
-
+    
     if ( inConfigData )
         SetEventParameter( event, kEventParamToolbarItemConfigData, typeCFTypeRef, sizeof( CFTypeRef ), &inConfigData );
-
+    
     err = HIObjectCreate( kControlToolbarItemClassID, event, (HIObjectRef*)&result );
     check_noerr( err );
-
+    
     ReleaseEvent( event );
-CantCreateEvent :
+CantCreateEvent :   
     return result ;
 }
 
@@ -787,7 +792,7 @@ static OSStatus ToolbarDelegateHandler( EventHandlerCallRef inCallRef, EventRef 
                 result = noErr;
             }
             break;
-
+            
         case kEventToolbarGetAllowedIdentifiers:
             {
                 GetEventParameter( inEvent, kEventParamMutableArray, typeCFMutableArrayRef, NULL,
@@ -802,13 +807,13 @@ static OSStatus ToolbarDelegateHandler( EventHandlerCallRef inCallRef, EventRef 
                 HIToolbarItemRef        item = NULL;
                 CFTypeRef               data = NULL;
                 CFStringRef             identifier = NULL ;
-
+                
                 GetEventParameter( inEvent, kEventParamToolbarItemIdentifier, typeCFStringRef, NULL,
                         sizeof( CFStringRef ), NULL, &identifier );
-
+                
                 GetEventParameter( inEvent, kEventParamToolbarItemConfigData, typeCFTypeRef, NULL,
                         sizeof( CFTypeRef ), NULL, &data );
-
+                    
                 if ( CFStringCompare( kControlToolbarItemClassID, identifier, kCFCompareBackwards ) == kCFCompareEqualTo )
                 {
                     item = CreateControlToolbarItem( kControlToolbarItemClassID, data );
@@ -819,7 +824,7 @@ static OSStatus ToolbarDelegateHandler( EventHandlerCallRef inCallRef, EventRef 
                         result = noErr;
                     }
                 }
-
+                
             }
             break;
     }
@@ -848,10 +853,10 @@ bool wxToolBar::Create(
 #if wxMAC_USE_NATIVE_TOOLBAR
     if (parent->IsKindOf(CLASSINFO(wxFrame)) && wxSystemOptions::GetOptionInt(wxT("mac.toolbar.no-native")) != 1)
     {
-        wxString labelStr = wxString::Format( wxT("%xd"), (int)this );
+        wxString labelStr = wxString::Format( wxT("%p"), this );
         err = HIToolbarCreate(
-          wxMacCFStringHolder( labelStr, wxFont::GetDefaultEncoding() ), 0,
-          (HIToolbarRef*) &m_macHIToolbarRef );
+            wxMacCFStringHolder( labelStr, wxFont::GetDefaultEncoding() ), 0,
+            (HIToolbarRef*) &m_macHIToolbarRef );
 
         if (m_macHIToolbarRef != NULL)
         {
@@ -869,10 +874,10 @@ bool wxToolBar::Create(
                 mode = kHIToolbarDisplayModeIconOnly;
 
             HIToolbarSetDisplayMode( (HIToolbarRef) m_macHIToolbarRef, mode );
-          HIToolbarSetDisplaySize( (HIToolbarRef) m_macHIToolbarRef, displaySize );
-       }
+            HIToolbarSetDisplaySize( (HIToolbarRef) m_macHIToolbarRef, displaySize );
+        }
     }
-#endif // wxMAC_USE_NATIVE_TOOLBAR
+#endif
 
     return (err == noErr);
 }
@@ -1131,8 +1136,6 @@ bool wxToolBar::Realize()
 #if wxMAC_USE_NATIVE_TOOLBAR
     CFIndex currentPosition = 0;
     bool insertAll = false;
-
-    HIToolbarRef refTB = (HIToolbarRef)m_macHIToolbarRef;
 #endif
 
     node = m_tools.GetFirst();
@@ -1172,9 +1175,9 @@ bool wxToolBar::Realize()
 
 #if wxMAC_USE_NATIVE_TOOLBAR
         // install in native HIToolbar
-        if ( refTB )
+        if ( m_macHIToolbarRef != NULL )
         {
-            HIToolbarItemRef hiItemRef = tool->GetToolbarItemRef();
+            HIToolbarItemRef    hiItemRef = tool->GetToolbarItemRef();
             if ( hiItemRef != NULL )
             {
                 if ( insertAll || (tool->GetIndex() != currentPosition) )
@@ -1187,7 +1190,7 @@ bool wxToolBar::Realize()
                         // if this is the first tool that gets newly inserted or repositioned
                         // first remove all 'old' tools from here to the right, because of this
                         // all following tools will have to be reinserted (insertAll).
-                        for ( wxToolBarToolsList::compatibility_iterator node2 = m_tools.GetLast();
+                       for ( wxToolBarToolsList::compatibility_iterator node2 = m_tools.GetLast();
                               node2 != node;
                               node2 = node2->GetPrevious() )
                         {
@@ -1202,7 +1205,7 @@ bool wxToolBar::Realize()
                                     wxASSERT_MSG( count == 3 || count == 2 , wxT("Reference Count of native tool was illegal before removal") );
                                     wxASSERT( IsValidControlHandle(tool2->GetControl()->GetPeer()->GetControlRef() )) ;
                                 }
-                                err = HIToolbarRemoveItemAtIndex(refTB, idx);
+                                err = HIToolbarRemoveItemAtIndex((HIToolbarRef) m_macHIToolbarRef, idx);
                                 if ( err != noErr )
                                 {
                                     wxLogDebug(wxT("HIToolbarRemoveItemAtIndex(%ld) failed [%ld]"),
@@ -1220,10 +1223,11 @@ bool wxToolBar::Realize()
                         }
                     }
 
-                    err = HIToolbarInsertItemAtIndex( refTB, hiItemRef, currentPosition );
+                    err = HIToolbarInsertItemAtIndex( (HIToolbarRef) m_macHIToolbarRef, hiItemRef, currentPosition );
                     if (err != noErr)
                     {
-                        wxLogDebug( wxT("HIToolbarInsertItemAtIndex failed [%ld]"), (long)err );
+                        wxString errMsg = wxString::Format( wxT("HIToolbarInsertItemAtIndex failed [%ld]"), (long)err );
+                        wxFAIL_MSG( errMsg.c_str() );
                     }
 
                     tool->SetIndex( currentPosition );
@@ -1388,7 +1392,7 @@ void wxToolBar::SetToolNormalBitmap( int id, const wxBitmap& bitmap )
 
         // a side-effect of the UpdateToggleImage function is that it always changes the bitmap used on the button.
         tool->UpdateToggleImage( tool->CanBeToggled() && tool->IsToggled() );
-    }
+    }    
 }
 
 void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
@@ -1399,9 +1403,9 @@ void wxToolBar::SetToolDisabledBitmap( int id, const wxBitmap& bitmap )
         wxCHECK_RET( tool->IsButton(), wxT("Can only set bitmap on button tools."));
 
         tool->SetDisabledBitmap(bitmap);
-
+        
         // TODO:  what to do for this one?
-    }
+    }    
 }
 
 wxToolBarToolBase *wxToolBar::FindToolForPosition(wxCoord x, wxCoord y) const
@@ -1459,10 +1463,6 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
     OSStatus err = 0;
     tool->Attach( this );
 
-#if wxMAC_USE_NATIVE_TOOLBAR
-    HIToolbarItemRef item;
-#endif
-
     switch (tool->GetStyle())
     {
         case wxTOOL_STYLE_SEPARATOR:
@@ -1475,10 +1475,12 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
                 else
                     toolrect.right = toolSize.x;
 
+#ifdef __WXMAC_OSX__
                 // in flat style we need a visual separator
 #if wxMAC_USE_NATIVE_TOOLBAR
                 if (m_macHIToolbarRef != NULL)
                 {
+                    HIToolbarItemRef item;
                     err = HIToolbarItemCreate(
                         kHIToolbarSeparatorIdentifier,
                         kHIToolbarItemCantBeRemoved | kHIToolbarItemIsSeparator | kHIToolbarItemAllowDuplicates,
@@ -1488,10 +1490,11 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
                 }
                 else
                     err = noErr;
-#endif // wxMAC_USE_NATIVE_TOOLBAR
+#endif
 
                 CreateSeparatorControl( window, &toolrect, &controlHandle );
                 tool->SetControlHandle( controlHandle );
+#endif
             }
             break;
 
@@ -1499,11 +1502,15 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
             {
                 wxASSERT( tool->GetControlHandle() == NULL );
                 ControlButtonContentInfo info;
-                wxMacCreateBitmapButton( &info, tool->GetNormalBitmap(), kControlContentIconRef );
+                wxMacCreateBitmapButton( &info, tool->GetNormalBitmap() );
 
-                if ( UMAGetSystemVersion() >= 0x1000)
+                if ( UMAGetSystemVersion() >= 0x1000 )
                 {
+                    // contrary to the docs this control only works with iconrefs
+                    ControlButtonContentInfo info;
+                    wxMacCreateBitmapButton( &info, tool->GetNormalBitmap(), kControlContentIconRef );
                     CreateIconControl( window, &toolrect, &info, false, &controlHandle );
+                    wxMacReleaseBitmapButton( &info );
                 }
                 else
                 {
@@ -1518,24 +1525,30 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
 #if wxMAC_USE_NATIVE_TOOLBAR
                 if (m_macHIToolbarRef != NULL)
                 {
-                    wxString labelStr = wxString::Format(wxT("%xd"), (int)tool);
+                    HIToolbarItemRef item;
+                    wxString labelStr = wxString::Format(wxT("%p"), tool);
                     err = HIToolbarItemCreate(
                         wxMacCFStringHolder(labelStr, wxFont::GetDefaultEncoding()),
                         kHIToolbarItemCantBeRemoved | kHIToolbarItemAnchoredLeft | kHIToolbarItemAllowDuplicates, &item );
                     if (err  == noErr)
                     {
+                        ControlButtonContentInfo info2;
+                        wxMacCreateBitmapButton( &info2, tool->GetNormalBitmap(), kControlContentCGImageRef);
+
                         InstallEventHandler(
                             HIObjectGetEventTarget(item), GetwxMacToolBarEventHandlerUPP(),
                             GetEventTypeCount(toolBarEventList), toolBarEventList, tool, NULL );
-
-                        HIToolbarItemSetIconRef( item, info.u.iconRef );
+                        HIToolbarItemSetLabel( item, wxMacCFStringHolder(tool->GetLabel(), m_font.GetEncoding()) );
+                        HIToolbarItemSetImage( item, info2.u.imageRef );
                         HIToolbarItemSetCommandID( item, kHIToolbarCommandPressAction );
                         tool->SetToolbarItemRef( item );
+
+                        wxMacReleaseBitmapButton( &info2 );
                     }
                 }
                 else
                     err = noErr;
-#endif // wxMAC_USE_NATIVE_TOOLBAR
+#endif
 
                 wxMacReleaseBitmapButton( &info );
 
@@ -1557,12 +1570,12 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
 #if wxMAC_USE_NATIVE_TOOLBAR
             if (m_macHIToolbarRef != NULL)
             {
-                wxCHECK_MSG( tool->GetControl(), false, _T("control must be non-NULL") );
-
+                wxASSERT( tool->GetControl() != NULL );
+                HIToolbarItemRef    item;
                 HIViewRef viewRef = (HIViewRef) tool->GetControl()->GetHandle() ;
                 CFDataRef data = CFDataCreate( kCFAllocatorDefault , (UInt8*) &viewRef , sizeof(viewRef) ) ;
-                err = HIToolbarCreateItemWithIdentifier((HIToolbarRef) m_macHIToolbarRef,kControlToolbarItemClassID,
-                    data , &item ) ;
+                 err = HIToolbarCreateItemWithIdentifier((HIToolbarRef) m_macHIToolbarRef,kControlToolbarItemClassID,
+                   data , &item ) ;
 
                 if (err  == noErr)
                 {
@@ -1575,6 +1588,7 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
                err = noErr;
                break;
            }
+
 #else
                 // right now there's nothing to do here
 #endif
@@ -1583,19 +1597,6 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
         default:
             break;
     }
-
-#if wxMAC_USE_NATIVE_TOOLBAR
-    wxString label = tool->GetLabel();
-    if (m_macHIToolbarRef && !label.empty() )
-    {
-        // strip mnemonics from the label for compatibility
-        // with the usual labels in wxStaticText sense
-        label = wxStripMenuCodes(label);
-
-        HIToolbarItemSetLabel(item,
-                              wxMacCFStringHolder(label, m_font.GetEncoding()));
-    }
-#endif // wxMAC_USE_NATIVE_TOOLBAR
 
     if ( err == noErr )
     {
@@ -1616,7 +1617,8 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
     }
     else
     {
-        wxFAIL_MSG( wxString::Format( wxT("wxToolBar::DoInsertTool - failure [%ld]"), (long)err ) );
+        wxString errMsg = wxString::Format( wxT("wxToolBar::DoInsertTool - failure [%ld]"), (long)err );
+        wxFAIL_MSG( errMsg.c_str() );
     }
 
     return (err == noErr);

@@ -25,7 +25,7 @@
 
 #include "wx/listctrl.h"
 
-#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && !defined(__WXMAC__)
+#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && (!defined(__WXMAC__)|| defined(__WXUNIVERSAL__))
     // if we have a native version, its implementation file does all this
     IMPLEMENT_DYNAMIC_CLASS(wxListItem, wxObject)
     IMPLEMENT_DYNAMIC_CLASS(wxListView, wxListCtrl)
@@ -42,7 +42,6 @@
     #include "wx/dcclient.h"
     #include "wx/dcscreen.h"
     #include "wx/math.h"
-    #include "wx/settings.h"
 #endif
 
 #include "wx/imaglist.h"
@@ -3028,13 +3027,8 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
         if (event.RightDown())
         {
             SendNotify( (size_t)-1, wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, event.GetPosition() );
-            
-            wxContextMenuEvent evtCtx(
-                wxEVT_CONTEXT_MENU,
-                GetParent()->GetId(),
-                ClientToScreen(event.GetPosition()));
-            evtCtx.SetEventObject(GetParent());
-            GetParent()->GetEventHandler()->ProcessEvent(evtCtx);
+            // Allow generation of context menu event
+            event.Skip();
         }
         return;
     }
@@ -3165,12 +3159,15 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
                 (hitResult == wxLIST_HITTEST_ONITEMLABEL) &&
                 HasFlag(wxLC_EDIT_LABELS) )
             {
-                if ( !InReportView() ||
-                        GetLineLabelRect(current).Contains(x, y) )
+                if (InReportView())
                 {
-                    int dclick = wxSystemSettings::GetMetric(wxSYS_DCLICK_MSEC);
-                    m_renameTimer->Start(dclick > 0 ? dclick : 250, true);
+                    wxRect label = GetLineLabelRect( current );
+                    if (label.Contains( x, y ))
+                        m_renameTimer->Start( 250, true );
+
                 }
+                else
+                    m_renameTimer->Start( 250, true );
             }
         }
 
@@ -3201,8 +3198,12 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
 
         SendNotify( current, wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, event.GetPosition() );
 
-        // Allow generation of context menu event
-        event.Skip();
+        wxContextMenuEvent evtCtx(
+                wxEVT_CONTEXT_MENU,
+                GetParent()->GetId(),
+                ClientToScreen(event.GetPosition()));
+        evtCtx.SetEventObject(GetParent());
+        GetParent()->GetEventHandler()->ProcessEvent(evtCtx);
     }
     else if (event.MiddleDown())
     {
@@ -5002,11 +5003,12 @@ bool wxGenericListCtrl::Create(wxWindow *parent,
         style = style | wxLC_LIST;
     }
 
-    if ( !wxControl::Create( parent, id, pos, size, style, validator, name ) )
+    // add more styles here that should only appear
+    // in the main window
+    unsigned long only_main_window_style = wxALWAYS_SHOW_SB;
+    
+    if ( !wxControl::Create( parent, id, pos, size, style & ~only_main_window_style, validator, name ) )
         return false;
-
-    // this window itself shouldn't get the focus, only m_mainWin should
-    SetCanFocus(false);
 
     // don't create the inner window with the border
     style &= ~wxBORDER_MASK;
@@ -5226,6 +5228,11 @@ bool wxGenericListCtrl::SetItemPtrData( long item, wxUIntPtr data )
     info.m_data = data;
     m_mainWin->SetItem( info );
     return true;
+}
+
+bool wxGenericListCtrl::SetItemData(long item, long data)
+{
+    return SetItemPtrData(item, data);
 }
 
 wxRect wxGenericListCtrl::GetViewRect() const

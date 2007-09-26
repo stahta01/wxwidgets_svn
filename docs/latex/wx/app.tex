@@ -26,10 +26,6 @@ a reference to your application object) to be visible to other files.
 
 <wx/app.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxApp overview}{wxappoverview}
@@ -129,21 +125,6 @@ had been already processed (for the former return value) or that it is not
 going to be processed at all (for the latter one).
 
 
-\membersection{wxApp::GetAppDisplayName}\label{wxappgetappdisplayname}
-
-\constfunc{wxString}{GetAppDisplayName}{\void}
-
-Returns the user-readable application name. The difference between this string
-and the one returned by \helpref{GetAppName}{wxappgetappname} is that this one
-is meant to be shown to the user and so should be used for the window titles,
-page headers and so on while the other one should be only used internally, e.g.
-for the file names or configuration file keys.
-
-By default, returns the same string as \helpref{GetAppName}{wxappgetappname}.
-
-\newsince{3.0}
-
-
 \membersection{wxApp::GetAppName}\label{wxappgetappname}
 
 \constfunc{wxString}{GetAppName}{\void}
@@ -154,10 +135,6 @@ Returns the application name.
 
 wxWidgets sets this to a reasonable default before
 calling \helpref{wxApp::OnInit}{wxapponinit}, but the application can reset it at will.
-
-\wxheading{See also}
-
-\helpref{GetAppDisplayName}{wxappgetappdisplayname}
 
 
 \membersection{wxApp::GetClassName}\label{wxappgetclassname}
@@ -261,7 +238,7 @@ to do it.
 Returns \true if the main event loop is currently running, i.e. if the
 application is inside \helpref{OnRun}{wxapponrun}.
 
-This can be useful to test whether events can be dispatched. For example,
+This can be useful to test whether the events can be dispatched. For example,
 if this function returns \false, non-blocking sockets cannot be used because
 the events from them would never be processed.
 
@@ -542,13 +519,10 @@ should return $0$ in case of successful termination.
 
 This function is called when an unhandled C++ exception occurs inside 
 \helpref{OnRun()}{wxapponrun} (the exceptions which occur during the program
-startup and shutdown might not be caught at all). Notice that by now the main
-event loop has been terminated and the program will exit, if you want to
-prevent this from happening (i.e. continue running after catching an exception)
-you need to override \helpref{OnExceptionInMainLoop}{wxapponexceptioninmainloop}.
-
-The default implementation shows information about the exception in debug build
-but does nothing in the release build.
+startup and shutdown might not be caught at all).
+Note that the exception type is lost by now, so if you want to really handle
+the exception you should override \helpref{OnRun()}{wxapponrun} and put a
+try/catch clause around the call to the base class version there.
 
 
 \membersection{wxApp::ProcessMessage}\label{wxappprocessmessage}
@@ -606,25 +580,13 @@ If true is returned, more OnIdle processing is requested by one or more window.
 \helpref{wxIdleEvent}{wxidleevent}
 
 
-\membersection{wxApp::SetAppDisplayName}\label{wxappsetappdisplayname}
-
-\func{void}{SetAppDisplayName}{\param{const wxString\& }{name}}
-
-Set the application name to be used in the user-visible places such as window
-titles. See \helpref{GetAppDisplayName}{wxappgetappdisplayname} for more about
-the differences between the display name and name.
-
-
 \membersection{wxApp::SetAppName}\label{wxappsetappname}
 
 \func{void}{SetAppName}{\param{const wxString\& }{name}}
 
-Sets the name of the application. This name should be used for file names,
-configuration file entries and other internal strings. For the user-visible
-strings, such as the window titles, the application display name set by 
-\helpref{SetAppDisplayName}{wxappsetappdisplayname} is used instead.
-
-By default the application name is set to the name of its executable file.
+Sets the name of the application. The name may be used in dialogs
+(for example by the document/view framework). A default name is set by
+wxWidgets.
 
 \wxheading{See also}
 

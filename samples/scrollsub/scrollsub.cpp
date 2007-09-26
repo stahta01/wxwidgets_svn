@@ -302,6 +302,8 @@ MyCanvas::MyCanvas( wxScrolledWindow *parent, MyTopLabels *top, MyRightLabels *r
     (void)new wxComboBox( this, wxID_ANY, _T("ComboBox I"), wxPoint(0,150), wxSize(100,25));
     (void)new wxComboBox( this, wxID_ANY, _T("ComboBox II"), wxPoint(200,150), wxSize(100,25));
 
+    (void)new wxStaticBox( this, wxID_ANY, _T("StaticBox"), wxPoint(0,200), wxSize(200,60));
+
     SetBackgroundColour( wxT("WHEAT") );
 
     SetCursor( wxCursor( wxCURSOR_IBEAM ) );
@@ -448,9 +450,6 @@ void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame *frame = new MyFrame();
     frame->Show( true );
 

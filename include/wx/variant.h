@@ -215,60 +215,28 @@ public:
 
     // wxString
     wxVariant(const wxString& val, const wxString& name = wxEmptyString);
-    // these overloads are necessary to prevent the compiler from using bool
-    // version instead of wxString one:
-    wxVariant(const char* val, const wxString& name = wxEmptyString);
-    wxVariant(const wchar_t* val, const wxString& name = wxEmptyString);
-    wxVariant(const wxCStrData& val, const wxString& name = wxEmptyString);
-    wxVariant(const wxCharBuffer& val, const wxString& name = wxEmptyString);
-    wxVariant(const wxWCharBuffer& val, const wxString& name = wxEmptyString);
-
+    wxVariant(const wxChar* val, const wxString& name = wxEmptyString); // Necessary or VC++ assumes bool!
     bool operator== (const wxString& value) const;
     bool operator!= (const wxString& value) const;
-    wxVariant& operator=(const wxString& value);
-    // these overloads are necessary to prevent the compiler from using bool
-    // version instead of wxString one:
-    wxVariant& operator=(const char* value)
-        { return *this = wxString(value); }
-    wxVariant& operator=(const wchar_t* value)
-        { return *this = wxString(value); }
-    wxVariant& operator=(const wxCStrData& value)
-        { return *this = value.AsString(); }
-    template<typename T>
-    wxVariant& operator=(const wxCharTypeBuffer<T>& value)
-        { return *this = value.data(); }
-
+    void operator= (const wxString& value) ;
+    void operator= (const wxChar* value) ; // Necessary or VC++ assumes bool!
     inline operator wxString () const {  return MakeString(); }
     wxString GetString() const;
 
-    // wxUniChar
-    wxVariant(const wxUniChar& val, const wxString& name = wxEmptyString);
-    wxVariant(const wxUniCharRef& val, const wxString& name = wxEmptyString);
-    wxVariant(char val, const wxString& name = wxEmptyString);
-    wxVariant(wchar_t val, const wxString& name = wxEmptyString);
-    bool operator==(const wxUniChar& value) const;
-    bool operator==(const wxUniCharRef& value) const { return *this == wxUniChar(value); }
-    bool operator==(char value) const { return *this == wxUniChar(value); }
-    bool operator==(wchar_t value) const { return *this == wxUniChar(value); }
-    bool operator!=(const wxUniChar& value) const { return !(*this == value); }
-    bool operator!=(const wxUniCharRef& value) const { return !(*this == value); }
-    bool operator!=(char value) const { return !(*this == value); }
-    bool operator!=(wchar_t value) const { return !(*this == value); }
-    wxVariant& operator=(const wxUniChar& value);
-    wxVariant& operator=(const wxUniCharRef& value) { return *this = wxUniChar(value); }
-    wxVariant& operator=(char value) { return *this = wxUniChar(value); }
-    wxVariant& operator=(wchar_t value) { return *this = wxUniChar(value); }
-    operator wxUniChar() const { return GetChar(); }
-    operator char() const { return GetChar(); }
-    operator wchar_t() const { return GetChar(); }
-    wxUniChar GetChar() const;
+    // wxChar
+    wxVariant(wxChar val, const wxString& name = wxEmptyString);
+    bool operator== (wxChar value) const;
+    bool operator!= (wxChar value) const;
+    void operator= (wxChar value) ;
+    inline operator wxChar () const { return GetChar(); }
+    wxChar GetChar() const ;
 
     // wxArrayString
     wxVariant(const wxArrayString& val, const wxString& name = wxEmptyString);
     bool operator== (const wxArrayString& value) const;
     bool operator!= (const wxArrayString& value) const;
     void operator= (const wxArrayString& value);
-    operator wxArrayString () const { return GetArrayString(); }
+    inline operator wxArrayString () const { return GetArrayString(); }
     wxArrayString GetArrayString() const;
 
     // void*
@@ -276,7 +244,7 @@ public:
     bool operator== (void* value) const;
     bool operator!= (void* value) const;
     void operator= (void* value);
-    operator void* () const {  return GetVoidPtr(); }
+    inline operator void* () const {  return GetVoidPtr(); }
     void* GetVoidPtr() const;
 
     // wxObject*
@@ -286,6 +254,14 @@ public:
     void operator= (wxObject* value);
     wxObject* GetWxObjectPtr() const;
 
+
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( wxVariant(const wxStringList& val, const wxString& name = wxEmptyString) );
+    wxDEPRECATED( bool operator== (const wxStringList& value) const );
+    wxDEPRECATED( bool operator!= (const wxStringList& value) const );
+    wxDEPRECATED( void operator= (const wxStringList& value) );
+    wxDEPRECATED( wxStringList& GetStringList() const );
+#endif
 
     // ------------------------------
     // list operations
@@ -327,9 +303,7 @@ public:
     bool Convert(bool* value) const;
     bool Convert(double* value) const;
     bool Convert(wxString* value) const;
-    bool Convert(wxUniChar* value) const;
-    bool Convert(char* value) const;
-    bool Convert(wchar_t* value) const;
+    bool Convert(wxChar* value) const;
 #if wxUSE_DATETIME
     bool Convert(wxDateTime* value) const;
 #endif // wxUSE_DATETIME

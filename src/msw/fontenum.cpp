@@ -24,7 +24,7 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_FONTENUM
+#if wxUSE_FONTMAP
 
 #ifndef WX_PRECOMP
     #include "wx/gdicmn.h"
@@ -160,7 +160,7 @@ void wxFontEnumeratorHelper::DoEnumerate()
 
 #ifdef __WXWINCE__
     ::EnumFontFamilies(hDC,
-                       m_facename.empty() ? NULL : m_facename.wx_str(),
+                       m_facename.empty() ? NULL : m_facename.c_str(),
                        (wxFONTENUMPROC)wxFontEnumeratorProc,
                        (LPARAM)this) ;
 #else // __WIN32__
@@ -289,4 +289,4 @@ int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
 }
 #endif
 
-#endif // wxUSE_FONTENUM
+#endif // wxUSE_FONTMAP

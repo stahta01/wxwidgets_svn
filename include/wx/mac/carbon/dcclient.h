@@ -18,8 +18,8 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxPaintDC;
+class WXDLLEXPORT wxWindow;
 
 class WXDLLEXPORT wxWindowDC: public wxDC
 {

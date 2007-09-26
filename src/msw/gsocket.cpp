@@ -177,8 +177,6 @@ GSocket::GSocket()
   m_timeout.tv_usec = 0;
   m_establishing    = false;
   m_reusable        = false;
-  m_broadcast		= false;
-  m_dobind          = true;
 
   assert(gs_gui_functions);
   /* Per-socket GUI-specific initialization */
@@ -531,34 +529,6 @@ bool GSocket::SetReusable()
     return false;
 }
 
-/* GSocket_SetBroadcast:
-*  Simply sets the m_broadcast flag on the socket. GSocket_SetServer will
-*  make the appropriate setsockopt() call.
-*  Implemented as a GSocket function because clients (ie, wxSocketServer)
-*  don't have access to the GSocket struct information.
-*  Returns true if the flag was set correctly, false if an error occurred
-*  (ie, if the parameter was NULL)
-*/
-bool GSocket::SetBroadcast()
-{
-    /* socket must not be in use/already bound */
-    if (m_fd == INVALID_SOCKET) {
-        m_broadcast = true;
-        return true;
-    }
-    return false;
-}
-
-bool GSocket::DontDoBind()
-{
-    /* socket must not be in use/already bound */
-    if (m_fd == INVALID_SOCKET) {
-        m_dobind = false;
-        return true;
-    }
-    return false;
-}
-
 /* Client specific parts */
 
 /* GSocket_Connect:
@@ -736,24 +706,18 @@ GSocketError GSocket::SetNonOriented()
   {
     setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&arg, sizeof(arg));
   }
-  if (m_broadcast)
+
+  /* Bind to the local address,
+   * and retrieve the actual address bound.
+   */
+  if ((bind(m_fd, m_local->m_addr, m_local->m_len) != 0) ||
+      (getsockname(m_fd,
+                   m_local->m_addr,
+                   (WX_SOCKLEN_T *)&m_local->m_len) != 0))
   {
-    setsockopt(m_fd, SOL_SOCKET, SO_BROADCAST, (const char*)&arg, sizeof(arg));
-  }
-  if (m_dobind)
-  {
-    /* Bind to the local address,
-     * and retrieve the actual address bound.
-     */
-    if ((bind(m_fd, m_local->m_addr, m_local->m_len) != 0) ||
-        (getsockname(m_fd,
-                     m_local->m_addr,
-                     (WX_SOCKLEN_T *)&m_local->m_len) != 0))
-    {
-      Close();
-      m_error = GSOCK_IOERR;
-      return GSOCK_IOERR;
-    }
+    Close();
+    m_error = GSOCK_IOERR;
+    return GSOCK_IOERR;
   }
 
   return GSOCK_NOERROR;
@@ -906,9 +870,9 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
       result |= GSOCK_INPUT_FLAG;
 
       if (m_server && m_stream)
-      {
-        /* This is a TCP server socket that detected a connection.
-           While the INPUT_FLAG is also set, it doesn't matter on
+      { 
+        /* This is a TCP server socket that detected a connection. 
+           While the INPUT_FLAG is also set, it doesn't matter on 
            this kind of  sockets, as we can only Accept() from them. */
         result |= GSOCK_CONNECTION_FLAG;
         m_detected |= GSOCK_CONNECTION_FLAG;
@@ -1447,11 +1411,6 @@ GSocketError GAddress_INET_SetHostName(GAddress *address, const char *hostname)
     addr->s_addr = array_addr[0].s_addr;
   }
   return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET_SetBroadcastAddress(GAddress *address)
-{
-  return GAddress_INET_SetHostAddress(address, INADDR_BROADCAST);
 }
 
 GSocketError GAddress_INET_SetAnyAddress(GAddress *address)

@@ -19,11 +19,11 @@
 // fwd declarations
 // -----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxWindow;
 
-class WXDLLIMPEXP_FWD_CORE wxWindowDC;
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxClientDC;
+class WXDLLIMPEXP_CORE wxWindowDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxClientDC;
 
 //-----------------------------------------------------------------------------
 // wxWindowDC
@@ -116,7 +116,7 @@ protected:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     void Init();
 

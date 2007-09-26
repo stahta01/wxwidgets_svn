@@ -170,7 +170,7 @@ bool wxRadioBox::Create(wxWindow *parent,
         long newId = NewControlId();
 
         HWND hwndBtn = ::CreateWindow(_T("BUTTON"),
-                                      choices[i].wx_str(),
+                                      choices[i],
                                       styleBtn,
                                       0, 0, 0, 0,   // will be set in SetSize()
                                       GetHwndOf(parent),
@@ -258,10 +258,8 @@ void wxRadioBox::SubclassRadioButton(WXHWND hWndBtn)
 // events generation
 // ----------------------------------------------------------------------------
 
-bool wxRadioBox::MSWCommand(WXUINT cmd, WXWORD id_)
+bool wxRadioBox::MSWCommand(WXUINT cmd, WXWORD id)
 {
-    const int id = (signed short)id_;
-
     if ( cmd == BN_CLICKED )
     {
         if (id == GetId())

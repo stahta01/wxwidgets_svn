@@ -61,10 +61,6 @@ that normally all menus used are deleted automatically.
 
 <wx/menu.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Event handling}
 
 If the menu is part of a menubar, then \helpref{wxMenuBar}{wxmenubar} event processing is used.
@@ -77,6 +73,10 @@ With a popup menu, there is a variety of ways to handle a menu selection event
 \item Set a new event handler for wxMenu, using an object whose class has EVT\_MENU entries.
 \item Provide EVT\_MENU handlers in the window which pops up the menu, or in an ancestor of
 this window.
+\item Define a callback of type wxFunction, which you pass to the wxMenu constructor.
+The callback takes a reference to the menu, and a reference to a
+\helpref{wxCommandEvent}{wxcommandevent}. This method is deprecated and should
+not be used in the new code, it is provided for backwards compatibility only.
 \end{enumerate}
 
 \wxheading{See also}
@@ -423,7 +423,7 @@ item was not found.
 
 \constfunc{wxString}{GetLabel}{\param{int}{ id}}
 
-Returns a menu item label.
+Returns a menu item label, including any mnemonics and accelerators.
 
 \wxheading{Parameters}
 
@@ -455,6 +455,7 @@ The item label, or the empty string if the item was not found.
 \wxheading{See also}
 
 \helpref{wxMenu::GetLabel}{wxmenugetlabel}, \helpref{wxMenu::SetLabel}{wxmenusetlabel}
+
 
 \membersection{wxMenu::GetMenuItemCount}\label{wxmenugetmenuitemcount}
 
@@ -739,10 +740,6 @@ A menu bar is a series of menus accessible from the top of a frame.
 
 <wx/menu.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Event handling}
 
 To respond to a menu selection, provide a handler for EVT\_MENU, in the frame
@@ -996,7 +993,7 @@ Returns the menu at {\it menuIndex} (zero-based).
 
 \membersection{wxMenuBar::GetMenuCount}\label{wxmenubargetmenucount}
 
-\constfunc{size\_t}{GetMenuCount}{\void}
+\constfunc{int}{GetMenuCount}{\void}
 
 Returns the number of menus in this menubar.
 

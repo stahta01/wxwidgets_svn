@@ -15,10 +15,6 @@ was initialized. (This applies to sharing display lists among contexts analogous
 
 Note that some wxGLContext features are extremely platform-specific - its best to check your native platform's glcanvas header (on windows include/wx/msw/glcanvas.h) to see what features your native platform provides.
 
-\wxheading{Library}
-
-\helpref{wxGl}{librarieslist}
-
 \wxheading{Derived from}
 
 \helpref{wxObject}{wxobject}
@@ -51,10 +47,10 @@ with equivalent attributes as {\it win}.}
 
 \membersection{wxGLContext::SetCurrent}\label{wxglcontextsetcurrent}
 
-\func{void}{SetCurrent}{\param{const wxGLCanvas\&}{ win}}
+\func{void}{SetCurrent}{\param{const wxGLCanvas&}{ win}}
 
 Makes the OpenGL state that is represented by this rendering context current with the wxGLCanvas {\it win}.
 Note that {\it win} can be a different wxGLCanvas window than the one that was passed to the constructor of this rendering context.
 If { \it RC } is an object of type wxGLContext, the statements {\it RC.SetCurrent(win);} and {\it win.SetCurrent(RC);} are equivalent,
-see \helpref{wxGLCanvas::SetCurrent}{wxglcanvassetcurrent}.
+see \helpref{wxGLCanvas::SetCurrent}{wxglcanvassetcurrentrc}.
 

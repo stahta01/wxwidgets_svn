@@ -40,6 +40,8 @@
 		4086D109063BBC5C00D4CD53 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 20286C33FDCF999611CA2CEA /* Carbon.framework */; };
 		4086D10B063BBC5C00D4CD53 /* System.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA60173504D423C000000080 /* System.framework */; };
 		409F03A10977B97B00D1030F /* libwx_mac_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 409F039A0977B96200D1030F /* libwx_mac_static.a */; };
+		40C8A9AB0C53458D006D5BE9 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40C8A9AA0C53458D006D5BE9 /* QuickTime.framework */; };
+		40C8A9AC0C53458D006D5BE9 /* QuickTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40C8A9AA0C53458D006D5BE9 /* QuickTime.framework */; };
 		40F017470A306CAD00AC9076 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40F017460A306CAD00AC9076 /* AppKit.framework */; };
 		40F017480A306CAD00AC9076 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 40F017460A306CAD00AC9076 /* AppKit.framework */; };
 /* End PBXBuildFile section */
@@ -95,7 +97,9 @@
 		1864B4F208566CAB00E32E9B /* minimalDynamic.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = minimalDynamic.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1864B4F408566CAB00E32E9B /* minimal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = minimal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		20286C33FDCF999611CA2CEA /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		4086D0EF063BBC5B00D4CD53 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Info.plist; sourceTree = "<group>"; };
 		409F03930977B96200D1030F /* wxWindows.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = wxWindows.xcodeproj; path = ../../src/wxWindows.xcodeproj; sourceTree = SOURCE_ROOT; };
+		40C8A9AA0C53458D006D5BE9 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
 		40F017460A306CAD00AC9076 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		CA60173504D423C000000080 /* System.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = System.framework; path = /System/Library/Frameworks/System.framework; sourceTree = "<absolute>"; };
 		F591E05701FCC5DE01000133 /* minimal.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = minimal.cpp; sourceTree = SOURCE_ROOT; };
@@ -115,6 +119,7 @@
 				1842CAFD085664390032BCF7 /* OpenGL.framework in Frameworks */,
 				1842CAFE085664390032BCF7 /* WebKit.framework in Frameworks */,
 				40F017470A306CAD00AC9076 /* AppKit.framework in Frameworks */,
+				40C8A9AB0C53458D006D5BE9 /* QuickTime.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +135,7 @@
 				1842CB01085664390032BCF7 /* OpenGL.framework in Frameworks */,
 				1842CB02085664390032BCF7 /* WebKit.framework in Frameworks */,
 				40F017480A306CAD00AC9076 /* AppKit.framework in Frameworks */,
+				40C8A9AC0C53458D006D5BE9 /* QuickTime.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +158,7 @@
 				20286C2AFDCF999611CA2CEA /* Sources */,
 				20286C2CFDCF999611CA2CEA /* Resources */,
 				20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */,
+				4086D0EF063BBC5B00D4CD53 /* Info.plist */,
 				1864B4F608566CB300E32E9B /* Products */,
 			);
 			name = "¬´PROJECTNAME¬ª";
@@ -176,6 +183,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				40C8A9AA0C53458D006D5BE9 /* QuickTime.framework */,
 				40F017460A306CAD00AC9076 /* AppKit.framework */,
 				20286C33FDCF999611CA2CEA /* Carbon.framework */,
 				CA60173504D423C000000080 /* System.framework */,
@@ -403,7 +411,6 @@
 				);
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 3.3;
-				INFOPLIST_FILE = ../Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../src/build/Development";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
@@ -442,7 +449,6 @@
 				);
 				GCC_VERSION_i386 = 4.0;
 				GCC_VERSION_ppc = 3.3;
-				INFOPLIST_FILE = ../Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../src/build/Deployment";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
@@ -466,7 +472,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(NATIVE_ARCH)";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ../../include/wx/wxprec.h;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -600,7 +605,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = __WXDEBUG__;
-				INFOPLIST_FILE = ../Info.plist;
+				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = ../../src/;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = minimal;
@@ -620,7 +625,7 @@
 				DynamicLibName = libwx_mac.dylib;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_OPTIMIZATION_LEVEL = s;
-				INFOPLIST_FILE = ../Info.plist;
+				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = ../../src/build/Deployment;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = minimal;

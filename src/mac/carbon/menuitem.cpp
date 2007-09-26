@@ -63,6 +63,13 @@ void wxMenuItem::UpdateItemBitmap()
 
     MenuHandle mhandle = MAC_WXHMENU(m_parentMenu->GetHMenu()) ;
     MenuItemIndex index = m_parentMenu->MacGetIndexFromItem( this ) ;
+    DoUpdateItemBitmap( mhandle, index );
+}
+
+void wxMenuItem::DoUpdateItemBitmap( WXHMENU menu, wxUint16 index)
+{
+    MenuHandle mhandle = (MenuHandle) menu;
+
     if ( mhandle == NULL || index == 0)
         return ;
 
@@ -76,6 +83,9 @@ void wxMenuItem::UpdateItemBitmap()
             if ( info.contentType == kControlContentIconRef )
                 SetMenuItemIconHandle( mhandle , index ,
                     kMenuIconRefType , (Handle) info.u.iconRef ) ;
+            else if ( info.contentType == kControlContentCGImageRef )
+               SetMenuItemIconHandle( mhandle , index ,
+                    kMenuCGImageRefType , (Handle) info.u.imageRef ) ;
         }
         wxMacReleaseBitmapButton( &info ) ;
 #endif
@@ -233,13 +243,13 @@ void wxMenuItem::Check(bool bDoCheck)
     }
 }
 
-void wxMenuItem::SetItemLabel(const wxString& text)
+void wxMenuItem::SetText(const wxString& text)
 {
     // don't do anything if label didn't change
     if ( m_text == text )
         return;
 
-    wxMenuItemBase::SetItemLabel(text);
+    wxMenuItemBase::SetText(text);
 
     UpdateItemText() ;
 }
@@ -273,7 +283,7 @@ void wxMenuItem::SetRadioGroupEnd(int end)
 // ----------------------------------------------------------------------------
 
 /* static */
-wxString wxMenuItemBase::GetLabelText(const wxString& text)
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }

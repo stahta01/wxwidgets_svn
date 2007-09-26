@@ -323,18 +323,18 @@ void wxHtmlListBox::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
-void wxHtmlListBox::RefreshRow(size_t line)
+void wxHtmlListBox::RefreshLine(size_t line)
 {
     m_cache->InvalidateRange(line, line);
 
-    wxVListBox::RefreshRow(line);
+    wxVListBox::RefreshLine(line);
 }
 
-void wxHtmlListBox::RefreshRows(size_t from, size_t to)
+void wxHtmlListBox::RefreshLines(size_t from, size_t to)
 {
     m_cache->InvalidateRange(from, to);
 
-    wxVListBox::RefreshRows(from, to);
+    wxVListBox::RefreshLines(from, to);
 }
 
 void wxHtmlListBox::RefreshAll()
@@ -364,6 +364,17 @@ void wxHtmlListBox::OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const
     wxCHECK_RET( cell, _T("this cell should be cached!") );
 
     wxHtmlRenderingInfo htmlRendInfo;
+
+    // draw the selected cell in selected state
+    if ( IsSelected(n) )
+    {
+        wxHtmlSelection htmlSel;
+        htmlSel.Set(wxPoint(0,0), cell, wxPoint(INT_MAX, INT_MAX), cell);
+        htmlRendInfo.SetSelection(&htmlSel);
+        if ( m_htmlRendStyle )
+            htmlRendInfo.SetStyle(m_htmlRendStyle);
+        htmlRendInfo.GetState().SetSelectionState(wxHTML_SEL_IN);
+    }
 
     // note that we can't stop drawing exactly at the window boundary as then
     // even the visible cells part could be not drawn, so always draw the
@@ -458,7 +469,7 @@ wxPoint wxHtmlListBox::GetRootCellCoords(size_t n) const
 {
     wxPoint pos(CELL_BORDER, CELL_BORDER);
     pos += GetMargins();
-    pos.y += GetRowsHeight(GetVisibleBegin(), n);
+    pos.y += GetLinesHeight(GetFirstVisibleLine(), n);
     return pos;
 }
 
@@ -562,19 +573,19 @@ bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
 #if wxUSE_VALIDATORS
     SetValidator(validator);
 #endif
-
-    Append(n, choices);
+    for (int i=0; i<n; i++)
+        Append(choices[i]);
 
     return true;
 }
 
 bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
-                                 const wxPoint& pos,
-                                 const wxSize& size,
-                                 const wxArrayString& choices,
-                                 long style,
-                                 const wxValidator& validator,
-                                 const wxString& name)
+                                    const wxPoint& pos,
+                                    const wxSize& size,
+                                    const wxArrayString& choices,
+                                    long style,
+                                    const wxValidator& validator,
+                                    const wxString& name)
 {
     if (!wxHtmlListBox::Create(parent, id, pos, size, style, name))
         return false;
@@ -582,7 +593,6 @@ bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
 #if wxUSE_VALIDATORS
     SetValidator(validator);
 #endif
-
     Append(choices);
 
     return true;
@@ -590,46 +600,53 @@ bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
 
 wxSimpleHtmlListBox::~wxSimpleHtmlListBox()
 {
-    wxItemContainer::Clear();
-}
-
-void wxSimpleHtmlListBox::DoClear()
-{
     wxASSERT(m_items.GetCount() == m_HTMLclientData.GetCount());
+    if (HasClientObjectData())
+    {
+        // clear the array of client data objects
+        for (size_t i=0; i<m_items.GetCount(); i++)
+            delete DoGetItemClientObject(i);
+    }
 
     m_items.Clear();
     m_HTMLclientData.Clear();
+}
 
+void wxSimpleHtmlListBox::Clear()
+{
+    m_items.Clear();
+    m_HTMLclientData.Clear();
     UpdateCount();
 }
 
-void wxSimpleHtmlListBox::DoDeleteOneItem(unsigned int n)
+void wxSimpleHtmlListBox::Delete(unsigned int n)
 {
     m_items.RemoveAt(n);
-
     m_HTMLclientData.RemoveAt(n);
-
     UpdateCount();
 }
 
-int wxSimpleHtmlListBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                                       unsigned int pos,
-                                       void **clientData,
-                                       wxClientDataType type)
+void wxSimpleHtmlListBox::Append(const wxArrayString& strings)
 {
-    const unsigned int count = items.GetCount();
-
-    m_items.Insert(wxEmptyString, pos, count);
-    m_HTMLclientData.Insert(NULL, pos, count);
-
-    for ( unsigned int i = 0; i < count; ++i, ++pos )
-    {
-        m_items[pos] = items[i];
-        AssignNewItemClientData(pos, clientData, i, type);
-    }
-
+    // append all given items at once
+    WX_APPEND_ARRAY(m_items, strings);
+    m_HTMLclientData.Add(NULL, strings.GetCount());
     UpdateCount();
+}
 
+int wxSimpleHtmlListBox::DoAppend(const wxString& item)
+{
+    m_items.Add(item);
+    m_HTMLclientData.Add(NULL);
+    UpdateCount();
+    return GetCount()-1;
+}
+
+int wxSimpleHtmlListBox::DoInsert(const wxString& item, unsigned int pos)
+{
+    m_items.Insert(item, pos);
+    m_HTMLclientData.Insert(NULL, pos);
+    UpdateCount();
     return pos;
 }
 
@@ -638,8 +655,8 @@ void wxSimpleHtmlListBox::SetString(unsigned int n, const wxString& s)
     wxCHECK_RET( IsValid(n),
                  wxT("invalid index in wxSimpleHtmlListBox::SetString") );
 
-    m_items[n]=s;
-    RefreshRow(n);
+    m_items[n]=s; 
+    RefreshLine(n);
 }
 
 wxString wxSimpleHtmlListBox::GetString(unsigned int n) const

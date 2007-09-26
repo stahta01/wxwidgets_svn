@@ -24,9 +24,12 @@
 
 // Flags for wxSound::Play
 
-// NB: We can't use enum with some compilers, because they keep reporting
-//     nonexistent ambiguities between Play(unsigned) and static Play(const
-//     wxString&, unsigned).
+// NB: We can't use enum because there would be ambiguity between the
+//     two Play() prototypes when called without explicit parameters
+//     if WXWIN_COMPATIBILITY_2_4.
+//     We can't use enum with some compilers either, because they
+//     keep reporting nonexistent ambiguities between
+//     Play(unsigned) and static Play(const wxString&, unsigned).
 #define wxSOUND_SYNC  ((unsigned)0)
 #define wxSOUND_ASYNC ((unsigned)1)
 #define wxSOUND_LOOP  ((unsigned)2)
@@ -43,6 +46,9 @@ public:
                      _T("sound can only be looped asynchronously") );
         return DoPlay(flags);
     }
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( bool Play(bool async, bool looped = false) const );
+#endif
 
     // Plays sound from filename:
     static bool Play(const wxString& filename, unsigned flags = wxSOUND_ASYNC);
@@ -76,6 +82,16 @@ inline bool wxSoundBase::Play(const wxString& filename, unsigned flags)
     wxSound snd(filename);
     return snd.IsOk() ? snd.Play(flags) : false;
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+inline bool wxSoundBase::Play(bool async, bool looped) const
+{
+    unsigned flags = 0;
+    if (async) flags |= wxSOUND_ASYNC;
+    if (looped) flags |= wxSOUND_LOOP | wxSOUND_ASYNC;
+    return DoPlay(flags);
+}
+#endif
 
 #endif // wxUSE_SOUND
 

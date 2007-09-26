@@ -28,7 +28,7 @@
 #include "wx/msw/private.h"
 #include "wx/msw/debughlp.h"
 
-const wxString wxDynamicLibrary::ms_dllext(_T(".dll"));
+const wxChar *wxDynamicLibrary::ms_dllext = _T(".dll");
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -139,12 +139,9 @@ HMODULE wxGetModuleHandle(const char *name, void *addr)
     }
 
     // Windows CE only has Unicode API, so even we have an ANSI string here, we
-    // still need to use GetModuleHandleW() there
-#ifdef __WXWINCE__
-    return ::GetModuleHandleW(wxConvLibc.cMB2WC(name).data());
-#else
-    return ::GetModuleHandleA((char *)name);
-#endif
+    // still need to use GetModuleHandleW() there and so do it everywhere to
+    // avoid #ifdefs -- this code is not performance-critical anyhow...
+    return ::GetModuleHandle(wxString::FromAscii((char *)name));
 }
 
 // ============================================================================
@@ -194,7 +191,7 @@ wxString wxVersionDLL::GetFileVersion(const wxString& filename) const
     wxString ver;
     if ( m_dll.IsLoaded() )
     {
-        wxChar *pc = wx_const_cast(wxChar *, filename.wx_str());
+        wxChar *pc = wx_const_cast(wxChar *, filename.c_str());
 
         DWORD dummy;
         DWORD sizeVerInfo = m_pfnGetFileVersionInfoSize(pc, &dummy);
@@ -281,7 +278,7 @@ wxDllType wxDynamicLibrary::GetProgramHandle()
 wxDllType
 wxDynamicLibrary::RawLoad(const wxString& libname, int WXUNUSED(flags))
 {
-    return ::LoadLibrary(libname.wx_str());
+    return ::LoadLibrary(libname);
 }
 
 /* static */

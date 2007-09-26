@@ -52,7 +52,6 @@
 #include "wx/imaglist.h"
 #include "wx/bmpcbox.h"
 
-#include "itemcontainer.h"
 #include "widgets.h"
 
 #include "icons/bmpcombobox.xpm"
@@ -83,8 +82,7 @@ enum
     BitmapComboBoxPage_Delete,
     BitmapComboBoxPage_DeleteText,
     BitmapComboBoxPage_DeleteSel,
-    BitmapComboBoxPage_Combo,
-    BitmapComboBoxPage_ContainerTests
+    BitmapComboBoxPage_Combo
 };
 
 
@@ -92,13 +90,12 @@ enum
 // BitmapComboBoxWidgetsPage
 // ----------------------------------------------------------------------------
 
-class BitmapComboBoxWidgetsPage : public ItemContainerWidgetsPage
+class BitmapComboBoxWidgetsPage : public WidgetsPage
 {
 public:
     BitmapComboBoxWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
 
     virtual wxControl *GetWidget() const { return m_combobox; }
-    virtual wxItemContainer* GetContainer() const { return m_combobox; }
     virtual void RecreateWidget() { CreateCombo(); }
 
     // lazy creation of the content
@@ -198,7 +195,6 @@ BEGIN_EVENT_TABLE(BitmapComboBoxWidgetsPage, WidgetsPage)
     EVT_BUTTON(BitmapComboBoxPage_AddMany, BitmapComboBoxWidgetsPage::OnButtonAddMany)
     EVT_BUTTON(BitmapComboBoxPage_LoadFromFile, BitmapComboBoxWidgetsPage::OnButtonLoadFromFile)
     EVT_BUTTON(BitmapComboBoxPage_SetFromFile, BitmapComboBoxWidgetsPage::OnButtonSetFromFile)
-    EVT_BUTTON(BitmapComboBoxPage_ContainerTests, ItemContainerWidgetsPage::OnButtonTestItemContainer)
 
     EVT_TEXT_ENTER(BitmapComboBoxPage_InsertText, BitmapComboBoxWidgetsPage::OnButtonInsert)
     EVT_TEXT(BitmapComboBoxPage_ChangeHeight, BitmapComboBoxWidgetsPage::OnTextChangeHeight)
@@ -237,7 +233,7 @@ IMPLEMENT_WIDGETS_PAGE(BitmapComboBoxWidgetsPage, _T("BitmapCombobox"),
 
 BitmapComboBoxWidgetsPage::BitmapComboBoxWidgetsPage(WidgetsBookCtrl *book,
                                              wxImageList *imaglist)
-                  : ItemContainerWidgetsPage(book, imaglist, bmpcombobox_xpm)
+                  : WidgetsPage(book, imaglist, bmpcombobox_xpm)
 {
     // init everything
     m_chkSort =
@@ -311,9 +307,6 @@ void BitmapComboBoxWidgetsPage::CreateContent()
     wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY,
         _T("&Change wxBitmapComboBox contents"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
-
-    btn = new wxButton(this, BitmapComboBoxPage_ContainerTests, _T("Run &tests"));
-    sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
 #if wxUSE_IMAGE
     btn = new wxButton(this, BitmapComboBoxPage_AddWidgetIcons, _T("Add &widget icons"));

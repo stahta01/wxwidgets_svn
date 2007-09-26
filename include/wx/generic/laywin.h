@@ -196,8 +196,8 @@ private:
 
 #endif // wxUSE_SASH
 
-class WXDLLIMPEXP_FWD_CORE wxMDIParentFrame;
-class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLEXPORT wxMDIParentFrame;
+class WXDLLEXPORT wxFrame;
 
 // This class implements the layout algorithm
 class WXDLLIMPEXP_ADV wxLayoutAlgorithm: public wxObject

@@ -44,10 +44,6 @@ positioned correctly (including their order which is platform-dependent).
 
 <wx/dialog.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Modal and modeless dialogs}
 
 There are two kinds of dialog -- {\it modal}\ and {\it modeless}. A modal dialog
@@ -207,8 +203,7 @@ for details.
 \func{wxSizer*}{CreateButtonSizer}{\param{long}{ flags}}
 
 Creates a sizer with standard buttons. {\it flags} is a bit list
-of the following flags: wxOK, wxCANCEL, wxYES, wxNO, wxAPPLY, wxCLOSE, 
-wxHELP, wxNO\_DEFAULT.
+of the following flags: wxOK, wxCANCEL, wxYES, wxNO, wxHELP, wxNO\_DEFAULT.
 
 The sizer lays out the buttons in a manner appropriate to the platform.
 
@@ -236,8 +231,7 @@ if no buttons were created.
 \func{wxStdDialogButtonSizer*}{CreateStdDialogButtonSizer}{\param{long}{ flags}}
 
 Creates a \helpref{wxStdDialogButtonSizer}{wxstddialogbuttonsizer} with standard buttons. {\it flags} is a bit list
-of the following flags: wxOK, wxCANCEL, wxYES, wxNO, wxAPPLY, wxCLOSE,
-wxHELP, wxNO\_DEFAULT.
+of the following flags: wxOK, wxCANCEL, wxYES, wxNO, wxHELP, wxNO\_DEFAULT.
 
 The sizer lays out the buttons in a manner appropriate to the platform.
 
@@ -324,7 +318,7 @@ This function is not available on any other platform.
 
 \membersection{wxDialog::Iconize}\label{wxdialogiconized}
 
-\func{void}{Iconize}{\param{bool}{ iconize}}
+\func{void}{Iconize}{\param{const bool}{ iconize}}
 
 Iconizes or restores the dialog. Windows only.
 
@@ -450,7 +444,7 @@ See also \helpref{wxIconBundle}{wxiconbundle}.
 
 \membersection{wxDialog::SetModal}\label{wxdialogsetmodal}
 
-\func{void}{SetModal}{\param{bool}{ flag}}
+\func{void}{SetModal}{\param{const bool}{ flag}}
 
 {\bf NB:} This function is deprecated and doesn't work for all ports, just use
 \helpref{ShowModal}{wxdialogshowmodal} to show a modal dialog instead.
@@ -486,7 +480,7 @@ a code to the application. The function \helpref{wxDialog::EndModal}{wxdialogend
 
 \membersection{wxDialog::Show}\label{wxdialogshow}
 
-\func{bool}{Show}{\param{bool}{ show}}
+\func{bool}{Show}{\param{const bool}{ show}}
 
 Hides or shows the dialog.
 

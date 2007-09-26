@@ -15,9 +15,9 @@
 #include "wx/control.h"         // the base class
 #include "wx/dcclient.h"        // for wxPaintDC
 
-class WXDLLIMPEXP_FWD_CORE wxComboBox;
-class WXDLLIMPEXP_FWD_CORE wxStaticText;
-class WXDLLIMPEXP_FWD_CORE wxSpinCtrl;
+class WXDLLEXPORT wxComboBox;
+class WXDLLEXPORT wxStaticText;
+class WXDLLEXPORT wxSpinCtrl;
 
 #define wxCalendarNameStr _T("CalendarCtrl")
 

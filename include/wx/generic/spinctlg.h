@@ -22,8 +22,8 @@
 
 #if wxUSE_SPINBTN
 
-class WXDLLIMPEXP_FWD_CORE wxSpinButton;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+class WXDLLEXPORT wxSpinButton;
+class WXDLLEXPORT wxTextCtrl;
 
 // ----------------------------------------------------------------------------
 // wxSpinCtrl is a combination of wxTextCtrl and wxSpinButton

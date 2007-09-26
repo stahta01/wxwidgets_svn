@@ -276,7 +276,13 @@ int wxFileDialog::ShowModal()
     *fileNameBuffer = wxT('\0');
     *titleBuffer    = wxT('\0');
 
+#if WXWIN_COMPATIBILITY_2_4
+    long msw_flags = 0;
+    if ( HasFdFlag(wxHIDE_READONLY) || HasFdFlag(wxFD_SAVE) )
+        msw_flags |= OFN_HIDEREADONLY;
+#else
     long msw_flags = OFN_HIDEREADONLY;
+#endif
 
     if ( HasFdFlag(wxFD_FILE_MUST_EXIST) )
         msw_flags |= OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
@@ -320,7 +326,7 @@ int wxFileDialog::ShowModal()
 
     of.lStructSize       = gs_ofStructSize;
     of.hwndOwner         = hWnd;
-    of.lpstrTitle        = m_message.wx_str();
+    of.lpstrTitle        = WXSTRINGCAST m_message;
     of.lpstrFileTitle    = titleBuffer;
     of.nMaxFileTitle     = wxMAXFILE + 1 + wxMAXEXT;
 
@@ -391,12 +397,12 @@ int wxFileDialog::ShowModal()
         }
     }
 
-    of.lpstrFilter  = (LPTSTR)filterBuffer.wx_str();
+    of.lpstrFilter  = (LPTSTR)filterBuffer.c_str();
     of.nFilterIndex = m_filterIndex + 1;
 
     //=== Setting defaultFileName >>=========================================
 
-    wxStrncpy(fileNameBuffer, m_fileName, wxMAXPATH-1);
+    wxStrncpy( fileNameBuffer, (const wxChar *)m_fileName, wxMAXPATH-1 );
     fileNameBuffer[ wxMAXPATH-1 ] = wxT('\0');
 
     of.lpstrFile = fileNameBuffer;  // holds returned filename
@@ -409,7 +415,7 @@ int wxFileDialog::ShowModal()
     wxString defextBuffer; // we need it to be alive until GetSaveFileName()!
     if (HasFdFlag(wxFD_SAVE))
     {
-        const wxChar* extension = filterBuffer.wx_str();
+        const wxChar* extension = filterBuffer;
         int maxFilter = (int)(of.nFilterIndex*2L) - 1;
 
         for( int i = 0; i < maxFilter; i++ )           // get extension
@@ -511,7 +517,7 @@ int wxFileDialog::ShowModal()
                  (of.nFileExtension && fileNameBuffer[of.nFileExtension] == wxT('\0')) )
             {
                 // User has typed a filename without an extension:
-                const wxChar* extension = filterBuffer.wx_str();
+                const wxChar* extension = filterBuffer;
                 int   maxFilter = (int)(of.nFilterIndex*2L) - 1;
 
                 for( int i = 0; i < maxFilter; i++ )           // get extension

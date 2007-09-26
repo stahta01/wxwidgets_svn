@@ -15,11 +15,11 @@
 #include "wx/gdiobj.h"
 #include "wx/os2/private.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPalette;
+class WXDLLEXPORT wxPalette;
 
 class WXDLLEXPORT wxPaletteRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxPalette;
+    friend class WXDLLEXPORT wxPalette;
 public:
     wxPaletteRefData();
     virtual ~wxPaletteRefData();

@@ -71,9 +71,7 @@ enum
   wxSOCKET_NOWAIT = 1,
   wxSOCKET_WAITALL = 2,
   wxSOCKET_BLOCK = 4,
-  wxSOCKET_REUSEADDR = 8,
-  wxSOCKET_BROADCAST = 16,
-  wxSOCKET_NOBIND = 32
+  wxSOCKET_REUSEADDR = 8
 };
 
 enum wxSocketType

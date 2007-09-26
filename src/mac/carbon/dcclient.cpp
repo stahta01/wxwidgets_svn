@@ -120,7 +120,7 @@ wxWindowDC::wxWindowDC()
 wxWindowDC::wxWindowDC(wxWindow *window)
 {
     m_window = window ;
-    wxTopLevelWindowMac* rootwindow = window->MacGetTopLevelWindow() ;
+    WindowRef rootwindow = (WindowRef) window->MacGetTopLevelWindowRef() ;
     if (!rootwindow)
         return;
 
@@ -150,12 +150,12 @@ wxWindowDC::wxWindowDC(wxWindow *window)
     int x , y ;
     x = y = 0 ;
     window->MacWindowToRootWindow( &x , &y ) ;
-    m_deviceLocalOriginX = x;
-    m_deviceLocalOriginY = y;
-    m_macPort = UMAGetWindowPort( (WindowRef) rootwindow->MacGetWindowRef() ) ;
+    m_macLocalOrigin.x = x ;
+    m_macLocalOrigin.y = y ;
+    m_macPort = UMAGetWindowPort( rootwindow ) ;
 
     CopyRgn( (RgnHandle) window->MacGetVisibleRegion(true).GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
-    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_deviceLocalOriginX , m_deviceLocalOriginY ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
     CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
 #endif
     SetBackground(MacGetBackgroundBrush(window));
@@ -226,6 +226,7 @@ wxBitmap wxWindowDC::DoGetAsBitmap(const wxRect *subrect) const
     wxBitmap bmp = wxBitmap(width, height, 32);
     wxAlphaPixelData pixData(bmp, wxPoint(0,0), wxSize(width, height));
 
+    pixData.UseAlpha();
     wxAlphaPixelData::Iterator p(pixData);
     for (int y=0; y<height; y++) {
         wxAlphaPixelData::Iterator rowStart = p;
@@ -257,6 +258,7 @@ wxClientDC::wxClientDC()
 wxClientDC::wxClientDC(wxWindow *window) :
     wxWindowDC( window )
 {
+    wxCHECK_RET( window, _T("invalid window in wxClientDC") );
     wxPoint origin = window->GetClientAreaOrigin() ;
     m_window->GetClientSize( &m_width , &m_height);
     SetDeviceOrigin( origin.x, origin.y );
@@ -265,6 +267,7 @@ wxClientDC::wxClientDC(wxWindow *window) :
 #else
 wxClientDC::wxClientDC(wxWindow *window)
 {
+    wxCHECK_RET( window, _T("invalid window in wxClientDC") );
     m_window = window ;
     wxTopLevelWindowMac* rootwindow = window->MacGetTopLevelWindow() ;
     if (!rootwindow)
@@ -280,12 +283,12 @@ wxClientDC::wxClientDC(wxWindow *window)
     m_macPort = UMAGetWindowPort( windowref ) ;
     m_ok = true ;
 
-    m_deviceLocalOriginX = x ;
-    m_deviceLocalOriginY = y ;
+    m_macLocalOrigin.x = x ;
+    m_macLocalOrigin.y = y ;
     SetRectRgn( (RgnHandle) m_macBoundaryClipRgn , origin.x , origin.y , origin.x + size.x , origin.y + size.y ) ;
     SectRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) window->MacGetVisibleRegion().GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
     OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , -origin.x , -origin.y ) ;
-    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_deviceLocalOriginX , m_deviceLocalOriginY ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
     CopyRgn( (RgnHandle) m_macBoundaryClipRgn ,(RgnHandle)  m_macCurrentClipRgn ) ;
 
     SetBackground(MacGetBackgroundBrush(window));
@@ -355,13 +358,13 @@ wxPaintDC::wxPaintDC(wxWindow *window)
     }
     // there is no out-of-order drawing on OSX
 #else
-    m_deviceLocalOriginX = x ;
-    m_deviceLocalOriginY = y ;
+    m_macLocalOrigin.x = x ;
+    m_macLocalOrigin.y = y ;
     SetRectRgn( (RgnHandle) m_macBoundaryClipRgn , origin.x , origin.y , origin.x + size.x , origin.y + size.y ) ;
     SectRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) window->MacGetVisibleRegion().GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
     OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , -origin.x , -origin.y ) ;
     SectRgn( (RgnHandle) m_macBoundaryClipRgn  , (RgnHandle) window->GetUpdateRegion().GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
-    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_deviceLocalOriginX , m_deviceLocalOriginY ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
     CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
     SetBackground(MacGetBackgroundBrush(window));
 #endif

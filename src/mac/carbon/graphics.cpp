@@ -20,6 +20,7 @@
     #include "wx/dcmemory.h"
     #include "wx/log.h"
     #include "wx/region.h"
+    #include "wx/image.h"
 #endif
 
 #include "wx/mac/uma.h"
@@ -169,7 +170,7 @@ public :
     void StrokeLineSegments( CGContextRef ctxRef , const CGPoint pts[] , size_t count )
     {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
-        if ( CGContextStrokeLineSegments!=NULL  )
+        if ( &CGContextStrokeLineSegments!=NULL  )
         {
             CGContextStrokeLineSegments( ctxRef , pts , count );
         }
@@ -297,7 +298,7 @@ wxMacCoreGraphicsPenData::wxMacCoreGraphicsPenData( wxGraphicsRenderer* renderer
 {
     Init();
 
-    float components[4] = { pen.GetColour().Red() / 255.0 , pen.GetColour().Green() / 255.0 ,
+    CGFloat components[4] = { pen.GetColour().Red() / 255.0 , pen.GetColour().Green() / 255.0 ,
             pen.GetColour().Blue() / 255.0 , pen.GetColour().Alpha() / 255.0 } ;
     m_color.Set( CGColorCreate( wxMacGetGenericRGBColorSpace() , components ) ) ;
 
@@ -532,6 +533,20 @@ void wxMacCoreGraphicsBrushData::CreateRadialGradientBrush( wxDouble xo, wxDoubl
     m_isShading = true ;
 }
 
+static const char *gs_stripedback_xpm[] = {
+/* columns rows colors chars-per-pixel */
+"4 4 2 1",
+". c #F0F0F0",
+"X c #ECECEC",
+/* pixels */
+"....",
+"....",
+"XXXX",
+"XXXX"
+};
+
+wxBitmap gs_stripedback_bmp( wxImage( (const char* const* ) gs_stripedback_xpm  ), -1 ) ;
+
 wxMacCoreGraphicsBrushData::wxMacCoreGraphicsBrushData(wxGraphicsRenderer* renderer, const wxBrush &brush) : wxGraphicsObjectRefData( renderer )
 {
     Init();
@@ -541,7 +556,7 @@ wxMacCoreGraphicsBrushData::wxMacCoreGraphicsBrushData(wxGraphicsRenderer* rende
         if ( brush.MacGetBrushKind() == kwxMacBrushTheme )
         {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
-            if ( HIThemeBrushCreateCGColor != 0 )
+            if ( UMAGetSystemVersion()  >= 0x1040 )
             {
                 CGColorRef color ;
                 HIThemeBrushCreateCGColor( brush.MacGetTheme(), &color );
@@ -550,17 +565,30 @@ wxMacCoreGraphicsBrushData::wxMacCoreGraphicsBrushData(wxGraphicsRenderer* rende
             else
 #endif
             {
-                // as close as we can get, unfortunately < 10.4 things get difficult
-                RGBColor color;
-                GetThemeBrushAsColor( brush.MacGetTheme(), 32, true, &color );
-                float components[4] = {  (CGFloat) color.red / 65536,
-                    (CGFloat) color.green / 65536, (CGFloat) color.blue / 65536, 1 } ;
-                m_color.Set( CGColorCreate( wxMacGetGenericRGBColorSpace() , components ) ) ;
+                if( brush.MacGetTheme() == kThemeBrushDialogBackgroundActive )
+                {
+                    // striped background is a pattern, we have to emulate it
+                    
+                    m_isPattern = true;
+                    m_patternColorComponents = new CGFloat[1] ;
+                    m_patternColorComponents[0] = 1.0;
+                    m_colorSpace.Set( CGColorSpaceCreatePattern( NULL ) );
+                    m_pattern.Set( *( new ImagePattern( &gs_stripedback_bmp , CGAffineTransformMakeScale( 1,-1 ) ) ) );
+                }
+                else
+                {
+                    // as close as we can get, unfortunately < 10.4 things get difficult
+                    RGBColor color;
+                    GetThemeBrushAsColor( brush.MacGetTheme(), 32, true, &color );
+                    CGFloat components[4] = {  (CGFloat) color.red / 65536,
+                        (CGFloat) color.green / 65536, (CGFloat) color.blue / 65536, 1 } ;
+                    m_color.Set( CGColorCreate( wxMacGetGenericRGBColorSpace() , components ) ) ;
+                }
             }
         }
         else
         {
-            float components[4] = { brush.GetColour().Red() / 255.0 , brush.GetColour().Green() / 255.0 ,
+            CGFloat components[4] = { brush.GetColour().Red() / 255.0 , brush.GetColour().Green() / 255.0 ,
                 brush.GetColour().Blue() / 255.0 , brush.GetColour().Alpha() / 255.0 } ;
             m_color.Set( CGColorCreate( wxMacGetGenericRGBColorSpace() , components ) ) ;
         }
@@ -697,7 +725,7 @@ wxMacCoreGraphicsFontData::wxMacCoreGraphicsFontData(wxGraphicsRenderer* rendere
 
     // we need the scale here ...
 
-    Fixed atsuSize = IntToFixed( int( 1 * font.MacGetFontSize()) );
+    Fixed atsuSize = IntToFixed( int( 1 * font.GetPointSize()) );
     RGBColor atsuColor = MAC_WXCOLORREF( col.GetPixel() );
     ATSUAttributeTag atsuTags[] =
     {
@@ -853,7 +881,7 @@ bool wxMacCoreGraphicsMatrixData::IsEqual( const wxGraphicsMatrixData* t) const
 {
     const CGAffineTransform* tm = (CGAffineTransform*) t->GetNativeMatrix();
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
-    if ( CGAffineTransformEqualToTransform!=NULL )
+    if ( &CGAffineTransformEqualToTransform!=NULL )
     {
         return CGAffineTransformEqualToTransform(m_matrix, *((CGAffineTransform*) t->GetNativeMatrix()));
     }
@@ -1107,7 +1135,7 @@ void wxMacCoreGraphicsPathData::GetBox(wxDouble *x, wxDouble *y, wxDouble *w, wx
 bool wxMacCoreGraphicsPathData::Contains( wxDouble x, wxDouble y, int fillStyle) const
 {
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
-    if ( CGPathContainsPoint!=NULL )
+    if ( &CGPathContainsPoint!=NULL )
     {
         return CGPathContainsPoint( m_path, NULL, CGPointMake(x,y), fillStyle == wxODDEVEN_RULE );
     }
@@ -1320,7 +1348,12 @@ void wxMacCoreGraphicsContext::EnsureIsValid()
 {
     if ( !m_cgContext )
     {
-        OSStatus status = QDBeginCGContext( GetWindowPort( m_windowRef ) , &m_cgContext );
+        OSStatus status = 
+#ifndef __LP64__
+            QDBeginCGContext( GetWindowPort( m_windowRef ) , &m_cgContext );
+#else
+            paramErr;
+#endif
         wxASSERT_MSG( status == noErr , wxT("Cannot nest wxDCs on the same window") );
 
         CGContextConcatCTM( m_cgContext, m_windowTransform );
@@ -1551,7 +1584,11 @@ void wxMacCoreGraphicsContext::SetNativeContext( CGContextRef cg )
         CGContextRestoreGState( m_cgContext );
         CGContextRestoreGState( m_cgContext );
         if ( m_releaseContext )
+        {
+#ifndef __LP64__
             QDEndCGContext( GetWindowPort( m_windowRef ) , &m_cgContext);
+#endif
+        }
         else
             CGContextRelease(m_cgContext);
     }

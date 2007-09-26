@@ -108,10 +108,10 @@ class WXDLLEXPORT wxListCtrl: public wxControl
 
   // Sets the item text
   void SetItemText(long item, const wxString& str) ;
-
+  
   void SetItemTextColour(long item, const wxColour& colour) ;
   wxColour GetItemTextColour(long item) const;
-
+  
   void SetItemBackgroundColour(long item, const wxColour& colour) ;
   wxColour GetItemBackgroundColour(long item) const;
 
@@ -122,8 +122,10 @@ class WXDLLEXPORT wxListCtrl: public wxControl
   long GetItemData(long item) const ;
 
   // Sets the item data
+#if wxABI_VERSION >= 20804
   bool SetItemPtrData(long item, wxUIntPtr data);
-  bool SetItemData(long item, long data) { return SetItemPtrData(item, data); }
+#endif // wxABI 2.8.4+
+  bool SetItemData(long item, long data);
 
   // Gets the item rectangle
   bool GetItemRect(long item, wxRect& rect, int code = wxLIST_RECT_BOUNDS) const ;
@@ -145,7 +147,7 @@ class WXDLLEXPORT wxListCtrl: public wxControl
 
   // Gets the number of selected items in the list control
   int GetSelectedItemCount() const;
-
+  
   wxRect GetViewRect() const;
 
   // Gets the text colour of the listview
@@ -317,13 +319,13 @@ class WXDLLEXPORT wxListCtrl: public wxControl
   wxListCtrlCompare GetCompareFunc() { return m_compareFunc; };
   long GetCompareFuncData() { return m_compareFuncData; };
 
-
-  // public overrides needed for pimpl approach
+  
+  // public overrides needed for pimpl approach  
   virtual bool SetFont(const wxFont& font);
   virtual bool SetForegroundColour(const wxColour& colour);
   virtual bool SetBackgroundColour(const wxColour& colour);
   virtual wxColour GetBackgroundColour();
-
+  
   // functions for editing/timer
   void OnRenameTimer();
   bool OnRenameAccept(long itemEdit, const wxString& value);
@@ -332,31 +334,33 @@ class WXDLLEXPORT wxListCtrl: public wxControl
   void ChangeCurrent(long current);
   void ResetCurrent() { ChangeCurrent((long)-1); }
   bool HasCurrent() const { return m_current != (long)-1; }
-
+  
   void OnLeftDown(wxMouseEvent& event);
   void OnDblClick(wxMouseEvent& event);
-
+  
   void FinishEditing(wxTextCtrl *text)
   {
       delete text;
       m_textctrlWrapper = NULL;
       SetFocus();
   }
-
+  
   virtual int GetScrollPos(int orient) const;
-
+  
+#if wxABI_VERSION >= 20801
   void OnRightDown(wxMouseEvent& event);
   void OnMiddleDown(wxMouseEvent& event);
   void OnChar(wxKeyEvent& event);
   virtual void SetFocus();
   void FireMouseEvent(wxEventType eventType, wxPoint position);
+#endif
 
   virtual void SetDropTarget( wxDropTarget *dropTarget );
   virtual wxDropTarget* GetDropTarget() const;
-
+  
   // with CG, we need to get the context from an kEventControlDraw event
   // unfortunately, the DataBrowser callbacks don't provide the context
-  // and we need it, so we need to set/remove it before and after draw
+  // and we need it, so we need to set/remove it before and after draw 
   // events so we can access it in the callbacks.
   void MacSetDrawingContext(void* context) { m_cgContext = context; }
   void* MacGetDrawingContext() { return m_cgContext; }
@@ -375,23 +379,23 @@ protected:
   wxListCtrlRenameTimer *m_renameTimer;
   // common part of all ctors
   void Init();
-
+  
   wxGenericListCtrl* m_genericImpl;   // allow use of the generic impl.
   wxMacDataBrowserListCtrlControl* m_dbImpl;
   void*  m_macListCtrlEventHandler;
   void*  m_cgContext;
   wxListCtrlCompare m_compareFunc;
   long m_compareFuncData;
-
+  
   wxTextCtrl*       m_textCtrl;        // The control used for editing a label
   wxImageList *     m_imageListNormal; // The image list for normal icons
   wxImageList *     m_imageListSmall;  // The image list for small icons
   wxImageList *     m_imageListState;  // The image list state icons (not implemented yet)
-
+  
   wxColumnList      m_colsInfo; // for storing info about each column
   wxColour          m_textColor;
-  wxColour          m_bgColor;
-
+  wxColour          m_bgColor; 
+  
   // keep track of whether or not we should delete the image list ourselves.
   bool              m_ownsImageListNormal,
                     m_ownsImageListSmall,
@@ -404,8 +408,8 @@ protected:
                                   // keep track of inserted/deleted columns
 
   int               m_count; // for virtual lists, store item count
-
-private:
+  
+private: 
   DECLARE_EVENT_TABLE()
 };
 

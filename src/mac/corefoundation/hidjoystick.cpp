@@ -25,7 +25,7 @@
 //---------------------------------------------------------------------------
 
 //we only support HID on OSX (DARWIN), since it requires DARWIN...
-#if wxUSE_JOYSTICK && defined(__DARWIN__) && wxUSE_THREADS
+#if wxUSE_JOYSTICK && defined(__DARWIN__)
 
 //---------------------------------------------------------------------------
 // Includes

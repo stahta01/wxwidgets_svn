@@ -13,7 +13,6 @@
 #define _WX_HASHMAP_H_
 
 #include "wx/string.h"
-#include "wx/wxcrt.h"
 
 #if (defined(HAVE_EXT_HASH_MAP) || defined(HAVE_HASH_MAP)) \
     && (defined(HAVE_GNU_CXX_HASH_MAP) || defined(HAVE_STD_HASH_MAP))
@@ -144,6 +143,8 @@ public: \
         value_type m_value; \
     }; \
  \
+    CLASSEXP Iterator; \
+    friend CLASSEXP Iterator; \
 protected: \
     static void DeleteNode( _wxHashTable_NodeBase* node ) \
     { \
@@ -184,7 +185,6 @@ public: \
             m_node = next ? next : GetNextNode(); \
         } \
     }; \
-    friend class Iterator; \
  \
 public: \
     CLASSEXP iterator : public Iterator \
@@ -271,9 +271,9 @@ public: \
     const_iterator end() const { return const_iterator( 0, this ); } \
     iterator end() { return iterator( 0, this ); } \
     const_iterator begin() const \
-        { return const_iterator( (Node*)GetFirstNode( m_tableBuckets, (_wxHashTable_NodeBase**)m_table ), this ); }  \
+        { return const_iterator( (Node*)GetFirstNode( m_tableBuckets, (_wxHashTable_NodeBase**)m_table ), this ); } \
     iterator begin() \
-        { return iterator( (Node*)GetFirstNode( m_tableBuckets, (_wxHashTable_NodeBase**)m_table ), this ); }  \
+        { return iterator( (Node*)GetFirstNode( m_tableBuckets, (_wxHashTable_NodeBase**)m_table ), this ); } \
  \
     size_type erase( const const_key_type& key ) \
     { \
@@ -561,29 +561,21 @@ public:
     wxPointerEqual& operator=(const wxPointerEqual&) { return *this; }
 };
 
-// wxString, char*, wchar_t*
+// wxString, char*, wxChar*
 class WXDLLIMPEXP_BASE wxStringHash
 {
 public:
     wxStringHash() {}
     unsigned long operator()( const wxString& x ) const
-        { return stringHash( x.wx_str() ); }
-    unsigned long operator()( const wchar_t* x ) const
-        { return stringHash( x ); }
+        { return wxCharStringHash( x.c_str() ); }
+    unsigned long operator()( const wxChar* x ) const
+        { return wxCharStringHash( x ); }
+    static unsigned long wxCharStringHash( const wxChar* );
+#if wxUSE_UNICODE
     unsigned long operator()( const char* x ) const
-        { return stringHash( x ); }
-
-#if WXWIN_COMPATIBILITY_2_8
-    static unsigned long wxCharStringHash( const wxChar* x )
-        { return stringHash(x); }
-    #if wxUSE_UNICODE
-    static unsigned long charStringHash( const char* x )
-        { return stringHash(x); }
-    #endif
-#endif // WXWIN_COMPATIBILITY_2_8
-
-    static unsigned long stringHash( const wchar_t* );
-    static unsigned long stringHash( const char* );
+        { return charStringHash( x ); }
+    static unsigned long charStringHash( const char* );
+#endif // wxUSE_UNICODE
 
     wxStringHash& operator=(const wxStringHash&) { return *this; }
 };

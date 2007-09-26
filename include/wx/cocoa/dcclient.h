@@ -18,7 +18,7 @@
 // NSView of the content view seems to return the entire window rectangle
 // (including decorations).  Of course, that is not at all part of the
 // Cocoa or OpenStep APIs, but it might be a neat hack.
-class WXDLLIMPEXP_CORE wxWindowDC: public wxDC
+class wxWindowDC: public wxDC
 {
     DECLARE_DYNAMIC_CLASS(wxWindowDC)
 public:
@@ -38,7 +38,7 @@ protected:
     virtual bool CocoaGetBounds(void *rectData);
 };
 
-class WXDLLIMPEXP_CORE wxClientDC: public wxWindowDC
+class wxClientDC: public wxWindowDC
 {
     DECLARE_DYNAMIC_CLASS(wxClientDC)
 public:
@@ -52,7 +52,7 @@ protected:
     virtual bool CocoaUnlockFocus();
 };
 
-class WXDLLIMPEXP_CORE wxPaintDC: public wxWindowDC
+class wxPaintDC: public wxWindowDC
 {
     DECLARE_DYNAMIC_CLASS(wxPaintDC)
 public:

@@ -75,7 +75,7 @@ public:
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const;
+                                 wxFont *theFont = NULL) const;
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
 
     virtual bool CanDrawBitmap() const;
@@ -92,15 +92,6 @@ public:
     virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
     virtual void SetLogicalFunction(int function);
 
-    virtual wxCoord DeviceToLogicalX(wxCoord x) const;
-    virtual wxCoord DeviceToLogicalY(wxCoord y) const;
-    virtual wxCoord DeviceToLogicalXRel(wxCoord x) const;
-    virtual wxCoord DeviceToLogicalYRel(wxCoord y) const;
-    virtual wxCoord LogicalToDeviceX(wxCoord x) const;
-    virtual wxCoord LogicalToDeviceY(wxCoord y) const;
-    virtual wxCoord LogicalToDeviceXRel(wxCoord x) const;
-    virtual wxCoord LogicalToDeviceYRel(wxCoord y) const ;
-    
     // implementation from now on
     // --------------------------
 

@@ -47,18 +47,55 @@ void wxMacConvertNewlines10To13( char * data )
     }
 }
 
-const wxString sCR((wxChar)13);
-const wxString sLF((wxChar)10);
-
 void wxMacConvertNewlines13To10( wxString * data )
 {
-    data->Replace( sCR,sLF);
+    size_t len = data->Length() ;
+
+    if ( len == 0 || wxStrchr(data->c_str(),0x0d)==NULL)
+        return ;
+
+    wxString temp(*data) ;
+    wxStringBuffer buf(*data,len ) ;
+    memcpy( buf , temp.c_str() , (len+1)*sizeof(wxChar) ) ;
+
+    wxMacConvertNewlines13To10( buf ) ;
 }
 
 void wxMacConvertNewlines10To13( wxString * data )
 {
-    data->Replace( sLF,sCR);
+    size_t len = data->Length() ;
+
+    if ( data->Length() == 0 || wxStrchr(data->c_str(),0x0a)==NULL)
+        return ;
+
+    wxString temp(*data) ;
+    wxStringBuffer buf(*data,len ) ;
+    memcpy( buf , temp.c_str() , (len+1)*sizeof(wxChar) ) ;
+    wxMacConvertNewlines10To13( buf ) ;
 }
+
+
+#if wxUSE_UNICODE
+void wxMacConvertNewlines13To10( wxChar * data )
+{
+    wxChar * buf = data ;
+    while( (buf=wxStrchr(buf,0x0d)) != NULL )
+    {
+        *buf = 0x0a ;
+        buf++ ;
+    }
+}
+
+void wxMacConvertNewlines10To13( wxChar * data )
+{
+    wxChar * buf =  data ;
+    while( (buf=wxStrchr(buf,0x0a)) != NULL )
+    {
+        *buf = 0x0d ;
+        buf++ ;
+    }
+}
+#endif
 
 wxUint32 wxMacGetSystemEncFromFontEnc(wxFontEncoding encoding)
 {
@@ -666,9 +703,9 @@ wxString wxMacCFStringHolder::AsString(wxFontEncoding encoding)
 #endif
 
     buf[noChars] = 0 ;
+    wxMacConvertNewlines10To13( buf ) ;
     wxString result(buf) ;
     delete[] buf ;
-    wxMacConvertNewlines10To13( &result);
     return result ;
 }
 

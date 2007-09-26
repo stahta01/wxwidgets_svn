@@ -34,7 +34,7 @@
 #define wxWIZARD_EX_HELPBUTTON   0x00000010
 
 // forward declarations
-class WXDLLIMPEXP_FWD_ADV wxWizard;
+class WXDLLIMPEXP_ADV wxWizard;
 
 // ----------------------------------------------------------------------------
 // wxWizardPage is one of the wizards screen: it must know what are the
@@ -54,10 +54,12 @@ public:
     // that no other parameters are needed because the wizard will resize and
     // reposition the page anyhow
     wxWizardPage(wxWizard *parent,
-                 const wxBitmap& bitmap = wxNullBitmap);
+                 const wxBitmap& bitmap = wxNullBitmap,
+                 const wxChar* resource = NULL);
 
     bool Create(wxWizard *parent,
-                const wxBitmap& bitmap = wxNullBitmap);
+                const wxBitmap& bitmap = wxNullBitmap,
+                const wxChar* resource = NULL);
 
     // these functions are used by the wizard to show another page when the
     // user chooses "Back" or "Next" button
@@ -119,19 +121,21 @@ public:
     wxWizardPageSimple(wxWizard *parent,
                        wxWizardPage *prev = (wxWizardPage *)NULL,
                        wxWizardPage *next = (wxWizardPage *)NULL,
-                       const wxBitmap& bitmap = wxNullBitmap)
+                       const wxBitmap& bitmap = wxNullBitmap,
+                       const wxChar* resource = NULL)
     {
-        Create(parent, prev, next, bitmap);
+        Create(parent, prev, next, bitmap, resource);
     }
 
     bool Create(wxWizard *parent = NULL, // let it be default ctor too
                 wxWizardPage *prev = (wxWizardPage *)NULL,
                 wxWizardPage *next = (wxWizardPage *)NULL,
-                const wxBitmap& bitmap = wxNullBitmap)
+                const wxBitmap& bitmap = wxNullBitmap,
+                const wxChar* resource = NULL)
     {
         m_prev = prev;
         m_next = next;
-        return wxWizardPage::Create(parent, bitmap);
+        return wxWizardPage::Create(parent, bitmap, resource);
     }
 
     // the pointers may be also set later - but before starting the wizard

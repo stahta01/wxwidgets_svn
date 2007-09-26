@@ -44,7 +44,6 @@ public:
     // implement base class pure virtuals
     // ----------------------------------
 
-    virtual void WriteText(const wxString& text);
     virtual wxString GetValue() const;
     virtual bool IsEmpty() const;
 
@@ -55,13 +54,30 @@ public:
     virtual bool IsModified() const;
     virtual bool IsEditable() const;
 
+    // If the return values from and to are the same, there is no selection.
     virtual void GetSelection(long* from, long* to) const;
 
+    // operations
+    // ----------
+
+    // editing
+    virtual void Clear();
+    virtual void Replace(long from, long to, const wxString& value);
     virtual void Remove(long from, long to);
 
+    // sets/clears the dirty flag
     virtual void MarkDirty();
     virtual void DiscardEdits();
 
+    virtual void SetMaxLength(unsigned long len);
+
+    // writing text inserts it at the current position, appending always
+    // inserts it at the end
+    virtual void WriteText(const wxString& text);
+    virtual void AppendText(const wxString& text);
+
+    // apply text attribute to the range of text (only works with richedit
+    // controls)
     virtual bool SetStyle(long start, long end, const wxTextAttr& style);
 
     // translate between the position (which is just an index in the text ctrl
@@ -85,8 +101,16 @@ public:
     virtual void Cut();
     virtual void Paste();
 
+    // Undo/redo
+    virtual void Undo();
+    virtual void Redo();
+
+    virtual bool CanUndo() const;
+    virtual bool CanRedo() const;
+
     // Insertion point
     virtual void SetInsertionPoint(long pos);
+    virtual void SetInsertionPointEnd();
     virtual long GetInsertionPoint() const;
     virtual wxTextPos GetLastPosition() const;
 
@@ -131,7 +155,7 @@ public:
     // wxGTK-specific: called recursively by Enable,
     // to give widgets an oppprtunity to correct their colours after they
     // have been changed by Enable
-    virtual void OnEnabled( bool enable ) ;
+    virtual void OnParentEnable( bool enable ) ;
 
     // tell the control to ignore next text changed signal
     void IgnoreNextTextUpdate(int n = 1) { m_countUpdatesToIgnore = n; }
@@ -157,15 +181,9 @@ public:
     bool IsFrozen() const { return m_freezeCount > 0; }
 
 protected:
-    // overridden wxWindow virtual methods
     virtual wxSize DoGetBestSize() const;
     virtual void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
-
-    // overridden wxTextEntry virtual methods
-    virtual const wxWindow *GetEditableWindow() const { return this; }
-    virtual GtkEditable *GetEditable() const;
-    virtual void EnableTextChangedEvents(bool enable);
 
     // common part of all ctors
     void Init();
@@ -194,17 +212,7 @@ private:
     // encoding
     wxFontEncoding GetTextEncoding() const;
 
-    // returns either m_text or m_buffer depending on whether the control is
-    // single- or multi-line; convenient for the GTK+ functions which work with
-    // both
-    void *GetTextObject() const
-    {
-        return IsMultiLine() ? wx_static_cast(void *, m_buffer)
-                             : wx_static_cast(void *, m_text);
-    }
 
-
-    // the widget used for single line controls
     GtkWidget  *m_text;
 
     bool        m_modified:1;

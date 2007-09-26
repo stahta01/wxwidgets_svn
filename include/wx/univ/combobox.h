@@ -15,7 +15,7 @@
 
 #include "wx/combo.h"
 
-class WXDLLIMPEXP_FWD_CORE wxListBox;
+class WXDLLEXPORT wxListBox;
 
 // ----------------------------------------------------------------------------
 // NB: some actions supported by this control are in wx/generic/combo.h
@@ -93,7 +93,6 @@ public:
     // wxTextCtrl methods
     virtual wxString GetValue() const;
     virtual void SetValue(const wxString& value);
-    virtual void WriteText(const wxString& value);
     virtual void Copy();
     virtual void Cut();
     virtual void Paste();
@@ -104,7 +103,6 @@ public:
     virtual void Replace(long from, long to, const wxString& value);
     virtual void Remove(long from, long to);
     virtual void SetSelection(long from, long to);
-    virtual void GetSelection(long *from, long *to) const;
     virtual void SetEditable(bool editable);
     virtual bool IsEditable() const;
 
@@ -119,15 +117,14 @@ public:
     virtual bool CanRedo() const;
 
     // wxControlWithItems methods
-    virtual void DoClear();
-    virtual void DoDeleteOneItem(unsigned int n);
+    virtual void Clear();
+    virtual void Delete(unsigned int n);
     virtual unsigned int GetCount() const;
     virtual wxString GetString(unsigned int n) const;
     virtual void SetString(unsigned int n, const wxString& s);
     virtual int FindString(const wxString& s, bool bCase = false) const;
     virtual void SetSelection(int n);
     virtual int GetSelection() const;
-    virtual wxString GetStringSelection() const;
 
     wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
 
@@ -145,23 +142,13 @@ public:
         return GetStdInputHandler(handlerDef);
     }
 
-    // we delegate our client data handling to wxListBox which we use for the
-    // items, so override this and other methods dealing with the client data
-    virtual wxClientDataType GetClientDataType() const
-    {
-        return GetLBox()->GetClientDataType();
-    }
-
-    virtual void SetClientDataType(wxClientDataType clientDataItemsType);
-
 protected:
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
-
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
-
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
 
     // common part of all ctors
     void Init();

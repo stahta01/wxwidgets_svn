@@ -97,11 +97,7 @@ public:
 
     void OnClear(wxCommandEvent& event);
 
-    void OnBeginBusyCursor(wxCommandEvent& event);
-    void OnEndBusyCursor(wxCommandEvent& event);
-
     void OnSyncExec(wxCommandEvent& event);
-    void OnSyncNoEventsExec(wxCommandEvent& event);
     void OnAsyncExec(wxCommandEvent& event);
     void OnShell(wxCommandEvent& event);
     void OnExecWithRedirect(wxCommandEvent& event);
@@ -303,10 +299,7 @@ enum
     Exec_Quit = 100,
     Exec_Kill,
     Exec_ClearLog,
-    Exec_BeginBusyCursor,
-    Exec_EndBusyCursor,
     Exec_SyncExec = 200,
-    Exec_SyncNoEventsExec,
     Exec_AsyncExec,
     Exec_Shell,
     Exec_POpen,
@@ -338,11 +331,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Exec_Quit,  MyFrame::OnQuit)
     EVT_MENU(Exec_Kill,  MyFrame::OnKill)
     EVT_MENU(Exec_ClearLog,  MyFrame::OnClear)
-    EVT_MENU(Exec_BeginBusyCursor,  MyFrame::OnBeginBusyCursor)
-    EVT_MENU(Exec_EndBusyCursor,  MyFrame::OnEndBusyCursor)
 
     EVT_MENU(Exec_SyncExec, MyFrame::OnSyncExec)
-    EVT_MENU(Exec_SyncNoEventsExec, MyFrame::OnSyncNoEventsExec)
     EVT_MENU(Exec_AsyncExec, MyFrame::OnAsyncExec)
     EVT_MENU(Exec_Shell, MyFrame::OnShell)
     EVT_MENU(Exec_Redirect, MyFrame::OnExecWithRedirect)
@@ -396,9 +386,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main application window
     MyFrame *frame = new MyFrame(_T("Exec wxWidgets sample"),
                                  wxDefaultPosition, wxSize(500, 140));
@@ -439,19 +426,14 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuFile->Append(Exec_Kill, _T("&Kill process...\tCtrl-K"),
                      _T("Kill a process by PID"));
     menuFile->AppendSeparator();
-    menuFile->Append(Exec_ClearLog, _T("&Clear log\tCtrl-L"),
+    menuFile->Append(Exec_ClearLog, _T("&Clear log\tCtrl-C"),
                      _T("Clear the log window"));
-    menuFile->AppendSeparator();
-    menuFile->Append(Exec_BeginBusyCursor, _T("Show &busy cursor\tCtrl-C"));
-    menuFile->Append(Exec_EndBusyCursor, _T("Show &normal cursor\tShift-Ctrl-C"));
     menuFile->AppendSeparator();
     menuFile->Append(Exec_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     wxMenu *execMenu = new wxMenu;
     execMenu->Append(Exec_SyncExec, _T("Sync &execution...\tCtrl-E"),
                      _T("Launch a program and return when it terminates"));
-    execMenu->Append(Exec_SyncNoEventsExec, _T("Sync execution and &block...\tCtrl-B"),
-                     _T("Launch a program and block until it terminates"));
     execMenu->Append(Exec_AsyncExec, _T("&Async execution...\tCtrl-A"),
                      _T("Launch a program and return immediately"));
     execMenu->Append(Exec_Shell, _T("Execute &shell command...\tCtrl-S"),
@@ -514,16 +496,6 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnClear(wxCommandEvent& WXUNUSED(event))
 {
     m_lbox->Clear();
-}
-
-void MyFrame::OnBeginBusyCursor(wxCommandEvent& WXUNUSED(event))
-{
-    wxBeginBusyCursor();
-}
-
-void MyFrame::OnEndBusyCursor(wxCommandEvent& WXUNUSED(event))
-{
-    wxEndBusyCursor();
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
@@ -673,25 +645,6 @@ void MyFrame::OnSyncExec(wxCommandEvent& WXUNUSED(event))
     m_cmdLast = cmd;
 }
 
-void MyFrame::OnSyncNoEventsExec(wxCommandEvent& WXUNUSED(event))
-{
-    wxString cmd = wxGetTextFromUser(_T("Enter the command: "),
-                                     DIALOG_TITLE,
-                                     m_cmdLast);
-
-    if ( !cmd )
-        return;
-
-    wxLogStatus( _T("'%s' is running please wait..."), cmd.c_str() );
-
-    int code = wxExecute(cmd, wxEXEC_BLOCK);
-
-    wxLogStatus(_T("Process '%s' terminated with exit code %d."),
-        cmd.c_str(), code);
-
-    m_cmdLast = cmd;
-}
-
 void MyFrame::OnAsyncExec(wxCommandEvent& WXUNUSED(event))
 {
     wxString cmd = wxGetTextFromUser(_T("Enter the command: "),
@@ -747,12 +700,9 @@ void MyFrame::OnExecWithRedirect(wxCommandEvent& WXUNUSED(event))
 
     if ( sync )
     {
-        wxLogStatus( _T("'%s' is running please wait..."), cmd.c_str() );
-
         wxArrayString output, errors;
         int code = wxExecute(cmd, output, errors);
-
-        wxLogStatus(_T("Command '%s' terminated with exit code %d."),
+        wxLogStatus(_T("command '%s' terminated with exit code %d."),
                     cmd.c_str(), code);
 
         if ( code != -1 )
@@ -856,7 +806,7 @@ void MyFrame::OnFileExec(wxCommandEvent& WXUNUSED(event))
     wxString filename;
 
 #if wxUSE_FILEDLG
-    filename = wxLoadFileSelector(_T("any file"), wxEmptyString, s_filename, this);
+    filename = wxLoadFileSelector(_T("any file"), NULL, s_filename, this);
 #else // !wxUSE_FILEDLG
     filename = wxGetTextFromUser(_T("Enter the file name"), _T("exec sample"),
                                  s_filename, this);
@@ -892,7 +842,7 @@ void MyFrame::OnFileExec(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnOpenURL(wxCommandEvent& WXUNUSED(event))
 {
-    static wxString s_filename(_T("http://www.wxwidgets.org/"));
+    static wxString s_filename;
 
     wxString filename = wxGetTextFromUser
                         (

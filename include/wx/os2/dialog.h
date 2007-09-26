@@ -16,7 +16,7 @@
 
 WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
 
-class WXDLLIMPEXP_FWD_CORE wxDialogModalData;
+class WXDLLEXPORT wxDialogModalData;
 
 //
 // Dialog boxes

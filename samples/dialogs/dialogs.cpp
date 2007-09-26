@@ -27,7 +27,6 @@
 #include "wx/bookctrl.h"
 #include "wx/artprov.h"
 #include "wx/imaglist.h"
-#include "wx/minifram.h"
 #include "wx/sysopt.h"
 
 #if wxUSE_COLOURDLG
@@ -163,11 +162,10 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
 #if USE_MODAL_PRESENTATION
     EVT_MENU(DIALOGS_MODAL,                         MyFrame::ModalDlg)
-#endif // USE_MODAL_PRESENTATION
     EVT_MENU(DIALOGS_MODELESS,                      MyFrame::ModelessDlg)
     EVT_MENU(DIALOGS_CENTRE_SCREEN,                 MyFrame::DlgCenteredScreen)
     EVT_MENU(DIALOGS_CENTRE_PARENT,                 MyFrame::DlgCenteredParent)
-    EVT_MENU(DIALOGS_MINIFRAME,                     MyFrame::MiniFrame)
+#endif // USE_MODAL
 
 #if wxUSE_STARTUP_TIPS
     EVT_MENU(DIALOGS_TIP,                           MyFrame::ShowTip)
@@ -217,7 +215,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK, MyFrame::OnPropertySheet)
 #endif
 
-    EVT_MENU(DIALOGS_STANDARD_BUTTON_SIZER_DIALOG,  MyFrame::OnStandardButtonsSizerDialog)
     EVT_MENU(DIALOGS_REQUEST,                       MyFrame::OnRequestUserAttention)
 
     EVT_MENU(wxID_EXIT,                             MyFrame::OnExit)
@@ -236,19 +233,11 @@ END_EVENT_TABLE()
 
 #endif // USE_MODAL_PRESENTATION
 
-BEGIN_EVENT_TABLE(StdButtonSizerDialog, wxDialog)
-    EVT_CHECKBOX(wxID_ANY, StdButtonSizerDialog::OnEvent)
-    EVT_RADIOBUTTON(wxID_ANY, StdButtonSizerDialog::OnEvent)
-END_EVENT_TABLE()
-
 MyCanvas *myCanvas = (MyCanvas *) NULL;
 
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_IMAGE
     wxInitAllImageHandlers();
 #endif
@@ -382,15 +371,14 @@ bool MyApp::OnInit()
     menuDlg->Append(wxID_ANY,_T("&Searching"),find_menu);
 #endif // wxUSE_FINDREPLDLG
 
-    wxMenu *dialogs_menu = new wxMenu;
 #if USE_MODAL_PRESENTATION
+    wxMenu *dialogs_menu = new wxMenu;
     dialogs_menu->Append(DIALOGS_MODAL, _T("&Modal dialog\tCtrl-W"));
-#endif // USE_MODAL_PRESENTATION
     dialogs_menu->AppendCheckItem(DIALOGS_MODELESS, _T("Mode&less dialog\tCtrl-Z"));
     dialogs_menu->Append(DIALOGS_CENTRE_SCREEN, _T("Centered on &screen\tShift-Ctrl-1"));
     dialogs_menu->Append(DIALOGS_CENTRE_PARENT, _T("Centered on &parent\tShift-Ctrl-2"));
-    dialogs_menu->Append(DIALOGS_MINIFRAME, _T("&Mini frame"));
     menuDlg->Append(wxID_ANY, _T("&Generic dialogs"), dialogs_menu);
+#endif // USE_MODAL_PRESENTATION
 
 #if USE_SETTINGS_DIALOG
     wxMenu *sheet_menu = new wxMenu;
@@ -406,8 +394,6 @@ bool MyApp::OnInit()
 */
     menuDlg->Append(wxID_ANY, _T("&Property sheets"), sheet_menu);
 #endif // USE_SETTINGS_DIALOG
-
-    menuDlg->Append(DIALOGS_STANDARD_BUTTON_SIZER_DIALOG, _T("&Standard Buttons Sizer Dialog"));
 
     menuDlg->Append(DIALOGS_REQUEST, _T("&Request user attention\tCtrl-R"));
 
@@ -596,19 +582,8 @@ void MyFrame::LogDialog(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::MessageBox(wxCommandEvent& WXUNUSED(event) )
 {
-    wxMessageDialog dialog(NULL,
-                           _T("This is a message box\nA long, long string to test out the message box properly"),
-                           _T("Message box text"),
-                           wxNO_DEFAULT | wxYES_NO | wxCANCEL | wxICON_INFORMATION);
-
-    if ( dialog.SetYesNoLabels(_T("Answer &Yes"),_T("Answer &No")) )
-    {
-        dialog.SetExtendedMessage(_T("This platform supports custom button labels"));
-    }
-    else
-    {
-        dialog.SetExtendedMessage(_T("Custom button labels are not supported."));
-    }
+    wxMessageDialog dialog( NULL, _T("This is a message box\nA long, long string to test out the message box properly"),
+        _T("Message box text"), wxNO_DEFAULT|wxYES_NO|wxCANCEL|wxICON_INFORMATION);
 
     switch ( dialog.ShowModal() )
     {
@@ -796,7 +771,7 @@ void MyFrame::FileOpen2(wxCommandEvent& WXUNUSED(event) )
     s_extDef = path.AfterLast(_T('.'));
 
     wxLogMessage(_T("You selected the file '%s', remembered extension '%s'"),
-                 path, s_extDef);
+                 (const wxChar*) path, (const wxChar*) s_extDef);
 }
 
 void MyFrame::FilesOpen(wxCommandEvent& WXUNUSED(event) )
@@ -846,7 +821,7 @@ void MyFrame::FileSave(wxCommandEvent& WXUNUSED(event) )
                         _T("Testing save file dialog"),
                         wxEmptyString,
                         _T("myletter.doc"),
-                        _T("Text files (*.txt)|*.txt|Document files (*.doc;*.ods)|*.doc;*.ods"),
+                        _T("Text files (*.txt)|*.txt|Document files (*.doc)|*.doc"),
                         wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
     dialog.SetFilterIndex(1);
@@ -931,7 +906,7 @@ void MyFrame::FileSaveGeneric(wxCommandEvent& WXUNUSED(event) )
                         _T("Testing save file dialog"),
                         wxEmptyString,
                         _T("myletter.doc"),
-                        _T("Text files (*.txt)|*.txt|Document files (*.doc;*.ods)|*.doc;*.ods"),
+                        _T("Text files (*.txt)|*.txt|Document files (*.doc)|*.doc"),
                         wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 
     dialog.SetFilterIndex(1);
@@ -993,7 +968,6 @@ void MyFrame::ModalDlg(wxCommandEvent& WXUNUSED(event))
     MyModalDialog dlg(this);
     dlg.ShowModal();
 }
-#endif // USE_MODAL_PRESENTATION
 
 void MyFrame::ModelessDlg(wxCommandEvent& event)
 {
@@ -1039,23 +1013,7 @@ void MyFrame::DlgCenteredParent(wxCommandEvent& WXUNUSED(event))
     dlg.ShowModal();
 }
 
-void MyFrame::MiniFrame(wxCommandEvent& WXUNUSED(event))
-{
-    wxFrame *frame = new wxMiniFrame(this, wxID_ANY, _T("Mini frame"),
-                                     wxDefaultPosition, wxSize(300, 100),
-                                     wxCAPTION | wxCLOSE_BOX);
-    new wxStaticText(frame,
-                     wxID_ANY,
-                     _T("Mini frames have slightly different appearance"),
-                     wxPoint(5, 5));
-    new wxStaticText(frame,
-                     wxID_ANY,
-                     _T("from the normal frames but that's the only difference."),
-                     wxPoint(5, 25));
-
-    frame->CentreOnParent();
-    frame->Show();
-}
+#endif // USE_MODAL_PRESENTATION
 
 #if wxUSE_STARTUP_TIPS
 void MyFrame::ShowTip(wxCommandEvent& WXUNUSED(event))
@@ -1101,12 +1059,6 @@ void MyFrame::OnRequestUserAttention(wxCommandEvent& WXUNUSED(event))
     wxSleep(3);
 
     RequestUserAttention(wxUSER_ATTENTION_ERROR);
-}
-
-void MyFrame::OnStandardButtonsSizerDialog(wxCommandEvent& WXUNUSED(event))
-{
-    StdButtonSizerDialog  dialog(this);
-    dialog.ShowModal();
 }
 
 void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event) )
@@ -1558,165 +1510,6 @@ void MyModalDialog::OnButton(wxCommandEvent& event)
 }
 
 #endif // USE_MODAL_PRESENTATION
-
-// ----------------------------------------------------------------------------
-// StdButtonSizerDialog
-// ----------------------------------------------------------------------------
-
-StdButtonSizerDialog::StdButtonSizerDialog(wxWindow *parent)
-    : wxDialog(parent, wxID_ANY, wxString(_T("StdButtonSizer dialog")),
-      wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER),
-      m_buttonsSizer(NULL)
-{
-    wxBoxSizer *const sizerTop = new wxBoxSizer(wxVERTICAL);
-
-    wxBoxSizer *const sizer = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer *const sizerInside1 = new wxBoxSizer(wxVERTICAL);
-
-    m_chkboxAffirmativeButton = new wxCheckBox(this, wxID_ANY, _("Enable Affirmative Button"));
-
-    wxStaticBoxSizer *const sizer1 = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Affirmative Button"));
-
-    m_radiobtnOk = new wxRadioButton(this, wxID_ANY, _("Ok"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    m_radiobtnYes = new wxRadioButton(this, wxID_ANY, _("Yes"));
-
-    wxBoxSizer *const sizerInside2 = new wxBoxSizer(wxVERTICAL);
-
-    m_chkboxDismissButton = new wxCheckBox(this, wxID_ANY, _("Enable Dismiss Button"));
-
-    wxStaticBoxSizer *const sizer2 = new wxStaticBoxSizer(wxVERTICAL, this, wxT("Dismiss Button"));
-
-    m_radiobtnCancel = new wxRadioButton(this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, wxRB_GROUP);
-    m_radiobtnClose = new wxRadioButton(this, wxID_ANY, _("Close"));
-
-    wxBoxSizer *const sizer3 = new wxBoxSizer(wxHORIZONTAL);
-
-    m_chkboxNo = new wxCheckBox(this, wxID_ANY, _("No"));
-    m_chkboxHelp = new wxCheckBox(this, wxID_ANY, _("Help"));
-    m_chkboxApply = new wxCheckBox(this, wxID_ANY, _("Apply"));
-
-    m_chkboxNoDefault = new wxCheckBox(this, wxID_ANY, wxT("No Default"));
-
-    sizer1->Add(m_radiobtnOk, 0, wxALL, 5);
-    sizer1->Add(m_radiobtnYes, 0, wxALL, 5);
-
-    sizer->Add(sizerInside1, 0, 0, 0);
-    sizerInside1->Add(m_chkboxAffirmativeButton, 0, wxALL, 5);
-    sizerInside1->Add(sizer1, 0, wxALL, 5);
-    sizerInside1->SetItemMinSize(sizer1, sizer1->GetStaticBox()->GetBestSize());    // to prevent wrapping of static box label
-
-    sizer2->Add(m_radiobtnCancel, 0, wxALL, 5);
-    sizer2->Add(m_radiobtnClose, 0, wxALL, 5);
-
-    sizer->Add(sizerInside2, 0, 0, 0);
-    sizerInside2->Add(m_chkboxDismissButton, 0, wxALL, 5);
-    sizerInside2->Add(sizer2, 0, wxALL, 5);
-    sizerInside2->SetItemMinSize(sizer2, sizer2->GetStaticBox()->GetBestSize());    // to prevent wrapping of static box label
-
-    sizerTop->Add(sizer, 0, wxALL, 5);
-
-    sizer3->Add(m_chkboxNo, 0, wxALL, 5);
-    sizer3->Add(m_chkboxHelp, 0, wxALL, 5);
-    sizer3->Add(m_chkboxApply, 0, wxALL, 5);
-
-    sizerTop->Add(sizer3, 0, wxALL, 5);
-
-    sizerTop->Add(m_chkboxNoDefault, 0, wxLEFT|wxRIGHT, 10);
-
-    EnableDisableControls();
-
-    SetSizer(sizerTop);
-
-    sizerTop->SetSizeHints(this);
-    wxCommandEvent ev;
-    OnEvent(ev);
-}
-
-void StdButtonSizerDialog::OnEvent(wxCommandEvent& WXUNUSED(event))
-{
-    if (m_buttonsSizer)
-    {
-        m_buttonsSizer->DeleteWindows();
-        GetSizer()->Remove(m_buttonsSizer);
-    }
-
-    EnableDisableControls();
-
-    long flags = 0;
-    unsigned long numButtons = 0;
-
-    if (m_chkboxAffirmativeButton->IsChecked())
-    {
-        if (m_radiobtnOk->GetValue())
-        {
-            flags |= wxOK;
-            numButtons ++;
-        }
-        else if (m_radiobtnYes->GetValue())
-        {
-            flags |= wxYES;
-            numButtons ++;
-        }
-    }
-
-    if (m_chkboxDismissButton->IsChecked())
-    {
-        if (m_radiobtnCancel->GetValue())
-        {
-            flags |= wxCANCEL;
-            numButtons ++;
-        }
-
-        else if (m_radiobtnClose->GetValue())
-        {
-            flags |= wxCLOSE;
-            numButtons ++;
-        }
-
-    }
-
-    if (m_chkboxApply->IsChecked())
-    {
-        flags |= wxAPPLY;
-        numButtons ++;
-    }
-
-    if (m_chkboxNo->IsChecked())
-    {
-        flags |= wxNO;
-        numButtons ++;
-    }
-
-    if (m_chkboxHelp->IsChecked())
-    {
-        flags |= wxHELP;
-        numButtons ++;
-    }
-
-    if (m_chkboxNoDefault->IsChecked())
-    {
-        flags |= wxNO_DEFAULT;
-    }
-
-    m_buttonsSizer = CreateStdDialogButtonSizer(flags);
-    GetSizer()->Add(m_buttonsSizer, 0, wxGROW|wxALL, 5);
-
-    Layout();
-    GetSizer()->SetSizeHints(this);
-}
-
-void StdButtonSizerDialog::EnableDisableControls()
-{
-    const bool affButtonEnabled = m_chkboxAffirmativeButton->IsChecked();
-
-    m_radiobtnOk->Enable(affButtonEnabled);
-    m_radiobtnYes->Enable(affButtonEnabled);
-
-    const bool dismissButtonEnabled = m_chkboxDismissButton->IsChecked();
-
-    m_radiobtnCancel->Enable(dismissButtonEnabled);
-    m_radiobtnClose->Enable(dismissButtonEnabled);
-}
 
 #if USE_SETTINGS_DIALOG
 // ----------------------------------------------------------------------------

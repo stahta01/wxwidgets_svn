@@ -43,21 +43,24 @@ bool wxStaticText::Create( wxWindow *parent,
 {
     m_macIsUserPane = false;
 
+    m_label = GetLabelText( label );
+
     if ( !wxControl::Create( parent, id, pos, size, style, wxDefaultValidator, name ) )
         return false;
 
     Rect bounds = wxMacGetBoundsForControl( this, pos, size );
+    wxMacCFStringHolder str( m_label, m_font.GetEncoding() );
 
     m_peer = new wxMacControl( this );
     OSStatus err = CreateStaticTextControl(
         MAC_WXHWND(parent->MacGetTopLevelWindowRef()),
-        &bounds, NULL, NULL, m_peer->GetControlRefAddr() );
+        &bounds, str, NULL, m_peer->GetControlRefAddr() );
     verify_noerr( err );
 
-    if ( ( style & wxST_ELLIPSIZE_END ) || ( style & wxST_ELLIPSIZE_MIDDLE ) )
+    if ( ( style & wxST_DOTS_END ) || ( style & wxST_DOTS_MIDDLE ) )
     {
         TruncCode tCode = truncEnd;
-        if ( style & wxST_ELLIPSIZE_MIDDLE )
+        if ( style & wxST_DOTS_MIDDLE )
             tCode = truncMiddle;
 
         err = m_peer->SetData( kControlStaticTextTruncTag, tCode );
@@ -65,8 +68,6 @@ bool wxStaticText::Create( wxWindow *parent,
     }
 
     MacPostControlCreate( pos, size );
-
-    SetLabel(label);
 
     return true;
 }
@@ -95,6 +96,7 @@ wxSize wxStaticText::DoGetBestSize() const
         SInt16 baseline;
         wxMacCFStringHolder str( m_label,  m_font.GetEncoding() );
 
+#ifndef __LP64__
         if ( m_font.MacGetThemeFontID() != kThemeCurrentPortFont )
         {
             err = GetThemeTextDimensions(
@@ -103,6 +105,7 @@ wxSize wxStaticText::DoGetBestSize() const
             verify_noerr( err );
         }
         else
+#endif
         {
     #if wxMAC_USE_CORE_GRAPHICS
             wxClientDC dc(const_cast<wxStaticText*>(this));
@@ -132,28 +135,16 @@ wxSize wxStaticText::DoGetBestSize() const
     return wxSize( bounds.h, bounds.v );
 }
 
-void wxStaticText::SetLabel(const wxString& label)
+void wxStaticText::SetLabel( const wxString& st )
 {
-    m_labelOrig = label;
+    m_label = GetLabelText( st );
 
-    // middle/end ellipsization is handled by the OS:
-    if ( HasFlag(wxST_ELLIPSIZE_END) || HasFlag(wxST_ELLIPSIZE_MIDDLE) )
-    {
-        // remove markup
-        wxString str(label);
-        if (HasFlag(wxST_MARKUP))
-            str = RemoveMarkup(label);
+    wxMacCFStringHolder str( m_label, m_font.GetEncoding() );
+    CFStringRef ref = str;
+    OSStatus err = m_peer->SetData<CFStringRef>(kControlEntireControl, kControlStaticTextCFStringTag, ref );
+    verify_noerr( err );
 
-        // and leave ellipsization to the OS
-        DoSetLabel(str);
-    }
-    else // not supported natively
-    {
-        DoSetLabel(GetEllipsizedLabelWithoutMarkup());
-    }
-
-    if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) &&
-         !IsEllipsized() )  // don't resize if we adjust to current size
+    if ( !(GetWindowStyle() & wxST_NO_AUTORESIZE) )
     {
         InvalidateBestSize();
         SetSize( GetBestSize() );
@@ -180,28 +171,5 @@ bool wxStaticText::SetFont(const wxFont& font)
 
     return ret;
 }
-
-
-// for wxST_ELLIPSIZE_* support:
-
-void wxStaticText::DoSetLabel(const wxString& label)
-{
-    m_labelOrig = label;
-    m_label = RemoveMnemonics(label);
-
-    wxMacCFStringHolder str( m_label, m_font.GetEncoding() );
-    OSStatus err = m_peer->SetData<CFStringRef>(kControlEntireControl, kControlStaticTextCFStringTag, str);
-    verify_noerr( err );
-}
-
-wxString wxStaticText::DoGetLabel() const
-{
-    return m_label;
-}
-
-/*
-   FIXME: UpdateLabel() should be called on size events when wxST_ELLIPSIZE_START is set
-          to allow correct dynamic ellipsizing of the label
-*/
 
 #endif //if wxUSE_STATTEXT

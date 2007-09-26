@@ -64,7 +64,6 @@ public:
   virtual bool IsLocalHost() const = 0;
 
   virtual bool AnyAddress() = 0;
-  virtual bool BroadcastAddress() = 0;
 
   virtual wxString IPAddress() const = 0;
 
@@ -94,8 +93,6 @@ public:
 
   // any (0.0.0.0)
   virtual bool AnyAddress();
-  // all (255.255.255.255)
-  virtual bool BroadcastAddress();
 
   virtual wxString Hostname() const;
   wxString OrigHostname() { return m_origHostname; }
@@ -152,8 +149,6 @@ public:
 
   // any (0000:0000:0000:0000:0000:0000:0000:0000 (::))
   virtual bool AnyAddress();
-  // all (?)
-  virtual bool BroadcastAddress();
 
   // 3ffe:ffff:0100:f101:0210:a4ff:fee3:9566
   virtual wxString IPAddress() const;

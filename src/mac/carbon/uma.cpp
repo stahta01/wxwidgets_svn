@@ -11,8 +11,6 @@
 
 #include "wx/wxprec.h"
 
-#include "wx/mac/uma.h"
-
 #if wxUSE_GUI
 
 #include "wx/toplevel.h"
@@ -31,9 +29,7 @@
 #  endif
 #endif
 
-#ifndef __DARWIN__
-#  include <Scrap.h>
-#endif
+#include "wx/mac/uma.h"
 
 // since we have decided that we only support 8.6 upwards we are
 // checking for these minimum requirements in the startup code of
@@ -218,7 +214,7 @@ void UMASetMenuItemShortcut( MenuRef menu , MenuItemIndex item , wxAcceleratorEn
             macKey = 0 ;
             glyph = kMenuF1Glyph + ( key - WXK_F1 ) ;
             if ( key >= WXK_F13 )
-                glyph += 13 ;
+                glyph += 12 ;
         }
         else
         {
@@ -645,29 +641,14 @@ static OSStatus helpMenuStatus = noErr ;
 static MenuItemIndex firstCustomItemIndex = 0 ;
 #endif
 
-static OSStatus UMAGetHelpMenu(
+OSStatus UMAGetHelpMenu(
     MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex,
-    bool             allowHelpMenuCreation);
-
-static OSStatus UMAGetHelpMenu(
-    MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex,
-    bool             allowHelpMenuCreation)
+    MenuItemIndex *  outFirstCustomItemIndex)
 {
 #if TARGET_CARBON
-    static bool s_createdHelpMenu = false ;
+    return HMGetHelpMenu( outHelpMenu , outFirstCustomItemIndex ) ;
 
-    if ( !s_createdHelpMenu && !allowHelpMenuCreation )
-    {
-        return paramErr ;
-    }
-
-    OSStatus status = HMGetHelpMenu( outHelpMenu , outFirstCustomItemIndex ) ;
-    s_createdHelpMenu = ( status == noErr ) ;
-    return status ;
 #else
-    wxUnusedVar( allowHelpMenuCreation ) ;
     MenuRef helpMenuHandle ;
 
     helpMenuStatus = HMGetHelpMenuHandle( &helpMenuHandle ) ;
@@ -681,20 +662,6 @@ static OSStatus UMAGetHelpMenu(
 
     return helpMenuStatus ;
 #endif
-}
-
-OSStatus UMAGetHelpMenu(
-    MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex)
-{
-    return UMAGetHelpMenu( outHelpMenu , outFirstCustomItemIndex , true );
-}
-
-OSStatus UMAGetHelpMenuDontCreate(
-    MenuRef *        outHelpMenu,
-    MenuItemIndex *  outFirstCustomItemIndex)
-{
-    return UMAGetHelpMenu( outHelpMenu , outFirstCustomItemIndex , false );
 }
 
 #ifndef __LP64__
@@ -755,22 +722,6 @@ wxMacPortStateHelper::~wxMacPortStateHelper()
 
 #endif
 
-OSStatus UMAPutScrap( Size size , OSType type , void *data )
-{
-    OSStatus err = noErr ;
-
-#if !TARGET_CARBON
-    err = PutScrap( size , type , data ) ;
-#else
-    ScrapRef    scrap;
-    err = GetCurrentScrap( &scrap );
-    if ( err == noErr )
-        err = PutScrapFlavor( scrap, type , 0, size, data );
-#endif
-
-    return err ;
-}
-
 Rect * UMAGetControlBoundsInWindowCoords( ControlRef theControl, Rect *bounds )
 {
     GetControlBounds( theControl , bounds ) ;
@@ -791,6 +742,72 @@ Rect * UMAGetControlBoundsInWindowCoords( ControlRef theControl, Rect *bounds )
     return bounds ;
 }
 
+size_t UMAPutBytesCFRefCallback( void *info, const void *bytes, size_t count )
+{
+    CFMutableDataRef data = (CFMutableDataRef) info;
+    if ( data )
+    {
+        CFDataAppendBytes( data, (const UInt8*) bytes, count );
+    }
+    return count;
+}
+
+void UMAReleaseCFDataProviderCallback( void *info, const void *data, size_t count )
+{
+    if ( info )
+        CFRelease( (CFDataRef) info );
+}
+
+void UMAReleaseCFDataConsumerCallback( void *info )
+{
+    if ( info )
+        CFRelease( (CFDataRef) info );
+}
+
+CGDataProviderRef UMACGDataProviderCreateWithCFData( CFDataRef data )
+{
+    if ( data == NULL )
+        return NULL;
+        
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if( &CGDataProviderCreateWithCFData != NULL )
+    {
+        return CGDataProviderCreateWithCFData( data );
+    }
+#endif
+
+    // make sure we keep it until done
+    CFRetain( data );
+    CGDataProviderRef provider = CGDataProviderCreateWithData( (void*) data , CFDataGetBytePtr( data ) ,
+        CFDataGetLength( data ), UMAReleaseCFDataProviderCallback );
+    // if provider couldn't be created, release the data again
+    if ( provider == NULL )
+        CFRelease( data );
+    return provider;
+}
+
+CGDataConsumerRef UMACGDataConsumerCreateWithCFData( CFMutableDataRef data )
+{
+    if ( data == NULL )
+        return NULL;
+        
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if( &CGDataConsumerCreateWithCFData != NULL )
+    {
+        return CGDataConsumerCreateWithCFData( data );
+    }
+#endif
+    // make sure we keep it until done
+    CFRetain( data );
+    CGDataConsumerCallbacks callbacks;
+    callbacks.putBytes = UMAPutBytesCFRefCallback;
+    callbacks.releaseConsumer = UMAReleaseCFDataConsumerCallback;
+    CGDataConsumerRef consumer = CGDataConsumerCreate( data , &callbacks );
+    // if consumer couldn't be created, release the data again
+    if ( consumer == NULL )
+        CFRelease( data );
+    return consumer;
+}
 #endif  // wxUSE_GUI
 
 #if wxUSE_BASE

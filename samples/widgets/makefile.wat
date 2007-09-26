@@ -224,11 +224,10 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 29
-COMPILER_PREFIX = wat
+WX_RELEASE_NODOT = 28
 OBJS = &
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
-LIBDIRNAME = .\..\..\lib\$(COMPILER_PREFIX)_$(LIBTYPE_SUFFIX)$(CFG)
+	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
+LIBDIRNAME = .\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = &
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 WIDGETS_CXXFLAGS = $(__DEBUGINFO_0) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG_5) &
@@ -242,18 +241,15 @@ WIDGETS_OBJECTS =  &
 	$(OBJS)\widgets_bmpcombobox.obj &
 	$(OBJS)\widgets_button.obj &
 	$(OBJS)\widgets_checkbox.obj &
-	$(OBJS)\widgets_choice.obj &
 	$(OBJS)\widgets_clrpicker.obj &
 	$(OBJS)\widgets_combobox.obj &
 	$(OBJS)\widgets_datepick.obj &
 	$(OBJS)\widgets_dirctrl.obj &
 	$(OBJS)\widgets_dirpicker.obj &
-	$(OBJS)\widgets_filectrl.obj &
 	$(OBJS)\widgets_filepicker.obj &
 	$(OBJS)\widgets_fontpicker.obj &
 	$(OBJS)\widgets_gauge.obj &
 	$(OBJS)\widgets_hyperlnk.obj &
-	$(OBJS)\widgets_itemcontainer.obj &
 	$(OBJS)\widgets_listbox.obj &
 	$(OBJS)\widgets_notebook.obj &
 	$(OBJS)\widgets_odcombobox.obj &
@@ -304,9 +300,6 @@ $(OBJS)\widgets_button.obj :  .AUTODEPEND .\button.cpp
 $(OBJS)\widgets_checkbox.obj :  .AUTODEPEND .\checkbox.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
-$(OBJS)\widgets_choice.obj :  .AUTODEPEND .\choice.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
 $(OBJS)\widgets_clrpicker.obj :  .AUTODEPEND .\clrpicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
@@ -322,9 +315,6 @@ $(OBJS)\widgets_dirctrl.obj :  .AUTODEPEND .\dirctrl.cpp
 $(OBJS)\widgets_dirpicker.obj :  .AUTODEPEND .\dirpicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
-$(OBJS)\widgets_filectrl.obj :  .AUTODEPEND .\filectrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
 $(OBJS)\widgets_filepicker.obj :  .AUTODEPEND .\filepicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
@@ -335,9 +325,6 @@ $(OBJS)\widgets_gauge.obj :  .AUTODEPEND .\gauge.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_hyperlnk.obj :  .AUTODEPEND .\hyperlnk.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
-$(OBJS)\widgets_itemcontainer.obj :  .AUTODEPEND .\itemcontainer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_listbox.obj :  .AUTODEPEND .\listbox.cpp

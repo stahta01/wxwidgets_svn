@@ -33,8 +33,10 @@
 #include "bmputils.h"
 #include "table.h"
 
+#if !WXWIN_COMPATIBILITY_2_4
 static inline wxChar* copystring(const wxChar* s)
     { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
+#endif
 
 wxList itemizeStack;
 static int indentLevel = 0;
@@ -3552,7 +3554,7 @@ bool RTFOnArgument(int macroId, int arg_no, bool start)
       if(tok.HasMoreTokens())
       {
         wxString token = tok.GetNextToken();
-        imageWidth = (int)(20*ParseUnitArgument(token));
+        imageWidth = (int)(20*ParseUnitArgument((wxChar*)token.c_str()));
       }
       else
       {
@@ -3563,7 +3565,7 @@ bool RTFOnArgument(int macroId, int arg_no, bool start)
       if(tok.HasMoreTokens())
       {
         wxString token = tok.GetNextToken();
-        imageHeight = (int)(20*ParseUnitArgument(token));
+        imageHeight = (int)(20*ParseUnitArgument((wxChar*)token.c_str()));
       }
       else
       {

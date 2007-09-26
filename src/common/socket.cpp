@@ -39,7 +39,7 @@
 #include "wx/apptrait.h"
 
 #include "wx/sckaddr.h"
-#include "wx/stopwatch.h"
+#include "wx/datetime.h"
 
 // DLL options compatibility check:
 #include "wx/build.h"
@@ -680,7 +680,7 @@ bool wxSocketBase::_Wait(long seconds,
                          wxSocketEventFlags flags)
 {
   GSocketEventFlags result;
-  long timeout; // in ms
+  long timeout;
 
   // Set this to true to interrupt ongoing waits
   m_interrupt = false;
@@ -707,7 +707,8 @@ bool wxSocketBase::_Wait(long seconds,
   // Do this at least once (important if timeout == 0, when
   // we are just polling). Also, if just polling, do not yield.
 
-  const wxMilliClock_t time_limit = wxGetLocalTimeMillis() + timeout;
+  wxDateTime current_time = wxDateTime::UNow();
+  unsigned int time_limit = (current_time.GetTicks() * 1000) + current_time.GetMillisecond() + timeout;
   bool done = false;
   bool valid_result = false;
 
@@ -751,7 +752,8 @@ bool wxSocketBase::_Wait(long seconds,
     }
 
     // Wait more?
-    long time_left = wxMilliClockToLong(time_limit - wxGetLocalTimeMillis());
+    current_time = wxDateTime::UNow();
+    int time_left = time_limit - ((current_time.GetTicks() * 1000) + current_time.GetMillisecond());
     if ((!timeout) || (time_left <= 0) || (m_interrupt))
       done = true;
     else
@@ -1103,12 +1105,6 @@ wxSocketServer::wxSocketServer(const wxSockAddress& addr_man,
     if (GetFlags() & wxSOCKET_REUSEADDR) {
         m_socket->SetReusable();
     }
-    if (GetFlags() & wxSOCKET_BROADCAST) {
-        m_socket->SetBroadcast();
-    }
-    if (GetFlags() & wxSOCKET_NOBIND) {
-        m_socket->DontDoBind();
-    }
 
     if (m_socket->SetServer() != GSOCK_NOERROR)
     {
@@ -1279,14 +1275,6 @@ bool wxSocketClient::DoConnect(wxSockAddress& addr_man, wxSockAddress* local, bo
   {
     m_socket->SetReusable();
   }
-  if (GetFlags() & wxSOCKET_BROADCAST)
-  {
-    m_socket->SetBroadcast();
-  }
-  if (GetFlags() & wxSOCKET_NOBIND)
-  {
-    m_socket->DontDoBind();
-  }
 
   // If no local address was passed and one has been set, use the one that was Set
   if (!local && m_localAddress.GetAddress())
@@ -1366,14 +1354,6 @@ wxDatagramSocket::wxDatagramSocket( const wxSockAddress& addr,
     if (flags & wxSOCKET_REUSEADDR)
     {
         m_socket->SetReusable();
-    }
-    if (GetFlags() & wxSOCKET_BROADCAST)
-    {
-        m_socket->SetBroadcast();
-    }
-    if (GetFlags() & wxSOCKET_NOBIND)
-    {
-        m_socket->DontDoBind();
     }
     if ( m_socket->SetNonOriented() != GSOCK_NOERROR )
     {

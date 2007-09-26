@@ -16,11 +16,11 @@
 #include "wx/colour.h"
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPen;
+class WXDLLEXPORT wxPen;
 
 class WXDLLEXPORT wxPenRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxPen;
+    friend class WXDLLEXPORT wxPen;
 public:
     wxPenRefData();
     wxPenRefData(const wxPenRefData& data);
@@ -108,8 +108,9 @@ public:
   // Useful helper: create the brush resource
   bool RealizeResource();
 
-private:
-    void Unshare();
+  // When setting properties, we must make sure we're not changing
+  // another object
+  void Unshare();
 };
 
 #endif

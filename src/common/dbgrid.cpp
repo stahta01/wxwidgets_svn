@@ -203,12 +203,11 @@ bool wxDbGridTableBase::AssignDbTable(wxDbTable *tab, int count, bool takeOwners
 {
     wxDbGridCellAttrProvider *provider;
 
-    wxGridUpdateLocker locker(GetView());
-
     //Remove Information from grid about old data
     if (GetView())
     {
         wxGrid *grid = GetView();
+        grid->BeginBatch();
         grid->ClearSelection();
         if (grid->IsCellEditControlEnabled())
         {
@@ -251,6 +250,7 @@ bool wxDbGridTableBase::AssignDbTable(wxDbTable *tab, int count, bool takeOwners
         wxGrid * grid = GetView();
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, m_rowtotal);
         grid->ProcessTableMessage(msg);
+        grid->EndBatch();
     }
     m_dbowner = takeOwnership;
     m_rowmodified = false;

@@ -11,7 +11,7 @@
 #define _WX_GTK_BITMAP_H_
 
 typedef struct _GdkPixbuf GdkPixbuf;
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxPixelDataBase;
 
 //-----------------------------------------------------------------------------
 // wxMask
@@ -62,9 +62,7 @@ public:
     }
 #endif
     wxBitmap( const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM );
-#if wxUSE_IMAGE
     wxBitmap( const wxImage& image, int depth = -1 ) { (void)CreateFromImage(image, depth); }
-#endif // wxUSE_IMAGE
     virtual ~wxBitmap();
     bool Ok() const { return IsOk(); }
     bool IsOk() const;
@@ -75,9 +73,7 @@ public:
     int GetWidth() const;
     int GetDepth() const;
 
-#if wxUSE_IMAGE
     wxImage ConvertToImage() const;
-#endif // wxUSE_IMAGE
 
     // copies the contents and mask of the given (colour) icon to the bitmap
     virtual bool CopyFromIcon(const wxIcon& icon);
@@ -121,24 +117,19 @@ public:
     void UngetRawData(wxPixelDataBase& data);
 
     bool HasAlpha() const;
+    void UseAlpha();
 
 protected:
-#if wxUSE_IMAGE
     bool CreateFromImage(const wxImage& image, int depth);
-#endif // wxUSE_IMAGE
 
     virtual wxObjectRefData* CreateRefData() const;
     virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
 
 private:
-#if wxUSE_IMAGE
     // to be called from CreateFromImage only!
     bool CreateFromImageAsPixmap(const wxImage& image, int depth);
     bool CreateFromImageAsPixbuf(const wxImage& image);
-#endif // wxUSE_IMAGE
 
-public:
-    // implementation only
     enum Representation
     {
         Pixmap,
@@ -147,6 +138,9 @@ public:
     // removes other representations from memory, keeping only 'keep'
     // (wxBitmap may keep same bitmap e.g. as both pixmap and pixbuf):
     void PurgeOtherRepresentations(Representation keep);
+
+    friend class wxMemoryDC;
+    friend class wxBitmapHandler;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxBitmap)

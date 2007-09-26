@@ -21,7 +21,6 @@
 #if wxUSE_TEXTCTRL
 
 #include "wx/control.h"         // the base class
-#include "wx/textentry.h"       // single-line text entry interface
 #include "wx/dynarray.h"        // wxArrayInt
 #include "wx/gdicmn.h"          // wxPoint
 
@@ -40,12 +39,20 @@
     #define wxHAS_TEXT_WINDOW_STREAM 0
 #endif
 
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrlBase;
+#if WXWIN_COMPATIBILITY_2_4 && !wxHAS_TEXT_WINDOW_STREAM
+    // define old flag if one could use it somewhere
+    #define NO_TEXT_WINDOW_STREAM
+#endif
+
+class WXDLLEXPORT wxTextCtrl;
+class WXDLLEXPORT wxTextCtrlBase;
 
 // ----------------------------------------------------------------------------
 // wxTextCtrl types
 // ----------------------------------------------------------------------------
+
+// wxTextPos is the position in the text
+typedef long wxTextPos;
 
 // wxTextCoord is the line or row number (which should have been unsigned but
 // is long for backwards compatibility)
@@ -270,35 +277,69 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// wxTextAreaBase: multiline text control specific methods
+// wxTextCtrl: a single or multiple line text zone where user can enter and
+// edit text
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTextAreaBase
+class WXDLLEXPORT wxTextCtrlBase : public wxControl
+#if wxHAS_TEXT_WINDOW_STREAM
+                                 , public wxSTD streambuf
+#endif
+
 {
 public:
-    wxTextAreaBase() { }
-    virtual ~wxTextAreaBase() { }
+    // creation
+    // --------
 
-    // lines access
-    // ------------
+    wxTextCtrlBase(){}
+    virtual ~wxTextCtrlBase(){}
+
+    // accessors
+    // ---------
+
+    virtual wxString GetValue() const = 0;
+    virtual bool IsEmpty() const { return GetValue().empty(); }
+
+    virtual void SetValue(const wxString& value)
+        { DoSetValue(value, SetValue_SendEvent); }
+    virtual void ChangeValue(const wxString& value)
+        { DoSetValue(value); }
+
+    virtual wxString GetRange(long from, long to) const;
 
     virtual int GetLineLength(long lineNo) const = 0;
     virtual wxString GetLineText(long lineNo) const = 0;
     virtual int GetNumberOfLines() const = 0;
 
-
-    // file IO
-    // -------
-
-    bool LoadFile(const wxString& file, int fileType = wxTEXT_TYPE_ANY)
-        { return DoLoadFile(file, fileType); }
-    bool SaveFile(const wxString& file = wxEmptyString,
-                  int fileType = wxTEXT_TYPE_ANY);
-
-    // dirty flag handling
-    // -------------------
-
     virtual bool IsModified() const = 0;
+    virtual bool IsEditable() const = 0;
+
+    // more readable flag testing methods
+    bool IsSingleLine() const { return !HasFlag(wxTE_MULTILINE); }
+    bool IsMultiLine() const { return !IsSingleLine(); }
+
+    // If the return values from and to are the same, there is no selection.
+    virtual void GetSelection(long* from, long* to) const = 0;
+
+    virtual wxString GetStringSelection() const;
+
+    // operations
+    // ----------
+
+    // editing
+    virtual void Clear() = 0;
+    virtual void Replace(long from, long to, const wxString& value) = 0;
+    virtual void Remove(long from, long to) = 0;
+
+    // load/save the control's contents from/to a file
+    bool LoadFile(const wxString& file, int fileType = wxTEXT_TYPE_ANY) { return DoLoadFile(file, fileType); }
+    bool SaveFile(const wxString& file = wxEmptyString, int fileType = wxTEXT_TYPE_ANY);
+
+    // implementation for loading/saving
+    virtual bool DoLoadFile(const wxString& file, int fileType);
+    virtual bool DoSaveFile(const wxString& file, int fileType);
+
+    // sets/clears the dirty flag
     virtual void MarkDirty() = 0;
     virtual void DiscardEdits() = 0;
     void SetModified(bool modified)
@@ -309,21 +350,26 @@ public:
             DiscardEdits();
     }
 
+    // set the max number of characters which may be entered in a single line
+    // text control
+    virtual void SetMaxLength(unsigned long WXUNUSED(len)) { }
 
-    // styles handling
-    // ---------------
+    // writing text inserts it at the current position, appending always
+    // inserts it at the end
+    virtual void WriteText(const wxString& text) = 0;
+    virtual void AppendText(const wxString& text) = 0;
+
+    // insert the character which would have resulted from this key event,
+    // return true if anything has been inserted
+    virtual bool EmulateKeyPress(const wxKeyEvent& event);
 
     // text control under some platforms supports the text styles: these
     // methods allow to apply the given text style to the given selection or to
     // set/get the style which will be used for all appended text
-    virtual bool SetStyle(long start, long end, const wxTextAttr& style) = 0;
-    virtual bool GetStyle(long position, wxTextAttr& style) = 0;
-    virtual bool SetDefaultStyle(const wxTextAttr& style) = 0;
-    virtual const wxTextAttr& GetDefaultStyle() const { return m_defaultStyle; }
-
-
-    // coordinates translation
-    // -----------------------
+    virtual bool SetStyle(long start, long end, const wxTextAttr& style);
+    virtual bool GetStyle(long position, wxTextAttr& style);
+    virtual bool SetDefaultStyle(const wxTextAttr& style);
+    virtual const wxTextAttr& GetDefaultStyle() const;
 
     // translate between the position (which is just an index in the text ctrl
     // considering all its contents as a single strings) and (x, y) coordinates
@@ -342,60 +388,31 @@ public:
                                             wxTextCoord *col,
                                             wxTextCoord *row) const;
 
-protected:
-    // implementation of loading/saving
-    virtual bool DoLoadFile(const wxString& file, int fileType) = 0;
-    virtual bool DoSaveFile(const wxString& file, int fileType) = 0;
+    // Clipboard operations
+    virtual void Copy() = 0;
+    virtual void Cut() = 0;
+    virtual void Paste() = 0;
 
+    virtual bool CanCopy() const;
+    virtual bool CanCut() const;
+    virtual bool CanPaste() const;
 
-    // the name of the last file loaded with LoadFile() which will be used by
-    // SaveFile() by default
-    wxString m_filename;
+    // Undo/redo
+    virtual void Undo() = 0;
+    virtual void Redo() = 0;
 
-    // the text style which will be used for any new text added to the control
-    wxTextAttr m_defaultStyle;
+    virtual bool CanUndo() const = 0;
+    virtual bool CanRedo() const = 0;
 
+    // Insertion point
+    virtual void SetInsertionPoint(long pos) = 0;
+    virtual void SetInsertionPointEnd() = 0;
+    virtual long GetInsertionPoint() const = 0;
+    virtual wxTextPos GetLastPosition() const = 0;
 
-    DECLARE_NO_COPY_CLASS(wxTextAreaBase)
-};
-
-// this class defines wxTextCtrl interface, wxTextCtrlBase actually implements
-// too much things because it derives from wxTextEntry and not wxTextEntryBase
-// and so any classes which "look like" wxTextCtrl (such as wxRichTextCtrl)
-// but don't need the (native) implementation bits from wxTextEntry should
-// actually derive from this one and not wxTextCtrlBase
-class WXDLLIMPEXP_CORE wxTextCtrlIface : public wxTextAreaBase,
-                                         public wxTextEntryBase
-{
-public:
-    wxTextCtrlIface() { }
-
-private:
-    DECLARE_NO_COPY_CLASS(wxTextCtrlIface)
-};
-
-// ----------------------------------------------------------------------------
-// wxTextCtrl: a single or multiple line text zone where user can edit text
-// ----------------------------------------------------------------------------
-
-class WXDLLEXPORT wxTextCtrlBase : public wxControl,
-#if wxHAS_TEXT_WINDOW_STREAM
-                                   public wxSTD streambuf,
-#endif
-                                   public wxTextAreaBase,
-                                   public wxTextEntry
-{
-public:
-    // creation
-    // --------
-
-    wxTextCtrlBase() { }
-    virtual ~wxTextCtrlBase() { }
-
-
-    // more readable flag testing methods
-    bool IsSingleLine() const { return !HasFlag(wxTE_MULTILINE); }
-    bool IsMultiLine() const { return !IsSingleLine(); }
+    virtual void SetSelection(long from, long to) = 0;
+    virtual void SelectAll();
+    virtual void SetEditable(bool editable) = 0;
 
     // stream-like insertion operators: these are always available, whether we
     // were, or not, compiled with streambuf support
@@ -406,39 +423,13 @@ public:
     wxTextCtrl& operator<<(double d);
     wxTextCtrl& operator<<(const wxChar c);
 
-    // insert the character which would have resulted from this key event,
-    // return true if anything has been inserted
-    virtual bool EmulateKeyPress(const wxKeyEvent& event);
-
-
     // generate the wxEVT_COMMAND_TEXT_UPDATED event, like SetValue() does
-    static void SendTextUpdatedEvent(wxWindow *win);
-    void SendTextUpdatedEvent() { SendTextUpdatedEvent(this); }
+    void SendTextUpdatedEvent();
 
     // do the window-specific processing after processing the update event
     virtual void DoUpdateWindowUI(wxUpdateUIEvent& event);
 
     virtual bool ShouldInheritColours() const { return false; }
-
-    // work around the problem with having HitTest() both in wxControl and
-    // wxTextAreaBase base classes
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt, long *pos) const
-    {
-        return wxTextAreaBase::HitTest(pt, pos);
-    }
-
-    virtual wxTextCtrlHitTestResult HitTest(const wxPoint& pt,
-                                            wxTextCoord *col,
-                                            wxTextCoord *row) const
-    {
-        return wxTextAreaBase::HitTest(pt, col, row);
-    }
-
-    // we provide stubs for these functions as not all platforms have styles
-    // support, but we really should leave them pure virtual here
-    virtual bool SetStyle(long start, long end, const wxTextAttr& style);
-    virtual bool GetStyle(long position, wxTextAttr& style);
-    virtual bool SetDefaultStyle(const wxTextAttr& style);
 
 protected:
     // override streambuf method
@@ -446,9 +437,23 @@ protected:
     int overflow(int i);
 #endif // wxHAS_TEXT_WINDOW_STREAM
 
-    virtual bool DoLoadFile(const wxString& file, int fileType);
-    virtual bool DoSaveFile(const wxString& file, int fileType);
+    // flags for DoSetValue(): common part of SetValue() and ChangeValue() and
+    // also used to implement WriteText() in wxMSW
+    enum
+    {
+        SetValue_SendEvent = 1,
+        SetValue_SelectionOnly = 2
+    };
 
+    virtual void DoSetValue(const wxString& value, int flags = 0) = 0;
+
+
+    // the name of the last file loaded with LoadFile() which will be used by
+    // SaveFile() by default
+    wxString m_filename;
+
+    // the text style which will be used for any new text added to the control
+    wxTextAttr m_defaultStyle;
 
     DECLARE_NO_COPY_CLASS(wxTextCtrlBase)
     DECLARE_ABSTRACT_CLASS(wxTextCtrlBase)

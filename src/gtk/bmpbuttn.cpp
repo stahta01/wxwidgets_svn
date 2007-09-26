@@ -14,7 +14,7 @@
 
 #include "wx/bmpbuttn.h"
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // classes
@@ -35,6 +35,9 @@ extern bool   g_blockEventsOnDrag;
 extern "C" {
 static void gtk_bmpbutton_clicked_callback( GtkWidget *WXUNUSED(widget), wxBitmapButton *button )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
@@ -121,6 +124,9 @@ bool wxBitmapButton::Create( wxWindow *parent,
                              const wxValidator& validator,
                              const wxString &name )
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -160,6 +166,14 @@ bool wxBitmapButton::Create( wxWindow *parent,
     return true;
 }
 
+void wxBitmapButton::SetDefault()
+{
+    GTK_WIDGET_SET_FLAGS( m_widget, GTK_CAN_DEFAULT );
+    gtk_widget_grab_default( m_widget );
+
+    SetSize( m_x, m_y, m_width, m_height );
+}
+
 void wxBitmapButton::SetLabel( const wxString &label )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid button") );
@@ -182,7 +196,7 @@ void wxBitmapButton::OnSetBitmap()
     InvalidateBestSize();
 
     wxBitmap the_one;
-    if (!IsThisEnabled())
+    if (!m_isEnabled)
         the_one = m_bmpDisabled;
     else if (m_isSelected)
         the_one = m_bmpSelected;

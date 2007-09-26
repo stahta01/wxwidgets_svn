@@ -26,6 +26,14 @@
 // compatibility settings
 // ----------------------------------------------------------------------------
 
+// This setting determines the compatibility with 2.4 API: set it to 1 to
+// enable it
+//
+// Default is 0.
+//
+// Recommended setting: 0 (please update your code instead!)
+#define WXWIN_COMPATIBILITY_2_4 0
+
 // This setting determines the compatibility with 2.6 API: set it to 0 to
 // flag all cases of using deprecated functions.
 //
@@ -34,17 +42,7 @@
 // in the version after it completely.
 //
 // Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_6 0
-
-// This setting determines the compatibility with 2.8 API: set it to 0 to
-// flag all cases of using deprecated functions.
-//
-// Default is 1 but please try building your code with 0 as the default will
-// change to 0 in the next version and the deprecated functions will disappear
-// in the version after it completely.
-//
-// Recommended setting: 0 (please update your code)
-#define WXWIN_COMPATIBILITY_2_8 1
+#define WXWIN_COMPATIBILITY_2_6 1
 
 // Set to 0 for accurate dialog units, else 1 to be as per 2.1.16 and before.
 // If migrating between versions, your dialogs may seem to shrink.
@@ -142,11 +140,11 @@
 // doesn't support it and the programs compiled in Unicode mode will not run
 // under 9x).
 //
-// Default is 1
+// Default is 0
 //
-// Recommended setting: 1
+// Recommended setting: 0 (unless you only plan to use Windows NT/2000/XP)
 #ifndef wxUSE_UNICODE
-    #define wxUSE_UNICODE 1
+    #define wxUSE_UNICODE 0
 #endif
 
 // Set wxUSE_UNICODE_MSLU to 1 if you want to compile wxWidgets in Unicode mode
@@ -361,6 +359,15 @@
 // Recommended setting: 1
 #define wxUSE_DATETIME 1
 
+// wxUSE_TIMEDATE enables compilation of the old wxDate and wxTime classes (not
+// the same as wxDateTime!). These classes are obsolete and shouldn't be used
+// in new code
+//
+// Default is 0
+//
+// Recommended setting: 0 unless you have legacy code which uses these classes
+#define wxUSE_TIMEDATE 0
+
 // Set wxUSE_TIMER to 1 to compile wxTimer class
 //
 // Default is 1
@@ -534,6 +541,20 @@
 // Recommended setting: 1
 #define wxUSE_MEDIACTRL     1
 
+// Use QuickTime
+//
+// Default is 0
+//
+// Recommended setting: 1 if you have the QT SDK installed and you need it, else 0
+#define wxUSE_QUICKTIME     0
+
+// Use DirectShow
+//
+// Default is 0
+//
+// Recommended setting: 1 if the DirectX 7 SDK is installed (highly recommended), else 0
+#define wxUSE_DIRECTSHOW    0
+
 // Use wxWidget's XRC XML-based resource system.  Recommended.
 //
 // Default is 1
@@ -560,13 +581,6 @@
 // Recommended setting: 1
 #define wxUSE_AUI       1
 
-// Use wxStyledTextCtrl, a wxWidgets implementation of Scintilla.
-//
-// Default is 1
-//
-// Recommended setting: 1
-#define wxUSE_STC 1
-
 
 // Enable the new wxGraphicsPath and wxGraphicsContext classes for an advanced
 // 2D drawing API.  (Still somewhat experimental)
@@ -584,6 +598,10 @@
 
 // Set to 1 to compile MS Windows XP theme engine support
 #define wxUSE_UXTHEME           0
+
+// Set to 1 to auto-adapt to MS Windows XP themes where possible
+// (notably, wxNotebook pages)
+#define wxUSE_UXTHEME_AUTO      0
 
 // ----------------------------------------------------------------------------
 // Individual GUI controls
@@ -742,6 +760,9 @@
 //
 #define wxUSE_GRID 1
 
+// wxProperty[Value/Form/List] classes, used by Dialog Editor
+#define wxUSE_PROPSHEET 1
+
 // wxComboCtrl and related classes: combobox with custom popup window and
 // not necessarily a listbox.
 //
@@ -839,6 +860,10 @@
 
 // wxDC cacheing implementation
 #define wxUSE_DC_CACHEING 1
+
+// Set this to 1 to enable the use of DIB's for wxBitmap to support
+// bitmaps > 16MB on Win95/98/Me.  Set to 0 to use DDB's only.
+#define wxUSE_DIB_FOR_BITMAP 0
 
 // ----------------------------------------------------------------------------
 // common dialogs
@@ -1017,6 +1042,9 @@
 // smaller library.
 #define wxUSE_RICHTEXT       1
 
+// wxTreeLayout class
+#define wxUSE_TREELAYOUT 1
+
 // ----------------------------------------------------------------------------
 // Data transfer
 // ----------------------------------------------------------------------------
@@ -1092,6 +1120,9 @@
 
 // Use wxHTML-based help controller
 #define wxUSE_WXHTML_HELP 1
+
+// Use resources
+#define wxUSE_RESOURCES 0
 
 // Window layout constraint system
 #define wxUSE_CONSTRAINTS 1
@@ -1273,6 +1304,10 @@
 // ----------------------------------------------------------------------------
 // unknown settings
 // ----------------------------------------------------------------------------
+
+// If 1, enables provision of run-time type information.
+// NOW MANDATORY: don't change.
+#define wxUSE_DYNAMIC_CLASSES 1
 
 //??????
 #if defined(__WIN32__)

@@ -15,7 +15,7 @@
 #include "wx/window.h"                      // base class declaration
 #include "wx/containr.h"                    // wxControlContainer
 
-class WXDLLIMPEXP_FWD_CORE wxSplitterEvent;
+class WXDLLEXPORT wxSplitterEvent;
 
 // ---------------------------------------------------------------------------
 // splitter constants
@@ -367,7 +367,7 @@ public:
     }
 
 private:
-    friend class WXDLLIMPEXP_FWD_CORE wxSplitterWindow;
+    friend class WXDLLEXPORT wxSplitterWindow;
 
     // data for the different types of event
     union

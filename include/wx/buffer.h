@@ -12,213 +12,144 @@
 #ifndef _WX_BUFFER_H
 #define _WX_BUFFER_H
 
-#include "wx/chartype.h"
-#include "wx/wxcrtbase.h"
+#include "wx/wxchar.h"
 
 #include <stdlib.h>             // malloc() and free()
-
-class WXDLLIMPEXP_FWD_BASE wxCStrData;
 
 // ----------------------------------------------------------------------------
 // Special classes for (wide) character strings: they use malloc/free instead
 // of new/delete
 // ----------------------------------------------------------------------------
 
-template <typename T>
-class WXDLLIMPEXP_BASE wxCharTypeBuffer
-{
-public:
-    typedef T CharType;
+#define DEFINE_BUFFER(classname, chartype, strdupfunc)                      \
+class WXDLLIMPEXP_BASE classname                                            \
+{                                                                           \
+public:                                                                     \
+    classname(const chartype *str = NULL)                                   \
+        : m_str(str ? strdupfunc(str) : NULL)                               \
+    {                                                                       \
+    }                                                                       \
+                                                                            \
+    classname(size_t len)                                                   \
+        : m_str((chartype *)malloc((len + 1)*sizeof(chartype)))             \
+    {                                                                       \
+        m_str[len] = (chartype)0;                                           \
+    }                                                                       \
+                                                                            \
+    /* no need to check for NULL, free() does it */                         \
+    ~classname() { free(m_str); }                                           \
+                                                                            \
+    /*                                                                      \
+        WARNING:                                                            \
+                                                                            \
+        the copy ctor and assignment operators change the passed in object  \
+        even although it is declared as "const", so:                        \
+                                                                            \
+        a) it shouldn't be really const                                     \
+        b) you shouldn't use it afterwards (or know that it was reset)      \
+                                                                            \
+        This is very ugly but is unfortunately needed to make the normal use\
+        of classname buffer objects possible and is very similar to what    \
+        std::auto_ptr<> does (as if it were an excuse...)                   \
+    */                                                                      \
+                                                                            \
+    /*                                                                      \
+       because of the remark above, release() is declared const even if it  \
+       isn't really const                                                   \
+     */                                                                     \
+    chartype *release() const                                               \
+    {                                                                       \
+        chartype *p = m_str;                                                \
+        ((classname *)this)->m_str = NULL;                                  \
+        return p;                                                           \
+    }                                                                       \
+                                                                            \
+    void reset()                                                            \
+    {                                                                       \
+        free(m_str);                                                        \
+        m_str = NULL;                                                       \
+    }                                                                       \
+                                                                            \
+    classname(const classname& src)                                         \
+        : m_str(src.release())                                              \
+    {                                                                       \
+    }                                                                       \
+                                                                            \
+    classname& operator=(const chartype *str)                               \
+    {                                                                       \
+        free(m_str);                                                        \
+        m_str = str ? strdupfunc(str) : NULL;                               \
+        return *this;                                                       \
+    }                                                                       \
+                                                                            \
+    classname& operator=(const classname& src)                              \
+    {                                                                       \
+        free(m_str);                                                        \
+        m_str = src.release();                                              \
+                                                                            \
+        return *this;                                                       \
+    }                                                                       \
+                                                                            \
+    bool extend(size_t len)                                                 \
+    {                                                                       \
+        chartype *                                                          \
+            str = (chartype *)realloc(m_str, (len + 1)*sizeof(chartype));   \
+        if ( !str )                                                         \
+            return false;                                                   \
+                                                                            \
+        m_str = str;                                                        \
+                                                                            \
+        return true;                                                        \
+    }                                                                       \
+                                                                            \
+    chartype *data() { return m_str; }                                      \
+    const chartype *data() const { return m_str; }                          \
+    operator const chartype *() const { return m_str; }                     \
+    chartype operator[](size_t n) const { return m_str[n]; }                \
+                                                                            \
+private:                                                                    \
+    chartype *m_str;                                                        \
+}
 
-    wxCharTypeBuffer(const CharType *str = NULL)
-        : m_str(str ? wxStrdup(str) : NULL),
-          m_owned(true)
-    {
-    }
+#if wxABI_VERSION >= 20804
+// needed for wxString::char_str() and wchar_str()
+#define DEFINE_WRITABLE_BUFFER(classname, baseclass, chartype)              \
+class WXDLLIMPEXP_BASE classname : public baseclass                         \
+{                                                                           \
+public:                                                                     \
+    classname(const baseclass& src) : baseclass(src) {}                     \
+    classname(const chartype *str = NULL) : baseclass(str) {}               \
+                                                                            \
+    operator chartype*() { return this->data(); }                           \
+}
+#endif // wxABI_VERSION >= 20804
 
-    wxCharTypeBuffer(size_t len)
-        : m_str((CharType *)malloc((len + 1)*sizeof(CharType))),
-          m_owned(true)
-    {
-        m_str[len] = (CharType)0;
-    }
-
-    static const wxCharTypeBuffer CreateNonOwned(const CharType *str)
-    {
-        wxCharTypeBuffer buf;
-        buf.m_str = wx_const_cast(CharType*, str);
-        buf.m_owned = false;
-        return buf;
-    }
-
-    /* no need to check for NULL, free() does it */
-    ~wxCharTypeBuffer()
-    {
-        if ( m_owned)
-            free(m_str);
-    }
-
-    /*
-        WARNING:
-
-        the copy ctor and assignment operators change the passed in object
-        even although it is declared as "const", so:
-
-        a) it shouldn't be really const
-        b) you shouldn't use it afterwards (or know that it was reset)
-
-        This is very ugly but is unfortunately needed to make the normal use
-        of wxCharTypeBuffer buffer objects possible and is very similar to what
-        std::auto_ptr<> does (as if it were an excuse...)
-    */
-
-    /*
-       because of the remark above, release() is declared const even if it
-       isn't really const
-     */
-    CharType *release() const
-    {
-        wxASSERT_MSG( m_owned, _T("can't release non-owned buffer") );
-        return DoRelease();
-    }
-
-    void reset()
-    {
-        if ( m_owned )
-            free(m_str);
-        m_str = NULL;
-    }
-
-    wxCharTypeBuffer(const wxCharTypeBuffer& src)
-    {
-        CopyFrom(src);
-    }
-
-    wxCharTypeBuffer& operator=(const CharType *str)
-    {
-        if ( m_owned )
-            free(m_str);
-        m_str = str ? wxStrdup(str) : NULL;
-        m_owned = true;
-        return *this;
-    }
-
-    wxCharTypeBuffer& operator=(const wxCharTypeBuffer& src)
-    {
-        if ( m_owned )
-            free(m_str);
-        CopyFrom(src);
-        return *this;
-    }
-
-    bool extend(size_t len)
-    {
-        wxASSERT_MSG( m_owned, _T("cannot extend non-owned buffer") );
-
-        CharType *
-            str = (CharType *)realloc(m_str, (len + 1)*sizeof(CharType));
-        if ( !str )
-            return false;
-
-        m_str = str;
-
-        return true;
-    }
-
-    CharType *data() { return m_str; }
-    const CharType *data() const { return m_str; }
-    operator const CharType *() const { return m_str; }
-    CharType operator[](size_t n) const { return m_str[n]; }
-
-
-private:
-    CharType *DoRelease() const
-    {
-        CharType *p = m_str;
-        ((wxCharTypeBuffer *)this)->m_str = NULL;
-        return p;
-    }
-
-    void CopyFrom(const wxCharTypeBuffer& src)
-    {
-        m_owned = src.m_owned;
-        m_str = src.DoRelease();
-    }
-
-private:
-    CharType *m_str;
-    bool m_owned;
-};
-
-WXDLLIMPEXP_TEMPLATE_INSTANCE_BASE( wxCharTypeBuffer<char> )
-
-class WXDLLIMPEXP_BASE wxCharBuffer : public wxCharTypeBuffer<char>
-{
-public:
-    typedef wxCharTypeBuffer<char> wxCharTypeBufferBase;
-
-    wxCharBuffer(const wxCharTypeBufferBase& buf)
-        : wxCharTypeBufferBase(buf) {}
-
-    wxCharBuffer(const CharType *str = NULL) : wxCharTypeBufferBase(str) {}
-    wxCharBuffer(size_t len) : wxCharTypeBufferBase(len) {}
-
-    wxCharBuffer(const wxCStrData& cstr);
-};
+DEFINE_BUFFER(wxCharBuffer, char, wxStrdupA);
+#if wxABI_VERSION >= 20804
+DEFINE_WRITABLE_BUFFER(wxWritableCharBuffer, wxCharBuffer, char);
+#endif
 
 #if wxUSE_WCHAR_T
-WXDLLIMPEXP_TEMPLATE_INSTANCE_BASE( wxCharTypeBuffer<wchar_t> )
 
-class WXDLLIMPEXP_BASE wxWCharBuffer : public wxCharTypeBuffer<wchar_t>
-{
-public:
-    typedef wxCharTypeBuffer<wchar_t> wxCharTypeBufferBase;
+DEFINE_BUFFER(wxWCharBuffer, wchar_t, wxStrdupW);
+#if wxABI_VERSION >= 20804
+DEFINE_WRITABLE_BUFFER(wxWritableWCharBuffer, wxWCharBuffer, wchar_t);
+#endif
 
-    wxWCharBuffer(const wxCharTypeBufferBase& buf)
-        : wxCharTypeBufferBase(buf) {}
-
-    wxWCharBuffer(const CharType *str = NULL) : wxCharTypeBufferBase(str) {}
-    wxWCharBuffer(size_t len) : wxCharTypeBufferBase(len) {}
-
-    wxWCharBuffer(const wxCStrData& cstr);
-};
 #endif // wxUSE_WCHAR_T
 
-// wxCharTypeBuffer<T> implicitly convertible to T*
-template <typename T>
-class wxWritableCharTypeBuffer : public wxCharTypeBuffer<T>
-{
-public:
-    typedef typename wxCharTypeBuffer<T>::CharType CharType;
-
-    wxWritableCharTypeBuffer(const wxCharTypeBuffer<T>& src)
-        : wxCharTypeBuffer<T>(src) {}
-    // FIXME-UTF8: this won't be needed after converting mb_str()/wc_str() to
-    //             always return a buffer
-    wxWritableCharTypeBuffer(const CharType *str = NULL)
-        : wxCharTypeBuffer<T>(str) {}
-
-    operator CharType*() { return this->data(); }
-};
-
-typedef wxWritableCharTypeBuffer<char> wxWritableCharBuffer;
-typedef wxWritableCharTypeBuffer<wchar_t> wxWritableWCharBuffer;
-
+#undef DEFINE_BUFFER
+#undef DEFINE_WRITABLE_BUFFER
 
 #if wxUSE_UNICODE
-    #define wxWxCharBuffer wxWCharBuffer
+    typedef wxWCharBuffer wxWxCharBuffer;
 
     #define wxMB2WXbuf wxWCharBuffer
     #define wxWX2MBbuf wxCharBuffer
-    #if wxUSE_UNICODE_WCHAR
-        #define wxWC2WXbuf wxChar*
-        #define wxWX2WCbuf wxChar*
-    #elif wxUSE_UNICODE_UTF8
-        #define wxWC2WXbuf wxWCharBuffer
-        #define wxWX2WCbuf wxWCharBuffer
-    #endif
+    #define wxWC2WXbuf wxChar*
+    #define wxWX2WCbuf wxChar*
 #else // ANSI
-    #define wxWxCharBuffer wxCharBuffer
+    typedef wxCharBuffer wxWxCharBuffer;
 
     #define wxMB2WXbuf wxChar*
     #define wxWX2MBbuf wxChar*
@@ -288,7 +219,7 @@ private:
 };
 
 
-class WXDLLIMPEXP_BASE wxMemoryBuffer
+class wxMemoryBuffer
 {
 public:
     // ctor and dtor

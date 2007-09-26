@@ -135,8 +135,8 @@ bool wxControl::OS2CreateControl( const wxChar*   zClassname,
     dwStyle &= ~WS_CLIPSIBLINGS;
 
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
-                                       ,zClass              // Window class
-                                       ,label.c_str()       // Initial Text
+                                       ,(PSZ)zClass              // Window class
+                                       ,(PSZ)label.c_str()       // Initial Text
                                        ,(ULONG)dwStyle           // Style flags
                                        ,(LONG)0                  // X pos of origin
                                        ,(LONG)0                  // Y pos of origin
@@ -227,7 +227,7 @@ WXDWORD wxControl::OS2GetStyle( long lStyle, WXDWORD* pdwExstyle ) const
 {
     long dwStyle = wxWindow::OS2GetStyle( lStyle, pdwExstyle );
 
-    if (AcceptsFocusFromKeyboard())
+    if (AcceptsFocus())
     {
         dwStyle |= WS_TABSTOP;
     }
@@ -244,7 +244,7 @@ void wxControl::SetLabel( const wxString& rsLabel )
             label = ::wxPMTextToLabel(m_label);
         else
             label = m_label;
-        ::WinSetWindowText(GetHwnd(), label.c_str());
+        ::WinSetWindowText(GetHwnd(), (PSZ)label.c_str());
     }
 } // end of wxControl::SetLabel
 

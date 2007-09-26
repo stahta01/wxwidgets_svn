@@ -70,7 +70,6 @@ enum ScreenToShow
     Show_Brushes,
     Show_Polygons,
     Show_Mask,
-    Show_Mask_Stretch,
     Show_Ops,
     Show_Regions,
     Show_Circles,
@@ -179,17 +178,11 @@ public:
 #endif
 
 protected:
-    enum DrawMode
-    {
-        Draw_Normal,
-        Draw_Stretch
-    };
-
     void DrawTestLines( int x, int y, int width, wxDC &dc );
     void DrawTestPoly(wxDC& dc);
     void DrawTestBrushes(wxDC& dc);
     void DrawText(wxDC& dc);
-    void DrawImages(wxDC& dc, DrawMode mode);
+    void DrawImages(wxDC& dc);
     void DrawWithLogicalOps(wxDC& dc);
 #if wxUSE_GRAPHICS_CONTEXT
     void DrawAlpha(wxDC& dc);
@@ -234,7 +227,6 @@ enum
     File_ShowBrushes,
     File_ShowPolygons,
     File_ShowMask,
-    File_ShowMaskStretch,
     File_ShowOps,
     File_ShowRegions,
     File_ShowCircles,
@@ -318,7 +310,6 @@ bool MyApp::LoadImages()
     wxPathList pathList;
     pathList.Add(_T("."));
     pathList.Add(_T(".."));
-    pathList.Add(_T("../.."));
 
     wxString path = pathList.FindValidPath(_T("pat4.bmp"));
     if ( !path )
@@ -362,9 +353,6 @@ bool MyApp::LoadImages()
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main application window
     MyFrame *frame = new MyFrame(_T("Drawing sample"),
                                  wxPoint(50, 50), wxSize(550, 340));
@@ -790,9 +778,9 @@ void MyCanvas::DrawText(wxDC& dc)
 
     dc.DrawText( _T("This is Swiss 18pt text."), 110, 40 );
 
-    wxCoord length;
-    wxCoord height;
-    wxCoord descent;
+    long length;
+    long height;
+    long descent;
     dc.GetTextExtent( _T("This is Swiss 18pt text."), &length, &height, &descent );
     text.Printf( wxT("Dimensions are length %ld, height %ld, descent %ld"), length, height, descent );
     dc.DrawText( text, 110, 80 );
@@ -844,7 +832,7 @@ static const struct
     { wxT("wxXOR"),          wxXOR           },
 };
 
-void MyCanvas::DrawImages(wxDC& dc, DrawMode mode)
+void MyCanvas::DrawImages(wxDC& dc)
 {
     dc.DrawText(_T("original image"), 0, 0);
     dc.DrawBitmap(*gs_bmpNoMask, 0, 20, 0);
@@ -866,15 +854,7 @@ void MyCanvas::DrawImages(wxDC& dc, DrawMode mode)
 
         dc.DrawText(rasterOperations[n].name, x, y - 20);
         memDC.SelectObject(*gs_bmpWithColMask);
-        if ( mode == Draw_Stretch )
-        {
-            dc.StretchBlit(x, y, cx, cy, &memDC, 0, 0, cx/2, cy/2,
-                           rasterOperations[n].rop, true);
-        }
-        else
-        {
-            dc.Blit(x, y, cx, cy, &memDC, 0, 0, rasterOperations[n].rop, true);
-        }
+        dc.Blit(x, y, cx, cy, &memDC, 0, 0, rasterOperations[n].rop, true);
     }
 }
 
@@ -929,32 +909,32 @@ void MyCanvas::DrawAlpha(wxDC& dc)
     wxDouble margin = 20 ;
     wxDouble width = 180 ;
     wxDouble radius = 30 ;
-
+    
     dc.SetPen( wxPen( wxColour( 128, 0, 0, 255 ),12, wxSOLID));
     dc.SetBrush( wxBrush( wxColour( 255, 0, 0, 255),wxSOLID));
-
+    
     wxRect r(margin,margin+width*0.66,width,width) ;
-
+    
     dc.DrawRoundedRectangle( r.x, r.y, r.width, r.width, radius ) ;
-
+    
     dc.SetPen( wxPen( wxColour( 0, 0, 128, 255 ),12, wxSOLID));
     dc.SetBrush( wxBrush( wxColour( 0, 0, 255, 255),wxSOLID));
-
+    
     r.Offset( width * 0.8 , - width * 0.66 ) ;
-
+    
     dc.DrawRoundedRectangle( r.x, r.y, r.width, r.width, radius ) ;
-
+    
     dc.SetPen( wxPen( wxColour( 128, 128, 0, 255 ),12, wxSOLID));
     dc.SetBrush( wxBrush( wxColour( 192, 192, 0, 255),wxSOLID));
 
     r.Offset( width * 0.8 , width *0.5 ) ;
-
+    
     dc.DrawRoundedRectangle( r.x, r.y, r.width, r.width, radius ) ;
-
+    
     dc.SetPen( *wxTRANSPARENT_PEN ) ;
     dc.SetBrush( wxBrush( wxColour(255,255,128,128) ) );
     dc.DrawRoundedRectangle( 0 , margin + width / 2 , width * 3 , 100 , radius) ;
-
+    
     dc.SetTextForeground( wxColour(255,255,0,128) );
     dc.SetFont( wxFont( 40, wxFONTFAMILY_SWISS, wxFONTSTYLE_ITALIC, wxFONTWEIGHT_NORMAL ) );
     dc.DrawText( wxT("Hello!"), 120, 80 );
@@ -993,9 +973,9 @@ void MyCanvas::DrawCircles(wxDC& dc)
     dc.DrawEllipticArc(x + r, y, 2*r, r, 90, 180);
     dc.DrawEllipticArc(x + 3*r, y, 2*r, r, 180, 270);
     dc.DrawEllipticArc(x + 5*r, y, 2*r, r, 270, 360);
-
+    
     // same as above, just transparent brush
-
+    
     dc.SetPen( *wxRED_PEN );
     dc.SetBrush( *wxTRANSPARENT_BRUSH );
 
@@ -1022,7 +1002,7 @@ void MyCanvas::DrawCircles(wxDC& dc)
     dc.DrawEllipticArc(x + r, y, 2*r, r, 90, 180);
     dc.DrawEllipticArc(x + 3*r, y, 2*r, r, 180, 270);
     dc.DrawEllipticArc(x + 5*r, y, 2*r, r, 270, 360);
-
+    
 }
 
 void MyCanvas::DrawSplines(wxDC& dc)
@@ -1159,37 +1139,6 @@ void MyCanvas::DrawGradients(wxDC& dc)
     dc.DrawText(_T("Blue in bottom right corner"), r.x, r.y);
     r.Offset(0, TEXT_HEIGHT);
     dc.GradientFillConcentric(r, *wxBLUE, *wxWHITE, wxPoint(r.width, r.height));
-
-    // check that the area filled by the gradient is exactly the interior of
-    // the rectangle
-    r.x = 350;
-    r.y = 30;
-    dc.DrawText("The interior should be filled but", r.x, r.y);
-    r.y += 15;
-    dc.DrawText(" the red border should remain visible:", r.x, r.y);
-    r.y += 15;
-
-    r.width =
-    r.height = 50;
-    wxRect r2 = r;
-    r2.x += 60;
-    wxRect r3 = r;
-    r3.y += 60;
-    wxRect r4 = r2;
-    r4.y += 60;
-    dc.SetPen(wxPen(wxColour(255, 0, 0)));
-    dc.DrawRectangle(r);
-    r.Deflate(1);
-    dc.GradientFillLinear(r, wxColour(0,255,0), wxColour(0,0,0), wxNORTH);
-    dc.DrawRectangle(r2);
-    r2.Deflate(1);
-    dc.GradientFillLinear(r2, wxColour(0,0,0), wxColour(0,255,0), wxSOUTH);
-    dc.DrawRectangle(r3);
-    r3.Deflate(1);
-    dc.GradientFillLinear(r3, wxColour(0,255,0), wxColour(0,0,0), wxEAST);
-    dc.DrawRectangle(r4);
-    r4.Deflate(1);
-    dc.GradientFillLinear(r4, wxColour(0,0,0), wxColour(0,255,0), wxWEST);
 }
 
 void MyCanvas::DrawRegions(wxDC& dc)
@@ -1328,17 +1277,13 @@ void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
             break;
 
         case Show_Mask:
-            DrawImages(dc, Draw_Normal);
-            break;
-
-        case Show_Mask_Stretch:
-            DrawImages(dc, Draw_Stretch);
+            DrawImages(dc);
             break;
 
         case Show_Ops:
             DrawWithLogicalOps(dc);
             break;
-
+        
 #if wxUSE_GRAPHICS_CONTEXT
         case Show_Alpha:
             DrawAlpha(dc);
@@ -1407,7 +1352,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuFile->Append(File_ShowBrushes, _T("&Brushes screen\tF4"));
     menuFile->Append(File_ShowPolygons, _T("&Polygons screen\tF5"));
     menuFile->Append(File_ShowMask, _T("&Mask screen\tF6"));
-    menuFile->Append(File_ShowMaskStretch, _T("1/&2 scaled mask\tShift-F6"));
     menuFile->Append(File_ShowOps, _T("&ROP screen\tF7"));
     menuFile->Append(File_ShowRegions, _T("Re&gions screen\tF8"));
     menuFile->Append(File_ShowCircles, _T("&Circles screen\tF9"));

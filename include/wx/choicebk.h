@@ -19,7 +19,7 @@
 #include "wx/bookctrl.h"
 #include "wx/choice.h"
 
-class WXDLLIMPEXP_FWD_CORE wxChoice;
+class WXDLLEXPORT wxChoice;
 
 extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED;
 extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING;

@@ -96,7 +96,7 @@ static void gtk_collapsiblepane_expanded_callback (GObject    *object,
         // fire an event
         wxCollapsiblePaneEvent ev(p, p->GetId(), p->IsCollapsed());
         p->GetEventHandler()->ProcessEvent(ev);
-
+    
         // the user asked to explicitely handle the resizing itself...
         return;
     }
@@ -106,7 +106,7 @@ static void gtk_collapsiblepane_expanded_callback (GObject    *object,
     if ( top && top->GetSizer() )
     {
         // 2) recalculate minimal size of the top window
-        sz = top->GetSizer()->CalcMin();
+        wxSize sz = top->GetSizer()->CalcMin();
 
         if (top->m_mainWidget)
         {
@@ -202,6 +202,8 @@ bool wxCollapsiblePane::Create(wxWindow *parent,
         return wxGenericCollapsiblePane::Create(parent, id, label,
                                                 pos, size, style, val, name);
 
+    m_needParent = true;
+    m_acceptsFocus = true;
     m_bIgnoreNextChange = false;
 
     if ( !PreCreation( parent, pos, size ) ||
@@ -228,7 +230,7 @@ bool wxCollapsiblePane::Create(wxWindow *parent,
     m_pPane = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                            wxTAB_TRAVERSAL|wxNO_BORDER);
 
-    gtk_widget_show(m_widget);
+    gtk_widget_show( GTK_WIDGET(m_widget) );
     m_parent->DoAddChild( this );
 
     PostCreation(size);

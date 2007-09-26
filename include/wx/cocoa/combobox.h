@@ -101,28 +101,24 @@ protected:
 // Implementation
 // ------------------------------------------------------------------------
 public:
-    // FIXME: Quit deriving from wxTextCtrl
-    void Clear() // HACK
-    {   wxComboBoxBase::Clear(); }
-
     // wxCombobox methods
     virtual void SetSelection(int pos);
     // Overlapping methods
     virtual wxString GetStringSelection();
     // wxItemContainer
-    virtual void DoClear();
-    virtual void DoDeleteOneItem(unsigned int n);
+    virtual void Clear();
+    virtual void Delete(unsigned int n);
     virtual unsigned int GetCount() const;
     virtual wxString GetString(unsigned int) const;
     virtual void SetString(unsigned int pos, const wxString&);
     virtual int FindString(const wxString& s, bool bCase = false) const;
     virtual int GetSelection() const;
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString&);
+    virtual int DoInsert(const wxString&, unsigned int pos);
     virtual void DoSetItemClientData(unsigned int, void*);
     virtual void* DoGetItemClientData(unsigned int) const;
-    virtual bool IsSorted() const { return HasFlag(wxCB_SORT); }
+    virtual void DoSetItemClientObject(unsigned int, wxClientData*);
+    virtual wxClientData* DoGetItemClientObject(unsigned int) const;
     // wxComboBoxBase pure virtuals
     virtual wxString GetValue() const
     {   return wxTextCtrl::GetValue(); }

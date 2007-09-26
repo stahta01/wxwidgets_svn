@@ -18,7 +18,7 @@
 #include "wx/dynarray.h"
 #include "wx/graphics.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindowDC;
+class WXDLLEXPORT wxWindowDC;
 
 #ifdef __WXMAC__
 #define wxGCDC wxDC
@@ -145,14 +145,6 @@ protected:
         wxDC *source, wxCoord xsrc, wxCoord ysrc,
         int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
 
-    virtual bool DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                               wxCoord dstWidth, wxCoord dstHeight,
-                               wxDC *source,
-                               wxCoord xsrc, wxCoord ysrc,
-                               wxCoord srcWidth, wxCoord srcHeight,
-                               int rop = wxCOPY, bool useMask = false,
-                               wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
-
     virtual void DoGetSize(int *,int *) const;
     virtual void DoGetSizeMM(int* width, int* height) const;
 
@@ -173,7 +165,7 @@ protected:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
 

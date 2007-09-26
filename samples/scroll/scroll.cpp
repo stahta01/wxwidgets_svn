@@ -273,7 +273,6 @@ protected: // event stuff
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseLeftUp(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
-    void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
     void OnScroll(wxScrollWinEvent& event);
 
     DECLARE_EVENT_TABLE()
@@ -535,11 +534,16 @@ MyAutoScrollWindow::MyAutoScrollWindow( wxWindow *parent )
                              wxDefaultPosition,
                              SMALL_BUTTON );
 
+    // We need to do this here, because wxADJUST_MINSIZE below
+    // will cause the initial size to be ignored for Best/Min size.
+    // It would be nice to fix the sizers to handle this a little
+    // more cleanly.
+
     m_button->SetSizeHints( SMALL_BUTTON.GetWidth(), SMALL_BUTTON.GetHeight() );
 
     innersizer->Add( m_button,
                      0,
-                     wxALIGN_CENTER | wxALL,
+                     wxALIGN_CENTER | wxALL | wxADJUST_MINSIZE,
                      20 );
 
     innersizer->Add( new wxStaticText( this, wxID_ANY, _T("This is just") ),
@@ -668,9 +672,6 @@ void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame *frame = new MyFrame();
     frame->Show( true );
 
@@ -739,7 +740,6 @@ BEGIN_EVENT_TABLE(MyAutoTimedScrollingWindow, wxScrolledWindow)
     EVT_LEFT_DOWN(MyAutoTimedScrollingWindow::OnMouseLeftDown)
     EVT_LEFT_UP(MyAutoTimedScrollingWindow::OnMouseLeftUp)
     EVT_MOTION(MyAutoTimedScrollingWindow::OnMouseMove)
-    EVT_MOUSE_CAPTURE_LOST(MyAutoTimedScrollingWindow::OnMouseCaptureLost)
     EVT_SCROLLWIN(MyAutoTimedScrollingWindow::OnScroll)
 END_EVENT_TABLE()
 
@@ -1008,12 +1008,6 @@ void MyAutoTimedScrollingWindow::OnMouseMove(wxMouseEvent& event)
             CaptureMouse();
         }
     }
-}
-
-void MyAutoTimedScrollingWindow::OnMouseCaptureLost(wxMouseCaptureLostEvent& WXUNUSED(event))
-{
-    // we only capture mouse for timed scrolling, so nothing is needed here
-    // other than making sure to not call event.Skip()
 }
 
 void MyAutoTimedScrollingWindow::OnScroll(wxScrollWinEvent& event)

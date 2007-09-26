@@ -112,9 +112,6 @@ END_EVENT_TABLE()
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
 
     frame = new MyFrame((wxFrame *)NULL, wxID_ANY, _T("MDI Demo"),
@@ -266,6 +263,11 @@ void MyFrame::OnNewWindow(wxCommandEvent& WXUNUSED(event) )
     // Associate the menu bar with the frame
     subframe->SetMenuBar(menu_bar);
 #endif // wxUSE_MENUS
+
+#if wxUSE_STATUSBAR
+    subframe->CreateStatusBar();
+    subframe->SetStatusText(title);
+#endif // wxUSE_STATUSBAR
 
     int width, height;
     subframe->GetClientSize(&width, &height);

@@ -26,10 +26,6 @@ None
 
 <wx/string.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{Predefined objects}
 
 Objects:
@@ -217,15 +213,16 @@ formatted value to a string:
 These are "advanced" functions and they will be needed quite rarely. 
 \helpref{Alloc}{wxstringalloc} and \helpref{Shrink}{wxstringshrink} are only
 interesting for optimization purposes. 
-\helpref{wxStringBuffer}{wxstringbuffer}
-and \helpref{wxStringBufferLength}{wxstringbufferlength} classes may be very
-useful when working with some external API which requires the caller to provide
-a writable buffer.
+\helpref{GetWriteBuf}{wxstringgetwritebuf} may be very useful when working with
+some external API which requires the caller to provide a writable buffer, but
+extreme care should be taken when using it: before performing any other
+operation on the string \helpref{UngetWriteBuf}{wxstringungetwritebuf} {\bf
+must} be called!
 
 \helpref{Alloc}{wxstringalloc}\\
 \helpref{Shrink}{wxstringshrink}\\
-\helpref{wxStringBuffer}{wxstringbuffer}\\
-\helpref{wxStringBufferLength}{wxstringbufferlength}
+\helpref{GetWriteBuf}{wxstringgetwritebuf}\\
+\helpref{UngetWriteBuf}{wxstringungetwritebuf}
 
 
 \membersection{Miscellaneous}\label{miscellaneousinwxstring}
@@ -458,7 +455,7 @@ For ANSI builds only (note the use of {\tt char} instead of {\tt wxChar}).
 The following constructors allow you to construct wxString from a wide string
 in ANSI build or from a C string in Unicode build.
 
-\func{}{wxString}{\param{const wchar\_t*}{ psz}, \param{const wxMBConv\&}{ conv}, \param{size\_t}{ nLength = wxSTRING\_MAXLEN}}
+\func{}{wxString}{\param{const wchar\_t*}{ psz}, \param{wxMBConv\&}{ conv}, \param{size\_t}{ nLength = wxSTRING\_MAXLEN}}
 
 Initializes the string from first \arg{nLength} characters of wide string. 
 The default value of {\tt wxSTRING\_MAXLEN} means take all the string.
@@ -466,14 +463,13 @@ In ANSI build, \arg{conv}'s
 \helpref{WC2MB}{wxmbconvwc2mb} method is called to
 convert \arg{psz} to wide string. It is ignored in Unicode build.
 
-\func{}{wxString}{\param{const char*}{ psz}, \param{const wxMBConv\&}{ conv = wxConvLibc}, \param{size\_t}{ nLength = wxSTRING\_MAXLEN}}
+\func{}{wxString}{\param{const char*}{ psz}, \param{wxMBConv\&}{ conv}, \param{size\_t}{ nLength = wxSTRING\_MAXLEN}}
 
 Initializes the string from first \arg{nLength} characters of C string.
 The default value of {\tt wxSTRING\_MAXLEN} means take all the string.
 In Unicode build, \arg{conv}'s 
 \helpref{MB2WC}{wxmbconvmb2wc} method is called to
-convert \arg{psz} to wide string (the default converter uses current locale's
-charset). It is ignored in ANSI build.
+convert \arg{psz} to wide string. It is ignored in ANSI build.
 
 \wxheading{See also}
 
@@ -577,8 +573,9 @@ Returns the empty string if {\it ch} is not found.
 Returns a pointer to the string data ({\tt const char*} in ANSI build,
 {\tt const wchar\_t*} in Unicode build).
 
-Note that the returned value is not convertible to {\tt char*} or
-{\tt wchar\_t*}, use \helpref{char\_str}{wxstringcharstr} or
+Note that the returned value will not be convertible to {\tt char*} or
+{\tt wchar\_t*} in wxWidgets 3, consider using
+\helpref{char\_str}{wxstringcharstr} or
 \helpref{wchar\_string}{wxstringwcharstr} if you need to pass string value
 to a function expecting non-const pointer.
 
@@ -590,7 +587,7 @@ to a function expecting non-const pointer.
 
 \membersection{wxString::char\_str}\label{wxstringcharstr}
 
-\constfunc{wxWritableCharBuffer}{char\_str}{\param{const wxMBConv\&}{ conv = wxConvLibc}}
+\constfunc{wxWritableCharBuffer}{char\_str}{\param{wxMBConv\&}{ conv = wxConvLibc}}
 
 Returns an object with string data that is implicitly convertible to
 {\tt char*} pointer. Note that any change to the returned buffer is lost and so
@@ -598,12 +595,13 @@ this function is only usable for passing strings to legacy libraries that
 don't have const-correct API. Use \helpref{wxStringBuffer}{wxstringbuffer} if
 you want to modify the string.
 
+\newsince{2.8.4}
+
 \wxheading{See also}
 
 \helpref{mb\_str}{wxstringmbstr}, \helpref{wc\_str}{wxstringwcstr},
 \helpref{fn\_str}{wxstringfnstr}, \helpref{c\_str}{wxstringcstr},
 \helpref{wchar\_str}{wxstringwcharstr}
-
 
 \membersection{wxString::Clear}\label{wxstringclear}
 
@@ -677,11 +675,11 @@ See also: \helpref{Clear()}{wxstringclear}.
 
 \membersection{wxString::Find}\label{wxstringfind}
 
-\constfunc{int}{Find}{\param{wxUniChar}{ ch}, \param{bool}{ fromEnd = false}}
+\constfunc{int}{Find}{\param{wxChar}{ ch}, \param{bool}{ fromEnd = false}}
 
 Searches for the given character. Returns the starting index, or {\tt wxNOT\_FOUND} if not found.
 
-\constfunc{int}{Find}{\param{const wxString\&}{ sub}}
+\constfunc{int}{Find}{\param{const wxChar*}{ sz}}
 
 Searches for the given string. Returns the starting index, or {\tt wxNOT\_FOUND} if not found.
 
@@ -774,13 +772,7 @@ This is a convenience method useful when storing binary data in wxString.
 
 \func{static wxString }{FromAscii}{\param{const char*}{ s}}
 
-\func{static wxString }{FromAscii}{\param{const unsigned char*}{ s}}
-
-\func{static wxString }{FromAscii}{\param{const char*}{ s}, \param{size\_t}{ len}}
-
-\func{static wxString }{FromAscii}{\param{const unsigned char*}{ s}, \param{size\_t}{ len}}
-
-\func{static wxString }{FromAscii}{\param{char}{ c}}
+\func{static wxString }{FromAscii}{\param{const char}{ c}}
 
 Converts the string or character from an ASCII, 7-bit form
 to the native wxString representation. Most useful when using
@@ -831,12 +823,8 @@ Returns a writable buffer of at least {\it len} bytes.
 It returns a pointer to a new memory block, and the
 existing data will not be copied.
 
-Call \helpref{wxString::UngetWriteBuf}{wxstringungetwritebuf} as soon as
-possible to put the string back into a reasonable state.
-
-This method is deprecated, please use
-\helpref{wxStringBuffer}{wxstringbuffer} or
-\helpref{wxStringBufferLength}{wxstringbufferlength} instead.
+Call \helpref{wxString::UngetWriteBuf}{wxstringungetwritebuf} as soon as possible
+to put the string back into a reasonable state.
 
 
 \membersection{wxString::Index}\label{wxstringindex}
@@ -983,16 +971,16 @@ Converts all characters to upper case and returns the result.
 
 \membersection{wxString::Matches}\label{wxstringmatches}
 
-\constfunc{bool}{Matches}{\param{const wxString\&}{ mask}}
+\constfunc{bool}{Matches}{\param{const wxChar*}{ szMask}}
 
 Returns \true if the string contents matches a mask containing '*' and '?'.
 
 
 \membersection{wxString::mb\_str}\label{wxstringmbstr}
 
-\constfunc{const char*}{mb\_str}{\param{const wxMBConv\&}{ conv = wxConvLibc}}
+\constfunc{const char*}{mb\_str}{\param{wxMBConv\&}{ conv}}
 
-\constfunc{const wxCharBuffer}{mb\_str}{\param{const wxMBConv\&}{ conv = wxConvLibc}}
+\constfunc{const wxCharBuffer}{mb\_str}{\param{wxMBConv\&}{ conv}}
 
 Returns multibyte (C string) representation of the string.
 In Unicode build, converts using \arg{conv}'s \helpref{cWC2MB}{wxmbconvcwc2mb}
@@ -1087,7 +1075,7 @@ Removes the last character.
 
 \membersection{wxString::Replace}\label{wxstringreplace}
 
-\func{size\_t}{Replace}{\param{const wxString\&}{ strOld}, \param{const wxString\&}{ strNew}, \param{bool}{ replaceAll = true}}
+\func{size\_t}{Replace}{\param{const wxChar*}{ szOld}, \param{const wxChar*}{ szNew}, \param{bool}{ replaceAll = true}}
 
 Replace first (or all) occurrences of substring with another one.
 
@@ -1120,7 +1108,7 @@ Minimizes the string's memory. This can be useful after a call to
 
 \membersection{wxString::StartsWith}\label{wxstringstartswith}
 
-\constfunc{bool}{StartsWith}{\param{const wxString\& }{prefix}, \param{wxString }{*rest = NULL}}
+\constfunc{bool}{StartsWith}{\param{const wxChar }{*prefix}, \param{wxString }{*rest = NULL}}
 
 This function can be used to test if the string starts with the specified 
 {\it prefix}. If it does, the function will return \true and put the rest
@@ -1131,7 +1119,7 @@ of the string (i.e. after the prefix) into {\it rest} string if it is not
 
 \membersection{wxString::EndsWith}\label{wxstringendswith}
 
-\constfunc{bool}{EndsWith}{\param{const wxString\& }{suffix}, \param{wxString }{*rest = NULL}}
+\constfunc{bool}{EndsWith}{\param{const wxChar }{*suffix}, \param{wxString }{*rest = NULL}}
 
 This function can be used to test if the string ends with the specified 
 {\it suffix}. If it does, the function will return \true and put the
@@ -1286,11 +1274,11 @@ Please see \helpref{ToLongLong}{wxstringtolonglong} for additional remarks.
 
 \membersection{wxString::ToUTF8}\label{wxstringtoutf8}
 
-\constfunc{const char*}{ToUTF8}{\void}
-
 \constfunc{const wxCharBuffer}{ToUF8}{\void}
 
 Same as \helpref{utf8\_str}{wxstringutf8str}.
+
+\newsince{2.8.4}
 
 
 \membersection{wxString::Trim}\label{wxstringtrim}
@@ -1325,10 +1313,6 @@ and thus is the only version which should be used with the strings with
 embedded {\tt NUL}s (it is also slightly more efficient as {\tt strlen()} 
 doesn't have to be called).
 
-This method is deprecated, please use
-\helpref{wxStringBuffer}{wxstringbuffer} or
-\helpref{wxStringBufferLength}{wxstringbufferlength} instead.
-
 
 \membersection{wxString::Upper}\label{wxstringupper}
 
@@ -1348,21 +1332,19 @@ This is a wxWidgets 1.xx compatibility function; you should not use it in new co
 
 \membersection{wxString::utf8\_str}\label{wxstringutf8str}
 
-\constfunc{const char*}{utf8\_str}{\void}
-
 \constfunc{const wxCharBuffer}{utf8\_str}{\void}
 
-Converts the strings contents to UTF-8 and returns it either as a temporary
-wxCharBuffer object or as a pointer to the internal string contents in
-UTF-8 build.
-% FIXME-UTF8: link to a topic explaining UTF-8 build here
+Converts the strings contents to UTF-8 and returns it as a temporary
+wxCharBuffer object.
+
+\newsince{2.8.4}
 
 
 \membersection{wxString::wc\_str}\label{wxstringwcstr}
 
-\constfunc{const wchar\_t*}{wc\_str}{\param{const wxMBConv\&}{ conv}}
+\constfunc{const wchar\_t*}{wc\_str}{\param{wxMBConv\&}{ conv}}
 
-\constfunc{const wxWCharBuffer}{wc\_str}{\param{const wxMBConv\&}{ conv}}
+\constfunc{const wxWCharBuffer}{wc\_str}{\param{wxMBConv\&}{ conv}}
 
 Returns wide character representation of the string.
 In ANSI build, converts using \arg{conv}'s \helpref{cMB2WC}{wxmbconvcmb2wc}
@@ -1381,10 +1363,12 @@ The macro wxWX2WCbuf is defined as the correct return type (without const).
 \constfunc{wxWritableWCharBuffer}{wchar\_str}{\void}
 
 Returns an object with string data that is implicitly convertible to
-{\tt char*} pointer. Note that changes to the returned buffer may or may
-not be lost (depending on the build) and so this function is only usable for
-passing strings to legacy libraries that don't have const-correct API. Use
-\helpref{wxStringBuffer}{wxstringbuffer} if you want to modify the string.
+{\tt char*} pointer. Note that any change to the returned buffer is lost and so
+this function is only usable for passing strings to legacy libraries that
+don't have const-correct API. Use \helpref{wxStringBuffer}{wxstringbuffer} if
+you want to modify the string.
+
+\newsince{2.8.4}
 
 \wxheading{See also}
 

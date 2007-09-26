@@ -17,30 +17,29 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_GRAPHICS_CONTEXT
-
 #ifndef WX_PRECOMP
-    #include "wx/msw/wrapcdlg.h"
-    #include "wx/image.h"
-    #include "wx/window.h"
-    #include "wx/dc.h"
-    #include "wx/utils.h"
-    #include "wx/dialog.h"
-    #include "wx/app.h"
-    #include "wx/bitmap.h"
-    #include "wx/dcmemory.h"
-    #include "wx/log.h"
-    #include "wx/icon.h"
-    #include "wx/dcprint.h"
-    #include "wx/module.h"
+#include "wx/msw/wrapcdlg.h"
+#include "wx/image.h"
+#include "wx/window.h"
+#include "wx/dc.h"
+#include "wx/utils.h"
+#include "wx/dialog.h"
+#include "wx/app.h"
+#include "wx/bitmap.h"
+#include "wx/dcmemory.h"
+#include "wx/log.h"
+#include "wx/icon.h"
+#include "wx/dcprint.h"
+#include "wx/module.h"
 #endif
 
 #include "wx/graphics.h"
-#include "wx/msw/wrapgdip.h"
 
-#include "wx/stack.h"
+#if wxUSE_GRAPHICS_CONTEXT
 
-WX_DECLARE_STACK(GraphicsState, GraphicsStates);
+#include <vector>
+
+using namespace std;
 
 //-----------------------------------------------------------------------------
 // constants
@@ -80,7 +79,20 @@ static inline double RadToDeg(double deg) { return (deg * 180.0) / M_PI; }
 #include <commdlg.h>
 #endif
 
-class wxGDIPlusPathData : public wxGraphicsPathData
+// TODO remove this dependency (gdiplus needs the macros)
+
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
+#include "gdiplus.h"
+using namespace Gdiplus;
+
+class WXDLLIMPEXP_CORE wxGDIPlusPathData : public wxGraphicsPathData
 {
 public :
     wxGDIPlusPathData(wxGraphicsRenderer* renderer, GraphicsPath* path = NULL);
@@ -148,7 +160,7 @@ private :
     GraphicsPath* m_path;
 };
 
-class wxGDIPlusMatrixData : public wxGraphicsMatrixData
+class WXDLLIMPEXP_CORE wxGDIPlusMatrixData : public wxGraphicsMatrixData
 {
 public :
     wxGDIPlusMatrixData(wxGraphicsRenderer* renderer, Matrix* matrix = NULL) ;
@@ -166,7 +178,7 @@ public :
     // gets the component valuess of the matrix
     virtual void Get(wxDouble* a=NULL, wxDouble* b=NULL,  wxDouble* c=NULL,
                      wxDouble* d=NULL, wxDouble* tx=NULL, wxDouble* ty=NULL) const;
-
+       
     // makes this the inverse matrix
     virtual void Invert();
 
@@ -205,7 +217,7 @@ private:
     Matrix* m_matrix ;
 } ;
 
-class wxGDIPlusPenData : public wxGraphicsObjectRefData
+class WXDLLIMPEXP_CORE wxGDIPlusPenData : public wxGraphicsObjectRefData
 {
 public:
     wxGDIPlusPenData( wxGraphicsRenderer* renderer, const wxPen &pen );
@@ -224,7 +236,7 @@ protected :
     wxDouble m_width;
 };
 
-class wxGDIPlusBrushData : public wxGraphicsObjectRefData
+class WXDLLIMPEXP_CORE wxGDIPlusBrushData : public wxGraphicsObjectRefData
 {
 public:
     wxGDIPlusBrushData( wxGraphicsRenderer* renderer );
@@ -246,7 +258,7 @@ private :
     GraphicsPath* m_brushPath;
 };
 
-class wxGDIPlusFontData : public wxGraphicsObjectRefData
+class WXDLLIMPEXP_CORE wxGDIPlusFontData : public wxGraphicsObjectRefData
 {
 public:
     wxGDIPlusFontData( wxGraphicsRenderer* renderer, const wxFont &font, const wxColour& col );
@@ -259,7 +271,7 @@ private :
     Font* m_font;
 };
 
-class wxGDIPlusContext : public wxGraphicsContext
+class WXDLLIMPEXP_CORE wxGDIPlusContext : public wxGraphicsContext
 {
 public:
     wxGDIPlusContext( wxGraphicsRenderer* renderer, HDC hdc );
@@ -310,7 +322,7 @@ private:
     void    SetDefaults();
 
     Graphics* m_context;
-    GraphicsStates m_stateStack;
+    vector<GraphicsState> m_stateStack;
     GraphicsState m_state1;
     GraphicsState m_state2;
 
@@ -668,7 +680,7 @@ void wxGDIPlusPathData::GetCurrentPoint( wxDouble* x, wxDouble* y) const
 void wxGDIPlusPathData::AddArc( wxDouble x, wxDouble y, wxDouble r, double startAngle, double endAngle, bool clockwise )
 {
     double sweepAngle = endAngle - startAngle ;
-    if( fabs(sweepAngle) >= 2*M_PI)
+    if( abs(sweepAngle) >= 2*M_PI)
     {
         sweepAngle = 2 * M_PI;
     }
@@ -953,13 +965,13 @@ void wxGDIPlusContext::Scale( wxDouble xScale , wxDouble yScale )
 void wxGDIPlusContext::PushState()
 {
     GraphicsState state = m_context->Save();
-    m_stateStack.push(state);
+    m_stateStack.push_back(state);
 }
 
 void wxGDIPlusContext::PopState()
 {
-    GraphicsState state = m_stateStack.top();
-    m_stateStack.pop();
+    GraphicsState state = m_stateStack.back();
+    m_stateStack.pop_back();
     m_context->Restore(state);
 }
 
@@ -1169,8 +1181,7 @@ void wxGDIPlusContext::GetPartialTextExtents(const wxString& text, wxArrayDouble
 
     CharacterRange* ranges = new CharacterRange[len] ;
     Region* regions = new Region[len];
-    size_t i;
-    for( i = 0 ; i < len ; ++i)
+    for( size_t i = 0 ; i < len ; ++i)
     {
         ranges[i].First = i ;
         ranges[i].Length = 1 ;
@@ -1179,7 +1190,7 @@ void wxGDIPlusContext::GetPartialTextExtents(const wxString& text, wxArrayDouble
     m_context->MeasureCharacterRanges(ws, -1 , f,layoutRect, &strFormat,1,regions) ;
 
     RectF bbox ;
-    for ( i = 0 ; i < len ; ++i)
+    for ( size_t i = 0 ; i < len ; ++i)
     {
         regions[i].GetBounds(&bbox,m_context);
         widths[i] = bbox.GetRight()-bbox.GetLeft();
@@ -1226,7 +1237,7 @@ wxGraphicsMatrix wxGDIPlusContext::GetTransform() const
 // wxGDIPlusRenderer declaration
 //-----------------------------------------------------------------------------
 
-class wxGDIPlusRenderer : public wxGraphicsRenderer
+class WXDLLIMPEXP_CORE wxGDIPlusRenderer : public wxGraphicsRenderer
 {
 public :
     wxGDIPlusRenderer()
@@ -1286,7 +1297,6 @@ protected :
     void EnsureIsLoaded();
     void Load();
     void Unload();
-    friend class wxGDIPlusRendererModule;
 
 private :
     bool m_loaded;
@@ -1327,11 +1337,7 @@ void wxGDIPlusRenderer::Load()
 void wxGDIPlusRenderer::Unload()
 {
     if ( m_gditoken )
-    {
         GdiplusShutdown(m_gditoken);
-        m_gditoken = NULL;
-    }
-    m_loaded = false;
 }
 
 wxGraphicsContext * wxGDIPlusRenderer::CreateContext( const wxWindowDC& dc)
@@ -1462,18 +1468,5 @@ wxGraphicsFont wxGDIPlusRenderer::CreateFont( const wxFont &font , const wxColou
     else
         return wxNullGraphicsFont;
 }
-
-// Shutdown GDI+ at app exit, before possible dll unload
-class wxGDIPlusRendererModule : public wxModule
-{
-public:
-    virtual bool OnInit() { return true; }
-    virtual void OnExit() { gs_GDIPlusRenderer.Unload(); }
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxGDIPlusRendererModule)
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxGDIPlusRendererModule, wxModule)
 
 #endif  // wxUSE_GRAPHICS_CONTEXT

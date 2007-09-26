@@ -37,7 +37,6 @@
     #include "wx/menu.h"
     #include "wx/math.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/sysopt.h"
@@ -76,15 +75,6 @@
 #endif // wxUSE_RICHEDIT
 
 #include "wx/msw/missing.h"
-
-#if wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
-
-// dummy value used for m_dropTarget, different from any valid pointer value
-// (which are all even under Windows) and NULL
-static wxDropTarget *
-    wxRICHTEXT_DEFAULT_DROPTARGET = wx_reinterpret_cast(wxDropTarget *, 1);
-
-#endif // wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -298,14 +288,6 @@ void wxTextCtrl::Init()
 
 wxTextCtrl::~wxTextCtrl()
 {
-#if wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
-    if ( m_dropTarget == wxRICHTEXT_DEFAULT_DROPTARGET )
-    {
-        // don't try to destroy this dummy pointer in the base class dtor
-        m_dropTarget = NULL;
-    }
-#endif // wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
-
     delete m_privateContextMenu;
 }
 
@@ -318,6 +300,15 @@ bool wxTextCtrl::Create(wxWindow *parent,
                         const wxValidator& validator,
                         const wxString& name)
 {
+#ifdef __WXWINCE__
+    if ((style & wxBORDER_MASK) == 0)
+        style |= wxBORDER_SIMPLE;
+#else
+    // Standard text control already handles theming
+    if ((style & (wxTE_RICH|wxTE_RICH2)) && ((style & wxBORDER_MASK) == wxBORDER_DEFAULT))
+        style |= wxBORDER_THEME;
+#endif
+
     // base initialization
     if ( !CreateControl(parent, id, pos, size, style, validator, name) )
         return false;
@@ -325,32 +316,7 @@ bool wxTextCtrl::Create(wxWindow *parent,
     if ( !MSWCreateText(value, pos, size) )
         return false;
 
-#if wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
-    if ( IsRich() )
-    {
-        // rich text controls have a default associated drop target which
-        // allows them to receive (rich) text dropped on them, which is nice,
-        // but prevents us from associating a user-defined drop target with
-        // them as we need to unregister the old one first
-        //
-        // to make it work, we set m_dropTarget to this special value initially
-        // and check for it in our SetDropTarget()
-        m_dropTarget = wxRICHTEXT_DEFAULT_DROPTARGET;
-    }
-#endif // wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
-
     return true;
-}
-
-// returns true if the platform should explicitly apply a theme border
-bool wxTextCtrl::CanApplyThemeBorder() const
-{
-#ifdef __WXWINCE__
-    return false;
-#else
-    // Standard text control already handles theming
-    return ((GetWindowStyle() & (wxTE_RICH|wxTE_RICH2)) != 0);
-#endif
 }
 
 bool wxTextCtrl::MSWCreateText(const wxString& value,
@@ -483,7 +449,7 @@ bool wxTextCtrl::MSWCreateText(const wxString& value,
         valueWin = value;
     }
 
-    if ( !MSWCreateControl(windowClass.wx_str(), msStyle, pos, size, valueWin) )
+    if ( !MSWCreateControl(windowClass, msStyle, pos, size, valueWin) )
         return false;
 
 #if wxUSE_RICHEDIT
@@ -972,7 +938,7 @@ wxTextCtrl::StreamIn(const wxString& value,
 #else // !wxUSE_UNICODE_MSLU
     wxCSConv conv(encoding);
 
-    const size_t len = conv.MB2WC(NULL, value.mb_str(), value.length());
+    const size_t len = conv.MB2WC(NULL, value, value.length());
 
 #if wxUSE_WCHAR_T
     wxWCharBuffer wchBuf(len);
@@ -982,7 +948,7 @@ wxTextCtrl::StreamIn(const wxString& value,
     wchar_t *wpc = wchBuf;
 #endif
 
-    conv.MB2WC(wpc, value.mb_str(), value.length());
+    conv.MB2WC(wpc, value, value.length());
 #endif // wxUSE_UNICODE_MSLU
 
     // finally, stream it in the control
@@ -1161,7 +1127,7 @@ void wxTextCtrl::DoWriteText(const wxString& value, int flags)
 
         ::SendMessage(GetHwnd(), selectionOnly ? EM_REPLACESEL : WM_SETTEXT,
                       // EM_REPLACESEL takes 1 to indicate the operation should be redoable
-                      selectionOnly ? 1 : 0, (LPARAM)valueDos.wx_str());
+                      selectionOnly ? 1 : 0, (LPARAM)valueDos.c_str());
 
         if ( !ucf.GotUpdate() && (flags & SetValue_SendEvent) )
         {
@@ -2435,22 +2401,6 @@ bool wxTextCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     // not processed, leave it to the base class
     return wxTextCtrlBase::MSWOnNotify(idCtrl, lParam, result);
 }
-
-#if wxUSE_DRAG_AND_DROP
-
-void wxTextCtrl::SetDropTarget(wxDropTarget *dropTarget)
-{
-    if ( m_dropTarget == wxRICHTEXT_DEFAULT_DROPTARGET )
-    {
-        // get rid of the built-in drop target
-        ::RevokeDragDrop(GetHwnd());
-        m_dropTarget = NULL;
-    }
-
-    wxTextCtrlBase::SetDropTarget(dropTarget);
-}
-
-#endif // wxUSE_DRAG_AND_DROP
 
 // ----------------------------------------------------------------------------
 // colour setting for the rich edit controls

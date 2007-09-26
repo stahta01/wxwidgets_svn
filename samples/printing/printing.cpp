@@ -50,6 +50,12 @@
 #include "mondrian.xpm"
 #endif
 
+#if wxUSE_LIBGNOMEPRINT
+#include "wx/html/forcelnk.h"
+FORCE_LINK(gnome_print)
+#endif
+
+
 // Declare a frame
 MyFrame   *frame = (MyFrame *) NULL;
 // int orientation = wxPORTRAIT;
@@ -71,9 +77,6 @@ bool WritePageHeader(wxPrintout *printout, wxDC *dc, const wxChar *text, float m
 
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxInitAllImageHandlers();
 
     m_testFont.Create(10, wxSWISS, wxNORMAL, wxNORMAL);
@@ -331,10 +334,10 @@ void MyFrame::Draw(wxDC& dc)
     // between the screen image, the print preview image (at various zoom
     // levels), and the printed page.
     dc.SetBackground(*wxWHITE_BRUSH);
-    // dc.Clear();
+    dc.Clear();
     dc.SetFont(wxGetApp().m_testFont);
 
-    // dc.SetBackgroundMode(wxTRANSPARENT);
+    dc.SetBackgroundMode(wxTRANSPARENT);
 
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxLIGHT_GREY_BRUSH);
@@ -347,7 +350,7 @@ void MyFrame::Draw(wxDC& dc)
     dc.SetPen(*wxRED_PEN);
 
     dc.DrawRoundedRectangle(0, 20, 200, 80, 20);
-    
+
     dc.DrawText( wxT("Rectangle 200 by 80"), 40, 40);
 
     dc.SetPen( wxPen(*wxBLACK,0,wxDOT_DASH) );
@@ -603,7 +606,7 @@ void MyPrintout::DrawPageTwo()
 
     { // GetTextExtent demo:
         wxString words[7] = {_T("This "), _T("is "), _T("GetTextExtent "), _T("testing "), _T("string. "), _T("Enjoy "), _T("it!")};
-        wxCoord w, h;
+        long w, h;
         long x = 200, y= 250;
         wxFont fnt(15, wxSWISS, wxNORMAL, wxNORMAL);
 
@@ -675,7 +678,7 @@ dc->SetFont(headerFont);
     float topMarginLogical = (float)(mmToLogical*topMargin);
     float rightMarginLogical = (float)(mmToLogical*(pageWidthMM - rightMargin));
 
-    wxCoord xExtent, yExtent;
+    long xExtent, yExtent;
     dc->GetTextExtent(text, &xExtent, &yExtent);
     float xPos = (float)(((((pageWidthMM - leftMargin - rightMargin)/2.0)+leftMargin)*mmToLogical) - (xExtent/2.0));
     dc->DrawText(text, (long)xPos, (long)topMarginLogical);

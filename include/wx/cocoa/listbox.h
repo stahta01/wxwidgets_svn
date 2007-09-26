@@ -84,14 +84,16 @@ public:
     virtual bool IsSelected(int n) const;
     virtual int GetSelections(wxArrayInt& aSelections) const;
 protected:
+    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
+    virtual void DoSetItems(const wxArrayString& items, void **clientData);
     virtual void DoSetFirstItem(int n);
     virtual void DoSetSelection(int n, bool select);
 
 // pure virtuals from wxItemContainer
 public:
     // deleting items
-    virtual void DoClear();
-    virtual void DoDeleteOneItem(unsigned int n);
+    virtual void Clear();
+    virtual void Delete(unsigned int n);
     // accessing strings
     virtual unsigned int GetCount() const;
     virtual wxString GetString(unsigned int n) const;
@@ -100,11 +102,11 @@ public:
     // selection
     virtual int GetSelection() const;
 protected:
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
 };
 
 #endif // __WX_COCOA_LISTBOX_H__

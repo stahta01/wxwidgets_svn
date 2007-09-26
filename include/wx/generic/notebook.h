@@ -22,9 +22,9 @@
 // ----------------------------------------------------------------------------
 
 // fwd declarations
-class WXDLLIMPEXP_FWD_CORE wxImageList;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxTabView;
+class WXDLLEXPORT wxImageList;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxTabView;
 
 // ----------------------------------------------------------------------------
 // wxNotebook

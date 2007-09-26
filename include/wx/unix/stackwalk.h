@@ -74,7 +74,7 @@ public:
     }
 
     virtual void Walk(size_t skip = 1, size_t maxDepth = 200);
-    virtual void WalkFromException(size_t maxDepth = 200) { Walk(2, maxDepth); }
+    virtual void WalkFromException() { Walk(2); }
 
     static const wxString& GetExePath() { return ms_exepath; }
 

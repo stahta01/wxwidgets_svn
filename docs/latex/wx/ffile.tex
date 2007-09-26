@@ -25,10 +25,6 @@ None.
 
 <wx/ffile.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \twocolwidtha{7cm}
 \begin{twocollist}\itemsep=0pt%
 \twocolitem{{\bf wxFromStart}}{Count offset from the start of the file}
@@ -45,7 +41,7 @@ None.
 
 Default constructor.
 
-\func{}{wxFFile}{\param{const wxString\&}{ filename}, \param{const wxString\&}{ mode = "r"}}
+\func{}{wxFFile}{\param{const char*}{ filename}, \param{const char*}{ mode = "r"}}
 
 Opens a file with the given mode. As there is no way to return whether the
 operation was successful or not from the constructor you should test the
@@ -184,7 +180,7 @@ Returns the length of the file.
 
 \membersection{wxFFile::Open}\label{wxffileopen}
 
-\func{bool}{Open}{\param{const wxString\&}{ filename}, \param{const wxString\&}{ mode = "r"}}
+\func{bool}{Open}{\param{const char*}{ filename}, \param{const char*}{ mode = "r"}}
 
 Opens the file, returning \true if successful.
 
@@ -214,7 +210,7 @@ The number of bytes read.
 
 \membersection{wxFFile::ReadAll}\label{wxffilereadall}
 
-\func{bool}{ReadAll}{\param{wxString *}{ str}, \param{const wxMBConv\&}{ conv = wxConvAuto()}}
+\func{bool}{ReadAll}{\param{wxString *}{ str}, \param{wxMBConv\&}{ conv = wxConvUTF8}}
 
 Reads the entire contents of the file into a string.
 
@@ -281,7 +277,7 @@ Number of bytes written.
 
 \membersection{wxFFile::Write}\label{wxffilewrites}
 
-\func{bool}{Write}{\param{const wxString\& }{s}, \param{const wxMBConv\&}{ conv = wxConvAuto()}}
+\func{bool}{Write}{\param{const wxString\& }{s}, \param{wxMBConv\&}{ conv = wxConvUTF8}}
 
 Writes the contents of the string to the file, returns \true on success.
 

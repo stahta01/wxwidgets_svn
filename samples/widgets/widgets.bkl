@@ -9,18 +9,15 @@
             bmpcombobox.cpp
             button.cpp
             checkbox.cpp
-            choice.cpp
             clrpicker.cpp
             combobox.cpp
             datepick.cpp
             dirctrl.cpp
             dirpicker.cpp
-            filectrl.cpp
             filepicker.cpp
             fontpicker.cpp
             gauge.cpp
             hyperlnk.cpp
-            itemcontainer.cpp
             listbox.cpp
             notebook.cpp
             odcombobox.cpp

@@ -46,8 +46,6 @@ protected:
     virtual void DoMoveWindow(int x, int y, int width, int height);
 
 private:
-    bool m_sizeSet;
-
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxPopupWindow)
 };

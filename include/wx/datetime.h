@@ -27,9 +27,9 @@
 
 #include "wx/longlong.h"
 
-class WXDLLIMPEXP_FWD_BASE wxDateTime;
-class WXDLLIMPEXP_FWD_BASE wxTimeSpan;
-class WXDLLIMPEXP_FWD_BASE wxDateSpan;
+class WXDLLIMPEXP_BASE wxDateTime;
+class WXDLLIMPEXP_BASE wxTimeSpan;
+class WXDLLIMPEXP_BASE wxDateSpan;
 
 #include "wx/dynarray.h"
 
@@ -125,7 +125,7 @@ WXDLLIMPEXP_BASE struct tm *wxGmtime_r(const time_t*, struct tm*);
 // argument for arguments of type wxDateTime; it is also returned by all
 // functions returning wxDateTime on failure (this is why it is also called
 // wxInvalidDateTime)
-class WXDLLIMPEXP_FWD_BASE wxDateTime;
+class WXDLLIMPEXP_BASE wxDateTime;
 
 extern WXDLLIMPEXP_DATA_BASE(const wxChar*) wxDefaultDateTimeFormat;
 extern WXDLLIMPEXP_DATA_BASE(const wxChar*) wxDefaultTimeSpanFormat;
@@ -564,7 +564,7 @@ public:
     // ------------------------------------------------------------------------
 
         // default ctor does not initialize the object, use Set()!
-    wxDateTime() { m_time = wxLongLong(wxINT32_MIN, 0); }
+    wxDateTime() { m_time = wxLongLong((long)ULONG_MAX, ULONG_MAX); }
 
         // from time_t: seconds since the Epoch 00:00:00 UTC, Jan 1, 1970)
 #if (!(defined(__VISAGECPP__) && __IBMCPP__ >= 400))
@@ -639,9 +639,11 @@ public:
         // resets time to 00:00:00, doesn't change the date
     wxDateTime& ResetTime();
 
+#if wxABI_VERSION >= 20802
         // get the date part of this object only, i.e. the object which has the
         // same date as this one but time of 00:00:00
     wxDateTime GetDateOnly() const;
+#endif // wxABI 2.8.1+
 
         // the following functions don't change the values of the other
         // fields, i.e. SetMinute() won't change either hour or seconds value
@@ -1042,7 +1044,7 @@ public:
         // default, they will not change if they had valid values or will
         // default to Today() otherwise)
     const wxChar *ParseFormat(const wxChar *date,
-                              const wxString& format = wxDefaultDateTimeFormat,
+                              const wxChar *format = wxDefaultDateTimeFormat,
                               const wxDateTime& dateDef = wxDefaultDateTime);
         // parse a string containing the date/time in "free" format, this
         // function will try to make an educated guess at the string contents
@@ -1057,7 +1059,7 @@ public:
         // argument corresponds to the preferred date and time representation
         // for the current locale) and returns the string containing the
         // resulting text representation
-    wxString Format(const wxString& format = wxDefaultDateTimeFormat,
+    wxString Format(const wxChar *format = wxDefaultDateTimeFormat,
                     const TimeZone& tz = Local) const;
         // preferred date representation for the current locale
     wxString FormatDate() const { return Format(_T("%x")); }
@@ -1085,8 +1087,13 @@ public:
     // another one to get the current time broken down
     static struct tm *GetTmNow()
     {
+#ifdef __WXWINCE__
         static struct tm l_CurrentTime;
         return GetTmNow(&l_CurrentTime);
+#else
+        time_t t = GetTimeNow();
+        return localtime(&t);
+#endif
     }
 
     // get current time using thread-safe function
@@ -1294,7 +1301,7 @@ public:
         // resulting text representation. Notice that only some of format
         // specifiers valid for wxDateTime are valid for wxTimeSpan: hours,
         // minutes and seconds make sense, but not "PM/AM" string for example.
-    wxString Format(const wxString& format = wxDefaultTimeSpanFormat) const;
+    wxString Format(const wxChar *format = wxDefaultTimeSpanFormat) const;
 
     // implementation
     // ------------------------------------------------------------------------
@@ -1487,7 +1494,7 @@ WX_DECLARE_USER_EXPORTED_OBJARRAY(wxDateTime, wxDateTimeArray, WXDLLIMPEXP_BASE)
 //     virtual methods to work with the holidays they correspond to.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_BASE wxDateTimeHolidayAuthority;
+class WXDLLIMPEXP_BASE wxDateTimeHolidayAuthority;
 WX_DEFINE_USER_EXPORTED_ARRAY_PTR(wxDateTimeHolidayAuthority *,
                               wxHolidayAuthoritiesArray,
                               class WXDLLIMPEXP_BASE);
