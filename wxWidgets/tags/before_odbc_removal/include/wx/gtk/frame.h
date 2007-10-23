@@ -1,0 +1,103 @@
+/////////////////////////////////////////////////////////////////////////////
+// Name:        wx/gtk/frame.h
+// Purpose:
+// Author:      Robert Roebling
+// Id:          $Id$
+// Copyright:   (c) 1998 Robert Roebling, Julian Smart
+// Licence:     wxWindows licence
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef _WX_GTK_FRAME_H_
+#define _WX_GTK_FRAME_H_
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
+class WXDLLIMPEXP_FWD_CORE wxMenu;
+class WXDLLIMPEXP_FWD_CORE wxMenuBar;
+class WXDLLIMPEXP_FWD_CORE wxToolBar;
+class WXDLLIMPEXP_FWD_CORE wxStatusBar;
+
+//-----------------------------------------------------------------------------
+// wxFrame
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxFrame : public wxFrameBase
+{
+public:
+    // construction
+    wxFrame() { Init(); }
+    wxFrame(wxWindow *parent,
+               wxWindowID id,
+               const wxString& title,
+               const wxPoint& pos = wxDefaultPosition,
+               const wxSize& size = wxDefaultSize,
+               long style = wxDEFAULT_FRAME_STYLE,
+               const wxString& name = wxFrameNameStr)
+    {
+        Init();
+
+        Create(parent, id, title, pos, size, style, name);
+    }
+
+    bool Create(wxWindow *parent,
+                wxWindowID id,
+                const wxString& title,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = wxDEFAULT_FRAME_STYLE,
+                const wxString& name = wxFrameNameStr);
+
+    virtual ~wxFrame();
+
+#if wxUSE_STATUSBAR
+    void SetStatusBar(wxStatusBar *statbar);
+#endif // wxUSE_STATUSBAR
+
+#if wxUSE_TOOLBAR
+    void SetToolBar(wxToolBar *toolbar);
+#endif // wxUSE_TOOLBAR
+
+    virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
+    wxPoint GetClientAreaOrigin() const { return wxPoint(0, 0); }
+
+    // implementation from now on
+    // --------------------------
+
+    // GTK callbacks
+    virtual void GtkOnSize();
+    virtual void OnInternalIdle();
+
+    bool          m_menuBarDetached;
+    int           m_menuBarHeight;
+    bool          m_toolBarDetached;
+
+protected:
+    // common part of all ctors
+    void Init();
+
+    // override wxWindow methods to take into account tool/menu/statusbars
+    virtual void DoGetClientSize( int *width, int *height ) const;
+
+#if wxUSE_MENUS_NATIVE
+    virtual void DetachMenuBar();
+    virtual void AttachMenuBar(wxMenuBar *menubar);
+    // Whether frame has a menubar showing
+    //   (needed to deal with perverted MDI menubar handling)
+    virtual bool HasVisibleMenubar() const;
+
+public:
+    // Menu size is dynamic now, call this whenever it might change.
+    void UpdateMenuBarSize();
+#endif // wxUSE_MENUS_NATIVE
+
+private:
+    long m_fsSaveFlag;
+
+    DECLARE_DYNAMIC_CLASS(wxFrame)
+};
+
+#endif // _WX_GTK_FRAME_H_
