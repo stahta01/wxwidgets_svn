@@ -21,8 +21,6 @@
 #include "wx/wxprec.h"
 
 #include "wx/toplevel.h"
-#include "wx/settings.h"
-#include "wx/app.h"
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
@@ -68,6 +66,8 @@ void wxTopLevelWindowMotif::PreDestroy()
 {
     wxModelessWindows.DeleteObject(this);
 
+    m_icons.m_icons.Empty();
+
     DestroyChildren();
 
     // MessageDialog and FileDialog do not have a client widget
@@ -108,9 +108,6 @@ bool wxTopLevelWindowMotif::Create( wxWindow *parent, wxWindowID id,
     wxTopLevelWindows.Append(this);
 
     m_windowId = ( id > -1 ) ? id : NewControlId();
-    // MBN: More backward compatible, but uglier
-    m_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
-    m_inheritFont = true;
 
     bool retval = XmDoCreateTLW( parent, id, title, pos, size, style, name );
 
@@ -368,7 +365,7 @@ static void wxCloseTLWCallback( Widget WXUNUSED(widget), XtPointer client_data,
     closeEvent.SetEventObject( tlw );
 
     // May delete the dialog (with delayed deletion)
-    tlw->HandleWindowEvent(closeEvent);
+    tlw->GetEventHandler()->ProcessEvent(closeEvent);
 }
 
 void wxTLWEventHandler( Widget wid,
@@ -387,7 +384,7 @@ void wxTLWEventHandler( Widget wid,
         {
             wxevent.SetEventObject( tlw );
             wxevent.SetId( tlw->GetId() );
-            tlw->HandleWindowEvent( wxevent );
+            tlw->GetEventHandler()->ProcessEvent( wxevent );
         }
         else
         {
@@ -401,7 +398,7 @@ void wxTLWEventHandler( Widget wid,
                 keyEvent.SetEventObject( tlw );
                 keyEvent.SetId( tlw->GetId() );
                 keyEvent.SetEventType( wxEVT_CHAR_HOOK );
-                if( tlw->HandleWindowEvent( keyEvent ) )
+                if( tlw->GetEventHandler()->ProcessEvent( keyEvent ) )
                 {
                     *continueToDispatch = False;
                     return;
@@ -413,10 +410,10 @@ void wxTLWEventHandler( Widget wid,
                     keyEvent.SetEventType( wxEVT_KEY_DOWN );
 
                     // Only process OnChar if OnKeyDown didn't swallow it
-                    if( !tlw->HandleWindowEvent( keyEvent ) )
+                    if( !tlw->GetEventHandler()->ProcessEvent( keyEvent ) )
                     {
                         keyEvent.SetEventType( wxEVT_CHAR );
-                        tlw->HandleWindowEvent( keyEvent );
+                        tlw->GetEventHandler()->ProcessEvent( keyEvent );
                     }
                 }
             }

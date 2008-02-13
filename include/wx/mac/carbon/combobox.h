@@ -15,7 +15,7 @@
 #include "wx/containr.h"
 #include "wx/choice.h"
 
-WXDLLEXPORT_DATA(extern const char) wxComboBoxNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxComboBoxNameStr[];
 
 // forward declaration of private implementation classes
 
@@ -84,6 +84,10 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxComboBoxNameStr);
 
+    // List functions
+    virtual void Delete(unsigned int n);
+    virtual void Clear();
+
     virtual int GetSelection() const;
     virtual void SetSelection(int n);
     virtual int FindString(const wxString& s, bool bCase = false) const;
@@ -92,10 +96,8 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
     virtual void SetString(unsigned int n, const wxString& s);
 
     // Text field functions
-    virtual void SetValue(const wxString& value);
     virtual wxString GetValue() const;
-    virtual void WriteText(const wxString& text);
-    virtual void GetSelection(long *from, long *to) const;
+    virtual void SetValue(const wxString& value);
 
     // Clipboard operations
     virtual void Copy();
@@ -123,8 +125,6 @@ class WXDLLEXPORT wxComboBox : public wxControl, public wxComboBoxBase
     virtual bool CanUndo() const;
     virtual bool CanRedo() const;
 
-    virtual wxClientDataType GetClientDataType() const;
-
     wxInt32 MacControlHit( WXEVENTHANDLERREF handler, WXEVENTREF event );
 
     wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
@@ -135,22 +135,19 @@ protected:
     // common part of all ctors
     void Init();
 
-    // List functions
-    virtual void DoDeleteOneItem(unsigned int n);
-    virtual void DoClear();
+    void FreeData();
 
     // override the base class virtuals involved in geometry calculations
     virtual wxSize DoGetBestSize() const;
     virtual void DoMoveWindow(int x, int y, int width, int height);
 
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
 
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void * DoGetItemClientData(unsigned int n) const;
-
-    virtual void SetClientDataType(wxClientDataType clientDataItemsType);
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData * DoGetItemClientObject(unsigned int n) const;
 
     // the subcontrols
     wxComboBoxText*     m_text;

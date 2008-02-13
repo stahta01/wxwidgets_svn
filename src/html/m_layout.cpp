@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/image.h"
 #endif
 
@@ -100,7 +100,7 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_page
     // vertical position. Otherwise we'd be setting a pagebreak above
     // the current cell, which is incorrect, or duplicating a
     // pagebreak that has already been set.
-    if( known_pagebreaks.GetCount() == 0 || *pagebreak <= m_PosY)
+    if( known_pagebreaks.Count() == 0 || *pagebreak <= m_PosY)
     {
         return false;
     }
@@ -289,7 +289,9 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
         wxHtmlWindowInterface *winIface = m_WParser->GetWindowInterface();
         if (winIface)
         {
-            wxString title(tag.GetBeginIter(), tag.GetEndIter1());
+            wxString title = m_WParser->GetSource()->Mid(
+                                    tag.GetBeginPos(),
+                                    tag.GetEndPos1()-tag.GetBeginPos());
 #if !wxUSE_UNICODE && wxUSE_WCHAR_T
             const wxFontEncoding enc = m_WParser->GetInputEncoding();
             if ( enc != wxFONTENCODING_DEFAULT )
@@ -344,9 +346,11 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
                 wxInputStream *is = fileBgImage->GetStream();
                 if ( is )
                 {
+#if !defined(__WXMSW__) || wxUSE_WXDIB
                     wxImage image(*is);
                     if ( image.Ok() )
                         winIface->SetHTMLBackgroundImage(image);
+#endif
                 }
 
                 delete fileBgImage;

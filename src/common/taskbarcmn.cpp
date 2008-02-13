@@ -16,15 +16,12 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_TASKBARICON
+#ifdef wxHAS_TASK_BAR_ICON
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
-    #include "wx/list.h"
     #include "wx/menu.h"
 #endif
-
-extern WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
 
 // DLL options compatibility check:
 WX_CHECK_BUILD_OPTIONS("wxAdvanced")
@@ -38,8 +35,6 @@ DEFINE_EVENT_TYPE( wxEVT_TASKBAR_RIGHT_DOWN )
 DEFINE_EVENT_TYPE( wxEVT_TASKBAR_RIGHT_UP )
 DEFINE_EVENT_TYPE( wxEVT_TASKBAR_LEFT_DCLICK )
 DEFINE_EVENT_TYPE( wxEVT_TASKBAR_RIGHT_DCLICK )
-DEFINE_EVENT_TYPE( wxEVT_TASKBAR_BALLOON_TIMEOUT )
-DEFINE_EVENT_TYPE( wxEVT_TASKBAR_BALLOON_CLICK )
 
 
 BEGIN_EVENT_TABLE(wxTaskBarIconBase, wxEvtHandler)
@@ -56,9 +51,4 @@ void wxTaskBarIconBase::OnRightButtonDown(wxTaskBarIconEvent& WXUNUSED(event))
     }
 }
 
-void wxTaskBarIconBase::Destroy()
-{
-    wxPendingDelete.Append(this);
-}
-
-#endif // wxUSE_TASKBARICON
+#endif // defined(wxHAS_TASK_BAR_ICON)

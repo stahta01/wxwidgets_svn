@@ -13,7 +13,6 @@
 #define _WX_COMBOBOX_H_
 
 #include "wx/choice.h"
-#include "wx/textentry.h"
 
 #if wxUSE_COMBOBOX
 
@@ -21,8 +20,7 @@
 // Combobox control
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxComboBox : public wxChoice,
-                               public wxTextEntry
+class WXDLLEXPORT wxComboBox: public wxChoice
 {
 public:
     wxComboBox() { }
@@ -70,27 +68,46 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxComboBoxNameStr);
 
-    // resolve ambiguities among virtual functions inherited from both base
-    // classes
-    virtual void Clear();
+    // List functions: see wxChoice
+
+    // Text field functions
     virtual wxString GetValue() const;
     virtual void SetValue(const wxString& value);
-    virtual wxString GetStringSelection() const
-        { return wxChoice::GetStringSelection(); }
 
+    // Clipboard operations
+    virtual void Copy();
+    virtual void Cut();
+    virtual void Paste();
+    virtual bool CanCopy() const;
+    virtual bool CanCut() const;
+    virtual bool CanPaste() const;
+    virtual void SetInsertionPoint(long pos);
+    virtual void SetInsertionPointEnd();
+    virtual long GetInsertionPoint() const;
+    virtual wxTextPos GetLastPosition() const;
+    virtual void Replace(long from, long to, const wxString& value);
+    virtual void Remove(long from, long to);
     virtual void SetSelection(int n) { wxChoice::SetSelection(n); }
-    virtual void SetSelection(long from, long to)
-        { wxTextEntry::SetSelection(from, to); }
+    virtual void SetSelection(long from, long to);
     virtual int GetSelection() const { return wxChoice::GetSelection(); }
-    virtual void GetSelection(long *from, long *to) const;
+    virtual void GetSelection(long* from, long* to) const;
+    virtual void SetEditable(bool editable);
 
+    virtual void Undo();
+    virtual void Redo();
+    virtual bool CanUndo() const;
+    virtual bool CanRedo() const;
+    virtual void SelectAll();
     virtual bool IsEditable() const;
+    virtual bool HasSelection() const;
 
     // implementation only from now on
     virtual bool MSWCommand(WXUINT param, WXWORD id);
     bool MSWProcessEditMsg(WXUINT msg, WXWPARAM wParam, WXLPARAM lParam);
     virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
     bool MSWShouldPreProcessMessage(WXMSG *pMsg);
+    
+    WXHWND GetEditHWND() const;
 
     // Standard event handling
     void OnCut(wxCommandEvent& event);
@@ -111,29 +128,11 @@ public:
 
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
-protected:
-#if wxUSE_TOOLTIPS
-    virtual void DoSetToolTip(wxToolTip *tip);
-#endif
-
-    // this is the implementation of GetEditHWND() which can also be used when
-    // we don't have the edit control, it simply returns NULL then
-    //
-    // try not to use this function unless absolutely necessary (as in the
-    // message handling code where the edit control might not be created yet
-    // for the messages we receive during the control creation) as normally
-    // just testing for IsEditable() and using GetEditHWND() should be enough
-    WXHWND GetEditHWNDIfAvailable() const;
-
 private:
-    // this is the overridden wxTextEntry method which should only be called
-    // when we do have an edit control so it asserts if this is not the case
-    virtual WXHWND GetEditHWND() const;
-
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxComboBox)
     DECLARE_EVENT_TABLE()
 };
 
 #endif // wxUSE_COMBOBOX
-
-#endif // _WX_COMBOBOX_H_
+#endif
+    // _WX_COMBOBOX_H_

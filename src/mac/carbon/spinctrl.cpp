@@ -57,7 +57,7 @@ public:
     }
 
 protected:
-     void OnKillFocus(wxFocusEvent& WXUNUSED(event))
+     void OnKillFocus(wxFocusEvent &event)
      {
          long l;
          if ( !GetValue().ToLong(&l) )
@@ -65,35 +65,35 @@ protected:
              // not a number at all
              return;
          }
-
+         
          // is within range
          if (l < m_spin->GetMin())
              l = m_spin->GetMin();
          if (l > m_spin->GetMax())
              l = m_spin->GetMax();
-
+         
          // Update text control
          wxString str;
          str.Printf( wxT("%d"), (int)l );
          if (str != GetValue())
              SetValue( str );
-
+         
          if (l != m_spin->m_oldValue)
          {
              // set value in spin button
              // does that trigger an event?
              m_spin->m_btn->SetValue( l );
-
+             
              // if not
              wxCommandEvent event(wxEVT_COMMAND_SPINCTRL_UPDATED, m_spin->GetId());
              event.SetEventObject(m_spin);
              event.SetInt(l);
-             m_spin->HandleWindowEvent(event);
-
+             m_spin->GetEventHandler()->ProcessEvent(event);
+             
              m_spin->m_oldValue = l;
-         }
+         } 
     }
-
+   
     void OnTextChange(wxCommandEvent& event)
     {
         int val;
@@ -116,7 +116,7 @@ protected:
             event.SetString(m_spin->GetText()->GetValue());
             event.SetInt(val);
 
-            m_spin->HandleWindowEvent(event);
+            m_spin->GetEventHandler()->ProcessEvent(event);
         }
 
         event.Skip();
@@ -166,7 +166,7 @@ protected:
         event.SetEventObject(m_spin);
         event.SetInt(pos);
 
-        m_spin->HandleWindowEvent(event);
+        m_spin->GetEventHandler()->ProcessEvent(event);
 
         m_spin->m_oldValue = pos;
     }
@@ -202,7 +202,7 @@ void wxSpinCtrl::Init()
 {
     m_text = NULL;
     m_btn = NULL;
-    WX_INIT_CONTROL_CONTAINER();
+    m_container.SetContainerWindow(this);
 }
 
 bool wxSpinCtrl::Create(wxWindow *parent,

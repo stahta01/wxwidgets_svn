@@ -31,7 +31,7 @@
 #ifndef WX_PRECOMP
 #endif
 
-const char wxChoiceNameStr[] = "choice";
+const wxChar wxChoiceNameStr[] = wxT("choice");
 
 // ============================================================================
 // implementation

@@ -37,10 +37,6 @@
 #include "wx/splitter.h"
 #include "wx/dcmirror.h"
 
-#ifdef __WXMAC__
-    #include "wx/mac/private.h"
-#endif
-
 // ----------------------------------------------------------------------------
 // wxRendererGeneric: our wxRendererNative implementation
 // ----------------------------------------------------------------------------
@@ -107,8 +103,6 @@ public:
                                        wxDC& dc,
                                        const wxRect& rect,
                                        int flags = 0);
-
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0);
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 
@@ -218,6 +212,8 @@ wxRendererGeneric::DrawHeaderButton(wxWindow* win,
                                     wxHeaderSortIconType sortArrow,
                                     wxHeaderButtonParams* params)
 {
+    const int CORNER = 1;
+
     const wxCoord x = rect.x,
                   y = rect.y,
                   w = rect.width,
@@ -226,20 +222,22 @@ wxRendererGeneric::DrawHeaderButton(wxWindow* win,
     dc.SetBrush(wxBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE)));
     dc.SetPen(*wxTRANSPARENT_PEN);
     dc.DrawRectangle(rect);
-
+    
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
 
     dc.SetPen(m_penBlack);
-    dc.DrawLine( x+w-1, y, x+w-1, y+h );  // right (outer)
-    dc.DrawLine( x, y+h-1, x+w, y+h-1 );  // bottom (outer)
+    dc.DrawLine( x+w-CORNER+1, y, x+w, y+h );  // right (outer)
+    dc.DrawRectangle( x, y+h, w+1, 1 );        // bottom (outer)
 
     dc.SetPen(m_penDarkGrey);
-    dc.DrawLine( x+w-2, y+1, x+w-2, y+h-1 );  // right (inner)
-    dc.DrawLine( x+1, y+h-2, x+w-1, y+h-2 );  // bottom (inner)
+    dc.DrawLine( x+w-CORNER, y, x+w-1, y+h );  // right (inner)
+    dc.DrawRectangle( x+1, y+h-1, w-2, 1 );    // bottom (inner)
 
     dc.SetPen(m_penHighlight);
-    dc.DrawLine( x, y, x, y+h-1 ); // left (outer)
-    dc.DrawLine( x, y, x+w-1, y ); // top (outer)
+    dc.DrawRectangle( x, y, w-CORNER+1, 1 );   // top (outer)
+    dc.DrawRectangle( x, y, 1, h );            // left (outer)
+    dc.DrawLine( x, y+h-1, x+1, y+h-1 );
+    dc.DrawLine( x+w-1, y, x+w-1, y+1 );
 
     return DrawHeaderButtonContents(win, dc, rect, flags, sortArrow, params);
 }
@@ -254,7 +252,7 @@ wxRendererGeneric::DrawHeaderButtonContents(wxWindow *win,
                                             wxHeaderButtonParams* params)
 {
     int labelWidth = 0;
-
+    
     // Mark this item as selected.  For the generic version we'll just draw an
     // underline
     if ( flags & wxCONTROL_SELECTED )
@@ -283,7 +281,7 @@ wxRendererGeneric::DrawHeaderButtonContents(wxWindow *win,
         ar.y += (rect.height - ar.height)/2;
         ar.x = ar.x + rect.width - 3*ar.width/2;
         arrowSpace = 3*ar.width/2; // space to preserve when drawing the label
-
+        
         wxPoint triPt[3];
         if ( sortArrow & wxHDR_SORT_ICON_UP )
         {
@@ -308,19 +306,19 @@ wxRendererGeneric::DrawHeaderButtonContents(wxWindow *win,
             params->m_arrowColour : wxSystemSettings::GetColour(wxSYS_COLOUR_3DSHADOW);
         dc.SetPen(wxPen(c));
         dc.SetBrush(wxBrush(c));
-        dc.DrawPolygon( 3, triPt, ar.x, ar.y);
+        dc.DrawPolygon( 3, triPt, ar.x, ar.y);                  
     }
     labelWidth += arrowSpace;
-
+    
     const int margin = 5;   // number of pixels to reserve on either side of the label
     int bmpWidth = 0;
     int txtEnd = 0;
-
+    
     if ( params && params->m_labelBitmap.Ok() )
         bmpWidth = params->m_labelBitmap.GetWidth() + 2;
 
     labelWidth += bmpWidth + 2*margin;
-
+    
     // Draw a label if one is given
     if ( params && !params->m_labelText.empty() )
     {
@@ -330,7 +328,7 @@ wxRendererGeneric::DrawHeaderButtonContents(wxWindow *win,
             params->m_labelColour : win->GetForegroundColour();
 
         wxString label( params->m_labelText );
-
+        
         dc.SetFont(font);
         dc.SetTextForeground(clr);
         dc.SetBackgroundMode(wxTRANSPARENT);
@@ -339,10 +337,10 @@ wxRendererGeneric::DrawHeaderButtonContents(wxWindow *win,
         dc.GetTextExtent( label, &tw, &th, &td);
         labelWidth += tw;
         y = rect.y + wxMax(0, (rect.height - (th+td)) / 2);
-
+        
         // truncate and add an ellipsis (...) if the text is too wide.
         int targetWidth = rect.width - arrowSpace - bmpWidth - 2*margin;
-        if ( tw > targetWidth )
+        if ( tw > targetWidth )        
         {
             int ellipsisWidth;
             dc.GetTextExtent( wxT("..."), &ellipsisWidth, NULL);
@@ -353,7 +351,7 @@ wxRendererGeneric::DrawHeaderButtonContents(wxWindow *win,
             label.append( wxT("...") );
             tw += ellipsisWidth;
         }
-
+        
         switch (params->m_labelAlignment)
         {
             default:
@@ -635,17 +633,10 @@ wxRendererGeneric::DrawPushButton(wxWindow *win,
 }
 
 void
-#ifdef __WXMAC__
-wxRendererGeneric::DrawItemSelectionRect(wxWindow * win,
-                                         wxDC& dc,
-                                         const wxRect& rect,
-                                         int flags)
-#else
 wxRendererGeneric::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
                                          wxDC& dc,
                                          const wxRect& rect,
                                          int flags)
-#endif
 {
     wxBrush brush;
     if ( flags & wxCONTROL_SELECTED )
@@ -665,59 +656,11 @@ wxRendererGeneric::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
     }
 
     dc.SetBrush(brush);
-    if ((flags & wxCONTROL_CURRENT) && (flags & wxCONTROL_FOCUSED)
-#if defined( __WXMAC__ ) && !defined(__WXUNIVERSAL__)
-                && IsControlActive( (ControlRef)win->GetHandle() )
-#endif
-    )
-        dc.SetPen( *wxBLACK_PEN );
-    else
-        dc.SetPen( *wxTRANSPARENT_PEN );
+    dc.SetPen(flags & wxCONTROL_CURRENT ? *wxBLACK_PEN : *wxTRANSPARENT_PEN);
 
     dc.DrawRectangle( rect );
 }
 
-void
-wxRendererGeneric::DrawFocusRect(wxWindow* WXUNUSED(win), wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
-{
-    // draw the pixels manually because the "dots" in wxPen with wxDOT style
-    // may be short traits and not really dots
-    //
-    // note that to behave in the same manner as DrawRect(), we must exclude
-    // the bottom and right borders from the rectangle
-    wxCoord x1 = rect.GetLeft(),
-            y1 = rect.GetTop(),
-            x2 = rect.GetRight(),
-            y2 = rect.GetBottom();
-
-    dc.SetPen(m_penBlack);
-
-#ifdef __WXMAC__
-    dc.SetLogicalFunction(wxCOPY);
-#else
-    // this seems to be closer than what Windows does than wxINVERT although
-    // I'm still not sure if it's correct
-    dc.SetLogicalFunction(wxAND_REVERSE);
-#endif
-
-    wxCoord z;
-    for ( z = x1 + 1; z < x2; z += 2 )
-        dc.DrawPoint(z, rect.GetTop());
-
-    wxCoord shift = z == x2 ? 0 : 1;
-    for ( z = y1 + shift; z < y2; z += 2 )
-        dc.DrawPoint(x2, z);
-
-    shift = z == y2 ? 0 : 1;
-    for ( z = x2 - shift; z > x1; z -= 2 )
-        dc.DrawPoint(z, y2);
-
-    shift = z == x1 ? 0 : 1;
-    for ( z = y2 - shift; z > y1; z -= 2 )
-        dc.DrawPoint(x1, z);
-
-    dc.SetLogicalFunction(wxCOPY);
-}
 
 // ----------------------------------------------------------------------------
 // A module to allow cleanup of generic renderer.

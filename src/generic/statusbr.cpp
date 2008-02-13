@@ -23,11 +23,11 @@
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/dcclient.h"
-    #include "wx/toplevel.h"
 #endif
 
 #ifdef __WXGTK20__
     #include <gtk/gtk.h>
+    #include "wx/gtk/win_gtk.h"
 #endif
 
 // we only have to do it here when we use wxStatusBarGeneric in addition to the
@@ -190,23 +190,13 @@ void wxStatusBarGeneric::SetStatusWidths(int n, const int widths_field[])
     wxStatusBarBase::SetStatusWidths(n, widths_field);
 }
 
-bool wxStatusBarGeneric::ShowsSizeGrip() const
-{
-    if ( !HasFlag(wxST_SIZEGRIP) )
-        return false;
-
-    wxTopLevelWindow * const
-        tlw = wxDynamicCast(wxGetTopLevelParent(GetParent()), wxTopLevelWindow);
-    return tlw && !tlw->IsMaximized() && tlw->HasFlag(wxRESIZE_BORDER);
-}
-
 void wxStatusBarGeneric::OnPaint(wxPaintEvent& WXUNUSED(event) )
 {
     wxPaintDC dc(this);
 
 #ifdef __WXGTK20__
     // Draw grip first
-    if ( ShowsSizeGrip() )
+    if (HasFlag( wxST_SIZEGRIP ))
     {
         int width, height;
         GetClientSize(&width, &height);
@@ -214,7 +204,7 @@ void wxStatusBarGeneric::OnPaint(wxPaintEvent& WXUNUSED(event) )
         if (GetLayoutDirection() == wxLayout_RightToLeft)
         {
             gtk_paint_resize_grip( m_widget->style,
-                               GTKGetDrawingWindow(),
+                               GTK_PIZZA(m_wxwindow)->bin_window,
                                (GtkStateType) GTK_WIDGET_STATE (m_widget),
                                NULL,
                                m_widget,
@@ -225,7 +215,7 @@ void wxStatusBarGeneric::OnPaint(wxPaintEvent& WXUNUSED(event) )
         else
         {
             gtk_paint_resize_grip( m_widget->style,
-                               GTKGetDrawingWindow(),
+                               GTK_PIZZA(m_wxwindow)->bin_window,
                                (GtkStateType) GTK_WIDGET_STATE (m_widget),
                                NULL,
                                m_widget,
@@ -234,12 +224,19 @@ void wxStatusBarGeneric::OnPaint(wxPaintEvent& WXUNUSED(event) )
                                width-height-2, 2, height-2, height-4 );
         }
     }
-#endif // __WXGTK20__
+#endif
 
     if (GetFont().Ok())
         dc.SetFont(GetFont());
 
     dc.SetBackgroundMode(wxTRANSPARENT);
+
+#ifdef __WXPM__
+    wxColour vColor;
+
+    vColor = wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR);
+    ::WinFillRect(dc.m_hPS, &dc.m_vRclPaint, vColor.GetPixel());
+#endif
 
     for (int i = 0; i < m_nFields; i ++)
         DrawField(dc, i);
@@ -254,7 +251,7 @@ void wxStatusBarGeneric::DrawFieldText(wxDC& dc, int i)
 
     wxString text(GetStatusText(i));
 
-    wxCoord x = 0, y = 0;
+    long x = 0, y = 0;
 
     dc.GetTextExtent(text, &x, &y);
 
@@ -412,14 +409,14 @@ void wxStatusBarGeneric::OnLeftDown(wxMouseEvent& event)
     int width, height;
     GetClientSize(&width, &height);
 
-    if ( ShowsSizeGrip()  && (event.GetX() > width-height) )
+    if (HasFlag( wxST_SIZEGRIP ) && (event.GetX() > width-height))
     {
         GtkWidget *ancestor = gtk_widget_get_toplevel( m_widget );
 
         if (!GTK_IS_WINDOW (ancestor))
             return;
 
-        GdkWindow *source = GTKGetDrawingWindow();
+        GdkWindow *source = GTK_PIZZA(m_wxwindow)->bin_window;
 
         int org_x = 0;
         int org_y = 0;
@@ -459,14 +456,14 @@ void wxStatusBarGeneric::OnRightDown(wxMouseEvent& event)
     int width, height;
     GetClientSize(&width, &height);
 
-    if ( ShowsSizeGrip() && (event.GetX() > width-height) )
+    if (HasFlag( wxST_SIZEGRIP ) && (event.GetX() > width-height))
     {
         GtkWidget *ancestor = gtk_widget_get_toplevel( m_widget );
 
         if (!GTK_IS_WINDOW (ancestor))
             return;
 
-        GdkWindow *source = GTKGetDrawingWindow();
+        GdkWindow *source = GTK_PIZZA(m_wxwindow)->bin_window;
 
         int org_x = 0;
         int org_y = 0;

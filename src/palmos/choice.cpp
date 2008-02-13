@@ -85,7 +85,7 @@ wxEND_HANDLERS_TABLE()
 
 wxCONSTRUCTOR_4( wxChoice , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size )
 #else
-IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControlWithItems)
+IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
 #endif
 
 // ============================================================================
@@ -150,19 +150,21 @@ wxChoice::~wxChoice()
 // adding/deleting items to/from the list
 // ----------------------------------------------------------------------------
 
-int wxChoice::DoInsertItems(const wxArrayStringsAdapter& items,
-                            unsigned int pos,
-                            void **clientData,
-                            wxClientDataType type)
+int wxChoice::DoAppend(const wxString& item)
 {
     return 0;
 }
 
-void wxChoice::DoDeleteOneItem(unsigned int n)
+int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+{
+    return 0;
+}
+
+void wxChoice::Delete(unsigned int n)
 {
 }
 
-void wxChoice::DoClear()
+void wxChoice::Clear()
 {
 }
 
@@ -212,6 +214,15 @@ void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
 void* wxChoice::DoGetItemClientData(unsigned int n) const
 {
     return (void *)NULL;
+}
+
+void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData )
+{
+}
+
+wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData *)DoGetItemClientData(n);
 }
 
 // ----------------------------------------------------------------------------

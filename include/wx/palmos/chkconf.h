@@ -14,6 +14,10 @@
 #ifndef _WX_PALMOS_CHKCONF_H_
 #define _WX_PALMOS_CHKCONF_H_
 
+#if WXWIN_COMPATIBILITY_2_4
+    #error "wxPalmOS port was introduced after 2.4.X"
+#endif
+
 /*
  * disable the settings which are not implemented yet
  */
@@ -149,9 +153,6 @@
 
 #undef wxUSE_ICO_CUR
 #define wxUSE_ICO_CUR 0
-
-#undef wxUSE_SVG
-#define wxUSE_SVG 0
 
 #undef wxUSE_INTL
 #define wxUSE_INTL 0
@@ -306,8 +307,8 @@
 #undef wxUSE_URL
 #define wxUSE_URL 0
 
-//#undef wxUSE_WCHAR_T
-//#define wxUSE_WCHAR_T 1
+#undef wxUSE_WCHAR_T
+#define wxUSE_WCHAR_T 0
 
 #undef wxUSE_WIZARDDLG
 #define wxUSE_WIZARDDLG 0
@@ -326,12 +327,6 @@
 
 #undef wxUSE_ZLIB
 #define wxUSE_ZLIB 0
-
-#undef wxUSE_COLLPANE
-#define wxUSE_COLLPANE 0
-
-#undef wxUSE_TOOLBOOK
-#define wxUSE_TOOLBOOK 0
 
 #endif
     /* _WX_PALMOS_CHKCONF_H_ */

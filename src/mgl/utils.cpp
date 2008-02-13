@@ -24,7 +24,6 @@
 
 #include "wx/apptrait.h"
 #include "wx/process.h"
-#include "wx/evtloop.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -122,12 +121,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
 
     return wxPORT_MGL;
 }
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
-}
-
 
 void wxGetMousePosition(int* x, int* y)
 {

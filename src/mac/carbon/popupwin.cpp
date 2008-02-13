@@ -51,7 +51,7 @@ wxPopupWindow::~wxPopupWindow()
     }
 }
 
-bool wxPopupWindow::Create(wxWindow *parent, int WXUNUSED(flags))
+bool wxPopupWindow::Create(wxWindow *parent, int flags)
 {
     m_macIsUserPane = false ;
 
@@ -63,23 +63,21 @@ bool wxPopupWindow::Create(wxWindow *parent, int WXUNUSED(flags))
 
     WindowClass wclass = kHelpWindowClass;
     WindowAttributes attr = kWindowCompositingAttribute ;
+    WindowRef parentWindow =(WindowRef) parent->MacGetTopLevelWindowRef();
 
     Rect bounds = { 0,0,0,0 };
     OSStatus err = ::CreateNewWindow( wclass , attr , &bounds , (WindowRef*)&m_popupWindowRef ) ;
     if ( err == noErr )
     {
-#if 0
-        WindowRef parentWindow =(WindowRef) parent->MacGetTopLevelWindowRef();
-        SetWindowGroup( (WindowRef) m_popupWindowRef, GetWindowGroup(parentWindow));    //  Put them in the same group so that their window layers are consistent
-#endif
-}
-
+//        SetWindowGroup( (WindowRef) m_popupWindowRef, GetWindowGroup(parentWindow));    //  Put them in the same group so that their window layers are consistent
+    }
+    
     m_peer = new wxMacControl(this , true /*isRootControl*/) ;
 
     HIViewFindByID( HIViewGetRoot( (WindowRef) m_popupWindowRef ) , kHIViewWindowContentID ,
         m_peer->GetControlRefAddr() ) ;
     if ( !m_peer->Ok() )
-{
+    {
         // compatibility mode fallback
         GetRootControl( (WindowRef) m_popupWindowRef , m_peer->GetControlRefAddr() ) ;
         if ( !m_peer->Ok() )
@@ -107,7 +105,7 @@ void wxPopupWindow::DoMoveWindow(int x, int y, int width, int height)
 }
 
 void wxPopupWindow::DoGetPosition( int *x, int *y ) const
-    {
+{
     Rect bounds ;
 
     verify_noerr(GetWindowBounds((WindowRef) m_popupWindowRef, kWindowStructureRgn , &bounds )) ;
@@ -116,7 +114,7 @@ void wxPopupWindow::DoGetPosition( int *x, int *y ) const
        *x = bounds.left ;
     if (y)
        *y = bounds.top ;
-    }
+}
 
 void wxPopupWindow::DoGetSize( int *width, int *height ) const
 {
@@ -147,7 +145,7 @@ bool wxPopupWindow::Show(bool show)
     if ( !wxWindowMac::Show(show) )
         return false;
 
-    if ( show )
+    if (show)
     {
         ::ShowWindow( (WindowRef)m_popupWindowRef );
         ::SelectWindow( (WindowRef)m_popupWindowRef ) ;
@@ -155,10 +153,10 @@ bool wxPopupWindow::Show(bool show)
         // because apps expect a size event to occur at this moment
         wxSizeEvent event(GetSize() , m_windowId);
         event.SetEventObject(this);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
     }
     else
-        {
+    {
         ::HideWindow( (WindowRef)m_popupWindowRef );
     }
     return true;

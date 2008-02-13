@@ -21,12 +21,13 @@
 
 #include "wx/scrolwin.h"
 #include "wx/arrstr.h"
+#include "wx/datetime.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+class WXDLLIMPEXP_CORE wxTextCtrl;
 
 //-----------------------------------------------------------------------------
 // helpers
@@ -203,6 +204,9 @@ public:
     bool SetBackgroundColour(const wxColour& colour);
 
     void SetModified() { m_modified = true; }
+
+    virtual void Freeze();
+    virtual void Thaw();
 
     // textctrl specific scrolling
     virtual bool ScrollLines(int lines);

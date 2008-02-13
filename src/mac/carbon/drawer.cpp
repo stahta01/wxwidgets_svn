@@ -16,7 +16,7 @@
 
 #include "wx/mac/private.h"
 
-#if defined( __WXMAC__ )
+#if defined( __WXMAC__ ) && TARGET_API_MAC_OSX && ( MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_2 )
 
 #include "wx/mac/carbon/drawer.h"
 
@@ -79,8 +79,9 @@ bool wxDrawerWindow::Create(wxWindow *parent,
     if (success)
     {
         // Use drawer brush.
-        SetBackgroundColour( wxColour( wxMacCreateCGColorFromHITheme( kThemeBrushDrawerBackground ) ) );
-        ::SetThemeWindowBackground((WindowRef)m_macWindow, kThemeBrushDrawerBackground, false);
+        m_macBackgroundBrush.MacSetTheme(kThemeBrushDrawerBackground);
+        ::SetThemeWindowBackground((WindowRef)m_macWindow,
+         m_macBackgroundBrush.MacGetTheme(), false);
          
         // Leading and trailing offset are gaps from parent window edges
         // to where the drawer starts.
@@ -196,4 +197,5 @@ wxDirection WindowEdgeToDirection(OptionBits edge)
     return direction;
 }
 
-#endif // defined( __WXMAC__ ) 
+#endif // defined( __WXMAC__ ) && TARGET_API_MAC_OSX && ( MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_2 )
+

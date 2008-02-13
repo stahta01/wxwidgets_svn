@@ -231,7 +231,7 @@ bool wxScrollBar::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
     event.SetPosition(position);
     event.SetEventObject( this );
 
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 void wxScrollBar::SetThumbPosition(int viewStart)

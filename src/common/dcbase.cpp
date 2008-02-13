@@ -25,613 +25,48 @@
 #endif
 
 #include "wx/dc.h"
-#include "wx/dcclient.h"
-#include "wx/dcmemory.h"
-#include "wx/dcscreen.h"
-#include "wx/dcprint.h"
-#include "wx/prntbase.h"
+#include "wx/dcbuffer.h" // for IMPLEMENT_DYNAMIC_CLASS
 
 #ifndef WX_PRECOMP
     #include "wx/math.h"
-    #include "wx/module.h"
 #endif
 
-#ifdef __WXMSW__
-    #include "wx/msw/dcclient.h"
-    #include "wx/msw/dcmemory.h"
-    #include "wx/msw/dcscreen.h"
-#endif
+// bool wxDCBase::sm_cacheing = false;
 
-#ifdef __WXGTK20__
-    #include "wx/gtk/dcclient.h"
-    #include "wx/gtk/dcmemory.h"
-    #include "wx/gtk/dcscreen.h"
-#elif defined(__WXGTK__)
-    #include "wx/gtk1/dcclient.h"
-    #include "wx/gtk1/dcmemory.h"
-    #include "wx/gtk1/dcscreen.h"
-#endif
+IMPLEMENT_ABSTRACT_CLASS(wxDCBase, wxObject)
 
-#ifdef __WXMAC__
-    #include "wx/mac/dcclient.h"
-    #include "wx/mac/dcmemory.h"
-    #include "wx/mac/dcscreen.h"
-#endif
+// ============================================================================
+// implementation
+// ============================================================================
 
-#ifdef __WXPM__
-    #include "wx/os2/dcclient.h"
-    #include "wx/os2/dcmemory.h"
-    #include "wx/os2/dcscreen.h"
-#endif
+IMPLEMENT_DYNAMIC_CLASS(wxBufferedDC, wxMemoryDC)
+IMPLEMENT_ABSTRACT_CLASS(wxBufferedPaintDC, wxBufferedDC)
 
-#ifdef __WXCOCOA__
-    #include "wx/cocoa/dcclient.h"
-    #include "wx/cocoa/dcmemory.h"
-    #include "wx/cocoa/dcscreen.h"
-#endif
-
-#ifdef __WXMOTIF__
-    #include "wx/motif/dcclient.h"
-    #include "wx/motif/dcmemory.h"
-    #include "wx/motif/dcscreen.h"
-#endif
-
-#ifdef __WXX11__
-    #include "wx/x11/dcclient.h"
-    #include "wx/x11/dcmemory.h"
-    #include "wx/x11/dcscreen.h"
-#endif
-
-#ifdef __WXDFB__
-    #include "wx/dfb/dcclient.h"
-    #include "wx/dfb/dcmemory.h"
-    #include "wx/dfb/dcscreen.h"
-#endif
-
-#ifdef __WXPALMOS__
-    #include "wx/palmos/dcclient.h"
-    #include "wx/palmos/dcmemory.h"
-    #include "wx/palmos/dcscreen.h"
-#endif
-
-//----------------------------------------------------------------------------
-// wxDCFactory
-//----------------------------------------------------------------------------
-
-wxDCFactory *wxDCFactory::m_factory = NULL;
-
-void wxDCFactory::Set(wxDCFactory *factory)
-{
-    delete m_factory;
-
-    m_factory = factory;
-}
-
-wxDCFactory *wxDCFactory::Get()
-{
-    if ( !m_factory )
-        m_factory = new wxNativeDCFactory;
-
-    return m_factory;
-}
-
-class wxDCFactoryCleanupModule : public wxModule
-{
-public:
-    virtual bool OnInit() { return true; }
-    virtual void OnExit() { wxDCFactory::Set(NULL); }
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxDCFactoryCleanupModule)
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxDCFactoryCleanupModule, wxModule)
-
-//-----------------------------------------------------------------------------
-// wxNativeDCFactory
-//-----------------------------------------------------------------------------
-
-wxDCImpl* wxNativeDCFactory::CreateWindowDC( wxWindowDC *owner )
-{
-    return new wxWindowDCImpl( owner );
-}
-
-wxDCImpl* wxNativeDCFactory::CreateWindowDC( wxWindowDC *owner, wxWindow *window )
-{
-    return new wxWindowDCImpl( owner, window );
-}
-
-wxDCImpl* wxNativeDCFactory::CreateClientDC( wxClientDC *owner )
-{
-    return new wxClientDCImpl( owner );
-}
-
-wxDCImpl* wxNativeDCFactory::CreateClientDC( wxClientDC *owner, wxWindow *window )
-{
-    return new wxClientDCImpl( owner, window );
-}
-
-wxDCImpl* wxNativeDCFactory::CreatePaintDC( wxPaintDC *owner )
-{
-    return new wxPaintDCImpl( owner );
-}
-
-wxDCImpl* wxNativeDCFactory::CreatePaintDC( wxPaintDC *owner, wxWindow *window )
-{
-    return new wxPaintDCImpl( owner, window );
-}
-
-wxDCImpl* wxNativeDCFactory::CreateMemoryDC( wxMemoryDC *owner )
-{
-    return new wxMemoryDCImpl( owner );
-}
-
-wxDCImpl* wxNativeDCFactory::CreateMemoryDC( wxMemoryDC *owner, wxBitmap &bitmap )
-{
-    return new wxMemoryDCImpl( owner, bitmap );
-}
-
-wxDCImpl* wxNativeDCFactory::CreateMemoryDC( wxMemoryDC *owner, wxDC *dc )
-{
-    return new wxMemoryDCImpl( owner, dc );
-}
-
-wxDCImpl* wxNativeDCFactory::CreateScreenDC( wxScreenDC *owner )
-{
-    return new wxScreenDCImpl( owner );
-}
-
-#if wxUSE_PRINTING_ARCHITECTURE
-wxDCImpl *wxNativeDCFactory::CreatePrinterDC( wxPrinterDC *owner, const wxPrintData &data )
-{
-    wxPrintFactory *factory = wxPrintFactory::GetFactory();
-    return factory->CreatePrinterDCImpl( owner, data );
-}
-#endif
-
-//-----------------------------------------------------------------------------
-// wxWindowDC
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxWindowDC, wxDC)
-
-wxWindowDC::wxWindowDC(wxWindow *win)
-          : wxDC(wxDCFactory::Get()->CreateWindowDC(this, win))
+#if WXWIN_COMPATIBILITY_2_6
+void wxDCBase::BeginDrawing()
 {
 }
 
-//-----------------------------------------------------------------------------
-// wxClientDC
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxClientDC, wxWindowDC)
-
-wxClientDC::wxClientDC(wxWindow *win)
-          : wxWindowDC(wxDCFactory::Get()->CreateClientDC(this, win))
+void wxDCBase::EndDrawing()
 {
 }
-
-//-----------------------------------------------------------------------------
-// wxMemoryDC
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC, wxDC)
-
-wxMemoryDC::wxMemoryDC()
-          : wxDC(wxDCFactory::Get()->CreateMemoryDC(this))
-{
-}
-
-wxMemoryDC::wxMemoryDC(wxBitmap& bitmap)
-          : wxDC(wxDCFactory::Get()->CreateMemoryDC(this, bitmap))
-{
-}
-
-wxMemoryDC::wxMemoryDC(wxDC *dc)
-          : wxDC(wxDCFactory::Get()->CreateMemoryDC(this, dc))
-{
-}
-
-void wxMemoryDC::SelectObject(wxBitmap& bmp)
-{
-    // make sure that the given wxBitmap is not sharing its data with other
-    // wxBitmap instances as its contents will be modified by any drawing
-    // operation done on this DC
-    if (bmp.IsOk())
-        bmp.UnShare();
-
-    GetImpl()->DoSelect(bmp);
-}
-
-void wxMemoryDC::SelectObjectAsSource(const wxBitmap& bmp)
-{
-    GetImpl()->DoSelect(bmp);
-}
-
-const wxBitmap& wxMemoryDC::GetSelectedBitmap() const
-{
-    return GetImpl()->GetSelectedBitmap();
-}
-
-wxBitmap& wxMemoryDC::GetSelectedBitmap()
-{
-    return GetImpl()->GetSelectedBitmap();
-}
-
-
-//-----------------------------------------------------------------------------
-// wxPaintDC
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxPaintDC, wxClientDC)
-
-wxPaintDC::wxPaintDC(wxWindow *win)
-         : wxClientDC(wxDCFactory::Get()->CreatePaintDC(this, win))
-{
-}
-
-//-----------------------------------------------------------------------------
-// wxScreenDC
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
-
-wxScreenDC::wxScreenDC()
-          : wxDC(wxDCFactory::Get()->CreateScreenDC(this))
-{
-}
-
-//-----------------------------------------------------------------------------
-// wxPrinterDC
-//-----------------------------------------------------------------------------
-
-#if wxUSE_PRINTING_ARCHITECTURE
-
-IMPLEMENT_DYNAMIC_CLASS(wxPrinterDC, wxDC)
-
-wxPrinterDC::wxPrinterDC()
-           : wxDC(wxDCFactory::Get()->CreatePrinterDC(this, wxPrintData()))
-{
-}
-
-wxPrinterDC::wxPrinterDC(const wxPrintData& data)
-           : wxDC(wxDCFactory::Get()->CreatePrinterDC(this, data))
-{
-}
-
-wxRect wxPrinterDC::GetPaperRect()
-{
-    return GetImpl()->GetPaperRect();
-}
-
-int wxPrinterDC::GetResolution()
-{
-    return GetImpl()->GetResolution();
-}
-
-#endif // wxUSE_PRINTING_ARCHITECTURE
-
-//-----------------------------------------------------------------------------
-// wxDCImpl
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxDCImpl, wxObject)
-
-wxDCImpl::wxDCImpl( wxDC *owner )
-        : m_window(NULL)
-        , m_colour(wxColourDisplay())
-        , m_ok(true)
-        , m_clipping(false)
-        , m_isInteractive(0)
-        , m_isBBoxValid(false)
-        , m_logicalOriginX(0), m_logicalOriginY(0)
-        , m_deviceOriginX(0), m_deviceOriginY(0)
-        , m_deviceLocalOriginX(0), m_deviceLocalOriginY(0)
-        , m_logicalScaleX(1.0), m_logicalScaleY(1.0)
-        , m_userScaleX(1.0), m_userScaleY(1.0)
-        , m_scaleX(1.0), m_scaleY(1.0)
-        , m_signX(1), m_signY(1)
-        , m_minX(0), m_minY(0), m_maxX(0), m_maxY(0)
-        , m_clipX1(0), m_clipY1(0), m_clipX2(0), m_clipY2(0)
-        , m_logicalFunction(wxCOPY)
-        , m_backgroundMode(wxTRANSPARENT)
-        , m_mappingMode(wxMM_TEXT)
-        , m_pen()
-        , m_brush()
-        , m_backgroundBrush()
-        , m_textForegroundColour(*wxBLACK)
-        , m_textBackgroundColour(*wxWHITE)
-        , m_font()
-#if wxUSE_PALETTE
-        , m_palette()
-        , m_hasCustomPalette(false)
-#endif // wxUSE_PALETTE
-{
-    m_owner = owner;
-
-    m_mm_to_pix_x = (double)wxGetDisplaySize().GetWidth() /
-                    (double)wxGetDisplaySizeMM().GetWidth();
-    m_mm_to_pix_y = (double)wxGetDisplaySize().GetHeight() /
-                    (double)wxGetDisplaySizeMM().GetHeight();
-
-    ResetBoundingBox();
-    ResetClipping();
-}
-
-wxDCImpl::~wxDCImpl()
-{
-}
+#endif // WXWIN_COMPATIBILITY_2_6
 
 // ----------------------------------------------------------------------------
-// coordinate conversions and transforms
+// special symbols
 // ----------------------------------------------------------------------------
 
-wxCoord wxDCImpl::DeviceToLogicalX(wxCoord x) const
-{
-    return wxRound((double)(x - m_deviceOriginX - m_deviceLocalOriginX) / m_scaleX) * m_signX + m_logicalOriginX;
-}
-
-wxCoord wxDCImpl::DeviceToLogicalY(wxCoord y) const
-{
-    return wxRound((double)(y - m_deviceOriginY - m_deviceLocalOriginY) / m_scaleY) * m_signY + m_logicalOriginY;
-}
-
-wxCoord wxDCImpl::DeviceToLogicalXRel(wxCoord x) const
-{
-    return wxRound((double)(x) / m_scaleX);
-}
-
-wxCoord wxDCImpl::DeviceToLogicalYRel(wxCoord y) const
-{
-    return wxRound((double)(y) / m_scaleY);
-}
-
-wxCoord wxDCImpl::LogicalToDeviceX(wxCoord x) const
-{
-    return wxRound((double)(x - m_logicalOriginX) * m_scaleX) * m_signX + m_deviceOriginX * m_signY + m_deviceLocalOriginX;
-}
-
-wxCoord wxDCImpl::LogicalToDeviceY(wxCoord y) const
-{
-    return wxRound((double)(y - m_logicalOriginY) * m_scaleY) * m_signY + m_deviceOriginY * m_signY + m_deviceLocalOriginY;
-}
-
-wxCoord wxDCImpl::LogicalToDeviceXRel(wxCoord x) const
-{
-    return wxRound((double)(x) * m_scaleX);
-}
-
-wxCoord wxDCImpl::LogicalToDeviceYRel(wxCoord y) const
-{
-    return wxRound((double)(y) * m_scaleY);
-}
-
-void wxDCImpl::ComputeScaleAndOrigin()
-{
-    m_scaleX = m_logicalScaleX * m_userScaleX;
-    m_scaleY = m_logicalScaleY * m_userScaleY;
-}
-
-void wxDCImpl::SetMapMode( int mode )
-{
-    switch (mode)
-    {
-        case wxMM_TWIPS:
-          SetLogicalScale( twips2mm*m_mm_to_pix_x, twips2mm*m_mm_to_pix_y );
-          break;
-        case wxMM_POINTS:
-          SetLogicalScale( pt2mm*m_mm_to_pix_x, pt2mm*m_mm_to_pix_y );
-          break;
-        case wxMM_METRIC:
-          SetLogicalScale( m_mm_to_pix_x, m_mm_to_pix_y );
-          break;
-        case wxMM_LOMETRIC:
-          SetLogicalScale( m_mm_to_pix_x/10.0, m_mm_to_pix_y/10.0 );
-          break;
-        default:
-        case wxMM_TEXT:
-          SetLogicalScale( 1.0, 1.0 );
-          break;
-    }
-    m_mappingMode = mode;
-}
-
-void wxDCImpl::SetUserScale( double x, double y )
-{
-    // allow negative ? -> no
-    m_userScaleX = x;
-    m_userScaleY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCImpl::SetLogicalScale( double x, double y )
-{
-    // allow negative ?
-    m_logicalScaleX = x;
-    m_logicalScaleY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCImpl::SetLogicalOrigin( wxCoord x, wxCoord y )
-{
-    m_logicalOriginX = x * m_signX;
-    m_logicalOriginY = y * m_signY;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCImpl::SetDeviceOrigin( wxCoord x, wxCoord y )
-{
-    m_deviceOriginX = x;
-    m_deviceOriginY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCImpl::SetDeviceLocalOrigin( wxCoord x, wxCoord y )
-{
-    m_deviceLocalOriginX = x;
-    m_deviceLocalOriginY = y;
-    ComputeScaleAndOrigin();
-}
-
-void wxDCImpl::SetAxisOrientation( bool xLeftRight, bool yBottomUp )
-{
-    // only wxPostScripDC has m_signX = -1, we override SetAxisOrientation there
-    // wxWidgets 2.9: no longer override it
-    m_signX = (xLeftRight ?  1 : -1);
-    m_signY = (yBottomUp  ? -1 :  1);
-    ComputeScaleAndOrigin();
-}
-
-
-// Each element of the widths array will be the width of the string up to and
-// including the corresponding character in text.  This is the generic
-// implementation, the port-specific classes should do this with native APIs
-// if available and if faster.  Note: pango_layout_index_to_pos is much slower
-// than calling GetTextExtent!!
-
-#define FWC_SIZE 256
-
-class FontWidthCache
-{
-public:
-    FontWidthCache() : m_scaleX(1), m_widths(NULL) { }
-    ~FontWidthCache() { delete []m_widths; }
-
-    void Reset()
-    {
-        if (!m_widths)
-            m_widths = new int[FWC_SIZE];
-
-        memset(m_widths, 0, sizeof(int)*FWC_SIZE);
-    }
-
-    wxFont m_font;
-    double m_scaleX;
-    int *m_widths;
-};
-
-static FontWidthCache s_fontWidthCache;
-
-bool wxDCImpl::DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const
-{
-    int totalWidth = 0;
-
-    const size_t len = text.length();
-    widths.Empty();
-    widths.Add(0, len);
-
-    // reset the cache if font or horizontal scale have changed
-    if ( !s_fontWidthCache.m_widths ||
-         !wxIsSameDouble(s_fontWidthCache.m_scaleX, m_scaleX) ||
-         (s_fontWidthCache.m_font != GetFont()) )
-    {
-        s_fontWidthCache.Reset();
-        s_fontWidthCache.m_font = GetFont();
-        s_fontWidthCache.m_scaleX = m_scaleX;
-    }
-
-    // Calculate the position of each character based on the widths of
-    // the previous characters
-    int w, h;
-    for ( size_t i = 0; i < len; i++ )
-    {
-        const wxChar c = text[i];
-        unsigned int c_int = (unsigned int)c;
-
-        if ((c_int < FWC_SIZE) && (s_fontWidthCache.m_widths[c_int] != 0))
-        {
-            w = s_fontWidthCache.m_widths[c_int];
-        }
-        else
-        {
-            DoGetTextExtent(c, &w, &h);
-            if (c_int < FWC_SIZE)
-                s_fontWidthCache.m_widths[c_int] = w;
-        }
-
-        totalWidth += w;
-        widths[i] = totalWidth;
-    }
-
-    return true;
-}
-
-void wxDCImpl::GetMultiLineTextExtent(const wxString& text,
-                                      wxCoord *x,
-                                      wxCoord *y,
-                                      wxCoord *h,
-                                      const wxFont *font) const
-{
-    wxCoord widthTextMax = 0, widthLine,
-            heightTextTotal = 0, heightLineDefault = 0, heightLine = 0;
-
-    wxString curLine;
-    for ( wxString::const_iterator pc = text.begin(); ; ++pc )
-    {
-        if ( pc == text.end() || *pc == _T('\n') )
-        {
-            if ( curLine.empty() )
-            {
-                // we can't use GetTextExtent - it will return 0 for both width
-                // and height and an empty line should count in height
-                // calculation
-
-                // assume that this line has the same height as the previous
-                // one
-                if ( !heightLineDefault )
-                    heightLineDefault = heightLine;
-
-                if ( !heightLineDefault )
-                {
-                    // but we don't know it yet - choose something reasonable
-                    DoGetTextExtent(_T("W"), NULL, &heightLineDefault,
-                                  NULL, NULL, font);
-                }
-
-                heightTextTotal += heightLineDefault;
-            }
-            else
-            {
-                DoGetTextExtent(curLine, &widthLine, &heightLine,
-                              NULL, NULL, font);
-                if ( widthLine > widthTextMax )
-                    widthTextMax = widthLine;
-                heightTextTotal += heightLine;
-            }
-
-            if ( pc == text.end() )
-            {
-               break;
-            }
-            else // '\n'
-            {
-               curLine.clear();
-            }
-        }
-        else
-        {
-            curLine += *pc;
-        }
-    }
-
-    if ( x )
-        *x = widthTextMax;
-    if ( y )
-        *y = heightTextTotal;
-    if ( h )
-        *h = heightLine;
-}
-
-void wxDCImpl::DoDrawCheckMark(wxCoord x1, wxCoord y1,
+void wxDCBase::DoDrawCheckMark(wxCoord x1, wxCoord y1,
                                wxCoord width, wxCoord height)
 {
-    wxCHECK_RET( IsOk(), wxT("invalid window dc") );
+    wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
     wxCoord x2 = x1 + width,
             y2 = y1 + height;
 
     // the pen width is calibrated to give 3 for width == height == 10
-    wxDCPenChanger pen( *m_owner, wxPen(GetTextForeground(), (width + height + 1)/7));
+    wxDCPenChanger pen((wxDC&)*this,
+                        wxPen(GetTextForeground(), (width + height + 1)/7));
 
     // we're drawing a scaled version of wx/generic/tick.xpm here
     wxCoord x3 = x1 + (4*width) / 10,   // x of the tick bottom
@@ -643,47 +78,19 @@ void wxDCImpl::DoDrawCheckMark(wxCoord x1, wxCoord y1,
     CalcBoundingBox(x2, y2);
 }
 
-bool
-wxDCImpl::DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                        wxCoord dstWidth, wxCoord dstHeight,
-                        wxDC *source,
-                        wxCoord xsrc, wxCoord ysrc,
-                        wxCoord srcWidth, wxCoord srcHeight,
-                        int rop,
-                        bool useMask,
-                        wxCoord xsrcMask,
-                        wxCoord ysrcMask)
-{
-    wxCHECK_MSG( srcWidth && srcHeight && dstWidth && dstHeight, false,
-                 _T("invalid blit size") );
+// ----------------------------------------------------------------------------
+// line/polygons
+// ----------------------------------------------------------------------------
 
-    // emulate the stretching by modifying the DC scale
-    double xscale = (double)srcWidth/dstWidth,
-           yscale = (double)srcHeight/dstHeight;
-
-    double xscaleOld, yscaleOld;
-    GetUserScale(&xscaleOld, &yscaleOld);
-    SetUserScale(xscaleOld/xscale, yscaleOld/yscale);
-
-    bool rc = DoBlit(wxCoord(xdest*xscale), wxCoord(ydest*yscale),
-                     wxCoord(dstWidth*xscale), wxCoord(dstHeight*yscale),
-                     source,
-                     xsrc, ysrc, rop, useMask, xsrcMask, ysrcMask);
-
-    SetUserScale(xscaleOld, yscaleOld);
-
-    return rc;
-}
-
-void wxDCImpl::DrawLines(const wxPointList *list, wxCoord xoffset, wxCoord yoffset)
+void wxDCBase::DrawLines(const wxList *list, wxCoord xoffset, wxCoord yoffset)
 {
     int n = list->GetCount();
     wxPoint *points = new wxPoint[n];
 
     int i = 0;
-    for ( wxPointList::compatibility_iterator node = list->GetFirst(); node; node = node->GetNext(), i++ )
+    for ( wxList::compatibility_iterator node = list->GetFirst(); node; node = node->GetNext(), i++ )
     {
-        wxPoint *point = node->GetData();
+        wxPoint *point = (wxPoint *)node->GetData();
         points[i].x = point->x;
         points[i].y = point->y;
     }
@@ -693,7 +100,8 @@ void wxDCImpl::DrawLines(const wxPointList *list, wxCoord xoffset, wxCoord yoffs
     delete [] points;
 }
 
-void wxDCImpl::DrawPolygon(const wxPointList *list,
+
+void wxDCBase::DrawPolygon(const wxList *list,
                            wxCoord xoffset, wxCoord yoffset,
                            int fillStyle)
 {
@@ -701,9 +109,9 @@ void wxDCImpl::DrawPolygon(const wxPointList *list,
     wxPoint *points = new wxPoint[n];
 
     int i = 0;
-    for ( wxPointList::compatibility_iterator node = list->GetFirst(); node; node = node->GetNext(), i++ )
+    for ( wxList::compatibility_iterator node = list->GetFirst(); node; node = node->GetNext(), i++ )
     {
-        wxPoint *point = node->GetData();
+        wxPoint *point = (wxPoint *)node->GetData();
         points[i].x = point->x;
         points[i].y = point->y;
     }
@@ -714,7 +122,7 @@ void wxDCImpl::DrawPolygon(const wxPointList *list,
 }
 
 void
-wxDCImpl::DoDrawPolyPolygon(int n,
+wxDCBase::DoDrawPolyPolygon(int n,
                             int count[],
                             wxPoint points[],
                             wxCoord xoffset, wxCoord yoffset,
@@ -756,40 +164,47 @@ wxDCImpl::DoDrawPolyPolygon(int n,
     delete[] pts;
 }
 
+// ----------------------------------------------------------------------------
+// splines
+// ----------------------------------------------------------------------------
+
 #if wxUSE_SPLINES
 
-void wxDCImpl::DoDrawSpline(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, wxCoord x3, wxCoord y3)
+// TODO: this API needs fixing (wxPointList, why (!const) "wxList *"?)
+void wxDCBase::DrawSpline(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2, wxCoord x3, wxCoord y3)
 {
-    wxPointList point_list;
+    wxList point_list;
 
     wxPoint *point1 = new wxPoint;
     point1->x = x1; point1->y = y1;
-    point_list.Append( point1 );
+    point_list.Append((wxObject*)point1);
 
     wxPoint *point2 = new wxPoint;
     point2->x = x2; point2->y = y2;
-    point_list.Append( point2 );
+    point_list.Append((wxObject*)point2);
 
     wxPoint *point3 = new wxPoint;
     point3->x = x3; point3->y = y3;
-    point_list.Append( point3 );
+    point_list.Append((wxObject*)point3);
 
-    DoDrawSpline(&point_list);
+    DrawSpline(&point_list);
 
-    for( wxPointList::compatibility_iterator node = point_list.GetFirst(); node; node = node->GetNext() )
+    for( wxList::compatibility_iterator node = point_list.GetFirst(); node; node = node->GetNext() )
     {
-        wxPoint *p = node->GetData();
+        wxPoint *p = (wxPoint *)node->GetData();
         delete p;
     }
 }
 
-void wxDCImpl::DoDrawSpline(int n, wxPoint points[])
+void wxDCBase::DrawSpline(int n, wxPoint points[])
 {
-    wxPointList list;
+    wxList list;
     for (int i =0; i < n; i++)
-        list.Append( &points[i] );
+    {
+        list.Append((wxObject*)&points[i]);
+    }
 
-    DoDrawSpline(&list);
+    DrawSpline(&list);
 }
 
 // ----------------------------------- spline code ----------------------------------------
@@ -802,9 +217,9 @@ int wx_spline_pop(double *x1, double *y1, double *x2, double *y2, double *x3,
 void wx_spline_push(double x1, double y1, double x2, double y2, double x3, double y3,
           double x4, double y4);
 static bool wx_spline_add_point(double x, double y);
-static void wx_spline_draw_point_array(wxDC *dc);
+static void wx_spline_draw_point_array(wxDCBase *dc);
 
-wxPointList wx_spline_point_list;
+wxList wx_spline_point_list;
 
 #define                half(z1, z2)        ((z1+z2)/2.0)
 #define                THRESHOLD        5
@@ -887,33 +302,35 @@ int wx_spline_pop(double *x1, double *y1, double *x2, double *y2,
 
 static bool wx_spline_add_point(double x, double y)
 {
-    wxPoint *point = new wxPoint( wxRound(x), wxRound(y) );
-    wx_spline_point_list.Append(point );
-    return true;
+  wxPoint *point = new wxPoint ;
+  point->x = (int) x;
+  point->y = (int) y;
+  wx_spline_point_list.Append((wxObject*)point);
+  return true;
 }
 
-static void wx_spline_draw_point_array(wxDC *dc)
+static void wx_spline_draw_point_array(wxDCBase *dc)
 {
-    dc->DrawLines(&wx_spline_point_list, 0, 0 );
-    wxPointList::compatibility_iterator node = wx_spline_point_list.GetFirst();
-    while (node)
-    {
-        wxPoint *point = node->GetData();
-        delete point;
-        wx_spline_point_list.Erase(node);
-        node = wx_spline_point_list.GetFirst();
-    }
+  dc->DrawLines(&wx_spline_point_list, 0, 0 );
+  wxList::compatibility_iterator node = wx_spline_point_list.GetFirst();
+  while (node)
+  {
+    wxPoint *point = (wxPoint *)node->GetData();
+    delete point;
+    wx_spline_point_list.Erase(node);
+    node = wx_spline_point_list.GetFirst();
+  }
 }
 
-void wxDCImpl::DoDrawSpline( const wxPointList *points )
+void wxDCBase::DoDrawSpline( wxList *points )
 {
-    wxCHECK_RET( IsOk(), wxT("invalid window dc") );
+    wxCHECK_RET( Ok(), wxT("invalid window dc") );
 
     wxPoint *p;
     double           cx1, cy1, cx2, cy2, cx3, cy3, cx4, cy4;
     double           x1, y1, x2, y2;
 
-    wxPointList::compatibility_iterator node = points->GetFirst();
+    wxList::compatibility_iterator node = points->GetFirst();
     if (!node)
         // empty list
         return;
@@ -924,7 +341,7 @@ void wxDCImpl::DoDrawSpline( const wxPointList *points )
     y1 = p->y;
 
     node = node->GetNext();
-    p = node->GetData();
+    p = (wxPoint *)node->GetData();
 
     x2 = p->x;
     y2 = p->y;
@@ -941,7 +358,7 @@ void wxDCImpl::DoDrawSpline( const wxPointList *points )
 #endif // !wxUSE_STL
           )
     {
-        p = node->GetData();
+        p = (wxPoint *)node->GetData();
         x1 = x2;
         y1 = y2;
         x2 = p->x;
@@ -962,175 +379,162 @@ void wxDCImpl::DoDrawSpline( const wxPointList *points )
     wx_spline_add_point( cx1, cy1 );
     wx_spline_add_point( x2, y2 );
 
-    wx_spline_draw_point_array( m_owner );
+    wx_spline_draw_point_array( this );
 }
 
 #endif // wxUSE_SPLINES
 
+// ----------------------------------------------------------------------------
+// Partial Text Extents
+// ----------------------------------------------------------------------------
 
 
-void wxDCImpl::DoGradientFillLinear(const wxRect& rect,
-                                    const wxColour& initialColour,
-                                    const wxColour& destColour,
-                                    wxDirection nDirection)
+// Each element of the widths array will be the width of the string up to and
+// including the corresponding character in text.  This is the generic
+// implementation, the port-specific classes should do this with native APIs
+// if available and if faster.  Note: pango_layout_index_to_pos is much slower
+// than calling GetTextExtent!!
+
+#define FWC_SIZE 256
+
+class FontWidthCache
 {
-    // save old pen
-    wxPen oldPen = m_pen;
-    wxBrush oldBrush = m_brush;
+public:
+    FontWidthCache() : m_scaleX(1), m_widths(NULL) { }
+    ~FontWidthCache() { delete []m_widths; }
 
-    wxUint8 nR1 = initialColour.Red();
-    wxUint8 nG1 = initialColour.Green();
-    wxUint8 nB1 = initialColour.Blue();
-    wxUint8 nR2 = destColour.Red();
-    wxUint8 nG2 = destColour.Green();
-    wxUint8 nB2 = destColour.Blue();
-    wxUint8 nR, nG, nB;
-
-    if ( nDirection == wxEAST || nDirection == wxWEST )
+    void Reset()
     {
-        wxInt32 x = rect.GetWidth();
-        wxInt32 w = x;              // width of area to shade
-        wxInt32 xDelta = w/256;     // height of one shade bend
-        if (xDelta < 1)
-            xDelta = 1;
+        if (!m_widths)
+            m_widths = new int[FWC_SIZE];
 
-        while (x >= xDelta)
-        {
-            x -= xDelta;
-            if (nR1 > nR2)
-                nR = nR1 - (nR1-nR2)*(w-x)/w;
-            else
-                nR = nR1 + (nR2-nR1)*(w-x)/w;
-
-            if (nG1 > nG2)
-                nG = nG1 - (nG1-nG2)*(w-x)/w;
-            else
-                nG = nG1 + (nG2-nG1)*(w-x)/w;
-
-            if (nB1 > nB2)
-                nB = nB1 - (nB1-nB2)*(w-x)/w;
-            else
-                nB = nB1 + (nB2-nB1)*(w-x)/w;
-
-            wxColour colour(nR,nG,nB);
-            SetPen(wxPen(colour, 1, wxSOLID));
-            SetBrush(wxBrush(colour));
-            if(nDirection == wxEAST)
-                DoDrawRectangle(rect.GetRight()-x-xDelta+1, rect.GetTop(),
-                        xDelta, rect.GetHeight());
-            else //nDirection == wxWEST
-                DoDrawRectangle(rect.GetLeft()+x, rect.GetTop(),
-                        xDelta, rect.GetHeight());
-        }
-    }
-    else  // nDirection == wxNORTH || nDirection == wxSOUTH
-    {
-        wxInt32 y = rect.GetHeight();
-        wxInt32 w = y;              // height of area to shade
-        wxInt32 yDelta = w/255;     // height of one shade bend
-        if (yDelta < 1)
-            yDelta = 1;
-
-        while (y > 0)
-        {
-            y -= yDelta;
-            if (nR1 > nR2)
-                nR = nR1 - (nR1-nR2)*(w-y)/w;
-            else
-                nR = nR1 + (nR2-nR1)*(w-y)/w;
-
-            if (nG1 > nG2)
-                nG = nG1 - (nG1-nG2)*(w-y)/w;
-            else
-                nG = nG1 + (nG2-nG1)*(w-y)/w;
-
-            if (nB1 > nB2)
-                nB = nB1 - (nB1-nB2)*(w-y)/w;
-            else
-                nB = nB1 + (nB2-nB1)*(w-y)/w;
-
-            wxColour colour(nR,nG,nB);
-            SetPen(wxPen(colour, 1, wxSOLID));
-            SetBrush(wxBrush(colour));
-            if(nDirection == wxNORTH)
-                DoDrawRectangle(rect.GetLeft(), rect.GetTop()+y,
-                        rect.GetWidth(), yDelta);
-            else //nDirection == wxSOUTH
-                DoDrawRectangle(rect.GetLeft(), rect.GetBottom()-y-yDelta+1,
-                        rect.GetWidth(), yDelta);
-        }
+        memset(m_widths, 0, sizeof(int)*FWC_SIZE);
     }
 
-    SetPen(oldPen);
-    SetBrush(oldBrush);
+    wxFont m_font;
+    double m_scaleX;
+    int *m_widths;
+};
+
+static FontWidthCache s_fontWidthCache;
+
+bool wxDCBase::DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const
+{
+    int totalWidth = 0;
+
+    const size_t len = text.length();
+    widths.Empty();
+    widths.Add(0, len);
+
+    // reset the cache if font or horizontal scale have changed
+    if ( !s_fontWidthCache.m_widths ||
+         !wxIsSameDouble(s_fontWidthCache.m_scaleX, m_scaleX) ||
+         (s_fontWidthCache.m_font != GetFont()) )
+    {
+        s_fontWidthCache.Reset();
+        s_fontWidthCache.m_font = GetFont();
+        s_fontWidthCache.m_scaleX = m_scaleX;
+    }
+
+    // Calculate the position of each character based on the widths of
+    // the previous characters
+    int w, h;
+    for ( size_t i = 0; i < len; i++ )
+    {
+        const wxChar c = text[i];
+        unsigned int c_int = (unsigned int)c;
+
+        if ((c_int < FWC_SIZE) && (s_fontWidthCache.m_widths[c_int] != 0))
+        {
+            w = s_fontWidthCache.m_widths[c_int];
+        }
+        else
+        {
+            GetTextExtent(c, &w, &h);
+            if (c_int < FWC_SIZE)
+                s_fontWidthCache.m_widths[c_int] = w;
+        }
+
+        totalWidth += w;
+        widths[i] = totalWidth;
+    }
+
+    return true;
 }
 
-void wxDCImpl::DoGradientFillConcentric(const wxRect& rect,
-                                      const wxColour& initialColour,
-                                      const wxColour& destColour,
-                                      const wxPoint& circleCenter)
+
+// ----------------------------------------------------------------------------
+// enhanced text drawing
+// ----------------------------------------------------------------------------
+
+void wxDCBase::GetMultiLineTextExtent(const wxString& text,
+                                      wxCoord *x,
+                                      wxCoord *y,
+                                      wxCoord *h,
+                                      wxFont *font) const
 {
-    //save the old pen color
-    wxColour oldPenColour = m_pen.GetColour();
+    wxCoord widthTextMax = 0, widthLine,
+            heightTextTotal = 0, heightLineDefault = 0, heightLine = 0;
 
-    wxUint8 nR1 = destColour.Red();
-    wxUint8 nG1 = destColour.Green();
-    wxUint8 nB1 = destColour.Blue();
-    wxUint8 nR2 = initialColour.Red();
-    wxUint8 nG2 = initialColour.Green();
-    wxUint8 nB2 = initialColour.Blue();
-    wxUint8 nR, nG, nB;
-
-
-    //Radius
-    wxInt32 cx = rect.GetWidth() / 2;
-    wxInt32 cy = rect.GetHeight() / 2;
-    wxInt32 nRadius;
-    if (cx < cy)
-        nRadius = cx;
-    else
-        nRadius = cy;
-
-    //Offset of circle
-    wxInt32 nCircleOffX = circleCenter.x - (rect.GetWidth() / 2);
-    wxInt32 nCircleOffY = circleCenter.y - (rect.GetHeight() / 2);
-
-    for ( wxInt32 x = 0; x < rect.GetWidth(); x++ )
+    wxString curLine;
+    for ( const wxChar *pc = text; ; pc++ )
     {
-        for ( wxInt32 y = 0; y < rect.GetHeight(); y++ )
+        if ( *pc == _T('\n') || *pc == _T('\0') )
         {
-            //get color difference
-            wxInt32 nGradient = ((nRadius -
-                                  (wxInt32)sqrt(
-                                    pow((double)(x - cx - nCircleOffX), 2) +
-                                    pow((double)(y - cy - nCircleOffY), 2)
-                                  )) * 100) / nRadius;
+            if ( curLine.empty() )
+            {
+                // we can't use GetTextExtent - it will return 0 for both width
+                // and height and an empty line should count in height
+                // calculation
 
-            //normalize Gradient
-            if (nGradient < 0 )
-                nGradient = 0;
+                // assume that this line has the same height as the previous
+                // one
+                if ( !heightLineDefault )
+                    heightLineDefault = heightLine;
 
-            //get dest colors
-            nR = (wxUint8)(nR1 + ((nR2 - nR1) * nGradient / 100));
-            nG = (wxUint8)(nG1 + ((nG2 - nG1) * nGradient / 100));
-            nB = (wxUint8)(nB1 + ((nB2 - nB1) * nGradient / 100));
+                if ( !heightLineDefault )
+                {
+                    // but we don't know it yet - choose something reasonable
+                    GetTextExtent(_T("W"), NULL, &heightLineDefault,
+                                  NULL, NULL, font);
+                }
 
-            //set the pixel
-            m_pen.SetColour(wxColour(nR,nG,nB));
-            DoDrawPoint(x + rect.GetLeft(), y + rect.GetTop());
+                heightTextTotal += heightLineDefault;
+            }
+            else
+            {
+                GetTextExtent(curLine, &widthLine, &heightLine,
+                              NULL, NULL, font);
+                if ( widthLine > widthTextMax )
+                    widthTextMax = widthLine;
+                heightTextTotal += heightLine;
+            }
+
+            if ( *pc == _T('\n') )
+            {
+               curLine.clear();
+            }
+            else
+            {
+               // the end of string
+               break;
+            }
+        }
+        else
+        {
+            curLine += *pc;
         }
     }
-    //return old pen color
-    m_pen.SetColour(oldPenColour);
+
+    if ( x )
+        *x = widthTextMax;
+    if ( y )
+        *y = heightTextTotal;
+    if ( h )
+        *h = heightLine;
 }
 
-//-----------------------------------------------------------------------------
-// wxDC
-//-----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
-
-void wxDC::DrawLabel(const wxString& text,
+void wxDCBase::DrawLabel(const wxString& text,
                          const wxBitmap& bitmap,
                          const wxRect& rect,
                          int alignment,
@@ -1202,9 +606,9 @@ void wxDC::DrawLabel(const wxString& text,
 
     // split the string into lines and draw each of them separately
     wxString curLine;
-    for ( wxString::const_iterator pc = text.begin(); ; ++pc )
+    for ( const wxChar *pc = text; ; pc++ )
     {
-        if ( *pc == _T('\n') || pc == text.end() )
+        if ( *pc == _T('\n') || *pc == _T('\0') )
         {
             int xRealStart = x; // init it here to avoid compielr warnings
 
@@ -1242,14 +646,14 @@ void wxDC::DrawLabel(const wxString& text,
                 endUnderscore += xRealStart;
             }
 
-            if ( pc == text.end() )
+            if ( *pc == _T('\0') )
                 break;
 
             curLine.clear();
         }
         else // not end of line
         {
-            if ( pc - text.begin() == indexAccel )
+            if ( pc - text.c_str() == indexAccel )
             {
                 // remeber to draw underscore here
                 GetTextExtent(curLine, &startUnderscore, NULL);
@@ -1286,56 +690,470 @@ void wxDC::DrawLabel(const wxString& text,
     CalcBoundingBox(x0 + width0, y0 + height);
 }
 
-#if WXWIN_COMPATIBILITY_2_8
-    // for compatibility with the old code when wxCoord was long everywhere
-void wxDC::GetTextExtent(const wxString& string,
-                       long *x, long *y,
-                       long *descent,
-                       long *externalLeading,
-                       const wxFont *theFont) const
+
+void wxDCBase::DoGradientFillLinear(const wxRect& rect,
+                                    const wxColour& initialColour,
+                                    const wxColour& destColour,
+                                    wxDirection nDirection)
+{
+    // save old pen
+    wxPen oldPen = m_pen;
+    wxBrush oldBrush = m_brush;
+
+    wxUint8 nR1 = initialColour.Red();
+    wxUint8 nG1 = initialColour.Green();
+    wxUint8 nB1 = initialColour.Blue();
+    wxUint8 nR2 = destColour.Red();
+    wxUint8 nG2 = destColour.Green();
+    wxUint8 nB2 = destColour.Blue();
+    wxUint8 nR, nG, nB;
+
+    if ( nDirection == wxEAST || nDirection == wxWEST )
     {
-        wxCoord x2, y2, descent2, externalLeading2;
-        m_pimpl->DoGetTextExtent(string, &x2, &y2,
-                        &descent2, &externalLeading2,
-                        theFont);
-        if ( x )
-            *x = x2;
-        if ( y )
-            *y = y2;
-        if ( descent )
-            *descent = descent2;
-        if ( externalLeading )
-            *externalLeading = externalLeading2;
+        wxInt32 x = rect.GetWidth();
+        wxInt32 w = x;              // width of area to shade
+        wxInt32 xDelta = w/256;     // height of one shade bend
+        if (xDelta < 1)
+            xDelta = 1;
+
+        while (x >= xDelta)
+        {
+            x -= xDelta;
+            if (nR1 > nR2)
+                nR = nR1 - (nR1-nR2)*(w-x)/w;
+            else
+                nR = nR1 + (nR2-nR1)*(w-x)/w;
+
+            if (nG1 > nG2)
+                nG = nG1 - (nG1-nG2)*(w-x)/w;
+            else
+                nG = nG1 + (nG2-nG1)*(w-x)/w;
+
+            if (nB1 > nB2)
+                nB = nB1 - (nB1-nB2)*(w-x)/w;
+            else
+                nB = nB1 + (nB2-nB1)*(w-x)/w;
+
+            wxColour colour(nR,nG,nB);
+            SetPen(wxPen(colour, 1, wxSOLID));
+            SetBrush(wxBrush(colour));
+            if(nDirection == wxEAST)
+                DrawRectangle(rect.GetRight()-x-xDelta+1, rect.GetTop(),
+                        xDelta, rect.GetHeight());
+            else //nDirection == wxWEST
+                DrawRectangle(rect.GetLeft()+x, rect.GetTop(),
+                        xDelta, rect.GetHeight());
+        }
+    }
+    else  // nDirection == wxNORTH || nDirection == wxSOUTH
+    {
+        wxInt32 y = rect.GetHeight();
+        wxInt32 w = y;              // height of area to shade
+        wxInt32 yDelta = w/255;     // height of one shade bend
+        if (yDelta < 1)
+            yDelta = 1;
+
+        while (y > 0)
+        {
+            y -= yDelta;
+            if (nR1 > nR2)
+                nR = nR1 - (nR1-nR2)*(w-y)/w;
+            else
+                nR = nR1 + (nR2-nR1)*(w-y)/w;
+
+            if (nG1 > nG2)
+                nG = nG1 - (nG1-nG2)*(w-y)/w;
+            else
+                nG = nG1 + (nG2-nG1)*(w-y)/w;
+
+            if (nB1 > nB2)
+                nB = nB1 - (nB1-nB2)*(w-y)/w;
+            else
+                nB = nB1 + (nB2-nB1)*(w-y)/w;
+
+            wxColour colour(nR,nG,nB);
+            SetPen(wxPen(colour, 1, wxSOLID));
+            SetBrush(wxBrush(colour));
+            if(nDirection == wxNORTH)
+                DrawRectangle(rect.GetLeft(), rect.GetTop()+y,
+                        rect.GetWidth(), yDelta);
+            else //nDirection == wxSOUTH
+                DrawRectangle(rect.GetLeft(), rect.GetBottom()-y-yDelta+1,
+                        rect.GetWidth(), yDelta);
+        }
     }
 
-void wxDC::GetLogicalOrigin(long *x, long *y) const
+    SetPen(oldPen);
+    SetBrush(oldBrush);
+}
+
+void wxDCBase::DoGradientFillConcentric(const wxRect& rect,
+                                      const wxColour& initialColour,
+                                      const wxColour& destColour,
+                                      const wxPoint& circleCenter)
+{
+    //save the old pen color
+    wxColour oldPenColour = m_pen.GetColour();
+
+    wxUint8 nR1 = destColour.Red();
+    wxUint8 nG1 = destColour.Green();
+    wxUint8 nB1 = destColour.Blue();
+    wxUint8 nR2 = initialColour.Red();
+    wxUint8 nG2 = initialColour.Green();
+    wxUint8 nB2 = initialColour.Blue();
+    wxUint8 nR, nG, nB;
+
+
+    //Radius
+    wxInt32 cx = rect.GetWidth() / 2;
+    wxInt32 cy = rect.GetHeight() / 2;
+    wxInt32 nRadius;
+    if (cx < cy)
+        nRadius = cx;
+    else
+        nRadius = cy;
+
+    //Offset of circle
+    wxInt32 nCircleOffX = circleCenter.x - (rect.GetWidth() / 2);
+    wxInt32 nCircleOffY = circleCenter.y - (rect.GetHeight() / 2);
+
+    for ( wxInt32 x = 0; x < rect.GetWidth(); x++ )
     {
-        wxCoord x2, y2;
-        m_pimpl->DoGetLogicalOrigin(&x2, &y2);
-        if ( x )
-            *x = x2;
-        if ( y )
-            *y = y2;
+        for ( wxInt32 y = 0; y < rect.GetHeight(); y++ )
+        {
+            //get color difference
+            wxInt32 nGradient = ((nRadius -
+                                  (wxInt32)sqrt(
+                                    pow((double)(x - cx - nCircleOffX), 2) +
+                                    pow((double)(y - cy - nCircleOffY), 2)
+                                  )) * 100) / nRadius;
+
+            //normalize Gradient
+            if (nGradient < 0 )
+                nGradient = 0;
+
+            //get dest colors
+            nR = (wxUint8)(nR1 + ((nR2 - nR1) * nGradient / 100));
+            nG = (wxUint8)(nG1 + ((nG2 - nG1) * nGradient / 100));
+            nB = (wxUint8)(nB1 + ((nB2 - nB1) * nGradient / 100));
+
+            //set the pixel
+            m_pen.SetColour(wxColour(nR,nG,nB));
+            DrawPoint(wxPoint(x + rect.GetLeft(), y + rect.GetTop()));
+        }
+    }
+    //return old pen color
+    m_pen.SetColour(oldPenColour);
+}
+
+/*
+Notes for wxWidgets DrawEllipticArcRot(...)
+
+wxDCBase::DrawEllipticArcRot(...) draws a rotated elliptic arc or an ellipse.
+It uses wxDCBase::CalculateEllipticPoints(...) and wxDCBase::Rotate(...),
+which are also new.
+
+All methods are generic, so they can be implemented in wxDCBase.
+DoDrawEllipticArcRot(...) is virtual, so it can be called from deeper
+methods like (WinCE) wxDC::DoDrawArc(...).
+
+CalculateEllipticPoints(...) fills a given list of wxPoints with some points
+of an elliptic arc. The algorithm is pixel-based: In every row (in flat
+parts) or every column (in steep parts) only one pixel is calculated.
+Trigonometric calculation (sin, cos, tan, atan) is only done if the
+starting angle is not equal to the ending angle. The calculation of the
+pixels is done using simple arithmetic only and should perform not too
+bad even on devices without floating point processor. I didn't test this yet.
+
+Rotate(...) rotates a list of point pixel-based, you will see rounding errors.
+For instance: an ellipse rotated 180 degrees is drawn
+slightly different from the original.
+
+The points are then moved to an array and used to draw a polyline and/or polygon
+(with center added, the pie).
+The result looks quite similar to the native ellipse, only e few pixels differ.
+
+The performance on a desktop system (Athlon 1800, WinXP) is about 7 times
+slower as DrawEllipse(...), which calls the native API.
+An rotated ellipse outside the clipping region takes nearly the same time,
+while an native ellipse outside takes nearly no time to draw.
+
+If you draw an arc with this new method, you will see the starting and ending angles
+are calculated properly.
+If you use DrawEllipticArc(...), you will see they are only correct for circles
+and not properly calculated for ellipses.
+
+Peter Lenhard
+p.lenhard@t-online.de
+*/
+
+#ifdef __WXWINCE__
+void wxDCBase::DoDrawEllipticArcRot( wxCoord x, wxCoord y,
+                                     wxCoord w, wxCoord h,
+                                     double sa, double ea, double angle )
+{
+    wxList list;
+
+    CalculateEllipticPoints( &list, x, y, w, h, sa, ea );
+    Rotate( &list, angle, wxPoint( x+w/2, y+h/2 ) );
+
+    // Add center (for polygon/pie)
+    list.Append( (wxObject*) new wxPoint( x+w/2, y+h/2 ) );
+
+    // copy list into array and delete list elements
+    int n = list.GetCount();
+    wxPoint *points = new wxPoint[n];
+    int i = 0;
+    wxNode* node = 0;
+    for ( node = list.GetFirst(); node; node = node->GetNext(), i++ )
+    {
+        wxPoint *point = (wxPoint *)node->GetData();
+        points[i].x = point->x;
+        points[i].y = point->y;
+        delete point;
     }
 
-void wxDC::GetDeviceOrigin(long *x, long *y) const
+    // first draw the pie without pen, if necessary
+    if( GetBrush() != *wxTRANSPARENT_BRUSH )
     {
-        wxCoord x2, y2;
-        m_pimpl->DoGetDeviceOrigin(&x2, &y2);
-        if ( x )
-            *x = x2;
-        if ( y )
-            *y = y2;
+        wxPen tempPen( GetPen() );
+        SetPen( *wxTRANSPARENT_PEN );
+        DoDrawPolygon( n, points, 0, 0 );
+        SetPen( tempPen );
     }
 
-void wxDC::GetClippingBox(long *x, long *y, long *w, long *h) const
+    // then draw the arc without brush, if necessary
+    if( GetPen() != *wxTRANSPARENT_PEN )
     {
-        wxCoord xx,yy,ww,hh;
-        m_pimpl->DoGetClippingBox(&xx, &yy, &ww, &hh);
-        if (x) *x = xx;
-        if (y) *y = yy;
-        if (w) *w = ww;
-        if (h) *h = hh;
+        // without center
+        DoDrawLines( n-1, points, 0, 0 );
     }
 
-#endif  // WXWIN_COMPATIBILITY_2_8
+    delete [] points;
+
+} // DrawEllipticArcRot
+
+void wxDCBase::Rotate( wxList* points, double angle, wxPoint center )
+{
+    if( angle != 0.0 )
+    {
+        double pi(M_PI);
+        double dSinA = -sin(angle*2.0*pi/360.0);
+        double dCosA = cos(angle*2.0*pi/360.0);
+        for ( wxNode* node = points->GetFirst(); node; node = node->GetNext() )
+        {
+            wxPoint* point = (wxPoint*)node->GetData();
+
+            // transform coordinates, if necessary
+            if( center.x ) point->x -= center.x;
+            if( center.y ) point->y -= center.y;
+
+            // calculate rotation, rounding simply by implicit cast to integer
+            int xTemp = point->x * dCosA - point->y * dSinA;
+            point->y = point->x * dSinA + point->y * dCosA;
+            point->x = xTemp;
+
+            // back transform coordinates, if necessary
+            if( center.x ) point->x += center.x;
+            if( center.y ) point->y += center.y;
+        }
+    }
+}
+
+void wxDCBase::CalculateEllipticPoints( wxList* points,
+                                        wxCoord xStart, wxCoord yStart,
+                                        wxCoord w, wxCoord h,
+                                        double sa, double ea )
+{
+    double pi = M_PI;
+    double sar = 0;
+    double ear = 0;
+    int xsa = 0;
+    int ysa = 0;
+    int xea = 0;
+    int yea = 0;
+    int sq = 0;
+    int eq = 0;
+    bool bUseAngles = false;
+    if( w<0 ) w = -w;
+    if( h<0 ) h = -h;
+    // half-axes
+    wxCoord a = w/2;
+    wxCoord b = h/2;
+    // decrement 1 pixel if ellipse is smaller than 2*a, 2*b
+    int decrX = 0;
+    if( 2*a == w ) decrX = 1;
+    int decrY = 0;
+    if( 2*b == h ) decrY = 1;
+    // center
+    wxCoord xCenter = xStart + a;
+    wxCoord yCenter = yStart + b;
+    // calculate data for start and end, if necessary
+    if( sa != ea )
+    {
+        bUseAngles = true;
+        // normalisation of angles
+        while( sa<0 ) sa += 360;
+        while( ea<0 ) ea += 360;
+        while( sa>=360 ) sa -= 360;
+        while( ea>=360 ) ea -= 360;
+        // calculate quadrant numbers
+        if( sa > 270 ) sq = 3;
+        else if( sa > 180 ) sq = 2;
+        else if( sa > 90 ) sq = 1;
+        if( ea > 270 ) eq = 3;
+        else if( ea > 180 ) eq = 2;
+        else if( ea > 90 ) eq = 1;
+        sar = sa * pi / 180.0;
+        ear = ea * pi / 180.0;
+        // correct angle circle -> ellipse
+        sar = atan( -a/(double)b * tan( sar ) );
+        if ( sq == 1 || sq == 2 ) sar += pi;
+        ear = atan( -a/(double)b * tan( ear ) );
+        if ( eq == 1 || eq == 2 ) ear += pi;
+        // coordinates of points
+        xsa = xCenter + a * cos( sar );
+        if( sq == 0 || sq == 3 ) xsa -= decrX;
+        ysa = yCenter + b * sin( sar );
+        if( sq == 2 || sq == 3 ) ysa -= decrY;
+        xea = xCenter + a * cos( ear );
+        if( eq == 0 || eq == 3 ) xea -= decrX;
+        yea = yCenter + b * sin( ear );
+        if( eq == 2 || eq == 3 ) yea -= decrY;
+    } // if iUseAngles
+    // calculate c1 = b^2, c2 = b^2/a^2 with a = w/2, b = h/2
+    double c1 = b * b;
+    double c2 = 2.0 / w;
+    c2 *= c2;
+    c2 *= c1;
+    wxCoord x = 0;
+    wxCoord y = b;
+    long x2 = 1;
+    long y2 = y*y;
+    long y2_old = 0;
+    long y_old = 0;
+    // Lists for quadrant 1 to 4
+    wxList pointsarray[4];
+    // Calculate points for first quadrant and set in all quadrants
+    for( x = 0; x <= a; ++x )
+    {
+        x2 = x2+x+x-1;
+        y2_old = y2;
+        y_old = y;
+        bool bNewPoint = false;
+        while( y2 > c1 - c2 * x2 && y > 0 )
+        {
+            bNewPoint = true;
+            y2 = y2-y-y+1;
+            --y;
+        }
+        // old y now to big: set point with old y, old x
+        if( bNewPoint && x>1)
+        {
+            int x1 = x - 1;
+            // remove points on the same line
+            pointsarray[0].Insert( (wxObject*) new wxPoint( xCenter + x1 - decrX, yCenter - y_old ) );
+            pointsarray[1].Append( (wxObject*) new wxPoint( xCenter - x1, yCenter - y_old ) );
+            pointsarray[2].Insert( (wxObject*) new wxPoint( xCenter - x1, yCenter + y_old - decrY ) );
+            pointsarray[3].Append( (wxObject*) new wxPoint( xCenter + x1 - decrX, yCenter + y_old - decrY ) );
+        } // set point
+    } // calculate point
+
+    // Starting and/or ending points for the quadrants, first quadrant gets both.
+    pointsarray[0].Insert( (wxObject*) new wxPoint( xCenter + a - decrX, yCenter ) );
+    pointsarray[0].Append( (wxObject*) new wxPoint( xCenter, yCenter - b ) );
+    pointsarray[1].Append( (wxObject*) new wxPoint( xCenter - a, yCenter ) );
+    pointsarray[2].Append( (wxObject*) new wxPoint( xCenter, yCenter + b - decrY ) );
+    pointsarray[3].Append( (wxObject*) new wxPoint( xCenter + a - decrX, yCenter ) );
+
+    // copy quadrants in original list
+    if( bUseAngles )
+    {
+        // Copy the right part of the points in the lists
+        // and delete the wxPoints, because they do not leave this method.
+        points->Append( (wxObject*) new wxPoint( xsa, ysa ) );
+        int q = sq;
+        bool bStarted = false;
+        bool bReady = false;
+        bool bForceTurn = ( sq == eq && sa > ea );
+        while( !bReady )
+        {
+            for( wxNode *node = pointsarray[q].GetFirst(); node; node = node->GetNext() )
+            {
+                // once: go to starting point in start quadrant
+                if( !bStarted &&
+                    (
+                      ( (wxPoint*) node->GetData() )->x < xsa+1 && q <= 1
+                      ||
+                      ( (wxPoint*) node->GetData() )->x > xsa-1 && q >= 2
+                    )
+                  )
+                {
+                    bStarted = true;
+                }
+
+                // copy point, if not at ending point
+                if( bStarted )
+                {
+                    if( q != eq || bForceTurn
+                        ||
+                        ( (wxPoint*) node->GetData() )->x > xea+1 && q <= 1
+                        ||
+                        ( (wxPoint*) node->GetData() )->x < xea-1 && q >= 2
+                      )
+                    {
+                        // copy point
+                        wxPoint* pPoint = new wxPoint( *((wxPoint*) node->GetData() ) );
+                        points->Append( (wxObject*) pPoint );
+                    }
+                    else if( q == eq && !bForceTurn || ( (wxPoint*) node->GetData() )->x == xea)
+                    {
+                        bReady = true;
+                    }
+                }
+            } // for node
+            ++q;
+            if( q > 3 ) q = 0;
+            bForceTurn = false;
+            bStarted = true;
+        } // while not bReady
+        points->Append( (wxObject*) new wxPoint( xea, yea ) );
+
+        // delete points
+        for( q = 0; q < 4; ++q )
+        {
+            for( wxNode *node = pointsarray[q].GetFirst(); node; node = node->GetNext() )
+            {
+                wxPoint *p = (wxPoint *)node->GetData();
+                delete p;
+            }
+        }
+    }
+    else
+    {
+        wxNode* node;
+        // copy whole ellipse, wxPoints will be deleted outside
+        for( node = pointsarray[0].GetFirst(); node; node = node->GetNext() )
+        {
+            wxObject *p = node->GetData();
+            points->Append( p );
+        }
+        for( node = pointsarray[1].GetFirst(); node; node = node->GetNext() )
+        {
+            wxObject *p = node->GetData();
+            points->Append( p );
+        }
+        for( node = pointsarray[2].GetFirst(); node; node = node->GetNext() )
+        {
+            wxObject *p = node->GetData();
+            points->Append( p );
+        }
+        for( node = pointsarray[3].GetFirst(); node; node = node->GetNext() )
+        {
+            wxObject *p = node->GetData();
+            points->Append( p );
+        }
+    } // not iUseAngles
+} // CalculateEllipticPoints
+
+#endif

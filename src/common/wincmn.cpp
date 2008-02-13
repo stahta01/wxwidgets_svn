@@ -44,7 +44,6 @@
     #include "wx/scrolbar.h"
     #include "wx/layout.h"
     #include "wx/sizer.h"
-    #include "wx/menu.h"
 #endif //WX_PRECOMP
 
 #if wxUSE_DRAG_AND_DROP
@@ -79,6 +78,9 @@
     #else
         #include <gtk/gtkfeatures.h>
     #endif
+    extern const unsigned int gtk_major_version;
+    extern const unsigned int gtk_minor_version;
+    extern const unsigned int gtk_micro_version;
 #endif
 
 #include "wx/platinfo.h"
@@ -86,15 +88,17 @@
 // Windows List
 WXDLLIMPEXP_DATA_CORE(wxWindowList) wxTopLevelWindows;
 
-// globals
-#if wxUSE_MENUS
-wxMenu *wxCurrentPopupMenu = NULL;
-#endif // wxUSE_MENUS
-
 // ----------------------------------------------------------------------------
 // static data
 // ----------------------------------------------------------------------------
 
+#if defined(__WXPALMOS__)
+int wxWindowBase::ms_lastControlId = 32767;
+#elif defined(__WXPM__)
+int wxWindowBase::ms_lastControlId = 2000;
+#else
+int wxWindowBase::ms_lastControlId = -200;
+#endif
 
 IMPLEMENT_ABSTRACT_CLASS(wxWindowBase, wxEvtHandler)
 
@@ -198,6 +202,11 @@ wxWindowBase::wxWindowBase()
 
     m_scrollHelper = (wxScrollHelper *) NULL;
 
+    m_minVirtualWidth =
+    m_maxVirtualWidth = wxDefaultCoord;
+    m_minVirtualHeight =
+    m_maxVirtualHeight = wxDefaultCoord;
+
     m_windowVariant = wxWINDOW_VARIANT_NORMAL;
 #if wxUSE_SYSTEM_OPTIONS
     if ( wxSystemOptions::HasOption(wxWINDOW_DEFAULT_VARIANT) )
@@ -211,8 +220,6 @@ wxWindowBase::wxWindowBase()
 
     // VZ: this one shouldn't exist...
     m_isBeingDeleted = false;
-
-    m_freezeCount = 0;
 }
 
 // common part of window creation process
@@ -238,19 +245,11 @@ bool wxWindowBase::CreateBase(wxWindowBase *parent,
     // ids are limited to 16 bits under MSW so if you care about portability,
     // it's not a good idea to use ids out of this range (and negative ids are
     // reserved for wxWidgets own usage)
-    wxASSERT_MSG( id == wxID_ANY || (id >= 0 && id < 32767) ||
-                  (id >= wxID_AUTO_LOWEST && id <= wxID_AUTO_HIGHEST),
+    wxASSERT_MSG( id == wxID_ANY || (id >= 0 && id < 32767),
                   _T("invalid id value") );
 
     // generate a new id if the user doesn't care about it
-    if ( id == wxID_ANY )
-    {
-        m_windowId = NewControlId();
-    }
-    else // valid id specified
-    {
-        m_windowId = id;
-    }
+    m_windowId = id == wxID_ANY ? NewControlId() : id;
 
     // don't use SetWindowStyleFlag() here, this function should only be called
     // to change the flag after creation as it tries to reflect the changes in
@@ -317,18 +316,42 @@ wxWindowBase::~wxWindowBase()
     // we weren't a dialog class
     wxTopLevelWindows.DeleteObject((wxWindow*)this);
 
-#if wxUSE_MENUS
-    // The associated popup menu can still be alive, disassociate from it in
-    // this case
-    if ( wxCurrentPopupMenu && wxCurrentPopupMenu->GetInvokingWindow() == this )
-        wxCurrentPopupMenu->SetInvokingWindow(NULL);
-#endif // wxUSE_MENUS
-
     wxASSERT_MSG( GetChildren().GetCount() == 0, wxT("children not destroyed") );
 
-    // notify the parent about this window destruction
+    // reset the top-level parent's default item if it is this widget
     if ( m_parent )
+    {
+        wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent((wxWindow*)this),
+                                              wxTopLevelWindow);
+
+        if ( tlw )
+        {
+            wxWindow* tmpDefaultItem = tlw->GetTmpDefaultItem();
+            if ( tmpDefaultItem == this )
+                tlw->SetTmpDefaultItem(NULL);
+            else if ( tmpDefaultItem )
+            {
+                // A temporary default item masks the real default item, so
+                // temporarily unset the temporary default item so we can access the
+                // real default item.
+                tlw->SetTmpDefaultItem(NULL);
+
+                if ( tlw->GetDefaultItem() == this )
+                    tlw->SetDefaultItem(NULL);
+
+                // Set the temporary default item back.
+                tlw->SetTmpDefaultItem(tmpDefaultItem);
+            }
+            else if ( tlw->GetDefaultItem() == this )
+                tlw->SetDefaultItem(NULL);
+        }
+    }
+
+    // reset the dangling pointer our parent window may keep to us
+    if ( m_parent )
+    {
         m_parent->RemoveChild(this);
+    }
 
 #if wxUSE_CARET
     delete m_caret;
@@ -491,7 +514,18 @@ wxSize wxWindowBase::DoGetBestSize() const
 
     if ( m_windowSizer )
     {
-        best = m_windowSizer->GetMinSize();
+        // Adjust to window size, since the return value of GetWindowSizeForVirtualSize is
+        // expressed in window and not client size
+        wxSize minSize = m_windowSizer->GetMinSize();
+        wxSize size(GetSize());
+        wxSize clientSize(GetClientSize());
+
+        wxSize minWindowSize(minSize.x + size.x - clientSize.x,
+                             minSize.y + size.y - clientSize.y);
+
+        best = GetWindowSizeForVirtualSize(minWindowSize);
+
+        return best;
     }
 #if wxUSE_CONSTRAINTS
     else if ( m_constraints )
@@ -713,22 +747,6 @@ wxPoint wxWindowBase::GetClientAreaOrigin() const
     return wxPoint(0,0);
 }
 
-wxSize wxWindowBase::ClientToWindowSize(const wxSize& size) const
-{
-    const wxSize diff(GetSize() - GetClientSize());
-
-    return wxSize(size.x == -1 ? -1 : size.x + diff.x,
-                  size.y == -1 ? -1 : size.y + diff.y);
-}
-
-wxSize wxWindowBase::WindowToClientSize(const wxSize& size) const
-{
-    const wxSize diff(GetSize() - GetClientSize());
-
-    return wxSize(size.x == -1 ? -1 : size.x - diff.x,
-                  size.y == -1 ? -1 : size.y - diff.y);
-}
-
 void wxWindowBase::SetWindowVariant( wxWindowVariant variant )
 {
     if ( m_windowVariant != variant )
@@ -789,20 +807,26 @@ void wxWindowBase::DoSetSizeHints( int minW, int minH,
 }
 
 
-#if WXWIN_COMPATIBILITY_2_8
-void wxWindowBase::SetVirtualSizeHints(int WXUNUSED(minW), int WXUNUSED(minH),
-                                       int WXUNUSED(maxW), int WXUNUSED(maxH))
+void wxWindowBase::SetVirtualSizeHints( int minW, int minH,
+                                        int maxW, int maxH )
 {
+    m_minVirtualWidth = minW;
+    m_maxVirtualWidth = maxW;
+    m_minVirtualHeight = minH;
+    m_maxVirtualHeight = maxH;
 }
-
-void wxWindowBase::SetVirtualSizeHints(const wxSize& WXUNUSED(minsize),
-                                       const wxSize& WXUNUSED(maxsize))
-{
-}
-#endif // WXWIN_COMPATIBILITY_2_8
 
 void wxWindowBase::DoSetVirtualSize( int x, int y )
 {
+    if ( m_minVirtualWidth != wxDefaultCoord && m_minVirtualWidth > x )
+        x = m_minVirtualWidth;
+    if ( m_maxVirtualWidth != wxDefaultCoord && m_maxVirtualWidth < x )
+        x = m_maxVirtualWidth;
+    if ( m_minVirtualHeight != wxDefaultCoord && m_minVirtualHeight > y )
+        y = m_minVirtualHeight;
+    if ( m_maxVirtualHeight != wxDefaultCoord && m_maxVirtualHeight < y )
+        y = m_maxVirtualHeight;
+
     m_virtualSize = wxSize(x, y);
 }
 
@@ -851,64 +875,24 @@ bool wxWindowBase::Show(bool show)
     }
 }
 
-bool wxWindowBase::IsEnabled() const
-{
-    return IsThisEnabled() && (IsTopLevel() || !GetParent() || GetParent()->IsEnabled());
-}
-
-void wxWindowBase::NotifyWindowOnEnableChange(bool enabled)
-{
-#ifndef wxHAS_NATIVE_ENABLED_MANAGEMENT
-    DoEnable(enabled);
-#endif // !defined(wxHAS_NATIVE_ENABLED_MANAGEMENT)
-
-    OnEnabled(enabled);
-
-    // If we are top-level then the logic doesn't apply - otherwise
-    // showing a modal dialog would result in total greying out (and ungreying
-    // out later) of everything which would be really ugly
-    if ( IsTopLevel() )
-        return;
-
-    for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
-          node;
-          node = node->GetNext() )
-    {
-        wxWindowBase * const child = node->GetData();
-        if ( !child->IsTopLevel() && child->IsThisEnabled() )
-            child->NotifyWindowOnEnableChange(enabled);
-    }
-}
-
 bool wxWindowBase::Enable(bool enable)
 {
-    if ( enable == IsThisEnabled() )
-        return false;
-
-    m_isEnabled = enable;
-
-#ifdef wxHAS_NATIVE_ENABLED_MANAGEMENT
-    DoEnable(enable);
-#else // !defined(wxHAS_NATIVE_ENABLED_MANAGEMENT)
-    wxWindowBase * const parent = GetParent();
-    if( !IsTopLevel() && parent && !parent->IsEnabled() )
+    if ( enable != m_isEnabled )
     {
+        m_isEnabled = enable;
+
         return true;
     }
-#endif // !defined(wxHAS_NATIVE_ENABLED_MANAGEMENT)
-
-    NotifyWindowOnEnableChange(enable);
-
-    return true;
+    else
+    {
+        return false;
+    }
 }
 
 bool wxWindowBase::IsShownOnScreen() const
 {
-    // A window is shown on screen if it itself is shown and so are all its
-    // parents. But if a window is toplevel one, then its always visible on
-    // screen if IsShown() returns true, even if it has a hidden parent.
     return IsShown() &&
-           (IsTopLevel() || GetParent() == NULL || GetParent()->IsShownOnScreen());
+           (GetParent() == NULL || GetParent()->IsShownOnScreen());
 }
 
 // ----------------------------------------------------------------------------
@@ -954,8 +938,6 @@ bool wxWindowBase::Reparent(wxWindowBase *newParent)
         return false;
     }
 
-    const bool oldEnabledState = IsEnabled();
-
     // unlink this window from the existing parent.
     if ( oldParent )
     {
@@ -974,14 +956,6 @@ bool wxWindowBase::Reparent(wxWindowBase *newParent)
     else
     {
         wxTopLevelWindows.Append((wxWindow *)this);
-    }
-
-    // We need to notify window (and its subwindows) if by changing the parent
-    // we also change our enabled/disabled status.
-    const bool newEnabledState = IsEnabled();
-    if ( newEnabledState != oldEnabledState )
-    {
-        NotifyWindowOnEnableChange(newEnabledState);
     }
 
     return true;
@@ -1066,11 +1040,6 @@ bool wxWindowBase::RemoveEventHandler(wxEvtHandler *handler)
     return false;
 }
 
-bool wxWindowBase::HandleWindowEvent(wxEvent& event) const
-{
-    return GetEventHandler()->SafelyProcessEvent(event);
-}
-
 // ----------------------------------------------------------------------------
 // colours, fonts &c
 // ----------------------------------------------------------------------------
@@ -1131,7 +1100,7 @@ wxWindowBase::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 
 wxColour wxWindowBase::GetBackgroundColour() const
 {
-    if ( !m_backgroundColour.IsOk() )
+    if ( !m_backgroundColour.Ok() )
     {
         wxASSERT_MSG( !m_hasBgCol, _T("we have invalid explicit bg colour?") );
 
@@ -1157,9 +1126,11 @@ wxColour wxWindowBase::GetForegroundColour() const
     // logic is the same as above
     if ( !m_hasFgCol && !m_foregroundColour.Ok() )
     {
+        wxASSERT_MSG( !m_hasFgCol, _T("we have invalid explicit fg colour?") );
+
         wxColour colFg = GetDefaultAttributes().colFg;
 
-        if ( !colFg.IsOk() )
+        if ( !colFg.Ok() )
             colFg = GetClassDefaultAttributes().colFg;
 
         return colFg;
@@ -1173,7 +1144,7 @@ bool wxWindowBase::SetBackgroundColour( const wxColour &colour )
     if ( colour == m_backgroundColour )
         return false;
 
-    m_hasBgCol = colour.IsOk();
+    m_hasBgCol = colour.Ok();
     if ( m_backgroundStyle != wxBG_STYLE_CUSTOM )
         m_backgroundStyle = m_hasBgCol ? wxBG_STYLE_COLOUR : wxBG_STYLE_SYSTEM;
 
@@ -1188,7 +1159,7 @@ bool wxWindowBase::SetForegroundColour( const wxColour &colour )
     if (colour == m_foregroundColour )
         return false;
 
-    m_hasFgCol = colour.IsOk();
+    m_hasFgCol = colour.Ok();
     m_inheritFgCol = m_hasFgCol;
     m_foregroundColour = colour;
     SetThemeEnabled( !m_hasFgCol && !m_backgroundColour.Ok() );
@@ -1213,12 +1184,12 @@ bool wxWindowBase::SetCursor(const wxCursor& cursor)
 wxFont wxWindowBase::GetFont() const
 {
     // logic is the same as in GetBackgroundColour()
-    if ( !m_font.IsOk() )
+    if ( !m_font.Ok() )
     {
         wxASSERT_MSG( !m_hasFont, _T("we have invalid explicit font?") );
 
         wxFont font = GetDefaultAttributes().font;
-        if ( !font.IsOk() )
+        if ( !font.Ok() )
             font = GetClassDefaultAttributes().font;
 
         return font;
@@ -1236,7 +1207,7 @@ bool wxWindowBase::SetFont(const wxFont& font)
     }
 
     m_font = font;
-    m_hasFont = font.IsOk();
+    m_hasFont = font.Ok();
     m_inheritFont = m_hasFont;
 
     InvalidateBestSize();
@@ -2262,58 +2233,6 @@ void wxWindowBase::OnInitDialog( wxInitDialogEvent &WXUNUSED(event) )
     UpdateWindowUI(wxUPDATE_UI_RECURSE);
 }
 
-// ----------------------------------------------------------------------------
-// menu-related functions
-// ----------------------------------------------------------------------------
-
-#if wxUSE_MENUS
-
-bool wxWindowBase::PopupMenu(wxMenu *menu, int x, int y)
-{
-    wxCHECK_MSG( menu, false, "can't popup NULL menu" );
-
-    wxCurrentPopupMenu = menu;
-    const bool rc = DoPopupMenu(menu, x, y);
-    wxCurrentPopupMenu = NULL;
-
-    return rc;
-}
-
-// this is used to pass the id of the selected item from the menu event handler
-// to the main function itself
-//
-// it's ok to use a global here as there can be at most one popup menu shown at
-// any time
-static int gs_popupMenuSelection = wxID_NONE;
-
-void wxWindowBase::InternalOnPopupMenu(wxCommandEvent& event)
-{
-    // store the id in a global variable where we'll retrieve it from later
-    gs_popupMenuSelection = event.GetId();
-}
-
-int
-wxWindowBase::DoGetPopupMenuSelectionFromUser(wxMenu& menu, int x, int y)
-{
-    gs_popupMenuSelection = wxID_NONE;
-
-    Connect(wxEVT_COMMAND_MENU_SELECTED,
-            wxCommandEventHandler(wxWindowBase::InternalOnPopupMenu),
-            NULL,
-            this);
-
-    PopupMenu(&menu, x, y);
-
-    Disconnect(wxEVT_COMMAND_MENU_SELECTED,
-               wxCommandEventHandler(wxWindowBase::InternalOnPopupMenu),
-               NULL,
-               this);
-
-    return gs_popupMenuSelection;
-}
-
-#endif // wxUSE_MENUS
-
 // methods for drawing the sizers in a visible way
 #ifdef __WXDEBUG__
 
@@ -2388,9 +2307,45 @@ void wxWindowBase::OnMiddleClick( wxMouseEvent& event )
             return;
         }
 #endif // __WXDEBUG__
-        ::wxInfoMessageBox((wxWindow*)this);
+
+#if wxUSE_MSGDLG
+        // don't translate these strings, they're for diagnostics purposes only
+        wxString msg;
+        msg.Printf(_T("wxWidgets Library (%s port)\n")
+                   _T("Version %d.%d.%d%s%s, compiled at %s %s\n")
+                   _T("Runtime version of toolkit used is %d.%d.%s\n")
+                   _T("Copyright (c) 1995-2007 wxWidgets team"),
+                   wxPlatformInfo::Get().GetPortIdName().c_str(),
+                   wxMAJOR_VERSION,
+                   wxMINOR_VERSION,
+                   wxRELEASE_NUMBER,
+#if wxUSE_UNICODE
+                   L" (Unicode)",
+#else
+                   wxEmptyString,
+#endif
+#ifdef __WXDEBUG__
+                   _T(" Debug build"),
+#else
+                   wxEmptyString,
+#endif
+                   __TDATE__,
+                   __TTIME__,
+                   wxPlatformInfo::Get().GetToolkitMajorVersion(),
+                   wxPlatformInfo::Get().GetToolkitMinorVersion(),
+#ifdef __WXGTK__
+                   wxString::Format(_T("\nThe compile-time GTK+ version is %d.%d.%d."), GTK_MAJOR_VERSION, GTK_MINOR_VERSION, GTK_MICRO_VERSION).c_str()
+#else
+                   wxEmptyString
+#endif
+                   );
+
+        wxMessageBox(msg, _T("wxWidgets information"),
+                     wxICON_INFORMATION | wxOK,
+                     (wxWindow *)this);
     }
     else
+#endif // wxUSE_MSGDLG
     {
         event.Skip();
     }
@@ -2454,10 +2409,6 @@ wxBorder wxWindowBase::GetBorder(long flags) const
     if ( border == wxBORDER_DEFAULT )
     {
         border = GetDefaultBorder();
-    }
-    else if ( border == wxBORDER_THEME )
-    {
-        border = GetDefaultBorderForControl();
     }
 
     return border;
@@ -2670,7 +2621,7 @@ bool wxWindowBase::TryParent(wxEvent& event)
 // window relationships
 // ----------------------------------------------------------------------------
 
-wxWindow *wxWindowBase::DoGetSibling(WindowOrder order) const
+wxWindow *wxWindowBase::DoGetSibling(MoveKind order) const
 {
     wxCHECK_MSG( GetParent(), NULL,
                     _T("GetPrev/NextSibling() don't work for TLWs!") );
@@ -2679,9 +2630,9 @@ wxWindow *wxWindowBase::DoGetSibling(WindowOrder order) const
     wxWindowList::compatibility_iterator i = siblings.Find((wxWindow *)this);
     wxCHECK_MSG( i, NULL, _T("window not a child of its parent?") );
 
-    if ( order == OrderBefore )
+    if ( order == MoveBefore )
         i = i->GetPrevious();
-    else // OrderAfter
+    else // MoveAfter
         i = i->GetNext();
 
     return i ? i->GetData() : NULL;
@@ -2691,43 +2642,20 @@ wxWindow *wxWindowBase::DoGetSibling(WindowOrder order) const
 // keyboard navigation
 // ----------------------------------------------------------------------------
 
-// Navigates in the specified direction inside this window
-bool wxWindowBase::DoNavigateIn(int flags)
+// Navigates in the specified direction.
+bool wxWindowBase::Navigate(int flags)
 {
-#ifdef wxHAS_NATIVE_TAB_TRAVERSAL
-    // native code doesn't process our wxNavigationKeyEvents anyhow
-    wxUnusedVar(flags);
-    return false;
-#else // !wxHAS_NATIVE_TAB_TRAVERSAL
     wxNavigationKeyEvent eventNav;
-    wxWindow *focused = FindFocus();
-    eventNav.SetCurrentFocus(focused);
-    eventNav.SetEventObject(focused);
     eventNav.SetFlags(flags);
-    return GetEventHandler()->ProcessEvent(eventNav);
-#endif // wxHAS_NATIVE_TAB_TRAVERSAL/!wxHAS_NATIVE_TAB_TRAVERSAL
+    eventNav.SetEventObject(this);
+    if ( GetParent()->GetEventHandler()->ProcessEvent(eventNav) )
+    {
+        return true;
+    }
+    return false;
 }
 
-bool wxWindowBase::HandleAsNavigationKey(const wxKeyEvent& event)
-{
-    if ( event.GetKeyCode() != WXK_TAB )
-        return false;
-
-    int flags = wxNavigationKeyEvent::FromTab;
-
-    if ( event.ShiftDown() )
-        flags |= wxNavigationKeyEvent::IsBackward;
-    else
-        flags |= wxNavigationKeyEvent::IsForward;
-
-    if ( event.ControlDown() )
-        flags |= wxNavigationKeyEvent::WinChange;
-
-    Navigate(flags);
-    return true;
-}
-
-void wxWindowBase::DoMoveInTabOrder(wxWindow *win, WindowOrder move)
+void wxWindowBase::DoMoveInTabOrder(wxWindow *win, MoveKind move)
 {
     // check that we're not a top level window
     wxCHECK_RET( GetParent(),
@@ -2747,7 +2675,7 @@ void wxWindowBase::DoMoveInTabOrder(wxWindow *win, WindowOrder move)
     // can't just move the node around
     wxWindow *self = (wxWindow *)this;
     siblings.DeleteObject(self);
-    if ( move == OrderAfter )
+    if ( move == MoveAfter )
     {
         i = i->GetNext();
     }
@@ -2756,7 +2684,7 @@ void wxWindowBase::DoMoveInTabOrder(wxWindow *win, WindowOrder move)
     {
         siblings.Insert(i, self);
     }
-    else // OrderAfter and win was the last sibling
+    else // MoveAfter and win was the last sibling
     {
         siblings.Append(self);
     }
@@ -2770,13 +2698,6 @@ void wxWindowBase::DoMoveInTabOrder(wxWindow *win, WindowOrder move)
 {
     wxWindowBase *win = DoFindFocus();
     return win ? win->GetMainWindowOfCompositeControl() : NULL;
-}
-
-bool wxWindowBase::HasFocus() const
-{
-    wxWindowBase *win = DoFindFocus();
-    return win == this ||
-           win == wxConstCast(this, wxWindowBase)->GetMainWindowOfCompositeControl();
 }
 
 // ----------------------------------------------------------------------------
@@ -3232,5 +3153,4 @@ wxWindowBase::AdjustForLayoutDirection(wxCoord x,
 
     return x;
 }
-
 

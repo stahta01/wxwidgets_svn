@@ -12,10 +12,10 @@
 
 Represents a node in an XML document. See \helpref{wxXmlDocument}{wxxmldocument}.
 
-Node has a name and may have content and attributes. Most common node types are 
-{\tt wxXML\_TEXT\_NODE} (name and attributes are irrelevant) and 
-{\tt wxXML\_ELEMENT\_NODE} (e.g. in {\tt <title>hi</title>} there is an element
-with name="title", irrelevant content and one child ({\tt wxXML\_TEXT\_NODE}
+Node has a name and may have content
+and properties. Most common node types are {\tt wxXML\_TEXT\_NODE} (name and
+properties are irrelevant) and {\tt wxXML\_ELEMENT\_NODE} (e.g. in {\tt <title>hi</title>} there is
+an element with name="title", irrelevant content and one child ({\tt wxXML\_TEXT\_NODE}
 with content="hi").
 
 If \texttt{wxUSE\_UNICODE} is 0, all strings are encoded in the encoding given to
@@ -29,10 +29,6 @@ No base class
 \wxheading{Include files}
 
 <wx/xml/xml.h>
-
-\wxheading{Library}
-
-\helpref{wxXml}{librarieslist}
 
 \wxheading{Constants}
 
@@ -61,7 +57,7 @@ enum wxXmlNodeType
 
 \wxheading{See also}
 
-\helpref{wxXmlDocument}{wxxmldocument}, \helpref{wxXmlAttribute}{wxxmlattribute}
+\helpref{wxXmlDocument}{wxxmldocument}, \helpref{wxXmlProperty}{wxxmlproperty}
 
 
 \latexignore{\rtfignore{\wxheading{Members}}}
@@ -69,47 +65,39 @@ enum wxXmlNodeType
 
 \membersection{wxXmlNode::wxXmlNode}\label{wxxmlnodewxxmlnode}
 
-\func{}{wxXmlNode}{\param{wxXmlNode* }{parent}, \param{wxXmlNodeType }{type}, \param{const wxString\& }{name}, \param{const wxString\& }{content = wxEmptyString}, \param{wxXmlAttribute* }{attrs = \NULL}, \param{wxXmlNode* }{next = \NULL}, \param{int }{lineNo = -1}}
+
+\func{}{wxXmlNode}{\param{wxXmlNode* }{parent}, \param{wxXmlNodeType }{type}, \param{const wxString\& }{name}, \param{const wxString\& }{content = wxEmptyString}, \param{wxXmlProperty* }{props = \NULL}, \param{wxXmlNode* }{next = \NULL}}
 
 \wxheading{Parameters}
 
-\docparam{parent}{The parent node to which append this node instance.
-If this argument is \NULL this new node will be {\it floating} and it can be appended later to 
-another one using the \helpref{AddChild}{wxxmlnodeaddchild} or \helpref{InsertChild}{wxxmlnodeinsertchild}
-functions. Otherwise the child is already added to the XML tree by this
-constructor and it shouldn't be done again.}
+\docparam{parent}{The parent node. Can be \NULL.}
 \docparam{type}{One of the wxXmlNodeType enumeration value.}
 \docparam{name}{The name of the node. This is the string which appears between angular brackets.}
-\docparam{content}{The content of the node. Only meaningful when {\it type} is 
-{\tt wxXML\_TEXT\_NODE} or {\tt wxXML\_CDATA\_SECTION\_NODE}.}
-\docparam{attrs}{If not \NULL, this \helpref{wxXmlAttribute}{wxxmlattribute} object 
-and its eventual siblings are attached to the node.}
+\docparam{content}{The content of the node. Only meaningful when {\it type} is {\tt wxXML\_TEXT\_NODE} or {\tt wxXML\_CDATA\_SECTION\_NODE}.}
+\docparam{props}{If not \NULL, this wxXmlProperty object and its eventual siblings are attached to
+the node.}
 \docparam{next}{If not \NULL, this node and its eventual siblings are attached to
 the node.}
-\docparam{lineNo}{Number of line this node was present at in input file or -1.}
-
-Creates this XML node and eventually insert it into an existing XML tree.
 
 \func{}{wxXmlNode}{\param{const wxXmlNode\& }{node}}
 
 Copy constructor. Note that this does NOT copy syblings
-and parent pointer, i.e. \helpref{GetParent()}{wxxmlnodegetparent} and 
-\helpref{GetNext()}{wxxmlnodegetnext} will return \NULL
+and parent pointer, i.e. \helpref{GetParent()}{wxxmlnodegetparent} and \helpref{GetNext()}{wxxmlnodegetnext} will return \NULL
 after using copy ctor and are never unmodified by operator=.
 
-On the other hand, it DOES copy children and attributes.
+On the other hand, it DOES copy children and properties.
 
 
-\func{}{wxXmlNode}{\param{wxXmlNodeType }{type}, \param{const wxString\& }{name}, \param{const wxString\& }{content = wxEmptyString}, \param{int }{lineNo = -1}}
+\func{}{wxXmlNode}{\param{wxXmlNodeType }{type}, \param{const wxString\& }{name}, \param{const wxString\& }{content = wxEmptyString}}
 
-A simplified version of the first constructor form, assuming a \NULL parent.
+A simplified version of the first constructor form.
 
 
 \membersection{wxXmlNode::\destruct{wxXmlNode}}\label{wxxmlnodedtor}
 
 \func{}{\destruct{wxXmlNode}}{\void}
 
-The virtual destructor. Deletes attached children and attributes.
+The virtual destructor. Deletes attached children and properties.
 
 \membersection{wxXmlNode::AddChild}\label{wxxmlnodeaddchild}
 
@@ -118,21 +106,21 @@ The virtual destructor. Deletes attached children and attributes.
 Adds the given node as child of this node. To attach a second children to this node, use the
 \helpref{SetNext()}{wxxmlnodesetnext} function of the {\it child} node.
 
-\membersection{wxXmlNode::AddAttribute}\label{wxxmlnodeaddattribute}
+\membersection{wxXmlNode::AddProperty}\label{wxxmlnodeaddproperty}
 
-\func{void}{AddAttribute}{\param{const wxString\& }{name}, \param{const wxString\& }{value}}
+\func{void}{AddProperty}{\param{const wxString\& }{name}, \param{const wxString\& }{value}}
 
-Appends a attribute with given {\it name} and {\it value} to the list of attributes for this node.
+Appends a property with given {\it name} and {\it value} to the list of properties for this node.
 
-\func{void}{AddAttribute}{\param{wxXmlAttribute* }{attr}}
+\func{void}{AddProperty}{\param{wxXmlProperty* }{prop}}
 
-Appends given attribute to the list of attributes for this node.
+Appends the given property to the list of properties for this node.
 
-\membersection{wxXmlNode::DeleteAttribute}\label{wxxmlnodedeleteattribute}
+\membersection{wxXmlNode::DeleteProperty}\label{wxxmlnodedeleteproperty}
 
-\func{bool}{DeleteAttribute}{\param{const wxString\& }{name}}
+\func{bool}{DeleteProperty}{\param{const wxString\& }{name}}
 
-Removes the first attributes which has the given {\it name} from the list of attributes for this node.
+Removes the first properties which has the given {\it name} from the list of properties for this node.
 
 \membersection{wxXmlNode::GetChildren}\label{wxxmlnodegetchildren}
 
@@ -160,12 +148,6 @@ Returns the number of nodes which separe this node from {\tt grandparent}.
 This function searches only the parents of this node until it finds {\tt grandparent}
 or the \NULL node (which is the parent of non-linked nodes or the parent of a
 \helpref{wxXmlDocument}{wxxmldocument}'s root node).
-
-\membersection{wxXmlNode::GetLineNumber}\label{wxxmlnodegetlinenumber}
-
-\constfunc{int}{GetLineNumber}{\void}
-
-Returns line number of the node in the input XML file or -1 if it is unknown.
 
 
 \membersection{wxXmlNode::GetNodeContent}\label{wxxmlnodegetnodecontent}
@@ -209,24 +191,23 @@ Returns a pointer to the sibling of this node or \NULL if there are no siblings.
 
 Returns a pointer to the parent of this node or \NULL if this node has no parent.
 
-\membersection{wxXmlNode::GetAttribute}\label{wxxmlnodegetattribute}
+\membersection{wxXmlNode::GetPropVal}\label{wxxmlnodegetpropval}
 
-\constfunc{bool}{GetAttribute}{\param{const wxString\& }{attrName}, \param{wxString* }{value}}
+\constfunc{bool}{GetPropVal}{\param{const wxString\& }{propName}, \param{wxString* }{value}}
 
-Returns \true if a attribute named {\it attrName} could be found.
-The value of that attribute is saved in \arg{value} (which
-must not be \NULL).
+Returns \true if a property named {\it propName} could be found.
+The value of that property is saved in \arg{value} (which must not be \NULL).
 
-\constfunc{wxString}{GetAttribute}{\param{const wxString\& }{attrName}, \param{const wxString\& }{defaultVal}}
+\constfunc{wxString}{GetPropVal}{\param{const wxString\& }{propName}, \param{const wxString\& }{defaultVal}}
 
-Returns the value of the attribute named {\it attrName} if it does exist.
+Returns the value of the property named {\it propName} if it does exist.
 If it does not exist, the {\it defaultVal} is returned.
 
-\membersection{wxXmlNode::GetAttributes}\label{wxxmlnodegetattributes}
+\membersection{wxXmlNode::GetProperties}\label{wxxmlnodegetproperties}
 
-\constfunc{wxXmlAttribute *}{GetAttributes}{\void}
+\constfunc{wxXmlProperty *}{GetProperties}{\void}
 
-Return a pointer to the first attribute of this node.
+Return a pointer to the first property of this node.
 
 \membersection{wxXmlNode::GetType}\label{wxxmlnodegettype}
 
@@ -235,11 +216,11 @@ Return a pointer to the first attribute of this node.
 Returns the type of this node.
 
 
-\membersection{wxXmlNode::HasAttribute}\label{wxxmlnodehasattribute}
+\membersection{wxXmlNode::HasProp}\label{wxxmlnodehasprop}
 
-\constfunc{bool}{HasAttribute}{\param{const wxString\& }{attrName}}
+\constfunc{bool}{HasProp}{\param{const wxString\& }{propName}}
 
-Returns \true if this node has a attribute named {\it attrName}.
+Returns \true if this node has a property named {\it propName}.
 
 \membersection{wxXmlNode::InsertChild}\label{wxxmlnodeinsertchild}
 
@@ -300,12 +281,12 @@ sibling node.
 Sets as parent the given node. The caller is responsible to delete any previously present
 parent node.
 
-\membersection{wxXmlNode::SetAttributes}\label{wxxmlnodesetattributes}
+\membersection{wxXmlNode::SetProperties}\label{wxxmlnodesetproperties}
 
-\func{void}{SetAttributes}{\param{wxXmlAttribute* }{attr}}
+\func{void}{SetProperties}{\param{wxXmlProperty* }{prop}}
 
-Sets as first attribute the given wxXmlAttribute object.
-The caller is responsible to delete any previously present attributes attached to this node.
+Sets as first property the given wxXmlProperty object.
+The caller is responsible to delete any previously present properties attached to this node.
 
 \membersection{wxXmlNode::SetType}\label{wxxmlnodesettype}
 

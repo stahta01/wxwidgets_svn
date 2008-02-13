@@ -32,10 +32,19 @@
 #endif
 #include "wx/mac/corefoundation/cfstring.h"
 
+#if defined(__DARWIN__)
 #include <CoreFoundation/CFBundle.h>
 #include <CoreFoundation/CFURL.h>
+#else
+#include <CFBundle.h>
+#include <CFURL.h>
+#endif
 
+#if defined(__WXCOCOA__) || defined(__WXMAC_OSX__)
 #define kDefaultPathStyle kCFURLPOSIXPathStyle
+#else
+#define kDefaultPathStyle kCFURLHFSPathStyle
+#endif
 
 // ============================================================================
 // implementation
@@ -49,14 +58,12 @@ wxStandardPathsCF::wxStandardPathsCF()
                  : m_bundle(CFBundleGetMainBundle())
 {
     CFRetain(m_bundle);
-    UseAppInfo(AppInfo_AppName | AppInfo_VendorName);
 }
 
 wxStandardPathsCF::wxStandardPathsCF(wxCFBundleRef bundle)
                  : m_bundle(bundle)
 {
     CFRetain(m_bundle);
-    UseAppInfo(AppInfo_AppName | AppInfo_VendorName);
 }
 
 wxStandardPathsCF::~wxStandardPathsCF()
@@ -85,7 +92,7 @@ static wxString BundleRelativeURLToPath(CFURLRef relativeURL)
     wxCHECK_MSG(absoluteURL, wxEmptyString, wxT("Failed to resolve relative URL to absolute URL"));
     CFStringRef cfStrPath = CFURLCopyFileSystemPath(absoluteURL,kDefaultPathStyle);
     CFRelease(absoluteURL);
-    return wxCFStringRef(cfStrPath).AsString(wxLocale::GetSystemEncoding());
+    return wxMacCFStringHolder(cfStrPath).AsString(wxLocale::GetSystemEncoding());
 }
 
 wxString wxStandardPathsCF::GetFromFunc(wxCFURLRef (*func)(wxCFBundleRef)) const
@@ -104,7 +111,11 @@ wxString wxStandardPathsCF::GetDocumentsDir() const
 #ifdef __WXMAC__
     return wxMacFindFolderNoSeparator
         (
+#if TARGET_API_MAC_OSX
         kUserDomain,
+#else
+        kOnSystemDisk,
+#endif
         kDocumentsFolderType,
         kCreateFolder
         );
@@ -140,13 +151,10 @@ wxString wxStandardPathsCF::GetDataDir() const
     return GetFromFunc(CFBundleCopySharedSupportURL);
 }
 
+// TODO: implement this using real CoreFoundation API instead of Carbon API
 wxString wxStandardPathsCF::GetExecutablePath() const
 {
 #ifdef __WXMAC__
-#if 1
-    return GetFromFunc(CFBundleCopyBundleURL);
-#else
-    // TODO remove if cf implementation ok
     ProcessInfoRec processinfo;
     ProcessSerialNumber procno ;
 #ifdef __LP64__
@@ -154,7 +162,7 @@ wxString wxStandardPathsCF::GetExecutablePath() const
 #else
     FSSpec fsSpec;
 #endif
-    
+
     procno.highLongOfPSN = 0 ;
     procno.lowLongOfPSN = kCurrentProcess ;
     processinfo.processInfoLength = sizeof(ProcessInfoRec);
@@ -164,15 +172,13 @@ wxString wxStandardPathsCF::GetExecutablePath() const
 #else
     processinfo.processAppSpec = &fsSpec;
 #endif
-    
+
     GetProcessInformation( &procno , &processinfo ) ;
 #ifdef __LP64__
     return wxMacFSRefToPath(&fsRef);
 #else
     return wxMacFSSpec2MacFilename(&fsSpec);
 #endif
-#endif
-    
 #else
     return wxStandardPathsBase::GetExecutablePath();
 #endif
@@ -181,18 +187,18 @@ wxString wxStandardPathsCF::GetExecutablePath() const
 wxString wxStandardPathsCF::GetLocalDataDir() const
 {
 #ifdef __WXMAC__
-    return AppendAppInfo(wxMacFindFolder((short)kLocalDomain, kApplicationSupportFolderType, kCreateFolder));
+    return AppendAppName(wxMacFindFolder((short)kLocalDomain, kApplicationSupportFolderType, kCreateFolder));
 #else
-    return AppendAppInfo(wxT("/Library/Application Support"));
+    return AppendAppName(wxT("/Library/Application Support"));
 #endif
 }
 
 wxString wxStandardPathsCF::GetUserDataDir() const
 {
 #ifdef __WXMAC__
-    return AppendAppInfo(wxMacFindFolder((short)kUserDomain, kApplicationSupportFolderType, kCreateFolder));
+    return AppendAppName(wxMacFindFolder((short)kUserDomain, kApplicationSupportFolderType, kCreateFolder));
 #else
-    return AppendAppInfo(wxFileName::GetHomeDir() + _T("/Library/Application Support"));
+    return AppendAppName(wxFileName::GetHomeDir() + _T("/Library/Application Support"));
 #endif
 }
 
@@ -207,7 +213,7 @@ wxString wxStandardPathsCF::GetResourcesDir() const
 }
 
 wxString
-wxStandardPathsCF::GetLocalizedResourcesDir(const wxString& lang,
+wxStandardPathsCF::GetLocalizedResourcesDir(const wxChar *lang,
                                             ResourceCat category) const
 {
     return wxStandardPathsBase::

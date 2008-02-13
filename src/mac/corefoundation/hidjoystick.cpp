@@ -25,7 +25,7 @@
 //---------------------------------------------------------------------------
 
 //we only support HID on OSX (DARWIN), since it requires DARWIN...
-#if wxUSE_JOYSTICK && wxUSE_THREADS
+#if wxUSE_JOYSTICK && defined(__DARWIN__)
 
 //---------------------------------------------------------------------------
 // Includes
@@ -480,7 +480,7 @@ int wxJoystick::GetMovementThreshold() const
     return 0;
 }
 
-void wxJoystick::SetMovementThreshold(int WXUNUSED(threshold))
+void wxJoystick::SetMovementThreshold(int threshold)
 {
 }
 
@@ -795,10 +795,8 @@ void* wxJoystickThread::Entry()
 // 5) Sends the event to the polling window (if any)
 // 6) Gets the next event and goes back to (1)
 //---------------------------------------------------------------------------
-/*static*/ void wxJoystickThread::HIDCallback(void* WXUNUSED(target),
-                                              IOReturn WXUNUSED(res),
-                                              void* context,
-                                              void* WXUNUSED(sender))
+/*static*/ void wxJoystickThread::HIDCallback(void* target, IOReturn res,
+                                              void* context, void* sender)
 {
     IOHIDEventStruct hidevent;
     AbsoluteTime bogustime = {0,0};
@@ -902,4 +900,4 @@ void* wxJoystickThread::Entry()
     }
 }
 
-#endif // wxUSE_JOYSTICK 
+#endif // wxUSE_JOYSTICK && defined(__DARWIN__)

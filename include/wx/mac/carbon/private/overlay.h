@@ -30,13 +30,13 @@ public:
     // returns true if it has been setup
     bool IsOk();
     
-    void Init( wxDC* dc, int x , int y , int width , int height );
+    void Init( wxWindowDC* dc, int x , int y , int width , int height );
     
-    void BeginDrawing( wxDC* dc);
+    void BeginDrawing( wxWindowDC* dc);
     
-    void EndDrawing( wxDC* dc);
+    void EndDrawing( wxWindowDC* dc);
     
-    void Clear( wxDC* dc);
+    void Clear( wxWindowDC* dc);
 
 private:
     OSStatus CreateOverlayWindow();

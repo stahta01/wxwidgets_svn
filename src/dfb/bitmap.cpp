@@ -23,7 +23,6 @@
 #include "wx/bitmap.h"
 #include "wx/colour.h"
 #include "wx/image.h"
-#include "wx/rawbmp.h"
 
 #include "wx/dfb/private.h"
 
@@ -31,222 +30,33 @@
 // helpers
 //-----------------------------------------------------------------------------
 
-// NB: Most of this conversion code is needed because of differences between
-//     wxImage and wxDFB's wxBitmap representations:
-//     (1) wxImage uses RGB order, while DirectFB uses BGR
-//     (2) wxImage has alpha channel in a separate plane, while DirectFB puts
-//         all components into single BGRA plane
-
-// pitch = stride = # of bytes between the start of N-th line and (N+1)-th line
-// {Src,Dst}PixSize = # of bytes used to represent one pixel
-template<int SrcPixSize, int DstPixSize>
-static void CopyPixelsAndSwapRGB(unsigned w, unsigned h,
-                                 const unsigned char *src,
-                                 unsigned src_pitch,
-                                 unsigned char *dst,
-                                 unsigned dst_pitch)
-{
-    unsigned src_advance = src_pitch - SrcPixSize * w;
-    unsigned dst_advance = dst_pitch - DstPixSize * w;
-    for ( unsigned y = 0; y < h; y++, src += src_advance, dst += dst_advance )
-    {
-        for ( unsigned x = 0; x < w; x++, src += SrcPixSize, dst += DstPixSize )
-        {
-            // copy with RGB -> BGR translation:
-            dst[0] = src[2];
-            dst[1] = src[1];
-            dst[2] = src[0];
-        }
-    }
-}
-
-static void CopySurfaceToImage(const wxIDirectFBSurfacePtr& surface,
-                               wxImage& image)
-{
-    wxIDirectFBSurface::Locked locked(surface, DSLF_READ);
-    wxCHECK_RET( locked.ptr, "failed to lock surface" );
-
-    const unsigned width = image.GetWidth();
-    const unsigned height = image.GetHeight();
-    const DFBSurfacePixelFormat format = surface->GetPixelFormat();
-
-    // copy RGB data from the surface:
-    switch ( format )
-    {
-        case DSPF_RGB24:
-            CopyPixelsAndSwapRGB<3,3>
-            (
-                width, height,
-                (unsigned char*)locked.ptr, locked.pitch,
-                image.GetData(), width * 3
-            );
-            break;
-
-        case DSPF_RGB32:
-        case DSPF_ARGB:
-            CopyPixelsAndSwapRGB<4,3>
-            (
-                width, height,
-                (unsigned char*)locked.ptr, locked.pitch,
-                image.GetData(), width * 3
-            );
-            break;
-
-        default:
-            wxFAIL_MSG( "unexpected pixel format" );
-            return;
-    }
-
-    // extract alpha channel if the bitmap has it:
-    if ( format == DSPF_ARGB )
-    {
-        // create alpha plane:
-        image.SetAlpha();
-
-        // and copy alpha data to it:
-        const unsigned advance = locked.pitch - 4 * width;
-        unsigned char *alpha = image.GetAlpha();
-        // NB: "+3" is to get pointer to alpha component
-        const unsigned char *src = ((unsigned char*)locked.ptr) + 3;
-
-        for ( unsigned y = 0; y < height; y++, src += advance )
-            for ( unsigned x = 0; x < width; x++, src += 4 )
-                *(alpha++) = *src;
-    }
-}
-
-static void CopyImageToSurface(const wxImage& image,
-                               const wxIDirectFBSurfacePtr& surface)
-{
-    wxIDirectFBSurface::Locked locked(surface, DSLF_WRITE);
-    wxCHECK_RET( locked.ptr, "failed to lock surface" );
-
-    const unsigned width = image.GetWidth();
-    const unsigned height = image.GetHeight();
-    const DFBSurfacePixelFormat format = surface->GetPixelFormat();
-
-    // copy RGB data to the surface:
-    switch ( format )
-    {
-        case DSPF_RGB24:
-            CopyPixelsAndSwapRGB<3,3>
-            (
-               width, height,
-               image.GetData(), width * 3,
-               (unsigned char*)locked.ptr, locked.pitch
-            );
-            break;
-
-        case DSPF_RGB32:
-        case DSPF_ARGB:
-            CopyPixelsAndSwapRGB<3,4>
-            (
-               width, height,
-               image.GetData(), width * 3,
-               (unsigned char*)locked.ptr, locked.pitch
-            );
-            break;
-
-        default:
-            wxFAIL_MSG( "unexpected pixel format" );
-            return;
-    }
-
-    // if the image has alpha channel, merge it in:
-    if ( format == DSPF_ARGB )
-    {
-        wxCHECK_RET( image.HasAlpha(), "logic error - ARGB, but no alpha" );
-
-        const unsigned advance = locked.pitch - 4 * width;
-        const unsigned char *alpha = image.GetAlpha();
-        // NB: "+3" is to get pointer to alpha component
-        unsigned char *dest = ((unsigned char*)locked.ptr) + 3;
-
-        for ( unsigned y = 0; y < height; y++, dest += advance )
-            for ( unsigned x = 0; x < width; x++, dest += 4 )
-                *dest = *(alpha++);
-    }
-}
-
-static wxIDirectFBSurfacePtr
-CreateSurfaceWithFormat(int w, int h, DFBSurfacePixelFormat format)
-{
-    DFBSurfaceDescription desc;
-    desc.flags = (DFBSurfaceDescriptionFlags)
-        (DSDESC_CAPS | DSDESC_WIDTH | DSDESC_HEIGHT);
-    desc.caps = DSCAPS_NONE;
-    desc.width = w;
-    desc.height = h;
-
-    if ( format != DSPF_UNKNOWN )
-    {
-        desc.flags = (DFBSurfaceDescriptionFlags)(
-                            desc.flags | DSDESC_PIXELFORMAT);
-        desc.pixelformat = format;
-    }
-
-    return wxIDirectFB::Get()->CreateSurface(&desc);
-}
-
 // Creates a surface that will use wxImage's pixel data (RGB only)
 static wxIDirectFBSurfacePtr CreateSurfaceForImage(const wxImage& image)
 {
-    wxCHECK_MSG( image.Ok(), NULL, "invalid image" );
+    wxCHECK_MSG( image.Ok(), NULL, _T("invalid image") );
     // FIXME_DFB: implement alpha handling by merging alpha buffer with RGB
     //            into a temporary RGBA surface
-    wxCHECK_MSG( !image.HasAlpha(), NULL, "alpha channel not supported" );
+    wxCHECK_MSG( !image.HasAlpha(), NULL, _T("alpha channel not supported") );
 
-    // NB: wxImage uses RGB order of bytes while DirectFB uses BGR, so we
-    //     cannot use preallocated surface that shares data with wxImage, we
-    //     have to copy the data to temporary surface instead
-    return CreateSurfaceWithFormat(image.GetWidth(), image.GetHeight(),
-                                   DSPF_RGB24);
-}
+    DFBSurfaceDescription desc;
+    desc.flags = (DFBSurfaceDescriptionFlags)
+        (DSDESC_CAPS | DSDESC_WIDTH | DSDESC_HEIGHT | DSDESC_PIXELFORMAT |
+         DSDESC_PREALLOCATED);
+    desc.caps = DSCAPS_NONE;
+    desc.width = image.GetWidth();
+    desc.height = image.GetHeight();
+    desc.pixelformat = DSPF_RGB24;
+    desc.preallocated[0].data = image.GetData();
+    desc.preallocated[0].pitch = 3 * desc.width;
 
-static bool ConvertSurfaceToFormat(wxIDirectFBSurfacePtr& surface,
-                                   DFBSurfacePixelFormat format)
-{
-    if ( surface->GetPixelFormat() == format )
-        return true;
-
-    int w, h;
-    surface->GetSize(&w, &h);
-    wxIDirectFBSurfacePtr s = CreateSurfaceWithFormat(w, h, format);
-    if ( !s )
-        return false;
-
-    if ( !s->SetBlittingFlags(DSBLIT_NOFX) )
-        return false;
-    if ( !s->Blit(surface->GetRaw(), NULL, 0, 0) )
-        return false;
-
-    surface = s;
-    return true;
-}
-
-static DFBSurfacePixelFormat DepthToFormat(int depth)
-{
-    switch ( depth )
-    {
-        case 24:
-            return DSPF_RGB24;
-        case 32:
-            // NB: we treat depth=32 as requesting ARGB for consistency with
-            //     other ports
-            return DSPF_ARGB;
-        default:
-            wxFAIL_MSG( "unsupported depth requested" );
-            // fall through
-        case -1:
-            return DSPF_UNKNOWN;
-    }
+    return wxIDirectFB::Get()->CreateSurface(&desc);
 }
 
 //-----------------------------------------------------------------------------
 // wxBitmapRefData
 //-----------------------------------------------------------------------------
 
-class wxBitmapRefData: public wxGDIRefData
+class wxBitmapRefData: public wxObjectRefData
 {
 public:
     wxBitmapRefData()
@@ -275,8 +85,6 @@ public:
 #endif
     }
 
-    virtual bool IsOk() const { return m_surface; }
-
     wxIDirectFBSurfacePtr m_surface;
     wxMask               *m_mask;
 #if wxUSE_PALETTE
@@ -302,7 +110,7 @@ bool wxBitmap::Create(const wxIDirectFBSurfacePtr& surface)
 {
     UnRef();
 
-    wxCHECK_MSG( surface, false, "invalid surface" );
+    wxCHECK_MSG( surface, false, _T("invalid surface") );
 
     m_refData = new wxBitmapRefData();
     M_BITMAP->m_surface = surface;
@@ -311,64 +119,41 @@ bool wxBitmap::Create(const wxIDirectFBSurfacePtr& surface)
 
 bool wxBitmap::Create(int width, int height, int depth)
 {
-    return CreateWithFormat(width, height, DepthToFormat(depth));
-}
-
-bool wxBitmap::CreateWithFormat(int width, int height, int dfbFormat)
-{
     UnRef();
 
     wxCHECK_MSG( width > 0 && height > 0, false, wxT("invalid bitmap size") );
+    wxCHECK_MSG( depth == -1, false, wxT("only default depth supported now") );
 
-    return Create(CreateSurfaceWithFormat(width, height,
-                                          DFBSurfacePixelFormat(dfbFormat)));
+    DFBSurfaceDescription desc;
+    desc.flags = (DFBSurfaceDescriptionFlags)(
+                        DSDESC_CAPS | DSDESC_WIDTH | DSDESC_HEIGHT);
+    desc.caps = DSCAPS_NONE;
+    desc.width = width;
+    desc.height = height;
+
+    return Create(wxIDirectFB::Get()->CreateSurface(&desc));
 }
 
 #if wxUSE_IMAGE
-wxBitmap::wxBitmap(const wxImage& imageOrig, int depth)
+wxBitmap::wxBitmap(const wxImage& image, int depth)
 {
-    wxCHECK_RET( imageOrig.Ok(), wxT("invalid image") );
+    wxCHECK_RET( image.Ok(), wxT("invalid image") );
 
-    wxImage image(imageOrig);
-
-    // convert mask to alpha channel, because wxMask isn't implemented yet
-    // FIXME: don't do this, implement proper wxMask support
-    if ( image.HasMask() )
-        image.InitAlpha();
-
-    DFBSurfacePixelFormat format = DepthToFormat(depth);
-    if ( format == DSPF_UNKNOWN && image.HasAlpha() )
-        format = DSPF_ARGB;
-
-    // create surface in screen's format (unless we need alpha channel,
-    // in which case use ARGB):
-    if ( !CreateWithFormat(image.GetWidth(), image.GetHeight(), format) )
+    // create surface in screen's format:
+    if ( !Create(image.GetWidth(), image.GetHeight(), depth) )
         return;
 
     // then copy the image to it:
+    wxIDirectFBSurfacePtr src(CreateSurfaceForImage(image));
     wxIDirectFBSurfacePtr dst = M_BITMAP->m_surface;
 
-    switch ( dst->GetPixelFormat() )
-    {
-        case DSPF_RGB24:
-        case DSPF_RGB32:
-        case DSPF_ARGB:
-            CopyImageToSurface(image, dst);
-            break;
+    if ( !dst->SetBlittingFlags(DSBLIT_NOFX) )
+        return;
+    if ( !dst->Blit(src->GetRaw(), NULL, 0, 0) )
+        return;
 
-        default:
-        {
-            // wxBitmap uses different pixel format, so we have to use a
-            // temporary surface and blit to the bitmap via it:
-            wxIDirectFBSurfacePtr src(CreateSurfaceForImage(image));
-            CopyImageToSurface(image, src);
-
-            if ( !dst->SetBlittingFlags(DSBLIT_NOFX) )
-                return;
-            if ( !dst->Blit(src->GetRaw(), NULL, 0, 0) )
-                return;
-        }
-    }
+    // FIXME: implement mask creation from image's mask (or alpha channel?)
+    wxASSERT_MSG( !image.HasMask(), _T("image masks are ignored for now") );
 }
 
 wxImage wxBitmap::ConvertToImage() const
@@ -376,81 +161,20 @@ wxImage wxBitmap::ConvertToImage() const
     wxCHECK_MSG( Ok(), wxNullImage, wxT("invalid bitmap") );
 
     wxImage img(GetWidth(), GetHeight());
+    wxIDirectFBSurfacePtr dst(CreateSurfaceForImage(img));
     wxIDirectFBSurfacePtr src = M_BITMAP->m_surface;
 
-    switch ( src->GetPixelFormat() )
-    {
-        case DSPF_RGB24:
-        case DSPF_RGB32:
-        case DSPF_ARGB:
-            CopySurfaceToImage(src, img);
-            break;
-        default:
-        {
-            // wxBitmap uses different pixel format, so we have to use a
-            // temporary surface and blit to the bitmap via it:
-            wxIDirectFBSurfacePtr dst(CreateSurfaceForImage(img));
-
-            if ( !dst->SetBlittingFlags(DSBLIT_NOFX) )
-                return wxNullImage;
-            if ( !dst->Blit(src->GetRaw(), NULL, 0, 0) )
-                return wxNullImage;
-
-            CopySurfaceToImage(dst, img);
-        }
-    }
+    if ( !dst->SetBlittingFlags(DSBLIT_NOFX) )
+        return wxNullImage;
+    if ( !dst->Blit(src->GetRaw(), NULL, 0, 0) )
+        return wxNullImage;
 
     // FIXME: implement mask setting in the image
-    wxASSERT_MSG( GetMask() == NULL, "bitmap masks are ignored for now" );
+    wxASSERT_MSG( GetMask() == NULL, _T("bitmap masks are ignored for now") );
 
     return img;
 }
 #endif // wxUSE_IMAGE
-
-void *wxBitmap::GetRawData(wxPixelDataBase& data, int bpp)
-{
-    wxCHECK_MSG( Ok(), NULL, "invalid bitmap" );
-
-    AllocExclusive();
-
-    DFBSurfacePixelFormat format;
-    if ( bpp == 32 )
-        format = DSPF_ARGB;
-    else
-        format = DSPF_RGB24;
-
-    // convert the bitmap into format compatible with requested raw access;
-    // note that we don't bother converting the bitmap back in UngetRawData(),
-    // as unpacked formats (RGB24, RGB32) are the common case and converting
-    // between them while blitting is fast enough (FIXME?)
-    if ( !ConvertSurfaceToFormat(M_BITMAP->m_surface, format) )
-        return NULL;
-
-    void *bits = NULL;
-    if ( !M_BITMAP->m_surface->Lock
-                               (
-                                 (DFBSurfaceLockFlags)(DSLF_READ | DSLF_WRITE),
-                                 &bits,
-                                 &data.m_stride
-                               ) )
-        return NULL;
-
-    M_BITMAP->m_surface->GetSize(&data.m_width, &data.m_height);
-
-    return bits;
-}
-
-void wxBitmap::UngetRawData(wxPixelDataBase& WXUNUSED(data))
-{
-    M_BITMAP->m_surface->Unlock();
-}
-
-bool wxBitmap::HasAlpha() const
-{
-    wxCHECK_MSG( Ok(), false, "invalid bitmap" );
-
-    return M_BITMAP->m_surface->GetPixelFormat() == DSPF_ARGB;
-}
 
 wxBitmap::wxBitmap(const wxString &filename, wxBitmapType type)
 {
@@ -461,7 +185,12 @@ wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
 {
     wxCHECK_RET( depth == 1, wxT("can only create mono bitmap from XBM data") );
 
-    wxFAIL_MSG( "not implemented" );
+    wxFAIL_MSG( _T("not implemented") );
+}
+
+bool wxBitmap::IsOk() const
+{
+    return (m_refData != NULL && M_BITMAP->m_surface);
 }
 
 int wxBitmap::GetHeight() const
@@ -538,7 +267,7 @@ bool wxBitmap::LoadFile(const wxString &name, wxBitmapType type)
         wxImage image;
         if ( !image.LoadFile(name, type) || !image.Ok() )
         {
-            wxLogError(_("No bitmap handler for type %d defined."), type);
+            wxLogError("no bitmap handler for type %d defined.", type);
             return false;
         }
         else
@@ -572,7 +301,7 @@ bool wxBitmap::SaveFile(const wxString& filename, wxBitmapType type, const wxPal
             return image.SaveFile(filename, type);
         else
         {
-            wxLogError(_("No bitmap handler for type %d defined."), type);
+            wxLogError("no bitmap handler for type %d defined.", type);
             return false;
         }
     }
@@ -607,35 +336,21 @@ void wxBitmap::SetHeight(int height)
 {
     AllocExclusive();
 
-    wxFAIL_MSG( "SetHeight not implemented" );
+    wxFAIL_MSG( _T("SetHeight not implemented") );
 }
 
 void wxBitmap::SetWidth(int width)
 {
     AllocExclusive();
 
-    wxFAIL_MSG( "SetWidth not implemented" );
+    wxFAIL_MSG( _T("SetWidth not implemented") );
 }
 
 void wxBitmap::SetDepth(int depth)
 {
-    DFBSurfacePixelFormat format = DepthToFormat(depth);
-    if ( M_BITMAP->m_surface->GetPixelFormat() == format )
-        return;
-
     AllocExclusive();
 
-    int w, h;
-    M_BITMAP->m_surface->GetSize(&w, &h);
-    wxIDirectFBSurfacePtr s = CreateSurfaceWithFormat(w, h, format);
-    if ( !s )
-        return;
-    if ( !s->SetBlittingFlags(DSBLIT_NOFX) )
-        return;
-    if ( !s->Blit(M_BITMAP->m_surface->GetRaw(), NULL, 0, 0) )
-        return;
-
-    M_BITMAP->m_surface = s;
+    wxFAIL_MSG( _T("SetDepth not implemented") );
 }
 
 wxIDirectFBSurfacePtr wxBitmap::GetDirectFBSurface() const
@@ -645,12 +360,12 @@ wxIDirectFBSurfacePtr wxBitmap::GetDirectFBSurface() const
     return M_BITMAP->m_surface;
 }
 
-wxGDIRefData *wxBitmap::CreateGDIRefData() const
+wxObjectRefData *wxBitmap::CreateRefData() const
 {
     return new wxBitmapRefData;
 }
 
-wxGDIRefData *wxBitmap::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBitmapRefData(*(wxBitmapRefData *)data);
 }

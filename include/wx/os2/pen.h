@@ -17,11 +17,11 @@
 
 typedef long wxPMDash;
 
-class WXDLLIMPEXP_FWD_CORE wxPen;
+class WXDLLEXPORT wxPen;
 
 class WXDLLEXPORT wxPenRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxPen;
+    friend class WXDLLEXPORT wxPen;
 public:
     wxPenRefData();
     wxPenRefData(const wxPenRefData& rData);
@@ -58,6 +58,7 @@ protected:
 // Pen
 class WXDLLEXPORT wxPen : public wxGDIObject
 {
+    DECLARE_DYNAMIC_CLASS(wxPen)
 public:
     wxPen();
     wxPen( const wxColour& rColour
@@ -79,6 +80,9 @@ public:
 
     inline bool   operator != (const wxPen& rPen) const
         { return !(*this == rPen); }
+
+    virtual bool Ok() const { return IsOk(); }
+    virtual bool IsOk(void) const { return (m_refData != NULL); }
 
     //
     // Override in order to recreate the pen
@@ -123,19 +127,11 @@ public:
     bool     FreeResource(bool bForce = false);
     virtual WXHANDLE GetResourceHandle(void) const;
     bool     IsFree(void) const;
+    void     Unshare(void);
 
 private:
     LINEBUNDLE                     m_vLineBundle;
     AREABUNDLE                     m_vAreaBundle;
-
-protected:
-    virtual wxGDIRefData* CreateGDIRefData() const;
-    virtual wxGDIRefData* CloneGDIRefData(const wxGDIRefData* data) const;
-
-    // same as FreeResource() + RealizeResource()
-    bool Recreate();
-
-    DECLARE_DYNAMIC_CLASS(wxPen)
 }; // end of CLASS wxPen
 
 extern int wx2os2PenStyle(int nWxStyle);

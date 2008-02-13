@@ -30,15 +30,6 @@ class WXDLLIMPEXP_FWD_CORE wxMask;
 class WXDLLIMPEXP_FWD_CORE wxPalette;
 class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
 
-// What kind of transparency should a bitmap copied from an icon or cursor
-// have?
-enum wxBitmapTransparency
-{
-  wxBitmapTransparency_Auto,    // default: copy alpha if the source has it
-  wxBitmapTransparency_None,    // never create alpha
-  wxBitmapTransparency_Always   // always use alpha
-};
-
 // ----------------------------------------------------------------------------
 // wxBitmap: a mono or colour bitmap
 // ----------------------------------------------------------------------------
@@ -89,11 +80,7 @@ public:
 
     // we must have this, otherwise icons are silently copied into bitmaps using
     // the copy ctor but the resulting bitmap is invalid!
-    wxBitmap(const wxIcon& icon,
-             wxBitmapTransparency transp = wxBitmapTransparency_Auto)
-    {
-        CopyFromIcon(icon, transp);
-    }
+    wxBitmap(const wxIcon& icon) { CopyFromIcon(icon); }
 
     wxBitmap& operator=(const wxIcon& icon)
     {
@@ -123,12 +110,10 @@ public:
     wxBitmap GetSubBitmapOfHDC( const wxRect& rect, WXHDC hdc ) const;
 
     // copies the contents and mask of the given (colour) icon to the bitmap
-    bool CopyFromIcon(const wxIcon& icon,
-                      wxBitmapTransparency transp = wxBitmapTransparency_Auto);
+    bool CopyFromIcon(const wxIcon& icon);
 
     // copies the contents and mask of the given cursor to the bitmap
-    bool CopyFromCursor(const wxCursor& cursor,
-                        wxBitmapTransparency transp = wxBitmapTransparency_Auto);
+    bool CopyFromCursor(const wxCursor& cursor);
 
 #if wxUSE_WXDIB
     // copies from a device independent bitmap
@@ -162,6 +147,13 @@ public:
     bool HasAlpha() const;
     void UseAlpha();
 
+#if WXWIN_COMPATIBILITY_2_4
+    // these functions do nothing and are only there for backwards
+    // compatibility
+    wxDEPRECATED( int GetQuality() const );
+    wxDEPRECATED( void SetQuality(int quality) );
+#endif // WXWIN_COMPATIBILITY_2_4
+
     // implementation only from now on
     // -------------------------------
 
@@ -176,7 +168,7 @@ public:
 
 protected:
     virtual wxGDIImageRefData *CreateData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     // creates an uninitialized bitmap, called from Create()s above
     bool DoCreate(int w, int h, int depth, WXHDC hdc);
@@ -194,9 +186,7 @@ protected:
 
 private:
     // common part of CopyFromIcon/CopyFromCursor for Win32
-    bool
-    CopyFromIconOrCursor(const wxGDIImage& icon,
-                         wxBitmapTransparency transp = wxBitmapTransparency_Auto);
+    bool CopyFromIconOrCursor(const wxGDIImage& icon);
 
 
     DECLARE_DYNAMIC_CLASS(wxBitmap)

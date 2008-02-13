@@ -14,7 +14,7 @@
 
 #include "wx/control.h"
 
-WXDLLEXPORT_DATA(extern const char) wxStaticBoxNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxStaticBoxNameStr[];
 
 // Group box
 class WXDLLEXPORT wxStaticBox: public wxControl
@@ -45,7 +45,9 @@ class WXDLLEXPORT wxStaticBox: public wxControl
 
     virtual void GetBordersForSizer(int *borderTop, int *borderOther) const;
     
+#if wxABI_VERSION >= 20807
     virtual bool AcceptsFocus() const { return false; }
+#endif
 };
 
 #endif

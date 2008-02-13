@@ -77,6 +77,7 @@ wxSizerXmlHandler::wxSizerXmlHandler()
     XRC_ADD_STYLE(wxALIGN_CENTER_VERTICAL);
     XRC_ADD_STYLE(wxALIGN_CENTRE_VERTICAL);
 
+    XRC_ADD_STYLE(wxADJUST_MINSIZE);
     XRC_ADD_STYLE(wxFIXED_MINSIZE);
 }
 
@@ -145,9 +146,9 @@ wxObject* wxSizerXmlHandler::Handle_sizeritem()
         wxWindow *wnd = wxDynamicCast(item, wxWindow);
 
         if (sizer)
-            sitem->AssignSizer(sizer);
+            sitem->SetSizer(sizer);
         else if (wnd)
-            sitem->AssignWindow(wnd);
+            sitem->SetWindow(wnd);
         else
             wxLogError(wxT("Error in resource."));
 
@@ -171,7 +172,7 @@ wxObject* wxSizerXmlHandler::Handle_spacer()
 
     wxSizerItem* sitem = MakeSizerItem();
     SetSizerItemAttributes(sitem);
-    sitem->AssignSpacer(GetSize());
+    sitem->SetSpacer(GetSize());
     AddSizerItem(sitem);
     return NULL;
 }
@@ -249,10 +250,8 @@ wxObject* wxSizerXmlHandler::Handle_sizer()
         }
         m_node = nd;
 
-        if (m_parentAsWindow->IsTopLevel())
-        {
+        if (m_parentAsWindow->GetWindowStyle() & (wxMAXIMIZE_BOX | wxRESIZE_BORDER))
             sizer->SetSizeHints(m_parentAsWindow);
-        }
     }
 
     return sizer;
@@ -373,9 +372,6 @@ void wxSizerXmlHandler::SetSizerItemAttributes(wxSizerItem* sitem)
         gbsitem->SetPos(GetGBPos(wxT("cellpos")));
         gbsitem->SetSpan(GetGBSpan(wxT("cellspan")));
     }
-
-    // record the id of the item, if any, for use by XRCSIZERITEM()
-    sitem->SetId(GetID());
 }
 
 void wxSizerXmlHandler::AddSizerItem(wxSizerItem* sitem)

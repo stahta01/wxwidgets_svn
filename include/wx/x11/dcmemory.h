@@ -12,21 +12,16 @@
 #ifndef _WX_DCMEMORY_H_
 #define _WX_DCMEMORY_H_
 
-#include "wx/dc.h"
-#include "wx/dcmemory.h"
-#include "wx/x11/dcclient.h"
+#include "wx/dcclient.h"
 
-class WXDLLIMPEXP_CORE wxMemoryDCImpl : public wxWindowDCImpl
+class WXDLLIMPEXP_CORE wxMemoryDC : public wxWindowDC, public wxMemoryDCBase
 {
 public:
-    wxMemoryDCImpl( wxDC* owner );
-    wxMemoryDCImpl( wxDC* owner, wxBitmap& bitmap);
-    wxMemoryDCImpl( wxDC* owner, wxDC *dc );
-    virtual ~wxMemoryDCImpl();
+    wxMemoryDC() { Init(); }
+    wxMemoryDC(wxBitmap& bitmap) { Init(); SelectObject(bitmap); }
+    wxMemoryDC( wxDC *dc ); // Create compatible DC
+    virtual ~wxMemoryDC();
 
-    virtual const wxBitmap& GetSelectedBitmap() const;
-    virtual wxBitmap& GetSelectedBitmap();
-    
     // implementation
     wxBitmap  m_selected;
 
@@ -37,8 +32,7 @@ protected:
 private:
     void Init();
 
-private:
-    DECLARE_CLASS(wxMemoryDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxMemoryDC)
 };
 
 #endif

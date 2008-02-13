@@ -256,8 +256,6 @@ enum
     Menu_Popup_ToBeChecked,
     Menu_Popup_Submenu,
 
-    Menu_PopupChoice,
-
     Menu_Max
 };
 
@@ -346,9 +344,6 @@ IMPLEMENT_APP(MyApp)
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame* frame = new MyFrame;
 
@@ -548,7 +543,7 @@ MyFrame::MyFrame()
                                 wxTE_MULTILINE);
     m_textctrl->SetEditable(false);
 
-    wxLog::DisableTimestamp();
+    wxLog::SetTimestamp(NULL);
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_textctrl));
 
     wxLogMessage(_T("Brief explanations: the commands or the \"Menu\" menu ")
@@ -721,7 +716,7 @@ void MyFrame::OnGetLabelMenu(wxCommandEvent& WXUNUSED(event))
     wxCHECK_RET( count, _T("no last menu?") );
 
     wxLogMessage(_T("The label of the last menu item is '%s'"),
-                 mbar->GetMenuLabel(count - 1).c_str());
+                 mbar->GetLabelTop(count - 1).c_str());
 }
 
 #if wxUSE_TEXTDLG
@@ -736,13 +731,13 @@ void MyFrame::OnSetLabelMenu(wxCommandEvent& WXUNUSED(event))
                      (
                         _T("Enter new label: "),
                         _T("Change last menu text"),
-                        mbar->GetMenuLabel(count - 1),
+                        mbar->GetLabelTop(count - 1),
                         this
                      );
 
     if ( !label.empty() )
     {
-        mbar->SetMenuLabel(count - 1, label);
+        mbar->SetLabelTop(count - 1, label);
     }
 }
 
@@ -860,9 +855,8 @@ void MyFrame::OnGetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
 
     if ( item )
     {
-        wxString label = item->GetItemLabel();
         wxLogMessage(_T("The label of the last menu item is '%s'"),
-                     label.c_str());
+                     item->GetLabel().c_str());
     }
 }
 
@@ -877,14 +871,14 @@ void MyFrame::OnSetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
                          (
                             _T("Enter new label: "),
                             _T("Change last menu item text"),
-                            item->GetItemLabel(),
+                            item->GetLabel(),
                             this
                          );
         label.Replace( _T("\\t"), _T("\t") );
 
         if ( !label.empty() )
         {
-            item->SetItemLabel(label);
+            item->SetText(label);
         }
     }
 }
@@ -1007,50 +1001,27 @@ void MyFrame::ShowContextMenu(const wxPoint& pos)
 {
     wxMenu menu;
 
-    if ( wxGetKeyState(WXK_SHIFT) )
-    {
-        // when Shift is pressed, demonstrate the use of a simple function
-        // returning the id of the item selected in the popup menu
-        menu.SetTitle("Choose one of:");
-        static const char *choices[] = { "Apple", "Banana", "Cherry" };
-        for ( size_t n = 0; n < WXSIZEOF(choices); n++ )
-            menu.Append(Menu_PopupChoice + n, choices[n]);
+    menu.Append(Menu_Help_About, _T("&About"));
+    menu.Append(Menu_Popup_Submenu, _T("&Submenu"), CreateDummyMenu(NULL));
+    menu.Append(Menu_Popup_ToBeDeleted, _T("To be &deleted"));
+    menu.AppendCheckItem(Menu_Popup_ToBeChecked, _T("To be &checked"));
+    menu.Append(Menu_Popup_ToBeGreyed, _T("To be &greyed"),
+                _T("This menu item should be initially greyed out"));
+    menu.AppendSeparator();
+    menu.Append(Menu_File_Quit, _T("E&xit"));
 
-        const int rc = GetPopupMenuSelectionFromUser(menu, pos);
-        if ( rc == wxID_NONE )
-        {
-            wxLogMessage("No selection");
-        }
-        else
-        {
-            wxLogMessage("You have selected \"%s\"",
-                         choices[rc - Menu_PopupChoice]);
-        }
-    }
-    else // normal case, shift not pressed
-    {
-        menu.Append(Menu_Help_About, _T("&About"));
-        menu.Append(Menu_Popup_Submenu, _T("&Submenu"), CreateDummyMenu(NULL));
-        menu.Append(Menu_Popup_ToBeDeleted, _T("To be &deleted"));
-        menu.AppendCheckItem(Menu_Popup_ToBeChecked, _T("To be &checked"));
-        menu.Append(Menu_Popup_ToBeGreyed, _T("To be &greyed"),
-                    _T("This menu item should be initially greyed out"));
-        menu.AppendSeparator();
-        menu.Append(Menu_File_Quit, _T("E&xit"));
+    menu.Delete(Menu_Popup_ToBeDeleted);
+    menu.Check(Menu_Popup_ToBeChecked, true);
+    menu.Enable(Menu_Popup_ToBeGreyed, false);
 
-        menu.Delete(Menu_Popup_ToBeDeleted);
-        menu.Check(Menu_Popup_ToBeChecked, true);
-        menu.Enable(Menu_Popup_ToBeGreyed, false);
+    PopupMenu(&menu, pos.x, pos.y);
 
-        PopupMenu(&menu, pos);
-
-        // test for destroying items in popup menus
+    // test for destroying items in popup menus
 #if 0 // doesn't work in wxGTK!
-        menu.Destroy(Menu_Popup_Submenu);
+    menu.Destroy(Menu_Popup_Submenu);
 
-        PopupMenu( &menu, event.GetX(), event.GetY() );
+    PopupMenu( &menu, event.GetX(), event.GetY() );
 #endif // 0
-    }
 }
 
 void MyFrame::OnTestNormal(wxCommandEvent& WXUNUSED(event))

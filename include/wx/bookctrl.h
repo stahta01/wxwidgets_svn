@@ -96,6 +96,7 @@ public:
     virtual size_t GetPageCount() const { return m_pages.size(); }
 
     // get the panel which represents the given page
+    wxWindow *GetPage(size_t n) { return m_pages[n]; }
     wxWindow *GetPage(size_t n) const { return m_pages[n]; }
 
     // get the current page or NULL if none
@@ -157,7 +158,6 @@ public:
 
     // returns the sizer containing the control, if any
     wxSizer* GetControlSizer() const { return m_controlSizer; }
-
 
     // operations
     // ----------
@@ -229,11 +229,6 @@ public:
     // we do have multiple pages
     virtual bool HasMultiplePages() const { return true; }
 
-    // we don't want focus for ourselves
-    virtual bool AcceptsFocus() const { return false; }
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
 
 protected:
     // flags for DoSetSelection()
@@ -241,9 +236,6 @@ protected:
     {
         SetSelection_SendEvent = 1
     };
-
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 
     // set the selection to the given page, sending the events (which can
     // possibly prevent the page change from taking place) if SendEvent flag is

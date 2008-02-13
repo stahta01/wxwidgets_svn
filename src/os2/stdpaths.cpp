@@ -82,7 +82,7 @@ wxString wxStandardPaths::GetDataDir() const
 
 wxString wxStandardPaths::GetUserDataDir() const
 {
-    return AppendAppInfo(wxFileName::GetHomeDir() + _T("\\."));
+    return AppendAppName(wxFileName::GetHomeDir() + _T("\\."));
 }
 
 wxString wxStandardPaths::GetPluginsDir() const

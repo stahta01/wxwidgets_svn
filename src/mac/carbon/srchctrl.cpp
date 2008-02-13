@@ -37,10 +37,15 @@ IMPLEMENT_DYNAMIC_CLASS(wxSearchCtrl, wxSearchCtrlBase)
 // wxMacSearchFieldControl
 // ============================================================================
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_2
+
+
 static const EventTypeSpec eventList[] =
 {
     { kEventClassSearchField, kEventSearchFieldCancelClicked } ,
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
     { kEventClassSearchField, kEventSearchFieldSearchClicked } ,
+#endif
 };
 
 class wxMacSearchFieldControl : public wxMacUnicodeTextControl
@@ -66,7 +71,7 @@ public :
 
     virtual void SetDescriptiveText(const wxString& text);
     virtual wxString GetDescriptiveText() const;
-
+    
 protected :
     virtual void CreateControl( wxTextCtrl* peer, const Rect* bounds, CFStringRef crf );
 
@@ -74,12 +79,15 @@ private:
     wxMenu* m_menu;
 } ;
 
-void wxMacSearchFieldControl::CreateControl(wxTextCtrl* WXUNUSED(peer),
-                                            const Rect* bounds,
-                                            CFStringRef WXUNUSED(crf))
+void wxMacSearchFieldControl::CreateControl( wxTextCtrl* /*peer*/, const Rect* bounds, CFStringRef crf )
 {
-    OptionBits attributes = kHISearchFieldAttributesSearchIcon;
-
+    OptionBits attributes = 0;
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if ( UMAGetSystemVersion() >= 0x1040 )
+    {
+        attributes = kHISearchFieldAttributesSearchIcon;
+    }
+#endif
     HIRect hibounds = { { bounds->left, bounds->top }, { bounds->right-bounds->left, bounds->bottom-bounds->top } };
     verify_noerr( HISearchFieldCreate(
         &hibounds,
@@ -94,24 +102,33 @@ void wxMacSearchFieldControl::CreateControl(wxTextCtrl* WXUNUSED(peer),
 // search field options
 void wxMacSearchFieldControl::ShowSearchButton( bool show )
 {
-    OptionBits set = 0;
-    OptionBits clear = 0;
-    if ( show )
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if ( UMAGetSystemVersion() >= 0x1040 )
     {
-        set |= kHISearchFieldAttributesSearchIcon;
+        OptionBits set = 0;
+        OptionBits clear = 0;
+        if ( show )
+        {
+            set |= kHISearchFieldAttributesSearchIcon;
+        }
+        else
+        {
+            clear |= kHISearchFieldAttributesSearchIcon;
+        }
+        HISearchFieldChangeAttributes( m_controlRef, set, clear );
     }
-    else
-    {
-        clear |= kHISearchFieldAttributesSearchIcon;
-    }
-    HISearchFieldChangeAttributes( m_controlRef, set, clear );
+#endif
 }
 
 bool wxMacSearchFieldControl::IsSearchButtonVisible() const
 {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
     OptionBits attributes = 0;
     verify_noerr( HISearchFieldGetAttributes( m_controlRef, &attributes ) );
     return ( attributes & kHISearchFieldAttributesSearchIcon ) != 0;
+#else
+    return false;
+#endif
 }
 
 void wxMacSearchFieldControl::ShowCancelButton( bool show )
@@ -159,7 +176,7 @@ void wxMacSearchFieldControl::SetDescriptiveText(const wxString& text)
 {
     verify_noerr( HISearchFieldSetDescriptiveText(
                       m_controlRef,
-                      wxCFStringRef( text, wxFont::GetDefaultEncoding() )));
+                      wxMacCFStringHolder( text, wxFont::GetDefaultEncoding() )));
 }
 
 wxString wxMacSearchFieldControl::GetDescriptiveText() const
@@ -168,13 +185,15 @@ wxString wxMacSearchFieldControl::GetDescriptiveText() const
     verify_noerr( HISearchFieldCopyDescriptiveText( m_controlRef, &cfStr ));
     if ( cfStr )
     {
-        return wxCFStringRef(cfStr).AsString();
+        return wxMacCFStringHolder(cfStr).AsString();
     }
     else
     {
         return wxEmptyString;
     }
 }
+
+#endif
 
 // ============================================================================
 // implementation
@@ -195,9 +214,11 @@ static pascal OSStatus wxMacSearchControlEventHandler( EventHandlerCallRef handl
         case kEventSearchFieldCancelClicked :
             thisWindow->MacSearchFieldCancelHit( handler , event ) ;
             break ;
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
         case kEventSearchFieldSearchClicked :
             thisWindow->MacSearchFieldSearchHit( handler , event ) ;
             break ;
+#endif
     }
 
     return result ;
@@ -253,8 +274,6 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
     InstallControlEventHandler( m_peer->GetControlRef(), GetwxMacSearchControlEventHandlerUPP(),
         GetEventTypeCount(eventList), eventList, this,
         (EventHandlerRef *)&searchEventHandler);
-
-    SetValue(value);
 
     return true;
 }
@@ -390,7 +409,18 @@ void wxSearchCtrl::CreatePeer(
            const wxPoint& pos,
            const wxSize& size, long style )
 {
-    m_peer = new wxMacSearchFieldControl( this , str , pos , size , style );
+#ifdef __WXMAC_OSX__
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_2
+    if ( UMAGetSystemVersion() >= 0x1030 )
+    {
+        m_peer = new wxMacSearchFieldControl( this , str , pos , size , style );
+    }
+#endif
+#endif
+    if ( !m_peer )
+    {
+        wxTextCtrl::CreatePeer( str, pos, size, style );
+    }
 }
 
 #endif // wxUSE_NATIVE_SEARCH_CONTROL

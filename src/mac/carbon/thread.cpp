@@ -25,8 +25,19 @@
 
 #include "wx/thread.h"
 
-#include <CoreServices/CoreServices.h>
+#ifdef __WXMAC__
+#ifdef __DARWIN__
+    #include <CoreServices/CoreServices.h>
+#else
+    #include <DriverServices.h>
+    #include <Multiprocessing.h>
+#endif
+
 #include "wx/mac/uma.h"
+#endif
+
+#include "wx/mac/macnotfy.h"
+
 
 // the possible states of the thread:
 // ("=>" shows all possible transitions from this state)
@@ -125,9 +136,15 @@ void wxCriticalSection::Leave()
 // wxMutex implementation
 // ----------------------------------------------------------------------------
 
+#if TARGET_API_MAC_OSX
 #define wxUSE_MAC_SEMAPHORE_MUTEX 0
 #define wxUSE_MAC_CRITICAL_REGION_MUTEX 1
 #define wxUSE_MAC_PTHREADS_MUTEX 0
+#else
+#define wxUSE_MAC_SEMAPHORE_MUTEX 0
+#define wxUSE_MAC_CRITICAL_REGION_MUTEX 1
+#define wxUSE_MAC_PTHREADS_MUTEX 0
+#endif
 
 #if wxUSE_MAC_PTHREADS_MUTEX
 
@@ -401,10 +418,10 @@ public:
     wxMutexInternal( wxMutexType mutexType );
     virtual ~wxMutexInternal();
 
-    bool IsOk() const { return m_isOk; }
+    bool IsOk() const
+    { return m_isOk; }
 
-    wxMutexError Lock() { return Lock(kDurationForever); }
-    wxMutexError Lock(unsigned long ms);
+    wxMutexError Lock() ;
     wxMutexError TryLock();
     wxMutexError Unlock();
 
@@ -413,7 +430,7 @@ private:
     bool m_isOk ;
 };
 
-wxMutexInternal::wxMutexInternal( wxMutexType WXUNUSED(mutexType) )
+wxMutexInternal::wxMutexInternal( wxMutexType mutexType )
 {
     m_isOk = false;
     m_critRegion = kInvalidID;
@@ -434,23 +451,15 @@ wxMutexInternal::~wxMutexInternal()
     MPYield();
 }
 
-wxMutexError wxMutexInternal::Lock(unsigned long ms)
+wxMutexError wxMutexInternal::Lock()
 {
     wxCHECK_MSG( m_isOk , wxMUTEX_MISC_ERROR , wxT("Invalid Mutex") );
 
-    OSStatus err = MPEnterCriticalRegion( m_critRegion, ms );
-    switch ( err )
+    OSStatus err = MPEnterCriticalRegion( m_critRegion, kDurationForever);
+    if (err != noErr)
     {
-        case noErr:
-            break;
-
-        case kMPTimeoutErr:
-            wxASSERT_MSG( ms != kDurationForever, wxT("unexpected timeout") );
-            return wxMUTEX_TIMEOUT;
-
-        default:
-            wxLogSysError(wxT("Could not lock mutex"));
-            return wxMUTEX_MISC_ERROR;
+        wxLogSysError(wxT("Could not lock mutex"));
+        return wxMUTEX_MISC_ERROR;
     }
 
     return wxMUTEX_NO_ERROR;
@@ -1238,7 +1247,9 @@ bool wxThread::IsMain()
 
 void wxThread::Yield()
 {
+#if TARGET_API_MAC_OSX
     CFRunLoopRunInMode( kCFRunLoopDefaultMode , 0 , true ) ;
+#endif
 
     MPYield();
 }
@@ -1259,7 +1270,7 @@ unsigned long wxThread::GetCurrentId()
     return (unsigned long)MPCurrentTaskID();
 }
 
-bool wxThread::SetConcurrency( size_t WXUNUSED(level) )
+bool wxThread::SetConcurrency( size_t level )
 {
     // Cannot be set in MacOS.
     return false;
@@ -1679,7 +1690,7 @@ void wxThreadModule::OnExit()
 // GUI Serialization copied from MSW implementation
 // ----------------------------------------------------------------------------
 
-void wxMutexGuiEnterImpl()
+void WXDLLIMPEXP_BASE wxMutexGuiEnter()
 {
     // this would dead lock everything...
     wxASSERT_MSG( !wxThread::IsMain(),
@@ -1701,7 +1712,7 @@ void wxMutexGuiEnterImpl()
     gs_critsectGui->Enter();
 }
 
-void wxMutexGuiLeaveImpl()
+void WXDLLIMPEXP_BASE wxMutexGuiLeave()
 {
     wxCriticalSectionLocker enter(*gs_critsectWaitingForGui);
 

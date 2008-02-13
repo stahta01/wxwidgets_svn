@@ -7,11 +7,11 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_CHOICE_H_
-#define _WX_GTK_CHOICE_H_
+#ifndef __GTKCHOICEH__
+#define __GTKCHOICEH__
 
-class WXDLLIMPEXP_FWD_BASE wxSortedArrayString;
-class WXDLLIMPEXP_FWD_BASE wxArrayString;
+class WXDLLIMPEXP_BASE wxSortedArrayString;
+class WXDLLIMPEXP_BASE wxArrayString;
 
 //-----------------------------------------------------------------------------
 // wxChoice
@@ -61,6 +61,10 @@ public:
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxChoiceNameStr );
 
+    // implement base class pure virtuals
+    void Delete(unsigned int n);
+    void Clear();
+
     int GetSelection() const;
     void SetSelection(int n);
 
@@ -73,24 +77,22 @@ public:
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
-    void DoDeleteOneItem(unsigned int n);
-    void DoClear();
-
-    wxArrayPtrVoid m_clientData; // contains the client data for the items
+    wxList m_clientList;    // contains the client data for the items
 
     virtual wxSize DoGetBestSize() const;
     virtual void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
 
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
 
 private:
-    // DoInsertItems() helper
+    // common part of Create() and DoAppend()
     int GtkAddHelper(GtkWidget *menu, unsigned int pos, const wxString& item);
 
     // this array is only used for controls with wxCB_SORT style, so only
@@ -107,4 +109,4 @@ private:
 };
 
 
-#endif // _WX_GTK_CHOICE_H_
+#endif // __GTKCHOICEH__

@@ -23,21 +23,14 @@
 #endif
 
 
-class WXDLLIMPEXP_FWD_CORE wxPrintNativeDataBase;
+class WXDLLEXPORT wxPrintNativeDataBase;
 
 
-class WXDLLEXPORT wxColourData : public wxObject
+class WXDLLEXPORT wxColourData: public wxObject
 {
 public:
-    // number of custom colours we store
-    enum
-    {
-        NUM_CUSTOM = 16
-    };
-
     wxColourData();
     wxColourData(const wxColourData& data);
-    wxColourData& operator=(const wxColourData& data);
     virtual ~wxColourData();
 
     void SetChooseFull(bool flag) { m_chooseFull = flag; }
@@ -46,18 +39,15 @@ public:
     const wxColour& GetColour() const { return m_dataColour; }
     wxColour& GetColour() { return m_dataColour; }
 
-    // These functions modify colours in an internal array of NUM_CUSTOM custom
-    // colours
+    // Array of 16 custom colours
     void SetCustomColour(int i, const wxColour& colour);
     wxColour GetCustomColour(int i);
 
-    // Serialize the object to a string and restore it from it
-    wxString ToString() const;
-    bool FromString(const wxString& str);
+    void operator=(const wxColourData& data);
 
-public: // TODO: make these fields private
+public:
     wxColour        m_dataColour;
-    wxColour        m_custColours[NUM_CUSTOM];
+    wxColour        m_custColours[16];
     bool            m_chooseFull;
 
 private:
@@ -87,20 +77,17 @@ public:
 
     wxFontData& operator=(const wxFontData& data)
     {
-        if (&data != this)
-        {
-            wxObject::operator=(data);
-            m_fontColour     = data.m_fontColour;
-            m_showHelp       = data.m_showHelp;
-            m_allowSymbols   = data.m_allowSymbols;
-            m_enableEffects  = data.m_enableEffects;
-            m_initialFont    = data.m_initialFont;
-            m_chosenFont     = data.m_chosenFont;
-            m_minSize        = data.m_minSize;
-            m_maxSize        = data.m_maxSize;
-            m_encoding       = data.m_encoding;
-            m_encodingInfo   = data.m_encodingInfo;
-        }
+        wxObject::operator=(data);
+        m_fontColour     = data.m_fontColour;
+        m_showHelp       = data.m_showHelp;
+        m_allowSymbols   = data.m_allowSymbols;
+        m_enableEffects  = data.m_enableEffects;
+        m_initialFont    = data.m_initialFont;
+        m_chosenFont     = data.m_chosenFont;
+        m_minSize        = data.m_minSize;
+        m_maxSize        = data.m_maxSize;
+        m_encoding       = data.m_encoding;
+        m_encodingInfo   = data.m_encodingInfo;
         return *this;
     }
 
@@ -233,6 +220,29 @@ public:
     void SetPrivData( char *privData, int len );
 
 
+#if WXWIN_COMPATIBILITY_2_4
+    // PostScript-specific data
+    wxString GetPrinterCommand() const;
+    wxString GetPrinterOptions() const;
+    wxString GetPreviewCommand() const;
+    wxString GetFontMetricPath() const;
+    double GetPrinterScaleX() const;
+    double GetPrinterScaleY() const;
+    long GetPrinterTranslateX() const;
+    long GetPrinterTranslateY() const;
+
+    void SetPrinterCommand(const wxString& command);
+    void SetPrinterOptions(const wxString& options);
+    void SetPreviewCommand(const wxString& command);
+    void SetFontMetricPath(const wxString& path);
+    void SetPrinterScaleX(double x);
+    void SetPrinterScaleY(double y);
+    void SetPrinterScaling(double x, double y);
+    void SetPrinterTranslateX(long x);
+    void SetPrinterTranslateY(long y);
+    void SetPrinterTranslation(long x, long y);
+#endif
+
     // Convert between wxPrintData and native data
     void ConvertToNative();
     void ConvertFromNative();
@@ -291,7 +301,9 @@ public:
     bool GetSelection() const { return m_printSelection; }
     bool GetCollate() const { return m_printCollate; }
     bool GetPrintToFile() const { return m_printToFile; }
-
+#if WXWIN_COMPATIBILITY_2_4
+    bool GetSetupDialog() const { return m_printSetupDialog; }
+#endif
     void SetFromPage(int v) { m_printFromPage = v; }
     void SetToPage(int v) { m_printToPage = v; }
     void SetMinPage(int v) { m_printMinPage = v; }
@@ -301,7 +313,9 @@ public:
     void SetSelection(bool flag) { m_printSelection = flag; }
     void SetCollate(bool flag) { m_printCollate = flag; }
     void SetPrintToFile(bool flag) { m_printToFile = flag; }
-
+#if WXWIN_COMPATIBILITY_2_4
+    void SetSetupDialog(bool flag) { m_printSetupDialog = flag; }
+#endif
     void EnablePrintToFile(bool flag) { m_printEnablePrintToFile = flag; }
     void EnableSelection(bool flag) { m_printEnableSelection = flag; }
     void EnablePageNumbers(bool flag) { m_printEnablePageNumbers = flag; }
@@ -336,6 +350,9 @@ private:
     bool            m_printEnablePageNumbers;
     bool            m_printEnableHelp;
     bool            m_printEnablePrintToFile;
+#if WXWIN_COMPATIBILITY_2_4
+    bool            m_printSetupDialog;
+#endif
     wxPrintData     m_printData;
 
 private:

@@ -5,16 +5,11 @@
 
 \wxheading{Derived from}
 
-\helpref{wxInputStream}{wxinputstream}\\
-\helpref{wxStreamBase}{wxstreambase}
+\helpref{wxInputStream}{wxinputstream}
 
 \wxheading{Include files}
 
 <wx/mstream.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
 
 \wxheading{See also}
 
@@ -38,16 +33,6 @@ buffer, i.e. the buffer will not be deleted in its destructor.
 Creates a new read-only memory stream, initializing it with the
 data from the given output stream \arg{stream}.
 
-\func{}{wxMemoryInputStream}{\param{wxInputStream\&}{ stream}, \param{wxFileOffset}{ len = wxInvalidOffset}}
-
-Creates a new read-only memory stream, initializing it with the
-data from the given input stream \arg{stream}.
-
-The \arg{len} argument specifies the amount of data to read from
-the \arg{stream}. Setting it to {\it wxInvalidOffset} means that
-the \arg{stream} is to be read entirely (i.e. till the EOF is reached).
-
-
 \membersection{wxMemoryInputStream::\destruct{wxMemoryInputStream}}\label{wxmemoryinputstreamdtor}
 
 \func{}{\destruct{wxMemoryInputStream}}{\void}
@@ -68,16 +53,11 @@ for that stream.
 
 \wxheading{Derived from}
 
-\helpref{wxOutputStream}{wxoutputstream}\\
-\helpref{wxStreamBase}{wxstreambase}
+\helpref{wxOutputStream}{wxoutputstream}
 
 \wxheading{Include files}
 
 <wx/mstream.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
 
 \wxheading{See also}
 

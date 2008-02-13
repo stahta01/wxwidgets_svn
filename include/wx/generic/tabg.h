@@ -20,7 +20,7 @@
 #include "wx/panel.h"
 #include "wx/list.h"
 
-class WXDLLIMPEXP_FWD_CORE wxTabView;
+class WXDLLEXPORT wxTabView;
 
 /*
  * A wxTabControl is the internal and visual representation
@@ -102,7 +102,11 @@ public:
   virtual ~wxTabView();
 
   inline int GetNumberOfLayers() const { return m_layers.GetCount(); }
+#if WXWIN_COMPATIBILITY_2_4
+  inline wxList& GetLayers() { return *(wxList *)&m_layers; }
+#else
   inline wxTabLayerList& GetLayers() { return m_layers; }
+#endif
 
   inline void SetWindow(wxWindow* wnd) { m_window = wnd; }
   inline wxWindow* GetWindow(void) const { return m_window; }

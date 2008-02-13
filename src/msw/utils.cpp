@@ -25,10 +25,12 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h"     // CHARSET_HANGUL
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
+    #include "wx/timer.h"
 #endif  //WX_PRECOMP
 
 #include "wx/msw/registry.h"
@@ -40,7 +42,6 @@
 #include "wx/confbase.h"        // for wxExpandEnvVars()
 
 #include "wx/msw/private.h"     // includes <windows.h>
-#include "wx/msw/missing.h"     // for CHARSET_HANGUL
 
 #if defined(__CYGWIN__)
     //CYGWIN gives annoying warning about runtime stuff if we don't do this
@@ -55,7 +56,7 @@
     #include <winsock.h>
 #endif
 
-#if !defined(__GNUWIN32__) && !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#if !defined(__GNUWIN32__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
     #include <direct.h>
 
     #ifndef __MWERKS__
@@ -158,7 +159,7 @@ bool wxGetHostName(wxChar *WXUNUSED_IN_WINCE(buf),
 // get full hostname (with domain name if possible)
 bool wxGetFullHostName(wxChar *buf, int maxSize)
 {
-#if !defined( __WXMICROWIN__) && wxUSE_DYNLIB_CLASS && wxUSE_SOCKETS
+#if !defined( __WXMICROWIN__) && wxUSE_DYNAMIC_LOADER && wxUSE_SOCKETS
     // TODO should use GetComputerNameEx() when available
 
     // we don't want to always link with Winsock DLL as we might not use it at
@@ -286,7 +287,7 @@ bool wxGetUserName(wxChar *buf, int maxSize)
 {
     wxCHECK_MSG( buf && ( maxSize > 0 ), false,
                     _T("empty buffer in wxGetUserName") );
-#if defined(__WXWINCE__) && wxUSE_REGKEY
+#if defined(__WXWINCE__)
     wxLogNull noLog;
     wxRegKey key(wxRegKey::HKCU, wxT("ControlPanel\\Owner"));
     if(!key.Open(wxRegKey::Read))
@@ -467,14 +468,14 @@ const wxChar* wxGetHomeDir(wxString *pstr)
     return strDir.c_str();
 }
 
-wxString wxGetUserHome(const wxString& user)
+wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
 {
-    wxString home;
+    // VZ: the old code here never worked for user != "" anyhow! Moreover, it
+    //     returned sometimes a malloc()'d pointer, sometimes a pointer to a
+    //     static buffer and sometimes I don't even know what.
+    static wxString s_home;
 
-    if ( user.empty() || user == wxGetUserId() )
-        wxGetHomeDir(&home);
-
-    return home;
+    return (wxChar *)wxGetHomeDir(&s_home);
 }
 
 bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
@@ -514,7 +515,7 @@ bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
         ULARGE_INTEGER bytesFree, bytesTotal;
 
         // may pass the path as is, GetDiskFreeSpaceEx() is smart enough
-        if ( !pGetDiskFreeSpaceEx(path.fn_str(),
+        if ( !pGetDiskFreeSpaceEx(path,
                                   &bytesFree,
                                   &bytesTotal,
                                   NULL) )
@@ -564,7 +565,7 @@ bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
 
         // FIXME: this is wrong, we should extract the root drive from path
         //        instead, but this is the job for wxFileName...
-        if ( !::GetDiskFreeSpace(path.fn_str(),
+        if ( !::GetDiskFreeSpace(path,
                                  &lSectorsPerCluster,
                                  &lBytesPerSector,
                                  &lNumberOfFreeClusters,
@@ -608,7 +609,7 @@ bool wxGetEnv(const wxString& WXUNUSED_IN_WINCE(var),
     return false;
 #else // Win32
     // first get the size of the buffer
-    DWORD dwRet = ::GetEnvironmentVariable(var.wx_str(), NULL, 0);
+    DWORD dwRet = ::GetEnvironmentVariable(var, NULL, 0);
     if ( !dwRet )
     {
         // this means that there is no such variable
@@ -617,8 +618,7 @@ bool wxGetEnv(const wxString& WXUNUSED_IN_WINCE(var),
 
     if ( value )
     {
-        (void)::GetEnvironmentVariable(var.wx_str(),
-                                       wxStringBuffer(*value, dwRet),
+        (void)::GetEnvironmentVariable(var, wxStringBuffer(*value, dwRet),
                                        dwRet);
     }
 
@@ -626,8 +626,8 @@ bool wxGetEnv(const wxString& WXUNUSED_IN_WINCE(var),
 #endif // WinCE/32
 }
 
-bool wxDoSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
-                const wxChar *WXUNUSED_IN_WINCE(value))
+bool wxSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
+              const wxChar *WXUNUSED_IN_WINCE(value))
 {
     // some compilers have putenv() or _putenv() or _wputenv() but it's better
     // to always use Win32 function directly instead of dealing with them
@@ -635,7 +635,7 @@ bool wxDoSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
     // no environment variables under CE
     return false;
 #else
-    if ( !::SetEnvironmentVariable(var.wx_str(), value) )
+    if ( !::SetEnvironmentVariable(var, value) )
     {
         wxLogLastError(_T("SetEnvironmentVariable"));
 
@@ -644,16 +644,6 @@ bool wxDoSetEnv(const wxString& WXUNUSED_IN_WINCE(var),
 
     return true;
 #endif
-}
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.wx_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
 }
 
 // ----------------------------------------------------------------------------
@@ -1176,7 +1166,7 @@ bool wxIsPlatform64Bit()
 {
 #if defined(_WIN64)
     return true;  // 64-bit programs run only on Win64
-#elif wxUSE_DYNLIB_CLASS // Win32
+#else // Win32
     // 32-bit programs run on both 32-bit and 64-bit Windows so check
     typedef BOOL (WINAPI *IsWow64Process_t)(HANDLE, BOOL *);
 
@@ -1192,71 +1182,37 @@ bool wxIsPlatform64Bit()
     //else: running under a system without Win64 support
 
     return wow64 != FALSE;
-#else
-    return false;
 #endif // Win64/Win32
 }
 
 wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
 {
-    static struct
+    OSVERSIONINFO info;
+    wxZeroMemory(info);
+
+    info.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    if ( ::GetVersionEx(&info) )
     {
-        // this may be false, true or -1 if we tried to initialize but failed
-        int initialized;
-
-        wxOperatingSystemId os;
-
-        int verMaj,
-            verMin;
-    } s_version;
-
-    // query the OS info only once as it's not supposed to change
-    if ( !s_version.initialized )
-    {
-        OSVERSIONINFO info;
-        wxZeroMemory(info);
-        info.dwOSVersionInfoSize = sizeof(info);
-        if ( ::GetVersionEx(&info) )
-        {
-            s_version.initialized = true;
-
-#if defined(__WXWINCE__)
-            s_version.os = wxOS_WINDOWS_CE;
-#elif defined(__WXMICROWIN__)
-            s_version.os = wxOS_WINDOWS_MICRO;
-#else // "normal" desktop Windows system, use run-time detection
-            switch ( info.dwPlatformId )
-            {
-                case VER_PLATFORM_WIN32_NT:
-                    s_version.os = wxOS_WINDOWS_NT;
-                    break;
-
-                case VER_PLATFORM_WIN32_WINDOWS:
-                    s_version.os = wxOS_WINDOWS_9X;
-                    break;
-            }
-#endif // Windows versions
-
-            s_version.verMaj = info.dwMajorVersion;
-            s_version.verMin = info.dwMinorVersion;
-        }
-        else // GetVersionEx() failed
-        {
-            s_version.initialized = -1;
-        }
+        if (verMaj) *verMaj = info.dwMajorVersion;
+        if (verMin) *verMin = info.dwMinorVersion;
     }
 
-    if ( s_version.initialized == 1 )
+#if defined( __WXWINCE__ )
+    return wxOS_WINDOWS_CE;
+#elif defined( __WXMICROWIN__ )
+    return wxOS_WINDOWS_MICRO;
+#else
+    switch ( info.dwPlatformId )
     {
-        if ( verMaj )
-            *verMaj = s_version.verMaj;
-        if ( verMin )
-            *verMin = s_version.verMin;
+    case VER_PLATFORM_WIN32_NT:
+        return wxOS_WINDOWS_NT;
+
+    case VER_PLATFORM_WIN32_WINDOWS:
+        return wxOS_WINDOWS_9X;
     }
 
-    // this works even if we were not initialized successfully as the initial
-    // values of this field is 0 which is wxOS_UNKNOWN and exactly what we need
-    return s_version.os;
+    return wxOS_UNKNOWN;
+#endif
 }
 
 wxWinVersion wxGetWinVersion()
@@ -1439,10 +1395,8 @@ extern WXDLLIMPEXP_BASE long wxEncodingToCodepage(wxFontEncoding encoding)
         case wxFONTENCODING_ISO8859_13:     ret = 28603; break;
         // case wxFONTENCODING_ISO8859_14:     ret = 28604; break; // no correspondence on Windows
         case wxFONTENCODING_ISO8859_15:     ret = 28605; break;
-
         case wxFONTENCODING_KOI8:           ret = 20866; break;
         case wxFONTENCODING_KOI8_U:         ret = 21866; break;
-
         case wxFONTENCODING_CP437:          ret = 437; break;
         case wxFONTENCODING_CP850:          ret = 850; break;
         case wxFONTENCODING_CP852:          ret = 852; break;
@@ -1461,9 +1415,7 @@ extern WXDLLIMPEXP_BASE long wxEncodingToCodepage(wxFontEncoding encoding)
         case wxFONTENCODING_CP1255:         ret = 1255; break;
         case wxFONTENCODING_CP1256:         ret = 1256; break;
         case wxFONTENCODING_CP1257:         ret = 1257; break;
-
         case wxFONTENCODING_EUC_JP:         ret = 20932; break;
-
         case wxFONTENCODING_MACROMAN:       ret = 10000; break;
         case wxFONTENCODING_MACJAPANESE:    ret = 10001; break;
         case wxFONTENCODING_MACCHINESETRAD: ret = 10002; break;
@@ -1478,12 +1430,8 @@ extern WXDLLIMPEXP_BASE long wxEncodingToCodepage(wxFontEncoding encoding)
         case wxFONTENCODING_MACCROATIAN:    ret = 10082; break;
         case wxFONTENCODING_MACICELANDIC:   ret = 10079; break;
         case wxFONTENCODING_MACROMANIAN:    ret = 10009; break;
-
-        case wxFONTENCODING_ISO2022_JP:     ret = 50222; break;
-
         case wxFONTENCODING_UTF7:           ret = 65000; break;
         case wxFONTENCODING_UTF8:           ret = 65001; break;
-
         default:                            return -1;
     }
 
@@ -1497,7 +1445,7 @@ extern WXDLLIMPEXP_BASE long wxEncodingToCodepage(wxFontEncoding encoding)
     return (long) ret;
 }
 
-extern long wxCharsetToCodepage(const char *name)
+extern long wxCharsetToCodepage(const wxChar *name)
 {
     // first get the font encoding for this charset
     if ( !name )
@@ -1516,14 +1464,13 @@ extern long wxCharsetToCodepage(const char *name)
 #include "wx/msw/registry.h"
 
 // this should work if Internet Exploiter is installed
-extern long wxCharsetToCodepage(const char *name)
+extern long wxCharsetToCodepage(const wxChar *name)
 {
     if (!name)
         return GetACP();
 
     long CP = -1;
 
-#if wxUSE_REGKEY
     wxString path(wxT("MIME\\Database\\Charset\\"));
     wxString cn(name);
 
@@ -1549,7 +1496,6 @@ extern long wxCharsetToCodepage(const char *name)
             !key.QueryValue(wxT("AliasForCharset"), cn))
             break;
     }
-#endif // wxUSE_REGKEY
 
     return CP;
 }

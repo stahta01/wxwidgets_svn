@@ -56,7 +56,6 @@ enum
     wxCONTROL_ISSUBMENU  = wxCONTROL_SPECIAL, // only for the menu items
     wxCONTROL_EXPANDED   = wxCONTROL_SPECIAL, // only for the tree items
     wxCONTROL_SIZEGRIP   = wxCONTROL_SPECIAL, // only for the status bar panes
-    wxCONTROL_FLAT       = wxCONTROL_SPECIAL, // checkboxes only: flat border
     wxCONTROL_CURRENT    = 0x00000010,  // mouse is currently over the control
     wxCONTROL_SELECTED   = 0x00000020,  // selected item in e.g. listbox
     wxCONTROL_CHECKED    = 0x00000040,  // (check/radio button) is checked
@@ -247,11 +246,6 @@ public:
                                        const wxRect& rect,
                                        int flags = 0) = 0;
 
-    // draw the focus rectangle around the label contained in the given rect
-    //
-    // only wxCONTROL_SELECTED makes sense in flags here
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0) = 0;
-
     // geometry functions
     // ------------------
 
@@ -384,9 +378,6 @@ public:
                                        const wxRect& rect,
                                        int flags = 0 )
         { m_rendererNative.DrawItemSelectionRect( win, dc, rect, flags ); }
-
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0)
-        { m_rendererNative.DrawFocusRect( win, dc, rect, flags ); }
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win)
         { return m_rendererNative.GetSplitterParams(win); }

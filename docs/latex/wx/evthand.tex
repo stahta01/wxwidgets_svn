@@ -18,10 +18,6 @@ will be identical to the "this" pointer for the wxEvtHandler portion.
 
 <wx/event.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \overview{Event handling overview}{eventhandlingoverview}
@@ -44,7 +40,7 @@ each other.
 
 \membersection{wxEvtHandler::AddPendingEvent}\label{wxevthandleraddpendingevent}
 
-\func{virtual void}{AddPendingEvent}{\param{const wxEvent\& }{event}}
+\func{void}{AddPendingEvent}{\param{wxEvent\& }{event}}
 
 This function posts an event to be processed later.
 
@@ -104,7 +100,7 @@ argument, it defaults to \texttt{wxID\_ANY}.}
 
 \docparam{function}{The event handler function. Note that this function should
 be explicitly converted to the correct type which can be done using a macro
-called \texttt{wxFooEventHandler} for the handler for any \texttt{wxFooEvent}.}
+called \texttt{wxFooHandler} for the handler for any \texttt{wxFooEvent}.}
 
 \docparam{userData}{Data to be associated with the event table entry.}
 
@@ -273,30 +269,6 @@ recursively applied to the parent window's event handler. If this returns true, 
 \wxheading{See also}
 
 \helpref{wxEvtHandler::SearchEventTable}{wxevthandlersearcheventtable}
-
-
-\membersection{wxEvtHandler::SafelyProcessEvent}\label{wxevthandlersafelyprocessevent}
-
-\func{bool}{SafelyProcessEvent}{\param{wxEvent\& }{event}}
-
-Processes an event by calling \helpref{ProcessEvent}{wxevthandlerprocessevent}
-and handles any exceptions that occur in the process. If an exception is
-thrown in event handler, \helpref{wxApp::OnExceptionInMainLoop}{wxapponexceptioninmainloop}
-is called.
-
-\wxheading{Parameters}
-
-\docparam{event}{Event to process.}
-
-\wxheading{Return value}
-
-\true if the event was processed, \false if no handler was found or an
-exception was thrown.
-
-\wxheading{See also}
-
-\helpref{wxWindow::HandleWindowEvent}{wxwindowhandlewindowevent}
-
 
 \membersection{wxEvtHandler::SearchEventTable}\label{wxevthandlersearcheventtable}
 

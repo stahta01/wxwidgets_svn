@@ -1,38 +1,84 @@
 /* ///////////////////////////////////////////////////////////////////////////
 // Name:        win_gtk.h
-// Purpose:     native GTK+ widget for wxWindow
+// Purpose:     wxWidgets's GTK base widget = GtkPizza
 // Author:      Robert Roebling
 // Id:          $Id$
 // Copyright:   (c) 1998 Robert Roebling
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////// */
 
-#ifndef _WX_GTK_PIZZA_H_
-#define _WX_GTK_PIZZA_H_
 
-#include <gtk/gtkfixed.h>
+#ifndef __GTK_PIZZA_H__
+#define __GTK_PIZZA_H__
 
-#define WX_PIZZA(obj) G_TYPE_CHECK_INSTANCE_CAST(obj, wxPizza::type(), wxPizza)
-#define WX_IS_PIZZA(obj) G_TYPE_CHECK_INSTANCE_TYPE(obj, wxPizza::type())
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-struct WXDLLIMPEXP_CORE wxPizza
+#include <gtk/gtkcontainer.h>
+
+#include "wx/dlimpexp.h"
+
+#define GTK_PIZZA(obj)          GTK_CHECK_CAST (obj, gtk_pizza_get_type (), GtkPizza)
+#define GTK_IS_PIZZA(obj)       GTK_CHECK_TYPE (obj, gtk_pizza_get_type ())
+
+typedef struct _GtkPizza        GtkPizza;
+
+struct _GtkPizza
 {
-    // borders styles which can be used with wxPizza
-    enum { BORDER_STYLES =
-        wxBORDER_SIMPLE | wxBORDER_RAISED | wxBORDER_SUNKEN | wxBORDER_THEME };
+    GtkContainer container;
+    GList *children;
 
-    static GtkWidget* New(long windowStyle = 0);
-    static GType type();
-    void move(GtkWidget* widget, int x, int y);
-    void scroll(int dx, int dy);
-    void get_border_widths(int& x, int& y);
-
-    GtkFixed m_fixed;
-    GdkWindow* m_backing_window;
-    int m_scroll_x;
-    int m_scroll_y;
-    int m_border_style;
-    bool m_is_scrollable;
+    guint m_xoffset;
+    guint m_yoffset;
+    
+    GdkWindow *bin_window;
 };
 
-#endif // _WX_GTK_PIZZA_H_
+WXDLLIMPEXP_CORE
+GtkType    gtk_pizza_get_type        (void);
+WXDLLIMPEXP_CORE
+GtkWidget* gtk_pizza_new             (void);
+
+/* accessors */
+
+WXDLLIMPEXP_CORE
+gint       gtk_pizza_get_xoffset     (GtkPizza          *pizza); 
+WXDLLIMPEXP_CORE
+gint       gtk_pizza_get_yoffset     (GtkPizza          *pizza); 
+WXDLLIMPEXP_CORE
+void       gtk_pizza_set_xoffset     (GtkPizza          *pizza, gint xoffset); 
+WXDLLIMPEXP_CORE
+void       gtk_pizza_set_yoffset     (GtkPizza          *pizza, gint yoffset); 
+
+
+WXDLLIMPEXP_CORE
+gint       gtk_pizza_get_rtl_offset  (GtkPizza          *pizza); 
+
+
+WXDLLIMPEXP_CORE
+void       gtk_pizza_scroll          (GtkPizza          *pizza,
+                                      gint               dx,
+                                      gint               dy);
+
+WXDLLIMPEXP_CORE
+void       gtk_pizza_put             (GtkPizza          *pizza,
+                                      GtkWidget         *widget,
+                                      gint               x,
+                                      gint               y,
+                                      gint               width,
+                                      gint               height);
+
+WXDLLIMPEXP_CORE
+void       gtk_pizza_set_size        (GtkPizza          *pizza,
+                                      GtkWidget         *widget,
+                                      gint               x,
+                                      gint               y,
+                                      gint               width,
+                                      gint               height);
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+
+#endif /* __GTK_PIZZA_H__ */

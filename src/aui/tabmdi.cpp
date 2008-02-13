@@ -128,7 +128,7 @@ wxAuiTabArt* wxAuiMDIParentFrame::GetArtProvider()
 {
     if (!m_pClientWindow)
         return NULL;
-
+    
     return m_pClientWindow->GetArtProvider();
 }
 
@@ -179,13 +179,13 @@ void wxAuiMDIParentFrame::SetChildMenuBar(wxAuiMDIChildFrame* pChild)
         // No Child, set Our menu bar back.
         if (m_pMyMenuBar)
             SetMenuBar(m_pMyMenuBar);
-        else
+             else
             SetMenuBar(GetMenuBar());
 
         // Make sure we know our menu bar is in use
         m_pMyMenuBar = NULL;
     }
-    else
+     else
     {
         if (pChild->GetMenuBar() == NULL)
             return;
@@ -205,7 +205,7 @@ bool wxAuiMDIParentFrame::ProcessEvent(wxEvent& event)
     if (m_pLastEvt == &event)
         return false;
     m_pLastEvt = &event;
-
+    
     // let the active child (if any) process the event first.
     bool res = false;
     if (m_pActiveChild &&
@@ -314,7 +314,7 @@ void wxAuiMDIParentFrame::AddWindowMenu(wxMenuBar *pMenuBar)
         int pos = pMenuBar->FindMenu(wxGetStockLabel(wxID_HELP,wxSTOCK_NOFLAGS));
         if (pos == wxNOT_FOUND)
             pMenuBar->Append(m_pWindowMenu, _("&Window"));
-        else
+             else
             pMenuBar->Insert(pos, m_pWindowMenu, _("&Window"));
     }
 }
@@ -357,16 +357,16 @@ void wxAuiMDIParentFrame::Tile(wxOrientation orient)
 {
     wxAuiMDIClientWindow* client_window = GetClientWindow();
     wxASSERT_MSG(client_window, wxT("Missing MDI Client Window"));
-
+    
     int cur_idx = client_window->GetSelection();
     if (cur_idx == -1)
         return;
-
+        
     if (orient == wxVERTICAL)
     {
         client_window->Split(cur_idx, wxLEFT);
     }
-    else if (orient == wxHORIZONTAL)
+     else if (orient == wxHORIZONTAL)
     {
         client_window->Split(cur_idx, wxTOP);
     }
@@ -399,7 +399,7 @@ wxAuiMDIChildFrame::wxAuiMDIChildFrame(wxAuiMDIParentFrame *parent,
                                        const wxString& name)
 {
     Init();
-
+    
     // There are two ways to create an tabbed mdi child fram without
     // making it the active document.  Either Show(false) can be called
     // before Create() (as is customary on some ports with wxFrame-type
@@ -409,7 +409,7 @@ wxAuiMDIChildFrame::wxAuiMDIChildFrame(wxAuiMDIParentFrame *parent,
     // onto the panel underneath.
     if (style & wxMINIMIZE)
         m_activate_on_create = false;
-
+        
     Create(parent, id, title, wxDefaultPosition, size, 0, name);
 }
 
@@ -421,7 +421,7 @@ wxAuiMDIChildFrame::~wxAuiMDIChildFrame()
         pParentFrame->SetActiveChild(NULL);
         pParentFrame->SetChildMenuBar(NULL);
     }
-
+    
 #if wxUSE_MENUS
     wxDELETE(m_pMenuBar);
 #endif // wxUSE_MENUS
@@ -446,10 +446,10 @@ bool wxAuiMDIChildFrame::Create(wxAuiMDIParentFrame* parent,
 
     // create the window off-screen to prevent flicker
     wxPanel::Create(pClientWindow,
-                    id,
-                    wxPoint(cli_size.x+1, cli_size.y+1),
-                    size,
-                    wxNO_BORDER, name);
+		    id,
+		    wxPoint(cli_size.x+1, cli_size.y+1),
+		    size,
+		    wxNO_BORDER, name);
 
     DoShow(false);
 
@@ -462,7 +462,7 @@ bool wxAuiMDIChildFrame::Create(wxAuiMDIParentFrame* parent,
 
     pClientWindow->AddPage(this, title, m_activate_on_create);
     pClientWindow->Refresh();
-
+    
     return true;
 }
 
@@ -480,7 +480,7 @@ bool wxAuiMDIChildFrame::Destroy()
         wxActivateEvent event(wxEVT_ACTIVATE, false, GetId());
         event.SetEventObject(this);
         GetEventHandler()->ProcessEvent(event);
-
+        
         pParentFrame->SetActiveChild(NULL);
         pParentFrame->SetChildMenuBar(NULL);
     }
@@ -568,15 +568,15 @@ void wxAuiMDIChildFrame::SetIcon(const wxIcon& icon)
     wxASSERT_MSG(pParentFrame, wxT("Missing MDI Parent Frame"));
 
     m_icon = icon;
-
+    
     wxBitmap bmp;
     bmp.CopyFromIcon(m_icon);
-
+        
     wxAuiMDIClientWindow* pClientWindow = pParentFrame->GetClientWindow();
     if (pClientWindow != NULL)
     {
         int idx = pClientWindow->GetPageIndex(this);
-
+        
         if (idx != -1)
         {
             pClientWindow->SetPageBitmap((size_t)idx, bmp);
@@ -588,8 +588,8 @@ const wxIcon& wxAuiMDIChildFrame::GetIcon() const
 {
     return m_icon;
 }
-
-
+    
+    
 void wxAuiMDIChildFrame::Activate()
 {
     wxAuiMDIParentFrame* pParentFrame = GetMDIParentFrame();
@@ -657,7 +657,7 @@ void wxAuiMDIChildFrame::Init()
 bool wxAuiMDIChildFrame::Show(bool show)
 {
     m_activate_on_create = show;
-
+    
     // do nothing
     return true;
 }
@@ -716,18 +716,17 @@ wxAuiMDIClientWindow::wxAuiMDIClientWindow(wxAuiMDIParentFrame* parent, long sty
 
 wxAuiMDIClientWindow::~wxAuiMDIClientWindow()
 {
-    DestroyChildren();
 }
 
 bool wxAuiMDIClientWindow::CreateClient(wxAuiMDIParentFrame* parent, long style)
 {
     SetWindowStyleFlag(style);
 
-    wxSize caption_icon_size =
+    wxSize caption_icon_size = 
             wxSize(wxSystemSettings::GetMetric(wxSYS_SMALLICON_X),
                    wxSystemSettings::GetMetric(wxSYS_SMALLICON_Y));
     SetUniformBitmapSize(caption_icon_size);
-
+    
     if (!wxAuiNotebook::Create(parent,
                                wxID_ANY,
                                wxPoint(0,0),
@@ -755,7 +754,7 @@ void wxAuiMDIClientWindow::PageChanged(int old_selection, int new_selection)
     // don't do anything if the page doesn't actually change
     if (old_selection == new_selection)
         return;
-
+        
     /*
     // don't do anything if the new page is already active
     if (new_selection != -1)
@@ -764,8 +763,8 @@ void wxAuiMDIClientWindow::PageChanged(int old_selection, int new_selection)
         if (child->GetMDIParentFrame()->GetActiveChild() == child)
             return;
     }*/
-
-
+    
+    
     // notify old active child that it has been deactivated
     if (old_selection != -1)
     {
@@ -776,24 +775,24 @@ void wxAuiMDIClientWindow::PageChanged(int old_selection, int new_selection)
         event.SetEventObject(old_child);
         old_child->GetEventHandler()->ProcessEvent(event);
     }
-
+     
     // notify new active child that it has been activated
     if (new_selection != -1)
     {
         wxAuiMDIChildFrame* active_child = (wxAuiMDIChildFrame*)GetPage(new_selection);
         wxASSERT_MSG(active_child, wxT("wxAuiMDIClientWindow::PageChanged - null page pointer"));
-
+        
         wxActivateEvent event(wxEVT_ACTIVATE, true, active_child->GetId());
         event.SetEventObject(active_child);
         active_child->GetEventHandler()->ProcessEvent(event);
-
+        
         if (active_child->GetMDIParentFrame())
         {
             active_child->GetMDIParentFrame()->SetActiveChild(active_child);
             active_child->GetMDIParentFrame()->SetChildMenuBar(active_child);
         }
     }
-
+    
 
 }
 
@@ -801,9 +800,9 @@ void wxAuiMDIClientWindow::OnPageClose(wxAuiNotebookEvent& evt)
 {
     wxAuiMDIChildFrame* wnd;
     wnd = static_cast<wxAuiMDIChildFrame*>(GetPage(evt.GetSelection()));
-
+    
     wnd->Close();
-
+    
     // regardless of the result of wnd->Close(), we've
     // already taken care of the close operations, so
     // suppress further processing

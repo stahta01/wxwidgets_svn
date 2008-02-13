@@ -19,7 +19,7 @@ class wxPipe;
 // wxAppTraits: the Unix version adds extra hooks needed by Unix code
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxAppTraits : public wxAppTraitsBase
+class WXDLLEXPORT wxAppTraits : public wxAppTraitsBase
 {
 public:
     // wxExecute() support methods
@@ -48,13 +48,6 @@ public:
     // ----------------
 
     // TODO
-
-#if wxUSE_SOCKETS
-    // returns the select()-based socket manager for console applications which
-    // is also used by some ports (wxX11, wxDFB) in the GUI build (hence it is
-    // here and not in wxConsoleAppTraits)
-    virtual GSocketManager *GetSocketManager();
-#endif
 };
 
 #endif // _WX_UNIX_APPTBASE_H_

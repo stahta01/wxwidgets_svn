@@ -44,7 +44,7 @@ bool wxButton::Create(wxWindow *parent,
     if ( !wxButtonBase::Create(parent, id, pos, size, style, validator, name) )
         return false;
 
-    m_labelOrig = m_label = label ;
+    m_label = label ;
 
     OSStatus err;
     Rect bounds = wxMacGetBoundsForControl( this , pos , size ) ;
@@ -61,6 +61,7 @@ bool wxButton::Create(wxWindow *parent,
     }
     else if ( label.Find('\n' ) == wxNOT_FOUND && label.Find('\r' ) == wxNOT_FOUND)
     {
+#if TARGET_API_MAC_OSX
         // Button height is static in Mac, can't be changed, so we need to force it here
         if ( GetWindowVariant() == wxWINDOW_VARIANT_NORMAL || GetWindowVariant() == wxWINDOW_VARIANT_LARGE )
         {
@@ -77,6 +78,8 @@ bool wxButton::Create(wxWindow *parent,
             bounds.bottom = bounds.top + 15 ;
             m_maxHeight = 15 ;
         }
+#endif
+
         err = CreatePushButtonControl(
             MAC_WXHWND(parent->MacGetTopLevelWindowRef()),
             &bounds, CFSTR(""), m_peer->GetControlRefAddr() );
@@ -99,19 +102,20 @@ bool wxButton::Create(wxWindow *parent,
     return true;
 }
 
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
-    wxWindow *btnOldDefault = wxButtonBase::SetDefault();
-
-    if ( btnOldDefault )
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxButton *btnOldDefault = NULL;
+    if ( tlw )
     {
-        // cast needed to access the protected member
-        btnOldDefault->GetPeer()->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 0 ) ;
+        btnOldDefault = wxDynamicCast(tlw->GetDefaultItem(), wxButton);
+        tlw->SetDefaultItem(this);
     }
 
-    m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 1 ) ;
+    if ( btnOldDefault )
+        btnOldDefault->m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 0 ) ;
 
-    return btnOldDefault;
+    m_peer->SetData(kControlButtonPart , kControlPushButtonDefaultTag , (Boolean) 1 ) ;
 }
 
 wxSize wxButton::DoGetBestSize() const
@@ -152,10 +156,10 @@ wxSize wxButton::DoGetBestSize() const
         OSStatus err = m_peer->GetData<ControlFontStyleRec>( kControlEntireControl, kControlFontStyleTag, &controlFont );
         verify_noerr( err );
 
-        wxCFStringRef str( m_label,  m_font.GetEncoding() );
-
-#if wxMAC_USE_ATSU_TEXT
         SInt16 baseline;
+        wxMacCFStringHolder str( m_label,  m_font.GetEncoding() );
+
+#ifndef __LP64__
         if ( m_font.MacGetThemeFontID() != kThemeCurrentPortFont )
         {
             err = GetThemeTextDimensions(
@@ -166,11 +170,23 @@ wxSize wxButton::DoGetBestSize() const
         else
 #endif
         {
+#if wxMAC_USE_CORE_GRAPHICS
             wxClientDC dc(const_cast<wxButton*>(this));
             wxCoord width, height ;
             dc.GetTextExtent( m_label , &width, &height);
             bounds.h = width;
             bounds.v = height;
+#else
+            wxMacWindowStateSaver sv( this );
+            ::TextFont( m_font.MacGetFontNum() );
+            ::TextSize( (short)(m_font.MacGetFontSize()) );
+            ::TextFace( m_font.MacGetFontStyle() );
+
+            err = GetThemeTextDimensions(
+                (!m_label.empty() ? (CFStringRef)str : CFSTR(" ")),
+                kThemeCurrentPortFont, kThemeStateActive, false, &bounds, &baseline );
+            verify_noerr( err );
+#endif
         }
 
         wBtn = bounds.h + sz.y;
@@ -210,64 +226,3 @@ wxInt32 wxButton::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTREF
 
     return noErr;
 }
-
-//-------------------------------------------------------
-// wxDisclosureTriangle
-//-------------------------------------------------------
-
-bool wxDisclosureTriangle::Create(wxWindow *parent, wxWindowID id, const wxString& label,
-   const wxPoint& pos, const wxSize& size, long style,const wxValidator& validator, const wxString& name )
-{
-    m_macIsUserPane = false ;
-
-    if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
-        return false;
-
-    Rect bounds = wxMacGetBoundsForControl( this , pos , size ) ;
-    m_peer = new wxMacControl(this) ;
-
-    OSStatus err = CreateDisclosureTriangleControl(
-            MAC_WXHWND(parent->MacGetTopLevelWindowRef()) , &bounds, 
-            kControlDisclosureTrianglePointDefault,
-            wxCFStringRef( label ),
-            0,    // closed
-            TRUE, // draw title
-            TRUE, // auto toggle back and forth
-            m_peer->GetControlRefAddr() );
-           
-    verify_noerr( err );
-    wxASSERT_MSG( m_peer != NULL && m_peer->Ok() , wxT("No valid Mac control") ) ;
-
-    MacPostControlCreate( pos, size );
-    // passing the text in the param doesn't seem to work, so lets do if again
-    SetLabel( label );
-    
-    return true;
-}
-
-void wxDisclosureTriangle::SetOpen( bool open )
-{
-    m_peer->SetValue( open ? 1 : 0 );
-}
-
-bool wxDisclosureTriangle::IsOpen() const
-{
-   return m_peer->GetValue() == 1;
-}
-
-wxInt32 wxDisclosureTriangle::MacControlHit( WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTREF WXUNUSED(event) )
-{
-    // Just emit button event for now
-    wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, m_windowId);
-    event.SetEventObject(this);
-    ProcessCommand(event);
-
-    return noErr;
-}
-
-wxSize wxDisclosureTriangle::DoGetBestSize() const
-{
-    return wxSize(16,16);
-}
-
-

@@ -46,8 +46,10 @@
 IMPLEMENT_DYNAMIC_CLASS(wxToolbook, wxBookCtrlBase)
 IMPLEMENT_DYNAMIC_CLASS(wxToolbookEvent, wxNotifyEvent)
 
+#if !WXWIN_COMPATIBILITY_EVENT_TYPES
 const wxEventType wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGING = wxNewEventType();
 const wxEventType wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGED = wxNewEventType();
+#endif
 
 BEGIN_EVENT_TABLE(wxToolbook, wxBookCtrlBase)
     EVT_SIZE(wxToolbook::OnSize)
@@ -87,19 +89,14 @@ bool wxToolbook::Create(wxWindow *parent,
                             wxDefaultValidator, name) )
         return false;
 
-    int tbFlags = wxTB_TEXT | wxTB_FLAT | wxBORDER_NONE;
-    if ( (style & (wxBK_LEFT | wxBK_RIGHT)) != 0 )
-        tbFlags |= wxTB_VERTICAL;
-    else
-        tbFlags |= wxTB_HORIZONTAL;
-
-    if ( style & wxTBK_HORZ_LAYOUT )
-        tbFlags |= wxTB_HORZ_LAYOUT;
+    int orient = wxTB_HORIZONTAL;
+    if ( (style & (wxBK_LEFT | wxBK_RIGHT)) != 0)
+        orient = wxTB_VERTICAL;
 
     // TODO: make more configurable
 
 #if defined(__WXMAC__) && wxUSE_TOOLBAR && wxUSE_BMPBUTTON
-    if (style & wxTBK_BUTTONBAR)
+    if (style & wxBK_BUTTONBAR)
     {
         m_bookctrl = new wxButtonToolBar
                  (
@@ -107,7 +104,7 @@ bool wxToolbook::Create(wxWindow *parent,
                     wxID_ANY,
                     wxDefaultPosition,
                     wxDefaultSize,
-                    tbFlags
+                    orient|wxTB_TEXT|wxTB_FLAT|wxNO_BORDER
                  );
     }
     else
@@ -119,7 +116,7 @@ bool wxToolbook::Create(wxWindow *parent,
                     wxID_ANY,
                     wxDefaultPosition,
                     wxDefaultSize,
-                    tbFlags | wxTB_NODIVIDER
+                    orient|wxTB_TEXT|wxTB_FLAT|wxTB_NODIVIDER|wxNO_BORDER
                  );
     }
 

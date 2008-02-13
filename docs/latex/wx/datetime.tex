@@ -175,10 +175,6 @@ No base class
 
 <wx/datetime.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{Date classes overview}{wxdatetimeoverview},\rtfsp
@@ -331,10 +327,9 @@ date and time representations for the current locale (
 \helpref{FormatDate}{wxdatetimeformatdate} and
 \helpref{FormatTime}{wxdatetimeformattime}), using the international standard
 representation defined by ISO 8601 (
-\helpref{FormatISODate}{wxdatetimeformatisodate},
-\helpref{FormatISOTime}{wxdatetimeformatisotime} and
-\helpref{FormatISOCombined}{wxdatetimeformatisocombined}) or by specifying any
-format at all and using \helpref{Format}{wxdatetimeformat} directly.
+\helpref{FormatISODate}{wxdatetimeformatisodate} and
+\helpref{FormatISOTime}{wxdatetimeformatisotime}) or by specifying any format
+at all and using \helpref{Format}{wxdatetimeformat} directly.
 
 The conversions from text are more interesting, as there are much more
 possibilities to care about. The simplest cases can be taken care of with
@@ -356,26 +351,14 @@ format. As an example, \helpref{ParseDateTime}{wxdatetimeparsedatetime} can
 parse the strings such as {\tt "tomorrow"}, {\tt "March first"} and even
 {\tt "next Sunday"}.
 
-Finally notice that each of the parsing functions is available in several
-overloads: if the input string is a narrow (\texttt{char *}) string, then a
-narrow pointer is returned. If the input string is a wide string, a wide char
-pointer is returned. Finally, if the input parameter is a wxString, a narrow
-char pointer is also returned for backwards compatibility but there is also an
-additional argument of wxString::const\_iterator type in which, if it is not
-\NULL, an iterator pointing to the end of the scanned string part is returned.
-
+\helpref{ParseRfc822Date}{wxdatetimeparserfc822date}\\
 \helpref{ParseFormat}{wxdatetimeparseformat}\\
 \helpref{ParseDateTime}{wxdatetimeparsedatetime}\\
 \helpref{ParseDate}{wxdatetimeparsedate}\\
 \helpref{ParseTime}{wxdatetimeparsetime}\\
-\helpref{ParseISODate}{wxdatetimeparseisodate}\\
-\helpref{ParseISOTime}{wxdatetimeparseisotime}\\
-\helpref{ParseISOCombined}{wxdatetimeparseisocombined}\\
-\helpref{ParseRfc822Date}{wxdatetimeparserfc822date}\\
 \helpref{Format}{wxdatetimeformat}\\
 \helpref{FormatDate}{wxdatetimeformatdate}\\
 \helpref{FormatTime}{wxdatetimeformattime}\\
-\helpref{FormatISOCombined}{wxdatetimeformatisocombined}\\
 \helpref{FormatISODate}{wxdatetimeformatisodate}\\
 \helpref{FormatISOTime}{wxdatetimeformatisotime}
 
@@ -1182,13 +1165,9 @@ as wxTimeSpan.
 
 \membersection{wxDateTime::ParseRfc822Date}\label{wxdatetimeparserfc822date}
 
-\func{const char *}{ParseRfc822Date}{\param{const wxString\& }{date}, \param{wxString::const\_iterator *}{end = \NULL}}
+\func{const wxChar *}{ParseRfc822Date}{\param{const wxChar* }{date}}
 
-\func{const char *}{ParseRfc822Date}{\param{const char* }{date}}
-
-\func{const wchar\_t *}{ParseRfc822Date}{\param{const wchar\_t* }{date}}
-
-Parses the string \arg{date} looking for a date formatted according to the RFC
+Parses the string {\it date} looking for a date formatted according to the RFC
 822 in it. The exact description of this format may, of course, be found in
 the RFC (section $5$), but, briefly, this is the format used in the headers of
 Internet email messages and one of the most common strings expressing date in
@@ -1207,11 +1186,7 @@ free ways, you should use \helpref{ParseDateTime}{wxdatetimeparsedatetime} or
 
 \membersection{wxDateTime::ParseFormat}\label{wxdatetimeparseformat}
 
-\func{const char *}{ParseFormat}{\param{const wxString\& }{date}, \param{const wxString\& }{format = wxDefaultDateTimeFormat}, \param{const wxDateTime\& }{dateDef = wxDefaultDateTime}, \param{wxString::const\_iterator *}{end = \NULL}}
-
-\func{const char *}{ParseFormat}{\param{const char *}{date}, \param{const wxString\& }{format = wxDefaultDateTimeFormat}, \param{const wxDateTime\& }{dateDef = wxDefaultDateTime}}
-
-\func{const wchar\_t *}{ParseFormat}{\param{const wchar\_t *}{date}, \param{const wxString\& }{format = wxDefaultDateTimeFormat}, \param{const wxDateTime\& }{dateDef = wxDefaultDateTime}}
+\func{const wxChar *}{ParseFormat}{\param{const wxChar *}{date}, \param{const wxChar *}{format = wxDefaultDateTimeFormat}, \param{const wxDateTime\& }{dateDef = wxDefaultDateTime}}
 
 This function parses the string {\it date} according to the given
 {\it format}. The system {\tt strptime(3)} function is used whenever available,
@@ -1236,11 +1211,7 @@ the character which stopped the scan.
 
 \membersection{wxDateTime::ParseDateTime}\label{wxdatetimeparsedatetime}
 
-\func{const char *}{ParseDateTime}{\param{const wxString\& }{datetime}, \param{wxString::const\_iterator *}{end = \NULL}}
-
-\func{const char *}{ParseDateTime}{\param{const char *}{datetime}}
-
-\func{const wchar\_t *}{ParseDateTime}{\param{const wchar\_t *}{datetime}}
+\func{const wxChar *}{ParseDateTime}{\param{const wxChar *}{datetime}}
 
 Parses the string {\it datetime} containing the date and time in free format.
 This function tries as hard as it can to interpret the given string as date
@@ -1254,11 +1225,7 @@ the character which stopped the scan.
 
 \membersection{wxDateTime::ParseDate}\label{wxdatetimeparsedate}
 
-\func{const char *}{ParseDate}{\param{const wxString\& }{date}, \param{wxString::const\_iterator *}{end = \NULL}}
-
-\func{const char *}{ParseDate}{\param{const char *}{date}}
-
-\func{const wchar\_t *}{ParseDate}{\param{const wchar\_t *}{date}}
+\func{const wxChar *}{ParseDate}{\param{const wxChar *}{date}}
 
 This function is like \helpref{ParseDateTime}{wxdatetimeparsedatetime}, but it
 only allows the date to be specified. It is thus less flexible then
@@ -1271,46 +1238,13 @@ the character which stopped the scan.
 
 \membersection{wxDateTime::ParseTime}\label{wxdatetimeparsetime}
 
-\func{const char *}{ParseTime}{\param{const wxString\& }{time}, \param{wxString::const\_iterator *}{end = \NULL}}
-
-\func{const char *}{ParseTime}{\param{const char *}{time}}
-
-\func{const wchar\_t *}{ParseTime}{\param{const wchar\_t *}{time}}
+\func{const wxChar *}{ParseTime}{\param{const wxChar *}{time}}
 
 This functions is like \helpref{ParseDateTime}{wxdatetimeparsedatetime}, but
 only allows the time to be specified in the input string.
 
 Returns {\tt NULL} if the conversion failed, otherwise return the pointer to
 the character which stopped the scan.
-
-
-\membersection{wxDateTime::ParseISODate}\label{wxdatetimeparseisodate}
-
-\func{bool}{ParseISODate}{\param{const wxString\& }{date}}
-
-This function parses the date in ISO 8601 format (YYYY-MM-DD).
-
-Returns \true if the entire string was parsed successfully, \false otherwise.
-
-
-\membersection{wxDateTime::ParseISOTime}\label{wxdatetimeparseisotime}
-
-\func{bool}{ParseISOTime}{\param{const wxString\& }{date}}
-
-This function parses the time in ISO 8601 format (HH:MM:SS).
-
-Returns \true if the entire string was parsed successfully, \false otherwise.
-
-
-\membersection{wxDateTime::ParseISOCombined}\label{wxdatetimeparseisocombined}
-
-\func{bool}{ParseISOCombined}{\param{const wxString\& }{date}, \param{char }{sep = 'T'}}
-
-This function parses the string containing the date and time in ISO 8601
-combined format (YYYY-MM-DDTHH:MM:SS). The separator between the date and time
-parts must be equal to \arg{sep} for the function to succeed.
-
-Returns \true if the entire string was parsed successfully, \false otherwise.
 
 
 \membersection{wxDateTime::Format}\label{wxdatetimeformat}
@@ -1343,23 +1277,6 @@ argument (which means `preferred date representation for the current locale').
 
 Identical to calling \helpref{Format()}{wxdatetimeformat} with {\tt "\%X"}
 argument (which means `preferred time representation for the current locale').
-
-
-\membersection{wxDateTime::FormatISOCombined}\label{wxdatetimeformatisocombined}
-
-\constfunc{wxString}{FormatISOCombined}{\param{char }{sep = 'T'}}
-
-Returns the combined date-time representation in the ISO 8601 format
-(YYYY-MM-DDTHH:MM:SS). The \arg{sep} parameter default value produces the
-result exactly corresponding to the ISO standard, but it can also be useful to
-use a space as seprator if a more human-readable combined date-time
-representation is needed.
-
-\wxheading{See also}
-
-\helpref{FormatISODate}{wxdatetimeformatisodate},\\
-\helpref{FormatISOTime}{wxdatetimeformatisotime},\\
-\helpref{ParseISOCombined}{wxdatetimeparseisocombined}
 
 
 \membersection{wxDateTime::FormatISODate}\label{wxdatetimeformatisodate}
@@ -1647,37 +1564,9 @@ Returns {\tt true} if the DST is applied for this date in the given country.
 
 \section{\class{wxDateTimeHolidayAuthority}}\label{wxdatetimeholidayauthority}
 
-\wxheading{Derived from}
-
-No base class
-
-\wxheading{Include files}
-
-<wx/datetime.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
-\latexignore{\rtfignore{\wxheading{Members}}}
-
 TODO
 
 \section{\class{wxDateTimeWorkDays}}\label{wxdatetimeworkdays}
-
-\wxheading{Derived from}
-
-No base class
-
-\wxheading{Include files}
-
-<wx/datetime.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 TODO
 

@@ -12,9 +12,6 @@
 
 #include "wx/frame.h"
 
-class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
-class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
-
 //-----------------------------------------------------------------------------
 // wxMDIParentFrame
 //-----------------------------------------------------------------------------
@@ -61,11 +58,11 @@ public:
     wxMDIClientWindow  *m_clientWindow;
     bool                m_justInserted;
 
+    virtual void GtkOnSize();
     virtual void OnInternalIdle();
 
 protected:
     void Init();
-    virtual void DoGetClientSize(int* width, int* height) const;
 
 private:
     friend class wxMDIChildFrame;
@@ -118,6 +115,14 @@ public:
     virtual void SetStatusWidths( int WXUNUSED(n), const int WXUNUSED(widths_field)[] ) {}
 #endif
 
+    // no size hints
+    virtual void DoSetSizeHints( int WXUNUSED(minW),
+                                 int WXUNUSED(minH),
+                                 int WXUNUSED(maxW) = wxDefaultCoord,
+                                 int WXUNUSED(maxH) = wxDefaultCoord,
+                                 int WXUNUSED(incW) = wxDefaultCoord,
+                                 int WXUNUSED(incH) = wxDefaultCoord) {}
+
 #if wxUSE_TOOLBAR
     // no toolbar
     virtual wxToolBar* CreateToolBar( long WXUNUSED(style),
@@ -128,6 +133,8 @@ public:
 #endif // wxUSE_TOOLBAR
 
     // no icon
+    virtual void SetIcon(const wxIcon& icon)
+        { wxTopLevelWindowBase::SetIcon(icon); }
     virtual void SetIcons(const wxIconBundle& icons )
         { wxTopLevelWindowBase::SetIcons(icons); }
 
@@ -159,11 +166,8 @@ protected:
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
-
-    // no size hints
-    virtual void DoSetSizeHints(int WXUNUSED(minW), int WXUNUSED(minH),
-                                int WXUNUSED(maxW), int WXUNUSED(maxH),
-                                int WXUNUSED(incW), int WXUNUSED(incH)) {}
+    virtual void DoSetClientSize(int width, int height);
+    virtual void DoGetClientSize( int *width, int *height ) const;
 
 private:
     DECLARE_EVENT_TABLE()

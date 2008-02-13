@@ -224,15 +224,13 @@ GdkBitmap *wxMask::GetBitmap() const
 // wxBitmap
 //-----------------------------------------------------------------------------
 
-class wxBitmapRefData : public wxGDIRefData
+class wxBitmapRefData: public wxObjectRefData
 {
 public:
     wxBitmapRefData();
     wxBitmapRefData(const wxBitmapRefData& data);
     bool Create(int width, int height, int bpp);
     virtual ~wxBitmapRefData();
-
-    virtual bool IsOk() const { return m_pixmap || m_bitmap; }
 
     GdkPixmap      *m_pixmap;
     GdkBitmap      *m_bitmap;
@@ -362,12 +360,12 @@ wxBitmap::wxBitmap( int width, int height, int depth )
     Create( width, height, depth );
 }
 
-wxGDIRefData *wxBitmap::CreateGDIRefData() const
+wxObjectRefData *wxBitmap::CreateRefData() const
 {
     return new wxBitmapRefData;
 }
 
-wxGDIRefData *wxBitmap::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBitmapRefData(*wx_static_cast(const wxBitmapRefData *, data));
 }
@@ -1139,6 +1137,12 @@ wxBitmap::~wxBitmap()
 {
 }
 
+bool wxBitmap::IsOk() const
+{
+    return (m_refData != NULL) &&
+           (M_BMPDATA->m_bitmap || M_BMPDATA->m_pixmap);
+}
+
 int wxBitmap::GetHeight() const
 {
     wxCHECK_MSG( Ok(), -1, wxT("invalid bitmap") );
@@ -1359,7 +1363,7 @@ GdkBitmap *wxBitmap::GetBitmap() const
     return M_BMPDATA->m_bitmap;
 }
 
-void *wxBitmap::GetRawData(wxPixelDataBase& WXUNUSED(data), int WXUNUSED(bpp))
+void *wxBitmap::GetRawData(wxPixelDataBase& data, int bpp)
 {
     return NULL;
 }
@@ -1371,6 +1375,10 @@ void wxBitmap::UngetRawData(wxPixelDataBase& WXUNUSED(data))
 bool wxBitmap::HasAlpha() const
 {
     return false;
+}
+
+void wxBitmap::UseAlpha()
+{
 }
 
 //-----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/common/effects.cpp
-// Purpose:     wxEffectsImpl implementation
+// Purpose:     wxEffects implementation
 // Author:      Julian Smart
 // Modified by:
 // Created:     25/4/2000
@@ -26,13 +26,13 @@
 #endif //WX_PRECOMP
 
 /*
- * wxEffectsImpl: various 3D effects
+ * wxEffects: various 3D effects
  */
 
-IMPLEMENT_CLASS(wxEffectsImpl, wxObject)
+IMPLEMENT_CLASS(wxEffects, wxObject)
 
 // Assume system colours
-wxEffectsImpl::wxEffectsImpl()
+wxEffects::wxEffects()
 {
     m_highlightColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DHILIGHT) ;
     m_lightShadow = wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT) ;
@@ -42,7 +42,7 @@ wxEffectsImpl::wxEffectsImpl()
 }
 
 // Going from lightest to darkest
-wxEffectsImpl::wxEffectsImpl(const wxColour& highlightColour, const wxColour& lightShadow,
+wxEffects::wxEffects(const wxColour& highlightColour, const wxColour& lightShadow,
                 const wxColour& faceColour, const wxColour& mediumShadow, const wxColour& darkShadow)
 {
     m_highlightColour = highlightColour;
@@ -53,7 +53,7 @@ wxEffectsImpl::wxEffectsImpl(const wxColour& highlightColour, const wxColour& li
 }
 
 // Draw a sunken edge
-void wxEffectsImpl::DrawSunkenEdge(wxDC& dc, const wxRect& rect, int WXUNUSED(borderSize))
+void wxEffects::DrawSunkenEdge(wxDC& dc, const wxRect& rect, int WXUNUSED(borderSize))
 {
     wxPen highlightPen(m_highlightColour, 1, wxSOLID);
     wxPen lightShadowPen(m_lightShadow, 1, wxSOLID);
@@ -86,7 +86,7 @@ void wxEffectsImpl::DrawSunkenEdge(wxDC& dc, const wxRect& rect, int WXUNUSED(bo
     dc.SetPen(wxNullPen);
 }
 
-bool wxEffectsImpl::TileBitmap(const wxRect& rect, wxDC& dc, const wxBitmap& bitmap)
+bool wxEffects::TileBitmap(const wxRect& rect, wxDC& dc, const wxBitmap& bitmap)
 {
     int w = bitmap.GetWidth();
     int h = bitmap.GetHeight();

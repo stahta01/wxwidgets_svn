@@ -20,18 +20,21 @@ class WXDLLEXPORT wxColour: public wxColourBase
 public:
     // constructors
     // ------------
+
+    // default
+    wxColour();
     DEFINE_STD_WXCOLOUR_CONSTRUCTORS
 
     // copy ctors and assignment operators
-    wxColour(const wxColour& col)
-    {
-        *this = col;
-    }
-
+    wxColour(const wxColour& col);
     wxColour& operator=(const wxColour& col);
 
+    // dtor
+    virtual ~wxColour();
+
     // accessors
-    virtual bool IsOk() const { return m_isInit; }
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_isInit; }
 
     unsigned char Red() const { return m_red; }
     unsigned char Green() const { return m_green; }

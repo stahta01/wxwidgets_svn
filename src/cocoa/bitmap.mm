@@ -47,8 +47,6 @@ public:
     wxBitmapRefData( const wxBitmapRefData& data );
     virtual ~wxBitmapRefData();
 
-    virtual bool IsOk() const { return m_ok; }
-
 protected:
     int                 m_width;
     int                 m_height;
@@ -150,12 +148,12 @@ wxBitmap::wxBitmap(const wxString& filename, wxBitmapType type)
     LoadFile(filename, type);
 }
 
-wxGDIRefData *wxBitmap::CreateGDIRefData() const
+wxObjectRefData *wxBitmap::CreateRefData() const
 {
     return new wxBitmapRefData;
 }
 
-wxGDIRefData *wxBitmap::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBitmapRefData(*(wxBitmapRefData*)data);
 }
@@ -257,6 +255,11 @@ void wxBitmap::SetMask(wxMask *mask)
         m_refData = new wxBitmapRefData;
 
     M_BITMAPDATA->m_bitmapMask = mask ;
+}
+
+bool wxBitmap::IsOk() const
+{
+    return m_refData && M_BITMAPDATA->m_ok;
 }
 
 wxPalette* wxBitmap::GetPalette() const
@@ -540,6 +543,10 @@ void *wxBitmap::GetRawData(wxPixelDataBase& data, int bpp)
 }
 
 void wxBitmap::UngetRawData(wxPixelDataBase& data)
+{   // TODO
+}
+
+void wxBitmap::UseAlpha()
 {   // TODO
 }
 

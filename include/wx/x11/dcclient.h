@@ -13,27 +13,29 @@
 #define _WX_DCCLIENT_H_
 
 #include "wx/dc.h"
-#include "wx/dcclient.h"
-#include "wx/x11/dc.h"
 #include "wx/region.h"
 
 // -----------------------------------------------------------------------------
 // fwd declarations
 // -----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxWindow;
+
+class WXDLLIMPEXP_CORE wxWindowDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxClientDC;
 
 //-----------------------------------------------------------------------------
-// wxWindowDCImpl
+// wxWindowDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowDCImpl : public wxX11DCImpl
+class WXDLLIMPEXP_CORE wxWindowDC : public wxDC
 {
 public:
-    wxWindowDCImpl( wxDC *owner );
-    wxWindowDCImpl( wxDC *owner, wxWindow *win );
-        
-    virtual ~wxWindowDCImpl();
+    wxWindowDC() { Init(); }
+    wxWindowDC( wxWindow *win );
+
+    virtual ~wxWindowDC();
 
     virtual bool CanDrawBitmap() const { return true; }
     virtual bool CanGetTextExtent() const { return true; }
@@ -103,7 +105,7 @@ public:
     virtual wxSize GetPPI() const;
 
     virtual void DestroyClippingRegion();
-    WXWindow GetX11Window() const { return m_x11window; }
+    WXWindow GetWindow() const { return m_window; }
 
     virtual void ComputeScaleAndOrigin();
 
@@ -114,12 +116,12 @@ protected:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     void Init();
 
     WXDisplay    *m_display;
-    WXWindow      m_x11window;
+    WXWindow      m_window;
     WXGC          m_penGC;
     WXGC          m_brushGC;
     WXGC          m_textGC;
@@ -127,6 +129,7 @@ protected:
     WXColormap    m_cmap;
     bool          m_isMemDC;
     bool          m_isScreenDC;
+    wxWindow     *m_owner;
     wxRegion      m_currentClippingRegion;
     wxRegion      m_paintClippingRegion;
 
@@ -139,38 +142,38 @@ protected:
     void Destroy();
 
 private:
-    DECLARE_CLASS(wxWindowDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxWindowDC)
 };
 
 //-----------------------------------------------------------------------------
 // wxClientDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxClientDCImpl : public wxWindowDCImpl
+class WXDLLIMPEXP_CORE wxClientDC : public wxWindowDC
 {
 public:
-    wxClientDCImpl( wxDC *owner ) : wxWindowDCImpl( owner ) { }
-    wxClientDCImpl( wxDC *owner, wxWindow *win );
+    wxClientDC() { }
+    wxClientDC( wxWindow *win );
 
 protected:
     virtual void DoGetSize(int *width, int *height) const;
 
 private:
-    DECLARE_CLASS(wxClientDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxClientDC)
 };
 
 //-----------------------------------------------------------------------------
 // wxPaintDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPaintDCImpl : public wxClientDCImpl
+class WXDLLIMPEXP_CORE wxPaintDC : public wxClientDC
 {
 public:
-    wxPaintDCImpl( wxDC *owner ) : wxClientDCImpl( owner ) { }
-    wxPaintDCImpl( wxDC *owner, wxWindow *win );
+    wxPaintDC() { }
+    wxPaintDC( wxWindow *win );
 
 private:
-    DECLARE_CLASS(wxPaintDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxPaintDC)
 };
 
 #endif

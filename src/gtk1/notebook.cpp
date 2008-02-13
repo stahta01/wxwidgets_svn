@@ -249,7 +249,7 @@ static gint gtk_notebook_key_press_callback( GtkWidget *widget, GdkEventKey *gdk
         event.SetCurrentFocus( notebook );
 
         wxNotebookPage *client = notebook->GetPage(sel);
-        if ( !client->HandleWindowEvent( event ) )
+        if ( !client->GetEventHandler()->ProcessEvent( event ) )
         {
              client->SetFocus();
         }

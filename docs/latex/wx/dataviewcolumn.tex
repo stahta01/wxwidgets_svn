@@ -11,16 +11,15 @@ this class to render its data.
 
 \wxheading{Constants}
 
-These flags define behaviour of the column:
+These flags define behavi
 
 {\small
 \begin{verbatim}
 enum wxDataViewColumnFlags
 {
-    wxDATAVIEW_COL_RESIZABLE    = 1,    // the user can resize the column
-    wxDATAVIEW_COL_SORTABLE     = 2,    // same as SetSortable()
-    wxDATAVIEW_COL_REORDERABLE  = 4,    // column can be reordered
-    wxDATAVIEW_COL_HIDDEN       = 8     // column is hidden
+    wxDATAVIEW_COL_RESIZABLE  = 1,    // the user can resize the column
+    wxDATAVIEW_COL_SORTABLE   = 2,    // same as SetSortable()
+    wxDATAVIEW_COL_HIDDEN     = 4     // column is hidden
 };
 \end{verbatim}
 }
@@ -33,18 +32,13 @@ enum wxDataViewColumnFlags
 
 <wx/dataview.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewColumn::wxDataViewColumn}\label{wxdataviewcolumnwxdataviewcolumn}
 
-\func{}{wxDataViewColumn}{\param{const wxString\& }{title}, \param{wxDataViewRenderer* }{renderer}, \param{unsigned int }{model\_column}, \param{int }{width = wxDVC\_DEFAULT\_WIDTH}, \param{wxAlignment }{align = wxALIGN\_CENTRE}, \param{int }{flags = wxDATAVIEW\_COL\_RESIZABLE}}
+\func{}{wxDataViewColumn}{\param{const wxString\& }{title}, \param{wxDataViewRenderer* }{renderer}, \param{unsigned int }{model\_column}, \param{int }{width = 80}, \param{int }{flags = wxDATAVIEW\_COL\_RESIZABLE}}
 
-\func{}{wxDataViewColumn}{\param{const wxBitmap\& }{bitmap}, \param{wxDataViewRenderer* }{renderer}, \param{unsigned int }{model\_column}, \param{int }{width = wxDVC\_DEFAULT\_WIDTH}, \param{wxAlignment }{align = wxALIGN\_CENTRE}, \param{int }{flags = wxDATAVIEW\_COL\_RESIZABLE}}
+
+\func{}{wxDataViewColumn}{\param{const wxBitmap\& }{bitmap}, \param{wxDataViewRenderer* }{renderer}, \param{unsigned int }{model\_column}, \param{int }{width = 80}, \param{int }{flags = wxDATAVIEW\_COL\_RESIZABLE}}
 
 Constructors.
 
@@ -82,12 +76,6 @@ Returns the renderer of this wxDataViewColumn.
 
 See also \helpref{wxDataViewRenderer}{wxdataviewrenderer}.
 
-\membersection{wxDataViewColumn::GetReorderable}\label{wxdataviewcolumngetreorderable}
-
-\func{bool}{GetReorderable}{\void}
-
-Returns true if the column is reorderable.
-
 \membersection{wxDataViewColumn::GetSortable}\label{wxdataviewcolumngetsortable}
 
 \func{bool}{GetSortable}{\void}
@@ -122,34 +110,25 @@ Set the alignment of the column header.
 
 Set the bitmap of the column header.
 
-\membersection{wxDataViewColumn::SetReorderable}\label{wxdataviewcolumnsetreorderable}
-
-\func{void}{SetReorderable}{\param{bool }{reorderable}}
-
-Indicate wether the column can be reordered by the
-user using the mouse. This is typically implemented 
-visually by dragging the header button around.
-
 \membersection{wxDataViewColumn::SetSortOrder}\label{wxdataviewcolumnsetsortorder}
 
 \func{void}{SetSortOrder}{\param{bool }{ascending}}
 
 Indicate the sort order if the implementation of the
 wxDataViewCtrl supports it, most commonly by showing
-a little arrow. 
+a little arrow. Use this in conjunction with 
+\helpref{wxDataViewSortedListModel::SetAscending}{wxdataviewsortedlistmodelsetascending}
+to sort the actual data.
 
 \membersection{wxDataViewColumn::SetSortable}\label{wxdataviewcolumnsetsortable}
 
 \func{void}{SetSortable}{\param{bool }{sortable}}
 
-Indicate that the column is sortable. This does
-not show any sorting indicate yet, but it does
-make the column header clickable. Call 
-\helpref{SetSortOrder}{wxdataviewcolumnsetsortorder}
-afterwards to actually make the sort indicator appear.
-If {\it sortable} is false, the column header is
-no longer clickable and the sort indicator (little
-arrow) will disappear.
+Indicate that the column is sortable. This is only to provide a
+visual hint in the column (such as a sort order indicator). It
+will not actually sort the data. Use a 
+\helpref{wxDataViewSortedListModel}{wxdataviewsortedlistmodel}
+to so the sorting.
 
 \membersection{wxDataViewColumn::SetTitle}\label{wxdataviewcolumnsettitle}
 

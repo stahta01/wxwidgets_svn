@@ -17,20 +17,19 @@
 #if wxUSE_FILEPICKERCTRL || wxUSE_DIRPICKERCTRL
 
 #include "wx/pickerbase.h"
-#include "wx/filename.h"
 
 class WXDLLIMPEXP_FWD_CORE wxDialog;
 class WXDLLIMPEXP_FWD_CORE wxFileDirPickerEvent;
 
-extern WXDLLEXPORT_DATA(const char) wxFilePickerWidgetLabel[];
-extern WXDLLEXPORT_DATA(const char) wxFilePickerWidgetNameStr[];
-extern WXDLLEXPORT_DATA(const char) wxFilePickerCtrlNameStr[];
-extern WXDLLEXPORT_DATA(const char) wxFileSelectorPromptStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFilePickerWidgetLabel[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFilePickerWidgetNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFilePickerCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFileSelectorPromptStr[];
 
-extern WXDLLEXPORT_DATA(const char) wxDirPickerWidgetLabel[];
-extern WXDLLEXPORT_DATA(const char) wxDirPickerWidgetNameStr[];
-extern WXDLLEXPORT_DATA(const char) wxDirPickerCtrlNameStr[];
-extern WXDLLEXPORT_DATA(const char) wxDirSelectorPromptStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxDirPickerWidgetLabel[];
+extern WXDLLEXPORT_DATA(const wxChar) wxDirPickerWidgetNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxDirPickerCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxDirSelectorPromptStr[];
 
 
 // ----------------------------------------------------------------------------
@@ -216,11 +215,6 @@ public:
                                                    validator, name);
     }
 
-    void SetFileName(const wxFileName &filename)
-        { SetPath(filename.GetFullPath()); }
-
-    wxFileName GetFileName() const
-        { return wxFileName(GetPath()); }
 
 public:     // overrides
 
@@ -237,14 +231,13 @@ public:     // overrides
         { return wxEVT_COMMAND_FILEPICKER_CHANGED; }
 
 protected:
-    virtual
     wxFileDirPickerWidgetBase *CreatePicker(wxWindow *parent,
                                             const wxString& path,
                                             const wxString& message,
                                             const wxString& wildcard)
     {
         return new wxFilePickerWidget(parent, wxID_ANY,
-                                      wxGetTranslation(wxFilePickerWidgetLabel),
+                                      wxFilePickerWidgetLabel,
                                       path, message, wildcard,
                                       wxDefaultPosition, wxDefaultSize,
                                       GetPickerStyle(GetWindowStyle()));
@@ -314,11 +307,6 @@ public:
                );
     }
 
-    void SetDirName(const wxFileName &dirname)
-        { SetPath(dirname.GetPath()); }
-
-    wxFileName GetDirName() const
-        { return wxFileName::DirName(GetPath()); }
 
 public:     // overrides
 
@@ -333,14 +321,12 @@ public:     // overrides
         { return wxEVT_COMMAND_DIRPICKER_CHANGED; }
 
 protected:
-    virtual
     wxFileDirPickerWidgetBase *CreatePicker(wxWindow *parent,
                                             const wxString& path,
                                             const wxString& message,
                                             const wxString& WXUNUSED(wildcard))
     {
-        return new wxDirPickerWidget(parent, wxID_ANY,
-                                     wxGetTranslation(wxDirPickerWidgetLabel),
+        return new wxDirPickerWidget(parent, wxID_ANY, wxDirPickerWidgetLabel,
                                      path, message,
                                      wxDefaultPosition, wxDefaultSize,
                                      GetPickerStyle(GetWindowStyle()));
@@ -363,8 +349,10 @@ private:
 // wxFileDirPickerEvent: used by wxFilePickerCtrl and wxDirPickerCtrl only
 // ----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FILEPICKER_CHANGED;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_DIRPICKER_CHANGED;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_CORE, wxEVT_COMMAND_FILEPICKER_CHANGED, 1102)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_CORE, wxEVT_COMMAND_DIRPICKER_CHANGED, 1103)
+END_DECLARE_EVENT_TYPES()
 
 class WXDLLIMPEXP_CORE wxFileDirPickerEvent : public wxCommandEvent
 {

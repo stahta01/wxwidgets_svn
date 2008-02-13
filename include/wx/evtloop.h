@@ -14,11 +14,13 @@
 
 #include "wx/utils.h"
 
+class WXDLLEXPORT wxEventLoop;
+
 // ----------------------------------------------------------------------------
-// wxEventLoopBase: interface for wxEventLoop
+// wxEventLoop: a GUI event loop
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxEventLoopBase
+class WXDLLEXPORT wxEventLoopBase
 {
 public:
     // trivial, but needed (because of wxEventLoopBase) ctor
@@ -26,10 +28,6 @@ public:
 
     // dtor
     virtual ~wxEventLoopBase() { }
-
-    // use this to check whether the event loop was successfully created before
-    // using it
-    virtual bool IsOk() const { return true; }
 
     // start the event loop, return the exit code when it is finished
     virtual int Run() = 0;
@@ -44,20 +42,16 @@ public:
     virtual bool Dispatch() = 0;
 
     // return currently active (running) event loop, may be NULL
-    static wxEventLoopBase *GetActive() { return ms_activeLoop; }
+    static wxEventLoop *GetActive() { return ms_activeLoop; }
 
     // set currently active (running) event loop
-    static void SetActive(wxEventLoopBase* loop) { ms_activeLoop = loop; }
+    static void SetActive(wxEventLoop* loop) { ms_activeLoop = loop; }
 
     // is this event loop running now?
     //
     // notice that even if this event loop hasn't terminated yet but has just
     // spawned a nested (e.g. modal) event loop, this would return false
     bool IsRunning() const;
-
-    // implement this to wake up the loop: usually done by posting a dummy event
-    // to it (can be called from non main thread)
-    virtual void WakeUp() = 0;
 
 protected:
     // this function should be called before the event loop terminates, whether
@@ -67,18 +61,18 @@ protected:
 
 
     // the pointer to currently active loop
-    static wxEventLoopBase *ms_activeLoop;
+    static wxEventLoop *ms_activeLoop;
 
     DECLARE_NO_COPY_CLASS(wxEventLoopBase)
 };
 
-#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXDFB__) || defined(__UNIX__)
+#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXDFB__)
 
 // this class can be used to implement a standard event loop logic using
 // Pending() and Dispatch()
 //
 // it also handles idle processing automatically
-class WXDLLIMPEXP_BASE wxEventLoopManual : public wxEventLoopBase
+class WXDLLEXPORT wxEventLoopManual : public wxEventLoopBase
 {
 public:
     wxEventLoopManual();
@@ -92,6 +86,10 @@ public:
     virtual void Exit(int rc = 0);
 
 protected:
+    // implement this to wake up the loop: usually done by posting a dummy event
+    // to it (called from Exit())
+    virtual void WakeUp() = 0;
+
     // may be overridden to perform some action at the start of each new event
     // loop iteration
     virtual void OnNextIteration() { }
@@ -121,51 +119,30 @@ protected:
     #include "wx/dfb/evtloop.h"
 #else // other platform
 
-class WXDLLIMPEXP_FWD_CORE wxEventLoopImpl;
+class WXDLLEXPORT wxEventLoopImpl;
 
-class WXDLLEXPORT wxGUIEventLoop : public wxEventLoopBase
+class WXDLLEXPORT wxEventLoop : public wxEventLoopBase
 {
 public:
-    wxGUIEventLoop() { m_impl = NULL; }
-    virtual ~wxGUIEventLoop();
+    wxEventLoop() { m_impl = NULL; }
+    virtual ~wxEventLoop();
 
     virtual int Run();
     virtual void Exit(int rc = 0);
     virtual bool Pending() const;
     virtual bool Dispatch();
-    virtual void WakeUp() { }
 
 protected:
     // the pointer to the port specific implementation class
     wxEventLoopImpl *m_impl;
 
-    DECLARE_NO_COPY_CLASS(wxGUIEventLoop)
+    DECLARE_NO_COPY_CLASS(wxEventLoop)
 };
 
 #endif // platforms
 
-// also include the header defining wxConsoleEventLoop for Unix systems
-#if defined(__UNIX__)
-    #include "wx/unix/evtloop.h"
-#endif
-
-// we use a class rather than a typedef because wxEventLoop is forward-declared
-// in many places
-#if wxUSE_GUI
-    class wxEventLoop : public wxGUIEventLoop { };
-#else // !GUI
-    // we can't define wxEventLoop differently in GUI and base libraries so use
-    // a #define to still allow writing wxEventLoop in the user code
-    #if defined(__WXMSW__) || defined(__UNIX__)
-        #define wxEventLoop wxConsoleEventLoop
-    #else // we still must define it somehow for the code below...
-        #define wxEventLoop wxEventLoopBase
-    #endif
-#endif
-
 inline bool wxEventLoopBase::IsRunning() const { return GetActive() == this; }
 
-#if wxUSE_GUI
 // ----------------------------------------------------------------------------
 // wxModalEventLoop
 // ----------------------------------------------------------------------------
@@ -174,7 +151,7 @@ inline bool wxEventLoopBase::IsRunning() const { return GetActive() == this; }
 // implement modality, we will surely need platform-specific implementations
 // too, this generic implementation is here only temporarily to see how it
 // works
-class WXDLLEXPORT wxModalEventLoop : public wxGUIEventLoop
+class WXDLLEXPORT wxModalEventLoop : public wxEventLoop
 {
 public:
     wxModalEventLoop(wxWindow *winModal)
@@ -188,14 +165,12 @@ protected:
         delete m_windowDisabler;
         m_windowDisabler = NULL;
 
-        wxGUIEventLoop::OnExit();
+        wxEventLoop::OnExit();
     }
 
 private:
     wxWindowDisabler *m_windowDisabler;
 };
-
-#endif //wxUSE_GUI
 
 // ----------------------------------------------------------------------------
 // wxEventLoopActivator: helper class for wxEventLoop implementations
@@ -207,20 +182,20 @@ private:
 class wxEventLoopActivator
 {
 public:
-    wxEventLoopActivator(wxEventLoopBase *evtLoop)
+    wxEventLoopActivator(wxEventLoop *evtLoop)
     {
-        m_evtLoopOld = wxEventLoopBase::GetActive();
-        wxEventLoopBase::SetActive(evtLoop);
+        m_evtLoopOld = wxEventLoop::GetActive();
+        wxEventLoop::SetActive(evtLoop);
     }
 
     ~wxEventLoopActivator()
     {
         // restore the previously active event loop
-        wxEventLoopBase::SetActive(m_evtLoopOld);
+        wxEventLoop::SetActive(m_evtLoopOld);
     }
 
 private:
-    wxEventLoopBase *m_evtLoopOld;
+    wxEventLoop *m_evtLoopOld;
 };
 
 #endif // _WX_EVTLOOP_H_

@@ -68,6 +68,9 @@ bool wxStatusBar95::Create(wxWindow *parent,
 {
     wxCHECK_MSG( parent, false, wxT("status bar must have a parent") );
 
+    // Avoid giving the status bar a themed window
+    style = (style & ~wxBORDER_MASK) | wxBORDER_NONE;
+
     SetName(name);
     SetWindowStyleFlag(style);
     SetParent(parent);
@@ -99,17 +102,10 @@ bool wxStatusBar95::Create(wxWindow *parent,
 #endif
     }
 
-    m_hWnd = CreateWindow
-             (
-                STATUSCLASSNAME,
-                _T(""),
-                wstyle,
-                0, 0, 0, 0,
-                GetHwndOf(parent),
-                (HMENU)m_windowId.GetValue(),
-                wxGetInstance(),
-                NULL
-             );
+    m_hWnd = (WXHWND)CreateStatusWindow(wstyle,
+                                        wxEmptyString,
+                                        GetHwndOf(parent),
+                                        m_windowId);
     if ( m_hWnd == 0 )
     {
         wxLogSysError(_("Failed to create a status bar."));
@@ -225,7 +221,7 @@ void wxStatusBar95::SetStatusText(const wxString& strText, int nField)
 
     // Pass both field number and style. MSDN library doesn't mention
     // that nField and style have to be 'ORed'
-    if ( !StatusBar_SetText(GetHwnd(), nField | style, strText.wx_str()) )
+    if ( !StatusBar_SetText(GetHwnd(), nField | style, strText) )
     {
         wxLogLastError(wxT("StatusBar_SetText"));
     }
@@ -303,53 +299,6 @@ bool wxStatusBar95::GetFieldRect(int i, wxRect& rect) const
     return true;
 }
 
-// no idea for a default width, just choose something
-#define DEFAULT_FIELD_WIDTH 25
-
-wxSize wxStatusBar95::DoGetBestSize() const
-{
-    int borders[3];
-    SendMessage(GetHwnd(), SB_GETBORDERS, 0, (LPARAM)borders);
-
-    // calculate width
-    int width = 0;
-    for ( int i = 0; i < m_nFields; ++i )
-    {
-        int widthField = m_statusWidths ? m_statusWidths[i]
-                                        : DEFAULT_FIELD_WIDTH;
-        if ( widthField >= 0 )
-        {
-            width += m_statusWidths[i];
-        }
-        else
-        {
-            // variable width field, its width is really a proportion
-            // related to the other fields
-            width += -widthField*DEFAULT_FIELD_WIDTH;
-        }
-
-        // add the space between fields
-        width += borders[2];
-    }
-
-    if ( !width )
-    {
-        // still need something even for an empty status bar
-        width = 2*DEFAULT_FIELD_WIDTH;
-    }
-
-
-    // calculate height
-    int height;
-    wxGetCharSize(GetHWND(), NULL, &height, GetFont());
-    height = EDIT_HEIGHT_FROM_CHAR_HEIGHT(height);
-    height += borders[1];
-
-    wxSize best(width, height);
-    CacheBestSize(best);
-    return best;
-}
-
 void wxStatusBar95::DoMoveWindow(int x, int y, int width, int height)
 {
     if ( GetParent()->IsSizeDeferred() )
@@ -380,7 +329,7 @@ void wxStatusBar95::DoMoveWindow(int x, int y, int width, int height)
     {
         wxSizeEvent event(GetClientSize(), m_windowId);
         event.SetEventObject(this);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
     }
 }
 
@@ -411,7 +360,7 @@ void wxStatusBar95::SetStatusStyles(int n, const int styles[])
         // the fields' styles. MSDN library doesn't mention
         // that nField and style have to be 'ORed'
         wxString text = GetStatusText(i);
-        if (!StatusBar_SetText(GetHwnd(), style | i, text.wx_str()))
+        if (!StatusBar_SetText(GetHwnd(), style | i, text))
         {
             wxLogLastError(wxT("StatusBar_SetText"));
         }

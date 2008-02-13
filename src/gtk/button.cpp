@@ -12,13 +12,16 @@
 
 #if wxUSE_BUTTON
 
+#include "wx/button.h"
+
 #ifndef WX_PRECOMP
-    #include "wx/button.h"
+    #include "wx/toplevel.h"
 #endif
 
 #include "wx/stockitem.h"
 
 #include "wx/gtk/private.h"
+#include "wx/gtk/win_gtk.h"
 
 //-----------------------------------------------------------------------------
 // classes
@@ -39,12 +42,15 @@ extern bool   g_blockEventsOnDrag;
 extern "C" {
 static void gtk_button_clicked_callback( GtkWidget *WXUNUSED(widget), wxButton *button )
 {
+    if (g_isIdle)
+       wxapp_install_idle_handler();
+
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, button->GetId());
     event.SetEventObject(button);
-    button->HandleWindowEvent(event);
+    button->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -55,6 +61,9 @@ static void gtk_button_clicked_callback( GtkWidget *WXUNUSED(widget), wxButton *
 static gint
 gtk_button_style_set_callback( GtkWidget *m_widget, GtkStyle *WXUNUSED(style), wxButton *win )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     int left_border = 0;
     int right_border = 0;
     int top_border = 0;
@@ -97,15 +106,13 @@ wxButton::~wxButton()
 {
 }
 
-bool wxButton::Create(wxWindow *parent,
-                      wxWindowID id,
-                      const wxString &label,
-                      const wxPoint& pos,
-                      const wxSize& size,
-                      long style,
-                      const wxValidator& validator,
-                      const wxString& name)
+bool wxButton::Create(  wxWindow *parent, wxWindowID id, const wxString &label,
+      const wxPoint &pos, const wxSize &size,
+      long style, const wxValidator& validator, const wxString &name )
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -127,7 +134,18 @@ bool wxButton::Create(wxWindow *parent,
     else if (HasFlag(wxBU_BOTTOM))
         y_alignment = 1.0;
 
-    gtk_button_set_alignment(GTK_BUTTON(m_widget), x_alignment, y_alignment);
+#ifdef __WXGTK24__
+    if (!gtk_check_version(2,4,0))
+    {
+        gtk_button_set_alignment(GTK_BUTTON(m_widget), x_alignment, y_alignment);
+    }
+    else
+#endif
+    {
+        if (GTK_IS_MISC(GTK_BIN(m_widget)->child))
+            gtk_misc_set_alignment(GTK_MISC(GTK_BIN(m_widget)->child),
+                                x_alignment, y_alignment);
+    }
 
     SetLabel(label);
 
@@ -150,17 +168,18 @@ bool wxButton::Create(wxWindow *parent,
 }
 
 
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
-    wxWindow *oldDefault = wxButtonBase::SetDefault();
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxCHECK_RET( tlw, _T("button without top level window?") );
+
+    tlw->SetDefaultItem(this);
 
     GTK_WIDGET_SET_FLAGS( m_widget, GTK_CAN_DEFAULT );
     gtk_widget_grab_default( m_widget );
 
     // resize for default border
     gtk_button_style_set_callback( m_widget, NULL, this );
-
-    return oldDefault;
 }
 
 /* static */

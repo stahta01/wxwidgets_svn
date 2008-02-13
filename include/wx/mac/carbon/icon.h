@@ -15,12 +15,13 @@
 #include "wx/bitmap.h"
 
 // Icon
-class WXDLLEXPORT wxIcon : public wxGDIObject
+class WXDLLEXPORT wxIcon: public wxGDIObject
 {
 public:
     wxIcon();
 
-    wxIcon(const char* const* data);
+    wxIcon(const char **data);
+    wxIcon(char **data);
     wxIcon(const char bits[], int width , int height );
     wxIcon(const wxString& name, int flags = wxBITMAP_TYPE_ICON_RESOURCE,
          int desiredWidth = -1, int desiredHeight = -1);
@@ -28,9 +29,6 @@ public:
     {
       LoadFile(loc.GetFileName(), wxBITMAP_TYPE_ICON);
     }
-
-    wxIcon(WXHICON icon, const wxSize& size);
-
     virtual ~wxIcon();
 
     bool LoadFile(const wxString& name, wxBitmapType flags /* = wxBITMAP_TYPE_ICON_RESOURCE */ ,
@@ -44,6 +42,8 @@ public:
     // ctors, assignment operators...), but it's ok to have such function
     void CopyFromBitmap(const wxBitmap& bmp);
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
     int GetWidth() const;
     int GetHeight() const;
     int GetDepth() const;
@@ -54,11 +54,6 @@ public:
 
     WXHICON GetHICON() const ;
 
-protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
-private:
     DECLARE_DYNAMIC_CLASS(wxIcon)
 };
 

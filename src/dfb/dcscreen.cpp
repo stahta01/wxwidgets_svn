@@ -20,7 +20,7 @@
 #include "wx/wxprec.h"
 
 #include "wx/dcscreen.h"
-#include "wx/dfb/dcscreen.h"
+
 #include "wx/dfb/private.h"
 
 // ===========================================================================
@@ -34,10 +34,9 @@
 #warning "FIXME: this doesn't work (neither single app nor multiapp core)
 // FIXME: maybe use a subsurface as well?
 
-IMPLEMENT_ABSTRACT_CLASS(wxScreenDCImpl, wxDFBDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxDC)
 
-wxScreenDCImpl::wxScreenDCImpl(wxScreenDC *owner)
-              : wxDFBDCImpl(owner)
+wxScreenDC::wxScreenDC()
 {
     DFBInit(wxIDirectFB::Get()->GetPrimarySurface());
 }

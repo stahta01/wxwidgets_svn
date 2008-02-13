@@ -215,7 +215,7 @@ wxALIGN\_BOTTOM, wxALIGN\_CENTER\_HORIZONTAL and wxALIGN\_CENTER\_VERTICAL do wh
 wxALIGN\_CENTRE (same as wxALIGN\_CENTER) is defined as (wxALIGN\_CENTER\_HORIZONTAL |
 wxALIGN\_CENTER\_VERTICAL).  Default alignment is wxALIGN\_LEFT | wxALIGN\_TOP.
 
-As mentioned above, any window belonging to a sizer may have a border, and it can be specified
+As mentioned above, any window belonging to a sizer may have border, and it can be specified
 which of the four sides may have this border, using the wxTOP, wxLEFT, wxRIGHT and wxBOTTOM
 constants or wxALL for all directions (and you may also use wxNORTH, wxWEST etc instead). These
 flags can be used in combination with the alignment flags above as the second parameter of the
@@ -259,9 +259,9 @@ MyDialog::MyDialog(wxFrame *parent, wxWindowID id, const wxString &title )
      0,                // make vertically unstretchable
      wxALIGN_CENTER ); // no border and centre horizontally
 
-  SetSizerAndFit(topsizer); // use the sizer for layout and size window
-                            // accordingly and prevent it from being resized
-                            // to smaller size
+  SetSizer( topsizer );      // use the sizer for layout
+
+  topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 \end{verbatim}
 
@@ -302,7 +302,9 @@ MyDialog::MyDialog(wxFrame *parent, wxWindowID id, const wxString &title )
      button_sizer,
      wxSizerFlags(0).Center() ); 
 
-  SetSizerAndFit(topsizer); // use the sizer for layout and set size and hints
+  SetSizer( topsizer );      // use the sizer for layout
+
+  topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 \end{verbatim}
 

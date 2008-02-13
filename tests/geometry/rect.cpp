@@ -28,7 +28,7 @@
 // ----------------------------------------------------------------------------
 
 // this operator is needed to use CPPUNIT_ASSERT_EQUAL with wxRects
-std::ostream& operator<<(std::ostream& os, const wxRect& r)
+wxSTD ostream& operator<<(wxSTD ostream& os, const wxRect& r)
 {
     os << "{"
         << r.x << ", " << r.y << ", " << r.width << ", " << r.height
@@ -129,14 +129,6 @@ void RectTestCase::Operators()
             ( data.GetSecond() + data.GetFirst() ) == data.GetResult()
         );
     }
-
-    // test operator*() which returns the intersection of two rectangles
-    wxRect r1 = wxRect(0, 2, 3, 4);
-    wxRect r2 = wxRect(1, 2, 7, 8);
-    r1 *= r2;
-    CPPUNIT_ASSERT(wxRect(1, 2, 2, 4) == r1);
-
-    CPPUNIT_ASSERT( (r1 * wxRect()).IsEmpty() );
 }
 
 void RectTestCase::Union()

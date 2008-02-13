@@ -24,7 +24,7 @@
     #include "wx/dcclient.h"
 #endif
 
-IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControlWithItems)
+IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 
 BEGIN_EVENT_TABLE(wxListBox, wxControl)
 END_EVENT_TABLE()
@@ -82,12 +82,12 @@ bool wxListBox::Create(
         return false;
 
     wxMacDataBrowserListControl* control = new wxMacDataBrowserListControl( this, pos, size, style );
-    // TODO CHECK control->SetClientDataType( m_clientDataItemsType );
+    control->SetClientDataType( m_clientDataItemsType );
     m_peer = control;
 
     MacPostControlCreate( pos, size );
 
-    Append(n, choices);
+    InsertItems( n, choices, 0 );
 
    // Needed because it is a wxControlWithItems
     SetInitialSize( size );
@@ -116,29 +116,36 @@ void wxListBox::EnsureVisible(int n)
     GetPeer()->MacScrollTo( n );
 }
 
-void wxListBox::DoDeleteOneItem(unsigned int n)
+void wxListBox::Delete(unsigned int n)
 {
     wxCHECK_RET( IsValid(n), wxT("invalid index in wxListBox::Delete") );
 
     GetPeer()->MacDelete( n );
 }
 
-int wxListBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                             unsigned int pos,
-                             void **clientData,
-                             wxClientDataType type)
+int wxListBox::DoAppend(const wxString& item)
 {
     InvalidateBestSize();
 
-    GetPeer()->MacInsert( pos, items );
-    const unsigned int count = items.GetCount();
-    if ( clientData )
+    return GetPeer()->MacAppend( item );
+}
+
+void wxListBox::DoSetItems(const wxArrayString& choices, void** clientData)
+{
+    Clear();
+
+    unsigned int n = choices.GetCount();
+
+    for ( size_t i = 0; i < n; ++i )
     {
-        for (unsigned int i = 0; i < count; ++i)
-            AssignNewItemClientData( pos + i, clientData, i, type );
+        if ( clientData )
+        {
+            Append( choices[i], clientData[i] );
+        }
+        else
+            Append( choices[i] );
     }
 
-    return pos + count - 1;
 }
 
 int wxListBox::FindString(const wxString& s, bool bCase) const
@@ -152,7 +159,7 @@ int wxListBox::FindString(const wxString& s, bool bCase) const
     return wxNOT_FOUND;
 }
 
-void wxListBox::DoClear()
+void wxListBox::Clear()
 {
     FreeData();
 }
@@ -181,10 +188,20 @@ void *wxListBox::DoGetItemClientData(unsigned int n) const
     return GetPeer()->MacGetClientData( n );
 }
 
+wxClientData *wxListBox::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData*)DoGetItemClientData( n );
+}
+
 void wxListBox::DoSetItemClientData(unsigned int n, void *clientData)
 {
     wxCHECK_RET( IsValid(n), wxT("invalid index in wxListBox::SetClientData") );
     GetPeer()->MacSetClientData( n , clientData);
+}
+
+void wxListBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+{
+    DoSetItemClientData(n, clientData);
 }
 
 // Return number of selections and an array of selected integers
@@ -206,6 +223,15 @@ wxString wxListBox::GetString(unsigned int n) const
     return GetPeer()->MacGetString(n);
 }
 
+void wxListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
+{
+    wxCHECK_RET( IsValidInsert(pos), wxT("invalid index in wxListBox::InsertItems") );
+
+    InvalidateBestSize();
+
+    GetPeer()->MacInsert( pos, items );
+}
+
 void wxListBox::SetString(unsigned int n, const wxString& s)
 {
     GetPeer()->MacSetString( n, s );
@@ -218,17 +244,52 @@ wxSize wxListBox::DoGetBestSize() const
     int wLine;
 
     {
+#if wxMAC_USE_CORE_GRAPHICS
         wxClientDC dc(const_cast<wxListBox*>(this));
         dc.SetFont(GetFont());
+#else
+        wxMacPortStateHelper st( UMAGetWindowPort( (WindowRef)MacGetTopLevelWindowRef() ) );
 
+        // TODO: clean this up
+        if ( m_font.Ok() )
+        {
+            ::TextFont( m_font.MacGetFontNum() );
+            ::TextSize( m_font.MacGetFontSize() );
+            ::TextFace( m_font.MacGetFontStyle() );
+        }
+        else
+        {
+            ::TextFont( kFontIDMonaco );
+            ::TextSize( 9 );
+            ::TextFace( 0 );
+        }
+#endif
         // Find the widest line
         for (unsigned int i = 0; i < GetCount(); i++)
         {
             wxString str( GetString( i ) );
-
+#if wxMAC_USE_CORE_GRAPHICS
             wxCoord width, height ;
             dc.GetTextExtent( str , &width, &height);
             wLine = width ;
+#else
+#if wxUSE_UNICODE
+            Point bounds = {0, 0};
+            SInt16 baseline;
+
+            // NB: what if m_font.Ok() == false ???
+            ::GetThemeTextDimensions(
+                wxMacCFStringHolder( str, m_font.GetEncoding() ),
+                kThemeCurrentPortFont,
+                kThemeStateActive,
+                false,
+                &bounds,
+                &baseline );
+            wLine = bounds.h;
+#else
+            wLine = ::TextWidth( str.c_str(), 0, str.length() );
+#endif
+#endif
             lbWidth = wxMax( lbWidth, wLine );
         }
 
@@ -237,10 +298,13 @@ wxSize wxListBox::DoGetBestSize() const
 
         // And just a bit more
         int cy = 12;
-
+#if wxMAC_USE_CORE_GRAPHICS
         wxCoord width, height ;
         dc.GetTextExtent( wxT("XX") , &width, &height);
         int cx = width ;
+#else
+        int cx = ::TextWidth( "XX", 0, 1 );
+#endif
         lbWidth += cx;
 
         // don't make the listbox too tall (limit height to around 10 items)
@@ -287,6 +351,12 @@ int wxListBox::DoListHitTest(const wxPoint& inpoint) const
     //    for where the first visible item lies
 
     wxPoint point = inpoint;
+
+    // interestingly enough 10.2 (and below?) have GetDataBrowserItemPartBounds
+    // giving root window coordinates but 10.3 and above give client coordinates
+    // so we only compare using root window coordinates on 10.3 and up
+    if ( UMAGetSystemVersion() < 0x1030 )
+        MacClientToRootWindow(&point.x, &point.y);
 
     // get column property ID (req. for call to itempartbounds)
     DataBrowserTableViewColumnID colId = 0;
@@ -392,7 +462,7 @@ wxMacListBoxItem::~wxMacListBoxItem()
 
 void wxMacListBoxItem::Notification(wxMacDataItemBrowserControl *owner ,
     DataBrowserItemNotification message,
-    DataBrowserItemDataRef WXUNUSED(itemData) ) const
+    DataBrowserItemDataRef itemData ) const
 {
     wxMacDataBrowserListControl *lb = wxDynamicCast(owner,wxMacDataBrowserListControl);
 
@@ -447,7 +517,7 @@ void wxMacListBoxItem::Notification(wxMacDataItemBrowserControl *owner ,
 
         // direct notification is not always having the listbox GetSelection()
         // having in synch with event, so use wxPostEvent instead
-        // list->HandleWindowEvent(event);
+        // list->GetEventHandler()->ProcessEvent(event);
 
         wxPostEvent( list->GetEventHandler(), event );
     }
@@ -498,7 +568,9 @@ wxMacDataBrowserListControl::wxMacDataBrowserListControl( wxWindow *peer, const 
     columnDesc.propertyDesc.propertyID = kTextColumnId;
     columnDesc.propertyDesc.propertyType = kDataBrowserTextType;
     columnDesc.propertyDesc.propertyFlags = kDataBrowserTableViewSelectionColumn;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_2
     columnDesc.propertyDesc.propertyFlags |= kDataBrowserListViewTypeSelectColumn;
+#endif
 
     verify_noerr( AddColumn( &columnDesc, kDataBrowserListViewAppendColumn ) );
 
@@ -507,7 +579,9 @@ wxMacDataBrowserListControl::wxMacDataBrowserListControl( wxWindow *peer, const 
     columnDesc.propertyDesc.propertyID = kNumericOrderColumnId;
     columnDesc.propertyDesc.propertyType = kDataBrowserPropertyRelevanceRankPart;
     columnDesc.propertyDesc.propertyFlags = kDataBrowserTableViewSelectionColumn;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_2
     columnDesc.propertyDesc.propertyFlags |= kDataBrowserListViewTypeSelectColumn;
+#endif
 
     verify_noerr( AddColumn( &columnDesc, kDataBrowserListViewAppendColumn ) );
 
@@ -575,7 +649,8 @@ static pascal void ListBoxDrawProc(
         // TODO: switch over to wxSystemSettingsNative::GetColour() when kThemeBrushSecondaryHighlightColor
         // is incorporated Panther DB starts using kThemeBrushSecondaryHighlightColor
         // for inactive browser highlighting
-        if ( !IsControlActive( browser ) )
+        Gestalt( gestaltSystemVersion, &systemVersion );
+        if ( (systemVersion >= 0x00001030) && !IsControlActive( browser ) )
             colorBrushID = kThemeBrushSecondaryHighlightColor;
         else
             colorBrushID = kThemeBrushPrimaryHighlightColor;

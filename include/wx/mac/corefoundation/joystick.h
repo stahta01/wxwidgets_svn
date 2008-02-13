@@ -14,9 +14,9 @@
 
 #include "wx/event.h"
 
-class WXDLLIMPEXP_FWD_CORE wxJoystickThread;
+class WXDLLEXPORT wxJoystickThread;
 
-class WXDLLIMPEXP_ADV wxJoystick: public wxObject
+class WXDLLEXPORT wxJoystick: public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxJoystick)
  public:
@@ -28,8 +28,6 @@ class WXDLLIMPEXP_ADV wxJoystick: public wxObject
     ////////////////////////////////////////////////////////////////////////////
 
     wxPoint GetPosition() const;
-    int GetPosition(unsigned axis) const;
-    bool GetButtonState(unsigned button) const;
     int GetZPosition() const;
     int GetButtonState() const;
     int GetPOVPosition() const;

@@ -7,21 +7,12 @@ wxDataViewEvent - the event class for the wxDataViewCtrl notifications
 
 \wxheading{Derived from}
 
-\helpref{wxNotifyEvent}{wxnotifyevent}\\
-\helpref{wxCommandEvent}{wxcommandevent}\\
-\helpref{wxEvent}{wxevent}\\
-\helpref{wxObject}{wxobject}
+\helpref{wxNotifyEvent}{wxnotifyevent}
 
 \wxheading{Include files}
 
 <wx/dataview.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataViewEvent::wxDataViewEvent}\label{wxdatavieweventwxdataviewevent}
 
@@ -35,44 +26,37 @@ wxDataViewEvent - the event class for the wxDataViewCtrl notifications
 
 \constfunc{wxEvent*}{Clone}{\void}
 
-Used to clone the event.
-
 
 \membersection{wxDataViewEvent::GetColumn}\label{wxdatavieweventgetcolumn}
 
 \constfunc{int}{GetColumn}{\void}
-
-Returns the position of the column in the control or -1
-if no column field was set by the event emitter.
 
 
 \membersection{wxDataViewEvent::GetDataViewColumn}\label{wxdatavieweventgetdataviewcolumn}
 
 \func{wxDataViewColumn*}{GetDataViewColumn}{\void}
 
-Returns a pointer to the wxDataViewColumn from which
-the event was emitted or NULL.
-
 
 \membersection{wxDataViewEvent::GetModel}\label{wxdatavieweventgetmodel}
 
 \constfunc{wxDataViewModel*}{GetModel}{\void}
 
-Returns the wxDataViewModel associated with the event.
 
+\membersection{wxDataViewEvent::GetRow}\label{wxdatavieweventgetrow}
 
-\membersection{wxDataViewEvent::GetPosition}\label{wxdatavieweventgetposition}
-
-\constfunc{wxPoint}{GetPosition}{\void}
-
-Returns a the position of a context menu event in screen coordinates.
+\constfunc{int}{GetRow}{\void}
 
 
 \membersection{wxDataViewEvent::GetValue}\label{wxdatavieweventgetvalue}
 
 \constfunc{const wxVariant\&}{GetValue}{\void}
 
-Returns a reference to a value.
+
+\membersection{wxDataViewEvent::IsEditCancelled}\label{wxdatavieweventiseditcancelled}
+
+\constfunc{bool}{IsEditCancelled}{\void}
+
+Was cell editing canceled? For wxEVT\_COMMAND\_DATAVIEW\_END\_CELL\_EDIT only.
 
 
 \membersection{wxDataViewEvent::SetColumn}\label{wxdatavieweventsetcolumn}
@@ -87,10 +71,19 @@ Returns a reference to a value.
 For wxEVT\_DATAVIEW\_COLUMN\_HEADER\_CLICKED only.
 
 
+\membersection{wxDataViewEvent::SetEditCanceled}\label{wxdatavieweventseteditcanceled}
+
+\func{void}{SetEditCanceled}{\param{bool }{editCancelled}}
+
+
 \membersection{wxDataViewEvent::SetModel}\label{wxdatavieweventsetmodel}
 
 \func{void}{SetModel}{\param{wxDataViewModel* }{model}}
 
+
+\membersection{wxDataViewEvent::SetRow}\label{wxdatavieweventsetrow}
+
+\func{void}{SetRow}{\param{int }{row}}
 
 
 \membersection{wxDataViewEvent::SetValue}\label{wxdatavieweventsetvalue}

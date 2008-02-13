@@ -47,7 +47,6 @@
 
 #include "wx/utils.h"
 
-#include "wx/beforestd.h"
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
 #include <fstream.h>
@@ -55,7 +54,6 @@
 #include <iostream>
 #include <fstream>
 #endif
-#include "wx/afterstd.h"
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -68,8 +66,10 @@
 #include "tex2rtf.xpm"
 #endif
 
+#if !WXWIN_COMPATIBILITY_2_4
 static inline wxChar* copystring(const wxChar* s)
     { return wxStrcpy(new wxChar[wxStrlen(s) + 1], s); }
+#endif
 
 const float versionNo = float(TEX2RTF_VERSION_NUMBER);
 
@@ -249,7 +249,7 @@ bool MyApp::OnInit()
       i ++;
       if (i < argc)
       {
-        const wxChar *s = argv[i];
+        wxChar *s = argv[i];
         i ++;
         if (wxStrcmp(s, _T("ansi")) == 0 || wxStrcmp(s, _T("pc")) == 0 || wxStrcmp(s, _T("mac")) == 0 ||
             wxStrcmp(s, _T("pca")) == 0)
@@ -292,7 +292,7 @@ bool MyApp::OnInit()
     {
       wxString buf;
       buf.Printf(_T("Invalid switch %s.\n"), argv[i]);
-      OnError(buf);
+      OnError((wxChar *)buf.c_str());
 #ifdef NO_GUI
       ShowOptions();
       exit(1);
@@ -703,7 +703,7 @@ void MyFrame::OnGo(wxCommandEvent& WXUNUSED(event))
 #endif // wxUSE_STATUSBAR
         wxString errBuf;
         errBuf.Printf(_T("\nErrors encountered during this pass: %lu\n"), errorCount);
-        OnInform(errBuf);
+        OnInform((wxChar *)errBuf.c_str());
       }
 
 
@@ -900,7 +900,7 @@ void ChooseInputFile(bool force)
             wxString str = wxFileNameFromPath(InputFile);
             wxString buf;
             buf.Printf(_T("Tex2RTF [%s]"), str.c_str());
-            frame->SetTitle(buf);
+            frame->SetTitle((wxChar *)buf.c_str());
             OutputFile = wxEmptyString;
         }
     }
@@ -1029,7 +1029,7 @@ bool Go(void)
     {
       wxString buf;
       buf.Printf(_T("Working, pass %d...Click CLOSE to abort"), passNumber);
-      frame->SetStatusText(buf);
+      frame->SetStatusText((wxChar *)buf.c_str());
     }
 #endif
     OkToClose = false;
@@ -1079,28 +1079,28 @@ bool Go(void)
 #ifndef NO_GUI
     wxLongLong elapsed = wxGetLocalTimeMillis() - localTime;
     buf.Printf(_T("Finished PASS #%d in %ld seconds.\n"), passNumber, (long)(elapsed.GetLo()/1000.0));
-    OnInform(buf);
+    OnInform((wxChar *)buf.c_str());
 
     if (errorCount)
     {
         buf.Printf(_T("Errors encountered during this pass: %lu\n"), errorCount);
-        OnInform(buf);
+        OnInform((wxChar *)buf.c_str());
     }
 
 #if wxUSE_STATUSBAR
     if (isInteractive)
     {
       buf.Printf(_T("Done, %d %s."), passNumber, (passNumber > 1) ? _T("passes") : _T("pass"));
-      frame->SetStatusText(buf);
+      frame->SetStatusText((wxChar *)buf.c_str());
     }
 #endif // wxUSE_STATUSBAR
 #else
     buf.Printf(_T("Done, %d %s."), passNumber, (passNumber > 1) ? _T("passes") : _T("pass"));
-    OnInform(buf);
+    OnInform((wxChar *)buf.c_str());
     if (errorCount)
     {
         buf.Printf(_T("Errors encountered during this pass: %lu\n"), errorCount);
-        OnInform(buf.c_str());
+        OnInform((wxChar *)buf.c_str());
     }
 #endif
     passNumber ++;
@@ -1121,12 +1121,13 @@ bool Go(void)
   return false;
 }
 
-void OnError(const wxString& msg)
+void OnError(const wxChar *msg)
 {
+    wxString msg_string = msg;
     errorCount++;
 
 #ifdef NO_GUI
-    wxSTD cerr << "Error: " << msg.mb_str() << "\n";
+    wxSTD cerr << "Error: " << msg_string.mb_str() << "\n";
     wxSTD cerr.flush();
 #else
     if (isInteractive && frame)
@@ -1136,7 +1137,7 @@ void OnError(const wxString& msg)
     else
     {
 #if defined(__UNIX__)
-        wxSTD cerr << "Error: " << msg.mb_str() << "\n";
+        wxSTD cerr << "Error: " << msg_string.mb_str() << "\n";
         wxSTD cerr.flush();
 #elif defined(__WXMSW__)
         wxLogError(msg);
@@ -1147,10 +1148,11 @@ void OnError(const wxString& msg)
 #endif // NO_GUI
 }
 
-void OnInform(const wxString& msg)
+void OnInform(const wxChar *msg)
 {
+    wxString msg_string = msg;
 #ifdef NO_GUI
-    wxSTD cout << msg.mb_str() << "\n";
+    wxSTD cout << msg_string.mb_str() << "\n";
     wxSTD cout.flush();
 #else
     if (isInteractive && frame)
@@ -1160,7 +1162,7 @@ void OnInform(const wxString& msg)
     else
     {
 #if defined(__UNIX__)
-        wxSTD cout << msg.mb_str() << "\n";
+        wxSTD cout << msg_string.mb_str() << "\n";
         wxSTD cout.flush();
 #elif defined(__WXMSW__)
         wxLogInfo(msg);

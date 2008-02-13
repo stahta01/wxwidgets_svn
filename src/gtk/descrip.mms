@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 26 November 2007                                                    *
+# Date : 31 October 2006                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -34,7 +34,6 @@ CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
-	animate.obj,\
 	app.obj,\
 	artgtk.obj,\
 	bitmap.obj,\
@@ -44,6 +43,7 @@ OBJECTS = \
 	colour.obj,\
 	collpane.obj,\
 	cursor.obj,\
+	data.obj,\
 	dataobj.obj,\
 	dc.obj,\
 	dcclient.obj,\
@@ -55,6 +55,7 @@ OBJECTS = \
 	font.obj,\
         glcanvas.obj,\
 	gsockgtk.obj,\
+	main.obj,\
 	minifram.obj,\
 	pen.obj,\
 	popupwin.obj,\
@@ -66,6 +67,7 @@ OBJECTS = \
 	toplevel.obj,\
 	utilsgtk.obj,\
 	utilsres.obj,\
+        win_gtk.obj,\
 	window.obj
 
 OBJECTS0= \
@@ -99,11 +101,9 @@ OBJECTS0= \
 	textctrl.obj,\
 	tglbtn.obj,\
 	msgdlg.obj,\
-	treeentry_gtk.obj,textentry.obj,filectrl.obj,print.obj,win_gtk.obj,\
-	mnemonics.obj
+	treeentry_gtk.obj
 
 SOURCES =\
-	animate.cpp,\
 	app.cpp,\
 	artgtk.cpp, \
 	bitmap.cpp,\
@@ -120,6 +120,7 @@ SOURCES =\
         combobox.cpp,\
 	control.cpp,\
 	cursor.cpp,\
+	data.cpp,\
 	dataobj.cpp,\
 	dc.cpp,\
 	dcclient.cpp,\
@@ -136,6 +137,7 @@ SOURCES =\
         glcanvas.cpp,\
 	gsockgtk.cpp,\
 	listbox.cpp,\
+	main.cpp,\
 	mdi.cpp,\
 	menu.cpp,\
 	minifram.cpp,\
@@ -165,9 +167,9 @@ SOURCES =\
 	toplevel.cpp,\
 	utilsgtk.cpp,\
 	utilsres.cpp,\
+        win_gtk.c,\
 	window.cpp,\
-	treeentry_gtk.c,textentry.cpp,filectrl.cpp,print.cpp,win_gtk.cpp,\
-	mnemonics.cpp
+	treeentry_gtk.c
    
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -188,10 +190,6 @@ all : $(SOURCES)
 .endif
 .endif
 
-$(OBJECTS) : [--.include.wx]setup.h
-$(OBJECTS0) : [--.include.wx]setup.h
-
-animate.obj : animate.cpp
 app.obj : app.cpp
 artgtk.obj : artgtk.cpp
 bitmap.obj : bitmap.cpp
@@ -208,6 +206,7 @@ collpane.obj : collpane.cpp
 combobox.obj : combobox.cpp
 control.obj : control.cpp
 cursor.obj : cursor.cpp
+data.obj : data.cpp
 dataobj.obj : dataobj.cpp
 dc.obj : dc.cpp
 dcclient.obj : dcclient.cpp
@@ -224,6 +223,7 @@ gauge.obj : gauge.cpp
 glcanvas.obj : glcanvas.cpp
 gsockgtk.obj : gsockgtk.cpp
 listbox.obj : listbox.cpp
+main.obj : main.cpp
 msgdlg.obj : msgdlg.cpp
 mdi.obj : mdi.cpp
 menu.obj : menu.cpp
@@ -253,10 +253,6 @@ tooltip.obj : tooltip.cpp
 toplevel.obj : toplevel.cpp
 utilsgtk.obj : utilsgtk.cpp
 utilsres.obj : utilsres.cpp
+win_gtk.obj : win_gtk.c
 window.obj : window.cpp
 treeentry_gtk.obj : treeentry_gtk.c
-textentry.obj : textentry.cpp
-filectrl.obj : filectrl.cpp
-print.obj : print.cpp
-win_gtk.obj : win_gtk.cpp
-mnemonics.obj : mnemonics.cpp

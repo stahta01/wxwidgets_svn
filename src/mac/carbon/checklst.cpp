@@ -24,6 +24,10 @@
 
 #include "wx/mac/uma.h"
 
+#ifndef __DARWIN__
+#include <Appearance.h>
+#endif
+
 IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox, wxListBox)
 
 BEGIN_EVENT_TABLE(wxCheckListBox, wxListBox)
@@ -85,7 +89,7 @@ bool wxCheckListBox::Create(
 
     // this will be increased by our Append command
     wxMacDataBrowserCheckListControl* control = new wxMacDataBrowserCheckListControl( this, pos, size, style );
-    // TODO CHECK control->SetClientDataType( m_clientDataItemsType );
+    control->SetClientDataType( m_clientDataItemsType );
     m_peer = control;
 
     MacPostControlCreate(pos,size);
@@ -222,7 +226,7 @@ public :
                     wxCommandEvent event( wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, checklist->GetId() );
                     event.SetInt( owner->GetLineFromItem( this ) );
                     event.SetEventObject( checklist );
-                    checklist->HandleWindowEvent( event );
+                    checklist->GetEventHandler()->ProcessEvent( event );
                 }
                 break;
 

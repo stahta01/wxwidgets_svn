@@ -25,7 +25,7 @@
 #include "wx/hashmap.h"
 #include "wx/module.h"
 
-class WXDLLIMPEXP_FWD_BASE wxPluginLibrary;
+class WXDLLIMPEXP_BASE wxPluginLibrary;
 
 
 WX_DECLARE_STRING_HASH_MAP_WITH_DECL(wxPluginLibrary *, wxDLManifest,
@@ -82,8 +82,8 @@ public:
 
 private:
 
-    const wxClassInfo    *m_before; // sm_first before loading this lib
-    const wxClassInfo    *m_after;  // ..and after.
+    wxClassInfo    *m_before;       // sm_first before loading this lib
+    wxClassInfo    *m_after;        // ..and after.
 
     size_t          m_linkcount;    // Ref count of library link calls
     size_t          m_objcount;     // ..and (pluggable) object instantiations.

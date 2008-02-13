@@ -368,9 +368,6 @@ MyApp::MyApp()
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_LIBPNG
     wxImage::AddHandler( new wxPNGHandler );
 #endif
@@ -385,12 +382,15 @@ bool MyApp::OnInit()
 
     wxString rootName(_T("shape0"));
 
-    for (int i = 1; i < 4; i++)
+    int i;
+    for (i = 1; i < 4; i++)
     {
+        wxString filename;
+        filename.Printf(wxT("%s%d.png"), (const wxChar*)rootName, i);
     /* For some reason under wxX11, the 2nd LoadFile in this loop fails, with
        a BadMatch inside CreateFromImage (inside ConvertToBitmap). This happens even if you copy
        the first file over the second file. */
-        if (image.LoadFile(wxString::Format("%s%d.png", rootName, i), wxBITMAP_TYPE_PNG))
+        if (image.LoadFile(filename, wxBITMAP_TYPE_PNG))
         {
             DragShape* newShape = new DragShape(wxBitmap(image));
             newShape->SetPosition(wxPoint(i*50, i*50));

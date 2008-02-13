@@ -20,8 +20,8 @@
 
 class WXDLLIMPEXP_CORE wxWindow : public wxWindowBase
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxDC;
-    friend class WXDLLIMPEXP_FWD_CORE wxWindowDC;
+    friend class WXDLLEXPORT wxDC;
+    friend class WXDLLEXPORT wxWindowDC;
 
 public:
     wxWindow() { Init(); }
@@ -146,12 +146,6 @@ public:
 
     // Process idle (send update events)
     void OnInternalIdle();
-
-    // post-creation activities
-    void PostCreation();
-
-    // pre-creation activities
-    void PreCreation();
 
 protected:
     // Responds to colour changes: passes event on to children.

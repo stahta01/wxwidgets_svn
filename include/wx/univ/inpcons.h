@@ -12,8 +12,8 @@
 #ifndef _WX_UNIV_INPCONS_H_
 #define _WX_UNIV_INPCONS_H_
 
-class WXDLLIMPEXP_FWD_CORE wxInputHandler;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxInputHandler;
+class WXDLLEXPORT wxWindow;
 
 #include "wx/object.h"
 #include "wx/event.h"

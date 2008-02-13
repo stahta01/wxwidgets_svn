@@ -26,7 +26,7 @@ WX_DEFINE_EXPORTED_ARRAY_PTR(wxToolTip *, wxToolTipArray);
 
 #endif // wxUSE_TOOLTIPS
 
-extern WXDLLEXPORT_DATA(const char) wxRadioBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxRadioBoxNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxRadioBoxBase is not a normal base class, but rather a mix-in because the
@@ -84,6 +84,14 @@ public:
     }
 
 
+    // deprecated functions
+    // --------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( int GetNumberOfRowsOrCols() const );
+    wxDEPRECATED( void SetNumberOfRowsOrCols(int n) );
+#endif // WXWIN_COMPATIBILITY_2_4
+
 protected:
     wxRadioBoxBase()
     {
@@ -95,8 +103,6 @@ protected:
         m_itemsTooltips = NULL;
 #endif // wxUSE_TOOLTIPS
     }
-
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 
     // return the number of items in major direction (which depends on whether
     // we have wxRA_SPECIFY_COLS or wxRA_SPECIFY_ROWS style)

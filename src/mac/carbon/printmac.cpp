@@ -80,12 +80,12 @@ void wxMacCarbonPrintData::ValidateOrCreate()
     OSStatus err = noErr ;
     if ( m_macPrintSession == kPMNoReference )
     {
-        err = PMCreateSession( &m_macPrintSession ) ;
+        err = PMCreateSession( (PMPrintSession *) &m_macPrintSession ) ;
     }
     //  Set up a valid PageFormat object.
     if ( m_macPageFormat == kPMNoPageFormat)
     {
-        err = PMCreatePageFormat(&m_macPageFormat);
+        err = PMCreatePageFormat((PMPageFormat *) &m_macPageFormat);
 
         //  Note that PMPageFormat is not session-specific, but calling
         //  PMSessionDefaultPageFormat assigns values specific to the printer
@@ -93,21 +93,21 @@ void wxMacCarbonPrintData::ValidateOrCreate()
         if ((err == noErr) &&
             ( m_macPageFormat != kPMNoPageFormat))
         {
-            err = PMSessionDefaultPageFormat(m_macPrintSession,
-                m_macPageFormat);
+            err = PMSessionDefaultPageFormat((PMPrintSession) m_macPrintSession,
+                (PMPageFormat) m_macPageFormat);
         }
     }
     else
     {
-        err = PMSessionValidatePageFormat(m_macPrintSession,
-            m_macPageFormat,
+        err = PMSessionValidatePageFormat((PMPrintSession) m_macPrintSession,
+            (PMPageFormat) m_macPageFormat,
             kPMDontWantBoolean);
     }
 
     //  Set up a valid PrintSettings object.
     if ( m_macPrintSettings == kPMNoPrintSettings)
     {
-        err = PMCreatePrintSettings( &m_macPrintSettings);
+        err = PMCreatePrintSettings((PMPrintSettings *) &m_macPrintSettings);
 
         //  Note that PMPrintSettings is not session-specific, but calling
         //  PMSessionDefaultPrintSettings assigns values specific to the printer
@@ -115,14 +115,14 @@ void wxMacCarbonPrintData::ValidateOrCreate()
         if ((err == noErr) &&
             ( m_macPrintSettings != kPMNoPrintSettings))
         {
-            err = PMSessionDefaultPrintSettings(m_macPrintSession,
-               m_macPrintSettings);
+            err = PMSessionDefaultPrintSettings((PMPrintSession) m_macPrintSession,
+                (PMPrintSettings) m_macPrintSettings);
         }
     }
     else
     {
-        err = PMSessionValidatePrintSettings( m_macPrintSession,
-            m_macPrintSettings,
+        err = PMSessionValidatePrintSettings((PMPrintSession) m_macPrintSession,
+            (PMPrintSettings) m_macPrintSettings,
             kPMDontWantBoolean);
     }
 }
@@ -140,7 +140,7 @@ bool wxMacCarbonPrintData::TransferFrom( const wxPrintData &data )
     // collate cannot be set
 #if 0 // not yet tested
     if ( !m_printerName.empty() )
-        PMSessionSetCurrentPrinter( (PMPrintSession) m_macPrintSession , wxCFStringRef( m_printerName , wxFont::GetDefaultEncoding() ) ) ;
+        PMSessionSetCurrentPrinter( (PMPrintSession) m_macPrintSession , wxMacCFStringHolder( m_printerName , wxFont::GetDefaultEncoding() ) ) ;
 #endif
 #ifndef __LP64__
     PMColorMode color ;
@@ -154,33 +154,36 @@ bool wxMacCarbonPrintData::TransferFrom( const wxPrintData &data )
         PMSetColorMode( (PMPrintSettings) m_macPrintSettings, kPMBlackAndWhite ) ;
 #endif
 
-    PMDuplexMode mode = 0 ;
-    switch( data.GetDuplex() )
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if ( &PMSetDuplex!=NULL )
     {
-        case wxDUPLEX_HORIZONTAL :
-            mode = kPMDuplexNoTumble ;
-            break ;
-        case wxDUPLEX_VERTICAL :
-            mode = kPMDuplexTumble ;
-            break ;
-        case wxDUPLEX_SIMPLEX :
-        default :
-            mode = kPMDuplexNone ;
-            break ;
+        PMDuplexMode mode = 0 ;
+        switch( data.GetDuplex() )
+        {
+            case wxDUPLEX_HORIZONTAL :
+                mode = kPMDuplexNoTumble ;
+                break ;
+            case wxDUPLEX_VERTICAL :
+                mode = kPMDuplexTumble ;
+                break ;
+            case wxDUPLEX_SIMPLEX :
+            default :
+                mode = kPMDuplexNone ;
+                break ;
+        }
+        PMSetDuplex( (PMPrintSettings) m_macPrintSettings, mode ) ;
     }
-    PMSetDuplex( (PMPrintSettings) m_macPrintSettings, mode ) ;
-
+#endif
     // PMQualityMode not yet accessible via API
     // todo paperSize
 
     PMResolution res;
     PMPrinter printer;
     PMSessionGetCurrentPrinter(m_macPrintSession, &printer);
-#if 0 // MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 
     PMPrinterGetOutputResolution( printer,  
         (PMPrintSettings) m_macPrintSettings,  &res) ;
     // TODO transfer ? into page format ?
-    // may fail !
 #else
     PMTag tag = kPMMaxSquareResolution;
     PMPrinterGetPrinterResolution(printer, tag, &res);
@@ -223,7 +226,7 @@ bool wxMacCarbonPrintData::TransferTo( wxPrintData &data )
     // collate cannot be set
 #if 0
     {
-        wxCFStringRef name ;
+        wxMacCFStringHolder name ;
         PMPrinter printer ;
         PMSessionGetCurrentPrinter( m_macPrintSession ,
             &printer ) ;
@@ -237,21 +240,26 @@ bool wxMacCarbonPrintData::TransferTo( wxPrintData &data )
     if ( err == noErr )
         data.SetColour( !(color == kPMBlackAndWhite) ) ;
 #endif
-    PMDuplexMode mode = 0 ;
-    PMGetDuplex( (PMPrintSettings) m_macPrintSettings, &mode ) ;
-    switch( mode )
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if ( &PMGetDuplex!=NULL )
     {
-        case kPMDuplexNoTumble :
-            data.SetDuplex(wxDUPLEX_HORIZONTAL);
-            break ;
-        case kPMDuplexTumble :
-            data.SetDuplex(wxDUPLEX_VERTICAL);
-            break ;
-        case kPMDuplexNone :
-        default :
-            data.SetDuplex(wxDUPLEX_SIMPLEX);
-            break ;
+        PMDuplexMode mode = 0 ;
+        PMGetDuplex( (PMPrintSettings) m_macPrintSettings, &mode ) ;
+        switch( mode )
+        {
+            case kPMDuplexNoTumble :
+                data.SetDuplex(wxDUPLEX_HORIZONTAL);
+                break ;
+            case kPMDuplexTumble :
+                data.SetDuplex(wxDUPLEX_VERTICAL);
+                break ;
+            case kPMDuplexNone :
+            default :
+                data.SetDuplex(wxDUPLEX_SIMPLEX);
+                break ;
+        }
     }
+#endif
     // PMQualityMode not yet accessible via API
     
     PMPaper paper ;
@@ -273,7 +281,7 @@ bool wxMacCarbonPrintData::TransferTo( wxPrintData &data )
     return true ;
 }
 
-void wxMacCarbonPrintData::TransferFrom( wxPageSetupData *WXUNUSED(data) )
+void wxMacCarbonPrintData::TransferFrom( wxPageSetupData *data )
 {
     // should we setup the page rect here ?
     // since MacOS sometimes has two same paper rects with different
@@ -404,7 +412,7 @@ bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
     }
 
     // May have pressed cancel.
-    if (!dc || !dc->IsOk())
+    if (!dc || !dc->Ok())
     {
         if (dc)
             delete dc;
@@ -416,7 +424,7 @@ bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
     PMResolution res;
     wxMacCarbonPrintData* nativeData = (wxMacCarbonPrintData*)
           (m_printDialogData.GetPrintData().GetNativeData());
-#if 0 // MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5 
     PMPrinter printer;
     PMSessionGetCurrentPrinter(nativeData->m_macPrintSession, &printer);
     PMPrinterGetOutputResolution( printer, nativeData->m_macPrintSettings, &res) ;
@@ -501,7 +509,19 @@ bool wxMacPrinter::Print(wxWindow *parent, wxPrintout *printout, bool prompt)
             }
             else
             {
-                wxSafeYield(win,true);
+#if TARGET_CARBON
+                if ( UMAGetSystemVersion() >= 0x1000 )
+#endif
+                {
+#if !wxMAC_USE_CORE_GRAPHICS
+                    GrafPtr thePort ;
+                    GetPort( &thePort ) ;
+#endif
+                    wxSafeYield(win,true);
+#if !wxMAC_USE_CORE_GRAPHICS
+                    SetPort( thePort ) ;
+#endif
+                }
                 dc->StartPage();
                 keepGoing = printout->OnPrintPage(pn);
                 dc->EndPage();
@@ -542,7 +562,7 @@ wxDC* wxMacPrinter::PrintDialog(wxWindow *parent)
     return dc;
 }
 
-bool wxMacPrinter::Setup(wxWindow *WXUNUSED(parent))
+bool wxMacPrinter::Setup(wxWindow *parent)
 {
 #if 0
     wxPrintDialog dialog(parent, & m_printDialogData);
@@ -607,7 +627,7 @@ void wxMacPrintPreview::DetermineScaling(void)
 
     // Get a device context for the currently selected printer
     wxPrinterDC printerDC(m_printDialogData.GetPrintData());
-    if (printerDC.IsOk())
+    if (printerDC.Ok())
     {
         printerDC.GetSizeMM(&ww, &hh);
         printerDC.GetSize( &w , &h ) ;

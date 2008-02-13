@@ -342,9 +342,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_HELP
     wxHelpProvider::Set(new wxSimpleHelpProvider);
 #endif
@@ -693,13 +690,13 @@ MyFrame::MyFrame(const wxString& title, wxWindowID id, const wxPoint& pos,
 
     toolBar->Realize();
 
-    wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSP_LIVE_UPDATE);
+    wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSP_NO_XP_THEME|wxSP_3D|wxSP_LIVE_UPDATE);
 
     wxFont textFont = wxFont(12, wxROMAN, wxNORMAL, wxNORMAL);
     wxFont boldFont = wxFont(12, wxROMAN, wxNORMAL, wxBOLD);
     wxFont italicFont = wxFont(12, wxROMAN, wxITALIC, wxNORMAL);
 
-    m_richTextCtrl = new wxRichTextCtrl(splitter, ID_RICHTEXT_CTRL, wxEmptyString, wxDefaultPosition, wxSize(200, 200), wxVSCROLL|wxHSCROLL|wxWANTS_CHARS);
+    m_richTextCtrl = new wxRichTextCtrl(splitter, ID_RICHTEXT_CTRL, wxEmptyString, wxDefaultPosition, wxSize(200, 200), wxVSCROLL|wxHSCROLL|wxNO_BORDER|wxWANTS_CHARS);
     wxFont font(12, wxROMAN, wxNORMAL, wxNORMAL);
 
     m_richTextCtrl->SetFont(font);
@@ -751,6 +748,7 @@ void MyFrame::WriteInitialText()
 
     r.WriteText(wxString(wxT("Welcome to wxRichTextCtrl, a wxWidgets control")) + lineBreak + wxT("for editing and presenting styled text and images\n"));
     r.EndFontSize();
+    //r.Newline();
 
     r.BeginItalic();
     r.WriteText(wxT("by Julian Smart"));
@@ -824,11 +822,13 @@ void MyFrame::WriteInitialText()
     r.BeginNumberedBullet(1, 100, 60);
     r.WriteText(wxT("This is my first item. Note that wxRichTextCtrl can apply numbering and bullets automatically based on list styles, but this list is formatted explicitly by setting indents."));
     r.Newline();
+
     r.EndNumberedBullet();
 
     r.BeginNumberedBullet(2, 100, 60);
     r.WriteText(wxT("This is my second item."));
     r.Newline();
+
     r.EndNumberedBullet();
 
     r.WriteText(wxT("The following paragraph is right-indented:"));
@@ -917,12 +917,15 @@ void MyFrame::WriteInitialText()
 
     r.Newline();
 
-    r.WriteText(wxT("Note: this sample content was generated programmatically from within the MyFrame constructor in the demo. The images were loaded from inline XPMs. Enjoy wxRichTextCtrl!\n"));
+    r.WriteText(wxT("Note: this sample content was generated programmatically from within the MyFrame constructor in the demo. The images were loaded from inline XPMs. Enjoy wxRichTextCtrl!"));
+
+    r.Newline();
 
     r.EndParagraphSpacing();
 
     r.EndSuppressUndo();
 }
+
 
 // event handlers
 
@@ -1197,7 +1200,7 @@ void MyFrame::OnUpdateFormat(wxUpdateUIEvent& event)
 
 void MyFrame::OnIndentMore(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LEFT_INDENT);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1215,7 +1218,7 @@ void MyFrame::OnIndentMore(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnIndentLess(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LEFT_INDENT);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1235,7 +1238,7 @@ void MyFrame::OnIndentLess(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingHalf(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1253,7 +1256,7 @@ void MyFrame::OnLineSpacingHalf(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingDouble(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1271,7 +1274,7 @@ void MyFrame::OnLineSpacingDouble(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingSingle(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1289,7 +1292,7 @@ void MyFrame::OnLineSpacingSingle(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnParagraphSpacingMore(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_PARA_SPACING_AFTER);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1307,7 +1310,7 @@ void MyFrame::OnParagraphSpacingMore(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnParagraphSpacingLess(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_PARA_SPACING_AFTER);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1441,7 +1444,7 @@ void MyFrame::OnManageStyles(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnInsertSymbol(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_FONT);
     m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr);
 

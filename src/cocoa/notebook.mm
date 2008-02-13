@@ -326,7 +326,7 @@ bool wxNotebook::CocoaDelegate_tabView_shouldSelectTabViewItem(WX_NSTabViewItem 
     wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, GetId(),
         [GetNSTabView() indexOfTabViewItem:tabViewItem], GetSelection());
     event.SetEventObject(this);
-    return !HandleWindowEvent(event) || event.IsAllowed();
+    return !GetEventHandler()->ProcessEvent(event) || event.IsAllowed();
 }
 
 #endif // wxUSE_NOTEBOOK

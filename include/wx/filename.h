@@ -27,7 +27,6 @@
 #include "wx/filefn.h"
 #include "wx/datetime.h"
 #include "wx/intl.h"
-#include "wx/longlong.h"
 
 #if wxUSE_FILE
 class WXDLLIMPEXP_FWD_BASE wxFile;
@@ -85,10 +84,8 @@ enum
     wxPATH_MKDIR_FULL    = 0x0001   // create directories recursively
 };
 
-#if wxUSE_LONGLONG
 // error code of wxFileName::GetSize()
-extern WXDLLIMPEXP_DATA_BASE(const wxULongLong) wxInvalidSize;
-#endif // wxUSE_LONGLONG
+extern WXDLLIMPEXP_DATA_BASE(wxULongLong) wxInvalidSize;
 
 
 
@@ -392,7 +389,7 @@ public:
     static wxString GetPathTerminators(wxPathFormat format = wxPATH_NATIVE);
 
     // get the canonical path separator for this format
-    static wxUniChar GetPathSeparator(wxPathFormat format = wxPATH_NATIVE)
+    static wxChar GetPathSeparator(wxPathFormat format = wxPATH_NATIVE)
         { return GetPathSeparators(format)[0u]; }
 
     // is the char a path separator for this format?
@@ -486,7 +483,6 @@ public:
 
     // Filesize
 
-#if wxUSE_LONGLONG
         // returns the size of the given filename
     wxULongLong GetSize() const;
     static wxULongLong GetSize(const wxString &file);
@@ -497,7 +493,6 @@ public:
     static wxString GetHumanReadableSize(const wxULongLong &sz,
                                          const wxString &nullsize = wxGetTranslation(_T("Not available")),
                                          int precision = 1);
-#endif // wxUSE_LONGLONG
 
 
     // deprecated methods, don't use any more

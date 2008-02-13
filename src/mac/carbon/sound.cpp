@@ -52,7 +52,15 @@
 #endif
 #endif
 
+#if defined __WXMAC__ && defined __DARWIN__/*TARGET_CARBON*/
+#ifdef __APPLE_CC__
 #include <Carbon/Carbon.h>
+#else
+#include <Carbon.h>
+#endif
+#else
+#include <Sound.h>
+#endif
 
 //quicktime media layer only required for mac emulation on pc
 #ifndef __WXMAC__
@@ -71,7 +79,7 @@
 static wxTimer* lastSoundTimer=NULL;
 static bool lastSoundIsPlaying=false;
 
-#if !defined(__LP64__)
+#if !defined(__DARWIN__) || !defined(__LP64__)
 #define USE_QUICKTIME 1
 #else
 #define USE_QUICKTIME 0
@@ -393,7 +401,7 @@ bool wxSound::DoPlay(unsigned flags) const
             Handle dataRef = NULL;
             OSType dataRefType;
 
-            err = QTNewDataReferenceFromFullPathCFString(wxCFStringRef(m_sndname,wxLocale::GetSystemEncoding()),
+            err = QTNewDataReferenceFromFullPathCFString(wxMacCFStringHolder(m_sndname,wxLocale::GetSystemEncoding()),
                 (UInt32)kQTNativeDefaultPathStyle, 0, &dataRef, &dataRefType);
 
             wxASSERT(err == noErr);

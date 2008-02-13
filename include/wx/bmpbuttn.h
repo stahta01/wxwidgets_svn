@@ -19,7 +19,7 @@
 #include "wx/bitmap.h"
 #include "wx/button.h"
 
-extern WXDLLEXPORT_DATA(const char) wxButtonNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxButtonNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxBitmapButton: a button which shows bitmaps instead of the usual string.
@@ -36,15 +36,15 @@ public:
     }
 
     // set the bitmaps
-    virtual void SetBitmapLabel(const wxBitmap& bitmap)
+    void SetBitmapLabel(const wxBitmap& bitmap)
         { m_bmpNormal = bitmap; OnSetBitmap(); }
-    virtual void SetBitmapSelected(const wxBitmap& sel)
+    void SetBitmapSelected(const wxBitmap& sel)
         { m_bmpSelected = sel; OnSetBitmap(); }
-    virtual void SetBitmapFocus(const wxBitmap& focus)
+    void SetBitmapFocus(const wxBitmap& focus)
         { m_bmpFocus = focus; OnSetBitmap(); }
-    virtual void SetBitmapDisabled(const wxBitmap& disabled)
+    void SetBitmapDisabled(const wxBitmap& disabled)
         { m_bmpDisabled = disabled; OnSetBitmap(); }
-    virtual void SetBitmapHover(const wxBitmap& hover)
+    void SetBitmapHover(const wxBitmap& hover)
         { m_bmpHover = hover; OnSetBitmap(); }
 
     // retrieve the bitmaps

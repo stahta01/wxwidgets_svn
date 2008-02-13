@@ -24,10 +24,6 @@ and \helpref{wxDocTemplate}{wxdoctemplate} classes.
 
 <wx/docview.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxDocManager overview}{wxdocmanageroverview}, \helpref{wxDocument}{wxdocument},\rtfsp
@@ -87,11 +83,11 @@ The directory last selected by the user when opening a file.
 \member{wxFileHistory*}{m\_fileHistory}
 
 
-\membersection{wxDocManager::GetTemplates}\label{wxdocmanagergettemplates}
+\membersection{wxDocManager::m\_templates}\label{wxdocmanagermtemplates}
 
-\func{wxList\&}{Gettemplates}{\void}
+\member{wxList}{m\_templates}
 
-Returns the list of all document templates.
+A list of all document templates.
 
 
 \membersection{wxDocManager::wxDocManager}\label{wxdocmanagerctor}
@@ -324,14 +320,16 @@ The bottom line: if you're not deriving from Initialize, forget it and
 construct wxDocManager with no arguments.
 
 
-\membersection{wxDocManager::MakeNewDocumentName}\label{wxdocmanagermakenewdocumentname}
+\membersection{wxDocManager::MakeDefaultName}\label{wxdocmanagermakedefaultname}
 
-\func{wxString}{MakeNewDocumentName}{\void}
+\func{bool}{MakeDefaultName}{\param{const wxString\& }{buf}}
 
-Return a string containing a suitable default name for a new document. By
-default this is implemented by appending an integer counter to the string
-{\bf unnamed} but can be overridden in the derived classes to do something more
-appropriate.
+Copies a suitable default name into {\it buf}. This is implemented by
+appending an integer counter to the string {\bf unnamed} and incrementing
+the counter.
+
+\perlnote{In wxPerl this function must return the modified name rather
+than just modifying the argument.}
 
 
 \membersection{wxDocManager::OnCreateFileHistory}\label{wxdocmanageroncreatefilehistory}

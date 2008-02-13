@@ -18,7 +18,7 @@
 
 #include "wx/control.h"
 
-extern WXDLLEXPORT_DATA(const char) wxStaticBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStaticBoxNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxStaticBox: a grouping box with a label
@@ -46,10 +46,7 @@ public:
         *borderOther = BORDER;
     }
 
-protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
+private:
     DECLARE_NO_COPY_CLASS(wxStaticBoxBase)
 };
 

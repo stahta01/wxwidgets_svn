@@ -20,18 +20,11 @@
 
 #include "wx/utils.h"
 
-#define USE_PUTENV (!defined(HAVE_SETENV) && defined(HAVE_PUTENV))
-
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/app.h"
-    #include "wx/wxcrtvararg.h"
-    #if USE_PUTENV
-        #include "wx/module.h"
-        #include "wx/hashmap.h"
-    #endif
 #endif
 
 #include "wx/apptrait.h"
@@ -44,12 +37,7 @@
 #include "wx/unix/execute.h"
 #include "wx/unix/private.h"
 
-#ifdef wxHAS_GENERIC_PROCESS_CALLBACK
-#include "wx/private/fdiodispatcher.h"
-#endif
-
 #include <pwd.h>
-#include <sys/wait.h>       // waitpid()
 
 #ifdef HAVE_SYS_SELECT_H
 #   include <sys/select.h>
@@ -699,7 +687,7 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process)
 
 const wxChar* wxGetHomeDir( wxString *home  )
 {
-    *home = wxGetUserHome();
+    *home = wxGetUserHome( wxEmptyString );
     wxString tmp;
     if ( home->empty() )
         *home = wxT("/");
@@ -711,7 +699,11 @@ const wxChar* wxGetHomeDir( wxString *home  )
     return home->c_str();
 }
 
-wxString wxGetUserHome( const wxString &user )
+#if wxUSE_UNICODE
+const wxMB2WXbuf wxGetUserHome( const wxString &user )
+#else // just for binary compatibility -- there is no 'const' here
+char *wxGetUserHome( const wxString &user )
+#endif
 {
     struct passwd *who = (struct passwd *) NULL;
 
@@ -721,17 +713,20 @@ wxString wxGetUserHome( const wxString &user )
 
         if ((ptr = wxGetenv(wxT("HOME"))) != NULL)
         {
+#if wxUSE_UNICODE
+            wxWCharBuffer buffer( ptr );
+            return buffer;
+#else
             return ptr;
+#endif
         }
-
-        if ((ptr = wxGetenv(wxT("USER"))) != NULL ||
-             (ptr = wxGetenv(wxT("LOGNAME"))) != NULL)
+        if ((ptr = wxGetenv(wxT("USER"))) != NULL || (ptr = wxGetenv(wxT("LOGNAME"))) != NULL)
         {
             who = getpwnam(wxSafeConvertWX2MB(ptr));
         }
 
-        // make sure the user exists!
-        if ( !who )
+        // We now make sure the the user exists!
+        if (who == NULL)
         {
             who = getpwuid(getuid());
         }
@@ -916,10 +911,9 @@ wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
     // get OS version
     int major, minor;
     wxString release = wxGetCommandOutput(wxT("uname -r"));
-    if ( release.empty() ||
-         wxSscanf(release.c_str(), wxT("%d.%d"), &major, &minor) != 2 )
+    if ( !release.empty() && wxSscanf(release, wxT("%d.%d"), &major, &minor) != 2 )
     {
-        // failed to get version string or unrecognized format
+        // unrecognized uname string format
         major =
         minor = -1;
     }
@@ -995,12 +989,12 @@ wxMemorySize wxGetFreeMemory()
 
         return (wxMemorySize)memFree;
     }
+#elif defined(__SUN__) && defined(_SC_AVPHYS_PAGES)
+    return (wxMemorySize)(sysconf(_SC_AVPHYS_PAGES)*sysconf(_SC_PAGESIZE));
 #elif defined(__SGI__)
     struct rminfo realmem;
     if ( sysmp(MP_SAGET, MPSA_RMINFO, &realmem, sizeof realmem) == 0 )
         return ((wxMemorySize)realmem.physmem * sysconf(_SC_PAGESIZE));
-#elif defined(_SC_AVPHYS_PAGES)
-    return ((wxMemorySize)sysconf(_SC_AVPHYS_PAGES))*sysconf(_SC_PAGESIZE);
 //#elif defined(__FREEBSD__) -- might use sysctl() to find it out, probably
 #endif
 
@@ -1048,39 +1042,10 @@ bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspace
 // env vars
 // ----------------------------------------------------------------------------
 
-#if USE_PUTENV
-
-WX_DECLARE_STRING_HASH_MAP(char *, wxEnvVars);
-
-static wxEnvVars gs_envVars;
-
-class wxSetEnvModule : public wxModule
-{
-public:
-    virtual bool OnInit() { return true; }
-    virtual void OnExit()
-    {
-        for ( wxEnvVars::const_iterator i = gs_envVars.begin();
-              i != gs_envVars.end();
-              ++i )
-        {
-            free(i->second);
-        }
-
-        gs_envVars.clear();
-    }
-
-    DECLARE_DYNAMIC_CLASS(wxSetEnvModule)
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxSetEnvModule, wxModule)
-
-#endif // USE_PUTENV
-
 bool wxGetEnv(const wxString& var, wxString *value)
 {
     // wxGetenv is defined as getenv()
-    char *p = wxGetenv(var);
+    wxChar *p = wxGetenv(var);
     if ( !p )
         return false;
 
@@ -1092,7 +1057,7 @@ bool wxGetEnv(const wxString& var, wxString *value)
     return true;
 }
 
-static bool wxDoSetEnv(const wxString& variable, const char *value)
+bool wxSetEnv(const wxString& variable, const wxChar *value)
 {
 #if defined(HAVE_SETENV)
     if ( !value )
@@ -1103,11 +1068,13 @@ static bool wxDoSetEnv(const wxString& variable, const char *value)
         unsetenv(variable.mb_str());
         return true;
 #else
-        value = ""; // we can't pass NULL to setenv()
+        value = _T(""); // we can't pass NULL to setenv()
 #endif
     }
 
-    return setenv(variable.mb_str(), value, 1 /* overwrite */) == 0;
+    return setenv(variable.mb_str(),
+                  wxString(value).mb_str(),
+                  1 /* overwrite */) == 0;
 #elif defined(HAVE_PUTENV)
     wxString s = variable;
     if ( value )
@@ -1116,35 +1083,14 @@ static bool wxDoSetEnv(const wxString& variable, const char *value)
     // transform to ANSI
     const wxWX2MBbuf p = s.mb_str();
 
+    // the string will be free()d by libc
     char *buf = (char *)malloc(strlen(p) + 1);
     strcpy(buf, p);
-
-    // store the string to free() it later
-    wxEnvVars::iterator i = gs_envVars.find(variable);
-    if ( i != gs_envVars.end() )
-    {
-        free(i->second);
-        i->second = buf;
-    }
-    else // this variable hadn't been set before
-    {
-        gs_envVars[variable] = buf;
-    }
 
     return putenv(buf) == 0;
 #else // no way to set an env var
     return false;
 #endif
-}
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.mb_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
 }
 
 // ----------------------------------------------------------------------------
@@ -1232,18 +1178,35 @@ bool wxHandleFatalExceptions(bool doit)
 // ----------------------------------------------------------------------------
 
 /*
-    NOTE: If this proves not to work well for wxMac then move back to the old
-    behavior.  If, however, it proves to work just fine, nuke all of the code
-    for the old behavior.  I strongly suggest backporting this to 2.8 as well.
-    However, beware that while you can nuke the old code here, you cannot
-    nuke the wxAddProcessCallbackForPid from the 2.8 branch (found in
-    utilsexc_cf since it's an exported symbol).
- */
-// #define USE_OLD_DARWIN_END_PROCESS_DETECT (defined(__DARWIN__) && defined(__WXMAC__))
-#define USE_OLD_DARWIN_END_PROCESS_DETECT 0
+    NOTE: The original code shipped in 2.8 used __DARWIN__ && __WXMAC__ to wrap
+    the wxGUIAppTraits differences but __DARWIN__ && (__WXMAC__ || __WXCOCOA__)
+    to decide whether to call wxAddProcessCallbackForPid instead of
+    wxAddProcessCallback.  This define normalizes things so the two match.
 
-// wxMac/wxCocoa don't use the same process end detection mechanisms so we don't
-// need wxExecute-related helpers for them
+    Since wxCocoa was already creating the pipes in its wxGUIAppTraits I
+    decided to leave that as is and implement wxAddProcessCallback in the
+    utilsexec_cf.cpp file.  I didn't see a reason to wrap that in a __WXCOCOA__
+    check since it's valid for both wxMac and wxCocoa.
+
+    Since the existing code is working for wxMac I've left it as is although
+    do note that the old task_for_pid method still used on PPC machines is
+    expected to fail in Leopard PPC and theoretically already fails if you run
+    your PPC app under Rosetta.
+
+    You thus have two choices if you find end process detect broken:
+     1) Change the define below such that the new code is used for wxMac.
+        This is theoretically ABI compatible since the old code still remains
+        in utilsexec_cf.cpp it's just no longer used by this code.
+     2) Change the USE_POLLING define in utilsexc_cf.cpp to 1 unconditionally
+        This is theoretically not compatible since it removes the
+        wxMAC_MachPortEndProcessDetect helper function.  Though in practice
+        this shouldn't be a problem since it wasn't prototyped anywhere.
+ */
+#define USE_OLD_DARWIN_END_PROCESS_DETECT (defined(__DARWIN__) && defined(__WXMAC__))
+// #define USE_OLD_DARWIN_END_PROCESS_DETECT 0
+
+// wxMac doesn't use the same process end detection mechanisms so we don't
+// need wxExecute-related helpers for it.
 #if !USE_OLD_DARWIN_END_PROCESS_DETECT
 
 bool wxGUIAppTraits::CreateEndProcessPipe(wxExecuteData& execData)
@@ -1312,122 +1275,55 @@ int wxGUIAppTraits::WaitForChild(wxExecuteData& execData)
     }
 
 
-    if ( !(flags & wxEXEC_NOEVENTS) )
-    {
 #if USE_OLD_DARWIN_END_PROCESS_DETECT
-        endProcData->tag = wxAddProcessCallbackForPid(endProcData, execData.pid);
+    endProcData->tag = wxAddProcessCallbackForPid(endProcData, execData.pid);
 #else
-        endProcData->tag = wxAddProcessCallback
-                           (
-                             endProcData,
-                             execData.pipeEndProcDetect.Detach(wxPipe::Read)
-                           );
+    endProcData->tag = wxAddProcessCallback
+                (
+                    endProcData,
+                    execData.pipeEndProcDetect.Detach(wxPipe::Read)
+                );
 
-        execData.pipeEndProcDetect.Close();
+    execData.pipeEndProcDetect.Close();
 #endif // USE_OLD_DARWIN_END_PROCESS_DETECT
-    }
 
     if ( flags & wxEXEC_SYNC )
     {
         wxBusyCursor bc;
-        int exitcode = 0;
+        wxWindowDisabler *wd = flags & wxEXEC_NODISABLE ? NULL
+                                                        : new wxWindowDisabler;
 
-        wxWindowDisabler *wd = flags & (wxEXEC_NODISABLE | wxEXEC_NOEVENTS)
-                                    ? NULL
-                                    : new wxWindowDisabler;
-
-        if ( flags & wxEXEC_NOEVENTS )
+        // endProcData->pid will be set to 0 from GTK_EndProcessDetector when the
+        // process terminates
+        while ( endProcData->pid != 0 )
         {
-            // just block waiting for the child to exit
-            int status = 0;
-
-            int result = waitpid(execData.pid, &status, 0);
-#ifdef __DARWIN__
-            /*  DE: waitpid manpage states that waitpid can fail with EINTR
-                if the call is interrupted by a caught signal.  I suppose
-                that means that this ought to be a while loop.
-
-                The odd thing is that it seems to fail EVERY time.  It fails
-                with a quickly exiting process (e.g. echo), and fails with a
-                slowly exiting process (e.g. sleep 2) but clearly after
-                having waited for the child to exit. Maybe it's a bug in
-                my particular version.
-
-                It works, however, from the CFSocket callback without this
-                trick but in that case it's used only after CFSocket calls
-                the callback and with the WNOHANG flag which would seem to
-                preclude it from being interrupted or at least make it much
-                less likely since it would not then be waiting.
-
-                If Darwin's man page is to be believed then this is definitely
-                necessary.  It's just weird that I've never seen it before
-                and apparently no one else has either or you'd think they'd
-                have reported it by now.  Perhaps blocking the GUI while
-                waiting for a child process to exit is simply not that common.
-             */
-            if(result == -1 && errno == EINTR)
-            {
-                result = waitpid(execData.pid, &status, 0);
-            }
-
-#endif
-
-            if ( result == -1 )
-            {
-                wxLogLastError(_T("waitpid"));
-                exitcode = -1;
-            }
-            else
-            {
-                wxASSERT_MSG( result == execData.pid,
-                              _T("unexpected waitpid() return value") );
-
-                if ( WIFEXITED(status) )
-                {
-                    exitcode = WEXITSTATUS(status);
-                }
-                else // abnormal termination?
-                {
-                    wxASSERT_MSG( WIFSIGNALED(status),
-                                  _T("unexpected child wait status") );
-                    exitcode = -1;
-                }
-            }
-        }
-        else // !wxEXEC_NOEVENTS
-        {
-            // endProcData->pid will be set to 0 from
-            // wxHandleProcessTermination when the process terminates
-            while ( endProcData->pid != 0 )
-            {
-                bool idle = true;
+            bool idle = true;
 
 #if HAS_PIPE_INPUT_STREAM
-                if ( execData.bufOut )
-                {
-                    execData.bufOut->Update();
-                    idle = false;
-                }
-
-                if ( execData.bufErr )
-                {
-                    execData.bufErr->Update();
-                    idle = false;
-                }
-#endif // HAS_PIPE_INPUT_STREAM
-
-                // don't consume 100% of the CPU while we're sitting in this
-                // loop
-                if ( idle )
-                    wxMilliSleep(1);
-
-                // give GTK+ a chance to call GTK_EndProcessDetector here and
-                // also repaint the GUI
-                wxYield();
+            if ( execData.bufOut )
+            {
+                execData.bufOut->Update();
+                idle = false;
             }
 
-            exitcode = endProcData->exitcode;
+            if ( execData.bufErr )
+            {
+                execData.bufErr->Update();
+                idle = false;
+            }
+#endif // HAS_PIPE_INPUT_STREAM
+
+            // don't consume 100% of the CPU while we're sitting in this
+            // loop
+            if ( idle )
+                wxMilliSleep(1);
+
+            // give GTK+ a chance to call GTK_EndProcessDetector here and
+            // also repaint the GUI
+            wxYield();
         }
+
+        int exitcode = endProcData->exitcode;
 
         delete wd;
         delete endProcData;
@@ -1439,78 +1335,6 @@ int wxGUIAppTraits::WaitForChild(wxExecuteData& execData)
         return execData.pid;
     }
 }
-
-#ifdef wxHAS_GENERIC_PROCESS_CALLBACK
-struct wxEndProcessFDIOHandler : public wxFDIOHandler
-{
-    wxEndProcessFDIOHandler(wxEndProcessData *data, int fd)
-        : m_data(data), m_fd(fd)
-    {}
-
-    virtual void OnReadWaiting()
-        { wxFAIL_MSG("this isn't supposed to happen"); }
-    virtual void OnWriteWaiting()
-        { wxFAIL_MSG("this isn't supposed to happen"); }
-
-    virtual void OnExceptionWaiting()
-    {
-        int pid = (m_data->pid > 0) ? m_data->pid : -(m_data->pid);
-        int status = 0;
-
-        // has the process really terminated?
-        int rc = waitpid(pid, &status, WNOHANG);
-        if ( rc == 0 )
-        {
-            // This can only happen if the child application closes our dummy
-            // pipe that is used to monitor its lifetime; in that case, our
-            // best bet is to pretend the process did terminate, because
-            // otherwise wxExecute() would hang indefinitely
-            // (OnExceptionWaiting() won't be called again, the descriptor
-            // is closed now).
-            wxLogDebug("Child process (PID %i) still alive, even though notification was received that it terminated.", pid);
-        }
-        else if ( rc == -1 )
-        {
-            // As above, if waitpid() fails, the best we can do is to log the
-            // error and pretend the child terminated:
-            wxLogSysError(_("Failed to check child process' status"));
-        }
-
-        // set exit code to -1 if something bad happened
-        m_data->exitcode = (rc > 0 && WIFEXITED(status))
-                           ? WEXITSTATUS(status)
-                           : -1;
-
-        wxLogTrace("exec",
-                   "Child process (PID %i) terminated with exit code %i",
-                   pid, m_data->exitcode);
-
-        // child exited, end waiting
-        wxFDIODispatcher::Get()->UnregisterFD(m_fd);
-        close(m_fd);
-
-        m_data->fdioHandler = NULL;
-        wxHandleProcessTermination(m_data);
-
-        delete this;
-    }
-
-    wxEndProcessData *m_data;
-    int m_fd;
-};
-
-int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
-{
-    proc_data->fdioHandler = new wxEndProcessFDIOHandler(proc_data, fd);
-    wxFDIODispatcher::Get()->RegisterFD
-                             (
-                                 fd,
-                                 proc_data->fdioHandler,
-                                 wxFDIO_EXCEPTION
-                             );
-    return fd; // unused, but return something unique for the tag
-}
-#endif // wxHAS_GENERIC_PROCESS_CALLBACK
 
 #endif // wxUSE_GUI
 #if wxUSE_BASE

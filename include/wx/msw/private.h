@@ -213,11 +213,6 @@ struct WinStruct : public T
 #include "wx/gdicmn.h"
 #include "wx/colour.h"
 
-#include "wx/msw/dc.h"
-#include "wx/msw/dcclient.h"
-#include "wx/msw/dcmemory.h"
-
-
 // make conversion from wxColour and COLORREF a bit less painful
 inline COLORREF wxColourToRGB(const wxColour& c)
 {
@@ -316,32 +311,21 @@ HCURSOR wxBitmapToHCURSOR(const wxBitmap& bmp, int hotSpotX, int hotSpotY);
     #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 #endif // GET_X_LPARAM
 
-// get the current state of SHIFT/CTRL/ALT keys
-inline bool wxIsModifierDown(int vk)
-{
-    // GetKeyState() returns different negative values on WinME and WinNT,
-    // so simply test for negative value.
-    return ::GetKeyState(vk) < 0;
-}
-
+// get the current state of SHIFT/CTRL keys
 inline bool wxIsShiftDown()
 {
-    return wxIsModifierDown(VK_SHIFT);
+//    return (::GetKeyState(VK_SHIFT) & 0x100) != 0;
+    // Returns different negative values on WinME and WinNT,
+    // so simply test for negative value.
+    return ::GetKeyState(VK_SHIFT) < 0;
 }
 
 inline bool wxIsCtrlDown()
 {
-    return wxIsModifierDown(VK_CONTROL);
-}
-
-inline bool wxIsAltDown()
-{
-    return wxIsModifierDown(VK_MENU);
-}
-
-inline bool wxIsAnyModifierDown()
-{
-    return wxIsShiftDown() || wxIsCtrlDown() || wxIsAltDown();
+//    return (::GetKeyState(VK_CONTROL) & 0x100) != 0;
+    // Returns different negative values on WinME and WinNT,
+    // so simply test for negative value.
+    return ::GetKeyState(VK_CONTROL) < 0;
 }
 
 // wrapper around GetWindowRect() and GetClientRect() APIs doing error checking
@@ -708,7 +692,7 @@ public:
     {
         if ( IsRegistered() )
         {
-            if ( !::UnregisterClass(m_clsname.wx_str(), wxhInstance) )
+            if ( !::UnregisterClass(m_clsname, wxhInstance) )
             {
                 wxLogLastError(_T("UnregisterClass"));
             }
@@ -840,8 +824,7 @@ enum wxWinVersion
     wxWinVersion_2003 = 0x0502,
 
     wxWinVersion_6 = 0x0600,
-    wxWinVersion_Vista = wxWinVersion_6,
-    wxWinVersion_NT6 = wxWinVersion_6
+    wxWinVersion_NT6 = 0x0600
 };
 
 WXDLLIMPEXP_BASE wxWinVersion wxGetWinVersion();
@@ -871,7 +854,7 @@ extern WXDLLEXPORT wxString wxGetWindowClass(WXHWND hWnd);
 
 // get the window id (should be unsigned, hence this is not wxWindowID which
 // is, for mainly historical reasons, signed)
-extern WXDLLEXPORT int wxGetWindowId(WXHWND hWnd);
+extern WXDLLEXPORT WXWORD wxGetWindowId(WXHWND hWnd);
 
 // check if hWnd's WNDPROC is wndProc. Return true if yes, false if they are
 // different

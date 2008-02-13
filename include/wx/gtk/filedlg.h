@@ -10,13 +10,13 @@
 #ifndef __GTKFILEDLGH__
 #define __GTKFILEDLGH__
 
-#include "wx/gtk/filectrl.h"    // for wxGtkFileChooser
+#include "wx/generic/filedlgg.h"
 
 //-------------------------------------------------------------------------
 // wxFileDialog
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileDialog: public wxFileDialogBase
+class WXDLLIMPEXP_CORE wxFileDialog: public wxGenericFileDialog
 {
 public:
     wxFileDialog() { }
@@ -64,8 +64,6 @@ private:
     DECLARE_DYNAMIC_CLASS(wxFileDialog)
     DECLARE_EVENT_TABLE()
     void OnFakeOk( wxCommandEvent &event );
-
-    wxGtkFileChooser    m_fc;
 };
 
 #endif // __GTKFILEDLGH__

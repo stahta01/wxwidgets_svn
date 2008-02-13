@@ -223,7 +223,7 @@ public:
 
     virtual unsigned GetCount() { return unsigned(m_displays.size()); }
     virtual int GetFromPoint(const wxPoint& pt);
-    virtual int GetFromWindow(const wxWindow *window);
+    virtual int GetFromWindow(wxWindow *window);
 
 protected:
     // ctor checks if the current system supports multimon API and dynamically
@@ -482,9 +482,7 @@ wxVideoMode wxDisplayImplWin32Base::GetCurrentMode() const
     // according to MSDN.  The version of GetName() we implement for Win95
     // returns an empty string.
     const wxString name = GetName();
-    const wxChar * const deviceName = name.empty()
-                                          ? (const wxChar*)NULL
-                                          : (const wxChar*)name.c_str();
+    const wxChar * const deviceName = name.empty() ? NULL : name.c_str();
 
     DEVMODE dm;
     dm.dmSize = sizeof(dm);
@@ -513,11 +511,23 @@ wxDisplayFactoryWin32Base::wxDisplayFactoryWin32Base()
     {
         ms_supportsMultimon = 0;
 
-        wxDynamicLibrary dllUser32(_T("user32.dll"), wxDL_VERBATIM | wxDL_QUIET);
+        wxDynamicLibrary dllUser32(_T("user32.dll"));
 
-        if ( (wxDL_INIT_FUNC(gs_, MonitorFromPoint, dllUser32)) == NULL ||
-             (wxDL_INIT_FUNC(gs_, MonitorFromWindow, dllUser32)) == NULL ||
-             (wxDL_INIT_FUNC_AW(gs_, GetMonitorInfo, dllUser32)) == NULL )
+        wxLogNull noLog;
+
+        gs_MonitorFromPoint = (MonitorFromPoint_t)
+            dllUser32.GetSymbol(wxT("MonitorFromPoint"));
+        if ( !gs_MonitorFromPoint )
+            return;
+
+        gs_MonitorFromWindow = (MonitorFromWindow_t)
+            dllUser32.GetSymbol(wxT("MonitorFromWindow"));
+        if ( !gs_MonitorFromWindow )
+            return;
+
+        gs_GetMonitorInfo = (GetMonitorInfo_t)
+            dllUser32.GetSymbolAorW(wxT("GetMonitorInfo"));
+        if ( !gs_GetMonitorInfo )
             return;
 
         ms_supportsMultimon = 1;
@@ -563,7 +573,7 @@ int wxDisplayFactoryWin32Base::GetFromPoint(const wxPoint& pt)
                                                        MONITOR_DEFAULTTONULL));
 }
 
-int wxDisplayFactoryWin32Base::GetFromWindow(const wxWindow *window)
+int wxDisplayFactoryWin32Base::GetFromWindow(wxWindow *window)
 {
     return FindDisplayFromHMONITOR(gs_MonitorFromWindow(GetHwndOf(window),
                                                         MONITOR_DEFAULTTONULL));
@@ -586,8 +596,12 @@ wxDisplayFactoryMultimon::wxDisplayFactoryMultimon()
     // implementation
     EnumDisplayMonitors_t pfnEnumDisplayMonitors;
     {
-        wxDynamicLibrary dllUser32(_T("user32.dll"), wxDL_VERBATIM | wxDL_QUIET);
-        if ( (wxDL_INIT_FUNC(pfn, EnumDisplayMonitors, dllUser32)) == NULL )
+        wxLogNull noLog;
+
+        wxDynamicLibrary dllUser32(_T("user32.dll"));
+        pfnEnumDisplayMonitors = (EnumDisplayMonitors_t)
+            dllUser32.GetSymbol(wxT("EnumDisplayMonitors"));
+        if ( !pfnEnumDisplayMonitors )
             return;
     }
 
@@ -655,9 +669,7 @@ wxDisplayImplMultimon::GetModes(const wxVideoMode& modeMatch) const
     // according to MSDN.  The version of GetName() we implement for Win95
     // returns an empty string.
     const wxString name = GetName();
-    const wxChar * const deviceName = name.empty()
-                                            ? (const wxChar*)NULL
-                                            : (const wxChar*)name.c_str();
+    const wxChar * const deviceName = name.empty() ? NULL : name.c_str();
 
     DEVMODE dm;
     dm.dmSize = sizeof(dm);
@@ -731,10 +743,11 @@ bool wxDisplayImplMultimon::ChangeMode(const wxVideoMode& mode)
     static ChangeDisplaySettingsEx_t pfnChangeDisplaySettingsEx = NULL;
     if ( !pfnChangeDisplaySettingsEx )
     {
-        wxDynamicLibrary dllUser32(_T("user32.dll"), wxDL_VERBATIM | wxDL_QUIET);
+        wxDynamicLibrary dllUser32(_T("user32.dll"));
         if ( dllUser32.IsLoaded() )
         {
-            wxDL_INIT_FUNC_AW(pfn, ChangeDisplaySettingsEx, dllUser32);
+            pfnChangeDisplaySettingsEx = (ChangeDisplaySettingsEx_t)
+                dllUser32.GetSymbolAorW(_T("ChangeDisplaySettingsEx"));
         }
         //else: huh, no user32.dll??
 
@@ -751,11 +764,11 @@ bool wxDisplayImplMultimon::ChangeMode(const wxVideoMode& mode)
     // do change the mode
     switch ( pfnChangeDisplaySettingsEx
              (
-                GetName().wx_str(), // display name
-                pDevMode,           // dev mode or NULL to reset
-                NULL,               // reserved
+                GetName(),      // display name
+                pDevMode,       // dev mode or NULL to reset
+                NULL,           // reserved
                 flags,
-                NULL                // pointer to video parameters (not used)
+                NULL            // pointer to video parameters (not used)
              ) )
     {
         case DISP_CHANGE_SUCCESSFUL:
@@ -801,24 +814,32 @@ wxDisplayFactoryDirectDraw::wxDisplayFactoryDirectDraw()
     if ( !ms_supportsMultimon )
         return;
 
-    m_dllDDraw.Load(_T("ddraw.dll"), wxDL_VERBATIM | wxDL_QUIET);
+#if wxUSE_LOG
+    // suppress the errors if ddraw.dll is not found, we're prepared to handle
+    // this
+    wxLogNull noLog;
+#endif
+
+    m_dllDDraw.Load(_T("ddraw.dll"));
 
     if ( !m_dllDDraw.IsLoaded() )
         return;
 
-    DirectDrawEnumerateEx_t
-        wxDL_INIT_FUNC_AW(pfn, DirectDrawEnumerateEx, m_dllDDraw);
-    if ( !pfnDirectDrawEnumerateEx )
+    DirectDrawEnumerateEx_t pDDEnumEx = (DirectDrawEnumerateEx_t)
+        m_dllDDraw.GetSymbolAorW(_T("DirectDrawEnumerateEx"));
+    if ( !pDDEnumEx )
         return;
 
     // we can't continue without DirectDrawCreate() later, so resolve it right
     // now and fail the initialization if it's not available
-    if ( !wxDL_INIT_FUNC(m_pfn, DirectDrawCreate, m_dllDDraw) )
+    m_pfnDirectDrawCreate = (DirectDrawCreate_t)
+        m_dllDDraw.GetSymbol(_T("DirectDrawCreate"));
+    if ( !m_pfnDirectDrawCreate )
         return;
 
-    if ( (*pfnDirectDrawEnumerateEx)(DDEnumExCallback,
-                                     this,
-                                     DDENUM_ATTACHEDSECONDARYDEVICES) != DD_OK )
+    if ( (*pDDEnumEx)(DDEnumExCallback,
+                      this,
+                      DDENUM_ATTACHEDSECONDARYDEVICES) != DD_OK )
     {
         wxLogLastError(_T("DirectDrawEnumerateEx"));
     }

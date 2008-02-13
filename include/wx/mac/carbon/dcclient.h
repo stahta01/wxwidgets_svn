@@ -13,60 +13,73 @@
 #define _WX_DCCLIENT_H_
 
 #include "wx/dc.h"
-#include "wx/dcgraph.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxPaintDC;
+class WXDLLEXPORT wxWindow;
 
-class WXDLLEXPORT wxWindowDCImpl: public wxGCDCImpl
+class WXDLLEXPORT wxWindowDC: public wxDC
 {
-public:
-    wxWindowDCImpl( wxDC *owner );
-    wxWindowDCImpl( wxDC *owner, wxWindow *window );
-    virtual ~wxWindowDCImpl();
-    
+  DECLARE_DYNAMIC_CLASS(wxWindowDC)
+
+ public:
+  wxWindowDC(void);
+
+  // Create a DC corresponding to a canvas
+  wxWindowDC(wxWindow *win);
+
+  virtual ~wxWindowDC(void);
+  wxWindow *GetWindow() const { return m_window; }
+  protected :
     virtual void DoGetSize( int *width, int *height ) const;
     virtual wxBitmap DoGetAsBitmap(const wxRect *subrect) const; 
+    wxWindow     *m_window;
+#if wxMAC_USE_CORE_GRAPHICS
+	bool		m_release;
+	int			m_width;
+	int			m_height;
+#endif
+};
+
+
+class WXDLLEXPORT wxClientDC: public wxWindowDC
+{
+  DECLARE_DYNAMIC_CLASS(wxClientDC)
+
+ public:
+  wxClientDC(void);
+
+  // Create a DC corresponding to a canvas
+  wxClientDC(wxWindow *win);
+
+  virtual ~wxClientDC(void);
 
 protected:
-    bool m_release;
-    int	 m_width;
-    int	 m_height;
-
-    DECLARE_CLASS(wxWindowDCImpl)
-    DECLARE_NO_COPY_CLASS(wxWindowDCImpl)
+#if !wxMAC_USE_CORE_GRAPHICS
+  virtual void DoGetSize( int *width, int *height ) const;
+#endif
 };
 
-
-class WXDLLEXPORT wxClientDCImpl: public wxWindowDCImpl
+class WXDLLEXPORT wxPaintDC: public wxWindowDC
 {
-public:
-    wxClientDCImpl( wxDC *owner );
-    wxClientDCImpl( wxDC *owner, wxWindow *window );
-    virtual ~wxClientDCImpl();
-    
-private:
-    DECLARE_CLASS(wxClientDCImpl)
-    DECLARE_NO_COPY_CLASS(wxClientDCImpl)
-};
+  DECLARE_DYNAMIC_CLASS(wxPaintDC)
 
+ public:
+  wxPaintDC(void);
 
-class WXDLLEXPORT wxPaintDCImpl: public wxWindowDCImpl
-{
-public:
-    wxPaintDCImpl( wxDC *owner );
-    wxPaintDCImpl( wxDC *owner, wxWindow *win );
-    virtual ~wxPaintDCImpl();
+  // Create a DC corresponding to a canvas
+  wxPaintDC(wxWindow *win);
+
+  virtual ~wxPaintDC(void);
 
 protected:
-    DECLARE_CLASS(wxPaintDCImpl)
-    DECLARE_NO_COPY_CLASS(wxPaintDCImpl)
+#if !wxMAC_USE_CORE_GRAPHICS
+  virtual void DoGetSize( int *width, int *height ) const;
+#endif
 };
-
 
 #endif
     // _WX_DCCLIENT_H_

@@ -211,7 +211,8 @@ void GaugeWidgetsPage::CreateContent()
     sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
-    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY, _T("&Change gauge value"));
+    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY,
+        _T("&Change gauge value"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxTextCtrl *text;
@@ -238,8 +239,7 @@ void GaugeWidgetsPage::CreateContent()
     btn = new wxButton(this, GaugePage_Progress, _T("Simulate &progress"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
-    btn = new wxButton(this, GaugePage_IndeterminateProgress,
-                       _T("Simulate &indeterminate job"));
+    btn = new wxButton(this, GaugePage_IndeterminateProgress, _T("Simulate undeterminate job"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
     btn = new wxButton(this, GaugePage_Clear, _T("&Clear"));
@@ -345,7 +345,7 @@ void GaugeWidgetsPage::StopTimer(wxButton *clicked)
     }
     else
     {
-        clicked->SetLabel(_T("Simulate indeterminate job"));
+        clicked->SetLabel(_T("Simulate undeterminate job"));
         FindWindow(GaugePage_Progress)->Enable();
     }
 

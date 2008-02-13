@@ -14,11 +14,11 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_TASKBARICON
+#ifdef wxHAS_TASK_BAR_ICON
 
 #include "wx/event.h"
 
-class WXDLLIMPEXP_FWD_ADV wxTaskBarIconEvent;
+class WXDLLIMPEXP_ADV wxTaskBarIconEvent;
 
 // ----------------------------------------------------------------------------
 // wxTaskBarIconBase: define wxTaskBarIcon interface
@@ -34,9 +34,6 @@ public:
                          const wxString& tooltip = wxEmptyString) = 0;
     virtual bool RemoveIcon() = 0;
     virtual bool PopupMenu(wxMenu *menu) = 0;
-
-    // delayed destruction (similarly to wxWindow::Destroy())
-    void Destroy();
 
 protected:
     // creates menu to be displayed when user clicks on the icon
@@ -61,7 +58,7 @@ private:
     #include "wx/msw/taskbar.h"
 #elif defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__)
     #include "wx/unix/taskbarx11.h"
-#elif defined (__WXMAC__)
+#elif defined (__WXMAC__) && defined(__WXMAC_OSX__)
     #include "wx/mac/taskbarosx.h"
 #elif defined (__WXCOCOA__)
     #include "wx/cocoa/taskbar.h"
@@ -88,15 +85,15 @@ private:
 
 typedef void (wxEvtHandler::*wxTaskBarIconEventFunction)(wxTaskBarIconEvent&);
 
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_MOVE;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_LEFT_DOWN;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_LEFT_UP;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_RIGHT_DOWN;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_RIGHT_UP;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_LEFT_DCLICK;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_RIGHT_DCLICK;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_BALLOON_TIMEOUT;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_BALLOON_CLICK;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,wxEVT_TASKBAR_MOVE,1550)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,wxEVT_TASKBAR_LEFT_DOWN,1551)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,wxEVT_TASKBAR_LEFT_UP,1552)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,wxEVT_TASKBAR_RIGHT_DOWN,1553)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,wxEVT_TASKBAR_RIGHT_UP,1554)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,wxEVT_TASKBAR_LEFT_DCLICK,1555)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV,wxEVT_TASKBAR_RIGHT_DCLICK,1556)
+END_DECLARE_EVENT_TYPES()
 
 #define wxTaskBarIconEventHandler(func) \
     (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxTaskBarIconEventFunction, &func)
@@ -122,13 +119,6 @@ extern WXDLLIMPEXP_ADV const wxEventType wxEVT_TASKBAR_BALLOON_CLICK;
 #endif
 #define EVT_TASKBAR_CLICK(fn)        wx__DECLARE_TASKBAREVT(CLICK, fn)
 
-// these events are currently generated only under wxMSW and only after (MSW-
-// specific) ShowBalloon() had been called, don't use them in portable code
-#define EVT_TASKBAR_BALLOON_TIMEOUT(fn) \
-    wx__DECLARE_TASKBAREVT(BALLOON_TIMEOUT, fn)
-#define EVT_TASKBAR_BALLOON_CLICK(fn) \
-    wx__DECLARE_TASKBAREVT(BALLOON_CLICK, fn)
-
-#endif // wxUSE_TASKBARICON
+#endif // wxHAS_TASK_BAR_ICON
 
 #endif // _WX_TASKBAR_H_BASE_

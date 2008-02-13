@@ -37,6 +37,9 @@ END_EVENT_TABLE()
 // Item members
 wxControl::wxControl()
 {
+    m_backgroundColour = *wxWHITE;
+    m_foregroundColour = *wxBLACK;
+
     m_inSetValue = false;
 }
 
@@ -68,6 +71,10 @@ bool wxControl::CreateControl(wxWindow *parent,
     if( !wxControlBase::CreateControl( parent, id, pos, size, style,
                                        validator, name ) )
         return false;
+
+    m_backgroundColour = parent->GetBackgroundColour();
+    m_foregroundColour = parent->GetForegroundColour();
+    m_font = parent->GetFont();
 
     return true;
 }
@@ -102,7 +109,7 @@ wxString wxControl::GetLabel() const
 
 bool wxControl::ProcessCommand(wxCommandEvent & event)
 {
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 wxSize wxControl::DoGetBestSize() const

@@ -14,54 +14,27 @@
 #if wxUSE_PALETTE
 
 #include "wx/palette.h"
-#include "wx/colour.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxPalette, wxGDIObject)
 
-// ============================================================================
-// wxPaletteRefData
-// ============================================================================
-
-class WXDLLEXPORT wxPaletteRefData: public wxGDIRefData
-{
-public:
-    wxPaletteRefData();
-    wxPaletteRefData(const wxPaletteRefData& data);
-    virtual ~wxPaletteRefData();
-
-    virtual bool IsOk() const { return m_count > 0; }
-
-protected:
-    wxColour* m_palette;
-    wxInt32   m_count;
-
-    friend class WXDLLIMPEXP_FWD_CORE wxPalette;
-
-    DECLARE_NO_ASSIGN_CLASS(wxPaletteRefData)
-};
+/*
+ * Palette
+ *
+ */
 
 wxPaletteRefData::wxPaletteRefData()
 {
-    m_palette = NULL;
-    m_count = 0;
-}
-
-wxPaletteRefData::wxPaletteRefData(const wxPaletteRefData& data)
-{
-    m_count = data.m_count;
-    m_palette = new wxColour[m_count];
-    for ( wxInt32 i = 0; i < m_count; i++ )
-        m_palette[i] = data.m_palette[i];
+    m_palette = NULL ;
+    m_count = 0 ;
 }
 
 wxPaletteRefData::~wxPaletteRefData()
 {
-    delete[] m_palette;
+    if (m_palette != NULL) {
+        delete[] m_palette ;
+        m_palette = NULL;
+    }
 }
-
-// ============================================================================
-// wxPalette
-// ============================================================================
 
 wxPalette::wxPalette()
 {
@@ -138,18 +111,10 @@ int wxPalette::GetColoursCount() const
 {
     if (m_refData)
         return M_PALETTEDATA->m_count;
-
-    return 0;
+    
+    return 0;    
 }
 
-wxGDIRefData *wxPalette::CreateGDIRefData() const
-{
-    return new wxPaletteRefData;
-}
 
-wxGDIRefData *wxPalette::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxPaletteRefData(*wx_static_cast(const wxPaletteRefData *, data));
-}
-
-#endif // wxUSE_PALETTE
+#endif
+// wxUSE_PALETTE

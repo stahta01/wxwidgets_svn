@@ -24,7 +24,7 @@
 // wxPen
 //-----------------------------------------------------------------------------
 
-class wxPenRefData : public wxGDIRefData
+class wxPenRefData: public wxObjectRefData
 {
 public:
     wxPenRefData()
@@ -91,12 +91,12 @@ wxPen::~wxPen()
     // m_refData unrefed in ~wxObject
 }
 
-wxGDIRefData *wxPen::CreateGDIRefData() const
+wxObjectRefData *wxPen::CreateRefData() const
 {
     return new wxPenRefData;
 }
 
-wxGDIRefData *wxPen::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxPen::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxPenRefData(*(wxPenRefData *)data);
 }

@@ -154,9 +154,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("wxComboCtrl and wxOwnerDrawnComboBox Sample"));
 
@@ -747,7 +744,7 @@ MyFrame::MyFrame(const wxString& title)
     m_logWin->SetEditable(false);
     wxLogTextCtrl* logger = new wxLogTextCtrl( m_logWin );
     m_logOld = logger->SetActiveTarget( logger );
-    logger->DisableTimestamp();
+    logger->SetTimestamp( NULL );
 
 
     topSizer = new wxBoxSizer( wxVERTICAL );

@@ -17,15 +17,15 @@
 #include "wx/palette.h"
 #include "wx/gdiobj.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxPixelDataBase;
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxMask;
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxImage;
+class WXDLLIMPEXP_CORE wxMask;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxImage;
 
 //-----------------------------------------------------------------------------
 // wxMask
@@ -78,12 +78,14 @@ public:
     wxBitmap( const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM );
     wxBitmap( const wxImage& image, int depth = -1 ) { (void)CreateFromImage(image, depth); }
     virtual ~wxBitmap();
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
 
     bool Create(int width, int height, int depth = -1);
 
-    virtual int GetHeight() const;
-    virtual int GetWidth() const;
-    virtual int GetDepth() const;
+    int GetHeight() const;
+    int GetWidth() const;
+    int GetDepth() const;
 
     wxImage ConvertToImage() const;
 
@@ -128,12 +130,13 @@ public:
     void UngetRawData(wxPixelDataBase& data);
 
     bool HasAlpha() const;
+    void UseAlpha();
 
 protected:
     bool CreateFromImage(const wxImage& image, int depth);
 
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
 private:
     // to be called from CreateFromImage only!

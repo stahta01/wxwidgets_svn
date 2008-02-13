@@ -17,6 +17,15 @@
 // constants
 // ---------------------------------------------------------------------------
 
+#if WXWIN_COMPATIBILITY_2_4
+// they're unused by wxWidgets...
+enum
+{
+    wxKEY_SHIFT = 1,
+    wxKEY_CTRL  = 2
+};
+#endif
+
 // ---------------------------------------------------------------------------
 // wxWindow declaration for MSW
 // ---------------------------------------------------------------------------
@@ -59,19 +68,8 @@ public:
     virtual void Raise();
     virtual void Lower();
 
-    virtual bool Show(bool show = true);
-    virtual bool ShowWithEffect(wxShowEffect effect,
-                                unsigned timeout = 0,
-                                wxDirection dir = wxBOTTOM)
-    {
-        return MSWShowWithEffect(true, effect, timeout, dir);
-    }
-    virtual bool HideWithEffect(wxShowEffect effect,
-                                unsigned timeout = 0,
-                                wxDirection dir = wxBOTTOM)
-    {
-        return MSWShowWithEffect(false, effect, timeout, dir);
-    }
+    virtual bool Show( bool show = true );
+    virtual bool Enable( bool enable = true );
 
     virtual void SetFocus();
     virtual void SetFocusFromKbd();
@@ -83,6 +81,9 @@ public:
     virtual void Refresh( bool eraseBackground = true,
                           const wxRect *rect = (const wxRect *) NULL );
     virtual void Update();
+    virtual void Freeze();
+    virtual void Thaw();
+    virtual bool IsFrozen() const { return m_frozenness > 0; }
 
     virtual void SetWindowStyleFlag(long style);
     virtual void SetExtraStyle(long exStyle);
@@ -123,6 +124,12 @@ public:
     // Accept files for dragging
     virtual void DragAcceptFiles(bool accept);
 
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( bool GetUseCtl3D() const );
+    wxDEPRECATED( bool GetTransparentBackground() const );
+    wxDEPRECATED( void SetTransparent(bool t = true) );
+#endif // WXWIN_COMPATIBILITY_2_4
+
 #ifndef __WXUNIVERSAL__
     // Native resource loading (implemented in src/msw/nativdlg.cpp)
     // FIXME: should they really be all virtual?
@@ -155,29 +162,6 @@ public:
 
     // does this window have deferred position and/or size?
     bool IsSizeDeferred() const;
-
-    // these functions allow to register a global handler for the given Windows
-    // message: it will be called from MSWWindowProc() of any window which gets
-    // this event if it's not processed before (i.e. unlike a hook procedure it
-    // does not override the normal processing)
-    //
-    // notice that if you want to process a message for a given window only you
-    // should override its MSWWindowProc() instead
-
-    // type of the handler: it is called with the message parameters (except
-    // that the window object is passed instead of window handle) and should
-    // return true if it handled the message or false if it should be passed to
-    // DefWindowProc()
-    typedef bool (*MSWMessageHandler)(wxWindowMSW *win,
-                                      WXUINT nMsg,
-                                      WXWPARAM wParam,
-                                      WXLPARAM lParam);
-
-    // install a handler, shouldn't be called more than one for the same message
-    static bool MSWRegisterMessageHandler(int msg, MSWMessageHandler handler);
-
-    // unregister a previously registered handler
-    static void MSWUnregisterMessageHandler(int msg, MSWMessageHandler handler);
 
 
     // implementation from now on
@@ -234,6 +218,12 @@ public:
     // current wxWindow object style (safe to call even if window isn't fully
     // created yet)
     void MSWUpdateStyle(long flagsOld, long exflagsOld);
+
+#if wxABI_VERSION >= 20805
+    // Helper for getting an appropriate theme style for the application. Unnecessary in
+    // 2.9 and above.
+	wxBorder GetThemedBorderStyle() const;
+#endif
 
     // translate wxWidgets coords into Windows ones suitable to be passed to
     // ::CreateWindow()
@@ -325,8 +315,6 @@ public:
     bool HandleSize(int x, int y, WXUINT flag);
     bool HandleSizing(wxRect& rect);
     bool HandleGetMinMaxInfo(void *mmInfo);
-    bool HandleEnterSizeMove();
-    bool HandleExitSizeMove();
 
     bool HandleShow(bool show, int status);
     bool HandleActivate(int flag, bool minimized, WXHWND activate);
@@ -428,11 +416,6 @@ public:
         return true;
     }
 
-    // common part of Show/HideWithEffect()
-    bool MSWShowWithEffect(bool show,
-                           wxShowEffect effect,
-                           unsigned timeout,
-                           wxDirection dir);
 
     // Responds to colour changes: passes event on to children.
     void OnSysColourChanged(wxSysColourChangedEvent& event);
@@ -454,17 +437,6 @@ public:
     virtual void OnInternalIdle();
 
 protected:
-    // this allows you to implement standard control borders without
-    // repeating the code in different classes that are not derived from
-    // wxControl
-    virtual wxBorder GetDefaultBorderForControl() const;
-
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const;
-
-    // Translate wxBORDER_THEME (and other border styles if necessary to the value
-    // that makes most sense for this Windows environment
-    virtual wxBorder TranslateBorder(wxBorder border) const;
 
 #if wxUSE_MENUS_NATIVE
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
@@ -497,11 +469,6 @@ protected:
 
     virtual void DoCaptureMouse();
     virtual void DoReleaseMouse();
-
-    virtual void DoEnable(bool enable);
-
-    virtual void DoFreeze();
-    virtual void DoThaw();
 
     // this simply moves/resizes the given HWND which is supposed to be our
     // sibling (this is useful for controls which are composite at MSW level
@@ -554,6 +521,11 @@ private:
     bool HandleJoystickEvent(WXUINT msg, int x, int y, WXUINT flags);
     bool HandleNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
 
+    // list of disabled children before last call to our Disable()
+    wxWindowList *m_childrenDisabled;
+
+    // number of calls to Freeze() minus number of calls to Thaw()
+    unsigned int m_frozenness;
 
     // current defer window position operation handle (may be NULL)
     WXHANDLE m_hDWP;
@@ -578,6 +550,14 @@ private:
 // ----------------------------------------------------------------------------
 // inline functions
 // ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+
+inline bool wxWindowMSW::GetUseCtl3D() const { return false; }
+inline bool wxWindowMSW::GetTransparentBackground() const { return false; }
+inline void wxWindowMSW::SetTransparent(bool WXUNUSED(t)) { }
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // ---------------------------------------------------------------------------
 // global functions
@@ -606,7 +586,11 @@ public:
 #include "wx/hash.h"
 
 // pseudo-template HWND <-> wxWindow hash table
+#if WXWIN_COMPATIBILITY_2_4
+WX_DECLARE_HASH(wxWindow, wxWindowList, wxWinHashTable);
+#else
 WX_DECLARE_HASH(wxWindowMSW, wxWindowList, wxWinHashTable);
+#endif
 
 extern wxWinHashTable *wxWinHandleHash;
 

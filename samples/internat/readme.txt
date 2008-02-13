@@ -47,20 +47,20 @@ A. First of all, you will need the GNU gettext tools (see the next question).
    xgettext -C -n -k_ -kwxPLURAL:1,2 -kwxTRANSLATE -o internat.po ../internat.cpp
    
    # .po file for wxWindows might be generated in the same way. An already 
-   # generated wxstd.pot as well as translations for some languages can be 
+   # generated wxstd.po as well as translations for some languages can be 
    # found in the locale directory.
-   cp ../../locale/<language>.po ./wxstd.pot
+   cp ../../locale/<language>.po ./wxstd.po
    - or -
-   cp ../../locale/wxstd.pot .
+   cp ../../locale/wxstd.po .
 
    # now edit the files and do translate strings (this isn't done by gettext)
-   # you can use another editor if you wish :-) No need to edit wxstd.pot if you
+   # you can use another editor if you wish :-) No need to edit wxstd.po if you
    # already got a translated one.
-   vi internat.po wxstd.pot
+   vi internat.po wxstd.po
 
    # create the message catalog files
    msgfmt -o internat.mo internat.po
-   msgfmt -o wxstd.mo wxstd.pot
+   msgfmt -o wxstd.mo wxstd.po
 
    # run the sample to test it
    cd ..

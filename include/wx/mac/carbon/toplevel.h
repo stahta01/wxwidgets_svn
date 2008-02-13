@@ -60,6 +60,10 @@ public:
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
     virtual bool IsIconized() const;
+    virtual void SetIcon(const wxIcon& icon);
+#ifndef __WXUNIVERSAL__
+    virtual void SetIcons(const wxIconBundle& icons) { SetIcon( icons.GetIcon( -1 ) ); }
+#endif
     virtual void Restore();
 
     virtual bool SetShape(const wxRegion& region);
@@ -70,7 +74,6 @@ public:
     virtual bool SetTransparent(wxByte alpha);
     virtual bool CanSetTransparent();
 
-    virtual bool SetBackgroundStyle(wxBackgroundStyle style);
 
     // implementation from now on
     // --------------------------
@@ -94,18 +97,10 @@ public:
     virtual void Lower();
     virtual bool Show( bool show = true );
 
-    virtual bool ShowWithEffect(wxShowEffect effect,
-                                unsigned timeout = 0,
-                                wxDirection dir = wxBOTTOM);
-   
-    virtual bool HideWithEffect(wxShowEffect effect,
-                                unsigned timeout = 0,
-                                wxDirection dir = wxBOTTOM);
-     
     virtual void SetExtraStyle(long exStyle) ;
 
-    virtual bool SetBackgroundColour( const wxColour &colour );
-    
+    virtual void MacSetBackgroundBrush( const wxBrush &brush ) ;
+
     virtual void MacInstallTopLevelWindowEventHandler() ;
 
     bool MacGetMetalAppearance() const ;
@@ -134,7 +129,7 @@ protected:
     // should the frame be maximized when it will be shown? set by Maximize()
     // when it is called while the frame is hidden
     bool m_maximizeOnShow;
-
+ 
     WXWindow m_macWindow ;
 
     wxWindowMac* m_macFocus ;
@@ -148,7 +143,7 @@ private :
     // logic & checks cease to work as expected. To set the metal appearance, use SetExtraStyle.
     void MacSetMetalAppearance( bool on ) ;
     void MacSetUnifiedAppearance( bool on ) ;
-    // binary compatible workaround TODO REPLACE
+    // binary compatible workaround
     void DoMacCreateRealWindow( wxWindow *parent, const wxString& title,
                                       const wxPoint& pos,
                                       const wxSize& size,

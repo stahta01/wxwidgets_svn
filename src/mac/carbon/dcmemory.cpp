@@ -17,32 +17,12 @@
 #include "wx/mac/private.h"
 
 //-----------------------------------------------------------------------------
-// wxMemoryDCImpl
+// wxMemoryDC
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxMemoryDCImpl,wxPaintDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC,wxPaintDC)
 
-
-wxMemoryDCImpl::wxMemoryDCImpl( wxMemoryDC *owner )
-  : wxPaintDCImpl( owner )
-{
-    Init();
-}
-
-wxMemoryDCImpl::wxMemoryDCImpl( wxMemoryDC *owner, wxBitmap& bitmap )
-  : wxPaintDCImpl( owner )
-{
-    Init();
-    DoSelect(bitmap);
-}
-
-wxMemoryDCImpl::wxMemoryDCImpl( wxMemoryDC *owner, wxDC * WXUNUSED(dc) )
-  : wxPaintDCImpl( owner )
-{
-    Init();
-}
-
-void wxMemoryDCImpl::Init()
+void wxMemoryDC::Init()
 {
     m_ok = true;
     SetBackground(*wxWHITE_BRUSH);
@@ -52,28 +32,43 @@ void wxMemoryDCImpl::Init()
     m_ok = false;
 }
 
-wxMemoryDCImpl::~wxMemoryDCImpl()
+wxMemoryDC::wxMemoryDC( wxDC *WXUNUSED(dc) )
+: m_selected()
+{
+    Init();
+}
+
+wxMemoryDC::~wxMemoryDC()
 {
     if ( m_selected.Ok() )
     {
+#if wxMAC_USE_CORE_GRAPHICS
         m_selected.EndRawAccess() ;
         delete m_graphicContext ;
         m_graphicContext = NULL ;
+#else
+// TODO: UnlockPixels( GetGWorldPixMap(MAC_WXHBITMAP(m_selected.GetHBITMAP())) );
+#endif
     }
 }
 
-void wxMemoryDCImpl::DoSelect( const wxBitmap& bitmap )
+void wxMemoryDC::DoSelect( const wxBitmap& bitmap )
 {
     if ( m_selected.Ok() )
     {
+#if wxMAC_USE_CORE_GRAPHICS
         m_selected.EndRawAccess() ;
         delete m_graphicContext ;
         m_graphicContext = NULL ;
+#else
+// TODO: UnlockPixels( GetGWorldPixMap(MAC_WXHBITMAP(m_selected.GetHBITMAP())) );
+#endif
     }
 
     m_selected = bitmap;
     if (m_selected.Ok())
-    {
+    { 
+#if wxMAC_USE_CORE_GRAPHICS
         if ( m_selected.GetDepth() != 1 )
             m_selected.UseAlpha() ;
         m_selected.BeginRawAccess() ;
@@ -89,6 +84,17 @@ void wxMemoryDCImpl::DoSelect( const wxBitmap& bitmap )
 			SetGraphicsContext( wxGraphicsContext::CreateFromNative( bmCtx ) );
         }
         m_ok = (m_graphicContext != NULL) ;
+
+#else
+        m_macPort = m_selected.GetHBITMAP( &m_macMask ) ;
+        m_ok = (m_macPort != NULL) ;
+        if (m_ok)
+        {
+            LockPixels( GetGWorldPixMap( (CGrafPtr) m_macPort ) ) ;
+            SetRectRgn( (RgnHandle) m_macBoundaryClipRgn , 0 , 0 , m_selected.GetWidth() , m_selected.GetHeight() ) ;
+            CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
+        }
+#endif
     }
     else
     {
@@ -96,7 +102,7 @@ void wxMemoryDCImpl::DoSelect( const wxBitmap& bitmap )
     }
 }
 
-void wxMemoryDCImpl::DoGetSize( int *width, int *height ) const
+void wxMemoryDC::DoGetSize( int *width, int *height ) const
 {
     if (m_selected.Ok())
     {

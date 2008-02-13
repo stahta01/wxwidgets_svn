@@ -17,15 +17,15 @@
 #include "wx/gdicmn.h"
 #include "wx/palette.h"
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxBitmapHandler;
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxMask;
-class WXDLLIMPEXP_FWD_CORE wxCursor;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxImage;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxBitmapHandler;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxMask;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxImage;
 
 // ----------------------------------------------------------------------------
 // Bitmap data
@@ -216,7 +216,9 @@ protected:
 
     bool CreateFromImage(const wxImage& image, int depth);
 
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+   // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
 private:
     bool CopyFromIconOrCursor(const wxGDIImage& rIcon);
@@ -342,7 +344,7 @@ public:
 private:
     inline virtual bool Load( wxGDIImage*     WXUNUSED(pImage)
                              ,const wxString& WXUNUSED(rName)
-                             ,WXHANDLE        WXUNUSED(hPs)
+                             ,HPS             WXUNUSED(hPs)
                              ,long            WXUNUSED(lFlags)
                              ,int             WXUNUSED(nDesiredWidth)
                              ,int             WXUNUSED(nDesiredHeight)

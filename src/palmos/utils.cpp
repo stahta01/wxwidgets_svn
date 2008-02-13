@@ -90,7 +90,7 @@ bool wxGetUserName(wxChar *buf, int maxSize)
         return false;
     }
 
-    wxStrncpy (buf, wxSafeConvertMB2WX(id), maxSize - 1);
+    wxStrncpy (buf, wxConvertMB2WX(id), maxSize - 1);
 
     // free the buffer
     MemPtrUnlock(id);
@@ -103,9 +103,9 @@ const wxChar* wxGetHomeDir(wxString *pstr)
     return NULL;
 }
 
-wxString wxGetUserHome(const wxString& WXUNUSED(user))
+wxChar *wxGetUserHome(const wxString& WXUNUSED(user))
 {
-    return wxString();
+    return NULL;
 }
 
 bool wxGetDiskSpace(const wxString& path, wxDiskspaceSize_t *pTotal, wxDiskspaceSize_t *pFree)
@@ -122,14 +122,7 @@ bool wxGetEnv(const wxString& var, wxString *value)
     return false;
 }
 
-#if ! WXWIN_COMPATIBILITY_2_8
 bool wxSetEnv(const wxString& var, const wxChar *value)
-{
-    return false;
-}
-#endif // ! WXWIN_COMPATIBILITY_2_8
-
-bool wxUnsetEnv(const wxString& var)
 {
     return false;
 }

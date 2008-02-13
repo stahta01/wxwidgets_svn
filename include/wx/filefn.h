@@ -15,7 +15,6 @@
 #include "wx/list.h"
 #include "wx/arrstr.h"
 
-#ifndef __WXPALMOS5__
 #ifdef __WXWINCE__
     #include "wx/msw/wince/time.h"
     #include "wx/msw/private.h"
@@ -40,7 +39,6 @@
         #include <unix.h>
     #endif
 #endif
-#endif // !__WXPALMOS5__
 
 #ifdef __OS2__
 // need to check for __OS2__ first since currently both
@@ -60,7 +58,7 @@
 #endif
 
 #if defined(__WINDOWS__) && !defined(__WXMICROWIN__)
-#if !defined( __GNUWIN32__ ) && !defined( __MWERKS__ ) && !defined(__WXWINCE__) && !defined(__CYGWIN__)
+#if !defined( __GNUWIN32__ ) && !defined( __MWERKS__ ) && !defined(__SALFORDC__) && !defined(__WXWINCE__) && !defined(__CYGWIN__)
     #include <direct.h>
     #include <dos.h>
     #include <io.h>
@@ -85,18 +83,17 @@
     #include <dir.h>
 #endif
 
-#ifndef __WXPALMOS5__
+#ifdef __SALFORDC__
+    #include <dir.h>
+    #include <unix.h>
+#endif
+
 #ifndef __WXWINCE__
     #include  <fcntl.h>       // O_RDONLY &c
 #endif
-#endif // !__WXPALMOS5__
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
-
-#if defined(__VISUALC__) || defined(__DIGITALMARS__)
-    typedef int mode_t;
-#endif
 
 #ifdef __WXWINCE__
     typedef long off_t;
@@ -114,8 +111,6 @@
 #elif defined(__SYMANTEC__)
     typedef long off_t;
 #elif defined(__MWERKS__) && !defined(__INTEL__) && !defined(__MACH__)
-    typedef long off_t;
-#elif defined(__WXPALMOS5__)
     typedef long off_t;
 #endif
 
@@ -144,21 +139,21 @@ enum wxFileKind
 #if defined( __WXWINCE__)
     typedef __int64 wxFileOffset;
     #define wxFileOffsetFmtSpec _("I64")
-    WXDLLIMPEXP_BASE int wxCRT_Open(const wxChar *filename, int oflag, int WXUNUSED(pmode));
-    WXDLLIMPEXP_BASE int wxCRT_Access(const wxChar *name, int WXUNUSED(how));
-    WXDLLIMPEXP_BASE int wxClose(int fd);
-    WXDLLIMPEXP_BASE int wxFsync(int WXUNUSED(fd));
-    WXDLLIMPEXP_BASE int wxRead(int fd, void *buf, unsigned int count);
-    WXDLLIMPEXP_BASE int wxWrite(int fd, const void *buf, unsigned int count);
-    WXDLLIMPEXP_BASE int wxEof(int fd);
-    WXDLLIMPEXP_BASE wxFileOffset wxSeek(int fd, wxFileOffset offset, int origin);
+    int wxOpen(const wxChar *filename, int oflag, int WXUNUSED(pmode));
+    int wxAccess(const wxChar *name, int WXUNUSED(how));
+    int wxClose(int fd);
+    int wxFsync(int WXUNUSED(fd));
+    int wxRead(int fd, void *buf, unsigned int count);
+    int wxWrite(int fd, const void *buf, unsigned int count);
+    int wxEof(int fd);
+    wxFileOffset wxSeek(int fd, wxFileOffset offset, int origin);
     #define wxLSeek wxSeek
-    WXDLLIMPEXP_BASE wxFileOffset wxTell(int fd);
+    wxFileOffset wxTell(int fd);
 
     // always Unicode under WinCE
-    #define   wxCRT_MkDir      _wmkdir
-    #define   wxCRT_RmDir      _wrmdir
-    #define   wxCRT_Stat       _wstat
+    #define   wxMkDir      _wmkdir
+    #define   wxRmDir      _wrmdir
+    #define   wxStat       _wstat
     #define   wxStructStat struct _stat
 #elif (defined(__WXMSW__) || defined(__OS2__)) && !defined(__WXPALMOS__) && \
       ( \
@@ -281,58 +276,62 @@ enum wxFileKind
                                  wxPOSIX_STRUCT(stati64) *buffer);
             #endif // Windows compilers with MSLU support
 
-            #define   wxCRT_Open       wxMSLU__wopen
+            #define   wxOpen       wxMSLU__wopen
 
-            #define   wxCRT_Access     wxMSLU__waccess
-            #define   wxCRT_MkDir      wxMSLU__wmkdir
-            #define   wxCRT_RmDir      wxMSLU__wrmdir
+            #define   wxAccess     wxMSLU__waccess
+            #define   wxMkDir      wxMSLU__wmkdir
+            #define   wxRmDir      wxMSLU__wrmdir
             #ifdef wxHAS_HUGE_FILES
-                #define   wxCRT_Stat   wxMSLU__wstati64
+                #define   wxStat       wxMSLU__wstati64
             #else
-                #define   wxCRT_Stat   wxMSLU__wstat
+                #define   wxStat       wxMSLU__wstat
             #endif
         #else // !wxUSE_UNICODE_MSLU
             #ifdef __BORLANDC__
                 #if __BORLANDC__ >= 0x550 && __BORLANDC__ <= 0x551
-                    WXDLLIMPEXP_BASE int wxCRT_Open(const wxChar *pathname,
-                                                    int flags, mode_t mode);
+                    WXDLLIMPEXP_BASE int wxOpen(const wxChar *pathname,
+                                                int flags, mode_t mode);
                 #else
-                    #define   wxCRT_Open       _wopen
+                    #define   wxOpen       _wopen
                 #endif
-                #define   wxCRT_Access     _waccess
-                #define   wxCRT_MkDir      _wmkdir
-                #define   wxCRT_RmDir      _wrmdir
+                #define   wxAccess     _waccess
+                #define   wxMkDir      _wmkdir
+                #define   wxRmDir      _wrmdir
                 #ifdef wxHAS_HUGE_FILES
-                    #define   wxCRT_Stat       _wstati64
+                    #define   wxStat       _wstati64
                 #else
-                    #define   wxCRT_Stat       _wstat
+                    #define   wxStat       _wstat
                 #endif
             #else
-                #define   wxCRT_Open       _wopen
-                #define   wxCRT_Access     _waccess
-                #define   wxCRT_MkDir      _wmkdir
-                #define   wxCRT_RmDir      _wrmdir
+                #define   wxOpen       _wopen
+                #define   wxAccess     _waccess
+                #define   wxMkDir      _wmkdir
+                #define   wxRmDir      _wrmdir
                 #ifdef wxHAS_HUGE_FILES
-                    #define   wxCRT_Stat       _wstati64
+                    #define   wxStat       _wstati64
                 #else
-                    #define   wxCRT_Stat       _wstat
+                    #define   wxStat       _wstat
                 #endif
             #endif
         #endif // wxUSE_UNICODE_MSLU/!wxUSE_UNICODE_MSLU
     #else // !wxUSE_UNICODE
-        #define   wxCRT_Open       wxPOSIX_IDENT(open)
-        #define   wxCRT_Access     wxPOSIX_IDENT(access)
-        #define   wxCRT_MkDir      wxPOSIX_IDENT(mkdir)
-        #define   wxCRT_RmDir      wxPOSIX_IDENT(rmdir)
+        #define   wxOpen       wxPOSIX_IDENT(open)
+        #define   wxAccess     wxPOSIX_IDENT(access)
+        #define   wxMkDir      wxPOSIX_IDENT(mkdir)
+        #define   wxRmDir      wxPOSIX_IDENT(rmdir)
         #ifdef wxHAS_HUGE_FILES
-            #define   wxCRT_Stat       wxPOSIX_IDENT(stati64)
+            #define   wxStat       wxPOSIX_IDENT(stati64)
         #else
             // Unfortunately Watcom is not consistent, so:-
             #if defined(__OS2__) && defined(__WATCOMC__)
-                #define   wxCRT_Stat       _stat
+                #define   wxStat       _stat
             #else
-                #define   wxCRT_Stat       wxPOSIX_IDENT(stat)
-            #endif
+                #if defined (__BORLANDC__)
+                    #define   wxStat       _stat //wxPOSIX_IDENT(stat)
+                #else
+                    #define   wxStat       wxPOSIX_IDENT(stat)
+                #endif // !borland
+            #endif // !watcom
         #endif
     #endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
@@ -408,53 +407,42 @@ enum wxFileKind
     #define   wxFsync      fsync
     #define   wxEof        eof
 
-    #define   wxCRT_MkDir      mkdir
-    #define   wxCRT_RmDir      rmdir
+    #define   wxMkDir      mkdir
+    #define   wxRmDir      rmdir
 
     #define   wxTell(fd)   lseek(fd, 0, SEEK_CUR)
 
     #define   wxStructStat struct stat
 
-    #define   wxCRT_Open       open
-    #define   wxCRT_Stat       stat
-    #define   wxCRT_Lstat      lstat
-    #define   wxCRT_Access     access
+    #if wxUSE_UNICODE
+        #define wxNEED_WX_UNISTD_H
+        #if defined(__DMC__)
+            typedef unsigned long mode_t;
+        #endif
+        WXDLLIMPEXP_BASE int wxStat( const wxChar *file_name, wxStructStat *buf );
+        WXDLLIMPEXP_BASE int wxLstat( const wxChar *file_name, wxStructStat *buf );
+        WXDLLIMPEXP_BASE int wxAccess( const wxChar *pathname, int mode );
+        WXDLLIMPEXP_BASE int wxOpen( const wxChar *pathname, int flags, mode_t mode );
+    #else
+        #define   wxOpen       open
+        #define   wxStat       stat
+        #define   wxLstat      lstat
+        #define   wxAccess     access
+    #endif
 
     #define wxHAS_NATIVE_LSTAT
 #endif // platforms
-
-// if the platform doesn't have symlinks, define wxCRT_Lstat to be the same as
-// wxCRT_Stat to avoid #ifdefs in the code using it
-#ifndef wxHAS_NATIVE_LSTAT
-    #define wxCRT_Lstat wxCRT_Stat
-#endif
-
-inline int wxAccess(const wxString& path, mode_t mode)
-    { return wxCRT_Access(path.fn_str(), mode); }
-inline int wxOpen(const wxString& path, int flags, mode_t mode)
-    { return wxCRT_Open(path.fn_str(), flags, mode); }
-
-// FIXME-CE: provide our own implementations of the missing CRT functions
-#ifndef __WXWINCE__
-inline int wxStat(const wxString& path, wxStructStat *buf)
-    { return wxCRT_Stat(path.fn_str(), buf); }
-inline int wxLstat(const wxString& path, wxStructStat *buf)
-    { return wxCRT_Lstat(path.fn_str(), buf); }
-inline int wxRmDir(const wxString& path)
-    { return wxCRT_RmDir(path.fn_str()); }
-#if defined(__WINDOWS__) || (defined(__OS2__) && defined(__WATCOMC__))
-inline int wxMkDir(const wxString& path, mode_t WXUNUSED(mode) = 0)
-    { return wxCRT_MkDir(path.fn_str()); }
-#else
-inline int wxMkDir(const wxString& path, mode_t mode)
-    { return wxCRT_MkDir(path.fn_str(), mode); }
-#endif
-#endif // !__WXWINCE__
 
 #ifdef O_BINARY
     #define wxO_BINARY O_BINARY
 #else
     #define wxO_BINARY 0
+#endif
+
+// if the platform doesn't have symlinks, define wxLstat to be the same as
+// wxStat to avoid #ifdefs in the code using it
+#ifndef wxHAS_NATIVE_LSTAT
+    #define wxLstat wxStat
 #endif
 
 #if defined(__VISAGECPP__) && __IBMCPP__ >= 400
@@ -473,7 +461,7 @@ const int wxInvalidOffset = -1;
 WXDLLIMPEXP_BASE bool wxFileExists(const wxString& filename);
 
 // does the path exist? (may have or not '/' or '\\' at the end)
-WXDLLIMPEXP_BASE bool wxDirExists(const wxString& pathName);
+WXDLLIMPEXP_BASE bool wxDirExists(const wxChar *pszPathName);
 
 WXDLLIMPEXP_BASE bool wxIsAbsolutePath(const wxString& filename);
 
@@ -484,15 +472,15 @@ WXDLLIMPEXP_BASE wxString wxFileNameFromPath(const wxString& path);
 // Get directory
 WXDLLIMPEXP_BASE wxString wxPathOnly(const wxString& path);
 
-WXDLLIMPEXP_BASE void wxDos2UnixFilename(char *s);
-WXDLLIMPEXP_BASE void wxDos2UnixFilename(wchar_t *s);
+// wxString version
+WXDLLIMPEXP_BASE wxString wxRealPath(const wxString& path);
 
-WXDLLIMPEXP_BASE void wxUnix2DosFilename(char *s);
-WXDLLIMPEXP_BASE void wxUnix2DosFilename(wchar_t *s);
+WXDLLIMPEXP_BASE void wxDos2UnixFilename(wxChar *s);
+
+WXDLLIMPEXP_BASE void wxUnix2DosFilename(wxChar *s);
 
 // Strip the extension, in situ
-WXDLLIMPEXP_BASE void wxStripExtension(char *buffer);
-WXDLLIMPEXP_BASE void wxStripExtension(wchar_t *buffer);
+WXDLLIMPEXP_BASE void wxStripExtension(wxChar *buffer);
 WXDLLIMPEXP_BASE void wxStripExtension(wxString& buffer);
 
 // Get a temporary filename
@@ -500,9 +488,8 @@ WXDLLIMPEXP_BASE wxChar* wxGetTempFileName(const wxString& prefix, wxChar *buf =
 WXDLLIMPEXP_BASE bool wxGetTempFileName(const wxString& prefix, wxString& buf);
 
 // Expand file name (~/ and ${OPENWINHOME}/ stuff)
-WXDLLIMPEXP_BASE char* wxExpandPath(char *dest, const wxString& path);
-WXDLLIMPEXP_BASE wchar_t* wxExpandPath(wchar_t *dest, const wxString& path);
-// FIXME-UTF8: add some wxString version
+WXDLLIMPEXP_BASE wxChar* wxExpandPath(wxChar *dest, const wxChar *path);
+WXDLLIMPEXP_BASE bool wxExpandPath(wxString& dest, const wxChar *path);
 
 // Contract w.r.t environment (</usr/openwin/lib, OPENWHOME> -> ${OPENWINHOME}/lib)
 // and make (if under the home tree) relative to home
@@ -512,10 +499,7 @@ WXDLLIMPEXP_BASE wxChar* wxContractPath(const wxString& filename,
                                    const wxString& user = wxEmptyString);
 
 // Destructive removal of /./ and /../ stuff
-// FIXME-UTF8: deprecate these two (and similar)
-WXDLLIMPEXP_BASE char* wxRealPath(char *path);
-WXDLLIMPEXP_BASE wchar_t* wxRealPath(wchar_t *path);
-WXDLLIMPEXP_BASE wxString wxRealPath(const wxString& path);
+WXDLLIMPEXP_BASE wxChar* wxRealPath(wxChar *path);
 
 // Allocate a copy of the full absolute path
 WXDLLIMPEXP_BASE wxChar* wxCopyAbsolutePath(const wxString& path);
@@ -524,7 +508,7 @@ WXDLLIMPEXP_BASE wxChar* wxCopyAbsolutePath(const wxString& path);
 // Flags are reserved for future use.
 #define wxFILE  1
 #define wxDIR   2
-WXDLLIMPEXP_BASE wxString wxFindFirstFile(const wxString& spec, int flags = wxFILE);
+WXDLLIMPEXP_BASE wxString wxFindFirstFile(const wxChar *spec, int flags = wxFILE);
 WXDLLIMPEXP_BASE wxString wxFindNextFile();
 
 // Does the pattern contain wildcards?
@@ -616,9 +600,6 @@ WXDLLIMPEXP_BASE bool wxIsExecutable(const wxString &path);
   // CYGWIN also uses UNIX settings
   #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_UNIX
   #define wxPATH_SEP          wxPATH_SEP_UNIX
-#elif defined(__WXPALMOS__)
-  #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_UNIX
-  #define wxPATH_SEP          wxPATH_SEP_UNIX
 #elif defined(__MAC__)
   #define wxFILE_SEP_PATH     wxFILE_SEP_PATH_MAC
   #define wxPATH_SEP          wxPATH_SEP_MAC
@@ -647,17 +628,17 @@ inline bool wxIsPathSeparator(wxChar c)
 }
 
 // does the string ends with path separator?
-WXDLLIMPEXP_BASE bool wxEndsWithPathSeparator(const wxString& filename);
+WXDLLIMPEXP_BASE bool wxEndsWithPathSeparator(const wxChar *pszFileName);
 
 // split the full path into path (including drive for DOS), name and extension
 // (understands both '/' and '\\')
-WXDLLIMPEXP_BASE void wxSplitPath(const wxString& fileName,
+WXDLLIMPEXP_BASE void wxSplitPath(const wxChar *pszFileName,
                              wxString *pstrPath,
                              wxString *pstrName,
                              wxString *pstrExt);
 
 // find a file in a list of directories, returns false if not found
-WXDLLIMPEXP_BASE bool wxFindFileInPath(wxString *pStr, const wxString& szPath, const wxString& szFile);
+WXDLLIMPEXP_BASE bool wxFindFileInPath(wxString *pStr, const wxChar *pszPath, const wxChar *pszFile);
 
 // Get the OS directory if appropriate (such as the Windows directory).
 // On non-Windows platform, probably just return the empty string.

@@ -29,7 +29,7 @@
 #import <AppKit/NSTableView.h>
 #import <AppKit/NSTableColumn.h>
 
-IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControlWithItems)
+IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 BEGIN_EVENT_TABLE(wxListBox, wxListBoxBase)
 END_EVENT_TABLE()
 WX_IMPLEMENT_COCOA_OWNER(wxListBox,NSTableView,NSControl,NSView)
@@ -169,21 +169,33 @@ int wxListBox::GetSelections(wxArrayInt& aSelections) const
     return [GetNSTableView() numberOfSelectedRows];
 }
 
-int wxListBox::DoInsertItems(const wxArrayStringsAdapter & items, unsigned int pos, void **clientData, wxClientDataType type)
+void wxListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
 {
     wxAutoNSAutoreleasePool pool;
 
-    const unsigned int numItems = items.GetCount();
-    for ( unsigned int i = 0; i < numItems; ++i, ++pos )
+    for(int i=int(items.GetCount())-1; i >= 0; i--)
     {
         [m_cocoaItems insertObject: wxNSStringWithWxString(items[i])
             atIndex: pos];
-        m_itemClientData.Insert(NULL, pos);
-        AssignNewItemClientData(pos, clientData, i, type);
+        m_itemClientData.Insert(NULL,pos);
     }
-
     [GetNSTableView() reloadData];
-    return pos - 1;
+}
+
+void wxListBox::DoSetItems(const wxArrayString& items, void **clientData)
+{
+    wxAutoNSAutoreleasePool pool;
+
+    // Remove everything
+    [m_cocoaItems removeAllObjects];
+    m_itemClientData.Clear();
+    // Provide the data
+    for(unsigned int i=0; i < items.GetCount(); i++)
+    {
+        [m_cocoaItems addObject: wxNSStringWithWxString(items[i])];
+        m_itemClientData.Add(clientData[i]);
+    }
+    [GetNSTableView() reloadData];
 }
 
 void wxListBox::DoSetFirstItem(int n)
@@ -198,14 +210,14 @@ void wxListBox::DoSetFirstItem(int n)
 
 // pure virtuals from wxItemContainer
     // deleting items
-void wxListBox::DoClear()
+void wxListBox::Clear()
 {
     [m_cocoaItems removeAllObjects];
     m_itemClientData.Clear();
     [GetNSTableView() reloadData];
 }
 
-void wxListBox::DoDeleteOneItem(unsigned int n)
+void wxListBox::Delete(unsigned int n)
 {
     [m_cocoaItems removeObjectAtIndex:n];
     m_itemClientData.RemoveAt(n);
@@ -244,6 +256,15 @@ int wxListBox::GetSelection() const
     return [GetNSTableView() selectedRow];
 }
 
+int wxListBox::DoAppend(const wxString& item)
+{
+    wxAutoNSAutoreleasePool pool;
+    [m_cocoaItems addObject:wxNSStringWithWxString(item)];
+    [GetNSTableView() reloadData];
+    m_itemClientData.Add(NULL);
+    return [m_cocoaItems count];
+}
+
 void wxListBox::DoSetItemClientData(unsigned int n, void* clientData)
 {
     m_itemClientData[n] = clientData;
@@ -254,4 +275,14 @@ void* wxListBox::DoGetItemClientData(unsigned int n) const
     return m_itemClientData[n];
 }
 
-#endif // wxUSE_LISTBOX
+void wxListBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+{
+    m_itemClientData[n] = (void*) clientData;
+}
+
+wxClientData* wxListBox::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData*) m_itemClientData[n];
+}
+
+#endif

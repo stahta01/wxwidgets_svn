@@ -17,8 +17,6 @@
 // ----------------------------------------------------------------------------
 
 #include "wx/dc.h"
-#include "wx/msw/dc.h"
-#include "wx/dcclient.h"
 #include "wx/dynarray.h"
 
 // ----------------------------------------------------------------------------
@@ -26,7 +24,7 @@
 // ----------------------------------------------------------------------------
 
 // this one if used by wxPaintDC only
-struct WXDLLIMPEXP_FWD_CORE wxPaintDCInfo;
+struct WXDLLEXPORT wxPaintDCInfo;
 
 WX_DECLARE_EXPORTED_OBJARRAY(wxPaintDCInfo, wxArrayDCInfo);
 
@@ -34,54 +32,56 @@ WX_DECLARE_EXPORTED_OBJARRAY(wxPaintDCInfo, wxArrayDCInfo);
 // DC classes
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxWindowDCImpl : public wxMSWDCImpl
+class WXDLLEXPORT wxWindowDC : public wxDC
 {
 public:
     // default ctor
-    wxWindowDCImpl( wxDC *owner );
+    wxWindowDC();
 
     // Create a DC corresponding to the whole window
-    wxWindowDCImpl( wxDC *owner, wxWindow *win );
-
-    virtual void DoGetSize(int *width, int *height) const;
+    wxWindowDC(wxWindow *win);
 
 protected:
     // initialize the newly created DC
     void InitDC();
 
-    DECLARE_CLASS(wxWindowDCImpl)
-    DECLARE_NO_COPY_CLASS(wxWindowDCImpl)
+    // override some base class virtuals
+    virtual void DoGetSize(int *width, int *height) const;
+
+private:
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxWindowDC)
 };
 
-class WXDLLEXPORT wxClientDCImpl : public wxWindowDCImpl
+class WXDLLEXPORT wxClientDC : public wxWindowDC
 {
 public:
     // default ctor
-    wxClientDCImpl( wxDC *owner );
+    wxClientDC();
 
     // Create a DC corresponding to the client area of the window
-    wxClientDCImpl( wxDC *owner, wxWindow *win );
+    wxClientDC(wxWindow *win);
 
-    virtual ~wxClientDCImpl();
-
-    virtual void DoGetSize(int *width, int *height) const;
+    virtual ~wxClientDC();
 
 protected:
     void InitDC();
 
-    DECLARE_CLASS(wxClientDCImpl)
-    DECLARE_NO_COPY_CLASS(wxClientDCImpl)
+    // override some base class virtuals
+    virtual void DoGetSize(int *width, int *height) const;
+
+private:
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxClientDC)
 };
 
-class WXDLLEXPORT wxPaintDCImpl : public wxClientDCImpl
+class WXDLLEXPORT wxPaintDC : public wxClientDC
 {
 public:
-    wxPaintDCImpl( wxDC *owner );
+    wxPaintDC();
 
     // Create a DC corresponding for painting the window in OnPaint()
-    wxPaintDCImpl( wxDC *owner, wxWindow *win );
+    wxPaintDC(wxWindow *win);
 
-    virtual ~wxPaintDCImpl();
+    virtual ~wxPaintDC();
 
     // find the entry for this DC in the cache (keyed by the window)
     static WXHDC FindDCInCache(wxWindow* win);
@@ -92,8 +92,8 @@ protected:
     // find the entry for this DC in the cache (keyed by the window)
     wxPaintDCInfo *FindInCache(size_t *index = NULL) const;
 
-    DECLARE_CLASS(wxPaintDCImpl)
-    DECLARE_NO_COPY_CLASS(wxPaintDCImpl)
+private:
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxPaintDC)
 };
 
 /*
@@ -106,7 +106,10 @@ class WXDLLEXPORT wxPaintDCEx : public wxPaintDC
 {
 public:
     wxPaintDCEx(wxWindow *canvas, WXHDC dc);
-    
+    virtual ~wxPaintDCEx();
+private:
+    int saveState;
+
     DECLARE_CLASS(wxPaintDCEx)
     DECLARE_NO_COPY_CLASS(wxPaintDCEx)
 };

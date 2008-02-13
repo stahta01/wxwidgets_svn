@@ -157,7 +157,7 @@ bool wxShell( const wxString& rCommand )
     SData.PgmName  = (char*)zShell;
 
     sInputs = _T("/C ") + rCommand;
-    SData.PgmInputs     = (BYTE*)sInputs.wx_str();
+    SData.PgmInputs     = (BYTE*)sInputs.c_str();
     SData.TermQ         = 0;
     SData.Environment   = 0;
     SData.InheritOpt    = SSF_INHERTOPT_SHELL;
@@ -226,7 +226,7 @@ unsigned long wxGetProcessId()
 bool wxGetEnv(const wxString& var, wxString *value)
 {
     // wxGetenv is defined as getenv()
-    wxChar *p = wxGetenv((const wxChar *)var);
+    wxChar *p = wxGetenv(var);
     if ( !p )
         return false;
 
@@ -238,10 +238,11 @@ bool wxGetEnv(const wxString& var, wxString *value)
     return true;
 }
 
-static bool wxDoSetEnv(const wxString& variable, const char *value)
+bool wxSetEnv(const wxString& variable, const wxChar *value)
 {
 #if defined(HAVE_SETENV)
-    return setenv(variable.mb_str(), value, 1 /* overwrite */) == 0;
+    return setenv(variable.mb_str(), value ? wxString(value).mb_str()
+                                           : NULL, 1 /* overwrite */) == 0;
 #elif defined(HAVE_PUTENV)
     wxString s = variable;
     if ( value )
@@ -260,16 +261,6 @@ static bool wxDoSetEnv(const wxString& variable, const char *value)
     wxUnusedVar(value);
     return false;
 #endif
-}
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.mb_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
 }
 
 void wxMilliSleep(
@@ -394,45 +385,59 @@ const wxChar* wxGetHomeDir(
     return rStrDir.c_str();
 }
 
-wxString wxGetUserHome ( const wxString &rUser )
+// Hack for OS/2
+#if wxUSE_UNICODE
+const wxMB2WXbuf wxGetUserHome( const wxString &rUser )
+#else // just for binary compatibility -- there is no 'const' here
+wxChar* wxGetUserHome ( const wxString &rUser )
+#endif
 {
     wxChar*    zHome;
-    wxString   sUser(rUser);
+    wxString   sUser1(rUser);
 
-    wxString home;
-
+    wxChar *wxBuffer = new wxChar[256];
 #ifndef __EMX__
-    if (!sUser.empty())
+    if (!sUser1.empty())
     {
-        const wxString currentUser = wxGetUserId();
+        wxChar                      zTmp[64];
 
-        // Guests belong in the temp dir
-        if ( currentUser == "annonymous" )
+        if (wxGetUserId( zTmp
+                        ,sizeof(zTmp)/sizeof(char)
+                       ))
         {
-            zHome = wxGetenv(_T("TMP"));
-            if ( !zHome )
-                zHome = wxGetenv(_T("TMPDIR"));
-            if ( !zHome )
-                zHome = wxGetenv(_T("TEMP"));
-
-            if ( zHome && *zHome )
-                return zHome;
+            // Guests belong in the temp dir
+            if (wxStricmp(zTmp, _T("annonymous")) == 0)
+            {
+                if ((zHome = wxGetenv(_T("TMP"))) != NULL    ||
+                    (zHome = wxGetenv(_T("TMPDIR"))) != NULL ||
+                    (zHome = wxGetenv(_T("TEMP"))) != NULL)
+                    delete[] wxBuffer;
+                    return *zHome ? zHome : (wxChar*)_T("\\");
+            }
+            if (wxStricmp(zTmp, WXSTRINGCAST sUser1) == 0)
+                sUser1 = wxEmptyString;
         }
-
-        if ( sUser == currentUser )
-            sUser.clear();
     }
 #endif
-    if (sUser.empty())
+    if (sUser1.empty())
     {
         if ((zHome = wxGetenv(_T("HOME"))) != NULL)
         {
-            home = zHome;
-            home.Replace("/", "\\");
+            wxStrcpy(wxBuffer, zHome);
+            wxUnix2DosFilename(wxBuffer);
+#if wxUSE_UNICODE
+            wxWCharBuffer retBuffer (wxBuffer);
+            delete[] wxBuffer;
+            return retBuffer;
+#else
+            wxStrcpy(zHome, wxBuffer);
+            delete[] wxBuffer;
+            return zHome;
+#endif
         }
     }
-
-    return home;
+    delete[] wxBuffer;
+    return (wxChar*)wxEmptyString; // No home known!
 }
 
 bool wxGetDiskSpace(const wxString& path,
@@ -452,7 +457,7 @@ bool wxGetDiskSpace(const wxString& path,
     if (wxDirExists(fn.GetFullPath()) == false)
         return false;
 
-    disknum = wxToupper(fn.GetVolume().GetChar(0)) - _T('A') + 1;
+    disknum = 1 + wxToupper(fn.GetVolume().GetChar(0)) - _T('A');
 
     rc = ::DosQueryFSInfo(disknum,             // 1 = A, 2 = B, 3 = C, ...
                           FSIL_ALLOC,          // allocation info

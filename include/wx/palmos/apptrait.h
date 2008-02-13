@@ -19,17 +19,11 @@
 class WXDLLIMPEXP_BASE wxConsoleAppTraits : public wxConsoleAppTraitsBase
 {
 public:
-#if wxUSE_CONSOLE_EVENTLOOP
-    virtual wxEventLoopBase *CreateEventLoop();
-#endif // wxUSE_CONSOLE_EVENTLOOP
     virtual void *BeforeChildWaitLoop();
     virtual void AlwaysYield();
     virtual void AfterChildWaitLoop(void *data);
-#if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer) { return new wxPalmOSTimerImpl(timer); }
-#endif
+
     virtual bool DoMessageFromThreadWait();
-    virtual WXDWORD WaitForThread(WXHANDLE hThread);
 };
 
 #if wxUSE_GUI
@@ -37,14 +31,10 @@ public:
 class WXDLLIMPEXP_CORE wxGUIAppTraits : public wxGUIAppTraitsBase
 {
 public:
-    virtual wxEventLoopBase *CreateEventLoop();
     virtual void *BeforeChildWaitLoop();
     virtual void AlwaysYield();
     virtual void AfterChildWaitLoop(void *data);
-#if wxUSE_TIMER
-    // there is no wxTimer support yet
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer);
-#endif
+
     virtual bool DoMessageFromThreadWait();
     virtual wxPortId GetToolkitVersion(int *majVer, int *minVer) const;
 };

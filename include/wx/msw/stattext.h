@@ -44,12 +44,10 @@ public:
 
 protected:
     // implement/override some base class virtuals
+    virtual wxBorder GetDefaultBorder() const;
     virtual void DoSetSize(int x, int y, int w, int h,
                            int sizeFlags = wxSIZE_AUTO);
     virtual wxSize DoGetBestSize() const;
-
-    virtual wxString DoGetLabel() const;
-    virtual void DoSetLabel(const wxString& str);
 
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxStaticText)
 };

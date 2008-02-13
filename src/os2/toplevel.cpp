@@ -484,8 +484,8 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
      hFrame = ::WinCreateStdWindow( hParent
                                    ,ulStyleFlags          // frame-window style
                                    ,(PULONG)&lFlags       // window style
-                                   ,wxString(wxFrameClassName).c_str() // class name
-                                   ,rsTitle.c_str()       // window title
+                                   ,(PSZ)wxFrameClassName // class name
+                                   ,(PSZ)rsTitle.c_str()  // window title
                                    ,0L                    // default client style
                                    ,NULLHANDLE            // resource in executable file
                                    ,0                     // resource id
@@ -553,7 +553,7 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
     //
     if (nWidth == (int)CW_USEDEFAULT)
     {
-        //
+       //
         // The exact number doesn't matter, the dialog will be resized
         // again soon anyhow but it should be big enough to allow
         // calculation relying on "totalSize - clientSize > 0" work, i.e.
@@ -790,7 +790,7 @@ bool wxTopLevelWindowOS2::Show( bool bShow )
         ::WinEnableWindow(m_hFrame, TRUE);
 
         vEvent.SetEventObject(this);
-        HandleWindowEvent(vEvent);
+        GetEventHandler()->ProcessEvent(vEvent);
     }
     else
     {
@@ -965,7 +965,7 @@ bool wxTopLevelWindowOS2::ShowFullScreen( bool bShow,
 
         wxSize full( nWidth, nHeight );
         wxSizeEvent vEvent( full, GetId() );
-        HandleWindowEvent(vEvent);
+        GetEventHandler()->ProcessEvent(vEvent);
         return true;
     }
     else
@@ -995,6 +995,13 @@ bool wxTopLevelWindowOS2::ShowFullScreen( bool bShow,
 // wxTopLevelWindowOS2 misc
 // ----------------------------------------------------------------------------
 
+void wxTopLevelWindowOS2::SetIcon(
+  const wxIcon&                     rIcon
+)
+{
+    SetIcons(wxIconBundle(rIcon));
+} // end of wxTopLevelWindowOS2::SetIcon
+
 void wxTopLevelWindowOS2::SetIcons(
   const wxIconBundle&               rIcons
 )
@@ -1004,9 +1011,9 @@ void wxTopLevelWindowOS2::SetIcons(
     //
     wxTopLevelWindowBase::SetIcons(rIcons);
 
-    const wxIcon& vIcon = rIcons.GetIconOfExactSize(32);
+    const wxIcon&                   vIcon = rIcons.GetIcon(wxSize(32, 32));
 
-    if (vIcon.Ok())
+    if (vIcon.Ok() && vIcon.GetWidth() == 32 && vIcon.GetHeight() == 32)
     {
         ::WinSendMsg( m_hFrame
                      ,WM_SETICON

@@ -100,7 +100,8 @@ void wxMenuItem::UpdateItemStatus()
     if ( IsSeparator() )
         return ;
 
-    if ( GetId() == wxApp::s_macPreferencesMenuItemId)
+#if TARGET_CARBON
+    if ( UMAGetSystemVersion() >= 0x1000 && GetId() == wxApp::s_macPreferencesMenuItemId)
     {
         if ( !IsEnabled() )
             DisableMenuCommand( NULL , kHICommandPreferences ) ;
@@ -108,13 +109,14 @@ void wxMenuItem::UpdateItemStatus()
             EnableMenuCommand( NULL , kHICommandPreferences ) ;
     }
 
-    if ( GetId() == wxApp::s_macExitMenuItemId)
+    if ( UMAGetSystemVersion() >= 0x1000 && GetId() == wxApp::s_macExitMenuItemId)
     {
         if ( !IsEnabled() )
             DisableMenuCommand( NULL , kHICommandQuit ) ;
         else
             EnableMenuCommand( NULL , kHICommandQuit ) ;
     }
+#endif
 
     {
         MenuHandle mhandle = MAC_WXHMENU(m_parentMenu->GetHMenu()) ;
@@ -161,6 +163,7 @@ void wxMenuItem::UpdateItemText()
 void wxMenuItem::Enable(bool bDoEnable)
 {
     if (( m_isEnabled != bDoEnable
+#if TARGET_CARBON
       // avoid changing menuitem state when menu is disabled
       // eg. BeginAppModalStateForWindow() will disable menus and ignore this change
       // which in turn causes m_isEnabled to become out of sync with real menuitem state
@@ -169,6 +172,7 @@ void wxMenuItem::Enable(bool bDoEnable)
          || (   GetId() == wxApp::s_macPreferencesMenuItemId
              || GetId() == wxApp::s_macExitMenuItemId
              || GetId() == wxApp::s_macAboutMenuItemId
+#endif
          ))
     {
         wxMenuItemBase::Enable( bDoEnable ) ;
@@ -239,13 +243,13 @@ void wxMenuItem::Check(bool bDoCheck)
     }
 }
 
-void wxMenuItem::SetItemLabel(const wxString& text)
+void wxMenuItem::SetText(const wxString& text)
 {
     // don't do anything if label didn't change
     if ( m_text == text )
         return;
 
-    wxMenuItemBase::SetItemLabel(text);
+    wxMenuItemBase::SetText(text);
 
     UpdateItemText() ;
 }
@@ -279,7 +283,7 @@ void wxMenuItem::SetRadioGroupEnd(int end)
 // ----------------------------------------------------------------------------
 
 /* static */
-wxString wxMenuItemBase::GetLabelText(const wxString& text)
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }

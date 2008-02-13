@@ -66,7 +66,7 @@ gtk_mdi_page_change_callback( GtkNotebook *WXUNUSED(widget),
     {
         wxActivateEvent event1( wxEVT_ACTIVATE, false, child->GetId() );
         event1.SetEventObject( child);
-        child->HandleWindowEvent( event1 );
+        child->GetEventHandler()->ProcessEvent( event1 );
     }
 
     // send activate event to new child
@@ -100,7 +100,7 @@ gtk_mdi_page_change_callback( GtkNotebook *WXUNUSED(widget),
 
     wxActivateEvent event2( wxEVT_ACTIVATE, true, child->GetId() );
     event2.SetEventObject( child);
-    child->HandleWindowEvent( event2 );
+    child->GetEventHandler()->ProcessEvent( event2 );
 }
 }
 
@@ -409,7 +409,7 @@ void wxMDIChildFrame::OnMenuHighlight( wxMenuEvent& event )
 {
 #if wxUSE_STATUSBAR
     wxMDIParentFrame *mdi_frame = (wxMDIParentFrame*)m_parent->GetParent();
-    if ( !ShowMenuHelp(event.GetMenuId()) )
+    if ( !ShowMenuHelp(mdi_frame->GetStatusBar(), event.GetMenuId()) )
     {
         // we don't have any help text for this item, but may be the MDI frame
         // does?

@@ -78,10 +78,10 @@ bool wxControl::ProcessCommand( wxCommandEvent &event )
     // Tries:
     // 1) OnCommand, starting at this window and working up parent hierarchy
     // 2) OnCommand then calls ProcessEvent to search the event tables.
-    return HandleWindowEvent( event );
+    return GetEventHandler()->ProcessEvent( event );
 }
 
-void  wxControl::OnKeyDown( wxKeyEvent &WXUNUSED(event) )
+void  wxControl::OnKeyDown( wxKeyEvent &event )
 {
     if ( m_peer == NULL || !m_peer->Ok() )
         return;

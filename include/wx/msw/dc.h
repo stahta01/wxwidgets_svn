@@ -13,7 +13,6 @@
 #define _WX_MSW_DC_H_
 
 #include "wx/defs.h"
-#include "wx/dc.h"
 
 // ---------------------------------------------------------------------------
 // macros
@@ -43,11 +42,11 @@ public:
 
 // this is an ABC: use one of the derived classes to create a DC associated
 // with a window, screen, printer and so on
-class WXDLLEXPORT wxMSWDCImpl: public wxDCImpl
+class WXDLLEXPORT wxDC : public wxDCBase
 {
 public:
-    wxMSWDCImpl(wxDC *owner, WXHDC hDC);
-    virtual ~wxMSWDCImpl();
+    wxDC(WXHDC hDC) { Init(); m_hDC = hDC; }
+    virtual ~wxDC();
 
     // implement base class pure virtuals
     // ----------------------------------
@@ -79,14 +78,13 @@ public:
     virtual int GetDepth() const;
     virtual wxSize GetPPI() const;
 
-
     virtual void SetMapMode(int mode);
     virtual void SetUserScale(double x, double y);
+    virtual void SetSystemScale(double x, double y);
     virtual void SetLogicalScale(double x, double y);
     virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
     virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
     virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
-
     virtual void SetLogicalFunction(int function);
 
     // implementation from now on
@@ -95,9 +93,10 @@ public:
     virtual void SetRop(WXHDC cdc);
     virtual void SelectOldObjects(WXHDC dc);
 
+    wxWindow *GetWindow() const { return m_canvas; }
     void SetWindow(wxWindow *win)
     {
-        m_window = win;
+        m_canvas = win;
 
 #if wxUSE_PALETTE
         // if we have palettes use the correct one for this window
@@ -145,6 +144,7 @@ public:
 protected:
     void Init()
     {
+        m_canvas = NULL;
         m_bOwnsDC = false;
         m_hDC = NULL;
 
@@ -160,16 +160,13 @@ protected:
 
     // create an uninitialized DC: this should be only used by the derived
     // classes
-    wxMSWDCImpl( wxDC *owner ) : wxDCImpl( owner ) { Init(); }
+    wxDC() { Init(); }
 
-    void RealizeScaleAndOrigin();
-
-public:
     virtual void DoGetTextExtent(const wxString& string,
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const;
+                                 wxFont *theFont = NULL) const;
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
 
     virtual bool DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
@@ -200,7 +197,7 @@ public:
     virtual void DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
 
 #if wxUSE_SPLINES
-    virtual void DoDrawSpline(const wxPointList *points);
+    virtual void DoDrawSpline(wxList *points);
 #endif
 
     virtual void DoCrossHair(wxCoord x, wxCoord y);
@@ -216,14 +213,6 @@ public:
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
                         int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
-
-    virtual bool DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                               wxCoord dstWidth, wxCoord dstHeight,
-                               wxDC *source,
-                               wxCoord xsrc, wxCoord ysrc,
-                               wxCoord srcWidth, wxCoord srcHeight,
-                               int rop = wxCOPY, bool useMask = false,
-                               wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
 
     // this is gnarly - we can't even call this function DoSetClippingRegion()
     // because of virtual function hiding
@@ -243,11 +232,8 @@ public:
     virtual void DoDrawPolyPolygon(int n, int count[], wxPoint points[],
                                    wxCoord xoffset, wxCoord yoffset,
                                    int fillStyle = wxODDEVEN_RULE);
-    virtual wxBitmap DoGetAsBitmap(const wxRect *subrect) const
-    {
-        return subrect == NULL ? GetSelectedBitmap()
-                               : GetSelectedBitmap().GetSubBitmap(*subrect);
-    }
+    virtual wxBitmap DoGetAsBitmap(const wxRect *subrect) const 
+    { return subrect == NULL ? GetSelectedBitmap() : GetSelectedBitmap().GetSubBitmap(*subrect); }
 
 
 #if wxUSE_PALETTE
@@ -261,7 +247,6 @@ public:
     void InitializePalette();
 #endif // wxUSE_PALETTE
 
-protected:
     // common part of DoDrawText() and DoDrawRotatedText()
     void DrawAnyText(const wxString& text, wxCoord x, wxCoord y);
 
@@ -306,12 +291,12 @@ protected:
 #endif // wxUSE_PALETTE
 
 #if wxUSE_DC_CACHEING
-    static wxObjectList     sm_bitmapCache;
-    static wxObjectList     sm_dcCache;
+    static wxList     sm_bitmapCache;
+    static wxList     sm_dcCache;
 #endif
 
-    DECLARE_CLASS(wxMSWDCImpl)
-    DECLARE_NO_COPY_CLASS(wxMSWDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxDC)
+    DECLARE_NO_COPY_CLASS(wxDC)
 };
 
 // ----------------------------------------------------------------------------
@@ -319,23 +304,24 @@ protected:
 // only/mainly)
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxDCTempImpl : public wxMSWDCImpl
+class WXDLLEXPORT wxDCTemp : public wxDC
 {
 public:
     // construct a temporary DC with the specified HDC and size (it should be
     // specified whenever we know it for this HDC)
-    wxDCTempImpl(wxDC *owner, WXHDC hdc, const wxSize& size )
-        : wxMSWDCImpl( owner, hdc ),
+    wxDCTemp(WXHDC hdc, const wxSize& size = wxDefaultSize)
+        : wxDC(hdc),
           m_size(size)
     {
     }
 
-    virtual ~wxDCTempImpl()
+    virtual ~wxDCTemp()
     {
         // prevent base class dtor from freeing it
         SetHDC((WXHDC)NULL);
     }
 
+protected:
     virtual void DoGetSize(int *w, int *h) const
     {
         wxASSERT_MSG( m_size.IsFullySpecified(),
@@ -352,16 +338,7 @@ private:
     // find it ourselves
     const wxSize m_size;
 
-    DECLARE_NO_COPY_CLASS(wxDCTempImpl)
-};
-
-class WXDLLEXPORT wxDCTemp : public wxDC
-{
-public:
-    wxDCTemp(WXHDC hdc, const wxSize& size = wxDefaultSize)
-        : wxDC(new wxDCTempImpl(this, hdc, size))
-    {
-    }
+    DECLARE_NO_COPY_CLASS(wxDCTemp)
 };
 
 #endif // _WX_MSW_DC_H_

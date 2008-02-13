@@ -105,8 +105,6 @@ public:
     // set the XFLD
     void SetXFontName(const wxString& xFontName);
 #elif defined(__WXMSW__)
-    wxNativeFontInfo(const LOGFONT& lf_) : lf(lf_) { }
-
     LOGFONT      lf;
 #elif defined(__WXPM__)
     // OS/2 native structures that define a font
@@ -226,12 +224,12 @@ public:
 // translate a wxFontEncoding into native encoding parameter (defined above),
 // returning true if an (exact) macth could be found, false otherwise (without
 // attempting any substitutions)
-WXDLLIMPEXP_CORE bool wxGetNativeFontEncoding(wxFontEncoding encoding,
-                                              wxNativeEncodingInfo *info);
+extern bool wxGetNativeFontEncoding(wxFontEncoding encoding,
+                                    wxNativeEncodingInfo *info);
 
 // test for the existence of the font described by this facename/encoding,
 // return true if such font(s) exist, false otherwise
-WXDLLIMPEXP_CORE bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
+extern bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
 
 // ----------------------------------------------------------------------------
 // font-related functions (X and GTK)

@@ -194,11 +194,19 @@ static void SetDefaultEndpointModes(EndpointRef ep , void *data )
 */
 }
 
-bool GSocket_Init()
+/* Global initialisers */
+
+void GSocket_SetGUIFunctions(GSocketGUIFunctionsTable *table)
 {
-    return true;
+    // do nothing, wxMac doesn't have wxBase-GUI separation yet
 }
 
+int GSocket_Init()
+{
+    return 1;
+}
+
+bool GSocket_Verify_Inited() ;
 bool GSocket_Verify_Inited()
 {
     OSStatus err ;
@@ -1304,11 +1312,6 @@ GSocketError GAddress_INET_SetHostName(GAddress *address, const char *hostname)
   }
   address->m_host = hinfo.addrs[0] ;
   return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET_SetBroadcastAddress(GAddress *address)
-{
-  return GAddress_INET_SetHostAddress(address, INADDR_BROADCAST);
 }
 
 GSocketError GAddress_INET_SetAnyAddress(GAddress *address)

@@ -40,7 +40,7 @@ public:
     virtual ~wxMenuItem();
 
     // override base class virtuals
-    virtual void SetItemLabel(const wxString& strName);
+    virtual void SetText(const wxString& strName);
     virtual void SetCheckable(bool checkable);
 
     virtual void Enable(bool bDoEnable = true);
@@ -53,11 +53,8 @@ public:
 
     // the id for a popup menu is really its menu handle (as required by
     // ::AppendMenu() API), so this function will return either the id or the
-    // menu handle depending on what we are
-    //
-    // notice that it also returns the id as an unsigned int, as required by
-    // Win32 API
-    unsigned GetMSWId() const;
+    // menu handle depending on what we're
+    int GetRealId() const;
 
     // mark item as belonging to the given radio group
     void SetAsRadioGroupStart();
@@ -90,6 +87,14 @@ private:
     bool m_isRadioGroupStart;
 
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxMenuItem)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // return the item label including any mnemonics and accelerators.
+    // This used to be called GetText.
+    wxString GetItemLabel() const { return GetText(); }
+#endif
 };
 
 #endif  //_MENUITEM_H

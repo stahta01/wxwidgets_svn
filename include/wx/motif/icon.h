@@ -24,10 +24,8 @@ public:
     wxIcon(const char bits[], int width, int height);
 
     // Initialize with XPM data
-    wxIcon(const char* const* data);
-#ifdef wxNEEDS_CHARPP
+    wxIcon(const char **data);
     wxIcon(char **data);
-#endif
 
     wxIcon(const wxString& name, wxBitmapType type = wxBITMAP_TYPE_XPM,
            int desiredWidth = -1, int desiredHeight = -1)

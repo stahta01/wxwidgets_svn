@@ -38,7 +38,6 @@ enum wxMutexError
     wxMUTEX_DEAD_LOCK,      // mutex is already locked by the calling thread
     wxMUTEX_BUSY,           // mutex is already locked by another thread
     wxMUTEX_UNLOCKED,       // attempt to unlock a mutex which is not locked
-    wxMUTEX_TIMEOUT,        // LockTimeout() has timed out
     wxMUTEX_MISC_ERROR      // any other error
 };
 
@@ -110,11 +109,11 @@ enum wxMutexType
 };
 
 // forward declarations
-class WXDLLIMPEXP_FWD_BASE wxThreadHelper;
-class WXDLLIMPEXP_FWD_BASE wxConditionInternal;
-class WXDLLIMPEXP_FWD_BASE wxMutexInternal;
-class WXDLLIMPEXP_FWD_BASE wxSemaphoreInternal;
-class WXDLLIMPEXP_FWD_BASE wxThreadInternal;
+class WXDLLIMPEXP_BASE wxThreadHelper;
+class WXDLLIMPEXP_BASE wxConditionInternal;
+class WXDLLIMPEXP_BASE wxMutexInternal;
+class WXDLLIMPEXP_BASE wxSemaphoreInternal;
+class WXDLLIMPEXP_BASE wxThreadInternal;
 
 // ----------------------------------------------------------------------------
 // A mutex object is a synchronization object whose state is set to signaled
@@ -149,10 +148,6 @@ public:
     //
     // The caller must call Unlock() later if Lock() returned wxMUTEX_NO_ERROR.
     wxMutexError Lock();
-
-    // Same as Lock() but return wxMUTEX_TIMEOUT if the mutex can't be locked
-    // during the given number of milliseconds
-    wxMutexError LockTimeout(unsigned long ms);
 
     // Try to lock the mutex: if it is currently locked, return immediately
     // with an error. Otherwise the caller must call Unlock().
@@ -600,8 +595,8 @@ class WXDLLIMPEXP_BASE wxThreadHelperThread : public wxThread
 public:
     // constructor only creates the C++ thread object and doesn't create (or
     // start) the real thread
-    wxThreadHelperThread(wxThreadHelper& owner, wxThreadKind kind)
-        : wxThread(kind), m_owner(owner)
+    wxThreadHelperThread(wxThreadHelper& owner)
+        : wxThread(wxTHREAD_JOINABLE), m_owner(owner)
         { }
 
 protected:
@@ -628,28 +623,16 @@ class WXDLLIMPEXP_BASE wxThreadHelper
 private:
     void KillThread()
     {
-        // If detached thread is about to finish, it will set
-        // m_thread to NULL so don't delete it then
-        // But if KillThread is called before detached thread
-        // sets it to NULL, then the thread object still
-        // exists and can be killed
-        wxCriticalSectionLocker locker(m_critSection);
-    
         if ( m_thread )
         {
             m_thread->Kill();
-            
-            if ( m_kind == wxTHREAD_JOINABLE )
-              delete m_thread;
-            
-            m_thread = NULL;
+            delete m_thread;
         }
     }
 
 public:
     // constructor only initializes m_thread to NULL
-    wxThreadHelper(wxThreadKind kind = wxTHREAD_JOINABLE)
-        : m_thread(NULL), m_kind(kind) { }
+    wxThreadHelper() : m_thread(NULL) { }
 
     // destructor deletes m_thread
     virtual ~wxThreadHelper() { KillThread(); }
@@ -660,7 +643,7 @@ public:
     {
         KillThread();
 
-        m_thread = new wxThreadHelperThread(*this, m_kind);
+        m_thread = new wxThreadHelperThread(*this);
 
         return m_thread->Create(stackSize);
     }
@@ -670,38 +653,16 @@ public:
     virtual void *Entry() = 0;
 
     // returns a pointer to the thread which can be used to call Run()
-    wxThread *GetThread() const
-    {
-        wxCriticalSectionLocker locker((wxCriticalSection&)m_critSection);
-        
-        wxThread* thread = m_thread;
-        
-        return thread;
-    }
+    wxThread *GetThread() const { return m_thread; }
 
 protected:
     wxThread *m_thread;
-    wxThreadKind m_kind;
-    wxCriticalSection m_critSection; // To guard the m_thread variable
-    
-    friend class wxThreadHelperThread;
 };
 
 // call Entry() in owner, put it down here to avoid circular declarations
 inline void *wxThreadHelperThread::Entry()
 {
-    void * const result = m_owner.Entry();
-    
-    wxCriticalSectionLocker locker(m_owner.m_critSection);
-    
-    // Detached thread will be deleted after returning, so make sure
-    // wxThreadHelper::GetThread will not return an invalid pointer.
-    // And that wxThreadHelper::KillThread will not try to kill
-    // an already deleted thread
-    if ( m_owner.m_kind == wxTHREAD_DETACHED )
-        m_owner.m_thread = NULL;
-        
-    return result;
+    return m_owner.Entry();
 }
 
 // ----------------------------------------------------------------------------
@@ -727,8 +688,8 @@ inline bool wxIsMainThread() { return wxThread::IsMain(); }
 #else // !wxUSE_THREADS
 
 // no thread support
-inline void wxMutexGuiEnter() { }
-inline void wxMutexGuiLeave() { }
+inline void WXDLLIMPEXP_BASE wxMutexGuiEnter() { }
+inline void WXDLLIMPEXP_BASE wxMutexGuiLeave() { }
 
 // macros for entering/leaving critical sections which may be used without
 // having to take them inside "#if wxUSE_THREADS"

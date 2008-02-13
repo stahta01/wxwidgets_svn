@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/list.h"
     #include "wx/log.h"
     #include "wx/intl.h"
@@ -1136,10 +1136,9 @@ void wxHtmlWindow::OnMouseDown(wxMouseEvent& event)
             CaptureMouse();
         }
     }
+#else
+    wxUnusedVar(event);
 #endif // wxUSE_CLIPBOARD
-
-    // in any case, let the default handler set focus to this window
-    event.Skip();
 }
 
 void wxHtmlWindow::OnMouseUp(wxMouseEvent& event)
@@ -1163,6 +1162,8 @@ void wxHtmlWindow::OnMouseUp(wxMouseEvent& event)
         }
     }
 #endif // wxUSE_CLIPBOARD
+
+    SetFocus();
 
     wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
     wxHtmlWindowMouseHelper::HandleMouseClick(m_Cell, pos, event);

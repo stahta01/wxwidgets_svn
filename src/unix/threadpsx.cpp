@@ -27,10 +27,8 @@
 #if wxUSE_THREADS
 
 #include "wx/thread.h"
-#include "wx/except.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
     #include "wx/dynarray.h"
     #include "wx/intl.h"
     #include "wx/log.h"
@@ -165,15 +163,10 @@ public:
     ~wxMutexInternal();
 
     wxMutexError Lock();
-    wxMutexError Lock(unsigned long ms);
     wxMutexError TryLock();
     wxMutexError Unlock();
 
     bool IsOk() const { return m_isOk; }
-
-private:
-    // convert the result of pthread_mutex_[timed]lock() call to wx return code
-    wxMutexError HandleLockResult(int err);
 
 private:
     pthread_mutex_t m_mutex;
@@ -252,61 +245,7 @@ wxMutexInternal::~wxMutexInternal()
 
 wxMutexError wxMutexInternal::Lock()
 {
-    return HandleLockResult(pthread_mutex_lock(&m_mutex));
-}
-
-wxMutexError wxMutexInternal::Lock(unsigned long ms)
-{
-#ifdef HAVE_PTHREAD_MUTEX_TIMEDLOCK
-    static const long MSEC_IN_SEC   = 1000;
-    static const long NSEC_IN_MSEC  = 1000000;
-    static const long NSEC_IN_USEC  = 1000;
-    static const long NSEC_IN_SEC   = MSEC_IN_SEC * NSEC_IN_MSEC;
-
-    time_t seconds = ms/MSEC_IN_SEC;
-    long nanoseconds = (ms % MSEC_IN_SEC) * NSEC_IN_MSEC;
-    timespec ts = { 0, 0 };
-
-    // normally we should use clock_gettime(CLOCK_REALTIME) here but this
-    // function is in librt and we don't link with it currently, so use
-    // gettimeofday() instead -- if it turns out that this is really too
-    // imprecise, we should modify configure to check if clock_gettime() is
-    // available and whether it requires -lrt and use it instead
-#if 0
-    if ( clock_gettime(CLOCK_REALTIME, &ts) == 0 )
-    {
-    }
-#else
-    struct timeval tv;
-    if ( wxGetTimeOfDay(&tv) != -1 )
-    {
-        ts.tv_sec = tv.tv_sec;
-        ts.tv_nsec = tv.tv_usec*NSEC_IN_USEC;
-    }
-#endif
-    else // fall back on system timer
-    {
-        ts.tv_sec = time(NULL);
-    }
-
-    ts.tv_sec += seconds;
-    ts.tv_nsec += nanoseconds;
-    if ( ts.tv_nsec > NSEC_IN_SEC )
-    {
-        ts.tv_sec += 1;
-        ts.tv_nsec -= NSEC_IN_SEC;
-    }
-
-    return HandleLockResult(pthread_mutex_timedlock(&m_mutex, &ts));
-#else // !HAVE_PTHREAD_MUTEX_TIMEDLOCK
-    wxUnusedVar(ms);
-
-    return wxMUTEX_MISC_ERROR;
-#endif // HAVE_PTHREAD_MUTEX_TIMEDLOCK/!HAVE_PTHREAD_MUTEX_TIMEDLOCK
-}
-
-wxMutexError wxMutexInternal::HandleLockResult(int err)
-{
+    int err = pthread_mutex_lock(&m_mutex);
     switch ( err )
     {
         case EDEADLK:
@@ -316,22 +255,18 @@ wxMutexError wxMutexInternal::HandleLockResult(int err)
             return wxMUTEX_DEAD_LOCK;
 
         case EINVAL:
-            wxLogDebug(_T("pthread_mutex_[timed]lock(): mutex not initialized"));
+            wxLogDebug(_T("pthread_mutex_lock(): mutex not initialized."));
             break;
-
-        case ETIMEDOUT:
-            return wxMUTEX_TIMEOUT;
 
         case 0:
             return wxMUTEX_NO_ERROR;
 
         default:
-            wxLogApiError(_T("pthread_mutex_[timed]lock()"), err);
+            wxLogApiError(_T("pthread_mutex_lock()"), err);
     }
 
     return wxMUTEX_MISC_ERROR;
 }
-
 
 wxMutexError wxMutexInternal::TryLock()
 {
@@ -828,15 +763,11 @@ void *wxThreadInternal::PthreadStart(wxThread *thread)
                    _T("Thread %ld about to enter its Entry()."),
                    THR_ID(pthread));
 
-        wxTRY
-        {
-            pthread->m_exitcode = thread->Entry();
+        pthread->m_exitcode = thread->Entry();
 
-            wxLogTrace(TRACE_THREADS,
-                       _T("Thread %ld Entry() returned %lu."),
-                       THR_ID(pthread), wxPtrToUInt(pthread->m_exitcode));
-        }
-        wxCATCH_ALL( wxTheApp->OnUnhandledException(); )
+        wxLogTrace(TRACE_THREADS,
+                   _T("Thread %ld Entry() returned %lu."),
+                   THR_ID(pthread), wxPtrToUInt(pthread->m_exitcode));
 
         {
             wxCriticalSectionLocker lock(thread->m_critsect);
@@ -1548,11 +1479,7 @@ void wxThread::Exit(ExitCode status)
     // might deadlock if, for example, it signals a condition in OnExit() (a
     // common case) while the main thread calls any of functions entering
     // m_critsect on us (almost all of them do)
-    wxTRY
-    {
-        OnExit();
-    }
-    wxCATCH_ALL( wxTheApp->OnUnhandledException(); )
+    OnExit();
 
     // delete C++ thread object if this is a detached thread - user is
     // responsible for doing this for joinable ones
@@ -1800,12 +1727,12 @@ static void DeleteThread(wxThread *This)
     }
 }
 
-void wxMutexGuiEnterImpl()
+void wxMutexGuiEnter()
 {
     gs_mutexGui->Lock();
 }
 
-void wxMutexGuiLeaveImpl()
+void wxMutexGuiLeave()
 {
     gs_mutexGui->Unlock();
 }

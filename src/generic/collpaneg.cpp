@@ -52,21 +52,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxCollapsiblePaneEvent, wxCommandEvent)
 BEGIN_EVENT_TABLE(wxGenericCollapsiblePane, wxControl)
     EVT_BUTTON(wxID_ANY, wxGenericCollapsiblePane::OnButton)
     EVT_SIZE(wxGenericCollapsiblePane::OnSize)
-
-    WX_EVENT_TABLE_CONTROL_CONTAINER(wxGenericCollapsiblePane)
 END_EVENT_TABLE()
 
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxGenericCollapsiblePane, wxControl)
-
-void wxGenericCollapsiblePane::Init()
-{
-    WX_INIT_CONTROL_CONTAINER();
-
-    m_pButton = NULL;
-    m_pPane = NULL;
-    m_pStaticLine = NULL;
-    m_sz = NULL;
-}
 
 bool wxGenericCollapsiblePane::Create(wxWindow *parent,
                                       wxWindowID id,
@@ -82,22 +69,17 @@ bool wxGenericCollapsiblePane::Create(wxWindow *parent,
 
     m_strLabel = label;
 
-#ifdef __WXMAC__
-    // on Mac we use the disclosure triangle
-    // we need a light gray line above and below, lets approximate with the frame
-    m_pStaticLine = NULL;
-    m_pButton = new wxDisclosureTriangle( this, wxID_ANY, GetBtnLabel(), 
-                                         wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER );
-    m_pButton->SetBackgroundColour( wxColour( 221, 226, 239 ) );
-    m_sz = new wxBoxSizer(wxHORIZONTAL);
-    // m_sz->Add(4,4); where shall we put it?
-    m_sz->Add( m_pButton, 1);
-#else
     // create children and lay them out using a wxBoxSizer
     // (so that we automatically get RTL features)
     m_pButton = new wxButton(this, wxID_ANY, GetBtnLabel(), wxPoint(0, 0),
                              wxDefaultSize, wxBU_EXACTFIT);
     m_pStaticLine = new wxStaticLine(this, wxID_ANY);
+#ifdef __WXMAC__
+    // on Mac we put the static libe above the button
+    m_sz = new wxBoxSizer(wxVERTICAL);
+    m_sz->Add(m_pStaticLine, 0, wxALL|wxGROW, GetBorder());
+    m_sz->Add(m_pButton, 0, wxLEFT|wxRIGHT|wxBOTTOM, GetBorder());
+#else
     // on other platforms we put the static line and the button horizontally
     m_sz = new wxBoxSizer(wxHORIZONTAL);
     m_sz->Add(m_pButton, 0, wxLEFT|wxTOP|wxBOTTOM, GetBorder());
@@ -106,7 +88,7 @@ bool wxGenericCollapsiblePane::Create(wxWindow *parent,
 
     // FIXME: at least under wxCE and wxGTK1 the background is black if we don't do
     //        this, no idea why...
-#if defined(__WXWINCE__) || defined(__WXGTK__)
+#if defined(__WXWINCE__) || (defined(__WXGTK__) && !defined(__WXGTK20__))
     SetBackgroundColour(parent->GetBackgroundColour());
 #endif
 
@@ -122,14 +104,14 @@ bool wxGenericCollapsiblePane::Create(wxWindow *parent,
 
 wxGenericCollapsiblePane::~wxGenericCollapsiblePane()
 {
-    if (m_pButton)
+    if (m_pButton && m_pStaticLine && m_sz)
+    {
         m_pButton->SetContainingSizer(NULL);
-    
-    if (m_pStaticLine)
         m_pStaticLine->SetContainingSizer(NULL);
-    
-    // our sizer is not deleted automatically since we didn't use SetSizer()!
-    wxDELETE(m_sz);
+
+        // our sizer is not deleted automatically since we didn't use SetSizer()!
+        wxDELETE(m_sz);
+    }
 }
 
 wxSize wxGenericCollapsiblePane::DoGetBestSize() const
@@ -149,12 +131,7 @@ wxSize wxGenericCollapsiblePane::DoGetBestSize() const
 
 wxString wxGenericCollapsiblePane::GetBtnLabel() const
 {
-    // on mac the triangle indicates the state, no string change
-#ifdef __WXMAC__
-    return m_strLabel;
-#else
     return m_strLabel + (IsCollapsed() ? wxT(" >>") : wxT(" <<"));
-#endif
 }
 
 void wxGenericCollapsiblePane::OnStateChange(const wxSize& sz)
@@ -207,11 +184,11 @@ void wxGenericCollapsiblePane::OnStateChange(const wxSize& sz)
                 if (top->GetSizer())
                 {
                     // we have just set the size hints...
-                    wxSize szClient = top->GetSizer()->CalcMin();
+                    wxSize sz = top->GetSizer()->CalcMin();
 
                     // use SetClientSize() and not SetSize() otherwise the size for
                     // e.g. a wxFrame with a menubar wouldn't be correctly set
-                    top->SetClientSize(szClient);
+                    top->SetClientSize(sz);
                 }
                 else
                     top->Layout();
@@ -238,13 +215,8 @@ void wxGenericCollapsiblePane::Collapse(bool collapse)
     m_pPane->Show(!collapse);
 
     // update button label
-#ifdef __WXMAC__
-    m_pButton->SetOpen( !collapse );
-#else
     // NB: this must be done after updating our "state"
     m_pButton->SetLabel(GetBtnLabel());
-#endif
-
 
     OnStateChange(GetBestSize());
 }
@@ -252,25 +224,16 @@ void wxGenericCollapsiblePane::Collapse(bool collapse)
 void wxGenericCollapsiblePane::SetLabel(const wxString &label)
 {
     m_strLabel = label;
-#ifdef __WXMAC__
-    m_pButton->SetLabel(GetBtnLabel());
-#else
     m_pButton->SetLabel(GetBtnLabel());
     m_pButton->SetInitialSize();
-#endif
 
     Layout();
 }
 
 bool wxGenericCollapsiblePane::Layout()
 {
-#ifdef __WXMAC__
-    if (!m_pButton || !m_pPane || !m_sz)
-        return false;     // we need to complete the creation first!
-#else
     if (!m_pButton || !m_pStaticLine || !m_pPane || !m_sz)
         return false;     // we need to complete the creation first!
-#endif
 
     wxSize oursz(GetSize());
 
@@ -296,6 +259,8 @@ int wxGenericCollapsiblePane::GetBorder() const
 {
 #if defined( __WXMAC__ )
     return 6;
+#elif defined(__WXGTK20__)
+    return 3;
 #elif defined(__WXMSW__)
     wxASSERT(m_pButton);
     return m_pButton->ConvertDialogToPixels(wxSize(2, 0)).x;

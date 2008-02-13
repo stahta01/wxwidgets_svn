@@ -37,17 +37,9 @@
 #define wxIMAGE_OPTION_RESOLUTIONUNIT        wxString(_T("ResolutionUnit"))
 
 // constants used with wxIMAGE_OPTION_RESOLUTIONUNIT
-//
-// NB: don't change these values, they correspond to libjpeg constants
-enum wxImageResolution
+enum
 {
-    // Resolution not specified
-    wxIMAGE_RESOLUTION_NONE = 0,
-
-    // Resolution specified in inches
     wxIMAGE_RESOLUTION_INCHES = 1,
-
-    // Resolution specified in centimeters
     wxIMAGE_RESOLUTION_CM = 2
 };
 
@@ -119,13 +111,6 @@ protected:
     // save the stream position, call DoCanRead() and restore the position
     bool CallDoCanRead(wxInputStream& stream);
 #endif // wxUSE_STREAMS
-
-    // helper for the derived classes SaveFile() implementations: returns the
-    // values of x- and y-resolution options specified as the image options if
-    // any
-    static wxImageResolution
-    GetResolutionFromOptions(const wxImage& image, int *x, int *y);
-
 
     wxString  m_name;
     wxString  m_extension;
@@ -258,9 +243,9 @@ public:
     wxImage ResampleBicubic(int width, int height) const;
 
     // blur the image according to the specified pixel radius
-    wxImage Blur(int radius) const;
-    wxImage BlurHorizontal(int radius) const;
-    wxImage BlurVertical(int radius) const;
+    wxImage Blur(int radius);
+    wxImage BlurHorizontal(int radius);
+    wxImage BlurVertical(int radius);
 
     wxImage ShrinkBy( int xFactor , int yFactor ) const ;
 

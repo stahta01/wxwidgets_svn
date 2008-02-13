@@ -14,7 +14,7 @@
 
 #if wxUSE_CLIPBOARD
 
-class WXDLLIMPEXP_FWD_CORE wxDataObject;
+class WXDLLIMPEXP_CORE wxDataObject;
 struct wxDataIdToDataObject;
 
 #include "wx/list.h"
@@ -22,16 +22,16 @@ struct wxDataIdToDataObject;
 WX_DECLARE_LIST(wxDataObject, wxDataObjectList);
 WX_DECLARE_LIST(wxDataIdToDataObject, wxDataIdToDataObjectList);
 
-WXDLLEXPORT bool wxOpenClipboard();
-WXDLLEXPORT bool wxClipboardOpen();
-WXDLLEXPORT bool wxCloseClipboard();
-WXDLLEXPORT bool wxEmptyClipboard();
-WXDLLEXPORT bool wxIsClipboardFormatAvailable(wxDataFormat dataFormat);
-WXDLLEXPORT bool wxSetClipboardData(wxDataFormat dataFormat, wxObject *obj, int width = 0, int height = 0);
-WXDLLEXPORT wxObject* wxGetClipboardData(wxDataFormat dataFormat, long *len = NULL);
-WXDLLEXPORT wxDataFormat wxEnumClipboardFormats(wxDataFormat dataFormat);
-WXDLLEXPORT wxDataFormat wxRegisterClipboardFormat(char *formatName);
-WXDLLEXPORT bool wxGetClipboardFormatName(wxDataFormat dataFormat, char *formatName, int maxCount);
+bool WXDLLEXPORT wxOpenClipboard();
+bool WXDLLEXPORT wxClipboardOpen();
+bool WXDLLEXPORT wxCloseClipboard();
+bool WXDLLEXPORT wxEmptyClipboard();
+bool WXDLLEXPORT wxIsClipboardFormatAvailable(wxDataFormat dataFormat);
+bool WXDLLEXPORT wxSetClipboardData(wxDataFormat dataFormat, wxObject *obj, int width = 0, int height = 0);
+wxObject* WXDLLEXPORT wxGetClipboardData(wxDataFormat dataFormat, long *len = NULL);
+wxDataFormat WXDLLEXPORT wxEnumClipboardFormats(wxDataFormat dataFormat);
+wxDataFormat WXDLLEXPORT wxRegisterClipboardFormat(char *formatName);
+bool WXDLLEXPORT wxGetClipboardFormatName(wxDataFormat dataFormat, char *formatName, int maxCount);
 
 //-----------------------------------------------------------------------------
 // wxClipboard
@@ -67,9 +67,13 @@ public:
     // clears wxTheClipboard and the system's clipboard if possible
     virtual void Clear();
 
+    virtual void UsePrimarySelection(bool primary = true)
+    { m_usePrimary = primary; }
+
     // implementation from now on
     bool              m_open;
     wxDataObjectList  m_data;
+    bool              m_usePrimary;
     wxDataIdToDataObjectList m_idToObject;
 
 private:
@@ -78,4 +82,5 @@ private:
 
 #endif // wxUSE_CLIPBOARD
 
-#endif // _WX_CLIPBRD_H_
+#endif
+// _WX_CLIPBRD_H_

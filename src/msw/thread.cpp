@@ -26,6 +26,7 @@
 #include "wx/thread.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h"
     #include "wx/intl.h"
     #include "wx/app.h"
     #include "wx/module.h"
@@ -35,7 +36,6 @@
 #include "wx/scopeguard.h"
 
 #include "wx/msw/private.h"
-#include "wx/msw/missing.h"
 #include "wx/msw/seh.h"
 
 #include "wx/except.h"
@@ -85,6 +85,16 @@
     typedef DWORD THREAD_RETVAL;
     #define THREAD_CALLCONV WINAPI
 #endif
+
+// this is a hack to allow the code here to know whether wxEventLoop is
+// currently running: as wxBase doesn't have event loop at all, we can't simple
+// use "wxEventLoop::GetActive() != NULL" test, so instead wxEventLoop uses
+// this variable to indicate whether it is active
+//
+// the proper solution is to use wxAppTraits to abstract the base/GUI-dependent
+// operation of waiting for the thread to terminate and is already implemented
+// in cvs HEAD, this is just a backwards compatible hack for 2.8
+WXDLLIMPEXP_DATA_BASE(int) wxRunningEventLoopCount = 0;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -178,8 +188,7 @@ public:
     bool IsOk() const { return m_mutex != NULL; }
 
     wxMutexError Lock() { return LockTimeout(INFINITE); }
-    wxMutexError Lock(unsigned long ms) { return LockTimeout(ms); }
-    wxMutexError TryLock();
+    wxMutexError TryLock() { return LockTimeout(0); }
     wxMutexError Unlock();
 
 private:
@@ -197,7 +206,7 @@ wxMutexInternal::wxMutexInternal(wxMutexType WXUNUSED(mutexType))
     m_mutex = ::CreateMutex
                 (
                     NULL,       // default secutiry attributes
-                    FALSE,      // not initially locked
+                    false,      // not initially locked
                     NULL        // no name
                 );
 
@@ -216,14 +225,6 @@ wxMutexInternal::~wxMutexInternal()
             wxLogLastError(_T("CloseHandle(mutex)"));
         }
     }
-}
-
-wxMutexError wxMutexInternal::TryLock()
-{
-    const wxMutexError rc = LockTimeout(0);
-
-    // we have a special return code for timeout in this case
-    return rc == wxMUTEX_TIMEOUT ? wxMUTEX_BUSY : rc;
 }
 
 wxMutexError wxMutexInternal::LockTimeout(DWORD milliseconds)
@@ -246,7 +247,7 @@ wxMutexError wxMutexInternal::LockTimeout(DWORD milliseconds)
             break;
 
         case WAIT_TIMEOUT:
-            return wxMUTEX_TIMEOUT;
+            return wxMUTEX_BUSY;
 
         case WAIT_ABANDONED:        // checked for above
         default:
@@ -761,15 +762,28 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
             }
         }
 
-        wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-        if ( traits )
+#if !defined(QS_ALLPOSTMESSAGE)
+#define QS_ALLPOSTMESSAGE 0
+#endif
+        if ( !wxRunningEventLoopCount )
         {
-            result = traits->WaitForThread(m_hThread);
+            // don't ask for Windows messages if we don't have a running event
+            // loop to process them as otherwise we'd enter an infinite loop
+            // with MsgWaitForMultipleObjects() always returning WAIT_OBJECT_0
+            // + 1 because the message would remain forever in the queue
+            result = ::WaitForSingleObject(m_hThread, INFINITE);
         }
-        else // can't wait for the thread
+        else // wait for thread termination without blocking the GUI
         {
-            // so kill it below
-            result = 0xFFFFFFFF;
+            result = ::MsgWaitForMultipleObjects
+                     (
+                       1,              // number of objects to wait for
+                       &m_hThread,     // the objects
+                       false,          // don't wait for all objects
+                       INFINITE,       // no timeout
+                       QS_ALLINPUT |   // return as soon as there are any events
+                       QS_ALLPOSTMESSAGE
+                     );
         }
 
         switch ( result )
@@ -795,6 +809,9 @@ wxThreadInternal::WaitForTerminate(wxCriticalSection& cs,
                 //     the system might dead lock then
                 if ( wxThread::IsMain() )
                 {
+                    wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits()
+                                                   : NULL;
+
                     if ( traits && !traits->DoMessageFromThreadWait() )
                     {
                         // WM_QUIT received: kill the thread
@@ -1292,7 +1309,7 @@ void wxThreadModule::OnExit()
 // not a mutex, so the names are a bit confusing
 // ----------------------------------------------------------------------------
 
-void wxMutexGuiEnterImpl()
+void WXDLLIMPEXP_BASE wxMutexGuiEnter()
 {
     // this would dead lock everything...
     wxASSERT_MSG( !wxThread::IsMain(),
@@ -1314,7 +1331,7 @@ void wxMutexGuiEnterImpl()
     gs_critsectGui->Enter();
 }
 
-void wxMutexGuiLeaveImpl()
+void WXDLLIMPEXP_BASE wxMutexGuiLeave()
 {
     wxCriticalSectionLocker enter(*gs_critsectWaitingForGui);
 

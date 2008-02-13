@@ -10,8 +10,8 @@
 #ifndef _WX_GTK_BRUSH_H_
 #define _WX_GTK_BRUSH_H_
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxColour;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxColour;
 
 //-----------------------------------------------------------------------------
 // wxBrush
@@ -26,8 +26,11 @@ public:
     wxBrush( const wxBitmap &stippleBitmap );
     virtual ~wxBrush();
 
-    bool operator==(const wxBrush& brush) const;
-    bool operator!=(const wxBrush& brush) const { return !(*this == brush); }
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_refData != NULL; }
+
+    bool operator == ( const wxBrush& brush ) const;
+    bool operator != (const wxBrush& brush) const { return !(*this == brush); }
 
     virtual int GetStyle() const;
     wxColour &GetColour() const;
@@ -39,8 +42,9 @@ public:
     void SetStipple( const wxBitmap& stipple );
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     DECLARE_DYNAMIC_CLASS(wxBrush)
 };

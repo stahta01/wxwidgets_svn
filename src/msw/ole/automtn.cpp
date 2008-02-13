@@ -54,7 +54,7 @@
 
 #if wxUSE_DATETIME
 #include "wx/datetime.h"
-#endif // wxUSE_DATETIME
+#endif // wxUSE_TIMEDATE
 
 static void ClearVariant(VARIANTARG *pvarg) ;
 static void ReleaseVariant(VARIANTARG *pvarg) ;
@@ -498,7 +498,7 @@ bool wxAutomationObject::GetInstance(const wxString& classId) const
     CLSID clsId;
     IUnknown * pUnk = NULL;
 
-    wxBasicString unicodeName(classId);
+    wxBasicString unicodeName(classId.mb_str());
 
     if (FAILED(CLSIDFromProgID((BSTR) unicodeName, &clsId)))
     {
@@ -530,7 +530,7 @@ bool wxAutomationObject::CreateInstance(const wxString& classId) const
 
     CLSID clsId;
 
-    wxBasicString unicodeName(classId);
+    wxBasicString unicodeName(classId.mb_str());
 
     if (FAILED(CLSIDFromProgID((BSTR) unicodeName, &clsId)))
     {
@@ -671,137 +671,112 @@ WXDLLEXPORT bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& ole
 #define VT_TYPEMASK 0xfff
 #endif
 
-WXDLLEXPORT bool
-wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
+WXDLLEXPORT bool wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
 {
-    if ( oleVariant.vt & VT_ARRAY )
+    switch (oleVariant.vt & VT_TYPEMASK)
     {
-        variant.ClearList();
-
-        // Compute the total number of elements in all array dimensions
-        int cElements = 1;
-        for ( int cDims = 0; cDims < oleVariant.parray->cDims; cDims++ )
-            cElements *= oleVariant.parray->rgsabound[cDims].cElements;
-
-        // Get a pointer to the data
-        VARIANTARG* pvdata;
-        HRESULT hr = SafeArrayAccessData(oleVariant.parray, (void **)&pvdata);
-        if ( FAILED(hr) )
-            return false;
-
-        bool ok = true;
-        for ( int i = 0; i < cElements; i++ )
+    case VT_BSTR:
         {
-            VARIANTARG& oleElement = pvdata[i];
-            wxVariant vElement;
-            if ( !wxConvertOleToVariant(oleElement, vElement) )
-            {
-                ok = false;
-                variant.ClearList();
-                break;
-            }
-
-            variant.Append(vElement);
+            wxString str(wxConvertStringFromOle(oleVariant.bstrVal));
+            variant = str;
+            break;
         }
-
-        SafeArrayUnaccessData(oleVariant.parray);
-    }
-    else if ( oleVariant.vt & VT_BYREF )
-    {
-        switch ( oleVariant.vt & VT_TYPEMASK )
+    case VT_DATE:
         {
-            case VT_VARIANT:
-                {
-                    VARIANTARG& oleReference = *((LPVARIANT)oleVariant.byref);
-                    if (!wxConvertOleToVariant(oleReference,variant))
-                        return false;
-                    break;
-                }
-
-            default:
-                wxLogError(wxT("wxAutomationObject::ConvertOleToVariant: [as yet] unhandled reference %X"),oleVariant.vt);
-                return false;
-        }
-    }
-    else // simply type (not array or reference)
-    {
-        switch (oleVariant.vt & VT_TYPEMASK)
-        {
-            case VT_BSTR:
-                {
-                    wxString str(wxConvertStringFromOle(oleVariant.bstrVal));
-                    variant = str;
-                    break;
-                }
-            case VT_DATE:
-                {
 #if wxUSE_DATETIME
-                    unsigned short dosDate = 0;
-                    unsigned short dosTime = 0;
-                    VariantTimeToDosDateTime(oleVariant.date, & dosDate, & dosTime);
+            unsigned short dosDate = 0;
+            unsigned short dosTime = 0;
+            VariantTimeToDosDateTime(oleVariant.date, & dosDate, & dosTime);
 
-                    long dosDateTime = (dosDate << 16) | dosTime;
-                    wxDateTime date;
-                    date.SetFromDOS(dosDateTime);
-                    variant = date;
+            long dosDateTime = (dosDate << 16) | dosTime;
+            wxDateTime date;
+            date.SetFromDOS(dosDateTime);
+            variant = date;
 #endif
-                    break;
-                }
-            case VT_I4:
-                {
-                    variant = (long) oleVariant.lVal;
-                    break;
-                }
-            case VT_I2:
-                {
-                    variant = (long) oleVariant.iVal;
-                    break;
-                }
+            break;
+        }
+    case VT_I4:
+        {
+            variant = (long) oleVariant.lVal;
+            break;
+        }
+    case VT_I2:
+        {
+            variant = (long) oleVariant.iVal;
+            break;
+        }
 
-            case VT_BOOL:
-                {
+    case VT_BOOL:
+        {
 #if (defined(_MSC_VER) && (_MSC_VER <= 1000) && !defined(__MWERKS__) ) //GC
 #ifndef HAVE_BOOL // Can't use bool operator if no native bool type
-                    variant = (long) (oleVariant.bool != 0);
+            variant = (long) (oleVariant.bool != 0);
 #else
-                    variant = (bool) (oleVariant.bool != 0);
+            variant = (bool) (oleVariant.bool != 0);
 #endif
 #else
 #ifndef HAVE_BOOL // Can't use bool operator if no native bool type
-                    variant = (long) (oleVariant.boolVal != 0);
+            variant = (long) (oleVariant.boolVal != 0);
 #else
-                    variant = (bool) (oleVariant.boolVal != 0);
+            variant = (bool) (oleVariant.boolVal != 0);
 #endif
 #endif
-                    break;
-                }
-            case VT_R8:
-                {
-                    variant = oleVariant.dblVal;
-                    break;
-                }
-            case VT_DISPATCH:
-                {
-                    variant = (void*) oleVariant.pdispVal;
-                    break;
-                }
-            case VT_NULL:
-                {
-                    variant.MakeNull();
-                    break;
-                }
-            case VT_EMPTY:
-                {
-                    break;    // Ignore Empty Variant, used only during destruction of objects
-                }
-            default:
-                {
-                    wxLogError(wxT("wxAutomationObject::ConvertOleToVariant: Unknown variant value type %X -> %X"),oleVariant.vt,oleVariant.vt&VT_TYPEMASK);
+            break;
+        }
+    case VT_R8:
+        {
+            variant = oleVariant.dblVal;
+            break;
+        }
+    case VT_ARRAY:
+        {
+            variant.ClearList();
+
+            int cDims, cElements, i;
+            VARIANTARG* pvdata;
+
+            // Iterate the dimensions: number of elements is x*y*z
+            for (cDims = 0, cElements = 1;
+                cDims < oleVariant.parray->cDims; cDims ++)
+                    cElements *= oleVariant.parray->rgsabound[cDims].cElements;
+
+            // Get a pointer to the data
+            HRESULT hr = SafeArrayAccessData(oleVariant.parray, (void HUGEP* FAR*) & pvdata);
+            if (hr != NOERROR)
+                return false;
+            // Iterate the data.
+            for (i = 0; i < cElements; i++)
+            {
+                VARIANTARG& oleElement = pvdata[i];
+                wxVariant vElement;
+                if (!wxConvertOleToVariant(oleElement, vElement))
                     return false;
-                }
+
+                variant.Append(vElement);
+            }
+            SafeArrayUnaccessData(oleVariant.parray);
+            break;
+        }
+    case VT_DISPATCH:
+        {
+            variant = (void*) oleVariant.pdispVal;
+            break;
+        }
+    case VT_NULL:
+        {
+            variant.MakeNull();
+            break;
+        }
+    case VT_EMPTY:
+        {
+            break;    // Ignore Empty Variant, used only during destruction of objects
+        }
+    default:
+        {
+            wxLogError(wxT("wxAutomationObject::ConvertOleToVariant: Unknown variant value type"));
+            return false;
         }
     }
-
     return true;
 }
 

@@ -4,10 +4,8 @@ wxSizer is the abstract base class used for laying out subwindows in a window. Y
 cannot use wxSizer directly; instead, you will have to use one of the sizer
 classes derived from it. Currently there are \helpref{wxBoxSizer}{wxboxsizer}, 
 \helpref{wxStaticBoxSizer}{wxstaticboxsizer},
-\helpref{wxGridSizer}{wxgridsizer},
-\helpref{wxFlexGridSizer}{wxflexgridsizer},
-\helpref{wxWrapSizer}{wxwrapsizer}
- and \helpref{wxGridBagSizer}{wxgridbagsizer}.
+\helpref{wxGridSizer}{wxgridsizer} 
+\helpref{wxFlexGridSizer}{wxflexgridsizer} and \helpref{wxGridBagSizer}{wxgridbagsizer}.
 
 The layout algorithm used by sizers in wxWidgets is closely related to layout
 in other GUI toolkits, such as Java's AWT, the GTK toolkit or the Qt toolkit. It is
@@ -45,15 +43,12 @@ capabilities for the various virtual methods.}
 
 \wxheading{Derived from}
 
-\helpref{wxObject}{wxobject}
+\helpref{wxObject}{wxobject}\\
+\helpref{wxClientDataContainer}{wxclientdatacontainer}
 
 \wxheading{Include files}
 
 <wx/sizer.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{See also}
 
@@ -187,7 +182,7 @@ Adds stretchable space to the sizer. More readable way of calling
 \func{wxSize}{CalcMin}{\void}
 
 This method is abstract and has to be overwritten by any derived class.
-Here, the sizer will do the actual calculation of its children's minimal sizes.
+Here, the sizer will do the actual calculation of its children minimal sizes.
 
 
 \membersection{wxSizer::Clear}\label{wxsizerclear}
@@ -195,44 +190,6 @@ Here, the sizer will do the actual calculation of its children's minimal sizes.
 \func{void}{Clear}{\param{bool }{delete\_windows = false}}
 
 Detaches all children from the sizer. If \arg{delete\_windows} is \true then child windows will also be deleted.
-
-
-\membersection{wxSizer::ComputeFittingClientSize}\label{wxsizercomputefittingclientsize}
-
-\func{wxSize}{ComputeFittingClientSize}{\param{wxWindow* }{window}}
-
-Computes client area size for \arg{window} so that it matches the 
-sizer's minimal size. Unlike \helpref{GetMinSize}{wxsizergetminsize}, this
-method accounts for other constraints imposed on \arg{window}, namely display's
-size (returned size will never be too large for the display) and maximum
-window size if previously set by
-\helpref{wxWindow::SetMaxSize}{wxwindowsetmaxsize}.
-
-The returned value is suitable for passing to
-\helpref{wxWindow::SetClientSize}{wxwindowsetclientsize} or
-\helpref{wxWindow::SetMinClientSize}{wxwindowsetminclientsize}.
-
-\wxheading{See also}
-
-\helpref{ComputeFittingWindowSize}{wxsizercomputefittingwindowsize},
-\helpref{Fit}{wxsizerfit}
-
-
-\membersection{wxSizer::ComputeFittintWindowSize}\label{wxsizercomputefittingwindowsize}
-
-\func{wxSize}{ComputeFittingWindowSize}{\param{wxWindow* }{window}}
-
-Like \helpref{ComputeFittingClientSize}{wxsizercomputefittingclientsize},
-but converts the result into \emph{window} size.
-
-The returned value is suitable for passing to
-\helpref{wxWindow::SetSize}{wxwindowsetsize} or
-\helpref{wxWindow::SetMinSize}{wxwindowsetminsize}.
-
-\wxheading{See also}
-
-\helpref{ComputeFittingClientSize}{wxsizercomputefittingclientsize},
-\helpref{Fit}{wxsizerfit}
 
 
 \membersection{wxSizer::Detach}\label{wxsizerdetach}
@@ -260,18 +217,11 @@ Returns true if the child item was found and detached, false otherwise.
 
 \func{wxSize}{Fit}{\param{wxWindow* }{window}}
 
-Tell the sizer to resize the \arg{window} so that its client area matches the 
-sizer's minimal size
-(\helpref{ComputeFittingClientSize}{wxsizercomputefittingclientsize} is called
-to determine it).
-This is commonly done in the constructor of the window
-itself, see sample in the description
-of \helpref{wxBoxSizer}{wxboxsizer}. Returns the new \emph{window} size.
+Tell the sizer to resize the \arg{window} to match the sizer's minimal size. This
+is commonly done in the constructor of the window itself, see sample in the description
+of \helpref{wxBoxSizer}{wxboxsizer}. Returns the new size.
 
-\wxheading{See also}
-
-\helpref{ComputeFittingClientSize}{wxsizercomputefittingclientsize},
-\helpref{ComputeFittingWindowSize}{wxsizercomputefittingwindowsize}
+For a top level window this is the total window size, not client size.
 
 
 \membersection{wxSizer::FitInside}\label{wxsizerfitinside}
@@ -290,8 +240,6 @@ windows which manage it.
 
 
 \membersection{wxSizer::GetChildren}\label{wxsizergetchildren}
-
-\constfunc{const wxSizerItemList\&}{GetChildren}{\void}
 
 \func{wxSizerItemList\&}{GetChildren}{\void}
 
@@ -321,18 +269,6 @@ Use parameter \arg{recursive} to search in subsizers too.
 
 Returns pointer to item or NULL.
 
-\membersection{wxSizer::GetItemById}\label{wxsizergetitembyid}
-
-\func{wxSizerItem *}{GetItemById}{\param{int }{id}, \param{bool }{recursive = false}}
-
-Finds item of the sizer which has the given \arg{id}.  This \arg{id} is not the
-window id but the id of the wxSizerItem itself.  This is mainly useful for
-retrieving the sizers created from XRC resources. 
-
-Use parameter \arg{recursive} to search in subsizers too.
-
-Returns pointer to item or \NULL.
-
 
 \membersection{wxSizer::GetSize}\label{wxsizergetsize}
 
@@ -355,13 +291,6 @@ Returns the current position of the sizer.
 Returns the minimal size of the sizer. This is either the combined minimal
 size of all the children and their borders or the minimal size set by 
 \helpref{SetMinSize}{wxsizersetminsize}, depending on which is bigger.
-
-Note that the returned value is \emph{client} size, not window size.
-In particular, if you use the value to set toplevel window's minimal or
-actual size, use \helpref{wxWindow::SetMinClientSize}{wxwindowsetminclientsize}
-or \helpref{wxWindow::SetClientSize}{wxwindowsetclientsize}, \emph{not}
-\helpref{wxWindow::SetMinSize}{wxwindowsetminsize}
-or \helpref{wxWindow::SetSize}{wxwindowsetsize}.
 
 
 \membersection{wxSizer::Hide}\label{wxsizerhide}
@@ -579,11 +508,9 @@ passed to it. This only makes sense when {\it window} is actually a
 wxDialog, since SetSizeHints only has any effect in these classes. 
 It does nothing in normal windows or controls.
 
-This method is implicitly used by \helpref{wxWindow::SetSizerAndFit}{wxwindowsetsizerandfit} 
-which is commonly invoked in the constructor of a toplevel window itself (see
-the sample in the description of \helpref{wxBoxSizer}{wxboxsizer}) if the
+This method is commonly invoked in the constructor of a toplevel window itself
+(see the sample in the description of \helpref{wxBoxSizer}{wxboxsizer}) if the
 toplevel window is resizable.
-
 
 \membersection{wxSizer::SetVirtualSizeHints}\label{wxsizersetvirtualsizehints}
 
@@ -628,7 +555,7 @@ allows you to specify all parameters using the named methods instead. For
 example, instead of
 
 \begin{verbatim}
-    sizer->Add(ctrl, 0, wxEXPAND | wxALL, 10);
+    sizer->Add(ctrl, 0, wxEXPAND | wxBORDER, 10);
 \end{verbatim}
 
 you can now write
@@ -651,23 +578,6 @@ Note that by specification, all methods of wxSizerFlags return the wxSizerFlags
 object itself to allowing chaining multiple methods calls like in the examples
 above.
 
-\wxheading{See also}
-
-\helpref{wxSizer}{wxsizer}
-
-\wxheading{Derived from}
-
-No base class
-
-\wxheading{Include files}
-
-<wx/sizer.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
-\latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxSizerFlags::wxSizerFlags}\label{wxsizerflagsctor}
 
@@ -686,10 +596,8 @@ Note that if this method is not called, the wxSizerFlags has no specified alignm
 
 \wxheading{See also}
 
-\helpref{Top}{wxsizerflagstop},\\
 \helpref{Left}{wxsizerflagsleft},\\
 \helpref{Right}{wxsizerflagsright},\\
-\helpref{Bottom}{wxsizerflagsbottom},\\
 \helpref{Centre}{wxsizerflagscentre}
 
 
@@ -705,17 +613,6 @@ Sets the wxSizerFlags to have a border of a number of pixels specified by
 In the overloaded version without \arg{borderinpixels} parameter, the border of
 default size, as returned by \helpref{GetDefaultBorder}{wxsizerflagsgetdefaultborder},
 is used.
-
-
-\membersection{wxSizerFlags::Bottom}\label{wxsizerflagsbottom}
-
-\func{wxSizerFlags\& }{Bottom}{\void}
-
-Aligns the object to the bottom, shortcut for \texttt{Align(wxALIGN\_BOTTOM)}
-
-\wxheading{See also}
-
-\helpref{Align}{wxsizerflagsalign}
 
 
 \membersection{wxSizerFlags::Center}\label{wxsizerflagscenter}
@@ -805,17 +702,6 @@ Aligns the object to the right, shortcut for \texttt{Align(wxALIGN\_RIGHT)}
 
 Set the \texttt{wx\_SHAPED} flag which indicates that the elements should
 always keep the fixed width to height ratio equal to its original value.
-
-
-\membersection{wxSizerFlags::Top}\label{wxsizerflagstop}
-
-\func{wxSizerFlags\& }{Top}{\void}
-
-Aligns the object to the top, shortcut for \texttt{Align(wxALIGN\_TOP)}
-
-\wxheading{See also}
-
-\helpref{Align}{wxsizerflagsalign}
 
 
 \membersection{wxSizerFlags::TripleBorder}\label{wxsizerflagstriplebleborder}

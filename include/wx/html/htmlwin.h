@@ -28,9 +28,9 @@ class wxHtmlProcessor;
 class wxHtmlWinModule;
 class wxHtmlHistoryArray;
 class wxHtmlProcessorList;
-class WXDLLIMPEXP_FWD_HTML wxHtmlWinAutoScrollTimer;
-class WXDLLIMPEXP_FWD_HTML wxHtmlCellEvent;
-class WXDLLIMPEXP_FWD_HTML wxHtmlLinkEvent;
+class WXDLLIMPEXP_HTML wxHtmlWinAutoScrollTimer;
+class WXDLLIMPEXP_HTML wxHtmlCellEvent;
+class WXDLLIMPEXP_HTML wxHtmlLinkEvent;
 
 
 // wxHtmlWindow flags:
@@ -550,9 +550,16 @@ private:
 };
 
 
-extern WXDLLIMPEXP_HTML const wxEventType wxEVT_COMMAND_HTML_CELL_CLICKED;
-extern WXDLLIMPEXP_HTML const wxEventType wxEVT_COMMAND_HTML_CELL_HOVER;
-extern WXDLLIMPEXP_HTML const wxEventType wxEVT_COMMAND_HTML_LINK_CLICKED;
+
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_HTML,
+                                wxEVT_COMMAND_HTML_CELL_CLICKED, 1000)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_HTML,
+                                wxEVT_COMMAND_HTML_CELL_HOVER, 1001)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_HTML,
+                                wxEVT_COMMAND_HTML_LINK_CLICKED, 1002)
+END_DECLARE_EVENT_TYPES()
 
 
 /*!

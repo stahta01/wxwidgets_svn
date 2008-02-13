@@ -19,11 +19,11 @@
 #include "wx/html/htmlcell.h"
 #include "wx/encconv.h"
 
-class WXDLLIMPEXP_FWD_HTML wxHtmlWindow;
-class WXDLLIMPEXP_FWD_HTML wxHtmlWindowInterface;
-class WXDLLIMPEXP_FWD_HTML wxHtmlWinParser;
-class WXDLLIMPEXP_FWD_HTML wxHtmlWinTagHandler;
-class WXDLLIMPEXP_FWD_HTML wxHtmlTagsModule;
+class WXDLLIMPEXP_HTML wxHtmlWindow;
+class WXDLLIMPEXP_HTML wxHtmlWindowInterface;
+class WXDLLIMPEXP_HTML wxHtmlWinParser;
+class WXDLLIMPEXP_HTML wxHtmlWinTagHandler;
+class WXDLLIMPEXP_HTML wxHtmlTagsModule;
 
 
 //--------------------------------------------------------------------------------
@@ -146,10 +146,10 @@ public:
     virtual wxFont* CreateCurrentFont();
 
 protected:
-    virtual void AddText(const wxString& txt);
+    virtual void AddText(const wxChar* txt);
 
 private:
-    void DoAddText(wxChar *temp, int& templen);
+    void DoAddText(wxChar *temp, int& templen, wxChar nbsp);
 
     bool m_tmpLastWasSpace;
     wxChar *m_tmpStrBuf;
@@ -201,7 +201,6 @@ private:
             // html font sizes and faces of fixed and proportional fonts
 
 #if !wxUSE_UNICODE
-    wxChar m_nbsp;
     wxFontEncoding m_InputEnc, m_OutputEnc;
             // I/O font encodings
     wxEncodingConverter *m_EncConv;

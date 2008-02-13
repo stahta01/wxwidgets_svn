@@ -113,7 +113,7 @@ public:
 
         wxPoint yearPosition = yearControl->GetPosition();
 
-        SetFormat("%x");
+        SetFormat(wxT("%x"));
 
         width = yearPosition.x + yearSize.x+2+CALBORDER/2;
         if (width < calSize.x-4)
@@ -181,7 +181,7 @@ public:
 
         if ( !s.empty() )
         {
-            pDt->ParseFormat(s.c_str(), m_format);
+            pDt->ParseFormat(s, m_format);
             if ( !pDt->IsValid() )
                 return false;
         }
@@ -259,7 +259,7 @@ private:
         return m_combo->GetParent()->HasFlag(flag);
     }
 
-    bool SetFormat(const wxString& fmt)
+    bool SetFormat(const wxChar *fmt)
     {
         m_format.clear();
 
@@ -515,7 +515,7 @@ void wxDatePickerCtrlGeneric::OnText(wxCommandEvent &ev)
 {
     ev.SetEventObject(this);
     ev.SetId(GetId());
-    GetParent()->GetEventHandler()->ProcessEvent(ev);
+    GetParent()->ProcessEvent(ev);
 
     // We'll create an additional event if the date is valid.
     // If the date isn't valid, the user's probably in the middle of typing

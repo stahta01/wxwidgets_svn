@@ -67,8 +67,8 @@
         #define wxUSE_LONGLONG_NATIVE 0
     #endif
 
-    class WXDLLIMPEXP_FWD_BASE wxLongLongWx;
-    class WXDLLIMPEXP_FWD_BASE wxULongLongWx;
+    class WXDLLIMPEXP_BASE wxLongLongWx;
+    class WXDLLIMPEXP_BASE wxULongLongWx;
 #if defined(__VISUALC__) && !defined(__WIN32__)
     #define wxLongLong wxLongLongWx
     #define wxULongLong wxULongLongWx
@@ -86,8 +86,8 @@
 
 #ifndef wxUSE_LONGLONG_WX
     #define wxUSE_LONGLONG_WX 0
-    class WXDLLIMPEXP_FWD_BASE wxLongLongNative;
-    class WXDLLIMPEXP_FWD_BASE wxULongLongNative;
+    class WXDLLIMPEXP_BASE wxLongLongNative;
+    class WXDLLIMPEXP_BASE wxULongLongNative;
     typedef wxLongLongNative wxLongLong;
     typedef wxULongLongNative wxULongLong;
 #endif
@@ -113,9 +113,9 @@ public:
         // from long long
     wxLongLongNative(wxLongLong_t ll) : m_ll(ll) { }
         // from 2 longs
-    wxLongLongNative(wxInt32 hi, wxUint32 lo)
+    wxLongLongNative(long hi, unsigned long lo) : m_ll(0)
     {
-        // cast to wxLongLong_t first to avoid precision loss!
+        // assign first to avoid precision loss!
         m_ll = ((wxLongLong_t) hi) << 32;
         m_ll |= (wxLongLong_t) lo;
     }
@@ -160,11 +160,11 @@ public:
 
     // accessors
         // get high part
-    wxInt32 GetHi() const
-        { return wx_truncate_cast(wxInt32, m_ll >> 32); }
+    long GetHi() const
+        { return wx_truncate_cast(long, m_ll >> 32); }
         // get low part
-    wxUint32 GetLo() const
-        { return wx_truncate_cast(wxUint32, m_ll); }
+    unsigned long GetLo() const
+        { return wx_truncate_cast(unsigned long, m_ll); }
 
         // get absolute value
     wxLongLongNative Abs() const { return wxLongLongNative(*this).Abs(); }
@@ -350,9 +350,9 @@ public:
         // from long long
     wxULongLongNative(wxULongLong_t ll) : m_ll(ll) { }
         // from 2 longs
-    wxULongLongNative(wxUint32 hi, wxUint32 lo) : m_ll(0)
+    wxULongLongNative(unsigned long hi, unsigned long lo) : m_ll(0)
     {
-        // cast to wxLongLong_t first to avoid precision loss!
+        // assign first to avoid precision loss!
         m_ll = ((wxULongLong_t) hi) << 32;
         m_ll |= (wxULongLong_t) lo;
     }
@@ -392,11 +392,11 @@ public:
 
     // accessors
         // get high part
-    wxUint32 GetHi() const
-        { return wx_truncate_cast(wxUint32, m_ll >> 32); }
+    unsigned long GetHi() const
+        { return wx_truncate_cast(unsigned long, m_ll >> 32); }
         // get low part
-    wxUint32 GetLo() const
-        { return wx_truncate_cast(wxUint32, m_ll); }
+    unsigned long GetLo() const
+        { return wx_truncate_cast(unsigned long, m_ll); }
 
         // convert to native ulong long
     wxULongLong_t GetValue() const { return m_ll; }

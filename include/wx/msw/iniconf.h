@@ -9,10 +9,8 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef   _WX_MSW_INICONF_H_
-#define   _WX_MSW_INICONF_H_
-
-#if wxUSE_INICONF
+#ifndef   _INICONF_H
+#define   _INICONF_H
 
 // ----------------------------------------------------------------------------
 // wxIniConfig is a wxConfig implementation which uses MS Windows INI files to
@@ -80,11 +78,9 @@ protected:
   // read/write
   bool DoReadString(const wxString& key, wxString *pStr) const;
   bool DoReadLong(const wxString& key, long *plResult) const;
-  bool DoReadBinary(const wxString& key, wxMemoryBuffer *buf) const;
 
   bool DoWriteString(const wxString& key, const wxString& szValue);
   bool DoWriteLong(const wxString& key, long lValue);
-  bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf);
 
 private:
   // helpers
@@ -94,11 +90,6 @@ private:
   wxString m_strLocalFilename;  // name of the private INI file
   wxString m_strGroup,    // current group in appname.ini file
            m_strPath;     // the rest of the path (no trailing '_'!)
-
-  DECLARE_NO_COPY_CLASS(wxIniConfig)
-  DECLARE_ABSTRACT_CLASS(wxIniConfig)
 };
 
-#endif // wxUSE_INICONF
-
-#endif  //_WX_MSW_INICONF_H_
+#endif  //_INICONF_H

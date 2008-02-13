@@ -46,15 +46,16 @@ public:
     void SetLabel( const wxString &label );
     virtual void SetLabel( const wxBitmap& bitmap ) { SetBitmapLabel(bitmap); }
 
+    virtual void SetDefault();
     virtual bool Enable(bool enable = TRUE);
 
     // implementation
     // --------------
 
-    void GTKHasFocus();
-    void GTKNotFocus();
-    void GTKStartSelect();
-    void GTKEndSelect();
+    void HasFocus();
+    void NotFocus();
+    void StartSelect();
+    void EndSelect();
 
     bool         m_hasFocus:1;
     bool         m_isSelected:1;

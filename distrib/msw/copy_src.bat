@@ -109,6 +109,7 @@ cd ..
 
 cd common
 md \wxmsw_dist\wxMSW\src\common
+copy glob.inc \wxmsw_dist\wxMSW\src\common
 copy lexer.l \wxmsw_dist\wxMSW\src\common
 copy parser.y \wxmsw_dist\wxMSW\src\common
 copy *.c \wxmsw_dist\wxMSW\src\common
@@ -433,7 +434,7 @@ copy *.def \wxmsw_dist\wxMSW\samples\internat
 copy *.rc \wxmsw_dist\wxMSW\samples\internat
 copy *.ico \wxmsw_dist\wxMSW\samples\internat
 copy readme.txt \wxmsw_dist\wxMSW\samples\internat
-copy wxstd.pot \wxmsw_dist\wxMSW\samples\internat
+copy wxstd.po \wxmsw_dist\wxMSW\samples\internat
 cd fr
 md \wxmsw_dist\wxMSW\samples\internat\fr
 copy *.?o \wxmsw_dist\wxMSW\samples\internat\fr

@@ -18,7 +18,7 @@
 
 #if wxUSE_GRAPHICS_CONTEXT
 
-#include "wx/private/graphics.h"
+#include "wx/graphics.h"
 
 #ifndef WX_PRECOMP
     #include "wx/icon.h"
@@ -26,6 +26,10 @@
     #include "wx/dcmemory.h"
     #include "wx/region.h"
     #include "wx/log.h"
+#endif
+
+#if !defined(wxMAC_USE_CORE_GRAPHICS_BLEND_MODES)
+#define wxMAC_USE_CORE_GRAPHICS_BLEND_MODES 0
 #endif
 
 //-----------------------------------------------------------------------------
@@ -505,51 +509,6 @@ wxGraphicsContext::~wxGraphicsContext()
 {
 }
 
-bool wxGraphicsContext::StartDoc(const wxString& WXUNUSED(message)) 
-{
-    return true;
-}
-    
-void wxGraphicsContext::EndDoc()
-{
-}
-
-void wxGraphicsContext::StartPage(wxDouble WXUNUSED(width),
-                                  wxDouble WXUNUSED(height))
-{
-}
-    
-void wxGraphicsContext::EndPage()
-{
-}
-
-void wxGraphicsContext::Flush()
-{
-}
-
-#if 0
-void wxGraphicsContext::SetAlpha( wxDouble WXUNUSED(alpha) )
-{
-}
-    
-wxDouble wxGraphicsContext::GetAlpha() const
-{
-    return 1.0;
-}
-#endif
-
-void wxGraphicsContext::GetSize( wxDouble* width, wxDouble* height)
-{
-    *width = 10000.0;
-    *height = 10000.0;
-}
-
-void wxGraphicsContext::GetDPI( wxDouble* dpiX, wxDouble* dpiY)
-{
-    *dpiX = 72.0;
-    *dpiY = 72.0;
-}
-
 // sets the pen
 void wxGraphicsContext::SetPen( const wxGraphicsPen& pen ) 
 {
@@ -774,11 +733,12 @@ wxGraphicsContext* wxGraphicsContext::Create( const wxWindowDC& dc)
 {
     return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
 }
-
+#ifdef __WXMSW__
 wxGraphicsContext* wxGraphicsContext::Create( const wxMemoryDC& dc) 
 {
     return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
 }
+#endif
 
 wxGraphicsContext* wxGraphicsContext::CreateFromNative( void * context )
 {

@@ -12,14 +12,16 @@
 #ifndef _WX_CURSOR_H_
 #define _WX_CURSOR_H_
 
-#include "wx/gdiobj.h"
+#include "wx/object.h"
 #include "wx/gdicmn.h"
 
-class WXDLLIMPEXP_FWD_CORE wxImage;
+class WXDLLEXPORT wxImage;
 
 // Cursor
-class WXDLLEXPORT wxCursor : public wxGDIObject
+class WXDLLEXPORT wxCursor: public wxObject
 {
+    DECLARE_DYNAMIC_CLASS(wxCursor)
+
 public:
     wxCursor();
 
@@ -37,14 +39,12 @@ public:
     wxCursor(wxStockCursor id);
     virtual ~wxCursor();
 
+    virtual bool Ok() const { return IsOk(); }
+    virtual bool IsOk() const;
+
     // Motif-specific.
     // Create/get a cursor for the current display
     WXCursor GetXCursor(WXDisplay* display) const;
-
-protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
 private:
     void Create(const char bits[], int width, int height,
                 int hotSpotX = -1, int hotSpotY = -1,
@@ -53,8 +53,6 @@ private:
 
     // Make a cursor from standard id
     WXCursor MakeCursor(WXDisplay* display, wxStockCursor id) const;
-
-    DECLARE_DYNAMIC_CLASS(wxCursor)
 };
 
 extern WXDLLEXPORT void wxSetCursor(const wxCursor& cursor);

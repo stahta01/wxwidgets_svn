@@ -6,9 +6,9 @@
 \section{What is wxWidgets?}\label{whatis}
 
 wxWidgets is a C++ framework providing GUI (Graphical User
-Interface) and other facilities on more than one platform.  Version 2 and higher
-currently support all desktop versions of MS Windows, Unix with GTK+ 1.x or 2.x,
-Unix with Motif, Unix with just X11, Unix with DirectFB, Mac OS X, OS/2.
+Interface) and other facilities on more than one platform.  Version 2 currently
+supports all desktop versions of MS Windows, Unix with GTK+, Unix with Motif,
+and MacOS. An OS/2 port is in progress.
 
 wxWidgets was originally developed at the Artificial Intelligence
 Applications Institute, University of Edinburgh, for internal use,
@@ -20,7 +20,7 @@ This manual contains a class reference and topic overviews.
 For a selection of wxWidgets tutorials, please see the documentation page on the \urlref{wxWidgets web site}{http://www.wxwidgets.org}.
 
 Please note that in the following, ``MS Windows" often refers to all
-platforms related to Microsoft Windows, including 32-bit and 64-bit
+platforms related to Microsoft Windows, including 16-bit and 32-bit
 variants, unless otherwise stated. All trademarks are acknowledged.
 
 \section{Why another cross-platform development tool?}\label{why}
@@ -81,8 +81,10 @@ here are some of the benefits:
 \item You get the source.
 \item Available on a variety of popular platforms.
 \item Works with almost all popular C++ compilers and Python.
-\item Over 70 example programs.
+\item Over 50 example programs.
 \item Over 1000 pages of printable and on-line documentation.
+\item Includes Tex2RTF, to allow you to produce your own documentation
+in Windows Help, HTML and Word RTF formats.
 \item Simple-to-use, object-oriented API.
 \item Flexible event system.
 \item Graphics calls include lines, rounded rectangles, splines, polylines, etc.
@@ -100,9 +102,37 @@ them to the clipboard.
 \item Network support via a family of socket and protocol classes.
 \item Support for platform independent image processing.
 \item Built-in support for many file formats (BMP, PNG, JPEG, GIF, XPM, PNM, PCX).
-\item Includes Tex2RTF, to allow you to produce your own documentation
-in Windows Help, HTML and Word RTF formats.
 \end{itemize}
+
+\begin{comment}
+\section{Changes from version 2.0}\label{versionchanges20}
+
+These are a few of the differences between versions 2.0 and 2.2.
+
+Removals:
+
+\begin{itemize}\itemsep=0pt
+\item GTK 1.0 no longer supported.
+\end{itemize}
+
+Additions and changes:
+
+\begin{itemize}\itemsep=0pt
+\item Corrected many classes to conform better to documented behaviour.
+\item Added handlers for more image formats (Now GIF, JPEG, PCX, BMP, XPM, PNG, PNM).
+\item Improved support for socket and network functions.
+\item Support for different national font encodings.
+\item Sizer based layout system.
+\item HTML widget and help system.
+\item Added some controls (e.g. wxSpinCtrl) and supplemented many.
+\item Many optical improvements to GTK port.
+\item Support for menu accelerators in GTK port.
+\item Enhanced and improved support for scrolling, including child windows.
+\item Complete rewrite of clipboard and drag and drop classes.
+\item Improved support for ODBC databases.
+\item Improved tab traversal in dialogs.
+\end{itemize}
+\end{comment}
 
 \section{wxWidgets requirements}\label{requirements}
 
@@ -116,31 +146,29 @@ To make use of wxWidgets, you currently need one of the following setups.
 port), Borland C++, Watcom C++, Cygwin, MinGW, Metrowerks CodeWarrior,
 Digital Mars C++. See {\tt install.txt} for details about compiler 
 version supported.
+\item At least 100 MB of disk space for source tree and additional space for 
+libraries and application building (depends on compiler and build settings).
 \end{enumerate}
 
 (b) Unix:
 
 \begin{enumerate}\itemsep=0pt
-\item Almost any C++ compiler, including GNU C++ and many Unix vendors
-compilers such as Sun CC, HP-UX aCC or SGI mipsPro.
-\item Almost any Unix workstation, and one of: GTK+ 2.4 or higher (GTK+ 1.2.10
-may still be supported but wxGTK1 port is not maintained any longer and lacks
-many features of wxGTK2), Motif 1.2 or higher or Lesstif. If using the wxX11
-port, no such widget set is required.
+\item Almost any C++ compiler, including GNU C++ (EGCS 1.1.1 or above).
+\item Almost any Unix workstation, and one of: GTK+ 1.2, GTK+ 2.0, Motif 1.2 or higher, Lesstif.
+If using the wxX11 port, no such widget set is required.
+\item At least 100 MB of disk space for source tree and additional space for 
+libraries and application building (depends on compiler and build settings).
 \end{enumerate}
 
 (c) Mac OS/Mac OS X:
 
 \begin{enumerate}\itemsep=0pt
-\item A PowerPC or Intel Mac running Mac OS X 10.3 or higher
-\item The Apple Developer Tools (eg. GNU C++) or MetroWerks CodeWarrior (not
-actively supported)
+\item A PowerPC Mac running Mac OS 8.6/9.x (eg. Classic) or Mac OS X 10.x.
+\item CodeWarrior 5.3, 6 or 7 for Classic Mac OS.
+\item The Apple Developer Tools (eg. GNU C++), CodeWarrior 7 or above for Mac OS X.
+\item At least 100 MB of disk space for source tree and additional space for 
+libraries and application building (depends on compiler and build settings).
 \end{enumerate}
-
-Under all platforms it's recommended to have large amounts of free hard disk
-space. The exact amount needed depends on the port, compiler and build
-configurations but to give an example, a debug build of the library may take up
-to 500MB.
 
 \section{Availability and location of wxWidgets}\label{where}
 
@@ -154,54 +182,36 @@ You can also buy a CD-ROM using the form on the Web site.
 
 \section{Acknowledgements}\label{acknowledgements}
 
-The following is the list of the core, active developers of wxWidgets which keep
-it running and have provided an invaluable, extensive and high-quality amount of
-changes over the many of years of wxWidgets' life:
+Thanks are due to AIAI for being willing to release the original version of
+wxWidgets into the public domain, and to our patient partners.
 
-\begin{description}\itemsep=0pt
-\item Julian Smart
-\item Vadim Zeitlin
-\item Robert Roebling
-\item Robin Dunn
-\item Stefan Csomor
-\item Vaclav Slavik
-\item Paul Cornett
-\item Wlodzimierz `ABX' Skiba
-\item Chris Elliott
-\item David Elliott
-\item Kevin Hock
-\item Stefan Neis
-\item Michael Wetherell
-\end{description}
-
-We would particularly like to thank the following peoples for their contributions 
-to wxWidgets, and the many others who have been involved in the project over the years. 
-Apologies for any unintentional omissions from this alphabetic list:
+We would particularly like to thank the following for their contributions to wxWidgets, and the many others who have been involved in
+the project over the years. Apologies for any unintentional omissions from this list. 
  
 Yiorgos Adamopoulos, Jamshid Afshar, Alejandro Aguilar-Sierra, AIAI, 
 Patrick Albert, Karsten Ballueder, Mattia Barbon, Michael Bedward, 
 Kai Bendorf, Yura Bidus, Keith Gary Boyce, Chris Breeze, Pete Britton, 
 Ian Brown, C. Buckley, Marco Cavallini, Dmitri Chubraev, Robin Corbet, Cecil Coupe, 
-Andrew Davison, Gilles Depeyrot, Neil Dudman, Hermann Dunkel, Jos van Eijndhoven, 
-Tom Felici, Thomas Fettig, Matthew Flatt, Pasquale Foggia, Josep Fortiana, Todd Fries, 
+Stefan Csomor, Andrew Davison, Gilles Depeyrot, Neil Dudman, Robin Dunn, 
+Hermann Dunkel, Jos van Eijndhoven, Chris Elliott, David Elliott, Tom Felici, 
+Thomas Fettig, Matthew Flatt, Pasquale Foggia, Josep Fortiana, Todd Fries, 
 Dominic Gallagher, Guillermo Rodriguez Garcia, Wolfram Gloger, Norbert Grotz, 
 Stefan Gunter, Bill Hale, Patrick Halke, Stefan Hammes, Guillaume Helle, 
-Harco de Hilster, Cord Hockemeyer, Markus Holzem, Olaf Klein, Leif Jensen, 
+Harco de Hilster, Kevin Hock, Cord Hockemeyer, Markus Holzem, Olaf Klein, Leif Jensen, 
 Bart Jourquin, Guilhem Lavaux, Ron Lee, Jan Lessner, Nicholas Liebmann, 
-Torsten Liermann, Per Lindqvist, Francesco Montorsi, Thomas Runge, Tatu M\"{a}nnist\"{o}, 
-Scott Maxwell, Thomas Myers, Oliver Niedung, Ryan Norton, Hernan Otero, 
+Torsten Liermann, Per Lindqvist, Thomas Runge, Tatu M\"{a}nnist\"{o}, 
+Scott Maxwell, Thomas Myers, Oliver Niedung, Stefan Neis, Ryan Norton, Hernan Otero, 
 Ian Perrigo, Timothy Peters, Giordano Pezzoli, Harri Pasanen, Thomaso Paoletti, 
-Garrett Potts, Marcel Rasche, Dino Scaringella, Jobst Schmalenbach, Arthur Seaton, 
-Paul Shirley, Stein Somers, Petr Smilauer, Neil Smith, Kari Syst\"{a}, George Tasker, 
-Arthur Tetzlaff-Deas, Jonathan Tonberg, Jyrki Tuomi, Janos Vegh, Andrea Venturoli, 
-David Webster, Otto Wyss, Xiaokun Zhu, Edward Zimmermann.
-
-Many thanks also to AIAI for being willing to release the original version of
-wxWidgets into the public domain, and to our patient partners.
+Garrett Potts, Marcel Rasche, Robert Roebling, Dino Scaringella, 
+Jobst Schmalenbach, Arthur Seaton, Paul Shirley, Wlodzimierz `ABX' Skiba, 
+Vaclav Slavik, Julian Smart, Stein Somers, Petr Smilauer, Neil Smith, 
+Kari Syst\"{a}, George Tasker, Arthur Tetzlaff-Deas, Jonathan Tonberg, 
+Jyrki Tuomi, Janos Vegh, Andrea Venturoli, David Webster, Otto Wyss, 
+Vadim Zeitlin, Xiaokun Zhu, Edward Zimmermann.
 
 `Graphplace', the basis for the wxGraphLayout library, is copyright Dr. Jos
 T.J. van Eijndhoven of Eindhoven University of Technology. The code has
-been used in wxGraphLayout (not in wxWidgets anymore) with his permission.
+been used in wxGraphLayout with his permission.
 
 We also acknowledge the author of XFIG, the excellent Unix drawing tool,
 from the source of which we have borrowed some spline drawing code.
@@ -396,8 +406,8 @@ are described in the \helpref{Byte order macros}{byteordermacros} section.
 One of the purposes of wxWidgets is to reduce the need for conditional
 compilation in source code, which can be messy and confusing to follow.
 However, sometimes it is necessary to incorporate platform-specific
-features (such as metafile use under MS Windows). The \helpref{wxUSE\_*}{wxusedef} 
-symbols listed in the file {\tt setup.h} may be used for this purpose,
+features (such as metafile use under MS Windows). The symbols
+listed in the file {\tt symbols.txt} may be used for this purpose,
 along with any user-supplied ones.
 
 \section{C++ issues}\label{cpp}
@@ -461,42 +471,43 @@ in Microsoft C++.
 When building an application which may be used under different
 environments, one difficulty is coping with documents which may be
 moved to different directories on other machines. Saving a file which
-has pointers to full pathnames is going to be inherently unportable.
+has pointers to full pathnames is going to be inherently unportable. One
+approach is to store filenames on their own, with no directory
+information.  The application searches through a number of locally
+defined directories to find the file. To support this, the class {\bf
+wxPathList} makes adding directories and searching for files easy, and
+the global function {\bf wxFileNameFromPath} allows the application to
+strip off the filename from the path if the filename must be stored.
+This has undesirable ramifications for people who have documents of the
+same name in different directories.
 
-One approach is to store filenames on their own, with no directory
-information. The application then searches into a list of standard
-paths (platform-specific) through the use of \helpref{wxStandardPaths}{wxstandardpaths}.
+As regards the limitations of DOS 8+3 single-case filenames versus
+unrestricted Unix filenames, the best solution is to use DOS filenames
+for your application, and also for document filenames {\it if} the user
+is likely to be switching platforms regularly. Obviously this latter
+choice is up to the application user to decide.  Some programs (such as
+YACC and LEX) generate filenames incompatible with DOS; the best
+solution here is to have your Unix makefile rename the generated files
+to something more compatible before transferring the source to DOS.
+Transferring DOS files to Unix is no problem, of course, apart from EOL
+conversion for which there should be a utility available (such as
+dos2unix).
 
-Eventually you may want to use also the \helpref{wxPathList}{wxpathlist} class.
-
-Nowadays the limitations of DOS 8+3 filenames doesn't apply anymore.
-Most modern operating systems allow at least 255 characters in the filename;
-the exact maximum length, as well as the characters allowed in the filenames, 
-are OS-specific so you should try to avoid extremely long (> 255 chars) filenames
-and/or filenames with non-ANSI characters.
-
-Another thing you need to keep in mind is that all Windows operating systems
-are case-insensitive, while Unix operating systems (Linux, Mac, etc) are
-case-sensitive.
-
-Also, for text files, different OSes use different End Of Lines (EOL).
-Windows uses CR+LF convention, Linux uses LF only, Mac CR only.
-
-The \helpref{wxTextFile}{wxtextfile},\helpref{wxTextInputStream}{wxtextinputstream},
-\helpref{wxTextOutputStream}{wxtextoutputstream} classes help to abstract
-from these differences.
-Of course, there are also 3rd party utilities such as \tt{dos2unix} and \tt{unix2dos}
-which do the EOL conversions.
-
-See also the \helpref{File Functions}{filefunctions} section of the reference 
-manual for the description of miscellaneous file handling functions.
+See also the File Functions section of the reference manual for
+descriptions of miscellaneous file handling functions.
 
 \chapter{Utilities and libraries supplied with wxWidgets}\label{utilities}
 \setheader{{\it CHAPTER \thechapter}}{}{}{}{}{{\it CHAPTER \thechapter}}%
 \setfooter{\thepage}{}{}{}{}{\thepage}%
 
-In addition to the \helpref{wxWidgets libraries}{librarieslist}, some
-additional utilities are supplied in the \tt{utils} hierarchy.
+In addition to the core wxWidgets library, a number of further
+libraries and utilities are supplied with each distribution.
+
+Some are under the 'contrib' hierarchy which mirrors the
+structure of the main wxWidgets hierarchy. See also the 'utils'
+hierarchy. The first place to look for documentation about
+these tools and libraries is under the wxWidgets 'docs' hierarchy,
+for example {\tt docs/htmlhelp/fl.chm}.
 
 For other user-contributed packages, please see the Contributions page
 on the \urlref{wxWidgets Web site}{http://www.wxwidgets.org}.
@@ -524,6 +535,40 @@ Helpgen can be found in {\tt utils/HelpGen}.
 Xnest-based display emulator for X11-based PDA applications. On some
 systems, the Xnest window does not synchronise with the
 'skin' window. This program can be found in {\tt utils/emulator}.
+\item[{\bf XRC resource system}]
+This is the sizer-aware resource system, and uses
+XML-based resource specifications that can be generated by tools
+such as \urlref{wxDesigner}{http://www.roebling.de}.
+You can find this in {\tt src/xrc}, {\tt include/wx/xrc}, {\tt samples/xrc}.
+For more information, see the \helpref{XML-based resource system overview}{xrcoverview}.
+\item[{\bf Object Graphics Library}]
+OGL defines an API for applications that need to display objects connected by lines.
+The objects can be moved around and interacted with.
+You can find this in {\tt contrib/src/ogl}, {\tt contrib/include/wx/ogl}, and {\tt contrib/samples/ogl}.
+\item[{\bf Frame Layout library}]
+FL provides sophisticated pane dragging and docking facilities.
+You can find this in {\tt contrib/src/fl}, {\tt contrib/include/wx/fl}, and {\tt contrib/samples/fl}.
+\item[{\bf Gizmos library}]
+Gizmos is a collection of useful widgets and other classes. Classes include wxLEDNumberCtrl,
+wxEditableListBox, wxMultiCellCanvas.
+You can find this in {\tt contrib/src/gizmos}, {\tt contrib/include/wx/gizmos}, and {\tt contrib/samples/gizmos}.
+\item[{\bf Net library}]
+Net is a collection of very simple mail and web related classes. Currently
+there is only wxEmail, which makes it easy to send email messages via MAPI on Windows or sendmail on Unix.
+You can find this in {\tt contrib/src/net} and {\tt contrib/include/wx/net}.
+\item[{\bf Animate library}]
+Animate allows you to load animated GIFs and play them on a window. The library can be extended
+to use other animation formats.
+You can find this in {\tt contrib/src/animate}, {\tt contrib/include/wx/animate}, and {\tt contrib/samples/animate}.
+\item[{\bf MMedia library}]
+Mmedia supports a variety of multimedia functionality. The status of this library is currently unclear.
+You can find this in {\tt contrib/src/mmedia}, {\tt contrib/include/wx/mmedia}, and {\tt contrib/samples/mmedia}.
+\item[{\bf Styled Text Control library}]
+STC is a wrapper around Scintilla, a syntax-highlighting text editor.
+You can find this in {\tt contrib/src/stc}, {\tt contrib/include/wx/stc}, and {\tt contrib/samples/stc}.
+\item[{\bf Plot}]
+Plot is a simple curve plotting library.
+You can find this in {\tt contrib/src/plot}, {\tt contrib/include/wx/plot}, and {\tt contrib/samples/plot}.
 \end{description}
 
 \chapter{Programming strategies}\label{strategies}
@@ -538,37 +583,41 @@ please submit them for inclusion here.
 
 \subsection{Use ASSERT}\label{useassert}
 
-It is good practice to use ASSERT statements liberally, that check for conditions 
-that should or should not hold, and print out appropriate error messages.
-
+Although I haven't done this myself within wxWidgets, it is good
+practice to use ASSERT statements liberally, that check for conditions that
+should or should not hold, and print out appropriate error messages.
 These can be compiled out of a non-debugging version of wxWidgets
 and your application. Using ASSERT is an example of `defensive programming':
 it can alert you to problems later on.
 
-See \helpref{wxASSERT}{wxassert} for more info.
-
 \subsection{Use wxString in preference to character arrays}\label{usewxstring}
 
-Using \helpref{wxString}{wxstring} can be much safer and more convenient than using wxChar *.
-
-You can reduce the possibility of memory leaks substantially, and it is much more
-convenient to use the overloaded operators than functions such as \tt{strcmp}.
-wxString won't add a significant overhead to your program; the overhead is compensated 
-for by easier manipulation (which means less code).
+Using wxString can be much safer and more convenient than using wxChar *.
+Again, I haven't practiced what I'm preaching, but I'm now trying to use
+wxString wherever possible. You can reduce the possibility of memory
+leaks substantially, and it is much more convenient to use the overloaded
+operators than functions such as strcmp. wxString won't add a significant
+overhead to your program; the overhead is compensated for by easier
+manipulation (which means less code).
 
 The same goes for other data types: use classes wherever possible.
 
 \section{Strategies for portability}\label{portability}
 
-\subsection{Use sizers}\label{usesizers}
+\subsection{Use relative positioning or constraints}\label{userelativepositioning}
 
 Don't use absolute panel item positioning if you can avoid it. Different GUIs have
-very differently sized panel items. Consider using the \helpref{sizers}{sizeroverview} instead.
+very differently sized panel items. Consider using the constraint system, although this
+can be complex to program.
+
+Alternatively, you could use alternative .wrc (wxWidgets resource files) on different
+platforms, with slightly different dimensions in each. Or space your panel items out
+to avoid problems.
 
 \subsection{Use wxWidgets resource files}\label{useresources}
 
 Use .xrc (wxWidgets resource files) where possible, because they can be easily changed
-independently of source code. See the \helpref{XRC overview}{xrcoverview} for more info.
+independently of source code.
 
 \section{Strategies for debugging}\label{debugstrategies}
 
@@ -617,7 +666,7 @@ of debugging code, or you wish to print a bunch of variables).
 
 \subsection{Use the wxWidgets debugging facilities}\label{usedebuggingfacilities}
 
-You can use \helpref{wxDebugContext}{wxdebugcontext} to check for
+You can use wxDebugContext to check for
 memory leaks and corrupt memory: in fact in debugging mode, wxWidgets will
 automatically check for memory leaks at the end of the program if wxWidgets is suitably
 configured. Depending on the operating system and compiler, more or less

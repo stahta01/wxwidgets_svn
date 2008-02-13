@@ -972,13 +972,13 @@ bool wxSlider::OS2OnScroll( int    WXUNUSED(nOrientation),
 
     vEvent.SetPosition(nNewPos);
     vEvent.SetEventObject(this);
-    HandleWindowEvent(vEvent);
+    GetEventHandler()->ProcessEvent(vEvent);
 
     wxCommandEvent vCevent( wxEVT_COMMAND_SLIDER_UPDATED, GetId() );
 
     vCevent.SetInt(nNewPos);
     vCevent.SetEventObject(this);
-    return (HandleWindowEvent(vCevent));
+    return (GetEventHandler()->ProcessEvent(vCevent));
 } // end of wxSlider::OS2OnScroll
 
 void wxSlider::SetLineSize( int nLineSize )

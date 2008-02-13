@@ -25,7 +25,7 @@
 
 #if ( MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_2 )
 
-class WXDLLIMPEXP_ADV wxDrawerWindow : public wxTopLevelWindow
+class WXDLLEXPORT wxDrawerWindow : public wxTopLevelWindow
 {
     DECLARE_DYNAMIC_CLASS(wxDrawerWindow)
 

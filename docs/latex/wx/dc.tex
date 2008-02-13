@@ -24,12 +24,6 @@ On Mac OS X when using Core Graphics (wx\_MAC\_USE\_CORE\_GRAPHICS set to 1)
 colors with alpha are supported, so instances  {\tt wxPen} or  {\tt wxBrush} that are built from  {\tt wxColour} use
 the color's alpha values when stroking or filling.
 
-Note that beginning with wxWidgets 2.9.0 the entire wxDC code has been
-reorganized. All platform dependent code (actual all drawing code) has
-been moved into backend classes which derive from a common wxDCImpl
-class. The user-visible classes such as wxClientDC and wxPaintDC
-merely forward all calls to the backend implementation.
-
 \wxheading{Derived from}
 
 \helpref{wxObject}{wxobject}
@@ -37,10 +31,6 @@ merely forward all calls to the backend implementation.
 \wxheading{Include files}
 
 <wx/dc.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{See also}
 
@@ -118,7 +108,7 @@ See \helpref{wxMemoryDC}{wxmemorydc} for typical usage.
 
 \wxheading{See also}
 
-\helpref{wxDC::StretchBlit}{wxdcstretchblit}, \helpref{wxMemoryDC}{wxmemorydc}, \helpref{wxBitmap}{wxbitmap}, \helpref{wxMask}{wxmask}
+\helpref{wxMemoryDC}{wxmemorydc}, \helpref{wxBitmap}{wxbitmap}, \helpref{wxMask}{wxmask}
 
 \begin{comment}
 
@@ -209,7 +199,7 @@ See also \helpref{wxDC::SetClippingRegion}{wxdcsetclippingregion}.
 
 \membersection{wxDC::DeviceToLogicalX}\label{wxdcdevicetologicalx}
 
-\func{virtual wxCoord}{DeviceToLogicalX}{\param{wxCoord}{ x}}
+\func{wxCoord}{DeviceToLogicalX}{\param{wxCoord}{ x}}
 
 Convert device X coordinate to logical coordinate, using the current
 mapping mode.
@@ -217,7 +207,7 @@ mapping mode.
 
 \membersection{wxDC::DeviceToLogicalXRel}\label{wxdcdevicetologicalxrel}
 
-\func{virtual wxCoord}{DeviceToLogicalXRel}{\param{wxCoord}{ x}}
+\func{wxCoord}{DeviceToLogicalXRel}{\param{wxCoord}{ x}}
 
 Convert device X coordinate to relative logical coordinate, using the current
 mapping mode but ignoring the x axis orientation.
@@ -226,7 +216,7 @@ Use this function for converting a width, for example.
 
 \membersection{wxDC::DeviceToLogicalY}\label{wxdcdevicetologicaly}
 
-\func{virtual wxCoord}{DeviceToLogicalY}{\param{wxCoord}{ y}}
+\func{wxCoord}{DeviceToLogicalY}{\param{wxCoord}{ y}}
 
 Converts device Y coordinate to logical coordinate, using the current
 mapping mode.
@@ -234,7 +224,7 @@ mapping mode.
 
 \membersection{wxDC::DeviceToLogicalYRel}\label{wxdcdevicetologicalyrel}
 
-\func{virtual wxCoord}{DeviceToLogicalYRel}{\param{wxCoord}{ y}}
+\func{wxCoord}{DeviceToLogicalYRel}{\param{wxCoord}{ y}}
 
 Convert device Y coordinate to relative logical coordinate, using the current
 mapping mode but ignoring the y axis orientation.
@@ -365,15 +355,12 @@ of many other toolkits).
 
 \func{void}{DrawLines}{\param{int}{ n}, \param{wxPoint}{ points[]}, \param{wxCoord}{ xoffset = 0}, \param{wxCoord}{ yoffset = 0}}
 
-Draws lines using an array of {\it points} of size {\it n}
-adding the optional offset coordinate. The current pen is
-used for drawing the lines.
+\func{void}{DrawLines}{\param{wxList *}{points}, \param{wxCoord}{ xoffset = 0}, \param{wxCoord}{ yoffset = 0}}
 
-\func{void}{DrawLines}{\param{const wxPointList *}{points}, \param{wxCoord}{ xoffset = 0}, \param{wxCoord}{ yoffset = 0}}
-
-This method uses a list of wxPoints, adding the optional offset
-coordinate. The programmer is responsible for deleting the list
-of points.
+Draws lines using an array of {\it points} of size {\it n}, or list of
+pointers to points, adding the optional offset coordinate. The current
+pen is used for drawing the lines.  The programmer is responsible for
+deleting the list of points.
 
 \pythonnote{The wxPython version of this method accepts a Python list
 of wxPoint objects.}
@@ -388,14 +375,11 @@ of wxPoint objects.}
 \func{void}{DrawPolygon}{\param{int}{ n}, \param{wxPoint}{ points[]}, \param{wxCoord}{ xoffset = 0}, \param{wxCoord}{ yoffset = 0},\\
   \param{int }{fill\_style = wxODDEVEN\_RULE}}
 
-Draws a filled polygon using an array of {\it points} of size {\it n},
-adding the optional offset coordinate.
-
-\func{void}{DrawPolygon}{\param{const wxPointList *}{points}, \param{wxCoord}{ xoffset = 0}, \param{wxCoord}{ yoffset = 0},\\
+\func{void}{DrawPolygon}{\param{wxList *}{points}, \param{wxCoord}{ xoffset = 0}, \param{wxCoord}{ yoffset = 0},\\
   \param{int }{fill\_style = wxODDEVEN\_RULE}}
 
-This method draws a filled polygon using a list of wxPoints,
-adding the optional offset coordinate.
+Draws a filled polygon using an array of {\it points} of size {\it n},
+or list of pointers to points, adding the optional offset coordinate.
 
 The last argument specifies the fill rule: {\bf wxODDEVEN\_RULE} (the
 default) or {\bf wxWINDING\_RULE}.
@@ -503,9 +487,10 @@ the rectangle.
 Draws a spline between all given control points, using the current
 pen.
 
-\func{void}{DrawSpline}{\param{const wxPointList *}{points}}
+\func{void}{DrawSpline}{\param{wxList *}{points}}
 
-Draws a spline between all given control points.
+Draws a spline between all given control points, using the current
+pen.  Doesn't delete the wxList and contents.
 
 \func{void}{DrawSpline}{\param{wxCoord}{ x1}, \param{wxCoord}{ y1}, \param{wxCoord}{ x2}, \param{wxCoord}{ y2}, \param{wxCoord}{ x3}, \param{wxCoord}{ y3}}
 
@@ -637,17 +622,6 @@ rectangle are returned as a tuple.}
 
 \perlnote{This method takes no arguments and returns a four element list
 {\tt ( x, y, width, height )}}
-
-
-\membersection{wxDC::GetDepth}\label{wxdcgetdepth}
-
-\constfunc{int}{GetDepth}{\void}
-
-Returns the depth (number of bits/pixel) of this DC.
-
-\wxheading{See also}
-
-\helpref{wxDisplayDepth}{wxdisplaydepth}
 
 
 \membersection{wxDC::GetFont}\label{wxdcgetfont}
@@ -819,7 +793,7 @@ Gets the current text background colour (see \helpref{wxDC::SetTextBackground}{w
 \membersection{wxDC::GetTextExtent}\label{wxdcgettextextent}
 
 \constfunc{void}{GetTextExtent}{\param{const wxString\& }{string}, \param{wxCoord *}{w}, \param{wxCoord *}{h},\\
-  \param{wxCoord *}{descent = NULL}, \param{wxCoord *}{externalLeading = NULL}, \param{const wxFont *}{font = NULL}}
+  \param{wxCoord *}{descent = NULL}, \param{wxCoord *}{externalLeading = NULL}, \param{wxFont *}{font = NULL}}
 
 \constfunc{wxSize}{GetTextExtent}{\param{const wxString\& }{string}}
 
@@ -906,7 +880,7 @@ use \arg{initialColour} on the left part of the rectangle and
 
 \membersection{wxDC::LogicalToDeviceX}\label{wxdclogicaltodevicex}
 
-\func{virtual wxCoord}{LogicalToDeviceX}{\param{wxCoord}{ x}}
+\func{wxCoord}{LogicalToDeviceX}{\param{wxCoord}{ x}}
 
 Converts logical X coordinate to device coordinate, using the current
 mapping mode.
@@ -914,7 +888,7 @@ mapping mode.
 
 \membersection{wxDC::LogicalToDeviceXRel}\label{wxdclogicaltodevicexrel}
 
-\func{virtual wxCoord}{LogicalToDeviceXRel}{\param{wxCoord}{ x}}
+\func{wxCoord}{LogicalToDeviceXRel}{\param{wxCoord}{ x}}
 
 Converts logical X coordinate to relative device coordinate, using the current
 mapping mode but ignoring the x axis orientation.
@@ -923,7 +897,7 @@ Use this for converting a width, for example.
 
 \membersection{wxDC::LogicalToDeviceY}\label{wxdclogicaltodevicey}
 
-\func{virtual wxCoord}{LogicalToDeviceY}{\param{wxCoord}{ y}}
+\func{wxCoord}{LogicalToDeviceY}{\param{wxCoord}{ y}}
 
 Converts logical Y coordinate to device coordinate, using the current
 mapping mode.
@@ -931,7 +905,7 @@ mapping mode.
 
 \membersection{wxDC::LogicalToDeviceYRel}\label{wxdclogicaltodeviceyrel}
 
-\func{virtual wxCoord}{LogicalToDeviceYRel}{\param{wxCoord}{ y}}
+\func{wxCoord}{LogicalToDeviceYRel}{\param{wxCoord}{ y}}
 
 Converts logical Y coordinate to relative device coordinate, using the current
 mapping mode but ignoring the y axis orientation.
@@ -1025,7 +999,7 @@ whether text will be drawn with a background colour or not.
 Sets the current brush for the DC.
 
 If the argument is wxNullBrush, the current brush is selected out of the device
-context (leaving wxDC without any valid brush), allowing the current brush to
+context, and the original brush restored, allowing the current brush to
 be destroyed safely.
 
 See also \helpref{wxBrush}{wxbrush}.
@@ -1155,7 +1129,7 @@ The mapping mode can be one of the following:
 \twocolitem{wxMM\_POINTS}{Each logical unit is a point, or 1/72 of an inch.}
 \twocolitem{wxMM\_METRIC}{Each logical unit is 1 mm.}
 \twocolitem{wxMM\_LOMETRIC}{Each logical unit is 1/10 of a mm.}
-\twocolitem{wxMM\_TEXT}{Each logical unit is 1 device pixel.}
+\twocolitem{wxMM\_TEXT}{Each logical unit is 1 pixel.}
 \end{twocollist}
 
 
@@ -1168,7 +1142,7 @@ or bitmap associated with the DC. If the argument is wxNullPalette, the current
 palette is selected out of the device context, and the original palette
 restored.
 
-See \helpref{wxPalette}{wxpalette} for further details.
+See \helpref{wxPalette}{wxpalette} for further details. 
 
 
 \membersection{wxDC::SetPen}\label{wxdcsetpen}
@@ -1178,8 +1152,7 @@ See \helpref{wxPalette}{wxpalette} for further details.
 Sets the current pen for the DC.
 
 If the argument is wxNullPen, the current pen is selected out of the device
-context (leaving wxDC without any valid pen), allowing the current brush to
-be destroyed safely.
+context, and the original pen restored.
 
 See also \helpref{wxMemoryDC}{wxmemorydc} for the interpretation of colours
 when drawing into a monochrome bitmap.
@@ -1223,85 +1196,4 @@ Message is a message to show while printing.
 \func{bool}{StartPage}{\void}
 
 Starts a document page (only relevant when outputting to a printer).
-
-
-\membersection{wxDC::StretchBlit}\label{wxdcstretchblit}
-
-\func{bool}{StretchBlit}{\param{wxCoord}{ xdest}, \param{wxCoord}{ ydest}, \param{wxCoord}{ dstWidth}, \param{wxCoord}{ dstHeight},
-  \param{wxDC* }{source}, \param{wxCoord}{ xsrc}, \param{wxCoord}{ ysrc}, \param{wxCoord}{ srcWidth}, \param{wxCoord}{ srcHeight}, 
-  \param{int}{ logicalFunc = wxCOPY}, \param{bool }{useMask = false}, \param{wxCoord}{ xsrcMask = -1}, \param{wxCoord}{ ysrcMask = -1}}
-
-Copy from a source DC to this DC, specifying the destination
-coordinates, destination size, source DC, source coordinates,
-size of source area to copy, logical function, whether to use a bitmap mask, 
-and mask source position.
-
-\wxheading{Parameters}
-
-\docparam{xdest}{Destination device context x position.}
-
-\docparam{ydest}{Destination device context y position.}
-
-\docparam{dstWidth}{Width of destination area.}
-
-\docparam{dstHeight}{Height of destination area.}
-
-\docparam{source}{Source device context.}
-
-\docparam{xsrc}{Source device context x position.}
-
-\docparam{ysrc}{Source device context y position.}
-
-\docparam{srcWidth}{Width of source area to be copied.}
-
-\docparam{srcHeight}{Height of source area to be copied.}
-
-\docparam{logicalFunc}{Logical function to use: see \helpref{wxDC::SetLogicalFunction}{wxdcsetlogicalfunction}.}
-
-\docparam{useMask}{If true, Blit does a transparent blit using the mask that is associated with the bitmap
-selected into the source device context. The Windows implementation does the following if \texttt{MaskBlt} cannot be used:
-
-\begin{enumerate}
-\item Creates a temporary bitmap and copies the destination area into it.
-\item Copies the source area into the temporary bitmap using the specified logical function.
-\item Sets the masked area in the temporary bitmap to BLACK by ANDing the
-mask bitmap with the temp bitmap with the foreground colour set to WHITE
-and the background colour set to BLACK.
-\item Sets the unmasked area in the destination area to BLACK by ANDing the
-mask bitmap with the destination area with the foreground colour set to BLACK
-and the background colour set to WHITE.
-\item ORs the temporary bitmap with the destination area.
-\item Deletes the temporary bitmap.
-\end{enumerate}
-
-This sequence of operations ensures that the source's transparent area need not be black,
-and logical functions are supported.
-
-{\bf Note:} on Windows, blitting with masks can be speeded up considerably by compiling
-wxWidgets with the \texttt{wxUSE\_DC\_CACHE} option enabled. You can also influence whether \texttt{MaskBlt}
-or the explicit mask blitting code above is used, by using \helpref{wxSystemOptions}{wxsystemoptions} and
-setting the {\bf no-maskblt} option to 1.
-
-}
-
-\docparam{xsrcMask}{Source x position on the mask. If both xsrcMask and ysrcMask are -1, xsrc and ysrc
-will be assumed for the mask source position. Currently only implemented on Windows.}
-
-\docparam{ysrcMask}{Source y position on the mask. If both xsrcMask and ysrcMask are -1, xsrc and ysrc
-will be assumed for the mask source position. Currently only implemented on Windows.}
-
-
-\wxheading{Remarks}
-
-There is partial support for Blit in wxPostScriptDC, under X.
-
-wxDC::StretchBlit is only implemented under wxMAC and wxMSW.
-
-See \helpref{wxMemoryDC}{wxmemorydc} for typical usage.
-
-\newsince{2.9.0}
-
-\wxheading{See also}
-
-\helpref{wxDC::Blit}{wxdcblit}, \helpref{wxMemoryDC}{wxmemorydc}, \helpref{wxBitmap}{wxbitmap}, \helpref{wxMask}{wxmask}
 

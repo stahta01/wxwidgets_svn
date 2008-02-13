@@ -21,14 +21,14 @@
 // ----------------------------------------------------------------------------
 
 // fwd declarations
-class WXDLLIMPEXP_FWD_CORE wxImageList;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxImageList;
+class WXDLLEXPORT wxWindow;
 
 // ----------------------------------------------------------------------------
 // wxNotebook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebook : public wxNotebookBase
+class wxNotebook : public wxNotebookBase
 {
 public:
   // ctors

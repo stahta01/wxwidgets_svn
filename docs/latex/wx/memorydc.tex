@@ -15,10 +15,6 @@ foreground colour (i.e. 1).
 
 <wx/dcmemory.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Remarks}
 
 A bitmap must be selected into the new memory DC before it may be used
@@ -36,16 +32,6 @@ for anything.  Typical usage is as follows:
 
 Note that the memory DC {\it must} be deleted (or the bitmap selected out of it) before a bitmap
 can be reselected into another memory DC.
-
-And, before performing any other operations on the bitmap data, the bitmap must
-be selected out of the memory DC:
-
-\begin{verbatim}
-    temp_dc.SelectObject(wxNullBitmap)
-\end{verbatim}
-
-(this happens automatically when wxMemoryDC object goes out of scope).
-
 
 \wxheading{See also}
 
@@ -79,12 +65,10 @@ Works exactly like \helpref{SelectObjectAsSource}{wxmemorydcselectobjectassource
 this is the function you should use when you select a bitmap because you want to modify
 it, e.g. drawing on this DC.
 
-Using \helpref{SelectObjectAsSource}{wxmemorydcselectobjectassource} when modifying
-the bitmap may incurr some problems related to wxBitmap being a reference counted object
+Be careful to use this function and not \helpref{SelectObjectAsSource}{wxmemorydcselectobjectassource}
+when you want to modify the bitmap you are selecting otherwise you may incurr in some
+problems related to wxBitmap being a reference counted object
 (see \helpref{reference counting overview}{trefcount}).
-
-Also, before using the updated bitmap data, make sure to select it out of context first
-(for example by selecting wxNullBitmap into the device context).
 
 \wxheading{See also}
 

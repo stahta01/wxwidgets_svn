@@ -26,7 +26,7 @@
 // global data
 // ----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const char) wxChoiceNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxChoiceNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxChoice allows to select one of a non-modifiable list of strings
@@ -54,9 +54,6 @@ public:
 
     // emulate selecting the item event.GetInt()
     void Command(wxCommandEvent& event);
-
-    // override wxItemContainer::IsSorted
-    virtual bool IsSorted() const { return HasFlag(wxCB_SORT); }
 
 private:
     DECLARE_NO_COPY_CLASS(wxChoiceBase)

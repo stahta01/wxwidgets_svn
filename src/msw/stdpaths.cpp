@@ -50,7 +50,7 @@ typedef HRESULT (WINAPI *SHGetSpecialFolderPath_t)(HWND, LPTSTR, int, BOOL);
 // ----------------------------------------------------------------------------
 
 // used in our wxLogTrace messages
-#define TRACE_MASK _T("stdpaths")
+static const wxChar *TRACE_MASK = _T("stdpaths");
 
 #ifndef CSIDL_APPDATA
     #define CSIDL_APPDATA         0x001a
@@ -281,7 +281,7 @@ wxString wxStandardPaths::GetExecutablePath() const
 
 wxString wxStandardPaths::GetConfigDir() const
 {
-    return AppendAppInfo(DoGetDirectory(CSIDL_COMMON_APPDATA));
+    return AppendAppName(DoGetDirectory(CSIDL_COMMON_APPDATA));
 }
 
 wxString wxStandardPaths::GetUserConfigDir() const
@@ -298,12 +298,12 @@ wxString wxStandardPaths::GetDataDir() const
 
 wxString wxStandardPaths::GetUserDataDir() const
 {
-    return AppendAppInfo(GetUserConfigDir());
+    return AppendAppName(GetUserConfigDir());
 }
 
 wxString wxStandardPaths::GetUserLocalDataDir() const
 {
-    return AppendAppInfo(DoGetDirectory(CSIDL_LOCAL_APPDATA));
+    return AppendAppName(DoGetDirectory(CSIDL_LOCAL_APPDATA));
 }
 
 wxString wxStandardPaths::GetPluginsDir() const

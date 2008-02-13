@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver  2.9.0
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.7
+%define ver2 2.8
+%define rel  0
 
 # Configurable settings (use --with(out) unicode on rpmbuild cmd line):
 %define unicode 0
@@ -105,8 +105,9 @@ cd obj-shared
 %if %{unicode}
                               --enable-unicode \
 %else
-                              --disable-unicode \
+                              --with-odbc \
 %endif
+                              --with-opengl
 $MAKE
 
 cd contrib/src
@@ -119,7 +120,7 @@ cd obj-static
 %if %{unicode}
                               --enable-unicode \
 %else
-                              --disable-unicode \
+                              --with-odbc \
 %endif
                               --with-opengl
 $MAKE
@@ -140,22 +141,17 @@ wx/apptrait.h
 wx/archive.h
 wx/arrimpl.cpp
 wx/arrstr.h
-wx/atomic.h
-wx/base64.h
 wx/beforestd.h
 wx/buffer.h
 wx/build.h
-wx/chartype.h
 wx/chkconf.h
 wx/clntdata.h
-wx/cmdargs.h
 wx/cmdline.h
 wx/confbase.h
 wx/config.h
 wx/convauto.h
 wx/containr.h
 wx/cpp.h
-wx/crt.h
 wx/datetime.h
 wx/datstrm.h
 wx/dde.h
@@ -170,7 +166,6 @@ wx/encconv.h
 wx/event.h
 wx/except.h
 wx/features.h
-wx/flags.h
 wx/ffile.h
 wx/file.h
 wx/fileconf.h
@@ -194,6 +189,8 @@ wx/iosfwrap.h
 wx/ioswrap.h
 wx/ipc.h
 wx/ipcbase.h
+wx/isql.h
+wx/isqlext.h
 wx/link.h
 wx/list.h
 wx/listimpl.cpp
@@ -213,7 +210,6 @@ wx/platinfo.h
 wx/power.h
 wx/process.h
 wx/ptr_scpd.h
-wx/ptr_shrd.h
 wx/recguard.h
 wx/regex.h
 wx/scopeguard.h
@@ -227,9 +223,6 @@ wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/stringimpl.h
-wx/stringops.h
-wx/strvararg.h
 wx/sysopt.h
 wx/tarstrm.h
 wx/textbuf.h
@@ -238,47 +231,30 @@ wx/thread.h
 wx/thrimpl.cpp
 wx/timer.h
 wx/tokenzr.h
-wx/tracker.h
 wx/txtstrm.h
 wx/types.h
-wx/unichar.h
 wx/uri.h
 wx/utils.h
 wx/variant.h
 wx/vector.h
 wx/version.h
 wx/volume.h
-wx/weakref.h
 wx/wfstream.h
 wx/wx.h
 wx/wxchar.h
-wx/wxcrt.h
-wx/wxcrtbase.h
-wx/wxcrtvararg.h
 wx/wxprec.h
-wx/xlocale.h
 wx/xti.h
 wx/xtistrm.h
 wx/zipstrm.h
 wx/zstream.h
-wx/meta/convertible.h
-wx/meta/if.h
-wx/meta/int2type.h
-wx/meta/movable.h
-wx/private/fdiodispatcher.h
-wx/private/selectdispatcher.h
-wx/unix/app.h
 wx/unix/apptbase.h
 wx/unix/apptrait.h
-wx/unix/chkconf.h
-wx/unix/evtloop.h
-wx/unix/pipe.h
-wx/unix/stdpaths.h
-wx/unix/stackwalk.h
 wx/unix/execute.h
 wx/unix/mimetype.h
+wx/unix/pipe.h
 wx/unix/private.h
-wx/private/gsocketiohandler.h
+wx/unix/stackwalk.h
+wx/unix/stdpaths.h
 wx/fs_inet.h
 wx/gsocket.h
 wx/protocol/file.h
@@ -293,6 +269,9 @@ wx/url.h
 wx/unix/gsockunx.h
 wx/xml/xml.h
 wx/xtixml.h
+wx/db.h
+wx/dbkeyg.h
+wx/dbtable.h
 EOF
 # --- wxBase headers list ends here ---
 for f in `cat wxbase-headers-list` ; do
@@ -366,6 +345,9 @@ rm -f %{_bindir}/%{wxconfiglink}
 %doc COPYING.LIB *.txt
 %{_libdir}/libwx_%{portname}*_adv-%{ver2}.so.*
 %{_libdir}/libwx_%{portname}*_core-%{ver2}.so.*
+%if !%{unicode}
+    %{_libdir}/libwx_%{portname}*_dbgrid-%{ver2}.so.*
+%endif
 %{_libdir}/libwx_%{portname}*_html-%{ver2}.so.*
 %{_libdir}/libwx_%{portname}*_media-%{ver2}.so.*
 %{_libdir}/libwx_%{portname}*_qa-%{ver2}.so.*
@@ -376,6 +358,9 @@ rm -f %{_bindir}/%{wxconfiglink}
 %defattr(-,root,root)
 %{_libdir}/libwx_%{portname}*_adv-%{ver2}.so
 %{_libdir}/libwx_%{portname}*_core-%{ver2}.so
+%if !%{unicode}
+    %{_libdir}/libwx_%{portname}*_dbgrid-%{ver2}.so
+%endif
 %{_libdir}/libwx_%{portname}*_gl-%{ver2}.so
 %{_libdir}/libwx_%{portname}*_html-%{ver2}.so
 %{_libdir}/libwx_%{portname}*_media-%{ver2}.so

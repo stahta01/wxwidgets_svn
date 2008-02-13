@@ -24,6 +24,8 @@
     #pragma hdrstop
 #endif
 
+#if wxUSE_STDPATHS
+
 #ifndef WX_PRECOMP
     #include "wx/app.h"
 #endif //WX_PRECOMP
@@ -77,15 +79,6 @@ wxStandardPathsBase& wxAppTraitsBase::GetStandardPaths()
     return gs_stdPaths;
 }
 
-wxStandardPathsBase::wxStandardPathsBase()
-{
-    // Set the default information that is used when
-    // forming some paths (by AppendAppInfo).
-    // Derived classes can call this in their constructors
-    // to set the platform-specific settings
-    UseAppInfo(AppInfo_AppName);
-}
-
 wxStandardPathsBase::~wxStandardPathsBase()
 {
     // nothing to do here
@@ -113,41 +106,25 @@ wxString wxStandardPathsBase::GetTempDir() const
 }
 
 /* static */
-wxString wxStandardPathsBase::AppendPathComponent(const wxString& dir, const wxString& component)
+wxString wxStandardPathsBase::AppendAppName(const wxString& dir)
 {
     wxString subdir(dir);
 
     // empty string indicates that an error has occurred, don't touch it then
     if ( !subdir.empty() )
     {
-        if ( !component.empty() )
+        const wxString appname = wxTheApp->GetAppName();
+        if ( !appname.empty() )
         {
             const wxChar ch = *(subdir.end() - 1);
             if ( !wxFileName::IsPathSeparator(ch) && ch != _T('.') )
                 subdir += wxFileName::GetPathSeparator();
 
-            subdir += component;
+            subdir += appname;
         }
     }
 
     return subdir;
 }
 
-
-wxString wxStandardPathsBase::AppendAppInfo(const wxString& dir) const
-{
-    wxString subdir(dir);
-
-    if ( UsesAppInfo(AppInfo_VendorName) )
-    {
-        subdir = AppendPathComponent(subdir, wxTheApp->GetVendorName());
-    }
-
-    if ( UsesAppInfo(AppInfo_AppName) )
-    {
-        subdir = AppendPathComponent(subdir, wxTheApp->GetAppName());
-    }
-
-    return subdir;
-}
-
+#endif // wxUSE_STDPATHS

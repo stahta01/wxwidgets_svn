@@ -68,7 +68,7 @@ enum
 // wxRegEx: a regular expression
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_BASE wxRegExImpl;
+class WXDLLIMPEXP_BASE wxRegExImpl;
 
 class WXDLLIMPEXP_BASE wxRegEx
 {
@@ -97,9 +97,10 @@ public:
     // len may be the length of text (ignored by most system regex libs)
     //
     // may only be called after successful call to Compile()
-    bool Matches(const wxString& text, int flags = 0) const;
-    bool Matches(const wxChar *text, int flags, size_t len) const
-        { return Matches(wxString(text, len), flags); }
+    bool Matches(const wxChar *text, int flags = 0) const;
+    bool Matches(const wxChar *text, int flags, size_t len) const;
+    bool Matches(const wxString& text, int flags = 0) const
+        { return Matches(text.c_str(), flags, text.length()); }
 
     // get the start index and the length of the match of the expression
     // (index 0) or a bracketed subexpression (index != 0)

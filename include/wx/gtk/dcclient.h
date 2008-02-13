@@ -7,30 +7,30 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTKDCCLIENT_H_
-#define _WX_GTKDCCLIENT_H_
+#ifndef __GTKDCCLIENTH__
+#define __GTKDCCLIENTH__
 
-#include "wx/gtk/dc.h"
-#include "wx/dcclient.h"
+#include "wx/dc.h"
 #include "wx/region.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxWindow;
 
 //-----------------------------------------------------------------------------
-// wxWindowDCImpl
+// wxWindowDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowDCImpl : public wxGTKDCImpl
+class WXDLLIMPEXP_CORE wxWindowDC : public wxDC
 {
 public:
-    wxWindowDCImpl( wxDC *owner );
-    wxWindowDCImpl( wxDC *owner, wxWindow *win );
+    wxWindowDC();
+    wxWindowDC( wxWindow *win );
 
-    virtual ~wxWindowDCImpl();
+    virtual ~wxWindowDC();
 
     virtual bool CanDrawBitmap() const { return true; }
     virtual bool CanGetTextExtent() const { return true; }
 
+protected:
     virtual void DoGetSize(int *width, int *height) const;
     virtual bool DoFloodFill( wxCoord x, wxCoord y, const wxColour& col, int style=wxFLOOD_SURFACE );
     virtual bool DoGetPixel( wxCoord x1, wxCoord y1, wxColour *col ) const;
@@ -68,11 +68,13 @@ public:
                                 wxCoord *width, wxCoord *height,
                                 wxCoord *descent = (wxCoord *) NULL,
                                 wxCoord *externalLeading = (wxCoord *) NULL,
-                                const wxFont *theFont = (wxFont *) NULL) const;
+                                wxFont *theFont = (wxFont *) NULL) const;
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
     virtual void DoSetClippingRegion( wxCoord x, wxCoord y, wxCoord width, wxCoord height );
     virtual void DoSetClippingRegionAsRegion( const wxRegion &region );
 
+
+public:
     virtual wxCoord GetCharWidth() const;
     virtual wxCoord GetCharHeight() const;
 
@@ -102,13 +104,15 @@ public:
     // implementation
     // --------------
 
-    GdkWindow    *m_gdkwindow;
+    GdkWindow    *m_window;
     GdkGC        *m_penGC;
     GdkGC        *m_brushGC;
     GdkGC        *m_textGC;
     GdkGC        *m_bgGC;
     GdkColormap  *m_cmap;
+    bool          m_isMemDC;
     bool          m_isScreenDC;
+    wxWindow     *m_owner;
     wxRegion      m_currentClippingRegion;
     wxRegion      m_paintClippingRegion;
 
@@ -117,45 +121,46 @@ public:
     PangoLayout *m_layout;
     PangoFontDescription *m_fontdesc;
 
-    void SetUpDC( bool ismem = false );
+    void SetUpDC();
     void Destroy();
     
     virtual void ComputeScaleAndOrigin();
 
-    virtual GdkWindow *GetGDKWindow() const { return m_gdkwindow; }
+    virtual GdkWindow *GetGDKWindow() const { return m_window; }
 
 private:
-    void DrawingSetup(GdkGC*& gc, bool& originChanged);
-
-    DECLARE_ABSTRACT_CLASS(wxWindowDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxWindowDC)
 };
 
 //-----------------------------------------------------------------------------
-// wxClientDCImpl
+// wxClientDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxClientDCImpl : public wxWindowDCImpl
+class WXDLLIMPEXP_CORE wxClientDC : public wxWindowDC
 {
 public:
-    wxClientDCImpl( wxDC *owner );
-    wxClientDCImpl( wxDC *owner, wxWindow *win );
+    wxClientDC() { }
+    wxClientDC( wxWindow *win );
 
+protected:
     virtual void DoGetSize(int *width, int *height) const;
 
-    DECLARE_ABSTRACT_CLASS(wxClientDCImpl)
+private:
+    DECLARE_DYNAMIC_CLASS(wxClientDC)
 };
 
 //-----------------------------------------------------------------------------
-// wxPaintDCImpl
+// wxPaintDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPaintDCImpl : public wxClientDCImpl
+class WXDLLIMPEXP_CORE wxPaintDC : public wxClientDC
 {
 public:
-    wxPaintDCImpl( wxDC *owner );
-    wxPaintDCImpl( wxDC *owner, wxWindow *win );
+    wxPaintDC() { }
+    wxPaintDC( wxWindow *win );
 
-    DECLARE_ABSTRACT_CLASS(wxPaintDCImpl)
+private:
+    DECLARE_DYNAMIC_CLASS(wxPaintDC)
 };
 
-#endif // _WX_GTKDCCLIENT_H_
+#endif // __GTKDCCLIENTH__

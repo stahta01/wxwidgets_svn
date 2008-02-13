@@ -71,9 +71,7 @@ enum
   wxSOCKET_NOWAIT = 1,
   wxSOCKET_WAITALL = 2,
   wxSOCKET_BLOCK = 4,
-  wxSOCKET_REUSEADDR = 8,
-  wxSOCKET_BROADCAST = 16,
-  wxSOCKET_NOBIND = 32
+  wxSOCKET_REUSEADDR = 8
 };
 
 enum wxSocketType
@@ -263,21 +261,8 @@ public:
 
   bool WaitOnConnect(long seconds = -1, long milliseconds = 0);
 
-  // Sets initial socket buffer sizes using the SO_SNDBUF and SO_RCVBUF options
-  // before calling connect (either one can be -1 to leave it unchanged)
-  void SetInitialSocketBuffers(int recv, int send)
-  {
-      m_initialRecvBufferSize = recv;
-      m_initialSendBufferSize = send;
-  }
-
 private:
-  virtual bool
-      DoConnect(wxSockAddress& addr, wxSockAddress* local, bool wait = true);
-
-  // buffer sizes, -1 if unset and defaults should be used
-  int m_initialRecvBufferSize;
-  int m_initialSendBufferSize;
+  virtual bool DoConnect(wxSockAddress& addr, wxSockAddress* local, bool wait = true);
 
   DECLARE_NO_COPY_CLASS(wxSocketClient)
 };

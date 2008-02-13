@@ -123,7 +123,7 @@ public:
 
         // set items label
     virtual void SetItemText(const wxTreeItemId& item, const wxString& text) = 0;
-        // set one of the images associated with the item (normal by default)
+        // get one of the images associated with the item (normal by default)
     virtual void SetItemImage(const wxTreeItemId& item,
                               int image,
                               wxTreeItemIcon which = wxTreeItemIcon_Normal) = 0;
@@ -172,8 +172,10 @@ public:
     virtual bool IsSelected(const wxTreeItemId& item) const = 0;
         // is item text in bold font?
     virtual bool IsBold(const wxTreeItemId& item) const = 0;
+#if wxABI_VERSION >= 20801
         // is the control empty?
     bool IsEmpty() const;
+#endif // wxABI 2.8.1+
 
 
     // number of children
@@ -290,16 +292,18 @@ public:
 
         // expand this item
     virtual void Expand(const wxTreeItemId& item) = 0;
-        // expand the item and all its children recursively
+        // expand the item and all its childs and thats childs
     void ExpandAllChildren(const wxTreeItemId& item);
         // expand all items
     void ExpandAll();
         // collapse the item without removing its children
     virtual void Collapse(const wxTreeItemId& item) = 0;
-        // collapse the item and all its children
+#if wxABI_VERSION >= 20801
+        // collapse the item and all its childs and thats childs
     void CollapseAllChildren(const wxTreeItemId& item);
         // collapse all items
     void CollapseAll();
+#endif // wxABI 2.8.1+
         // collapse the item and remove all children
     virtual void CollapseAndReset(const wxTreeItemId& item) = 0;
         // toggles the current state

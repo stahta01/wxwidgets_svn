@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: wxWidgets 2.9.0\n"
+"Project-Id-Version: wxWidgets 2.8.7\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-10-29 14:59+0100\n"
-"PO-Revision-Date: 2007-12-13 10:00+0100\n"
+"PO-Revision-Date: 2007-12-13 02:44+0100\n"
 "Last-Translator: MiguelSky <MiguelSky@gmail.com>\n"
 "Language-Team: wxWidgets translators <wx-translators@wxwidgets.org>\n"
 "MIME-Version: 1.0\n"
@@ -4132,7 +4132,6 @@ msgstr "Los objetos deben tener un atributo de identificación"
 
 #: ../src/common/docview.cpp:1279
 #: ../src/common/docview.cpp:1629
-#: ../src/common/docview.cpp:1589
 msgid "Open File"
 msgstr "Abrir archivo"
 
@@ -4772,8 +4771,7 @@ msgid "Save &As..."
 msgstr "Guardar &como..."
 
 #: ../src/common/docview.cpp:300
-#, fuzzy
-msgid "Save As"
+msgid "Save as"
 msgstr "Guardar como"
 
 #: ../src/common/stockitem.cpp:212
@@ -4851,6 +4849,10 @@ msgstr "Seleccionar una plantilla de documento"
 #: ../src/common/docview.cpp:1786
 msgid "Select a document view"
 msgstr "Seleccionar una vista de documento"
+
+#: ../src/common/docview.cpp:1589
+msgid "Select a file"
+msgstr "Seleccionar un archivo"
 
 #: ../src/common/stockitem.cpp:153
 msgid "Select all"
@@ -6766,52 +6768,35 @@ msgstr "|<<"
 msgid "~"
 msgstr "~"
 
-msgid "."
-msgstr "."
-
-msgid ".."
-msgstr ".."
-
-msgid "Cannot open URL '%s'"
-msgstr "No se puede abrir la URL '%s'"
-
-msgid "Error "
-msgstr "Error "
-
-#, fuzzy
-msgid "Failed to create directory %s/.gnome."
-msgstr "Fallo al crear directorio %s/mime-info."
-
-msgid "Failed to create directory %s/mime-info."
-msgstr "Fallo al crear directorio %s/mime-info."
-
-msgid "MP Thread Support is not available on this System"
-msgstr "El soporte para hilos MP no está disponible en este sistema"
-
-msgid "Mailcap file %s, line %d: incomplete entry ignored."
-msgstr "Archivo Mailcap %s, linea %d: entrada incompleta ignorada."
-
-msgid "Mime.types file %s, line %d: unterminated quoted string."
-msgstr "Archivo de Tipos Mime %s, linea %d: cadena entrecomillada no terminada."
-
-msgid "Unknown field in file %s, line %d: '%s'."
-msgstr "Campo desconocido en el archivo %s, linea %d: '%s'."
-
-msgid "bold "
-msgstr "negrita"
-
-msgid "can't query for GUI plugins name in console applications"
-msgstr "no se pueden solicitar los nombres complementos del GUI en las aplicaciones de consola"
-
-msgid "light "
-msgstr "ligera"
-
-msgid "underlined "
-msgstr "subrayado"
-
-msgid "unsupported zip archive"
-msgstr "paquete zip no soportado"
-
-#~ msgid "Select a file"
-#~ msgstr "Seleccionar un archivo"
+#~ msgid "."
+#~ msgstr "."
+#~ msgid ".."
+#~ msgstr ".."
+#~ msgid "Cannot open URL '%s'"
+#~ msgstr "No se puede abrir la URL '%s'"
+#~ msgid "Error "
+#~ msgstr "Error "
+#~ msgid "Failed to create directory %s/mime-info."
+#~ msgstr "Fallo al crear directorio %s/mime-info."
+#~ msgid "MP Thread Support is not available on this System"
+#~ msgstr "El soporte para hilos MP no está disponible en este sistema"
+#~ msgid "Mailcap file %s, line %d: incomplete entry ignored."
+#~ msgstr "Archivo Mailcap %s, linea %d: entrada incompleta ignorada."
+#~ msgid "Mime.types file %s, line %d: unterminated quoted string."
+#~ msgstr ""
+#~ "Archivo de Tipos Mime %s, linea %d: cadena entrecomillada no terminada."
+#~ msgid "Unknown field in file %s, line %d: '%s'."
+#~ msgstr "Campo desconocido en el archivo %s, linea %d: '%s'."
+#~ msgid "bold "
+#~ msgstr "negrita"
+#~ msgid "can't query for GUI plugins name in console applications"
+#~ msgstr ""
+#~ "no se pueden solicitar los nombres complementos del GUI en las "
+#~ "aplicaciones de consola"
+#~ msgid "light "
+#~ msgstr "ligera"
+#~ msgid "underlined "
+#~ msgstr "subrayado"
+#~ msgid "unsupported zip archive"
+#~ msgstr "paquete zip no soportado"
 

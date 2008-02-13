@@ -16,7 +16,7 @@
 #include "wx/slider.h"
 #include "wx/stattext.h"
 
-WXDLLEXPORT_DATA(extern const char) wxSliderNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxSliderNameStr[];
 
 // Slider
 class WXDLLEXPORT wxSlider: public wxSliderBase
@@ -74,6 +74,11 @@ public:
     int GetThumbLength() const ;
     void SetTick(int tickPos) ;
 
+    // set min/max size of the slider
+    virtual void DoSetSizeHints( int minW, int minH,
+                                 int maxW = -1, int maxH = -1,
+                                 int incW = -1, int incH = -1 );
+
     void Command(wxCommandEvent& event);
     virtual wxInt32 MacControlHit(WXEVENTHANDLERREF handler, WXEVENTREF event);
     void MacHandleControlClick(WXWidget control, wxInt16 controlpart, bool mouseStillDown);
@@ -82,11 +87,6 @@ protected:
     virtual wxSize DoGetBestSize() const;
     virtual void   DoSetSize(int x, int y, int w, int h, int sizeFlags);
     virtual void   DoMoveWindow(int x, int y, int w, int h);
-
-    // set min/max size of the slider
-    virtual void DoSetSizeHints( int minW, int minH,
-                                 int maxW, int maxH,
-                                 int incW, int incH);
 
     // Common processing to invert slider values based on wxSL_INVERSE
     virtual int ValueInvertOrNot(int value) const;

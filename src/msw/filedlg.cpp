@@ -64,8 +64,7 @@
 // globals
 // ----------------------------------------------------------------------------
 
-// standard dialog size for the old Windows systems where the dialog wasn't
-// resizeable
+// standard dialog size
 static wxRect gs_rectDialog(0, 0, 428, 266);
 
 // ============================================================================
@@ -91,9 +90,16 @@ wxFileDialogHookFunction(HWND      hDlg,
                 OFNOTIFY *pNotifyCode = wx_reinterpret_cast(OFNOTIFY *, lParam);
                 if ( pNotifyCode->hdr.code == CDN_INITDONE )
                 {
-                    wx_reinterpret_cast(wxFileDialog *,
-                                        pNotifyCode->lpOFN->lCustData)
-                        ->MSWOnInitDone((WXHWND)hDlg);
+                    // note that we need to move the parent window: hDlg is a
+                    // child of it when OFN_EXPLORER is used
+                    ::SetWindowPos
+                      (
+                        ::GetParent(hDlg),
+                        HWND_TOP,
+                        gs_rectDialog.x, gs_rectDialog.y,
+                        0, 0,
+                        SWP_NOZORDER | SWP_NOSIZE
+                      );
                  }
             }
             break;
@@ -132,15 +138,14 @@ wxFileDialog::wxFileDialog(wxWindow *parent,
     // NB: all style checks are done by wxFileDialogBase::Create
 
     m_bMovedWindow = false;
-    m_centreDir = 0;
 
     // Must set to zero, otherwise the wx routines won't size the window
     // the second time you call the file dialog, because it thinks it is
     // already at the requested size.. (when centering)
     gs_rectDialog.x =
     gs_rectDialog.y = 0;
-}
 
+}
 void wxFileDialog::GetPaths(wxArrayString& paths) const
 {
     paths.Empty();
@@ -180,6 +185,7 @@ void wxFileDialog::DoGetPosition(int *x, int *y) const
         *y = gs_rectDialog.y;
 }
 
+
 void wxFileDialog::DoGetSize(int *width, int *height) const
 {
     if ( width )
@@ -190,64 +196,13 @@ void wxFileDialog::DoGetSize(int *width, int *height) const
 
 void wxFileDialog::DoMoveWindow(int x, int y, int WXUNUSED(w), int WXUNUSED(h))
 {
+    m_bMovedWindow = true;
+
     gs_rectDialog.x = x;
     gs_rectDialog.y = y;
 
-    // our HWND is only set when we're called from MSWOnInitDone(), test if
-    // this is the case
-    HWND hwnd = GetHwnd();
-    if ( hwnd )
-    {
-        // size of the dialog can't be changed because the controls are not
-        // laid out correctly then
-       ::SetWindowPos(hwnd, HWND_TOP, x, y, 0, 0, SWP_NOZORDER | SWP_NOSIZE);
-    }
-    else // just remember that we were requested to move the window
-    {
-        m_bMovedWindow = true;
-
-        // if Centre() had been called before, it shouldn't be taken into
-        // account now
-        m_centreDir = 0;
-    }
-}
-
-void wxFileDialog::DoCentre(int dir)
-{
-    m_centreDir = dir;
-    m_bMovedWindow = true;
-
-    // it's unnecessary to do anything else at this stage as we'll redo it in
-    // MSWOnInitDone() anyhow
-}
-
-void wxFileDialog::MSWOnInitDone(WXHWND hDlg)
-{
-    // note the the dialog is the parent window: hDlg is a child of it when
-    // OFN_EXPLORER is used
-    HWND hFileDlg = ::GetParent((HWND)hDlg);
-
-    // set HWND so that our DoMoveWindow() works correctly
-    SetHWND((WXHWND)hFileDlg);
-
-    if ( m_centreDir )
-    {
-        // now we have the real dialog size, remember it
-        RECT rect;
-        GetWindowRect(hFileDlg, &rect);
-        gs_rectDialog = wxRectFromRECT(rect);
-
-        // and position the window correctly: notice that we must use the base
-        // class version as our own doesn't do anything except setting flags
-        wxFileDialogBase::DoCentre(m_centreDir);
-    }
-    else // need to just move it to the correct place
-    {
-        SetPosition(gs_rectDialog.GetPosition());
-    }
-
-    // we shouldn't destroy this HWND
-    SetHWND(NULL);
+    // size of the dialog can't be changed because the controls are not laid
+    // out correctly then
 }
 
 // helper used below in ShowModal(): style is used to determine whether to show
@@ -321,7 +276,13 @@ int wxFileDialog::ShowModal()
     *fileNameBuffer = wxT('\0');
     *titleBuffer    = wxT('\0');
 
+#if WXWIN_COMPATIBILITY_2_4
+    long msw_flags = 0;
+    if ( HasFdFlag(wxHIDE_READONLY) || HasFdFlag(wxFD_SAVE) )
+        msw_flags |= OFN_HIDEREADONLY;
+#else
     long msw_flags = OFN_HIDEREADONLY;
+#endif
 
     if ( HasFdFlag(wxFD_FILE_MUST_EXIST) )
         msw_flags |= OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
@@ -365,7 +326,7 @@ int wxFileDialog::ShowModal()
 
     of.lStructSize       = gs_ofStructSize;
     of.hwndOwner         = hWnd;
-    of.lpstrTitle        = m_message.wx_str();
+    of.lpstrTitle        = WXSTRINGCAST m_message;
     of.lpstrFileTitle    = titleBuffer;
     of.nMaxFileTitle     = wxMAXFILE + 1 + wxMAXEXT;
 
@@ -412,7 +373,6 @@ int wxFileDialog::ShowModal()
 
     of.Flags             = msw_flags;
     of.lpfnHook          = wxFileDialogHookFunction;
-    of.lCustData         = (LPARAM)this;
 
     wxArrayString wildDescriptions, wildFilters;
 
@@ -437,12 +397,12 @@ int wxFileDialog::ShowModal()
         }
     }
 
-    of.lpstrFilter  = (LPTSTR)filterBuffer.wx_str();
+    of.lpstrFilter  = (LPTSTR)filterBuffer.c_str();
     of.nFilterIndex = m_filterIndex + 1;
 
     //=== Setting defaultFileName >>=========================================
 
-    wxStrncpy(fileNameBuffer, m_fileName, wxMAXPATH-1);
+    wxStrncpy( fileNameBuffer, (const wxChar *)m_fileName, wxMAXPATH-1 );
     fileNameBuffer[ wxMAXPATH-1 ] = wxT('\0');
 
     of.lpstrFile = fileNameBuffer;  // holds returned filename
@@ -455,7 +415,7 @@ int wxFileDialog::ShowModal()
     wxString defextBuffer; // we need it to be alive until GetSaveFileName()!
     if (HasFdFlag(wxFD_SAVE))
     {
-        const wxChar* extension = filterBuffer.wx_str();
+        const wxChar* extension = filterBuffer;
         int maxFilter = (int)(of.nFilterIndex*2L) - 1;
 
         for( int i = 0; i < maxFilter; i++ )           // get extension
@@ -557,7 +517,7 @@ int wxFileDialog::ShowModal()
                  (of.nFileExtension && fileNameBuffer[of.nFileExtension] == wxT('\0')) )
             {
                 // User has typed a filename without an extension:
-                const wxChar* extension = filterBuffer.wx_str();
+                const wxChar* extension = filterBuffer;
                 int   maxFilter = (int)(of.nFilterIndex*2L) - 1;
 
                 for( int i = 0; i < maxFilter; i++ )           // get extension

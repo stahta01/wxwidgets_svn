@@ -130,12 +130,12 @@ public:
     {
         wxLogMessage(_T("Listbox item %d double clicked."), event.GetInt());
     }
-
+    
     void OnHtmlLinkClicked(wxHtmlLinkEvent& event);
     void OnHtmlCellHover(wxHtmlCellEvent &event);
     void OnHtmlCellClicked(wxHtmlCellEvent &event);
 
-    wxSimpleHtmlListBox *GetSimpleBox()
+    wxSimpleHtmlListBox *GetSimpleBox() 
         { return wxDynamicCast(m_hlbox, wxSimpleHtmlListBox); }
     MyHtmlListBox *GetMyBox()
         { return wxDynamicCast(m_hlbox, MyHtmlListBox); }
@@ -243,9 +243,9 @@ MyFrame::MyFrame()
 #if wxUSE_MENUS
     // create a menu bar
     wxMenu *menuFile = new wxMenu;
-    menuFile->AppendRadioItem(HtmlLbox_CustomBox, _T("Use custom box"),
+    menuFile->AppendRadioItem(HtmlLbox_CustomBox, _T("Use custom box"), 
                               _T("Use a wxHtmlListBox virtual class control"));
-    menuFile->AppendRadioItem(HtmlLbox_SimpleBox, _T("Use simple box"),
+    menuFile->AppendRadioItem(HtmlLbox_SimpleBox, _T("Use simple box"), 
                               _T("Use a wxSimpleHtmlListBox control"));
     menuFile->AppendSeparator();
     menuFile->Append(HtmlLbox_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
@@ -296,7 +296,7 @@ MyFrame::MyFrame()
     CreateStatusBar(2);
     SetStatusText(_T("Welcome to wxWidgets!"));
 #endif // wxUSE_STATUSBAR
-
+    
     // create the child controls
     CreateBox();
     wxTextCtrl *text = new wxTextCtrl(this, wxID_ANY, _T(""),
@@ -329,7 +329,7 @@ void MyFrame::CreateBox()
     {
         m_hlbox = new wxSimpleHtmlListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                           0, NULL, multi ? wxLB_MULTIPLE : 0);
-
+        
         // unlike wxHtmlListBox which is abstract, wxSimpleHtmlListBox is a
         // concrete control and doesn't support virtual mode, this we need
         // to add all of its items from the beginning
@@ -362,12 +362,12 @@ void MyFrame::CreateBox()
 void MyFrame::OnSimpleOrCustomBox(wxCommandEvent& WXUNUSED(event))
 {
     wxWindow *old = m_hlbox;
-
+ 
     // we need to recreate the listbox
     CreateBox();
     GetSizer()->Replace(old, m_hlbox);
     delete old;
-
+    
     GetSizer()->Layout();
     Refresh();
 }
@@ -409,7 +409,7 @@ void MyFrame::OnSetMargins(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnToggleMulti(wxCommandEvent& WXUNUSED(event))
 {
     wxWindow *old = m_hlbox;
-
+ 
     // we need to recreate the listbox
     CreateBox();
     GetSizer()->Replace(old, m_hlbox);
@@ -483,7 +483,7 @@ void MyFrame::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
     if (GetMyBox())
     {
         GetMyBox()->m_linkClicked = true;
-        GetMyBox()->RefreshRow(1);
+        GetMyBox()->RefreshLine(1);
     }
 }
 
@@ -588,7 +588,7 @@ wxString MyHtmlListBox::OnGetItem(size_t n) const
 {
     if ( !n && m_firstItemUpdated )
     {
-        return _T("<h1><b>Just updated</b></h1>");
+        return wxString::Format(_T("<h1><b>Just updated</b></h1>"));
     }
 
 #ifdef USE_HTML_FILE
@@ -631,5 +631,5 @@ void MyHtmlListBox::UpdateFirstItem()
 {
     m_firstItemUpdated = !m_firstItemUpdated;
 
-    RefreshRow(0);
+    RefreshLine(0);
 }

@@ -21,25 +21,27 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxBrush;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxBrush;
 
 //-----------------------------------------------------------------------------
 // wxBrush
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBrush : public wxBrushBase
+class WXDLLIMPEXP_CORE wxBrush: public wxBrushBase
 {
 public:
     wxBrush() {}
     wxBrush(const wxColour &colour, int style = wxSOLID);
     wxBrush(const wxBitmap &stippleBitmap);
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
     bool operator==(const wxBrush& brush) const;
     bool operator!=(const wxBrush& brush) const { return !(*this == brush); }
 
     virtual int GetStyle() const;
-    wxColour& GetColour() const;
+    wxColour &GetColour() const;
     wxBitmap *GetStipple() const;
 
     void SetColour(const wxColour& col);
@@ -48,8 +50,9 @@ public:
     void SetStipple(const wxBitmap& stipple);
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     DECLARE_DYNAMIC_CLASS(wxBrush)
 };

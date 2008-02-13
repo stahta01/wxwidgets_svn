@@ -55,6 +55,10 @@
     #pragma hdrstop
 #endif
 
+#if wxUSE_UNICODE
+    #error "HelpGen doesn't build in Unicode mode"
+#endif
+
 #ifndef WX_PRECOMP
     #include "wx/string.h"
     #include "wx/log.h"
@@ -78,10 +82,10 @@
 // -----------------------------------------------------------------------------
 
 // return the label for the given function name (i.e. argument of \label)
-static wxString MakeLabel(const char *classname, const char *funcname = NULL);
+static wxString MakeLabel(const wxChar *classname, const wxChar *funcname = NULL);
 
 // return the whole \helpref{arg}{arg_label} string
-static wxString MakeHelpref(const char *argument);
+static wxString MakeHelpref(const wxChar *argument);
 
 // [un]quote special TeX characters (in place)
 static void TeXFilter(wxString* str);
@@ -381,7 +385,7 @@ protected:
 
     // returns the length of 'match' if the string 'str' starts with it or 0
     // otherwise
-    static size_t TryMatch(const char *str, const char *match);
+    static size_t TryMatch(const wxChar *str, const wxChar *match);
 
     // skip spaces: returns pointer to first non space character (also
     // updates the value of m_line)
@@ -673,7 +677,7 @@ int main(int argc, char **argv)
                         directoryOut = argv[current];
                         if ( !directoryOut.empty() ) {
                             // terminate with a '/' if it doesn't have it
-                            switch ( directoryOut.Last().GetValue() ) {
+                            switch ( directoryOut.Last() ) {
                                 case '/':
 #ifdef __WXMSW__
                                 case '\\':
@@ -1064,7 +1068,7 @@ void HelpGenVisitor::VisitClass( spClass& cl )
 
             baseHeaderName.erase(0, 3);
             for ( index = 0; index < WXSIZEOF(headers); index++ ) {
-                if ( wxStricmp(baseHeaderName, headers[index]) == 0 )
+                if ( Stricmp(baseHeaderName, headers[index]) == 0 )
                     break;
             }
 
@@ -2207,9 +2211,6 @@ static const wxString GetVersionString()
 
 /*
    $Log$
-   Revision 1.45  2007/05/25 20:29:14  VS
-   compilation fix: can't use wxUniCharRef in switch statement
-
    Revision 1.44  2005/05/31 17:47:45  ABX
    More warning and error fixes (work in progress with Tinderbox).
 

@@ -3,10 +3,6 @@
 
 <makefile>
 
-    <set var="IS_MSVC_PRJ">
-        $(FORMAT in ['msvc6prj','msevc4prj','msvs2003prj','msvs2005prj'])
-    </set>
-
     <set var="BUILDING_LIB" overwrite="0">0</set>
 
     <set var="CPP_DEFAULT_VALUE">
@@ -50,22 +46,14 @@
         </description>
     </option>
 
-    <!-- don't include ANSI configuration in project files, it's going to be
-         eventually removed anyway and it only doubles the number of build
-         configs in projects: -->
-    <if cond="IS_MSVC_PRJ=='1'">
-        <set var="UNICODE">1</set>
-    </if>
-    <if cond="IS_MSVC_PRJ=='0'">
-        <option name="UNICODE">
-            <values>0,1</values>
-            <values-description>,Unicode</values-description>
-            <default-value>1</default-value>
-            <description>
-                Compile Unicode build of wxWidgets?
-            </description>
-        </option>
-    </if>
+    <option name="UNICODE">
+        <values>0,1</values>
+        <values-description>,Unicode</values-description>
+        <default-value>0</default-value>
+        <description>
+            Compile Unicode build of wxWidgets?
+        </description>
+    </option>
 
     <if cond="FORMAT!='autoconf' and FORMAT!='watcom'">
         <option name="MSLU">
@@ -107,10 +95,14 @@ Accepted values: AMD64, IA64.
         <set var="TARGET_CPU"/>
     </if>
 
+    <!-- FIXME: restore this once bakefile is fixed to not use
+                /Gm /GZ (incompatible with /O2) w/ debug-info -->
     <set var="DEBUG_INFO_DEFAULT">
-        <if cond="IS_MSVC_PRJ=='1'">1</if>
-        <if cond="IS_MSVC_PRJ=='0'">default</if>
+        <if cond="FORMAT in ['msvc','msvc6prj','msevc4prj','msvs2005prj']">1</if>
+        <if cond="FORMAT not in ['msvc','msvc6prj','msevc4prj','msvs2005prj']">default</if>
     </set>
+    -->
+    <set var="DEBUG_INFO_DEFAULT">default</set>
 
     <option name="DEBUG_INFO">
         <values>0,1,default</values>
@@ -221,14 +213,6 @@ Acts according to BUILD by default.
         </description>
     </option>
 
-    <option name="USE_STC">
-        <values>0,1</values>
-        <default-value>1</default-value>
-        <description>
-            Build wxStyledTextCtrl library (USE_GUI must be 1)?
-        </description>
-    </option>
-
     <option name="USE_OPENGL">
         <values>0,1</values>
         <default-value>0</default-value>
@@ -237,10 +221,18 @@ Acts according to BUILD by default.
         </description>
     </option>
 
+    <option name="USE_ODBC">
+        <values>0,1</values>
+        <default-value>0</default-value>
+        <description>
+            Build ODBC database classes (USE_GUI must be 1)?
+        </description>
+    </option>
+
     <!-- currently only VC++ can compile wxDebugReport which is in QA lib -->
     <set var="USE_QA_DEFAULT">
-        <if cond="FORMAT in ['msvc','msvc6prj','msvs2003prj','msvs2005prj']">1</if>
-        <if cond="FORMAT not in ['msvc','msvc6prj','msvs2003prj','msvs2005prj']">0</if>
+        <if cond="FORMAT in ['msvc','msvc6prj','msvs2005prj']">1</if>
+        <if cond="FORMAT not in ['msvc','msvc6prj','msvs2005prj']">0</if>
     </set>
     <option name="USE_QA">
         <values>0,1</values>
@@ -348,11 +340,11 @@ to run the tests, include CppUnit library here.
         <option name="EXTRALIBS_XML"/>
         <option name="EXTRALIBS_HTML"/>
         <option name="EXTRALIBS_MEDIA"/>
+        <option name="EXTRALIBS_ODBC"/>
         <option name="EXTRALIBS_GUI"/>
         <option name="EXTRALIBS_OPENGL"/>
         <option name="EXTRALIBS_SDL"/>
         <option name="EXTRALIBS_GNOMEPRINT"/>
-        <option name="CXXWARNINGS"/>
         <option name="HOST_SUFFIX"/>
         <option name="SAMPLES_RPATH_FLAG"/>
         <option name="SAMPLES_RPATH_POSTLINK"/>
@@ -400,6 +392,7 @@ it if SHARED=1 unless you know what you are doing.
         <set var="EXTRALIBS_XML"/>
         <set var="EXTRALIBS_HTML"/>
         <set var="EXTRALIBS_MEDIA"/>
+        <set var="EXTRALIBS_ODBC"/>
         <set var="EXTRALIBS_GUI"/>
         <set var="EXTRALIBS_OPENGL">
             <if cond="COMPILER=='wat' and TOOLKIT=='MSW'">opengl32.lib glu32.lib</if>
@@ -411,9 +404,10 @@ it if SHARED=1 unless you know what you are doing.
 
         <set var="WITH_PLUGIN_SDL">0</set>
 
-        <if cond="BUILDING_LIB=='1'">
-            <set-srcdir>../..</set-srcdir>
-        </if>
+        <set var="SRCDIR">
+            <if cond="BUILDING_LIB=='1'">..$(DIRSEP)..</if>
+            <if cond="BUILDING_LIB=='0'">.</if>
+        </set>
         <set var="TOP_SRCDIR">$(SRCDIR)/$(WXTOPDIR)</set>
     </if>
 
@@ -433,6 +427,12 @@ Set the version of your Mingw installation here.
         <set var="EXTRACFLAGS">$(GCCFLAGS) -DHAVE_W32API_H</set>
     </if>
 
+    <if cond="FORMAT=='cbuilderx'">
+        <set var="EXTRACFLAGS">
+            <if cond="COMPILER=='gcc'">-DHAVE_W32API_H</if>
+        </set>
+    </if>
+
 
     <!-- ================================================================== -->
     <!--            Project files - hardcode some defaults                  -->
@@ -443,11 +443,11 @@ Set the version of your Mingw installation here.
         <set var="OFFICIAL_BUILD">0</set>
         <set var="USE_AUI">1</set>
         <set var="USE_RICHTEXT">1</set>
-        <set var="USE_STC">1</set>
         <set var="USE_HTML">1</set>
         <set var="USE_MEDIA">1</set>
         <set var="USE_XRC">1</set>
         <set var="USE_OPENGL">1</set>
+        <set var="USE_ODBC">1</set>
         <set var="USE_QA">1</set>
         <set var="MONOLITHIC">0</set>
         <set var="USE_GUI">1</set>
@@ -461,6 +461,19 @@ Set the version of your Mingw installation here.
     </if>
 
 
+    <!-- FIXME:
+         C++BuilderX supports only wxMSW, monolithic (sic!) static build
+         and the project can't be put into build/msw and store objects in
+         build/msw/something. This *must* be fixed! -->
+    <if cond="FORMAT=='cbuilderx'">
+        <set var="WXUNIV">0</set>
+        <set var="MONOLITHIC">1</set>
+        <set var="SRCDIR">.</set>
+        <set var="TOP_SRCDIR">$(SRCDIR)/$(WXTOPDIR)</set>
+        <set var="SHARED">0</set>
+    </if>
+
+
     <!-- DigitalMars make is braindead, it doesn't have conditional
          processing: -->
     <if cond="FORMAT=='dmars'">
@@ -468,7 +481,7 @@ Set the version of your Mingw installation here.
         <set var="BUILD">debug</set>
         <set var="SHARED">0</set>
         <set var="WXUNIV">0</set>
-        <set var="UNICODE">1</set>
+        <set var="UNICODE">0</set>
         <!-- Free version does not distribute OpenGL,
              in commercial distribution better use dmars_smake format -->
         <set var="USE_OPENGL">0</set>
@@ -477,6 +490,7 @@ Set the version of your Mingw installation here.
     <!-- No need for wxUniv on embedded devices (yet): -->
     <if cond="FORMAT=='msevc4prj'">
         <set var="WXUNIV">0</set>
+        <set var="UNICODE">1</set>
         <!-- Uploading debug reports from PDAs seems impractical -->
         <set var="USE_QA">0</set>
         <set var="MONOLITHIC">1</set> <!-- sic! -->

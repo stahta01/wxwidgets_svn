@@ -17,10 +17,6 @@
 #define wxCONCAT_HELPER(text, line) text ## line
 #define wxCONCAT(text, line)        wxCONCAT_HELPER(text, line)
 
-#define wxCONCAT3(x1, x2, x3) wxCONCAT(wxCONCAT(x1, x2), x3)
-#define wxCONCAT4(x1, x2, x3, x4) wxCONCAT(wxCONCAT3(x1, x2, x3), x4)
-#define wxCONCAT5(x1, x2, x3, x4, x5) wxCONCAT(wxCONCAT4(x1, x2, x3, x4), x5)
-
 /* wxSTRINGIZE works as the preprocessor # operator but also works with macros */
 #define wxSTRINGIZE_HELPER(x)       #x
 #define wxSTRINGIZE(x)              wxSTRINGIZE_HELPER(x)
@@ -57,5 +53,5 @@
  */
 #define wxEMPTY_PARAMETER_VALUE /* Fake macro parameter value */
 
-#endif /* _WX_CPP_H_ */
+#endif // _WX_CPP_H_
 

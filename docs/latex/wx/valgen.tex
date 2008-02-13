@@ -20,10 +20,6 @@ For more information, please see \helpref{Validator overview}{validatoroverview}
 
 <wx/valgen.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{Validator overview}{validatoroverview}, \helpref{wxValidator}{wxvalidator},
@@ -39,28 +35,21 @@ Copy constructor.
 
 \func{}{wxGenericValidator}{\param{bool*}{ valPtr}}
 
-Constructor taking a bool pointer. This will be used for wxCheckBox,
-wxRadioButton, wxToggleButton and wxBitmapToggleButton.
+Constructor taking a bool pointer. This will be used for wxCheckBox and wxRadioButton.
 
 \func{}{wxGenericValidator}{\param{wxString*}{ valPtr}}
 
-Constructor taking a wxString pointer. This will be used for wxButton,
-wxComboBox, wxStaticText, wxTextCtrl.
+Constructor taking a wxString pointer. This will be used for wxButton, wxComboBox, wxStaticText,
+wxTextCtrl.
 
 \func{}{wxGenericValidator}{\param{int*}{ valPtr}}
 
-Constructor taking an integer pointer. This will be used for wxChoice,
-wxGauge, wxScrollBar, wxRadioBox, wxSlider, wxSpinButton and
-wxSpinCtrl.
+Constructor taking an integer pointer. This will be used for wxGauge, wxScrollBar, wxRadioBox, wxSpinButton,
+wxChoice.
 
 \func{}{wxGenericValidator}{\param{wxArrayInt*}{ valPtr}}
 
 Constructor taking a wxArrayInt pointer. This will be used for wxListBox, wxCheckListBox.
-
-\func{}{wxGenericValidator}{\param{wxDateTime*}{ valPtr}}
-
-Constructor taking a \helpref{wxDateTime}{wxdatetime} pointer. This will be
-used for \helpref{wxDatePickerCtrl}{wxdatepickerctrl}.
 
 \wxheading{Parameters}
 

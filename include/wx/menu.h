@@ -237,9 +237,6 @@ public:
     void SetLabel(int itemid, const wxString& label);
     wxString GetLabel(int itemid) const;
 
-    //  Returns the stripped label
-    wxString GetLabelText(int itemid) const { return wxMenuItem::GetLabelText(GetLabel(itemid)); }
-
     virtual void SetHelpString(int itemid, const wxString& helpString);
     virtual wxString GetHelpString(int itemid) const;
 
@@ -378,6 +375,14 @@ protected:
     static bool      ms_locked;
 
     DECLARE_NO_COPY_CLASS(wxMenuBase)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    //  Returns the stripped label
+    wxString GetLabelText(int itemid) const { return wxMenuItem::GetLabelFromText(GetLabel(itemid)); }
+#endif
+
 };
 
 // ----------------------------------------------------------------------------
@@ -427,11 +432,8 @@ public:
     virtual bool IsEnabledTop(size_t WXUNUSED(pos)) const { return true; }
 
     // get or change the label of the menu at given position
-    virtual void SetMenuLabel(size_t pos, const wxString& label) = 0;
-    virtual wxString GetMenuLabel(size_t pos) const = 0;
-
-    // get the stripped label of the menu at given position
-    virtual wxString GetMenuLabelText(size_t pos) const { return wxMenuItem::GetLabelText(GetMenuLabel(pos)); }
+    virtual void SetLabelTop(size_t pos, const wxString& label) = 0;
+    virtual wxString GetLabelTop(size_t pos) const = 0;
 
     // item search
     // -----------
@@ -494,14 +496,6 @@ public:
     // update all menu item states in all menus
     virtual void UpdateMenus();
 
-    virtual bool CanBeOutsideClientArea() const { return true; }
-
-#if WXWIN_COMPATIBILITY_2_8
-    // get or change the label of the menu at given position
-    wxDEPRECATED( void SetLabelTop(size_t pos, const wxString& label) );
-    wxDEPRECATED( wxString GetLabelTop(size_t pos) const );
-#endif
-
 protected:
     // the list of all our menus
     wxMenuList m_menus;
@@ -510,6 +504,21 @@ protected:
     wxFrame *m_menuBarFrame;
 
     DECLARE_NO_COPY_CLASS(wxMenuBarBase)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // Replacement for SetLabelTop
+    void SetMenuLabel(size_t pos, const wxString& label) { SetLabelTop(pos, label); }
+
+    // Gets the original label at the top-level of the menubar
+    // Implemented per port, since we can't have virtual functions in the stable branch.
+    // wxString GetMenuLabel(size_t pos) const;
+
+    // Get the text only, from the label at the top-level of the menubar
+    wxString GetMenuLabelText(size_t pos) const;
+#endif
+
 };
 
 // ----------------------------------------------------------------------------

@@ -14,24 +14,22 @@
 
 DECLARE_WXCOCOA_OBJC_CLASS(NSAffineTransform);
 
-#include "wx/dc.h"
-
-class WXDLLIMPEXP_FWD_CORE wxCocoaDCImpl;
-WX_DECLARE_LIST(wxCocoaDCImpl, wxCocoaDCStack);
+class WXDLLEXPORT wxDC;
+WX_DECLARE_LIST(wxDC, wxCocoaDCStack);
 
 //=========================================================================
 // wxDC
 //=========================================================================
-class WXDLLIMPEXP_CORE wxCocoaDCImpl: public wxDCImpl
+class WXDLLEXPORT wxDC: public wxDCBase
 {
-    DECLARE_ABSTRACT_CLASS(wxCocoaDCImpl)
-    DECLARE_NO_COPY_CLASS(wxCocoaDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxDC)
+    DECLARE_NO_COPY_CLASS(wxDC)
 //-------------------------------------------------------------------------
 // Initialization
 //-------------------------------------------------------------------------
 public:
-    wxCocoaDCImpl(wxDC *owner);
-    virtual ~wxCocoaDCImpl();
+    wxDC();
+    virtual ~wxDC();
 
 //-------------------------------------------------------------------------
 // wxCocoa specifics
@@ -100,7 +98,7 @@ public:
                                  wxCoord *x, wxCoord *y,
                                  wxCoord *descent = NULL,
                                  wxCoord *externalLeading = NULL,
-                                 const wxFont *theFont = NULL) const;
+                                 wxFont *theFont = NULL) const;
 
     virtual bool CanDrawBitmap() const;
     virtual bool CanGetTextExtent() const;

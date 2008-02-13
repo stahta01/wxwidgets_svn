@@ -50,7 +50,7 @@ WXDLLEXPORT bool wxGetClipboardFormatName(wxDataFormat dataFormat,
 // wxClipboard
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxDataObject;
+class WXDLLEXPORT wxDataObject;
 class WXDLLEXPORT wxClipboard : public wxClipboardBase
 {
     DECLARE_DYNAMIC_CLASS(wxClipboard)
@@ -88,9 +88,13 @@ public:
     // eating memory), otherwise the clipboard will be emptied on exit
     virtual bool Flush();
 
+    // X11 has two clipboards which get selected by this call. Empty on MSW.
+    void UsePrimarySelection( bool WXUNUSED(primary) = FALSE ) { }
+
 private:
     bool m_clearOnExit;
 };
 
 #endif // wxUSE_CLIPBOARD
-#endif // _WX_CLIPBRD_H_
+#endif
+    // _WX_CLIPBRD_H_

@@ -28,7 +28,7 @@
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/dcclient.h"
     #include "wx/frame.h"
     #include "wx/textctrl.h"
@@ -46,7 +46,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxFontDialog, wxDialog)
 
-#include "wx/mac/uma.h"
+#include "wx/mac/private.h"
 
 // ---------------------------------------------------------------------------
 // wxFontDialog
@@ -58,41 +58,23 @@ static const EventTypeSpec eventList[] =
 } ;
 
 
-pascal OSStatus
-wxMacCarbonFontPanelHandler(EventHandlerCallRef WXUNUSED(nextHandler),
-                            EventRef event,
-                            void *userData)
+pascal OSStatus wxMacCarbonFontPanelHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = eventNotHandledErr ;
     wxFontDialog *fontdialog = (wxFontDialog*) userData ;
     wxFontData& fontdata= fontdialog->GetFontData() ;
-    
+
     wxMacCarbonEvent cEvent( event );
     switch(cEvent.GetKind())
     {
         case kEventFontSelection :
         {
-            bool setup = false ;
-#if wxMAC_USE_CORE_TEXT
-            if (  UMAGetSystemVersion() >= 0x1050 )
-            {
-                CTFontDescriptorRef descr;
-                if ( cEvent.GetParameter<CTFontDescriptorRef>( kEventParamCTFontDescriptor, typeCTFontDescriptorRef, &descr ) == noErr )
-                {
-                    wxFont font;
-                    font.MacCreateFromCTFontDescriptor(descr);
-                    fontdata.SetChosenFont( font ) ;
-                    setup = true;
-                }
-            }
-#endif
-#if wxMAC_USE_ATSU_TEXT
             ATSUFontID fontId = 0 ;
-            if ( !setup && (cEvent.GetParameter<ATSUFontID>(kEventParamATSUFontID, &fontId) == noErr) )
+            if ( cEvent.GetParameter<ATSUFontID>(kEventParamATSUFontID, &fontId) == noErr )
             {
                 FMFontStyle fontStyle = cEvent.GetParameter<FMFontStyle>(kEventParamFMFontStyle);
                 FMFontSize fontSize = cEvent.GetParameter<FMFontSize>(kEventParamFMFontSize);
-                
+
                 CFStringRef cfName = NULL;
 #if 1
                 FMFontFamily fontFamily = cEvent.GetParameter<FMFontFamily>(kEventParamFMFontFamily);
@@ -104,25 +86,25 @@ wxMacCarbonFontPanelHandler(EventHandlerCallRef WXUNUSED(nextHandler),
                 ByteCount actualLength = 0;
                 char *c = NULL;
                 OSStatus err = ATSUFindFontName(fontId , kFontFamilyName, kFontUnicodePlatform, kFontNoScriptCode,
-                                                kFontNoLanguageCode , 0 , NULL , &actualLength , NULL );
+                    kFontNoLanguageCode , 0 , NULL , &actualLength , NULL );
                 if ( err == noErr)
                 {
                     actualLength += 1 ;
                     char *c = (char*)malloc( actualLength );
                     err = ATSUFindFontName(fontId, kFontFamilyName, kFontUnicodePlatform, kFontNoScriptCode,
-                                           kFontNoLanguageCode, actualLength, c , NULL, NULL);
+                        kFontNoLanguageCode, actualLength, c , NULL, NULL);
                     cfName = CFStringCreateWithCharacters(NULL, (UniChar*) c, (actualLength-1) >> 1);
                 }
                 else
                 {
                     err = ATSUFindFontName(fontId , kFontFamilyName, kFontNoPlatformCode, kFontNoScriptCode,
-                                           kFontNoLanguageCode , 0 , NULL , &actualLength , NULL );
+                    kFontNoLanguageCode , 0 , NULL , &actualLength , NULL );
                     if ( err == noErr )
                     {
                         actualLength += 1 ;
                         c = (char*)malloc(actualLength);
                         err = ATSUFindFontName(fontId, kFontFamilyName, kFontNoPlatformCode, kFontNoScriptCode,
-                                               kFontNoLanguageCode, actualLength, c , NULL, NULL);
+                            kFontNoLanguageCode, actualLength, c , NULL, NULL);
                         c[actualLength-1] = 0;
                         cfName = CFStringCreateWithCString(NULL, c, kCFStringEncodingMacRoman );
                     }
@@ -130,23 +112,20 @@ wxMacCarbonFontPanelHandler(EventHandlerCallRef WXUNUSED(nextHandler),
                 if ( c!=NULL )
                     free(c);
 #endif
+                 
                 if ( cfName!=NULL )
                 {
-                    fontdata.m_chosenFont.SetFaceName(wxCFStringRef(cfName).AsString(wxLocale::GetSystemEncoding()));
+                    fontdata.m_chosenFont.SetFaceName(wxMacCFStringHolder(cfName).AsString(wxLocale::GetSystemEncoding()));
                     fontdata.m_chosenFont.SetPointSize(fontSize);
                     fontdata.m_chosenFont.SetStyle(fontStyle & italic ? wxFONTSTYLE_ITALIC : wxFONTSTYLE_NORMAL);
                     fontdata.m_chosenFont.SetUnderlined((fontStyle & underline)!=0);
                     fontdata.m_chosenFont.SetWeight(fontStyle & bold ? wxFONTWEIGHT_BOLD : wxFONTWEIGHT_NORMAL);
                 }
             }
-#endif // wxMAC_USE_ATSU_TEXT
-            
-            // retrieving the color
+
             RGBColor fontColor ;
             if ( cEvent.GetParameter<RGBColor>(kEventParamFontColor, &fontColor) == noErr )
-            {
-                fontdata.m_fontColour = fontColor;
-            }
+                fontdata.m_fontColour.FromRGBColor((WXCOLORREF*) &fontColor);
             else
             {
                 CFDictionaryRef dict ;
@@ -159,8 +138,8 @@ wxMacCarbonFontPanelHandler(EventHandlerCallRef WXUNUSED(nextHandler),
                         CFDataRef sizesData;
                         CFDataRef valuesData;
                         if ( CFDictionaryGetValueIfPresent(attributesDict, kFontPanelAttributeTagsKey, (const void **)&tagsData) &&
-                            CFDictionaryGetValueIfPresent(attributesDict, kFontPanelAttributeSizesKey, (const void **)&sizesData) &&
-                            CFDictionaryGetValueIfPresent(attributesDict, kFontPanelAttributeValuesKey, (const void **)&valuesData) )
+                             CFDictionaryGetValueIfPresent(attributesDict, kFontPanelAttributeSizesKey, (const void **)&sizesData) &&
+                             CFDictionaryGetValueIfPresent(attributesDict, kFontPanelAttributeValuesKey, (const void **)&valuesData) )
                         {
                             ItemCount count = CFDataGetLength(tagsData)/sizeof(ATSUAttributeTag);
                             ATSUAttributeTag *tagPtr = (ATSUAttributeTag *)CFDataGetBytePtr(tagsData);
@@ -171,7 +150,7 @@ wxMacCarbonFontPanelHandler(EventHandlerCallRef WXUNUSED(nextHandler),
                             {
                                 if ( tagPtr[i] == kATSUColorTag && sizePtr[i] == sizeof(RGBColor))
                                 {
-                                    fontdata.m_fontColour = *(RGBColor *)valuesPtr;
+                                    fontdata.m_fontColour.FromRGBColor((WXCOLORREF*) valuesPtr);
                                     break ;
                                 }
                                 bytePtr = (UInt32*)( (UInt8*)bytePtr + sizePtr[i]);
@@ -183,7 +162,7 @@ wxMacCarbonFontPanelHandler(EventHandlerCallRef WXUNUSED(nextHandler),
         }
             break ;
     } ;
-    
+
     return result ;
 }
 
@@ -202,7 +181,7 @@ wxFontDialog::~wxFontDialog()
 {
 }
 
-bool wxFontDialog::Create(wxWindow *WXUNUSED(parent), const wxFontData& data)
+bool wxFontDialog::Create(wxWindow *parent, const wxFontData& data)
 {
     m_fontData = data;
     return true ;
@@ -217,23 +196,8 @@ int wxFontDialog::ShowModal()
         font = m_fontData.m_initialFont ;
     }
 
-    bool setup = false;
-#if wxMAC_USE_CORE_TEXT
-    if ( UMAGetSystemVersion() >= 0x1050 )
-    {
-        CTFontDescriptorRef descr = (CTFontDescriptorRef)font.MacGetCTFontDescriptor();
-        err = SetFontInfoForSelection (kFontSelectionCoreTextType,1, &descr , NULL);
-        setup = true;
-    }
-#endif
-#if wxMAC_USE_ATSU_TEXT
-    if ( !setup )
-    {
-        ATSUStyle style = (ATSUStyle)font.MacGetATSUStyle();
-        err = SetFontInfoForSelection (kFontSelectionATSUIType,1, &style , NULL);
-        setup = true;
-    }
-#endif
+    ATSUStyle style = (ATSUStyle)font.MacGetATSUStyle();
+    err = SetFontInfoForSelection (kFontSelectionATSUIType,1, &style , NULL);
     // just clicking on ENTER will not send us any font setting event, therefore we have to make sure
     // that field is already correct
     m_fontData.m_chosenFont = font ;
@@ -388,7 +352,7 @@ void wxFontColourSwatchCtrl::OnMouseEvent(wxMouseEvent& event)
         Refresh();
 
         wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, GetId());
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
     }
 }
 
@@ -486,7 +450,7 @@ void wxFontDialog::CreateControls()
     itemBoxSizer3->Add(itemFlexGridSizer4, 1, wxGROW|wxALL, 5);
 
     wxStaticText* itemStaticText5 = new wxStaticText( itemDialog1, wxID_STATIC, _("Font:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemFlexGridSizer4->Add(itemStaticText5, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL, 5);
+    itemFlexGridSizer4->Add(itemStaticText5, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL|wxADJUST_MINSIZE, 5);
 
     wxBoxSizer* itemBoxSizer6 = new wxBoxSizer(wxVERTICAL);
     itemFlexGridSizer4->Add(itemBoxSizer6, 0, wxGROW|wxGROW, 5);
@@ -496,7 +460,7 @@ void wxFontDialog::CreateControls()
     itemBoxSizer6->Add(m_facenameCtrl, 0, wxGROW|wxALL, 5);
 
     wxStaticText* itemStaticText8 = new wxStaticText( itemDialog1, wxID_STATIC, _("Size:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemFlexGridSizer4->Add(itemStaticText8, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemFlexGridSizer4->Add(itemStaticText8, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL|wxADJUST_MINSIZE, 5);
 
     m_sizeCtrl = new wxSpinCtrl( itemDialog1, wxID_FONTDIALOG_FONTSIZE, _T("12"), wxDefaultPosition, wxSize(60, -1), wxSP_ARROW_KEYS, 1, 300, 12 );
     m_sizeCtrl->SetHelpText(_("The font size in points."));
@@ -505,7 +469,7 @@ void wxFontDialog::CreateControls()
     itemFlexGridSizer4->Add(m_sizeCtrl, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL, 5);
 
     wxStaticText* itemStaticText10 = new wxStaticText( itemDialog1, wxID_STATIC, _("Style:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemFlexGridSizer4->Add(itemStaticText10, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5);
+    itemFlexGridSizer4->Add(itemStaticText10, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL|wxADJUST_MINSIZE, 5);
 
     wxBoxSizer* itemBoxSizer11 = new wxBoxSizer(wxHORIZONTAL);
     itemFlexGridSizer4->Add(itemBoxSizer11, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
@@ -537,7 +501,7 @@ void wxFontDialog::CreateControls()
     if (m_fontData.GetEnableEffects())
     {
         wxStaticText* itemStaticText15 = new wxStaticText( itemDialog1, wxID_STATIC, _("Colour:"), wxDefaultPosition, wxDefaultSize, 0 );
-        itemFlexGridSizer4->Add(itemStaticText15, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL, 5);
+        itemFlexGridSizer4->Add(itemStaticText15, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL|wxADJUST_MINSIZE, 5);
 
         m_colourCtrl = new wxFontColourSwatchCtrl( itemDialog1, wxID_FONTDIALOG_COLOUR, wxDefaultPosition, wxSize(-1, 30), wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
         m_colourCtrl->SetHelpText(_("Click to change the font colour."));
@@ -547,7 +511,7 @@ void wxFontDialog::CreateControls()
     }
 
     wxStaticText* itemStaticText17 = new wxStaticText( itemDialog1, wxID_STATIC, _("Preview:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemFlexGridSizer4->Add(itemStaticText17, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL, 5);
+    itemFlexGridSizer4->Add(itemStaticText17, 0, wxALIGN_RIGHT|wxALIGN_TOP|wxALL|wxADJUST_MINSIZE, 5);
 
     m_previewCtrl = new wxFontPreviewCtrl( itemDialog1, wxID_FONTDIALOG_PREVIEW, wxDefaultPosition, wxSize(-1, 70), wxSUNKEN_BORDER|wxTAB_TRAVERSAL );
     m_previewCtrl->SetHelpText(_("Shows a preview of the font."));

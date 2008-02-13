@@ -11,13 +11,11 @@
 
 #include "wx/wxprec.h"
 
+#include "wx/dc.h"
+
 #ifdef __BORLANDC__
 #pragma hdrstop
 #endif
-
-#if wxUSE_GRAPHICS_CONTEXT
-
-#include "wx/dc.h"
 
 #ifndef WX_PRECOMP
 #include "wx/image.h"
@@ -34,8 +32,14 @@
 #include "wx/module.h"
 #endif
 
-#include "wx/private/graphics.h"
+#ifdef __WXGTK__
+#include "wx/gtk/win_gtk.h"
+#endif
+
+#include "wx/graphics.h"
 #include "wx/rawbmp.h"
+
+#if wxUSE_GRAPHICS_CONTEXT
 
 #include <vector>
 
@@ -98,18 +102,6 @@ static inline double RadToDeg(double deg)
 #include <cairo.h>
 #ifdef __WXGTK__
 #include <gtk/gtk.h>
-#include "wx/fontutil.h"
-#include "wx/gtk/dc.h"
-#endif
-
-#ifdef __WXMSW__
-#include <cairo-win32.h>
-#endif
-
-#ifdef __WXMAC__
-#include "wx/mac/private.h"
-#include <cairo-quartz.h>
-#include <cairo-atsui.h>
 #endif
 
 class WXDLLIMPEXP_CORE wxCairoPathData : public wxGraphicsPathData
@@ -298,24 +290,15 @@ public:
     ~wxCairoFontData();
 
     virtual void Apply( wxGraphicsContext* context );
-#ifdef __WXGTK__
-    const PangoFontDescription* GetFont() const { return m_font; }
-#endif
 private :
+    wxCharBuffer m_fontName;
     double m_size;
+    cairo_font_slant_t m_slant;
+    cairo_font_weight_t m_weight;
     double m_red;
     double m_green;
     double m_blue;
     double m_alpha;
-#ifdef __WXMAC__
-    cairo_font_face_t *m_font;
-#elif defined(__WXGTK__)
-    PangoFontDescription* m_font;
-#else
-    wxCharBuffer m_fontName;
-    cairo_font_slant_t m_slant;
-    cairo_font_weight_t m_weight;
-#endif
 };
 
 class WXDLLIMPEXP_CORE wxCairoContext : public wxGraphicsContext
@@ -324,7 +307,6 @@ class WXDLLIMPEXP_CORE wxCairoContext : public wxGraphicsContext
 
 public:
     wxCairoContext( wxGraphicsRenderer* renderer, const wxWindowDC& dc );
-    wxCairoContext( wxGraphicsRenderer* renderer, const wxMemoryDC& dc );
 #ifdef __WXGTK__
     wxCairoContext( wxGraphicsRenderer* renderer, GdkDrawable *drawable );
 #endif
@@ -332,18 +314,6 @@ public:
     wxCairoContext( wxGraphicsRenderer* renderer, wxWindow *window);
     wxCairoContext();
     virtual ~wxCairoContext();
-
-    virtual bool ShouldOffset() const
-    {     
-        int penwidth = 0 ;
-        if ( !m_pen.IsNull() )
-        {
-            penwidth = (int)((wxCairoPenData*)m_pen.GetRefData())->GetWidth();
-            if ( penwidth == 0 )
-                penwidth = 1;
-        }
-        return ( penwidth % 2 ) == 1;
-    }
 
     virtual void Clip( const wxRegion &region );
 
@@ -382,8 +352,6 @@ public:
     virtual void GetPartialTextExtents(const wxString& text, wxArrayDouble& widths) const;
 
 private:
-    void Init(cairo_t *context);
-    
     cairo_t* m_context;
 };
 
@@ -487,17 +455,17 @@ wxCairoPenData::wxCairoPenData( wxGraphicsRenderer* renderer, const wxPen &pen )
         break;
 
     case wxLONG_DASH :
-        m_lengths = dashed ;
+        m_lengths = dotted ;
         m_count = WXSIZEOF(dashed);
         break;
 
     case wxSHORT_DASH :
-        m_lengths = short_dashed ;
+        m_lengths = dotted ;
         m_count = WXSIZEOF(short_dashed);
         break;
 
     case wxDOT_DASH :
-        m_lengths = dotted_dashed ;
+        m_lengths = dotted ;
         m_count = WXSIZEOF(dotted_dashed);
         break;
 
@@ -706,42 +674,25 @@ wxCairoFontData::wxCairoFontData( wxGraphicsRenderer* renderer, const wxFont &fo
     m_green = col.Green()/255.0; 
     m_blue = col.Blue()/255.0;
     m_alpha = col.Alpha()/255.0;
-    m_size = font.GetPointSize();
 
-#ifdef __WXMAC__
-    m_font = cairo_atsui_font_face_create_for_atsu_font_id( font.MacGetATSUFontID() );
-#elif defined(__WXGTK__)
-    m_font = pango_font_description_copy( font.GetNativeFontInfo()->description );
-#else
+    m_size = font.GetPointSize();
     m_fontName = font.GetFaceName().mb_str(wxConvUTF8);
     m_slant = font.GetStyle() == wxFONTSTYLE_ITALIC ? CAIRO_FONT_SLANT_ITALIC:CAIRO_FONT_SLANT_NORMAL;
     m_weight = font.GetWeight() == wxFONTWEIGHT_BOLD ? CAIRO_FONT_WEIGHT_BOLD:CAIRO_FONT_WEIGHT_NORMAL;
-#endif
 }
 
 wxCairoFontData::~wxCairoFontData()
 {
-#ifdef __WXMAC__
-    cairo_font_face_destroy( m_font );
-#elif defined(__WXGTK__)
-    pango_font_description_free( m_font );
-#else
-#endif
 }
 
 void wxCairoFontData::Apply( wxGraphicsContext* context )
 {
     cairo_t * ctext = (cairo_t*) context->GetNativeContext();
     cairo_set_source_rgba(ctext,m_red,m_green, m_blue,m_alpha);
-#ifdef __WXGTK__
-    // the rest is done using Pango layouts
-#elif defined(__WXMAC__)
-    cairo_set_font_face(ctext, m_font);
-    cairo_set_font_size(ctext, m_size );
-#else
-    cairo_select_font_face(ctext, m_fontName, m_slant, m_weights );
-    cairo_set_font_size(ctext, m_size );
-#endif
+    cairo_select_font_face(ctext,m_fontName,m_slant,m_weight);
+    cairo_set_font_size(ctext,m_size);
+    // TODO UNDERLINE
+    // TODO FIX SIZE
 }
 
 //-----------------------------------------------------------------------------
@@ -883,7 +834,7 @@ void wxCairoPathData::GetBox(wxDouble *x, wxDouble *y, wxDouble *w, wxDouble *h)
     }
 }
 
-bool wxCairoPathData::Contains( wxDouble x, wxDouble y, int WXUNUSED(fillStyle) ) const
+bool wxCairoPathData::Contains( wxDouble x, wxDouble y, int fillStyle ) const
 {
     return cairo_in_stroke( m_pathContext, x, y) != 0;
 }
@@ -1014,72 +965,32 @@ void * wxCairoMatrixData::GetNativeMatrix() const
 // wxCairoContext implementation
 //-----------------------------------------------------------------------------
 
-class wxCairoOffsetHelper
-{
-public :
-    wxCairoOffsetHelper( cairo_t* ctx , bool offset )
-    {
-        m_ctx = ctx;
-        m_offset = offset;
-        if ( m_offset )
-             cairo_translate( m_ctx, 0.5, 0.5 );
-    }
-    ~wxCairoOffsetHelper( )
-    {
-        if ( m_offset )
-            cairo_translate( m_ctx, -0.5, -0.5 );
-    }
-public :
-    cairo_t* m_ctx;
-    bool m_offset;
-} ;
-
 wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, const wxWindowDC& dc )
 : wxGraphicsContext(renderer)
 {
 #ifdef __WXGTK__
-    wxGTKDCImpl *impldc = (wxGTKDCImpl*) dc.GetImpl();
-    Init( gdk_cairo_create( impldc->GetGDKWindow() ) );
+    m_context = gdk_cairo_create( dc.m_window ) ;
 #endif
-#ifdef __WXMAC__
-    int width, height;
-    dc.GetSize( &width, &height );
-    CGContextRef cgcontext = (CGContextRef)dc.GetWindow()->MacGetCGContextRef();
-    cairo_surface_t* surface = cairo_quartz_surface_create_for_cg_context(cgcontext, width, height);
-    Init( cairo_create( surface ) );
-    cairo_surface_destroy( surface );
-#endif
-}
-
-wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, const wxMemoryDC& dc )
-: wxGraphicsContext(renderer)
-{
-#ifdef __WXGTK__
-    wxGTKDCImpl *impldc = (wxGTKDCImpl*) dc.GetImpl();
-    Init( gdk_cairo_create( impldc->GetGDKWindow() ) );
-#endif
-#ifdef __WXMAC__
-    int width, height;
-    dc.GetSize( &width, &height );
-    CGContextRef cgcontext = (CGContextRef)dc.GetWindow()->MacGetCGContextRef();
-    cairo_surface_t* surface = cairo_quartz_surface_create_for_cg_context(cgcontext, width, height);
-    Init( cairo_create( surface ) );
-    cairo_surface_destroy( surface );
-#endif
+    PushState();
+    PushState();
 }
 
 #ifdef __WXGTK__
 wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, GdkDrawable *drawable )
 : wxGraphicsContext(renderer)
 {
-    Init( gdk_cairo_create( drawable ) );
+    m_context = gdk_cairo_create( drawable ) ;
+    PushState();
+    PushState();
 }
 #endif
 
 wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, cairo_t *context )
 : wxGraphicsContext(renderer)
 {
-    Init( context );
+    m_context = context ;
+    PushState();
+    PushState();
 }
 
 wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, wxWindow *window)
@@ -1088,18 +999,25 @@ wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, wxWindow *window)
 #ifdef __WXGTK__
     // something along these lines (copied from dcclient)
 
+    GtkWidget *widget = window->m_wxwindow;
+
     // Some controls don't have m_wxwindow - like wxStaticBox, but the user
     // code should still be able to create wxClientDCs for them, so we will
     // use the parent window here then.
-    if (window->m_wxwindow == NULL)
+    if ( !widget )
     {
         window = window->GetParent();
+        widget = window->m_wxwindow;
     }
 
-    wxASSERT_MSG( window->m_wxwindow, wxT("wxCairoContext needs a widget") );
+    wxASSERT_MSG( widget, wxT("wxCairoContext needs a widget") );
 
-    Init(gdk_cairo_create(window->GTKGetDrawingWindow()));
+    GtkPizza *pizza = GTK_PIZZA( widget );
+    GdkDrawable* drawable = pizza->bin_window;
+    m_context = gdk_cairo_create( drawable ) ;
 #endif
+    PushState();
+    PushState();
 }
 
 wxCairoContext::~wxCairoContext()
@@ -1112,13 +1030,6 @@ wxCairoContext::~wxCairoContext()
     }
 }
 
-void wxCairoContext::Init(cairo_t *context)
-{
-    m_context = context ;
-    PushState();
-    PushState();
-}
-
 
 void wxCairoContext::Clip( const wxRegion& region )
 {
@@ -1128,7 +1039,7 @@ void wxCairoContext::Clip( const wxRegion& region )
     while (ri)
     {
         path.AddRectangle(ri.GetX(), ri.GetY(), ri.GetW(), ri.GetH());
-        ++ri;
+        ri++;
     }
     
     // Put it in the context
@@ -1165,7 +1076,6 @@ void wxCairoContext::StrokePath( const wxGraphicsPath& path )
 {
     if ( !m_pen.IsNull() )
     {   
-        wxCairoOffsetHelper helper( m_context, ShouldOffset() ) ;       
         cairo_path_t* cp = (cairo_path_t*) path.GetNativePath() ;
         cairo_append_path(m_context,cp);
         ((wxCairoPenData*)m_pen.GetRefData())->Apply(this);
@@ -1178,7 +1088,6 @@ void wxCairoContext::FillPath( const wxGraphicsPath& path , int fillStyle )
 {
     if ( !m_brush.IsNull() )
     {
-        wxCairoOffsetHelper helper( m_context, ShouldOffset() ) ;
         cairo_path_t* cp = (cairo_path_t*) path.GetNativePath() ;
         cairo_append_path(m_context,cp);
         ((wxCairoBrushData*)m_brush.GetRefData())->Apply(this);
@@ -1346,23 +1255,9 @@ void wxCairoContext::DrawText( const wxString &str, wxDouble x, wxDouble y )
 {
     if ( m_font.IsNull() || str.empty())
         return;
-
-#ifdef __WXGTK__
-    const wxCharBuffer data = str.utf8_str();
-    if ( !data )
-        return;
-    size_t datalen = strlen(data);
+    
     ((wxCairoFontData*)m_font.GetRefData())->Apply(this);
 
-    PangoLayout *layout = pango_cairo_create_layout (m_context);
-    pango_layout_set_font_description( layout, ((wxCairoFontData*)m_font.GetRefData())->GetFont());
-    pango_layout_set_text(layout, data, datalen);
-    cairo_move_to(m_context, x, y);
-    pango_cairo_show_layout (m_context, layout);
-
-    g_object_unref (layout);
-#else
-    ((wxCairoFontData*)m_font.GetRefData())->Apply(this);
     // Cairo's x,y for drawing text is at the baseline, so we need to adjust
     // the position we move to by the ascent.
     cairo_font_extents_t fe;
@@ -1371,49 +1266,14 @@ void wxCairoContext::DrawText( const wxString &str, wxDouble x, wxDouble y )
     
     const wxWX2MBbuf buf(str.mb_str(wxConvUTF8));
     cairo_show_text(m_context,buf);
-#endif
 }
 
 void wxCairoContext::GetTextExtent( const wxString &str, wxDouble *width, wxDouble *height,
                                     wxDouble *descent, wxDouble *externalLeading ) const
 {
-    if ( width )
-        *width = 0;
-    if ( height )
-        *height = 0;
-    if ( descent )
-        *descent = 0;
-    if ( externalLeading )
-        *externalLeading = 0;
-
     if ( m_font.IsNull() || str.empty())
         return;
 
-#ifdef __WXGTK__
-    int w, h;
-  
-    PangoLayout *layout = pango_cairo_create_layout (m_context);
-    pango_layout_set_font_description( layout, ((wxCairoFontData*)m_font.GetRefData())->GetFont());
-    const wxCharBuffer data = str.utf8_str();
-    if ( !data )
-    {
-        return;
-    }
-    pango_layout_set_text( layout, data, strlen(data) );
-    pango_layout_get_pixel_size (layout, &w, &h);
-    if ( width )
-        *width = w;
-    if ( height )
-        *height = h;
-    if (descent)
-    {
-        PangoLayoutIter *iter = pango_layout_get_iter(layout);
-        int baseline = pango_layout_iter_get_baseline(iter);
-        pango_layout_iter_free(iter);
-        *descent = h - PANGO_PIXELS(baseline);
-    }
-    g_object_unref (layout);
-#else
     ((wxCairoFontData*)m_font.GetRefData())->Apply((wxCairoContext*)this);
 
     if (width)
@@ -1428,17 +1288,6 @@ void wxCairoContext::GetTextExtent( const wxString &str, wxDouble *width, wxDoub
     {
         cairo_font_extents_t fe;
         cairo_font_extents(m_context, &fe);
-        
-        // some backends have negative descents
-        
-        if ( fe.descent < 0 )
-            fe.descent = -fe.descent;
-    
-        if ( fe.height < (fe.ascent + fe.descent ) )
-        {
-            // some backends are broken re height ... (eg currently ATSUI)
-            fe.height = fe.ascent + fe.descent;
-        }
     
         if (height)
             *height = fe.height;
@@ -1447,7 +1296,6 @@ void wxCairoContext::GetTextExtent( const wxString &str, wxDouble *width, wxDoub
         if ( externalLeading )
             *externalLeading = wxMax(0, fe.height - (fe.ascent + fe.descent));
     }
-#endif
 }
 
 void wxCairoContext::GetPartialTextExtents(const wxString& text, wxArrayDouble& widths) const
@@ -1480,7 +1328,10 @@ public :
     // Context
 
     virtual wxGraphicsContext * CreateContext( const wxWindowDC& dc);
+
+#ifdef __WXMSW__
     virtual wxGraphicsContext * CreateContext( const wxMemoryDC& dc);
+#endif
 
     virtual wxGraphicsContext * CreateContextFromNativeContext( void * context );
 
@@ -1527,9 +1378,6 @@ private :
 IMPLEMENT_DYNAMIC_CLASS(wxCairoRenderer,wxGraphicsRenderer)
 
 static wxCairoRenderer gs_cairoGraphicsRenderer;
-// temporary hack to allow creating a cairo context on any platform
-extern wxGraphicsRenderer* gCairoRenderer;
-wxGraphicsRenderer* gCairoRenderer = &gs_cairoGraphicsRenderer;
 
 #ifdef __WXGTK__
 wxGraphicsRenderer* wxGraphicsRenderer::GetDefaultRenderer()
@@ -1543,10 +1391,12 @@ wxGraphicsContext * wxCairoRenderer::CreateContext( const wxWindowDC& dc)
     return new wxCairoContext(this,dc);
 }
 
+#ifdef __WXMSW__
 wxGraphicsContext * wxCairoRenderer::CreateContext( const wxMemoryDC& dc)
 {
-    return new wxCairoContext(this,dc);
+    return NULL;
 }
+#endif
 
 wxGraphicsContext * wxCairoRenderer::CreateContextFromNativeContext( void * context )
 {

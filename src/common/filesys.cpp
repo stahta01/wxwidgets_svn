@@ -30,29 +30,14 @@
 #include "wx/uri.h"
 #include "wx/private/fileback.h"
 
-// ----------------------------------------------------------------------------
-// wxFSFile
-// ----------------------------------------------------------------------------
 
-const wxString& wxFSFile::GetMimeType() const
-{
-    if ( m_MimeType.empty() && !m_Location.empty() )
-    {
-        wxConstCast(this, wxFSFile)->m_MimeType =
-            wxFileSystemHandler::GetMimeTypeFromExt(m_Location);
-    }
-
-    return m_MimeType;
-}
-
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 // wxFileSystemHandler
-// ----------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
 
 IMPLEMENT_ABSTRACT_CLASS(wxFileSystemHandler, wxObject)
 
 
-/* static */
 wxString wxFileSystemHandler::GetMimeTypeFromExt(const wxString& location)
 {
     wxString ext, mime;
@@ -85,27 +70,27 @@ wxString wxFileSystemHandler::GetMimeTypeFromExt(const wxString& location)
                            wxEmptyString,
                            wxEmptyString,
                            _T("JPEG image (from fallback)"),
-                           _T("jpg"), _T("jpeg"), _T("JPG"), _T("JPEG"), wxNullPtr),
+                           _T("jpg"), _T("jpeg"), _T("JPG"), _T("JPEG"), NULL),
             wxFileTypeInfo(_T("image/gif"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("GIF image (from fallback)"),
-                           _T("gif"), _T("GIF"), wxNullPtr),
+                           _T("gif"), _T("GIF"), NULL),
             wxFileTypeInfo(_T("image/png"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("PNG image (from fallback)"),
-                           _T("png"), _T("PNG"), wxNullPtr),
+                           _T("png"), _T("PNG"), NULL),
             wxFileTypeInfo(_T("image/bmp"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("windows bitmap image (from fallback)"),
-                           _T("bmp"), _T("BMP"), wxNullPtr),
+                           _T("bmp"), _T("BMP"), NULL),
             wxFileTypeInfo(_T("text/html"),
                            wxEmptyString,
                            wxEmptyString,
                            _T("HTML document (from fallback)"),
-                           _T("htm"), _T("html"), _T("HTM"), _T("HTML"), wxNullPtr),
+                           _T("htm"), _T("html"), _T("HTM"), _T("HTML"), NULL),
             // must terminate the table with this!
             wxFileTypeInfo()
         };
@@ -139,8 +124,7 @@ wxString wxFileSystemHandler::GetMimeTypeFromExt(const wxString& location)
 
 
 
-/* static */
-wxString wxFileSystemHandler::GetProtocol(const wxString& location)
+wxString wxFileSystemHandler::GetProtocol(const wxString& location) const
 {
     wxString s = wxEmptyString;
     int i, l = location.length();
@@ -155,8 +139,7 @@ wxString wxFileSystemHandler::GetProtocol(const wxString& location)
 }
 
 
-/* static */
-wxString wxFileSystemHandler::GetLeftLocation(const wxString& location)
+wxString wxFileSystemHandler::GetLeftLocation(const wxString& location) const
 {
     int i;
     bool fnd = false;
@@ -168,8 +151,7 @@ wxString wxFileSystemHandler::GetLeftLocation(const wxString& location)
     return wxEmptyString;
 }
 
-/* static */
-wxString wxFileSystemHandler::GetRightLocation(const wxString& location)
+wxString wxFileSystemHandler::GetRightLocation(const wxString& location) const
 {
     int i, l = location.length();
     int l2 = l + 1;
@@ -185,8 +167,7 @@ wxString wxFileSystemHandler::GetRightLocation(const wxString& location)
     else return location.Mid(i + 1, l2 - i - 2);
 }
 
-/* static */
-wxString wxFileSystemHandler::GetAnchor(const wxString& location)
+wxString wxFileSystemHandler::GetAnchor(const wxString& location) const
 {
     wxChar c;
     int l = location.length();
@@ -250,7 +231,7 @@ wxFSFile* wxLocalFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs), const wxString&
 
     return new wxFSFile(is,
                         right,
-                        wxEmptyString,
+                        GetMimeTypeFromExt(location),
                         GetAnchor(location)
 #if wxUSE_DATETIME
                         ,wxDateTime(wxFileModificationTime(fullpath))
@@ -418,7 +399,7 @@ wxFSFile* wxFileSystem::OpenFile(const wxString& location, int flags)
     meta = 0;
     for (i = 0; i < ln; i++)
     {
-        switch ( loc[i].GetValue() )
+        switch (loc[i])
         {
             case wxT('/') : case wxT(':') : case wxT('#') :
                 meta = loc[i];
@@ -519,19 +500,16 @@ wxString wxFileSystem::FindNext()
 }
 
 bool wxFileSystem::FindFileInPath(wxString *pStr,
-                                  const wxString& path,
-                                  const wxString& basename)
+                                  const wxChar *path,
+                                  const wxChar *basename)
 {
     // we assume that it's not empty
-    wxCHECK_MSG( !basename.empty(), false,
+    wxCHECK_MSG( !wxIsEmpty(basename), false,
                 _T("empty file name in wxFileSystem::FindFileInPath"));
 
-    wxString name;
     // skip path separator in the beginning of the file name if present
-    if ( wxIsPathSeparator(basename[0u]) )
-        name = basename.substr(1);
-    else
-        name = basename;
+    if ( wxIsPathSeparator(*basename) )
+       basename++;
 
     wxStringTokenizer tokenizer(path, wxPATH_SEP);
     while ( tokenizer.HasMoreTokens() )
@@ -539,7 +517,7 @@ bool wxFileSystem::FindFileInPath(wxString *pStr,
         wxString strFile = tokenizer.GetNextToken();
         if ( !wxEndsWithPathSeparator(strFile) )
             strFile += wxFILE_SEP_PATH;
-        strFile += name;
+        strFile += basename;
 
         wxFSFile *file = OpenFile(strFile);
         if ( file )

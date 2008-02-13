@@ -16,10 +16,10 @@
 // wxEventLoop
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxGUIEventLoop : public wxEventLoopBase
+class WXDLLEXPORT wxEventLoop : public wxEventLoopBase
 {
 public:
-    wxGUIEventLoop();
+    wxEventLoop();
 
     // implement base class pure virtuals
     virtual int Run();
@@ -37,7 +37,6 @@ public:
 
     // process a single message
     virtual void ProcessMessage(WXMSG *msg);
-    virtual void WakeUp();
 
 protected:
     // should we exit the loop?

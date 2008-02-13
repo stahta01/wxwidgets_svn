@@ -14,16 +14,11 @@ can seek beyond the end of the stream (file) and will thus not return
 
 \wxheading{Derived from}
 
-\helpref{wxInputStream}{wxinputstream}\\
-\helpref{wxStreamBase}{wxstreambase}
+\helpref{wxInputStream}{wxinputstream}
 
 \wxheading{Include files}
 
 <wx/wfstream.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
 
 \wxheading{See also}
 
@@ -36,7 +31,7 @@ can seek beyond the end of the stream (file) and will thus not return
 
 \membersection{wxFFileInputStream::wxFFileInputStream}\label{wxffileinputstreamctor}
 
-\func{}{wxFFileInputStream}{\param{const wxString\&}{ filename}, \param{const wxString\&}{ mode = "rb"}}
+\func{}{wxFFileInputStream}{\param{const wxString\&}{ filename}, \param{const wxChar *}{ mode = "rb"}}
 
 Opens the specified file using its {\it filename} name using the specified mode.
 
@@ -76,16 +71,11 @@ can seek beyond the end of the stream (file) and will thus not return
 
 \wxheading{Derived from}
 
-\helpref{wxOutputStream}{wxoutputstream}\\
-\helpref{wxStreamBase}{wxstreambase}
+\helpref{wxOutputStream}{wxoutputstream}
 
 \wxheading{Include files}
 
 <wx/wfstream.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
 
 \wxheading{See also}
 
@@ -98,7 +88,7 @@ can seek beyond the end of the stream (file) and will thus not return
 
 \membersection{wxFFileOutputStream::wxFFileOutputStream}\label{wxffileoutputstreamctor}
 
-\func{}{wxFFileOutputStream}{\param{const wxString\&}{ filename}, \param{const wxString\&}{ mode="w+b"}}
+\func{}{wxFFileOutputStream}{\param{const wxString\&}{ filename}, \param{const wxChar *}{ mode="w+b"}}
 
 Opens the file with the given {\it filename} name in the specified mode.
 
@@ -129,17 +119,11 @@ Returns true if the stream is initialized and ready.
 
 \wxheading{Derived from}
 
-\helpref{wxFFileOutputStream}{wxffileoutputstream}\\
-\helpref{wxOutputStream}{wxoutputstream}\\
-\helpref{wxStreamBase}{wxstreambase}
+\helpref{wxFFileOutputStream}{wxffileoutputstream}, \helpref{wxFFileInputStream}{wxffileinputstream}
 
 \wxheading{Include files}
 
 <wx/wfstream.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
 
 \wxheading{See also}
 

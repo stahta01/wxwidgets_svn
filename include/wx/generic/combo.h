@@ -31,7 +31,7 @@
 
 #endif
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxComboBoxNameStr[];
+extern WXDLLIMPEXP_DATA_CORE(const wxChar) wxComboBoxNameStr[];
 
 class WXDLLEXPORT wxGenericComboCtrl : public wxComboCtrlBase
 {

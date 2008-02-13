@@ -98,7 +98,7 @@ public:
 
 private:
     // implement sink functions
-    virtual void DoLog(wxLogLevel level, const wxString& szString, time_t t)
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
     {
         // don't put trace messages into listbox or we can get into infinite
         // recursion
@@ -162,11 +162,6 @@ protected:
     {
         wxPaintDC dc(this);
         dc.SetTextForeground(*wxWHITE);
-        wxFont font(*wxSWISS_FONT);
-        font.SetWeight(wxFONTWEIGHT_BOLD);
-        font.SetPointSize(font.GetPointSize() + 2);
-        dc.SetFont(font);
-
         dc.DrawLabel(_T("Press keys here"), GetClientRect(), wxALIGN_CENTER);
     }
 
@@ -245,9 +240,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("Keyboard wxWidgets App"),
                                  wxPoint(50, 50), wxSize(450, 340));

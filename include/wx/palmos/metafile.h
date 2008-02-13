@@ -23,22 +23,19 @@
 // Metafile and metafile device context classes
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxMetafile;
+class WXDLLEXPORT wxMetafile;
 
 class WXDLLEXPORT wxMetafileRefData: public wxGDIRefData
 {
+    friend class WXDLLEXPORT wxMetafile;
 public:
     wxMetafileRefData();
     virtual ~wxMetafileRefData();
-
-    virtual bool IsOk() const { return m_metafile != 0; }
 
 public:
     WXHANDLE m_metafile;
     int m_windowsMappingMode;
     int m_width, m_height;
-
-    friend class WXDLLIMPEXP_FWD_CORE wxMetafile;
 };
 
 #define M_METAFILEDATA ((wxMetafileRefData *)m_refData)
@@ -54,6 +51,8 @@ public:
     virtual bool SetClipboard(int width = 0, int height = 0);
 
     virtual bool Play(wxDC *dc);
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return (M_METAFILEDATA && (M_METAFILEDATA->m_metafile != 0)); };
 
     // set/get the size of metafile for clipboard operations
     wxSize GetSize() const { return wxSize(GetWidth(), GetHeight()); }
@@ -91,7 +90,7 @@ public:
     virtual void SetMapMode(int mode);
     virtual void GetTextExtent(const wxString& string, long *x, long *y,
             long *descent = NULL, long *externalLeading = NULL,
-            const wxFont *theFont = NULL, bool use16bit = FALSE) const;
+            wxFont *theFont = NULL, bool use16bit = FALSE) const;
 
     // Implementation
     wxMetafile *GetMetaFile() const { return m_metaFile; }

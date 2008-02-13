@@ -143,7 +143,7 @@ extern "C" {
 #include <mach/mach.h>
 }
 
-void wxMAC_MachPortEndProcessDetect(CFMachPortRef WXUNUSED(port), void *data)
+void wxMAC_MachPortEndProcessDetect(CFMachPortRef port, void *data)
 {
     wxEndProcessData *proc_data = (wxEndProcessData*)data;
     wxLogDebug(wxT("Process ended"));
@@ -240,11 +240,7 @@ int wxAddProcessCallbackForPid(wxEndProcessData *proc_data, int pid)
     Called due to source signal detected by the CFRunLoop.
     This is nearly identical to the wxGTK equivalent.
  */
-extern "C" void WXCF_EndProcessDetector(CFSocketRef s,
-                                        CFSocketCallBackType WXUNUSED(callbackType),
-                                        CFDataRef WXUNUSED(address),
-                                        void const *WXUNUSED(data),
-                                        void *info)
+extern "C" void WXCF_EndProcessDetector(CFSocketRef s, CFSocketCallBackType callbackType, CFDataRef address, void const *data, void *info)
 {
     wxEndProcessData * const proc_data = static_cast<wxEndProcessData*>(info);
 
@@ -356,13 +352,11 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 // put it in because it's already compiled for wxCocoa and wxMac GUI lib.
 #if wxUSE_GUI
 
-#if wxUSE_STDPATHS
 static wxStandardPathsCF gs_stdPaths;
 wxStandardPathsBase& wxGUIAppTraits::GetStandardPaths()
 {
     return gs_stdPaths;
 }
-#endif
 
 #endif // wxUSE_GUI
 

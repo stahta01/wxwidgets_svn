@@ -22,8 +22,8 @@
   like the old class.
 */
 
-#ifndef _WX_LIST_H_
-#define _WX_LIST_H_
+#ifndef _WX_LISTH__
+#define _WX_LISTH__
 
 // -----------------------------------------------------------------------------
 // headers
@@ -54,11 +54,27 @@ extern "C"
 typedef int (* LINKAGEMODE wxSortCompareFunction)(const void *elem1, const void *elem2);
 }
 
-class WXDLLIMPEXP_FWD_BASE wxObjectListNode;
+class WXDLLIMPEXP_BASE wxObjectListNode;
 typedef wxObjectListNode wxNode;
 
 //
 typedef int (* LINKAGEMODE wxListIterateFunction)(void *current);
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+#if !defined(wxENUM_KEY_TYPE_DEFINED)
+#define wxENUM_KEY_TYPE_DEFINED
+
+enum wxKeyType
+{
+    wxKEY_NONE,
+    wxKEY_INTEGER,
+    wxKEY_STRING
+};
+
+#endif
 
 #if wxUSE_STL
 
@@ -77,10 +93,10 @@ typedef int (* LINKAGEMODE wxListIterateFunction)(void *current);
 #define WX_DECLARE_LIST_WITH_DECL(elT, liT, decl) \
     WX_DECLARE_LIST_XO(elT*, liT, decl)
 
-#if !defined(__VISUALC__) || __VISUALC__ >= 1300 // == !VC6
+#if !defined( __VISUALC__ )
 
 template<class T>
-class wxList_SortFunction
+class WXDLLIMPEXP_BASE wxList_SortFunction
 {
 public:
     wxList_SortFunction(wxSortCompareFunction f) : m_f(f) { }
@@ -91,12 +107,12 @@ private:
 };
 
 #define WX_LIST_SORTFUNCTION( elT, f ) wxList_SortFunction<elT>(f)
-#define WX_LIST_VC6_WORKAROUND(elT, liT, decl)
+#define VC6_WORKAROUND(elT, liT, decl)
 
-#else // if defined( __VISUALC__ ) && __VISUALC__ < 1300 // == VC6
+#else // if defined( __VISUALC__ )
 
 #define WX_LIST_SORTFUNCTION( elT, f ) std::greater<elT>( f )
-#define WX_LIST_VC6_WORKAROUND(elT, liT, decl)                                \
+#define VC6_WORKAROUND(elT, liT, decl)                                        \
     decl liT;                                                                 \
                                                                               \
     /* Workaround for broken VC6 STL incorrectly requires a std::greater<> */ \
@@ -112,19 +128,12 @@ private:
             bool operator()(const elT X, const elT Y) const                   \
                 {                                                             \
                     return m_CompFunc ?                                       \
-                        ( m_CompFunc( wxListCastElementToVoidPtr(X),          \
-                                      wxListCastElementToVoidPtr(Y) ) < 0 ) : \
+                        ( m_CompFunc( X, Y ) < 0 ) :                          \
                         ( X > Y );                                            \
                 }                                                             \
     };
 
-// helper for std::greater<elT> above:
-template<typename T>
-inline const void *wxListCastElementToVoidPtr(const T* ptr) { return ptr; }
-inline const void *wxListCastElementToVoidPtr(const wxString& str)
-    { return (const char*)str; }
-
-#endif // VC6/!VC6
+#endif // defined( __VISUALC__ )
 
 /*
     Note 1: the outer helper class _WX_LIST_HELPER_##liT below is a workaround
@@ -164,7 +173,7 @@ inline const void *wxListCastElementToVoidPtr(const wxString& str)
         static void DeleteFunction( _WX_LIST_ITEM_TYPE_##liT X );             \
     };                                                                        \
                                                                               \
-    WX_LIST_VC6_WORKAROUND(elT, liT, decl)                                    \
+    VC6_WORKAROUND(elT, liT, decl)                                            \
     decl liT : public std::list<elT>                                          \
     {                                                                         \
     private:                                                                  \
@@ -333,7 +342,7 @@ inline const void *wxListCastElementToVoidPtr(const wxString& str)
         ~liT() { Clear(); }                                                   \
                                                                               \
         /* It needs access to our EmptyList */                                \
-        friend class compatibility_iterator;                                  \
+        friend decl compatibility_iterator;                                   \
     }
 
 #define WX_DECLARE_LIST(elementtype, listname)                              \
@@ -360,6 +369,11 @@ inline const void *wxListCastElementToVoidPtr(const wxString& str)
 
 #else // if !wxUSE_STL
 
+// due to circular header dependencies this function has to be declared here
+// (normally it's found in utils.h which includes itself list.h...)
+#if WXWIN_COMPATIBILITY_2_4
+extern WXDLLIMPEXP_BASE wxChar* copystring(const wxChar *s);
+#endif
 
 // undef it to get rid of old, deprecated functions
 #define wxLIST_COMPATIBILITY
@@ -371,7 +385,7 @@ inline const void *wxListCastElementToVoidPtr(const wxString& str)
 union wxListKeyValue
 {
     long integer;
-    wxString *string;
+    wxChar *string;
 };
 
 // a struct which may contain both types of keys
@@ -388,17 +402,15 @@ public:
         { }
     wxListKey(long i) : m_keyType(wxKEY_INTEGER)
         { m_key.integer = i; }
+    wxListKey(const wxChar *s) : m_keyType(wxKEY_STRING)
+        { m_key.string = wxStrdup(s); }
     wxListKey(const wxString& s) : m_keyType(wxKEY_STRING)
-        { m_key.string = new wxString(s); }
-    wxListKey(const char *s) : m_keyType(wxKEY_STRING)
-        { m_key.string = new wxString(s); }
-    wxListKey(const wchar_t *s) : m_keyType(wxKEY_STRING)
-        { m_key.string = new wxString(s); }
+        { m_key.string = wxStrdup(s.c_str()); }
 
     // accessors
     wxKeyType GetKeyType() const { return m_keyType; }
-    const wxString GetString() const
-        { wxASSERT( m_keyType == wxKEY_STRING ); return *m_key.string; }
+    const wxChar *GetString() const
+        { wxASSERT( m_keyType == wxKEY_STRING ); return m_key.string; }
     long GetNumber() const
         { wxASSERT( m_keyType == wxKEY_INTEGER ); return m_key.integer; }
 
@@ -411,7 +423,7 @@ public:
     ~wxListKey()
     {
         if ( m_keyType == wxKEY_STRING )
-            delete m_key.string;
+            free(m_key.string);
     }
 
 private:
@@ -425,7 +437,7 @@ private:
 
 extern WXDLLIMPEXP_DATA_BASE(wxListKey) wxDefaultListKey;
 
-class WXDLLIMPEXP_FWD_BASE wxListBase;
+class WXDLLIMPEXP_BASE wxListBase;
 
 class WXDLLIMPEXP_BASE wxNodeBase
 {
@@ -441,11 +453,11 @@ public:
     virtual ~wxNodeBase();
 
     // FIXME no check is done that the list is really keyed on strings
-    wxString GetKeyString() const { return *m_key.string; }
+    const wxChar *GetKeyString() const { return m_key.string; }
     long GetKeyInteger() const { return m_key.integer; }
 
     // Necessary for some existing code
-    void SetKeyString(const wxString& s) { m_key.string = new wxString(s); }
+    void SetKeyString(wxChar* s) { m_key.string = s; }
     void SetKeyInteger(long i) { m_key.integer = i; }
 
 #ifdef wxLIST_COMPATIBILITY
@@ -469,7 +481,7 @@ protected:
     virtual void DeleteData() { }
 public:
     // for wxList::iterator
-    void** GetDataPtr() const { return &(wx_const_cast(wxNodeBase*, this)->m_data); }
+    void** GetDataPtr() const { return &(((wxNodeBase*)this)->m_data); }
 private:
     // optional key stuff
     wxListKeyValue m_key;
@@ -487,11 +499,11 @@ private:
 // a double-linked list class
 // -----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_BASE wxList;
+class WXDLLIMPEXP_BASE wxList;
 
-class WXDLLIMPEXP_BASE wxListBase
+class WXDLLIMPEXP_BASE wxListBase : public wxObject
 {
-friend class wxNodeBase; // should be able to call DetachNode()
+friend class WXDLLIMPEXP_FWD_BASE wxNodeBase; // should be able to call DetachNode()
 friend class wxHashTableBase;   // should be able to call untyped Find()
 
 public:
@@ -548,6 +560,10 @@ protected:
                                    void *data,
                                    const wxListKey& key = wxDefaultListKey) = 0;
 
+// Can't access these from derived classes otherwise (bug in Salford C++?)
+#ifdef __SALFORDC__
+public:
+#endif
 
     // ctors
         // from an array
@@ -591,7 +607,7 @@ protected:
 
         // keyed append
     wxNodeBase *Append(long key, void *object);
-    wxNodeBase *Append(const wxString& key, void *object);
+    wxNodeBase *Append(const wxChar *key, void *object);
 
         // removes node from the list but doesn't delete it (returns pointer
         // to the node or NULL if it wasn't found in the list)
@@ -732,7 +748,7 @@ private:
             : wxListBase(count, (void **)elements) { }                      \
                                                                             \
         name& operator=(const name& list)                                   \
-            { if (&list != this) Assign(list); return *this; }              \
+            { Assign(list); return *this; }                                 \
                                                                             \
         nodetype *GetFirst() const                                          \
             { return (nodetype *)wxListBase::GetFirst(); }                  \
@@ -1020,8 +1036,7 @@ private:
         iterator insert(const iterator& it, const_reference v = value_type())\
         {                                                                   \
             Insert(it.m_node, (const_base_reference)v);                     \
-            iterator itprev(it);                                            \
-            return itprev--;                                                \
+            return iterator(it.m_node->GetPrevious(), GetLast());           \
         }                                                                   \
         void insert(const iterator& it, size_type n, const_reference v = value_type())\
         {                                                                   \
@@ -1178,7 +1193,7 @@ public:
 
 #if !wxUSE_STL
     wxList& operator=(const wxList& list)
-        { if (&list != this) Assign(list); return *this; }
+        { (void) wxListBase::operator=(list); return *this; }
 
     // compatibility methods
     void Sort(wxSortCompareFunction compfunc) { wxListBase::Sort(compfunc); }
@@ -1187,6 +1202,11 @@ public:
 #if wxUSE_STL
 #else
     wxNode *Member(wxObject *object) const { return (wxNode *)Find(object); }
+#endif
+
+private:
+#if !wxUSE_STL
+    DECLARE_DYNAMIC_CLASS(wxList)
 #endif
 };
 
@@ -1204,24 +1224,17 @@ public:
         // default
 #ifdef wxWARN_COMPAT_LIST_USE
     wxStringList();
-    wxDEPRECATED( wxStringList(const wxChar *first ...) ); // FIXME-UTF8
+    wxDEPRECATED( wxStringList(const wxChar *first ...) );
 #else
     wxStringList();
-    wxStringList(const wxChar *first ...); // FIXME-UTF8
+    wxStringList(const wxChar *first ...);
 #endif
 
         // copying the string list: the strings are copied, too (extremely
         // inefficient!)
     wxStringList(const wxStringList& other) : wxStringListBase() { DeleteContents(true); DoCopy(other); }
     wxStringList& operator=(const wxStringList& other)
-    {
-        if (&other != this)
-        {
-            Clear();
-            DoCopy(other);
-        }
-        return *this;
-    }
+        { Clear(); DoCopy(other); return *this; }
 
     // operations
         // makes a copy of the string
@@ -1240,6 +1253,8 @@ public:
 
 private:
     void DoCopy(const wxStringList&); // common part of copy ctor and operator=
+
+    DECLARE_DYNAMIC_CLASS(wxStringList)
 };
 
 #else // if wxUSE_STL

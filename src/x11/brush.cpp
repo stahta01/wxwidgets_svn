@@ -24,7 +24,7 @@
 // wxBrush
 //-----------------------------------------------------------------------------
 
-class wxBrushRefData : public wxGDIRefData
+class wxBrushRefData: public wxObjectRefData
 {
 public:
     wxBrushRefData()
@@ -82,12 +82,12 @@ wxBrush::~wxBrush()
     // m_refData unrefed in ~wxObject
 }
 
-wxGDIRefData *wxBrush::CreateGDIRefData() const
+wxObjectRefData *wxBrush::CreateRefData() const
 {
     return new wxBrushRefData;
 }
 
-wxGDIRefData *wxBrush::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBrush::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBrushRefData(*(wxBrushRefData *)data);
 }

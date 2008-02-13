@@ -33,17 +33,8 @@
 // Extended style to specify a help button
 #define wxWIZARD_EX_HELPBUTTON   0x00000010
 
-// Placement flags
-#define wxWIZARD_VALIGN_TOP       0x01
-#define wxWIZARD_VALIGN_CENTRE    0x02
-#define wxWIZARD_VALIGN_BOTTOM    0x04
-#define wxWIZARD_HALIGN_LEFT      0x08
-#define wxWIZARD_HALIGN_CENTRE    0x10
-#define wxWIZARD_HALIGN_RIGHT     0x20
-#define wxWIZARD_TILE             0x40
-
 // forward declarations
-class WXDLLIMPEXP_FWD_ADV wxWizard;
+class WXDLLIMPEXP_ADV wxWizard;
 
 // ----------------------------------------------------------------------------
 // wxWizardPage is one of the wizards screen: it must know what are the
@@ -63,10 +54,12 @@ public:
     // that no other parameters are needed because the wizard will resize and
     // reposition the page anyhow
     wxWizardPage(wxWizard *parent,
-                 const wxBitmap& bitmap = wxNullBitmap);
+                 const wxBitmap& bitmap = wxNullBitmap,
+                 const wxChar* resource = NULL);
 
     bool Create(wxWizard *parent,
-                const wxBitmap& bitmap = wxNullBitmap);
+                const wxBitmap& bitmap = wxNullBitmap,
+                const wxChar* resource = NULL);
 
     // these functions are used by the wizard to show another page when the
     // user chooses "Back" or "Next" button
@@ -128,19 +121,21 @@ public:
     wxWizardPageSimple(wxWizard *parent,
                        wxWizardPage *prev = (wxWizardPage *)NULL,
                        wxWizardPage *next = (wxWizardPage *)NULL,
-                       const wxBitmap& bitmap = wxNullBitmap)
+                       const wxBitmap& bitmap = wxNullBitmap,
+                       const wxChar* resource = NULL)
     {
-        Create(parent, prev, next, bitmap);
+        Create(parent, prev, next, bitmap, resource);
     }
 
     bool Create(wxWizard *parent = NULL, // let it be default ctor too
                 wxWizardPage *prev = (wxWizardPage *)NULL,
                 wxWizardPage *next = (wxWizardPage *)NULL,
-                const wxBitmap& bitmap = wxNullBitmap)
+                const wxBitmap& bitmap = wxNullBitmap,
+                const wxChar* resource = NULL)
     {
         m_prev = prev;
         m_next = next;
-        return wxWizardPage::Create(parent, bitmap);
+        return wxWizardPage::Create(parent, bitmap, resource);
     }
 
     // the pointers may be also set later - but before starting the wizard
@@ -284,11 +279,13 @@ private:
 // macros for handling wxWizardEvents
 // ----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_WIZARD_PAGE_CHANGED;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_WIZARD_PAGE_CHANGING;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_WIZARD_CANCEL;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_WIZARD_HELP;
-extern WXDLLIMPEXP_ADV const wxEventType wxEVT_WIZARD_FINISHED;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_PAGE_CHANGED, 900)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_PAGE_CHANGING, 901)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_CANCEL, 902)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_HELP, 903)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_ADV, wxEVT_WIZARD_FINISHED, 903)
+END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxWizardEventFunction)(wxWizardEvent&);
 

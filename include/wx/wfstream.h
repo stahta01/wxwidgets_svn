@@ -116,7 +116,6 @@ class WXDLLIMPEXP_BASE wxFileStream : public wxFileInputStream,
 {
 public:
     wxFileStream(const wxString& fileName);
-    virtual bool IsOk() const;
 
 private:
     DECLARE_NO_COPY_CLASS(wxFileStream)
@@ -133,7 +132,7 @@ private:
 class WXDLLIMPEXP_BASE wxFFileInputStream : public wxInputStream
 {
 public:
-    wxFFileInputStream(const wxString& fileName, const wxString& mode = "rb");
+    wxFFileInputStream(const wxString& fileName, const wxChar *mode = _T("rb"));
     wxFFileInputStream(wxFFile& file);
     wxFFileInputStream(FILE *file);
     virtual ~wxFFileInputStream();
@@ -161,7 +160,7 @@ protected:
 class WXDLLIMPEXP_BASE wxFFileOutputStream : public wxOutputStream
 {
 public:
-    wxFFileOutputStream(const wxString& fileName, const wxString& mode = "w+b");
+    wxFFileOutputStream(const wxString& fileName, const wxChar *mode = _T("w+b"));
     wxFFileOutputStream(wxFFile& file);
     wxFFileOutputStream(FILE *file);
     virtual ~wxFFileOutputStream();
@@ -171,7 +170,7 @@ public:
     wxFileOffset GetLength() const;
 
     bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const;
+    virtual bool IsOk() const ;
     bool IsSeekable() const { return m_file->GetKind() == wxFILE_KIND_DISK; }
 
 protected:
@@ -193,7 +192,6 @@ class WXDLLIMPEXP_BASE wxFFileStream : public wxFFileInputStream,
 {
 public:
     wxFFileStream(const wxString& fileName);
-    virtual bool IsOk() const;
 
 private:
     DECLARE_NO_COPY_CLASS(wxFFileStream)

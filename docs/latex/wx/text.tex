@@ -17,10 +17,6 @@ streambuf\\
 
 <wx/textctrl.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Window styles}
 
 \twocolwidtha{5cm}
@@ -49,10 +45,6 @@ doesn't show the selection when it doesn't have focus - use this style to force
 it to always show it. It doesn't do anything under other platforms.}
 \twocolitem{\windowstyle{wxHSCROLL}}{A horizontal scrollbar will be created and
 used, so that text won't be wrapped. No effect under wxGTK1.}
-\twocolitem{\windowstyle{wxTE\_NO\_VSCROLL}}{For multiline controls only:
-vertical scrollbar will never be created. This limits the amount of text which
-can be entered into the control to what can be displayed in it under MSW but
-not under GTK2. Currently not implemented for the other platforms.}
 \twocolitem{\windowstyle{wxTE\_LEFT}}{The text in the control will be left-justified (default).}
 \twocolitem{\windowstyle{wxTE\_CENTRE}}{The text in the control will be centered (currently wxMSW and wxGTK2 only).}
 \twocolitem{\windowstyle{wxTE\_RIGHT}}{The text in the control will be right-justified (currently wxMSW and wxGTK2 only).}
@@ -326,50 +318,6 @@ the programmer should use \helpref{GetInsertionPoint}{wxtextctrlgetinsertionpoin
 \wxheading{See also}
 
 \helpref{wxTextCtrl::WriteText}{wxtextctrlwritetext}
-
-
-\membersection{wxTextCtrl::AutoComplete}\label{wxtextctrlautocomplete}
-
-\func{bool}{AutoComplete}{\param{const wxArrayString\& }{choices}}
-
-Call this function to enable auto-completion of the text typed in a single-line
-text control using the given \arg{choices}.
-
-Notice that currently this function is only implemented in wxGTK2 and wxMSW
-ports and does nothing under the other platforms.
-
-\newsince{2.9.0}
-
-\wxheading{Return value}
-
-\true if the auto-completion was enabled or \false if the operation failed,
-typically because auto-completion is not supported by the current platform.
-
-\wxheading{See also}
-
-\helpref{AutoCompleteFileNames}{wxtextctrlautocompletefilenames}
-
-
-\membersection{wxTextCtrl::AutoCompleteFileNames}\label{wxtextctrlautocompletefilenames}
-
-\func{bool}{AutoCompleteFileNames}{\void}
-
-Call this function to enable auto-completion of the text typed in a single-line
-text control using all valid file system paths.
-
-Notice that currently this function is only implemented in wxGTK2 port and does
-nothing under the other platforms.
-
-\newsince{2.9.0}
-
-\wxheading{Return value}
-
-\true if the auto-completion was enabled or \false if the operation failed,
-typically because auto-completion is not supported by the current platform.
-
-\wxheading{See also}
-
-\helpref{AutoComplete}{wxtextctrlautocomplete}
 
 
 \membersection{wxTextCtrl::CanCopy}\label{wxtextctrlcancopy}

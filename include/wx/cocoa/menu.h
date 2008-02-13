@@ -73,7 +73,9 @@ private:
 // ========================================================================
 // wxMenuBar
 // ========================================================================
-class WXDLLEXPORT wxMenuBar : public wxMenuBarBase
+// NOTE: wxCocoaNSMenu subclass is not needed but cannot be removed due to
+// ABI compatibility issues.  It is removed in trunk (2.9)
+class WXDLLEXPORT wxMenuBar : public wxMenuBarBase, public wxCocoaNSMenu
 {
 public:
     // ctors and dtor
@@ -102,8 +104,8 @@ public:
     virtual void EnableTop(size_t pos, bool enable);
     virtual bool IsEnabledTop(size_t pos) const;
 
-    virtual void SetMenuLabel(size_t pos, const wxString& label);
-    virtual wxString GetMenuLabel(size_t pos) const;
+    virtual void SetLabelTop(size_t pos, const wxString& label);
+    virtual wxString GetLabelTop(size_t pos) const;
 
     virtual void Attach(wxFrame *frame);
     virtual void Detach();
@@ -181,6 +183,14 @@ private:
     bool m_shouldShowMenu;
 
     DECLARE_DYNAMIC_CLASS(wxMenuBar)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // Gets the original label at the top-level of the menubar
+    wxString GetMenuLabel(size_t pos) const;
+#endif
+
 };
 
 #endif // _WX_COCOA_MENU_H_

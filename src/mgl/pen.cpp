@@ -257,12 +257,17 @@ void* wxPen::GetPixPattern() const
 }
 
 
-wxGDIRefData *wxPen::CreateGDIRefData() const
+bool wxPen::IsOk() const
+{
+    return (m_refData != NULL);
+}
+
+wxObjectRefData *wxPen::CreateRefData() const
 {
     return new wxPenRefData;
 }
 
-wxGDIRefData *wxPen::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxPen::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxPenRefData(*(wxPenRefData *)data);
 }

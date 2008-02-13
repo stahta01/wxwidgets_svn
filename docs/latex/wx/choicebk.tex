@@ -26,7 +26,7 @@ when screen space is restricted, as it often is when wxChoicebook is being emplo
 
 \wxheading{Derived from}
 
-wxBookCtrlBase (see \helpref{wxBookCtrl overview}{wxbookctrloverview})\\
+wxBookCtrlBase\\
 \helpref{wxControl}{wxcontrol}\\
 \helpref{wxWindow}{wxwindow}\\
 \helpref{wxEvtHandler}{wxevthandler}\\
@@ -35,10 +35,6 @@ wxBookCtrlBase (see \helpref{wxBookCtrl overview}{wxbookctrloverview})\\
 \wxheading{Include files}
 
 <wx/choicebk.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{Window styles}
 
@@ -55,27 +51,7 @@ it is top).}
 
 \end{twocollist}
 
-\input choicebevt.inc
-
 \wxheading{See also}
 
 \helpref{wxBookCtrl}{wxbookctrloverview}, \helpref{wxNotebook}{wxnotebook}, \helpref{notebook sample}{samplenotebook}
 
-\latexignore{\rtfignore{\wxheading{Members}}}
-
-\membersection{wxChoicebook::wxChoicebook}\label{wxchoicebookctor}
-
-\func{}{wxChoicebook}{\void}
-
-Default constructor.
-
-\func{}{wxChoicebook}{\param{wxWindow*}{ parent}, \param{wxWindowID }{id}, \param{const wxPoint\&}{ pos = wxDefaultPosition},
- \param{const wxSize\&}{ size = wxDefaultSize}, \param{long}{ style = 0}, \param{const wxString\& }{name = wxEmptyStr}}
-
-Constructs a choicebook control.
-
-\membersection{wxChoicebook::GetChoiceCtrl}\label{wxchoicebookgetchoicectrl}
-
-\constfunc{wxChoice *}{GetChoiceCtrl}{\void}
-
-Returns the \helpref{wxChoice}{wxchoice} associated with the control.

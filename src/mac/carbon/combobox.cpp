@@ -20,7 +20,6 @@
     #include "wx/menu.h"
     #include "wx/containr.h"
     #include "wx/toplevel.h"
-    #include "wx/textctrl.h"
 #endif
 
 #include "wx/mac/uma.h"
@@ -50,11 +49,16 @@ MenuHandle NewUniqueMenu()
 // ----------------------------------------------------------------------------
 
 // the margin between the text control and the choice
+#if TARGET_API_MAC_OSX
 // margin should be bigger on OS X due to blue highlight
 // around text control.
 static const wxCoord MARGIN = 4;
 // this is the border a focus rect on OSX is needing
 static const int    TEXTFOCUSBORDER = 3 ;
+#else
+static const wxCoord MARGIN = 2;
+static const int    TEXTFOCUSBORDER = 0 ;
+#endif
 
 
 // ----------------------------------------------------------------------------
@@ -83,14 +87,14 @@ protected:
             NavEvent.SetWindowChange(false);
 
             // Get the parent of the combo and have it process the navigation?
-            if (m_cb->GetParent()->HandleWindowEvent(NavEvent))
+            if (m_cb->GetParent()->GetEventHandler()->ProcessEvent(NavEvent))
                     return;
         }
 
         // send the event to the combobox class in case the user has bound EVT_CHAR
         wxKeyEvent kevt(event);
         kevt.SetEventObject(m_cb);
-        if (m_cb->HandleWindowEvent(kevt))
+        if (m_cb->GetEventHandler()->ProcessEvent(kevt))
             // If the event was handled and not skipped then we're done
             return;
 
@@ -103,7 +107,7 @@ protected:
 
             // This will invoke the dialog default action,
             // such as the clicking the default button.
-            if (!m_cb->HandleWindowEvent( event ))
+            if (!m_cb->GetEventHandler()->ProcessEvent( event ))
             {
                 wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
                 if ( tlw && tlw->GetDefaultItem() )
@@ -128,7 +132,7 @@ protected:
     {
         event.SetEventObject(m_cb);
         event.SetId(m_cb->GetId());
-        if (! m_cb->HandleWindowEvent(event))
+        if (! m_cb->GetEventHandler()->ProcessEvent(event))
             event.Skip();
     }
 
@@ -136,7 +140,7 @@ protected:
     {
         event.SetEventObject(m_cb);
         event.SetId(m_cb->GetId());
-        if (! m_cb->HandleWindowEvent(event))
+        if (! m_cb->GetEventHandler()->ProcessEvent(event))
             event.Skip();
     }
 
@@ -144,7 +148,7 @@ protected:
     {
         event.SetEventObject(m_cb);
         event.SetId(m_cb->GetId());
-        if (! m_cb->HandleWindowEvent(event))
+        if (! m_cb->GetEventHandler()->ProcessEvent(event))
             event.Skip();
     }
 
@@ -226,6 +230,9 @@ END_EVENT_TABLE()
 
 wxComboBox::~wxComboBox()
 {
+    // delete client objects
+    FreeData();
+
     // delete the controls now, don't leave them alive even though they would
     // still be eventually deleted by our parent - but it will be too late, the
     // user code expects them to be gone now
@@ -327,7 +334,7 @@ void wxComboBox::DelegateChoice( const wxString& value )
 
 void wxComboBox::Init()
 {
-    WX_INIT_CONTROL_CONTAINER();
+    m_container.SetContainerWindow(this);
 }
 
 bool wxComboBox::Create(wxWindow *parent,
@@ -340,13 +347,10 @@ bool wxComboBox::Create(wxWindow *parent,
     const wxValidator& validator,
     const wxString& name)
 {
-    if ( !Create( parent, id, value, pos, size, 0, NULL,
-                   style, validator, name ) )
-        return false;
+    wxCArrayString chs( choices );
 
-    Append(choices);
-
-    return true;
+    return Create( parent, id, value, pos, size, chs.GetCount(),
+                   chs.GetStrings(), style, validator, name );
 }
 
 bool wxComboBox::Create(wxWindow *parent,
@@ -384,7 +388,10 @@ bool wxComboBox::Create(wxWindow *parent,
 
     DoSetSize(pos.x, pos.y, csize.x, csize.y);
 
-    Append( n, choices );
+    for ( int i = 0 ; i < n ; i++ )
+    {
+        m_choice->DoAppend( choices[ i ] );
+    }
 
     // Needed because it is a wxControlWithItems
     SetInitialSize(size);
@@ -416,16 +423,6 @@ void wxComboBox::SetValue(const wxString& value)
         SetStringSelection( value ) ;
     else
         m_text->SetValue( value );
-}
-
-void wxComboBox::WriteText(const wxString& text)
-{
-    m_text->WriteText(text);
-}
-
-void wxComboBox::GetSelection(long *from, long *to) const
-{
-    m_text->GetSelection(from, to);
 }
 
 // Clipboard operations
@@ -513,12 +510,14 @@ void wxComboBox::SetSelection(long from, long to)
         m_text->SetSelection(from,to);
 }
 
-int wxComboBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData,
-                              wxClientDataType type)
+int wxComboBox::DoAppend(const wxString& item)
 {
-    return m_choice->DoInsertItems(items, pos, clientData, type);
+    return m_choice->DoAppend( item ) ;
+}
+
+int wxComboBox::DoInsert(const wxString& item, unsigned int pos)
+{
+    return m_choice->DoInsert( item , pos ) ;
 }
 
 void wxComboBox::DoSetItemClientData(unsigned int n, void* clientData)
@@ -531,24 +530,40 @@ void* wxComboBox::DoGetItemClientData(unsigned int n) const
     return m_choice->DoGetItemClientData( n ) ;
 }
 
-wxClientDataType wxComboBox::GetClientDataType() const
+void wxComboBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
 {
-    return m_choice->GetClientDataType();
+    return m_choice->DoSetItemClientObject(n, clientData);
 }
 
-void wxComboBox::SetClientDataType(wxClientDataType clientDataItemsType)
+wxClientData* wxComboBox::DoGetItemClientObject(unsigned int n) const
 {
-    m_choice->SetClientDataType(clientDataItemsType);
+    return m_choice->DoGetItemClientObject( n ) ;
 }
 
-void wxComboBox::DoDeleteOneItem(unsigned int n)
+void wxComboBox::FreeData()
 {
-    m_choice->DoDeleteOneItem( n );
+    if ( HasClientObjectData() )
+    {
+        unsigned int count = GetCount();
+        for ( unsigned int n = 0; n < count; n++ )
+        {
+            SetClientObject( n, NULL );
+        }
+    }
 }
 
-void wxComboBox::DoClear()
+void wxComboBox::Delete(unsigned int n)
 {
-    m_choice->DoClear();
+    // force client object deletion
+    if( HasClientObjectData() )
+        SetClientObject( n, NULL );
+    m_choice->Delete( n );
+}
+
+void wxComboBox::Clear()
+{
+    FreeData();
+    m_choice->Clear();
 }
 
 int wxComboBox::GetSelection() const

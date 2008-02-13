@@ -123,8 +123,7 @@ bool wxDatePickerCtrl::SendClickEvent()
     int16_t day = m_dt.GetDay();
     int16_t year = m_dt.GetYear();
 
-    //if(!SelectDay(selectDayByDay,&month,&day,&year,_T("Pick date")))
-    if(!SelectDay(selectDayByDay,&month,&day,&year, "Pick date"))
+    if(!SelectDay(selectDayByDay,&month,&day,&year,_T("Pick date")))
         return false;
     wxDateTime dt(m_dt);
     dt.Set((wxDateTime::wxDateTime_t)day,

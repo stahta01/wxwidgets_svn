@@ -44,10 +44,8 @@ enum
     wxDIRCTRL_DIR_ONLY       = 0x0010,
     // When setting the default path, select the first file in the directory
     wxDIRCTRL_SELECT_FIRST   = 0x0020,
-#if WXWIN_COMPATIBILITY_2_8
-    // Unused, for compatibility only
+    // Show the filter list
     wxDIRCTRL_SHOW_FILTERS   = 0x0040,
-#endif // WXWIN_COMPATIBILITY_2_8
     // Use 3D borders on internal controls
     wxDIRCTRL_3D_INTERNAL    = 0x0080,
     // Editable labels
@@ -78,7 +76,7 @@ public:
 // wxDirCtrl
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxDirFilterListCtrl;
+class WXDLLEXPORT wxDirFilterListCtrl;
 
 class WXDLLEXPORT wxGenericDirCtrl: public wxControl
 {
@@ -88,7 +86,7 @@ public:
               const wxString &dir = wxDirDialogDefaultFolderStr,
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize,
-              long style = wxDIRCTRL_3D_INTERNAL,
+              long style = wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER,
               const wxString& filter = wxEmptyString,
               int defaultFilter = 0,
               const wxString& name = wxTreeCtrlNameStr )
@@ -101,7 +99,7 @@ public:
               const wxString &dir = wxDirDialogDefaultFolderStr,
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize,
-              long style = wxDIRCTRL_3D_INTERNAL,
+              long style = wxDIRCTRL_3D_INTERNAL|wxSUNKEN_BORDER,
               const wxString& filter = wxEmptyString,
               int defaultFilter = 0,
               const wxString& name = wxTreeCtrlNameStr );
@@ -151,6 +149,11 @@ public:
     // Helper
     virtual void SetupSections();
 
+#if WXWIN_COMPATIBILITY_2_4
+    // Parse the filter into an array of filters and an array of descriptions
+    virtual int ParseFilter(const wxString& filterStr, wxArrayString& filters, wxArrayString& descriptions);
+#endif // WXWIN_COMPATIBILITY_2_4
+
     // Find the child that matches the first part of 'path'.
     // E.g. if a child path is "/usr" and 'path' is "/usr/include"
     // then the child for /usr is returned.
@@ -165,10 +168,6 @@ public:
 
     // Collapse the entire tree
     virtual void CollapseTree();
-
-
-    // overridden base class methods
-    virtual void SetFocus();
 
 protected:
     virtual void ExpandRoot();

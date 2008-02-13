@@ -77,8 +77,6 @@ public:
                                        const wxRect& rect,
                                        int flags = 0);
 
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0);
-
 private:
     void DrawMacThemeButton(wxWindow *win,
                             wxDC& dc,
@@ -111,24 +109,60 @@ int wxRendererMac::DrawHeaderButton( wxWindow *win,
     wxHeaderSortIconType sortArrow,
     wxHeaderButtonParams* params )
 {
+#if !wxMAC_USE_CORE_GRAPHICS
+    const wxCoord x = dc.LogicalToDeviceX(rect.x);
+    const wxCoord y = dc.LogicalToDeviceY(rect.y);
+    const wxCoord w = dc.LogicalToDeviceXRel(rect.width);
+    const wxCoord h = dc.LogicalToDeviceYRel(rect.height);
+#else
+    // now the wxGCDC is using native transformations
     const wxCoord x = rect.x;
     const wxCoord y = rect.y;
     const wxCoord w = rect.width;
     const wxCoord h = rect.height;
+#endif
 
     dc.SetBrush( *wxTRANSPARENT_BRUSH );
 
     HIRect headerRect = CGRectMake( x, y, w, h );
     if ( !dc.IsKindOf( CLASSINFO( wxPaintDC ) ) )
     {
-        win->Refresh( &rect );
+        Rect r =
+        {
+            (short) headerRect.origin.y, (short) headerRect.origin.x,
+            (short) (headerRect.origin.y + headerRect.size.height),
+            (short) (headerRect.origin.x + headerRect.size.width)
+        };
+
+        RgnHandle updateRgn = NewRgn();
+        RectRgn( updateRgn, &r );
+        HIViewSetNeedsDisplayInRegion( (HIViewRef) win->GetHandle(), updateRgn, true );
+        DisposeRgn( updateRgn );
     }
     else
     {
         CGContextRef cgContext;
-        wxGCDCImpl *impl = (wxGCDCImpl*) dc.GetImpl();
 
-        cgContext = (CGContextRef) impl->GetGraphicsContext()->GetNativeContext();
+#if wxMAC_USE_CORE_GRAPHICS
+        cgContext = (CGContextRef) dc.GetGraphicsContext()->GetNativeContext();
+#else
+        Rect bounds;
+
+        GetPortBounds( (CGrafPtr) dc.m_macPort, &bounds );
+        QDBeginCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
+
+        CGContextTranslateCTM( cgContext, 0, bounds.bottom - bounds.top );
+        CGContextScaleCTM( cgContext, 1, -1 );
+
+        HIShapeRef shape = HIShapeCreateWithQDRgn( (RgnHandle) dc.m_macCurrentClipRgn );
+        if ( shape != 0 )
+        {
+            HIShapeReplacePathInCGContext( shape , cgContext );
+            CFRelease( shape );
+            CGContextClip( cgContext );
+        }
+        HIViewConvertRect( &headerRect, (HIViewRef) win->GetHandle(), (HIViewRef) win->MacGetTopLevelWindow()->GetHandle() );
+#endif
 
         {
             HIThemeButtonDrawInfo drawInfo;
@@ -159,6 +193,11 @@ int wxRendererMac::DrawHeaderButton( wxWindow *win,
                 CGContextRestoreGState( cgContext );
             }
         }
+
+#if wxMAC_USE_CORE_GRAPHICS
+#else
+        QDEndCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
+#endif
     }
 
     // Reserve room for the arrows before writing the label, and turn off the
@@ -177,8 +216,8 @@ int wxRendererMac::DrawHeaderButton( wxWindow *win,
 
 int wxRendererMac::GetHeaderButtonHeight(wxWindow* WXUNUSED(win))
 {
-    SInt32      standardHeight;
-    OSStatus        errStatus;
+    SInt32		standardHeight;
+    OSStatus		errStatus;
 
     errStatus = GetThemeMetric( kThemeMetricListHeaderHeight, &standardHeight );
     if (errStatus == noErr)
@@ -193,39 +232,77 @@ void wxRendererMac::DrawTreeItemButton( wxWindow *win,
     const wxRect& rect,
     int flags )
 {
+#if !wxMAC_USE_CORE_GRAPHICS
+    const wxCoord x = dc.LogicalToDeviceX(rect.x);
+    const wxCoord y = dc.LogicalToDeviceY(rect.y);
+    const wxCoord w = dc.LogicalToDeviceXRel(rect.width);
+    const wxCoord h = dc.LogicalToDeviceYRel(rect.height);
+#else
     // now the wxGCDC is using native transformations
     const wxCoord x = rect.x;
     const wxCoord y = rect.y;
     const wxCoord w = rect.width;
     const wxCoord h = rect.height;
+#endif
 
     dc.SetBrush( *wxTRANSPARENT_BRUSH );
 
     HIRect headerRect = CGRectMake( x, y, w, h );
     if ( !dc.IsKindOf( CLASSINFO( wxPaintDC ) ) )
     {
-        win->Refresh( &rect );
+        Rect r =
+    {
+            (short) headerRect.origin.y, (short) headerRect.origin.x,
+            (short) (headerRect.origin.y + headerRect.size.height),
+            (short) (headerRect.origin.x + headerRect.size.width)
+        };
+
+        RgnHandle updateRgn = NewRgn();
+        RectRgn( updateRgn, &r );
+        HIViewSetNeedsDisplayInRegion( (HIViewRef) win->GetHandle(), updateRgn, true );
+        DisposeRgn( updateRgn );
     }
     else
     {
         CGContextRef cgContext;
 
-        wxGCDCImpl *impl = (wxGCDCImpl*) dc.GetImpl();
-        cgContext = (CGContextRef) impl->GetGraphicsContext()->GetNativeContext();
+#if wxMAC_USE_CORE_GRAPHICS
+        cgContext = (CGContextRef) dc.GetGraphicsContext()->GetNativeContext();
+#else
+        Rect bounds;
 
-        HIThemeButtonDrawInfo drawInfo;
-        HIRect labelRect;
+        GetPortBounds( (CGrafPtr) dc.m_macPort, &bounds );
+        QDBeginCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
 
-        memset( &drawInfo, 0, sizeof(drawInfo) );
-        drawInfo.version = 0;
-        drawInfo.kind = kThemeDisclosureButton;
-        drawInfo.state = (flags & wxCONTROL_DISABLED) ? kThemeStateInactive : kThemeStateActive;
-        // Apple mailing list posts say to use the arrow adornment constants, but those don't work.
-        // We need to set the value using the 'old' DrawThemeButton constants instead.
-        drawInfo.value = (flags & wxCONTROL_EXPANDED) ? kThemeDisclosureDown : kThemeDisclosureRight;
-        drawInfo.adornment = kThemeAdornmentNone;
+        CGContextTranslateCTM( cgContext, 0, bounds.bottom - bounds.top );
+        CGContextScaleCTM( cgContext, 1, -1 );
 
-        HIThemeDrawButton( &headerRect, &drawInfo, cgContext, kHIThemeOrientationNormal, &labelRect );
+        HIShapeReplacePathInCGContext( HIShapeCreateWithQDRgn( (RgnHandle) dc.m_macCurrentClipRgn ), cgContext );
+        CGContextClip( cgContext );
+        HIViewConvertRect( &headerRect, (HIViewRef) win->GetHandle(), (HIViewRef) win->MacGetTopLevelWindow()->GetHandle() );
+#endif
+
+    {
+            HIThemeButtonDrawInfo drawInfo;
+            HIRect labelRect;
+
+            memset( &drawInfo, 0, sizeof(drawInfo) );
+            drawInfo.version = 0;
+            drawInfo.kind = kThemeDisclosureButton;
+            drawInfo.state = (flags & wxCONTROL_DISABLED) ? kThemeStateInactive : kThemeStateActive;
+            // Apple mailing list posts say to use the arrow adornment constants, but those don't work.
+            // We need to set the value using the 'old' DrawThemeButton constants instead.
+            drawInfo.value = (flags & wxCONTROL_EXPANDED) ? kThemeDisclosureDown : kThemeDisclosureRight;
+            drawInfo.adornment = kThemeAdornmentNone;
+
+            HIThemeDrawButton( &headerRect, &drawInfo, cgContext, kHIThemeOrientationNormal, &labelRect );
+
+        }
+
+#if wxMAC_USE_CORE_GRAPHICS
+#else
+        QDEndCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
+#endif
     }
 }
 
@@ -245,42 +322,74 @@ void wxRendererMac::DrawSplitterSash( wxWindow *win,
     else
         splitterRect = CGRectMake( 0, position, size.x, height );
 
+#if !wxMAC_USE_CORE_GRAPHICS
+    HIViewConvertRect(
+        &splitterRect,
+        (HIViewRef) win->GetHandle(),
+        (HIViewRef) win->MacGetTopLevelWindow()->GetHandle() );
+#endif
+
     // under compositing we should only draw when called by the OS, otherwise just issue a redraw command
     // strange redraw errors occur if we don't do this
 
     if ( !dc.IsKindOf( CLASSINFO( wxPaintDC ) ) )
     {
-        wxRect rect( (int) splitterRect.origin.x, (int) splitterRect.origin.y, (int) splitterRect.size.width,
-                     (int) splitterRect.size.height );
-        win->Refresh( &rect );
-   }
+        Rect r =
+        {
+            (short) splitterRect.origin.y,
+            (short) splitterRect.origin.x,
+            (short) (splitterRect.origin.y + splitterRect.size.height),
+            (short) (splitterRect.origin.x + splitterRect.size.width)
+        };
+
+        RgnHandle updateRgn = NewRgn();
+        RectRgn( updateRgn, &r );
+        HIViewSetNeedsDisplayInRegion( (HIViewRef) win->GetHandle(), updateRgn, true );
+        DisposeRgn( updateRgn );
+    }
     else
     {
         CGContextRef cgContext;
-        wxGCDCImpl *impl = (wxGCDCImpl*) dc.GetImpl();
-        cgContext = (CGContextRef) impl->GetGraphicsContext()->GetNativeContext();
+
+#if wxMAC_USE_CORE_GRAPHICS
+        cgContext = (CGContextRef) dc.GetGraphicsContext()->GetNativeContext();
+#else
+        Rect bounds;
+        GetPortBounds( (CGrafPtr) dc.m_macPort, &bounds );
+        QDBeginCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
+        CGContextTranslateCTM( cgContext, 0, bounds.bottom - bounds.top );
+        CGContextScaleCTM( cgContext, 1, -1 );
+#endif
 
         HIThemeSplitterDrawInfo drawInfo;
         drawInfo.version = 0;
         drawInfo.state = kThemeStateActive;
         drawInfo.adornment = hasMetal ? kHIThemeSplitterAdornmentMetal : kHIThemeSplitterAdornmentNone;
         HIThemeDrawPaneSplitter( &splitterRect, &drawInfo, cgContext, kHIThemeOrientationNormal );
+
+#if wxMAC_USE_CORE_GRAPHICS
+#else
+        QDEndCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
+#endif
     }
 }
 
 void
-wxRendererMac::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
+wxRendererMac::DrawItemSelectionRect(wxWindow *win,
                                      wxDC& dc,
                                      const wxRect& rect,
-                                     int flags)
+                                     int flags )
 {
-    if ( !(flags & wxCONTROL_SELECTED) )
-        return;
+    RGBColor selColor;
+    if (flags & wxCONTROL_SELECTED)
+    {
+        if (flags & wxCONTROL_FOCUSED)
+            GetThemeBrushAsColor(kThemeBrushAlternatePrimaryHighlightColor, 32, true, &selColor);
+        else
+            GetThemeBrushAsColor(kThemeBrushSecondaryHighlightColor, 32, true, &selColor);
+    }
 
-    wxColour col( wxMacCreateCGColorFromHITheme( (flags & wxCONTROL_FOCUSED) ?
-                                                 kThemeBrushAlternatePrimaryHighlightColor
-                                                                             : kThemeBrushSecondaryHighlightColor ) );
-    wxBrush selBrush( col );
+    wxBrush selBrush = wxBrush( wxColour( selColor.red >> 8, selColor.green >> 8, selColor.blue >> 8 ), wxSOLID );
 
     dc.SetPen( *wxTRANSPARENT_PEN );
     dc.SetBrush( selBrush );
@@ -296,38 +405,76 @@ wxRendererMac::DrawMacThemeButton(wxWindow *win,
                                   int kind,
                                   int adornment)
 {
+#if !wxMAC_USE_CORE_GRAPHICS
+    const wxCoord x = dc.LogicalToDeviceX(rect.x);
+    const wxCoord y = dc.LogicalToDeviceY(rect.y);
+    const wxCoord w = dc.LogicalToDeviceXRel(rect.width);
+    const wxCoord h = dc.LogicalToDeviceYRel(rect.height);
+#else
     // now the wxGCDC is using native transformations
     const wxCoord x = rect.x;
     const wxCoord y = rect.y;
     const wxCoord w = rect.width;
     const wxCoord h = rect.height;
+#endif
 
     dc.SetBrush( *wxTRANSPARENT_BRUSH );
 
     HIRect headerRect = CGRectMake( x, y, w, h );
     if ( !dc.IsKindOf( CLASSINFO( wxPaintDC ) ) )
     {
-        win->Refresh( &rect );
+        Rect r =
+        {
+            (short) headerRect.origin.y, (short) headerRect.origin.x,
+            (short) (headerRect.origin.y + headerRect.size.height),
+            (short) (headerRect.origin.x + headerRect.size.width)
+        };
+
+        RgnHandle updateRgn = NewRgn();
+        RectRgn( updateRgn, &r );
+        HIViewSetNeedsDisplayInRegion( (HIViewRef) win->GetHandle(), updateRgn, true );
+        DisposeRgn( updateRgn );
     }
     else
     {
-        wxGCDCImpl *impl = (wxGCDCImpl*) dc.GetImpl();
         CGContextRef cgContext;
-        cgContext = (CGContextRef) impl->GetGraphicsContext()->GetNativeContext();
 
-        HIThemeButtonDrawInfo drawInfo;
-        HIRect labelRect;
+#if wxMAC_USE_CORE_GRAPHICS
+        cgContext = (CGContextRef) dc.GetGraphicsContext()->GetNativeContext();
+#else
+        Rect bounds;
 
-        memset( &drawInfo, 0, sizeof(drawInfo) );
-        drawInfo.version = 0;
-        drawInfo.kind = kind;
-        drawInfo.state = (flags & wxCONTROL_DISABLED) ? kThemeStateInactive : kThemeStateActive;
-        drawInfo.value = (flags & wxCONTROL_SELECTED) ? kThemeButtonOn : kThemeButtonOff;
-        if (flags & wxCONTROL_UNDETERMINED)
-            drawInfo.value = kThemeButtonMixed;
-        drawInfo.adornment = adornment;
+        GetPortBounds( (CGrafPtr) dc.m_macPort, &bounds );
+        QDBeginCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
 
-        HIThemeDrawButton( &headerRect, &drawInfo, cgContext, kHIThemeOrientationNormal, &labelRect );
+        CGContextTranslateCTM( cgContext, 0, bounds.bottom - bounds.top );
+        CGContextScaleCTM( cgContext, 1, -1 );
+
+        HIShapeReplacePathInCGContext( HIShapeCreateWithQDRgn( (RgnHandle) dc.m_macCurrentClipRgn ), cgContext );
+        CGContextClip( cgContext );
+        HIViewConvertRect( &headerRect, (HIViewRef) win->GetHandle(), (HIViewRef) win->MacGetTopLevelWindow()->GetHandle() );
+#endif
+
+        {
+            HIThemeButtonDrawInfo drawInfo;
+            HIRect labelRect;
+
+            memset( &drawInfo, 0, sizeof(drawInfo) );
+            drawInfo.version = 0;
+            drawInfo.kind = kind;
+            drawInfo.state = (flags & wxCONTROL_DISABLED) ? kThemeStateInactive : kThemeStateActive;
+            drawInfo.value = (flags & wxCONTROL_SELECTED) ? kThemeButtonOn : kThemeButtonOff;
+            if (flags & wxCONTROL_UNDETERMINED)
+                drawInfo.value = kThemeButtonMixed;
+            drawInfo.adornment = adornment;
+
+            HIThemeDrawButton( &headerRect, &drawInfo, cgContext, kHIThemeOrientationNormal, &labelRect );
+        }
+
+#if wxMAC_USE_CORE_GRAPHICS
+#else
+        QDEndCGContext( (CGrafPtr) dc.m_macPort, &cgContext );
+#endif
     }
 }
 
@@ -369,40 +516,17 @@ wxRendererMac::DrawPushButton(wxWindow *win,
                               int flags)
 {
     int kind;
+#if MAC_OS_X_VERSION_MAX_ALLOWED > MAC_OS_X_VERSION_10_3
     if (win->GetWindowVariant() == wxWINDOW_VARIANT_SMALL || (win->GetParent() && win->GetParent()->GetWindowVariant() == wxWINDOW_VARIANT_SMALL))
         kind = kThemeBevelButtonSmall;
     // There is no kThemeBevelButtonMini, but in this case, use Small
     else if (win->GetWindowVariant() == wxWINDOW_VARIANT_MINI || (win->GetParent() && win->GetParent()->GetWindowVariant() == wxWINDOW_VARIANT_MINI))
         kind = kThemeBevelButtonSmall;
     else
+#endif
         kind = kThemeBevelButton;
 
     DrawMacThemeButton(win, dc, rect, flags,
                        kind, kThemeAdornmentNone);
-}
-
-void
-wxRendererMac::DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags)
-{
-    if (!win)
-    {
-        wxDelegateRendererNative::DrawFocusRect(win, dc, rect, flags);
-        return;
-    }
-
-    CGRect cgrect = CGRectMake( rect.x , rect.y , rect.width, rect.height ) ;
-
-    HIThemeFrameDrawInfo info ;
-    memset( &info, 0 , sizeof(info) ) ;
-
-    info.version = 0 ;
-    info.kind = 0 ;
-    info.state = kThemeStateActive;
-    info.isFocused = true ;
-
-    CGContextRef cgContext = (CGContextRef) win->MacGetCGContextRef() ;
-    wxASSERT( cgContext ) ;
-
-    HIThemeDrawFocusRect( &cgrect , true , cgContext , kHIThemeOrientationNormal ) ;
 }
 

@@ -45,7 +45,7 @@
     #define wxSL_NOTIFY_DRAG     0x0000
 #endif // WXWIN_COMPATIBILITY_2_6
 
-extern WXDLLEXPORT_DATA(const char) wxSliderNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxSliderNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxSliderBase: define wxSlider interface
@@ -105,9 +105,6 @@ public:
 
 protected:
 
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // adjust value according to wxSL_INVERSE style
     virtual int ValueInvertOrNot(int value) const
     {
@@ -129,6 +126,9 @@ private:
     #include "wx/univ/slider.h"
 #elif defined(__WXMSW__)
     #include "wx/msw/slider95.h"
+    #if WXWIN_COMPATIBILITY_2_4
+         #define wxSlider95 wxSlider
+    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/slider.h"
 #elif defined(__WXGTK20__)

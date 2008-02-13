@@ -38,7 +38,7 @@
 // statics used by inline'ed C helper-functions
 static char* _gSrcStart = 0;
 static char* _gSrcEnd   = 0;
-static char* _gLastSuppresedComment = 0;
+static wxChar* _gLastSuppresedComment = 0;
 static int   _gLineNo      = 0;
 
 // FOR NOW:: comments queue is static
@@ -382,13 +382,13 @@ static inline bool get_next_token( char*& cur )
         return true;
 }
 
-static inline void skip_preprocessor_dir( char*& cur )
+static inline void skip_preprocessor_dir( wxChar*& cur )
 {
     do
     {
         skip_to_eol(cur);
 
-        if ( *(cur-1) != '\\' )
+        if ( *(cur-1) != _T('\\') )
             break;
 
         if ( cur < _gSrcEnd )
@@ -899,8 +899,8 @@ static void arrange_indirection_tokens_between( wxString& type,
 {
     // TBD:: FIXME:: return value of operators !
 
-    while ( identifier[0u] == '*' ||
-            identifier[0u] == '&'
+    while ( identifier[0u] == _T('*') ||
+            identifier[0u] == _T('&')
           )
     {
         type += identifier[0u];
@@ -931,33 +931,33 @@ static bool is_keyword( char* cur )
     return i == __gMultiLangMap.end() ? false : true;
 }
 
-static inline void get_string_between( char* start, char* end,
+static inline void get_string_between( wxChar* start, wxChar* end,
                                        wxString* pStr )
 {
     char saved = *end;
 
-    *end  = '\0';
+    *end  = _T('\0');
     *pStr = start;
     *end  = saved;
 }
 
-static char* set_comment_text( wxString& text, char* start )
+static wxChar* set_comment_text( wxString& text, wxChar* start )
 {
-    char* end = start;
+    wxChar* end = start;
 
     // to avoid poluting the queue with this comment
     _gLastSuppresedComment = start;
 
     skip_comments( end );
 
-    if ( *(end-1) == '/' )
+    if ( *(end-1) == _T('/') )
         end -= 2;
 
     start += 2;
 
     // skip multiple leading '/''s or '*''s
-    while( *start == '/' && start < end ) ++start;
-    while( *start == '*' && start < end ) ++start;
+    while( *start == _T('/') && start < end ) ++start;
+    while( *start == _T('*') && start < end ) ++start;
 
     get_string_between( start, end, &text );
 
@@ -1064,13 +1064,13 @@ spFile* CJSourceParser::Parse( char* start, char* end )
             continue;
         }
 
-        if ( *m_cur >= '0' && *m_cur <= '9' )
+        if ( *m_cur >= _T('0') && *m_cur <= _T('9') )
         {
             skip_token( m_cur );
             continue;
         }
 
-        if ( *m_cur == '}' )
+        if ( *m_cur == _T('}') )
         {
             if ( mCurCtxType != SP_CTX_CLASS )
             {
@@ -1186,13 +1186,13 @@ spFile* CJSourceParser::Parse( char* start, char* end )
     } while( 1 );
 }
 
-void CJSourceParser::AttachComments( spContext& ctx, char* cur )
+void CJSourceParser::AttachComments( spContext& ctx, wxChar* cur )
 {
     if ( !mCommentsOn ) return;
 
     MCommentListT& lst = ctx.GetCommentList();
 
-    char* prevComEnd = 0;
+    wxChar* prevComEnd = 0;
 
     int tmpLnNo;
     store_line_no( tmpLnNo );
@@ -1205,9 +1205,9 @@ void CJSourceParser::AttachComments( spContext& ctx, char* cur )
         lst.push_back( pComment );
 
         // find the end of comment
-        char* start = _gCommentsQueue[i];
+        wxChar* start = _gCommentsQueue[i];
 
-        pComment->mIsMultiline = ( *(start+1) == '*' );
+        pComment->mIsMultiline = ( *(start+1) == _T('*') );
 
         // first comment in the queue and multiline
         // comments are always treated as a begining
@@ -1226,7 +1226,7 @@ void CJSourceParser::AttachComments( spContext& ctx, char* cur )
             // find out wheather there is a new-line
             // between to adjecent comments
 
-            char* prevLine = start;
+            wxChar* prevLine = start;
             skip_to_prev_line(prevLine);
 
             if ( prevLine >= prevComEnd )
@@ -1249,7 +1249,7 @@ void CJSourceParser::AttachComments( spContext& ctx, char* cur )
         set_comment_text( pComment->m_Text, cur );
 
         pComment->mStartsPar = 1;
-        pComment->mIsMultiline = ( *(cur+1) == '*' );
+        pComment->mIsMultiline = ( *(cur+1) == _T('*') );
 
         // mark this comment, so that it would not
         // get in the comments list of the next context
@@ -1261,9 +1261,9 @@ void CJSourceParser::AttachComments( spContext& ctx, char* cur )
     clear_commets_queue();
 }
 
-void CJSourceParser::AddMacroNode( char*& cur )
+void CJSourceParser::AddMacroNode( wxChar*& cur )
 {
-    char* start = cur;
+    wxChar* start = cur;
 
     int lineNo = get_line_no();
 
@@ -1290,9 +1290,9 @@ void CJSourceParser::AddMacroNode( char*& cur )
     // determine the type exactly and assign
     // a name to the context
 
-    if ( *start == 'd' )
+    if ( *start == _T('d') )
     {
-        if ( cmp_tokens_fast( start, "define", 6 ) )
+        if ( cmp_tokens_fast( start, _T("define"), 6 ) )
         {
             char* tok = start+6;
 
@@ -1310,13 +1310,13 @@ void CJSourceParser::AddMacroNode( char*& cur )
                 pPL->mDefType = SP_PREP_DEF_REDEFINE_SYMBOL;
         }
     }
-    else if ( *start == 'i' )
+    else if ( *start == _T('i') )
     {
-        if ( cmp_tokens_fast( start, "include", 7 ) )
+        if ( cmp_tokens_fast( start, _T("include"), 7 ) )
         {
             pPL->mDefType = SP_PREP_DEF_INCLUDE_FILE;
         }
-        else if ( *++start == 'f' )
+        else if ( *++start == _T('f') )
         {
             // either "#if" or "#ifdef"
             cur = start;
@@ -1326,14 +1326,14 @@ void CJSourceParser::AddMacroNode( char*& cur )
             wxString condition = get_token_str( cur );
 
             // currently, everything except '0' is true
-            if ( condition == "0" ) {
+            if ( condition == _T("0") ) {
                 // skip until the following else or enif
                 while ( cur < _gSrcEnd ) {
                     skip_to_eol( cur );
                     skip_eol( cur );
 
                     get_next_token( cur );
-                    if ( *cur++ == '#' && *cur == 'e' )
+                    if ( *cur++ == _T('#') && *cur == _T('e') )
                         break;
                 }
             }
@@ -1341,7 +1341,7 @@ void CJSourceParser::AddMacroNode( char*& cur )
             // TODO parse the condition...
         }
     }
-    else if ( cmp_tokens_fast( start, "else", 4 ) )
+    else if ( cmp_tokens_fast( start, _T("else"), 4 ) )
     {
         // skip until "#endif"
         while ( cur < _gSrcEnd ) {
@@ -1349,7 +1349,7 @@ void CJSourceParser::AddMacroNode( char*& cur )
             skip_eol( cur );
 
             get_next_token( cur );
-            if ( *cur++ == '#' && cmp_tokens_fast( cur, "endif", 5 ) )
+            if ( *cur++ == _T('#') && cmp_tokens_fast( cur, "endif", 5 ) )
                 break;
         }
     }
@@ -1876,7 +1876,7 @@ void CJSourceParser::ParseMemberVar( char*& cur )
         // if comma, than variable list continues
         // otherwise the variable type reached - stop
 
-        if ( *cur == '=' )
+        if ( *cur == _T('=') )
         {
             // yes, we've mistaken, it was not a identifier,
             // but it's default value
@@ -2189,10 +2189,10 @@ void CJSourceParser::AddClassNode( char*& cur )
     clear_commets_queue();
 }
 
-void CJSourceParser::AddEnumNode( char*& cur )
+void CJSourceParser::AddEnumNode( wxChar*& cur )
 {
     // now the cursor is at "enum" keyword
-    char* start = cur;
+    wxChar* start = cur;
 
     spEnumeration* pEnum = new spEnumeration();
     mpCurCtx->AddMember( pEnum );
@@ -2226,13 +2226,13 @@ void CJSourceParser::AddEnumNode( char*& cur )
     clear_commets_queue();
 }
 
-void CJSourceParser::AddTypeDefNode( char*& cur )
+void CJSourceParser::AddTypeDefNode( wxChar*& cur )
 {
     // now the cursor at the token next to "typedef" keyword
 
     if ( !get_next_token(cur) ) return;
 
-    char* start = cur;
+    wxChar* start = cur;
 
     spTypeDef* pTDef = new spTypeDef();
     mpCurCtx->AddMember( pTDef );
@@ -2246,18 +2246,18 @@ void CJSourceParser::AddTypeDefNode( char*& cur )
     int tmpLnNo;
     store_line_no( tmpLnNo );
 
-    char* tok = cur-1;
+    wxChar* tok = cur-1;
     skip_next_token_back( tok );
 
-    char* nameEnd = tok;
+    wxChar* nameEnd = tok;
 
     skip_token_back( tok );
 
-    char* nameStart = tok;
+    wxChar* nameStart = tok;
 
     skip_next_token_back( tok );
 
-    char* typeEnd = tok;
+    wxChar* typeEnd = tok;
 
     // check if it's function prototype
     if ( *nameStart == ')' )

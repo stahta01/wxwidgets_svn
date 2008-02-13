@@ -133,6 +133,11 @@ static inline void UnselectItem(HWND hwndTV, HTREEITEM htItem)
     SelectItem(hwndTV, htItem, false);
 }
 
+static inline void ToggleItemSelection(HWND hwndTV, HTREEITEM htItem)
+{
+    SelectItem(hwndTV, htItem, !IsItemSelected(hwndTV, htItem));
+}
+
 // helper function which selects all items in a range and, optionally,
 // unselects all others
 static void SelectRange(HWND hwndTV,
@@ -201,56 +206,57 @@ static void SelectRange(HWND hwndTV,
 // helper function which tricks the standard control into changing the focused
 // item without changing anything else (if someone knows why Microsoft doesn't
 // allow to do it by just setting TVIS_FOCUSED flag, please tell me!)
-//
-// returns true if the focus was changed, false if the given item was already
-// the focused one
-static bool SetFocus(HWND hwndTV, HTREEITEM htItem)
+static void SetFocus(HWND hwndTV, HTREEITEM htItem)
 {
     // the current focus
     HTREEITEM htFocus = (HTREEITEM)TreeView_GetSelection(hwndTV);
 
-    if ( htItem == htFocus )
-        return false;
-
     if ( htItem )
     {
-        // remember the selection state of the item
-        bool wasSelected = IsItemSelected(hwndTV, htItem);
-
-        if ( htFocus && IsItemSelected(hwndTV, htFocus) )
+        // set the focus
+        if ( htItem != htFocus )
         {
-            // prevent the tree from unselecting the old focus which it
-            // would do by default (TreeView_SelectItem unselects the
-            // focused item)
-            TreeView_SelectItem(hwndTV, 0);
-            SelectItem(hwndTV, htFocus);
-        }
+            // remember the selection state of the item
+            bool wasSelected = IsItemSelected(hwndTV, htItem);
 
-        TreeView_SelectItem(hwndTV, htItem);
+            if ( htFocus && IsItemSelected(hwndTV, htFocus) )
+            {
+                // prevent the tree from unselecting the old focus which it
+                // would do by default (TreeView_SelectItem unselects the
+                // focused item)
+                TreeView_SelectItem(hwndTV, 0);
+                SelectItem(hwndTV, htFocus);
+            }
 
-        if ( !wasSelected )
-        {
-            // need to clear the selection which TreeView_SelectItem() gave
-            // us
-            UnselectItem(hwndTV, htItem);
+            TreeView_SelectItem(hwndTV, htItem);
+
+            if ( !wasSelected )
+            {
+                // need to clear the selection which TreeView_SelectItem() gave
+                // us
+                UnselectItem(hwndTV, htItem);
+            }
+            //else: was selected, still selected - ok
         }
-        //else: was selected, still selected - ok
+        //else: nothing to do, focus already there
     }
-    else // reset focus
+    else
     {
-        bool wasFocusSelected = IsItemSelected(hwndTV, htFocus);
-
-        // just clear the focus
-        TreeView_SelectItem(hwndTV, 0);
-
-        if ( wasFocusSelected )
+        if ( htFocus )
         {
-            // restore the selection state
-            SelectItem(hwndTV, htFocus);
-        }
-    }
+            bool wasFocusSelected = IsItemSelected(hwndTV, htFocus);
 
-    return true;
+            // just clear the focus
+            TreeView_SelectItem(hwndTV, 0);
+
+            if ( wasFocusSelected )
+            {
+                // restore the selection state
+                SelectItem(hwndTV, htFocus);
+            }
+        }
+        //else: nothing to do, no focus already
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -558,9 +564,7 @@ wxBEGIN_FLAGS( wxTreeCtrlStyle )
     wxFLAGS_MEMBER(wxTR_HAS_VARIABLE_ROW_HEIGHT)
     wxFLAGS_MEMBER(wxTR_SINGLE)
     wxFLAGS_MEMBER(wxTR_MULTIPLE)
-#if WXWIN_COMPATIBILITY_2_8
     wxFLAGS_MEMBER(wxTR_EXTENDED)
-#endif
     wxFLAGS_MEMBER(wxTR_DEFAULT_STYLE)
 
 wxEND_FLAGS( wxTreeCtrlStyle )
@@ -961,7 +965,7 @@ void wxTreeCtrl::SetItemText(const wxTreeItemId& item, const wxString& text)
         return;
 
     wxTreeViewItem tvItem(item, TVIF_TEXT);
-    tvItem.pszText = (wxChar *)text.wx_str();  // conversion is ok
+    tvItem.pszText = (wxChar *)text.c_str();  // conversion is ok
     DoSetItem(&tvItem);
 
     // when setting the text of the item being edited, the text control should
@@ -974,7 +978,7 @@ void wxTreeCtrl::SetItemText(const wxTreeItemId& item, const wxString& text)
     {
         if ( item == m_idEdited )
         {
-            ::SetWindowText(hwndEdit, text.wx_str());
+            ::SetWindowText(hwndEdit, text);
         }
     }
 }
@@ -1354,6 +1358,36 @@ wxTreeItemId wxTreeCtrl::GetNextChild(const wxTreeItemId& WXUNUSED(item),
     return item;
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+
+wxTreeItemId wxTreeCtrl::GetFirstChild(const wxTreeItemId& item,
+                                       long& cookie) const
+{
+    wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
+
+    cookie = (long)TreeView_GetChild(GetHwnd(), HITEM(item));
+
+    return wxTreeItemId((void *)cookie);
+}
+
+wxTreeItemId wxTreeCtrl::GetNextChild(const wxTreeItemId& WXUNUSED(item),
+                                      long& cookie) const
+{
+    wxTreeItemId fromCookie((void *)cookie);
+
+    HTREEITEM hitem = HITEM(fromCookie);
+
+    hitem = TreeView_GetNextSibling(GetHwnd(), hitem);
+
+    wxTreeItemId item(hitem);
+
+    cookie = (long)item.m_pItem;
+
+    return item;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 wxTreeItemId wxTreeCtrl::GetLastChild(const wxTreeItemId& item) const
 {
     wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
@@ -1394,15 +1428,7 @@ wxTreeItemId wxTreeCtrl::GetNextVisible(const wxTreeItemId& item) const
     wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
     wxASSERT_MSG( IsVisible(item), wxT("The item you call GetNextVisible() for must be visible itself!"));
 
-    wxTreeItemId next(TreeView_GetNextVisible(GetHwnd(), HITEM(item)));
-    if ( next.IsOk() && !IsVisible(next) )
-    {
-        // Win32 considers that any non-collapsed item is visible while we want
-        // to return only really visible items
-        next.Unset();
-    }
-
-    return next;
+    return wxTreeItemId(TreeView_GetNextVisible(GetHwnd(), HITEM(item)));
 }
 
 wxTreeItemId wxTreeCtrl::GetPrevVisible(const wxTreeItemId& item) const
@@ -1410,15 +1436,7 @@ wxTreeItemId wxTreeCtrl::GetPrevVisible(const wxTreeItemId& item) const
     wxCHECK_MSG( item.IsOk(), wxTreeItemId(), wxT("invalid tree item") );
     wxASSERT_MSG( IsVisible(item), wxT("The item you call GetPrevVisible() for must be visible itself!"));
 
-    wxTreeItemId prev(TreeView_GetPrevVisible(GetHwnd(), HITEM(item)));
-    if ( prev.IsOk() && !IsVisible(prev) )
-    {
-        // just as above, Win32 function will happily return the previous item
-        // in the tree for the first visible item too
-        prev.Unset();
-    }
-
-    return prev;
+    return wxTreeItemId(TreeView_GetPrevVisible(GetHwnd(), HITEM(item)));
 }
 
 // ----------------------------------------------------------------------------
@@ -1488,7 +1506,7 @@ wxTreeItemId wxTreeCtrl::DoInsertAfter(const wxTreeItemId& parent,
     if ( !text.empty() )
     {
         mask |= TVIF_TEXT;
-        tvIns.item.pszText = (wxChar *)text.wx_str();  // cast is ok
+        tvIns.item.pszText = (wxChar *)text.c_str();  // cast is ok
     }
     else
     {
@@ -1531,14 +1549,33 @@ wxTreeItemId wxTreeCtrl::DoInsertAfter(const wxTreeItemId& parent,
     return wxTreeItemId(id);
 }
 
+// for compatibility only
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxTreeCtrl::SetImageList(wxImageList *imageList, int)
+{
+    SetImageList(imageList);
+}
+
+int wxTreeCtrl::GetItemSelectedImage(const wxTreeItemId& item) const
+{
+    return GetItemImage(item, wxTreeItemIcon_Selected);
+}
+
+void wxTreeCtrl::SetItemSelectedImage(const wxTreeItemId& item, int image)
+{
+    SetItemImage(item, image, wxTreeItemIcon_Selected);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 wxTreeItemId wxTreeCtrl::AddRoot(const wxString& text,
                                  int image, int selectedImage,
                                  wxTreeItemData *data)
 {
+
     if ( HasFlag(wxTR_HIDE_ROOT) )
     {
-        wxASSERT_MSG( !m_pVirtualRoot, _T("tree can have only a single root") );
-
         // create a virtual root item, the parent for all the others
         wxTreeItemParam *param = new wxTreeItemParam;
         param->SetData(data);
@@ -1665,7 +1702,7 @@ void wxTreeCtrl::DoExpand(const wxTreeItemId& item, int flag)
                                                            : IDX_COLLAPSE]
                                          [IDX_DONE],
                            this, item);
-        (void)HandleWindowEvent(event);
+        (void)GetEventHandler()->ProcessEvent(event);
     }
     //else: change didn't took place, so do nothing at all
 }
@@ -1689,6 +1726,15 @@ void wxTreeCtrl::Toggle(const wxTreeItemId& item)
 {
     DoExpand(item, TVE_TOGGLE);
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxTreeCtrl::ExpandItem(const wxTreeItemId& item, int action)
+{
+    DoExpand(item, action);
+}
+
+#endif
 
 void wxTreeCtrl::Unselect()
 {
@@ -1723,34 +1769,34 @@ void wxTreeCtrl::SelectItem(const wxTreeItemId& item, bool select)
 {
     wxCHECK_RET( !IsHiddenRoot(item), _T("can't select hidden root item") );
 
-    wxASSERT_MSG( select || HasFlag(wxTR_MULTIPLE),
-                  _T("SelectItem(false) works only for multiselect") );
-
-    wxTreeEvent event(wxEVT_COMMAND_TREE_SEL_CHANGING, this, item);
-    if ( !HandleWindowEvent(event) || event.IsAllowed() )
+    if ( m_windowStyle & wxTR_MULTIPLE )
     {
-        if ( HasFlag(wxTR_MULTIPLE) )
+        ::SelectItem(GetHwnd(), HITEM(item), select);
+    }
+    else
+    {
+        wxASSERT_MSG( select,
+                      _T("SelectItem(false) works only for multiselect") );
+
+        // inspite of the docs (MSDN Jan 99 edition), we don't seem to receive
+        // the notification from the control (i.e. TVN_SELCHANG{ED|ING}), so
+        // send them ourselves
+
+        wxTreeEvent event(wxEVT_COMMAND_TREE_SEL_CHANGING, this, item);
+        if ( !GetEventHandler()->ProcessEvent(event) || event.IsAllowed() )
         {
-            if ( !::SelectItem(GetHwnd(), HITEM(item), select) )
-            {
-                wxLogLastError(wxT("TreeView_SelectItem"));
-                return;
-            }
-        }
-        else // single selection
-        {
-            // use TreeView_SelectItem() to deselect the previous selection
             if ( !TreeView_SelectItem(GetHwnd(), HITEM(item)) )
             {
                 wxLogLastError(wxT("TreeView_SelectItem"));
-                return;
+            }
+            else // ok
+            {
+                event.SetEventType(wxEVT_COMMAND_TREE_SEL_CHANGED);
+                (void)GetEventHandler()->ProcessEvent(event);
             }
         }
-
-        event.SetEventType(wxEVT_COMMAND_TREE_SEL_CHANGED);
-        (void)HandleWindowEvent(event);
+        //else: program vetoed the change
     }
-    //else: program vetoed the change
 }
 
 void wxTreeCtrl::EnsureVisible(const wxTreeItemId& item)
@@ -1948,9 +1994,11 @@ bool wxTreeCtrl::MSWShouldPreProcessMessage(WXMSG* msg)
 {
     if ( msg->message == WM_KEYDOWN )
     {
-        // Only eat VK_RETURN if not being used by the application in
-        // conjunction with modifiers
-        if ( (msg->wParam == VK_RETURN) && !wxIsAnyModifierDown() )
+        const bool isAltDown = ::GetKeyState(VK_MENU) < 0;
+
+        // Only eat VK_RETURN if not being used by the application in conjunction with
+        // modifiers
+        if ( msg->wParam == VK_RETURN && !wxIsCtrlDown() && !wxIsShiftDown() && !isAltDown)
         {
             // we need VK_RETURN to generate wxEVT_COMMAND_TREE_ITEM_ACTIVATED
             return false;
@@ -1960,10 +2008,8 @@ bool wxTreeCtrl::MSWShouldPreProcessMessage(WXMSG* msg)
     return wxTreeCtrlBase::MSWShouldPreProcessMessage(msg);
 }
 
-bool wxTreeCtrl::MSWCommand(WXUINT cmd, WXWORD id_)
+bool wxTreeCtrl::MSWCommand(WXUINT cmd, WXWORD id)
 {
-    const int id = (signed short)id_;
-
     if ( cmd == EN_UPDATE )
     {
         wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, id);
@@ -2041,7 +2087,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
 
         event.m_pointDrag = pt;
 
-        if ( HandleWindowEvent(event) )
+        if ( GetEventHandler()->ProcessEvent(event) )
             processed = true;
         //else: continue with generating wxEVT_CONTEXT_MENU in base class code
     }
@@ -2071,7 +2117,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
                         SetFocus();
 
                         // toggle selected state
-                        ToggleItemSelection(htItem);
+                        ::ToggleItemSelection(GetHwnd(), htItem);
 
                         ::SetFocus(GetHwnd(), htItem);
 
@@ -2279,8 +2325,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
                     // generate the drag end event
                     wxTreeEvent event(wxEVT_COMMAND_TREE_END_DRAG, this, htItem);
                     event.m_pointDrag = wxPoint(x, y);
-
-                    (void)HandleWindowEvent(event);
+                    (void)GetEventHandler()->ProcessEvent(event);
 
                     // if we don't do it, the tree seems to think that 2 items
                     // are selected simultaneously which is quite weird
@@ -2320,7 +2365,7 @@ WXLRESULT wxTreeCtrl::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lPara
             case VK_SPACE:
                 if ( bCtrl )
                 {
-                    ToggleItemSelection(htSel);
+                    ::ToggleItemSelection(GetHwnd(), htSel);
                 }
                 else
                 {
@@ -2605,7 +2650,8 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 // fabricate the lParam and wParam parameters sufficiently
                 // similar to the ones from a "real" WM_KEYDOWN so that
                 // CreateKeyEvent() works correctly
-                WXLPARAM lParam = (wxIsAltDown() ? KF_ALTDOWN : 0) << 16;
+                const bool isAltDown = ::GetKeyState(VK_MENU) < 0;
+                WXLPARAM lParam = (isAltDown ? KF_ALTDOWN : 0) << 16;
 
                 WXWPARAM wParam = info->wVKey;
 
@@ -2623,7 +2669,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                                                 wParam);
 
                 // a separate event for Space/Return
-                if ( !wxIsAnyModifierDown() &&
+                if ( !wxIsCtrlDown() && !wxIsShiftDown() && !isAltDown &&
                      ((info->wVKey == VK_SPACE) || (info->wVKey == VK_RETURN)) )
                 {
                    wxTreeItemId item;
@@ -2632,7 +2678,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
                    wxTreeEvent event2(wxEVT_COMMAND_TREE_ITEM_ACTIVATED,
                                         this, item);
-                   (void)HandleWindowEvent(event2);
+                   (void)GetEventHandler()->ProcessEvent(event2);
                 }
             }
             break;
@@ -2696,19 +2742,6 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                     event.m_itemOld = tv->itemOld.hItem;
                 }
             }
-
-            // we receive this message from WM_LBUTTONDOWN handler inside
-            // comctl32.dll and so before the click is passed to
-            // DefWindowProc() which sets the focus to the window which was
-            // clicked and this can lead to unexpected event sequences: for
-            // example, we may get a "selection change" event from the tree
-            // before getting a "kill focus" event for the text control which
-            // had the focus previously, thus breaking user code doing input
-            // validation
-            //
-            // to avoid such surprises, we force the generation of focus events
-            // now, before we generate the selection change ones
-            SetFocus();
             break;
 
             // instead of explicitly checking for _WIN32_IE, check if the
@@ -2849,7 +2882,7 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     if ( event.m_item.IsOk() )
         event.SetClientObject(GetItemData(event.m_item));
 
-    bool processed = HandleWindowEvent(event);
+    bool processed = GetEventHandler()->ProcessEvent(event);
 
     // post processing
     switch ( hdr->code )
@@ -2975,40 +3008,17 @@ bool wxTreeCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             break;
 
         case TVN_ITEMEXPANDED:
+            // the item is not refreshed properly after expansion when it has
+            // an image depending on the expanded/collapsed state - bug in
+            // comctl32.dll or our code?
             {
                 NM_TREEVIEW *tv = (NM_TREEVIEW *)lParam;
-                const wxTreeItemId id(tv->itemNew.hItem);
+                wxTreeItemId id(tv->itemNew.hItem);
 
-                if ( tv->action == TVE_COLLAPSE )
+                int image = GetItemImage(id, wxTreeItemIcon_Expanded);
+                if ( image != -1 )
                 {
-                    if ( wxApp::GetComCtl32Version() >= 600 )
-                    {
-                        // for some reason the item selection rectangle depends
-                        // on whether it is expanded or collapsed (at least
-                        // with comctl32.dll v6): it is wider (by 3 pixels) in
-                        // the expanded state, so when the item collapses and
-                        // then is deselected the rightmost 3 pixels of the
-                        // previously drawn selection are left on the screen
-                        //
-                        // it's not clear if it's a bug in comctl32.dll or in
-                        // our code (because it does not happen in Explorer but
-                        // OTOH we don't do anything which could result in this
-                        // AFAICS) but we do need to work around it to avoid
-                        // ugly artifacts
-                        RefreshItem(id);
-                    }
-                }
-                else // expand
-                {
-                    // the item is also not refreshed properly after expansion when
-                    // it has an image depending on the expanded/collapsed state:
-                    // again, it's not clear if the bug is in comctl32.dll or our
-                    // code...
-                    int image = GetItemImage(id, wxTreeItemIcon_Expanded);
-                    if ( image != -1 )
-                    {
-                        RefreshItem(id);
-                    }
+                    RefreshItem(id);
                 }
             }
             break;

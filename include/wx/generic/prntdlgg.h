@@ -23,7 +23,6 @@
 #include "wx/printdlg.h"
 #include "wx/listctrl.h"
 
-#include "wx/dc.h"
 #if wxUSE_POSTSCRIPT
     #include "wx/dcps.h"
 #endif

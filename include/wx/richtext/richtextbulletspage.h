@@ -31,6 +31,7 @@ class wxRichTextCtrl;
 
 ////@begin control identifiers
 #define SYMBOL_WXRICHTEXTBULLETSPAGE_STYLE wxRESIZE_BORDER|wxTAB_TRAVERSAL
+#define SYMBOL_WXRICHTEXTBULLETSPAGE_TITLE _("wxRichTextBulletsPage")
 #define SYMBOL_WXRICHTEXTBULLETSPAGE_IDNAME ID_RICHTEXTBULLETSPAGE
 #define SYMBOL_WXRICHTEXTBULLETSPAGE_SIZE wxSize(400, 300)
 #define SYMBOL_WXRICHTEXTBULLETSPAGE_POSITION wxDefaultPosition
@@ -67,7 +68,7 @@ public:
     virtual bool TransferDataToWindow();
 
     /// Gets the attributes associated with the main formatting dialog
-    wxTextAttr* GetAttributes();
+    wxTextAttrEx* GetAttributes();
 
     /// Update for symbol-related controls
     void OnSymbolUpdate( wxUpdateUIEvent& event );

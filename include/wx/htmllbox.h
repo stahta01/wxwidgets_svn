@@ -69,8 +69,8 @@ public:
     virtual ~wxHtmlListBox();
 
     // override some base class virtuals
-    virtual void RefreshRow(size_t line);
-    virtual void RefreshRows(size_t from, size_t to);
+    virtual void RefreshLine(size_t line);
+    virtual void RefreshLines(size_t from, size_t to);
     virtual void RefreshAll();
     virtual void SetItemCount(size_t count);
 
@@ -268,33 +268,45 @@ public:
 
     virtual void SetString(unsigned int n, const wxString& s);
 
-    // resolve ambiguity between wxItemContainer and wxVListBox versions
-    void Clear();
+    virtual void Clear();
+    virtual void Delete(unsigned int n);
+
+    // override default unoptimized wxItemContainer::Append() function
+    void Append(const wxArrayString& strings);
+
+    // since we override one Append() overload, we need to overload all others too
+    int Append(const wxString& item)
+        { return wxItemContainer::Append(item); }
+    int Append(const wxString& item, void *clientData)
+        { return wxItemContainer::Append(item, clientData); }
+    int Append(const wxString& item, wxClientData *clientData)
+        { return wxItemContainer::Append(item, clientData); }
+
 
 protected:
-    virtual int DoInsertItems(const wxArrayStringsAdapter & items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
 
     virtual void DoSetItemClientData(unsigned int n, void *clientData)
         { m_HTMLclientData[n] = clientData; }
 
     virtual void *DoGetItemClientData(unsigned int n) const
         { return m_HTMLclientData[n]; }
-
-    // wxItemContainer methods
-    virtual void DoClear();
-    virtual void DoDeleteOneItem(unsigned int n);
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData *clientData)
+        { m_HTMLclientData[n] = (void *)clientData; }
+    virtual wxClientData *DoGetItemClientObject(unsigned int n) const
+        { return (wxClientData *)m_HTMLclientData[n]; }
 
     // calls wxHtmlListBox::SetItemCount() and RefreshAll()
     void UpdateCount();
 
-    // override these functions just to change their visibility: users of
+    // overload these functions just to change their visibility: users of
     // wxSimpleHtmlListBox shouldn't be allowed to call them directly!
     virtual void SetItemCount(size_t count)
         { wxHtmlListBox::SetItemCount(count); }
-    virtual void SetRowCount(size_t count)
-        { wxHtmlListBox::SetRowCount(count); }
+    virtual void SetLineCount(size_t count)
+        { wxHtmlListBox::SetLineCount(count); }
 
     virtual wxString OnGetItem(size_t n) const
         { return m_items[n]; }

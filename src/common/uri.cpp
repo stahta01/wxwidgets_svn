@@ -23,10 +23,6 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/crt.h"
-#endif
-
 #include "wx/uri.h"
 
 // ---------------------------------------------------------------------------
@@ -97,10 +93,7 @@ const wxChar* wxURI::Create(const wxString& uri)
     if (m_fields)
         Clear();
 
-    // FIXME-UTF8: rewrite ParseXXX() methods using iterators
-    // NB: using wxWxCharBuffer instead of just c_str() avoids keeping
-    //     converted string in memory for longer than needed
-    return Parse(wxWxCharBuffer(uri.c_str()));
+    return Parse(uri);
 }
 
 // ---------------------------------------------------------------------------
@@ -116,29 +109,26 @@ const wxChar* wxURI::Create(const wxString& uri)
 // Unescape unencodes all 3 character URL escape sequences in a wxString
 // ---------------------------------------------------------------------------
 
-wxUniChar wxURI::TranslateEscape(const wxString::const_iterator& s)
+wxChar wxURI::TranslateEscape(const wxChar* s)
 {
-    wxChar c1(*s);
-    wxChar c2(*(s + 1));
+    wxASSERT_MSG( IsHex(s[0]) && IsHex(s[1]), wxT("Invalid escape sequence!"));
 
-    wxASSERT_MSG( IsHex(c1) && IsHex(c2), wxT("Invalid escape sequence!"));
-
-    return wx_truncate_cast(wxChar, (CharToHex(c1) << 4 ) | CharToHex(c2));
+    return wx_truncate_cast(wxChar, (CharToHex(s[0]) << 4 ) | CharToHex(s[1]));
 }
 
 wxString wxURI::Unescape(const wxString& uri)
 {
     wxString new_uri;
 
-    for (wxString::const_iterator i = uri.begin(); i != uri.end(); ++i)
+    for(size_t i = 0; i < uri.length(); ++i)
     {
-        if ( *i == wxT('%') )
+        if (uri[i] == wxT('%'))
         {
-            new_uri += wxURI::TranslateEscape(i + 1);
+            new_uri += wxURI::TranslateEscape( &(uri.c_str()[i+1]) );
             i += 2;
         }
         else
-            new_uri += *i;
+            new_uri += uri[i];
     }
 
     return new_uri;
@@ -381,7 +371,7 @@ bool wxURI::IsReference() const
 // URI-reference = URI / relative
 // ---------------------------------------------------------------------------
 
-const wxChar* wxURI::Parse(const wxChar *uri)
+const wxChar* wxURI::Parse(const wxChar* uri)
 {
     uri = ParseScheme(uri);
     uri = ParseAuthority(uri);
@@ -396,7 +386,7 @@ const wxChar* wxURI::Parse(const wxChar *uri)
 // Individual parsers for each URI component
 // ---------------------------------------------------------------------------
 
-const wxChar* wxURI::ParseScheme(const wxChar *uri)
+const wxChar* wxURI::ParseScheme(const wxChar* uri)
 {
     wxASSERT(uri != NULL);
 
@@ -648,8 +638,7 @@ const wxChar* wxURI::ParsePath(const wxChar* uri, bool bReference, bool bNormali
         if (bNormalize)
         {
             wxStringBufferLength theBuffer(m_path, m_path.length() + 1);
-#if wxUSE_STL || wxUSE_UNICODE_UTF8
-            // FIXME-UTF8: have some wxReadWriteStringBuffer instead?
+#if wxUSE_STL
             wxTmemcpy(theBuffer, m_path.c_str(), m_path.length()+1);
 #endif
             Normalize(theBuffer, true);
@@ -701,8 +690,7 @@ const wxChar* wxURI::ParsePath(const wxChar* uri, bool bReference, bool bNormali
             if (bNormalize)
             {
                 wxStringBufferLength theBuffer(m_path, m_path.length() + 1);
-#if wxUSE_STL || wxUSE_UNICODE_UTF8
-                // FIXME-UTF8: have some wxReadWriteStringBuffer instead?
+#if wxUSE_STL
                 wxTmemcpy(theBuffer, m_path.c_str(), m_path.length()+1);
 #endif
                 Normalize(theBuffer);
@@ -882,18 +870,18 @@ void wxURI::Resolve(const wxURI& base, int flags)
         if (m_path[0u] != wxT('/'))
         {
             //Merge paths
-            wxString::const_iterator op = m_path.begin();
-            wxString::const_iterator bp = base.m_path.begin() + base.m_path.length();
+            const wxChar* op = m_path.c_str();
+            const wxChar* bp = base.m_path.c_str() + base.m_path.Length();
 
             //not a ending directory?  move up
             if (base.m_path[0] && *(bp-1) != wxT('/'))
-                UpTree(base.m_path.begin(), bp);
+                UpTree(base.m_path, bp);
 
             //normalize directories
             while(*op == wxT('.') && *(op+1) == wxT('.') &&
                        (*(op+2) == '\0' || *(op+2) == wxT('/')) )
             {
-                UpTree(base.m_path.begin(), bp);
+                UpTree(base.m_path, bp);
 
                 if (*(op+2) == '\0')
                     op += 2;
@@ -901,8 +889,8 @@ void wxURI::Resolve(const wxURI& base, int flags)
                     op += 3;
             }
 
-            m_path = base.m_path.substr(0, bp - base.m_path.begin()) +
-                     m_path.substr((op - m_path.begin()), m_path.length());
+            m_path = base.m_path.substr(0, bp - base.m_path.c_str()) +
+                    m_path.substr((op - m_path.c_str()), m_path.Length());
         }
     }
 
@@ -916,8 +904,7 @@ void wxURI::Resolve(const wxURI& base, int flags)
 // ---------------------------------------------------------------------------
 
 //static
-void wxURI::UpTree(wxString::const_iterator uristart,
-                   wxString::const_iterator& uri)
+void wxURI::UpTree(const wxChar* uristart, const wxChar*& uri)
 {
     if (uri != uristart && *(uri-1) == wxT('/'))
     {
@@ -938,30 +925,6 @@ void wxURI::UpTree(wxString::const_iterator uristart,
         ++uri;
     //!!!//
 }
-
-// FIXME-UTF8: fix Normalize() to use iterators instead of having this method!
-/*static*/ void wxURI::UpTree(const wxChar* uristart, const wxChar*& uri)
-{
-    if (uri != uristart && *(uri-1) == wxT('/'))
-    {
-        uri -= 2;
-    }
-
-    for(;uri != uristart; --uri)
-    {
-        if (*uri == wxT('/'))
-        {
-            ++uri;
-            break;
-        }
-    }
-
-    //!!!TODO:HACK!!!//
-    if (uri == uristart && *uri == wxT('/'))
-        ++uri;
-    //!!!//
-}
-// end of FIXME-UTF8
 
 // ---------------------------------------------------------------------------
 // Normalize

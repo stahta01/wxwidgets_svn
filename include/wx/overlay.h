@@ -14,7 +14,7 @@
 
 #include "wx/defs.h"
 
-#if defined(wxMAC_USE_CORE_GRAPHICS) && wxMAC_USE_CORE_GRAPHICS && wxMAC_USE_QUICKDRAW
+#if defined(wxMAC_USE_CORE_GRAPHICS) && wxMAC_USE_CORE_GRAPHICS
     #define wxHAS_NATIVE_OVERLAY 1
 #elif defined(__WXDFB__)
     #define wxHAS_NATIVE_OVERLAY 1
@@ -29,7 +29,7 @@
 // ----------------------------------------------------------------------------
 
 class WXDLLIMPEXP_FWD_CORE wxOverlayImpl;
-class WXDLLIMPEXP_FWD_CORE wxDC;
+class WXDLLIMPEXP_FWD_CORE wxWindowDC;
 
 class WXDLLEXPORT wxOverlay
 {
@@ -45,18 +45,18 @@ public:
     wxOverlayImpl *GetImpl() { return m_impl; }
 
 private:
-    friend class WXDLLIMPEXP_FWD_CORE wxDCOverlay;
+    friend class WXDLLEXPORT wxDCOverlay;
 
     // returns true if it has been setup
     bool IsOk();
 
-    void Init(wxDC* dc, int x , int y , int width , int height);
+    void Init(wxWindowDC* dc, int x , int y , int width , int height);
 
-    void BeginDrawing(wxDC* dc);
+    void BeginDrawing(wxWindowDC* dc);
 
-    void EndDrawing(wxDC* dc);
+    void EndDrawing(wxWindowDC* dc);
 
-    void Clear(wxDC* dc);
+    void Clear(wxWindowDC* dc);
 
     wxOverlayImpl* m_impl;
 
@@ -72,10 +72,10 @@ class WXDLLEXPORT wxDCOverlay
 public:
     // connects this overlay to the corresponding drawing dc, if the overlay is
     // not initialized yet this call will do so
-    wxDCOverlay(wxOverlay &overlay, wxDC *dc, int x , int y , int width , int height);
+    wxDCOverlay(wxOverlay &overlay, wxWindowDC *dc, int x , int y , int width , int height);
 
     // convenience wrapper that behaves the same using the entire area of the dc
-    wxDCOverlay(wxOverlay &overlay, wxDC *dc);
+    wxDCOverlay(wxOverlay &overlay, wxWindowDC *dc);
 
     // removes the connection between the overlay and the dc
     virtual ~wxDCOverlay();
@@ -84,11 +84,11 @@ public:
     void Clear();
 
 private:
-    void Init(wxDC *dc, int x , int y , int width , int height);
+    void Init(wxWindowDC *dc, int x , int y , int width , int height);
 
     wxOverlay& m_overlay;
 
-    wxDC* m_dc;
+    wxWindowDC* m_dc;
 
 
     DECLARE_NO_COPY_CLASS(wxDCOverlay)

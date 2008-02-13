@@ -398,7 +398,7 @@ void wxFrame::AttachMenuBar(wxMenuBar *menubar)
     if( menubar->GetMenuCount() == 1 )
     {
         autoMenu = wxTopLevelWindowMSW::ButtonMenu::DuplicateMenu(menubar->GetMenu(0));
-        SetRightMenu(wxID_ANY, menubar->GetMenuLabel(0), autoMenu);
+        SetRightMenu(wxID_ANY, menubar->GetLabelTop(0), autoMenu);
     }
     else
     {
@@ -407,7 +407,7 @@ void wxFrame::AttachMenuBar(wxMenuBar *menubar)
         for( size_t n = 0; n < menubar->GetMenuCount(); n++ )
         {
             wxMenu *item = menubar->GetMenu(n);
-            wxString label = menubar->GetMenuLabel(n);
+            wxString label = menubar->GetLabelTop(n);
             wxMenu *new_item = wxTopLevelWindowMSW::ButtonMenu::DuplicateMenu(item);
             autoMenu->Append(wxID_ANY, label, new_item);
         }
@@ -497,7 +497,7 @@ void wxFrame::OnSysColourChanged(wxSysColourChangedEvent& event)
     {
         wxSysColourChangedEvent event2;
         event2.SetEventObject( m_frameStatusBar );
-        m_frameStatusBar->HandleWindowEvent(event2);
+        m_frameStatusBar->GetEventHandler()->ProcessEvent(event2);
     }
 #endif // wxUSE_STATUSBAR
 
@@ -563,7 +563,6 @@ bool wxFrame::ShowFullScreen(bool show, long style)
         }
 #endif // wxUSE_TOOLBAR
 
-#if wxUSE_MENUS
         if (m_fsStyle & wxFULLSCREEN_NOMENUBAR)
         {
             WXHMENU menu = m_hMenu;
@@ -585,7 +584,6 @@ bool wxFrame::ShowFullScreen(bool show, long style)
                 ::SetMenu(GetHwnd(), (HMENU)menu);
             }
         }
-#endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
         wxStatusBar *theStatusBar = GetStatusBar();
@@ -946,11 +944,8 @@ bool wxFrame::HandleSize(int WXUNUSED(x), int WXUNUSED(y), WXUINT id)
     return false;
 }
 
-bool wxFrame::HandleCommand(WXWORD id_, WXWORD cmd, WXHWND control)
+bool wxFrame::HandleCommand(WXWORD id, WXWORD cmd, WXHWND control)
 {
-    // sign extend to int from short before comparing with the other int ids
-    int id = (signed short)id_;
-
     if ( control )
     {
         // In case it's e.g. a toolbar.
@@ -989,8 +984,6 @@ bool wxFrame::HandleCommand(WXWORD id_, WXWORD cmd, WXHWND control)
     return false;
 }
 
-#if wxUSE_MENUS
-
 bool wxFrame::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU hMenu)
 {
     int item;
@@ -1011,7 +1004,7 @@ bool wxFrame::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU hMenu)
         // items opening popup menus (they don't have them anyhow) but do clear
         // the status line - otherwise, we would be left with the help message
         // for the previous item which doesn't apply any more
-        DoGiveHelp(wxEmptyString, true);
+        DoGiveHelp(wxEmptyString, false);
 
         return false;
     }
@@ -1019,7 +1012,7 @@ bool wxFrame::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU hMenu)
     wxMenuEvent event(wxEVT_MENU_HIGHLIGHT, item);
     event.SetEventObject(this);
 
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 bool wxFrame::HandleMenuLoop(const wxEventType& evtType, WXWORD isPopup)
@@ -1029,32 +1022,8 @@ bool wxFrame::HandleMenuLoop(const wxEventType& evtType, WXWORD isPopup)
     wxMenuEvent event(evtType, isPopup ? -1 : 0);
     event.SetEventObject(this);
 
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
-
-bool wxFrame::HandleInitMenuPopup(WXHMENU hMenu)
-{
-    wxMenu* menu = NULL;
-    if (GetMenuBar())
-    {
-        int nCount = GetMenuBar()->GetMenuCount();
-        for (int n = 0; n < nCount; n++)
-        {
-            if (GetMenuBar()->GetMenu(n)->GetHMenu() == hMenu)
-            {
-                menu = GetMenuBar()->GetMenu(n);
-                break;
-            }
-        }
-    }
-
-    wxMenuEvent event(wxEVT_MENU_OPEN, 0, menu);
-    event.SetEventObject(this);
-
-    return HandleWindowEvent(event);
-}
-
-#endif // wxUSE_MENUS
 
 // ---------------------------------------------------------------------------
 // the window proc for wxFrame
@@ -1092,12 +1061,11 @@ WXLRESULT wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPara
             processed = HandlePaint();
             break;
 
-#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
-#if wxUSE_MENUS
         case WM_INITMENUPOPUP:
             processed = HandleInitMenuPopup((WXHMENU) wParam);
             break;
 
+#if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
         case WM_MENUSELECT:
             {
                 WXWORD item, flags;
@@ -1111,7 +1079,6 @@ WXLRESULT wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPara
         case WM_EXITMENULOOP:
             processed = HandleMenuLoop(wxEVT_MENU_CLOSE, (WXWORD)wParam);
             break;
-#endif // wxUSE_MENUS
 
         case WM_QUERYDRAGICON:
             {
@@ -1129,6 +1096,29 @@ WXLRESULT wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPara
         rc = wxFrameBase::MSWWindowProc(message, wParam, lParam);
 
     return rc;
+}
+
+// handle WM_INITMENUPOPUP message
+bool wxFrame::HandleInitMenuPopup(WXHMENU hMenu)
+{
+    wxMenu* menu = NULL;
+    if (GetMenuBar())
+    {
+        int nCount = GetMenuBar()->GetMenuCount();
+        for (int n = 0; n < nCount; n++)
+        {
+            if (GetMenuBar()->GetMenu(n)->GetHMenu() == hMenu)
+            {
+                menu = GetMenuBar()->GetMenu(n);
+                break;
+            }
+        }
+    }
+
+    wxMenuEvent event(wxEVT_MENU_OPEN, 0, menu);
+    event.SetEventObject(this);
+
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 // ----------------------------------------------------------------------------

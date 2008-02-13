@@ -24,27 +24,19 @@
 #include "wx/mac/private.h"
 
 
-IMPLEMENT_DYNAMIC_CLASS(wxCursor, wxGDIObject)
+IMPLEMENT_DYNAMIC_CLASS(wxCursor, wxBitmap)
 
 
-class WXDLLEXPORT wxCursorRefData: public wxGDIRefData
+class WXDLLEXPORT wxCursorRefData: public wxBitmapRefData
 {
+    DECLARE_NO_COPY_CLASS(wxCursorRefData)
+
+    friend class WXDLLEXPORT wxBitmap;
+    friend class WXDLLEXPORT wxCursor;
+
 public:
     wxCursorRefData();
-    wxCursorRefData(const wxCursorRefData& cursor);
     virtual ~wxCursorRefData();
-
-    virtual bool IsOk() const
-    {
-        if ( m_hCursor != NULL )
-            return true;
-#if !wxMAC_USE_COCOA
-        if ( m_themeCursor != -1 )
-            return true;
-#endif
-
-        return false;
-    }
 
 protected:
 #if wxMAC_USE_COCOA
@@ -56,10 +48,6 @@ protected:
     bool        m_isColorCursor;
     long        m_themeCursor;
 #endif
-
-    friend class wxCursor;
-
-    DECLARE_NO_ASSIGN_CLASS(wxCursorRefData)
 };
 
 #define M_CURSORDATA wx_static_cast(wxCursorRefData*, m_refData)
@@ -211,6 +199,8 @@ CursHandle wxGetStockCursor( int number )
 
 wxCursorRefData::wxCursorRefData()
 {
+    SetWidth( 16 );
+    SetHeight( 16 );
     m_hCursor = NULL;
 #if wxMAC_USE_COCOA
 #else
@@ -218,21 +208,6 @@ wxCursorRefData::wxCursorRefData()
     m_releaseHandle = false;
     m_isColorCursor = false;
     m_themeCursor = -1;
-#endif
-}
-
-wxCursorRefData::wxCursorRefData(const wxCursorRefData& cursor)
-{
-    // FIXME: need to copy the cursor
-    m_hCursor = NULL;
-
-#if wxMAC_USE_COCOA
-    wxUnusedVar(cursor);
-#else
-    m_disposeHandle = false;
-    m_releaseHandle = false;
-    m_isColorCursor = cursor.m_isColorCursor;
-    m_themeCursor = cursor.m_themeCursor;
 #endif
 }
 
@@ -276,22 +251,17 @@ wxCursor::wxCursor( const wxImage &image )
 #endif
 }
 
-wxCursor::wxCursor(const char* const* bits)
+wxCursor::wxCursor(const char **bits)
 {
     (void) CreateFromXpm(bits);
 }
 
-wxGDIRefData *wxCursor::CreateGDIRefData() const
+wxCursor::wxCursor(char **bits)
 {
-    return new wxCursorRefData;
+    (void) CreateFromXpm((const char **)bits);
 }
 
-wxGDIRefData *wxCursor::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxCursorRefData(*wx_static_cast(const wxCursorRefData *, data));
-}
-
-bool wxCursor::CreateFromXpm(const char* const* bits)
+bool wxCursor::CreateFromXpm(const char **bits)
 {
 #if wxUSE_IMAGE
     wxCHECK_MSG( bits != NULL, false, wxT("invalid cursor data") );
@@ -308,6 +278,15 @@ bool wxCursor::CreateFromXpm(const char* const* bits)
 WXHCURSOR wxCursor::GetHCURSOR() const
 {
     return (M_CURSORDATA ? M_CURSORDATA->m_hCursor : 0);
+}
+
+bool wxCursor::IsOk() const
+{
+#if wxMAC_USE_COCOA
+    return GetHCURSOR() != NULL;
+#else
+    return (m_refData != NULL && ( M_CURSORDATA->m_hCursor != NULL || M_CURSORDATA->m_themeCursor != -1 ) ) ;
+#endif
 }
 
 #if !wxMAC_USE_COCOA
@@ -537,8 +516,7 @@ wxCursor::wxCursor(const wxString& cursor_file, long flags, int hotSpotX, int ho
         {
             image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_X, hotSpotX ) ;
             image.SetOption( wxIMAGE_OPTION_CUR_HOTSPOT_Y, hotSpotY ) ;
-            m_refData->DecRef() ;
-            m_refData = NULL ;
+            delete m_refData ;
             CreateFromImage( image ) ;
         }
 #endif

@@ -141,50 +141,6 @@ private:
 
 #endif // USE_MODAL_PRESENTATION
 
-class StdButtonSizerDialog : public wxDialog
-{
-public:
-    StdButtonSizerDialog(wxWindow *parent);
-
-    void OnEvent(wxCommandEvent& event);
-
-private:
-    void EnableDisableControls();
-
-    wxCheckBox *m_chkboxAffirmativeButton;
-    wxRadioButton *m_radiobtnOk,
-                  *m_radiobtnYes;
-
-    wxCheckBox *m_chkboxDismissButton;
-    wxRadioButton *m_radiobtnClose,
-                  *m_radiobtnCancel;
-
-    wxCheckBox *m_chkboxApply,
-               *m_chkboxNo,
-               *m_chkboxHelp,
-               *m_chkboxNoDefault;
-
-    wxSizer *m_buttonsSizer;
-
-    DECLARE_EVENT_TABLE()
-};
-
-class TestDefaultActionDialog: public wxDialog
-{
-public:
-    TestDefaultActionDialog( wxWindow *parent );
-    
-    void OnListBoxDClick(wxCommandEvent& event);
-    void OnCatchListBoxDClick(wxCommandEvent& event);
-    
-private:
-    bool   m_catchListBoxDClick;
-
-private:
-    DECLARE_EVENT_TABLE()
-};
-
-
 #if USE_SETTINGS_DIALOG
 // Property sheet dialog
 class SettingsDialog: public wxPropertySheetDialog
@@ -222,16 +178,11 @@ class MyFrame: public wxFrame
 {
 public:
     MyFrame(wxWindow *parent, const wxString& title);
-    virtual ~MyFrame();
 
-#if wxUSE_MSGDLG
     void MessageBox(wxCommandEvent& event);
-    void MessageBoxInfo(wxCommandEvent& event);
-#endif // wxUSE_MSGDLG
 
 #if wxUSE_COLOURDLG
     void ChooseColour(wxCommandEvent& event);
-    void GetColour(wxCommandEvent& event);
 #endif // wxUSE_COLOURDLG
 
 #if wxUSE_FONTDLG
@@ -284,12 +235,10 @@ public:
 
 #if USE_MODAL_PRESENTATION
     void ModalDlg(wxCommandEvent& event);
-#endif // USE_MODAL_PRESENTATION
     void ModelessDlg(wxCommandEvent& event);
     void DlgCenteredScreen(wxCommandEvent& event);
     void DlgCenteredParent(wxCommandEvent& event);
-    void MiniFrame(wxCommandEvent& event);
-    void DlgOnTop(wxCommandEvent& event);
+#endif // USE_MODAL_PRESENTATION
 
 #if wxUSE_PROGRESSDLG
     void ShowProgress(wxCommandEvent& event);
@@ -321,18 +270,7 @@ public:
 #endif // USE_FONTDLG_GENERIC
 
     void OnPropertySheet(wxCommandEvent& event);
-
     void OnRequestUserAttention(wxCommandEvent& event);
-#if wxUSE_NOTIFICATION_MESSAGE
-    void OnNotifMsgAuto(wxCommandEvent& event);
-    void OnNotifMsgShow(wxCommandEvent& event);
-    void OnNotifMsgHide(wxCommandEvent& event);
-#endif // wxUSE_NOTIFICATION_MESSAGE
-
-    void OnStandardButtonsSizerDialog(wxCommandEvent& event);
-    
-    void OnTestDefaultActionDialog(wxCommandEvent& event);
-    
     void OnExit(wxCommandEvent& event);
 
 private:
@@ -350,10 +288,6 @@ private:
     wxFindReplaceDialog *m_dlgFind,
                         *m_dlgReplace;
 #endif // wxUSE_FINDREPLDLG
-
-#if wxUSE_NOTIFICATION_MESSAGE
-    wxNotificationMessage *m_notifMsg;
-#endif // wxUSE_NOTIFICATION_MESSAGE
 
     wxColourData m_clrData;
 
@@ -376,12 +310,10 @@ public:
 enum
 {
     DIALOGS_CHOOSE_COLOUR = wxID_HIGHEST,
-    DIALOGS_GET_COLOUR,
     DIALOGS_CHOOSE_COLOUR_GENERIC,
     DIALOGS_CHOOSE_FONT,
     DIALOGS_CHOOSE_FONT_GENERIC,
     DIALOGS_MESSAGE_BOX,
-    DIALOGS_MESSAGE_BOX_WXINFO,
     DIALOGS_SINGLE_CHOICE,
     DIALOGS_MULTI_CHOICE,
     DIALOGS_TEXT_ENTRY,
@@ -403,8 +335,6 @@ enum
     DIALOGS_MODELESS,
     DIALOGS_CENTRE_SCREEN,
     DIALOGS_CENTRE_PARENT,
-    DIALOGS_MINIFRAME,
-    DIALOGS_ONTOP,
     DIALOGS_MODELESS_BTN,
     DIALOGS_PROGRESS,
     DIALOGS_ABOUTDLG_SIMPLE,
@@ -415,14 +345,9 @@ enum
     DIALOGS_FIND,
     DIALOGS_REPLACE,
     DIALOGS_REQUEST,
-    DIALOGS_NOTIFY_AUTO,
-    DIALOGS_NOTIFY_SHOW,
-    DIALOGS_NOTIFY_HIDE,
     DIALOGS_PROPERTY_SHEET,
     DIALOGS_PROPERTY_SHEET_TOOLBOOK,
-    DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK,
-    DIALOGS_STANDARD_BUTTON_SIZER_DIALOG,
-    DIALOGS_TEST_DEFAULT_ACTION
+    DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK
 };
 
 #endif

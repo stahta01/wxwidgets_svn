@@ -16,11 +16,11 @@
 #include "wx/gdiobj.h"
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxBrush;
+class WXDLLEXPORT wxBrush;
 
 class WXDLLEXPORT wxBrushRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxBrush;
+    friend class WXDLLEXPORT wxBrush;
 public:
     wxBrushRefData();
     wxBrushRefData(const wxBrushRefData& rData);
@@ -46,6 +46,8 @@ protected:
 // Brush
 class WXDLLEXPORT wxBrush: public wxBrushBase
 {
+    DECLARE_DYNAMIC_CLASS(wxBrush)
+
 public:
     wxBrush();
     wxBrush(const wxColour& rCol, int nStyle = wxSOLID);
@@ -66,6 +68,9 @@ public:
     inline wxBitmap* GetStipple(void) const { return (M_BRUSHDATA ? & M_BRUSHDATA->m_vStipple : 0); };
     inline int       GetPS(void) const { return (M_BRUSHDATA ? M_BRUSHDATA->m_hBrush : 0); };
 
+    inline virtual bool Ok() const { return IsOk(); }
+    inline virtual bool IsOk(void) const { return (m_refData != NULL) ; }
+
     //
     // Implementation
     //
@@ -77,13 +82,7 @@ public:
     virtual WXHANDLE GetResourceHandle(void) const;
     bool     FreeResource(bool bForce = false);
     bool     IsFree(void) const;
-
-protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxBrush)
+    void     Unshare(void);
 }; // end of CLASS wxBrush
 
 #endif

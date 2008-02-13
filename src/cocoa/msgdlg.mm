@@ -47,11 +47,11 @@ wxCocoaMessageDialog::wxCocoaMessageDialog(wxWindow *parent,
                         const wxString& message,
                         const wxString& caption,
                         long style,
-                        const wxPoint& pos) : wxMessageDialogBase(parent,message,caption,style)
+                        const wxPoint& pos) : wxDialog(parent,wxID_ANY,caption, pos, wxDefaultSize, style)
 {
 
-    //m_caption = caption;
-    //m_message = message;
+    m_caption = caption;
+    m_message = message;
 
     //wxTopLevelWindows.Append((wxWindowBase*)this);
     wxTopLevelWindows.Append(this);

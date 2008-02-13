@@ -425,9 +425,6 @@ enum
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame((wxFrame *) NULL,
             _T("Text wxWidgets sample"), 50, 50, 700, 550);
@@ -921,10 +918,6 @@ void MyTextCtrl::OnKeyDown(wxKeyEvent& event)
                 wxLogMessage(_T("Selection = '%s' (len = %u)"),
                              sel.c_str(),
                              (unsigned int) sel.length());
-
-                const wxString text = GetLineText(line);
-                wxLogMessage(_T("Current line: \"%s\"; length = %lu"),
-                             text.c_str(), text.length());
             }
             break;
 
@@ -1040,7 +1033,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     // a little hack to use the command line argument for encoding testing
     if ( wxTheApp->argc == 2 )
     {
-        switch ( (wxChar)wxTheApp->argv[1][0] )
+        switch ( wxTheApp->argv[1][0] )
         {
             case '2':
                 m_horizontal->SetFont(wxFont(18, wxSWISS, wxNORMAL, wxNORMAL,
@@ -1072,9 +1065,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
         m_horizontal->AppendText(_T("Text in default encoding"));
     }
 
-    m_multitext = new MyTextCtrl( this, wxID_ANY,
-                                  _T("Multi line without vertical scrollbar."),
-      wxPoint(180,10), wxSize(200,70), wxTE_MULTILINE | wxTE_NO_VSCROLL );
+    m_multitext = new MyTextCtrl( this, wxID_ANY, _T("Multi line."),
+      wxPoint(180,10), wxSize(200,70), wxTE_MULTILINE );
     m_multitext->SetFont(*wxITALIC_FONT);
     (*m_multitext) << _T(" Appended.");
     m_multitext->SetInsertionPoint(0);
@@ -1832,9 +1824,10 @@ void RichTextFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
                 alignment = wxT("left-aligned");
             else if (attr.GetAlignment() == wxTEXT_ALIGNMENT_JUSTIFIED)
                 alignment = wxT("justified");
-            msg.Printf( "Facename: %s, wxColour(%d, %d, %d), %s", facename,
+            msg.Printf(wxT("Facename: %s, wxColour(%d, %d, %d), %s"),
+                (const wxChar*) facename,
                 attr.GetTextColour().Red(), attr.GetTextColour().Green(), attr.GetTextColour().Blue(),
-                alignment );
+                (const wxChar*) alignment);
 
             if (attr.HasFont())
             {

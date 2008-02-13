@@ -13,54 +13,10 @@
 #ifndef _WX_TOGGLEBUTTON_H_
 #define _WX_TOGGLEBUTTON_H_
 
-WXDLLEXPORT_DATA(extern const char) wxCheckBoxNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxCheckBoxNameStr[];
 
-
-class WXDLLEXPORT wxBitmapToggleButton : public wxToggleButtonBase
-{
-public:
-    wxBitmapToggleButton() {}
-    wxBitmapToggleButton(wxWindow *parent,
-                   wxWindowID id,
-                   const wxBitmap& label,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = 0,
-                   const wxValidator& validator = wxDefaultValidator,
-                   const wxString& name = wxCheckBoxNameStr)
-    {
-        Create(parent, id, label, pos, size, style, validator, name);
-    }
-
-    bool Create(wxWindow *parent,
-                wxWindowID id,
-                const wxBitmap& label,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                const wxValidator& validator = wxDefaultValidator,
-                const wxString& name = wxCheckBoxNameStr);
-
-    virtual void SetValue(bool value);
-    virtual bool GetValue() const ;
-
-    virtual wxInt32 MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF event ) ;
-
-    virtual void Command(wxCommandEvent& event);
-
-private:
-    wxBitmap m_bitmap;
-
-protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-    virtual wxSize DoGetBestSize() const;
-
-private:
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxBitmapToggleButton)
-};
-
-
-class WXDLLEXPORT wxToggleButton : public wxToggleButtonBase
+// Checkbox item (single checkbox)
+class WXDLLEXPORT wxToggleButton : public wxControl
 {
 public:
     wxToggleButton() {}
@@ -93,7 +49,6 @@ public:
     virtual void Command(wxCommandEvent& event);
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
     virtual wxSize DoGetBestSize() const;
 
 private:

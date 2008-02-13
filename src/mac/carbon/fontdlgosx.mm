@@ -65,14 +65,14 @@
 {
     [super initWithFrame:rectBox];
 
-    wxCFStringRef cfOkString( wxT("OK"), wxLocale::GetSystemEncoding() );
-    wxCFStringRef cfCancelString( wxT("Cancel"), wxLocale::GetSystemEncoding() );
+    wxMacCFStringHolder cfOkString( wxT("OK"), wxLocale::GetSystemEncoding() );
+    wxMacCFStringHolder cfCancelString( wxT("Cancel"), wxLocale::GetSystemEncoding() );
 
     NSRect rectCancel = NSMakeRect( 10.0 , 10.0 , 82  , 24 );
     NSRect rectOK = NSMakeRect( 100.0 , 10.0 , 82  , 24 );
 
     NSButton* cancelButton = [[NSButton alloc] initWithFrame:rectCancel];
-    [cancelButton setTitle:(NSString*)wxCFRetain((CFStringRef)cfCancelString)];
+    [cancelButton setTitle:(NSString*)cfCancelString.Detach()];
     [cancelButton setBezelStyle:NSRoundedBezelStyle];
     [cancelButton setButtonType:NSMomentaryPushInButton];
     [cancelButton setAction:@selector(cancelPressed:)];
@@ -80,7 +80,7 @@
     m_cancelButton = cancelButton ;
 
     NSButton* okButton = [[NSButton alloc] initWithFrame:rectOK];
-    [okButton setTitle:(NSString*)wxCFRetain((CFStringRef)cfOkString)];
+    [okButton setTitle:(NSString*)cfOkString.Detach()];
     [okButton setBezelStyle:NSRoundedBezelStyle];
     [okButton setButtonType:NSMomentaryPushInButton];
     [okButton setAction:@selector(okPressed:)];
@@ -105,14 +105,12 @@
 
 - (IBAction)cancelPressed:(id)sender
 {
-    wxUnusedVar(sender);
     m_shouldClose = YES ;
     [NSApp stopModal];
 }
 
 - (IBAction)okPressed:(id)sender
 {
-    wxUnusedVar(sender);
     m_okPressed = YES ;
     m_shouldClose = YES ;
     [NSApp stopModal];
@@ -137,7 +135,7 @@
 
 extern "C" int RunMixedFontDialog(wxFontDialog* dialog) ;
 
-int RunMixedFontDialog(wxFontDialog* WXUNUSED(dialog))
+int RunMixedFontDialog(wxFontDialog* dialog)
 {
     int retval = wxID_CANCEL ;
 

@@ -16,7 +16,6 @@
 #endif
 
 #include "wx/utils.h"
-#include "wx/evtloop.h"
 #include "wx/apptrait.h"
 #include "wx/unix/execute.h"
 
@@ -37,12 +36,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     if ( verMin ) *verMaj = DIRECTFB_MINOR_VERSION;
 
     return wxPORT_DFB;
-}
-
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
 }
 
 // ----------------------------------------------------------------------------
@@ -116,7 +109,7 @@ wxPoint wxGetMousePosition()
 bool wxGetKeyState(wxKeyCode key)
 {
     wxASSERT_MSG(key != WXK_LBUTTON && key != WXK_RBUTTON && key != WXK_MBUTTON,
-                 "can't use wxGetKeyState() for mouse buttons");
+                 _T("can't use wxGetKeyState() for mouse buttons"));
 
     return false; // FIXME
 }
@@ -127,4 +120,10 @@ bool wxGetKeyState(wxKeyCode key)
 
 void wxBell()
 {
+}
+
+int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
+{
+    wxFAIL_MSG( _T("wxAddProcessCallback not implemented") );
+    return 0;
 }

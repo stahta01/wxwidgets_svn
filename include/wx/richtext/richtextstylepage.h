@@ -18,6 +18,7 @@
 
 ////@begin control identifiers
 #define SYMBOL_WXRICHTEXTSTYLEPAGE_STYLE wxRESIZE_BORDER|wxTAB_TRAVERSAL
+#define SYMBOL_WXRICHTEXTSTYLEPAGE_TITLE _("wxRichTextStylePage")
 #define SYMBOL_WXRICHTEXTSTYLEPAGE_IDNAME ID_RICHTEXTSTYLEPAGE
 #define SYMBOL_WXRICHTEXTSTYLEPAGE_SIZE wxSize(400, 300)
 #define SYMBOL_WXRICHTEXTSTYLEPAGE_POSITION wxDefaultPosition
@@ -51,7 +52,7 @@ public:
     virtual bool TransferDataToWindow();
 
     /// Gets the attributes associated with the main formatting dialog
-    wxTextAttr* GetAttributes();
+    wxTextAttrEx* GetAttributes();
 
 ////@begin wxRichTextStylePage event handler declarations
 

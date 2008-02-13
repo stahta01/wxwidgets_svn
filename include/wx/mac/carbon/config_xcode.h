@@ -40,11 +40,14 @@
 #define HAVE_PW_GECOS 1
 #define HAVE_GETTIMEOFDAY 1
 #define HAVE_FSYNC 1
+#define HAVE_LARGEFILE_SUPPORT 1
+#define HAVE_LOCALTIME 1
 #define HAVE_SCHED_YIELD 1
 #define HAVE_PTHREAD_MUTEXATTR_T 1
 #define HAVE_PTHREAD_MUTEXATTR_SETTYPE_DECL 1
 #define HAVE_PTHREAD_CANCEL 1
 #define HAVE_PTHREAD_ATTR_SETSTACKSIZE 1
+#define HAVE_SIGACTION 1
 #define HAVE_SNPRINTF 1
 #define HAVE_SNPRINTF_DECL 1
 #define HAVE_UNIX98_PRINTF 1
@@ -53,10 +56,12 @@
 #define HAVE_STRPTIME 1
 #define HAVE_STRPTIME_DECL 1
 #define HAVE_THREAD_PRIORITY_FUNCTIONS 1
+#define HAVE_TIMEGM 1
 #define HAVE_VSNPRINTF 1
 #define HAVE_VSNPRINTF_DECL 1
 #define HAVE_USLEEP 1
 #define HAVE_WCSLEN 1
+#define SIZEOF_CHAR 1
 #define SIZEOF_WCHAR_T 4
 #define SIZEOF_SHORT 2
 #define SIZEOF_INT 4
@@ -81,15 +86,18 @@
 #define HAVE_LOCALTIME_R 1
 #define HAVE_MKSTEMP 1
 #define HAVE_PUTENV 1
+#define HAVE_READDIR_R 1
 #define HAVE_STRTOK_R 1
 #define HAVE_UNAME 1
 #define HAVE_USLEEP 1
 #define HAVE_X11_XKBLIB_H 1
+#define HAVE_FNMATCH 1
+#define HAVE_FNMATCH_H 1
+#define HAVE_IOSTREAM 1
 #define HAVE_SCHED_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE_WCHAR_H 1
-/* better to use the built-in CF conversions, also avoid iconv versioning problems */
-/* #undef HAVE_ICONV */
+#define HAVE_ICONV 1
 #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
 #define ICONV_CONST const
 #else
@@ -100,17 +108,17 @@
 #define HAVE_FPUTWS 1
 #define HAVE_STRCASECMP_IN_STRING_H 1
 #define HAVE_WPRINTF 1
+#define HAVE_SWPRINTF 1
 #define HAVE_VSWPRINTF 1
-#define HAVE_VSWSCANF 1
 #define HAVE_FSEEKO 1
 #define HAVE_SYS_SELECT_H 1
 
 #define WXWIN_OS_DESCRIPTION "Darwin 7.9.0 Power Macintosh"
 #define PACKAGE_BUGREPORT "wx-dev@lists.wxwidgets.org"
 #define PACKAGE_NAME "wxWidgets"
-#define PACKAGE_STRING "wxWidgets 2.9.0"
+#define PACKAGE_STRING "wxWidgets 2.8.6"
 #define PACKAGE_TARNAME "wxwidgets"
-#define PACKAGE_VERSION "2.9.0"
+#define PACKAGE_VERSION "2.8.6"
 
 // for regex
 #define WX_NO_REGEX_ADVANCED 1

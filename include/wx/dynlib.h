@@ -32,7 +32,7 @@
     #define wxHAVE_DYNLIB_ERROR
 #endif
 
-class WXDLLIMPEXP_FWD_BASE wxDynamicLibraryDetailsCreator;
+class WXDLLIMPEXP_BASE wxDynamicLibraryDetailsCreator;
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -75,8 +75,6 @@ enum wxDLFlags
     wxDL_NOSHARE    = 0x00000010,   // load new DLL, don't reuse already loaded
                                     // (only for wxPluginManager)
 
-    wxDL_QUIET      = 0x00000020,   // don't log an error if failed to load
-
     wxDL_DEFAULT    = wxDL_NOW      // default flags correspond to Win32
 };
 
@@ -106,63 +104,6 @@ enum wxPluginCategory
 // called "pfn<name>" initialized with the "name" from the "dynlib"
 #define wxDYNLIB_FUNCTION(type, name, dynlib) \
     type pfn ## name = (type)(dynlib).GetSymbol(_T(#name))
-
-
-// a more convenient function replacing wxDYNLIB_FUNCTION above
-//
-// it uses the convention that the type of the function is its name suffixed
-// with "_t" but it doesn't define a variable but just assigns the loaded value
-// to it and also allows to pass it the prefix to be used instead of hardcoding
-// "pfn" (the prefix can be "m_" or "gs_pfn" or whatever)
-//
-// notice that this function doesn't generate error messages if the symbol
-// couldn't be loaded, the caller should generate the appropriate message
-#define wxDL_INIT_FUNC(pfx, name, dynlib) \
-    pfx ## name = (name ## _t)(dynlib).RawGetSymbol(#name)
-
-#ifdef __WXMSW__
-
-// same as wxDL_INIT_FUNC() but appends 'A' or 'W' to the function name, see
-// wxDynamicLibrary::GetSymbolAorW()
-#define wxDL_INIT_FUNC_AW(pfx, name, dynlib) \
-    pfx ## name = (name ## _t)(dynlib).GetSymbolAorW(#name)
-
-#endif // __WXMSW__
-
-// the following macros can be used to redirect a whole library to a class and
-// check at run-time if the library is present and contains all required
-// methods
-//
-// notice that they are supposed to be used inside a class which has "m_ok"
-// member variable indicating if the library had been successfully loaded
-
-// helper macros constructing the name of the variable storing the function
-// pointer and the name of its type from the function name
-#define wxDL_METHOD_NAME(name) m_pfn ## name
-#define wxDL_METHOD_TYPE(name) name ## _t
-
-// parameters are:
-//  - rettype: return type of the function, e.g. "int"
-//  - name: name of the function, e.g. "foo"
-//  - args: function signature in parentheses, e.g. "(int x, int y)"
-//  - argnames: the names of the parameters in parentheses, e.g. "(x, y)"
-//  - defret: the value to return if the library wasn't successfully loaded
-#define wxDL_METHOD_DEFINE( rettype, name, args, argnames, defret ) \
-    typedef rettype (* wxDL_METHOD_TYPE(name)) args ; \
-    wxDL_METHOD_TYPE(name) wxDL_METHOD_NAME(name); \
-    rettype name args \
-        { return m_ok ? wxDL_METHOD_NAME(name) argnames : defret; }
-
-#define wxDL_VOIDMETHOD_DEFINE( name, args, argnames ) \
-    typedef void (* wxDL_METHOD_TYPE(name)) args ; \
-    wxDL_METHOD_TYPE(name) wxDL_METHOD_NAME(name); \
-    void name args \
-        { if ( m_ok ) wxDL_METHOD_NAME(name) argnames ; }
-
-#define wxDL_METHOD_LOAD(lib, name) \
-    wxDL_METHOD_NAME(name) = \
-        (wxDL_METHOD_TYPE(name)) lib.GetSymbol(#name, &m_ok); \
-    if ( !m_ok ) return false
 
 // ----------------------------------------------------------------------------
 // wxDynamicLibraryDetails: contains details about a loaded wxDynamicLibrary
@@ -229,7 +170,7 @@ public:
     static wxDllType         GetProgramHandle();
 
     // return the platform standard DLL extension (with leading dot)
-    static const wxString& GetDllExt() { return ms_dllext; }
+    static const wxChar *GetDllExt() { return ms_dllext; }
 
     wxDynamicLibrary() : m_handle(0) { }
     wxDynamicLibrary(const wxString& libname, int flags = wxDL_DEFAULT)
@@ -357,7 +298,7 @@ protected:
 
 
     // platform specific shared lib suffix.
-    static const wxString ms_dllext;
+    static const wxChar *ms_dllext;
 
     // the handle to DLL or NULL
     wxDllType m_handle;

@@ -27,10 +27,8 @@ class WXDLLIMPEXP_CORE wxIcon: public wxBitmap
 public:
     wxIcon();
 
-    wxIcon(const char* const* bits);
-#ifdef wxNEEDS_CHARPP
-    wxIcon(char **bits);
-#endif
+    wxIcon( const char **bits, int width=-1, int height=-1 );
+    wxIcon( char **bits, int width=-1, int height=-1 );
 
     // For compatibility with wxMSW where desired size is sometimes required to
     // distinguish between multiple icons in a resource.

@@ -15,7 +15,7 @@
 #include "wx/vscroll.h"         // base class
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxSelectionStore;
+class WXDLLEXPORT wxSelectionStore;
 
 #define wxVListBoxNameStr _T("wxVListBox")
 
@@ -75,7 +75,7 @@ public:
     // ---------
 
     // get the number of items in the control
-    size_t GetItemCount() const { return GetRowCount(); }
+    size_t GetItemCount() const { return GetLineCount(); }
 
     // does this control use multiple selection?
     bool HasMultipleSelection() const { return m_selStore != NULL; }
@@ -133,7 +133,7 @@ public:
 
     // set the number of items to be shown in the control
     //
-    // this is just a synonym for wxVScrolledWindow::SetRowCount()
+    // this is just a synonym for wxVScrolledWindow::SetLineCount()
     virtual void SetItemCount(size_t count);
 
     // delete all items from the control
@@ -189,9 +189,6 @@ public:
     // change the background colour of the selected cells
     void SetSelectionBackground(const wxColour& col);
 
-    // refreshes only the selected items
-    void RefreshSelected();
-
 
     virtual wxVisualAttributes GetDefaultAttributes() const
     {
@@ -202,8 +199,6 @@ public:
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_THEME; }
-
     // the derived class must implement this function to actually draw the item
     // with the given index on the provided DC
     virtual void OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const = 0;
@@ -228,11 +223,11 @@ protected:
     // current
     virtual void OnDrawBackground(wxDC& dc, const wxRect& rect, size_t n) const;
 
-    // we implement OnGetRowHeight() in terms of OnMeasureItem() because this
+    // we implement OnGetLineHeight() in terms of OnMeasureItem() because this
     // allows us to add borders to the items easily
     //
     // this function is not supposed to be overridden by the derived classes
-    virtual wxCoord OnGetRowHeight(size_t line) const;
+    virtual wxCoord OnGetLineHeight(size_t line) const;
 
 
     // event handlers
@@ -240,7 +235,7 @@ protected:
     void OnKeyDown(wxKeyEvent& event);
     void OnLeftDown(wxMouseEvent& event);
     void OnLeftDClick(wxMouseEvent& event);
-    void OnSetOrKillFocus(wxFocusEvent& event);
+
 
     // common part of all ctors
     void Init();

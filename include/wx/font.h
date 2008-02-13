@@ -105,7 +105,7 @@ enum
 // wxFontBase represents a font object
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxNativeFontInfo;
+class WXDLLEXPORT wxNativeFontInfo;
 
 class WXDLLEXPORT wxFontBase : public wxGDIObject
 {
@@ -155,9 +155,13 @@ public:
     // from the string representation of wxNativeFontInfo
     static wxFont *New(const wxString& strNativeFontDesc);
 
+    // was the font successfully created?
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_refData != NULL; }
+
     // comparison
-    bool operator==(const wxFont& font) const;
-    bool operator!=(const wxFont& font) const { return !(*this == font); }
+    bool operator == (const wxFont& font) const;
+    bool operator != (const wxFont& font) const;
 
     // accessors: get the font characteristics
     virtual int GetPointSize() const = 0;
@@ -217,12 +221,6 @@ private:
     // specifying encoding parameter using this encoding
     static wxFontEncoding ms_encodingDefault;
 };
-
-// wxFontBase <-> wxString utilities, used by wxConfig
-WXDLLIMPEXP_CORE wxString wxToString(const wxFontBase& font);
-WXDLLIMPEXP_CORE bool wxFromString(const wxString& str, wxFontBase* font);
-
-
 
 // include the real class declaration
 #if defined(__WXPALMOS__)

@@ -167,14 +167,11 @@ void wxTopLevelWindowPalm::DoShowWindow(int nShowCmd)
 
 bool wxTopLevelWindowPalm::Show(bool show)
 {
-    if (true != show) {
-	    return true;
-    }
     FrmDrawForm((FormType *)FrameForm);
 
     wxPaintEvent event(m_windowId);
     event.SetEventObject(this);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 
     return true;
 }
@@ -235,6 +232,10 @@ void wxTopLevelWindowPalm::SetTitle( const wxString& WXUNUSED(title))
 wxString wxTopLevelWindowPalm::GetTitle() const
 {
     return wxEmptyString;
+}
+
+void wxTopLevelWindowPalm::SetIcon(const wxIcon& icon)
+{
 }
 
 void wxTopLevelWindowPalm::SetIcons(const wxIconBundle& icons)
@@ -333,7 +334,7 @@ bool wxTopLevelWindowPalm::HandleSize(WXEVENTPTR event)
                    palmEvent->data.winResized.newBounds.extent.y);
     wxSizeEvent eventWx(newSize,GetId());
     eventWx.SetEventObject(this);
-    return HandleWindowEvent(eventWx);
+    return GetEventHandler()->ProcessEvent(eventWx);
 }
 
 void wxTopLevelWindowPalm::OnActivate(wxActivateEvent& event)

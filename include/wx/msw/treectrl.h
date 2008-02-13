@@ -180,6 +180,34 @@ public:
                                  wxRect& rect,
                                  bool textOnly = false) const;
 
+    // deprecated
+    // ----------
+
+#if WXWIN_COMPATIBILITY_2_4
+    // these methods are deprecated and will be removed in future versions of
+    // wxWidgets, they're here for compatibility only, don't use them in new
+    // code (the comments indicate why these methods are now useless and how to
+    // replace them)
+
+        // use Expand, Collapse, CollapseAndReset or Toggle
+    wxDEPRECATED( void ExpandItem(const wxTreeItemId& item, int action) );
+
+        // use Set/GetImageList and Set/GetStateImageList
+        // Use base class GetImageList()
+    wxDEPRECATED( void SetImageList(wxImageList *imageList, int) );
+
+        // use Set/GetItemImage directly
+    wxDEPRECATED( int GetItemSelectedImage(const wxTreeItemId& item) const );
+    wxDEPRECATED( void SetItemSelectedImage(const wxTreeItemId& item, int image) );
+
+    // use the versions taking wxTreeItemIdValue cookies
+    wxDEPRECATED( wxTreeItemId GetFirstChild(const wxTreeItemId& item,
+                                             long& cookie) const );
+    wxDEPRECATED( wxTreeItemId GetNextChild(const wxTreeItemId& item,
+                                            long& cookie) const );
+#endif // WXWIN_COMPATIBILITY_2_4
+
+
     // implementation
     // --------------
 
@@ -209,9 +237,6 @@ public:
     // set/get the item state.image (state == -1 means cycle to the next one)
     void SetState(const wxTreeItemId& node, int state);
     int GetState(const wxTreeItemId& node);
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
 
 protected:
     // SetImageList helper

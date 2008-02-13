@@ -43,9 +43,6 @@ public:
     const WXHRGN GetWXHRGN() const ;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
     virtual bool DoIsEqual(const wxRegion& region) const;
     virtual bool DoGetBox(wxCoord& x, wxCoord& y, wxCoord& w, wxCoord& h) const;
     virtual wxRegionContain DoContainsPoint(wxCoord x, wxCoord y) const;
@@ -56,7 +53,7 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxRegion)
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIterator;
+    friend class WXDLLEXPORT wxRegionIterator;
 };
 
 class WXDLLEXPORT wxRegionIterator : public wxObject

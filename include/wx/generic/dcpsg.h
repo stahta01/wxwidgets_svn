@@ -13,21 +13,28 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_PRINTING_ARCHITECTURE && wxUSE_POSTSCRIPT
+#if wxUSE_PRINTING_ARCHITECTURE
+
+#if wxUSE_POSTSCRIPT
 
 #include "wx/dc.h"
-#include "wx/dcprint.h"
 #include "wx/dialog.h"
 #include "wx/module.h"
 #include "wx/cmndata.h"
-#include "wx/strvararg.h"
+
+extern WXDLLIMPEXP_DATA_CORE(int) wxPageNumber;
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class wxPostScriptDC;
 
 //-----------------------------------------------------------------------------
 // wxPostScriptDC
 //-----------------------------------------------------------------------------
 
-
-class WXDLLEXPORT wxPostScriptDC : public wxDC
+class WXDLLEXPORT wxPostScriptDC: public wxDC
 {
 public:
     wxPostScriptDC();
@@ -35,64 +42,59 @@ public:
     // Recommended constructor
     wxPostScriptDC(const wxPrintData& printData);
 
+    // Recommended destructor :-)
+    virtual ~wxPostScriptDC();
+
+  virtual bool Ok() const { return IsOk(); }
+  virtual bool IsOk() const;
+
+  bool CanDrawBitmap() const { return true; }
+
+  void Clear();
+  void SetFont( const wxFont& font );
+  void SetPen( const wxPen& pen );
+  void SetBrush( const wxBrush& brush );
+  void SetLogicalFunction( int function );
+  void SetBackground( const wxBrush& brush );
+
+  void DestroyClippingRegion();
+
+  bool StartDoc(const wxString& message);
+  void EndDoc();
+  void StartPage();
+  void EndPage();
+
+  wxCoord GetCharHeight() const;
+  wxCoord GetCharWidth() const;
+  bool CanGetTextExtent() const { return true; }
+
+  // Resolution in pixels per logical inch
+  wxSize GetPPI() const;
+
+  void SetAxisOrientation( bool xLeftRight, bool yBottomUp );
+  void SetDeviceOrigin( wxCoord x, wxCoord y );
+
+  void SetBackgroundMode(int WXUNUSED(mode)) { }
+  void SetPalette(const wxPalette& WXUNUSED(palette)) { }
+
+  wxPrintData& GetPrintData() { return m_printData; }
+  void SetPrintData(const wxPrintData& data) { m_printData = data; }
+
+  virtual int GetDepth() const { return 24; }
+
+  static void SetResolution(int ppi);
+  static int GetResolution();
+
+  void PsPrintf( const wxChar* fmt, ... );
+  void PsPrint( const char* psdata );
+  void PsPrint( int ch );
+
+#if wxUSE_UNICODE
+  void PsPrint( const wxChar* psdata ) { PsPrint( wxConvUTF8.cWX2MB( psdata ) ); }
+#endif
+
 private:
-    DECLARE_DYNAMIC_CLASS(wxPostScriptDC)
-};
-
-class WXDLLEXPORT wxPostScriptDCImpl : public wxDCImpl
-{
-public:
-    wxPostScriptDCImpl( wxPrinterDC *owner );
-    wxPostScriptDCImpl( wxPrinterDC *owner, const wxPrintData& data );
-    wxPostScriptDCImpl( wxPostScriptDC *owner );
-    wxPostScriptDCImpl( wxPostScriptDC *owner, const wxPrintData& data );
-
-    void Init();
-
-    virtual ~wxPostScriptDCImpl();
-
-    virtual bool Ok() const { return IsOk(); }
-    virtual bool IsOk() const;
-
-    bool CanDrawBitmap() const { return true; }
-
-    void Clear();
-    void SetFont( const wxFont& font );
-    void SetPen( const wxPen& pen );
-    void SetBrush( const wxBrush& brush );
-    void SetLogicalFunction( int function );
-    void SetBackground( const wxBrush& brush );
-
-    void DestroyClippingRegion();
-
-    bool StartDoc(const wxString& message);
-    void EndDoc();
-    void StartPage();
-    void EndPage();
-
-    wxCoord GetCharHeight() const;
-    wxCoord GetCharWidth() const;
-    bool CanGetTextExtent() const { return true; }
-
-    // Resolution in pixels per logical inch
-    wxSize GetPPI() const;
-
-    virtual void ComputeScaleAndOrigin();
-
-    void SetBackgroundMode(int WXUNUSED(mode)) { }
-    void SetPalette(const wxPalette& WXUNUSED(palette)) { }
-
-    void SetPrintData(const wxPrintData& data);
-    wxPrintData& GetPrintData() { return m_printData; }
-
-    virtual int GetDepth() const { return 24; }
-
-    void PsPrint( const wxString& psdata );
-
-    // Overrridden for wxPrinterDC Impl
-
-    virtual int GetResolution();
-    virtual wxRect GetPaperRect();
+    static float ms_PSScaleFactor;
 
 protected:
     bool DoFloodFill(wxCoord x1, wxCoord y1, const wxColour &col, int style = wxFLOOD_SURFACE);
@@ -109,8 +111,8 @@ protected:
     void DoDrawRoundedRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height, double radius = 20);
     void DoDrawEllipse(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
 #if wxUSE_SPLINES
-    void DoDrawSpline(const wxPointList *points);
-#endif
+    void DoDrawSpline(wxList *points);
+#endif // wxUSE_SPLINES
     bool DoBlit(wxCoord xdest, wxCoord ydest, wxCoord width, wxCoord height,
                 wxDC *source, wxCoord xsrc, wxCoord ysrc, int rop = wxCOPY, bool useMask = false,
                 wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
@@ -123,7 +125,7 @@ protected:
     void DoGetTextExtent(const wxString& string, wxCoord *x, wxCoord *y,
                          wxCoord *descent = NULL,
                          wxCoord *externalLeading = NULL,
-                         const wxFont *theFont = NULL) const;
+                         wxFont *theFont = NULL) const;
     void DoGetSize(int* width, int* height) const;
     void DoGetSizeMM(int *width, int *height) const;
 
@@ -137,14 +139,16 @@ protected:
     double            m_underlinePosition;
     double            m_underlineThickness;
     wxPrintData       m_printData;
-    double            m_pageHeight;
 
 private:
-    DECLARE_DYNAMIC_CLASS(wxPostScriptDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxPostScriptDC)
 };
 
 #endif
-    // wxUSE_POSTSCRIPT && wxUSE_PRINTING_ARCHITECTURE
+    // wxUSE_POSTSCRIPT
+
+#endif
+    // wxUSE_PRINTING_ARCHITECTURE
 
 #endif
         // _WX_DCPSG_H_

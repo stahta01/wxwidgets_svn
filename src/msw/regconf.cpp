@@ -16,7 +16,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CONFIG && wxUSE_REGKEY
+#if wxUSE_CONFIG
 
 #include "wx/config.h"
 
@@ -53,11 +53,6 @@ bool TryGetValue(const wxRegKey& key, const wxString& str, long *plVal)
   return key.IsOpened() && key.HasValue(str) && key.QueryValue(str, plVal);
 }
 
-bool TryGetValue(const wxRegKey& key, const wxString& str, wxMemoryBuffer &plVal)
-{
-  return key.IsOpened() && key.HasValue(str) && key.QueryValue(str, plVal);
-}
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -65,7 +60,6 @@ bool TryGetValue(const wxRegKey& key, const wxString& str, wxMemoryBuffer &plVal
 // ----------------------------------------------------------------------------
 // ctor/dtor
 // ----------------------------------------------------------------------------
-IMPLEMENT_ABSTRACT_CLASS(wxRegConfig, wxConfigBase)
 
 // create the config object which stores its data under HKCU\vendor\app and, if
 // style & wxCONFIG_USE_GLOBAL_FILE, under HKLM\vendor\app
@@ -625,40 +619,6 @@ bool wxRegConfig::DoReadLong(const wxString& key, long *plResult) const
   return false;
 }
 
-bool wxRegConfig::DoReadBinary(const wxString& key, wxMemoryBuffer *buf) const
-{
-    wxCHECK_MSG( buf, false, _T("wxRegConfig::Read(): NULL param") );
-
-  wxConfigPathChanger path(this, key);
-
-  bool bQueryGlobal = true;
-
-  // if immutable key exists in global key we must check that it's not
-  // overriden by the local key with the same name
-  if ( IsImmutable(path.Name()) ) {
-    if ( TryGetValue(m_keyGlobal, path.Name(), *buf) ) {
-      if ( m_keyLocal.Exists() && LocalKey().HasValue(path.Name()) ) {
-        wxLogWarning(wxT("User value for immutable key '%s' ignored."),
-                   path.Name().c_str());
-      }
-
-      return true;
-    }
-    else {
-      // don't waste time - it's not there anyhow
-      bQueryGlobal = false;
-    }
-  }
-
-  // first try local key
-  if ( (m_keyLocal.Exists() && TryGetValue(LocalKey(), path.Name(), *buf)) ||
-       (bQueryGlobal && TryGetValue(m_keyGlobal, path.Name(), *buf)) ) {
-    return true;
-  }
-
-  return false;
-}
-
 bool wxRegConfig::DoWriteString(const wxString& key, const wxString& szValue)
 {
   wxConfigPathChanger path(this, key);
@@ -681,18 +641,6 @@ bool wxRegConfig::DoWriteLong(const wxString& key, long lValue)
   }
 
   return LocalKey().SetValue(path.Name(), lValue);
-}
-
-bool wxRegConfig::DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf)
-{
-  wxConfigPathChanger path(this, key);
-
-  if ( IsImmutable(path.Name()) ) {
-    wxLogError(wxT("Can't change immutable entry '%s'."), path.Name().c_str());
-    return false;
-  }
-
-  return LocalKey().SetValue(path.Name(), buf);
 }
 
 // ----------------------------------------------------------------------------
@@ -780,4 +728,4 @@ bool wxRegConfig::DeleteAll()
   return bOk;
 }
 
-#endif // wxUSE_CONFIG && wxUSE_REGKEY
+#endif // wxUSE_CONFIG

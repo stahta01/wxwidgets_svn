@@ -17,8 +17,6 @@
     #include "wx/string.h"
 #endif
 
-#ifndef __WXUNIVERSAL__
-
 IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
 
 // ----------------------------------------------------------------------------
@@ -35,7 +33,7 @@ WX_DEFINE_LIST(wxAccelList)
 
 class WXDLLEXPORT wxAcceleratorRefData: public wxObjectRefData
 {
-    friend class wxAcceleratorTable;
+    friend class WXDLLEXPORT wxAcceleratorTable;
 public:
     wxAcceleratorRefData();
     virtual ~wxAcceleratorRefData();
@@ -105,5 +103,3 @@ int wxAcceleratorTable::GetCommand( wxKeyEvent &event )
 
     return -1;
 }
-
-#endif

@@ -16,10 +16,10 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxWindowDC;
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxClientDC;
-class WXDLLIMPEXP_FWD_CORE wxWindowMGL;
+class WXDLLEXPORT wxWindowDC;
+class WXDLLEXPORT wxPaintDC;
+class WXDLLEXPORT wxClientDC;
+class WXDLLEXPORT wxWindowMGL;
 
 //-----------------------------------------------------------------------------
 // wxWindowDC

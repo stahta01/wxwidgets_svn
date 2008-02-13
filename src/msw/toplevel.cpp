@@ -27,6 +27,7 @@
 #include "wx/toplevel.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h"
     #include "wx/app.h"
     #include "wx/dialog.h"
     #include "wx/string.h"
@@ -47,10 +48,10 @@
     #if _WIN32_WCE < 400 || !defined(__WINCE_STANDARDSDK__)
         #include <aygshell.h>
     #endif
+    #include "wx/msw/wince/missing.h"
 #endif
 
 #include "wx/msw/winundef.h"
-#include "wx/msw/missing.h"
 
 #include "wx/display.h"
 
@@ -221,11 +222,9 @@ WXDWORD wxTopLevelWindowMSW::MSWGetStyle(long style, WXDWORD *exflags) const
     }
 
 #ifndef __WXWINCE__
-    // notice that if wxCLOSE_BOX is specified we need to use WS_SYSMENU too as
-    // otherwise the close box doesn't appear
-    if ( style & (wxSYSTEM_MENU | wxCLOSE_BOX) )
+    if ( style & wxSYSTEM_MENU )
         msflags |= WS_SYSMENU;
-#endif // !__WXWINCE__
+#endif
 
     // NB: under CE these 2 styles are not supported currently, we should
     //     call Minimize()/Maximize() "manually" if we want to support them
@@ -425,10 +424,25 @@ bool wxTopLevelWindowMSW::CreateDialog(const void *dlgTemplate,
         return false;
     }
 
+    WXDWORD exflags;
+    (void)MSWGetCreateWindowFlags(&exflags);
+
+    if ( exflags )
+    {
+        ::SetWindowLong(GetHwnd(), GWL_EXSTYLE, exflags);
+        ::SetWindowPos(GetHwnd(),
+                       exflags & WS_EX_TOPMOST ? HWND_TOPMOST : 0,
+                       0, 0, 0, 0,
+                       SWP_NOSIZE |
+                       SWP_NOMOVE |
+                       (exflags & WS_EX_TOPMOST ? 0 : SWP_NOZORDER) |
+                       SWP_NOACTIVATE);
+    }
+
 #if !defined(__WXWINCE__)
     // For some reason, the system menu is activated when we use the
     // WS_EX_CONTEXTHELP style, so let's set a reasonable icon
-    if ( HasExtraStyle(wxWS_EX_CONTEXTHELP) )
+    if ( exflags & WS_EX_CONTEXTHELP )
     {
         wxFrame *winTop = wxDynamicCast(wxTheApp->GetTopWindow(), wxFrame);
         if ( winTop )
@@ -442,7 +456,7 @@ bool wxTopLevelWindowMSW::CreateDialog(const void *dlgTemplate,
             }
         }
     }
-#endif // !__WXWINCE__
+#endif
 
     // move the dialog to its initial position without forcing repainting
     int x, y, w, h;
@@ -466,7 +480,7 @@ bool wxTopLevelWindowMSW::CreateDialog(const void *dlgTemplate,
 
     if ( !title.empty() )
     {
-        ::SetWindowText(GetHwnd(), title.wx_str());
+        ::SetWindowText(GetHwnd(), title);
     }
 
     SubclassWin(m_hWnd);
@@ -494,7 +508,7 @@ bool wxTopLevelWindowMSW::CreateFrame(const wxString& title,
         exflags |= WS_EX_LAYOUTRTL;
 #endif
 
-    return MSWCreate(wxCanvasClassName, title.wx_str(), pos, sz, flags, exflags);
+    return MSWCreate(wxCanvasClassName, title, pos, sz, flags, exflags);
 }
 
 bool wxTopLevelWindowMSW::Create(wxWindow *parent,
@@ -548,7 +562,7 @@ bool wxTopLevelWindowMSW::Create(wxWindow *parent,
 
         // reuse the code in MSWGetStyle() but correct the results slightly for
         // the dialog
-        dlgTemplate->style = MSWGetStyle(style, &dlgTemplate->dwExtendedStyle);
+        dlgTemplate->style = MSWGetStyle(style, NULL);
 
         // all dialogs are popups
         dlgTemplate->style |= WS_POPUP;
@@ -733,7 +747,6 @@ bool wxTopLevelWindowMSW::IsMaximized() const
 {
     return IsAlwaysMaximized() ||
 #if !defined(__SMARTPHONE__) && !defined(__POCKETPC__) && !defined(__WINCE_STANDARDSDK__)
-
            (::IsZoomed(GetHwnd()) != 0) ||
 #endif
            m_maximizeOnShow;
@@ -770,79 +783,6 @@ void wxTopLevelWindowMSW::SetLayoutDirection(wxLayoutDirection dir)
     if ( dir != wxLayout_Default )
         wxTopLevelWindowBase::SetLayoutDirection(dir);
 }
-
-// ----------------------------------------------------------------------------
-// wxTopLevelWindowMSW geometry
-// ----------------------------------------------------------------------------
-
-#ifndef __WXWINCE__
-
-void wxTopLevelWindowMSW::DoGetPosition(int *x, int *y) const
-{
-    if ( IsIconized() )
-    {
-        WINDOWPLACEMENT wp;
-        wp.length = sizeof(WINDOWPLACEMENT);
-        if ( ::GetWindowPlacement(GetHwnd(), &wp) )
-        {
-            RECT& rc = wp.rcNormalPosition;
-
-            // the position returned by GetWindowPlacement() is in workspace
-            // coordinates except for windows with WS_EX_TOOLWINDOW style
-            if ( !HasFlag(wxFRAME_TOOL_WINDOW) )
-            {
-                // we must use the correct display for the translation as the
-                // task bar might be shown on one display but not the other one
-                int n = wxDisplay::GetFromWindow(this);
-                wxDisplay dpy(n == wxNOT_FOUND ? 0 : n);
-                const wxPoint ptOfs = dpy.GetClientArea().GetPosition() -
-                                      dpy.GetGeometry().GetPosition();
-
-                rc.left += ptOfs.x;
-                rc.top += ptOfs.y;
-            }
-
-            if ( x )
-                *x = rc.left;
-            if ( y )
-                *y = rc.top;
-
-            return;
-        }
-
-        wxLogLastError(_T("GetWindowPlacement"));
-    }
-    //else: normal case
-
-    wxTopLevelWindowBase::DoGetPosition(x, y);
-}
-
-void wxTopLevelWindowMSW::DoGetSize(int *width, int *height) const
-{
-    if ( IsIconized() )
-    {
-        WINDOWPLACEMENT wp;
-        wp.length = sizeof(WINDOWPLACEMENT);
-        if ( ::GetWindowPlacement(GetHwnd(), &wp) )
-        {
-            const RECT& rc = wp.rcNormalPosition;
-
-            if ( width )
-                *width = rc.right - rc.left;
-            if ( height )
-                *height = rc.bottom - rc.top;
-
-            return;
-        }
-
-        wxLogLastError(_T("GetWindowPlacement"));
-    }
-    //else: normal case
-
-    wxTopLevelWindowBase::DoGetSize(width, height);
-}
-
-#endif // __WXWINCE__
 
 // ----------------------------------------------------------------------------
 // wxTopLevelWindowMSW fullscreen
@@ -939,7 +879,7 @@ bool wxTopLevelWindowMSW::ShowFullScreen(bool show, long style)
 
         // finally send an event allowing the window to relayout itself &c
         wxSizeEvent event(rect.GetSize(), GetId());
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
     }
     else // stop showing full screen
     {
@@ -969,6 +909,11 @@ wxString wxTopLevelWindowMSW::GetTitle() const
     return GetLabel();
 }
 
+void wxTopLevelWindowMSW::SetIcon(const wxIcon& icon)
+{
+    SetIcons( wxIconBundle( icon ) );
+}
+
 void wxTopLevelWindowMSW::DoSelectAndSetIcon(const wxIconBundle& icons,
                                              int smX,
                                              int smY,
@@ -976,8 +921,8 @@ void wxTopLevelWindowMSW::DoSelectAndSetIcon(const wxIconBundle& icons,
 {
     const wxSize size(::GetSystemMetrics(smX), ::GetSystemMetrics(smY));
 
-    const wxIcon icon = icons.GetIconOfExactSize(size);
-    if ( icon.Ok() )
+    const wxIcon icon = icons.GetIcon(size);
+    if ( icon.Ok() && icon.GetWidth() == size.x && icon.GetHeight() == size.y )
     {
         ::SendMessage(GetHwnd(), WM_SETICON, i, (LPARAM)GetHiconOf(icon));
     }
@@ -1080,7 +1025,7 @@ void wxTopLevelWindowMSW::RequestUserAttention(int flags)
     // provide FlashWindowEx() declaration, so try to detect whether we have
     // real headers for WINVER 0x0500 by checking for existence of a symbol not
     // declated in MSVC6 header
-#if defined(FLASHW_STOP) && defined(VK_XBUTTON1) && wxUSE_DYNLIB_CLASS
+#if defined(FLASHW_STOP) && defined(VK_XBUTTON1)
     // available in the headers, check if it is supported by the system
     typedef BOOL (WINAPI *FlashWindowEx_t)(FLASHWINFO *pfwi);
     FlashWindowEx_t s_pfnFlashWindowEx = NULL;
@@ -1126,7 +1071,6 @@ void wxTopLevelWindowMSW::RequestUserAttention(int flags)
 
 bool wxTopLevelWindowMSW::SetTransparent(wxByte alpha)
 {
-#if wxUSE_DYNLIB_CLASS
     typedef DWORD (WINAPI *PSETLAYEREDWINDOWATTR)(HWND, DWORD, BYTE, DWORD);
     static PSETLAYEREDWINDOWATTR pSetLayeredWindowAttributes = NULL;
 
@@ -1138,7 +1082,6 @@ bool wxTopLevelWindowMSW::SetTransparent(wxByte alpha)
     }
     if ( pSetLayeredWindowAttributes == NULL )
         return false;
-#endif // wxUSE_DYNLIB_CLASS
 
     LONG exstyle = GetWindowLong(GetHwnd(), GWL_EXSTYLE);
 
@@ -1150,16 +1093,11 @@ bool wxTopLevelWindowMSW::SetTransparent(wxByte alpha)
         return true;
     }
 
-#if wxUSE_DYNLIB_CLASS
     // Otherwise, set the layered style if needed and set the alpha value
     if ((exstyle & WS_EX_LAYERED) == 0 )
         SetWindowLong(GetHwnd(), GWL_EXSTYLE, exstyle | WS_EX_LAYERED);
 
-    if ( pSetLayeredWindowAttributes(GetHwnd(), 0, (BYTE)alpha, LWA_ALPHA) )
-        return true;
-#endif // wxUSE_DYNLIB_CLASS
-
-    return false;
+    return pSetLayeredWindowAttributes(GetHwnd(), 0, (BYTE)alpha, LWA_ALPHA) != 0;
 }
 
 bool wxTopLevelWindowMSW::CanSetTransparent()
@@ -1174,55 +1112,6 @@ bool wxTopLevelWindowMSW::CanSetTransparent()
 
     return (os_type == wxOS_WINDOWS_NT && ver_major >= 5);
 }
-
-
-void wxTopLevelWindowMSW::DoFreeze()
-{
-    if ( IsShown() )
-    {
-        for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
-              node;
-              node = node->GetNext() )
-        {
-            wxWindow *child = node->GetData();
-            if ( child->IsTopLevel() )
-                continue;
-
-            child->Freeze();
-        }
-    }
-}
-
-void wxTopLevelWindowMSW::DoThaw()
-{
-    if ( IsShown() )
-    {
-        for ( wxWindowList::compatibility_iterator node = GetChildren().GetFirst();
-              node;
-              node = node->GetNext() )
-        {
-            wxWindow *child = node->GetData();
-            if ( child->IsTopLevel() )
-                continue;
-
-            child->Thaw();
-        }
-    }
-}
-
-
-void wxTopLevelWindowMSW::AddChild(wxWindowBase *child)
-{
-    // adding a child while frozen will assert when thawn, so freeze it as if
-    // it had been already present when we were frozen
-    if ( child && !child->IsTopLevel() && IsFrozen() )
-    {
-        child->Freeze();
-    }
-
-    wxTopLevelWindowBase::AddChild(child);
-}
-
 
 // ----------------------------------------------------------------------------
 // wxTopLevelWindow event handling

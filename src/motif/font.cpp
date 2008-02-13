@@ -59,9 +59,9 @@ public:
 #if !wxMOTIF_NEW_FONT_HANDLING
     WXFontStructPtr     m_fontStruct;   // XFontStruct
 #endif
-#if !wxMOTIF_USE_RENDER_TABLE
+#if !wxMOTIF_USE_RENDER_TABLE && !wxMOTIF_NEW_FONT_HANDLING
     WXFontList          m_fontList;     // Motif XmFontList
-#else // if wxMOTIF_USE_RENDER_TABLE
+#else // if wxUSE_RENDER_TABLE
     WXRenderTable       m_renderTable;  // Motif XmRenderTable
     WXRendition         m_rendition;    // Motif XmRendition
 #endif
@@ -131,7 +131,7 @@ wxXFont::wxXFont()
 #if !wxMOTIF_NEW_FONT_HANDLING
     m_fontStruct = (WXFontStructPtr) 0;
 #endif
-#if !wxMOTIF_USE_RENDER_TABLE
+#if !wxMOTIF_USE_RENDER_TABLE && !wxMOTIF_NEW_FONT_HANDLING
     m_fontList = (WXFontList) 0;
 #else // if wxMOTIF_USE_RENDER_TABLE
     m_renderTable = (WXRenderTable) 0;
@@ -147,7 +147,7 @@ wxXFont::~wxXFont()
     if (m_fontList)
         XmFontListFree ((XmFontList) m_fontList);
     m_fontList = NULL;
-#else // if wxMOTIF_USE_RENDER_TABLE
+#else // if wxUSE_RENDER_TABLE
     if (m_renderTable)
         XmRenderTableFree ((XmRenderTable) m_renderTable);
     m_renderTable = NULL;
@@ -280,7 +280,7 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
     tmp = tn.GetNextToken();                     // pointsize
     if (tmp != wxT("*"))
     {
-        long num = wxStrtol (tmp.mb_str(), (wxChar **) NULL, 10);
+        long num = wxStrtol (tmp.c_str(), (wxChar **) NULL, 10);
         M_FONTDATA->m_pointSize = (int)(num / 10);
     }
 
@@ -342,16 +342,6 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
 
 wxFont::~wxFont()
 {
-}
-
-wxGDIRefData *wxFont::CreateGDIRefData() const
-{
-    return new wxFontRefData;
-}
-
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxFontRefData(*wx_static_cast(const wxFontRefData *, data));
 }
 
 // ----------------------------------------------------------------------------
@@ -560,7 +550,7 @@ wxXFont* wxFont::GetInternalFont(double scale, WXDisplay* display) const
     int count = 0;
 
 #if wxMOTIF_NEW_FONT_HANDLING
-    char* fontSpec = wxStrdup(xFontSpec.mb_str());
+    wxChar* fontSpec = wxStrdup( xFontSpec.c_str() );
     XtSetArg( args[count], XmNfontName, fontSpec ); ++count;
     XtSetArg( args[count], XmNfontType, XmFONT_IS_FONTSET ); ++count;
 #else
@@ -645,7 +635,7 @@ WXFontType wxFont::GetFontTypeC(WXDisplay* display) const
 #endif
 }
 
-#if wxMOTIF_USE_RENDER_TABLE
+#if wxMOTIF_NEW_FONT_HANDLING
 
 WXFontSet wxFont::GetFontSet(double scale, WXDisplay* display) const
 {
@@ -669,7 +659,7 @@ void wxGetTextExtent(WXDisplay* display, const wxFont& font, double scale,
     XRectangle ink, logical;
     WXFontSet fset = font.GetFontSet(scale, display);
 
-    XmbTextExtents( (XFontSet)fset, str.mb_str(), str.length(), &ink, &logical);
+    XmbTextExtents( (XFontSet)fset, str.c_str(), str.length(), &ink, &logical);
 
     if( width ) *width = logical.width;
     if( height ) *height = logical.height;
@@ -677,7 +667,7 @@ void wxGetTextExtent(WXDisplay* display, const wxFont& font, double scale,
     if( descent ) *descent = logical.height + logical.y;
 }
 
-#else // if !wxMOTIF_USE_RENDER_TABLE
+#else // if !wxMOTIF_NEW_FONT_HANDLING
 
 void wxGetTextExtent(WXDisplay* display, const wxFont& font,
                      double scale, const wxString& str,
@@ -689,8 +679,7 @@ void wxGetTextExtent(WXDisplay* display, const wxFont& font,
     XCharStruct overall;
     int slen = str.length();
 
-    XTextExtents((XFontStruct*) pFontStruct,
-                 wx_const_cast(char*, (const char *)str.mb_str()), slen,
+    XTextExtents((XFontStruct*) pFontStruct, (char*) str.c_str(), slen,
                  &direction, &ascent2, &descent2, &overall);
 
     if ( width )
@@ -703,4 +692,4 @@ void wxGetTextExtent(WXDisplay* display, const wxFont& font,
         *ascent = ascent2;
 }
 
-#endif // !wxMOTIF_USE_RENDER_TABLE
+#endif // !wxMOTIF_NEW_FONT_HANDLING

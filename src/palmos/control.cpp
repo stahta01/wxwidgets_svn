@@ -137,7 +137,7 @@ bool wxControl::PalmCreateControl(int style,
                                (void **)&form,
                                GetId(),
                                (ControlStyleType)style,
-                               NULL,
+                               wxEmptyString,
                                x,
                                y,
                                w,
@@ -421,7 +421,7 @@ void wxControl::SetControlLabel(const wxString& label)
     ControlType* control = (ControlType*)GetObjectPtr();
     if(control==NULL)
         return;
-    CtlSetLabel(control, "");
+    CtlSetLabel(control,wxEmptyString);
     m_label = label;
     if(!m_label.empty())
         CtlSetLabel(control,m_label.c_str());
@@ -452,7 +452,7 @@ wxString wxControl::GetControlLabel()
         return wxEmptyString;
     return CtlGetLabel(control);
 }
-#if 0
+
 wxString wxControl::GetLabel()
 {
     if(IsPalmField())
@@ -464,7 +464,7 @@ wxString wxControl::GetLabel()
 
     return wxEmptyString;
 }
-#endif
+
 /* static */ wxVisualAttributes
 wxControl::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 {
@@ -501,7 +501,7 @@ wxControl::GetCompositeControlsDefaultAttributes(wxWindowVariant WXUNUSED(varian
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 void wxControl::OnEraseBackground(wxEraseEvent& event)
