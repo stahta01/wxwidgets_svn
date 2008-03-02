@@ -50,11 +50,9 @@ public:
 
     bool Create(const wxNativeFontInfo& info);
 
-    bool MacCreateFromThemeFont( wxUint16 themeFontID ) ;
-#if wxMAC_USE_CORE_TEXT
-    bool MacCreateFromUIFont( wxUint32 coreTextFontType );
-    bool MacCreateFromCTFontDescriptor( const void * ctFontDescriptor, int pointSize = 0 );
-    bool MacCreateFromCTFont( const void * ctFont );
+    bool MacCreateThemeFont( wxUint16 themeFontID ) ;
+#ifdef __LP64__
+	bool MacCreateUIFont( wxUint32 coreTextFontType );
 #endif
 
     virtual ~wxFont();
@@ -88,8 +86,8 @@ public:
     virtual bool GetNoAntiAliasing() const  ;
 
     // Mac-specific, risks to change, don't use in portable code
-
-#if wxMAC_USE_ATSU_TEXT
+    
+#ifndef __LP64__    
     // 'old' Quickdraw accessors
     short MacGetFontNum() const;
     short MacGetFontSize() const;
@@ -101,23 +99,19 @@ public:
     wxUint16 MacGetThemeFontID() const ;
 
     // Returns an ATSUStyle not ATSUStyle*
-#endif
-#if wxMAC_USE_CORE_TEXT
+    void* MacGetATSUStyle() const ; 
+#else
     const void * MacGetCTFont() const;
-    const void * MacGetCTFontDescriptor() const;
+    // soon to be removed for 64bit, Returns an ATSUStyle not ATSUStyle*
+    void* MacGetATSUStyle() const ; 
 #endif
-#if wxMAC_USE_CORE_TEXT || wxMAC_USE_ATSU_TEXT
-    void* MacGetATSUStyle() const ;
-#endif
-
+    
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
-private:
     void Unshare();
 
+private:
     DECLARE_DYNAMIC_CLASS(wxFont)
 };
 
-#endif // _WX_FONT_H_
+#endif
+    // _WX_FONT_H_

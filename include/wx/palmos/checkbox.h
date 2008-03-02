@@ -55,8 +55,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxCheckBox)
-    // current state of the checkbox
-    wxCheckBoxState m_state;
 };
 
 #endif

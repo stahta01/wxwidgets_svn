@@ -23,14 +23,14 @@
 // classes
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxWindow;
 
-class WXDLLIMPEXP_FWD_CORE wxDropTarget;
-class WXDLLIMPEXP_FWD_CORE wxTextDropTarget;
-class WXDLLIMPEXP_FWD_CORE wxFileDropTarget;
-class WXDLLIMPEXP_FWD_CORE wxPrivateDropTarget;
+class WXDLLEXPORT wxDropTarget;
+class WXDLLEXPORT wxTextDropTarget;
+class WXDLLEXPORT wxFileDropTarget;
+class WXDLLEXPORT wxPrivateDropTarget;
 
-class WXDLLIMPEXP_FWD_CORE wxDropSource;
+class WXDLLEXPORT wxDropSource;
 
 //-------------------------------------------------------------------------
 // wxDropTarget

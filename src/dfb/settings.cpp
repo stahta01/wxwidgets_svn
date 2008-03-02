@@ -58,7 +58,7 @@ wxFont wxSystemSettingsNative::GetFont(wxSystemFont index)
         }
 
         default:
-            wxFAIL_MSG( "unknown font type" );
+            wxFAIL_MSG( _T("unknown font type") );
             return wxNullFont;
     }
 }
@@ -85,7 +85,7 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index,
 #endif
 
         default:
-            wxFAIL_MSG( "unsupported metric" );
+            wxFAIL_MSG( _T("unsupported metric") );
             return -1;
     }
 }
@@ -100,7 +100,7 @@ bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
             return false;
 
         default:
-            wxFAIL_MSG( "unknown feature" );
+            wxFAIL_MSG( _T("unknown feature") );
             return false;
     }
 }

@@ -41,7 +41,7 @@
     #define wxGAUGE_EMULATE_INDETERMINATE_MODE 0
 #endif
 
-extern WXDLLEXPORT_DATA(const char) wxGaugeNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxGaugeNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxGauge: a progress bar
@@ -88,8 +88,6 @@ public:
     virtual bool AcceptsFocus() const { return false; }
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // the max position
     int m_rangeMax;
 

@@ -15,27 +15,24 @@
 #include "wx/string.h"
 #include "wx/platinfo.h"
 
-class WXDLLIMPEXP_FWD_BASE wxArrayString;
-class WXDLLIMPEXP_FWD_BASE wxConfigBase;
-class WXDLLIMPEXP_FWD_BASE wxEventLoopBase;
+class WXDLLIMPEXP_FWD_BASE wxObject;
+class WXDLLIMPEXP_FWD_BASE wxAppTraits;
 #if wxUSE_FONTMAP
     class WXDLLIMPEXP_FWD_CORE wxFontMapper;
 #endif // wxUSE_FONTMAP
 class WXDLLIMPEXP_FWD_BASE wxLog;
 class WXDLLIMPEXP_FWD_BASE wxMessageOutput;
-class WXDLLIMPEXP_FWD_BASE wxObject;
 class WXDLLIMPEXP_FWD_CORE wxRendererNative;
-class WXDLLIMPEXP_FWD_BASE wxStandardPathsBase;
 class WXDLLIMPEXP_FWD_BASE wxString;
-class WXDLLIMPEXP_FWD_BASE wxTimer;
-class WXDLLIMPEXP_FWD_BASE wxTimerImpl;
 
-class GSocketManager;
+class GSocketGUIFunctionsTable;
 
 
 // ----------------------------------------------------------------------------
 // wxAppTraits: this class defines various configurable aspects of wxApp
 // ----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_FWD_BASE wxStandardPathsBase;
 
 class WXDLLIMPEXP_BASE wxAppTraitsBase
 {
@@ -43,15 +40,8 @@ public:
     // needed since this class declares virtual members
     virtual ~wxAppTraitsBase() { }
 
-    // hooks for working with the global objects, may be overridden by the user
+    // hooks for creating the global objects, may be overridden by the user
     // ------------------------------------------------------------------------
-
-#if wxUSE_CONFIG
-    // create the default configuration object (base class version is
-    // implemented in config.cpp and creates wxRegConfig for wxMSW and
-    // wxFileConfig for all the other platforms)
-    virtual wxConfigBase *CreateConfig();
-#endif // wxUSE_CONFIG
 
 #if wxUSE_LOG
     // create the default log target
@@ -73,16 +63,11 @@ public:
     // NB: returned pointer will be deleted by the caller
     virtual wxRendererNative *CreateRenderer() = 0;
 
+#if wxUSE_STDPATHS
     // wxStandardPaths object is normally the same for wxBase and wxGUI
     // except in the case of wxMac and wxCocoa
     virtual wxStandardPathsBase& GetStandardPaths();
-
-#if wxUSE_INTL
-    // called during wxApp initialization to set the locale to correspond to
-    // the user default (i.e. system locale under Windows, LC_ALL under Unix)
-    virtual void SetLocale();
-#endif // wxUSE_INTL
-
+#endif // wxUSE_STDPATHS
 
     // functions abstracting differences between GUI and console modes
     // ------------------------------------------------------------------------
@@ -116,26 +101,14 @@ public:
     virtual void RemoveFromPendingDelete(wxObject *object) = 0;
 
 #if wxUSE_SOCKETS
-    // return socket manager: this is usually different for console and GUI
-    // applications (although some ports use the same implementation for both)
-    virtual GSocketManager *GetSocketManager() = 0;
+    // return table of GUI callbacks for GSocket code or NULL in wxBase. This
+    // is needed because networking classes are in their own library and so
+    // they can't directly call GUI functions (the same net library can be
+    // used in both GUI and base apps). To complicate it further, GUI library
+    // ("wxCore") doesn't depend on networking library and so only a functions
+    // table can be passed around
+    virtual GSocketGUIFunctionsTable* GetSocketGUIFunctionsTable() = 0;
 #endif
-
-    // create a new, port specific, instance of the event loop used by wxApp
-    virtual wxEventLoopBase *CreateEventLoop() = 0;
-
-#if wxUSE_TIMER
-    // return platform and toolkit dependent wxTimer implementation
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer) = 0;
-#endif
-
-#if wxUSE_THREADS
-    virtual void MutexGuiEnter();
-    virtual void MutexGuiLeave();
-#endif
-
-    // functions returning port-specific information
-    // ------------------------------------------------------------------------
 
     // return information about the (native) toolkit currently used and its
     // runtime (not compile-time) version.
@@ -148,21 +121,7 @@ public:
 
     // return the name of the Desktop Environment such as
     // "KDE" or "GNOME". May return an empty string.
-    virtual wxString GetDesktopEnvironment() const = 0;
-
-    // returns a short string to identify the block of the standard command
-    // line options parsed automatically by current port: if this string is
-    // empty, there are no such options, otherwise the function also fills
-    // passed arrays with the names and the descriptions of those options.
-    virtual wxString GetStandardCmdLineOptions(wxArrayString& names,
-                                               wxArrayString& desc) const
-    {
-        wxUnusedVar(names);
-        wxUnusedVar(desc);
-
-        return wxEmptyString;
-    }
-
+    virtual wxString GetDesktopEnvironment() const { return wxEmptyString; }
 
 protected:
 #if wxUSE_STACKWALKER && defined( __WXDEBUG__ )
@@ -184,6 +143,8 @@ protected:
     #include "wx/msw/apptbase.h"
 #elif defined(__UNIX__) && !defined(__EMX__)
     #include "wx/unix/apptbase.h"
+#elif defined(__WXMAC__)
+    #include "wx/mac/apptbase.h"
 #elif defined(__OS2__)
     #include "wx/os2/apptbase.h"
 #else // no platform-specific methods to add to wxAppTraits
@@ -204,10 +165,6 @@ protected:
 class WXDLLIMPEXP_BASE wxConsoleAppTraitsBase : public wxAppTraits
 {
 public:
-#if !wxUSE_CONSOLE_EVENTLOOP
-    virtual wxEventLoopBase *CreateEventLoop() { return NULL; }
-#endif // !wxUSE_CONSOLE_EVENTLOOP
-
 #if wxUSE_LOG
     virtual wxLog *CreateLogTarget();
 #endif // wxUSE_LOG
@@ -216,6 +173,9 @@ public:
     virtual wxFontMapper *CreateFontMapper();
 #endif // wxUSE_FONTMAP
     virtual wxRendererNative *CreateRenderer();
+#if wxUSE_SOCKETS
+    virtual GSocketGUIFunctionsTable* GetSocketGUIFunctionsTable();
+#endif
 
 #ifdef __WXDEBUG__
     virtual bool ShowAssertDialog(const wxString& msg);
@@ -237,7 +197,6 @@ public:
     }
 
     virtual bool IsUsingUniversalWidgets() const { return false; }
-    virtual wxString GetDesktopEnvironment() const { return wxEmptyString; }
 };
 
 // ----------------------------------------------------------------------------
@@ -257,6 +216,9 @@ public:
     virtual wxFontMapper *CreateFontMapper();
 #endif // wxUSE_FONTMAP
     virtual wxRendererNative *CreateRenderer();
+#if wxUSE_SOCKETS
+    virtual GSocketGUIFunctionsTable* GetSocketGUIFunctionsTable();
+#endif
 
 #ifdef __WXDEBUG__
     virtual bool ShowAssertDialog(const wxString& msg);
@@ -274,8 +236,6 @@ public:
         return false;
     #endif
     }
-
-    virtual wxString GetDesktopEnvironment() const { return wxEmptyString; }
 };
 
 #endif // wxUSE_GUI
@@ -293,6 +253,8 @@ public:
     #include "wx/os2/apptrait.h"
 #elif defined(__UNIX__)
     #include "wx/unix/apptrait.h"
+#elif defined(__WXMAC__)
+    #include "wx/mac/apptrait.h"
 #elif defined(__DOS__)
     #include "wx/msdos/apptrait.h"
 #else

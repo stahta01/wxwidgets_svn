@@ -20,17 +20,10 @@
 #include "wx/pickerbase.h"
 
 
-class WXDLLIMPEXP_FWD_CORE wxColourPickerEvent;
+class WXDLLIMPEXP_CORE wxColourPickerEvent;
 
-extern WXDLLEXPORT_DATA(const char) wxColourPickerWidgetNameStr[];
-extern WXDLLEXPORT_DATA(const char) wxColourPickerCtrlNameStr[];
-
-// show the colour in HTML form (#AABBCC) as colour button label
-#define wxCLRBTN_SHOW_LABEL     100
-
-// the default style
-#define wxCLRBTN_DEFAULT_STYLE  (wxCLRBTN_SHOW_LABEL)
-
+extern WXDLLEXPORT_DATA(const wxChar) wxColourPickerWidgetNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxColourPickerCtrlNameStr[];
 
 
 // ----------------------------------------------------------------------------
@@ -77,7 +70,7 @@ protected:
 //       same prototype for their contructor (and also explains why we use
 //       define instead of a typedef)
 // since GTK > 2.4, there is GtkColorButton
-#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
+#if defined(__WXGTK24__) && !defined(__WXUNIVERSAL__)
     #include "wx/gtk/clrpicker.h"
     #define wxColourPickerWidget      wxColourButton
 #else
@@ -160,7 +153,9 @@ private:
 // wxColourPickerEvent: used by wxColourPickerCtrl only
 // ----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_COLOURPICKER_CHANGED;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_CORE, wxEVT_COMMAND_COLOURPICKER_CHANGED, 1102)
+END_DECLARE_EVENT_TYPES()
 
 class WXDLLIMPEXP_CORE wxColourPickerEvent : public wxCommandEvent
 {

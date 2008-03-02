@@ -15,15 +15,15 @@
 #include "wx/palette.h"
 
 // Bitmap
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
+class WXDLLEXPORT wxBitmap;
 class wxBitmapRefData ;
-class WXDLLIMPEXP_FWD_CORE wxBitmapHandler;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxCursor;
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxImage;
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxBitmapHandler;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxImage;
+class WXDLLEXPORT wxPixelDataBase;
 
 // A mask is a bitmap used for drawing bitmaps
 // Internally it is stored as a 8 bit deep memory chunk, 0 = black means the source will be drawn
@@ -47,7 +47,7 @@ public:
 
     // Construct a mask from a mono bitmap (black meaning show pixels, white meaning transparent)
     wxMask(const wxBitmap& bitmap);
-
+    
     // implementation helper only : construct a mask from a 32 bit memory buffer
     wxMask(const wxMemoryBuffer& buf, int width , int height , int bytesPerRow ) ;
 
@@ -61,10 +61,10 @@ public:
 
     void Init() ;
 
-    // a 8 bit depth mask
+    // a 8 bit depth mask 
     void* GetRawAccess() const;
     int GetBytesPerRow() const { return m_bytesPerRow ; }
-    // renders/updates native representation when necessary
+    // renders/updates native representation when necessary 
     void RealizeNative() ;
 
     WXHBITMAP GetHBITMAP() const ;
@@ -89,7 +89,7 @@ class WXDLLEXPORT wxBitmap: public wxBitmapBase
 {
     DECLARE_DYNAMIC_CLASS(wxBitmap)
 
-    friend class WXDLLIMPEXP_FWD_CORE wxBitmapHandler;
+    friend class WXDLLEXPORT wxBitmapHandler;
 
 public:
     wxBitmap(); // Platform-specific
@@ -134,6 +134,8 @@ public:
     // copies the contents and mask of the given (colour) icon to the bitmap
     virtual bool CopyFromIcon(const wxIcon& icon);
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
     int GetWidth() const;
     int GetHeight() const;
     int GetDepth() const;
@@ -141,6 +143,13 @@ public:
     void SetHeight(int h);
     void SetDepth(int d);
     void SetOk(bool isOk);
+
+#if WXWIN_COMPATIBILITY_2_4
+    // these functions do nothing and are only there for backwards
+    // compatibility
+    wxDEPRECATED( int GetQuality() const );
+    wxDEPRECATED( void SetQuality(int quality) );
+#endif // WXWIN_COMPATIBILITY_2_4
 
 #if wxUSE_PALETTE
     wxPalette* GetPalette() const;
@@ -161,16 +170,13 @@ public:
     bool HasAlpha() const;
     void UseAlpha();
 
-    // returns the 'native' implementation, a GWorldPtr for the content and one for the mask
+    // returns the 'native' implementation, a GWorldPtr for the content and one for the mask 
     WXHBITMAP GetHBITMAP( WXHBITMAP * mask = NULL ) const;
 
+#ifdef __WXMAC_OSX__
     // returns a CGImageRef which must released after usage with CGImageRelease
-    CGImageRef CreateCGImage() const ;
-
-    // returns a IconRef which must be retained before and released after usage
-    IconRef GetIconRef() const;
-    // returns a IconRef which must be released after usage
-    IconRef CreateIconRef() const;
+    WXCGIMAGEREF CGImageCreate() const ;
+#endif
     // get read only access to the underlying buffer
     void *GetRawAccess() const ;
     // brackets to the underlying OS structure for read/write access
@@ -179,8 +185,9 @@ public:
     void EndRawAccess() ;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 };
-
-#endif // _WX_BITMAP_H_
+#endif
+  // _WX_BITMAP_H_

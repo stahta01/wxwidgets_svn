@@ -10,10 +10,6 @@ This is a base class for paragraph and character styles.
 
 <wx/richtext/richtextstyles.h>
 
-\wxheading{Library}
-
-\helpref{wxRichtext}{librarieslist}
-
 \wxheading{Data structures}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
@@ -50,15 +46,15 @@ Returns the style name.
 
 \membersection{wxRichTextStyleDefinition::GetStyle}\label{wxrichtextstyledefinitiongetstyle}
 
-\func{wxTextAttr\&}{GetStyle}{\void}
+\func{wxRichTextAttr\&}{GetStyle}{\void}
 
-\constfunc{const wxTextAttr\&}{GetStyle}{\void}
+\constfunc{const wxRichTextAttr\&}{GetStyle}{\void}
 
 Returns the attributes associated with this style.
 
 \membersection{wxRichTextStyleDefinition::GetStyleMergedWithBase}\label{wxrichtextstyledefinitiongetstylemergedwithbase}
 
-\constfunc{wxTextAttr}{GetStyleMergedWithBase}{\param{wxRichTextStyleSheet*}{ sheet}}
+\constfunc{wxRichTextAttr}{GetStyleMergedWithBase}{\param{wxRichTextStyleSheet*}{ sheet}}
 
 Returns the style attributes combined with the attributes of the specified base style, if any. This function works recursively.
 
@@ -82,7 +78,7 @@ Sets the name of the style.
 
 \membersection{wxRichTextStyleDefinition::SetStyle}\label{wxrichtextstyledefinitionsetstyle}
 
-\func{void}{SetStyle}{\param{const wxTextAttr\& }{style}}
+\func{void}{SetStyle}{\param{const wxRichTextAttr\& }{style}}
 
 Sets the attributes for this style.
 

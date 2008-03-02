@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 5 September 2007                                                    *
+# Date : 13 February 2006                                                    *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -43,7 +43,7 @@ CC_DEFINE =
 .c.obj :
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
-OBJECTS = appunix.obj,baseunix.obj,\
+OBJECTS =       baseunix.obj,\
 		dialup.obj,\
 		dir.obj,\
 		displayx11.obj,\
@@ -60,10 +60,9 @@ OBJECTS = appunix.obj,baseunix.obj,\
 		sound.obj,\
 		sound_sdl.obj,\
 		stdpaths.obj,\
-		taskbarx11.obj,\
-		timerunx.obj
+		taskbarx11.obj
 
-SOURCES = appunix.cpp,baseunix.cpp,\
+SOURCES =       baseunix.cpp,\
 		dialup.cpp,\
 		dir.cpp,\
 		displayx11.cpp,\
@@ -80,8 +79,7 @@ SOURCES = appunix.cpp,baseunix.cpp,\
 		sound.cpp,\
 		sound_sdl.cpp,\
 		stdpaths.cpp,\
-		taskbarx11.cpp,\
-		timerunx.cpp
+		taskbarx11.cpp
 
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -101,7 +99,6 @@ all : $(SOURCES)
 .endif
 .endif
 
-appunix.obj : appunix.cpp
 baseunix.obj : baseunix.cpp
 dialup.obj : dialup.cpp
 dir.obj : dir.cpp
@@ -121,4 +118,3 @@ sound_sdl.obj : sound_sdl.cpp
 stdpaths.obj : stdpaths.cpp
 taskbarx11.obj : taskbarx11.cpp
 displayx11.obj : displayx11.cpp
-timerunx.obj : timerunx.cpp

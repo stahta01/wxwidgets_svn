@@ -137,7 +137,7 @@ void wxMenuItem::Check(bool bDoCheck)
 }
 
 /* static */
-wxString wxMenuItemBase::GetLabelText(const wxString& text)
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }
@@ -308,7 +308,7 @@ void wxMenuItem::DestroyItem(bool full)
     }
 }
 
-void wxMenuItem::SetItemLabel(const wxString& label)
+void wxMenuItem::SetText(const wxString& label)
 {
     char mnem = wxFindMnemonic (label);
     wxString label2 = wxStripMenuCodes(label);
@@ -366,7 +366,7 @@ void wxMenuItemCallback (Widget WXUNUSED(w), XtPointer clientData,
             event.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
             item->GetMenuBar()->GetMenuBarFrame()
-                ->HandleWindowEvent(event);
+                ->GetEventHandler()->ProcessEvent(event);
         }
         // this is the child of a popup menu
         else if (item->GetTopMenu())
@@ -398,7 +398,7 @@ void wxMenuItemArmCallback (Widget WXUNUSED(w), XtPointer clientData,
             menuEvent.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
             item->GetMenuBar()->GetMenuBarFrame()
-                ->HandleWindowEvent(menuEvent);
+                ->GetEventHandler()->ProcessEvent(menuEvent);
         }
     }
 }
@@ -418,7 +418,7 @@ wxMenuItemDisarmCallback (Widget WXUNUSED(w), XtPointer clientData,
             menuEvent.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
             item->GetMenuBar()->GetMenuBarFrame()
-                ->HandleWindowEvent(menuEvent);
+                ->GetEventHandler()->ProcessEvent(menuEvent);
         }
     }
 }

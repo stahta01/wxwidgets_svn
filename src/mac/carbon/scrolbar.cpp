@@ -69,11 +69,7 @@ int wxScrollBar::GetThumbPosition() const
     return m_peer->GetValue();
 }
 
-void wxScrollBar::SetScrollbar( int position,
-                                int thumbSize,
-                                int range,
-                                int pageSize,
-                                bool WXUNUSED(refresh) )
+void wxScrollBar::SetScrollbar( int position, int thumbSize, int range, int pageSize, bool refresh )
 {
     m_pageSize = pageSize;
     m_viewSize = thumbSize;
@@ -93,7 +89,7 @@ void wxScrollBar::Command( wxCommandEvent& event )
     ProcessCommand( event );
 }
 
-void wxScrollBar::MacHandleControlClick( WXWidget WXUNUSED(control), wxInt16 controlpart, bool mouseStillDown )
+void wxScrollBar::MacHandleControlClick( WXWidget control, wxInt16 controlpart, bool mouseStillDown )
 {
     int position = m_peer->GetValue();
     int minPos = m_peer->GetMinimum();
@@ -165,10 +161,10 @@ void wxScrollBar::MacHandleControlClick( WXWidget WXUNUSED(control), wxInt16 con
         // this is hardcoded
         window->MacOnScroll( event );
     else
-        HandleWindowEvent( event );
+        GetEventHandler()->ProcessEvent( event );
 }
 
-wxInt32 wxScrollBar::MacControlHit( WXEVENTHANDLERREF WXUNUSED(handler), WXEVENTREF mevent )
+wxInt32 wxScrollBar::MacControlHit( WXEVENTHANDLERREF handler, WXEVENTREF mevent )
 {
     int position = m_peer->GetValue();
     int minPos = m_peer->GetMinimum();
@@ -221,7 +217,7 @@ wxInt32 wxScrollBar::MacControlHit( WXEVENTHANDLERREF WXUNUSED(handler), WXEVENT
         // this is hardcoded
         window->MacOnScroll( event );
     else
-        HandleWindowEvent( event );
+        GetEventHandler()->ProcessEvent( event );
 
     return noErr;
 }

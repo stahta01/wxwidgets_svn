@@ -43,12 +43,10 @@ struct wxSystemObjects
              m_colHighlightText,
              m_colListBox,
              m_colWindow,
-             m_colWindowText,
              m_colBtnText,
              m_colMenuItemHighlight,
              m_colTooltip,
-             m_colTooltipText,
-             m_colMenubarBg;
+             m_colTooltipText;
 
     wxFont m_fontSystem;
 };
@@ -63,12 +61,10 @@ void wxClearGtkSystemObjects()
     gs_objects.m_colHighlightText = wxColour();
     gs_objects.m_colListBox = wxColour();
     gs_objects.m_colWindow = wxColour();
-    gs_objects.m_colWindowText = wxColour();
     gs_objects.m_colBtnText = wxColour();
     gs_objects.m_colMenuItemHighlight = wxColour();
     gs_objects.m_colTooltip = wxColour();
     gs_objects.m_colTooltipText = wxColour();
-    gs_objects.m_colMenubarBg = wxColour();
     gs_objects.m_fontSystem = wxNullFont;
 }
 
@@ -82,8 +78,7 @@ enum wxGtkWidgetType
     wxGTK_BUTTON,
     wxGTK_LIST,
     wxGTK_MENUITEM,
-    wxGTK_TEXTCTRL,
-    wxGTK_MENUBAR, 
+    wxGTK_TEXTCTRL
 };
 
 // the colour we need
@@ -123,11 +118,6 @@ static bool GetColourFromGTKWidget(GdkColor& gdkColor,
 
         case wxGTK_MENUITEM:
             widget = gtk_menu_item_new();
-            
-        case wxGTK_MENUBAR:
-            widget = gtk_menu_bar_new();
-            break;
-            
     }
 
     GtkStyle *def = gtk_rc_get_style( widget );
@@ -193,6 +183,7 @@ wxColour wxSystemSettingsNative::GetColour( wxSystemColour index )
         case wxSYS_COLOUR_ACTIVEBORDER:
         case wxSYS_COLOUR_INACTIVEBORDER:
         case wxSYS_COLOUR_BTNFACE:
+        case wxSYS_COLOUR_MENUBAR:
         case wxSYS_COLOUR_3DLIGHT:
             if (!gs_objects.m_colBtnFace.Ok())
             {
@@ -215,19 +206,6 @@ wxColour wxSystemSettingsNative::GetColour( wxSystemColour index )
                 gs_objects.m_colWindow = wxColor(gdkColor);
             }
             color = gs_objects.m_colWindow;
-            break;
-
-
-        case wxSYS_COLOUR_MENUBAR:
-            if (!gs_objects.m_colMenubarBg.Ok())
-            {
-                gdkColor.red =
-                gdkColor.green = 0;
-                gdkColor.blue = 0x9c40;
-                GetColourFromGTKWidget(gdkColor,wxGTK_MENUBAR);
-                gs_objects.m_colMenubarBg = wxColor(gdkColor);
-            }
-            color = gs_objects.m_colMenubarBg;
             break;
 
         case wxSYS_COLOUR_3DDKSHADOW:
@@ -415,63 +393,36 @@ wxFont wxSystemSettingsNative::GetFont( wxSystemFont index )
     return font;
 }
 
-static bool GetFrameExtents(GdkWindow* window, int* left, int* right, int* top, int* bottom)
+static bool wxXGetWindowProperty(GdkWindow* window, Atom& type, int& format, gulong& nitems, guchar*& data)
 {
     bool success = false;
-    Atom property = 0;
-    if (gdk_x11_screen_supports_net_wm_hint(
-            gdk_drawable_get_screen(window),
-            gdk_atom_intern("_NET_FRAME_EXTENTS", false)))
+#if GTK_CHECK_VERSION(2, 2, 0)
+    if (gtk_check_version(2, 2, 0) == NULL)
     {
-        success = true;
-        property = gdk_x11_get_xatom_by_name_for_display(
-            gdk_drawable_get_display(window),
-            "_NET_FRAME_EXTENTS");
-    }
-
-    if (success)
-    {
-        Atom type;
-        int format;
-        gulong nitems, bytes_after;
-        guchar* data;
+        gulong bytes_after;
         success = XGetWindowProperty(
-            gdk_x11_drawable_get_xdisplay(window),
-            gdk_x11_drawable_get_xid(window),
-            property,
-            0, 4,
-            false,
-            XA_CARDINAL,
+            GDK_DISPLAY_XDISPLAY(gdk_drawable_get_display(window)),
+            GDK_WINDOW_XWINDOW(window),
+            gdk_x11_get_xatom_by_name_for_display(
+                gdk_drawable_get_display(window),
+                "_NET_FRAME_EXTENTS"),
+            0, // left, right, top, bottom, CARDINAL[4]/32
+            G_MAXLONG, // size of long
+            false, // do not delete property
+            XA_CARDINAL, // 32 bit
             &type, &format, &nitems, &bytes_after, &data
             ) == Success;
-        if (success)
-        {
-            success = data && nitems == 4;
-            if (success)
-            {
-                long* p = (long*)data;
-                if (left)   *left   = int(p[0]);
-                if (right)  *right  = int(p[1]);
-                if (top)    *top    = int(p[2]);
-                if (bottom) *bottom = int(p[3]);
-            }
-            if (data)
-                XFree(data);
-        }
     }
+#endif
     return success;
-}
-
-// helper: return the GtkSettings either for the screen the current window is
-// on or for the default screen if window is NULL
-static GtkSettings *GetSettingsForWindowScreen(GdkWindow *window)
-{
-    return window ? gtk_settings_get_for_screen(gdk_drawable_get_screen(window))
-                  : gtk_settings_get_default();
 }
 
 int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
 {
+    guchar *data = NULL;
+    Atom type;
+    int format;
+    gulong nitems;
     GdkWindow *window = NULL;
     if(win && GTK_WIDGET_REALIZED(win->GetHandle()))
         window = win->GetHandle()->window;
@@ -493,21 +444,49 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
                     return -1; // not a tlw, not sure how to approach
                 else
                 {
+                    // Check if wm supports frame extents - we can't know
+                    // the border widths if it does not.
+#if GTK_CHECK_VERSION(2,2,0)
+                    if (!gtk_check_version(2,2,0))
+                    {
+                        if (!gdk_x11_screen_supports_net_wm_hint(
+                                gdk_drawable_get_screen(window),
+                                gdk_atom_intern("_NET_FRAME_EXTENTS", false) ) )
+                            return -1;
+                    }
+                    else
+#endif
+                    {
+                        if (!gdk_net_wm_supports(gdk_atom_intern("_NET_FRAME_EXTENTS", false)))
+                            return -1;
+                    }
+
                     // Get the frame extents from the windowmanager.
                     // In most cases the top extent is the titlebar, so we use the bottom extent
                     // for the heights.
-                    int right, bottom;
-                    if (GetFrameExtents(window, NULL, &right, NULL, &bottom))
+                    if (wxXGetWindowProperty(window, type, format, nitems, data))
                     {
-                        switch (index)
+                        int border_return = -1;
+
+                        if ((type == XA_CARDINAL) && (format == 32) && (nitems >= 4) && (data))
                         {
-                            case wxSYS_BORDER_X:
-                            case wxSYS_EDGE_X:
-                            case wxSYS_FRAMESIZE_X:
-                                return right; // width of right extent
-                            default:
-                                return bottom; // height of bottom extent
+                            switch(index)
+                            {
+                                case wxSYS_BORDER_X:
+                                case wxSYS_EDGE_X:
+                                case wxSYS_FRAMESIZE_X:
+                                    border_return = ((long*)data)[1]; // width of right extent
+                                    break;
+                                default:
+                                    border_return = ((long*)data)[3]; // height of bottom extent
+                                    break;
+                            }
                         }
+
+                        if (data)
+                            XFree(data);
+
+                        return border_return;
                     }
                 }
             }
@@ -516,29 +495,49 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
 
         case wxSYS_CURSOR_X:
         case wxSYS_CURSOR_Y:
-                return gdk_display_get_default_cursor_size(
-                            window ? gdk_drawable_get_display(window)
-                                   : gdk_display_get_default());
+#ifdef __WXGTK24__
+            if (!gtk_check_version(2,4,0))
+            {
+                if (window)
+                    return gdk_display_get_default_cursor_size(gdk_drawable_get_display(window));
+                else
+                    return gdk_display_get_default_cursor_size(gdk_display_get_default());
+            }
+            else
+#endif
+                return 16;
 
         case wxSYS_DCLICK_X:
         case wxSYS_DCLICK_Y:
             gint dclick_distance;
-            g_object_get(GetSettingsForWindowScreen(window),
-                            "gtk-double-click-distance", &dclick_distance, NULL);
+#if GTK_CHECK_VERSION(2,2,0)
+            if (window && !gtk_check_version(2,2,0))
+                g_object_get(gtk_settings_get_for_screen(gdk_drawable_get_screen(window)),
+                                "gtk-double-click-distance", &dclick_distance, NULL);
+            else
+#endif
+                g_object_get(gtk_settings_get_default(),
+                                "gtk-double-click-distance", &dclick_distance, NULL);
 
             return dclick_distance * 2;
-
-        case wxSYS_DCLICK_MSEC:
-            gint dclick;
-            g_object_get(GetSettingsForWindowScreen(window),
-                            "gtk-double-click-time", &dclick, NULL);
-            return dclick;
 
         case wxSYS_DRAG_X:
         case wxSYS_DRAG_Y:
             gint drag_threshold;
-            g_object_get(GetSettingsForWindowScreen(window),
-                            "gtk-dnd-drag-threshold", &drag_threshold, NULL);
+#if GTK_CHECK_VERSION(2,2,0)
+            if (window && !gtk_check_version(2,2,0))
+            {
+                g_object_get(
+                        gtk_settings_get_for_screen(gdk_drawable_get_screen(window)),
+                        "gtk-dnd-drag-threshold",
+                        &drag_threshold, NULL);
+            }
+            else
+#endif
+            {
+                g_object_get(gtk_settings_get_default(),
+                             "gtk-dnd-drag-threshold", &drag_threshold, NULL);
+            }
 
             // The correct thing here would be to double the value
             // since that is what the API wants. But the values
@@ -548,30 +547,49 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
 
             return drag_threshold;
 
-        case wxSYS_ICON_X:
-        case wxSYS_ICON_Y:
-            return 32;
+        // MBN: ditto for icons
+        case wxSYS_ICON_X:     return 32;
+        case wxSYS_ICON_Y:     return 32;
 
         case wxSYS_SCREEN_X:
-            if (window)
+#if GTK_CHECK_VERSION(2,2,0)
+            if (window && !gtk_check_version(2,2,0))
                 return gdk_screen_get_width(gdk_drawable_get_screen(window));
             else
+#endif
                 return gdk_screen_width();
 
         case wxSYS_SCREEN_Y:
-            if (window)
+#if GTK_CHECK_VERSION(2,2,0)
+            if (window && !gtk_check_version(2,2,0))
                 return gdk_screen_get_height(gdk_drawable_get_screen(window));
             else
+#endif
                 return gdk_screen_height();
 
-        case wxSYS_HSCROLL_Y:
-        case wxSYS_VSCROLL_X:
-            return 15;
+        case wxSYS_HSCROLL_Y:  return 15;
+        case wxSYS_VSCROLL_X:  return 15;
 
         case wxSYS_CAPTION_Y:
             if (!window)
                 // No realized window specified, and no implementation for that case yet.
                 return -1;
+
+            // Check if wm supports frame extents - we can't know the caption height if it does not.
+#if GTK_CHECK_VERSION(2,2,0)
+            if (!gtk_check_version(2,2,0))
+            {
+                if (!gdk_x11_screen_supports_net_wm_hint(
+                        gdk_drawable_get_screen(window),
+                        gdk_atom_intern("_NET_FRAME_EXTENTS", false) ) )
+                    return -1;
+            }
+            else
+#endif
+            {
+                if (!gdk_net_wm_supports(gdk_atom_intern("_NET_FRAME_EXTENTS", false)))
+                    return -1;
+            }
 
             wxASSERT_MSG( wxDynamicCast(win, wxTopLevelWindow),
                           wxT("Asking for caption height of a non toplevel window") );
@@ -581,12 +599,19 @@ int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
             // we could check which is the thickest wm border to decide on which side the
             // titlebar is, but this might lead to interesting behaviours in used code.
             // Reconsider when we have a way to report to the user on which side it is.
+            if (wxXGetWindowProperty(window, type, format, nitems, data))
             {
-                int top;
-                if (GetFrameExtents(window, NULL, NULL, &top, NULL))
+                int caption_height = -1;
+
+                if ((type == XA_CARDINAL) && (format == 32) && (nitems >= 3) && (data))
                 {
-                    return top; // top frame extent
+                    caption_height = ((long*)data)[2]; // top frame extent
                 }
+
+                if (data)
+                    XFree(data);
+
+                return caption_height;
             }
 
             // Try a default approach without a window pointer, if possible

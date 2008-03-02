@@ -15,10 +15,10 @@
 // classes
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxFont;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxPaintDC;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxFont;
 
 struct font_t;
 
@@ -87,8 +87,8 @@ public:
 
 protected:
     // ref counting code
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxFont)

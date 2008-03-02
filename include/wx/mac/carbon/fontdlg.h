@@ -20,7 +20,11 @@
  */
 
 #ifndef wxMAC_USE_EXPERIMENTAL_FONTDIALOG
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_2
+#define wxMAC_USE_EXPERIMENTAL_FONTDIALOG 0
+#else
 #define wxMAC_USE_EXPERIMENTAL_FONTDIALOG 1
+#endif
 #endif
 
 #if wxMAC_USE_EXPERIMENTAL_FONTDIALOG
@@ -55,13 +59,13 @@ extern "C" int RunMixedFontDialog(wxFontDialog* dialog) ;
 
 class wxFontColourSwatchCtrl;
 class wxFontPreviewCtrl;
-class WXDLLIMPEXP_FWD_CORE wxSpinCtrl;
-class WXDLLIMPEXP_FWD_CORE wxSpinEvent;
-class WXDLLIMPEXP_FWD_CORE wxListBox;
-class WXDLLIMPEXP_FWD_CORE wxChoice;
-class WXDLLIMPEXP_FWD_CORE wxButton;
-class WXDLLIMPEXP_FWD_CORE wxStaticText;
-class WXDLLIMPEXP_FWD_CORE wxCheckBox;
+class WXDLLEXPORT wxSpinCtrl;
+class WXDLLEXPORT wxSpinEvent;
+class WXDLLEXPORT wxListBox;
+class WXDLLEXPORT wxChoice;
+class WXDLLEXPORT wxButton;
+class WXDLLEXPORT wxStaticText;
+class WXDLLEXPORT wxCheckBox;
 
 /*!
  * Control identifiers

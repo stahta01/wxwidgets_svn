@@ -35,12 +35,14 @@ public:
     // name "memory:" + filename
     static void AddFile(const wxString& filename, const wxString& textdata);
     static void AddFile(const wxString& filename, const void *binarydata, size_t size);
+#if wxABI_VERSION >= 20805
     static void AddFileWithMimeType(const wxString& filename,
                                     const wxString& textdata,
                                     const wxString& mimetype);
     static void AddFileWithMimeType(const wxString& filename,
                                     const void *binarydata, size_t size,
                                     const wxString& mimetype);
+#endif // wxABI_VERSION >= 20805
 
     // Remove file from memory FS and free occupied memory
     static void RemoveFile(const wxString& filename);
@@ -79,6 +81,7 @@ public:
     {
         wxMemoryFSHandlerBase::AddFile(filename, binarydata, size);
     }
+#if wxABI_VERSION >= 20805
     static void AddFileWithMimeType(const wxString& filename,
                                     const wxString& textdata,
                                     const wxString& mimetype)
@@ -95,6 +98,7 @@ public:
                                                    binarydata, size,
                                                    mimetype);
     }
+#endif // wxABI_VERSION >= 20805
 
 #if wxUSE_IMAGE
     static void AddFile(const wxString& filename,

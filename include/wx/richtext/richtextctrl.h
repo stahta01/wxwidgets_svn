@@ -84,8 +84,7 @@ class WXDLLIMPEXP_FWD_RICHTEXT wxRichTextStyleDefinition;
  * wxRichTextCtrl class declaration
  */
 
-class WXDLLIMPEXP_RICHTEXT wxRichTextCtrl : public wxControl,
-                                            public wxTextCtrlIface,
+class WXDLLIMPEXP_RICHTEXT wxRichTextCtrl : public wxTextCtrlBase,
                                             public wxScrollHelper
 {
     DECLARE_CLASS( wxRichTextCtrl )
@@ -145,18 +144,6 @@ public:
     /// Get the threshold in character positions for doing layout optimization during sizing
     long GetDelayedLayoutThreshold() const { return m_delayedLayoutThreshold; }
 
-    /// Set text cursor
-    void SetTextCursor(const wxCursor& cursor ) { m_textCursor = cursor; }
-
-    /// Get text cursor
-    wxCursor GetTextCursor() const { return m_textCursor; }
-
-    /// Set URL cursor
-    void SetURLCursor(const wxCursor& cursor ) { m_urlCursor = cursor; }
-
-    /// Get URL cursor
-    wxCursor GetURLCursor() const { return m_urlCursor; }
-
 // Operations
 
     // editing
@@ -191,23 +178,33 @@ public:
     // methods allow to apply the given text style to the given selection or to
     // set/get the style which will be used for all appended text
     virtual bool SetStyle(long start, long end, const wxTextAttr& style);
-    virtual bool SetStyle(const wxRichTextRange& range, const wxTextAttr& style);
+    virtual bool SetStyle(long start, long end, const wxTextAttrEx& style);
+    virtual bool SetStyle(const wxRichTextRange& range, const wxRichTextAttr& style);
     virtual bool GetStyle(long position, wxTextAttr& style);
+    virtual bool GetStyle(long position, wxTextAttrEx& style);
+    virtual bool GetStyle(long position, wxRichTextAttr& style);
 
     // get the common set of styles for the range
-    virtual bool GetStyleForRange(const wxRichTextRange& range, wxTextAttr& style);
+    virtual bool GetStyleForRange(const wxRichTextRange& range, wxRichTextAttr& style);
+    virtual bool GetStyleForRange(const wxRichTextRange& range, wxTextAttrEx& style);
+
     // extended style setting operation with flags including:
     // wxRICHTEXT_SETSTYLE_WITH_UNDO, wxRICHTEXT_SETSTYLE_OPTIMIZE, wxRICHTEXT_SETSTYLE_PARAGRAPHS_ONLY, wxRICHTEXT_SETSTYLE_CHARACTERS_ONLY
     // see richtextbuffer.h for more details.
-    virtual bool SetStyleEx(const wxRichTextRange& range, const wxTextAttr& style, int flags = wxRICHTEXT_SETSTYLE_WITH_UNDO);
+    virtual bool SetStyleEx(long start, long end, const wxTextAttrEx& style, int flags = wxRICHTEXT_SETSTYLE_WITH_UNDO);
+    virtual bool SetStyleEx(const wxRichTextRange& range, const wxTextAttrEx& style, int flags = wxRICHTEXT_SETSTYLE_WITH_UNDO);
+    virtual bool SetStyleEx(const wxRichTextRange& range, const wxRichTextAttr& style, int flags = wxRICHTEXT_SETSTYLE_WITH_UNDO);
 
     /// Get the content (uncombined) attributes for this position.
     virtual bool GetUncombinedStyle(long position, wxTextAttr& style);
+    virtual bool GetUncombinedStyle(long position, wxTextAttrEx& style);
+    virtual bool GetUncombinedStyle(long position, wxRichTextAttr& style);
 
+    virtual bool SetDefaultStyle(const wxTextAttrEx& style);
     virtual bool SetDefaultStyle(const wxTextAttr& style);
 
-    virtual const wxTextAttr& GetDefaultStyleEx() const { return GetDefaultStyle(); }
-
+    // TODO: change to GetDefaultStyle if we merge wxTextAttr and wxTextAttrEx
+    virtual const wxTextAttrEx& GetDefaultStyleEx() const;
     virtual const wxTextAttr& GetDefaultStyle() const;
 
     /// Set list style
@@ -275,6 +272,15 @@ public:
     virtual void SelectAll();
     virtual void SetEditable(bool editable);
 
+    /// Call Freeze to prevent refresh
+    virtual void Freeze();
+
+    /// Call Thaw to refresh
+    virtual void Thaw();
+
+    /// Call Thaw to refresh
+    virtual bool IsFrozen() const { return m_freezeCount > 0; }
+
     virtual bool HasSelection() const;
 
 ///// Functionality specific to wxRichTextCtrl
@@ -300,12 +306,14 @@ public:
     virtual bool LineBreak();
 
     /// Set basic (overall) style
-    virtual void SetBasicStyle(const wxTextAttr& style) { GetBuffer().SetBasicStyle(style); }
+    virtual void SetBasicStyle(const wxTextAttrEx& style) { GetBuffer().SetBasicStyle(style); }
+    virtual void SetBasicStyle(const wxRichTextAttr& style) { GetBuffer().SetBasicStyle(style); }
 
     /// Get basic (overall) style
-    virtual const wxTextAttr& GetBasicStyle() const { return GetBuffer().GetBasicStyle(); }
+    virtual const wxTextAttrEx& GetBasicStyle() const { return GetBuffer().GetBasicStyle(); }
 
-    virtual bool BeginStyle(const wxTextAttr& style) { return GetBuffer().BeginStyle(style); }
+    /// Begin using a style
+    virtual bool BeginStyle(const wxTextAttrEx& style) { return GetBuffer().BeginStyle(style); }
 
     /// End the style
     virtual bool EndStyle() { return GetBuffer().EndStyle(); }
@@ -526,7 +534,11 @@ public:
     /// of the attributes are different within the range, the test fails. You
     /// can use this to implement, for example, bold button updating. style must have
     /// flags indicating which attributes are of interest.
-    virtual bool HasCharacterAttributes(const wxRichTextRange& range, const wxTextAttr& style) const
+    virtual bool HasCharacterAttributes(const wxRichTextRange& range, const wxTextAttrEx& style) const
+    {
+        return GetBuffer().HasCharacterAttributes(range.ToInternal(), style);
+    }
+    virtual bool HasCharacterAttributes(const wxRichTextRange& range, const wxRichTextAttr& style) const
     {
         return GetBuffer().HasCharacterAttributes(range.ToInternal(), style);
     }
@@ -535,7 +547,11 @@ public:
     /// of the attributes are different within the range, the test fails. You
     /// can use this to implement, for example, centering button updating. style must have
     /// flags indicating which attributes are of interest.
-    virtual bool HasParagraphAttributes(const wxRichTextRange& range, const wxTextAttr& style) const
+    virtual bool HasParagraphAttributes(const wxRichTextRange& range, const wxTextAttrEx& style) const
+    {
+        return GetBuffer().HasParagraphAttributes(range.ToInternal(), style);
+    }
+    virtual bool HasParagraphAttributes(const wxRichTextRange& range, const wxRichTextAttr& style) const
     {
         return GetBuffer().HasParagraphAttributes(range.ToInternal(), style);
     }
@@ -585,7 +601,6 @@ public:
     void Command(wxCommandEvent& event);
     void OnDropFiles(wxDropFilesEvent& event);
     void OnCaptureLost(wxMouseCaptureLostEvent& event);
-    void OnSysColourChanged(wxSysColourChangedEvent& event);
 
     void OnCut(wxCommandEvent& event);
     void OnCopy(wxCommandEvent& event);
@@ -751,7 +766,7 @@ public:
 
     /// Convenience function that tells the control to start reflecting the default
     /// style, since the user is changing it.
-    void SetAndShowDefaultStyle(const wxTextAttr& attr)
+    void SetAndShowDefaultStyle(const wxRichTextAttr& attr)
     {
         SetDefaultStyle(attr);
         SetCaretPositionForDefaultStyle(GetCaretPosition());
@@ -775,11 +790,13 @@ protected:
 
     virtual void DoSetValue(const wxString& value, int flags = 0);
 
-    virtual void DoThaw();
-
 
 // Data members
 private:
+
+    /// Allows nested Freeze/Thaw
+    int                     m_freezeCount;
+
 #if wxRICHTEXT_BUFFERED_PAINTING
     /// Buffer bitmap
     wxBitmap                m_bufferBitmap;
@@ -887,31 +904,30 @@ private:
 };
 
 /*!
- * wxRichTextCtrl events
+ * wxRichTextCtrl event macros
  */
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_LEFT_CLICK;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_RIGHT_CLICK;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_MIDDLE_CLICK;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_LEFT_DCLICK;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_RETURN;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_CHARACTER;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_DELETE;
 
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_STYLESHEET_CHANGING;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_STYLESHEET_CHANGED;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_STYLESHEET_REPLACING;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_STYLESHEET_REPLACED;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_LEFT_CLICK, 2602)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_RIGHT_CLICK, 2603)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_MIDDLE_CLICK, 2604)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_LEFT_DCLICK, 2605)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_RETURN, 2606)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_CHARACTER, 2607)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_DELETE, 2608)
 
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_CONTENT_INSERTED;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_CONTENT_DELETED;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_STYLE_CHANGED;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_SELECTION_CHANGED;
-extern WXDLLIMPEXP_RICHTEXT const wxEventType wxEVT_COMMAND_RICHTEXT_BUFFER_RESET;
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_STYLESHEET_CHANGING, 2609)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_STYLESHEET_CHANGED, 2610)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_STYLESHEET_REPLACING, 2611)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_STYLESHEET_REPLACED, 2612)
+
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_CONTENT_INSERTED, 2613)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_CONTENT_DELETED, 2614)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_STYLE_CHANGED, 2615)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_RICHTEXT, wxEVT_COMMAND_RICHTEXT_SELECTION_CHANGED, 2616)
+END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxRichTextEventFunction)(wxRichTextEvent&);
-
-#define wxRichTextEventHandler(func) \
-    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxRichTextEventFunction, &func)
 
 #define EVT_RICHTEXT_LEFT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_RICHTEXT_LEFT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxRichTextEventFunction, & fn ), NULL ),
 #define EVT_RICHTEXT_RIGHT_CLICK(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_RICHTEXT_RIGHT_CLICK, id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxRichTextEventFunction, & fn ), NULL ),
@@ -930,7 +946,6 @@ typedef void (wxEvtHandler::*wxRichTextEventFunction)(wxRichTextEvent&);
 #define EVT_RICHTEXT_CONTENT_DELETED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_RICHTEXT_CONTENT_DELETED, id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxRichTextEventFunction, & fn ), NULL ),
 #define EVT_RICHTEXT_STYLE_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_RICHTEXT_STYLE_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxRichTextEventFunction, & fn ), NULL ),
 #define EVT_RICHTEXT_SELECTION_CHANGED(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_RICHTEXT_SELECTION_CHANGED, id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxRichTextEventFunction, & fn ), NULL ),
-#define EVT_RICHTEXT_BUFFER_RESET(id, fn) DECLARE_EVENT_TABLE_ENTRY( wxEVT_COMMAND_RICHTEXT_BUFFER_RESET, id, -1, (wxObjectEventFunction) (wxEventFunction)  wxStaticCastEvent( wxRichTextEventFunction, & fn ), NULL ),
 
 #endif
     // wxUSE_RICHTEXT

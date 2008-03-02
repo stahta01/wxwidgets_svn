@@ -37,17 +37,13 @@ None
 
 <wx/datstrm.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxDataInputStream::wxDataInputStream}\label{wxdatainputstreamctor}
 
 \func{}{wxDataInputStream}{\param{wxInputStream\&}{ stream}}
 
-\func{}{wxDataInputStream}{\param{wxInputStream\&}{ stream}, \param{const wxMBConv\&}{ conv = wxConvAuto()}}
+\func{}{wxDataInputStream}{\param{wxInputStream\&}{ stream}, \param{wxMBConv\&}{ conv = wxMBConvUTF8}}
 
 Constructs a datastream object from an input stream. Only read methods will
 be available. The second form is only available in Unicode build of wxWidgets.

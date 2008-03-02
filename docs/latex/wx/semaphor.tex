@@ -36,10 +36,6 @@ No base class
 
 <wx/thread.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 \membersection{wxSemaphore::wxSemaphore}\label{wxsemaphorewxsemaphore}
@@ -47,9 +43,8 @@ No base class
 \func{}{wxSemaphore}{\param{int }{initialcount = 0}, \param{int }{maxcount = 0}}
 
 Specifying a {\it maxcount} of $0$ actually makes wxSemaphore behave as if
-there is no upper limit. If maxcount is $1$, the semaphore behaves almost as a
-mutex (but unlike a mutex it can be released by a thread different from the one
-which acquired it).
+there is no upper limit. If maxcount is $1$, the semaphore behaves exactly as a
+mutex.
 
 {\it initialcount} is the initial value of the semaphore which must be between
 $0$ and {\it maxcount} (if it is not set to $0$).

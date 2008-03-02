@@ -18,7 +18,7 @@
 
 #include "wx/control.h"
 
-extern WXDLLEXPORT_DATA(const char) wxScrollBarNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxScrollBarNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxScrollBar: a scroll bar control
@@ -51,9 +51,6 @@ public:
     virtual void SetScrollbar(int position, int thumbSize,
                               int range, int pageSize,
                               bool refresh = true) = 0;
-
-    // implementation-only
-    bool IsNeeded() const { return GetRange() > GetThumbSize(); }
 
 private:
     DECLARE_NO_COPY_CLASS(wxScrollBarBase)

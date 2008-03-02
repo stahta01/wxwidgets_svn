@@ -22,8 +22,7 @@
 /* from requirements by Colin Plumb. */
 /* (http://burtleburtle.net/bob/hash/doobs.html) */
 /* adapted from Perl sources ( hv.h ) */
-template<typename T>
-static unsigned long DoStringHash(T *k)
+unsigned long wxStringHash::wxCharStringHash( const wxChar* k )
 {
     unsigned long hash = 0;
 
@@ -39,12 +38,23 @@ static unsigned long DoStringHash(T *k)
     return hash + (hash << 15);
 }
 
-unsigned long wxStringHash::stringHash( const char* k )
-  { return DoStringHash(k); }
+#if wxUSE_UNICODE
+unsigned long wxStringHash::charStringHash( const char* k )
+{
+    unsigned long hash = 0;
 
-unsigned long wxStringHash::stringHash( const wchar_t* k )
-  { return DoStringHash(k); }
+    while( *k )
+    {
+        hash += *k++;
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
 
+    return hash + (hash << 15);
+}
+#endif
 
 #if !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
@@ -103,7 +113,7 @@ void _wxHashTableBase2::DeleteNodes( size_t buckets,
 
         while( node )
         {
-            tmp = node->m_next;
+            tmp = node->m_nxt;
             dtor( node );
             node = tmp;
         }
@@ -126,9 +136,9 @@ void _wxHashTableBase2::CopyHashTable( _wxHashTable_NodeBase** srcTable,
         {
             size_t bucket = func( dst, node );
 
-            nextnode = node->m_next;
+            nextnode = node->m_nxt;
             _wxHashTable_NodeBase* newnode = proc( node );
-            newnode->m_next = dstTable[bucket];
+            newnode->m_nxt = dstTable[bucket];
             dstTable[bucket] = newnode;
         }
     }

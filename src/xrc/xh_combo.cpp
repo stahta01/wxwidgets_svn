@@ -22,7 +22,6 @@
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/combobox.h"
-    #include "wx/textctrl.h"    // for wxTE_PROCESS_ENTER
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxComboBoxXmlHandler, wxXmlResourceHandler)
@@ -35,7 +34,6 @@ wxComboBoxXmlHandler::wxComboBoxXmlHandler()
     XRC_ADD_STYLE(wxCB_SORT);
     XRC_ADD_STYLE(wxCB_READONLY);
     XRC_ADD_STYLE(wxCB_DROPDOWN);
-    XRC_ADD_STYLE(wxTE_PROCESS_ENTER);
     AddWindowStyles();
 }
 

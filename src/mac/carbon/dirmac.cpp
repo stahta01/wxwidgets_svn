@@ -125,7 +125,6 @@ bool wxDirData::Read(wxString *filename)
     }
 
     wxString name ;
-    wxString lowerfilespec = m_filespec.Lower();
 
     while( noErr == err )
     {
@@ -147,7 +146,6 @@ bool wxDirData::Read(wxString *filename)
             break ;
 
         name = wxMacHFSUniStrToString( &uniname ) ;
-        wxString lowername = name.Lower();
 
         if ( ( name == wxT(".") || name == wxT("..") ) && !(m_flags & wxDIR_DOTDOT) )
             continue;
@@ -169,7 +167,7 @@ bool wxDirData::Read(wxString *filename)
         if ( m_filespec.empty() || m_filespec == wxT("*.*") || m_filespec == wxT("*") )
         {
         }
-        else if ( !wxMatchWild(lowerfilespec, lowername , false) )
+        else if ( !wxMatchWild(m_filespec, name , false) )
         {
             continue ;
         }

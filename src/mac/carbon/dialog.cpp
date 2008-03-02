@@ -64,7 +64,9 @@ void wxDialog::SetModal( bool flag )
 
         wxModelessWindows.DeleteObject( this );
 
+#if TARGET_CARBON
         SetWindowModality( (WindowRef)MacGetWindowRef(), kWindowModalityAppModal, NULL ) ;
+#endif
     }
     else
     {
@@ -77,8 +79,6 @@ void wxDialog::SetModal( bool flag )
 wxDialog::~wxDialog()
 {
     m_isBeingDeleted = true;
-
-    // if the dialog is modal, this will end its event loop
     Show(false);
 }
 
@@ -99,14 +99,16 @@ bool wxDialog::IsModal() const
 }
 
 
+bool wxDialog::IsModalShowing() const
+{
+    return wxModalDialogs.Find((wxDialog *)this) != NULL; // const_cast
+}
+
 bool wxDialog::Show(bool show)
 {
     if ( !wxDialogBase::Show(show) )
         // nothing to do
         return false;
-
-    if (show && CanDoLayoutAdaptation())
-        DoLayoutAdaptation();
 
     if ( show )
         // usually will result in TransferDataToWindow() being called
@@ -131,9 +133,13 @@ bool wxDialog::Show(bool show)
     return true;
 }
 
+#if !TARGET_CARBON
+extern bool s_macIsInModalLoop ;
+#endif
+
 void wxDialog::DoShowModal()
 {
-    wxCHECK_RET( !IsModal(), wxT("DoShowModal() called twice") );
+    wxCHECK_RET( !IsModalShowing(), wxT("DoShowModal() called twice") );
 
     wxModalDialogs.Append(this);
 
@@ -153,7 +159,7 @@ void wxDialog::DoShowModal()
     }
     BeginAppModalStateForWindow(windowRef) ;
 
-    while ( IsModal() )
+    while ( IsModalShowing() )
     {
         wxTheApp->MacDoOneEvent() ;
         // calls process idle itself

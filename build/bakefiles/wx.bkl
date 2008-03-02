@@ -24,7 +24,7 @@
     <!-- ...and when there are multiple libraries: -->
     <include file="multilib.bkl"/>
 
-    <if cond="FORMAT in ['msvc6prj','msevc4prj','msvs2003prj','msvs2005prj']">
+    <if cond="FORMAT in ['msvc6prj','msevc4prj','msvs2005prj']">
         <set var="MSVC6PRJ_MERGED_TARGETS">
             <if cond="MONOLITHIC=='0'">$(MSVC6PRJ_MERGED_TARGETS_MULTILIB)</if>
             <if cond="MONOLITHIC=='1'">$(MSVC6PRJ_MERGED_TARGETS_MONOLIB)</if>
@@ -104,9 +104,7 @@
         <set var="RCDEFS_H">
             <if cond="TOOLKIT=='MSW'">msw/rcdefs.h</if>
         </set>
-
-
-        <data-files-tree>
+        <headers>
             <srcdir>
                 $(BUILDDIR)/lib/wx/include/$(TOOLCHAIN_FULLNAME)/wx
             </srcdir>
@@ -116,19 +114,15 @@
             <install-to>
                 $(LIBDIR)/wx/include/$(TOOLCHAIN_FULLNAME)/wx
             </install-to>
-        </data-files-tree>
+        </headers>
 
-        <!-- FIXME: make this use <headers> once it supports prefix removal -->
-        <if cond="BAKEFILE_VERSION!='0.2.3'">
-            <warning>is it time to use per-target &lt;headers&gt; now?</warning>
-        </if>
-        <data-files-tree>
+        <headers>
             <srcdir>$(SRCDIR)/include</srcdir>
             <files>$(ALL_HEADERS)</files>
             <install-to>
                 $(INCLUDEDIR)/wx-$(WX_RELEASE)$(WX_FLAVOUR)
             </install-to>
-        </data-files-tree>
+        </headers>
 
         <!-- Locales: -->
         <using module="gettext"/>
@@ -227,7 +221,7 @@
             <depends-on-file>$(SRCDIR)/include/wx/msw/genrcdefs.h</depends-on-file>
 
             <command>
-                $(DOLLAR)(CPP) "$(nativePaths(SRCDIR))\include\wx\msw\genrcdefs.h" > "$(SETUPHDIR)\wx\msw\rcdefs.h"
+                $(DOLLAR)(CPP) "$(SRCDIR)\include\wx\msw\genrcdefs.h" > "$(SETUPHDIR)\wx\msw\rcdefs.h"
             </command>
 
         </action>

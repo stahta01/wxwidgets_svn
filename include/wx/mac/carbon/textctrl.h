@@ -162,6 +162,7 @@ public:
     void OnUpdateDelete(wxUpdateUIEvent& event);
     void OnUpdateSelectAll(wxUpdateUIEvent& event);
 
+    void OnEraseBackground(wxEraseEvent& event);
     void OnContextMenu(wxContextMenuEvent& event);
 
     virtual bool MacCanFocus() const
@@ -170,8 +171,20 @@ public:
     virtual bool MacSetupCursor( const wxPoint& pt );
 
     virtual void MacVisibilityChanged();
+    virtual void MacEnabledStateChanged();
     virtual void MacSuperChangedPosition();
     virtual void MacCheckSpelling(bool check);
+
+#ifndef __WXMAC_OSX__
+    virtual void MacControlUserPaneDrawProc(wxInt16 part);
+    virtual wxInt16 MacControlUserPaneHitTestProc(wxInt16 x, wxInt16 y);
+    virtual wxInt16 MacControlUserPaneTrackingProc(wxInt16 x, wxInt16 y, void* actionProc);
+    virtual void MacControlUserPaneIdleProc();
+    virtual wxInt16 MacControlUserPaneKeyDownProc(wxInt16 keyCode, wxInt16 charCode, wxInt16 modifiers);
+    virtual void MacControlUserPaneActivateProc(bool activating);
+    virtual wxInt16 MacControlUserPaneFocusProc(wxInt16 action);
+    virtual void MacControlUserPaneBackgroundProc(void* info);
+#endif
 
     wxMacTextControl * GetPeer() const
     { return (wxMacTextControl*) m_peer; }

@@ -93,8 +93,8 @@ public:
 // Cocoa callbacks
 // ------------------------------------------------------------------------
 protected:
-    // Radio boxes cannot be enabled/disabled
-    virtual void CocoaSetEnabled(bool WXUNUSED(enable)) { }
+    // Static boxes cannot be enabled/disabled
+    virtual void CocoaSetEnabled(bool enable) { }
     virtual void CocoaTarget_action(void);
 // ------------------------------------------------------------------------
 // Implementation

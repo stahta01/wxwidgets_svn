@@ -26,7 +26,6 @@
 #undef new
 #endif
 
-#include "wx/beforestd.h"
 #if wxUSE_IOSTREAMH
 #include <iostream.h>
 #include <fstream.h>
@@ -34,7 +33,6 @@
 #include <iostream>
 #include <fstream>
 #endif
-#include "wx/afterstd.h"
 
 #include <ctype.h>
 #include "tex2any.h"

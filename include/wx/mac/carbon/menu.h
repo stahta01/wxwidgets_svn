@@ -12,7 +12,7 @@
 #ifndef _WX_MENU_H_
 #define _WX_MENU_H_
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLEXPORT wxFrame;
 
 #include "wx/arrstr.h"
 
@@ -60,7 +60,7 @@ public:
     WXHMENU GetHMenu() const { return m_hMenu; }
 
     short MacGetMenuId() { return m_macMenuId ; }
-
+    
     wxInt32 MacHandleCommandProcess( wxMenuItem* item, int id, wxWindow* targetWindow = NULL );
     wxInt32 MacHandleCommandUpdateStatus( wxMenuItem* item, int id, wxWindow* targetWindow = NULL);
 
@@ -122,8 +122,8 @@ public:
     virtual wxMenuItem* FindItem( int id, wxMenu **menu = NULL ) const;
 
     virtual void EnableTop( size_t pos, bool flag );
-    virtual void SetMenuLabel( size_t pos, const wxString& label );
-    virtual wxString GetMenuLabel( size_t pos ) const;
+    virtual void SetLabelTop( size_t pos, const wxString& label );
+    virtual wxString GetLabelTop( size_t pos ) const;
     virtual bool Enable( bool enable = TRUE );
     // for virtual function hiding
     virtual void Enable( int itemid, bool enable )
@@ -177,6 +177,13 @@ private:
   static wxMenuBar*            s_macCommonMenuBar ;
 
     DECLARE_DYNAMIC_CLASS(wxMenuBar)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // Gets the original label at the top-level of the menubar
+    wxString GetMenuLabel(size_t pos) const;
+#endif
 };
 
 #endif // _WX_MENU_H_

@@ -19,10 +19,6 @@ See \helpref{XML-based resource system overview}{xrcoverview} for details.
 
 <wx/xrc/xmlres.h>
 
-\wxheading{Library}
-
-\helpref{wxXrc}{librarieslist}
-
 \wxheading{Constants}
 
 \begin{verbatim}
@@ -96,7 +92,7 @@ allocated on the heap, since it will be delete by
 
 \membersection{wxXmlResource::AttachUnknownControl}\label{wxxmlresourceattachunknowncontrol}
 
-\func{bool}{AttachUnknownControl}{\param{const wxString\& }{name}, \param{wxWindow* }{control}, \param{wxWindow* }{parent = \NULL}}
+\func{bool}{AttachUnknownControl}{\param{const wxString\& }{name}, \param{wxWindow* }{control}, \param{wxWindow* }{parent = NULL}}
 
 Attaches an unknown control to the given panel/window/dialog.
 Unknown controls are used in conjunction with <object class="unknown">.
@@ -141,7 +137,7 @@ Returns version information (a.b.c.d = d+ 256*c + 256\textasciicircum2*b + 256\t
 
 \membersection{wxXmlResource::GetXRCID}\label{wxxmlresourcegetxmlid}
 
-\func{int}{GetXRCID}{\param{const wxString\& }{str\_id}, \param{int }{value\_if\_not\_found = -2}}
+\func{int}{GetXRCID}{\param{const wxChar* }{str\_id}, \param{int }{value\_if\_not\_found = -2}}
 
 Returns a numeric ID that is equivalent to the string ID used in an XML
 resource. If an unknown \arg{str\_id} is requested (i.e. other than wxID\_XXX
@@ -214,30 +210,18 @@ Loads an icon resource from a file.
 
 \func{wxMenu*}{LoadMenu}{\param{const wxString\& }{name}}
 
-Loads menu from resource. Returns \NULL on failure.
+Loads menu from resource. Returns NULL on failure.
 
 
 \membersection{wxXmlResource::LoadMenuBar}\label{wxxmlresourceloadmenubar}
 
 \func{wxMenuBar*}{LoadMenuBar}{\param{wxWindow* }{parent}, \param{const wxString\& }{name}}
 
+Loads a menubar from resource. Returns NULL on failure.
+
 \func{wxMenuBar*}{LoadMenuBar}{\param{const wxString\& }{name}}
 
-Loads a menubar from resource. Returns \NULL on failure.
-
-
-\membersection{wxXmlResource::LoadObject}\label{wxxmlresourceloadobject}
-
-\func{wxObject*}{LoadObject}{\param{wxWindow* }{parent}, \param{const wxString\& }{name}, \param{const wxString\& }{classname}}
-
-\func{bool}{LoadObject}{\param{wxObject* }{instance}, \param{wxWindow* }{parent}, \param{const wxString\& }{name}, \param{const wxString\& }{classname}}
-
-Load an object from the resource specifying both the resource name and the
-class name.
-
-The first overload lets you load nonstandard container windows and returns \NULL
-on failure. The second one lets you finish the creation of an existing
-instance and returns \false on failure.
+Loads a menubar from resource. Returns NULL on failure.
 
 
 \membersection{wxXmlResource::LoadPanel}\label{wxxmlresourceloadpanel}
@@ -263,7 +247,7 @@ Loads a toolbar.
 
 \func{wxXmlResource*}{Set}{\param{wxXmlResource* }{res}}
 
-Sets the global resources object and returns a pointer to the previous one (may be \NULL).
+Sets the global resources object and returns a pointer to the previous one (may be NULL).
 
 
 \membersection{wxXmlResource::SetFlags}\label{wxxmlresourcesetflags}

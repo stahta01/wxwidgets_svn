@@ -13,10 +13,10 @@
 
 #include "wx/textctrl.h"
 
-class WXDLLIMPEXP_FWD_CORE wxImageList;
+class WXDLLIMPEXP_CORE wxImageList;
 
 #if wxUSE_DRAG_AND_DROP
-class WXDLLIMPEXP_FWD_CORE wxDropTarget;
+class WXDLLEXPORT wxDropTarget;
 #endif
 
 // ----------------------------------------------------------------------------
@@ -28,8 +28,8 @@ class WXDLLIMPEXP_FWD_CORE wxDropTarget;
 // internal classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxListHeaderWindow;
-class WXDLLIMPEXP_FWD_CORE wxListMainWindow;
+class WXDLLEXPORT wxListHeaderWindow;
+class WXDLLEXPORT wxListMainWindow;
 
 //-----------------------------------------------------------------------------
 // wxListCtrl
@@ -77,8 +77,10 @@ public:
     wxString GetItemText( long item ) const;
     void SetItemText( long item, const wxString& str );
     wxUIntPtr GetItemData( long item ) const;
+#if wxABI_VERSION >= 20804
     bool SetItemPtrData(long item, wxUIntPtr data);
-    bool SetItemData(long item, long data) { return SetItemPtrData(item, data); }
+#endif // wxABI 2.8.4+
+    bool SetItemData(long item, long data);
     bool GetItemRect( long item, wxRect& rect, int code = wxLIST_RECT_BOUNDS ) const;
     bool GetItemPosition( long item, wxPoint& pos ) const;
     bool SetItemPosition( long item, const wxPoint& pos ); // not supported in wxGLC
@@ -174,6 +176,9 @@ public:
     virtual void Refresh(bool eraseBackground = true,
                          const wxRect *rect = NULL);
 
+    virtual void Freeze();
+    virtual void Thaw();
+
     virtual bool SetBackgroundColour( const wxColour &colour );
     virtual bool SetForegroundColour( const wxColour &colour );
     virtual wxColour GetBackgroundColour() const;
@@ -215,9 +220,6 @@ protected:
 
     virtual wxSize DoGetBestSize() const;
 
-    virtual void DoFreeze();
-    virtual void DoThaw();
-
     // return the text for the given column of the given item
     virtual wxString OnGetItemText(long item, long column) const;
 
@@ -233,7 +235,7 @@ protected:
     virtual wxListItemAttr *OnGetItemAttr(long item) const;
 
     // it calls our OnGetXXX() functions
-    friend class WXDLLIMPEXP_FWD_CORE wxListMainWindow;
+    friend class WXDLLEXPORT wxListMainWindow;
 
 private:
     // create the header window

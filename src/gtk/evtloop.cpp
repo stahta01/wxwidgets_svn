@@ -25,7 +25,6 @@
 #endif
 
 #include "wx/evtloop.h"
-#include "wx/ptr_scpd.h"
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
@@ -56,34 +55,36 @@ private:
 // wxEventLoop implementation
 // ============================================================================
 
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoopImpl)
-
 // ----------------------------------------------------------------------------
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
     wxEventLoopActivator activate(this);
 
-    wxEventLoopImplTiedPtr impl(&m_impl, new wxEventLoopImpl);
+    m_impl = new wxEventLoopImpl;
 
     gtk_main();
 
     OnExit();
 
-    return m_impl->GetExitCode();
+    int exitcode = m_impl->GetExitCode();
+    delete m_impl;
+    m_impl = NULL;
+
+    return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
     wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
@@ -96,22 +97,23 @@ void wxGUIEventLoop::Exit(int rc)
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
-    bool pending;
-    wxApp* app = wxTheApp;
-    if (app != NULL)
-        // app->EventsPending() avoids false positives from our idle source
-        pending = app->EventsPending();
-    else
-        pending = gtk_events_pending() != 0;
-    return pending;
+    if (wxTheApp)
+    {
+        // We need to remove idle callbacks or gtk_events_pending will
+        // never return false.
+        wxTheApp->SuspendIdleCallback();
+    }
+
+    return gtk_events_pending();
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
     wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
 
-    // gtk_main_iteration() returns TRUE only if gtk_main_quit() was called
-    return !gtk_main_iteration();
+    gtk_main_iteration();
+
+    return true;
 }

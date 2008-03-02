@@ -63,6 +63,7 @@ void wxStreamBuffer::InitBuffer()
     m_buffer_start =
     m_buffer_end =
     m_buffer_pos = NULL;
+    m_buffer_size = 0;
 
     // if we are going to allocate the buffer, we should free it later as well
     m_destroybuf = true;
@@ -105,6 +106,7 @@ wxStreamBuffer::wxStreamBuffer(const wxStreamBuffer& buffer)
     m_buffer_start = buffer.m_buffer_start;
     m_buffer_end = buffer.m_buffer_end;
     m_buffer_pos = buffer.m_buffer_pos;
+    m_buffer_size = buffer.m_buffer_size;
     m_fixed = buffer.m_fixed;
     m_flushable = buffer.m_flushable;
     m_stream = buffer.m_stream;
@@ -154,6 +156,8 @@ void wxStreamBuffer::SetBufferIO(void *start,
     m_buffer_start = (char *)start;
     m_buffer_end   = m_buffer_start + len;
 
+    m_buffer_size = len;
+
     // if we own it, we free it
     m_destroybuf = takeOwnership;
 
@@ -188,27 +192,6 @@ void wxStreamBuffer::ResetBuffer()
                         : m_buffer_start;
 }
 
-void wxStreamBuffer::Truncate()
-{
-    size_t new_size = m_buffer_pos - m_buffer_start;
-    if ( m_buffer_pos == m_buffer_end )
-        return;
-
-    if ( !new_size )
-    {
-        FreeBuffer();
-        InitBuffer();
-        return;
-    }
-
-    char *new_start = (char *)realloc(m_buffer_start, new_size);
-    wxCHECK_RET( new_size, _T("shrinking buffer shouldn't fail") );
-
-    m_buffer_start = new_start;
-    m_buffer_end = m_buffer_start + new_size;
-    m_buffer_pos = m_buffer_end;
-}
-
 // fill the buffer with as much data as possible (only for read buffers)
 bool wxStreamBuffer::FillBuffer()
 {
@@ -218,7 +201,7 @@ bool wxStreamBuffer::FillBuffer()
     if ( !inStream )
         return false;
 
-    size_t count = inStream->OnSysRead(GetBufferStart(), GetBufferSize());
+    size_t count = inStream->OnSysRead(m_buffer_start, m_buffer_size);
     if ( !count )
         return false;
 
@@ -288,26 +271,24 @@ void wxStreamBuffer::PutToBuffer(const void *buffer, size_t size)
         else // !m_fixed
         {
             // realloc the buffer to have enough space for the data
-            if ( m_buffer_pos + size > m_buffer_end )
+            size_t delta = m_buffer_pos - m_buffer_start;
+
+            char *startOld = m_buffer_start;
+            m_buffer_size += size;
+            m_buffer_start = (char *)realloc(m_buffer_start, m_buffer_size);
+            if ( !m_buffer_start )
             {
-                size_t delta = m_buffer_pos - m_buffer_start;
-                size_t new_size = delta + size;
+                // don't leak memory if realloc() failed
+                m_buffer_start = startOld;
+                m_buffer_size -= size;
 
-                char *startOld = m_buffer_start;
-                m_buffer_start = (char *)realloc(m_buffer_start, new_size);
-                if ( !m_buffer_start )
-                {
-                    // don't leak memory if realloc() failed
-                    m_buffer_start = startOld;
+                // what else can we do?
+                return;
+            }
 
-                    // what else can we do?
-                    return;
-                }
-
-                // adjust the pointers invalidated by realloc()
-                m_buffer_pos = m_buffer_start + delta;
-                m_buffer_end = m_buffer_start + new_size;
-            } // else: the buffer is big enough
+            // adjust the pointers invalidated by realloc()
+            m_buffer_pos = m_buffer_start + delta;
+            m_buffer_end = m_buffer_start + m_buffer_size;
         }
     }
 
@@ -676,8 +657,6 @@ wxFileOffset wxStreamBuffer::Tell() const
 // wxStreamBase
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxStreamBase, wxObject)
-
 wxStreamBase::wxStreamBase()
 {
     m_lasterror = wxSTREAM_NO_ERROR;
@@ -713,8 +692,6 @@ wxFileOffset wxStreamBase::OnSysTell() const
 // ----------------------------------------------------------------------------
 // wxInputStream
 // ----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxInputStream, wxStreamBase)
 
 wxInputStream::wxInputStream()
 {
@@ -961,8 +938,6 @@ wxFileOffset wxInputStream::TellI() const
 // wxOutputStream
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxOutputStream, wxStreamBase)
-
 wxOutputStream::wxOutputStream()
 {
 }
@@ -1012,8 +987,6 @@ void wxOutputStream::Sync()
 // ----------------------------------------------------------------------------
 // wxCountingOutputStream
 // ----------------------------------------------------------------------------
-
-IMPLEMENT_DYNAMIC_CLASS(wxCountingOutputStream, wxOutputStream)
 
 wxCountingOutputStream::wxCountingOutputStream ()
 {
@@ -1077,8 +1050,6 @@ wxFileOffset wxCountingOutputStream::OnSysTell() const
 // wxFilterInputStream
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxFilterInputStream, wxInputStream)
-
 wxFilterInputStream::wxFilterInputStream()
  :  m_parent_i_stream(NULL),
     m_owns(false)
@@ -1106,8 +1077,6 @@ wxFilterInputStream::~wxFilterInputStream()
 // ----------------------------------------------------------------------------
 // wxFilterOutputStream
 // ----------------------------------------------------------------------------
-
-IMPLEMENT_ABSTRACT_CLASS(wxFilterOutputStream, wxOutputStream)
 
 wxFilterOutputStream::wxFilterOutputStream()
  :  m_parent_o_stream(NULL),
@@ -1153,25 +1122,29 @@ wxString wxFilterClassFactoryBase::PopExtension(const wxString& location) const
 }
 
 wxString::size_type wxFilterClassFactoryBase::FindExtension(
-        const wxString& location) const
+        const wxChar *location) const
 {
+    size_t len = wxStrlen(location);
+
     for (const wxChar *const *p = GetProtocols(wxSTREAM_FILEEXT); *p; p++)
     {
-        if ( location.EndsWith(*p) )
-            return location.length() - wxStrlen(*p);
+        size_t l = wxStrlen(*p);
+
+        if (l <= len && wxStrcmp(*p, location + len - l) == 0)
+            return len - l;
     }
 
     return wxString::npos;
 }
 
-bool wxFilterClassFactoryBase::CanHandle(const wxString& protocol,
+bool wxFilterClassFactoryBase::CanHandle(const wxChar *protocol,
                                          wxStreamProtocolType type) const
 {
     if (type == wxSTREAM_FILEEXT)
         return FindExtension(protocol) != wxString::npos;
     else
         for (const wxChar *const *p = GetProtocols(type); *p; p++)
-            if (protocol == *p)
+            if (wxStrcmp(*p, protocol) == 0)
                 return true;
 
     return false;
@@ -1248,15 +1221,12 @@ wxInputStream& wxBufferedInputStream::Read(void *buf, size_t size)
         size -= m_lastcount;
         buf = (char *)buf + m_lastcount;
 
-        // the call to wxStreamBuffer::Read() below may reset our m_lastcount
-        // (but it also may not do it if the buffer is associated to another
-        // existing stream and wasn't created by us), so save it
+        // the call to wxStreamBuffer::Read() below will reset our m_lastcount,
+        // so save it
         size_t countOld = m_lastcount;
 
-        // the new count of the bytes read is the count of bytes read this time
-        m_lastcount = m_i_streambuf->Read(buf, size);
+        m_i_streambuf->Read(buf, size);
 
-        // plus those we had read before
         m_lastcount += countOld;
     }
 

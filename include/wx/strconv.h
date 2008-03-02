@@ -14,7 +14,7 @@
 #define _WX_STRCONV_H_
 
 #include "wx/defs.h"
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 #include "wx/buffer.h"
 
 #ifdef __DIGITALMARS__
@@ -25,13 +25,9 @@
 #  undef __BSEXCPT__
 #endif
 
-#ifndef __WXPALMOS5__
 #include <stdlib.h>
-#endif // ! __WXPALMOS5__
 
 #if wxUSE_WCHAR_T
-
-class WXDLLIMPEXP_FWD_BASE wxString;
 
 // the error value returned by wxMBConv methods
 #define wxCONV_FAILED ((size_t)-1)
@@ -139,12 +135,6 @@ public:
     // encoding
     static size_t GetMaxMBNulLen() { return 4 /* for UTF-32 */; }
 
-#if wxUSE_UNICODE_UTF8
-    // return true if the converter's charset is UTF-8, i.e. char* strings
-    // decoded using this object can be directly copied to wxString's internal
-    // storage without converting to WC and than back to UTF-8 MB string
-    virtual bool IsUTF8() const { return false; }
-#endif
 
     // The old conversion functions. The existing classes currently mostly
     // implement these ones but we're in transition to using To/FromWChar()
@@ -185,10 +175,6 @@ public:
     virtual size_t WC2MB(char *outputBuf, const wchar_t *psz, size_t outputSize) const;
 
     virtual wxMBConv *Clone() const { return new wxMBConvLibc; }
-
-#if wxUSE_UNICODE_UTF8
-    virtual bool IsUTF8() const { return wxLocaleIsUtf8; }
-#endif
 };
 
 #ifdef __UNIX__
@@ -203,7 +189,7 @@ public:
 class WXDLLIMPEXP_BASE wxConvBrokenFileNames : public wxMBConv
 {
 public:
-    wxConvBrokenFileNames(const wxString& charset);
+    wxConvBrokenFileNames(const wxChar *charset);
     wxConvBrokenFileNames(const wxConvBrokenFileNames& conv)
         : wxMBConv(),
           m_conv(conv.m_conv ? conv.m_conv->Clone() : NULL)
@@ -226,10 +212,6 @@ public:
         // cast needed to call a private function
         return m_conv->GetMBNulLen();
     }
-
-#if wxUSE_UNICODE_UTF8
-    virtual bool IsUTF8() const { return m_conv->IsUTF8(); }
-#endif
 
     virtual wxMBConv *Clone() const { return new wxConvBrokenFileNames(*this); }
 
@@ -259,29 +241,7 @@ public:
 // wxMBConvUTF8 (for conversion using UTF8 encoding)
 // ----------------------------------------------------------------------------
 
-// this is the real UTF-8 conversion class, it has to be called "strict UTF-8"
-// for compatibility reasons: the wxMBConvUTF8 class below also supports lossy
-// conversions if it is created with non default options
-class WXDLLIMPEXP_BASE wxMBConvStrictUTF8 : public wxMBConv
-{
-public:
-    // compiler-generated default ctor and other methods are ok
-
-    virtual size_t ToWChar(wchar_t *dst, size_t dstLen,
-                           const char *src, size_t srcLen = wxNO_LEN) const;
-    virtual size_t FromWChar(char *dst, size_t dstLen,
-                             const wchar_t *src, size_t srcLen = wxNO_LEN) const;
-
-    virtual wxMBConv *Clone() const { return new wxMBConvStrictUTF8(); }
-
-#if wxUSE_UNICODE_UTF8
-    // NB: other mapping modes are not, strictly speaking, UTF-8, so we can't
-    //     take the shortcut in that case
-    virtual bool IsUTF8() const { return true; }
-#endif
-};
-
-class WXDLLIMPEXP_BASE wxMBConvUTF8 : public wxMBConvStrictUTF8
+class WXDLLIMPEXP_BASE wxMBConvUTF8 : public wxMBConv
 {
 public:
     enum
@@ -292,19 +252,10 @@ public:
     };
 
     wxMBConvUTF8(int options = MAP_INVALID_UTF8_NOT) : m_options(options) { }
-
-    virtual size_t ToWChar(wchar_t *dst, size_t dstLen,
-                           const char *src, size_t srcLen = wxNO_LEN) const;
-    virtual size_t FromWChar(char *dst, size_t dstLen,
-                             const wchar_t *src, size_t srcLen = wxNO_LEN) const;
+    virtual size_t MB2WC(wchar_t *outputBuf, const char *psz, size_t outputSize) const;
+    virtual size_t WC2MB(char *outputBuf, const wchar_t *psz, size_t outputSize) const;
 
     virtual wxMBConv *Clone() const { return new wxMBConvUTF8(m_options); }
-
-#if wxUSE_UNICODE_UTF8
-    // NB: other mapping modes are not, strictly speaking, UTF-8, so we can't
-    //     take the shortcut in that case
-    virtual bool IsUTF8() const { return m_options == MAP_INVALID_UTF8_NOT; }
-#endif
 
 private:
     int m_options;
@@ -414,7 +365,7 @@ class WXDLLIMPEXP_BASE wxCSConv : public wxMBConv
 public:
     // we can be created either from charset name or from an encoding constant
     // but we can't have both at once
-    wxCSConv(const wxString& charset);
+    wxCSConv(const wxChar *charset);
     wxCSConv(wxFontEncoding encoding);
 
     wxCSConv(const wxCSConv& conv);
@@ -430,16 +381,14 @@ public:
     virtual size_t WC2MB(char *outputBuf, const wchar_t *psz, size_t outputSize) const;
     virtual size_t GetMBNulLen() const;
 
-#if wxUSE_UNICODE_UTF8
-    virtual bool IsUTF8() const;
-#endif
-
     virtual wxMBConv *Clone() const { return new wxCSConv(*this); }
 
     void Clear();
 
+#if wxABI_VERSION >= 20802
     // return true if the conversion could be initilized successfully
     bool IsOk() const;
+#endif // wx 2.8.2+
 
 private:
     // common part of all ctors
@@ -453,12 +402,12 @@ private:
 
     // set the name (may be only called when m_name == NULL), makes copy of
     // charset string
-    void SetName(const char *charset);
+    void SetName(const wxChar *charset);
 
 
     // note that we can't use wxString here because of compilation
     // dependencies: we're included from wx/string.h
-    char *m_name;
+    wxChar *m_name;
     wxFontEncoding m_encoding;
 
     // use CreateConvIfNeeded() before accessing m_convReal!
@@ -471,35 +420,14 @@ private:
 // declare predefined conversion objects
 // ----------------------------------------------------------------------------
 
-// Note: this macro is an implementation detail (see the comment in
-// strconv.cpp). The wxGet_XXX() and wxGet_XXXPtr() functions shouldn't be
-// used by user code and neither should XXXPtr, use the wxConvXXX macro
-// instead.
-#define WX_DECLARE_GLOBAL_CONV(klass, name)                             \
-    extern WXDLLIMPEXP_DATA_BASE(klass*) name##Ptr;                     \
-    extern WXDLLIMPEXP_BASE klass* wxGet_##name##Ptr();                 \
-    inline klass& wxGet_##name()                                        \
-    {                                                                   \
-        if ( !name##Ptr )                                               \
-            name##Ptr = wxGet_##name##Ptr();                            \
-        return *name##Ptr;                                              \
-    }
-
-
 // conversion to be used with all standard functions affected by locale, e.g.
 // strtol(), strftime(), ...
-WX_DECLARE_GLOBAL_CONV(wxMBConv, wxConvLibc)
-#define wxConvLibc wxGet_wxConvLibc()
+extern WXDLLIMPEXP_DATA_BASE(wxMBConv&) wxConvLibc;
 
 // conversion ISO-8859-1/UTF-7/UTF-8 <-> wchar_t
-WX_DECLARE_GLOBAL_CONV(wxCSConv, wxConvISO8859_1)
-#define wxConvISO8859_1 wxGet_wxConvISO8859_1()
-
-WX_DECLARE_GLOBAL_CONV(wxMBConvStrictUTF8, wxConvUTF8)
-#define wxConvUTF8 wxGet_wxConvUTF8()
-
-WX_DECLARE_GLOBAL_CONV(wxMBConvUTF7, wxConvUTF7)
-#define wxConvUTF7 wxGet_wxConvUTF7()
+extern WXDLLIMPEXP_DATA_BASE(wxCSConv&) wxConvISO8859_1;
+extern WXDLLIMPEXP_DATA_BASE(wxMBConvUTF7&) wxConvUTF7;
+extern WXDLLIMPEXP_DATA_BASE(wxMBConvUTF8&) wxConvUTF8;
 
 // conversion used for the file names on the systems where they're not Unicode
 // (basically anything except Windows)
@@ -518,16 +446,13 @@ extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvFileName;
 extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent;
 
 // the conversion corresponding to the current locale
-WX_DECLARE_GLOBAL_CONV(wxCSConv, wxConvLocal)
-#define wxConvLocal wxGet_wxConvLocal()
+extern WXDLLIMPEXP_DATA_BASE(wxCSConv&) wxConvLocal;
 
 // the conversion corresponding to the encoding of the standard UI elements
 //
 // by default this is the same as wxConvLocal but may be changed if the program
 // needs to use a fixed encoding
 extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvUI;
-
-#undef WX_DECLARE_GLOBAL_CONV
 
 // ----------------------------------------------------------------------------
 // endianness-dependent conversions
@@ -546,6 +471,12 @@ extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvUI;
 // ----------------------------------------------------------------------------
 
 // filenames are multibyte on Unix and widechar on Windows
+#if defined(__UNIX__) || defined(__WXMAC__)
+    #define wxMBFILES 1
+#else
+    #define wxMBFILES 0
+#endif
+
 #if wxMBFILES && wxUSE_UNICODE
     #define wxFNCONV(name) wxConvFileName->cWX2MB(name)
     #define wxFNSTRINGCAST wxMBSTRINGCAST
@@ -569,9 +500,13 @@ class WXDLLIMPEXP_BASE wxMBConv
 public:
     const char* cMB2WX(const char *psz) const { return psz; }
     const char* cWX2MB(const char *psz) const { return psz; }
+    wxMBConv *Clone() const { return NULL; }
 };
 
 #define wxConvFile wxConvLocal
+#define wxConvUI wxConvCurrent
+
+typedef wxMBConv wxCSConv;
 
 extern WXDLLIMPEXP_DATA_BASE(wxMBConv) wxConvLibc,
                                        wxConvLocal,
@@ -582,8 +517,7 @@ extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent;
 #define wxFNCONV(name) name
 #define wxFNSTRINGCAST WXSTRINGCAST
 
-#endif
-  // wxUSE_WCHAR_T
+#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
 
 // ----------------------------------------------------------------------------
 // macros for the most common conversions
@@ -593,6 +527,7 @@ extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent;
     #define wxConvertWX2MB(s)   wxConvCurrent->cWX2MB(s)
     #define wxConvertMB2WX(s)   wxConvCurrent->cMB2WX(s)
 
+#if wxABI_VERSION >= 20802
     // these functions should be used when the conversions really, really have
     // to succeed (usually because we pass their results to a standard C
     // function which would crash if we passed NULL to it), so these functions
@@ -605,6 +540,7 @@ extern WXDLLIMPEXP_DATA_BASE(wxMBConv *) wxConvCurrent;
     // this function uses wxConvLibc and wxConvUTF8(MAP_INVALID_UTF8_TO_OCTAL)
     // if it fails
     extern WXDLLIMPEXP_BASE wxCharBuffer wxSafeConvertWX2MB(const wchar_t *ws);
+#endif // wxABI 2.8.2+
 #else // ANSI
     // no conversions to do
     #define wxConvertWX2MB(s)   (s)

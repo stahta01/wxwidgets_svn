@@ -20,6 +20,12 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#ifdef __VMS
+#define XtDisplay XTDISPLAY
+#define XtWindow XTWINDOW
+#define XtScreen XTSCREEN
+#endif
+
 #ifndef WX_PRECOMP
     #include "wx/hash.h"
     #include "wx/log.h"
@@ -74,7 +80,6 @@
 #endif
 
 #include "wx/motif/private.h"
-#include "wx/motif/dcclient.h"
 
 #include <string.h>
 
@@ -225,17 +230,14 @@ bool wxWindow::Create(wxWindow *parent, wxWindowID id,
                       long style,
                       const wxString& name)
 {
-    // Get default border
-    wxBorder border = GetBorder(style);
-    style &= ~wxBORDER_MASK;
-    style |= border;
-
     wxCHECK_MSG( parent, false, "can't create wxWindow without parent" );
 
     CreateBase(parent, id, pos, size, style, wxDefaultValidator, name);
 
     parent->AddChild(this);
-    PreCreation();
+
+    m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
+    m_foregroundColour = *wxBLACK;
 
     //// TODO: we should probably optimize by only creating a
     //// a drawing area if we have one or more scrollbars (wxVSCROLL/wxHSCROLL).
@@ -328,16 +330,21 @@ bool wxWindow::Create(wxWindow *parent, wxWindowID id,
                        (XtPointer) this
                      );
 
+    // Scrolled widget needs to have its colour changed or we get a little blue
+    // square where the scrollbars abutt
+    wxColour backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
+    wxDoChangeBackgroundColour(m_scrolledWindow, backgroundColour, true);
+    wxDoChangeBackgroundColour(m_drawingArea, backgroundColour, true);
+
     XmScrolledWindowSetAreas(
                              (Widget)m_scrolledWindow,
                              (Widget) 0, (Widget) 0,
                              (Widget) m_drawingArea);
 
-    PostCreation();
-
     // Without this, the cursor may not be restored properly (e.g. in splitter
     // sample).
     SetCursor(*wxSTANDARD_CURSOR);
+    SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
     DoSetSizeIntr(pos.x, pos.y, size.x,size.y, wxSIZE_AUTO, true);
     return true;
 }
@@ -629,8 +636,7 @@ void wxWindow::Lower()
 
 void wxWindow::SetLabel(const wxString& label)
 {
-    XtVaSetValues((Widget)GetMainWidget(), XmNtitle,
-                  (const char*)label.mb_str(), NULL);
+    XtVaSetValues((Widget)GetMainWidget(), XmNtitle, label.c_str(), NULL);
 }
 
 wxString wxWindow::GetLabel() const
@@ -875,9 +881,6 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
     int y2 = (dy >= 0) ? y + dy : y;
 
     wxClientDC dc(this);
-    wxClientDCImpl * const
-        dcimpl = static_cast<wxClientDCImpl *>(dc.GetImpl());
-    GC const gc = (GC) dcimpl->GetGC();
 
     dc.SetLogicalFunction (wxCOPY);
 
@@ -885,9 +888,10 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
     Window window = XtWindow(widget);
     Display* display = XtDisplay(widget);
 
-    XCopyArea(display, window, window, gc, x1, y1, w1, h1, x2, y2);
+    XCopyArea(display, window, window, (GC) dc.GetGC(),
+              x1, y1, w1, h1, x2, y2);
 
-    dcimpl->SetAutoSetting(true);
+    dc.SetAutoSetting(true);
     wxBrush brush(GetBackgroundColour(), wxSOLID);
     dc.SetBrush(brush); // FIXME: needed?
 
@@ -915,7 +919,8 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
         rect->width = dx;
         rect->height = h;
 
-        XFillRectangle(display, window, gc, rect->x, rect->y, rect->width, rect->height);
+        XFillRectangle(display, window,
+            (GC) dc.GetGC(), rect->x, rect->y, rect->width, rect->height);
 
         rect->x = rect->x;
         rect->y = rect->y;
@@ -933,7 +938,9 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
         rect->width = -dx;
         rect->height = h;
 
-        XFillRectangle(display, window, gc, rect->x, rect->y, rect->width, rect->height);
+        XFillRectangle(display, window,
+            (GC) dc.GetGC(), rect->x, rect->y, rect->width,
+            rect->height);
 
         rect->x = rect->x;
         rect->y = rect->y;
@@ -951,7 +958,8 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
         rect->width = w;
         rect->height = dy;
 
-        XFillRectangle(display, window, gc, rect->x, rect->y, rect->width, rect->height);
+        XFillRectangle(display, window,
+            (GC) dc.GetGC(), rect->x, rect->y, rect->width, rect->height);
 
         rect->x = rect->x;
         rect->y = rect->y;
@@ -969,7 +977,8 @@ void wxWindow::ScrollWindow(int dx, int dy, const wxRect *rect)
         rect->width = w;
         rect->height = -dy;
 
-        XFillRectangle(display, window, gc, rect->x, rect->y, rect->width, rect->height);
+        XFillRectangle(display, window,
+            (GC) dc.GetGC(), rect->x, rect->y, rect->width, rect->height);
 
         rect->x = rect->x;
         rect->y = rect->y;
@@ -1164,13 +1173,12 @@ void wxWindow::DoGetSize(int *x, int *y) const
                                 m_drawingArea ) );
     Dimension xx, yy;
 
-    if (widget)
-        XtVaGetValues( widget,
-                       XmNwidth, &xx,
-                       XmNheight, &yy,
-                       NULL );
-    if(x) *x = widget ? xx : -1;
-    if(y) *y = widget ? yy : -1;
+    XtVaGetValues( widget,
+                   XmNwidth, &xx,
+                   XmNheight, &yy,
+                   NULL );
+    if(x) *x = xx;
+    if(y) *y = yy;
 }
 
 void wxWindow::DoGetPosition(int *x, int *y) const
@@ -1204,11 +1212,9 @@ void wxWindow::DoScreenToClient(int *x, int *y) const
     Window thisWindow = XtWindow(widget);
 
     Window childWindow;
-    int xx = x ? *x : 0;
-    int yy = y ? *y : 0;
-    XTranslateCoordinates(display, rootWindow, thisWindow,
-                          xx, yy, x ? x : &xx, y ? y : &yy,
-                          &childWindow);
+    int xx = *x;
+    int yy = *y;
+    XTranslateCoordinates(display, rootWindow, thisWindow, xx, yy, x, y, &childWindow);
 }
 
 void wxWindow::DoClientToScreen(int *x, int *y) const
@@ -1219,11 +1225,9 @@ void wxWindow::DoClientToScreen(int *x, int *y) const
     Window thisWindow = XtWindow(widget);
 
     Window childWindow;
-    int xx = x ? *x : 0;
-    int yy = y ? *y : 0;
-    XTranslateCoordinates(display, thisWindow, rootWindow,
-                          xx, yy, x ? x : &xx, y ? y : &yy,
-                          &childWindow);
+    int xx = *x;
+    int yy = *y;
+    XTranslateCoordinates(display, thisWindow, rootWindow, xx, yy, x, y, &childWindow);
 }
 
 
@@ -1252,11 +1256,6 @@ void wxWindow::DoSetSizeIntr(int x, int y, int width, int height,
         GetSize(& oldW, & oldH);
         GetPosition(& oldX, & oldY);
     }
-
-    if (x == -1)
-        x = oldX;
-    if (x == -1)
-        x = oldY;
 
     if ( !(sizeFlags & wxSIZE_ALLOW_MINUS_ONE) )
     {
@@ -1454,26 +1453,24 @@ void wxWindow::DoMoveWindow(int x, int y, int width, int height)
 
 int wxWindow::GetCharHeight() const
 {
+    wxCHECK_MSG( m_font.Ok(), 0, "valid window font needed" );
+
     int height;
 
-    if (m_font.Ok())
-        wxGetTextExtent (GetXDisplay(), m_font, 1.0,
-                         "x", NULL, &height, NULL, NULL);
-    else
-        wxGetTextExtent (this, "x", NULL, &height, NULL, NULL);
+    wxGetTextExtent (GetXDisplay(), m_font, 1.0,
+                     "x", NULL, &height, NULL, NULL);
 
     return height;
 }
 
 int wxWindow::GetCharWidth() const
 {
+    wxCHECK_MSG( m_font.Ok(), 0, "valid window font needed" );
+
     int width;
 
-    if (m_font.Ok())
-        wxGetTextExtent (GetXDisplay(), m_font, 1.0,
-                         "x", &width, NULL, NULL, NULL);
-    else
-        wxGetTextExtent (this, "x", &width, NULL, NULL, NULL);
+    wxGetTextExtent (GetXDisplay(), m_font, 1.0,
+                     "x", &width, NULL, NULL, NULL);
 
     return width;
 }
@@ -1485,13 +1482,12 @@ void wxWindow::GetTextExtent(const wxString& string,
 {
     const wxFont *fontToUse = theFont ? theFont : &m_font;
 
+    wxCHECK_RET( fontToUse->Ok(), "valid window font needed" );
+
     if (externalLeading)
         *externalLeading = 0;
-    if (fontToUse->Ok())
-        wxGetTextExtent (GetXDisplay(), *fontToUse, 1.0,
-                         string, x, y, NULL, descent);
-    else
-        wxGetTextExtent (this, string, x, y, NULL, descent);
+    wxGetTextExtent (GetXDisplay(), *fontToUse, 1.0,
+                     string, x, y, NULL, descent);
 }
 
 // ----------------------------------------------------------------------------
@@ -1505,12 +1501,9 @@ void wxWindow::AddUpdateRect(int x, int y, int w, int h)
 
 void wxWindow::Refresh(bool eraseBack, const wxRect *rect)
 {
-    Widget widget = (Widget) GetMainWidget();
-    if (!widget)
-        return;
     m_needsRefresh = true;
-    Display *display = XtDisplay(widget);
-    Window thisWindow = XtWindow(widget);
+    Display *display = XtDisplay((Widget) GetMainWidget());
+    Window thisWindow = XtWindow((Widget) GetMainWidget());
 
     XExposeEvent dummyEvent;
     int width, height;
@@ -1541,13 +1534,10 @@ void wxWindow::Refresh(bool eraseBack, const wxRect *rect)
         wxClientDC dc(this);
         wxBrush backgroundBrush(GetBackgroundColour(), wxSOLID);
         dc.SetBackground(backgroundBrush);
-
-        wxClientDCImpl * const
-            dcimpl = static_cast<wxClientDCImpl *>(dc.GetImpl());
         if (rect)
-            dcimpl->Clear(*rect);
+            dc.Clear(*rect);
         else
-            dcimpl->Clear();
+            dc.Clear();
     }
 
     XSendEvent(display, thisWindow, False, ExposureMask, (XEvent *)&dummyEvent);
@@ -1560,10 +1550,7 @@ void wxWindow::DoPaint()
     {
       wxPaintDC dc(this);
 
-      wxPaintDCImpl * const
-          dcimpl = static_cast<wxPaintDCImpl *>(dc.GetImpl());
-
-      GC tempGC = (GC) dcimpl->GetBackingGC();
+      GC tempGC = (GC) dc.GetBackingGC();
 
       Widget widget = (Widget) GetMainWidget();
 
@@ -1620,11 +1607,11 @@ void wxWindow::DoPaint()
         // Set an erase event first
         wxEraseEvent eraseEvent(GetId(), &dc);
         eraseEvent.SetEventObject(this);
-        HandleWindowEvent(eraseEvent);
+        GetEventHandler()->ProcessEvent(eraseEvent);
 
         wxPaintEvent event(GetId());
         event.SetEventObject(this);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
 
         m_needsRefresh = false;
     }
@@ -1646,7 +1633,7 @@ void wxWindow::OnSysColourChanged(wxSysColourChangedEvent& event)
         {
             wxSysColourChangedEvent event2;
             event.SetEventObject(win);
-            win->HandleWindowEvent(event2);
+            win->GetEventHandler()->ProcessEvent(event2);
         }
 
         node = node->GetNext();
@@ -1657,7 +1644,7 @@ void wxWindow::OnInternalIdle()
 {
     // This calls the UI-update mechanism (querying windows for
     // menu/toolbar/control state information)
-    if (wxUpdateUIEvent::CanUpdate(this) && IsShownOnScreen())
+    if (wxUpdateUIEvent::CanUpdate(this) && IsShown())
         UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
 }
 
@@ -1706,7 +1693,7 @@ bool wxWindow::ProcessAccelerator(wxKeyEvent& event)
 
                         // If ProcessEvent returns true (it was handled), then
                         // the calling code will skip the event handling.
-                        return frame->HandleWindowEvent(commandEvent);
+                        return frame->GetEventHandler()->ProcessEvent(commandEvent);
                     }
                 }
 #endif
@@ -1725,7 +1712,7 @@ bool wxWindow::ProcessAccelerator(wxKeyEvent& event)
             {
                 wxCommandEvent commandEvent (wxEVT_COMMAND_BUTTON_CLICKED, child->GetId());
                 commandEvent.SetEventObject(child);
-                return child->HandleWindowEvent(commandEvent);
+                return child->GetEventHandler()->ProcessEvent(commandEvent);
             }
 
             return false;
@@ -1911,7 +1898,7 @@ void wxWidgetResizeProc(Widget w, XConfigureEvent *WXUNUSED(event),
         wxSize newSize(win->GetSize());
         wxSizeEvent sizeEvent(newSize, win->GetId());
         sizeEvent.SetEventObject(win);
-        win->HandleWindowEvent(sizeEvent);
+        win->GetEventHandler()->ProcessEvent(sizeEvent);
     }
 }
 
@@ -1997,7 +1984,7 @@ static void wxCanvasInputEvent(Widget drawingArea,
             wxMouseEvent wxevent(0);
             if (wxTranslateMouseEvent(wxevent, canvas, drawingArea, xevent))
             {
-                canvas->HandleWindowEvent(wxevent);
+                canvas->GetEventHandler()->ProcessEvent(wxevent);
             }
             break;
         }
@@ -2014,7 +2001,7 @@ static void wxCanvasInputEvent(Widget drawingArea,
                 if (parent)
                 {
                     event.SetEventType(wxEVT_CHAR_HOOK);
-                    if (parent->HandleWindowEvent(event))
+                    if (parent->GetEventHandler()->ProcessEvent(event))
                         return;
                 }
 
@@ -2023,10 +2010,10 @@ static void wxCanvasInputEvent(Widget drawingArea,
                 event.SetEventType(wxEVT_KEY_DOWN);
 
                 // Only process OnChar if OnKeyDown didn't swallow it
-                if (!canvas->HandleWindowEvent (event))
+                if (!canvas->GetEventHandler()->ProcessEvent (event))
                 {
                     event.SetEventType(wxEVT_CHAR);
-                    canvas->HandleWindowEvent (event);
+                    canvas->GetEventHandler()->ProcessEvent (event);
                 }
             }
             break;
@@ -2036,7 +2023,7 @@ static void wxCanvasInputEvent(Widget drawingArea,
             wxKeyEvent event (wxEVT_KEY_UP);
             if (wxTranslateKeyEvent (event, canvas, (Widget) 0, xevent))
             {
-                canvas->HandleWindowEvent (event);
+                canvas->GetEventHandler()->ProcessEvent (event);
             }
             break;
         }
@@ -2046,7 +2033,7 @@ static void wxCanvasInputEvent(Widget drawingArea,
             {
                 wxFocusEvent event(wxEVT_SET_FOCUS, canvas->GetId());
                 event.SetEventObject(canvas);
-                canvas->HandleWindowEvent(event);
+                canvas->GetEventHandler()->ProcessEvent(event);
             }
             break;
         }
@@ -2056,7 +2043,7 @@ static void wxCanvasInputEvent(Widget drawingArea,
             {
                 wxFocusEvent event(wxEVT_KILL_FOCUS, canvas->GetId());
                 event.SetEventObject(canvas);
-                canvas->HandleWindowEvent(event);
+                canvas->GetEventHandler()->ProcessEvent(event);
             }
             break;
         }
@@ -2078,7 +2065,7 @@ static void wxPanelItemEventHandler(Widget    wid,
         wxMouseEvent wxevent(0);
         if (wxTranslateMouseEvent(wxevent, window, wid, event))
         {
-            window->HandleWindowEvent(wxevent);
+            window->GetEventHandler()->ProcessEvent(wxevent);
         }
     }
 
@@ -2097,8 +2084,6 @@ static void wxScrollBarCallback(Widget scrollbar,
                                 XmScrollBarCallbackStruct *cbs)
 {
     wxWindow *win = wxGetWindowFromTable(scrollbar);
-    wxCHECK_RET( win, _T("invalid widget in scrollbar callback") );
-
     wxOrientation orientation = (wxOrientation)wxPtrToUInt(clientData);
 
     wxEventType eventType = wxEVT_NULL;
@@ -2156,7 +2141,7 @@ static void wxScrollBarCallback(Widget scrollbar,
                            cbs->value,
                            orientation);
     event.SetEventObject( win );
-    win->HandleWindowEvent(event);
+    win->GetEventHandler()->ProcessEvent(event);
 }
 
 // For repainting arbitrary windows
@@ -2503,7 +2488,7 @@ void wxWindow::ChangeFont(bool keepOriginalSize)
         int width, height, width1, height1;
         GetSize(& width, & height);
 
-        wxDoChangeFont( w, m_font );
+        wxDoChangeFont( GetLabelWidget(), m_font );
 
         GetSize(& width1, & height1);
         if (keepOriginalSize && (width != width1 || height != height1))
@@ -2511,20 +2496,6 @@ void wxWindow::ChangeFont(bool keepOriginalSize)
             SetSize(wxDefaultCoord, wxDefaultCoord, width, height);
         }
     }
-}
-
-// Post-creation
-void wxWindow::PostCreation()
-{
-    ChangeFont();
-    ChangeForegroundColour();
-    ChangeBackgroundColour();
-}
-
-// Pre-creation
-void wxWindow::PreCreation()
-{
-    InheritAttributes();
 }
 
 // ----------------------------------------------------------------------------
@@ -2600,104 +2571,6 @@ wxMouseState wxGetMouseState()
     return ms;
 }
 
-
-#if wxMOTIF_NEW_FONT_HANDLING
-
-#include <Xm/XmP.h>
-
-void wxGetTextExtent(const wxWindow* window, const wxString& str,
-                     int* width, int* height, int* ascent, int* descent)
-{
-    Arg args[2];
-    int count = 0;
-    XmRendition rendition = NULL;
-    XmRenderTable table = NULL;
-    Widget w = (Widget) window->GetLabelWidget();
-
-    XtVaGetValues( w, XmNrenderTable, &table, NULL );
-    if (table == NULL)
-        table = XmeGetDefaultRenderTable(w, XmTEXT_RENDER_TABLE);
-
-    rendition = XmRenderTableGetRendition( table, "" );
-    XtSetArg( args[count], XmNfont, 0 ); ++count;
-    XtSetArg( args[count], XmNfontType, 0 ); ++count;
-    XmRenditionRetrieve( rendition, args, count );
-
-    if (args[1].value == XmFONT_IS_FONTSET)
-    {
-        XRectangle ink, logical;
-        WXFontSet fset = (WXFontSet) args[0].value;
-
-        XmbTextExtents( (XFontSet)fset, str.c_str(), str.length(),
-                        &ink, &logical);
-
-        if( width ) *width = logical.width;
-        if( height ) *height = logical.height;
-        if( ascent ) *ascent = -logical.y;
-        if( descent ) *descent = logical.height + logical.y;
-    }
-    else
-    {
-        int direction, ascent2, descent2;
-        XCharStruct overall;
-        XFontStruct* fontStruct;
-
-        XmeRenderTableGetDefaultFont( table, &fontStruct );
-        XTextExtents(fontStruct, (const char*)str.c_str(), str.length(),
-                     &direction, &ascent2, &descent2, &overall);
-
-        if ( width ) *width = overall.width;
-        if ( height ) *height = ascent2 + descent2;
-        if ( descent ) *descent = descent2;
-        if ( ascent ) *ascent = ascent2;
-    }
-}
-
-#else // if !wxMOTIF_NEW_FONT_HANDLING
-
-void wxGetTextExtent(const wxWindow* window, const wxString& str,
-                     int* width, int* height, int* ascent, int* descent)
-{
-    XmFontList list = NULL;
-    XmFontContext cxt;
-    XmFontType type;
-    Widget w = (Widget) window->GetLabelWidget();
-
-    XtVaGetValues( w, XmNfontList, &list, NULL );
-    XmFontListInitFontContext( &cxt, list );
-
-    XmFontListEntry entry = XmFontListNextEntry( cxt );
-    XmFontListFreeFontContext( cxt );
-    XtPointer thing = XmFontListEntryGetFont( entry, &type );
-
-    if (type == XmFONT_IS_FONTSET)
-    {
-        XRectangle ink, logical;
-
-        XmbTextExtents( (XFontSet)thing, str.c_str(), str.length(),
-                        &ink, &logical);
-
-        if( width ) *width = logical.width;
-        if( height ) *height = logical.height;
-        if( ascent ) *ascent = -logical.y;
-        if( descent ) *descent = logical.height + logical.y;
-    }
-    else
-    {
-        int direction, ascent2, descent2;
-        XCharStruct overall;
-
-        XTextExtents( (XFontStruct*)thing, (char*)(const char*)str.c_str(), str.length(),
-                     &direction, &ascent2, &descent2, &overall);
-
-        if ( width ) *width = overall.width;
-        if ( height ) *height = ascent2 + descent2;
-        if ( descent ) *descent = descent2;
-        if ( ascent ) *ascent = ascent2;
-    }
-}
-
-#endif // !wxMOTIF_NEW_FONT_HANDLING
 
 // ----------------------------------------------------------------------------
 // wxNoOptimize: switch off size optimization

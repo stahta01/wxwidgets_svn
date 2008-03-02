@@ -35,7 +35,6 @@
     #include "wx/dcclient.h"
     #include "wx/log.h"
     #include "wx/settings.h"
-    #include "wx/ctrlsub.h"
 #endif
 
 #if wxUSE_LISTCTRL
@@ -141,11 +140,11 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
                        (
                         exstyle,            // extended style
                         classname,          // the kind of control to create
-                        label.wx_str(),     // the window name
+                        label,              // the window name
                         style,              // the window style
                         x, y, w, h,         // the window position and size
-                        GetHwndOf(GetParent()),         // parent
-                        (HMENU)wxUIntToPtr(GetId()),    // child id
+                        GetHwndOf(GetParent()),  // parent
+                        (HMENU)GetId(),     // child id
                         wxGetInstance(),    // app instance
                         NULL                // creation parameters
                        );
@@ -153,19 +152,15 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
     if ( !m_hWnd )
     {
 #ifdef __WXDEBUG__
-        wxLogLastError(wxString::Format
-                       (
-                        _T("CreateWindowEx(\"%s\", flags=%08lx, ex=%08lx)"),
-                        classname, style, exstyle
-                       ));
+        wxFAIL_MSG(wxString::Format
+                   (
+                    _T("CreateWindowEx(\"%s\", flags=%08x, ex=%08x) failed"),
+                    classname, (unsigned int)style, (unsigned int)exstyle
+                   ));
 #endif // __WXDEBUG__
 
         return false;
     }
-
-    // saving the label in m_labelOrig to return it verbatim
-    // later in GetLabel()
-    m_labelOrig = label;
 
     // install wxWidgets window proc for this window
     SubclassWin(m_hWnd);
@@ -226,11 +221,23 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
 // various accessors
 // ----------------------------------------------------------------------------
 
+wxBorder wxControl::GetDefaultBorder() const
+{
+    // we want to automatically give controls a sunken style (confusingly,
+    // it may not really mean sunken at all as we map it to WS_EX_CLIENTEDGE
+    // which is not sunken at all under Windows XP -- rather, just the default)
+#if defined(__POCKETPC__) || defined(__SMARTPHONE__)
+    return wxBORDER_SIMPLE;
+#else
+    return wxBORDER_SUNKEN;
+#endif
+}
+
 WXDWORD wxControl::MSWGetStyle(long style, WXDWORD *exstyle) const
 {
     long msStyle = wxWindow::MSWGetStyle(style, exstyle);
 
-    if ( AcceptsFocusFromKeyboard() )
+    if ( AcceptsFocus() )
     {
         msStyle |= WS_TABSTOP;
     }
@@ -241,11 +248,6 @@ WXDWORD wxControl::MSWGetStyle(long style, WXDWORD *exstyle) const
 wxSize wxControl::DoGetBestSize() const
 {
     return wxSize(DEFAULT_ITEM_WIDTH, DEFAULT_ITEM_HEIGHT);
-}
-
-wxBorder wxControl::GetDefaultBorder() const
-{
-    return wxControlBase::GetDefaultBorder();
 }
 
 // This is a helper for all wxControls made with UPDOWN native control.
@@ -315,7 +317,7 @@ wxControl::GetCompositeControlsDefaultAttributes(wxWindowVariant WXUNUSED(varian
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 bool wxControl::MSWOnNotify(int idCtrl,
@@ -363,7 +365,7 @@ bool wxControl::MSWOnNotify(int idCtrl,
     event.SetEventType(eventType);
     event.SetEventObject(this);
 
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 WXHBRUSH wxControl::DoMSWControlColor(WXHDC pDC, wxColour colBg, WXHWND hWnd)
@@ -425,42 +427,6 @@ WXHBRUSH wxControl::MSWControlColorDisabled(WXHDC pDC)
     return DoMSWControlColor(pDC,
                              wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE),
                              GetHWND());
-}
-
-// ----------------------------------------------------------------------------
-// wxControlWithItems
-// ----------------------------------------------------------------------------
-
-void wxControlWithItems::MSWAllocStorage(const wxArrayStringsAdapter& items,
-                                         unsigned wm)
-{
-    const unsigned numItems = items.GetCount();
-    unsigned long totalTextLength = numItems; // for trailing '\0' characters
-    for ( unsigned i = 0; i < numItems; ++i )
-    {
-        totalTextLength += items[i].length();
-    }
-
-    if ( SendMessage((HWND)MSWGetItemsHWND(), wm, numItems,
-                     (LPARAM)totalTextLength*sizeof(wxChar)) == LB_ERRSPACE )
-    {
-        wxLogLastError(wxT("SendMessage(XX_INITSTORAGE)"));
-    }
-}
-
-int wxControlWithItems::MSWInsertOrAppendItem(unsigned pos,
-                                              const wxString& item,
-                                              unsigned wm)
-{
-    LRESULT n = SendMessage((HWND)MSWGetItemsHWND(), wm, pos,
-                            (LPARAM)item.wx_str());
-    if ( n == CB_ERR || n == CB_ERRSPACE )
-    {
-        wxLogLastError(wxT("SendMessage(XX_ADD/INSERTSTRING)"));
-        return wxNOT_FOUND;
-    }
-
-    return n;
 }
 
 // ---------------------------------------------------------------------------

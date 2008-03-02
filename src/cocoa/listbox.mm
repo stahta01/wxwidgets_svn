@@ -22,53 +22,14 @@
 
 #include "wx/cocoa/string.h"
 #include "wx/cocoa/autorelease.h"
-#include "wx/cocoa/ObjcRef.h"
-#include "wx/cocoa/private/scrollview.h"
 #include "wx/cocoa/NSTableDataSource.h"
 
 #import <Foundation/NSArray.h>
 #import <Foundation/NSEnumerator.h>
 #import <AppKit/NSTableView.h>
 #import <AppKit/NSTableColumn.h>
-#import <AppKit/NSScrollView.h>
-#import <AppKit/NSCell.h>
-  
 
-// ============================================================================
-// helper functions
-// ============================================================================
-
-static CGFloat _TableColumnMaxWidthForItems(NSTableColumn *tableColumn, NSArray *items)
-{
-    wxAutoNSAutoreleasePool pool;
-
-    NSCell *dataCell = [[[tableColumn dataCell] copy] autorelease];
-    CGFloat width = 0.0f;
-    NSEnumerator *itemEnum = [items objectEnumerator];
-    NSString *item;
-    while( (item = [itemEnum nextObject]) != nil )
-    {
-        [dataCell setStringValue: item];
-        NSSize itemSize = [dataCell cellSize];
-        CGFloat itemWidth = itemSize.width;
-        if(itemWidth > width)
-            width = itemWidth;
-    }
-    return width;
-}
-
-static void _SetWidthOfTableColumnToFitItems(NSTableColumn *tableColumn, NSArray *items)
-{
-    CGFloat width = _TableColumnMaxWidthForItems(tableColumn, items);
-    [tableColumn setWidth:width];
-    [tableColumn setMinWidth:width];
-}
-
-// ============================================================================
-// class wxListBox
-// ============================================================================
-
-IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControlWithItems)
+IMPLEMENT_DYNAMIC_CLASS(wxListBox, wxControl)
 BEGIN_EVENT_TABLE(wxListBox, wxListBoxBase)
 END_EVENT_TABLE()
 WX_IMPLEMENT_COCOA_OWNER(wxListBox,NSTableView,NSControl,NSView)
@@ -122,7 +83,7 @@ The listbox contents are sorted in alphabetical order.
         return false;
 
     // Provide the data
-    m_cocoaItems = wxGCSafeRetain([NSMutableArray arrayWithCapacity:n]);
+    m_cocoaItems = [[NSMutableArray arrayWithCapacity:n] retain];
     for(int i=0; i < n; i++)
     {
         [m_cocoaItems addObject: wxNSStringWithWxString(choices[i])];
@@ -154,68 +115,22 @@ The listbox contents are sorted in alphabetical order.
     CocoaCreateNSScrollView();
     SetInitialFrameRect(pos,size);
 
-    [m_wxCocoaScrollView->GetNSScrollView() setHasVerticalScroller:YES];
-    // Pre-10.3: Always show vertical scroller, never show horizontal scroller
-    // Post-10.3: Show scrollers dynamically (turn them both on, set auto-hide)
-    if([m_wxCocoaScrollView->GetNSScrollView() respondsToSelector:@selector(setAutohidesScrollers:)])
-    {
-        [m_wxCocoaScrollView->GetNSScrollView() setHasHorizontalScroller:YES];
-        [m_wxCocoaScrollView->GetNSScrollView() setAutohidesScrollers:YES];
-    }
-
     // Set up extended/multiple selection flags
     if ((style & wxLB_EXTENDED) || (style & wxLB_MULTIPLE))
         //diff is that mult requires shift down for multi selection
         [GetNSTableView() setAllowsMultipleSelection:true];
 
     [GetNSTableView() setAllowsColumnSelection:false];
-    _SetWidthOfTableColumnToFitItems(tableColumn, m_cocoaItems);
-    return true;
-}
 
-wxSize wxListBox::DoGetBestSize() const
-{
-    wxSize size = wxControlWithItems::DoGetBestSize();
-    // Limit best size to 100x100. It can be smaller if none of the items are very
-    // wide or if there aren't many items, but anything bigger than 100x100 ought
-    // to be asked for by the programmer. The 100x100 size is based on being barely
-    // enough for a scroller to be usable.
-    if(size.GetWidth() > 100)
-        size.SetWidth(100);
-    if(size.GetHeight() > 100)
-        size.SetHeight(100);
-    return size;
+    return true;
 }
 
 wxListBox::~wxListBox()
 {
     [GetNSTableView() setDataSource: nil];
     [m_cocoaDataSource release];
-    wxGCSafeRelease(m_cocoaItems);
-    m_cocoaItems = nil;
+    [m_cocoaItems release];
     DisassociateNSTableView(GetNSTableView());
-}
-
-bool wxListBox::_WxCocoa_GetNeedsUpdate()
-{
-    return m_needsUpdate;
-}
-
-void wxListBox::_WxCocoa_SetNeedsUpdate(bool needsUpdate)
-{
-    m_needsUpdate = needsUpdate;
-}
-
-void wxListBox::OnInternalIdle()
-{
-    wxControlWithItems::OnInternalIdle();
-    if(_WxCocoa_GetNeedsUpdate())
-    {
-        _SetWidthOfTableColumnToFitItems([[GetNSTableView() tableColumns] objectAtIndex:0], m_cocoaItems);
-        [GetNSTableView() tile];
-        [GetNSTableView() reloadData];
-        _WxCocoa_SetNeedsUpdate(false);
-    }
 }
 
 int wxListBox::CocoaDataSource_numberOfRows()
@@ -254,21 +169,33 @@ int wxListBox::GetSelections(wxArrayInt& aSelections) const
     return [GetNSTableView() numberOfSelectedRows];
 }
 
-int wxListBox::DoInsertItems(const wxArrayStringsAdapter & items, unsigned int pos, void **clientData, wxClientDataType type)
+void wxListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
 {
     wxAutoNSAutoreleasePool pool;
 
-    const unsigned int numItems = items.GetCount();
-    for ( unsigned int i = 0; i < numItems; ++i, ++pos )
+    for(int i=int(items.GetCount())-1; i >= 0; i--)
     {
         [m_cocoaItems insertObject: wxNSStringWithWxString(items[i])
             atIndex: pos];
-        m_itemClientData.Insert(NULL, pos);
-        AssignNewItemClientData(pos, clientData, i, type);
+        m_itemClientData.Insert(NULL,pos);
     }
+    [GetNSTableView() reloadData];
+}
 
-    _WxCocoa_SetNeedsUpdate(true);
-    return pos - 1;
+void wxListBox::DoSetItems(const wxArrayString& items, void **clientData)
+{
+    wxAutoNSAutoreleasePool pool;
+
+    // Remove everything
+    [m_cocoaItems removeAllObjects];
+    m_itemClientData.Clear();
+    // Provide the data
+    for(unsigned int i=0; i < items.GetCount(); i++)
+    {
+        [m_cocoaItems addObject: wxNSStringWithWxString(items[i])];
+        m_itemClientData.Add(clientData[i]);
+    }
+    [GetNSTableView() reloadData];
 }
 
 void wxListBox::DoSetFirstItem(int n)
@@ -277,24 +204,24 @@ void wxListBox::DoSetFirstItem(int n)
     void* pOld = m_itemClientData[n];
     m_itemClientData[n] = m_itemClientData[0];
     m_itemClientData[0] = pOld;
-    _WxCocoa_SetNeedsUpdate(true);
+    [GetNSTableView() reloadData];
 }
 
 
 // pure virtuals from wxItemContainer
     // deleting items
-void wxListBox::DoClear()
+void wxListBox::Clear()
 {
     [m_cocoaItems removeAllObjects];
     m_itemClientData.Clear();
-    _WxCocoa_SetNeedsUpdate(true);
+    [GetNSTableView() reloadData];
 }
 
-void wxListBox::DoDeleteOneItem(unsigned int n)
+void wxListBox::Delete(unsigned int n)
 {
     [m_cocoaItems removeObjectAtIndex:n];
     m_itemClientData.RemoveAt(n);
-    _WxCocoa_SetNeedsUpdate(true);
+    [GetNSTableView() reloadData];
 }
 
     // accessing strings
@@ -313,7 +240,7 @@ void wxListBox::SetString(unsigned int n, const wxString& s)
     wxAutoNSAutoreleasePool pool;
     [m_cocoaItems removeObjectAtIndex:n];
     [m_cocoaItems insertObject: wxNSStringWithWxString(s) atIndex: n];
-    _WxCocoa_SetNeedsUpdate(true);
+    [GetNSTableView() reloadData];
 }
 
 int wxListBox::FindString(const wxString& s, bool bCase) const
@@ -329,6 +256,15 @@ int wxListBox::GetSelection() const
     return [GetNSTableView() selectedRow];
 }
 
+int wxListBox::DoAppend(const wxString& item)
+{
+    wxAutoNSAutoreleasePool pool;
+    [m_cocoaItems addObject:wxNSStringWithWxString(item)];
+    [GetNSTableView() reloadData];
+    m_itemClientData.Add(NULL);
+    return [m_cocoaItems count];
+}
+
 void wxListBox::DoSetItemClientData(unsigned int n, void* clientData)
 {
     m_itemClientData[n] = clientData;
@@ -339,4 +275,14 @@ void* wxListBox::DoGetItemClientData(unsigned int n) const
     return m_itemClientData[n];
 }
 
-#endif // wxUSE_LISTBOX
+void wxListBox::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+{
+    m_itemClientData[n] = (void*) clientData;
+}
+
+wxClientData* wxListBox::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData*) m_itemClientData[n];
+}
+
+#endif

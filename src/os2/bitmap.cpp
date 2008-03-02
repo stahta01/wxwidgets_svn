@@ -27,7 +27,6 @@
     #include "wx/image.h"
 #endif
 
-#include "wx/os2/dc.h"
 #include "wx/os2/private.h"
 
 #include "wx/xpmdecod.h"
@@ -95,7 +94,12 @@ void wxBitmapRefData::Free()
 // wxBitmap creation
 // ----------------------------------------------------------------------------
 
-wxGDIRefData* wxBitmap::CloneGDIRefData(const wxGDIRefData* data) const
+wxObjectRefData* wxBitmap::CreateRefData() const
+{
+    return new wxBitmapRefData;
+}
+
+wxObjectRefData* wxBitmap::CloneRefData(const wxObjectRefData* data) const
 {
     return new wxBitmapRefData(*wx_static_cast(const wxBitmapRefData *, data));
 }
@@ -929,12 +933,9 @@ wxImage wxBitmap::ConvertToImage() const
     //
     // May already be selected into a PS
     //
-    pDC = GetSelectedInto();
-    const wxPMDCImpl *impl; 
-    if (pDC != NULL &&
-        (impl = wxDynamicCast( pDC->GetImpl(), wxPMDCImpl )) != NULL)
+    if ((pDC = GetSelectedInto()) != NULL)
     {
-        hPSMem = impl->GetHPS();
+        hPSMem = pDC->GetHPS();
     }
     else
     {

@@ -27,7 +27,6 @@
 #include "wx/log.h"
 #include "wx/apptrait.h"
 #include "wx/platinfo.h"
-#include "wx/wxchar.h"
 
 // without this pragma, the stupid compiler precompiles #defines below so that
 // changing them doesn't "take place" later!
@@ -70,6 +69,7 @@
     #define TEST_MIME
     #define TEST_MODULE
     #define TEST_PATHLIST
+    #define TEST_ODBC
     #define TEST_PRINTF
     #define TEST_REGCONF
     #define TEST_REGEX
@@ -88,7 +88,7 @@
     #define TEST_WCHAR
     #define TEST_ZIP
 #else // #if TEST_ALL
-    #define TEST_CMDLINE
+    #define TEST_STDPATHS
 #endif
 
 // some tests are interactive, define this to run them
@@ -1382,7 +1382,7 @@ static void TestMimeAssociate()
                             _T(""),             // print cmd
                             _T("XYZ File"),     // description
                             _T(".xyz"),         // extensions
-                            wxNullPtr           // end of extensions
+                            NULL                // end of extensions
                          );
     ftInfo.SetShortDesc(_T("XYZFile")); // used under Win32 only
 
@@ -1657,6 +1657,26 @@ static void TestRegExInteractive()
 }
 
 #endif // TEST_REGEX
+
+// ----------------------------------------------------------------------------
+// database
+// ----------------------------------------------------------------------------
+
+#if !wxUSE_ODBC
+    #undef TEST_ODBC
+#endif
+
+#ifdef TEST_ODBC
+
+#include "wx/db.h"
+
+static void TestDbOpen()
+{
+    HENV henv;
+    wxDb db(henv);
+}
+
+#endif // TEST_ODBC
 
 // ----------------------------------------------------------------------------
 // printf() tests
@@ -2764,7 +2784,6 @@ static void TestStackWalk(const char *argv0)
 #ifdef TEST_STDPATHS
 
 #include "wx/stdpaths.h"
-#include "wx/wxchar.h"      // wxPrintf
 
 static void TestStandardPaths()
 {
@@ -2921,52 +2940,6 @@ static void TestStopWatch()
     }
 
     wxPuts(_T(", ok."));
-}
-
-#include "wx/timer.h"
-#include "wx/evtloop.h"
-
-void TestTimer()
-{
-    wxPuts(_T("*** Testing wxTimer ***\n"));
-
-    class MyTimer : public wxTimer
-    {
-    public:
-        MyTimer() : wxTimer() { m_num = 0; }
-
-        virtual void Notify()
-        {
-            wxPrintf(_T("%d"), m_num++);
-            fflush(stdout);
-
-            if ( m_num == 10 )
-            {
-                wxPrintf(_T("... exiting the event loop"));
-                Stop();
-
-                wxEventLoop::GetActive()->Exit(0);
-                wxPuts(_T(", ok."));
-            }
-
-            fflush(stdout);
-        }
-
-    private:
-        int m_num;
-    };
-
-    wxEventLoop loop;
-
-    wxTimer timer1;
-    timer1.Start(100, true /* one shot */);
-    timer1.Stop();
-    timer1.Start(100, true /* one shot */);
-
-    MyTimer timer;
-    timer.Start(500);
-
-    loop.Run();
 }
 
 #endif // TEST_TIMER
@@ -4251,19 +4224,19 @@ int main(int argc, char **argv)
 #if wxUSE_CMDLINE_PARSER
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
-        { wxCMD_LINE_SWITCH, "h", "help", "show this help message",
+        { wxCMD_LINE_SWITCH, _T("h"), _T("help"), _T("show this help message"),
             wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-        { wxCMD_LINE_SWITCH, "v", "verbose", "be verbose" },
-        { wxCMD_LINE_SWITCH, "q", "quiet",   "be quiet" },
+        { wxCMD_LINE_SWITCH, _T("v"), _T("verbose"), _T("be verbose") },
+        { wxCMD_LINE_SWITCH, _T("q"), _T("quiet"),   _T("be quiet") },
 
-        { wxCMD_LINE_OPTION, "o", "output",  "output file" },
-        { wxCMD_LINE_OPTION, "i", "input",   "input dir" },
-        { wxCMD_LINE_OPTION, "s", "size",    "output block size",
+        { wxCMD_LINE_OPTION, _T("o"), _T("output"),  _T("output file") },
+        { wxCMD_LINE_OPTION, _T("i"), _T("input"),   _T("input dir") },
+        { wxCMD_LINE_OPTION, _T("s"), _T("size"),    _T("output block size"),
             wxCMD_LINE_VAL_NUMBER },
-        { wxCMD_LINE_OPTION, "d", "date",    "output file date",
+        { wxCMD_LINE_OPTION, _T("d"), _T("date"),    _T("output file date"),
             wxCMD_LINE_VAL_DATE },
 
-        { wxCMD_LINE_PARAM,  NULL, NULL, "input file",
+        { wxCMD_LINE_PARAM,  NULL, NULL, _T("input file"),
             wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_MULTIPLE },
 
         { wxCMD_LINE_NONE }
@@ -4392,10 +4365,12 @@ int main(int argc, char **argv)
 #endif // TEST_FTP
 
 #ifdef TEST_MIME
-    //wxLog::AddTraceMask(_T("mime"));
-    TestMimeEnum();
-    TestMimeOverride();
-    // TestMimeAssociate();
+    wxLog::AddTraceMask(_T("mime"));
+    #if TEST_ALL
+        TestMimeEnum();
+    #endif
+        TestMimeOverride();
+        TestMimeAssociate();
     TestMimeFilename();
 #endif // TEST_MIME
 
@@ -4412,6 +4387,10 @@ int main(int argc, char **argv)
 #ifdef TEST_PATHLIST
     TestPathList();
 #endif // TEST_PATHLIST
+
+#ifdef TEST_ODBC
+    TestDbOpen();
+#endif // TEST_ODBC
 
 #ifdef TEST_PRINTF
     TestPrintf();
@@ -4470,7 +4449,6 @@ int main(int argc, char **argv)
 
 #ifdef TEST_TIMER
     TestStopWatch();
-    TestTimer();
 #endif // TEST_TIMER
 
 #ifdef TEST_DATETIME

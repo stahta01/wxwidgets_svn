@@ -6,23 +6,9 @@ see also \helpref{wxDialog::SetIcons}{wxdialogseticons} and
 
 \wxheading{Derived from}
 
-\helpref{wxGDIObject}{wxgdiobject}\\
-\helpref{wxObject}{wxobject}
-
-\wxheading{Include files}
-
-<wx/iconbndl.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
-\wxheading{Predefined objects}
-
-{\bf wxNullIconBundle}
+No base class
 
 \latexignore{\rtfignore{\wxheading{Members}}}
-
 
 \membersection{wxIconBundle::wxIconBundle}\label{wxiconbundlewxiconbundle}
 
@@ -42,13 +28,11 @@ Initializes the bundle with a single icon.
 
 Copy constructor.
 
-
 \membersection{wxIconBundle::\destruct{wxIconBundle}}\label{wxiconbundledtor}
 
 \func{}{\destruct{wxIconBundle}}{\void}
 
 Destructor.
-
 
 \membersection{wxIconBundle::AddIcon}\label{wxiconbundleaddicon}
 
@@ -64,10 +48,9 @@ Adds the icon to the collection; if the collection already
 contains an icon with the same width and height, it is
 replaced by the new one.
 
-
 \membersection{wxIconBundle::GetIcon}\label{wxiconbundlegeticon}
 
-\constfunc{wxIcon}{GetIcon}{\param{const wxSize\& }{size}}
+\constfunc{const wxIcon\&}{GetIcon}{\param{const wxSize\& }{size}}
 
 Returns the icon with the given size; if no such icon exists,
 returns the icon with size wxSYS\_ICON\_X/wxSYS\_ICON\_Y;
@@ -75,44 +58,13 @@ if no such icon exists,
 returns the first icon in the bundle. If size = wxSize( -1, -1 ),
 returns the icon with size wxSYS\_ICON\_X/wxSYS\_ICON\_Y.
 
-\constfunc{wxIcon}{GetIcon}{\param{wxCoord }{size = -1}}
+\constfunc{const wxIcon\&}{GetIcon}{\param{wxCoord }{size = -1}}
 
 Same as GetIcon( wxSize( size, size ) ).
 
+\membersection{wxIconBundle::operator=}\label{wxiconbundleoperatorassign}
 
-\membersection{wxIconBundle::GetIconOfExactSize}\label{wxiconbundlegeticonofexactsize}
+\func{const wxIconBundle\&}{operator=}{\param{const wxIconBundle\& }{ic}}
 
-\constfunc{wxIcon}{GetIconOfExactSize}{\param{const wxSize\& }{size}}
+Assignment operator.
 
-Returns the icon with exactly the given size or \texttt{wxNullIcon} if this
-size is not available.
-
-
-\membersection{wxIconBundle::IsEmpty}\label{wxiconbundleisempty}
-
-\constfunc{bool}{IsEmpty}{\void}
-
-Returns \true if the bundle doesn't contain any icons, \false otherwise (in
-which case a call to \helpref{GetIcon()}{wxiconbundlegeticon} with default
-parameter should return a valid icon).
-
-
-\membersection{wxIconBundle::operator $=$}\label{wxiconbundleoperatorassign}
-
-\func{wxIconBundle\&}{operator $=$}{\param{const wxIconBundle\& }{ic}}
-
-Assignment operator, using \helpref{reference counting}{trefcount}.
-
-
-\membersection{wxIconBundle::operator $==$}\label{wxiconbundleoperatorequals}
-
-\func{bool}{operator $==$}{\param{const wxIconBundle\& }{ic}}
-
-Equality operator. This returns \true if two icon bundles are equal.
-
-
-\membersection{wxIconBundle::operator $!=$}\label{wxiconbundleoperatornotequals}
-
-\func{bool}{operator $!=$}{\param{const wxIconBundle\& }{ic}}
-
-Inequality operator. This returns \true if two icon bundles are not equal.

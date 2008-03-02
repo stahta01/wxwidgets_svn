@@ -80,14 +80,14 @@ wxString wxTextBuffer::Translate(const wxString& text, wxTextFileType type)
     wxString eol = GetEOL(type), result;
 
     // optimization: we know that the length of the new string will be about
-    // the same as the length of the old one, so prealloc memory to avoid
+    // the same as the length of the old one, so prealloc memory to aviod
     // unnecessary relocations
     result.Alloc(text.Len());
 
     wxChar chLast = 0;
-    for ( wxString::const_iterator i = text.begin(); i != text.end(); ++i )
+    for ( const wxChar *pc = text.c_str(); *pc; pc++ )
     {
-        wxChar ch = *i;
+        wxChar ch = *pc;
         switch ( ch ) {
             case _T('\n'):
                 // Dos/Unix line termination
@@ -218,7 +218,7 @@ wxTextFileType wxTextBuffer::GuessType() const
 
     // we take MAX_LINES_SCAN in the beginning, middle and the end of buffer
     #define MAX_LINES_SCAN    (10)
-    size_t nCount = m_aLines.GetCount() / 3,
+    size_t nCount = m_aLines.Count() / 3,
         nScan =  nCount > 3*MAX_LINES_SCAN ? MAX_LINES_SCAN : nCount / 3;
 
     #define   AnalyseLine(n)              \
@@ -226,7 +226,7 @@ wxTextFileType wxTextBuffer::GuessType() const
             case wxTextFileType_Unix: nUnix++; break;   \
             case wxTextFileType_Dos:  nDos++;  break;   \
             case wxTextFileType_Mac:  nMac++;  break;   \
-            default: wxFAIL_MSG(_T("unknown line terminator")); \
+            default: wxFAIL_MSG(_("unknown line terminator")); \
         }
 
     size_t n;

@@ -19,66 +19,10 @@
 
 #include "wx/mac/private.h"
 
-IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxGDIObject)
+IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxBitmap)
 
 #define M_ICONDATA ((wxIconRefData *)m_refData)
 
-class WXDLLEXPORT wxIconRefData : public wxGDIRefData
-{
-public:
-    wxIconRefData() { Init(); }
-    wxIconRefData( WXHICON iconref, int desiredWidth, int desiredHeight );
-    virtual ~wxIconRefData() { Free(); }
-
-    virtual bool IsOk() const { return m_iconRef != NULL; }
-
-    virtual void Free();
-
-    void SetWidth( int width ) { m_width = width; }
-    void SetHeight( int height ) { m_height = height; }
-
-    int GetWidth() const { return m_width; }
-    int GetHeight() const { return m_height; }
-
-    WXHICON GetHICON() const { return (WXHICON) m_iconRef; }
-
-private:
-    void Init();
-
-    IconRef m_iconRef;
-    int m_width;
-    int m_height;
-};
-
-
-wxIconRefData::wxIconRefData( WXHICON icon, int desiredWidth, int desiredHeight )
-{
-    m_iconRef = MAC_WXHICON( icon ) ;
-
-    // Standard sizes
-    SetWidth( desiredWidth == -1 ? 32 : desiredWidth ) ;
-    SetHeight( desiredHeight == -1 ? 32 : desiredHeight ) ;
-}
-
-void wxIconRefData::Init()
-{
-    m_iconRef = NULL ;
-    m_width =
-    m_height = 0;
-}
-
-void wxIconRefData::Free()
-{
-    if ( m_iconRef )
-    {
-        ReleaseIconRef( m_iconRef ) ;
-        m_iconRef = NULL ;
-    }
-}
-
-//
-//
-//
 
 wxIcon::wxIcon()
 {
@@ -90,7 +34,13 @@ wxIcon::wxIcon( const char bits[], int width, int height )
     CopyFromBitmap( bmp ) ;
 }
 
-wxIcon::wxIcon(const char* const* bits)
+wxIcon::wxIcon( const char **bits )
+{
+    wxBitmap bmp( bits ) ;
+    CopyFromBitmap( bmp ) ;
+}
+
+wxIcon::wxIcon( char **bits )
 {
     wxBitmap bmp( bits ) ;
     CopyFromBitmap( bmp ) ;
@@ -103,28 +53,8 @@ wxIcon::wxIcon(
     LoadFile( icon_file, (wxBitmapType) flags, desiredWidth, desiredHeight );
 }
 
-wxIcon::wxIcon(WXHICON icon, const wxSize& size)
-      : wxGDIObject()
-{
-    // as the icon owns that ref, we have to acquire it as well
-    if (icon)
-        AcquireIconRef( (IconRef) icon ) ;
-
-    m_refData = new wxIconRefData( icon, size.x, size.y ) ;
-}
-
 wxIcon::~wxIcon()
 {
-}
-
-wxGDIRefData *wxIcon::CreateGDIRefData() const
-{
-    return new wxIconRefData;
-}
-
-wxGDIRefData *wxIcon::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxIconRefData(*wx_static_cast(const wxIconRefData *, data));
 }
 
 WXHICON wxIcon::GetHICON() const
@@ -153,16 +83,21 @@ int wxIcon::GetDepth() const
     return 32;
 }
 
-void wxIcon::SetDepth( int WXUNUSED(depth) )
+void wxIcon::SetDepth( int depth )
 {
 }
 
-void wxIcon::SetWidth( int WXUNUSED(width) )
+void wxIcon::SetWidth( int width )
 {
 }
 
-void wxIcon::SetHeight( int WXUNUSED(height) )
+void wxIcon::SetHeight( int height )
 {
+}
+
+bool wxIcon::IsOk() const
+{
+    return m_refData != NULL ;
 }
 
 bool wxIcon::LoadFile(
@@ -191,48 +126,36 @@ bool wxIcon::LoadFile(
         {
             theId = kAlertStopIcon ;
         }
-        else if ( filename == wxT("wxICON_FOLDER") )
-        {
-            theId = kGenericFolderIcon ;
-        }
-        else if ( filename == wxT("wxICON_FOLDER_OPEN") )
-        {
-            theId = kOpenFolderIcon ;
-        }
-        else if ( filename == wxT("wxICON_NORMAL_FILE") )
-        {
-            theId = kGenericDocumentIcon ;
-        }
         else
         {
-            IconRef iconRef = NULL ;
+        	IconRef iconRef = NULL ;
+        	
+        	// first look in the resource fork
+        	if ( iconRef == NULL )
+        	{
+	        	Str255 theName ;
 
-            // first look in the resource fork
-            if ( iconRef == NULL )
-            {
-                Str255 theName ;
-
-                wxMacStringToPascal( filename , theName ) ;
-                Handle resHandle = GetNamedResource( 'icns' , theName ) ;
-                if ( resHandle != 0L )
-                {
-                    IconFamilyHandle iconFamily = (IconFamilyHandle) resHandle ;
+	        	wxMacStringToPascal( filename , theName ) ;
+	        	Handle resHandle = GetNamedResource( 'icns' , theName ) ;
+	        	if ( resHandle != 0L )
+	        	{
+					IconFamilyHandle iconFamily = (IconFamilyHandle) resHandle ;
                     HLock((Handle) iconFamily);
                     OSStatus err = GetIconRefFromIconFamilyPtr( *iconFamily, GetHandleSize((Handle) iconFamily), &iconRef );
                     HUnlock((Handle) iconFamily);
                     wxASSERT_MSG( err == noErr , wxT("Error when constructing icon ref") );
                     ReleaseResource( resHandle ) ;
-                }
-              }
+	        	}
+  			}
             if ( iconRef == NULL )
             {
                 // TODO add other attempts to load it from files etc here
             }
-               if ( iconRef )
-               {
-                   m_refData = new wxIconRefData( (WXHICON) iconRef, desiredWidth, desiredHeight ) ;
-                return true ;
-               }
+	   		if ( iconRef )
+	   		{
+               	m_refData = new wxIconRefData( (WXHICON) iconRef ) ;
+	        	return true ;
+	   		}      	
         }
 
         if ( theId != 0 )
@@ -241,7 +164,7 @@ bool wxIcon::LoadFile(
             verify_noerr( GetIconRef( kOnSystemDisk, kSystemIconsCreator, theId, &iconRef ) ) ;
             if ( iconRef )
             {
-                m_refData = new wxIconRefData( (WXHICON) iconRef, desiredWidth, desiredHeight ) ;
+                m_refData = new wxIconRefData( (WXHICON) iconRef ) ;
 
                 return true ;
             }
@@ -294,14 +217,41 @@ void wxIcon::CopyFromBitmap( const wxBitmap& bmp )
     UnRef() ;
 
     // as the bitmap owns that ref, we have to acquire it as well
-    IconRef iconRef = bmp.CreateIconRef() ;
-    m_refData = new wxIconRefData( (WXHICON) iconRef, bmp.GetWidth(), bmp.GetHeight()  ) ;
+    IconRef iconRef = bmp.GetBitmapData()->GetIconRef() ;
+    AcquireIconRef( iconRef ) ;
+
+    m_refData = new wxIconRefData( (WXHICON) iconRef ) ;
+    M_ICONDATA->SetWidth( bmp.GetWidth() ) ;
+    M_ICONDATA->SetHeight( bmp.GetHeight() ) ;
+}
+
+wxIconRefData::wxIconRefData( WXHICON icon )
+{
+    m_iconRef = MAC_WXHICON( icon ) ;
+
+    // Standard sizes
+    SetWidth( 32 ) ;
+    SetHeight( 32 ) ;
+}
+
+void wxIconRefData::Init()
+{
+    m_iconRef = NULL ;
+}
+
+void wxIconRefData::Free()
+{
+    if ( m_iconRef )
+    {
+        ReleaseIconRef( m_iconRef ) ;
+        m_iconRef = NULL ;
+    }
 }
 
 IMPLEMENT_DYNAMIC_CLASS(wxICONResourceHandler, wxBitmapHandler)
 
 bool  wxICONResourceHandler::LoadFile(
-    wxBitmap *bitmap, const wxString& name, long WXUNUSED(flags),
+    wxBitmap *bitmap, const wxString& name, long flags,
     int desiredWidth, int desiredHeight )
 {
     wxIcon icon ;

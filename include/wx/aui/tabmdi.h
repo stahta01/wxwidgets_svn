@@ -28,9 +28,9 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_AUI wxAuiMDIParentFrame;
-class WXDLLIMPEXP_FWD_AUI wxAuiMDIClientWindow;
-class WXDLLIMPEXP_FWD_AUI wxAuiMDIChildFrame;
+class WXDLLIMPEXP_AUI wxAuiMDIParentFrame;
+class WXDLLIMPEXP_AUI wxAuiMDIClientWindow;
+class WXDLLIMPEXP_AUI wxAuiMDIChildFrame;
 
 //-----------------------------------------------------------------------------
 // wxAuiMDIParentFrame
@@ -154,8 +154,6 @@ public:
     virtual void Activate();
     virtual bool Destroy();
 
-    virtual bool Show(bool show = true);
-
 #if wxUSE_STATUSBAR
     // no status bars
     virtual wxStatusBar* CreateStatusBar(int WXUNUSED(number) = 1,
@@ -169,6 +167,13 @@ public:
     virtual void SetStatusWidths( int WXUNUSED(n), const int WXUNUSED(widths_field)[] ) {}
 #endif
 
+    // no size hints
+    virtual void DoSetSizeHints(int WXUNUSED(minW),
+                                int WXUNUSED(minH),
+                                int WXUNUSED(maxW) = wxDefaultCoord,
+                                int WXUNUSED(maxH) = wxDefaultCoord,
+                                int WXUNUSED(incW) = wxDefaultCoord,
+                                int WXUNUSED(incH) = wxDefaultCoord) {}
 #if wxUSE_TOOLBAR
     // no toolbar bars
     virtual wxToolBar* CreateToolBar(long WXUNUSED(style),
@@ -199,13 +204,10 @@ public:
     
 protected:
     void Init();
+    virtual bool Show(bool show = true);
     virtual void DoSetSize(int x, int y, int width, int height, int size_flags);
     virtual void DoMoveWindow(int x, int y, int width, int height);
 
-    // no size hints
-    virtual void DoSetSizeHints(int WXUNUSED(minW), int WXUNUSED(minH),
-                                int WXUNUSED(maxW), int WXUNUSED(maxH),
-                                int WXUNUSED(incW), int WXUNUSED(incH)) {}
 public:
     // This function needs to be called when a size change is confirmed,
     // we needed this function to prevent anybody from the outside

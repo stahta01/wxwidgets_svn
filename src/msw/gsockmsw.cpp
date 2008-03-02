@@ -16,8 +16,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_SOCKETS
-
 /*
  * DONE: for WinCE we need to replace WSAAsyncSelect
  * (Windows message-based notification of network events for a socket)
@@ -36,16 +34,54 @@
 #   pragma warning(disable:4115) /* named type definition in parentheses */
 #endif
 
-#include "wx/gsocket.h"
-#include "wx/apptrait.h"
-#include "wx/link.h"
-
-wxFORCE_LINK_THIS_MODULE(gsockmsw)
-
-extern "C" WXDLLIMPEXP_BASE HINSTANCE wxGetInstance();
-#define INSTANCE wxGetInstance()
+/* This needs to be before the wx/defs/h inclusion
+ * for some reason
+ */
 
 #ifdef __WXWINCE__
+    /* windows.h results in tons of warnings at max warning level */
+#   ifdef _MSC_VER
+#       pragma warning(push, 1)
+#   endif
+#   include <windows.h>
+#   ifdef _MSC_VER
+#       pragma warning(pop)
+#       pragma warning(disable:4514)
+#   endif
+#endif
+
+#ifndef __GSOCKET_STANDALONE__
+#   include "wx/platform.h"
+#endif
+
+#if wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__)
+
+#ifndef __GSOCKET_STANDALONE__
+
+#include "wx/msw/gsockmsw.h"
+#include "wx/gsocket.h"
+
+extern "C" WXDLLIMPEXP_BASE HINSTANCE wxGetInstance(void);
+#define INSTANCE wxGetInstance()
+
+#else /* __GSOCKET_STANDALONE__ */
+
+#include "gsockmsw.h"
+#include "gsocket.h"
+
+/* If not using wxWidgets, a global var called hInst must
+ * be available and it must contain the app's instance
+ * handle.
+ */
+extern HINSTANCE hInst;
+#define INSTANCE hInst
+
+#endif /* !__GSOCKET_STANDALONE__/__GSOCKET_STANDALONE__ */
+
+#ifndef __WXWINCE__
+#include <assert.h>
+#else
+#define assert(x)
 #include <winsock.h>
 #include "wx/msw/wince/net.h"
 #include "wx/hashmap.h"
@@ -89,7 +125,7 @@ typedef struct _WSANETWORKEVENTS {
        long lNetworkEvents;
        int iErrorCode[10];
 } WSANETWORKEVENTS, FAR * LPWSANETWORKEVENTS;
-typedef HANDLE (PASCAL *WSACreateEventFunc)();
+typedef HANDLE (PASCAL *WSACreateEventFunc)(void);
 typedef int (PASCAL *WSAEventSelectFunc)(SOCKET,HANDLE,long);
 typedef int (PASCAL *WSAWaitForMultipleEventsFunc)(long,HANDLE,BOOL,long,BOOL);
 typedef int (PASCAL *WSAEnumNetworkEventsFunc)(SOCKET,HANDLE,LPWSANETWORKEVENTS);
@@ -174,29 +210,15 @@ DWORD WINAPI SocketThread(LPVOID data)
 }
 #endif
 
-// ----------------------------------------------------------------------------
-// MSW implementation of GSocketManager
-// ----------------------------------------------------------------------------
 
-class GSocketMSWManager : public GSocketManager
+bool GSocketGUIFunctionsTableConcrete::CanUseEventLoop()
 {
-public:
-    virtual bool OnInit();
-    virtual void OnExit();
-
-    virtual bool Init_Socket(GSocket *socket);
-    virtual void Destroy_Socket(GSocket *socket);
-
-    virtual void Install_Callback(GSocket *socket, GSocketEvent event);
-    virtual void Uninstall_Callback(GSocket *socket, GSocketEvent event);
-
-    virtual void Enable_Events(GSocket *socket);
-    virtual void Disable_Events(GSocket *socket);
-};
+    return true;
+}
 
 /* Global initializers */
 
-bool GSocketMSWManager::OnInit()
+bool GSocketGUIFunctionsTableConcrete::OnInit()
 {
   static LPCTSTR pclassname = NULL;
   int i;
@@ -258,7 +280,7 @@ bool GSocketMSWManager::OnInit()
   return true;
 }
 
-void GSocketMSWManager::OnExit()
+void GSocketGUIFunctionsTableConcrete::OnExit()
 {
 #ifdef __WXWINCE__
 /* Delete the threads here */
@@ -282,7 +304,7 @@ void GSocketMSWManager::OnExit()
 
 /* Per-socket GUI initialization / cleanup */
 
-bool GSocketMSWManager::Init_Socket(GSocket *socket)
+bool GSocketGUIFunctionsTableConcrete::Init_Socket(GSocket *socket)
 {
   int i;
 
@@ -309,37 +331,13 @@ bool GSocketMSWManager::Init_Socket(GSocket *socket)
   return true;
 }
 
-void GSocketMSWManager::Destroy_Socket(GSocket *socket)
+void GSocketGUIFunctionsTableConcrete::Destroy_Socket(GSocket *socket)
 {
   /* Remove the socket from the list */
   EnterCriticalSection(&critical);
   if ( socket->IsOk() )
-  {
-      const int msgnum = socket->m_msgnumber;
-
-      // we need to remove any pending messages for this socket to avoid having
-      // them sent to a new socket which could reuse the same message number as
-      // soon as we destroy this one
-      MSG msg;
-      while ( ::PeekMessage(&msg, hWin, msgnum, msgnum, PM_REMOVE) )
-          ;
-
-      socketList[msgnum - WM_USER] = NULL;
-  }
-
+      socketList[(socket->m_msgnumber - WM_USER)] = NULL;
   LeaveCriticalSection(&critical);
-}
-
-void GSocketMSWManager::Install_Callback(GSocket * WXUNUSED(socket),
-                                         GSocketEvent WXUNUSED(event))
-{
-    wxFAIL_MSG( _T("not used under MSW") );
-}
-
-void GSocketMSWManager::Uninstall_Callback(GSocket * WXUNUSED(socket),
-                                           GSocketEvent WXUNUSED(event))
-{
-    wxFAIL_MSG( _T("not used under MSW") );
 }
 
 /* Windows proc for asynchronous event handling */
@@ -418,8 +416,10 @@ LRESULT CALLBACK _GSocket_Internal_WinProc(HWND hWnd,
  *  events for internal processing, but we will only notify users
  *  when an appropiate callback function has been installed.
  */
-void GSocketMSWManager::Enable_Events(GSocket *socket)
+void GSocketGUIFunctionsTableConcrete::Enable_Events(GSocket *socket)
 {
+  assert (socket != NULL);
+
   if (socket->m_fd != INVALID_SOCKET)
   {
     /* We could probably just subscribe to all events regardless
@@ -449,8 +449,10 @@ void GSocketMSWManager::Enable_Events(GSocket *socket)
 /* _GSocket_Disable_Events:
  *  Disable event notifications (when shutdowning the socket)
  */
-void GSocketMSWManager::Disable_Events(GSocket *socket)
+void GSocketGUIFunctionsTableConcrete::Disable_Events(GSocket *socket)
 {
+  assert (socket != NULL);
+
   if (socket->m_fd != INVALID_SOCKET)
   {
 #ifndef __WXWINCE__
@@ -462,17 +464,12 @@ void GSocketMSWManager::Disable_Events(GSocket *socket)
   }
 }
 
-// set the wxBase variable to point to our GSocketManager implementation
-//
-// see comments in wx/msw/apptbase.h for the explanation of why do we do it
-// like this
-static struct ManagerSetter
-{
-    ManagerSetter()
-    {
-        static GSocketMSWManager s_manager;
-        wxAppTraits::SetDefaultSocketManager(&s_manager);
-    }
-} gs_managerSetter;
+#else /* !wxUSE_SOCKETS */
 
-#endif  // wxUSE_SOCKETS
+/*
+ * Translation unit shouldn't be empty, so include this typedef to make the
+ * compiler (VC++ 6.0, for example) happy
+ */
+typedef void (*wxDummy)();
+
+#endif  /* wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__) */

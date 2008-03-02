@@ -15,8 +15,6 @@ wxToggleButton is a button that stays pressed when clicked by the user. In
 other words, it is similar to \helpref{wxCheckBox}{wxcheckbox} in
 functionality but looks like a \helpref{wxButton}{wxbutton}.
 
-Since wxWidgets version 2.9.0 this control emits an update UI event.
-
 You can see wxToggleButton in action in the sixth page of the
 \helpref{controls}{samplecontrols} sample.
 
@@ -30,10 +28,6 @@ You can see wxToggleButton in action in the sixth page of the
 \wxheading{Include files}
 
 <wx/tglbtn.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{Window styles}
 
@@ -50,8 +44,7 @@ See also \helpref{window styles overview}{windowstyles}.
 
 \wxheading{See also}
 
-\helpref{wxCheckBox}{wxcheckbox}, \helpref{wxButton}{wxbutton},
-\helpref{wxBitmapToggleButton}{wxbitmaptogglebutton}
+\helpref{wxCheckBox}{wxcheckbox}, \helpref{wxButton}{wxbutton}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
@@ -118,7 +111,7 @@ Returns {\tt true} if it is pressed, {\tt false} otherwise.
 
 \membersection{wxToggleButton::SetValue}\label{wxtogglebuttonsetvalue}
 
-\func{void}{SetValue}{\param{bool}{ state}}
+\func{void}{SetValue}{\param{const bool}{ state}}
 
 Sets the toggle button to the given state. This does not cause a
 {\tt EVT\_TOGGLEBUTTON} event to be emitted.
@@ -126,4 +119,3 @@ Sets the toggle button to the given state. This does not cause a
 \wxheading{Parameters}
 
 \docparam{state}{If {\tt true}, the button is pressed.}
-

@@ -24,7 +24,7 @@
 // "toggled"
 //-----------------------------------------------------------------------------
 extern "C" {
-static void gtk_checklist_toggled(GtkCellRendererToggle * WXUNUSED(renderer),
+static void gtk_checklist_toggled(GtkCellRendererToggle *renderer,
                                   gchar                 *stringpath,
                                   wxCheckListBox        *listbox)
 {
@@ -37,7 +37,7 @@ static void gtk_checklist_toggled(GtkCellRendererToggle * WXUNUSED(renderer),
     new_event.SetInt( gtk_tree_path_get_indices(path)[0] );
     gtk_tree_path_free(path);
     listbox->Check( new_event.GetInt(), !listbox->IsChecked(new_event.GetInt()));
-    listbox->HandleWindowEvent( new_event );
+    listbox->GetEventHandler()->ProcessEvent( new_event );
 }
 }
 

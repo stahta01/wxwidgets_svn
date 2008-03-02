@@ -30,15 +30,11 @@ It is only available if \texttt{wxUSE\_ANIMATIONCTRL} is set to $1$ (the default
 
 <wx/animate.h>
 
-\wxheading{Library}
-
-\helpref{wxAdv}{librarieslist}
-
 \wxheading{Window styles}
 
 \twocolwidtha{5cm}%
 \begin{twocollist}\itemsep=0pt
-\twocolitem{\windowstyle{wxAC\_DEFAULT\_STYLE}}{The default style: wxBORDER\_NONE.}
+\twocolitem{\windowstyle{wxAC\_DEFAULT\_STYLE}}{The default style: wxNO\_BORDER.}
 \twocolitem{\windowstyle{wxAC\_NO\_AUTORESIZE}}{By default, the control will adjust
 its size to exactly fit to the size of the animation when \helpref{SetAnimation}{wxanimationctrlsetanimation}
 is called. If this style flag is given, the control will not change its size}
@@ -82,10 +78,6 @@ all the parameters.
 \param{long}{ style = wxAC\_DEFAULT\_STYLE},\rtfsp
 \param{const wxString\& }{name = ``animationctrl"}}
 
-After control creation you must explicitely call \helpref{Play}{wxanimationctrlplay}
-to start to play the animation. Until that function won't be called, the first frame
-of the animation is displayed.
-
 \wxheading{Parameters}
 
 \docparam{parent}{Parent window, must be non-\NULL.}
@@ -102,6 +94,9 @@ of the animation is displayed.
 
 \docparam{name}{Control name.}
 
+After control creation you must explicitely call \helpref{Play}{wxanimationctrlplay}
+to start to play the animation. Until that function won't be called, the first frame
+of the animation is displayed.
 
 \wxheading{Return value}
 

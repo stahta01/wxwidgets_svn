@@ -263,8 +263,6 @@ void wxDatePickerCtrl::SetValue(const wxDateTime& dt)
         m_date.ResetTime();
 }
 
-#include <iostream>
-
 wxDateTime wxDatePickerCtrl::GetValue() const
 {
 #ifdef __WXDEBUG__
@@ -354,7 +352,7 @@ wxDatePickerCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             {
                 m_date = dt;
                 wxDateEvent event(this, dt, wxEVT_DATE_CHANGED);
-                if ( HandleWindowEvent(event) )
+                if ( GetEventHandler()->ProcessEvent(event) )
                 {
                     *result = 0;
                     return true;

@@ -186,6 +186,31 @@ bool wxDialog::Create(wxWindow *parent,
     return true;
 }
 
+#if WXWIN_COMPATIBILITY_2_6
+
+// deprecated ctor
+wxDialog::wxDialog(wxWindow *parent,
+                   const wxString& title,
+                   bool WXUNUSED(modal),
+                   int x,
+                   int y,
+                   int w,
+                   int h,
+                   long style,
+                   const wxString& name)
+{
+    Init();
+
+    Create(parent, wxID_ANY, title, wxPoint(x, y), wxSize(w, h), style, name);
+}
+
+void wxDialog::SetModal(bool WXUNUSED(flag))
+{
+    // nothing to do, obsolete method
+}
+
+#endif // WXWIN_COMPATIBILITY_2_6
+
 wxDialog::~wxDialog()
 {
     m_isBeingDeleted = true;
@@ -197,6 +222,15 @@ wxDialog::~wxDialog()
 // ----------------------------------------------------------------------------
 // showing the dialogs
 // ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_6
+
+bool wxDialog::IsModalShowing() const
+{
+    return IsModal();
+}
+
+#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindow *wxDialog::FindSuitableParent() const
 {
@@ -237,9 +271,6 @@ bool wxDialog::Show(bool show)
 
     if ( show )
     {
-        if (CanDoLayoutAdaptation())
-            DoLayoutAdaptation();
-
         // this usually will result in TransferDataToWindow() being called
         // which will change the controls values so do it before showing as
         // otherwise we could have some flicker
@@ -352,7 +383,7 @@ bool wxDialog::DoOK()
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, GetAffirmativeId());
     event.SetEventObject(this);
 
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 #endif // __POCKETPC__
 

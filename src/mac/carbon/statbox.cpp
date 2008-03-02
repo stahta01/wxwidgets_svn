@@ -32,7 +32,7 @@ bool wxStaticBox::Create( wxWindow *parent,
     if ( !wxControl::Create( parent, id, pos, size, style, wxDefaultValidator, name ) )
         return false;
 
-    m_labelOrig = m_label = label;
+    m_label = label;
 
     Rect bounds = wxMacGetBoundsForControl( this, pos, size );
 
@@ -58,11 +58,14 @@ void wxStaticBox::GetBordersForSizer(int *borderTop, int *borderOther) const
         // Later on, the staticbox's font height is added to this.
         extraTop = 0;
 
-        // As indicated by the HIG, Panther needs an extra border of 11
-        // pixels (otherwise overlapping occurs at the top). The "other"
-        // border has to be 11.
-        extraTop = 11;
-        other = 11;
+        if ( UMAGetSystemVersion() >= 0x1030 ) // Panther
+        {
+            // As indicated by the HIG, Panther needs an extra border of 11
+            // pixels (otherwise overlapping occurs at the top). The "other"
+            // border has to be 11.
+            extraTop = 11;
+            other = 11;
+        }
     }
 
     *borderTop = extraTop;

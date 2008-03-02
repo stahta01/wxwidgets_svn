@@ -12,7 +12,7 @@
 
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxGTKRadioButtonInfo;
+class WXDLLIMPEXP_CORE wxGTKRadioButtonInfo;
 
 #include "wx/list.h"
 
@@ -132,7 +132,7 @@ public:
     void GtkDisableEvents();
     void GtkEnableEvents();
 #if wxUSE_TOOLTIPS
-    void ApplyToolTip( GtkTooltips *tips, const gchar *tip );
+    void ApplyToolTip( GtkTooltips *tips, const wxChar *tip );
 #endif // wxUSE_TOOLTIPS
 
     virtual void OnInternalIdle();
@@ -142,8 +142,6 @@ public:
     wxRadioBoxButtonsInfoList   m_buttonsInfo;
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
 #if wxUSE_TOOLTIPS
     virtual void DoSetItemToolTip(unsigned int n, wxToolTip *tooltip);
 #endif

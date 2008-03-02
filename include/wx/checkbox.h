@@ -49,7 +49,7 @@ enum wxCheckBoxState
 };
 
 
-extern WXDLLEXPORT_DATA(const char) wxCheckBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxCheckBoxNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxCheckBox: a control which shows a label and a box which may be checked
@@ -118,9 +118,6 @@ public:
     }
 
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     virtual void DoSet3StateValue(wxCheckBoxState WXUNUSED(state)) { wxFAIL; }
 
     virtual wxCheckBoxState DoGet3StateValue() const

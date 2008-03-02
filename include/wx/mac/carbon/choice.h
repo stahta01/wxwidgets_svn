@@ -17,7 +17,7 @@
 #include  "wx/dynarray.h"
 #include  "wx/arrstr.h"
 
-WXDLLEXPORT_DATA(extern const char) wxChoiceNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxChoiceNameStr[];
 
 WX_DEFINE_ARRAY( char * , wxChoiceDataArray ) ;
 
@@ -69,6 +69,9 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxChoiceNameStr);
 
+    virtual void Delete(unsigned int n);
+    virtual void Clear();
+
     virtual unsigned int GetCount() const ;
     virtual int GetSelection() const ;
     virtual void SetSelection(int n);
@@ -79,16 +82,18 @@ public:
     virtual wxInt32 MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF event ) ;
 
 protected:
-    virtual void DoDeleteOneItem(unsigned int n);
-    virtual void DoClear();
-
     virtual wxSize DoGetBestSize() const ;
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
 
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
+
+    // free all memory we have (used by Clear() and dtor)
+    // prevent collision with some BSD definitions of macro Free()
+    void FreeData();
 
     wxArrayString m_strings;
     wxChoiceDataArray m_datas ;

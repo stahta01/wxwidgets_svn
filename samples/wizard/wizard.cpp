@@ -38,13 +38,10 @@
     #include "wx/sizer.h"
 #endif
 
-#include "wx/textctrl.h"
 #include "wx/wizard.h"
 
 #include "wiztest.xpm"
 #include "wiztest2.xpm"
-
-#include "../sample.xpm"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -53,15 +50,11 @@
 // ids for menu items
 enum
 {
-    Wizard_About = wxID_ABOUT,
     Wizard_Quit = wxID_EXIT,
     Wizard_RunModal = wxID_HIGHEST,
-
     Wizard_RunNoSizer,
     Wizard_RunModeless,
-
-    Wizard_LargeWizard,
-    Wizard_ExpandBitmap
+    Wizard_About = wxID_ABOUT
 };
 
 // ----------------------------------------------------------------------------
@@ -306,14 +299,6 @@ public:
         );
 #endif // wxUSE_CHECKLISTBOX
 
-        wxSize textSize = wxSize(150, 200);
-        if (((wxFrame*) wxTheApp->GetTopWindow())->GetMenuBar()->IsChecked(Wizard_LargeWizard))
-            textSize = wxSize(150, wxGetClientDisplayRect().GetHeight() - 200);
-
-
-        wxTextCtrl* textCtrl = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, textSize, wxTE_MULTILINE);
-        mainSizer->Add(textCtrl, 0, wxALL|wxEXPAND, 5);
-
         SetSizer(mainSizer);
         mainSizer->Fit(this);
     }
@@ -368,9 +353,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     MyFrame *frame = new MyFrame(_T("wxWizard Sample"));
 
     // and show it (the frames, unlike simple controls, are not shown when
@@ -390,16 +372,6 @@ MyWizard::MyWizard(wxFrame *frame, bool useSizer)
                    wxBitmap(wiztest_xpm),wxDefaultPosition,
                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
-    SetIcon(wxIcon(sample_xpm));
-
-    // Allow the bitmap to be expanded to fit the page height
-    if (frame->GetMenuBar()->IsChecked(Wizard_ExpandBitmap))
-        SetBitmapPlacement(wxWIZARD_VALIGN_CENTRE);
-
-    // Enable scrolling adaptation
-    if (frame->GetMenuBar()->IsChecked(Wizard_LargeWizard))
-        SetLayoutAdaptationMode(wxDIALOG_ADAPTATION_MODE_ENABLED);
-
     // a wizard page may be either an object of predefined class
     m_page1 = new wxWizardPageSimple(this);
 
@@ -446,17 +418,12 @@ MyFrame::MyFrame(const wxString& title)
     menuFile->AppendSeparator();
     menuFile->Append(Wizard_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
-    wxMenu *menuOptions = new wxMenu;
-    menuOptions->AppendCheckItem(Wizard_LargeWizard, _T("&Scroll Wizard Pages"));
-    menuOptions->AppendCheckItem(Wizard_ExpandBitmap, _T("Si&ze Bitmap To Page"));
-
     wxMenu *helpMenu = new wxMenu;
     helpMenu->Append(Wizard_About, _T("&About...\tF1"), _T("Show about dialog"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
     menuBar->Append(menuFile, _T("&File"));
-    menuBar->Append(menuOptions, _T("&Options"));
     menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame

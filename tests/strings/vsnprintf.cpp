@@ -25,78 +25,46 @@
 #endif // WX_PRECOMP
 
 
-// NOTE: for more info about the specification of wxVsnprintf() behaviour you can
-//       refer to the following page of the GNU libc manual:
-//             http://www.gnu.org/software/libc/manual/html_node/Formatted-Output.html
-
-
-
-// ----------------------------------------------------------------------------
-// global utilities for testing
-// ----------------------------------------------------------------------------
 
 #define MAX_TEST_LEN        1024
+
 
 // temporary buffers
 static wxChar buf[MAX_TEST_LEN];
 int r;
 
-// these macros makes it possible to write all tests without repeating a lot
-// of times the wxT() macro
-// NOTE: you should use expected strings with these macros which do not exceed
-//       MAX_TEST_LEN as these macro do check if the return value is == (int)wxStrlen(buf)
+// these macros makes it possible to write all tests without repeating a lot of times wxT() macro
 
 #define ASSERT_STR_EQUAL( a, b ) \
     CPPUNIT_ASSERT_EQUAL( wxString(a), wxString(b) );
 
 #define CMP5(expected, x, y, z, w)                    \
     r=wxSnprintf(buf, MAX_TEST_LEN, wxT(x), y, z, w); \
-    CPPUNIT_ASSERT( r == (int)wxStrlen(buf) );        \
+    CPPUNIT_ASSERT( r > 0 );                          \
     ASSERT_STR_EQUAL( wxT(expected), buf );
 
 #define CMP4(expected, x, y, z)                     \
     r=wxSnprintf(buf, MAX_TEST_LEN, wxT(x), y, z);  \
-    CPPUNIT_ASSERT( r == (int)wxStrlen(buf) );      \
+    CPPUNIT_ASSERT( r > 0 );                        \
     ASSERT_STR_EQUAL( wxT(expected), buf );
 
 #define CMP3(expected, x, y)                        \
     r=wxSnprintf(buf, MAX_TEST_LEN, wxT(x), y);     \
-    CPPUNIT_ASSERT( r == (int)wxStrlen(buf) );      \
+    CPPUNIT_ASSERT( r > 0 );                        \
     ASSERT_STR_EQUAL( wxT(expected), buf );
 
 #define CMP2(expected, x)                           \
     r=wxSnprintf(buf, MAX_TEST_LEN, wxT(x));        \
-    CPPUNIT_ASSERT( r == (int)wxStrlen(buf) );      \
+    CPPUNIT_ASSERT( r > 0 );                        \
     ASSERT_STR_EQUAL( wxT(expected), buf );
 
-// NOTE: this macro is used also with too-small buffers (see Miscellaneous())
-//       test function, thus the return value can be > size and thus we
-//       cannot check if r == (int)wxStrlen(buf)
 #define CMPTOSIZE(buffer, size, expected, fmt, x, y, z, w)          \
     r=wxSnprintf(buffer, size, wxT(fmt), x, y, z, w);               \
     CPPUNIT_ASSERT( r > 0 );                                        \
     CPPUNIT_ASSERT_EQUAL( wxString(wxT(expected)).Left(size - 1),   \
                           wxString(buffer) )
 
-// this is the same as wxSnprintf() but it passes the format string to
-// wxVsnprintf() without using ATTRIBUTE_PRINTF and thus suppresses the gcc
-// checks (and resulting warnings) for the format string
-//
-// use with extreme care and only when you're really sure the warnings must be
-// suppressed!
-template<typename T>
-static int
-wxUnsafeSnprintf(T *buf, size_t len, const wxChar *fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
 
-    int rc = wxVsnprintf(buf, len, fmt, args);
-
-    va_end(args);
-
-    return rc;
-}
 
 // ----------------------------------------------------------------------------
 // test class
@@ -109,7 +77,6 @@ public:
 
 private:
     CPPUNIT_TEST_SUITE( VsnprintfTestCase );
-        CPPUNIT_TEST( C );
         CPPUNIT_TEST( D );
         CPPUNIT_TEST( X );
         CPPUNIT_TEST( O );
@@ -126,13 +93,10 @@ private:
 #endif
 
         CPPUNIT_TEST( BigToSmallBuffer );
-#if wxUSE_WXVSNPRINTF
         CPPUNIT_TEST( WrongFormatStrings );
-#endif // wxUSE_WXVSNPRINTF
         CPPUNIT_TEST( Miscellaneous );
     CPPUNIT_TEST_SUITE_END();
 
-    void C();
     void D();
     void X();
     void O();
@@ -150,17 +114,9 @@ private:
     void Unicode();
 
     void BigToSmallBuffer();
-#if wxUSE_WXVSNPRINTF
     void WrongFormatStrings();
-#endif // wxUSE_WXVSNPRINTF
     void Miscellaneous();
-    template<typename T> void Misc(T *buffer, int size);
-
-    // compares the expectedString and the result of wxVsnprintf() char by char
-    // for all its lenght (not only for first expectedLen chars) and also
-    // checks the return value
-    void DoMisc(int expectedLen, const wxString& expectedString,
-                size_t max, const wxChar *format, ...);
+    void Misc(wxChar *buffer, int size);
 
     DECLARE_NO_COPY_CLASS(VsnprintfTestCase)
 };
@@ -173,18 +129,6 @@ CPPUNIT_TEST_SUITE_NAMED_REGISTRATION( VsnprintfTestCase, "VsnprintfTestCase" );
 
 VsnprintfTestCase::VsnprintfTestCase()
 {
-}
-
-void VsnprintfTestCase::C()
-{
-    CMP5("hi!", "%c%c%c", wxT('h'), wxT('i'), wxT('!'));
-
-    // NOTE:
-    // the NULL characters _can_ be passed to %c to e.g. create strings
-    // with embedded NULs (because strings are not always supposed to be
-    // NUL-terminated).
-
-    DoMisc(14, wxT("Hello \0 World!"), 16, wxT("Hello %c World!"), wxT('\0'));
 }
 
 void VsnprintfTestCase::D()
@@ -335,10 +279,6 @@ void VsnprintfTestCase::S()
 
     CMP3(ABCDE, "%.5s", wxT(ABCDEFGHI));
 #endif
-
-    // test a string which have the NULL character after "ab";
-    // obviously it should be handled exactly like just as "ab"
-    CMP3("   ab", "%5s", wxT("ab\0cdefghi"));
 }
 
 void VsnprintfTestCase::Asterisk()
@@ -376,28 +316,25 @@ void VsnprintfTestCase::LongLong()
 
 #ifdef __WXMSW__
     CMP3("123456789", "%I64d", (wxLongLong_t)123456789);
-    CMP3("123456789abcdef", "%I64x", wxLL(0x123456789abcdef));
+    CMP3("123456789abcdef", "%I64x", (wxLongLong_t)0x123456789abcdef);
 #endif
 }
 #endif
 
-template<typename T>
-void VsnprintfTestCase::Misc(T *buffer, int size)
+void VsnprintfTestCase::Misc(wxChar *buffer, int size)
 {
-    // Remember that wx*printf could be mapped either to system
-    // implementation or to wx implementation.
-    // In the first case, when the output buffer is too small, the returned
-    // value can be the number of characters required for the output buffer
-    // (conforming to ISO C99; implemented in e.g. GNU libc >= 2.1), or
-    // just a negative number, usually -1; (this is how e.g. MSVC's
-    // *printf() behaves). Luckily, in all implementations, when the
-    // output buffer is too small, it's nonetheless filled up to its max size.
+    // NB: remember that wx*printf could be mapped either to system
+    //     implementation or to wx implementation.
+    //     In the first case, when the output buffer is too small, the returned
+    //     value can be the number of characters required for the output buffer
+    //     (conforming to ISO C99; implemented in e.g. GNU libc >= 2.1), or
+    //     just a negative number, usually -1; (this is how e.g. MSVC's
+    //     *printf() behaves). Luckily, in all implementations, when the
+    //     output buffer is too small, it's nonetheless filled up to its max
+    //     size.
     //
-    // Note that in the second case (i.e. when we're using our own implementation),
-    // wxVsnprintf() will return the number of characters written in the standard
-    // output or
-    //   -1         if there was an error in the format string
-    //   maxSize+1  if the output buffer is too small
+    //     Note that in the second case (i.e. when we're using our own implementation),
+    //     wxVsnprintf() will always return the number of characters which 
 
     // test without positionals
     CMPTOSIZE(buffer, size, "123 444444444 - test - 555 -0.666",
@@ -412,82 +349,61 @@ void VsnprintfTestCase::Misc(T *buffer, int size)
 #endif
 
     // test unicode/ansi conversion specifiers
-    //
-    // NB: we use wxUnsafeSnprintf() as %hs and %hc are invalid in printf
-    //     format and gcc would warn about this otherwise
+    // NB: this line will output two warnings like these, on GCC:
+    //     warning: use of 'h' length modifier with 's' type character (i.e.
+    //     GCC warns you that 'h' is not legal on 's' conv spec) but they must
+    //     be ignored as here we explicitely want to test the wxSnprintf()
+    //     behaviour in such case
 
-    r = wxUnsafeSnprintf(buffer, size,
-                         _T("unicode string: %ls %lc - ansi string: %hs %hc\n\n"),
-                         L"unicode!!", L'W', "ansi!!", 'w');
-    CPPUNIT_ASSERT( r != -1 );
-    CPPUNIT_ASSERT_EQUAL(
-        wxString(wxT("unicode string: unicode!! W - ansi string: ansi!! w\n\n")).Left(size - 1),
-        wxString(buffer)
-    );
+    CMPTOSIZE(buffer, size,
+              "unicode string: unicode!! W - ansi string: ansi!! w\n\n",
+              "unicode string: %ls %lc - ansi string: %hs %hc\n\n",
+              L"unicode!!", L'W', "ansi!!", 'w');
 }
-
-
-// this test is only for our own implementation, the system implementation
-// doesn't always give errors for invalid format strings (e.g. glibc doesn't)
-// and as it's not required too (the behaviour is "undefined" according to the
-// spec), there is really no sense in testing for it (and the first 2 formats
-// in this test are not invalid at all in fact)
-#if wxUSE_WXVSNPRINTF
 
 void VsnprintfTestCase::WrongFormatStrings()
 {
     // test how wxVsnprintf() behaves with wrong format string:
 
-    // NB: the next 2 tests currently return an error but they shouldn't,
-    //     according to POSIX reusing the parameters is allowed
+#if wxUSE_PRINTF_POS_PARAMS
 
     // two positionals with the same index:
     r = wxSnprintf(buf, MAX_TEST_LEN, wxT("%1$s %1$s"), "hello");
-    CPPUNIT_ASSERT(r != -1);
+    CPPUNIT_ASSERT(r == -1);
 
     // three positionals with the same index mixed with other pos args:
     r = wxSnprintf(buf, MAX_TEST_LEN, wxT("%4$d %2$f %1$s %2$s %3$d"), "hello", "world", 3, 4);
-    CPPUNIT_ASSERT(r != -1);
+    CPPUNIT_ASSERT(r == -1);
 
-    // a missing positional arg: this should result in an error but not all
-    // implementations detect it (e.g. glibc doesn't)
+    // a missing positional arg:
     r = wxSnprintf(buf, MAX_TEST_LEN, wxT("%1$d %3$d"), 1, 2, 3);
-    CPPUNIT_ASSERT_EQUAL(-1, r);
+    CPPUNIT_ASSERT(r == -1);
 
     // positional and non-positionals in the same format string:
     r = wxSnprintf(buf, MAX_TEST_LEN, wxT("%1$d %d %3$d"), 1, 2, 3);
-    CPPUNIT_ASSERT_EQUAL(-1, r);
-}
+    CPPUNIT_ASSERT(r == -1);
 
-#endif // wxUSE_WXVSNPRINTF
+#endif // wxUSE_PRINTF_POS_PARAMS
+}
 
 void VsnprintfTestCase::BigToSmallBuffer()
 {
-    // VC6 can't compile this code
-#if !defined(__VISUALC__) || (__VISUALC__ >= 1310)
-#if wxUSE_UNICODE
-    wchar_t bufw[1024], bufw2[16], bufw3[4], bufw4;
-    Misc(bufw, 1024);
-    Misc(bufw2, 16);
-    Misc(bufw3, 4);
-    Misc(&bufw4, 1);
-#endif // wxUSE_UNICODE
+    wxChar buf[1024], buf2[16], buf3[4], buf4;
 
-    char bufa[1024], bufa2[16], bufa3[4], bufa4;
-    Misc(bufa, 1024);
-    Misc(bufa2, 16);
-    Misc(bufa3, 4);
-    Misc(&bufa4, 1);
-#endif // !VC6
+    Misc(buf, 1024);
+    Misc(buf2, 16);
+    Misc(buf3, 4);
+    Misc(&buf4, 1);
 }
 
-void VsnprintfTestCase::DoMisc(
+static void DoMisc(
         int expectedLen,
         const wxString& expectedString,
         size_t max,
         const wxChar *format, ...)
 {
-    const size_t BUFSIZE = MAX_TEST_LEN - 1;
+    const size_t BUFSIZE = 16;
+    wxChar buf[BUFSIZE + 1];
     size_t i;
     static int count = 0;
 
@@ -499,7 +415,7 @@ void VsnprintfTestCase::DoMisc(
 
     va_list ap;
     va_start(ap, format);
-
+    
     int n = wxVsnprintf(buf, max, format, ap);
 
     va_end(ap);

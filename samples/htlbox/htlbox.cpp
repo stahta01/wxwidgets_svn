@@ -121,7 +121,6 @@ public:
     void OnSetSelBgCol(wxCommandEvent& event);
     void OnSetSelFgCol(wxCommandEvent& event);
 
-    void OnClear(wxCommandEvent& event);
 
     void OnUpdateUISelectAll(wxUpdateUIEvent& event);
 
@@ -130,12 +129,12 @@ public:
     {
         wxLogMessage(_T("Listbox item %d double clicked."), event.GetInt());
     }
-
+    
     void OnHtmlLinkClicked(wxHtmlLinkEvent& event);
     void OnHtmlCellHover(wxHtmlCellEvent &event);
     void OnHtmlCellClicked(wxHtmlCellEvent &event);
 
-    wxSimpleHtmlListBox *GetSimpleBox()
+    wxSimpleHtmlListBox *GetSimpleBox() 
         { return wxDynamicCast(m_hlbox, wxSimpleHtmlListBox); }
     MyHtmlListBox *GetMyBox()
         { return wxDynamicCast(m_hlbox, MyHtmlListBox); }
@@ -177,8 +176,6 @@ enum
     HtmlLbox_SetSelBgCol,
     HtmlLbox_SetSelFgCol,
 
-    HtmlLbox_Clear,
-
     // it is important for the id corresponding to the "About" command to have
     // this standard value as otherwise it won't be handled properly under Mac
     // (where it is special and put into the "Apple" menu)
@@ -205,8 +202,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(HtmlLbox_SetBgCol, MyFrame::OnSetBgCol)
     EVT_MENU(HtmlLbox_SetSelBgCol, MyFrame::OnSetSelBgCol)
     EVT_MENU(HtmlLbox_SetSelFgCol, MyFrame::OnSetSelFgCol)
-
-    EVT_MENU(HtmlLbox_Clear, MyFrame::OnClear)
 
     EVT_UPDATE_UI(HtmlLbox_SelectAll, MyFrame::OnUpdateUISelectAll)
 
@@ -243,9 +238,9 @@ MyFrame::MyFrame()
 #if wxUSE_MENUS
     // create a menu bar
     wxMenu *menuFile = new wxMenu;
-    menuFile->AppendRadioItem(HtmlLbox_CustomBox, _T("Use custom box"),
+    menuFile->AppendRadioItem(HtmlLbox_CustomBox, _T("Use custom box"), 
                               _T("Use a wxHtmlListBox virtual class control"));
-    menuFile->AppendRadioItem(HtmlLbox_SimpleBox, _T("Use simple box"),
+    menuFile->AppendRadioItem(HtmlLbox_SimpleBox, _T("Use simple box"), 
                               _T("Use a wxSimpleHtmlListBox control"));
     menuFile->AppendSeparator();
     menuFile->Append(HtmlLbox_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
@@ -272,9 +267,6 @@ MyFrame::MyFrame()
     menuHLbox->AppendCheckItem(HtmlLbox_SetSelFgCol,
                                _T("Keep &foreground in selection\tCtrl-F"));
 
-    menuHLbox->AppendSeparator();
-    menuHLbox->Append(HtmlLbox_Clear, _T("&Clear\tCtrl-L"));
-
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
     helpMenu->Append(HtmlLbox_About, _T("&About...\tF1"), _T("Show about dialog"));
@@ -296,7 +288,7 @@ MyFrame::MyFrame()
     CreateStatusBar(2);
     SetStatusText(_T("Welcome to wxWidgets!"));
 #endif // wxUSE_STATUSBAR
-
+    
     // create the child controls
     CreateBox();
     wxTextCtrl *text = new wxTextCtrl(this, wxID_ANY, _T(""),
@@ -329,7 +321,7 @@ void MyFrame::CreateBox()
     {
         m_hlbox = new wxSimpleHtmlListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                           0, NULL, multi ? wxLB_MULTIPLE : 0);
-
+        
         // unlike wxHtmlListBox which is abstract, wxSimpleHtmlListBox is a
         // concrete control and doesn't support virtual mode, this we need
         // to add all of its items from the beginning
@@ -362,12 +354,12 @@ void MyFrame::CreateBox()
 void MyFrame::OnSimpleOrCustomBox(wxCommandEvent& WXUNUSED(event))
 {
     wxWindow *old = m_hlbox;
-
+ 
     // we need to recreate the listbox
     CreateBox();
     GetSizer()->Replace(old, m_hlbox);
     delete old;
-
+    
     GetSizer()->Layout();
     Refresh();
 }
@@ -409,7 +401,7 @@ void MyFrame::OnSetMargins(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnToggleMulti(wxCommandEvent& WXUNUSED(event))
 {
     wxWindow *old = m_hlbox;
-
+ 
     // we need to recreate the listbox
     CreateBox();
     GetSizer()->Replace(old, m_hlbox);
@@ -471,11 +463,6 @@ void MyFrame::OnSetSelFgCol(wxCommandEvent& event)
     }
 }
 
-void MyFrame::OnClear(wxCommandEvent& WXUNUSED(event))
-{
-    m_hlbox->Clear();
-}
-
 void MyFrame::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
 {
     wxLogMessage(wxT("The url '%s' has been clicked!"), event.GetLinkInfo().GetHref().c_str());
@@ -483,7 +470,7 @@ void MyFrame::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
     if (GetMyBox())
     {
         GetMyBox()->m_linkClicked = true;
-        GetMyBox()->RefreshRow(1);
+        GetMyBox()->RefreshLine(1);
     }
 }
 
@@ -588,7 +575,7 @@ wxString MyHtmlListBox::OnGetItem(size_t n) const
 {
     if ( !n && m_firstItemUpdated )
     {
-        return _T("<h1><b>Just updated</b></h1>");
+        return wxString::Format(_T("<h1><b>Just updated</b></h1>"));
     }
 
 #ifdef USE_HTML_FILE
@@ -631,5 +618,5 @@ void MyHtmlListBox::UpdateFirstItem()
 {
     m_firstItemUpdated = !m_firstItemUpdated;
 
-    RefreshRow(0);
+    RefreshLine(0);
 }

@@ -34,7 +34,20 @@
 // forward declarations
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxButton;
+class WXDLLEXPORT wxButton;
+
+// ---------------------------------------------------------------------------
+// constants
+// ---------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+// they're unused by wxWidgets...
+enum
+{
+    wxKEY_SHIFT = 1,
+    wxKEY_CTRL  = 2
+};
+#endif
 
 // ---------------------------------------------------------------------------
 // wxWindow declaration for OS/2 PM
@@ -82,7 +95,7 @@ public:
     virtual void     Raise(void);
     virtual void     Lower(void);
     virtual bool     Show(bool bShow = true);
-    virtual void     DoEnable(bool bEnable);
+    virtual bool     Enable(bool bEnable = true);
     virtual void     SetFocus(void);
     virtual void     SetFocusFromKbd(void);
     virtual bool     Reparent(wxWindow* pNewParent);
@@ -92,7 +105,9 @@ public:
     virtual void     Refresh( bool          bEraseBackground = true
                              ,const wxRect* pRect = (const wxRect *)NULL
                             );
+    virtual void     Freeze(void);
     virtual void     Update(void);
+    virtual void     Thaw(void);
     virtual void     SetWindowStyleFlag(long lStyle);
     virtual bool     SetCursor(const wxCursor& rCursor);
     virtual bool     SetFont(const wxFont& rFont);
@@ -414,9 +429,6 @@ public:
     PSWP GetSwp(void) {return &m_vWinSwp;}
 
 protected:
-    virtual void     DoFreeze(void);
-    virtual void     DoThaw(void);
-
     // PM can't create some MSW styles natively but can perform these after
     // creation by sending messages
     typedef enum extra_flags { kFrameToolWindow = 0x0001
@@ -529,6 +541,7 @@ private:
                               ,WXWPARAM    wParam = 0
                              ) const;
 
+    wxWindowList*                   m_pChildrenDisabled;
     HWND                            m_hWndScrollBarHorz;
     HWND                            m_hWndScrollBarVert;
     SWP                             m_vWinSwp;

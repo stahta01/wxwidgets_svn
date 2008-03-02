@@ -44,15 +44,15 @@ cannot be declared outside the class, the shift left operators are used like thi
 \begin{verbatim}
     // in the header file
     DECLARE_VARIANT_OBJECT(MyClass)
-
+    
     // in the implementation file
-    IMPLEMENT_VARIANT_OBJECT(MyClass)
-
+    IMPLMENT_VARIANT_OBJECT(MyClass)
+    
     // in the user code
     wxVariant variant;
     MyClass value;
     variant << value;
-
+    
     // or
     value << variant;
 \end{verbatim}
@@ -72,17 +72,6 @@ IMPLEMENT_VARIANT_OBJECT(wxIcon)
 IMPLEMENT_VARIANT_OBJECT(wxBitmap)
 \end{verbatim}
 
-Note that as of wxWidgets 2.9.0, wxVariantData no longer inherits from wxObject
-and wxVariant no longer uses the type-unsafe wxList class for list
-operations but the type-safe wxVariantList class. Also, wxVariantData now
-supports the Clone function for implementing the \helpref{wxVariant::Unshare}{wxvariantunshare} function.
-Clone is implemented automatically by IMPLEMENT\_VARIANT\_OBJECT.
-
-Since wxVariantData no longer derives from wxObject, any code that tests the type
-of the data using wxDynamicCast will require adjustment. You can use the macro
-wxDynamicCastVariantData with the same arguments as wxDynamicCast, to use C++ RTTI
-type information instead of wxWidgets RTTI.
-
 \wxheading{Derived from}
 
 \helpref{wxObject}{wxobject}
@@ -90,10 +79,6 @@ type information instead of wxWidgets RTTI.
 \wxheading{Include files}
 
 <wx/variant.h>
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
 
 \wxheading{See also}
 
@@ -134,7 +119,7 @@ Construction from a boolean value.
 
 Construction from a double-precision floating point value.
 
-\func{}{wxVariant}{\param{const wxVariantList\&}{ value}, \param{const wxString\& }{name = ``"}}
+\func{}{wxVariant}{\param{const wxList\&}{ value}, \param{const wxString\& }{name = ``"}}
 
 Construction from a list of wxVariant objects. This constructor
 copies {\it value}, the application is still responsible for
@@ -162,15 +147,15 @@ Construction from an array of strings.  This constructor copies {\it value} and 
 
 \func{}{wxVariant}{\param{DATE\_STRUCT*}{ val}, \param{const wxString\& }{name = ``"}}
 
-Construction from a ODBC date value.  Represented internally by a \helpref{wxDateTime}{wxdatetime} value.
+Construction from a odbc date value.  Represented internally by a \helpref{wxDateTime}{wxdatetime} value.
 
 \func{}{wxVariant}{\param{TIME\_STRUCT*}{ val}, \param{const wxString\& }{name = ``"}}
 
-Construction from a ODBC time value.  Represented internally by a \helpref{wxDateTime}{wxdatetime} value.
+Construction from a odbc time value.  Represented internally by a \helpref{wxDateTime}{wxdatetime} value.
 
 \func{}{wxVariant}{\param{TIMESTAMP\_STRUCT*}{ val}, \param{const wxString\& }{name = ``"}}
 
-Construction from a ODBC timestamp value.  Represented internally by a \helpref{wxDateTime}{wxdatetime} value.
+Construction from a odbc timestamp value.  Represented internally by a \helpref{wxDateTime}{wxdatetime} value.
 
 \membersection{wxVariant::\destruct{wxVariant}}\label{wxvariantdtor}
 
@@ -271,13 +256,6 @@ Returns the date value.
 
 Returns the floating point value.
 
-\membersection{wxVariant::GetList}\label{wxvariantgetlist}
-
-\constfunc{wxVariantList &}{GetList}{\void}
-
-Returns a reference to the wxVariantList class used by
-wxVariant if this wxVariant is currently a list of variants.
-
 \membersection{wxVariant::GetLong}\label{wxvariantgetlong}
 
 \constfunc{long}{GetLong}{\void}
@@ -300,7 +278,7 @@ Gets the string value.
 
 \constfunc{wxString}{GetType}{\void}
 
-Returns the value type as a string. The built-in types are: bool, char, datetime, double, list, long, string, arrstring, void*.
+Returns the value type as a string. The built-in types are: bool, char, date, double, list, long, string, stringlist, time, void*.
 
 If the variant is null, the value type returned is the string ``null" (not the empty string).
 
@@ -371,15 +349,6 @@ is of type list, but the number of elements in the list is zero.
 
 Sets the internal variant data, deleting the existing data if there is any.
 
-\membersection{wxVariant::Unshare}\label{wxvariantunshare}
-
-\func{bool}{Unshare}{\void}
-
-Makes sure that any data associated with this variant is not shared with other
-variants. For this to work, \helpref{wxVariantData::Clone}{wxvariantdataclone} must
-be implemented for the data types you are working with. Clone is implemented
-for all the default data types.
-
 \membersection{wxVariant::operator $=$}\label{wxvariantassignment}
 
 \func{void}{operator $=$}{\param{const wxVariant\& }{value}}
@@ -402,7 +371,7 @@ for all the default data types.
 
 \func{void}{operator $=$}{\param{wxObject* }{value}}
 
-\func{void}{operator $=$}{\param{const wxVariantList\& }{value}}
+\func{void}{operator $=$}{\param{const wxList\& }{value}}
 
 \func{void}{operator $=$}{\param{const wxDateTime\& }{value}}
 
@@ -436,7 +405,7 @@ Assignment operators, using \helpref{reference counting}{trefcount} when possibl
 
 \constfunc{bool}{operator $==$}{\param{wxObject* }{value}}
 
-\constfunc{bool}{operator $==$}{\param{const wxVariantList\& }{value}}
+\constfunc{bool}{operator $==$}{\param{const wxList\& }{value}}
 
 \constfunc{bool}{operator $==$}{\param{const wxArrayString\& }{value}}
 
@@ -464,7 +433,7 @@ Equality test operators.
 
 \constfunc{bool}{operator $!=$}{\param{wxObject* }{value}}
 
-\constfunc{bool}{operator $!=$}{\param{const wxVariantList\& }{value}}
+\constfunc{bool}{operator $!=$}{\param{const wxList\& }{value}}
 
 \constfunc{bool}{operator $!=$}{\param{const wxArrayString\& }{value}}
 
@@ -536,17 +505,13 @@ Also note that the destructor is protected, so you can never explicitly delete a
 instance. Instead, \helpref{DecRef}{wxvariantdatadecref} will delete the object automatically
 when the reference count reaches zero.
 
+\wxheading{Derived from}
+
+\helpref{wxObject}{wxobject}
+
 \wxheading{Include files}
 
 <wx/variant.h>
-
-\wxheading{Derived from}
-
-No base class
-
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
 
 \wxheading{See also}
 
@@ -560,14 +525,6 @@ No base class
 
 Default constructor.
 
-\membersection{wxVariantData::Clone}\label{wxvariantdataclone}
-
-\constfunc{wxVariantData*}{Clone}{\void}
-
-This function can be overridden to clone the data.
-Implement Clone if you wish \helpref{wxVariant::Unshare}{wxvariantunshare} to work
-for your data. This function is implemented for all built-in data types.
-
 \membersection{wxVariantData::DecRef}\label{wxvariantdatadecref}
 
 \func{void}{DecRef}{\void}
@@ -577,6 +534,7 @@ automatically deleted.
 
 Note that destructor of wxVariantData is protected, so delete
 cannot be used as normal. Instead, \helpref{DecRef}{wxvariantdatadecref} should be called.
+
 
 
 \membersection{wxVariantData::Eq}\label{wxvariantdataeq}

@@ -398,15 +398,6 @@ wxFont::~wxFont()
 // ----------------------------------------------------------------------------
 // real implementation
 // ----------------------------------------------------------------------------
-wxGDIRefData *wxFont::CreateGDIRefData() const
-{
-    return new wxFontRefData();
-}
-
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxFontRefData(*wx_static_cast(const wxFontRefData *, data));
-}
 
 bool wxFont::RealizeResource()
 {
@@ -426,6 +417,10 @@ WXHANDLE wxFont::GetResourceHandle() const
 bool wxFont::IsFree() const
 {
     return false;
+}
+
+void wxFont::Unshare()
+{
 }
 
 // ----------------------------------------------------------------------------
@@ -521,24 +516,6 @@ wxFontEncoding wxFont::GetEncoding() const
 const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
 {
     return NULL;
-}
-
-wxString wxFont::GetNativeFontInfoDesc() const
-{
-    wxCHECK_MSG( Ok(), wxEmptyString, wxT("invalid font") );
-
-    // be sure we have an HFONT associated...
-    wxConstCast(this, wxFont)->RealizeResource();
-    return wxFontBase::GetNativeFontInfoDesc();
-}
-
-wxString wxFont::GetNativeFontInfoUserDesc() const
-{
-    wxCHECK_MSG( Ok(), wxEmptyString, wxT("invalid font") );
-
-    // be sure we have an HFONT associated...
-    wxConstCast(this, wxFont)->RealizeResource();
-    return wxFontBase::GetNativeFontInfoUserDesc();
 }
 
 bool wxFont::IsFixedWidth() const

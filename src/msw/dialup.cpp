@@ -452,10 +452,12 @@ wxDialUpManagerMSW::wxDialUpManagerMSW()
 exit:
         if ( funcName )
         {
-            wxLogError(_("The version of remote access service (RAS) installed "
-                          "on this machine is too old, please upgrade (the "
-                          "following required function is missing: %s)."),
-                       funcName);
+            static const wxChar *msg = wxTRANSLATE(
+"The version of remote access service (RAS) installed on this machine is too\
+old, please upgrade (the following required function is missing: %s)."
+                                                   );
+
+            wxLogError(wxGetTranslation(msg), funcName);
             m_dllRas.Unload();
             return;
         }
@@ -876,12 +878,9 @@ bool wxDialUpManagerMSW::Dial(const wxString& nameOfISP,
     if ( dwRet != 0 )
     {
         // can't pass a wxWCharBuffer through ( ... )
-        if ( async )
-            wxLogError(_("Failed to initiate dialup connection: %s"),
-                       GetErrorString(dwRet).c_str());
-        else
-            wxLogError(_("Failed to establish dialup connection: %s"),
-                       GetErrorString(dwRet).c_str());
+        wxLogError(_("Failed to %s dialup connection: %s"),
+                   wxString(async ? _("initiate") : _("establish")).c_str(),
+                   GetErrorString(dwRet).c_str());
 
         // we should still call RasHangUp() if we got a non 0 connection
         if ( ms_hRasConnection )

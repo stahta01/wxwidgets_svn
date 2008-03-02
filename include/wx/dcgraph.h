@@ -14,37 +14,33 @@
 
 #if wxUSE_GRAPHICS_CONTEXT
 
-#include "wx/dc.h"
 #include "wx/geometry.h"
+#include "wx/dynarray.h"
 #include "wx/graphics.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindowDC;
+class WXDLLEXPORT wxWindowDC;
 
+#ifdef __WXMAC__
+#define wxGCDC wxDC
+#endif
 
-class WXDLLEXPORT wxGCDC: public wxDC
+class WXDLLEXPORT wxGCDC: 
+#ifdef __WXMAC__
+    public wxDCBase
+#else
+    public wxDC
+#endif
 {
-public:
-    wxGCDC( const wxWindowDC& dc );
-    wxGCDC( const wxMemoryDC& dc );
-    wxGCDC();
-    virtual ~wxGCDC();
- 
-    wxGraphicsContext* GetGraphicsContext();
-    void SetGraphicsContext( wxGraphicsContext* ctx );
-    
     DECLARE_DYNAMIC_CLASS(wxGCDC)
     DECLARE_NO_COPY_CLASS(wxGCDC)
-};
 
-
-class WXDLLEXPORT wxGCDCImpl: public wxDCImpl
-{
 public:
-    wxGCDCImpl( wxDC *owner, const wxWindowDC& dc );
-    wxGCDCImpl( wxDC *owner, const wxMemoryDC& dc );
-    wxGCDCImpl( wxDC *owner );
-    
-    virtual ~wxGCDCImpl();
+    wxGCDC(const wxWindowDC& dc);
+#ifdef __WXMSW__
+    wxGCDC( const wxMemoryDC& dc);
+#endif    
+    wxGCDC();
+    virtual ~wxGCDC();
 
     void Init();
 
@@ -60,8 +56,9 @@ public:
     virtual void StartPage();
     virtual void EndPage();
     
+    // to be virtualized on next major
     // flushing the content of this dc immediately onto screen
-    virtual void Flush();
+    void Flush();
 
     virtual void SetFont(const wxFont& font);
     virtual void SetPen(const wxPen& pen);
@@ -81,7 +78,12 @@ public:
     virtual wxSize GetPPI() const;
 
     virtual void SetMapMode(int mode);
+    virtual void SetUserScale(double x, double y);
 
+    virtual void SetLogicalScale(double x, double y);
+    virtual void SetLogicalOrigin(wxCoord x, wxCoord y);
+    virtual void SetDeviceOrigin(wxCoord x, wxCoord y);
+    virtual void SetAxisOrientation(bool xLeftRight, bool yBottomUp);
     virtual void SetLogicalFunction(int function);
 
     virtual void SetTextForeground(const wxColour& colour);
@@ -92,6 +94,7 @@ public:
     wxGraphicsContext* GetGraphicsContext() { return m_graphicContext; }
     virtual void SetGraphicsContext( wxGraphicsContext* ctx );
     
+protected:
     // the true implementations
     virtual bool DoFloodFill(wxCoord x, wxCoord y, const wxColour& col,
         int style = wxFLOOD_SURFACE);
@@ -111,7 +114,7 @@ public:
     virtual void DoDrawPoint(wxCoord x, wxCoord y);
 
 #if wxUSE_SPLINES
-    virtual void DoDrawSpline(const wxPointList *points);
+    virtual void DoDrawSpline(wxList *points);
 #endif
 
     virtual void DoDrawLine(wxCoord x1, wxCoord y1, wxCoord x2, wxCoord y2);
@@ -146,14 +149,6 @@ public:
         wxDC *source, wxCoord xsrc, wxCoord ysrc,
         int rop = wxCOPY, bool useMask = false, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
 
-    virtual bool DoStretchBlit(wxCoord xdest, wxCoord ydest,
-                               wxCoord dstWidth, wxCoord dstHeight,
-                               wxDC *source,
-                               wxCoord xsrc, wxCoord ysrc,
-                               wxCoord srcWidth, wxCoord srcHeight,
-                               int rop = wxCOPY, bool useMask = false,
-                               wxCoord xsrcMask = wxDefaultCoord, wxCoord ysrcMask = wxDefaultCoord);
-
     virtual void DoGetSize(int *,int *) const;
     virtual void DoGetSizeMM(int* width, int* height) const;
 
@@ -174,7 +169,7 @@ public:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     virtual bool DoGetPartialTextExtents(const wxString& text, wxArrayInt& widths) const;
 
@@ -188,10 +183,8 @@ protected:
     double m_formerScaleX, m_formerScaleY;
 
     wxGraphicsContext* m_graphicContext;
-    
-    DECLARE_CLASS(wxGCDCImpl)
-    DECLARE_NO_COPY_CLASS(wxGCDCImpl)
 };
 
-#endif // wxUSE_GRAPHICS_CONTEXT
+#endif
+
 #endif // _WX_GRAPHICS_DC_H_

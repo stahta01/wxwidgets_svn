@@ -64,7 +64,7 @@ static pascal void NavEventProc(
 wxDirDialog::wxDirDialog(wxWindow *parent,
                          const wxString& message,
                          const wxString& defaultPath,
-                         long WXUNUSED(style),
+                         long style,
                          const wxPoint& WXUNUSED(pos),
                          const wxSize& WXUNUSED(size),
                          const wxString& WXUNUSED(name))
@@ -87,7 +87,7 @@ int wxDirDialog::ShowModal()
     options.optionFlags &= ~kNavAllowMultipleFiles;
     if (err == noErr)
     {
-        wxCFStringRef message(m_message, GetFont().GetEncoding());
+        wxMacCFStringHolder message(m_message, m_font.GetEncoding());
         options.message = message;
         err = NavCreateChooseFolderDialog(&options, sStandardNavEventFilter , NULL,  this , &dialog);
         if (err == noErr)
@@ -135,7 +135,7 @@ int wxDirDialog::ShowModal()
     // apparently cancelling shouldn't change m_path
     if ( err != noErr && err != userCanceledErr )
         m_path = wxEmptyString ;
-
+    	
 	if ( dialog )
     	::NavDialogDispose(dialog);
 

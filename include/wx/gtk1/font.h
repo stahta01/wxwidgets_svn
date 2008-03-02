@@ -16,11 +16,11 @@
 // classes
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxPaintDC;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxDC;
+class WXDLLIMPEXP_CORE wxPaintDC;
+class WXDLLIMPEXP_CORE wxWindow;
 
-class WXDLLIMPEXP_FWD_CORE wxFont;
+class WXDLLIMPEXP_CORE wxFont;
 
 // ----------------------------------------------------------------------------
 // wxFont
@@ -91,10 +91,9 @@ public:
 
     GdkFont* GetInternalFont(float scale = 1.0) const;
 
-protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // no data :-)
 
+protected:
     virtual void DoSetNativeFontInfo( const wxNativeFontInfo& info );
 
 private:

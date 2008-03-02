@@ -33,7 +33,7 @@
     // gtk_object_sink
     #undef GTK_DISABLE_DEPRECATED
 #endif
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 // compatibility with older GTK+ versions:
 #ifndef GTK_STOCK_FILE
@@ -95,14 +95,17 @@ static const char *wxArtIDToStock(const wxArtID& id)
     //ART(wxART_REPORT_VIEW,                         )
     //ART(wxART_LIST_VIEW,                           )
     //ART(wxART_NEW_DIR,                             )
+#ifdef __WXGTK24__
     ART(wxART_FOLDER,                              GTK_STOCK_DIRECTORY)
     ART(wxART_FOLDER_OPEN,                         GTK_STOCK_DIRECTORY)
+#endif
     //ART(wxART_GO_DIR_UP,                           )
     ART(wxART_EXECUTABLE_FILE,                     GTK_STOCK_EXECUTE)
     ART(wxART_NORMAL_FILE,                         GTK_STOCK_FILE)
     ART(wxART_TICK_MARK,                           GTK_STOCK_APPLY)
     ART(wxART_CROSS_MARK,                          GTK_STOCK_CANCEL)
 
+#ifdef __WXGTK24__
     ART(wxART_FLOPPY,                              GTK_STOCK_FLOPPY)
     ART(wxART_CDROM,                               GTK_STOCK_CDROM)
     ART(wxART_HARDDISK,                            GTK_STOCK_HARDDISK)
@@ -124,6 +127,7 @@ static const char *wxArtIDToStock(const wxArtID& id)
 
     ART(wxART_FIND,                                GTK_STOCK_FIND)
     ART(wxART_FIND_AND_REPLACE,                    GTK_STOCK_FIND_AND_REPLACE)
+#endif
 
     return NULL;
 
@@ -223,6 +227,7 @@ static GdkPixbuf *CreateStockIcon(const char *stockid, GtkIconSize size)
                                     GTK_STATE_NORMAL, size, NULL, NULL);
 }
 
+#ifdef __WXGTK24__
 static GdkPixbuf *CreateThemeIcon(const char *iconname,
                                   GtkIconSize iconsize, const wxSize& sz)
 {
@@ -238,6 +243,7 @@ static GdkPixbuf *CreateThemeIcon(const char *iconname,
                     size.x,
                     (GtkIconLookupFlags)0, NULL);
 }
+#endif
 
 wxBitmap wxGTK2ArtProvider::CreateBitmap(const wxArtID& id,
                                          const wxArtClient& client,
@@ -257,8 +263,13 @@ wxBitmap wxGTK2ArtProvider::CreateBitmap(const wxArtID& id,
         stockid = id.ToAscii();
 
     GdkPixbuf *pixbuf = CreateStockIcon(stockid, stocksize);
-    if (!pixbuf)
+
+#ifdef __WXGTK24__
+    if (!pixbuf && !gtk_check_version(2,4,0))
+    {
         pixbuf = CreateThemeIcon(stockid, stocksize, size);
+    }
+#endif
 
     if (pixbuf && size != wxDefaultSize &&
         (size.x != gdk_pixbuf_get_width(pixbuf) ||

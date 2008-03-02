@@ -12,8 +12,6 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_TASKBARICON
-
 #include "wx/gtk/taskbarpriv.h"
 
 #ifndef WX_PRECOMP
@@ -22,8 +20,13 @@
     #include "wx/menu.h"
 #endif
 
-#include <gtk/gtk.h>
 #include <gdk/gdkx.h>
+
+#ifdef __WXGTK20__
+#include <gtk/gtkversion.h>
+#if GTK_CHECK_VERSION(2, 1, 0)
+
+#include "gtk/gtk.h"
 
 #include "eggtrayicon.h"
 
@@ -43,16 +46,6 @@ wxTaskBarIconAreaBase::wxTaskBarIconAreaBase()
             wxDEFAULT_FRAME_STYLE | wxFRAME_NO_TASKBAR | wxSIMPLE_BORDER |
             wxFRAME_SHAPED,
             wxEmptyString /*eggtray doesn't like setting wmclass*/);
-
-    // WM frame extents are not useful for wxTaskBarIcon
-    m_deferShow = false;
-    gulong handler_id = g_signal_handler_find(
-        m_widget,
-        GSignalMatchType(G_SIGNAL_MATCH_ID | G_SIGNAL_MATCH_DATA),
-        g_signal_lookup("property_notify_event", GTK_TYPE_WIDGET),
-        0, NULL, NULL, this);
-    if (handler_id != 0)
-        g_signal_handler_disconnect(m_widget, handler_id);
 
     m_invokingWindow = NULL;
 }
@@ -148,6 +141,7 @@ bool wxTaskBarIconAreaBase::DoPopupMenu( wxMenu *menu, int x, int y )
 
     return true;
 }
-
 #endif // wxUSE_MENUS_NATIVE
-#endif // wxUSE_TASKBARICON
+
+#endif // __WXGTK20__
+#endif // GTK_CHECK_VERSION(2, 1, 0)

@@ -20,6 +20,9 @@ class WXDLLEXPORT wxColour: public wxColourBase
 public:
     // constructors
     // ------------
+
+    // default
+    wxColour();
     DEFINE_STD_WXCOLOUR_CONSTRUCTORS
 
     // Copy ctors and assignment operators
@@ -31,7 +34,8 @@ public:
     virtual ~wxColour();
 
     // Accessors
-    virtual bool IsOk(void) const { return m_bIsInit; }
+    bool Ok() const { return IsOk(); }
+    bool IsOk(void) const {return m_bIsInit; }
 
     unsigned char Red(void) const { return m_cRed; }
     unsigned char Green(void) const { return m_cGreen; }

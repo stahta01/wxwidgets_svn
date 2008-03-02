@@ -63,7 +63,7 @@ public:
     virtual wxDirTraverseResult OnDir(const wxString& dirname) = 0;
 
     // called for each directory which we couldn't open during our traversal
-    // of the directory tree
+    // of the directory tyree
     //
     // this method can also return either wxDIR_STOP, wxDIR_IGNORE or
     // wxDIR_CONTINUE but the latter is treated specially: it means to retry
@@ -78,7 +78,7 @@ public:
 // wxDir: portable equivalent of {open/read/close}dir functions
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_BASE wxDirData;
+class WXDLLIMPEXP_BASE wxDirData;
 
 class WXDLLIMPEXP_BASE wxDir
 {
@@ -95,7 +95,7 @@ public:
     // opens the directory for enumeration, use IsOpened() to test success
     wxDir(const wxString& dir);
 
-    // dtor cleans up the associated resources
+    // dtor cleans up the associated ressources
     ~wxDir();
 
     // open the directory for enumerating
@@ -146,10 +146,8 @@ public:
                               const wxString& filespec,
                               int flags = wxDIR_DEFAULT);
 
-#if wxUSE_LONGLONG
     // returns the size of all directories recursively found in given path
     static wxULongLong GetTotalSize(const wxString &dir, wxArrayString *filesSkipped = NULL);
-#endif // wxUSE_LONGLONG
 
 private:
     friend class wxDirData;

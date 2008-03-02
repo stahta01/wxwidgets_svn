@@ -25,7 +25,6 @@
     #include "wx/brush.h"
     #include "wx/palette.h"
     #include "wx/icon.h"
-    #include "wx/iconbndl.h"
     #include "wx/cursor.h"
     #include "wx/settings.h"
     #include "wx/bitmap.h"
@@ -34,7 +33,7 @@
 #endif
 
 
-IMPLEMENT_ABSTRACT_CLASS(wxGDIObject, wxObject)
+IMPLEMENT_DYNAMIC_CLASS(wxGDIObject, wxObject)
 
 
 WXDLLIMPEXP_DATA_CORE(wxBrushList*) wxTheBrushList;
@@ -53,14 +52,9 @@ WXDLLIMPEXP_DATA_CORE(wxPen)     wxNullPen;
 #if wxUSE_PALETTE
 WXDLLIMPEXP_DATA_CORE(wxPalette) wxNullPalette;
 #endif
-WXDLLIMPEXP_DATA_CORE(wxIconBundle) wxNullIconBundle;
 
 const wxSize wxDefaultSize(wxDefaultCoord, wxDefaultCoord);
 const wxPoint wxDefaultPosition(wxDefaultCoord, wxDefaultCoord);
-
-#include "wx/listimpl.cpp"
-WX_DEFINE_LIST(wxPointList)
-
 
 #if wxUSE_EXTENDED_RTTI
 
@@ -112,6 +106,23 @@ wxRect::wxRect(const wxPoint& point1, const wxPoint& point2)
         y = point2.y;
     }
     height++;
+}
+
+bool wxRect::operator==(const wxRect& rect) const
+{
+    return ((x == rect.x) &&
+            (y == rect.y) &&
+            (width == rect.width) &&
+            (height == rect.height));
+}
+
+wxRect wxRect::operator+(const wxRect& rect) const
+{
+    int x1 = wxMin(this->x, rect.x);
+    int y1 = wxMin(this->y, rect.y);
+    int y2 = wxMax(y+height, rect.height+rect.y);
+    int x2 = wxMax(x+width, rect.width+rect.x);
+    return wxRect(x1, y1, x2-x1, y2-y1);
 }
 
 wxRect& wxRect::Union(const wxRect& rect)
@@ -217,38 +228,6 @@ bool wxRect::Intersects(const wxRect& rect) const
 
     // if there is no intersection, both width and height are 0
     return r.width != 0;
-}
-
-wxRect& wxRect::operator+=(const wxRect& rect)
-{
-    *this = *this + rect;
-    return *this;
-}
-
-
-wxRect& wxRect::operator*=(const wxRect& rect)
-{
-    *this = *this * rect;
-    return *this;
-}
-
-
-wxRect operator+(const wxRect& r1, const wxRect& r2)
-{
-    int x1 = wxMin(r1.x, r2.x);
-    int y1 = wxMin(r1.y, r2.y);
-    int y2 = wxMax(r1.y+r1.height, r2.height+r2.y);
-    int x2 = wxMax(r1.x+r1.width, r2.width+r2.x);
-    return wxRect(x1, y1, x2-x1, y2-y1);
-}
-
-wxRect operator*(const wxRect& r1, const wxRect& r2)
-{
-    int x1 = wxMax(r1.x, r2.x);
-    int y1 = wxMax(r1.y, r2.y);
-    int y2 = wxMin(r1.y+r1.height, r2.height+r2.y);
-    int x2 = wxMin(r1.x+r1.width, r2.width+r2.x);
-    return wxRect(x1, y1, x2-x1, y2-y1);
 }
 
 // ============================================================================

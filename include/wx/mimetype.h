@@ -26,8 +26,6 @@
 #include "wx/dynarray.h"
 #include "wx/arrstr.h"
 
-#include <stdarg.h>
-
 // fwd decls
 class WXDLLIMPEXP_FWD_BASE wxIconLocation;
 class WXDLLIMPEXP_FWD_BASE wxFileTypeImpl;
@@ -118,99 +116,16 @@ private:
 
 class WXDLLIMPEXP_BASE wxFileTypeInfo
 {
-private:
-    void DoVarArgInit(const wxString& mimeType,
-                      const wxString& openCmd,
-                      const wxString& printCmd,
-                      const wxString& desc,
-                      va_list argptr);
-
-    void VarArgInit(const wxString *mimeType,
-                    const wxString *openCmd,
-                    const wxString *printCmd,
-                    const wxString *desc,
-                    // the other parameters form a NULL terminated list of
-                    // extensions
-                    ...);
-
 public:
-    // NB: This is a helper to get implicit conversion of variadic ctor's
-    //     fixed arguments into something that can be passed to VarArgInit().
-    //     Do not use, it's used by the ctor only.
-    struct WXDLLIMPEXP_BASE CtorString
-    {
-        CtorString(const char *str) : m_str(str) {}
-        CtorString(const wchar_t *str) : m_str(str) {}
-        CtorString(const wxString& str) : m_str(str) {}
-        CtorString(const wxCStrData& str) : m_str(str) {}
-        CtorString(const wxCharBuffer& str) : m_str(str) {}
-        CtorString(const wxWCharBuffer& str) : m_str(str) {}
-
-        operator const wxString*() const { return &m_str; }
-
-        wxString m_str;
-    };
-
     // ctors
         // a normal item
-
-    // wxFileTypeInfo(const wxString& mimeType,
-    //               const wxString& openCmd,
-    //               const wxString& printCmd,
-    //               const wxString& desc,
-    //               // the other parameters form a list of extensions for this
-    //               // file type and should be terminated with wxNullPtr (not
-    //               // just NULL!)
-    //               ...);
-    WX_DEFINE_VARARG_FUNC_CTOR(wxFileTypeInfo,
-                               4, (const CtorString&,
-                                   const CtorString&,
-                                   const CtorString&,
-                                   const CtorString&),
-                               VarArgInit, VarArgInit)
-#ifdef __WATCOMC__
-    // workaround for http://bugzilla.openwatcom.org/show_bug.cgi?id=351
-    WX_VARARG_WATCOM_WORKAROUND_CTOR(
-                                wxFileTypeInfo,
-                                4, (const wxString&,
-                                    const wxString&,
-                                    const wxString&,
-                                    const wxString&),
-                                (CtorString(f1),
-                                 CtorString(f2),
-                                 CtorString(f3),
-                                 CtorString(f4)));
-    WX_VARARG_WATCOM_WORKAROUND_CTOR(
-                                wxFileTypeInfo,
-                                4, (const wxCStrData&,
-                                    const wxCStrData&,
-                                    const wxCStrData&,
-                                    const wxCStrData&),
-                                (CtorString(f1),
-                                 CtorString(f2),
-                                 CtorString(f3),
-                                 CtorString(f4)));
-    WX_VARARG_WATCOM_WORKAROUND_CTOR(
-                                wxFileTypeInfo,
-                                4, (const char*,
-                                    const char*,
-                                    const char*,
-                                    const char*),
-                                (CtorString(f1),
-                                 CtorString(f2),
-                                 CtorString(f3),
-                                 CtorString(f4)));
-    WX_VARARG_WATCOM_WORKAROUND_CTOR(
-                                wxFileTypeInfo,
-                                4, (const wchar_t*,
-                                    const wchar_t*,
-                                    const wchar_t*,
-                                    const wchar_t*),
-                                (CtorString(f1),
-                                 CtorString(f2),
-                                 CtorString(f3),
-                                 CtorString(f4)));
-#endif
+    wxFileTypeInfo(const wxChar *mimeType,
+                   const wxChar *openCmd,
+                   const wxChar *printCmd,
+                   const wxChar *desc,
+                   // the other parameters form a NULL terminated list of
+                   // extensions
+                   ...);
 
         // the array elements correspond to the parameters of the ctor above in
         // the same order
@@ -288,7 +203,7 @@ WX_DECLARE_USER_EXPORTED_OBJARRAY(wxFileTypeInfo, wxArrayFileTypeInfo,
 
 class WXDLLIMPEXP_BASE wxFileType
 {
-friend class WXDLLIMPEXP_FWD_BASE wxMimeTypesManagerImpl;  // it has access to m_impl
+friend class WXDLLIMPEXP_BASE wxMimeTypesManagerImpl;  // it has access to m_impl
 
 public:
     // An object of this class must be passed to Get{Open|Print}Command. The

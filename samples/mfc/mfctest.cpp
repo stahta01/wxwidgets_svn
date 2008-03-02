@@ -38,17 +38,8 @@
 //
 //     nmake -f makefile.vc BUILD=debug SHARED=0 DEBUG_RUNTIME_LIBS=0 RUNTIME_LIBS=static all
 //
-//     Unless the run-time library settings match for wxWidgets and MFC, you
-//     will get link errors for symbols such as __mbctype, __argc, and __argv 
-//
-// (3) If you see bogus memory leaks within the MSVC IDE on exit, in this
-//     sample or in your own project, you must be using __WXDEBUG__ +
-//     WXUSINGDLL + _AFXDLL
-//     Unfortunately this confuses the MSVC/MFC leak detector. To do away with
-//     these bogus memory leaks, add this to the list of link objects, make it
-//     first: mfc[version][u]d.lib
-//     -  [version] -> 42 or 70 or 80 etc
-//     -  u if using Unicode
+//     Unless the run-time library settings match for wxWidgets and MFC, you will get
+//     link errors for symbols such as __mbctype, __argc, and __argv 
 
 #include "stdafx.h"
 
@@ -223,8 +214,7 @@ int CTheApp::ExitInstance()
 // Override this to provide wxWidgets message loop compatibility
 BOOL CTheApp::PreTranslateMessage(MSG *msg)
 {
-    wxEventLoop * const
-        evtLoop = wx_static_cast(wxEventLoop *, wxEventLoop::GetActive());
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
     if ( evtLoop && evtLoop->PreProcessMessage(msg) )
         return TRUE;
 
@@ -242,9 +232,6 @@ BOOL CTheApp::OnIdle(LONG WXUNUSED(lCount))
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if !START_WITH_MFC_WINDOW
     // as we're not inside wxWidgets main loop, the default logic doesn't work
     // in our case and we need to do this explicitly

@@ -10,6 +10,8 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#if wxUSE_CONFIG
+
 #include "wx/utils.h"
 
 #ifndef WX_PRECOMP
@@ -91,7 +93,7 @@ bool wxGetResource(const wxString& section, const wxString& entry, float *value,
     bool succ = wxGetResource(section, entry, (wxChar **)&s, file);
     if (succ)
     {
-        *value = (float)wxStrtod(s, (wchar_t**) NULL);
+        *value = (float)wxStrtod(s, NULL);
         delete[] s;
         return true;
     }
@@ -104,7 +106,7 @@ bool wxGetResource(const wxString& section, const wxString& entry, long *value, 
     bool succ = wxGetResource(section, entry, (wxChar **)&s, file);
     if (succ)
     {
-        *value = wxStrtol(s, (wchar_t**) NULL, 10);
+        *value = wxStrtol(s, NULL, 10);
         delete[] s;
         return true;
     }
@@ -117,9 +119,11 @@ bool wxGetResource(const wxString& section, const wxString& entry, int *value, c
     bool succ = wxGetResource(section, entry, (wxChar **)&s, file);
     if (succ)
     {
-        *value = (int)wxStrtol(s, (wchar_t**) NULL, 10);
+        *value = (int)wxStrtol(s, NULL, 10);
         delete[] s;
         return true;
     }
     else return false;
 }
+
+#endif // wxUSE_CONFIG

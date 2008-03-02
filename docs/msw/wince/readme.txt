@@ -63,11 +63,11 @@ wxWidgets/CE Compilation
 
 NOTE: to generate targets not in the standard project files,
 you should rebuild the project files using Bakefile.
-Also, if you are building from a SVN version of wxWidgets,
+Also, if you are building from a CVS version of wxWidgets,
 you need to create eVC++ project files or get them from
 somewhere, such as the daily makefile builds here:
 
-http://biolpc22.york.ac.uk/pub/Daily_Makefiles/
+http://biolpc22.york.ac.uk/pub/CVS_Makefiles/
 
 See technote docs/tech/tn0016.txt for details on using Bakefile,
 and you can get Bakefile from:
@@ -129,6 +129,13 @@ coredll.lib wx_mono.lib wx_wxjpeg.lib wx_wxpng.lib wx_wxzlib.lib wx_wxexpat.lib 
 
 since the library names in the wxWidgets workspace were changed
 by VS 2005.
+
+Alternatively, don't edit the wxWidgets library project file, so the libraries will be
+placed under build\wince, and then edit the sample projects as follows:
+
+- prepend ..\..\build\wince\ to the Additional Library Directives line
+- change the Additional Dependencies as above, to:
+  coredll.lib wx_mono.lib wx_wxjpeg.lib wx_wxpng.lib wx_wxzlib.lib wx_wxexpat.lib commctrl.lib winsock.lib wininet.lib
 
 Status
 ======

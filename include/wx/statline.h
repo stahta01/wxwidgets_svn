@@ -28,7 +28,7 @@
 // ----------------------------------------------------------------------------
 
 // the default name for objects of class wxStaticLine
-extern WXDLLEXPORT_DATA(const char) wxStaticLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStaticLineNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxStaticLine - a line in a dialog
@@ -50,9 +50,6 @@ public:
     virtual bool AcceptsFocus() const { return false; }
 
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // set the right size for the right dimension
     wxSize AdjustSize(const wxSize& size) const
     {

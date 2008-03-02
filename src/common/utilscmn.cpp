@@ -1,4 +1,3 @@
-/////////////////////////////////////////////////////////////////////////////
 // Name:        src/common/utilscmn.cpp
 // Purpose:     Miscellaneous utility functions and classes
 // Author:      Julian Smart
@@ -75,13 +74,11 @@
     #include "wx/statusbr.h"
 #endif // wxUSE_GUI
 
-#ifndef __WXPALMOS5__
 #ifndef __WXWINCE__
 #include <time.h>
 #else
 #include "wx/msw/wince/time.h"
 #endif
-#endif // ! __WXPALMOS5__
 
 #ifdef __WXMAC__
 #include "wx/mac/private.h"
@@ -90,21 +87,15 @@
 #endif
 #endif
 
-#ifndef __WXPALMOS5__
 #if !defined(__MWERKS__) && !defined(__WXWINCE__)
     #include <sys/types.h>
     #include <sys/stat.h>
 #endif
-#endif // ! __WXPALMOS5__
 
 #if defined(__WXMSW__)
     #include "wx/msw/private.h"
     #include "wx/msw/registry.h"
     #include <shellapi.h> // needed for SHELLEXECUTEINFO
-#endif
-
-#if wxUSE_GUI && defined(__WXGTK__)
-    #include <gtk/gtk.h>    // for GTK_XXX_VERSION constants
 #endif
 
 #if wxUSE_BASE
@@ -116,6 +107,97 @@
 // ============================================================================
 // implementation
 // ============================================================================
+
+#if WXWIN_COMPATIBILITY_2_4
+
+wxChar *
+copystring (const wxChar *s)
+{
+    if (s == NULL) s = wxEmptyString;
+    size_t len = wxStrlen (s) + 1;
+
+    wxChar *news = new wxChar[len];
+    memcpy (news, s, len * sizeof(wxChar));    // Should be the fastest
+
+    return news;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
+// ----------------------------------------------------------------------------
+// String <-> Number conversions (deprecated)
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+
+WXDLLIMPEXP_DATA_BASE(const wxChar *) wxFloatToStringStr = wxT("%.2f");
+WXDLLIMPEXP_DATA_BASE(const wxChar *) wxDoubleToStringStr = wxT("%.2f");
+
+void
+StringToFloat (const wxChar *s, float *number)
+{
+    if (s && *s && number)
+        *number = (float) wxStrtod (s, (wxChar **) NULL);
+}
+
+void
+StringToDouble (const wxChar *s, double *number)
+{
+    if (s && *s && number)
+        *number = wxStrtod (s, (wxChar **) NULL);
+}
+
+wxChar *
+FloatToString (float number, const wxChar *fmt)
+{
+    static wxChar buf[256];
+
+    wxSprintf (buf, fmt, number);
+    return buf;
+}
+
+wxChar *
+DoubleToString (double number, const wxChar *fmt)
+{
+    static wxChar buf[256];
+
+    wxSprintf (buf, fmt, number);
+    return buf;
+}
+
+void
+StringToInt (const wxChar *s, int *number)
+{
+    if (s && *s && number)
+        *number = (int) wxStrtol (s, (wxChar **) NULL, 10);
+}
+
+void
+StringToLong (const wxChar *s, long *number)
+{
+    if (s && *s && number)
+        *number = wxStrtol (s, (wxChar **) NULL, 10);
+}
+
+wxChar *
+IntToString (int number)
+{
+    static wxChar buf[20];
+
+    wxSprintf (buf, wxT("%d"), number);
+    return buf;
+}
+
+wxChar *
+LongToString (long number)
+{
+    static wxChar buf[20];
+
+    wxSprintf (buf, wxT("%ld"), number);
+    return buf;
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 // Array used in DecToHex conversion routine.
 static wxChar hexArray[] = wxT("0123456789ABCDEF");
@@ -146,15 +228,6 @@ void wxDecToHex(int dec, wxChar *buf)
     buf[0] = hexArray[firstDigit];
     buf[1] = hexArray[secondDigit];
     buf[2] = 0;
-}
-
-// Convert decimal integer to 2 characters
-void wxDecToHex(int dec, char* ch1, char* ch2)
-{
-    int firstDigit = (int)(dec/16.0);
-    int secondDigit = (int)(dec - (firstDigit*16.0));
-    (*ch1) = (char) hexArray[firstDigit];
-    (*ch2) = (char) hexArray[secondDigit];
 }
 
 // Convert decimal integer to 2-character hex string
@@ -648,319 +721,25 @@ long wxExecute(const wxString& command,
 }
 
 // ----------------------------------------------------------------------------
-// wxApp::Yield() wrappers for backwards compatibility
-// ----------------------------------------------------------------------------
-
-bool wxYield()
-{
-    return wxTheApp && wxTheApp->Yield();
-}
-
-bool wxYieldIfNeeded()
-{
-    return wxTheApp && wxTheApp->Yield(true);
-}
-
-// Id generation
-static long wxCurrentId = 100;
-
-long wxNewId()
-{
-    // skip the part of IDs space that contains hard-coded values:
-    if (wxCurrentId == wxID_LOWEST)
-        wxCurrentId = wxID_HIGHEST + 1;
-
-    return wxCurrentId++;
-}
-
-long
-wxGetCurrentId(void) { return wxCurrentId; }
-
-void
-wxRegisterId (long id)
-{
-  if (id >= wxCurrentId)
-    wxCurrentId = id + 1;
-}
-
-// ----------------------------------------------------------------------------
-// wxQsort, adapted by RR to allow user_data
-// ----------------------------------------------------------------------------
-
-/* This file is part of the GNU C Library.
-   Written by Douglas C. Schmidt (schmidt@ics.uci.edu).
-
-   Douglas Schmidt kindly gave permission to relicence the
-   code under the wxWindows licence:
-
-From: "Douglas C. Schmidt" <schmidt@dre.vanderbilt.edu>
-To: Robert Roebling <robert.roebling@uni-ulm.de>
-Subject: Re: qsort licence
-Date: Mon, 23 Jul 2007 03:44:25 -0500
-Sender: schmidt@dre.vanderbilt.edu
-Message-Id: <20070723084426.64F511000A8@tango.dre.vanderbilt.edu>
-
-Hi Robert,
-
-> [...] I'm asking if you'd be willing to relicence your code
-> under the wxWindows licence. [...]
-
-That's fine with me [...]
-
-Thanks,
-
-     Doug */
-
-
-/* Byte-wise swap two items of size SIZE. */
-#define SWAP(a, b, size)                                                      \
-  do                                                                              \
-    {                                                                              \
-      register size_t __size = (size);                                              \
-      register char *__a = (a), *__b = (b);                                      \
-      do                                                                      \
-        {                                                                      \
-          char __tmp = *__a;                                                      \
-          *__a++ = *__b;                                                      \
-          *__b++ = __tmp;                                                      \
-        } while (--__size > 0);                                                      \
-    } while (0)
-
-/* Discontinue quicksort algorithm when partition gets below this size.
-   This particular magic number was chosen to work best on a Sun 4/260. */
-#define MAX_THRESH 4
-
-/* Stack node declarations used to store unfulfilled partition obligations. */
-typedef struct
-  {
-    char *lo;
-    char *hi;
-  } stack_node;
-
-/* The next 4 #defines implement a very fast in-line stack abstraction. */
-#define STACK_SIZE        (8 * sizeof(unsigned long int))
-#define PUSH(low, high)   ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
-#define POP(low, high)    ((void) (--top, (low = top->lo), (high = top->hi)))
-#define STACK_NOT_EMPTY   (stack < top)
-
-
-/* Order size using quicksort.  This implementation incorporates
-   four optimizations discussed in Sedgewick:
-
-   1. Non-recursive, using an explicit stack of pointer that store the
-      next array partition to sort.  To save time, this maximum amount
-      of space required to store an array of MAX_INT is allocated on the
-      stack.  Assuming a 32-bit integer, this needs only 32 *
-      sizeof(stack_node) == 136 bits.  Pretty cheap, actually.
-
-   2. Chose the pivot element using a median-of-three decision tree.
-      This reduces the probability of selecting a bad pivot value and
-      eliminates certain extraneous comparisons.
-
-   3. Only quicksorts TOTAL_ELEMS / MAX_THRESH partitions, leaving
-      insertion sort to order the MAX_THRESH items within each partition.
-      This is a big win, since insertion sort is faster for small, mostly
-      sorted array segments.
-
-   4. The larger of the two sub-partitions is always pushed onto the
-      stack first, with the algorithm then concentrating on the
-      smaller partition.  This *guarantees* no more than log (n)
-      stack size is needed (actually O(1) in this case)!  */
-
-void wxQsort(void *const pbase, size_t total_elems,
-                             size_t size, CMPFUNCDATA cmp, const void* user_data)
-{
-  register char *base_ptr = (char *) pbase;
-  const size_t max_thresh = MAX_THRESH * size;
-
-  if (total_elems == 0)
-    /* Avoid lossage with unsigned arithmetic below.  */
-    return;
-
-  if (total_elems > MAX_THRESH)
-    {
-      char *lo = base_ptr;
-      char *hi = &lo[size * (total_elems - 1)];
-      stack_node stack[STACK_SIZE];
-      stack_node *top = stack;
-
-      PUSH (NULL, NULL);
-
-      while (STACK_NOT_EMPTY)
-        {
-          char *left_ptr;
-          char *right_ptr;
-
-          /* Select median value from among LO, MID, and HI. Rearrange
-             LO and HI so the three values are sorted. This lowers the
-             probability of picking a pathological pivot value and
-             skips a comparison for both the LEFT_PTR and RIGHT_PTR. */
-
-          char *mid = lo + size * ((hi - lo) / size >> 1);
-
-          if ((*cmp) ((void *) mid, (void *) lo, user_data) < 0)
-            SWAP (mid, lo, size);
-          if ((*cmp) ((void *) hi, (void *) mid, user_data) < 0)
-            SWAP (mid, hi, size);
-          else
-            goto jump_over;
-          if ((*cmp) ((void *) mid, (void *) lo, user_data) < 0)
-            SWAP (mid, lo, size);
-        jump_over:;
-          left_ptr  = lo + size;
-          right_ptr = hi - size;
-
-          /* Here's the famous ``collapse the walls'' section of quicksort.
-             Gotta like those tight inner loops!  They are the main reason
-             that this algorithm runs much faster than others. */
-          do
-            {
-              while ((*cmp) ((void *) left_ptr, (void *) mid, user_data) < 0)
-                left_ptr += size;
-
-              while ((*cmp) ((void *) mid, (void *) right_ptr, user_data) < 0)
-                right_ptr -= size;
-
-              if (left_ptr < right_ptr)
-                {
-                  SWAP (left_ptr, right_ptr, size);
-                  if (mid == left_ptr)
-                    mid = right_ptr;
-                  else if (mid == right_ptr)
-                    mid = left_ptr;
-                  left_ptr += size;
-                  right_ptr -= size;
-                }
-              else if (left_ptr == right_ptr)
-                {
-                  left_ptr += size;
-                  right_ptr -= size;
-                  break;
-                }
-            }
-          while (left_ptr <= right_ptr);
-
-          /* Set up pointers for next iteration.  First determine whether
-             left and right partitions are below the threshold size.  If so,
-             ignore one or both.  Otherwise, push the larger partition's
-             bounds on the stack and continue sorting the smaller one. */
-
-          if ((size_t) (right_ptr - lo) <= max_thresh)
-            {
-              if ((size_t) (hi - left_ptr) <= max_thresh)
-                /* Ignore both small partitions. */
-                POP (lo, hi);
-              else
-                /* Ignore small left partition. */
-                lo = left_ptr;
-            }
-          else if ((size_t) (hi - left_ptr) <= max_thresh)
-            /* Ignore small right partition. */
-            hi = right_ptr;
-          else if ((right_ptr - lo) > (hi - left_ptr))
-            {
-              /* Push larger left partition indices. */
-              PUSH (lo, right_ptr);
-              lo = left_ptr;
-            }
-          else
-            {
-              /* Push larger right partition indices. */
-              PUSH (left_ptr, hi);
-              hi = right_ptr;
-            }
-        }
-    }
-
-  /* Once the BASE_PTR array is partially sorted by quicksort the rest
-     is completely sorted using insertion sort, since this is efficient
-     for partitions below MAX_THRESH size. BASE_PTR points to the beginning
-     of the array to sort, and END_PTR points at the very last element in
-     the array (*not* one beyond it!). */
-
-  {
-    char *const end_ptr = &base_ptr[size * (total_elems - 1)];
-    char *tmp_ptr = base_ptr;
-    char *thresh = base_ptr + max_thresh;
-    if ( thresh > end_ptr )
-        thresh = end_ptr;
-    register char *run_ptr;
-
-    /* Find smallest element in first threshold and place it at the
-       array's beginning.  This is the smallest array element,
-       and the operation speeds up insertion sort's inner loop. */
-
-    for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size)
-      if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr, user_data) < 0)
-        tmp_ptr = run_ptr;
-
-    if (tmp_ptr != base_ptr)
-      SWAP (tmp_ptr, base_ptr, size);
-
-    /* Insertion sort, running from left-hand-side up to right-hand-side.  */
-
-    run_ptr = base_ptr + size;
-    while ((run_ptr += size) <= end_ptr)
-      {
-        tmp_ptr = run_ptr - size;
-        while ((*cmp) ((void *) run_ptr, (void *) tmp_ptr, user_data) < 0)
-          tmp_ptr -= size;
-
-        tmp_ptr += size;
-        if (tmp_ptr != run_ptr)
-          {
-            char *trav;
-
-            trav = run_ptr + size;
-            while (--trav >= run_ptr)
-              {
-                char c = *trav;
-                char *hi, *lo;
-
-                for (hi = lo = trav; (lo -= size) >= tmp_ptr; hi = lo)
-                  *hi = *lo;
-                *hi = c;
-              }
-          }
-      }
-  }
-}
-
-
-
-#endif // wxUSE_BASE
-
-// ============================================================================
-// GUI-only functions from now on
-// ============================================================================
-
-#if wxUSE_GUI
-
-// ----------------------------------------------------------------------------
 // Launch default browser
 // ----------------------------------------------------------------------------
 
-#ifdef __WXCOCOA__
-// Private method in Objective-C++ source file.
-bool wxCocoaLaunchDefaultBrowser(const wxString& url, int flags);
-#endif
+#include "wx/private/browserhack28.h"
 
-bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
+static bool wxLaunchDefaultBrowserBaseImpl(const wxString& url, int flags);
+
+// Use wxLaunchDefaultBrowserBaseImpl by default
+static wxLaunchDefaultBrowserImpl_t s_launchBrowserImpl = &wxLaunchDefaultBrowserBaseImpl;
+
+// Function the GUI library can call to provide a better implementation
+WXDLLIMPEXP_BASE void wxSetLaunchDefaultBrowserImpl(wxLaunchDefaultBrowserImpl_t newImpl)
+{
+    s_launchBrowserImpl = newImpl!=NULL ? newImpl : &wxLaunchDefaultBrowserBaseImpl;
+}
+
+static bool wxLaunchDefaultBrowserBaseImpl(const wxString& url, int flags)
 {
     wxUnusedVar(flags);
-
-    // set the scheme of url to http if it does not have one
-    // RR: This doesn't work if the url is just a local path
-    wxString url(urlOrig);
-    wxURI uri(url);
-    if ( !uri.HasScheme() )
-    {
-        if (wxFileExists(urlOrig))
-            url.Prepend( wxT("file://") );
-        else
-            url.Prepend(wxT("http://"));
-    }
-
 
 #if defined(__WXMSW__)
 
@@ -969,6 +748,7 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
     {
         // ShellExecuteEx() opens the URL in an existing window by default so
         // we can't use it if we need a new window
+        wxURI uri(url);
         wxRegKey key(wxRegKey::HKCR, uri.GetScheme() + _T("\\shell\\open"));
         if ( !key.Exists() )
         {
@@ -1037,7 +817,7 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
 
     ::ShellExecuteEx(&sei);
 
-    const INT_PTR nResult = (INT_PTR)sei.hInstApp;
+    const int nResult = (int) sei.hInstApp;
 
     // Firefox returns file not found for some reason, so make an exception
     // for it
@@ -1050,10 +830,6 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
 #endif // __WXDEBUG__
         return true;
     }
-#elif defined(__WXCOCOA__)
-    // NOTE: We need to call the real implementation from src/cocoa/utils.mm
-    // because the code must use Objective-C features.
-    return wxCocoaLaunchDefaultBrowser(url, flags);
 #elif defined(__WXMAC__)
     OSStatus err;
     ICInstance inst;
@@ -1063,6 +839,9 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
     err = ICStart(&inst, 'STKA'); // put your app creator code here
     if (err == noErr)
     {
+#if !TARGET_CARBON
+        err = ICFindConfigFile(inst, 0, NULL);
+#endif
         if (err == noErr)
         {
             ConstStr255Param hint = 0;
@@ -1080,24 +859,10 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
         wxLogDebug(wxT("ICStart error %d"), (int) err);
         return false;
     }
-#else
+#else 
     // (non-Mac, non-MSW)
 
 #ifdef __UNIX__
-
-    // Our best best is to use xdg-open from freedesktop.org cross-desktop
-    // compatibility suite xdg-utils
-    // (see http://portland.freedesktop.org/wiki/) -- this is installed on
-    // most modern distributions and may be tweaked by them to handle
-    // distribution specifics. Only if that fails, try to find the right
-    // browser ourselves.
-    wxString path, xdg_open;
-    if ( wxGetEnv("PATH", &path) &&
-         wxFindFileInPath(&xdg_open, path, "xdg-open") )
-    {
-        if ( wxExecute(xdg_open + " " + url) )
-            return true;
-    }
 
     wxString desktop = wxTheApp->GetTraits()->GetDesktopEnvironment();
 
@@ -1155,14 +920,77 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
         return ok;
 
     // no file type for HTML extension
-    wxLogError(_("No default application configured for HTML files."));
+    wxLogError(_T("No default application configured for HTML files."));
 
 #endif // !wxUSE_MIMETYPE && !__WXMSW__
+    return false;
+}
 
-    wxLogSysError(_("Failed to open URL \"%s\" in default browser."),
+bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
+{
+    // set the scheme of url to http if it does not have one
+    // RR: This doesn't work if the url is just a local path
+    wxString url(urlOrig);
+    wxURI uri(url);
+    if ( !uri.HasScheme() )
+    {
+        if (wxFileExists(urlOrig))
+            url.Prepend( wxT("file://") );
+        else
+            url.Prepend(wxT("http://"));
+    }
+
+    if(s_launchBrowserImpl(url, flags))
+        return true;
+
+    wxLogSysError(_T("Failed to open URL \"%s\" in default browser."),
                   url.c_str());
 
     return false;
+}
+
+// ----------------------------------------------------------------------------
+// wxApp::Yield() wrappers for backwards compatibility
+// ----------------------------------------------------------------------------
+
+bool wxYield()
+{
+    return wxTheApp && wxTheApp->Yield();
+}
+
+bool wxYieldIfNeeded()
+{
+    return wxTheApp && wxTheApp->Yield(true);
+}
+
+#endif // wxUSE_BASE
+
+// ============================================================================
+// GUI-only functions from now on
+// ============================================================================
+
+#if wxUSE_GUI
+
+// Id generation
+static long wxCurrentId = 100;
+
+long wxNewId()
+{
+    // skip the part of IDs space that contains hard-coded values:
+    if (wxCurrentId == wxID_LOWEST)
+        wxCurrentId = wxID_HIGHEST + 1;
+
+    return wxCurrentId++;
+}
+
+long
+wxGetCurrentId(void) { return wxCurrentId; }
+
+void
+wxRegisterId (long id)
+{
+  if (id >= wxCurrentId)
+    wxCurrentId = id + 1;
 }
 
 // ----------------------------------------------------------------------------
@@ -1172,7 +1000,7 @@ bool wxLaunchDefaultBrowser(const wxString& urlOrig, int flags)
 wxChar *wxStripMenuCodes(const wxChar *in, wxChar *out)
 {
 #if wxUSE_MENUS
-    wxString s = wxMenuItem::GetLabelText(in);
+    wxString s = wxMenuItem::GetLabelFromText(in);
 #else
     wxString str(in);
     wxString s = wxStripMenuCodes(str);
@@ -1184,6 +1012,7 @@ wxChar *wxStripMenuCodes(const wxChar *in, wxChar *out)
     }
     else
     {
+        // MYcopystring - for easier search...
         out = new wxChar[s.length() + 1];
         wxStrcpy(out, s.c_str());
     }
@@ -1261,19 +1090,13 @@ wxFindWindowByName (const wxString& name, wxWindow * parent)
 
 // Returns menu item id or wxNOT_FOUND if none.
 int
-wxFindMenuItemId(wxFrame *frame,
-                 const wxString& menuString,
-                 const wxString& itemString)
+wxFindMenuItemId (wxFrame * frame, const wxString& menuString, const wxString& itemString)
 {
 #if wxUSE_MENUS
     wxMenuBar *menuBar = frame->GetMenuBar ();
     if ( menuBar )
         return menuBar->FindMenuItem (menuString, itemString);
-#else // !wxUSE_MENUS
-    wxUnusedVar(frame);
-    wxUnusedVar(menuString);
-    wxUnusedVar(itemString);
-#endif // wxUSE_MENUS/!wxUSE_MENUS
+#endif // wxUSE_MENUS
 
     return wxNOT_FOUND;
 }
@@ -1387,46 +1210,6 @@ int wxMessageBox(const wxString& message, const wxString& caption, long style,
     return wxCANCEL;
 }
 
-void wxInfoMessageBox(wxWindow* parent)
-{
-    // don't translate these strings, they're for diagnostics purposes only
-    wxString msg;
-    msg.Printf(_T("wxWidgets Library (%s port)\n")
-               _T("Version %d.%d.%d%s%s, compiled at %s %s\n")
-               _T("Runtime version of toolkit used is %d.%d.%s\n")
-               _T("Copyright (c) 1995-2007 wxWidgets team"),
-               wxPlatformInfo::Get().GetPortIdName().c_str(),
-               wxMAJOR_VERSION,
-               wxMINOR_VERSION,
-               wxRELEASE_NUMBER,
-#if wxUSE_UNICODE
-               L" (Unicode)",
-#else
-               wxEmptyString,
-#endif
-#ifdef __WXDEBUG__
-               _T(" Debug build"),
-#else
-               wxEmptyString,
-#endif
-               __TDATE__,
-               __TTIME__,
-               wxPlatformInfo::Get().GetToolkitMajorVersion(),
-               wxPlatformInfo::Get().GetToolkitMinorVersion(),
-#ifdef __WXGTK__
-               wxString::Format("\nThe compile-time GTK+ version is %d.%d.%d.",
-                                GTK_MAJOR_VERSION,
-                                GTK_MINOR_VERSION,
-                                GTK_MICRO_VERSION).c_str()
-#else
-               wxEmptyString
-#endif
-               );
-    wxMessageBox(msg, _T("wxWidgets information"),
-                 wxICON_INFORMATION | wxOK,
-                 parent);
-}
-
 #endif // wxUSE_MSGDLG
 
 #if wxUSE_TEXTDLG
@@ -1481,56 +1264,24 @@ wxString wxGetPasswordFromUser(const wxString& message,
 
 #if wxUSE_COLOURDLG
 
-wxColour wxGetColourFromUser(wxWindow *parent, 
-                             const wxColour& colInit, 
-                             const wxString& caption,
-                             wxColourData *ptrData)
+wxColour wxGetColourFromUser(wxWindow *parent, const wxColour& colInit, const wxString& caption)
 {
-    // contains serialized representation of wxColourData used the last time
-    // the dialog was shown: we want to reuse it the next time in order to show
-    // the same custom colours to the user (and we can't just have static
-    // wxColourData itself because it's a GUI object and so should be destroyed
-    // before GUI shutdown and doing it during static cleanup is too late)
-    static wxString s_strColourData;
-
     wxColourData data;
-    if ( !ptrData )
+    data.SetChooseFull(true);
+    if ( colInit.Ok() )
     {
-        ptrData = &data;
-        if ( !s_strColourData.empty() )
-        {
-            if ( !data.FromString(s_strColourData) )
-            {
-                wxFAIL_MSG( "bug in wxColourData::FromString()?" );
-            }
-
-#ifdef __WXMSW__
-            // we don't get back the "choose full" flag value from the native
-            // dialog and so we can't preserve it between runs, so we decide to
-            // always use it as it seems better than not using it (user can
-            // just ignore the extra controls in the dialog but having to click
-            // a button each time to show them would be very annoying
-            data.SetChooseFull(true);
-#endif // __WXMSW__
-        }
-    }
-
-    if ( colInit.IsOk() )
-    {
-        ptrData->SetColour(colInit);
+        data.SetColour((wxColour &)colInit); // const_cast
     }
 
     wxColour colRet;
-    wxColourDialog dialog(parent, ptrData);
+    wxColourDialog dialog(parent, &data);
     if (!caption.empty())
         dialog.SetTitle(caption);
     if ( dialog.ShowModal() == wxID_OK )
     {
-        *ptrData = dialog.GetColourData();
-        colRet = ptrData->GetColour();
-        s_strColourData = ptrData->ToString();
+        colRet = dialog.GetColourData().GetColour();
     }
-    //else: leave colRet invalid
+    //else: leave it invalid
 
     return colRet;
 }

@@ -252,12 +252,12 @@ bool wxBrush::operator==(const wxBrush& brush) const
     return m_refData ? (brushData && *M_BRUSHDATA == *brushData) : !brushData;
 }
 
-wxGDIRefData *wxBrush::CreateGDIRefData() const
+wxObjectRefData *wxBrush::CreateRefData() const
 {
     return new wxBrushRefData;
 }
 
-wxGDIRefData *wxBrush::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBrush::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBrushRefData(*(const wxBrushRefData *)data);
 }

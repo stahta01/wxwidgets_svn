@@ -43,14 +43,6 @@ used if wider fonts selection is more important than higher quality.}
 \twocolwidtha{7cm}
 \begin{twocollist}\itemsep=0pt
 \twocolitem{{\bf Option}}{{\bf Value}}
-\twocolitem{gtk.tlw.can-set-transparent}{\helpref{wxTopLevelWindow::CanSetTransparent()}{wxtoplevelwindowcansettransparent} 
-method normally tries to detect automatically whether transparency for top
-level windows is currently supported, however this may sometimes fail and this
-option allows to override the automatic detection. Setting it to $1$ makes the
-transparency be always available (setting it can still fail, of course) and
-setting it to $0$ makes it always unavailable.}
-\twocolitem{gtk.desktop}{This option can be set to override the default desktop
-environment determination. Supported values are \texttt{GNOME} and \texttt{KDE}.}
 \twocolitem{gtk.window.force-background-colour}{If 1, the backgrounds of windows with the wxBG\_STYLE\_COLOUR background style are cleared forcibly instead
 of relying on the underlying GTK+ window colour. This works around a display problem when running applications under KDE with the gtk-qt theme installed (0.6 and below).}
 \end{twocollist}

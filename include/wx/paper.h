@@ -68,7 +68,7 @@ private:
 
 WX_DECLARE_STRING_HASH_MAP(wxPrintPaperType*, wxStringToPrintPaperTypeHashMap);
 
-class WXDLLIMPEXP_FWD_CORE wxPrintPaperTypeList;
+class WXDLLEXPORT wxPrintPaperTypeList;
 
 class WXDLLEXPORT wxPrintPaperDatabase
 {

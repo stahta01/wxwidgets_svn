@@ -15,10 +15,6 @@ No parent class.
 
 <wx/memory.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \overview{Overview}{wxdebugcontextoverview}
@@ -216,15 +212,6 @@ This is obsolete, replaced by \helpref{wxLog}{wxlog} functionality.
 \wxheading{See also}
 
 \helpref{wxDebugContext::GetLevel}{wxdebugcontextgetlevel}
-
-\membersection{wxDebugContext::SetShutdownNotifyFunction}\label{wxdebugcontextsetshutdownnotifyhook}
-
-\func{void}{SetShutdownNotifyFunction}{\param{wxShutdownNotifyFunction }{func}}
-
-Installs a function to be called at the end of wxWidgets shutdown. It will be called after
-all files with global instances of wxDebugContextDumpDelayCounter have run their destructors.
-
-The shutdown function must be take no parameters and return nothing.
 
 \membersection{wxDebugContext::SetStandardError}\label{wxdebugcontextsetstandarderror}
 

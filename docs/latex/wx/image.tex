@@ -36,12 +36,10 @@ means that the pixel is 100\% opaque.
 
 Unlike RGB data, not all images have an alpha channel and before using
 \helpref{GetAlpha}{wximagegetalpha} you should check if this image contains
-an alpha channel with \helpref{HasAlpha}{wximagehasalpha}. Note that currently
-only the PNG format has full alpha channel support so only the images loaded
-from PNG files can have alpha and, if you initialize the image alpha channel
-yourself using \helpref{SetAlpha}{wximagesetalpha}, you should save it in PNG
-format to avoid losing it.
-
+an alpha channel with \helpref{HasAlpha}{wximagehasalpha}. Note that currently only
+images loaded from PNG files with transparency information will have an alpha
+channel but alpha support will be added to the other formats as well (as well
+as support for saving images with alpha channel which also isn't implemented).
 
 \wxheading{Available image handlers}
 
@@ -81,10 +79,6 @@ PNM format, {\bf wxPNMHandler} will always save as raw RGB.
 \wxheading{Include files}
 
 <wx/image.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{See also}
 
@@ -781,8 +775,7 @@ the user.
 \wxheading{See also}
 
 \helpref{wxImageHandler}{wximagehandler},
-\helpref{wxInitAllImageHandlers}{wxinitallimagehandlers},
-\helpref{wxQuantize}{wxquantize}
+\helpref{wxInitAllImageHandlers}{wxinitallimagehandlers}
 
 
 \membersection{wxImage::InsertHandler}\label{wximageinserthandler}
@@ -945,12 +938,6 @@ true if the handler was found and removed, false otherwise.
 Returns a mirrored copy of the image. The parameter {\it horizontally}
 indicates the orientation.
 
-
-\membersection{wxImage::Paste}\label{wximagepaste}
-
-\func{void}{Paste}{\param{const wxImage\& }{image}, \param{int }{x}, \param{int }{y}}
-
-Copy the data of the given \arg{image} to the specified position in this image.
 
 \membersection{wxImage::Replace}\label{wximagereplace}
 
@@ -1166,10 +1153,8 @@ Returns a resized version of this image without scaling it by adding either a bo
 with the given colour or cropping as necessary. The image is pasted into a new
 image with the given {\it size} and background colour at the position {\it pos}
 relative to the upper left of the new image. If {\it red = green = blue = -1}
-then the areas of the larger image not covered by this image are made
-transparent by filling them with the image mask colour (which will be allocated
-automatically if it isn't currently set). Otherwise, the areas will be filled
-with the colour with the specified RGB components.
+then use either the current mask colour if set or find, use, and set a
+suitable mask colour for any newly exposed areas.
 
 \wxheading{See also}
 
@@ -1340,10 +1325,6 @@ created by IJG.)
 \wxheading{Include files}
 
 <wx/image.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{See also}
 

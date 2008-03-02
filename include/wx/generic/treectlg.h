@@ -112,13 +112,7 @@ public:
     // ----------
 
     virtual wxTreeItemId GetRootItem() const { return m_anchor; }
-    virtual wxTreeItemId GetSelection() const
-    {
-        wxASSERT_MSG( !HasFlag(wxTR_MULTIPLE),
-                       wxT("must use GetSelections() with this control") );
-
-        return m_current;
-    }
+    virtual wxTreeItemId GetSelection() const { return m_current; }
     virtual size_t GetSelections(wxArrayTreeItemIds&) const;
 
     virtual wxTreeItemId GetItemParent(const wxTreeItemId& item) const;
@@ -191,12 +185,29 @@ public:
     void Edit( const wxTreeItemId& item ) { EditLabel(item); }
 #endif // WXWIN_COMPATIBILITY_2_6
 
+#if WXWIN_COMPATIBILITY_2_4
+    // deprecated functions: use Set/GetItemImage directly
+    wxDEPRECATED( int GetItemSelectedImage(const wxTreeItemId& item) const );
+    wxDEPRECATED( void SetItemSelectedImage(const wxTreeItemId& item, int image) );
+
+    // use the versions taking wxTreeItemIdValue cookies (note that
+    // GetNextChild() is not inside wxDEPRECATED on purpose, as otherwise we
+    // get twice as many warnings without any added benefit: it is always used
+    // with GetFirstChild() anyhow)
+    wxDEPRECATED( wxTreeItemId GetFirstChild(const wxTreeItemId& item,
+                                             long& cookie) const );
+    wxTreeItemId GetNextChild(const wxTreeItemId& item,
+                              long& cookie) const;
+#endif // WXWIN_COMPATIBILITY_2_4
+
     // implementation only from now on
 
     // overridden base class virtuals
     virtual bool SetBackgroundColour(const wxColour& colour);
     virtual bool SetForegroundColour(const wxColour& colour);
 
+    virtual void Freeze();
+    virtual void Thaw();
     virtual void Refresh(bool eraseBackground = true, const wxRect *rect = NULL);
 
     virtual bool SetFont( const wxFont &font );
@@ -251,6 +262,7 @@ protected:
     bool                 m_lastOnSame;  // last click on the same item as prev
     wxImageList         *m_imageListButtons;
 
+    int                  m_freezeCount;
     int                  m_dragCount;
     wxPoint              m_dragStart;
     wxGenericTreeItem   *m_dropTarget;
@@ -269,9 +281,6 @@ protected:
 
     // the common part of all ctors
     void Init();
-
-    // overridden wxWindow methods 
-    virtual void DoThaw();
 
     // misc helpers
     void SendDeleteEvent(wxGenericTreeItem *itemBeingDeleted);

@@ -8,8 +8,20 @@
  * -------------------------------------------------------------------------
  */
 
-#ifndef _WX_MSW_GSOCKMSW_H_
-#define _WX_MSW_GSOCKMSW_H_
+#ifndef __GSOCK_MSW_H
+#define __GSOCK_MSW_H
+
+#ifndef __GSOCKET_STANDALONE__
+#include "wx/setup.h"
+#endif
+
+#if wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__)
+
+#ifndef __GSOCKET_STANDALONE__
+#include "wx/gsocket.h"
+#else
+#include "gsocket.h"
+#endif
 
 #include "wx/msw/wrapwin.h"
 
@@ -22,6 +34,18 @@
 #if defined(__WXWINCE__) || defined(__CYGWIN__)
 #include <winsock.h>
 #endif
+
+class GSocketGUIFunctionsTableConcrete: public GSocketGUIFunctionsTable
+{
+public:
+    virtual bool OnInit();
+    virtual void OnExit();
+    virtual bool CanUseEventLoop();
+    virtual bool Init_Socket(GSocket *socket);
+    virtual void Destroy_Socket(GSocket *socket);
+    virtual void Enable_Events(GSocket *socket);
+    virtual void Disable_Events(GSocket *socket);
+};
 
 /* Definition of GSocket */
 class GSocket
@@ -38,11 +62,7 @@ public:
   GAddress *GetPeer();
   GSocketError SetServer();
   GSocket *WaitConnection();
-  // not used under MSW
-  void Notify(bool) { }
   bool SetReusable();
-  bool SetBroadcast();
-  bool DontDoBind();
   GSocketError Connect(GSocketStream stream);
   GSocketError SetNonOriented();
   int Read(char *buffer, int size);
@@ -58,13 +78,6 @@ public:
     void *optval, int *optlen);
   GSocketError SetSockOpt(int level, int optname,
     const void *optval, int optlen);
-
-  void SetInitialSocketBuffers(int recv, int send)
-  {
-      m_initialRecvBufferSize = recv;
-      m_initialSendBufferSize = send;
-  }
-
 protected:
   GSocketError Input_Timeout();
   GSocketError Output_Timeout();
@@ -74,8 +87,6 @@ protected:
   int Send_Stream(const char *buffer, int size);
   int Send_Dgram(const char *buffer, int size);
   bool m_ok;
-  int m_initialRecvBufferSize;
-  int m_initialSendBufferSize;
 
 /* TODO: Make these protected */
 public:
@@ -90,8 +101,6 @@ public:
   bool m_stream;
   bool m_establishing;
   bool m_reusable;
-  bool m_broadcast;
-  bool m_dobind;
   struct timeval m_timeout;
 
   /* Callbacks */
@@ -100,6 +109,10 @@ public:
   char *m_data[GSOCK_MAX_EVENT];
   int m_msgnumber;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Definition of GAddress */
 struct _GAddress
@@ -123,4 +136,10 @@ GSocketError _GAddress_translate_to  (GAddress *address,
 GSocketError _GAddress_Init_INET(GAddress *address);
 GSocketError _GAddress_Init_UNIX(GAddress *address);
 
-#endif  /* _WX_MSW_GSOCKMSW_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__) */
+
+#endif  /* __GSOCK_MSW_H */

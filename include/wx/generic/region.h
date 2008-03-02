@@ -26,8 +26,8 @@ public:
     virtual bool IsEmpty() const;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     // wxRegionBase pure virtuals
     virtual bool DoIsEqual(const wxRegion& region) const;
@@ -42,7 +42,7 @@ protected:
     virtual bool DoSubtract(const wxRegion& region);
     virtual bool DoXor(const wxRegion& region);
 
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIteratorGeneric;
+    friend class WXDLLEXPORT wxRegionIteratorGeneric;
 };
 
 class WXDLLEXPORT wxRegionIteratorGeneric : public wxObject

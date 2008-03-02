@@ -9,8 +9,8 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_TEXTDLGG_H_
-#define _WX_TEXTDLGG_H_
+#ifndef __TEXTDLGH_G__
+#define __TEXTDLGH_G__
 
 #include "wx/defs.h"
 
@@ -20,13 +20,12 @@
 
 #if wxUSE_VALIDATORS
 #include "wx/valtext.h"
-#include "wx/textctrl.h"
 #endif
 
 class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
 
-extern WXDLLEXPORT_DATA(const char) wxGetTextFromUserPromptStr[];
-extern WXDLLEXPORT_DATA(const char) wxGetPasswordFromUserPromptStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxGetTextFromUserPromptStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxGetPasswordFromUserPromptStr[];
 
 #define wxTextEntryDialogStyle (wxOK | wxCANCEL | wxCENTRE | wxWS_EX_VALIDATE_RECURSIVELY)
 
@@ -110,4 +109,5 @@ wxGetPasswordFromUser(const wxString& message,
 
 #endif
     // wxUSE_TEXTDLG
-#endif // _WX_TEXTDLGG_H_
+#endif
+    // __TEXTDLGH_G__

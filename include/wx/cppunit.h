@@ -88,52 +88,17 @@
 #define WX_ASSERT_SIZET_EQUAL(n, m) CPPUNIT_ASSERT_EQUAL(((size_t)n), m)
 
 
-// Use this macro to assert with the given formatted message (it should contain
-// the format string and arguments in a separate pair of parentheses)
-#define WX_ASSERT_MESSAGE(msg, cond) \
-    CPPUNIT_ASSERT_MESSAGE(std::string(wxString::Format msg .mb_str()), (cond))
-
 ///////////////////////////////////////////////////////////////////////////////
-// define stream inserter for wxString if it's not defined in the main library,
-// we need it to output the test failures involving wxString
-#if !wxUSE_STD_IOSTREAM
+// stream inserter for wxString
+//
 
 #include "wx/string.h"
 
-#include <iostream>
-
 inline std::ostream& operator<<(std::ostream& o, const wxString& s)
 {
-#if wxUSE_UNICODE
-    return o << (const char *)wxSafeConvertWX2MB(s.wc_str());
-#else
-    return o << s.c_str();
-#endif
+    return o << s.mb_str();
 }
 
-// VC6 doesn't provide overloads for operator<<(__int64) in its stream classes
-// so do it ourselves
-#if defined(__VISUALC6__) && defined(wxLongLong_t)
-
-#include "wx/longlong.h"
-
-inline std::ostream& operator<<(std::ostream& ostr, wxLongLong_t ll)
-{
-    ostr << wxLongLong(ll).ToString();
-
-    return ostr;
-}
-
-inline std::ostream& operator<<(std::ostream& ostr, unsigned wxLongLong_t llu)
-{
-    ostr << wxULongLong(llu).ToString();
-
-    return ostr;
-}
-
-#endif // VC6 && wxLongLong_t
-
-#endif // !wxUSE_STD_IOSTREAM
 
 ///////////////////////////////////////////////////////////////////////////////
 // Some more compiler warning tweaking and auto linking.

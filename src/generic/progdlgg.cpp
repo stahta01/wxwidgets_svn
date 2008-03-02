@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/generic/progdlgg.cpp
 // Purpose:     wxProgressDialog class
-// Author:      Karsten Ballueder
+// Author:      Karsten Ballüder
 // Modified by:
 // Created:     09.05.1999
 // RCS-ID:      $Id$
-// Copyright:   (c) Karsten Ballueder
+// Copyright:   (c) Karsten Ballüder
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -92,12 +92,12 @@ IMPLEMENT_CLASS(wxProgressDialog, wxDialog)
 // wxProgressDialog creation
 // ----------------------------------------------------------------------------
 
-wxProgressDialog::wxProgressDialog(const wxString& title,
-                                   const wxString& message,
+wxProgressDialog::wxProgressDialog(wxString const &title,
+                                   wxString const &message,
                                    int maximum,
                                    wxWindow *parent,
                                    int style)
-                : wxDialog(GetParentForModalDialog(parent), wxID_ANY, title),
+                : wxDialog(parent, wxID_ANY, title),
                   m_skip(false),
                   m_delay(3),
                   m_hasAbortButton(false),
@@ -109,6 +109,8 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
 
     m_hasAbortButton = (style & wxPD_CAN_ABORT) != 0;
     m_hasSkipButton = (style & wxPD_CAN_SKIP) != 0;
+
+    bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
 
 #if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
     // we have to remove the "Close" button from the title bar then as it is
@@ -139,47 +141,39 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
 
     wxClientDC dc(this);
     dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-    wxCoord widthText = 0;
+    long widthText = 0;
     dc.GetTextExtent(message, &widthText, NULL, NULL, NULL, NULL);
 
-    // top-level sizerTop
-    wxSizer * const sizerTop = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 
     m_msg = new wxStaticText(this, wxID_ANY, message);
-    sizerTop->Add(m_msg, 0, wxLEFT | wxTOP, 2*LAYOUT_MARGIN);
+    sizer->Add(m_msg, 0, wxLEFT | wxTOP, 2*LAYOUT_MARGIN);
 
-    wxSize sizeLabel = m_msg->GetSize();
+    wxSize sizeDlg,
+           sizeLabel = m_msg->GetSize();
+    sizeDlg.y = 2*LAYOUT_MARGIN + sizeLabel.y;
+
     if ( maximum > 0 )
     {
         int gauge_style = wxGA_HORIZONTAL;
-        if ( style & wxPD_SMOOTH )
+        if ( ( style & wxPD_SMOOTH ) == wxPD_SMOOTH )
             gauge_style |= wxGA_SMOOTH;
-        m_gauge = new wxGauge
-                      (
-                        this,
-                        wxID_ANY,
-                        m_maximum,
-                        wxDefaultPosition,
-                        // make the progress bar sufficiently long
-                        wxSize(wxMin(wxGetClientDisplayRect().width/3, 300), -1),
-                        gauge_style
-                      );
+        m_gauge = new wxGauge(this, wxID_ANY, m_maximum,
+                              wxDefaultPosition, wxDefaultSize,
+                              gauge_style );
 
-        sizerTop->Add(m_gauge, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 2*LAYOUT_MARGIN);
+        sizer->Add(m_gauge, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 2*LAYOUT_MARGIN);
         m_gauge->SetValue(0);
+
+        wxSize sizeGauge = m_gauge->GetSize();
+        sizeDlg.y += 2*LAYOUT_MARGIN + sizeGauge.y;
     }
     else
-    {
-        m_gauge = NULL;
-    }
+        m_gauge = (wxGauge *)NULL;
 
     // create the estimated/remaining/total time zones if requested
-    m_elapsed =
-    m_estimated =
-    m_remaining = NULL;
-    m_display_estimated =
-    m_last_timeupdate =
-    m_break = 0;
+    m_elapsed = m_estimated = m_remaining = (wxStaticText*)NULL;
+    m_display_estimated = m_last_timeupdate = m_break = 0;
     m_ctdelay = 0;
 
     // if we are going to have at least one label, remember it in this var
@@ -188,14 +182,12 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
     // also count how many labels we really have
     size_t nTimeLabels = 0;
 
-    wxSizer * const sizerLabels = new wxFlexGridSizer(2);
-
     if ( style & wxPD_ELAPSED_TIME )
     {
         nTimeLabels++;
 
         label =
-        m_elapsed = CreateLabel(_("Elapsed time:"), sizerLabels);
+        m_elapsed = CreateLabel(_("Elapsed time : "), sizer);
     }
 
     if ( style & wxPD_ESTIMATED_TIME )
@@ -203,7 +195,7 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
         nTimeLabels++;
 
         label =
-        m_estimated = CreateLabel(_("Estimated time:"), sizerLabels);
+        m_estimated = CreateLabel(_("Estimated time : "), sizer);
     }
 
     if ( style & wxPD_REMAINING_TIME )
@@ -211,14 +203,14 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
         nTimeLabels++;
 
         label =
-        m_remaining = CreateLabel(_("Remaining time:"), sizerLabels);
+        m_remaining = CreateLabel(_("Remaining time : "), sizer);
     }
-    sizerTop->Add(sizerLabels, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, LAYOUT_MARGIN);
 
     if ( nTimeLabels > 0 )
     {
         // set it to the current time
         m_timeStart = wxGetCurrentTime();
+        sizeDlg.y += nTimeLabels * (label->GetSize().y + LAYOUT_MARGIN);
     }
 
 #if defined(__SMARTPHONE__)
@@ -227,12 +219,10 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
     if ( m_hasAbortButton )
         SetLeftMenu(wxID_CANCEL);
 #else
-    m_btnAbort =
-    m_btnSkip = NULL;
-
+    m_btnAbort = m_btnSkip = (wxButton *)NULL;
+    bool sizeDlgModified = false;
     wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    // Windows dialogs usually have buttons in the lower right corner
     const int sizerFlags =
 #if defined(__WXMSW__) || defined(__WXPM__)
                            wxALIGN_RIGHT | wxALL
@@ -243,22 +233,37 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
 
     if ( m_hasSkipButton )
     {
-        m_btnSkip = new wxButton(this, wxID_SKIP, _("&Skip"));
+        m_btnSkip = new wxButton(this, wxID_SKIP, _("Skip"));
 
+        // Windows dialogs usually have buttons in the lower right corner
         buttonSizer->Add(m_btnSkip, 0, sizerFlags, LAYOUT_MARGIN);
+        sizeDlg.y += 2*LAYOUT_MARGIN + wxButton::GetDefaultSize().y;
+        sizeDlgModified = true;
     }
 
     if ( m_hasAbortButton )
     {
         m_btnAbort = new wxButton(this, wxID_CANCEL);
 
+        // Windows dialogs usually have buttons in the lower right corner
         buttonSizer->Add(m_btnAbort, 0, sizerFlags, LAYOUT_MARGIN);
+        if(!sizeDlgModified)
+            sizeDlg.y += 2*LAYOUT_MARGIN + wxButton::GetDefaultSize().y;
     }
 
-    sizerTop->Add(buttonSizer, 0, sizerFlags, LAYOUT_MARGIN );
+    sizer->Add(buttonSizer, 0, sizerFlags, LAYOUT_MARGIN );
 #endif // __SMARTPHONE__/!__SMARTPHONE__
 
-    SetSizerAndFit(sizerTop);
+    SetSizerAndFit(sizer);
+
+    if (!isPda)
+    {
+        sizeDlg.y += 2*LAYOUT_MARGIN;
+
+        // try to make the dialog not square but rectangular of reasonable width
+        sizeDlg.x = (wxCoord)wxMax(3*widthText/2, 4*sizeDlg.y/3);
+        SetClientSize(sizeDlg);
+    }
 
     Centre(wxCENTER_FRAME | wxBOTH);
 
@@ -287,28 +292,33 @@ wxProgressDialog::wxProgressDialog(const wxString& title,
     Update();
 }
 
-wxStaticText *
-wxProgressDialog::CreateLabel(const wxString& text, wxSizer *sizer)
+wxStaticText *wxProgressDialog::CreateLabel(const wxString& text,
+                                            wxSizer *sizer)
 {
-    wxStaticText *label = new wxStaticText(this, wxID_ANY, text);
-    wxStaticText *value = new wxStaticText(this, wxID_ANY, _("unknown"));
+    wxBoxSizer *locsizer = new wxBoxSizer(wxLARGESMALL(wxHORIZONTAL,wxVERTICAL));
+
+    wxStaticText *dummy = new wxStaticText(this, wxID_ANY, text);
+    wxStaticText *label = new wxStaticText(this, wxID_ANY, _("unknown"));
 
     // select placement most native or nice on target GUI
 #if defined(__SMARTPHONE__)
-    // value and time to the left in two rows
-    sizer->Add(label, 1, wxALIGN_LEFT);
-    sizer->Add(value, 1, wxALIGN_LEFT);
+    // label and time to the left in two rows
+    locsizer->Add(dummy, 1, wxALIGN_LEFT);
+    locsizer->Add(label, 1, wxALIGN_LEFT);
+    sizer->Add(locsizer, 0, wxALIGN_LEFT | wxTOP | wxLEFT, LAYOUT_MARGIN);
 #elif defined(__WXMSW__) || defined(__WXPM__) || defined(__WXMAC__) || defined(__WXGTK20__)
-    // value and time centered in one row
-    sizer->Add(label, 1, wxLARGESMALL(wxALIGN_RIGHT,wxALIGN_LEFT) | wxTOP | wxRIGHT, LAYOUT_MARGIN);
-    sizer->Add(value, 1, wxALIGN_LEFT | wxTOP, LAYOUT_MARGIN);
+    // label and time centered in one row
+    locsizer->Add(dummy, 1, wxLARGESMALL(wxALIGN_RIGHT,wxALIGN_LEFT));
+    locsizer->Add(label, 1, wxALIGN_LEFT | wxLEFT, LAYOUT_MARGIN);
+    sizer->Add(locsizer, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, LAYOUT_MARGIN);
 #else
-    // value and time to the right in one row
-    sizer->Add(label);
-    sizer->Add(value, 0, wxLEFT, LAYOUT_MARGIN);
+    // label and time to the right in one row
+    sizer->Add(locsizer, 0, wxALIGN_RIGHT | wxRIGHT | wxTOP, LAYOUT_MARGIN);
+    locsizer->Add(dummy);
+    locsizer->Add(label, 0, wxLEFT, LAYOUT_MARGIN);
 #endif
 
-    return value;
+    return label;
 }
 
 // ----------------------------------------------------------------------------

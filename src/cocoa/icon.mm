@@ -32,8 +32,6 @@ public:
     wxIconRefData( const wxIconRefData& data );
     virtual ~wxIconRefData();
 
-    virtual bool IsOk() const { return m_ok; }
-
 protected:
     int                 m_width;
     int                 m_height;
@@ -100,17 +98,7 @@ wxIcon::~wxIcon()
 {
 }
 
-wxGDIRefData *wxIcon::CreateGDIRefData() const
-{
-    return new wxIconRefData;
-}
-
-wxGDIRefData *wxIcon::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxIconRefData(*wx_static_cast(const wxIconRefData *, data));
-}
-
-bool wxIcon::CreateFromXpm(const char* const* xpm)
+bool wxIcon::CreateFromXpm(const char **xpm)
 {
     wxBitmap bitmap(xpm);
     CopyFromBitmap(bitmap);
@@ -120,9 +108,17 @@ bool wxIcon::CreateFromXpm(const char* const* xpm)
 bool wxIcon::LoadFile(const wxString& filename, wxBitmapType type,
     int desiredWidth, int desiredHeight)
 {
-    wxBitmap bitmap(filename, type);
-    CopyFromBitmap(bitmap);
-    return bitmap.Ok();
+    UnRef();
+
+    m_refData = new wxIconRefData;
+    M_ICONDATA->m_width = 5;
+    M_ICONDATA->m_height = 5;
+    M_ICONDATA->m_cocoaNSImage = [[NSImage alloc] initWithSize:NSMakeSize(5,5)];
+    M_ICONDATA->m_ok = true;
+    M_ICONDATA->m_numColors = 0;
+    M_ICONDATA->m_quality = 0;
+
+    return false;
 }
 
 void wxIcon::CopyFromBitmap(const wxBitmap& bitmap)
@@ -136,6 +132,11 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bitmap)
     M_ICONDATA->m_ok = bitmap.Ok();
     M_ICONDATA->m_numColors = 0;
     M_ICONDATA->m_quality = 0;
+}
+
+bool wxIcon::IsOk() const
+{
+    return m_refData && M_ICONDATA->m_ok;
 }
 
 int wxIcon::GetWidth() const

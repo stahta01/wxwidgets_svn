@@ -40,7 +40,7 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/log.h"
     #include "wx/module.h"
 #endif
@@ -49,12 +49,9 @@
 #include "wx/filename.h"
 #include "wx/dynlib.h"
 #include "wx/evtloop.h"
-#include "wx/thread.h"
 
 #include "wx/msw/private.h"
-#include "wx/msw/dc.h"
 #include "wx/msw/ole/oleutils.h"
-#include "wx/msw/private/timer.h"
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -62,7 +59,7 @@
 
 // OLE is used for drag-and-drop, clipboard, OLE Automation..., but some
 // compilers don't support it (missing headers, libs, ...)
-#if defined(__GNUWIN32_OLD__) || defined(__SYMANTEC__)
+#if defined(__GNUWIN32_OLD__) || defined(__SYMANTEC__) || defined(__SALFORDC__)
     #undef wxUSE_OLE
 
     #define  wxUSE_OLE 0
@@ -80,7 +77,10 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "wx/msw/missing.h"
+// For MB_TASKMODAL
+#ifdef __WXWINCE__
+#include "wx/msw/wince/missing.h"
+#endif
 
 // instead of including <shlwapi.h> which is not part of the core SDK and not
 // shipped at all with other compilers, we always define the parts of it we
@@ -215,7 +215,7 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
 {
     // we should return false only if the app should exit, i.e. only if
     // Dispatch() determines that the main event loop should terminate
-    wxEventLoopBase * const evtLoop = wxEventLoop::GetActive();
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
     if ( !evtLoop || !evtLoop->Pending() )
     {
         // no events means no quit event
@@ -223,26 +223,6 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
     }
 
     return evtLoop->Dispatch();
-}
-
-DWORD wxGUIAppTraits::WaitForThread(WXHANDLE hThread)
-{
-    // if we don't have a running event loop, we shouldn't wait for the
-    // messages as we never remove them from the message queue and so we enter
-    // an infinite loop as MsgWaitForMultipleObjects() keeps returning
-    // WAIT_OBJECT_0 + 1
-    if ( !wxEventLoop::GetActive() )
-        return DoSimpleWaitForThread(hThread);
-
-    return ::MsgWaitForMultipleObjects
-             (
-               1,                   // number of objects to wait for
-               (HANDLE *)&hThread,  // the objects
-               false,               // wait for any objects, not all
-               INFINITE,            // no timeout
-               QS_ALLINPUT |        // return as soon as there are any events
-               QS_ALLPOSTMESSAGE
-             );
 }
 
 wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
@@ -266,20 +246,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
 #else
     return wxPORT_MSW;
 #endif
-}
-
-#if wxUSE_TIMER
-
-wxTimerImpl *wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxMSWTimerImpl(timer);
-}
-
-#endif // wxUSE_TIMER
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
 }
 
 // ===========================================================================
@@ -326,9 +292,9 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 #ifdef __WXWINCE__
     wxString tmp = GetAppName();
     tmp += wxT("ClassName");
-    wxCanvasClassName = wxStrdup( tmp.wc_str() );
+    wxCanvasClassName = wxStrdup( tmp.c_str() );
     tmp += wxT("NR");
-    wxCanvasClassNameNR = wxStrdup( tmp.wc_str() );
+    wxCanvasClassNameNR = wxStrdup( tmp.c_str() );
     HWND hWnd = FindWindow( wxCanvasClassNameNR, NULL );
     if (hWnd)
     {
@@ -354,6 +320,8 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
     wxOleInitialize();
 
     RegisterWindowClasses();
+
+    wxWinHandleHash = new wxWinHashTable(wxKEY_INTEGER, 100);
 
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
     wxSetKeyboardHook(true);
@@ -508,10 +476,10 @@ bool wxApp::UnregisterWindowClasses()
 
 void wxApp::CleanUp()
 {
-    // all objects pending for deletion must be deleted first, otherwise
-    // UnregisterWindowClasses() call wouldn't succeed (because windows
-    // using the classes being unregistered still exist), so call the base
-    // class method first and only then do our clean up
+    // all objects pending for deletion must be deleted first, otherwise we
+    // would crash when they use wxWinHandleHash (and UnregisterWindowClasses()
+    // call wouldn't succeed as long as any windows still exist), so call the
+    // base class method first and only then do our clean up
     wxAppBase::CleanUp();
 
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
@@ -525,6 +493,9 @@ void wxApp::CleanUp()
     // which case the registration will fail after the first time if we don't
     // unregister the classes now
     UnregisterWindowClasses();
+
+    delete wxWinHandleHash;
+    wxWinHandleHash = NULL;
 
 #ifdef __WXWINCE__
     free( wxCanvasClassName );
@@ -549,14 +520,16 @@ wxApp::~wxApp()
 // wxApp idle handling
 // ----------------------------------------------------------------------------
 
-void wxApp::OnIdle(wxIdleEvent& WXUNUSED(event))
+void wxApp::OnIdle(wxIdleEvent& event)
 {
+    wxAppBase::OnIdle(event);
+
 #if wxUSE_DC_CACHEING
     // automated DC cache management: clear the cached DCs and bitmap
     // if it's likely that the app has finished with them, that is, we
     // get an idle event and we're not dragging anything.
     if (!::GetKeyState(MK_LBUTTON) && !::GetKeyState(MK_MBUTTON) && !::GetKeyState(MK_RBUTTON))
-        wxMSWDCImpl::ClearCache();
+        wxDC::ClearCache();
 #endif // wxUSE_DC_CACHEING
 }
 
@@ -566,28 +539,13 @@ void wxApp::WakeUpIdle()
     // start up again.  Doing it this way ensures that the idle handler
     // wakes up in the right thread (see also wxWakeUpMainThread() which does
     // the same for the main app thread only)
-    wxWindow * const topWindow = wxTheApp->GetTopWindow();
+    wxWindow *topWindow = wxTheApp->GetTopWindow();
     if ( topWindow )
     {
-        HWND hwndTop = GetHwndOf(topWindow);
-
-        // Do not post WM_NULL if there's already a pending WM_NULL to avoid
-        // overflowing the message queue.
-        //
-        // Notice that due to a limitation of PeekMessage() API (which handles
-        // 0,0 range specially), we have to check the range from 0-1 instead.
-        // This still makes it possible to overflow the queue with WM_NULLs by
-        // interspersing the calles to WakeUpIdle() with windows creation but
-        // it should be rather hard to do it accidentally.
-        MSG msg;
-        if ( !::PeekMessage(&msg, hwndTop, 0, 1, PM_NOREMOVE) ||
-              ::PeekMessage(&msg, hwndTop, 1, 1, PM_NOREMOVE) )
+        if ( !::PostMessage(GetHwndOf(topWindow), WM_NULL, 0, 0) )
         {
-            if ( !::PostMessage(hwndTop, WM_NULL, 0, 0) )
-            {
-                // should never happen
-                wxLogLastError(wxT("PostMessage(WM_NULL)"));
-            }
+            // should never happen
+            wxLogLastError(wxT("PostMessage(WM_NULL)"));
         }
     }
 }
@@ -614,45 +572,15 @@ void wxApp::OnQueryEndSession(wxCloseEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// system DLL versions
+// miscellaneous
 // ----------------------------------------------------------------------------
-
-// these functions have trivial inline implementations for CE
-#ifndef __WXWINCE__
-
-#if wxUSE_DYNLIB_CLASS
-
-namespace
-{
-
-// helper function: retrieve the DLL version by using DllGetVersion(), returns
-// 0 if the DLL doesn't export such function
-int CallDllGetVersion(wxDynamicLibrary& dll)
-{
-    // now check if the function is available during run-time
-    wxDYNLIB_FUNCTION( DLLGETVERSIONPROC, DllGetVersion, dll );
-    if ( !pfnDllGetVersion )
-        return 0;
-
-    DLLVERSIONINFO dvi;
-    dvi.cbSize = sizeof(dvi);
-
-    HRESULT hr = (*pfnDllGetVersion)(&dvi);
-    if ( FAILED(hr) )
-    {
-        wxLogApiError(_T("DllGetVersion"), hr);
-
-        return 0;
-    }
-
-    return 100*dvi.dwMajorVersion + dvi.dwMinorVersion;
-}
-
-} // anonymous namespace
 
 /* static */
 int wxApp::GetComCtl32Version()
 {
+#if defined(__WXMICROWIN__) || defined(__WXWINCE__)
+    return 0;
+#else
     // cache the result
     //
     // NB: this is MT-ok as in the worst case we'd compute s_verComCtl32 twice,
@@ -661,105 +589,78 @@ int wxApp::GetComCtl32Version()
 
     if ( s_verComCtl32 == -1 )
     {
+        // initally assume no comctl32.dll at all
+        s_verComCtl32 = 0;
+
         // we're prepared to handle the errors
         wxLogNull noLog;
 
-        // the DLL should really be available
+#if wxUSE_DYNLIB_CLASS
+        // do we have it?
         wxDynamicLibrary dllComCtl32(_T("comctl32.dll"), wxDL_VERBATIM);
-        if ( !dllComCtl32.IsLoaded() )
-        {
-            s_verComCtl32 = 0;
-            return 0;
-        }
 
-        // try DllGetVersion() for recent DLLs
-        s_verComCtl32 = CallDllGetVersion(dllComCtl32);
-
-        // if DllGetVersion() is unavailable either during compile or
-        // run-time, try to guess the version otherwise
-        if ( !s_verComCtl32 )
+        // if so, then we can check for the version
+        if ( dllComCtl32.IsLoaded() )
         {
-            // InitCommonControlsEx is unique to 4.70 and later
-            void *pfn = dllComCtl32.GetSymbol(_T("InitCommonControlsEx"));
-            if ( !pfn )
+            // now check if the function is available during run-time
+            wxDYNLIB_FUNCTION( DLLGETVERSIONPROC, DllGetVersion, dllComCtl32 );
+            if ( pfnDllGetVersion )
             {
-                // not found, must be 4.00
-                s_verComCtl32 = 400;
-            }
-            else // 4.70+
-            {
-                // many symbols appeared in comctl32 4.71, could use any of
-                // them except may be DllInstall()
-                pfn = dllComCtl32.GetSymbol(_T("InitializeFlatSB"));
-                if ( !pfn )
+                DLLVERSIONINFO dvi;
+                dvi.cbSize = sizeof(dvi);
+
+                HRESULT hr = (*pfnDllGetVersion)(&dvi);
+                if ( FAILED(hr) )
                 {
-                    // not found, must be 4.70
-                    s_verComCtl32 = 470;
+                    wxLogApiError(_T("DllGetVersion"), hr);
                 }
                 else
                 {
-                    // found, must be 4.71 or later
-                    s_verComCtl32 = 471;
+                    // this is incompatible with _WIN32_IE values, but
+                    // compatible with the other values returned by
+                    // GetComCtl32Version()
+                    s_verComCtl32 = 100*dvi.dwMajorVersion +
+                                        dvi.dwMinorVersion;
+                }
+            }
+
+            // if DllGetVersion() is unavailable either during compile or
+            // run-time, try to guess the version otherwise
+            if ( !s_verComCtl32 )
+            {
+                // InitCommonControlsEx is unique to 4.70 and later
+                void *pfn = dllComCtl32.GetSymbol(_T("InitCommonControlsEx"));
+                if ( !pfn )
+                {
+                    // not found, must be 4.00
+                    s_verComCtl32 = 400;
+                }
+                else // 4.70+
+                {
+                    // many symbols appeared in comctl32 4.71, could use any of
+                    // them except may be DllInstall()
+                    pfn = dllComCtl32.GetSymbol(_T("InitializeFlatSB"));
+                    if ( !pfn )
+                    {
+                        // not found, must be 4.70
+                        s_verComCtl32 = 470;
+                    }
+                    else
+                    {
+                        // found, must be 4.71 or later
+                        s_verComCtl32 = 471;
+                    }
                 }
             }
         }
+#endif
     }
 
     return s_verComCtl32;
+#endif // Microwin/!Microwin
 }
 
-/* static */
-int wxApp::GetShell32Version()
-{
-    static int s_verShell32 = -1;
-    if ( s_verShell32 == -1 )
-    {
-        // we're prepared to handle the errors
-        wxLogNull noLog;
-
-        wxDynamicLibrary dllShell32(_T("shell32.dll"), wxDL_VERBATIM);
-        if ( dllShell32.IsLoaded() )
-        {
-            s_verShell32 = CallDllGetVersion(dllShell32);
-
-            if ( !s_verShell32 )
-            {
-                // there doesn't seem to be any way to distinguish between 4.00
-                // and 4.70 (starting from 4.71 we have DllGetVersion()) so
-                // just assume it is 4.0
-                s_verShell32 = 400;
-            }
-        }
-        else // failed load the DLL?
-        {
-            s_verShell32 = 0;
-        }
-    }
-
-    return s_verShell32;
-}
-
-#else // !wxUSE_DYNLIB_CLASS
-
-/* static */
-int wxApp::GetComCtl32Version()
-{
-    return 0;
-}
-
-/* static */
-int wxApp::GetShell32Version()
-{
-    return 0;
-}
-
-#endif // wxUSE_DYNLIB_CLASS/!wxUSE_DYNLIB_CLASS
-
-#endif // !__WXWINCE__
-
-// ----------------------------------------------------------------------------
 // Yield to incoming messages
-// ----------------------------------------------------------------------------
 
 bool wxApp::Yield(bool onlyIfNeeded)
 {
@@ -851,3 +752,30 @@ terminate the program,\r\n\
 }
 
 #endif // wxUSE_EXCEPTIONS
+
+// ----------------------------------------------------------------------------
+// deprecated event loop functions
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxApp::DoMessage(WXMSG *pMsg)
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    if ( evtLoop )
+        evtLoop->ProcessMessage(pMsg);
+}
+
+bool wxApp::DoMessage()
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    return evtLoop ? evtLoop->Dispatch() : false;
+}
+
+bool wxApp::ProcessMessage(WXMSG* pMsg)
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    return evtLoop && evtLoop->PreProcessMessage(pMsg);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4

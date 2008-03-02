@@ -38,8 +38,6 @@
 #endif
 
 #include "wx/imaglist.h"
-#include "wx/dc.h"
-#include "wx/msw/dc.h"
 #include "wx/msw/private.h"
 
 // ----------------------------------------------------------------------------
@@ -243,12 +241,7 @@ bool wxImageList::Draw(int index,
                        int flags,
                        bool solidBackground)
 {
-    wxDCImpl *impl = dc.GetImpl();
-    wxMSWDCImpl *msw_impl = wxDynamicCast( impl, wxMSWDCImpl );
-    if (!msw_impl)
-       return false;
-    
-    HDC hDC = GetHdcOf(*msw_impl);
+    HDC hDC = GetHdcOf(dc);
     wxCHECK_MSG( hDC, false, _T("invalid wxDC in wxImageList::Draw") );
 
     COLORREF clr = CLR_NONE;    // transparent by default
@@ -285,7 +278,7 @@ bool wxImageList::Draw(int index,
 // Get the bitmap
 wxBitmap wxImageList::GetBitmap(int index) const
 {
-#if wxUSE_WXDIB && wxUSE_IMAGE
+#if wxUSE_WXDIB
     int bmp_width = 0, bmp_height = 0;
     GetSize(index, bmp_width, bmp_height);
 

@@ -27,12 +27,12 @@
     #include "wx/app.h"
     #include "wx/filefn.h"
     #include "wx/log.h"
+    #include "wx/thread.h"
     #include "wx/intl.h"
     #include "wx/module.h"
 #endif
 
 #include "wx/init.h"
-#include "wx/thread.h"
 
 #include "wx/ptr_scpd.h"
 #include "wx/except.h"
@@ -179,11 +179,7 @@ static void ConvertArgsToUnicode(int argc, char **argv)
     int wargc = 0;
     for ( int i = 0; i < argc; i++ )
     {
-#ifdef __DARWIN__
-        wxWCharBuffer buf(wxConvFileName->cMB2WX(argv[i]));
-#else
         wxWCharBuffer buf(wxConvLocal.cMB2WX(argv[i]));
-#endif
         if ( !buf )
         {
             wxLogWarning(_("Command line argument %d couldn't be converted to Unicode and will be ignored."),

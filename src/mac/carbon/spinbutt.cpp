@@ -133,7 +133,7 @@ void wxSpinButton::MacHandleValueChanged( int inc )
 
     event.SetPosition( m_value );
     event.SetEventObject( this );
-    if ((HandleWindowEvent( event )) && !event.IsAllowed())
+    if ((GetEventHandler()->ProcessEvent( event )) && !event.IsAllowed())
         m_value = oldValue;
 
     m_peer->SetValue( m_value );
@@ -145,13 +145,11 @@ void wxSpinButton::MacHandleValueChanged( int inc )
         wxSpinEvent event2( scrollEvent, GetId() );
         event2.SetPosition( m_value );
         event2.SetEventObject( this );
-        HandleWindowEvent( event2 );
+        GetEventHandler()->ProcessEvent( event2 );
     }
 }
 
-void wxSpinButton::MacHandleControlClick(WXWidget WXUNUSED(control),
-                                         wxInt16 controlpart,
-                                         bool WXUNUSED(mouseStillDown))
+void wxSpinButton::MacHandleControlClick( WXWidget control, wxInt16 controlpart, bool mouseStillDown )
 {
     int nScrollInc = 0;
 
@@ -172,8 +170,7 @@ void wxSpinButton::MacHandleControlClick(WXWidget WXUNUSED(control),
     MacHandleValueChanged( nScrollInc ) ;
 }
 
-wxInt32 wxSpinButton::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler),
-                                    WXEVENTREF WXUNUSED(event))
+wxInt32 wxSpinButton::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTREF event )
 {
 #if 0
     // these have been handled by the live action proc already

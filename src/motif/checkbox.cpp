@@ -12,6 +12,10 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#ifdef __VMS
+#define XtDisplay XTDISPLAY
+#endif
+
 #include "wx/checkbox.h"
 
 #ifndef WX_PRECOMP
@@ -40,6 +44,7 @@
     #define wxHAS_3STATE 0
 #endif
 
+
 #include "wx/motif/private.h"
 
 void wxCheckBoxCallback (Widget w, XtPointer clientData,
@@ -57,7 +62,6 @@ bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
     if( !wxControl::CreateControl( parent, id, pos, size, style, validator,
                                    name ) )
         return false;
-    PreCreation();
 
     wxXmString text( GetLabelText(label) );
 
@@ -81,10 +85,10 @@ bool wxCheckBox::Create(wxWindow *parent, wxWindowID id, const wxString& label,
 
     XmToggleButtonSetState ((Widget) m_mainWidget, False, True);
 
-    PostCreation();
     AttachWidget( parent, m_mainWidget, (WXWidget)NULL,
                   pos.x, pos.y, size.x, size.y );
 
+    ChangeBackgroundColour();
     return true;
 }
 
@@ -140,9 +144,6 @@ void wxCheckBoxCallback (Widget WXUNUSED(w), XtPointer clientData,
 
 void wxCheckBox::ChangeBackgroundColour()
 {
-    if (!m_backgroundColour.Ok())
-        return;
-
     wxComputeColours (XtDisplay((Widget) m_mainWidget), & m_backgroundColour,
         (wxColour*) NULL);
 
@@ -253,4 +254,4 @@ bool wxToggleButton::Create( wxWindow* parent, wxWindowID id,
     return true;
 }
 
-#endif // wxUSE_TOGGLEBTN
+#endif // wxUSE_TOGGLEBUTTON

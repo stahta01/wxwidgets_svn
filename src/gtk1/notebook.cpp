@@ -249,7 +249,7 @@ static gint gtk_notebook_key_press_callback( GtkWidget *widget, GdkEventKey *gdk
         event.SetCurrentFocus( notebook );
 
         wxNotebookPage *client = notebook->GetPage(sel);
-        if ( !client->HandleWindowEvent( event ) )
+        if ( !client->GetEventHandler()->ProcessEvent( event ) )
         {
              client->SetFocus();
         }
@@ -287,9 +287,9 @@ static void wxInsertChildInNotebook( wxNotebook* parent, wxWindow* child )
 // wxNotebook
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxNotebook,wxBookCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxNotebook,wxControl)
 
-BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
+BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
 END_EVENT_TABLE()
 

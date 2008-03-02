@@ -50,6 +50,13 @@ public:
     virtual bool OnExceptionInMainLoop();
 #endif // wxUSE_EXCEPTIONS
 
+    // deprecated functions, use wxEventLoop directly instead
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( void DoMessage(WXMSG *pMsg) );
+    wxDEPRECATED( bool DoMessage() );
+    wxDEPRECATED( bool ProcessMessage(WXMSG* pMsg) );
+#endif // WXWIN_COMPATIBILITY_2_4
+
 protected:
     int    m_printMode; // wxPRINT_WINDOWS, wxPRINT_POSTSCRIPT
 
@@ -68,10 +75,6 @@ public:
     // wasn't found at all
     static int GetComCtl32Version();
 
-    // the same for shell32.dll: returns 400, 471, 500, 600, ... (4.70 not
-    // currently detected)
-    static int GetShell32Version();
-
     // the SW_XXX value to be used for the frames opened by the application
     // (currently seems unused which is a bug -- TODO)
     static int m_nCmdShow;
@@ -80,26 +83,6 @@ protected:
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxApp)
 };
-
-#ifdef __WXWINCE__
-
-// under CE provide a dummy implementation of GetComCtl32Version() returning
-// the value passing all ">= 470" tests (which are the only ones used in our
-// code currently) as commctrl.dll under CE 2.0 and later support comctl32.dll
-// functionality
-inline int wxApp::GetComCtl32Version()
-{
-    return 471;
-}
-
-// this is not currently used at all under CE so it's not really clear what do
-// we need to return from here
-inline int wxApp::GetShell32Version()
-{
-    return 0;
-}
-
-#endif // __WXWINCE__
 
 // ----------------------------------------------------------------------------
 // MSW-specific wxEntry() overload and IMPLEMENT_WXWIN_MAIN definition
@@ -119,14 +102,6 @@ inline int wxApp::GetShell32Version()
 #else
     typedef char *wxCmdLineArgType;
 #endif
-
-// wxMSW-only overloads of wxEntry() and wxEntryStart() which take the
-// parameters passed to WinMain() instead of those passed to main()
-extern bool WXDLLEXPORT
-wxEntryStart(HINSTANCE hInstance,
-             HINSTANCE hPrevInstance = NULL,
-             wxCmdLineArgType pCmdLine = NULL,
-             int nCmdShow = SW_SHOWNORMAL);
 
 extern int WXDLLEXPORT
 wxEntry(HINSTANCE hInstance,

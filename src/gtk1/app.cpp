@@ -7,6 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __VMS
+// vms_jackets.h should for proper working be included before anything else
+# include <vms_jackets.h>
+#undef ConnectionNumber
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -177,14 +183,14 @@ void wxApp::WakeUpIdle()
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
         wxMutexGuiEnter();
-#endif // wxUSE_THREADS
+#endif // wxUSE_THREADS_
 
     wxapp_install_idle_handler();
 
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
         wxMutexGuiLeave();
-#endif // wxUSE_THREADS
+#endif // wxUSE_THREADS_
 }
 
 //-----------------------------------------------------------------------------
@@ -418,6 +424,10 @@ GtkWidget* wxGetRootWindow()
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxApp,wxEvtHandler)
+
+BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxAppBase::OnIdle)
+END_EVENT_TABLE()
 
 wxApp::wxApp()
 {

@@ -41,10 +41,6 @@ changes the behaviour of the latter.
 
 <wx/window.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 \wxheading{Window styles}
 
 The following styles can apply to all windows, although they will not always make sense for a particular
@@ -52,16 +48,15 @@ window class or on all platforms.
 
 \twocolwidtha{5cm}%
 \begin{twocollist}\itemsep=0pt
-\twocolitem{\windowstyle{wxBORDER\_DEFAULT}}{The window class will decide the kind of border to show, if any.}
 \twocolitem{\windowstyle{wxBORDER\_SIMPLE}}{Displays a thin border around the window. wxSIMPLE\_BORDER is the old name
 for this style. }
+\twocolitem{\windowstyle{wxBORDER\_DOUBLE}}{Displays a double border. wxDOUBLE\_BORDER is the old name for this style. Windows and Mac only.}
 \twocolitem{\windowstyle{wxBORDER\_SUNKEN}}{Displays a sunken border. wxSUNKEN\_BORDER is the old name for this style.}
 \twocolitem{\windowstyle{wxBORDER\_RAISED}}{Displays a raised border. wxRAISED\_BORDER is the old name for this style. }
 \twocolitem{\windowstyle{wxBORDER\_STATIC}}{Displays a border suitable for a static control.  wxSTATIC\_BORDER is the old name for this style. Windows only. }
-\twocolitem{\windowstyle{wxBORDER\_THEME}}{Displays a native border suitable for a control, on the current platform. On Windows XP or Vista, this will be a themed border; on most other platforms
-a sunken border will be used. For more information for themed borders on Windows, please see \helpref{Themed borders on Windows}{wxmswthemedborders}.}
+\twocolitem{\windowstyle{wxBORDER\_THEME}}{Displays a themed border where possible. Currently this has an effect on Windows XP and above only.
+For more information on themed borders, please see \helpref{Themed borders on Windows}{wxmswthemedborders}.}
 \twocolitem{\windowstyle{wxBORDER\_NONE}}{Displays no border, overriding the default border style for the window. wxNO\_BORDER is the old name for this style.}
-\twocolitem{\windowstyle{wxBORDER\_DOUBLE}}{This style is obsolete and should not be used.}
 \twocolitem{\windowstyle{wxTRANSPARENT\_WINDOW}}{The window is transparent, that is, it will not receive paint
 events. Windows only.}
 \twocolitem{\windowstyle{wxTAB\_TRAVERSAL}}{Use this to enable tab traversal for non-dialog windows.}
@@ -69,18 +64,15 @@ events. Windows only.}
 the window wants to get all char/key events for all keys - even for
 keys like TAB or ENTER which are usually used for dialog navigation
 and which wouldn't be generated without this style.  If you need to
-use this style in order to get the arrows or etc., but would still like
-to have normal keyboard navigation take place, you should call
-\helpref{Navigate}{wxwindownavigate} in response to the key events for
-Tab and Shift-Tab.}
+use this style in order to get the arrows or etc., but would still like to have
+normal keyboard navigation take place, you should create and send a
+wxNavigationKeyEvent in response to the key events for Tab and
+Shift-Tab.}
 \twocolitem{\windowstyle{wxNO\_FULL\_REPAINT\_ON\_RESIZE}}{On Windows, this style used to disable repainting
 the window completely when its size is changed. Since this behaviour is now the default, the style is now obsolete
 and no longer has an effect.}
-\twocolitem{\windowstyle{wxVSCROLL}}{Use this style to enable a vertical
-scrollbar. Notice that this style cannot be used with native controls
-which don't support scrollbars nor with top-level windows in most ports.}
-\twocolitem{\windowstyle{wxHSCROLL}}{Use this style to enable a horizontal
-scrollbar. The same limitations as for wxVSCROLL apply to this style.}
+\twocolitem{\windowstyle{wxVSCROLL}}{Use this style to enable a vertical scrollbar.}
+\twocolitem{\windowstyle{wxHSCROLL}}{Use this style to enable a horizontal scrollbar.}
 \twocolitem{\windowstyle{wxALWAYS\_SHOW\_SB}}{If a window has scrollbars,
 disable them instead of hiding them when they are not needed (i.e. when the
 size of the window is big enough to not require the scrollbars to navigate it).
@@ -169,7 +161,7 @@ correctly sized. }
 
 \func{}{\destruct{wxWindow}}{\void}
 
-Destructor. Deletes all sub-windows, then deletes itself. Instead of using
+Destructor. Deletes all subwindows, then deletes itself. Instead of using
 the {\bf delete} operator explicitly, you should normally
 use \helpref{wxWindow::Destroy}{wxwindowdestroy} so that wxWidgets
 can delete a window only when it is safe to do so, in idle time.
@@ -179,29 +171,6 @@ can delete a window only when it is safe to do so, in idle time.
 \helpref{Window deletion overview}{windowdeletionoverview},\rtfsp
 \helpref{wxWindow::Destroy}{wxwindowdestroy},\rtfsp
 \helpref{wxCloseEvent}{wxcloseevent}
-
-
-\membersection{wxWindow::AcceptsFocus}\label{wxwindowacceptsfocus}
-
-\constfunc{bool}{AcceptsFocus}{\void}
-
-This method may be overridden in the derived classes to return \false to
-indicate that this control doesn't accept input at all (i.e. behaves like e.g.
-\helpref{wxStaticText}{wxstatictext}) and so doesn't need focus.
-
-\wxheading{See also}
-
-\helpref{AcceptsFocusFromKeyboard}{wxwindowacceptsfocusfromkeyboard}
-
-
-\membersection{wxWindow::AcceptsFocusFromKeyboard}\label{wxwindowacceptsfocusfromkeyboard}
-
-\constfunc{bool}{AcceptsFocusFromKeyboard}{\void}
-
-This method may be overridden in the derived classes to return \false to
-indicate that while this control can, in principle, have focus if the user
-clicks it with the mouse, it shouldn't be included in the TAB traversal chain
-when using the keyboard.
 
 
 \membersection{wxWindow::AddChild}\label{wxwindowaddchild}
@@ -219,41 +188,11 @@ called by the user code.
 \docparam{child}{Child window to add.}
 
 
-\membersection{wxWindow::AlwaysShowScrollbars}\label{wxwindowalwaysshowscrollbars}
-
-\func{void}{AlwaysShowScrollbars}{\param{bool}{ hflag}, \param{bool}{ vflag}}
-
-Call this function to force one or both scrollbars to be always shown, even if
-the window is big enough to show its entire contents without scrolling.
-
-\newsince{2.9.0}
-
-\wxheading{Parameters}
-
-\docparam{hflag}{Whether the horizontal scroll bar should always be visible.}
-
-\docparam{vflag}{Whether the vertical scroll bar should always be visible.}
-
-\wxheading{Remarks}
-
-This function is currently only implemented under Mac/Carbon.
-
-
 \membersection{wxWindow::CacheBestSize}\label{wxwindowcachebestsize}
 
 \constfunc{void}{CacheBestSize}{\param{const wxSize\& }{size}}
 
 Sets the cached best size value.
-
-
-\membersection{wxWindow::CanSetTransparent}\label{wxwindowcansettransparent}
-
-\func{bool}{CanSetTransparent}{\void}
-
-Returns \true if the system supports transparent windows and calling 
-\helpref{SetTransparent}{wxwindowsettransparent} may succeed. If this function
-returns \false, transparent windows are definitely not supported by the current
-system.
 
 
 \membersection{wxWindow::CaptureMouse}\label{wxwindowcapturemouse}
@@ -293,6 +232,13 @@ A synonym for \helpref{Centre}{wxwindowcentre}.
 \func{void}{CenterOnParent}{\param{int}{ direction}}
 
 A synonym for \helpref{CentreOnParent}{wxwindowcentreonparent}.
+
+
+\membersection{wxWindow::CenterOnScreen}\label{wxwindowcenteronscreen}
+
+\func{void}{CenterOnScreen}{\param{int}{ direction}}
+
+A synonym for \helpref{CentreOnScreen}{wxwindowcentreonscreen}.
 
 
 \membersection{wxWindow::Centre}\label{wxwindowcentre}
@@ -342,7 +288,24 @@ window is not a top level window, then behaviour is the same as
 
 \wxheading{See also}
 
-\helpref{wxTopLevelWindow::CentreOnScreen}{wxtoplevelwindowcenteronscreen}
+\helpref{wxWindow::CentreOnScreen}{wxwindowcenteronscreen}
+
+
+\membersection{wxWindow::CentreOnScreen}\label{wxwindowcentreonscreen}
+
+\func{void}{CentreOnScreen}{\param{int}{ direction = wxBOTH}}
+
+Centres the window on screen. This only works for top level windows -
+otherwise, the window will still be centered on its parent.
+
+\wxheading{Parameters}
+
+\docparam{direction}{Specifies the direction for the centering. May be {\tt wxHORIZONTAL}, {\tt wxVERTICAL}\rtfsp
+or {\tt wxBOTH}.}
+
+\wxheading{See also}
+
+\helpref{wxWindow::CentreOnParent}{wxwindowcenteronparent}
 
 
 \membersection{wxWindow::ClearBackground}\label{wxwindowclearbackground}
@@ -379,23 +342,6 @@ implements the following methods:\par
 \twocolitem{{\bf ClientToScreenXY(x, y)}}{Returns a 2-tuple, (x, y)}
 \end{twocollist}}
 }
-
-\membersection{wxWindow::ClientToWindowSize}\label{wxwindowclienttowindowsize}
-
-\func{virtual wxSize}{ClientToWindowSize}{\param{const wxSize\&}{ size}}
-
-Converts client area size \arg{size} to corresponding window size. In other
-words, the returned value is what would \helpref{GetSize}{wxwindowgetsize}
-return if this window had client area of given size.
-Components with $wxDefaultCoord$ value are left unchanged.
-
-Note that the conversion is not always exact, it assumes that non-client area
-doesn't change and so doesn't take into account things like menu bar
-(un)wrapping or (dis)appearance of the scrollbars.
-
-\wxheading{See also}
-
-\helpref{wxWindow::WindowToClientSize}{wxwindowwindowtoclientsize}
 
 
 \membersection{wxWindow::Close}\label{wxwindowclose}
@@ -641,8 +587,7 @@ Note that this is a static function, so it can be called without needing a wxWin
 
 \wxheading{See also}
 
-\helpref{wxWindow::SetFocus}{wxwindowsetfocus},
-\helpref{wxWindow::HasFocus}{wxwindowhasfocus}
+\helpref{wxWindow::SetFocus}{wxwindowsetfocus}
 
 
 
@@ -716,7 +661,7 @@ If no window with such name is found,
 \func{virtual void}{Fit}{\void}
 
 Sizes the window so that it fits around its subwindows. This function won't do
-anything if there are no subwindows and will only really work correctly if
+anything if there are no subwindows and will only really work correctly if the
 sizers are used for the subwindows layout. Also, if the window has exactly one
 subwindow it is better (faster and the result is more precise as Fit adds some
 margin to account for fuzziness of its calculations) to call
@@ -746,8 +691,7 @@ subwindows.
 Freezes the window or, in other words, prevents any updates from taking place
 on screen, the window is not redrawn at all. \helpref{Thaw}{wxwindowthaw} must
 be called to reenable window redrawing. Calls to these two functions may be
-nested but to ensure that the window is properly repainted again, you must thaw
-it exactly as many times as you froze it.
+nested.
 
 This method is useful for visual appearance optimization (for example, it
 is a good idea to use it before doing many large text insertions in a row into
@@ -800,32 +744,19 @@ Returns the background colour of the window.
 
 \constfunc{virtual wxBackgroundStyle}{GetBackgroundStyle}{\void}
 
-Returns the background style of the window. The background style can be one of:
-\begin{twocollist}\itemsep=0pt
-\twocolitem{wxBG\_STYLE\_SYSTEM}{Use the default background, as determined by
-the system or the current theme.}
-\twocolitem{wxBG\_STYLE\_COLOUR}{Use a solid colour for the background, this
-style is set automatically if you call 
-\helpref{SetBackgroundColour}{wxwindowsetbackgroundcolour} so you only need to
-set it explicitly if you had changed the background style to something else
-before.}
-\twocolitem{wxBG\_STYLE\_CUSTOM}{Don't draw the background at all, it's
-supposed that it is drawn by the user-defined erase background event handler.
-This style should be used to avoid flicker when the background is entirely
-custom-drawn.}
-\twocolitem{wxBG\_STYLE\_TRANSPARET}{The background is (partially) transparent,
-this style is automatically set if you call 
-\helpref{SetTransparent}{wxwindowsettransparent} which is used to set the
-transparency level.}
-\end{twocollist}
+Returns the background style of the window. The background style indicates
+whether background colour should be determined by the system (wxBG\_STYLE\_SYSTEM),
+be set to a specific colour (wxBG\_STYLE\_COLOUR), or should be left to the
+application to implement (wxBG\_STYLE\_CUSTOM).
+
+On GTK+, use of wxBG\_STYLE\_CUSTOM allows the flicker-free drawing of a custom
+background, such as a tiled bitmap. Currently the style has no effect on other platforms.
 
 \wxheading{See also}
 
 \helpref{wxWindow::SetBackgroundColour}{wxwindowsetbackgroundcolour},\rtfsp
 \helpref{wxWindow::GetForegroundColour}{wxwindowgetforegroundcolour},\rtfsp
-\helpref{wxWindow::SetBackgroundStyle}{wxwindowsetbackgroundstyle},\rtfsp
-\helpref{wxWindow::SetTransparent}{wxwindowsettransparent}
-
+\helpref{wxWindow::SetBackgroundStyle}{wxwindowsetbackgroundstyle}
 
 \membersection{wxWindow::GetEffectiveMinSize}\label{wxwindowgeteffectiveminsize}
 
@@ -833,7 +764,7 @@ transparency level.}
 
 Merges the window's best size into the min size and returns the
 result.  This is the value used by sizers to determine the appropriate
-ammount of space to allocate for the widget.
+ammount of sapce to allocate for the widget.
 
 \wxheading{See also}
 
@@ -940,12 +871,9 @@ a 2-element list {\tt (width, height)}.}
 
 \constfunc{wxSize}{GetClientSize}{\void}
 
-Returns the size of the window `client area' in pixels. The client area is the
-area which may be drawn on by the programmer, excluding title bar, border,
-scrollbars, etc.
-
-Note that if this window is a top-level one and it is currently minimized, the
-return size is empty (both width and height are $0$).
+This gets the size of the window `client area' in pixels.
+The client area is the area which may be drawn on by the programmer,
+excluding title bar, border, scrollbars, etc.
 
 \wxheading{Parameters}
 
@@ -1160,33 +1088,12 @@ the button text. This function can be useful for meta-programs (such as testing
 tools or special-needs access programs) which need to identify windows
 by name.
 
-
-\membersection{wxWindow::GetMaxClientSize}\label{wxwindowgetmaxclientsize}
-
-\constfunc{wxSize}{GetMaxClientSize}{\void}
-
-Returns the maximum size of window's client area. 
-This is an indication to the sizer layout mechanism that this is the maximum
-possible size as well as the upper bound on window's size settable using
-\helpref{SetClientSize}{wxwindowsetclientsize}. 
-
-\wxheading{See also}
-
-\helpref{wxWindow::GetMaxSize}{wxwindowgetmaxsize}
-
-
 \membersection{wxWindow::GetMaxSize}\label{wxwindowgetmaxsize}
 
 \constfunc{wxSize}{GetMaxSize}{\void}
 
-Returns the maximum size of the window. This is an indication to the sizer
-layout mechanism that this is the maximum possible size as well as the upper
-bound on window's size settable using \helpref{SetSize}{wxwindowsetsize}. 
-
-\wxheading{See also}
-
-\helpref{wxWindow::GetMaxClientSize}{wxwindowgetmaxclientsize}
-
+Returns the maximum size of the window, an indication to the sizer layout mechanism
+that this is the maximum possible size. 
 
 \membersection{wxWindow::GetMinSize}\label{wxwindowgetminsize}
 
@@ -1196,26 +1103,6 @@ Returns the minimum size of the window, an indication to the sizer layout mechan
 that this is the minimum required size. It normally just returns the value set
 by \helpref{SetMinSize}{wxwindowsetminsize}, but it can be overridden to do the
 calculation on demand.
-
-\wxheading{See also}
-
-\helpref{wxWindow::GetMinClientSize}{wxwindowgetminclientsize}
-
-
-\membersection{wxWindow::GetMinClientSize}\label{wxwindowgetminclientsize}
-
-\constfunc{virtual wxSize}{GetMinClientSize}{\void}
-
-Returns the minimum size of window's client area, an indication to the sizer
-layout mechanism that this is the minimum required size of its client area. It
-normally just returns the value set by
-\helpref{SetMinClientSize}{wxwindowsetminclientsize}, but it can be overridden
-to do the calculation on demand.
-
-\wxheading{See also}
-
-\helpref{wxWindow::GetMinSize}{wxwindowgetminsize}
-
 
 \membersection{wxWindow::GetName}\label{wxwindowgetname}
 
@@ -1252,33 +1139,6 @@ this window is the last child.
 \constfunc{virtual wxWindow*}{GetParent}{\void}
 
 Returns the parent of the window, or NULL if there is no parent.
-
-
-\membersection{wxWindow::GetPopupMenuSelectionFromUser}\label{wxwindowgetpopupmenuselectionfromuser}
-
-\func{int}{GetPopupMenuSelectionFromUser}{\param{wxMenu\&}{ menu}, \param{const wxPoint\&}{ pos}}
-
-\func{int}{GetPopupMenuSelectionFromUser}{\param{wxMenu\&}{ menu}, \param{int}{ x}, \param{int}{ y}}
-
-This function shows a popup menu at the given position in this window and
-returns the selected id. It can be more convenient than the general purpose
-\helpref{PopupMenu}{wxwindowpopupmenu} function for simple menus proposing a
-choice in a list of strings to the user.
-
-\wxheading{Parameters}
-
-\docparam{menu}{The menu to show}
-
-\docparam{pos}{The position at which to show the menu in client coordinates}
-
-\docparam{x}{The horizontal position of the menu}
-
-\docparam{y}{The vertical position of the menu}
-
-\wxheading{Return value}
-
-The selected menu item id or \texttt{wxID\_NONE} if none selected or an error
-occurred.
 
 
 \membersection{wxWindow::GetPosition}\label{wxwindowgetposition}
@@ -1338,7 +1198,7 @@ this window is the first child.
 
 \constfunc{virtual wxRect}{GetRect}{\void}
 
-Returns the position and size of the window as a \helpref{wxRect}{wxrect} object.
+Returns the size and position of the window as a \helpref{wxRect}{wxrect} object.
 
 \wxheading{See also}
 
@@ -1369,7 +1229,7 @@ child window or a top level one.
 
 \constfunc{virtual wxRect}{GetScreenRect}{\void}
 
-Returns the position and size of the window on the screen as a 
+Returns the size and position of the window on the screen as a 
 \helpref{wxRect}{wxrect} object.
 
 \wxheading{See also}
@@ -1416,11 +1276,8 @@ Returns the built-in scrollbar thumb size.
 
 \constfunc{wxSize}{GetSize}{\void}
 
-Returns the size of the entire window in pixels, including title bar, border,
-scrollbars, etc.
-
-Note that if this window is a top-level one and it is currently minimized, the
-returned size is the restored window size, not the size of the window icon.
+This gets the size of the entire window in pixels,
+including title bar, border, scrollbars, etc.
 
 \wxheading{Parameters}
 
@@ -1461,25 +1318,20 @@ Return the sizer associated with the window by a previous call to
 
 \membersection{wxWindow::GetTextExtent}\label{wxwindowgettextextent}
 
-\constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{w}, \param{int* }{h},
+\constfunc{virtual void}{GetTextExtent}{\param{const wxString\& }{string}, \param{int* }{x}, \param{int* }{y},
  \param{int* }{descent = NULL}, \param{int* }{externalLeading = NULL},
  \param{const wxFont* }{font = NULL}, \param{bool}{ use16 = {\tt false}}}
 
-\constfunc{wxSize}{GetTextExtent}{\param{const wxString\& }{string}}
-
 Gets the dimensions of the string as it would be drawn on the
 window with the currently selected font.
-
-The text extent is returned in \arg{w} and \arg{h} pointers (first form) or as a 
-\helpref{wxSize}{wxsize} object (second form).
 
 \wxheading{Parameters}
 
 \docparam{string}{String whose extent is to be measured.}
 
-\docparam{w}{Return value for width.}
+\docparam{x}{Return value for width.}
 
-\docparam{h}{Return value for height.}
+\docparam{y}{Return value for height.}
 
 \docparam{descent}{Return value for descent (optional).}
 
@@ -1575,31 +1427,6 @@ Returns the value previously passed to
 \helpref{wxWindow::SetWindowVariant}{wxwindowsetwindowvariant}.
 
 
-\membersection{wxWindow::HandleAsNavigationKey}\label{wxwindowhandleasnavigationkey}
-
-\func{bool}{HandleAsNavigationKey}{\param{const wxKeyEvent\&}{ event}}
-
-This function will generate the appropriate call to
-\helpref{Navigate}{wxwindownavigate} if the key event is one normally used for
-keyboard navigation and return \true in this case.
-
-\wxheading{Return value}
-
-Returns \true if the key pressed was for navigation and was handled, \false
-otherwise.
-
-\wxheading{See also}
-
-\helpref{Navigate}{wxwindownavigate}
-
-
-\membersection{wxWindow::HandleWindowEvent}\label{wxwindowhandlewindowevent}
-
-\func{bool}{HandleWindowEvent}{\param{wxEvent\& }{event}}
-
-Shorthand for \texttt{\helpref{GetEventHandler}{wxwindowgeteventhandler}()->\helpref{SafelyProcessEvent}{wxevthandlersafelyprocessevent}(event)}.
-
-
 \membersection{wxWindow::HasCapture}\label{wxwindowhascapture}
 
 \constfunc{virtual bool}{HasCapture}{\void}
@@ -1614,35 +1441,11 @@ Returns {\tt true} if this window has the current mouse capture.
 \helpref{wxMouseCaptureChangedEvent}{wxmousecapturechangedevent}
 
 
-\membersection{wxWindow::HasExtraStyle}\label{wxwindowhasextrastyle}
-
-\constfunc{bool}{HasExtraStyle}{\param{int }{exFlag}}
-
-Returns \texttt{true} if the window has the given \arg{exFlag} bit set in its
-extra styles.
-
-\wxheading{See also}
-
-\helpref{SetExtraStyle}{wxwindowsetextrastyle}
-
-
 \membersection{wxWindow::HasFlag}\label{wxwindowhasflag}
 
 \constfunc{bool}{HasFlag}{\param{int }{flag}}
 
 Returns \texttt{true} if the window has the given \arg{flag} bit set.
-
-
-\membersection{wxWindow::HasFocus}\label{wxwindowhasfocus}
-
-\constfunc{virtual bool}{HasFocus}{\void}
-
-Returns \true if the window (or in case of composite controls, its main
-child window) has focus.
-
-\wxheading{See also}
-
-\helpref{FindFocus}{wxwindowfindfocus}
 
 
 \membersection{wxWindow::HasMultiplePages}\label{wxwindowhasmultiplepages}
@@ -1685,20 +1488,6 @@ wxWindow-derived class to ensure that background is painted correctly.
 \func{bool}{Hide}{\void}
 
 Equivalent to calling \helpref{Show}{wxwindowshow}({\tt false}).
-
-
-\membersection{wxWindow::HideWithEffect}\label{wxwindowhidewitheffect}
-
-\func{virtual bool}{HideWithEffect}{\param{wxShowEffect }{effect}, \param{unsigned }{timeout = $0$}, \param{wxDirection }{dir = wxBOTTOM}}
-
-This function hides a window, like \helpref{Hide()}{wxwindowhide}, but using a
-special visual effect if possible.
-
-The parameters of this function are the same as for 
-\helpref{ShowWithEffect()}{wxwindowshowwitheffect}, please see their
-description there.
-
-\newsince{2.9.0}
 
 
 \membersection{wxWindow::InheritAttributes}\label{wxwindowinheritattributes}
@@ -1762,13 +1551,7 @@ and transferred to the screen all at once later.
 
 \constfunc{virtual bool}{IsEnabled}{\void}
 
-Returns \true if the window is enabled, i.e. if it accepts user input, \false 
-otherwise.
-
-Notice that this method can return \false even if this window itself hadn't
-been explicitly disabled when one of its parent windows is disabled. To get the
-intrinsic status of this window, use 
-\helpref{IsThisEnabled}{wxwindowisthisenabled}
+Returns {\tt true} if the window is enabled for input, {\tt false} otherwise.
 
 \wxheading{See also}
 
@@ -1821,21 +1604,6 @@ Returns {\tt true} if the window is retained, {\tt false} otherwise.
 Retained windows are only available on X platforms.
 
 
-\membersection{wxWindow::IsScrollbarAlwaysShown}\label{wxwindowisscrollbaralwaysshown}
-
-\func{bool}{IsScrollbarAlwaysShown}{\param{int}{ orient}}
-
-Return whether a scrollbar is always shown.
-
-\wxheading{Parameters}
-
-\docparam{orient}{Orientation to check, either {\tt wxHORIZONTAL} or {\tt wxVERTICAL}.}
-
-\wxheading{See also}
-
-\helpref{wxWindow::AlwaysShowScrollbars}{wxwindowalwaysshowscrollbars}
-
-
 \membersection{wxWindow::IsShown}\label{wxwindowisshown}
 
 \constfunc{virtual bool}{IsShown}{\void}
@@ -1857,16 +1625,6 @@ is shown and all its parents up to the toplevel window are shown as well.
 \wxheading{See also}
 
 \helpref{wxWindow::IsShown}{wxwindowisshown}
-
-
-\membersection{wxWindow::IsThisEnabled}\label{wxwindowisthisenabled}
-
-\constfunc{bool}{IsThisEnabled}{\void}
-
-Returns \true if this window is intrinsically enabled, \false otherwise, i.e.
-if \helpref{Enable(false)}{wxwindowenable} had been called. This method is
-mostly used for wxWidgets itself, user code should normally use 
-\helpref{IsEnabled}{wxwindowisenabled} instead.
 
 
 \membersection{wxWindow::IsTopLevel}\label{wxwindowistoplevel}
@@ -1903,7 +1661,7 @@ This is just a wrapper for \helpref{ScrollLines}{wxwindowscrolllines}$(-1)$.
 
 \func{void}{Lower}{\void}
 
-Lowers the window to the bottom of the window hierarchy (Z-order).
+Lowers the window to the bottom of the window hierarchy (z-order).
 
 \wxheading{See also}
 
@@ -1993,62 +1751,19 @@ it.
 
 \func{bool}{Navigate}{\param{int}{ flags = wxNavigationKeyEvent::IsForward}}
 
-Performs a keyboard navigation action starting from this window. This method is
-equivalent to calling \helpref{NavigateIn()}{wxwindownavigatein} method on the
-parent window.
+Does keyboard navigation from this window to another, by sending
+a wxNavigationKeyEvent.
 
 \wxheading{Parameters}
 
 \docparam{flags}{A combination of wxNavigationKeyEvent::IsForward and wxNavigationKeyEvent::WinChange.}
-
-\wxheading{Return value}
-
-Returns \true if the focus was moved to another window or \false if nothing
-changed.
 
 \wxheading{Remarks}
 
 You may wish to call this from a text control custom keypress handler to do the default
 navigation behaviour for the tab key, since the standard default behaviour for
 a multiline text control with the wxTE\_PROCESS\_TAB style is to insert a tab
-and not navigate to the next control. See also \helpref{wxNavigationKeyEvent}{wxnavigationkeyevent} and
-\helpref{HandleAsNavigationKey}{wxwindowhandleasnavigationkey}.
-
-
-\membersection{wxWindow::NavigateIn}\label{wxwindownavigatein}
-
-\func{bool}{NavigateIn}{\param{int}{ flags = wxNavigationKeyEvent::IsForward}}
-
-Performs a keyboard navigation action inside this window.
-
-See \helpref{Navigate}{wxwindownavigate} for more information.
-
-
-\membersection{wxWindow::NewControlId}\label{wxwindownewcontrolid}
-
-\func{static wxWindowID}{NewControlId}{\param{int}{ count = 1}}
-
-Create a new ID or range of IDs that are not currently in use.  The
-IDs will be reserved until assigned to a \helpref{wxWindowIDRef}{windowidsoverview}
-or unreserved with \helpref{UnreserveControlId}{wxwindowunreservecontrolid}.
-
-See \helpref{Window IDs overview}{windowidsoverview} for more information.
-
-\wxheading{Parameters}
-
-\docparam{count}{The number of sequential IDs to reserve.}
-
-\wxheading{Return value}
-
-Returns the ID or the first ID of the range, or \texttt{wxID\_NONE} if the
-specified number of identifiers couldn't be allocated.
-
-\wxheading{See also}
-
-\helpref{UnreserveControlId}{wxwindowunreservecontrolid}
-\helpref{wxIdManager}{wxidmanager}
-\helpref{Window IDs overview}{windowidsoverview}
-
+and not navigate to the next control.
 
 %% VZ: wxWindow::OnXXX() functions should not be documented but I'm leaving
 %%     the old docs here in case we want to move any still needed bits to
@@ -2608,6 +2323,7 @@ implements the following methods:\par
 \end{twocollist}}
 }
 
+
 \membersection{wxWindow::PushEventHandler}\label{wxwindowpusheventhandler}
 
 \func{void}{PushEventHandler}{\param{wxEvtHandler* }{handler}}
@@ -2644,7 +2360,7 @@ remove the event handler.
 
 \func{void}{Raise}{\void}
 
-Raises the window to the top of the window hierarchy (Z-order).
+Raises the window to the top of the window hierarchy (z-order).
 
 In current version of wxWidgets this works both for managed and child windows.
 
@@ -2968,34 +2684,41 @@ applications on the system.
 
 \func{virtual void}{SetBackgroundStyle}{\param{wxBackgroundStyle}{ style}}
 
-Sets the background style of the window. see 
-\helpref{GetBackgroundStyle()}{wxwindowgetbackgroundstyle} for the description
-of the possible style values.
+Sets the background style of the window. The background style indicates
+whether background colour should be determined by the system (wxBG\_STYLE\_SYSTEM),
+be set to a specific colour (wxBG\_STYLE\_COLOUR), or should be left to the
+application to implement (wxBG\_STYLE\_CUSTOM).
+
+On GTK+, use of wxBG\_STYLE\_CUSTOM allows the flicker-free drawing of a custom
+background, such as a tiled bitmap. Currently the style has no effect on other platforms.
 
 \wxheading{See also}
 
 \helpref{wxWindow::SetBackgroundColour}{wxwindowsetbackgroundcolour},\rtfsp
 \helpref{wxWindow::GetForegroundColour}{wxwindowgetforegroundcolour},\rtfsp
-\helpref{wxWindow::SetTransparent}{wxwindowsettransparent}
+\helpref{wxWindow::GetBackgroundStyle}{wxwindowgetbackgroundstyle}
 
 
+\membersection{wxWindow::SetInitialSize}\label{wxwindowsetinitialsize}
 
-\membersection{wxWindow::SetCanFocus}\label{wxwindowsetcanfocus}
+\func{void}{SetInitialSize}{\param{const wxSize\& }{size = wxDefaultSize}}
 
-\func{virtual void}{SetCanFocus}{\param{bool}{ canFocus}}
+A {\it smart} SetSize that will fill in default size components with the
+window's {\it best} size values.  Also sets the window's minsize to
+the value passed in for use with sizers.  This means that if a full or
+partial size is passed to this function then the sizers will use that
+size instead of the results of GetBestSize to determine the minimum
+needs of the window for layout.
 
-This method is only implemented by ports which have support for
-native TAB traversal (such as GTK+ 2.0). It is called by wxWidgets'
-container control code to give the native system a hint when
-doing TAB traversal. A call to this does not disable or change
-the effect of programmatically calling 
-\helpref{wxWindow::SetFocus}{wxwindowsetfocus}.
+Most controls will use this to set their initial size, and their min
+size to the passed in value (if any.)
+
 
 \wxheading{See also}
 
-\helpref{wxFocusEvent}{wxfocusevent}
-\helpref{wxPanel::SetFocus}{wxpanelsetfocus}
-\helpref{wxPanel::SetFocusIgnoringChildren}{wxpanelsetfocusignoringchildren}
+\helpref{wxWindow::SetSize}{wxwindowsetsize},\rtfsp
+\helpref{wxWindow::GetBestSize}{wxwindowgetbestsize},\rtfsp
+\helpref{wxWindow::GetEffectiveMinSize}{wxwindowgeteffectiveminsize}
 
 
 \membersection{wxWindow::SetCaret}\label{wxwindowsetcaret}
@@ -3099,6 +2822,13 @@ If the window already has a drop target, it is deleted.
 
 
 
+\membersection{wxWindow::SetInitialBestSize}\label{wxwindowsetinitialbestsize}
+
+\func{virtual void}{SetInitialBestSize}{\param{const wxSize\& }{size}}
+
+Sets the initial window size if none is given (i.e. at least one of the
+components of the size passed to ctor/Create() is wxDefaultCoord).
+
 \membersection{wxWindow::SetEventHandler}\label{wxwindowseteventhandler}
 
 \func{void}{SetEventHandler}{\param{wxEvtHandler* }{handler}}
@@ -3117,9 +2847,9 @@ an application may wish to substitute another, for example to allow
 central implementation of event-handling for a variety of different
 window classes.
 
-It is usually better to use \helpref{wxWindow::PushEventHandler}{wxwindowpusheventhandler}
-since this sets up a chain of event handlers, where an event not handled by
-one event handler is handed to the next one in the chain.
+It is usually better to use \helpref{wxWindow::PushEventHandler}{wxwindowpusheventhandler} since
+this sets up a chain of event handlers, where an event not handled by one event handler is
+handed to the next one in the chain.
 
 \wxheading{See also}
 
@@ -3173,9 +2903,8 @@ This sets the window to receive keyboard input.
 
 \wxheading{See also}
 
-\helpref{HasFocus}{wxwindowhasfocus},
-\helpref{wxFocusEvent}{wxfocusevent},
-\helpref{wxPanel::SetFocus}{wxpanelsetfocus},
+\helpref{wxFocusEvent}{wxfocusevent}
+\helpref{wxPanel::SetFocus}{wxpanelsetfocus}
 \helpref{wxPanel::SetFocusIgnoringChildren}{wxpanelsetfocusignoringchildren}
 
 
@@ -3191,7 +2920,7 @@ can be overridden to do something in addition to this in the derived classes.
 
 \membersection{wxWindow::SetFont}\label{wxwindowsetfont}
 
-\func{bool}{SetFont}{\param{const wxFont\& }{font}}
+\func{void}{SetFont}{\param{const wxFont\& }{font}}
 
 Sets the font for this window. This function should not be called for the
 parent window if you don't want its font to be inherited by its children,
@@ -3209,11 +2938,6 @@ any standard controls for drawing their text as well as by
 
 \docparam{font}{Font to associate with this window, pass
 {\tt wxNullFont} to reset to the default font.}
-
-\wxheading{Return value}
-
-\true if the want was really changed, \false if it was already set to this 
-\arg{font} and so nothing was done.
 
 \wxheading{See also}
 
@@ -3288,36 +3012,6 @@ on creation and should not be modified subsequently.
 
 
 
-\membersection{wxWindow::SetInitialBestSize}\label{wxwindowsetinitialbestsize}
-
-\func{virtual void}{SetInitialBestSize}{\param{const wxSize\& }{size}}
-
-Sets the initial window size if none is given (i.e. at least one of the
-components of the size passed to ctor/Create() is wxDefaultCoord).
-
-
-\membersection{wxWindow::SetInitialSize}\label{wxwindowsetinitialsize}
-
-\func{void}{SetInitialSize}{\param{const wxSize\& }{size = wxDefaultSize}}
-
-A {\it smart} SetSize that will fill in default size components with the
-window's {\it best} size values.  Also sets the window's minsize to
-the value passed in for use with sizers.  This means that if a full or
-partial size is passed to this function then the sizers will use that
-size instead of the results of GetBestSize to determine the minimum
-needs of the window for layout.
-
-Most controls will use this to set their initial size, and their min
-size to the passed in value (if any.)
-
-
-\wxheading{See also}
-
-\helpref{wxWindow::SetSize}{wxwindowsetsize},\rtfsp
-\helpref{wxWindow::GetBestSize}{wxwindowgetbestsize},\rtfsp
-\helpref{wxWindow::GetEffectiveMinSize}{wxwindowgeteffectiveminsize}
-
-
 \membersection{wxWindow::SetLabel}\label{wxwindowsetlabel}
 
 \func{virtual void}{SetLabel}{\param{const wxString\& }{label}}
@@ -3340,23 +3034,6 @@ Sets the window's label.
 Sets the maximum size of the window, to indicate to the sizer layout mechanism
 that this is the maximum possible size.
 
-\wxheading{See also}
-
-\helpref{wxWindow::SetMaxClientSize}{wxwindowsetmaxclientsize}
-
-
-\membersection{wxWindow::SetMaxClientSize}\label{wxwindowsetmaxclientsize}
-
-\func{void}{SetMaxClientSize}{\param{const wxSize\& }{size}}
-
-Sets the maximum \emph{client} size of the window, to indicate to the sizer
-layout mechanism that this is the maximum possible size of its client area.
-
-\wxheading{See also}
-
-\helpref{wxWindow::SetMaxSize}{wxwindowsetmaxsize}
-
-
 \membersection{wxWindow::SetMinSize}\label{wxwindowsetminsize}
 
 \func{void}{SetMinSize}{\param{const wxSize\& }{size}}
@@ -3365,25 +3042,6 @@ Sets the minimum size of the window, to indicate to the sizer layout mechanism
 that this is the minimum required size. You may need to call this
 if you change the window size after construction and before adding
 to its parent sizer.
-
-\wxheading{See also}
-
-\helpref{wxWindow::SetMinClientSize}{wxwindowsetminclientsize}
-
-
-\membersection{wxWindow::SetMinClientSize}\label{wxwindowsetminclientsize}
-
-\func{void}{SetMinClientSize}{\param{const wxSize\& }{size}}
-
-Sets the minimum \emph{client} size of the window, to indicate to the sizer
-layout mechanism that this is the minimum required size of window's client
-area. You may need to call this if you change the window size after
-construction and before adding to its parent sizer.
-
-\wxheading{See also}
-
-\helpref{wxWindow::SetMinSize}{wxwindowsetminsize}
-
 
 \membersection{wxWindow::SetName}\label{wxwindowsetname}
 
@@ -3607,7 +3265,7 @@ and usually the scrollbar will be automatically hidden.
 
 \func{virtual void}{SetSize}{\param{const wxRect\&}{ rect}}
 
-Sets the position and size of the window in pixels.
+Sets the size and position of the window in pixels.
 
 \func{virtual void}{SetSize}{\param{int}{ width}, \param{int}{ height}}
 
@@ -3643,7 +3301,7 @@ a wxWidgets-supplied default height.\\
 a wxWidgets-supplied default size.\\
 {\bf wxSIZE\_USE\_EXISTING}: existing dimensions should be used
 if $wxDefaultCoord$ values are supplied.\\
-{\bf wxSIZE\_ALLOW\_MINUS\_ONE}: allow negative dimensions (i.e. value of $wxDefaultCoord$) to be interpreted
+{\bf wxSIZE\_ALLOW\_MINUS\_ONE}: allow negative dimensions (ie. value of $wxDefaultCoord$) to be interpreted
 as real dimensions, not default values.
 {\bf wxSIZE\_FORCE}: normally, if the position and the size of the window are
 already the same as the parameters of this function, nothing is done. but with
@@ -3659,10 +3317,6 @@ x and y parameters, and must be used with non-default width and height values.
 The first form sets the position and optionally size, of the window.
 Parameters may be $wxDefaultCoord$ to indicate either that a default should be supplied
 by wxWidgets, or that the current value of the dimension should be used.
-
-Notice that for \helpref{top level window}{wxtoplevelwindow} the size will not
-be changed if it is outside of the valid range as set by 
-\helpref{SetSizeHints}{wxtoplevelwindowsetsizehints}.
 
 \wxheading{See also}
 
@@ -3708,7 +3362,7 @@ parameter if the {\it sizer}\/ is non-NULL and {\tt false} otherwise.
 \docparam{sizer}{The sizer to set. Pass NULL to disassociate and conditionally delete
 the window's sizer.  See below.}
 
-\docparam{deleteOld}{If true (the default), this will delete any pre-existing sizer.
+\docparam{deleteOld}{If true (the default), this will delete any prexisting sizer.
 Pass false if you wish to handle deleting the old sizer yourself.}
 
 \wxheading{Remarks}
@@ -3726,11 +3380,8 @@ only the sizer will have effect.
 
 \func{void}{SetSizerAndFit}{\param{wxSizer* }{sizer}, \param{bool }{deleteOld=true}}
 
-This method calls \helpref{SetSizer}{wxwindowsetsizer} and then 
-\helpref{wxSizer::SetSizeHints}{wxsizersetsizehints} which sets the initial
-window size to the size needed to accommodate all sizer elements and sets the
-size hints which, if this window is a top level one, prevent the user from
-resizing it to be less than this minimial size.
+The same as \helpref{SetSizer}{wxwindowsetsizer}, except it also sets the size hints
+for the window based on the sizer's minimum size.
 
 
 \membersection{wxWindow::SetThemeEnabled}\label{wxwindowsetthemeenabled}
@@ -3758,20 +3409,6 @@ Attach a tooltip to the window.
 
 See also: \helpref{GetToolTip}{wxwindowgettooltip},
  \helpref{wxToolTip}{wxtooltip}
-
-
-\membersection{wxWindow::SetTransparent}\label{wxwindowsettransparent}
-
-\func{bool}{SetTransparent}{\param{wxByte }{alpha}}
-
-Set the transparency of the window. If the system supports transparent windows,
-returns \true, otherwise returns \false and the window remains fully opaque.
-See also \helpref{CanSetTransparent}{wxwindowcansettransparent}.
-
-The parameter \arg{alpha} is in the range $0..255$ where $0$ corresponds to a
-fully transparent window and $255$ to the fully opaque one. The constants
-\texttt{wxIMAGE\_ALPHA\_TRANSPARENT} and \texttt{wxIMAGE\_ALPHA\_OPAQUE} can be
-used.
 
 
 \membersection{wxWindow::SetValidator}\label{wxwindowsetvalidator}
@@ -3904,39 +3541,6 @@ done because it already was in the requested state.
 \helpref{wxRadioBox::Show}{wxradioboxshow}
 
 
-\membersection{wxWindow::ShowWithEffect}\label{wxwindowshowwitheffect}
-
-\func{virtual bool}{ShowWithEffect}{\param{wxShowEffect }{effect}, \param{unsigned }{timeout = $0$}, \param{wxDirection }{dir = wxBOTTOM}}
-
-This function shows a window, like \helpref{Show()}{wxwindowshow}, but using a
-special visual effect if possible.
-
-Possible values for \arg{effect} are:
-\begin{twocollist}\itemsep=0pt
-\twocolitem{wxSHOW\_EFFECT\_ROLL}{Roll window effect}
-\twocolitem{wxSHOW\_EFFECT\_SLIDE}{Sliding window effect}
-\twocolitem{wxSHOW\_EFFECT\_BLEND}{Fade in or out effect}
-\twocolitem{wxSHOW\_EFFECT\_EXPAND}{Expanding or collapsing effect}
-\end{twocollist}
-
-For the roll and slide effects the \arg{dir} parameter specifies the animation
-direction: it can be one of \texttt{wxTOP}, \texttt{wxBOTTOM}, \texttt{wxLEFT} 
-or \texttt{wxRIGHT}. For the other effects, this parameter is unused.
-
-The \arg{timeout} parameter specifies the time of the animation, in
-milliseconds. If the default value of $0$ is used, the default animation time
-for the current platform is used.
-
-Currently this function is only implemented in wxMSW and does the same thing as
-Show() in the other ports.
-
-\newsince{2.9.0}
-
-\wxheading{See also}
-
-\helpref{HideWithEffect}{wxwindowhidewitheffect}
-
-
 \membersection{wxWindow::Thaw}\label{wxwindowthaw}
 
 \func{virtual void}{Thaw}{\void}
@@ -4029,25 +3633,6 @@ This function is currently only implemented under MSW.
 
 \helpref{wxWindow::RegisterHotKey}{wxwindowregisterhotkey}
 
-\membersection{wxWindow::UnreserveControlId}\label{wxwindowunreservecontrolid}
-
-\func{static void}{UnreserveControlId}{\param{wxWindowID}{ id}, \param{int}{ count = 1}}
-
-Unreserve an ID or range of IDs that was reserved by \helpref{NewControlId}{wxwindownewcontrolid}.
-
-See \helpref{Window IDs overview}{windowidsoverview} for more information.
-
-\wxheading{Parameters}
-
-\docparam{id}{The starting ID of the range of IDs to unreserve.}
-
-\docparam{count}{The number of sequential IDs to unreserve.}
-
-\wxheading{See also}
-
-\helpref{NewControlId}{wxwindownewcontrolid}
-\helpref{wxIdManager}{wxidmanager}
-\helpref{Window IDs overview}{windowidsoverview}
 
 \membersection{wxWindow::Update}\label{wxwindowupdate}
 
@@ -4146,19 +3731,3 @@ Interface Guidelines forbid moving the mouse cursor programmatically.
 
 \docparam{y}{The new y position for the cursor.}
 
-\membersection{wxWindow::WindowToClientSize}\label{wxwindowwindowtoclientsize}
-
-\func{virtual wxSize}{WindowToClientSize}{\param{const wxSize\&}{ size}}
-
-Converts window size \arg{size} to corresponding client area size. In other
-words, the returned value is what would
-\helpref{GetClientSize}{wxwindowgetclientsize} return if this window had
-given window size. Components with $wxDefaultCoord$ value are left unchanged. 
-
-Note that the conversion is not always exact, it assumes that non-client area
-doesn't change and so doesn't take into account things like menu bar
-(un)wrapping or (dis)appearance of the scrollbars.
-
-\wxheading{See also}
-
-\helpref{wxWindow::ClientToWindowSize}{wxwindowclienttowindowsize}

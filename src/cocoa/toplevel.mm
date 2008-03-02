@@ -32,7 +32,6 @@
 
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
-#include "wx/cocoa/ObjcRef.h"
 
 #include "wx/cocoa/objc/NSView.h"
 #include "wx/cocoa/objc/NSWindow.h"
@@ -150,7 +149,7 @@ bool wxTopLevelWindowCocoa::Create(wxWindow *parent,
         [m_cocoaNSWindow setExcludedFromWindowsMenu: YES];
     if(style & wxSTAY_ON_TOP)
         [m_cocoaNSWindow setLevel:NSFloatingWindowLevel];
-    [m_cocoaNSWindow setTitle:wxNSStringWithWxString(title)];
+    SetTitle(title);
     return true;
 }
 
@@ -191,8 +190,8 @@ void wxTopLevelWindowCocoa::SetNSWindow(WX_NSWindow cocoaNSWindow)
     bool need_debug = cocoaNSWindow || m_cocoaNSWindow;
     if(need_debug) wxLogTrace(wxTRACE_COCOA_RetainRelease,wxT("wxTopLevelWindowCocoa=%p::SetNSWindow [m_cocoaNSWindow=%p retainCount]=%d"),this,m_cocoaNSWindow,[m_cocoaNSWindow retainCount]);
     DisassociateNSWindow(m_cocoaNSWindow);
-    wxGCSafeRetain(cocoaNSWindow);
-    wxGCSafeRelease(m_cocoaNSWindow);
+    [cocoaNSWindow retain];
+    [m_cocoaNSWindow release];
     m_cocoaNSWindow = cocoaNSWindow;
     // NOTE: We are no longer using posing so we won't get events on the
     // window's view unless it was explicitly created as the wx view class.
@@ -223,7 +222,7 @@ void wxTopLevelWindowCocoa::CocoaDelegate_windowDidBecomeKey(void)
     wxLogTrace(wxTRACE_COCOA,wxT("wxTopLevelWindowCocoa=%p::CocoaDelegate_windowDidBecomeKey"),this);
     wxActivateEvent event(wxEVT_ACTIVATE, true, GetId());
     event.SetEventObject(this);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 }
 
 void wxTopLevelWindowCocoa::CocoaDelegate_windowDidResignKey(void)
@@ -231,7 +230,7 @@ void wxTopLevelWindowCocoa::CocoaDelegate_windowDidResignKey(void)
     wxLogTrace(wxTRACE_COCOA,wxT("wxTopLevelWindowCocoa=%p::CocoaDelegate_windowDidResignKey"),this);
     wxActivateEvent event(wxEVT_ACTIVATE, false, GetId());
     event.SetEventObject(this);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 }
 
 void wxTopLevelWindowCocoa::CocoaDelegate_windowDidBecomeMain(void)
@@ -302,7 +301,7 @@ bool wxTopLevelWindowCocoa::Show(bool show)
         // is shown.  I doubt this will cause any problems though.
         wxSizeEvent event(GetSize(), GetId());
         event.SetEventObject(this);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
 
         [m_cocoaNSWindow makeKeyAndOrderFront:m_cocoaNSWindow];
     }
@@ -353,25 +352,20 @@ wxString wxTopLevelWindowCocoa::GetTitle() const
 wxWindow* wxTopLevelWindowCocoa::SetDefaultItem(wxWindow *win)
 {
     wxWindow *old = wxTopLevelWindowBase::SetDefaultItem(win);
+    NSView *newView = win->GetNSView();
 
     NSCell *newCell;
-    if(win != NULL)
-    {
-        NSView *newView = win->GetNSView();
-        // newView does not have to be an NSControl, we only cast to NSControl*
-        // to silence the warning about cell not being implemented.
-        if(newView != nil && [newView respondsToSelector:@selector(cell)])
-            newCell = [(NSControl*)newView cell];
-        else
-            newCell = nil;
-    
-        if(newCell != nil && ![newCell isKindOfClass:[NSButtonCell class]])
-        {   // It's not an NSButtonCell, set the default to nil.
-            newCell = nil;
-        }
-    }
+    // newView does not have to be an NSControl, we only cast to NSControl*
+    // to silence the warning about cell not being implemented.
+    if(newView != nil && [newView respondsToSelector:@selector(cell)])
+        newCell = [(NSControl*)newView cell];
     else
         newCell = nil;
+
+    if(newCell != nil && ![newCell isKindOfClass:[NSButtonCell class]])
+    {   // It's not an NSButtonCell, set the default to nil.
+        newCell = nil;
+    }
 
     [GetNSWindow() setDefaultButtonCell:(NSButtonCell*)newCell];
     return old;

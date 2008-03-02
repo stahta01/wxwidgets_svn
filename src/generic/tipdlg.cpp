@@ -215,7 +215,7 @@ END_EVENT_TABLE()
 wxTipDialog::wxTipDialog(wxWindow *parent,
                          wxTipProvider *tipProvider,
                          bool showAtStartup)
-           : wxDialog(GetParentForModalDialog(parent), wxID_ANY, _("Tip of the Day"),
+           : wxDialog(parent, wxID_ANY, _("Tip of the Day"),
                       wxDefaultPosition, wxDefaultSize,
                       wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
                       )
@@ -224,6 +224,20 @@ wxTipDialog::wxTipDialog(wxWindow *parent,
     bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
 
     // 1) create all controls in tab order
+
+    // smart phones does not support or do not waste space for wxButtons
+#ifndef __SMARTPHONE__
+    wxButton *btnClose = new wxButton(this, wxID_CLOSE);
+    SetAffirmativeId(wxID_CLOSE);
+#endif
+
+    m_checkbox = new wxCheckBox(this, wxID_ANY, _("&Show tips at startup"));
+    m_checkbox->SetValue(showAtStartup);
+
+    // smart phones does not support or do not waste space for wxButtons
+#ifndef __SMARTPHONE__
+    wxButton *btnNext = new wxButton(this, wxID_NEXT_TIP, _("&Next Tip"));
+#endif
 
     wxStaticText *text = new wxStaticText(this, wxID_ANY, _("Did you know..."));
 
@@ -264,22 +278,6 @@ wxTipDialog::wxTipDialog(wxWindow *parent,
     wxStaticBitmap *bmp = new wxStaticBitmap(this, wxID_ANY, icon);
 
 //#endif
-
-    m_checkbox = new wxCheckBox(this, wxID_ANY, _("&Show tips at startup"));
-    m_checkbox->SetValue(showAtStartup);
-    m_checkbox->SetFocus();
-
-    // smart phones does not support or do not waste space for wxButtons
-#ifndef __SMARTPHONE__
-    wxButton *btnNext = new wxButton(this, wxID_NEXT_TIP, _("&Next Tip"));
-#endif
-
-    // smart phones does not support or do not waste space for wxButtons
-#ifndef __SMARTPHONE__
-    wxButton *btnClose = new wxButton(this, wxID_CLOSE);
-    SetAffirmativeId(wxID_CLOSE);
-#endif
-
 
     // 2) put them in boxes
 

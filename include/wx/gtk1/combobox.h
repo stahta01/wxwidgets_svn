@@ -21,13 +21,13 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxComboBox;
+class WXDLLIMPEXP_CORE wxComboBox;
 
 //-----------------------------------------------------------------------------
 // global data
 //-----------------------------------------------------------------------------
 
-extern WXDLLEXPORT_DATA(const char) wxComboBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxComboBoxNameStr[];
 extern WXDLLIMPEXP_BASE const wxChar* wxEmptyString;
 
 //-----------------------------------------------------------------------------
@@ -80,8 +80,8 @@ public:
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxComboBoxNameStr);
 
-    void DoClear();
-    void DoDeleteOneItem(unsigned int n);
+    void Clear();
+    void Delete(unsigned int n);
 
     virtual int FindString(const wxString& s, bool bCase = false) const;
     int GetSelection() const;
@@ -94,7 +94,6 @@ public:
 
     wxString GetValue() const;
     void SetValue(const wxString& value);
-    void WriteText(const wxString& value);
 
     void Copy();
     void Cut();
@@ -160,12 +159,13 @@ public:
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
 protected:
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
 
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
 
     virtual wxSize DoGetBestSize() const;
 

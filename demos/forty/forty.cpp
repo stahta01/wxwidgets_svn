@@ -26,7 +26,6 @@
 #include "forty.h"
 #include "card.h"
 #include "scoredg.h"
-#include "forty.xpm"
 
 #if wxUSE_HTML
 #include "wx/textfile.h"
@@ -142,7 +141,9 @@ FortyFrame::FortyFrame(wxFrame* frame, const wxString& title, const wxPoint& pos
 #ifdef __WXMSW__
     SetIcon(wxIcon(_T("CardsIcon")));
 #else
-    SetIcon(wxIcon(forty_xpm));
+#ifdef GTK_TBD
+    SetIcon(wxIcon(Cards_bits, Cards_width, Cards_height));
+#endif
 #endif
 
     // Make a menu bar

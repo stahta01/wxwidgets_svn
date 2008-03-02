@@ -1,39 +1,58 @@
 body
 {
-  padding: 0em;
+  padding: 0px 0px 0px 0px;
   background: #ffffff; 
   color: #000000;
   font-family: Verdana, Arial, Helvetica, sans-serif;
-  font-size: 100%;
 }
 
-h1, h2, h3
+div
+{
+  width: 90%;
+  border: 2px solid #999999;
+  padding: 4px 8px;
+  background: #cccccc;
+}
+  
+h1, h2, h3, h4
 {
   font-family: Verdana, Arial, Helvetica, sans-serif;
 }
-
+  
 h1
 {
-  font-size: 160%;
-  margin: 1.2em 0;
+  font-size: 200%;
+  margin-top: 1em;
+  margin-bottom: .6em; 
 }
-
+  
 h2
 {
-  font-size: 140%;
-  margin: 0.8em 0;
+  font-size: 150%;
+  margin-top: 1em;
+  margin-bottom: .6em; 
 }
-
+  
 h3
 {
   font-size: 120%;
-  margin: 0.4em 0;
+  margin-left: 0px;
+  margin-bottom: 0.2em;
+  margin-top: 1.5em;
+}
+  
+h4
+{
+  margin-top: 1em;
+  margin-bottom: .6em; 
 }
 
-hr
+h5
 {
-  margin: 0.8em 0;
+  margin-bottom: 1em;
+  margin-top: 1.5em;
 }
+
 
 ul p, ol p, dl p
 {
@@ -46,9 +65,20 @@ p
   margin-bottom: .6em;
 }
 
+dl
+{
+  margin-top: 0em; 
+}
+
+dd
+{
+  margin-bottom: 0em;  
+  margin-left: 1.5em; 
+}
+
 dt
 {
-  margin: 0.5em 0em;
+  margin-top: .6em; 
 }
 
 ul, ol
@@ -56,12 +86,12 @@ ul, ol
   margin-top: .6em;   
   margin-bottom: 0em;
 }
-
+  
 ol
 {
   margin-left: 3.6em; 
 } 
-
+  
 ul
 {
   list-style-type: disc; 
@@ -80,8 +110,10 @@ tt
 
 pre
 {
-  margin: 0.8em 2em;
-  padding: 0.4em;
+  margin-top: .6em;
+  margin-bottom: .6em;
+  margin-left: 2em;
+  margin-right: 2em;
   font-family: Andale Mono, Courier New, Courier, mono;
   color: #550000;
   background: #eeeeee;
@@ -95,14 +127,22 @@ table
   margin-bottom: .3em;
   background: #ffffff;
 }
-
+    
+th
+{ 
+  padding: 2px 4px;
+  background: #dddddd;
+  text-align: left;
+  vertical-align: top;
+  margin: .25em;
+}
+    
 td
 { 
   margin: .25em;
   padding: 2px 4px;
   background: #eeeeee;
   vertical-align: top;
-  font-size: 100%;
 }
 
 tr
@@ -111,7 +151,29 @@ tr
   vertical-align: top;
 }
 
-a:link    { color: #0066ff; }
-a:visited { color: #996600; }
-a:hover   { color: #cc9900; }
+a:link
+{
+  color: #0066ff;
+}
+  
+a:visited
+{
+  color: #996600; 
+}
 
+a:hover
+{
+  color: #cc9900;
+}
+
+
+
+body, td, pre, tt
+{
+  font-size: 100%;
+}
+
+h4, th
+{
+  font-size: 120%;
+}

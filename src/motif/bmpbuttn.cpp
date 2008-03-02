@@ -12,6 +12,10 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#ifdef __VMS
+#define XtScreen XTSCREEN
+#endif
+
 #include "wx/bmpbuttn.h"
 
 #ifdef __VMS__
@@ -47,7 +51,6 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     m_bmpNormal = m_bmpNormalOriginal = bitmap;
     m_bmpSelected = m_bmpSelectedOriginal = bitmap;
@@ -78,6 +81,12 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
 
     m_mainWidget = (WXWidget) buttonWidget;
 
+    ChangeFont(false);
+
+    ChangeBackgroundColour ();
+
+    DoSetBitmap();
+
     XtAddCallback (buttonWidget,
                    XmNactivateCallback, (XtCallbackProc) wxButtonCallback,
                    (XtPointer) this);
@@ -85,9 +94,6 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
     wxSize best = m_bmpNormal.Ok() ? GetBestSize() : wxSize(30, 30);
     if( size.x != -1 ) best.x = size.x;
     if( size.y != -1 ) best.y = size.y;
-
-    PostCreation();
-    DoSetBitmap();
 
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, best.x, best.y);

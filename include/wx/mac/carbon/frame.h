@@ -17,11 +17,11 @@
 #include "wx/accel.h"
 #include "wx/icon.h"
 
-WXDLLEXPORT_DATA(extern const char) wxToolBarNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
 
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
-class WXDLLIMPEXP_FWD_CORE wxStatusBar;
-class WXDLLIMPEXP_FWD_CORE wxMacToolTip ;
+class WXDLLEXPORT wxMenuBar;
+class WXDLLEXPORT wxStatusBar;
+class WXDLLEXPORT wxMacToolTip ;
 
 class WXDLLEXPORT wxFrame: public wxFrameBase 
 {

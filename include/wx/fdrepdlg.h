@@ -18,10 +18,10 @@
 
 #include "wx/dialog.h"
 
-class WXDLLIMPEXP_FWD_CORE wxFindDialogEvent;
-class WXDLLIMPEXP_FWD_CORE wxFindReplaceDialog;
-class WXDLLIMPEXP_FWD_CORE wxFindReplaceData;
-class WXDLLIMPEXP_FWD_CORE wxFindReplaceDialogImpl;
+class WXDLLEXPORT wxFindDialogEvent;
+class WXDLLEXPORT wxFindReplaceDialog;
+class WXDLLEXPORT wxFindReplaceData;
+class WXDLLEXPORT wxFindReplaceDialogImpl;
 
 // ----------------------------------------------------------------------------
 // Flags for wxFindReplaceData.Flags
@@ -161,11 +161,13 @@ private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxFindDialogEvent)
 };
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_NEXT;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_REPLACE;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_REPLACE_ALL;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_CLOSE;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND, 510)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_NEXT, 511)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_REPLACE, 512)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_REPLACE_ALL, 513)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_CLOSE, 514)
+END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxFindDialogEventFunction)(wxFindDialogEvent&);
 

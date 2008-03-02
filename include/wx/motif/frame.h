@@ -48,6 +48,7 @@ public:
     void SetTitle(const wxString& title);
 
     // Set icon
+    virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons);
 
 #if wxUSE_STATUSBAR

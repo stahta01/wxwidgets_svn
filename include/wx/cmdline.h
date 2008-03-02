@@ -17,7 +17,6 @@
 
 #include "wx/string.h"
 #include "wx/arrstr.h"
-#include "wx/cmdargs.h"
 
 #if wxUSE_CMDLINE_PARSER
 
@@ -65,16 +64,12 @@ enum wxCmdLineEntryType
 struct wxCmdLineEntryDesc
 {
     wxCmdLineEntryType kind;
-    const char *shortName;
-    const char *longName;
-    const char *description;
+    const wxChar *shortName;
+    const wxChar *longName;
+    const wxChar *description;
     wxCmdLineParamType type;
     int flags;
 };
-
-// the list of wxCmdLineEntryDesc objects should be terminated with this one
-#define wxCMD_LINE_DESC_END \
-        { wxCMD_LINE_NONE, NULL, NULL, NULL, wxCMD_LINE_VAL_NONE, 0x0 }
 
 // ----------------------------------------------------------------------------
 // wxCmdLineParser is a class for parsing command line.
@@ -105,8 +100,6 @@ public:
     wxCmdLineParser(int argc, char **argv) { Init(); SetCmdLine(argc, argv); }
 #if wxUSE_UNICODE
     wxCmdLineParser(int argc, wxChar **argv) { Init(); SetCmdLine(argc, argv); }
-    wxCmdLineParser(int argc, const wxCmdLineArgsArray& argv)
-        { Init(); SetCmdLine(argc, argv); }
 #endif // wxUSE_UNICODE
     wxCmdLineParser(const wxString& cmdline) { Init(); SetCmdLine(cmdline); }
 
@@ -119,10 +112,6 @@ public:
 #if wxUSE_UNICODE
     wxCmdLineParser(const wxCmdLineEntryDesc *desc, int argc, wxChar **argv)
         { Init(); SetCmdLine(argc, argv); SetDesc(desc); }
-    wxCmdLineParser(const wxCmdLineEntryDesc *desc,
-                    int argc,
-                    const wxCmdLineArgsArray& argv)
-        { Init(); SetCmdLine(argc, argv); SetDesc(desc); }
 #endif // wxUSE_UNICODE
     wxCmdLineParser(const wxCmdLineEntryDesc *desc, const wxString& cmdline)
         { Init(); SetCmdLine(cmdline); SetDesc(desc); }
@@ -131,7 +120,6 @@ public:
     void SetCmdLine(int argc, char **argv);
 #if wxUSE_UNICODE
     void SetCmdLine(int argc, wxChar **argv);
-    void SetCmdLine(int argc, const wxCmdLineArgsArray& argv);
 #endif // wxUSE_UNICODE
     void SetCmdLine(const wxString& cmdline);
 
@@ -221,7 +209,7 @@ public:
     void Reset();
 
     // break down the command line in arguments
-    static wxArrayString ConvertStringToArgs(const wxString& cmdline);
+    static wxArrayString ConvertStringToArgs(const wxChar *cmdline);
 
 private:
     // get usage string
@@ -242,7 +230,7 @@ private:
 class WXDLLIMPEXP_BASE wxCmdLineParser
 {
 public:
-    static wxArrayString ConvertStringToArgs(const wxString& cmdline);
+    static wxArrayString ConvertStringToArgs(const wxChar *cmdline);
 };
 
 #endif // wxUSE_CMDLINE_PARSER/!wxUSE_CMDLINE_PARSER

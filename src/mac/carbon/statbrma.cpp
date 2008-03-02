@@ -59,7 +59,7 @@ bool wxStatusBarMac::Create(wxWindow *parent, wxWindowID id,
         return false;
 
     if ( parent->MacGetTopLevelWindow()->MacGetMetalAppearance() )
-        SetBackgroundStyle( wxBG_STYLE_TRANSPARENT );
+        MacSetBackgroundBrush( wxNullBrush );
 
     // normal system font is too tall for fitting into the standard height
     SetWindowVariant( wxWINDOW_VARIANT_SMALL );
@@ -79,7 +79,8 @@ void wxStatusBarMac::DrawFieldText(wxDC& dc, int i)
 
     wxString text(GetStatusText( i ));
 
-    wxCoord x, y;
+    long x, y;
+
     dc.GetTextExtent(text, &x, &y);
 
     int leftMargin = 2;

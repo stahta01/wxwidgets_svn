@@ -208,21 +208,17 @@ wxSlider::Create(wxWindow *parent,
         HWND hwndParent = GetHwndOf(parent);
         for ( size_t n = 0; n < SliderLabel_Last; n++ )
         {
-            wxWindowIDRef lblid = NewControlId();
-
-            HWND wnd = ::CreateWindow
-                         (
-                            wxT("STATIC"),
-                            NULL,
-                            WS_CHILD | WS_VISIBLE | SS_CENTER,
-                            0, 0, 0, 0,
-                            hwndParent,
-                            (HMENU)wxUIntToPtr(lblid.GetValue()),
-                            wxGetInstance(),
-                            NULL
-                         );
-
-            m_labels->Set(n, wnd, lblid);
+            (*m_labels)[n] = ::CreateWindow
+                               (
+                                    wxT("STATIC"),
+                                    NULL,
+                                    WS_CHILD | WS_VISIBLE | SS_CENTER,
+                                    0, 0, 0, 0,
+                                    hwndParent,
+                                    (HMENU)NewControlId(),
+                                    wxGetInstance(),
+                                    NULL
+                               );
         }
 
         m_labels->SetFont(GetFont());
@@ -368,13 +364,13 @@ bool wxSlider::MSWOnScroll(int WXUNUSED(orientation),
     wxScrollEvent event(scrollEvent, m_windowId);
     event.SetPosition(newPos);
     event.SetEventObject( this );
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 
     wxCommandEvent cevent( wxEVT_COMMAND_SLIDER_UPDATED, GetId() );
     cevent.SetInt( newPos );
     cevent.SetEventObject( this );
 
-    return HandleWindowEvent( cevent );
+    return GetEventHandler()->ProcessEvent( cevent );
 }
 
 void wxSlider::Command (wxCommandEvent & event)
@@ -577,7 +573,7 @@ void wxSlider::SetValue(int value)
 
     if ( m_labels )
     {
-        ::SetWindowText((*m_labels)[SliderLabel_Value], Format(value).wx_str());
+        ::SetWindowText((*m_labels)[SliderLabel_Value], Format(value));
     }
 }
 
@@ -591,10 +587,8 @@ void wxSlider::SetRange(int minValue, int maxValue)
 
     if ( m_labels )
     {
-        ::SetWindowText((*m_labels)[SliderLabel_Min],
-                        Format(ValueInvertOrNot(m_rangeMin)).wx_str());
-        ::SetWindowText((*m_labels)[SliderLabel_Max],
-                        Format(ValueInvertOrNot(m_rangeMax)).wx_str());
+        ::SetWindowText((*m_labels)[SliderLabel_Min], Format(ValueInvertOrNot(m_rangeMin)));
+        ::SetWindowText((*m_labels)[SliderLabel_Max], Format(ValueInvertOrNot(m_rangeMax)));
     }
 }
 

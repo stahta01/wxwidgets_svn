@@ -15,7 +15,6 @@
     #include "wx/log.h"
 #endif // WX_PRECOMP
 
-#include "wx/cocoa/ObjcRef.h"
 #include "wx/cocoa/NSMenu.h"
 
 #import <Foundation/NSNotification.h>
@@ -98,10 +97,7 @@ WX_IMPLEMENT_GET_OBJC_CLASS(wxNSMenuNotificationObserver,NSObject)
 // ========================================================================
 WX_IMPLEMENT_OBJC_INTERFACE_HASHMAP(NSMenu)
 
-// New CF-retained observer (this should have been using wxObjcAutoRefFromAlloc to begin with)
-static wxObjcAutoRefFromAlloc<wxNSMenuNotificationObserver*> s_cocoaNSMenuObserver([[WX_GET_OBJC_CLASS(wxNSMenuNotificationObserver) alloc] init]);
-// For compatibility with old code
-struct objc_object *wxCocoaNSMenu::sm_cocoaObserver = s_cocoaNSMenuObserver;
+struct objc_object *wxCocoaNSMenu::sm_cocoaObserver = [[WX_GET_OBJC_CLASS(wxNSMenuNotificationObserver) alloc] init];
 
 void wxCocoaNSMenu::AssociateNSMenu(WX_NSMenu cocoaNSMenu, unsigned int flags)
 {

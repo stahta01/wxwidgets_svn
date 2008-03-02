@@ -64,7 +64,7 @@ class wxHtmlHelpMergedIndex;
 
 class WXDLLIMPEXP_FWD_CORE wxHelpControllerBase;
 class WXDLLIMPEXP_FWD_HTML wxHtmlHelpController;
-class WXDLLIMPEXP_FWD_HTML wxHtmlHelpWindow;
+class WXDLLIMPEXP_FWD_CORE wxHtmlHelpWindow;
 
 class WXDLLIMPEXP_HTML wxHtmlHelpFrame : public wxFrame
 {
@@ -109,7 +109,7 @@ public:
 
     // we don't want to prevent the app from closing just because a help window
     // remains opened
-    virtual bool ShouldPreventAppExit() const;
+    virtual bool ShouldPreventAppExit() const { return false; }
 
 protected:
     void Init(wxHtmlHelpData* data = NULL);

@@ -19,8 +19,6 @@
 
 #include "wx/control.h"
 
-// class name
-extern WXDLLIMPEXP_DATA_CORE(const wxChar) wxCollapsiblePaneNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxCollapsiblePaneBase: interface for wxCollapsiblePane
@@ -51,7 +49,9 @@ public:
 // event types and macros
 // ----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_COLLPANE_CHANGED;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_CORE, wxEVT_COMMAND_COLLPANE_CHANGED, 1102)
+END_DECLARE_EVENT_TYPES()
 
 class WXDLLIMPEXP_CORE wxCollapsiblePaneEvent : public wxCommandEvent
 {
@@ -90,7 +90,7 @@ typedef void (wxEvtHandler::*wxCollapsiblePaneEventFunction)(wxCollapsiblePaneEv
     wx__DECLARE_EVT1(wxEVT_COMMAND_COLLPANE_CHANGED, id, wxCollapsiblePaneEventHandler(fn))
 
 
-#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
+#if defined(__WXGTK24__) && !defined(__WXUNIVERSAL__)
     #include "wx/gtk/collpane.h"
 #else
     #include "wx/generic/collpaneg.h"

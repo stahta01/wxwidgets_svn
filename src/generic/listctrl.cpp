@@ -25,7 +25,7 @@
 
 #include "wx/listctrl.h"
 
-#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && !defined(__WXMAC__)
+#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && (!defined(__WXMAC__)|| defined(__WXUNIVERSAL__))
     // if we have a native version, its implementation file does all this
     IMPLEMENT_DYNAMIC_CLASS(wxListItem, wxObject)
     IMPLEMENT_DYNAMIC_CLASS(wxListView, wxListCtrl)
@@ -42,7 +42,6 @@
     #include "wx/dcclient.h"
     #include "wx/dcscreen.h"
     #include "wx/math.h"
-    #include "wx/settings.h"
 #endif
 
 #include "wx/imaglist.h"
@@ -464,7 +463,7 @@ public:
 
     wxTextCtrl *GetText() const { return m_text; }
 
-    void EndEdit( bool discardChanges );
+    void AcceptChangesAndFinish();
 
 protected:
     void OnChar( wxKeyEvent &event );
@@ -472,13 +471,14 @@ protected:
     void OnKillFocus( wxFocusEvent &event );
 
     bool AcceptChanges();
-    void Finish( bool setfocus );
+    void Finish();
 
 private:
     wxListMainWindow   *m_owner;
     wxTextCtrl         *m_text;
     wxString            m_startValue;
     size_t              m_itemEdited;
+    bool                m_finished;
     bool                m_aboutToFinish;
 
     DECLARE_EVENT_TABLE()
@@ -579,8 +579,6 @@ public:
     // bring the selected item into view, scrolling to it if necessary
     void MoveToItem(size_t item);
 
-    bool ScrollList( int WXUNUSED(dx), int dy );
-
     // bring the current item into view
     void MoveToFocus() { MoveToItem(m_current); }
 
@@ -592,15 +590,16 @@ public:
         return m_textctrlWrapper ? m_textctrlWrapper->GetText() : NULL;
     }
 
-    void ResetTextControl(wxTextCtrl *text)
+    void FinishEditing(wxTextCtrl *text)
     {
         delete text;
         m_textctrlWrapper = NULL;
+        SetFocusIgnoringChildren();
     }
 
-    // we don't draw anything while we're frozen so we must refresh ourselves
-    // when we're thawed to make sure the changes are displayed correctly
-    virtual void DoThaw() { Refresh(); }
+    // suspend/resume redrawing the control
+    void Freeze();
+    void Thaw();
 
     void OnRenameTimer();
     bool OnRenameAccept(size_t itemEdit, const wxString& value);
@@ -847,6 +846,9 @@ private:
     // the brushes to use for item highlighting when we do/don't have focus
     wxBrush *m_highlightBrush,
             *m_highlightUnfocusedBrush;
+
+    // if this is > 0, the control is frozen and doesn't redraw itself
+    size_t m_freezeCount;
 
     // wrapper around the text control currently used for in place editing or
     // NULL if no item is being edited
@@ -1412,7 +1414,7 @@ bool wxListLineData::SetAttributes(wxDC *dc,
 #ifdef __WXMAC__
     {
         if (m_owner->HasFocus()
-#if !defined(__WXUNIVERSAL__)
+#ifdef __WXMAC__
                 && IsControlActive( (ControlRef)m_owner->GetHandle() )
 #endif
         )
@@ -1476,7 +1478,7 @@ void wxListLineData::Draw( wxDC *dc )
         {
             int flags = wxCONTROL_SELECTED;
             if (m_owner->HasFocus()
-#if defined( __WXMAC__ ) && !defined(__WXUNIVERSAL__)
+#ifdef __WXMAC__
                 && IsControlActive( (ControlRef)m_owner->GetHandle() )
 #endif
             )
@@ -1538,7 +1540,11 @@ void wxListLineData::DrawInReportMode( wxDC *dc,
         if (highlighted)
         {
             int flags = wxCONTROL_SELECTED;
-            if (m_owner->HasFocus())
+            if (m_owner->HasFocus()
+#ifdef __WXMAC__
+                && IsControlActive( (ControlRef)m_owner->GetHandle() )
+#endif
+            )
                 flags |= wxCONTROL_FOCUSED;
             wxRendererNative::Get().DrawItemSelectionRect( m_owner, *dc, rectHL, flags );
         }
@@ -1569,9 +1575,6 @@ void wxListLineData::DrawInReportMode( wxDC *dc,
         int xOld = x;
         x += width;
 
-        const int wText = width - 8;
-        wxDCClipper clipper(*dc, xOld, rect.y, wText, rect.height);
-
         if ( item->HasImage() )
         {
             int ix, iy;
@@ -1585,7 +1588,7 @@ void wxListLineData::DrawInReportMode( wxDC *dc,
         }
 
         if ( item->HasText() )
-            DrawTextFormatted(dc, item->GetText(), col, xOld, yMid, wText);
+            DrawTextFormatted(dc, item->GetText(), col, xOld, yMid, width - 8);
     }
 }
 
@@ -1879,7 +1882,7 @@ void wxListHeaderWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
         // draw the text and image clipping them so that they
         // don't overwrite the column boundary
-        wxDCClipper clipper(dc, x, HEADER_OFFSET_Y, cw, h - 4 );
+        wxDCClipper clipper(dc, x, HEADER_OFFSET_Y, cw, h  );
 
         // if we have an image, draw it on the right of the label
         if ( imageList )
@@ -2121,6 +2124,7 @@ wxListTextCtrlWrapper::wxListTextCtrlWrapper(wxListMainWindow *owner,
 {
     m_owner = owner;
     m_text = text;
+    m_finished = false;
     m_aboutToFinish = false;
 
     wxRect rectLabel = owner->GetLineLabelRect(itemEdit);
@@ -2136,35 +2140,17 @@ wxListTextCtrlWrapper::wxListTextCtrlWrapper(wxListMainWindow *owner,
     m_text->PushEventHandler(this);
 }
 
-void wxListTextCtrlWrapper::EndEdit(bool discardChanges)
+void wxListTextCtrlWrapper::Finish()
 {
-    m_aboutToFinish = true;
-    
-    if ( discardChanges )
+    if ( !m_finished )
     {
-        m_owner->OnRenameCancelled(m_itemEdited);
-           
-        Finish( true );
+        m_finished = true;
+
+        m_text->RemoveEventHandler(this);
+        m_owner->FinishEditing(m_text);
+
+        wxPendingDelete.Append( this );
     }
-    else
-    {
-        // Notify the owner about the changes
-        AcceptChanges();
-
-        // Even if vetoed, close the control (consistent with MSW)
-        Finish( true );
-    }
-}
-
-void wxListTextCtrlWrapper::Finish( bool setfocus )
-{
-    m_text->RemoveEventHandler(this);
-    m_owner->ResetTextControl( m_text );
-
-    wxPendingDelete.Append( this );
-    
-    if (setfocus)
-        m_owner->SetFocusIgnoringChildren();
 }
 
 bool wxListTextCtrlWrapper::AcceptChanges()
@@ -2186,16 +2172,28 @@ bool wxListTextCtrlWrapper::AcceptChanges()
     return true;
 }
 
+void wxListTextCtrlWrapper::AcceptChangesAndFinish()
+{
+    m_aboutToFinish = true;
+
+    // Notify the owner about the changes
+    AcceptChanges();
+
+    // Even if vetoed, close the control (consistent with MSW)
+    Finish();
+}
+
 void wxListTextCtrlWrapper::OnChar( wxKeyEvent &event )
 {
     switch ( event.m_keyCode )
     {
         case WXK_RETURN:
-            EndEdit( false );
+            AcceptChangesAndFinish();
             break;
 
         case WXK_ESCAPE:
-            EndEdit( true );
+            m_owner->OnRenameCancelled( m_itemEdited );
+            Finish();
             break;
 
         default:
@@ -2205,32 +2203,35 @@ void wxListTextCtrlWrapper::OnChar( wxKeyEvent &event )
 
 void wxListTextCtrlWrapper::OnKeyUp( wxKeyEvent &event )
 {
-    if (m_aboutToFinish)
+    if (m_finished)
     {
-        // auto-grow the textctrl:
-        wxSize parentSize = m_owner->GetSize();
-        wxPoint myPos = m_text->GetPosition();
-        wxSize mySize = m_text->GetSize();
-        int sx, sy;
-        m_text->GetTextExtent(m_text->GetValue() + _T("MM"), &sx, &sy);
-        if (myPos.x + sx > parentSize.x)
-            sx = parentSize.x - myPos.x;
-       if (mySize.x > sx)
-            sx = mySize.x;
-       m_text->SetSize(sx, wxDefaultCoord);
+        event.Skip();
+        return;
     }
-    
+
+    // auto-grow the textctrl:
+    wxSize parentSize = m_owner->GetSize();
+    wxPoint myPos = m_text->GetPosition();
+    wxSize mySize = m_text->GetSize();
+    int sx, sy;
+    m_text->GetTextExtent(m_text->GetValue() + _T("MM"), &sx, &sy);
+    if (myPos.x + sx > parentSize.x)
+        sx = parentSize.x - myPos.x;
+    if (mySize.x > sx)
+        sx = mySize.x;
+    m_text->SetSize(sx, wxDefaultCoord);
+
     event.Skip();
 }
 
 void wxListTextCtrlWrapper::OnKillFocus( wxFocusEvent &event )
 {
-    if ( !m_aboutToFinish )
+    if ( !m_finished && !m_aboutToFinish )
     {
         if ( !AcceptChanges() )
             m_owner->OnRenameCancelled( m_itemEdited );
 
-        Finish( false );
+        Finish();
     }
 
     // We must let the native text control handle focus
@@ -2283,6 +2284,8 @@ void wxListMainWindow::Init()
     m_lineLastClicked =
     m_lineSelectSingleOnUp =
     m_lineBeforeLastClicked = (size_t)-1;
+
+    m_freezeCount = 0;
 }
 
 wxListMainWindow::wxListMainWindow()
@@ -2701,23 +2704,32 @@ void wxListMainWindow::RefreshSelected()
     }
 }
 
+void wxListMainWindow::Freeze()
+{
+    m_freezeCount++;
+}
+
+void wxListMainWindow::Thaw()
+{
+    wxCHECK_RET( m_freezeCount > 0, _T("thawing unfrozen list control?") );
+
+    if ( --m_freezeCount == 0 )
+        Refresh();
+}
+
 void wxListMainWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
 {
     // Note: a wxPaintDC must be constructed even if no drawing is
     // done (a Windows requirement).
     wxPaintDC dc( this );
 
-    if ( IsEmpty() || IsFrozen() )
-    {
+    if ( IsEmpty() || m_freezeCount )
         // nothing to draw or not the moment to draw it
         return;
-    }
 
     if ( m_dirty )
-    {
         // delay the repainting until we calculate all the items positions
         return;
-    }
 
     PrepareDC( dc );
 
@@ -2994,7 +3006,7 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
     // listctrl because the order of events is different (or something like
     // that), so explicitly end the edit if it is active.
     if ( event.LeftDown() && m_textctrlWrapper )
-        m_textctrlWrapper->EndEdit( false );
+        m_textctrlWrapper->AcceptChangesAndFinish();
 #endif // __WXMAC__
 
     if ( event.LeftDown() )
@@ -3016,13 +3028,8 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
         if (event.RightDown())
         {
             SendNotify( (size_t)-1, wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, event.GetPosition() );
-
-            wxContextMenuEvent evtCtx(
-                wxEVT_CONTEXT_MENU,
-                GetParent()->GetId(),
-                ClientToScreen(event.GetPosition()));
-            evtCtx.SetEventObject(GetParent());
-            GetParent()->GetEventHandler()->ProcessEvent(evtCtx);
+            // Allow generation of context menu event
+            event.Skip();
         }
         return;
     }
@@ -3153,12 +3160,15 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
                 (hitResult == wxLIST_HITTEST_ONITEMLABEL) &&
                 HasFlag(wxLC_EDIT_LABELS) )
             {
-                if ( !InReportView() ||
-                        GetLineLabelRect(current).Contains(x, y) )
+                if (InReportView())
                 {
-                    int dclick = wxSystemSettings::GetMetric(wxSYS_DCLICK_MSEC);
-                    m_renameTimer->Start(dclick > 0 ? dclick : 250, true);
+                    wxRect label = GetLineLabelRect( current );
+                    if (label.Contains( x, y ))
+                        m_renameTimer->Start( 250, true );
+
                 }
+                else
+                    m_renameTimer->Start( 250, true );
             }
         }
 
@@ -3189,8 +3199,12 @@ void wxListMainWindow::OnMouse( wxMouseEvent &event )
 
         SendNotify( current, wxEVT_COMMAND_LIST_ITEM_RIGHT_CLICK, event.GetPosition() );
 
-        // Allow generation of context menu event
-        event.Skip();
+        wxContextMenuEvent evtCtx(
+                wxEVT_CONTEXT_MENU,
+                GetParent()->GetId(),
+                ClientToScreen(event.GetPosition()));
+        evtCtx.SetEventObject(GetParent());
+        GetParent()->GetEventHandler()->ProcessEvent(evtCtx);
     }
     else if (event.MiddleDown())
     {
@@ -3298,49 +3312,11 @@ void wxListMainWindow::MoveToItem(size_t item)
     }
     else // !report
     {
-        int sx = -1,
-            sy = -1;
-
         if (rect.x-view_x < 5)
-            sx = (rect.x - 5) / SCROLL_UNIT_X;
+            Scroll( (rect.x - 5) / SCROLL_UNIT_X, -1 );
         if (rect.x + rect.width - 5 > view_x + client_w)
-            sx = (rect.x + rect.width - client_w + SCROLL_UNIT_X) / SCROLL_UNIT_X;
-
-        if (rect.y-view_y < 5)
-            sy = (rect.y - 5) / hLine;
-        if (rect.y + rect.height - 5 > view_y + client_h)
-            sy = (rect.y + rect.height - client_h + hLine) / hLine;
-
-        Scroll(sx, sy);
+            Scroll( (rect.x + rect.width - client_w + SCROLL_UNIT_X) / SCROLL_UNIT_X, -1 );
     }
-}
-
-bool wxListMainWindow::ScrollList(int WXUNUSED(dx), int dy)
-{
-    if ( !InReportView() )
-    {
-        // TODO: this should work in all views but is not implemented now
-        return false;
-    }
-
-    size_t top, bottom;
-    GetVisibleLinesRange(&top, &bottom);
-
-    if ( bottom == (size_t)-1 )
-        return 0;
-
-    ResetVisibleLinesRange();
-
-    int hLine = GetLineHeight();
-
-    Scroll(-1, top + dy / hLine);
-
-#ifdef __WXMAC__
-    // see comment in MoveToItem() for why we do this
-    ResetVisibleLinesRange();
-#endif
-
-    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -3459,8 +3435,16 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
     ke.SetEventObject( parent );
     if (parent->GetEventHandler()->ProcessEvent( ke )) return;
 
-    if ( HandleAsNavigationKey(event) )
-        return;
+    if (event.GetKeyCode() == WXK_TAB)
+    {
+        wxNavigationKeyEvent nevent;
+        nevent.SetWindowChange( event.ControlDown() );
+        nevent.SetDirection( !event.ShiftDown() );
+        nevent.SetEventObject( GetParent()->GetParent() );
+        nevent.SetCurrentFocus( m_parent );
+        if (GetParent()->GetParent()->GetEventHandler()->ProcessEvent( nevent ))
+            return;
+    }
 
     // no item -> nothing to do
     if (!HasCurrent())
@@ -5031,23 +5015,24 @@ bool wxGenericListCtrl::Create(wxWindow *parent,
         style = style | wxLC_LIST;
     }
 
-    if ( !wxControl::Create( parent, id, pos, size, style, validator, name ) )
-        return false;
+    // add more styles here that should only appear
+    // in the main window
+    unsigned long only_main_window_style = wxALWAYS_SHOW_SB;
 
-    // this window itself shouldn't get the focus, only m_mainWin should
-    SetCanFocus(false);
+    if ( !wxControl::Create( parent, id, pos, size, style & ~only_main_window_style, validator, name ) )
+        return false;
 
     // don't create the inner window with the border
     style &= ~wxBORDER_MASK;
 
     m_mainWin = new wxListMainWindow( this, wxID_ANY, wxPoint(0, 0), size, style );
 
-#ifdef __WXMAC__
+#ifdef  __WXMAC_CARBON__
     // Human Interface Guidelines ask us for a special font in this case
     if ( GetWindowVariant() == wxWINDOW_VARIANT_NORMAL )
     {
         wxFont font;
-        font.MacCreateFromThemeFont( kThemeViewsFont );
+        font.MacCreateThemeFont( kThemeViewsFont );
         SetFont( font );
     }
 #endif
@@ -5056,11 +5041,11 @@ bool wxGenericListCtrl::Create(wxWindow *parent,
     {
         CreateHeaderWindow();
 
-#ifdef __WXMAC__
+#ifdef  __WXMAC_CARBON__
         if (m_headerWin)
         {
             wxFont font;
-            font.MacCreateFromThemeFont( kThemeSmallSystemFont );
+            font.MacCreateThemeFont( kThemeSmallSystemFont );
             m_headerWin->SetFont( font );
             CalculateAndSetHeaderHeight();
         }
@@ -5255,6 +5240,11 @@ bool wxGenericListCtrl::SetItemPtrData( long item, wxUIntPtr data )
     info.m_data = data;
     m_mainWin->SetItem( info );
     return true;
+}
+
+bool wxGenericListCtrl::SetItemData(long item, long data)
+{
+    return SetItemPtrData(item, data);
 }
 
 wxRect wxGenericListCtrl::GetViewRect() const
@@ -5591,9 +5581,9 @@ long wxGenericListCtrl::InsertColumn( long col, const wxString &heading,
     return InsertColumn( col, item );
 }
 
-bool wxGenericListCtrl::ScrollList( int dx, int dy )
+bool wxGenericListCtrl::ScrollList( int WXUNUSED(dx), int WXUNUSED(dy) )
 {
-    return m_mainWin->ScrollList(dx, dy);
+    return 0;
 }
 
 // Sort items.
@@ -5901,12 +5891,12 @@ void wxGenericListCtrl::Refresh(bool eraseBackground, const wxRect *rect)
     }
 }
 
-void wxGenericListCtrl::DoFreeze()
+void wxGenericListCtrl::Freeze()
 {
     m_mainWin->Freeze();
 }
 
-void wxGenericListCtrl::DoThaw()
+void wxGenericListCtrl::Thaw()
 {
     m_mainWin->Thaw();
 }

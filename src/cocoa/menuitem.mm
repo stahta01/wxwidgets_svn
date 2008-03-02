@@ -102,7 +102,7 @@ wxMenuItem *wxMenuItemBase::New(wxMenu *parentMenu,
 }
 
 /* static */
-wxString wxMenuItemBase::GetLabelText(const wxString& text)
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }
@@ -285,9 +285,9 @@ void wxMenuItem::Check(bool check)
     }
 }
 
-void wxMenuItem::SetItemLabel(const wxString& label)
+void wxMenuItem::SetText(const wxString& label)
 {
-    wxMenuItemBase::SetItemLabel(label);
+    wxMenuItemBase::SetText(label);
     wxCHECK_RET(m_kind != wxITEM_SEPARATOR, wxT("Separator items do not have titles."));
     [m_cocoaNSMenuItem setTitle: wxNSStringWithWxString(wxStripMenuCodes(label))];
     CocoaSetKeyEquivalent();

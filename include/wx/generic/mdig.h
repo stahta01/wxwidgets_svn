@@ -20,19 +20,16 @@
 #include "wx/panel.h"
 #include "wx/notebook.h"
 
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxIconBundle;
-
-extern WXDLLEXPORT_DATA(const char) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
 
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIParentFrame;
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIChildFrame;
+class WXDLLEXPORT wxGenericMDIParentFrame;
+class WXDLLEXPORT wxGenericMDIClientWindow;
+class WXDLLEXPORT wxGenericMDIChildFrame;
 
 //-----------------------------------------------------------------------------
 // wxGenericMDIParentFrame
@@ -155,6 +152,14 @@ public:
     virtual void SetStatusWidths( int WXUNUSED(n), const int WXUNUSED(widths_field)[] ) {}
 #endif
 
+    // no size hints
+    virtual void DoSetSizeHints( int WXUNUSED(minW),
+                               int WXUNUSED(minH),
+                               int WXUNUSED(maxW) = wxDefaultCoord,
+                               int WXUNUSED(maxH) = wxDefaultCoord,
+                               int WXUNUSED(incW) = wxDefaultCoord,
+                               int WXUNUSED(incH) = wxDefaultCoord) {}
+
 #if wxUSE_TOOLBAR
     // no toolbar bars
     virtual wxToolBar* CreateToolBar( long WXUNUSED(style),
@@ -165,8 +170,8 @@ public:
 #endif
 
     // no icon
-    void SetIcon(const wxIcon& WXUNUSED(icon)) { }
-    virtual void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
+    void SetIcon( const wxIcon& WXUNUSED(icon) ) { }
+    void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
 
     // no maximize etc
     virtual void Maximize( bool WXUNUSED(maximize) = true) { /* Has no effect */ }
@@ -202,11 +207,6 @@ protected:
     void Init();
 
     virtual void DoMoveWindow(int x, int y, int width, int height);
-
-    // no size hints
-    virtual void DoSetSizeHints(int WXUNUSED(minW), int WXUNUSED(minH),
-                                int WXUNUSED(maxW), int WXUNUSED(maxH),
-                                int WXUNUSED(incW), int WXUNUSED(incH)) {}
 
     // This function needs to be called when a size change is confirmed,
     // we needed this function to prevent any body from the outside

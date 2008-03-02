@@ -1,4 +1,4 @@
-$Header: /cvs/maptools/cvsroot/libtiff/README,v 1.5 2004/10/30 13:44:45 dron Exp $
+$Header$
 
 
 TIFF Software Distribution
@@ -12,7 +12,7 @@ favorite WWW viewer at html/index.html; e.g.
 If you don't have an HTML viewer then you can read the HTML source
 or fetch a PostScript version of this documentation from the directory
 
-    ftp://ftp.remotesensing.org/pub/libtiff/
+    ftp://ftp.sgi.com/graphics/tiff/doc
 
 If you can't hack either of these options then basically what you
 want to do is:
@@ -22,13 +22,15 @@ want to do is:
     % su
     # make install
 
-More information, email contacts, and mailing list information can be 
-found online at http://www.remotesensing.org/libtiff/.
+If that doesn't do what you want, or something isn't clear then
+sorry, but you're SOL.
+
+    Sam Leffler	(sam@engr.sgi.com)
 
 
 Use and Copyright
 -----------------
-Silicon Graphics has seen fit to allow us to give this work away.  It
+Silicon Graphics has seen fit to allow me to give this work away.  It
 is free.  There is no support or guarantee of any sort as to its
 operations, correctness, or whatever.  If you do anything useful with
 all or parts of it you need to honor the copyright notices.   I would

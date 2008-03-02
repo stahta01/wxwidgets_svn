@@ -189,8 +189,6 @@ bool wxArrowButton::Create( wxSpinButton* parent,
                             ArrowDirection d,
                             const wxPoint& pos, const wxSize& size )
 {
-    wxCHECK_MSG( parent, false, _T("must have a valid parent") );
-
     int arrow_dir = XmARROW_UP;
 
     switch( d )
@@ -209,8 +207,7 @@ bool wxArrowButton::Create( wxSpinButton* parent,
         break;
     }
 
-    parent->AddChild( this );
-    PreCreation();
+    if( parent ) parent->AddChild( this );
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
     m_mainWidget = (WXWidget) XtVaCreateManagedWidget( "XmArrowButton",
@@ -231,9 +228,10 @@ bool wxArrowButton::Create( wxSpinButton* parent,
                    XmNactivateCallback, (XtCallbackProc) StopTimerCallback,
                    (XtPointer) this );
 
-    PostCreation();
     AttachWidget( parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, size.x, size.y );
+
+    SetForegroundColour( parent->GetBackgroundColour() );
 
     return true;
 }
@@ -352,7 +350,7 @@ void wxSpinButton::Increment( int delta )
     event.SetPosition( npos );
     event.SetEventObject( this );
 
-    HandleWindowEvent( event );
+    GetEventHandler()->ProcessEvent( event );
 
     if( event.IsAllowed() )
     {
@@ -360,7 +358,7 @@ void wxSpinButton::Increment( int delta )
         event.SetEventType( wxEVT_SCROLL_THUMBTRACK );
         event.SetPosition( m_pos );
 
-        HandleWindowEvent( event );
+        GetEventHandler()->ProcessEvent( event );
     }
 }
 

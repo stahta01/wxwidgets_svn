@@ -82,6 +82,9 @@ public:
     // accessors
     // ---------
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_refData != NULL; }
+
     // Is region empty?
     virtual bool IsEmpty() const = 0;
     bool Empty() const { return IsEmpty(); }

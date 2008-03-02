@@ -133,10 +133,22 @@ public:
         dc.DrawText(_T("Below is the standard header button drawn"), 10, 10);
         dc.DrawText(_T("using the current renderer:"), 10, 40);
 
-        wxRendererNative& renderer = wxRendererNative::Get();
-        const wxCoord height = renderer.GetHeaderButtonHeight(this);
+        wxRendererNative::Get().DrawHeaderButton(this, dc,
+                                                 wxRect(20, 70, 100, 60));
 
-        renderer.DrawHeaderButton(this, dc, wxRect(20, 70, 100, height));
+        // Draw some check boxes in various states
+        dc.SetBrush(*wxBLACK_BRUSH);
+        dc.SetTextForeground(*wxBLACK);
+        dc.DrawText(_T("Checkbox Drawn with native renderer"), 10, 150);
+        // Checked
+        wxRendererNative::Get().DrawCheckBox(this, dc, wxRect(20, 170, 16, 16), wxCONTROL_CHECKED);
+        // Undetermined
+        wxRendererNative::Get().DrawCheckBox(this, dc, wxRect(40, 170, 16, 16), wxCONTROL_CHECKABLE);
+        // Unchecked
+        wxRendererNative::Get().DrawCheckBox(this, dc, wxRect(60, 170, 16, 16), 0);
+        // Checked and Disabled
+        wxRendererNative::Get().DrawCheckBox(this, dc, wxRect(80, 170, 16, 16), wxCONTROL_CHECKED | wxCONTROL_DISABLED);
+
     }
 
     DECLARE_EVENT_TABLE()
@@ -203,9 +215,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     new MyFrame;
 

@@ -58,7 +58,13 @@ wxDataFormat::wxDataFormat( wxDataFormatId type )
     SetType( type );
 }
 
-void wxDataFormat::InitFromString( const wxString &id )
+wxDataFormat::wxDataFormat( const wxChar *id )
+{
+    PrepareFormats();
+    SetId( id );
+}
+
+wxDataFormat::wxDataFormat( const wxString &id )
 {
     PrepareFormats();
     SetId( id );
@@ -132,11 +138,12 @@ void wxDataFormat::SetId( NativeFormat format )
         m_type = wxDF_PRIVATE;
 }
 
-void wxDataFormat::SetId( const wxString& id )
+void wxDataFormat::SetId( const wxChar *id )
 {
     PrepareFormats();
     m_type = wxDF_PRIVATE;
-    m_format = gdk_atom_intern( id.ToAscii(), FALSE );
+    wxString tmp( id );
+    m_format = gdk_atom_intern( (const char*) tmp.ToAscii(), FALSE );
 }
 
 void wxDataFormat::PrepareFormats()
@@ -204,17 +211,13 @@ bool wxDataObject::IsSupportedFormat(const wxDataFormat& format, Direction dir) 
 // wxTextDataObject
 // ----------------------------------------------------------------------------
 
-#if wxUSE_UNICODE
-
-void
-wxTextDataObject::GetAllFormats(wxDataFormat *formats,
-                                wxDataObjectBase::Direction WXUNUSED(dir)) const
+#if defined(__WXGTK20__) && wxUSE_UNICODE
+void wxTextDataObject::GetAllFormats(wxDataFormat *formats, wxDataObjectBase::Direction dir) const
 {
     *formats++ = GetPreferredFormat();
     *formats = g_altTextAtom;
 }
-
-#endif // wxUSE_UNICODE
+#endif
 
 // ----------------------------------------------------------------------------
 // wxFileDataObject
@@ -401,54 +404,5 @@ void wxBitmapDataObject::DoConvertToPng()
     wxMemoryOutputStream mstream((char*) m_pngData, m_pngSize);
     image.SaveFile(mstream, wxBITMAP_TYPE_PNG);
 }
-
-// ----------------------------------------------------------------------------
-// wxURLDataObject
-// ----------------------------------------------------------------------------
-
-wxURLDataObject::wxURLDataObject(const wxString& url) :
-   wxDataObjectSimple( wxDataFormat( gdk_atom_intern("text/x-moz-url",FALSE) ) )
-{
-   m_url = url;
-}
-
-size_t wxURLDataObject::GetDataSize() const
-{ 
-    if (m_url.empty())
-        return 0;
-        
-    return 2*m_url.Len()+2;
-}
-
-bool wxURLDataObject::GetDataHere(void *buf) const
-{ 
-    if (m_url.empty())
-        return false;
-    
-    wxCSConv conv( "UCS2" );
-    conv.FromWChar( (char*) buf, 2*m_url.Len()+2, m_url.wc_str() );
-    
-    return true;
-}
-
-    // copy data from buffer to our data
-bool wxURLDataObject::SetData(size_t len, const void *buf)
-{ 
-    if (len == 0)
-    {
-        m_url = wxEmptyString;
-        return false;
-    }
-    
-    wxCSConv conv( "UCS2" );
-    wxWCharBuffer res = conv.cMB2WC( (const char*) buf );
-    m_url = res;
-    int pos = m_url.Find( '\n' );
-    if (pos != wxNOT_FOUND)
-        m_url.Remove( pos, m_url.Len() - pos );
-    
-    return true;
-}
-
 
 #endif // wxUSE_DATAOBJ

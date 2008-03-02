@@ -15,23 +15,32 @@
 #include "wx/gdiobj.h"
 #include "wx/gdicmn.h"
 
-class WXDLLIMPEXP_FWD_CORE wxColour;
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
+class WXDLLEXPORT wxColour;
+class WXDLLEXPORT wxBitmap;
 
 // ========================================================================
 // wxPen
 // ========================================================================
 class WXDLLEXPORT wxPen: public wxGDIObject
 {
+    DECLARE_DYNAMIC_CLASS(wxPen)
 public:
     wxPen();
     wxPen(const wxColour& col, int width = 1, int style = wxSOLID);
     wxPen(const wxBitmap& stipple, int width);
     virtual ~wxPen();
 
-    // FIXME: operator==() is wrong
-    bool operator==(const wxPen& pen) const { return m_refData == pen.m_refData; }
-    bool operator!=(const wxPen& pen) const { return !(*this == pen); }
+    // wxObjectRefData
+    wxObjectRefData *CreateRefData() const;
+    wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
+
+    inline bool operator == (const wxPen& pen) const
+    {   return m_refData == pen.m_refData; }
+    inline bool operator != (const wxPen& pen) const
+    {   return m_refData != pen.m_refData; }
+
+    virtual bool Ok() const { return IsOk(); }
+    virtual bool IsOk() const { return (m_refData != NULL) ; }
 
     void SetColour(const wxColour& col) ;
     void SetColour(unsigned char r, unsigned char g, unsigned char b)  ;
@@ -53,12 +62,6 @@ public:
 
     WX_NSColor GetNSColor();
     int GetCocoaLineDash(const CGFloat **pattern);
-
-protected:
-    wxGDIRefData *CreateGDIRefData() const;
-    wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
-    DECLARE_DYNAMIC_CLASS(wxPen)
 };
 
 #endif // __WX_COCOA_PEN_H__

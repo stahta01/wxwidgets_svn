@@ -62,7 +62,7 @@ static inline void FreeFindData(FIND_DATA fd)
 static inline FIND_DATA FindFirst(const wxString& spec,
                                       FIND_STRUCT *finddata)
 {
-        return ::FindFirstFile(spec.fn_str(), finddata);
+        return ::FindFirstFile(spec, finddata);
 }
 
 static inline bool FindNext(FIND_DATA fd, FIND_STRUCT *finddata)
@@ -184,10 +184,7 @@ bool wxDirData::Read(wxString *filename)
         {
             filespec += _T('\\');
         }
-        if ( !m_filespec )
-            filespec += _T("*.*");
-        else
-            filespec += m_filespec;
+        filespec += (!m_filespec ? _T("*.*") : m_filespec.c_str());
 
         m_finddata = FindFirst(filespec, PTR_TO_FINDDATA);
 

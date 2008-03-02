@@ -34,7 +34,6 @@
     #include "wx/button.h"
     #include "wx/settings.h"
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
     #include "wx/stattext.h"
     #include "wx/intl.h"
     #include "wx/textdlg.h"
@@ -52,14 +51,9 @@
 
 #if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
 #include "wx/msw/printdlg.h"
-#include "wx/msw/dcprint.h"
 #elif defined(__WXMAC__)
 #include "wx/mac/printdlg.h"
 #include "wx/mac/private/print.h"
-#include "wx/mac/dcprint.h"
-#elif defined(__WXPM__)
-#include "wx/os2/dcprint.h"
-#include "wx/generic/prntdlgg.h"
 #else
 #include "wx/generic/prntdlgg.h"
 #include "wx/dcps.h"
@@ -210,12 +204,14 @@ wxDialog *wxNativePrintFactory::CreatePrintSetupDialog( wxWindow *parent,
 #endif
 }
 
-wxDCImpl* wxNativePrintFactory::CreatePrinterDCImpl( wxPrinterDC *owner, const wxPrintData& data )
+wxDC* wxNativePrintFactory::CreatePrinterDC( const wxPrintData& data )
 {
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXUNIVERSAL__)
-    return new wxPostScriptDCImpl( owner, data );
+#if defined(__WXMSW__) && !defined(__WXUNIVERSAL__)
+    return new wxPrinterDC(data);
+#elif defined(__WXMAC__)
+    return new wxPrinterDC(data);
 #else
-    return new wxPrinterDCImpl( owner, data );
+    return new wxPostScriptDC(data);
 #endif
 }
 
@@ -736,42 +732,28 @@ wxRect wxPrintout::GetLogicalPageMarginsRect(const wxPageSetupDialogData& pageSe
     // Return the rectangle in logical units that corresponds to the region
     // within the page margins as specified by the given wxPageSetupDialogData
     // object.
-    
-    // We get the paper size in device units and the margins in mm,
-    // so we need to calculate the conversion with this trick
+    wxRect paperRect = GetPaperRectPixels();
     wxCoord pw, ph;
     GetPageSizePixels(&pw, &ph);
+    wxPoint topLeft = pageSetupData.GetMarginTopLeft();
+    wxPoint bottomRight = pageSetupData.GetMarginBottomRight();
     wxCoord mw, mh;
     GetPageSizeMM(&mw, &mh);
     float mmToDeviceX = float(pw) / mw;
     float mmToDeviceY = float(ph) / mh;
-
-    // paper size in device units    
-    wxRect paperRect = GetPaperRectPixels();
-    
-    // margins in mm
-    wxPoint topLeft = pageSetupData.GetMarginTopLeft();
-    wxPoint bottomRight = pageSetupData.GetMarginBottomRight();
-    
-    // calculate margins in device units
-    wxRect pageMarginsRect(
-        paperRect.x      + wxRound(mmToDeviceX * topLeft.x),
-        paperRect.y      + wxRound(mmToDeviceY * topLeft.y),
-        paperRect.width  - wxRound(mmToDeviceX * (topLeft.x + bottomRight.x)),
+    wxRect pageMarginsRect(paperRect.x + wxRound(mmToDeviceX * topLeft.x),
+        paperRect.y + wxRound(mmToDeviceY * topLeft.y),
+        paperRect.width - wxRound(mmToDeviceX * (topLeft.x + bottomRight.x)),
         paperRect.height - wxRound(mmToDeviceY * (topLeft.y + bottomRight.y)));
-        
     wxCoord w, h;
     m_printoutDC->GetSize(&w, &h);
-    if (w == pw && h == ph) 
-    {
+    if (w == pw && h == ph) {
         // this DC matches the printed page, so no scaling
-        return wxRect(
-            m_printoutDC->DeviceToLogicalX(pageMarginsRect.x), 
+        return wxRect(m_printoutDC->DeviceToLogicalX(pageMarginsRect.x), 
             m_printoutDC->DeviceToLogicalY(pageMarginsRect.y), 
             m_printoutDC->DeviceToLogicalXRel(pageMarginsRect.width), 
             m_printoutDC->DeviceToLogicalYRel(pageMarginsRect.height));
     }
-    
     // This DC doesn't match the printed page, so we have to scale.
     float scaleX = float(w) / pw;
     float scaleY = float(h) / ph;
@@ -784,18 +766,17 @@ wxRect wxPrintout::GetLogicalPageMarginsRect(const wxPageSetupDialogData& pageSe
 void wxPrintout::SetLogicalOrigin(wxCoord x, wxCoord y)
 {
     // Set the device origin by specifying a point in logical coordinates.
-    m_printoutDC->SetDeviceOrigin(
-        m_printoutDC->LogicalToDeviceX(x), 
-        m_printoutDC->LogicalToDeviceY(y) );
+    m_printoutDC->SetDeviceOrigin(m_printoutDC->LogicalToDeviceX(x), 
+        m_printoutDC->LogicalToDeviceY(y));
 }
     
 void wxPrintout::OffsetLogicalOrigin(wxCoord xoff, wxCoord yoff)
 {
     // Offset the device origin by a specified distance in device coordinates.
-    wxPoint dev_org = m_printoutDC->GetDeviceOrigin();
-    m_printoutDC->SetDeviceOrigin(
-        dev_org.x + m_printoutDC->LogicalToDeviceXRel(xoff), 
-        dev_org.y + m_printoutDC->LogicalToDeviceYRel(yoff) );
+    wxCoord x = m_printoutDC->LogicalToDeviceX(0);
+    wxCoord y = m_printoutDC->LogicalToDeviceY(0);
+    m_printoutDC->SetDeviceOrigin(x + m_printoutDC->LogicalToDeviceXRel(xoff), 
+        y + m_printoutDC->LogicalToDeviceYRel(yoff));
 }
     
 
@@ -881,14 +862,20 @@ void wxPreviewCanvas::OnSysColourChanged(wxSysColourChangedEvent& event)
 void wxPreviewCanvas::OnChar(wxKeyEvent &event)
 {
     wxPreviewControlBar* controlBar = ((wxPreviewFrame*) GetParent())->GetControlBar();
-    switch (event.GetKeyCode())
+    if (event.GetKeyCode() == WXK_ESCAPE)
     {
-        case WXK_TAB:
-            controlBar->OnGoto();
-            return;
-        case WXK_RETURN:
-            controlBar->OnPrint();
-            return;
+        ((wxPreviewFrame*) GetParent())->Close(true);
+        return;
+    }
+    else if (event.GetKeyCode() == WXK_TAB)
+    {
+        controlBar->OnGoto();
+        return;
+    }
+    else if (event.GetKeyCode() == WXK_RETURN)
+    {
+        controlBar->OnPrint();
+        return;
     }
 
     if (!event.ControlDown())
@@ -1221,21 +1208,8 @@ int wxPreviewControlBar::GetZoomControl()
 IMPLEMENT_CLASS(wxPreviewFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(wxPreviewFrame, wxFrame)
-    EVT_CHAR_HOOK(wxPreviewFrame::OnChar)
     EVT_CLOSE(wxPreviewFrame::OnCloseWindow)
 END_EVENT_TABLE()
-
-void wxPreviewFrame::OnChar(wxKeyEvent &event)
-{
-    if ( event.GetKeyCode() == WXK_ESCAPE )
-    {
-        Close(true);
-    }
-    else
-    {
-        event.Skip();
-    }
-}
 
 wxPreviewFrame::wxPreviewFrame(wxPrintPreviewBase *preview, wxWindow *parent, const wxString& title,
                                const wxPoint& pos, const wxSize& size, long style, const wxString& name):

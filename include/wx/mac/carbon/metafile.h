@@ -22,8 +22,6 @@
 #include "wx/dataobj.h"
 #endif
 
-#include "wx/mac/carbon/dcclient.h"
-
 /*
  * Metafile and metafile device context classes
  *
@@ -32,13 +30,14 @@
 #define wxMetaFile wxMetafile
 #define wxMetaFileDC wxMetafileDC
 
-class WXDLLIMPEXP_FWD_CORE wxMetafile;
+class WXDLLEXPORT wxMetafile;
 class wxMetafileRefData ;
 
 #define M_METAFILEDATA ((wxMetafileRefData *)m_refData)
 
-class WXDLLEXPORT wxMetafile : public wxGDIObject
+class WXDLLEXPORT wxMetafile: public wxGDIObject
 {
+    DECLARE_DYNAMIC_CLASS(wxMetafile)
 public:
     wxMetafile(const wxString& file = wxEmptyString);
     virtual ~wxMetafile(void);
@@ -48,6 +47,8 @@ public:
     virtual bool SetClipboard(int width = 0, int height = 0);
 
     virtual bool Play(wxDC *dc);
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const ;
 
     wxSize GetSize() const;
     int GetWidth() const { return GetSize().x; }
@@ -56,70 +57,37 @@ public:
     // Implementation
     WXHMETAFILE GetHMETAFILE() const ;
     void SetHMETAFILE(WXHMETAFILE mf) ;
-#ifndef __LP64__
     // Since the native metafile format is PDF for Quartz
     // we need a call that allows setting PICT content for
     // backwards compatibility
     void SetPICT(void* pictHandle) ;
-#endif
-
-protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
-    DECLARE_DYNAMIC_CLASS(wxMetafile)
-};
-
-
-class WXDLLEXPORT wxMetafileDCImpl: public wxGCDCImpl
-{
-public:
-    wxMetafileDCImpl( wxDC *owner,
-                      const wxString& filename,
-                      int width, int height,
-                      const wxString& description );
-
-    virtual ~wxMetafileDCImpl();
-
-    // Should be called at end of drawing
-    virtual wxMetafile *Close();
-
-    // Implementation
-    wxMetafile *GetMetaFile(void) const { return m_metaFile; }
-    void SetMetaFile(wxMetafile *mf) { m_metaFile = mf; }
-
-protected:
-    virtual void DoGetSize(int *width, int *height) const;
-
-    wxMetafile*   m_metaFile;
-
-private:
-    DECLARE_CLASS(wxMetafileDCImpl)
-    DECLARE_NO_COPY_CLASS(wxMetafileDCImpl)
 };
 
 class WXDLLEXPORT wxMetafileDC: public wxDC
 {
+  DECLARE_DYNAMIC_CLASS(wxMetafileDC)
+
  public:
     // the ctor parameters specify the filename (empty for memory metafiles),
     // the metafile picture size and the optional description/comment
-    wxMetafileDC(  const wxString& filename = wxEmptyString,
+    wxMetafileDC(const wxString& filename = wxEmptyString,
                     int width = 0, int height = 0,
-                    const wxString& description = wxEmptyString ) :
-      wxDC( new wxMetafileDCImpl( this, filename, width, height, description) )
-    { }
+                    const wxString& description = wxEmptyString);
 
-    wxMetafile *GetMetafile() const
-       { return ((wxMetafileDCImpl*)m_pimpl)->GetMetaFile(); }
+  virtual ~wxMetafileDC(void);
 
-    wxMetafile *Close()
-       { return ((wxMetafileDCImpl*)m_pimpl)->Close(); }
+  // Should be called at end of drawing
+  virtual wxMetafile *Close(void);
 
-private:
-    DECLARE_CLASS(wxMetafileDC)
-    DECLARE_NO_COPY_CLASS(wxMetafileDC)
+  // Implementation
+  inline wxMetafile *GetMetaFile(void) const { return m_metaFile; }
+  inline void SetMetaFile(wxMetafile *mf) { m_metaFile = mf; }
+
+protected:
+    virtual void DoGetSize(int *width, int *height) const;
+
+  wxMetafile*   m_metaFile;
 };
-
 
 /*
  * Pass filename of existing non-placeable metafile, and bounding box.
@@ -144,7 +112,7 @@ class WXDLLEXPORT wxMetafileDataObject : public wxDataObjectSimple
 {
 public:
   // ctors
-  wxMetafileDataObject()
+  wxMetafileDataObject() 
     : wxDataObjectSimple(wxDF_METAFILE) {  };
   wxMetafileDataObject(const wxMetafile& metafile)
     : wxDataObjectSimple(wxDF_METAFILE), m_metafile(metafile) { }

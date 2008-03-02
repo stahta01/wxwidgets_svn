@@ -49,7 +49,7 @@ private:
 // wxRegionRefData: private class containing the information about the region
 // ----------------------------------------------------------------------------
 
-class wxRegionRefData : public wxGDIRefData
+class wxRegionRefData : public wxObjectRefData
 {
 public:
     wxRegionRefData()
@@ -58,7 +58,7 @@ public:
     }
 
     wxRegionRefData(const wxRegionRefData& refData)
-        : wxGDIRefData()
+        : wxObjectRefData()
     {
         m_region = gdk_regions_union(wxGdkRegion(), refData.m_region);
     }
@@ -136,12 +136,12 @@ wxRegion::~wxRegion()
     // m_refData unrefed in ~wxObject
 }
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateRefData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }
@@ -187,9 +187,7 @@ bool wxRegion::DoUnionWithRect(const wxRect& r)
         rect.width = r.width;
         rect.height = r.height;
 
-        GdkRegion *reg = gdk_region_union_with_rect( M_REGIONDATA->m_region, &rect );
-        gdk_region_destroy( M_REGIONDATA->m_region );
-        M_REGIONDATA->m_region = reg;
+        gdk_region_union_with_rect( M_REGIONDATA->m_region, &rect );
     }
 
     return TRUE;
@@ -382,7 +380,7 @@ struct _XRegion {
 };
 
 
-class wxRIRefData : public wxGDIRefData
+class wxRIRefData: public wxObjectRefData
 {
 public:
     wxRIRefData() { Init(); }

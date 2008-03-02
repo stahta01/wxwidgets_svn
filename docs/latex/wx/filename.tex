@@ -24,14 +24,14 @@ make sure not to misuse the file name part of this class with the last
 directory. Instead initialize the wxFileName instance like this:
 
 \begin{verbatim}
-wxFileName dirname( "C:\mydir", "" );
+wxFileName dirname( wxT("C:\mydir"), wxEmptyString );
 MyMethod( dirname.GetPath() );
 \end{verbatim}
 
 The same can be done using the static method \helpref{wxFileName::DirName}{wxfilenamedirname}:
 
 \begin{verbatim}
-wxFileName dirname = wxFileName::DirName( "C:\mydir" );
+wxFileName dirname = wxFileName::DirName( wxT("C:\mydir") );
 MyMethod( dirname.GetPath() );
 \end{verbatim}
 
@@ -68,10 +68,6 @@ No base class
 
 <wx/filename.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{Data structures}
 
 Many wxFileName methods accept the path format argument which is by\rtfsp
@@ -88,7 +84,7 @@ enum wxPathFormat
     wxPATH_NATIVE = 0,      // the path format for the current platform
     wxPATH_UNIX,
     wxPATH_BEOS = wxPATH_UNIX,
-    wxPATH_MAC,             // the old HFS format, deprecated
+    wxPATH_MAC,
     wxPATH_DOS,
     wxPATH_WIN = wxPATH_DOS,
     wxPATH_OS2 = wxPATH_DOS,

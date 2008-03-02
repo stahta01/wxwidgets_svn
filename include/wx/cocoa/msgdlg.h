@@ -18,7 +18,7 @@ DECLARE_WXCOCOA_OBJC_CLASS(NSAlert);
 // trunk: Always use Cocoa dialog
 // 2.8: Only use Cocoa dialog if ABI incompatible features is on
 // Build both on both branches (there was no wxCocoaMessageDialog class so it's not an ABI issue)
-    #if 1/* wxUSE_ABI_INCOMPATIBLE_FEATURES */
+    #if wxUSE_ABI_INCOMPATIBLE_FEATURES
         #define wxUSE_COCOA_NATIVE_MSGDLG 1
     #else
         #define wxUSE_COCOA_NATIVE_MSGDLG 0
@@ -39,7 +39,7 @@ DECLARE_WXCOCOA_OBJC_CLASS(NSAlert);
 
 
 
-class WXDLLEXPORT wxCocoaMessageDialog: public wxMessageDialogBase
+class WXDLLEXPORT wxCocoaMessageDialog: public wxDialog, public wxMessageDialogBase
 {
     DECLARE_DYNAMIC_CLASS(wxCocoaMessageDialog)
     DECLARE_NO_COPY_CLASS(wxCocoaMessageDialog)
@@ -68,6 +68,10 @@ protected:
                            int WXUNUSED(width), int WXUNUSED(height),
                            int WXUNUSED(sizeFlags) = wxSIZE_AUTO) {}
 
+    // 2.8: These are in the base class in trunk:
+    wxString m_message,
+             m_extendedMessage,
+             m_caption;
 private:
     wxString m_yes,
              m_no,

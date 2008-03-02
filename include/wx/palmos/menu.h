@@ -19,10 +19,10 @@
     WX_DEFINE_EXPORTED_ARRAY_PTR(wxAcceleratorEntry *, wxAcceleratorArray);
 #endif // wxUSE_ACCEL
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLEXPORT wxFrame;
 
 #if defined(__WXWINCE__) && wxUSE_TOOLBAR
-class WXDLLIMPEXP_FWD_CORE wxToolBar;
+class WXDLLEXPORT wxToolBar;
 #endif
 
 #include "wx/arrstr.h"
@@ -144,8 +144,8 @@ public:
     virtual wxMenu *Remove(size_t pos);
 
     virtual void EnableTop( size_t pos, bool flag );
-    virtual void SetMenuLabel( size_t pos, const wxString& label );
-    virtual wxString GetMenuLabel( size_t pos ) const;
+    virtual void SetLabelTop( size_t pos, const wxString& label );
+    virtual wxString GetLabelTop( size_t pos ) const;
 
     // implementation from now on
     WXHMENU Create();
@@ -192,6 +192,13 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxMenuBar)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // Gets the original label at the top-level of the menubar
+    wxString GetMenuLabel(size_t pos) const;
+#endif
 };
 
 #endif // _WX_MENU_H_

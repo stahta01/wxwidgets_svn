@@ -15,11 +15,11 @@
 #include "wx/brush.h"
 #include "wx/dc.h"
 
-class WXDLLIMPEXP_FWD_CORE wxButton;
-class WXDLLIMPEXP_FWD_CORE wxScrollBar;
-class WXDLLIMPEXP_FWD_CORE wxTopLevelWindowMac;
+class WXDLLEXPORT wxButton;
+class WXDLLEXPORT wxScrollBar;
+class WXDLLEXPORT wxTopLevelWindowMac;
 
-class WXDLLIMPEXP_FWD_CORE wxMacControl ;
+class wxMacControl ;
 
 class WXDLLEXPORT wxWindowMac: public wxWindowBase
 {
@@ -55,8 +55,7 @@ public:
     virtual void Lower();
 
     virtual bool Show( bool show = true );
-
-    virtual bool IsShownOnScreen() const;
+    virtual bool Enable( bool enable = true );
 
     virtual void SetFocus();
 
@@ -64,7 +63,10 @@ public:
 
     virtual void Refresh( bool eraseBackground = true,
                           const wxRect *rect = NULL );
-
+    virtual void Freeze();
+    virtual void Thaw();
+    virtual bool IsFrozen() const;
+    
     virtual void Update() ;
     virtual void ClearBackground();
 
@@ -82,12 +84,7 @@ public:
                                const wxFont *theFont = NULL )
                                const;
 protected:
-    virtual void DoEnable( bool enable );
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
-
-    virtual void DoFreeze();
-    virtual void DoThaw();
-
 public:
     virtual void SetScrollbar( int orient, int pos, int thumbVisible,
                                int range, bool refresh = true );
@@ -97,13 +94,6 @@ public:
     virtual int GetScrollRange( int orient ) const;
     virtual void ScrollWindow( int dx, int dy,
                                const wxRect* rect = (wxRect *) NULL );
-    virtual void AlwaysShowScrollbars(bool horz = true, bool vert = true);
-    virtual bool IsScrollbarAlwaysShown(int orient) const
-    {
-        return orient == wxHORIZONTAL ? m_hScrollBarAlwaysShown
-                                      : m_vScrollBarAlwaysShown;
-    }
-
     virtual bool Reparent( wxWindowBase *newParent );
 
 #if wxUSE_DRAG_AND_DROP
@@ -135,9 +125,15 @@ public:
     virtual bool SetTransparent(wxByte alpha);
     virtual bool CanSetTransparent();
     virtual wxByte GetTransparent() const ;
+    
+#if WXWIN_COMPATIBILITY_2_4
+    bool GetTransparentBackground() const { return m_backgroundTransparent; }
+    void SetTransparent(bool t = true) { m_backgroundTransparent = t; }
+#endif
 
     // event handlers
     // --------------
+    void OnSetFocus( wxFocusEvent& event );
     void OnPaint( wxPaintEvent& event );
     void OnNcPaint( wxNcPaintEvent& event );
     void OnEraseBackground(wxEraseEvent& event );
@@ -163,7 +159,7 @@ public:
     wxWindowMac *FindItemByHWND(WXHWND hWnd, bool controlOnly = false) const;
 
     virtual void        MacHandleControlClick( WXWidget control , wxInt16 controlpart , bool mouseStillDown ) ;
-    virtual bool        MacDoRedraw( void* updatergn , long time ) ;
+    virtual bool        MacDoRedraw( WXHRGN updatergn , long time ) ;
     virtual bool        MacCanFocus() const ;
 
     // this should not be overriden in classes above wxWindowMac
@@ -195,12 +191,15 @@ public:
     virtual void        MacHiliteChanged() ;
     virtual wxInt32     MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF event ) ;
 
+    bool                MacIsReallyShown() ;
     bool                MacIsReallyEnabled() ;
     bool                MacIsReallyHilited() ;
 
     bool                MacIsUserPane() { return m_macIsUserPane; }
 
     virtual bool        MacSetupCursor( const wxPoint& pt ) ;
+    virtual void        MacSetBackgroundBrush( const wxBrush &brush ) ;
+    const wxBrush&      MacGetBackgroundBrush() const { return m_macBackgroundBrush ; }
 
     // return the rectangle that would be visible of this control,
     // regardless whether controls are hidden
@@ -220,18 +219,24 @@ public:
     // returns true if the grandchildren need to be clipped to the children's content area
     // (e.g., splitter windows)
     virtual bool        MacClipGrandChildren() const { return false ; }
-    bool                MacIsWindowScrollbar( const wxWindow* sb ) const
+    bool                MacIsWindowScrollbar( const wxWindow* sb )
     { return ((wxWindow*)m_hScrollBar == sb || (wxWindow*)m_vScrollBar == sb) ; }
-    virtual bool IsClientAreaChild(const wxWindow *child) const
-    {
-        return !MacIsWindowScrollbar(child) &&
-               wxWindowBase::IsClientAreaChild(child);
-    }
 
     virtual void        MacInstallEventHandler(WXWidget native) ;
     void                MacPostControlCreate(const wxPoint& pos, const wxSize& size) ;
     wxList&             GetSubcontrols() { return m_subControls; }
     WXEVENTHANDLERREF   MacGetControlEventHandler() { return m_macControlEventHandler ; }
+
+#ifndef __WXMAC_OSX__
+    virtual void            MacControlUserPaneDrawProc(wxInt16 part) ;
+    virtual wxInt16         MacControlUserPaneHitTestProc(wxInt16 x, wxInt16 y) ;
+    virtual wxInt16         MacControlUserPaneTrackingProc(wxInt16 x, wxInt16 y, void* actionProc) ;
+    virtual void            MacControlUserPaneIdleProc() ;
+    virtual wxInt16         MacControlUserPaneKeyDownProc(wxInt16 keyCode, wxInt16 charCode, wxInt16 modifiers) ;
+    virtual void            MacControlUserPaneActivateProc(bool activating) ;
+    virtual wxInt16         MacControlUserPaneFocusProc(wxInt16 action) ;
+    virtual void            MacControlUserPaneBackgroundProc(void* info) ;
+#endif
 
     // translate wxWidgets coords into ones suitable
     // to be passed to CreateControl calls
@@ -256,17 +261,24 @@ public:
     // the 'true' OS level control for this wxWindow
     wxMacControl*       GetPeer() const { return m_peer ; }
 
+#if wxMAC_USE_CORE_GRAPHICS
     void *              MacGetCGContextRef() { return m_cgContextRef ; }
     void                MacSetCGContextRef(void * cg) { m_cgContextRef = cg ; }
+#endif
 
 protected:
     // For controls like radio buttons which are genuinely composite
     wxList              m_subControls;
 
+    // number of calls to Freeze() minus number of calls to Thaw()
+    unsigned int        m_frozenness;
+
     // the peer object, allowing for cleaner API support
     wxMacControl *       m_peer ;
 
+#if wxMAC_USE_CORE_GRAPHICS
     void *              m_cgContextRef ;
+#endif
 
     // cache the clipped rectangles within the window hierarchy
     void                MacUpdateClippedRects() const ;
@@ -281,6 +293,7 @@ protected:
 
     // true if is is not a native control but a wxWindow control
     bool                m_macIsUserPane ;
+    wxBrush             m_macBackgroundBrush ;
 
     // insets of the mac control from the wx top left corner
     wxPoint             m_macTopLeftInset ;
@@ -289,8 +302,6 @@ protected:
 
     wxScrollBar*        m_hScrollBar ;
     wxScrollBar*        m_vScrollBar ;
-    bool                m_hScrollBarAlwaysShown;
-    bool                m_vScrollBarAlwaysShown;
     wxString            m_label ;
 
     // set to true if we do a sharp clip at the content area of this window
@@ -304,6 +315,14 @@ protected:
     void                MacCreateScrollBars( long style ) ;
     void                MacRepositionScrollBars() ;
     void                MacUpdateControlFont() ;
+
+    void                MacPropagateVisibilityChanged() ;
+    void                MacPropagateEnabledStateChanged() ;
+    void                MacPropagateHiliteChanged() ;
+
+#if WXWIN_COMPATIBILITY_2_4
+    bool                 m_backgroundTransparent ;
+#endif
 
     // implement the base class pure virtuals
     virtual wxSize DoGetBestSize() const;
@@ -335,11 +354,6 @@ protected:
 private:
     // common part of all ctors
     void Init();
-
-    // show/hide scrollbars as needed, common part of SetScrollbar() and
-    // AlwaysShowScrollbars()
-    void DoUpdateScrollbarVisibility();
-
 
     WXEVENTHANDLERREF    m_macControlEventHandler ;
 

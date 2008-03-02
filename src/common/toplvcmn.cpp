@@ -39,11 +39,7 @@
 BEGIN_EVENT_TABLE(wxTopLevelWindowBase, wxWindow)
     EVT_CLOSE(wxTopLevelWindowBase::OnCloseWindow)
     EVT_SIZE(wxTopLevelWindowBase::OnSize)
-    EVT_WINDOW_DESTROY(wxTopLevelWindowBase::OnChildDestroy)
-    WX_EVENT_TABLE_CONTROL_CONTAINER(wxTopLevelWindowBase)
 END_EVENT_TABLE()
-
-WX_DELEGATE_TO_CONTROL_CONTAINER(wxTopLevelWindowBase, wxWindow)
 
 // ============================================================================
 // implementation
@@ -59,50 +55,17 @@ wxTopLevelWindowBase::wxTopLevelWindowBase()
 {
     // Unlike windows, top level windows are created hidden by default.
     m_isShown = false;
-    m_winDefault =
+    m_winDefault = NULL;
     m_winTmpDefault = NULL;
-
-    WX_INIT_CONTROL_CONTAINER();
 }
 
 wxTopLevelWindowBase::~wxTopLevelWindowBase()
 {
-    m_winDefault =
-    m_winTmpDefault = NULL;
-
     // don't let wxTheApp keep any stale pointers to us
     if ( wxTheApp && wxTheApp->GetTopWindow() == this )
         wxTheApp->SetTopWindow(NULL);
 
     wxTopLevelWindows.DeleteObject(this);
-
-    // delete any our top level children which are still pending for deletion
-    // immediately: this could happen if a child (e.g. a temporary dialog
-    // created with this window as parent) was Destroy()'d) while this window
-    // was deleted directly (with delete, or maybe just because it was created
-    // on the stack) immediately afterwards and before the child TLW was really
-    // destroyed -- not destroying it now would leave it alive with a dangling
-    // parent pointer and result in a crash later
-    for ( wxObjectList::iterator i = wxPendingDelete.begin();
-          i != wxPendingDelete.end();
-          )
-    {
-        wxWindow * const win = wxDynamicCast(*i, wxWindow);
-        if ( win && win->GetParent() == this )
-        {
-            wxPendingDelete.erase(i);
-
-            delete win;
-
-            // deleting it invalidated the list (and not only one node because
-            // it could have resulted in deletion of other objects to)
-            i = wxPendingDelete.begin();
-        }
-        else
-        {
-            ++i;
-        }
-    }
 
     if ( IsLastBeforeExit() )
     {
@@ -118,28 +81,23 @@ bool wxTopLevelWindowBase::Destroy()
     if ( !wxPendingDelete.Member(this) )
         wxPendingDelete.Append(this);
 
-    // normally we want to hide the window immediately so that it doesn't get
-    // stuck on the screen while it's being destroyed, however we shouldn't
-    // hide the last visible window as then we might not get any idle events
-    // any more as no events will be sent to the hidden window and without idle
-    // events we won't prune wxPendingDelete list and the application won't
-    // terminate
-    const wxWindowList::const_iterator end = wxTopLevelWindows.end();
-    for ( wxWindowList::const_iterator i = wxTopLevelWindows.begin(),
-                                     end = wxTopLevelWindows.end();
-          i != end;
-          ++i )
+#ifdef __WXMAC__
+	// on mac we know that objects will always be deleted after this event
+	// has been handled, using Hide we avoid erratic redraws during window
+	// tear down
+	Hide();
+#else
+    if (wxTopLevelWindows.GetCount() > 1)
     {
-        wxTopLevelWindow * const win = wx_static_cast(wxTopLevelWindow *, *i);
-        if ( win != this && win->IsShown() )
-        {
-            // there remains at least one other visible TLW, we can hide this
-            // one
-            Hide();
-
-            break;
-        }
+        // Hide it immediately. This should
+        // not be done if this TLW is the
+        // only one left since we then would
+        // risk not to get any idle events
+        // at all anymore during which we
+        // could delete any pending events.
+        Hide();
     }
+#endif
 
     return true;
 }
@@ -191,12 +149,29 @@ bool wxTopLevelWindowBase::IsLastBeforeExit() const
 
 void wxTopLevelWindowBase::SetMinSize(const wxSize& minSize)
 {
-    SetSizeHints(minSize, GetMaxSize());
+    SetSizeHints( minSize.x, minSize.y, GetMaxWidth(), GetMaxHeight() );    
 }
 
 void wxTopLevelWindowBase::SetMaxSize(const wxSize& maxSize)
 {
-    SetSizeHints(GetMinSize(), maxSize);
+    SetSizeHints( GetMinWidth(), GetMinHeight(), maxSize.x, maxSize.y );
+}
+
+// set the min/max size of the window
+void wxTopLevelWindowBase::DoSetSizeHints(int minW, int minH,
+                                  int maxW, int maxH,
+                                  int WXUNUSED(incW), int WXUNUSED(incH))
+{
+    // setting min width greater than max width leads to infinite loops under
+    // X11 and generally doesn't make any sense, so don't allow it
+    wxCHECK_RET( (minW == wxDefaultCoord || maxW == wxDefaultCoord || minW <= maxW) &&
+                    (minH == wxDefaultCoord || maxH == wxDefaultCoord || minH <= maxH),
+                 _T("min width/height must be less than max width/height!") );
+
+    m_minWidth = minW;
+    m_maxWidth = maxW;
+    m_minHeight = minH;
+    m_maxHeight = maxH;
 }
 
 void wxTopLevelWindowBase::GetRectForTopLevelChildren(int *x, int *y, int *w, int *h)
@@ -265,7 +240,7 @@ void wxTopLevelWindowBase::DoCentre(int dir)
 
     if ( rectParent.IsEmpty() )
     {
-        // we were explicitly asked to centre this window on the entire screen
+        // we were explicitely asked to centre this window on the entire screen
         // or if we have no parent anyhow and so can't centre on it
         rectParent = rectDisplay;
     }
@@ -346,26 +321,6 @@ bool wxTopLevelWindowBase::IsAlwaysMaximized() const
 }
 
 // ----------------------------------------------------------------------------
-// icons
-// ----------------------------------------------------------------------------
-
-wxIcon wxTopLevelWindowBase::GetIcon() const
-{
-    return m_icons.IsEmpty() ? wxIcon() : m_icons.GetIcon( -1 );
-}
-
-void wxTopLevelWindowBase::SetIcon(const wxIcon& icon)
-{
-    // passing wxNullIcon to SetIcon() is possible (it means that we shouldn't
-    // have any icon), but adding an invalid icon to wxIconBundle is not
-    wxIconBundle icons;
-    if ( icon.Ok() )
-        icons.AddIcon(icon);
-
-    SetIcons(icons);
-}
-
-// ----------------------------------------------------------------------------
 // event handlers
 // ----------------------------------------------------------------------------
 
@@ -420,17 +375,6 @@ void wxTopLevelWindowBase::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
     Destroy();
 }
 
-void wxTopLevelWindowBase::OnChildDestroy(wxWindowDestroyEvent& event)
-{
-    event.Skip();
-
-    wxWindow * const win = event.GetWindow();
-    if ( win == m_winDefault )
-        m_winDefault = NULL;
-    if ( win == m_winTmpDefault )
-        m_winTmpDefault = NULL;
-}
-
 bool wxTopLevelWindowBase::SendIconizeEvent(bool iconized)
 {
     wxIconizeEvent event(GetId(), iconized);
@@ -459,4 +403,15 @@ void wxTopLevelWindowBase::RequestUserAttention(int WXUNUSED(flags))
 {
     // it's probably better than do nothing, isn't it?
     Raise();
+}
+
+void wxTopLevelWindowBase::RemoveChild(wxWindowBase *child)
+{
+    if ( child == m_winDefault )
+        m_winDefault = NULL;
+
+    if ( child == m_winTmpDefault )
+        m_winTmpDefault = NULL;
+
+    wxWindow::RemoveChild(child);
 }

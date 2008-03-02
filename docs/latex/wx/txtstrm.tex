@@ -39,17 +39,13 @@ For example:
 
 <wx/txtstrm.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 
 \membersection{wxTextInputStream::wxTextInputStream}\label{wxtextinputstreamctor}
 
 \func{}{wxTextInputStream}{\param{wxInputStream\&}{ stream}, \param{const wxString\&}{ sep=" $\backslash$t"}, 
-  \param{const wxMBConv\&}{ conv = wxConvAuto()} }
+  \param{wxMBConv\&}{ conv = wxConvUTF8} }
 
 Constructs a text stream associated to the given input stream.
 
@@ -215,16 +211,12 @@ and Unix in their native formats (concerning the line ending).
 
 <wx/txtstrm.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \latexignore{\rtfignore{\wxheading{Members}}}
 
 
 \membersection{wxTextOutputStream::wxTextOutputStream}\label{wxtextoutputstreamctor}
 
-\func{}{wxTextOutputStream}{\param{wxOutputStream\&}{ stream}, \param{wxEOL}{ mode = wxEOL\_NATIVE}, \param{const wxMBConv\&}{ conv = wxConvAuto()}}
+\func{}{wxTextOutputStream}{\param{wxOutputStream\&}{ stream}, \param{wxEOL}{ mode = wxEOL\_NATIVE}, \param{wxMBConv\&}{ conv = wxConvUTF8}}
 
 Constructs a text stream object associated to the given output stream.
 

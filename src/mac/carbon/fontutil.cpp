@@ -17,7 +17,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
-    #include "wx/wxcrtvararg.h"
     #include "wx/log.h"
     #include "wx/intl.h"
 #endif
@@ -81,7 +80,7 @@ bool wxGetNativeFontEncoding( wxFontEncoding encoding, wxNativeEncodingInfo *inf
     return true;
 }
 
-bool wxTestFontEncoding( const wxNativeEncodingInfo& WXUNUSED(info) )
+bool wxTestFontEncoding( const wxNativeEncodingInfo& info )
 {
     // basically we should be able to support every encoding via the OS
     return true;

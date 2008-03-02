@@ -39,8 +39,6 @@
 #include "wx/x11/private.h"
 #include "X11/Xatom.h"
 
-#include "wx/generic/private/timer.h"
-
 /*
  * wxAdoptedWindow
  */
@@ -70,7 +68,7 @@ wxWindow* wxReparenter::sm_newParent = NULL;
 wxString wxReparenter::sm_name;
 bool wxReparenter::sm_exactMatch = false;
 
-static int ErrorHandler(Display* WXUNUSED(dpy), XErrorEvent* WXUNUSED(event))
+static int ErrorHandler(Display* dpy, XErrorEvent* event)
 {
     Xerror = True;
     return False;
@@ -175,7 +173,7 @@ bool wxReparenter::WaitAndReparent(wxWindow* newParent, wxAdoptedWindow* toRepar
         else
         {
 #if wxUSE_TIMER
-            wxGenericTimerImpl::NotifyTimers();
+            wxTimer::NotifyTimers();
             wxTheApp->ProcessIdle();
 #endif
         }

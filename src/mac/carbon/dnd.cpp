@@ -83,7 +83,7 @@ bool wxDropTarget::CurrentDragHasSupportedFormat()
     bool supported = false;
     if (m_dataObject == NULL)
         return false;
-
+        
     if ( gTrackingGlobals.m_currentSource != NULL )
     {
         wxDataObject* data = gTrackingGlobals.m_currentSource->GetDataObject();
@@ -212,13 +212,11 @@ wxDropSource::~wxDropSource()
 {
 }
 
-OSStatus wxMacPromiseKeeper(PasteboardRef WXUNUSED(inPasteboard),
-                            PasteboardItemID WXUNUSED(inItem),
-                            CFStringRef WXUNUSED(inFlavorType),
-                            void * WXUNUSED(inContext))
+OSStatus wxMacPromiseKeeper( PasteboardRef inPasteboard, PasteboardItemID inItem, CFStringRef inFlavorType,
+              void *inContext )
 {
     OSStatus  err = noErr;
-
+    
     // we might add promises here later, inContext is the wxDropSource*
 
     return err;
@@ -237,29 +235,29 @@ wxDragResult wxDropSource::DoDragDrop(int flags)
     PasteboardRef   pasteboard;
 
     // add data to drag
-
+ 
     err = PasteboardCreate( kPasteboardUniqueName, &pasteboard );
     if ( err != noErr )
         return wxDragNone;
-
-    // we add a dummy promise keeper because of strange messages when linking against carbon debug
-    err = PasteboardSetPromiseKeeper( pasteboard, wxMacPromiseKeeper, this );
+        
+   // we add a dummy promise keeper because of strange messages when linking against carbon debug
+	err = PasteboardSetPromiseKeeper( pasteboard, wxMacPromiseKeeper, this );
     if ( err != noErr )
     {
         CFRelease( pasteboard );
         return wxDragNone;
     }
 
-    err = PasteboardClear( pasteboard );
+	err = PasteboardClear( pasteboard );
     if ( err != noErr )
     {
         CFRelease( pasteboard );
         return wxDragNone;
     }
-    PasteboardSynchronize( pasteboard );
+	PasteboardSynchronize( pasteboard );
 
     m_data->AddToPasteboard( pasteboard, 1 );
-
+ 
     if (NewDragWithPasteboard( pasteboard , &theDrag) != noErr)
     {
         CFRelease( pasteboard );
@@ -300,7 +298,7 @@ wxDragResult wxDropSource::DoDragDrop(int flags)
     gTrackingGlobals.m_flags = flags;
 
     err = TrackDrag( theDrag, &rec, dragRegion );
-
+    
     DisposeRgn( dragRegion );
     DisposeDrag( theDrag );
     CFRelease( pasteboard );
@@ -389,9 +387,10 @@ pascal OSErr wxMacWindowDragTrackingHandler(
             wxMacGlobalToLocal( theWindow, &localMouse );
 
             {
-                wxWindow *win = NULL;
+                wxWindowMac *win = NULL;
                 ControlPartCode controlPart;
-                ControlRef control = FindControlUnderMouse( localMouse, theWindow, &controlPart );
+                ControlRef control = wxMacFindControlUnderMouse(
+                    toplevel, localMouse, theWindow, &controlPart );
                 if ( control )
                     win = wxFindControlFromMacControl( control );
                 else
@@ -423,7 +422,7 @@ pascal OSErr wxMacWindowDragTrackingHandler(
                     if ( win )
                     {
                         // this window is entered
-                        trackingGlobals->m_currentTargetWindow = win;
+                        trackingGlobals->m_currentTargetWindow = (wxWindow*)win;
                         trackingGlobals->m_currentTarget = win->GetDropTarget();
                         {
                             if ( trackingGlobals->m_currentTarget )

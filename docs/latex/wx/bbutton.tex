@@ -18,10 +18,6 @@ almost any other window.
 
 <wx/bmpbuttn.h>
 
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
-
 
 \wxheading{Remarks}
 
@@ -223,8 +219,9 @@ A reference to the button's label bitmap.
 \membersection{wxBitmapButton::GetBitmapSelected}\label{wxbitmapbuttongetbitmapselected}
 
 \constfunc{wxBitmap\&}{GetBitmapSelected}{\void}
+\func{wxBitmap\&}{GetBitmapSelected}{\void}
 
-Returns the bitmap for the selected state.
+Returns the bitmap for the pushed button state, may be invalid.
 
 \wxheading{Return value}
 
@@ -319,4 +316,5 @@ Sets the bitmap for the selected (depressed) button appearance.
 \helpref{wxBitmapButton::SetBitmapLabel}{wxbitmapbuttonsetbitmaplabel},\rtfsp
 \helpref{wxBitmapButton::SetBitmapFocus}{wxbitmapbuttonsetbitmapfocus},\rtfsp
 \helpref{wxBitmapButton::SetBitmapDisabled}{wxbitmapbuttonsetbitmapdisabled}
+
 

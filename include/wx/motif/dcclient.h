@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        wx/motif/dcclient.h
-// Purpose:     wxClientDCImpl, wxPaintDCImpl and wxWindowDCImpl classes
+// Purpose:     wxClientDC, wxPaintDC and wxWindowDC classes
 // Author:      Julian Smart
 // Modified by:
 // Created:     17/09/98
@@ -12,21 +12,31 @@
 #ifndef _WX_DCCLIENT_H_
 #define _WX_DCCLIENT_H_
 
-#include "wx/motif/dc.h"
+#include "wx/dc.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+// ----------------------------------------------------------------------------
+// fwd declarations
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxWindowDC;
+class WXDLLEXPORT wxWindow;
+
+// Under Windows, wxClientDC, wxPaintDC and wxWindowDC are implemented
+// differently. On many platforms, however, they will be the same.
 
 //-----------------------------------------------------------------------------
-// wxWindowDCImpl
+// wxWindowDC
 //-----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxWindowDCImpl : public wxMotifDCImpl
+class WXDLLEXPORT wxWindowDC : public wxDC
 {
-public:
-    wxWindowDCImpl(wxDC *owner);
-    wxWindowDCImpl(wxDC *owner, wxWindow *win);
+    DECLARE_DYNAMIC_CLASS(wxWindowDC)
 
-    virtual ~wxWindowDCImpl();
+public:
+    wxWindowDC();
+    wxWindowDC( wxWindow *win );
+
+    virtual ~wxWindowDC();
 
     // TODO this function is Motif-only for now - should it go into base class?
     void Clear(const wxRect& rect);
@@ -53,7 +63,7 @@ public:
         wxCoord *x, wxCoord *y,
         wxCoord *descent = NULL,
         wxCoord *externalLeading = NULL,
-        const wxFont *theFont = NULL) const;
+        wxFont *theFont = NULL) const;
 
     virtual bool CanDrawBitmap() const;
     virtual bool CanGetTextExtent() const;
@@ -154,29 +164,26 @@ protected:
     int          m_currentStyle ;
     int          m_currentFill ;
     int          m_autoSetting ; // See comment in dcclient.cpp
-
-    DECLARE_DYNAMIC_CLASS(wxWindowDCImpl)
 };
 
-class WXDLLEXPORT wxPaintDCImpl: public wxWindowDCImpl
+class WXDLLEXPORT wxPaintDC: public wxWindowDC
 {
+    DECLARE_DYNAMIC_CLASS(wxPaintDC)
+
 public:
-    wxPaintDCImpl(wxDC *owner) : wxWindowDCImpl(owner) { }
-    wxPaintDCImpl(wxDC *owner, wxWindow* win);
+    wxPaintDC() { }
+    wxPaintDC(wxWindow* win);
 
-    virtual ~wxPaintDCImpl();
-
-    DECLARE_DYNAMIC_CLASS(wxPaintDCImpl)
+    virtual ~wxPaintDC();
 };
 
-class WXDLLEXPORT wxClientDCImpl: public wxWindowDCImpl
+class WXDLLEXPORT wxClientDC: public wxWindowDC
 {
-public:
-    wxClientDCImpl(wxDC *owner) : wxWindowDCImpl(owner) { }
-    wxClientDCImpl(wxDC *owner, wxWindow* win)
-        : wxWindowDCImpl(owner, win) { }
+    DECLARE_DYNAMIC_CLASS(wxClientDC)
 
-    DECLARE_DYNAMIC_CLASS(wxClientDCImpl)
+public:
+    wxClientDC() { }
+    wxClientDC(wxWindow* win) : wxWindowDC(win) { }
 };
 
 #endif // _WX_DCCLIENT_H_

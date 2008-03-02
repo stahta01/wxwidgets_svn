@@ -18,7 +18,6 @@
 #endif //WX_PRECOMP
 
 #include "wx/cocoa/autorelease.h"
-#include "wx/cocoa/ObjcRef.h"
 
 #import <AppKit/NSColor.h>
 
@@ -39,7 +38,7 @@ wxColour::wxColour (const wxColour& col)
 ,   m_blue(col.m_blue)
 ,   m_alpha(col.m_alpha)
 {
-    wxGCSafeRetain(m_cocoaNSColor);
+    [m_cocoaNSColor retain];
 }
 
 wxColour::wxColour( WX_NSColor aColor )
@@ -50,17 +49,18 @@ wxColour::wxColour( WX_NSColor aColor )
 
 wxColour& wxColour::operator =(const wxColour& col)
 {
-    m_cocoaNSColor = wxGCSafeRetain(col.m_cocoaNSColor);
+    m_cocoaNSColor = col.m_cocoaNSColor;
     m_red = col.m_red;
     m_green = col.m_green;
     m_blue = col.m_blue;
     m_alpha = col.m_alpha;
+    [m_cocoaNSColor retain];
     return *this;
 }
 
 wxColour::~wxColour ()
 {
-    wxGCSafeRelease(m_cocoaNSColor);
+    [m_cocoaNSColor release];
 }
 
 void wxColour::InitRGBA(unsigned char r,
@@ -69,8 +69,8 @@ void wxColour::InitRGBA(unsigned char r,
                         unsigned char a)
 {
     wxAutoNSAutoreleasePool pool;
-    wxGCSafeRelease(m_cocoaNSColor);
-    m_cocoaNSColor = wxGCSafeRetain([NSColor colorWithCalibratedRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a/255.0]);
+    [m_cocoaNSColor release];
+    m_cocoaNSColor = [[NSColor colorWithCalibratedRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:a/255.0] retain];
     m_red = r;
     m_green = g;
     m_blue = b;
@@ -79,8 +79,8 @@ void wxColour::InitRGBA(unsigned char r,
 
 void wxColour::Set( WX_NSColor aColor )
 {
-    wxGCSafeRetain(aColor);
-    wxGCSafeRelease(m_cocoaNSColor);
+    [aColor retain];
+    [m_cocoaNSColor release];
     m_cocoaNSColor = aColor;
 
     /* Make a temporary color in RGB format and get the values.  Note that

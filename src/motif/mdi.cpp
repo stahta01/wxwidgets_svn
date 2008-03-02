@@ -12,6 +12,11 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#ifdef __VMS
+#define XtDisplay XTDISPLAY
+#define XtWindow XTWINDOW
+#endif
+
 #include "wx/mdi.h"
 
 #ifndef WX_PRECOMP
@@ -233,7 +238,7 @@ bool wxMDIParentFrame::ProcessEvent(wxEvent& event)
     bool res = false;
     if (m_activeChild && event.IsKindOf(CLASSINFO(wxCommandEvent)))
     {
-        res = m_activeChild->HandleWindowEvent(event);
+        res = m_activeChild->GetEventHandler()->ProcessEvent(event);
     }
 
     if (!res)
@@ -333,6 +338,10 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
     SetName(name);
     SetWindowStyleFlag(style);
 
+    m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
+    m_foregroundColour = *wxBLACK;
+    m_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+
     if ( id > -1 )
         m_windowId = id;
     else
@@ -340,12 +349,11 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
 
     wxMDIClientWindow* clientWindow = parent->GetClientWindow();
 
-    wxCHECK_MSG( clientWindow, false, "Missing MDI client window." );
+    wxASSERT_MSG( (clientWindow != (wxWindow*) NULL), "Missing MDI client window.");
 
-    clientWindow->AddChild(this);
+    if (clientWindow) clientWindow->AddChild(this);
 
     SetMDIParentFrame(parent);
-    PreCreation();
 
     int width = size.x;
     int height = size.y;
@@ -360,7 +368,7 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
     {
         wxActivateEvent event(wxEVT_ACTIVATE, false, oldActiveChild->GetId());
         event.SetEventObject( oldActiveChild );
-        oldActiveChild->HandleWindowEvent(event);
+        oldActiveChild->GetEventHandler()->ProcessEvent(event);
     }
 
     // This is the currently active child
@@ -385,8 +393,9 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
     XtAddEventHandler((Widget) m_mainWidget, ExposureMask,False,
         wxUniversalRepaintProc, (XtPointer) this);
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
+
+    ChangeBackgroundColour();
 
     XtManageChild((Widget) m_mainWidget);
 
@@ -455,12 +464,12 @@ void wxMDIChildFrame::OnRaise()
     {
         wxActivateEvent event(wxEVT_ACTIVATE, false, oldActiveChild->GetId());
         event.SetEventObject( oldActiveChild );
-        oldActiveChild->HandleWindowEvent(event);
+        oldActiveChild->GetEventHandler()->ProcessEvent(event);
     }
 
     wxActivateEvent event(wxEVT_ACTIVATE, true, this->GetId());
     event.SetEventObject( this );
-    this->HandleWindowEvent(event);
+    this->GetEventHandler()->ProcessEvent(event);
 }
 
 void wxMDIChildFrame::OnLower()
@@ -472,7 +481,7 @@ void wxMDIChildFrame::OnLower()
     {
         wxActivateEvent event(wxEVT_ACTIVATE, false, oldActiveChild->GetId());
         event.SetEventObject( oldActiveChild );
-        oldActiveChild->HandleWindowEvent(event);
+        oldActiveChild->GetEventHandler()->ProcessEvent(event);
     }
     // TODO: unfortunately we don't now know which is the top-most child,
     // so make the active child NULL.
@@ -631,9 +640,14 @@ bool wxMDIClientWindow::CreateClient(wxMDIParentFrame *parent, long style)
 {
     SetWindowStyleFlag(style);
 
+    //    m_windowParent = parent;
+    //    m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
+
     bool success = wxNotebook::Create(parent, wxID_NOTEBOOK_CLIENT_AREA, wxPoint(0, 0), wxSize(100, 100), 0);
     if (success)
     {
+        wxFont font(10, wxSWISS, wxNORMAL, wxNORMAL);
+        SetFont(font);
         return true;
     }
     else
@@ -692,7 +706,7 @@ void wxMDIClientWindow::OnPageChanged(wxNotebookEvent& event)
         {
             wxActivateEvent event(wxEVT_ACTIVATE, false, oldChild->GetId());
             event.SetEventObject( oldChild );
-            oldChild->HandleWindowEvent(event);
+            oldChild->GetEventHandler()->ProcessEvent(event);
         }
     }
     if (event.GetSelection() != -1)
@@ -702,7 +716,7 @@ void wxMDIClientWindow::OnPageChanged(wxNotebookEvent& event)
         {
             wxActivateEvent event(wxEVT_ACTIVATE, true, activeChild->GetId());
             event.SetEventObject( activeChild );
-            activeChild->HandleWindowEvent(event);
+            activeChild->GetEventHandler()->ProcessEvent(event);
 
             if (activeChild->GetMDIParentFrame())
             {

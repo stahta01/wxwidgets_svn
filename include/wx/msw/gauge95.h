@@ -14,7 +14,7 @@
 
 #if wxUSE_GAUGE
 
-extern WXDLLEXPORT_DATA(const char) wxGaugeNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxGaugeNameStr[];
 
 // Group box
 class WXDLLEXPORT wxGauge95 : public wxGaugeBase
@@ -57,9 +57,6 @@ public:
     void Pulse();
 
     WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
 
 protected:
     virtual wxSize DoGetBestSize() const;

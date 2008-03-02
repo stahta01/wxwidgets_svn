@@ -11,7 +11,7 @@
 
 #include "wx/wxprec.h"
 
-#if wxUSE_TASKBARICON
+#ifdef wxHAS_TASK_BAR_ICON
 
 #include "wx/taskbar.h"
 
@@ -132,10 +132,8 @@ wxTaskBarIconImpl::~wxTaskBarIconImpl()
 // 1) To handle wxTaskBarIcon menu events (see below for why)
 // 2) To handle events from the dock when it requests a menu
 //-----------------------------------------------------------------------------
-pascal OSStatus
-wxDockEventHandler(EventHandlerCallRef WXUNUSED(inHandlerCallRef),
-                   EventRef inEvent,
-                   void *pData)
+pascal OSStatus wxDockEventHandler( EventHandlerCallRef inHandlerCallRef,
+                                    EventRef inEvent, void *pData )
 {
     // Get the parameters we want from the event
     wxDockTaskBarIcon* pTB = (wxDockTaskBarIcon*) pData;
@@ -272,7 +270,7 @@ wxMenu * wxDeepCopyMenu( wxMenu *menu )
             new wxMenuItem(
                 m_pMenu, // parent menu
                 theItem->GetId(), // id
-                theItem->GetItemLabel(), // text label
+                theItem->GetText(), // text label
                 theItem->GetHelp(), // status bar help string
                 theItem->GetKind(), // menu flags - checkable, separator, etc.
                 wxDeepCopyMenu(theItem->GetSubMenu()) )); // submenu
@@ -371,7 +369,7 @@ bool wxDockTaskBarIcon::IsIconInstalled() const
 //
 // Sets the icon for the dock CGImage functions and SetApplicationDockTileImage
 //-----------------------------------------------------------------------------
-bool wxDockTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& WXUNUSED(tooltip))
+bool wxDockTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
 {
     // convert the wxIcon into a wxBitmap so we can perform some
     // wxBitmap operations with it
@@ -380,7 +378,7 @@ bool wxDockTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& WXUNUSED(too
 
     // get the CGImageRef for the wxBitmap:
     // OSX builds only, but then the dock only exists in OSX
-    CGImageRef pImage = (CGImageRef) bmp.CreateCGImage();
+    CGImageRef pImage = (CGImageRef) bmp.CGImageCreate();
     wxASSERT( pImage != NULL );
 
     // actually set the dock image
@@ -504,4 +502,4 @@ bool wxTaskBarIcon::RemoveIcon()
 bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
 { return m_impl->PopupMenu(menu); }
 
-#endif // wxUSE_TASKBARICON
+#endif // wxHAS_TASK_BAR_ICON

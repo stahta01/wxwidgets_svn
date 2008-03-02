@@ -77,7 +77,7 @@ protected:
     wxArtProvider::Push(new wxDefaultArtProvider);
 }
 
-#if !(defined(__WXGTK20__) || defined(__WXMAC__)) || defined(__WXUNIVERSAL__)
+#if !defined(__WXGTK20__) || defined(__WXUNIVERSAL__)
 /*static*/ void wxArtProvider::InitNativeProvider()
 {
 }
@@ -87,6 +87,9 @@ protected:
 // ----------------------------------------------------------------------------
 // XPMs with the art
 // ----------------------------------------------------------------------------
+
+// XPM hack: make the arrays const
+#define static static const
 
 #if defined(__WXGTK__)
     #include "../../art/gtk/info.xpm"
@@ -148,6 +151,9 @@ protected:
 #include "../../art/quit.xpm"
 #include "../../art/find.xpm"
 #include "../../art/findrepl.xpm"
+
+
+#undef static
 
 wxBitmap wxDefaultArtProvider_CreateBitmap(const wxArtID& id)
 {

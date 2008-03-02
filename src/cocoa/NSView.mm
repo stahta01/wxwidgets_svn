@@ -28,7 +28,6 @@
 #import <Foundation/NSNotification.h>
 #import <Foundation/NSString.h>
 #include "wx/cocoa/objc/NSView.h"
-#include "wx/cocoa/ObjcRef.h"
 
 // ----------------------------------------------------------------------------
 // globals
@@ -169,15 +168,19 @@ void wxCocoaNSView::DisassociateNSView(WX_NSView cocoaNSView)
 
 - (void)viewDidMoveToWindow
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
     if( !win || !win->Cocoa_viewDidMoveToWindow() )
+#endif
         [super viewDidMoveToWindow];
 }
 
 - (void)viewWillMoveToWindow:(NSWindow *)newWindow
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(self);
     if( !win || !win->Cocoa_viewWillMoveToWindow(newWindow) )
+#endif
         [super viewWillMoveToWindow:newWindow];
 }
 
@@ -208,15 +211,15 @@ WX_DECLARE_GET_OBJC_CLASS(wxNSViewNotificationObserver,NSObject)
 
 - (void)synthesizeMouseMovedForView: (NSView *)theView
 {
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     wxCocoaNSView *win = wxCocoaNSView::GetFromCocoa(theView);
     wxCHECK_RET(win,wxT("synthesizeMouseMovedForView received but no wxWindow exists"));
     win->Cocoa_synthesizeMouseMoved();
+#endif
 }
 
 @end // implementation wxNSViewNotificationObserver
 WX_IMPLEMENT_GET_OBJC_CLASS(wxNSViewNotificationObserver,NSObject)
 
-// New CF-retained observer (this should have been using wxObjcAutoRefFromAlloc to begin with)
-wxObjcAutoRefFromAlloc<wxNSViewNotificationObserver*> s_cocoaNSViewObserver([[WX_GET_OBJC_CLASS(wxNSViewNotificationObserver) alloc] init]);
-// For compatibility with old code
-id wxCocoaNSView::sm_cocoaObserver = s_cocoaNSViewObserver;
+void *wxCocoaNSView::sm_cocoaObserver = [[WX_GET_OBJC_CLASS(wxNSViewNotificationObserver) alloc] init];
+

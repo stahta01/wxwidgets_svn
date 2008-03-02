@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/mac/carbon/dcclient.cpp
-// Purpose:     wxClientDCImpl class
+// Purpose:     wxClientDC class
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     01/02/97
@@ -28,28 +28,105 @@
 #include "wx/mac/private.h"
 
 //-----------------------------------------------------------------------------
-// wxWindowDCImpl
+// constants
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxWindowDCImpl, wxGCDCImpl)
+//-----------------------------------------------------------------------------
+// wxPaintDC
+//-----------------------------------------------------------------------------
 
-wxWindowDCImpl::wxWindowDCImpl( wxDC *owner )
-   : wxGCDCImpl( owner )
+IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
+IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
+IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
+
+/*
+ * wxWindowDC
+ */
+
+#include "wx/mac/uma.h"
+#include "wx/notebook.h"
+#include "wx/tabctrl.h"
+
+
+static wxBrush MacGetBackgroundBrush( wxWindow* window )
 {
-    m_release = false;
+    wxBrush bkdBrush = window->MacGetBackgroundBrush() ;
+
+#if !TARGET_API_MAC_OSX
+    // transparency cannot be handled by the OS when not using composited windows
+    wxWindow* parent = window->GetParent() ;
+
+    // if we have some 'pseudo' transparency
+    if ( ! bkdBrush.Ok() || bkdBrush.GetStyle() == wxTRANSPARENT || window->GetBackgroundColour() == wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE ) )
+    {
+        // walk up until we find something
+        while ( parent != NULL )
+        {
+            if ( parent->GetBackgroundColour() != wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE ) )
+            {
+                // if we have any other colours in the hierarchy
+                bkdBrush.SetColour( parent->GetBackgroundColour() ) ;
+                break ;
+            }
+
+            if ( parent->IsKindOf( CLASSINFO(wxTopLevelWindow) ) )
+            {
+                bkdBrush = parent->MacGetBackgroundBrush() ;
+                break ;
+            }
+
+            if ( parent->IsKindOf( CLASSINFO( wxNotebook ) )
+#if wxUSE_TAB_DIALOG
+                 || parent->IsKindOf( CLASSINFO( wxTabCtrl ) )
+#endif // wxUSE_TAB_DIALOG
+                )
+            {
+                Rect extent = { 0 , 0 , 0 , 0 } ;
+                int x , y ;
+                x = y = 0 ;
+                wxSize size = parent->GetSize() ;
+                parent->MacClientToRootWindow( &x , &y ) ;
+                extent.left = x ;
+                extent.top = y ;
+                extent.top-- ;
+                extent.right = x + size.x ;
+                extent.bottom = y + size.y ;
+                bkdBrush.MacSetThemeBackground( kThemeBackgroundTabPane , (WXRECTPTR) &extent ) ;
+                break ;
+            }
+
+            parent = parent->GetParent() ;
+        }
+    }
+
+    if ( !bkdBrush.Ok() || bkdBrush.GetStyle() == wxTRANSPARENT )
+    {
+        // if we did not find something, use a default
+        bkdBrush.MacSetTheme( kThemeBrushDialogBackgroundActive ) ;
+    }
+#endif
+
+    return bkdBrush ;
 }
 
-wxWindowDCImpl::wxWindowDCImpl( wxDC *owner, wxWindow *window )
-   : wxGCDCImpl( owner )
+wxWindowDC::wxWindowDC()
 {
-    m_window = window;
-    
+    m_window = NULL ;
+#if wxMAC_USE_CORE_GRAPHICS
+    m_release = false;
+#endif
+}
+
+wxWindowDC::wxWindowDC(wxWindow *window)
+{
+    m_window = window ;
     WindowRef rootwindow = (WindowRef) window->MacGetTopLevelWindowRef() ;
     if (!rootwindow)
         return;
 
     m_ok = true ;
 
+#if wxMAC_USE_CORE_GRAPHICS
     m_window->GetSize( &m_width , &m_height);
     CGContextRef cg = (CGContextRef) window->MacGetCGContextRef();
     m_release = false;
@@ -68,15 +145,27 @@ wxWindowDCImpl::wxWindowDCImpl( wxDC *owner, wxWindow *window )
 
         SetGraphicsContext( wxGraphicsContext::CreateFromNative( cg ) );
     }
-    DoSetClippingRegion( 0 , 0 , m_width , m_height ) ;
+    SetClippingRegion( 0 , 0 , m_width , m_height ) ;
+#else
+    int x , y ;
+    x = y = 0 ;
+    window->MacWindowToRootWindow( &x , &y ) ;
+    m_macLocalOrigin.x = x ;
+    m_macLocalOrigin.y = y ;
+    m_macPort = UMAGetWindowPort( rootwindow ) ;
 
-    SetBackground(wxBrush(window->GetBackgroundColour(),wxSOLID));
+    CopyRgn( (RgnHandle) window->MacGetVisibleRegion(true).GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
+    CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
+#endif
+    SetBackground(MacGetBackgroundBrush(window));
 
     SetFont( window->GetFont() ) ;
 }
 
-wxWindowDCImpl::~wxWindowDCImpl()
+wxWindowDC::~wxWindowDC()
 {
+#if wxMAC_USE_CORE_GRAPHICS
     if ( m_release )
     {
         // this must not necessarily be the current context, we must restore the state of the
@@ -84,30 +173,33 @@ wxWindowDCImpl::~wxWindowDCImpl()
         CGContextRef cg = (CGContextRef) m_window->MacGetCGContextRef();
         CGContextRestoreGState(cg);
     }
+#endif
 }
 
-void wxWindowDCImpl::DoGetSize( int* width, int* height ) const
+void wxWindowDC::DoGetSize( int* width, int* height ) const
 {
+#if wxMAC_USE_CORE_GRAPHICS
     if ( width )
         *width = m_width;
     if ( height )
         *height = m_height;
+#else
+    wxCHECK_RET( m_window, _T("GetSize() doesn't work without window") );
+    m_window->GetSize(width, height);
+#endif
 }
 
-wxBitmap wxWindowDCImpl::DoGetAsBitmap(const wxRect *subrect) const
+wxBitmap wxWindowDC::DoGetAsBitmap(const wxRect *subrect) const
 {
     // wxScreenDC is derived from wxWindowDC, so a screen dc will
     // call this method when a Blit is performed with it as a source.
     if (!m_window)
         return wxNullBitmap;
-
-#ifdef __LP64__
-    return wxNullBitmap;
-#else
+        
     ControlRef handle = (ControlRef) m_window->GetHandle();
     if ( !handle )
         return wxNullBitmap;
-    
+
     HIRect rect;
     CGImageRef image;
     CGContextRef context;
@@ -134,6 +226,7 @@ wxBitmap wxWindowDCImpl::DoGetAsBitmap(const wxRect *subrect) const
     wxBitmap bmp = wxBitmap(width, height, 32);
     wxAlphaPixelData pixData(bmp, wxPoint(0,0), wxSize(width, height));
 
+    pixData.UseAlpha();
     wxAlphaPixelData::Iterator p(pixData);
     for (int y=0; y<height; y++) {
         wxAlphaPixelData::Iterator rowStart = p;
@@ -150,54 +243,145 @@ wxBitmap wxWindowDCImpl::DoGetAsBitmap(const wxRect *subrect) const
     }
 
     return bmp;
+}
+
+/*
+ * wxClientDC
+ */
+
+wxClientDC::wxClientDC()
+{
+    m_window = NULL ;
+}
+
+#if wxMAC_USE_CORE_GRAPHICS
+wxClientDC::wxClientDC(wxWindow *window) :
+    wxWindowDC( window )
+{
+    wxCHECK_RET( window, _T("invalid window in wxClientDC") );
+    wxPoint origin = window->GetClientAreaOrigin() ;
+    m_window->GetClientSize( &m_width , &m_height);
+    SetDeviceOrigin( origin.x, origin.y );
+    SetClippingRegion( 0 , 0 , m_width , m_height ) ;
+}
+#else
+wxClientDC::wxClientDC(wxWindow *window)
+{
+    wxCHECK_RET( window, _T("invalid window in wxClientDC") );
+    m_window = window ;
+    wxTopLevelWindowMac* rootwindow = window->MacGetTopLevelWindow() ;
+    if (!rootwindow)
+        return;
+
+    WindowRef windowref = (WindowRef) rootwindow->MacGetWindowRef() ;
+    wxPoint origin = window->GetClientAreaOrigin() ;
+    wxSize size = window->GetClientSize() ;
+    int x , y ;
+    x = origin.x ;
+    y = origin.y ;
+    window->MacWindowToRootWindow( &x , &y ) ;
+    m_macPort = UMAGetWindowPort( windowref ) ;
+    m_ok = true ;
+
+    m_macLocalOrigin.x = x ;
+    m_macLocalOrigin.y = y ;
+    SetRectRgn( (RgnHandle) m_macBoundaryClipRgn , origin.x , origin.y , origin.x + size.x , origin.y + size.y ) ;
+    SectRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) window->MacGetVisibleRegion().GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , -origin.x , -origin.y ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
+    CopyRgn( (RgnHandle) m_macBoundaryClipRgn ,(RgnHandle)  m_macCurrentClipRgn ) ;
+
+    SetBackground(MacGetBackgroundBrush(window));
+    SetFont( window->GetFont() ) ;
+}
 #endif
+
+wxClientDC::~wxClientDC()
+{
 }
+
+#if !wxMAC_USE_CORE_GRAPHICS
+void wxClientDC::DoGetSize(int *width, int *height) const
+{
+    wxCHECK_RET( m_window, _T("GetSize() doesn't work without window") );
+
+    m_window->GetClientSize( width, height );
+}
+#endif
 
 /*
- * wxClientDCImpl
+ * wxPaintDC
  */
 
-IMPLEMENT_ABSTRACT_CLASS(wxClientDCImpl, wxWindowDCImpl)
-
-wxClientDCImpl::wxClientDCImpl( wxDC *owner )
- : wxWindowDCImpl( owner )
+wxPaintDC::wxPaintDC()
 {
+    m_window = NULL ;
 }
 
-wxClientDCImpl::wxClientDCImpl( wxDC *owner, wxWindow *window ) :
-    wxWindowDCImpl( owner, window )
-{
-    wxCHECK_RET( window, _T("invalid window in wxClientDCImpl") );
-    wxPoint origin = window->GetClientAreaOrigin() ;
-    m_window->GetClientSize( &m_width , &m_height);
-    SetDeviceOrigin( origin.x, origin.y );
-    DoSetClippingRegion( 0 , 0 , m_width , m_height ) ;
-}
-
-wxClientDCImpl::~wxClientDCImpl()
-{
-}
-
-/*
- * wxPaintDCImpl
- */
-
-IMPLEMENT_ABSTRACT_CLASS(wxPaintDCImpl, wxWindowDCImpl)
-
-wxPaintDCImpl::wxPaintDCImpl( wxDC *owner )
- : wxWindowDCImpl( owner )
-{
-}
-
-wxPaintDCImpl::wxPaintDCImpl( wxDC *owner, wxWindow *window ) :
-    wxWindowDCImpl( owner, window )
+#if wxMAC_USE_CORE_GRAPHICS
+wxPaintDC::wxPaintDC(wxWindow *window) :
+    wxWindowDC( window )
 {
     wxPoint origin = window->GetClientAreaOrigin() ;
     m_window->GetClientSize( &m_width , &m_height);
     SetDeviceOrigin( origin.x, origin.y );
-    DoSetClippingRegion( 0 , 0 , m_width , m_height ) ;
+    SetClippingRegion( 0 , 0 , m_width , m_height ) ;
 }
+#else
+wxPaintDC::wxPaintDC(wxWindow *window)
+{
+    m_window = window ;
+    wxTopLevelWindowMac* rootwindow = window->MacGetTopLevelWindow() ;
+    WindowRef windowref = (WindowRef) rootwindow->MacGetWindowRef() ;
+    wxPoint origin = window->GetClientAreaOrigin() ;
+    wxSize size = window->GetClientSize() ;
+    int x , y ;
+    x = origin.x ;
+    y = origin.y ;
+    window->MacWindowToRootWindow( &x , &y ) ;
+    m_macPort = UMAGetWindowPort( windowref ) ;
+    m_ok = true ;
 
-wxPaintDCImpl::~wxPaintDCImpl()
+#if wxMAC_USE_CORE_GRAPHICS
+    if ( window->MacGetCGContextRef() )
+    {
+        m_graphicContext = new wxMacCGContext( (CGContextRef) window->MacGetCGContextRef() ) ;
+        m_graphicContext->SetPen( m_pen ) ;
+        m_graphicContext->SetBrush( m_brush ) ;
+        SetClippingRegion( 0 , 0 , size.x , size.y ) ;
+        SetBackground(MacGetBackgroundBrush(window));
+    }
+    else
+    {
+        wxLogDebug(wxT("You cannot create a wxPaintDC outside an OS-draw event") ) ;
+        m_graphicContext = NULL ;
+    }
+    // there is no out-of-order drawing on OSX
+#else
+    m_macLocalOrigin.x = x ;
+    m_macLocalOrigin.y = y ;
+    SetRectRgn( (RgnHandle) m_macBoundaryClipRgn , origin.x , origin.y , origin.x + size.x , origin.y + size.y ) ;
+    SectRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) window->MacGetVisibleRegion().GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , -origin.x , -origin.y ) ;
+    SectRgn( (RgnHandle) m_macBoundaryClipRgn  , (RgnHandle) window->GetUpdateRegion().GetWXHRGN() , (RgnHandle) m_macBoundaryClipRgn ) ;
+    OffsetRgn( (RgnHandle) m_macBoundaryClipRgn , m_macLocalOrigin.x , m_macLocalOrigin.y ) ;
+    CopyRgn( (RgnHandle) m_macBoundaryClipRgn , (RgnHandle) m_macCurrentClipRgn ) ;
+    SetBackground(MacGetBackgroundBrush(window));
+#endif
+
+    SetFont( window->GetFont() ) ;
+}
+#endif
+
+wxPaintDC::~wxPaintDC()
 {
 }
+
+#if !wxMAC_USE_CORE_GRAPHICS
+void wxPaintDC::DoGetSize(int *width, int *height) const
+{
+    wxCHECK_RET( m_window, _T("GetSize() doesn't work without window") );
+
+    m_window->GetClientSize( width, height );
+}
+#endif

@@ -25,7 +25,6 @@
     #include "wx/string.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/crt.h"
     #if wxUSE_GUI
         #include "wx/icon.h"
         #include "wx/msgdlg.h"
@@ -200,47 +199,16 @@ bool wxFileTypeImpl::EnsureExtKeyExists()
 // get the command to use
 // ----------------------------------------------------------------------------
 
-static wxString wxFileTypeImplGetCurVer(const wxString& progId)
-{
-    wxRegKey key(wxRegKey::HKCR, progId + wxT("\\CurVer"));
-    if (key.Exists())
-    {
-        wxString value;
-        if (key.QueryValue(wxEmptyString, value))
-            return value;
-    }
-    return progId;
-}
-
-wxString wxFileTypeImpl::GetCommand(const wxString& verb) const
+wxString wxFileTypeImpl::GetCommand(const wxChar *verb) const
 {
     // suppress possible error messages
     wxLogNull nolog;
     wxString strKey;
 
-    {
-        wxRegKey explorerKey(wxRegKey::HKCU, wxT("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\") + m_ext);
-        if (explorerKey.Exists())
-        {
-            if (explorerKey.Open(wxRegKey::Read))
-            {
-                if (explorerKey.QueryValue(wxT("Progid"), strKey))
-                {
-                    strKey = wxFileTypeImplGetCurVer(strKey);
-                }
-            }
-        }
-    }
-
-    if (!strKey && wxRegKey(wxRegKey::HKCR, m_ext + _T("\\shell")).Exists())
+    if ( wxRegKey(wxRegKey::HKCR, m_ext + _T("\\shell")).Exists() )
         strKey = m_ext;
-
-    if ( !strKey && !m_strFileType.empty())
-    {
-        wxString fileType = wxFileTypeImplGetCurVer(m_strFileType);
-        if (wxRegKey(wxRegKey::HKCR, fileType + _T("\\shell")).Exists())
-            strKey = fileType;
-    }
+    if ( wxRegKey(wxRegKey::HKCR, m_strFileType + _T("\\shell")).Exists() )
+        strKey = m_strFileType;
 
     if ( !strKey )
     {

@@ -11,6 +11,20 @@
 #ifndef __GTKDIALOGH__
 #define __GTKDIALOGH__
 
+#include "wx/defs.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxDialog;
+
+//-----------------------------------------------------------------------------
+// global data
+//-----------------------------------------------------------------------------
+
+extern WXDLLIMPEXP_CORE const wxChar wxDialogNameStr[];
+
 //-----------------------------------------------------------------------------
 // wxDialog
 //-----------------------------------------------------------------------------
@@ -31,7 +45,7 @@ public:
             const wxSize &size = wxDefaultSize,
             long style = wxDEFAULT_DIALOG_STYLE,
             const wxString &name = wxDialogNameStr );
-    virtual ~wxDialog();
+    virtual ~wxDialog() {}
 
     virtual bool Show( bool show = TRUE );
     virtual int ShowModal();

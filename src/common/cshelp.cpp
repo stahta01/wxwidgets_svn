@@ -123,8 +123,8 @@ bool wxContextHelp::BeginContextHelp(wxWindow* win)
     wxCursor oldCursor = win->GetCursor();
     win->SetCursor(cursor);
 
-#ifdef __WXMAC__
-    wxSetCursor(cursor);
+#ifdef __WXMSW__
+    //    wxSetCursor(cursor);
 #endif
 
     m_status = false;
@@ -148,10 +148,6 @@ bool wxContextHelp::BeginContextHelp(wxWindow* win)
 #endif
 
     win->SetCursor(oldCursor);
-
-#ifdef __WXMAC__
-    wxSetCursor(wxNullCursor);
-#endif
 
     if (m_status)
     {
@@ -388,11 +384,6 @@ void wxSimpleHelpProvider::RemoveHelp(wxWindowBase* window)
 bool wxSimpleHelpProvider::ShowHelp(wxWindowBase *window)
 {
 #if wxUSE_MS_HTML_HELP || wxUSE_TIPWINDOW
-#if wxUSE_MS_HTML_HELP
-    // m_helptextAtPoint will be reset by GetHelpTextMaybeAtPoint(), stash it
-    const wxPoint posTooltip = m_helptextAtPoint;
-#endif // wxUSE_MS_HTML_HELP
-
     const wxString text = GetHelpTextMaybeAtPoint(window);
 
     if ( !text.empty() )
@@ -402,7 +393,7 @@ bool wxSimpleHelpProvider::ShowHelp(wxWindowBase *window)
         if ( !wxCHMHelpController::ShowContextHelpPopup
                                    (
                                         text,
-                                        posTooltip,
+                                        wxGetMousePosition(),
                                         (wxWindow *)window
                                    ) )
 #endif // wxUSE_MS_HTML_HELP

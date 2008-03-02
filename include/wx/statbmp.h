@@ -20,7 +20,7 @@
 #include "wx/bitmap.h"
 #include "wx/icon.h"
 
-extern WXDLLEXPORT_DATA(const char) wxStaticBitmapNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStaticBitmapNameStr[];
 
 // a control showing an icon or a bitmap
 class WXDLLEXPORT wxStaticBitmapBase : public wxControl
@@ -45,9 +45,6 @@ public:
     virtual bool HasTransparentBackground() { return true; }
 
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     virtual wxSize DoGetBestSize() const;
 
     DECLARE_NO_COPY_CLASS(wxStaticBitmapBase)

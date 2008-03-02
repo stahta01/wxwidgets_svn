@@ -50,8 +50,10 @@
 IMPLEMENT_DYNAMIC_CLASS(wxListbook, wxBookCtrlBase)
 IMPLEMENT_DYNAMIC_CLASS(wxListbookEvent, wxNotifyEvent)
 
+#if !WXWIN_COMPATIBILITY_EVENT_TYPES
 const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING = wxNewEventType();
 const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED = wxNewEventType();
+#endif
 
 BEGIN_EVENT_TABLE(wxListbook, wxBookCtrlBase)
     EVT_SIZE(wxListbook::OnSize)
@@ -324,7 +326,7 @@ wxListbook::InsertPage(size_t n,
 
     wxSizeEvent sz(GetSize(), GetId());
     GetEventHandler()->ProcessEvent(sz);
-    
+
     return true;
 }
 
@@ -357,7 +359,7 @@ wxWindow *wxListbook::DoRemovePage(size_t page)
         if (GetPageCount() == 0)
         {
             wxSizeEvent sz(GetSize(), GetId());
-            GetEventHandler()->ProcessEvent(sz);
+            ProcessEvent(sz);
         }
     }
 
@@ -374,7 +376,7 @@ bool wxListbook::DeleteAllPages()
     m_selection = -1;
 
     wxSizeEvent sz(GetSize(), GetId());
-    GetEventHandler()->ProcessEvent(sz);
+    ProcessEvent(sz);
 
     return true;
 }

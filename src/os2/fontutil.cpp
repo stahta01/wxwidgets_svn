@@ -281,16 +281,11 @@ void wxConvertVectorFontSize(
     //   NOTE: 1 point == 1/72 of an inch.
     //
 
-    // multiply first to avoid getting vSizef.cx,cy = 0 since fxPointSize
-    // is normally < 72 and FontResolution is typically ca. 100
-    vSizef.cx = (FIXED)( (fxPointSize * lXFontResolution) / 72 );
-    vSizef.cy = (FIXED)( (fxPointSize * lYFontResolution) / 72 );
+    vSizef.cx = (FIXED)(((fxPointSize) / 72 ) * lXFontResolution );
+    vSizef.cy = (FIXED)(((fxPointSize) / 72 ) * lYFontResolution );
 
-    if (pFattrs)
-    {
-        pFattrs->lMaxBaselineExt = MAKELONG( HIUSHORT( vSizef.cy ), 0 );
-        pFattrs->lAveCharWidth   = MAKELONG( HIUSHORT( vSizef.cx ), 0 );
-    }
+    pFattrs->lMaxBaselineExt = MAKELONG( HIUSHORT( vSizef.cy ), 0 );
+    pFattrs->lAveCharWidth   = MAKELONG( HIUSHORT( vSizef.cx ), 0 );
     WinReleasePS(hPS);
 
 } // end of wxConvertVectorPointSize

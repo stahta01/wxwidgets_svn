@@ -129,10 +129,18 @@ void wxDataFormat::SetType( wxDataFormatId dataType )
         break;
 
     case wxDF_BITMAP:
+#if wxMAC_USE_CORE_GRAPHICS
         m_format = (long) CFStringCreateCopy( NULL, CFSTR("public.tiff") );
+#else
+        m_format = (long) CFStringCreateCopy( NULL, CFSTR("com.apple.pict") );
+#endif
         break;
     case wxDF_METAFILE:
+#if wxMAC_USE_CORE_GRAPHICS
         m_format = (long) CFStringCreateCopy( NULL, CFSTR("com.adobe.pdf") );
+#else
+        m_format = (long) CFStringCreateCopy( NULL, CFSTR("com.apple.pict") );
+#endif
         break;
 
     case wxDF_FILENAME:
@@ -147,7 +155,10 @@ void wxDataFormat::SetType( wxDataFormatId dataType )
 
 wxString wxDataFormat::GetId() const
 {
-    return wxCFStringRef(wxCFRetain((CFStringRef)m_format)).AsString();
+    wxCHECK_MSG( !IsStandard(), wxEmptyString,
+                 wxT("name of predefined format cannot be retrieved") );
+
+    return m_id;
 }
 
 void wxDataFormat::SetId( NativeFormat format )
@@ -166,6 +177,7 @@ void wxDataFormat::SetId( NativeFormat format )
     {
         m_type = wxDF_TEXT;
     }
+#if wxMAC_USE_CORE_GRAPHICS
     else if (  UTTypeConformsTo( (CFStringRef)format, CFSTR("public.tiff") )  ) 
     {
         m_type = wxDF_BITMAP;
@@ -174,6 +186,12 @@ void wxDataFormat::SetId( NativeFormat format )
     {
         m_type = wxDF_METAFILE;
     }
+#else
+    else if (  UTTypeConformsTo( (CFStringRef)format, CFSTR("com.apple.pict") )  ) 
+    {
+        m_type = wxDF_METAFILE;
+    }
+#endif
     else if (  UTTypeConformsTo( (CFStringRef)format, CFSTR("public.file-url") )  ) 
     {
         m_type = wxDF_FILENAME;
@@ -181,11 +199,11 @@ void wxDataFormat::SetId( NativeFormat format )
     else 
     {
         m_type = wxDF_PRIVATE;
-        m_id = wxCFStringRef( (CFStringRef) CFRetain((CFStringRef) format )).AsString();
+        m_id = wxMacCFStringHolder( (CFStringRef) CFRetain((CFStringRef) format )).AsString();
     }
 }
 
-void wxDataFormat::SetId( const wxString& zId )
+void wxDataFormat::SetId( const wxChar* zId )
 {
     m_type = wxDF_PRIVATE;
     m_id = zId;
@@ -195,13 +213,13 @@ void wxDataFormat::SetId( const wxString& zId )
         m_format = 0;
     }
     // since it is private, no need to conform to anything ...
-    m_format = (long) wxCFRetain( (CFStringRef) wxCFStringRef(m_id) );
+    m_format = (long) wxMacCFStringHolder(m_id).Detach();
 }
 
 bool wxDataFormat::operator==(const wxDataFormat& format) const
 {
     if (IsStandard() || format.IsStandard())
-        return (format.m_type == m_type);
+        return ( format.m_type == m_type );
     else
         return ( UTTypeConformsTo( (CFStringRef) m_format , (CFStringRef) format.m_format ) );
 }
@@ -420,7 +438,7 @@ bool wxDataObject::GetFromPasteboard( void * pb )
                                 CFMutableStringRef cfMutableString = CFStringCreateMutableCopy(NULL, 0, cfString);
                                 CFRelease( cfString );
                                 CFStringNormalize(cfMutableString,kCFStringNormalizationFormC);
-                                wxString path = wxCFStringRef(cfMutableString).AsString();
+                                wxString path = wxMacCFStringHolder(cfMutableString).AsString();
                                 if (!path.empty())
                                     filenamesPassed += path + wxT("\n");
                             }
@@ -542,8 +560,7 @@ bool wxDataObject::HasDataInPasteboard( void * pb )
 // ----------------------------------------------------------------------------
 
 #if wxUSE_UNICODE
-void wxTextDataObject::GetAllFormats(wxDataFormat *formats,
-                                     wxDataObjectBase::Direction WXUNUSED(dir)) const
+void wxTextDataObject::GetAllFormats( wxDataFormat *formats, wxDataObjectBase::Direction dir ) const
 {
     *formats++ = wxDataFormat( wxDF_TEXT );
     *formats = wxDataFormat( wxDF_UNICODETEXT );
@@ -593,7 +610,7 @@ size_t wxFileDataObject::GetDataSize() const
     return buffLength + 1;
 }
 
-bool wxFileDataObject::SetData( size_t WXUNUSED(nSize), const void *pBuf )
+bool wxFileDataObject::SetData( size_t nSize, const void *pBuf )
 {
     wxString filenames;
 
@@ -629,7 +646,12 @@ wxBitmapDataObject::wxBitmapDataObject( const wxBitmap& rBitmap )
 
     if (m_bitmap.Ok())
     {
+#if wxMAC_USE_CORE_GRAPHICS
 		SetBitmap( rBitmap );
+#else
+        m_pictHandle = m_bitmap.GetBitmapData()->GetPictHandle();
+        m_pictCreated = false;
+#endif
     }
 }
 
@@ -644,24 +666,51 @@ void wxBitmapDataObject::SetBitmap( const wxBitmap& rBitmap )
     wxBitmapDataObjectBase::SetBitmap( rBitmap );
     if (m_bitmap.Ok())
     {
-        CGImageRef cgImageRef = (CGImageRef) m_bitmap.CreateCGImage();
-
-        CFMutableDataRef data = CFDataCreateMutable(kCFAllocatorDefault, 0);
-        CGImageDestinationRef destination = CGImageDestinationCreateWithData( data , kUTTypeTIFF , 1 , NULL );
-        if ( destination )
+#if wxMAC_USE_CORE_GRAPHICS
+        CGImageRef cgImageRef = (CGImageRef) m_bitmap.CGImageCreate();
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+        if ( UMAGetSystemVersion() >= 0x1040 )
         {
-            CGImageDestinationAddImage( destination, cgImageRef, NULL );
-            CGImageDestinationFinalize( destination );
-            CFRelease( destination );
+            CFMutableDataRef data = CFDataCreateMutable(kCFAllocatorDefault, 0);
+            CGImageDestinationRef destination = CGImageDestinationCreateWithData( data , kUTTypeTIFF , 1 , NULL );
+            if ( destination )
+            {
+                CGImageDestinationAddImage( destination, cgImageRef, NULL );
+                CGImageDestinationFinalize( destination );
+                CFRelease( destination );
+            }
+            m_pictHandle = NewHandle(CFDataGetLength(data));
+            if ( m_pictHandle )
+            {
+                memcpy( *(Handle)m_pictHandle, (const char *)CFDataGetBytePtr(data), CFDataGetLength(data) );
+            }
+            CFRelease( data );
         }
-        m_pictHandle = NewHandle(CFDataGetLength(data));
-        if ( m_pictHandle )
+        else
+#endif
+#ifndef __LP64__
         {
-            memcpy( *(Handle)m_pictHandle, (const char *)CFDataGetBytePtr(data), CFDataGetLength(data) );
+            // export as TIFF
+            GraphicsExportComponent exporter = 0;
+            OSStatus err = OpenADefaultComponent(GraphicsExporterComponentType, kQTFileTypeTIFF, &exporter);
+            if (noErr == err)
+            {
+                m_pictHandle = NewHandle(0);
+                if ( m_pictHandle )
+                {
+                    err = GraphicsExportSetInputCGImage( exporter, cgImageRef);
+                    err = GraphicsExportSetOutputHandle(exporter, (Handle)m_pictHandle);
+                    err = GraphicsExportDoExport(exporter, NULL);
+                }
+                CloseComponent( exporter );
+            }
         }
-        CFRelease( data );
-
+#endif
         CGImageRelease(cgImageRef);
+#else
+        m_pictHandle = m_bitmap.GetBitmapData()->GetPictHandle();
+        m_pictCreated = false;
+#endif
     }
 }
 
@@ -675,7 +724,12 @@ void wxBitmapDataObject::Clear()
 {
     if (m_pictHandle != NULL)
     {
+#if wxMAC_USE_CORE_GRAPHICS
         DisposeHandle( (Handle) m_pictHandle );
+#else
+        if (m_pictCreated)
+            KillPicture( (PicHandle)m_pictHandle );
+#endif
         m_pictHandle = NULL;
     }
     m_pictCreated = false;
@@ -723,29 +777,77 @@ bool wxBitmapDataObject::SetData( size_t nSize, const void *pBuf )
     if ((pBuf == NULL) || (nSize == 0))
         return false;
 
+#if wxMAC_USE_CORE_GRAPHICS
     Handle picHandle = NewHandle( nSize );
     memcpy( *picHandle, pBuf, nSize );
     m_pictHandle = picHandle;
     CGImageRef cgImageRef = 0;
-
-    CFDataRef data = CFDataCreateWithBytesNoCopy( kCFAllocatorDefault, (const UInt8*) pBuf, nSize, kCFAllocatorNull);
-    CGImageSourceRef source = CGImageSourceCreateWithData( data, NULL );
-    if ( source )
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if ( UMAGetSystemVersion() >= 0x1040 )
     {
-        cgImageRef = CGImageSourceCreateImageAtIndex(source, 0, NULL);
+        CFDataRef data = CFDataCreateWithBytesNoCopy( kCFAllocatorDefault, (const UInt8*) pBuf, nSize, kCFAllocatorNull);
+        CGImageSourceRef source = CGImageSourceCreateWithData( data, NULL );
+        if ( source )
+        {
+            cgImageRef = CGImageSourceCreateImageAtIndex(source, 0, NULL);
+        }
+        CFRelease( source );
+        CFRelease( data );
     }
-    CFRelease( source );
-    CFRelease( data );
-
+    else
+#endif
+#ifndef __LP64__
+    {
+        // import from TIFF
+        GraphicsImportComponent importer = 0;
+        OSStatus err = OpenADefaultComponent(GraphicsImporterComponentType, kQTFileTypeTIFF, &importer);
+        if (noErr == err)
+        {
+            if ( picHandle )
+            {
+                ComponentResult result = GraphicsImportSetDataHandle(importer, picHandle);
+                if ( result == noErr )
+                {
+                    Rect frame;
+                    GraphicsImportGetNaturalBounds( importer, &frame );
+                    GraphicsImportCreateCGImage( importer, &cgImageRef, kGraphicsImportCreateCGImageUsingCurrentSettings );
+                }
+            }
+            CloseComponent( importer );
+        }
+    }
+#endif
     if ( cgImageRef )
     {
         m_bitmap.Create( CGImageGetWidth(cgImageRef)  , CGImageGetHeight(cgImageRef) );
         CGRect r = CGRectMake( 0 , 0 , CGImageGetWidth(cgImageRef)  , CGImageGetHeight(cgImageRef) );
         // since our context is upside down we dont use CGContextDrawImage
-        wxMacDrawCGImage( (CGContextRef) m_bitmap.GetHBITMAP() , &r, cgImageRef ) ;
+        HIViewDrawCGImage( (CGContextRef) m_bitmap.GetHBITMAP() , &r, cgImageRef ) ;
         CGImageRelease(cgImageRef);
         cgImageRef = NULL;
     }
+#else
+    PicHandle picHandle = (PicHandle)NewHandle( nSize );
+    memcpy( *picHandle, pBuf, nSize );
+    m_pictHandle = picHandle;
+    // ownership is transferred to the bitmap
+    m_pictCreated = false;
+#ifndef __LP64__
+    Rect frame;
+    wxMacGetPictureBounds( picHandle, &frame );
+#if wxUSE_METAFILE
+    wxMetafile mf;
+    mf.SetHMETAFILE( (WXHMETAFILE)m_pictHandle );
+#endif
+    wxMemoryDC mdc;
+    m_bitmap.Create( frame.right - frame.left, frame.bottom - frame.top );
+    mdc.SelectObject( m_bitmap );
+#if wxUSE_METAFILE  
+    mf.Play( &mdc );
+#endif
+    mdc.SelectObject( wxNullBitmap );
+#endif
+#endif
 
     return m_bitmap.Ok();
 }

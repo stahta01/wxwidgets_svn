@@ -46,7 +46,7 @@ public:
 // ------------------------------------------------------------------------
 protected:
     // Static lines cannot be enabled/disabled
-    virtual void CocoaSetEnabled(bool WXUNUSED(enable)) { }
+    virtual void CocoaSetEnabled(bool enable) { }
 // ------------------------------------------------------------------------
 // Implementation
 // ------------------------------------------------------------------------

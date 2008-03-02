@@ -216,7 +216,7 @@ void wxSlider::SetRange(int minValue, int maxValue)
 }
 
 // For trackbars only
-void wxSlider::SetTickFreq(int n, int WXUNUSED(pos))
+void wxSlider::SetTickFreq(int n, int pos)
 {
     // TODO
     m_tickFreq = n;
@@ -267,12 +267,12 @@ int wxSlider::GetSelStart() const
     return 0;
 }
 
-void wxSlider::SetSelection(int WXUNUSED(minPos), int WXUNUSED(maxPos))
+void wxSlider::SetSelection(int minPos, int maxPos)
 {
     // TODO
 }
 
-void wxSlider::SetThumbLength(int WXUNUSED(len))
+void wxSlider::SetThumbLength(int len)
 {
     // TODO
 }
@@ -283,7 +283,7 @@ int wxSlider::GetThumbLength() const
     return 0;
 }
 
-void wxSlider::SetTick(int WXUNUSED(tickPos))
+void wxSlider::SetTick(int tickPos)
 {
     // TODO
 }
@@ -294,9 +294,7 @@ void wxSlider::Command(wxCommandEvent &event)
     ProcessCommand(event);
 }
 
-void wxSlider::MacHandleControlClick(WXWidget WXUNUSED(control),
-                                     wxInt16 WXUNUSED(controlpart),
-                                     bool WXUNUSED(mouseStillDown))
+void wxSlider::MacHandleControlClick( WXWidget control, wxInt16 controlpart, bool mouseStillDown )
 {
     // Whatever the native value is, we may need to invert it for calling
     // SetValue and putting the possibly inverted value in the event
@@ -307,16 +305,15 @@ void wxSlider::MacHandleControlClick(WXWidget WXUNUSED(control),
     wxScrollEvent event( wxEVT_SCROLL_THUMBTRACK, m_windowId );
     event.SetPosition( value );
     event.SetEventObject( this );
-    HandleWindowEvent( event );
+    GetEventHandler()->ProcessEvent( event );
 
     wxCommandEvent cevent( wxEVT_COMMAND_SLIDER_UPDATED, m_windowId );
     cevent.SetInt( value );
     cevent.SetEventObject( this );
-    HandleWindowEvent( cevent );
+    GetEventHandler()->ProcessEvent( cevent );
 }
 
-wxInt32 wxSlider::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler),
-                                WXEVENTREF WXUNUSED(mevent))
+wxInt32 wxSlider::MacControlHit( WXEVENTHANDLERREF handler , WXEVENTREF mevent )
 {
     // Whatever the native value is, we may need to invert it for calling
     // SetValue and putting the possibly inverted value in the event
@@ -327,13 +324,13 @@ wxInt32 wxSlider::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler),
     wxScrollEvent event( wxEVT_SCROLL_THUMBRELEASE, m_windowId );
     event.SetPosition( value );
     event.SetEventObject( this );
-    HandleWindowEvent( event );
+    GetEventHandler()->ProcessEvent( event );
 
     wxCommandEvent cevent( wxEVT_COMMAND_SLIDER_UPDATED, m_windowId );
     cevent.SetInt( value );
     cevent.SetEventObject( this );
 
-    HandleWindowEvent( cevent );
+    GetEventHandler()->ProcessEvent( cevent );
 
     return noErr;
 }
@@ -343,7 +340,7 @@ wxInt32 wxSlider::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler),
 //
 void wxSlider::DoSetSizeHints( int minW, int minH,
     int maxW, int maxH,
-    int WXUNUSED(incW), int WXUNUSED(incH) )
+    int incW, int incH )
 {
     wxSize size = GetBestSize();
 

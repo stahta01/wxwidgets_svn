@@ -2,7 +2,7 @@
 // Name:        wx/palmos/font.h
 // Purpose:     wxFont class
 // Author:      William Osborne - minimal working wxPalmOS port
-// Modified by: Yunhui Fu
+// Modified by:
 // Created:     10/14/04
 // RCS-ID:      $Id$
 // Copyright:   (c) William Osborne
@@ -82,10 +82,6 @@ public:
 
     virtual ~wxFont();
 
-    // wxFontBase overridden functions
-    virtual wxString GetNativeFontInfoDesc() const;
-    virtual wxString GetNativeFontInfoUserDesc() const;
-
     // implement base class pure virtuals
     virtual int GetPointSize() const;
     virtual wxSize GetPixelSize() const;
@@ -131,9 +127,7 @@ protected:
 
     virtual void DoSetNativeFontInfo(const wxNativeFontInfo& info);
 
-    // implement wxObject virtuals which are used by AllocExclusive()
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    void Unshare();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxFont)

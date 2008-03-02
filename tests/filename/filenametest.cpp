@@ -50,9 +50,9 @@ static struct FileNameInfo
 } filenames[] =
 {
     // the empty string
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_UNIX },
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_DOS },
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_VMS },
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_UNIX }, 
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_DOS }, 
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_VMS }, 
 
     // Unix file names
     { _T("/usr/bin/ls"), _T(""), _T("/usr/bin"), _T("ls"), _T(""), true, wxPATH_UNIX },
@@ -288,9 +288,9 @@ void FileNameTestCase::TestNormalize()
 
     static struct FileNameTest
     {
-        const wxString original;
+        const wxChar *original;
         int flags;
-        const wxString expected;
+        wxString expected;
     } tests[] =
     {
         // test wxPATH_NORM_ENV_VARS
@@ -335,7 +335,7 @@ void FileNameTestCase::TestNormalize()
         );
 
         // compare result with expected string
-        WX_ASSERT_STR_EQUAL( tests[i].expected, fn.GetFullPath(wxPATH_UNIX) );
+        CPPUNIT_ASSERT_EQUAL( tests[i].expected, fn.GetFullPath(wxPATH_UNIX) );
     }
 }
 

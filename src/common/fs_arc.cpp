@@ -17,12 +17,12 @@
 
 #include "wx/fs_arc.h"
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
 #endif
 
-#if WXWIN_COMPATIBILITY_2_6 && wxUSE_ZIPSTREAM
+#if WXWIN_COMPATIBILITY_2_6
     #include "wx/zipstrm.h"
 #else
     #include "wx/archive.h"
@@ -395,30 +395,27 @@ wxFSFile* wxArchiveFSHandler::OpenFile(
     }
 
     wxArchiveInputStream *s = factory->NewStream(leftStream);
-    if ( !s )
-        return NULL;
-
     s->OpenEntry(*entry);
 
-    if (!s->IsOk())
+    if (s && s->IsOk())
     {
-        delete s;
-        return NULL;
-    }
-
-#if WXWIN_COMPATIBILITY_2_6 && wxUSE_ZIPSTREAM
-    if (factory->IsKindOf(CLASSINFO(wxZipClassFactory)))
-        ((wxZipInputStream*)s)->m_allowSeeking = true;
+#if WXWIN_COMPATIBILITY_2_6
+        if (factory->IsKindOf(CLASSINFO(wxZipClassFactory)))
+            ((wxZipInputStream*)s)->m_allowSeeking = true;
 #endif // WXWIN_COMPATIBILITY_2_6
 
-    return new wxFSFile(s,
-                        key + right,
-                        wxEmptyString,
-                        GetAnchor(location)
+        return new wxFSFile(s,
+                            key + right,
+                            GetMimeTypeFromExt(location),
+                            GetAnchor(location)
 #if wxUSE_DATETIME
-                        , entry->GetDateTime()
+                            , entry->GetDateTime()
 #endif // wxUSE_DATETIME
-                        );
+                            );
+    }
+
+    delete s;
+    return NULL;
 }
 
 wxString wxArchiveFSHandler::FindFirst(const wxString& spec, int flags)

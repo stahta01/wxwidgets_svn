@@ -18,7 +18,7 @@
 
 #include "wx/dynarray.h"
 
-class WXDLLIMPEXP_FWD_CORE wxSpinCtrl;
+class WXDLLEXPORT wxSpinCtrl;
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxSpinCtrl *, wxArraySpins);
 
 // ----------------------------------------------------------------------------
@@ -92,7 +92,6 @@ protected:
     virtual void DoMoveWindow(int x, int y, int width, int height);
     virtual wxSize DoGetBestSize() const;
     virtual void DoGetSize(int *width, int *height) const;
-    virtual void DoGetClientSize(int *x, int *y) const;
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip( wxToolTip *tip );
 #endif // wxUSE_TOOLTIPS

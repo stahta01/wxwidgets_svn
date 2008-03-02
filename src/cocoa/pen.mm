@@ -17,8 +17,6 @@
     #include "wx/colour.h"
 #endif //WX_PRECOMP
 
-#include "wx/cocoa/ObjcRef.h"
-
 #import <AppKit/NSColor.h>
 
 // ========================================================================
@@ -26,6 +24,7 @@
 // ========================================================================
 class WXDLLEXPORT wxPenRefData: public wxGDIRefData
 {
+    friend class WXDLLEXPORT wxPen;
 public:
     wxPenRefData(const wxColour& colour = wxNullColour,
         int width = 1, int style = wxSOLID,
@@ -80,9 +79,6 @@ protected:
     static const CGFloat scm_patternShortDash[];
     static const int scm_countDotDash;
     static const CGFloat scm_patternDotDash[];
-
-    friend class WXDLLIMPEXP_FWD_CORE wxPen;
-
 private:
     // Don't allow assignment
     wxPenRefData& operator=(const wxPenRefData& data);
@@ -135,13 +131,13 @@ inline wxPenRefData::wxPenRefData(const wxPenRefData& data)
     m_nbDash = data.m_nbDash;
     m_dash = data.m_dash;
     m_stipple = data.m_stipple;
-    m_cocoaNSColor = wxGCSafeRetain(data.m_cocoaNSColor);
+    m_cocoaNSColor = [data.m_cocoaNSColor retain];
     m_cocoaDash = NULL;
 }
 
 inline void wxPenRefData::FreeCocoaNSColor()
 {
-    wxGCSafeRelease(m_cocoaNSColor);
+    [m_cocoaNSColor release];
     m_cocoaNSColor = nil;
 }
 
@@ -158,7 +154,7 @@ inline WX_NSColor wxPenRefData::GetNSColor()
         switch( m_style )
         {
         case wxTRANSPARENT:
-            m_cocoaNSColor = wxGCSafeRetain([NSColor clearColor]);
+            m_cocoaNSColor = [[NSColor clearColor] retain];
             break;
         case wxSTIPPLE:
 //  wxBitmap isn't implemented yet
@@ -183,7 +179,6 @@ inline WX_NSColor wxPenRefData::GetNSColor()
             if(!colour_NSColor)
                 colour_NSColor = [NSColor clearColor];
             m_cocoaNSColor = [colour_NSColor copyWithZone:nil];
-            [wxGCSafeRetain(m_cocoaNSColor) release]; // retain in GC. no change in RR.
             break;
         }
     }
@@ -269,12 +264,12 @@ wxPen::wxPen(const wxBitmap& stipple, int width)
     m_refData = new wxPenRefData(wxNullColour,width,wxSTIPPLE,stipple);
 }
 
-wxGDIRefData *wxPen::CreateGDIRefData() const
+wxObjectRefData *wxPen::CreateRefData() const
 {
     return new wxPenRefData;
 }
 
-wxGDIRefData *wxPen::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxPen::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxPenRefData(*(wxPenRefData *)data);
 }

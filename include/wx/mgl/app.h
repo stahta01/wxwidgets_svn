@@ -18,9 +18,9 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxApp;
-class WXDLLIMPEXP_FWD_BASE wxLog;
-class WXDLLIMPEXP_FWD_CORE wxEventLoop;
+class WXDLLEXPORT wxApp;
+class WXDLLEXPORT wxLog;
+class WXDLLEXPORT wxEventLoop;
 
 //-----------------------------------------------------------------------------
 // wxApp
@@ -51,6 +51,7 @@ public:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxApp)
+    DECLARE_EVENT_TABLE()
 
     wxVideoMode m_displayMode;
 };

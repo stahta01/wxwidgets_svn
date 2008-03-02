@@ -104,24 +104,6 @@ Pass the id of the tool.}
 for a range of ids. Pass the ids of the tools.}
 \twocolitem{{\bf EVT\_TOOL\_ENTER(id, func)}}{Process a wxEVT\_COMMAND\_TOOL\_ENTER event.
 Pass the id of the toolbar itself. The value of wxCommandEvent::GetSelection is the tool id, or -1 if the mouse cursor has moved off a tool.}
-\twocolitem{{\bf EVT\_TOOL\_DROPDOWN(id, func)}}{Process a wxEVT\_COMMAND\_TOOL\_DROPDOWN\_CLICKED event. If unhandled, displays the default dropdown menu set using \helpref{wxToolBar::SetDropdownMenu}{wxtoolbarsetdropdownmenu}.}
-\end{twocollist}
-
-\wxheading{wxItemKind}
-
-There are several different types of tools you can add to a toolbar. These
-types are controlled by the wxItemKind enumeration which has the following
-values:
-\twocolwidtha{5cm}
-\begin{twocollist}\itemsep=0pt
-\twocolitem{{\bf wxITEM\_NORMAL}}{Normal tool button}
-\twocolitem{{\bf wxITEM\_CHECK}}{Check (or toggle) tool button.}
-\twocolitem{{\bf wxITEM\_NORMAL}}{Radio tool button. See \helpref{wxToolBar::AddRadioTool}{wxtoolbaraddradiotool} for details}
-\twocolitem{{\bf wxITEM\_DROPDOWN}}{Normal tool button with a dropdown arrow
-next to it. Clicking the dropdown arrow sends a wxEVT\_COMMAND\_TOOL\_DROPDOWN\_CLICKED
-event and may also display the menu previously associated with the item with 
-\helpref{wxToolBar::SetDropdownMenu}{wxtoolbarsetdropdownmenu}. Currently this
-type of tools is supported under MSW and GTK.}
 \end{twocollist}
 
 \wxheading{See also}
@@ -141,7 +123,7 @@ Default constructor.
 \func{}{wxToolBar}{\param{wxWindow*}{ parent}, \param{wxWindowID }{id},
  \param{const wxPoint\& }{pos = wxDefaultPosition},
  \param{const wxSize\& }{size = wxDefaultSize},
- \param{long }{style = wxTB\_HORIZONTAL \pipe wxBORDER\_NONE},
+ \param{long }{style = wxTB\_HORIZONTAL \pipe wxNO\_BORDER},
  \param{const wxString\& }{name = wxPanelNameStr}}
 
 Constructs a toolbar.
@@ -183,19 +165,11 @@ Toolbar destructor.
 
 \membersection{wxToolBar::AddControl}\label{wxtoolbaraddcontrol}
 
-\func{bool}{AddControl}{\param{wxControl*}{ control}, \param{const wxString&}{ label = ""}}
+\func{bool}{AddControl}{\param{wxControl*}{ control}}
 
 Adds any control to the toolbar, typically e.g. a combobox.
 
 \docparam{control}{The control to be added.}
-
-\docparam{label}{Text to be displayed near the control.}
-
-\wxheading{Remarks}
-
-wxMSW: the label is only displayed if there is enough space available below the embedded control.
-
-wxMac: labels are only displayed if wxWidgets is built with wxMAC\_USE\_NATIVE\_TOOLBAR set to 1
 
 
 \membersection{wxToolBar::AddSeparator}\label{wxtoolbaraddseparator}
@@ -350,7 +324,7 @@ deletes the tool at the specified position and not the one with the given id.
 
 \membersection{wxToolBar::EnableTool}\label{wxtoolbarenabletool}
 
-\func{void}{EnableTool}{\param{int }{toolId}, \param{bool}{ enable}}
+\func{void}{EnableTool}{\param{int }{toolId}, \param{const bool}{ enable}}
 
 Enables or disables the tool.
 
@@ -756,17 +730,6 @@ default (zero-size) margins are to be overridden.
 \helpref{wxToolBar::GetMargins}{wxtoolbargetmargins}, \helpref{wxSize}{wxsize}
 
 
-\membersection{wxToolBar::SetDropdownMenu}\label{wxtoolbarsetdropdownmenu}
-
-\func{bool}{SetDropdownMenu}{\param{int }{id}, \param{wxMenu* }{menu}}
-
-Sets the dropdown menu for the tool given by its \arg{id}. The tool itself will
-delete the menu when it's no longer needed.
-
-If you define a EVT\_TOOL\_DROPDOWN handler in your program, you must call 
-\helpref{wxEvent::Skip()}{wxeventskip} from it or the menu won't be displayed.
-
-
 \membersection{wxToolBar::SetToolBitmapSize}\label{wxtoolbarsettoolbitmapsize}
 
 \func{void}{SetToolBitmapSize}{\param{const wxSize\&}{ size}}
@@ -898,7 +861,7 @@ Sets the default separator size. The default value is 5.
 
 \membersection{wxToolBar::ToggleTool}\label{wxtoolbartoggletool}
 
-\func{void}{ToggleTool}{\param{int }{toolId}, \param{bool}{ toggle}}
+\func{void}{ToggleTool}{\param{int }{toolId}, \param{const bool}{ toggle}}
 
 Toggles a tool on or off. This does not cause any event to get emitted.
 

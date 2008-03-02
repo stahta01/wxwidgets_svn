@@ -21,7 +21,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_TASKBARICON
+#ifdef wxHAS_TASK_BAR_ICON
 
 #include "wx/taskbar.h"
 
@@ -124,7 +124,7 @@ BEGIN_EVENT_TABLE(wxTaskBarIconArea, wxTaskBarIconAreaBase)
 END_EVENT_TABLE()
 
 wxTaskBarIconArea::wxTaskBarIconArea(wxTaskBarIcon *icon, const wxBitmap &bmp)
-    : wxTaskBarIconAreaBase(), m_icon(icon), m_bmp(bmp)
+    : wxTaskBarIconAreaBase(), m_icon(icon), m_pos(0,0)
 {
 #if defined(__WXGTK20__) && defined(TASKBAR_ICON_AREA_BASE_INCLUDED)
     m_invokingWindow = icon;
@@ -328,4 +328,4 @@ bool wxTaskBarIcon::PopupMenu(wxMenu *menu)
     return true;
 }
 
-#endif // wxUSE_TASKBARICON
+#endif // wxHAS_TASK_BAR_ICON

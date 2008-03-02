@@ -8,11 +8,10 @@ resource as only one thread at a time can own a mutex object.
 Mutexes may be recursive in the sense that a thread can lock a mutex which it
 had already locked before (instead of dead locking the entire process in this
 situation by starting to wait on a mutex which will never be released while the
-thread is waiting) but using them is not recommended under Unix and they are 
-{\bf not} recursive there by default. The reason for this is that recursive
-mutexes are not supported by all Unix flavours and, worse, they cannot be used
-with \helpref{wxCondition}{wxcondition}. On the other hand, Win32 mutexes are
-always recursive.
+thread is waiting) but using them is not recommended and they are {\bf not}
+recursive by default. The reason for this is that recursive mutexes are not
+supported by all Unix flavours and, worse, they cannot be used with 
+\helpref{wxCondition}{wxcondition}.
 
 For example, when several threads use the data stored in the linked list,
 modifications to the list should only be allowed to one thread at a time
@@ -42,7 +41,7 @@ because during a new node addition the list integrity is temporarily broken
         s_mutexProtectingTheGlobalList->Unlock();
     }
 
-    // return true if the given number is greater than all array elements
+    // return true the given number is greater than all array elements
     bool MyThread::IsGreater(int num)
     {
         // before using the list we must acquire the mutex
@@ -87,10 +86,6 @@ None.
 
 <wx/thread.h>
 
-\wxheading{Library}
-
-\helpref{wxBase}{librarieslist}
-
 \wxheading{See also}
 
 \helpref{wxThread}{wxthread}, \helpref{wxCondition}{wxcondition}, 
@@ -98,13 +93,11 @@ None.
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
-
 \membersection{wxMutex::wxMutex}\label{wxmutexctor}
 
 \func{}{wxMutex}{\param{wxMutexType }{type = {\tt wxMUTEX\_DEFAULT}}}
 
 Default constructor.
-
 
 \membersection{wxMutex::\destruct{wxMutex}}\label{wxmutexdtor}
 
@@ -112,13 +105,11 @@ Default constructor.
 
 Destroys the wxMutex object.
 
-
 \membersection{wxMutex::Lock}\label{wxmutexlock}
 
 \func{wxMutexError}{Lock}{\void}
 
-Locks the mutex object. This is equivalent to 
-\helpref{LockTimeout}{wxmutexlocktimeout} with infinite timeout.
+Locks the mutex object.
 
 \wxheading{Return value}
 
@@ -129,25 +120,6 @@ One of:
 \twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{There was no error.}
 \twocolitem{{\bf wxMUTEX\_DEAD\_LOCK}}{A deadlock situation was detected.}
 \end{twocollist}
-
-
-\membersection{wxMutex::LockTimeout}\label{wxmutexlocktimeout}
-
-\func{wxMutexError}{LockTimeout}{\param{unsigned long}{ msec}}
-
-Try to lock the mutex object during the specified time interval.
-
-\wxheading{Return value}
-
-One of:
-
-\twocolwidtha{7cm}
-\begin{twocollist}\itemsep=0pt
-\twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{Mutex successfully locked.}
-\twocolitem{{\bf wxMUTEX\_TIMEOUT}}{Mutex couldn't be acquired before timeout expiration.}
-\twocolitem{{\bf wxMUTEX\_DEAD\_LOCK}}{A deadlock situation was detected.}
-\end{twocollist}
-
 
 \membersection{wxMutex::TryLock}\label{wxmutextrylock}
 
@@ -164,7 +136,6 @@ One of:
 \twocolitem{{\bf wxMUTEX\_NO\_ERROR}}{There was no error.}
 \twocolitem{{\bf wxMUTEX\_BUSY}}{The mutex is already locked by another thread.}
 \end{twocollist}
-
 
 \membersection{wxMutex::Unlock}\label{wxmutexunlock}
 

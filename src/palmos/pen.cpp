@@ -80,6 +80,10 @@ bool wxPen::IsFree() const
     return false;
 }
 
+void wxPen::Unshare()
+{
+}
+
 void wxPen::SetColour(const wxColour& col)
 {
 }
@@ -111,14 +115,3 @@ void wxPen::SetJoin(int Join)
 void wxPen::SetCap(int Cap)
 {
 }
-
-wxGDIRefData *wxPen::CreateGDIRefData() const
-{
-    return new wxPenRefData();
-}
-
-wxGDIRefData *wxPen::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxPenRefData(*wx_static_cast(const wxPenRefData *, data));
-}
-

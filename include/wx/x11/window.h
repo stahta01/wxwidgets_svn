@@ -20,8 +20,8 @@
 
 class WXDLLIMPEXP_CORE wxWindowX11 : public wxWindowBase
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxDC;
-    friend class WXDLLIMPEXP_FWD_CORE wxWindowDC;
+    friend class WXDLLEXPORT wxDC;
+    friend class WXDLLEXPORT wxWindowDC;
 
 public:
     wxWindowX11() { Init(); }
@@ -80,6 +80,10 @@ public:
 
     virtual void ScrollWindow( int dx, int dy,
         const wxRect* rect = (wxRect *) NULL );
+
+    virtual void DoSetSizeHints(int minW, int minH,
+        int maxW = wxDefaultCoord, int maxH = wxDefaultCoord,
+        int incW = wxDefaultCoord, int incH = wxDefaultCoord);
 
 #if wxUSE_DRAG_AND_DROP
     virtual void SetDropTarget( wxDropTarget *dropTarget );
@@ -175,9 +179,6 @@ protected:
         int sizeFlags = wxSIZE_AUTO);
     virtual void DoSetClientSize(int width, int height);
     virtual void DoMoveWindow(int x, int y, int width, int height);
-    virtual void DoSetSizeHints(int minW, int minH,
-        int maxW, int maxH,
-        int incW, int incH);
     virtual void DoCaptureMouse();
     virtual void DoReleaseMouse();
 

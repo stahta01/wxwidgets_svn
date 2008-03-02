@@ -264,7 +264,16 @@ void HashesTestCase::wxUntypedHashTableDeleteContents()
     CPPUNIT_ASSERT( FooObject::count == 0 );
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+WX_DECLARE_LIST(Foo, wxListFoos);
+#endif
+
 WX_DECLARE_HASH(Foo, wxListFoos, wxHashFoos);
+
+#if WXWIN_COMPATIBILITY_2_4
+#include "wx/listimpl.cpp"
+WX_DEFINE_LIST(wxListFoos)
+#endif
 
 void HashesTestCase::wxTypedHashTableTest()
 {
@@ -472,12 +481,6 @@ void HashesTestCase::UShortHashMapTest() { HashMapTest<myTestHashMap4>();    }
 void HashesTestCase::LLongHashMapTest()  { HashMapTest<myLLongHashMap>();    }
 void HashesTestCase::ULLongHashMapTest() { HashMapTest<myULLongHashMap>();   }
 #endif
-
-#ifdef __VISUALC__
-    #if __VISUALC__ <= 1200
-        #pragma warning(disable:4284) // operator->() returns a non-UDT
-    #endif
-#endif // __VISUALC__
 
 // test compilation of basic set types
 WX_DECLARE_HASH_SET( int*, wxPointerHash, wxPointerEqual, myPtrHashSet );

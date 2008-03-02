@@ -26,7 +26,7 @@
 // wxBrush
 //-----------------------------------------------------------------------------
 
-class wxBrushRefData : public wxGDIRefData
+class wxBrushRefData: public wxObjectRefData
 {
 public:
     wxBrushRefData(const wxColour& clr = wxNullColour, int style = wxSOLID)
@@ -41,13 +41,11 @@ public:
         m_style = data.m_style;
     }
 
-    virtual bool IsOk() const { return m_colour.IsOk(); }
-
     void SetStyle(int style)
     {
         if ( style != wxSOLID && style != wxTRANSPARENT )
         {
-            wxFAIL_MSG( wxT("only wxSOLID and wxTRANSPARENT styles are supported") );
+            wxFAIL_MSG( _T("only wxSOLID and wxTRANSPARENT styles are supported") );
             style = wxSOLID;
         }
 
@@ -71,7 +69,7 @@ wxBrush::wxBrush(const wxColour &colour, int style)
 
 wxBrush::wxBrush(const wxBitmap &stippleBitmap)
 {
-    wxFAIL_MSG( wxT("brushes with stipple bitmaps not implemented") );
+    wxFAIL_MSG( "brushes with stipple bitmaps not implemented" );
 
     m_refData = new wxBrushRefData(*wxBLACK);
 }
@@ -80,6 +78,11 @@ bool wxBrush::operator==(const wxBrush& brush) const
 {
 #warning "this is incorrect (MGL too)"
     return m_refData == brush.m_refData;
+}
+
+bool wxBrush::IsOk() const
+{
+    return ((m_refData) && M_BRUSHDATA->m_colour.Ok());
 }
 
 int wxBrush::GetStyle() const
@@ -106,7 +109,7 @@ wxColour& wxBrush::GetColour() const
 
 wxBitmap *wxBrush::GetStipple() const
 {
-    wxFAIL_MSG( wxT("brushes with stipple bitmaps not implemented") );
+    wxFAIL_MSG( "brushes with stipple bitmaps not implemented" );
     return &wxNullBitmap;
 }
 
@@ -130,15 +133,15 @@ void wxBrush::SetStyle(int style)
 
 void wxBrush::SetStipple(const wxBitmap& WXUNUSED(stipple))
 {
-    wxFAIL_MSG( wxT("brushes with stipple bitmaps not implemented") );
+    wxFAIL_MSG( "brushes with stipple bitmaps not implemented" );
 }
 
-wxGDIRefData *wxBrush::CreateGDIRefData() const
+wxObjectRefData *wxBrush::CreateRefData() const
 {
     return new wxBrushRefData;
 }
 
-wxGDIRefData *wxBrush::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBrush::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBrushRefData(*(wxBrushRefData *)data);
 }

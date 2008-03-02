@@ -113,7 +113,7 @@ public:
 
         wxPoint yearPosition = yearControl->GetPosition();
 
-        SetFormat("%x");
+        SetFormat(wxT("%x"));
 
         width = yearPosition.x + yearSize.x+2+CALBORDER/2;
         if (width < calSize.x-4)
@@ -167,7 +167,12 @@ public:
             m_combo->SetText(wxEmptyString);
         }
 
-        SetDate(date);
+        m_currentDate = date;
+    }
+
+    const wxDateTime& GetDateValue() const
+    {
+        return m_currentDate;
     }
 
     bool ParseDateTime(const wxString& s, wxDateTime* pDt)
@@ -176,7 +181,7 @@ public:
 
         if ( !s.empty() )
         {
-            pDt->ParseFormat(s.c_str(), m_format);
+            pDt->ParseFormat(s, m_format);
             if ( !pDt->IsValid() )
                 return false;
         }
@@ -212,37 +217,39 @@ private:
 
     void OnSelChange(wxCalendarEvent &ev)
     {
-        m_combo->SetText(GetDate().Format(m_format));
+        m_currentDate = wxCalendarCtrl::GetDate();
+        m_combo->SetText(m_currentDate.Format(m_format));
 
         if ( ev.GetEventType() == wxEVT_CALENDAR_DOUBLECLICKED )
         {
             Dismiss();
         }
 
-        SendDateEvent(GetDate());
+        SendDateEvent(m_currentDate);
     }
 
     void OnKillTextFocus(wxFocusEvent &ev)
     {
         ev.Skip();
 
-        const wxDateTime& dtOld = GetDate();
-
         wxDateTime dt;
         wxString value = m_combo->GetValue();
         if ( !ParseDateTime(value, &dt) )
         {
             if ( !HasDPFlag(wxDP_ALLOWNONE) )
-                dt = dtOld;
+                dt = m_currentDate;
         }
 
-        m_combo->SetText(GetStringValueFor(dt));
+        if ( dt.IsValid() )
+            m_combo->SetText(dt.Format(m_format));
+        else
+            m_combo->SetText(wxEmptyString);
 
         // notify that we had to change the date after validation
-        if ( (dt.IsValid() && (!dtOld.IsValid() || dt != dtOld)) ||
-                (!dt.IsValid() && dtOld.IsValid()) )
+        if ( (dt.IsValid() && (!m_currentDate.IsValid() || m_currentDate != dt)) ||
+                (!dt.IsValid() && m_currentDate.IsValid()) )
         {
-            SetDate(dt);
+            m_currentDate = dt;
             SendDateEvent(dt);
         }
     }
@@ -252,7 +259,7 @@ private:
         return m_combo->GetParent()->HasFlag(flag);
     }
 
-    bool SetFormat(const wxString& fmt)
+    bool SetFormat(const wxChar *fmt)
     {
         m_format.clear();
 
@@ -312,8 +319,8 @@ private:
             m_combo->SetValidator(tv);
     #endif
 
-            if ( GetDate().IsValid() )
-                m_combo->SetText(GetDate().Format(m_format));
+            if (m_currentDate.IsValid())
+                m_combo->SetText(m_currentDate.Format(m_format));
         }
 
         return true;
@@ -323,31 +330,24 @@ private:
     {
         wxDateTime dt;
         if ( ParseDateTime(s, &dt) )
-            SetDate(dt);
+            m_currentDate = dt;
         else if ( HasDPFlag(wxDP_ALLOWNONE) )
-            SetDate(wxInvalidDateTime);
-        //else: !wxDP_ALLOWNONE, keep the old value
+            m_currentDate = dt;
     }
 
     virtual wxString GetStringValue() const
     {
-        return GetStringValueFor(GetDate());
+        if ( !m_currentDate.IsValid() ) 
+            return wxEmptyString;
+
+        return m_currentDate.Format(m_format);
     }
 
 private:
-    // returns either the given date representation using the current format or
-    // an empty string if it's invalid
-    wxString GetStringValueFor(const wxDateTime& dt) const
-    {
-        wxString val;
-        if ( dt.IsValid() )
-            val = dt.Format(m_format);
-
-        return val;
-    }
 
     wxSize          m_useSize;
     wxString        m_format;
+    wxDateTime      m_currentDate;
 
     DECLARE_EVENT_TABLE()
 };
@@ -415,6 +415,8 @@ bool wxDatePickerCtrlGeneric::Create(wxWindow *parent,
 #endif
     m_combo->SetPopupControl(m_popup);
 
+    m_cal = m_popup;
+
     m_popup->SetDateValue(date.IsValid() ? date : wxDateTime::Today());
 
     SetInitialSize(size);
@@ -426,6 +428,7 @@ bool wxDatePickerCtrlGeneric::Create(wxWindow *parent,
 void wxDatePickerCtrlGeneric::Init()
 {
     m_combo = NULL;
+    m_cal = NULL;
     m_popup = NULL;
 }
 
@@ -439,6 +442,7 @@ bool wxDatePickerCtrlGeneric::Destroy()
         m_combo->Destroy();
 
     m_combo = NULL;
+    m_cal = NULL;
     m_popup = NULL;
 
     return wxControl::Destroy();
@@ -461,13 +465,13 @@ bool
 wxDatePickerCtrlGeneric::SetDateRange(const wxDateTime& lowerdate,
                                       const wxDateTime& upperdate)
 {
-    return m_popup->SetDateRange(lowerdate, upperdate);
+    return m_cal->SetDateRange(lowerdate, upperdate);
 }
 
 
 wxDateTime wxDatePickerCtrlGeneric::GetValue() const
 {
-    return m_popup->GetDate();
+    return m_popup->GetDateValue();
 }
 
 
@@ -480,9 +484,9 @@ void wxDatePickerCtrlGeneric::SetValue(const wxDateTime& date)
 bool wxDatePickerCtrlGeneric::GetRange(wxDateTime *dt1, wxDateTime *dt2) const
 {
     if (dt1)
-        *dt1 = m_popup->GetLowerDateLimit();
+        *dt1 = m_cal->GetLowerDateLimit();
     if (dt2)
-        *dt2 = m_popup->GetUpperDateLimit();
+        *dt2 = m_cal->GetUpperDateLimit();
     return true;
 }
 
@@ -490,12 +494,7 @@ bool wxDatePickerCtrlGeneric::GetRange(wxDateTime *dt1, wxDateTime *dt2) const
 void
 wxDatePickerCtrlGeneric::SetRange(const wxDateTime &dt1, const wxDateTime &dt2)
 {
-    m_popup->SetDateRange(dt1, dt2);
-}
-
-wxCalendarCtrl *wxDatePickerCtrlGeneric::GetCalendar() const
-{
-    return m_popup;
+    m_cal->SetDateRange(dt1, dt2);
 }
 
 // ----------------------------------------------------------------------------
@@ -516,7 +515,7 @@ void wxDatePickerCtrlGeneric::OnText(wxCommandEvent &ev)
 {
     ev.SetEventObject(this);
     ev.SetId(GetId());
-    GetParent()->GetEventHandler()->ProcessEvent(ev);
+    GetParent()->ProcessEvent(ev);
 
     // We'll create an additional event if the date is valid.
     // If the date isn't valid, the user's probably in the middle of typing

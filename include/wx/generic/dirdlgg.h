@@ -15,13 +15,13 @@
 #ifndef _WX_DIRDLGG_H_
 #define _WX_DIRDLGG_H_
 
-class WXDLLIMPEXP_FWD_CORE wxGenericDirCtrl;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
-class WXDLLIMPEXP_FWD_CORE wxTreeEvent;
+class WXDLLEXPORT wxGenericDirCtrl;
+class WXDLLEXPORT wxTextCtrl;
+class WXDLLEXPORT wxTreeEvent;
 
 // we may be included directly as well as from wx/dirdlg.h (FIXME)
-extern WXDLLEXPORT_DATA(const char) wxDirDialogNameStr[];
-extern WXDLLEXPORT_DATA(const char) wxDirSelectorPromptStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxDirDialogNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxDirSelectorPromptStr[];
 
 #ifndef wxDD_DEFAULT_STYLE
 #ifdef __WXWINCE__

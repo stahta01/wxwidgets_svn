@@ -26,7 +26,6 @@
 #include "wx/artprov.h"
 #include "wx/colour.h"
 #include "wx/animate.h"
-#include "wx/vector.h"
 
 #include "wx/xml/xml.h"
 
@@ -40,9 +39,9 @@ class WXDLLIMPEXP_FWD_CORE wxToolBar;
 
 class WXDLLIMPEXP_FWD_XRC wxXmlResourceHandler;
 class WXDLLIMPEXP_FWD_XRC wxXmlSubclassFactory;
-class wxXmlSubclassFactories;
+class WXDLLIMPEXP_FWD_XRC wxXmlSubclassFactoriesList;
 class wxXmlResourceModule;
-class wxXmlResourceDataRecords;
+
 
 // These macros indicate current version of XML resources (this information is
 // encoded in root node of XRC file as "version" property).
@@ -68,6 +67,28 @@ class wxXmlResourceDataRecords;
                  WX_XMLRES_CURRENT_VERSION_RELEASE * 256 + \
                  WX_XMLRES_CURRENT_VERSION_REVISION)
 
+class WXDLLIMPEXP_XRC wxXmlResourceDataRecord
+{
+public:
+    wxXmlResourceDataRecord() : Doc(NULL) {
+#if wxUSE_DATETIME
+        Time = wxDateTime::Now();
+#endif
+    }
+    ~wxXmlResourceDataRecord() {delete Doc;}
+
+    wxString File;
+    wxXmlDocument *Doc;
+#if wxUSE_DATETIME
+    wxDateTime Time;
+#endif
+};
+
+
+WX_DECLARE_USER_EXPORTED_OBJARRAY(wxXmlResourceDataRecord,
+                                  wxXmlResourceDataRecords,
+                                  WXDLLIMPEXP_XRC);
+
 enum wxXmlResourceFlags
 {
     wxXRC_USE_LOCALE     = 1,
@@ -92,7 +113,7 @@ public:
     //              don't check the modification time of the XRC files and
     //              reload them if they have changed on disk
     wxXmlResource(int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain = wxEmptyString);
+                  const wxString& domain=wxEmptyString);
 
     // Constructor.
     // Flags: wxXRC_USE_LOCALE
@@ -102,13 +123,13 @@ public:
     //              subclass property of object nodes will be ignored
     //              (useful for previews in XRC editors)
     wxXmlResource(const wxString& filemask, int flags = wxXRC_USE_LOCALE,
-                  const wxString& domain = wxEmptyString);
+                  const wxString& domain=wxEmptyString);
 
     // Destructor.
     virtual ~wxXmlResource();
 
     wxXmlNode *GetFirstRoot();
-
+    
     // Loads resources from XML files that match given filemask.
     // This method understands VFS (see filesys.h).
     bool Load(const wxString& filemask);
@@ -204,11 +225,7 @@ public:
     // with a number. If value_if_not_found == wxID_NONE, the number is obtained via
     // wxWindow::NewControlId(). Otherwise value_if_not_found is used.
     // Macro XRCID(name) is provided for convenient use in event tables.
-    static int GetXRCID(const wxString& str_id, int value_if_not_found = wxID_NONE)
-        { return DoGetXRCID(str_id.mb_str(), value_if_not_found); }
-
-    // version for internal use only
-    static int DoGetXRCID(const char *str_id, int value_if_not_found = wxID_NONE);
+    static int GetXRCID(const wxChar *str_id, int value_if_not_found = wxID_NONE);
 
     // Returns version information (a.b.c.d = d+ 256*c + 256^2*b + 256^3*a).
     long GetVersion() const { return m_version; }
@@ -232,11 +249,10 @@ public:
     // Set flags after construction.
     void SetFlags(int flags) { m_flags = flags; }
 
-    // Get/Set the domain to be passed to the translation functions, defaults
-    // to empty string (no domain).
-    const wxString& GetDomain() const { return m_domain; }
-    void SetDomain(const wxString& domain);
-
+    // Get/Set the domain to be passed to the translation functions, defaults to NULL.
+    wxChar* GetDomain() const { return m_domain; }
+    void SetDomain(const wxChar* domain);
+    
 protected:
     // Scans the resources list for unloaded files and loads them. Also reloads
     // files that have been modified since last loading.
@@ -266,27 +282,23 @@ protected:
 #endif // wxUSE_FILESYSTEM
 
 private:
-    wxXmlResourceDataRecords& Data() { return *m_data; }
-    const wxXmlResourceDataRecords& Data() const { return *m_data; }
-
-private:
     long m_version;
 
     int m_flags;
-    wxVector<wxXmlResourceHandler*> m_handlers;
-    wxXmlResourceDataRecords *m_data;
+    wxList m_handlers;
+    wxXmlResourceDataRecords m_data;
 #if wxUSE_FILESYSTEM
     wxFileSystem m_curFileSystem;
     wxFileSystem& GetCurFileSystem() { return m_curFileSystem; }
 #endif
 
     // domain to pass to translation functions, if any.
-    wxString m_domain;
-
+    wxChar* m_domain;
+    
     friend class wxXmlResourceHandler;
     friend class wxXmlResourceModule;
 
-    static wxXmlSubclassFactories *ms_subclassFactories;
+    static wxXmlSubclassFactoriesList *ms_subclassFactories;
 
     // singleton instance:
     static wxXmlResource *ms_instance;
@@ -305,7 +317,7 @@ private:
 //    END_EVENT_TABLE()
 
 #define XRCID(str_id) \
-    wxXmlResource::DoGetXRCID(str_id)
+    wxXmlResource::GetXRCID(wxT(str_id))
 
 
 // This macro returns pointer to particular control in dialog
@@ -318,18 +330,6 @@ private:
 
 #define XRCCTRL(window, id, type) \
     (wxStaticCast((window).FindWindow(XRCID(id)), type))
-
-// This macro returns pointer to sizer item
-// Example:
-//
-// <object class="spacer" name="area">
-//   <size>400, 300</size>
-// </object>
-//
-// wxSizerItem* item = XRCSIZERITEM(*this, "area")
-
-#define XRCSIZERITEM(window, id) \
-    ((window).GetSizer() ? (window).GetSizer()->GetItemById(XRCID(id)) : NULL)
 
 // wxXmlResourceHandler is an abstract base class for resource handlers
 // capable of creating a control from an XML node.
@@ -517,6 +517,13 @@ public:
    Backward compatibility macros. Do *NOT* use, they may disappear in future
    versions of the XRC library!
    ------------------------------------------------------------------------- */
+#if WXWIN_COMPATIBILITY_2_4
+    #define ADD_STYLE         XRC_ADD_STYLE
+    #define wxTheXmlResource  wxXmlResource::Get()
+    #define XMLID             XRCID
+    #define XMLCTRL           XRCCTRL
+    #define GetXMLID          GetXRCID
+#endif
 
 #endif // wxUSE_XRC
 

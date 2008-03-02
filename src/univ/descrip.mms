@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 4 January 2008                                                      *
+# Date : 22 September 2006                                                   *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -106,8 +106,6 @@ all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS)
 
-$(OBJECTS) : [--.include.wx]setup.h
-
 bmpbuttn.obj : bmpbuttn.cpp
 button.obj : button.cpp
 checkbox.obj : checkbox.cpp
@@ -143,7 +141,7 @@ winuniv.obj : winuniv.cpp
 combobox.obj : combobox.cpp
 ctrlrend.obj : ctrlrend.cpp
 gtk.obj : [.themes]gtk.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/object=gtk.obj [.themes]gtk.cpp
+	cxx $(CXXFLAGS)$(CXX_DEFINE) [.themes]gtk.cpp
 metal.obj : [.themes]metal.cpp
 	cxx $(CXXFLAGS)$(CXX_DEFINE) [.themes]metal.cpp
 radiobox.obj : radiobox.cpp

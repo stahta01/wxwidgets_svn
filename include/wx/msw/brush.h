@@ -16,7 +16,7 @@
 #include "wx/gdiobj.h"
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxBrush;
+class WXDLLEXPORT wxBrush;
 
 // ----------------------------------------------------------------------------
 // wxBrush
@@ -42,15 +42,19 @@ public:
     virtual int GetStyle() const;
     wxBitmap *GetStipple() const;
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_refData != NULL; }
+
     // return the HBRUSH for this brush
     virtual WXHANDLE GetResourceHandle() const;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxBrush)
 };
 
-#endif // _WX_BRUSH_H_
+#endif
+    // _WX_BRUSH_H_

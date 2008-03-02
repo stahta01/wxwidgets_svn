@@ -19,7 +19,6 @@
     #include "wx/utils.h"
     #include "wx/icon.h"
     #include "wx/gdicmn.h"
-    #include "wx/image.h"
 #endif
 
 #include "wx/x11/private.h"
@@ -32,7 +31,7 @@
 // wxCursor
 //-----------------------------------------------------------------------------
 
-class wxCursorRefData: public wxGDIRefData
+class wxCursorRefData: public wxObjectRefData
 {
 public:
 
@@ -124,17 +123,15 @@ wxCursor::wxCursor( int cursorId )
 #endif
 }
 
-wxCursor::wxCursor(const char WXUNUSED(bits)[],
-                   int WXUNUSED(width), int WXUNUSED(height),
-                   int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY),
-                   const char WXUNUSED(maskBits)[],
-                   wxColour *WXUNUSED(fg), wxColour *WXUNUSED(bg))
+wxCursor::wxCursor(const char bits[], int width, int  height,
+                   int hotSpotX, int hotSpotY,
+                   const char maskBits[], wxColour *fg, wxColour *bg)
 {
    wxFAIL_MSG( wxT("wxCursor creation from bits not yet implemented") );
 }
 
 #if wxUSE_IMAGE
-wxCursor::wxCursor( const wxImage & WXUNUSED(image) )
+wxCursor::wxCursor( const wxImage & image )
 {
    wxFAIL_MSG( wxT("wxCursor creation from wxImage not yet implemented") );
 }
@@ -144,14 +141,9 @@ wxCursor::~wxCursor()
 {
 }
 
-wxGDIRefData *wxCursor::CreateGDIRefData() const
+bool wxCursor::IsOk() const
 {
-    return new wxCursorRefData;
-}
-
-wxGDIRefData *wxCursor::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxCursorRefData(*wx_static_cast(const wxCursorRefData *, data));
+    return (m_refData != NULL);
 }
 
 WXCursor wxCursor::GetCursor() const

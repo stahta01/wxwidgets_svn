@@ -20,7 +20,7 @@
     WX_DEFINE_EXPORTED_ARRAY_PTR(wxAcceleratorEntry *, wxAcceleratorArray);
 #endif // wxUSE_ACCEL
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
+class WXDLLEXPORT wxFrame;
 
 void wxSetShortCutKey(wxChar* zText);
 
@@ -226,10 +226,10 @@ public:
     virtual void        EnableTop( size_t nPos
                                   ,bool   bFlag
                                  );
-    virtual void        SetMenuLabel( size_t          nPos
+    virtual void        SetLabelTop( size_t          nPos
                                     ,const wxString& rLabel
                                    );
-    virtual wxString    GetMenuLabel(size_t nPos) const;
+    virtual wxString    GetLabelTop(size_t nPos) const;
 
     //
     // Implementation from now on
@@ -287,6 +287,13 @@ private:
     { wxWindow::Refresh(bErase, pRect); }
 
     DECLARE_DYNAMIC_CLASS(wxMenuBar)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // Gets the original label at the top-level of the menubar
+    wxString GetMenuLabel(size_t pos) const;
+#endif
 };
 
 #endif // _WX_MENU_H_

@@ -16,25 +16,12 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_MSGDLG
-
 #include "wx/msgdlg.h"
-
-// there is no hook support under CE so we can't use the code for message box
-// positioning there
-#ifndef __WXWINCE__
-    #define wxUSE_MSGBOX_HOOK 1
-#else
-    #define wxUSE_MSGBOX_HOOK 0
-#endif
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/utils.h"
     #include "wx/dialog.h"
-    #if wxUSE_MSGBOX_HOOK
-        #include "wx/hashmap.h"
-    #endif
 #endif
 
 #include "wx/msw/private.h"
@@ -46,69 +33,17 @@
 
 IMPLEMENT_CLASS(wxMessageDialog, wxDialog)
 
-#if wxUSE_MSGBOX_HOOK
-
-// there can potentially be one message box per thread so we use a hash map
-// with thread ids as keys and (currently shown) message boxes as values
-//
-// TODO: replace this with wxTLS once it's available
-WX_DECLARE_HASH_MAP(unsigned long, wxMessageDialog *,
-                    wxIntegerHash, wxIntegerEqual,
-                    wxMessageDialogMap);
-
-namespace
+wxMessageDialog::wxMessageDialog(wxWindow *parent,
+                                 const wxString& message,
+                                 const wxString& caption,
+                                 long style,
+                                 const wxPoint& WXUNUSED(pos))
 {
-
-wxMessageDialogMap& HookMap()
-{
-    static wxMessageDialogMap s_Map;
-
-    return s_Map;
+    m_caption = caption;
+    m_message = message;
+    m_parent = parent;
+    SetMessageDialogStyle(style);
 }
-
-} // anonymous namespace
-
-/* static */
-WXLRESULT wxCALLBACK
-wxMessageDialog::HookFunction(int code, WXWPARAM wParam, WXLPARAM lParam)
-{
-    // Find the thread-local instance of wxMessageDialog
-    const DWORD tid = ::GetCurrentThreadId();
-    wxMessageDialogMap::iterator node = HookMap().find(tid);
-    wxCHECK_MSG( node != HookMap().end(), false,
-                    wxT("bogus thread id in wxMessageDialog::Hook") );
-
-    wxMessageDialog *  const wnd = node->second;
-
-    const HHOOK hhook = (HHOOK)wnd->m_hook;
-    const LRESULT rc = ::CallNextHookEx(hhook, code, wParam, lParam);
-
-    if ( code == HC_ACTION && lParam )
-    {
-        const CWPRETSTRUCT * const s = (CWPRETSTRUCT *)lParam;
-
-        if ( s->message == HCBT_ACTIVATE )
-        {
-            // we won't need this hook any longer
-            ::UnhookWindowsHookEx(hhook);
-            wnd->m_hook = NULL;
-            HookMap().erase(tid);
-
-            if ( wnd->GetMessageDialogStyle() & wxCENTER )
-            {
-                wnd->SetHWND(s->hwnd);
-                wnd->Center(); // center on parent
-                wnd->SetHWND(NULL);
-            }
-            //else: default behaviour, center on screen
-        }
-    }
-
-    return rc;
-}
-
-#endif // wxUSE_MSGBOX_HOOK
-
 
 int wxMessageDialog::ShowModal()
 {
@@ -175,7 +110,7 @@ int wxMessageDialog::ShowModal()
     // per MSDN documentation for MessageBox() we can prefix the message with 2
     // right-to-left mark characters to tell the function to use RTL layout
     // (unfortunately this only works in Unicode builds)
-    wxString message = GetFullMessage();
+    wxString message = m_message;
 #if wxUSE_UNICODE
     if ( wxTheApp->GetLayoutDirection() == wxLayout_RightToLeft )
     {
@@ -185,19 +120,8 @@ int wxMessageDialog::ShowModal()
     }
 #endif // wxUSE_UNICODE
 
-#if wxUSE_MSGBOX_HOOK
-    // install the hook if we need to position the dialog in a non-default way
-    if ( wxStyle & wxCENTER )
-    {
-        const DWORD tid = ::GetCurrentThreadId();
-        m_hook = ::SetWindowsHookEx(WH_CALLWNDPROCRET,
-                                    &wxMessageDialog::HookFunction, NULL, tid);
-        HookMap()[tid] = this;
-    }
-#endif // wxUSE_MSGBOX_HOOK
-
     // do show the dialog
-    int msAns = MessageBox(hWnd, message.wx_str(), m_caption.wx_str(), msStyle);
+    int msAns = MessageBox(hWnd, message, m_caption, msStyle);
     int ans;
     switch (msAns)
     {
@@ -220,5 +144,3 @@ int wxMessageDialog::ShowModal()
     }
     return ans;
 }
-
-#endif // wxUSE_MSGDLG

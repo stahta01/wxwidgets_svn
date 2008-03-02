@@ -9,15 +9,14 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_VALTEXT_H_
-#define _WX_VALTEXT_H_
+#ifndef _WX_VALTEXTH__
+#define _WX_VALTEXTH__
 
 #include "wx/defs.h"
 
-#if wxUSE_VALIDATORS && (wxUSE_TEXTCTRL || wxUSE_COMBOBOX)
+#if wxUSE_VALIDATORS && wxUSE_TEXTCTRL
 
-class WXDLLIMPEXP_FWD_CORE wxTextEntry;
-
+#include "wx/textctrl.h"
 #include "wx/validate.h"
 
 #define wxFILTER_NONE           0x0000
@@ -61,7 +60,16 @@ public:
     inline long GetStyle() const { return m_validatorStyle; }
     inline void SetStyle(long style) { m_validatorStyle = style; }
 
-    wxTextEntry *GetTextEntry();
+#if WXWIN_COMPATIBILITY_2_4
+    wxDEPRECATED( void SetIncludeList(const wxStringList& list) );
+    wxDEPRECATED( wxStringList& GetIncludeList() );
+
+    wxDEPRECATED( void SetExcludeList(const wxStringList& list) );
+    wxDEPRECATED( wxStringList& GetExcludeList() );
+
+    wxDEPRECATED( bool IsInCharIncludeList(const wxString& val) );
+    wxDEPRECATED( bool IsNotInCharExcludeList(const wxString& val) );
+#endif
 
     void SetIncludes(const wxArrayString& includes) { m_includes = includes; }
     inline wxArrayString& GetIncludes() { return m_includes; }
@@ -75,13 +83,28 @@ public:
     // Filter keystrokes
     void OnChar(wxKeyEvent& event);
 
+
 DECLARE_EVENT_TABLE()
 
 protected:
     long            m_validatorStyle;
     wxString *      m_stringValue;
+#if WXWIN_COMPATIBILITY_2_4
+    wxStringList    m_includeList;
+    wxStringList    m_excludeList;
+#endif
     wxArrayString   m_includes;
     wxArrayString   m_excludes;
+
+    bool CheckValidator() const
+    {
+        wxCHECK_MSG( m_validatorWindow, false,
+                     _T("No window associated with validator") );
+        wxCHECK_MSG( m_validatorWindow->IsKindOf(CLASSINFO(wxTextCtrl)), false,
+                     _T("wxTextValidator is only for wxTextCtrl's") );
+
+        return true;
+    }
 
 private:
 // Cannot use
@@ -93,6 +116,7 @@ private:
 };
 
 #endif
-  // wxUSE_VALIDATORS && (wxUSE_TEXTCTRL || wxUSE_COMBOBOX)
+  // wxUSE_VALIDATORS && wxUSE_TEXTCTRL
 
-#endif // _WX_VALTEXT_H_
+#endif
+  // _WX_VALTEXTH__

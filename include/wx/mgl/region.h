@@ -44,8 +44,9 @@ public:
     const MGLRegion& GetMGLRegion() const;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     // wxRegionBase pure virtuals
     virtual bool DoIsEqual(const wxRegion& region) const;
@@ -62,7 +63,7 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxRegion);
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIterator;
+    friend class WXDLLEXPORT wxRegionIterator;
 };
 
 

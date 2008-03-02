@@ -26,7 +26,7 @@
 #endif
 #include "wx/arrstr.h"
 
-class WXDLLIMPEXP_FWD_CORE wxTipWindowView;
+class WXDLLEXPORT wxTipWindowView;
 
 // ----------------------------------------------------------------------------
 // wxTipWindow

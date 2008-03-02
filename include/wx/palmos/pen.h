@@ -2,7 +2,7 @@
 // Name:        wx/palmos/pen.h
 // Purpose:     wxPen class
 // Author:      William Osborne - minimal working wxPalmOS port
-// Modified by: Yunhui Fu
+// Modified by:
 // Created:     10/13/04
 // RCS-ID:      $Id$
 // Copyright:   (c) William Osborne
@@ -18,7 +18,7 @@
 
 typedef WXDWORD wxMSWDash;
 
-class WXDLLIMPEXP_FWD_CORE wxPen;
+class WXDLLEXPORT wxPen;
 
 // VZ: this class should be made private
 class WXDLLEXPORT wxPenRefData : public wxGDIRefData
@@ -54,7 +54,7 @@ protected:
     WXHPEN        m_hPen;
 
 private:
-    friend class WXDLLIMPEXP_FWD_CORE wxPen;
+    friend class WXDLLEXPORT wxPen;
 
     // Cannot use
     //  DECLARE_NO_COPY_CLASS(wxPenRefData)
@@ -89,6 +89,9 @@ public:
 
     bool operator!=(const wxPen& pen) const { return !(*this == pen); }
 
+    virtual bool Ok() const { return IsOk(); }
+    virtual bool IsOk() const { return (m_refData != NULL); }
+
     // Override in order to recreate the pen
     void SetColour(const wxColour& col);
     void SetColour(unsigned char r, unsigned char g, unsigned char b);
@@ -120,12 +123,7 @@ public:
     bool FreeResource(bool force = false);
     WXHANDLE GetResourceHandle() const;
     bool IsFree() const;
-
-protected:
-    virtual wxGDIRefData* CreateGDIRefData() const;
-    virtual wxGDIRefData* CloneGDIRefData(const wxGDIRefData* data) const;
-    // same as FreeResource() + RealizeResource()
-    bool Recreate();
+    void Unshare();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxPen)

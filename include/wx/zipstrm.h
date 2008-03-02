@@ -112,8 +112,8 @@ enum wxZipFlags
 
 // Forward decls
 //
-class WXDLLIMPEXP_FWD_BASE wxZipEntry;
-class WXDLLIMPEXP_FWD_BASE wxZipInputStream;
+class WXDLLIMPEXP_BASE wxZipEntry;
+class WXDLLIMPEXP_BASE wxZipInputStream;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -346,7 +346,6 @@ private:
     int m_level;
     wxFileOffset m_offsetAdjustment;
     wxString m_Comment;
-    bool m_endrecWritten;
 
     DECLARE_NO_COPY_CLASS(wxZipOutputStream)
 };

@@ -39,28 +39,13 @@
     #endif
 #endif
 
-// define _WIN32_WINNT and _WIN32_IE to the highest possible values because we
-// always check for the version of installed DLLs at runtime anyway (see
-// wxGetWinVersion() and wxApp::GetComCtl32Version()) unless the user really
-// doesn't want to use APIs only available on later OS versions and had defined
-// them to (presumably lower) values
 #ifndef _WIN32_WINNT
     #define _WIN32_WINNT 0x0600
-#endif
-
-#ifndef _WIN32_IE
-    #define _WIN32_IE 0x0700
 #endif
 
 /* Deal with clash with __WINDOWS__ include guard */
 #if defined(__WXWINCE__) && defined(__WINDOWS__)
 #undef __WINDOWS__
-#endif
-
-// For IPv6 support, we must include winsock2.h before winsock.h, and
-// windows.h include winsock.h so do it before including it
-#if wxUSE_IPV6
-    #include <winsock2.h>
 #endif
 
 #include <windows.h>
@@ -79,7 +64,6 @@
 // overwrite them if there is a chance that they're not defined
 #if !defined(_MSC_VER) || (_MSC_VER < 1300)
     #define UINT_PTR unsigned int
-    #define INT_PTR int
     #define LONG_PTR long
     #define ULONG_PTR unsigned long
     #define DWORD_PTR unsigned long
@@ -112,5 +96,4 @@ WXDLLEXPORT int wxMSLU_GetSaveFileNameW(void *ofn);
 #endif // wxUSE_UNICODE_MSLU
 
 #endif // _WX_WRAPWIN_H_
-
 

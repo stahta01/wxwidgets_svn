@@ -35,7 +35,7 @@ public:
     virtual ~wxMenuItem();
 
     // override base class virtuals
-    virtual void SetItemLabel(const wxString& strName);
+    virtual void SetText(const wxString& strName);
 
     virtual void Enable(bool bDoEnable = true);
     virtual void Check(bool bDoCheck = true);
@@ -48,14 +48,14 @@ public:
     void UpdateItemText() ;
     void UpdateItemStatus() ;
 
+    void DoUpdateItemBitmap( WXHMENU menu, wxUint16 index) ;
+
     // mark item as belonging to the given radio group
     void SetAsRadioGroupStart();
     void SetRadioGroupStart(int start);
     void SetRadioGroupEnd(int end);
 
 private:
-    void DoUpdateItemBitmap( WXHMENU menu, wxUint16 index) ;
-
     void UncheckRadio() ;
 
     // the positions of the first and last items of the radio group this item
@@ -75,6 +75,14 @@ private:
     void* m_menu ; // the appropriate menu , may also be a system menu
 
     DECLARE_DYNAMIC_CLASS(wxMenuItem)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // return the item label including any mnemonics and accelerators.
+    // This used to be called GetText.
+    wxString GetItemLabel() const { return GetText(); }
+#endif
 };
 
 #endif  //_MENUITEM_H

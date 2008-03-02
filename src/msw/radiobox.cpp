@@ -129,7 +129,6 @@ void wxRadioBox::Init()
 {
     m_selectedButton = wxNOT_FOUND;
     m_radioButtons = NULL;
-    m_dummyHwnd = NULL;
     m_radioWidth = NULL;
     m_radioHeight = NULL;
 }
@@ -156,15 +155,7 @@ bool wxRadioBox::Create(wxWindow *parent,
     wxUnusedVar(val);
 #endif // wxUSE_VALIDATORS/!wxUSE_VALIDATORS
 
-    // We need an extra one to keep track of the 'dummy' item we
-    // create to end the radio group, so it will be destroyed and
-    // it's id will be released.  But we want it separate from the
-    // other buttons since the wxSubwindows will operate on it as
-    // well and we just want to ignore it until destroying it.
-    // For instance, we don't want the bounding box of the radio
-    // buttons to include the dummy button
     m_radioButtons = new wxSubwindows(n);
-
     m_radioWidth = new int[n];
     m_radioHeight = new int[n];
 
@@ -176,14 +167,14 @@ bool wxRadioBox::Create(wxWindow *parent,
         if ( i == 0 )
             styleBtn |= WS_GROUP;
 
-        wxWindowIDRef subid = NewControlId();
+        long newId = NewControlId();
 
         HWND hwndBtn = ::CreateWindow(_T("BUTTON"),
-                                      choices[i].wx_str(),
+                                      choices[i],
                                       styleBtn,
                                       0, 0, 0, 0,   // will be set in SetSize()
                                       GetHwndOf(parent),
-                                      (HMENU)wxUIntToPtr(subid.GetValue()),
+                                      (HMENU)newId,
                                       wxGetInstance(),
                                       NULL);
 
@@ -194,25 +185,19 @@ bool wxRadioBox::Create(wxWindow *parent,
             return false;
         }
 
-        // Keep track of the subwindow
-        m_radioButtons->Set(i, hwndBtn, subid);
+        (*m_radioButtons)[i] = hwndBtn;
 
         SubclassRadioButton((WXHWND)hwndBtn);
 
-        // Also, make it a subcontrol of this control
-        m_subControls.Add(subid);
+        m_subControls.Add(newId);
     }
 
     // Create a dummy radio control to end the group.
-    m_dummyId = NewControlId();
-
-    m_dummyHwnd = (WXHWND)::CreateWindow(_T("BUTTON"),
+    (void)::CreateWindow(_T("BUTTON"),
                          wxEmptyString,
                          WS_GROUP | BS_AUTORADIOBUTTON | WS_CHILD,
                          0, 0, 0, 0, GetHwndOf(parent),
-                         (HMENU)wxUIntToPtr(m_dummyId.GetValue()),
-                         wxGetInstance(), NULL);
-
+                         (HMENU)NewControlId(), wxGetInstance(), NULL);
 
     m_radioButtons->SetFont(GetFont());
 
@@ -252,8 +237,6 @@ wxRadioBox::~wxRadioBox()
     m_isBeingDeleted = true;
 
     delete m_radioButtons;
-    if ( m_dummyHwnd )
-        DestroyWindow((HWND)m_dummyHwnd);
     delete[] m_radioWidth;
     delete[] m_radioHeight;
 }
@@ -275,10 +258,8 @@ void wxRadioBox::SubclassRadioButton(WXHWND hWndBtn)
 // events generation
 // ----------------------------------------------------------------------------
 
-bool wxRadioBox::MSWCommand(WXUINT cmd, WXWORD id_)
+bool wxRadioBox::MSWCommand(WXUINT cmd, WXWORD id)
 {
-    const int id = (signed short)id_;
-
     if ( cmd == BN_CLICKED )
     {
         if (id == GetId())
@@ -461,25 +442,6 @@ void wxRadioBox::DoSetItemToolTip(unsigned int item, wxToolTip *tooltip)
 }
 
 #endif // wxUSE_TOOLTIPS
-
-bool wxRadioBox::Reparent(wxWindowBase *newParent)
-{
-    if ( !wxStaticBox::Reparent(newParent) )
-    {
-        return false;
-    }
-
-    HWND hwndParent = GetHwndOf(GetParent());
-    for ( size_t item = 0; item < m_radioButtons->GetCount(); item++ )
-    {
-        ::SetParent((*m_radioButtons)[item], hwndParent);
-    }
-#ifdef __WXWINCE__
-    // put static box under the buttons in the Z-order
-    SetWindowPos(GetHwnd(), HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE);
-#endif
-    return true;
-}
 
 WX_FORWARD_STD_METHODS_TO_SUBWINDOWS(wxRadioBox, wxStaticBox, m_radioButtons)
 

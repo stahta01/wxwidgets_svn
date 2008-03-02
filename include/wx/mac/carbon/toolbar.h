@@ -17,7 +17,7 @@
 #include "wx/tbarbase.h"
 #include "wx/dynarray.h"
 
-WXDLLEXPORT_DATA(extern const char) wxToolBarNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxToolBarNameStr[];
 
 class WXDLLEXPORT wxToolBar: public wxToolBarBase
 {
@@ -57,8 +57,11 @@ class WXDLLEXPORT wxToolBar: public wxToolBarBase
 
     virtual void SetRows(int nRows);
 
-    virtual void SetToolNormalBitmap(int id, const wxBitmap& bitmap);
-    virtual void SetToolDisabledBitmap(int id, const wxBitmap& bitmap);
+#if wxABI_VERSION >= 20802
+    // TODO: In 2.9 these should probably be virtual, and declared in the base class...
+    void SetToolNormalBitmap(int id, const wxBitmap& bitmap);
+    void SetToolDisabledBitmap(int id, const wxBitmap& bitmap);
+#endif
 
     // Add all the buttons
 
@@ -93,8 +96,7 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     DECLARE_EVENT_TABLE()
 #if wxMAC_USE_NATIVE_TOOLBAR

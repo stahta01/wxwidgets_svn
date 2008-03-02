@@ -50,6 +50,9 @@ enum
     wxOPEN              = wxFD_OPEN,
     wxSAVE              = wxFD_SAVE,
     wxOVERWRITE_PROMPT  = wxFD_OVERWRITE_PROMPT,
+#if WXWIN_COMPATIBILITY_2_4
+    wxHIDE_READONLY     = 0x0008,
+#endif
     wxFILE_MUST_EXIST   = wxFD_FILE_MUST_EXIST,
     wxMULTIPLE          = wxFD_MULTIPLE,
     wxCHANGE_DIR        = wxFD_CHANGE_DIR
@@ -58,9 +61,9 @@ enum
 
 #define wxFD_DEFAULT_STYLE      wxFD_OPEN
 
-extern WXDLLEXPORT_DATA(const char) wxFileDialogNameStr[];
-extern WXDLLEXPORT_DATA(const char) wxFileSelectorPromptStr[];
-extern WXDLLEXPORT_DATA(const char) wxFileSelectorDefaultWildcardStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFileDialogNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFileSelectorPromptStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFileSelectorDefaultWildcardStr[];
 
 //----------------------------------------------------------------------------
 // wxFileDialogBase
@@ -84,9 +87,6 @@ public:
         Init();
         Create(parent, message, defaultDir, defaultFile, wildCard, style, pos, sz, name);
     }
-
-    virtual ~wxFileDialogBase() {}
-
 
     bool Create(wxWindow *parent,
                 const wxString& message = wxFileSelectorPromptStr,
@@ -116,18 +116,18 @@ public:
     virtual wxString GetWildcard() const { return m_wildCard; }
     virtual int GetFilterIndex() const { return m_filterIndex; }
 
-    // this function is called with wxFileDialog as parameter and should
-    // create the window containing the extra controls we want to show in it
-    typedef wxWindow *(*ExtraControlCreatorFunction)(wxWindow*);
-
-    // extra controls are currently supported in GTK and generic versions
-    // only currently
-    virtual bool SupportsExtraControl() const { return false; }
-
-    bool SetExtraControlCreator(ExtraControlCreatorFunction WXUNUSED(c));
-    wxWindow *GetExtraControl() const { return m_extraControl; }
-
     // Utility functions
+
+#if WXWIN_COMPATIBILITY_2_4
+    // Parses the wildCard, returning the number of filters.
+    // Returns 0 if none or if there's a problem,
+    // The arrays will contain an equal number of items found before the error.
+    // wildCard is in the form:
+    // "All files (*)|*|Image Files (*.jpeg *.png)|*.jpg;*.png"
+    wxDEPRECATED( static int ParseWildcard(const wxString& wildCard,
+                                           wxArrayString& descriptions,
+                                           wxArrayString& filters) );
+#endif // WXWIN_COMPATIBILITY_2_4
 
 #if WXWIN_COMPATIBILITY_2_6
 
@@ -151,19 +151,12 @@ protected:
     wxString      m_fileName;
     wxString      m_wildCard;
     int           m_filterIndex;
-    wxWindow*     m_extraControl;
-
-    // returns true if control is created (if it already exists returns false)
-    bool CreateExtraControl();
 
 private:
-    ExtraControlCreatorFunction m_extraControlCreator;
-
     void Init();
     DECLARE_DYNAMIC_CLASS(wxFileDialogBase)
     DECLARE_NO_COPY_CLASS(wxFileDialogBase)
 };
-
 
 //----------------------------------------------------------------------------
 // wxFileDialog convenience functions
@@ -171,61 +164,61 @@ private:
 
 // File selector - backward compatibility
 WXDLLEXPORT wxString
-wxFileSelector(const wxString& message = wxFileSelectorPromptStr,
-               const wxString& default_path = wxEmptyString,
-               const wxString& default_filename = wxEmptyString,
-               const wxString& default_extension = wxEmptyString,
-               const wxString& wildcard = wxFileSelectorDefaultWildcardStr,
+wxFileSelector(const wxChar *message = wxFileSelectorPromptStr,
+               const wxChar *default_path = NULL,
+               const wxChar *default_filename = NULL,
+               const wxChar *default_extension = NULL,
+               const wxChar *wildcard = wxFileSelectorDefaultWildcardStr,
                int flags = 0,
                wxWindow *parent = NULL,
                int x = wxDefaultCoord, int y = wxDefaultCoord);
 
 // An extended version of wxFileSelector
 WXDLLEXPORT wxString
-wxFileSelectorEx(const wxString& message = wxFileSelectorPromptStr,
-                 const wxString& default_path = wxEmptyString,
-                 const wxString& default_filename = wxEmptyString,
+wxFileSelectorEx(const wxChar *message = wxFileSelectorPromptStr,
+                 const wxChar *default_path = NULL,
+                 const wxChar *default_filename = NULL,
                  int *indexDefaultExtension = NULL,
-                 const wxString& wildcard = wxFileSelectorDefaultWildcardStr,
+                 const wxChar *wildcard = wxFileSelectorDefaultWildcardStr,
                  int flags = 0,
                  wxWindow *parent = NULL,
                  int x = wxDefaultCoord, int y = wxDefaultCoord);
 
 // Ask for filename to load
 WXDLLEXPORT wxString
-wxLoadFileSelector(const wxString& what,
-                   const wxString& extension,
-                   const wxString& default_name = wxEmptyString,
-                   wxWindow *parent = NULL);
+wxLoadFileSelector(const wxChar *what,
+                   const wxChar *extension,
+                   const wxChar *default_name = (const wxChar *)NULL,
+                   wxWindow *parent = (wxWindow *) NULL);
 
 // Ask for filename to save
 WXDLLEXPORT wxString
-wxSaveFileSelector(const wxString& what,
-                   const wxString& extension,
-                   const wxString& default_name = wxEmptyString,
-                   wxWindow *parent = NULL);
+wxSaveFileSelector(const wxChar *what,
+                   const wxChar *extension,
+                   const wxChar *default_name = (const wxChar *) NULL,
+                   wxWindow *parent = (wxWindow *) NULL);
 
 
 #if defined (__WXUNIVERSAL__)
-    #define wxHAS_GENERIC_FILEDIALOG
-    #include "wx/generic/filedlgg.h"
+#define wxUSE_GENERIC_FILEDIALOG
+#include "wx/generic/filedlgg.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/filedlg.h"
+#include "wx/msw/filedlg.h"
 #elif defined(__WXMOTIF__)
-    #include "wx/motif/filedlg.h"
+#include "wx/motif/filedlg.h"
+#elif defined(__WXGTK24__)
+#include "wx/gtk/filedlg.h"     // GTK+ > 2.4 has native version
 #elif defined(__WXGTK20__)
-    #include "wx/gtk/filedlg.h"     // GTK+ > 2.4 has native version
+#define wxUSE_GENERIC_FILEDIALOG
+#include "wx/generic/filedlgg.h"
 #elif defined(__WXGTK__)
-    #include "wx/gtk1/filedlg.h"
+#include "wx/gtk1/filedlg.h"
 #elif defined(__WXMAC__)
-    #include "wx/mac/filedlg.h"
+#include "wx/mac/filedlg.h"
 #elif defined(__WXCOCOA__)
-    #include "wx/cocoa/filedlg.h"
+#include "wx/cocoa/filedlg.h"
 #elif defined(__WXPM__)
-    #include "wx/os2/filedlg.h"
-#elif defined(__WXPALMOS__)
-    #define wxHAS_GENERIC_FILEDIALOG
-    #include "wx/generic/filedlgg.h"
+#include "wx/os2/filedlg.h"
 #endif
 
 #endif // wxUSE_FILEDLG

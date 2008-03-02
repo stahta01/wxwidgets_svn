@@ -100,12 +100,7 @@ wxString wxSystemOptions::GetOption(const wxString& name)
 
 int wxSystemOptions::GetOptionInt(const wxString& name)
 {
-#ifdef _PACC_VER
-    // work around the PalmOS pacc compiler bug
-    return wxAtoi (GetOption(name).data());
-#else
-    return wxAtoi (GetOption(name));
-#endif
+    return wxAtoi(GetOption(name));
 }
 
 bool wxSystemOptions::HasOption(const wxString& name)

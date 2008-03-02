@@ -20,9 +20,9 @@
 #include "wx/gdicmn.h"          // wxBITMAP_TYPE_INVALID
 #include "wx/list.h"
 
-class WXDLLIMPEXP_FWD_CORE wxGDIImageRefData;
-class WXDLLIMPEXP_FWD_CORE wxGDIImageHandler;
-class WXDLLIMPEXP_FWD_CORE wxGDIImage;
+class WXDLLEXPORT wxGDIImageRefData;
+class WXDLLEXPORT wxGDIImageHandler;
+class WXDLLEXPORT wxGDIImage;
 
 WX_DECLARE_EXPORTED_LIST(wxGDIImageHandler, wxGDIImageHandlerList);
 
@@ -41,7 +41,7 @@ public:
     }
 
     // accessors
-    virtual bool IsOk() const
+    bool IsOk() const
     {
         if (m_hHandle == 0)
             return false;
@@ -74,7 +74,7 @@ public:
         WXHCURSOR                   m_hCursor;
     };
 
-    unsigned int                    m_uId;
+    UINT                            m_uId;
 };
 
 // ----------------------------------------------------------------------------
@@ -187,6 +187,9 @@ public:
         pData->m_hHandle = hHandle;
     }
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return GetHandle() != 0; }
+
     int GetWidth() const { return IsNull() ? 0 : GetGDIImageData()->m_nWidth; }
     int GetHeight() const { return IsNull() ? 0 : GetGDIImageData()->m_nHeight; }
     int GetDepth() const { return IsNull() ? 0 : GetGDIImageData()->m_nDepth; }
@@ -204,7 +207,7 @@ public:
     }
     void SetSize(const wxSize& rSize) { SetSize(rSize.x, rSize.y); }
 
-    unsigned int GetId(void) const
+    UINT GetId(void) const
     {
         wxGDIImageRefData*          pData;
 
@@ -214,7 +217,7 @@ public:
         else
             return pData->m_uId;
     } // end of WxWinGdi_CGDIImage::GetId
-    void SetId(unsigned int uId)
+    void SetId(UINT uId)
     {
         wxGDIImageRefData*          pData;
 
@@ -229,16 +232,6 @@ public:
 protected:
     // create the data for the derived class here
     virtual wxGDIImageRefData* CreateData() const = 0;
-    virtual wxGDIRefData *CreateGDIRefData() const { return CreateData(); }
-
-    // we can't [efficiently] clone objects of this class
-    virtual wxGDIRefData *
-    CloneGDIRefData(const wxGDIRefData *WXUNUSED(data)) const
-    {
-        wxFAIL_MSG( _T("must be implemented if used") );
-
-        return NULL;
-    }
 
     static wxGDIImageHandlerList    ms_handlers;
 };

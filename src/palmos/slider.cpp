@@ -135,7 +135,6 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
 
     AdjustForParentClientOrigin(x, y);
 
-#ifdef __WXPALMOS6__
     SliderControlType *slider = CtlNewSliderControl (
                                    (void **)&form,
                                    GetId(),
@@ -152,17 +151,6 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
                                    1,
                                    value
                               );
-#else // __WXPALMOS5__
-    //SliderControlType *CtlNewSliderControl (void **formPP, UInt16 ID, ControlStyleType style, DmResID thumbID,
-    //    DmResID backgroundID, Coord x, Coord y, Coord width, Coord height, UInt16 minValue, UInt16 maxValue,
-    //    UInt16 pageSize, UInt16 value);
-    SliderControlType *slider =  CtlNewSliderControl ((void **)&form,
-             GetId(),
-             feedbackSliderCtl,//style
-             0,//thumbID
-             0,//backgroundid
-             x, y, w, h, minValue, maxValue, 1, value);
-#endif // __WXPALMOS6__/__WXPALMOS5__
 
     if(slider==NULL)
         return false;
@@ -320,7 +308,7 @@ bool wxSlider::SendUpdatedEvent()
     wxScrollEvent eventWxTrack(wxEVT_SCROLL_THUMBRELEASE, GetId());
     eventWxTrack.SetPosition(m_oldPos);
     eventWxTrack.SetEventObject(this);
-    bool handled = HandleWindowEvent(eventWxTrack);
+    bool handled = GetEventHandler()->ProcessEvent(eventWxTrack);
 
     // then slider event if position changed
     if( m_oldValue != m_oldPos )
@@ -351,7 +339,7 @@ bool wxSlider::SendScrollEvent(WXEVENTPTR event)
     wxScrollEvent eventWx(wxEVT_SCROLL_THUMBTRACK, GetId());
     eventWx.SetPosition(newPos);
     eventWx.SetEventObject(this);
-    return HandleWindowEvent(eventWx);
+    return GetEventHandler()->ProcessEvent(eventWx);
 }
 
 void wxSlider::Command (wxCommandEvent & event)

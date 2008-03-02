@@ -55,7 +55,7 @@ public:
     typedef <integral type> NativeFormat;
 
     wxDataFormat(NativeFormat format = wxDF_INVALID);
-    wxDataFormat(const wxString& format);
+    wxDataFormat(const wxChar *format);
 
     wxDataFormat& operator=(NativeFormat format);
     wxDataFormat& operator=(const wxDataFormat& format);
@@ -67,7 +67,7 @@ public:
     NativeFormat GetType() const;
 
     wxString GetId() const;
-    void SetId(const wxString& format);
+    void SetId(const wxChar *format);
 };
 
 */
@@ -502,13 +502,12 @@ private:
 
 #if defined(__WXMSW__)
     #include "wx/msw/ole/dataobj2.h"
-    // wxURLDataObject defined in msw/ole/dataobj2.h
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dataobj2.h"
-    // wxURLDataObject defined in msw/ole/dataobj2.h
 
-#else 
-    #if defined(__WXGTK__)
+    // wxURLDataObject defined in msw/ole/dataobj2.h
+#else // !__WXMSW__
+    #if defined(__WXGTK20__)
+        #include "wx/gtk/dataobj2.h"
+    #elif defined(__WXGTK__)
         #include "wx/gtk1/dataobj2.h"
     #elif defined(__WXX11__)
         #include "wx/x11/dataobj2.h"
@@ -534,7 +533,7 @@ private:
         wxString GetURL() const { return GetText(); }
         void SetURL(const wxString& url) { SetText(url); }
     };
-#endif
+#endif // __WXMSW__/!__WXMSW__
 
 #endif // wxUSE_DATAOBJ
 

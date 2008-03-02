@@ -53,16 +53,24 @@
 
 #include <winsock.h>
 
-#include "wx/platform.h"
+#ifndef __GSOCKET_STANDALONE__
+#   include "wx/platform.h"
+#endif
 
-#if wxUSE_SOCKETS
+#if wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__)
 
-#include "wx/gsocket.h"
-#include "wx/link.h"
+#ifndef __GSOCKET_STANDALONE__
+#  include "wx/msw/gsockmsw.h"
+#  include "wx/gsocket.h"
+#else
+#  include "gsockmsw.h"
+#  include "gsocket.h"
+#endif /* __GSOCKET_STANDALONE__ */
 
-wxFORCE_LINK_MODULE(gsockmsw)
-
-#ifdef __WXWINCE__
+#ifndef __WXWINCE__
+#include <assert.h>
+#else
+#define assert(x)
 #ifndef isdigit
 #define isdigit(x) (x > 47 && x < 58)
 #endif
@@ -80,29 +88,68 @@ wxFORCE_LINK_MODULE(gsockmsw)
 #  define WX_SOCKLEN_T int
 #endif
 
-#if wxUSE_IPV6
-typedef struct sockaddr_storage wxSockAddr;
-#else
-typedef struct sockaddr wxSockAddr;
-#endif
+/* Table of GUI-related functions. We must call them indirectly because
+ * of wxBase and GUI separation: */
 
-bool GSocket_Init()
+static GSocketGUIFunctionsTable *gs_gui_functions;
+
+class GSocketGUIFunctionsTableNull: public GSocketGUIFunctionsTable
+{
+public:
+    virtual bool OnInit();
+    virtual void OnExit();
+    virtual bool CanUseEventLoop();
+    virtual bool Init_Socket(GSocket *socket);
+    virtual void Destroy_Socket(GSocket *socket);
+    virtual void Enable_Events(GSocket *socket);
+    virtual void Disable_Events(GSocket *socket);
+};
+
+bool GSocketGUIFunctionsTableNull::OnInit()
+{   return true; }
+void GSocketGUIFunctionsTableNull::OnExit()
+{}
+bool GSocketGUIFunctionsTableNull::CanUseEventLoop()
+{   return false; }
+bool GSocketGUIFunctionsTableNull::Init_Socket(GSocket *WXUNUSED(socket))
+{   return true; }
+void GSocketGUIFunctionsTableNull::Destroy_Socket(GSocket *WXUNUSED(socket))
+{}
+void GSocketGUIFunctionsTableNull::Enable_Events(GSocket *WXUNUSED(socket))
+{}
+void GSocketGUIFunctionsTableNull::Disable_Events(GSocket *WXUNUSED(socket))
+{}
+/* Global initialisers */
+
+void GSocket_SetGUIFunctions(GSocketGUIFunctionsTable *guifunc)
+{
+  gs_gui_functions = guifunc;
+}
+
+int GSocket_Init(void)
 {
   WSADATA wsaData;
 
-  GSocketManager * const manager = GSocketManager::Get();
-  if ( !manager || !manager->OnInit() )
-      return false;
+  if (!gs_gui_functions)
+  {
+    static GSocketGUIFunctionsTableNull table;
+    gs_gui_functions = &table;
+  }
+  if ( !gs_gui_functions->OnInit() )
+  {
+    return 0;
+  }
 
   /* Initialize WinSocket */
-  return WSAStartup((1 << 8) | 1, &wsaData) == 0;
+  return (WSAStartup((1 << 8) | 1, &wsaData) == 0);
 }
 
-void GSocket_Cleanup()
+void GSocket_Cleanup(void)
 {
-  GSocketManager * const manager = GSocketManager::Get();
-  if ( manager )
-    manager->OnExit();
+  if (gs_gui_functions)
+  {
+      gs_gui_functions->OnExit();
+  }
 
   /* Cleanup WinSocket */
   WSACleanup();
@@ -130,24 +177,25 @@ GSocket::GSocket()
   m_timeout.tv_usec = 0;
   m_establishing    = false;
   m_reusable        = false;
-  m_broadcast       = false;
-  m_dobind          = true;
-  m_initialRecvBufferSize = -1;
-  m_initialSendBufferSize = -1;
 
-  m_ok = GSocketManager::Get()->Init_Socket(this);
+  assert(gs_gui_functions);
+  /* Per-socket GUI-specific initialization */
+  m_ok = gs_gui_functions->Init_Socket(this);
 }
 
 void GSocket::Close()
 {
-    GSocketManager::Get()->Disable_Events(this);
+    gs_gui_functions->Disable_Events(this);
     closesocket(m_fd);
     m_fd = INVALID_SOCKET;
 }
 
 GSocket::~GSocket()
 {
-  GSocketManager::Get()->Destroy_Socket(this);
+  assert(this);
+
+  /* Per-socket GUI-specific cleanup */
+  gs_gui_functions->Destroy_Socket(this);
 
   /* Check that the socket is really shutdowned */
   if (m_fd != INVALID_SOCKET)
@@ -168,6 +216,8 @@ GSocket::~GSocket()
 void GSocket::Shutdown()
 {
   int evt;
+
+  assert(this);
 
   /* If socket has been created, shutdown it */
   if (m_fd != INVALID_SOCKET)
@@ -201,6 +251,8 @@ void GSocket::Shutdown()
  */
 GSocketError GSocket::SetLocal(GAddress *address)
 {
+  assert(this);
+
   /* the socket must be initialized, or it must be a server */
   if (m_fd != INVALID_SOCKET && !m_server)
   {
@@ -225,6 +277,8 @@ GSocketError GSocket::SetLocal(GAddress *address)
 
 GSocketError GSocket::SetPeer(GAddress *address)
 {
+  assert(this);
+
   /* check address */
   if (address == NULL || address->m_family == GSOCK_NOFAMILY)
   {
@@ -243,9 +297,11 @@ GSocketError GSocket::SetPeer(GAddress *address)
 GAddress *GSocket::GetLocal()
 {
   GAddress *address;
-  wxSockAddr addr;
+  struct sockaddr addr;
   WX_SOCKLEN_T size = sizeof(addr);
   GSocketError err;
+
+  assert(this);
 
   /* try to get it from the m_local var first */
   if (m_local)
@@ -258,7 +314,7 @@ GAddress *GSocket::GetLocal()
     return NULL;
   }
 
-  if (getsockname(m_fd, (sockaddr*)&addr, &size) == SOCKET_ERROR)
+  if (getsockname(m_fd, &addr, &size) == SOCKET_ERROR)
   {
     m_error = GSOCK_IOERR;
     return NULL;
@@ -271,7 +327,7 @@ GAddress *GSocket::GetLocal()
      return NULL;
   }
 
-  if ((err = _GAddress_translate_from(address, (sockaddr*)&addr, size)) != GSOCK_NOERROR)
+  if ((err = _GAddress_translate_from(address, &addr, size)) != GSOCK_NOERROR)
   {
      GAddress_destroy(address);
      m_error = err;
@@ -283,6 +339,8 @@ GAddress *GSocket::GetLocal()
 
 GAddress *GSocket::GetPeer()
 {
+  assert(this);
+
   /* try to get it from the m_peer var */
   if (m_peer)
     return GAddress_copy(m_peer);
@@ -305,6 +363,8 @@ GAddress *GSocket::GetPeer()
 GSocketError GSocket::SetServer()
 {
   u_long arg = 1;
+
+  assert(this);
 
   /* must not be in use */
   if (m_fd != INVALID_SOCKET)
@@ -334,7 +394,7 @@ GSocketError GSocket::SetServer()
   }
 
   ioctlsocket(m_fd, FIONBIO, (u_long FAR *) &arg);
-  GSocketManager::Get()->Enable_Events(this);
+  gs_gui_functions->Enable_Events(this);
 
   /* allow a socket to re-bind if the socket is in the TIME_WAIT
      state after being previously closed.
@@ -377,10 +437,12 @@ GSocketError GSocket::SetServer()
 GSocket *GSocket::WaitConnection()
 {
   GSocket *connection;
-  wxSockAddr from;
+  struct sockaddr from;
   WX_SOCKLEN_T fromlen = sizeof(from);
   GSocketError err;
   u_long arg = 1;
+
+  assert(this);
 
   /* Reenable CONNECTION events */
   m_detected &= ~GSOCK_CONNECTION_FLAG;
@@ -409,7 +471,7 @@ GSocket *GSocket::WaitConnection()
     return NULL;
   }
 
-  connection->m_fd = accept(m_fd, (sockaddr*)&from, &fromlen);
+  connection->m_fd = accept(m_fd, &from, &fromlen);
 
   if (connection->m_fd == INVALID_SOCKET)
   {
@@ -434,7 +496,7 @@ GSocket *GSocket::WaitConnection()
     m_error = GSOCK_MEMERR;
     return NULL;
   }
-  err = _GAddress_translate_from(connection->m_peer, (sockaddr*)&from, fromlen);
+  err = _GAddress_translate_from(connection->m_peer, &from, fromlen);
   if (err != GSOCK_NOERROR)
   {
     GAddress_destroy(connection->m_peer);
@@ -444,7 +506,7 @@ GSocket *GSocket::WaitConnection()
   }
 
   ioctlsocket(connection->m_fd, FIONBIO, (u_long FAR *) &arg);
-  GSocketManager::Get()->Enable_Events(connection);
+  gs_gui_functions->Enable_Events(connection);
 
   return connection;
 }
@@ -462,34 +524,6 @@ bool GSocket::SetReusable()
     /* socket must not be null, and must not be in use/already bound */
     if (this && m_fd == INVALID_SOCKET) {
         m_reusable = true;
-        return true;
-    }
-    return false;
-}
-
-/* GSocket_SetBroadcast:
-*  Simply sets the m_broadcast flag on the socket. GSocket_SetServer will
-*  make the appropriate setsockopt() call.
-*  Implemented as a GSocket function because clients (ie, wxSocketServer)
-*  don't have access to the GSocket struct information.
-*  Returns true if the flag was set correctly, false if an error occurred
-*  (ie, if the parameter was NULL)
-*/
-bool GSocket::SetBroadcast()
-{
-    /* socket must not be in use/already bound */
-    if (m_fd == INVALID_SOCKET) {
-        m_broadcast = true;
-        return true;
-    }
-    return false;
-}
-
-bool GSocket::DontDoBind()
-{
-    /* socket must not be in use/already bound */
-    if (m_fd == INVALID_SOCKET) {
-        m_dobind = false;
         return true;
     }
     return false;
@@ -525,6 +559,8 @@ GSocketError GSocket::Connect(GSocketStream stream)
   int ret, err;
   u_long arg = 1;
 
+  assert(this);
+
   /* Enable CONNECTION events (needed for nonblocking connections) */
   m_detected &= ~GSOCK_CONNECTION_FLAG;
 
@@ -556,18 +592,13 @@ GSocketError GSocket::Connect(GSocketStream stream)
   }
 
   ioctlsocket(m_fd, FIONBIO, (u_long FAR *) &arg);
-  GSocketManager::Get()->Enable_Events(this);
+  gs_gui_functions->Enable_Events(this);
 
   // If the reuse flag is set, use the applicable socket reuse flag
   if (m_reusable)
   {
      setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&arg, sizeof(arg));
   }
-
-  if (m_initialRecvBufferSize >= 0)
-    setsockopt(m_fd, SOL_SOCKET, SO_RCVBUF, (const char*)&m_initialRecvBufferSize, sizeof(m_initialRecvBufferSize));
-  if (m_initialSendBufferSize >= 0)
-    setsockopt(m_fd, SOL_SOCKET, SO_SNDBUF, (const char*)&m_initialSendBufferSize, sizeof(m_initialSendBufferSize));
 
   // If a local address has been set, then we need to bind to it before calling connect
   if (m_local && m_local->m_addr)
@@ -641,6 +672,8 @@ GSocketError GSocket::SetNonOriented()
 {
   u_long arg = 1;
 
+  assert(this);
+
   if (m_fd != INVALID_SOCKET)
   {
     m_error = GSOCK_INVSOCK;
@@ -667,30 +700,24 @@ GSocketError GSocket::SetNonOriented()
   }
 
   ioctlsocket(m_fd, FIONBIO, (u_long FAR *) &arg);
-  GSocketManager::Get()->Enable_Events(this);
+  gs_gui_functions->Enable_Events(this);
 
   if (m_reusable)
   {
     setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&arg, sizeof(arg));
   }
-  if (m_broadcast)
+
+  /* Bind to the local address,
+   * and retrieve the actual address bound.
+   */
+  if ((bind(m_fd, m_local->m_addr, m_local->m_len) != 0) ||
+      (getsockname(m_fd,
+                   m_local->m_addr,
+                   (WX_SOCKLEN_T *)&m_local->m_len) != 0))
   {
-    setsockopt(m_fd, SOL_SOCKET, SO_BROADCAST, (const char*)&arg, sizeof(arg));
-  }
-  if (m_dobind)
-  {
-    /* Bind to the local address,
-     * and retrieve the actual address bound.
-     */
-    if ((bind(m_fd, m_local->m_addr, m_local->m_len) != 0) ||
-        (getsockname(m_fd,
-                     m_local->m_addr,
-                     (WX_SOCKLEN_T *)&m_local->m_len) != 0))
-    {
-      Close();
-      m_error = GSOCK_IOERR;
-      return GSOCK_IOERR;
-    }
+    Close();
+    m_error = GSOCK_IOERR;
+    return GSOCK_IOERR;
   }
 
   return GSOCK_NOERROR;
@@ -702,6 +729,8 @@ GSocketError GSocket::SetNonOriented()
 int GSocket::Read(char *buffer, int size)
 {
   int ret;
+
+  assert(this);
 
   /* Reenable INPUT events */
   m_detected &= ~GSOCK_INPUT_FLAG;
@@ -740,6 +769,8 @@ int GSocket::Read(char *buffer, int size)
 int GSocket::Write(const char *buffer, int size)
 {
   int ret;
+
+  assert(this);
 
   if (m_fd == INVALID_SOCKET || m_server)
   {
@@ -785,7 +816,107 @@ int GSocket::Write(const char *buffer, int size)
  */
 GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
 {
-  return flags & m_detected;
+  if (!gs_gui_functions->CanUseEventLoop())
+  {
+    GSocketEventFlags result = 0;
+    fd_set readfds;
+    fd_set writefds;
+    fd_set exceptfds;
+
+    assert(this);
+
+    FD_ZERO(&readfds);
+    FD_ZERO(&writefds);
+    FD_ZERO(&exceptfds);
+    FD_SET(m_fd, &readfds);
+    if (flags & GSOCK_OUTPUT_FLAG || flags & GSOCK_CONNECTION_FLAG)
+      FD_SET(m_fd, &writefds);
+    FD_SET(m_fd, &exceptfds);
+
+    /* Check 'sticky' CONNECTION flag first */
+    result |= (GSOCK_CONNECTION_FLAG & m_detected);
+
+    /* If we have already detected a LOST event, then don't try
+     * to do any further processing.
+     */
+    if ((m_detected & GSOCK_LOST_FLAG) != 0)
+    {
+      m_establishing = false;
+
+      return (GSOCK_LOST_FLAG & flags);
+    }
+
+    /* Try select now */
+    if (select(m_fd + 1, &readfds, &writefds, &exceptfds,
+        &m_timeout) <= 0)
+    {
+      /* What to do here? */
+      return (result & flags);
+    }
+
+    /* Check for exceptions and errors */
+    if (FD_ISSET(m_fd, &exceptfds))
+    {
+      m_establishing = false;
+      m_detected = GSOCK_LOST_FLAG;
+
+      /* LOST event: Abort any further processing */
+      return (GSOCK_LOST_FLAG & flags);
+    }
+
+    /* Check for readability */
+    if (FD_ISSET(m_fd, &readfds))
+    {
+      result |= GSOCK_INPUT_FLAG;
+
+      if (m_server && m_stream)
+      { 
+        /* This is a TCP server socket that detected a connection. 
+           While the INPUT_FLAG is also set, it doesn't matter on 
+           this kind of  sockets, as we can only Accept() from them. */
+        result |= GSOCK_CONNECTION_FLAG;
+        m_detected |= GSOCK_CONNECTION_FLAG;
+      }
+    }
+
+    /* Check for writability */
+    if (FD_ISSET(m_fd, &writefds))
+    {
+      if (m_establishing && !m_server)
+      {
+        int error;
+        WX_SOCKLEN_T len = sizeof(error);
+
+        m_establishing = false;
+
+        getsockopt(m_fd, SOL_SOCKET, SO_ERROR, (char*)&error, &len);
+
+        if (error)
+        {
+          m_detected = GSOCK_LOST_FLAG;
+
+          /* LOST event: Abort any further processing */
+          return (GSOCK_LOST_FLAG & flags);
+        }
+        else
+        {
+          result |= GSOCK_CONNECTION_FLAG;
+          m_detected |= GSOCK_CONNECTION_FLAG;
+        }
+      }
+      else
+      {
+        result |= GSOCK_OUTPUT_FLAG;
+      }
+    }
+
+    return (result & flags);
+  }
+  else /* USE_GUI() */
+  {
+    assert(this);
+    return flags & m_detected;
+  }
 }
 
 /* Attributes */
@@ -796,6 +927,8 @@ GSocketEventFlags GSocket::Select(GSocketEventFlags flags)
  */
 void GSocket::SetNonBlocking(bool non_block)
 {
+  assert(this);
+
   m_non_blocking = non_block;
 }
 
@@ -805,6 +938,8 @@ void GSocket::SetNonBlocking(bool non_block)
  */
 void GSocket::SetTimeout(unsigned long millis)
 {
+  assert(this);
+
   m_timeout.tv_sec  = (millis / 1000);
   m_timeout.tv_usec = (millis % 1000) * 1000;
 }
@@ -816,6 +951,8 @@ void GSocket::SetTimeout(unsigned long millis)
  */
 GSocketError WXDLLIMPEXP_NET GSocket::GetError()
 {
+  assert(this);
+
   return m_error;
 }
 
@@ -854,6 +991,8 @@ void GSocket::SetCallback(GSocketEventFlags flags,
 {
   int count;
 
+  assert(this);
+
   for (count = 0; count < GSOCK_MAX_EVENT; count++)
   {
     if ((flags & (1 << count)) != 0)
@@ -871,6 +1010,8 @@ void GSocket::SetCallback(GSocketEventFlags flags,
 void GSocket::UnsetCallback(GSocketEventFlags flags)
 {
   int count;
+
+  assert(this);
 
   for (count = 0; count < GSOCK_MAX_EVENT; count++)
   {
@@ -980,12 +1121,12 @@ int GSocket::Recv_Stream(char *buffer, int size)
 
 int GSocket::Recv_Dgram(char *buffer, int size)
 {
-  wxSockAddr from;
+  struct sockaddr from;
   WX_SOCKLEN_T fromlen = sizeof(from);
   int ret;
   GSocketError err;
 
-  ret = recvfrom(m_fd, buffer, size, 0, (sockaddr*)&from, &fromlen);
+  ret = recvfrom(m_fd, buffer, size, 0, &from, &fromlen);
 
   if (ret == SOCKET_ERROR)
     return SOCKET_ERROR;
@@ -1000,7 +1141,7 @@ int GSocket::Recv_Dgram(char *buffer, int size)
       return -1;
     }
   }
-  err = _GAddress_translate_from(m_peer, (sockaddr*)&from, fromlen);
+  err = _GAddress_translate_from(m_peer, &from, fromlen);
   if (err != GSOCK_NOERROR)
   {
     GAddress_destroy(m_peer);
@@ -1045,7 +1186,7 @@ int GSocket::Send_Dgram(const char *buffer, int size)
 }
 
 /* Compatibility functions for GSocket */
-GSocket *GSocket_new()
+GSocket *GSocket_new(void)
 {
     GSocket *newsocket = new GSocket();
     if(newsocket->IsOk())
@@ -1093,7 +1234,7 @@ GSocket *GSocket_new()
 }
 
 
-GAddress *GAddress_new()
+GAddress *GAddress_new(void)
 {
   GAddress *address;
 
@@ -1110,6 +1251,8 @@ GAddress *GAddress_new()
 GAddress *GAddress_copy(GAddress *address)
 {
   GAddress *addr2;
+
+  assert(address != NULL);
 
   if ((addr2 = (GAddress *) malloc(sizeof(GAddress))) == NULL)
     return NULL;
@@ -1132,6 +1275,8 @@ GAddress *GAddress_copy(GAddress *address)
 
 void GAddress_destroy(GAddress *address)
 {
+  assert(address != NULL);
+
   if (address->m_addr)
     free(address->m_addr);
 
@@ -1140,11 +1285,15 @@ void GAddress_destroy(GAddress *address)
 
 void GAddress_SetFamily(GAddress *address, GAddressType type)
 {
+  assert(address != NULL);
+
   address->m_family = type;
 }
 
 GAddressType GAddress_GetFamily(GAddress *address)
 {
+  assert(address != NULL);
+
   return address->m_family;
 }
 
@@ -1160,7 +1309,7 @@ GSocketError _GAddress_translate_from(GAddress *address,
     case AF_UNIX:
       address->m_family = GSOCK_UNIX;
       break;
-#if wxUSE_IPV6
+#ifdef AF_INET6
     case AF_INET6:
       address->m_family = GSOCK_INET6;
       break;
@@ -1238,6 +1387,8 @@ GSocketError GAddress_INET_SetHostName(GAddress *address, const char *hostname)
   struct hostent *he;
   struct in_addr *addr;
 
+  assert(address != NULL);
+
   CHECK_ADDRESS(address, INET);
 
   addr = &(((struct sockaddr_in *)address->m_addr)->sin_addr);
@@ -1262,11 +1413,6 @@ GSocketError GAddress_INET_SetHostName(GAddress *address, const char *hostname)
   return GSOCK_NOERROR;
 }
 
-GSocketError GAddress_INET_SetBroadcastAddress(GAddress *address)
-{
-  return GAddress_INET_SetHostAddress(address, INADDR_BROADCAST);
-}
-
 GSocketError GAddress_INET_SetAnyAddress(GAddress *address)
 {
   return GAddress_INET_SetHostAddress(address, INADDR_ANY);
@@ -1276,6 +1422,8 @@ GSocketError GAddress_INET_SetHostAddress(GAddress *address,
                                           unsigned long hostaddr)
 {
   struct in_addr *addr;
+
+  assert(address != NULL);
 
   CHECK_ADDRESS(address, INET);
 
@@ -1291,6 +1439,7 @@ GSocketError GAddress_INET_SetPortName(GAddress *address, const char *port,
   struct servent *se;
   struct sockaddr_in *addr;
 
+  assert(address != NULL);
   CHECK_ADDRESS(address, INET);
 
   if (!port)
@@ -1326,6 +1475,7 @@ GSocketError GAddress_INET_SetPort(GAddress *address, unsigned short port)
 {
   struct sockaddr_in *addr;
 
+  assert(address != NULL);
   CHECK_ADDRESS(address, INET);
 
   addr = (struct sockaddr_in *)address->m_addr;
@@ -1340,6 +1490,7 @@ GSocketError GAddress_INET_GetHostName(GAddress *address, char *hostname, size_t
   char *addr_buf;
   struct sockaddr_in *addr;
 
+  assert(address != NULL);
   CHECK_ADDRESS(address, INET);
 
   addr = (struct sockaddr_in *)address->m_addr;
@@ -1361,6 +1512,7 @@ unsigned long GAddress_INET_GetHostAddress(GAddress *address)
 {
   struct sockaddr_in *addr;
 
+  assert(address != NULL);
   CHECK_ADDRESS_RETVAL(address, INET, 0);
 
   addr = (struct sockaddr_in *)address->m_addr;
@@ -1372,169 +1524,12 @@ unsigned short GAddress_INET_GetPort(GAddress *address)
 {
   struct sockaddr_in *addr;
 
+  assert(address != NULL);
   CHECK_ADDRESS_RETVAL(address, INET, 0);
 
   addr = (struct sockaddr_in *)address->m_addr;
   return ntohs(addr->sin_port);
 }
-
-
-#if wxUSE_IPV6
-/*
- * -------------------------------------------------------------------------
- * Internet IPv6 address family
- * -------------------------------------------------------------------------
- */
-#include "ws2tcpip.h"
-
-#ifdef __VISUALC__
-    #pragma comment(lib,"ws2_32")
-#endif // __VISUALC__
-
-GSocketError _GAddress_Init_INET6(GAddress *address)
-{
-  struct in6_addr any_address = IN6ADDR_ANY_INIT;
-  address->m_len  = sizeof(struct sockaddr_in6);
-  address->m_addr = (struct sockaddr *) malloc(address->m_len);
-  if (address->m_addr == NULL)
-  {
-    address->m_error = GSOCK_MEMERR;
-    return GSOCK_MEMERR;
-  }
-  memset(address->m_addr,0,address->m_len);
-
-  address->m_family = GSOCK_INET6;
-  address->m_realfamily = AF_INET6;
-  ((struct sockaddr_in6 *)address->m_addr)->sin6_family = AF_INET6;
-  ((struct sockaddr_in6 *)address->m_addr)->sin6_addr = any_address;
-
-  return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET6_SetHostName(GAddress *address, const char *hostname)
-{
-  CHECK_ADDRESS(address, INET6);
-
-  addrinfo hints;
-  memset( & hints, 0, sizeof( hints ) );
-  hints.ai_family = AF_INET6;
-  addrinfo * info = 0;
-  if ( getaddrinfo( hostname, "0", & hints, & info ) || ! info )
-  {
-    address->m_error = GSOCK_NOHOST;
-    return GSOCK_NOHOST;
-  }
-
-  memcpy( address->m_addr, info->ai_addr, info->ai_addrlen );
-  freeaddrinfo( info );
-  return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET6_SetAnyAddress(GAddress *address)
-{
-  CHECK_ADDRESS(address, INET6);
-
-  struct in6_addr addr;
-  memset( & addr, 0, sizeof( addr ) );
-  return GAddress_INET6_SetHostAddress(address, addr);
-}
-GSocketError GAddress_INET6_SetHostAddress(GAddress *address,
-                                          struct in6_addr hostaddr)
-{
-  CHECK_ADDRESS(address, INET6);
-
-  ((struct sockaddr_in6 *)address->m_addr)->sin6_addr = hostaddr;
-
-  return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET6_SetPortName(GAddress *address, const char *port,
-                                       const char *protocol)
-{
-  struct servent *se;
-  struct sockaddr_in6 *addr;
-
-  CHECK_ADDRESS(address, INET6);
-
-  if (!port)
-  {
-    address->m_error = GSOCK_INVPORT;
-    return GSOCK_INVPORT;
-  }
-
-  se = getservbyname(port, protocol);
-  if (!se)
-  {
-    if (isdigit(port[0]))
-    {
-      int port_int;
-
-      port_int = atoi(port);
-      addr = (struct sockaddr_in6 *)address->m_addr;
-      addr->sin6_port = htons((u_short) port_int);
-      return GSOCK_NOERROR;
-    }
-
-    address->m_error = GSOCK_INVPORT;
-    return GSOCK_INVPORT;
-  }
-
-  addr = (struct sockaddr_in6 *)address->m_addr;
-  addr->sin6_port = se->s_port;
-
-  return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET6_SetPort(GAddress *address, unsigned short port)
-{
-  struct sockaddr_in6 *addr;
-
-  CHECK_ADDRESS(address, INET6);
-
-  addr = (struct sockaddr_in6 *)address->m_addr;
-  addr->sin6_port = htons(port);
-
-  return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET6_GetHostName(GAddress *address, char *hostname, size_t sbuf)
-{
-  struct hostent *he;
-  char *addr_buf;
-  struct sockaddr_in6 *addr;
-
-  CHECK_ADDRESS(address, INET6);
-
-  addr = (struct sockaddr_in6 *)address->m_addr;
-  addr_buf = (char *)&(addr->sin6_addr);
-
-  he = gethostbyaddr(addr_buf, sizeof(addr->sin6_addr), AF_INET6);
-  if (he == NULL)
-  {
-    address->m_error = GSOCK_NOHOST;
-    return GSOCK_NOHOST;
-  }
-
-  strncpy(hostname, he->h_name, sbuf);
-
-  return GSOCK_NOERROR;
-}
-
-GSocketError GAddress_INET6_GetHostAddress(GAddress *address,struct in6_addr *hostaddr)
-{
-  CHECK_ADDRESS_RETVAL(address, INET6, GSOCK_INVADDR);
-  *hostaddr = ( (struct sockaddr_in6 *)address->m_addr )->sin6_addr;
-  return GSOCK_NOERROR;
-}
-
-unsigned short GAddress_INET6_GetPort(GAddress *address)
-{
-  CHECK_ADDRESS_RETVAL(address, INET6, 0);
-
-  return ntohs( ((struct sockaddr_in6 *)address->m_addr)->sin6_port );
-}
-
-#endif // wxUSE_IPV6
 
 /*
  * -------------------------------------------------------------------------
@@ -1544,20 +1539,31 @@ unsigned short GAddress_INET6_GetPort(GAddress *address)
 
 GSocketError _GAddress_Init_UNIX(GAddress *address)
 {
+  assert (address != NULL);
   address->m_error = GSOCK_INVADDR;
   return GSOCK_INVADDR;
 }
 
 GSocketError GAddress_UNIX_SetPath(GAddress *address, const char *WXUNUSED(path))
 {
+  assert (address != NULL);
   address->m_error = GSOCK_INVADDR;
   return GSOCK_INVADDR;
 }
 
 GSocketError GAddress_UNIX_GetPath(GAddress *address, char *WXUNUSED(path), size_t WXUNUSED(sbuf))
 {
+  assert (address != NULL);
   address->m_error = GSOCK_INVADDR;
   return GSOCK_INVADDR;
 }
 
-#endif  // wxUSE_SOCKETS
+#else /* !wxUSE_SOCKETS */
+
+/*
+ * Translation unit shouldn't be empty, so include this typedef to make the
+ * compiler (VC++ 6.0, for example) happy
+ */
+typedef void (*wxDummy)();
+
+#endif  /* wxUSE_SOCKETS || defined(__GSOCKET_STANDALONE__) */

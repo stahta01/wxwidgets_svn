@@ -13,7 +13,6 @@
 #define _WX_MSW_ENHMETA_H_
 
 #include "wx/dc.h"
-#include "wx/gdiobj.h"
 
 #if wxUSE_DRAG_AND_DROP
     #include "wx/dataobj.h"
@@ -23,12 +22,12 @@
 // wxEnhMetaFile: encapsulation of Win32 HENHMETAFILE
 // ----------------------------------------------------------------------------
 
-class WXDLLEXPORT wxEnhMetaFile : public wxGDIObject
+class WXDLLEXPORT wxEnhMetaFile : public wxObject
 {
 public:
     wxEnhMetaFile(const wxString& file = wxEmptyString) : m_filename(file)
         { Init(); }
-    wxEnhMetaFile(const wxEnhMetaFile& metafile) : wxGDIObject()
+    wxEnhMetaFile(const wxEnhMetaFile& metafile) : wxObject()
         { Init(); Assign(metafile); }
     wxEnhMetaFile& operator=(const wxEnhMetaFile& metafile)
         { Free(); Assign(metafile); return *this; }
@@ -40,7 +39,8 @@ public:
     bool Play(wxDC *dc, wxRect *rectBound = (wxRect *)NULL);
 
     // accessors
-    virtual bool IsOk() const { return m_hMF != 0; }
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_hMF != 0; }
 
     wxSize GetSize() const;
     int GetWidth() const { return GetSize().x; }
@@ -62,11 +62,6 @@ protected:
     void Free();
     void Assign(const wxEnhMetaFile& mf);
 
-    // we don't use these functions (but probably should) but have to implement
-    // them as they're pure virtual in the base class
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
 private:
     wxString m_filename;
     WXHANDLE m_hMF;
@@ -87,10 +82,19 @@ public:
                     int width = 0, int height = 0,
                     const wxString& description = wxEmptyString);
 
+    virtual ~wxEnhMetaFileDC();
+
     // obtain a pointer to the new metafile (caller should delete it)
     wxEnhMetaFile *Close();
 
+protected:
+    virtual void DoGetSize(int *width, int *height) const;
+
 private:
+    // size passed to ctor and returned by DoGetSize()
+    int m_width,
+        m_height;
+
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxEnhMetaFileDC)
 };
 

@@ -18,6 +18,7 @@
 
 #include "wx/bookctrl.h"
 #include "wx/treectrl.h"        // for wxArrayTreeItemIds
+#include "wx/containr.h"
 
 typedef wxWindow wxTreebookPage;
 
@@ -221,11 +222,12 @@ private:
 
     // Returns internal number of pages which can be different from
     // GetPageCount() while performing a page insertion or removal.
-    size_t DoInternalGetPageCount() const { return m_treeIds.GetCount(); }
+    size_t DoInternalGetPageCount() const { return m_treeIds.Count(); }
 
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxTreebook)
+    WX_DECLARE_CONTROL_CONTAINER();
 };
 
 

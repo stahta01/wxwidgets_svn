@@ -20,11 +20,7 @@
     are included
 */
 #ifdef __MWERKS__
-#   include <stddef.h>
-
-#  if !defined(__WXMAC__) && !defined(__WINDOWS__) && !defined(WIN32) && !defined(_WIN32_WCE)
-#    define __PALMOS__ 0x05000000
-#  endif
+#    include <stddef.h>
 #endif
 
 /*
@@ -36,7 +32,7 @@
 #ifdef __WXMAC__
 #    if defined(__MACH__)
 #        define __WXMAC_OSX__
-#        define __WXMAC_CARBON__ /* for backwards compat in user code still defined */
+#        define __WXMAC_CARBON__
 #        include <AvailabilityMacros.h>
 #        ifndef MAC_OS_X_VERSION_10_4
 #           define MAC_OS_X_VERSION_10_4 1040
@@ -44,40 +40,26 @@
 #        ifndef MAC_OS_X_VERSION_10_5
 #           define MAC_OS_X_VERSION_10_5 1050
 #        endif
+#        ifdef __WXMAC_XCODE__
+#            include <unistd.h>
+#            include "wx/mac/carbon/config_xcode.h"
+#        endif
 #    else
-#        error "only mach-o configurations are supported"
+#        if TARGET_CARBON
+#            define __WXMAC_CARBON__
+#        else
+#            define __WXMAC_CLASSIC__
+#        endif
 #    endif
 #endif
 
 /*
     __WXOSX__ is a common define to wxMac (Carbon) and wxCocoa ports under OS X.
-
-    DO NOT use this define in base library code.  Although wxMac has its own
-    private base library (and thus __WXOSX__,__WXMAC__ and related defines are
-    valid there), wxCocoa shares its library with other ports like wxGTK and wxX11.
-
-    To keep wx authors from screwing this up, only enable __WXOSX__ for wxCocoa when
-    not compiling the base library.  We determine this by first checking if
-    wxUSE_BASE is not defined.  If it is not defined, then we're not buildling
-    the base library, and possibly not building wx at all (but actually building
-    user code that's using wx). If it is defined then we must check to make sure
-    it is not true.  If it is true, we're building base.
-
-    If you want it in the common darwin base library then use __DARWIN__.  You
-    can use any Darwin-available libraries like CoreFoundation but please avoid
-    using OS X libraries like Carbon or CoreServices.
-
  */
-#if defined(__WXMAC_OSX__) || (defined(__WXCOCOA__) && (!defined(wxUSE_BASE) || !wxUSE_BASE))
+#if defined(__WXMAC_OSX__) || defined(__WXCOCOA__)
 #   define __WXOSX__
 #endif
 
-#ifdef __WXOSX__
-#    ifdef __WXMAC_XCODE__
-#        include <unistd.h>
-#        include "wx/mac/carbon/config_xcode.h"
-#    endif
-#endif
 /*
    first define Windows symbols if they're not defined on the command line: we
    can autodetect everything we need if _WIN32 is defined
@@ -98,13 +80,13 @@
 
 #if defined(__PALMOS__)
 #   if __PALMOS__ == 0x06000000
-#       define __WXPALMOS6__ 1
+#       define __WXPALMOS6__
 #   endif
 #   if __PALMOS__ == 0x05000000
-#       define __WXPALMOS5__ 1
+#       define __WXPALMOS5__
 #   endif
 #   ifndef __WXPALMOS__
-#       define __WXPALMOS__ 1
+#       define __WXPALMOS__
 #   endif
 #   ifdef __WXMSW__
 #       undef __WXMSW__
@@ -276,21 +258,6 @@
 
 
 /*
-   test for old versions of Borland C, normally need at least 5.82, Turbo
-   explorer, available for free at http://www.turboexplorer.com/downloads 
-*/
-#if defined(__BORLANDC__) && (__BORLANDC__ < 0x550)
-#   error "wxWidgets requires a newer version of Borland, we recommend upgrading to 5.82 (Turbo Explorer). You may at your own risk remove this line and try building but be prepared to get build errors."
-#endif /* __BORLANDC__ */
-
-#if defined(__BORLANDC__) && (__BORLANDC__ < 0x582) && (__BORLANDC__ > 0x559)
-#   ifndef _USE_OLD_RW_STL
-#       error "wxWidgets is incompatible with default Borland C++ 5.6 STL library, please add -D_USE_OLD_RW_STL to your bcc32.cfg to use RogueWave STL implementation."
-#   endif
-#endif /* __BORLANDC__ */
-
-
-/*
    This macro can be used to test the Open Watcom version.
 */
 #ifndef __WATCOMC__
@@ -303,6 +270,43 @@
 #   define wxWATCOM_VERSION(major,minor) ( major * 100 + minor * 10 + 1100 )
 #   define wxCHECK_WATCOM_VERSION(major,minor) ( __WATCOMC__ >= wxWATCOM_VERSION(major,minor) )
 #   define wxONLY_WATCOM_EARLIER_THAN(major,minor) ( __WATCOMC__ < wxWATCOM_VERSION(major,minor) )
+#endif
+
+/*
+   check the consistency of the settings in setup.h: note that this must be
+   done after setting wxUSE_UNICODE correctly as it is used in wx/chkconf.h
+ */
+#include "wx/chkconf.h"
+
+
+/*
+   some compilers don't support iostream.h any longer, while some of theme
+   are not updated with <iostream> yet, so override the users setting here
+   in such case.
+ */
+#if defined(_MSC_VER) && (_MSC_VER >= 1310)
+#    undef wxUSE_IOSTREAMH
+#    define wxUSE_IOSTREAMH 0
+#elif defined(__DMC__) || defined(__WATCOMC__)
+#    undef wxUSE_IOSTREAMH
+#    define wxUSE_IOSTREAMH 1
+#elif defined(__MINGW32__)
+#    undef wxUSE_IOSTREAMH
+#    define wxUSE_IOSTREAMH 0
+#endif /* compilers with/without iostream.h */
+
+/*
+   old C++ headers (like <iostream.h>) declare classes in the global namespace
+   while the new, standard ones (like <iostream>) do it in std:: namespace,
+   unless it's an old gcc version.
+
+   using this macro allows constuctions like "wxSTD iostream" to work in
+   either case
+ */
+#if !wxUSE_IOSTREAMH && (!defined(__GNUC__) || ( __GNUC__ > 2 ) || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
+#    define wxSTD std::
+#else
+#    define wxSTD
 #endif
 
 /*
@@ -354,11 +358,13 @@
 #       endif
 #    endif  /* SGI */
 
-#    if defined(__SUNPRO_CC)
-#       ifndef __SUNCC__
-#           define __SUNCC__ __SUNPRO_CC
-#       endif /* Sun CC */
-#    endif /* Sun CC */
+#    if defined(sun) || defined(__SUN__)
+#        ifndef __GNUG__
+#            ifndef __SUNCC__
+#                define __SUNCC__
+#            endif /* Sun CC */
+#        endif
+#    endif /* Sun */
 
 #    ifdef __EMX__
 #        define OS2EMX_PLAIN_CHAR
@@ -467,27 +473,6 @@
      */
 #    if defined(_MSC_VER) && !defined(__MWERKS__)
 #        define __VISUALC__ _MSC_VER
-
-    /*
-       define special symbols for different VC version instead of writing tests
-       for magic numbers such as 1200, 1300 &c repeatedly
-     */
-#   if __VISUALC__ < 1100
-#       error "This Visual C++ version is too old and not supported any longer."
-#   elif __VISUALC__ < 1200
-#       define __VISUALC5__
-#   elif __VISUALC__ < 1300
-#       define __VISUALC6__
-#   elif __VISUALC__ < 1400
-#       define __VISUALC7__
-#   elif __VISUALC__ < 1500
-#       define __VISUALC8__
-#   elif __VISUALC__ < 1600
-#       define __VISUALC9__
-#   else
-#       pragma message("Please update this code for the next VC++ version")
-#   endif
-
 #    elif defined(__BCPLUSPLUS__) && !defined(__BORLANDC__)
 #        define __BORLANDC__
 #    elif defined(__WATCOMC__)
@@ -563,17 +548,6 @@
 #endif
 
 /*
-   This macro can be used to test the Visual C++ version.
-*/
-#ifndef __VISUALC__
-#   define wxVISUALC_VERSION(major) 0
-#   define wxCHECK_VISUALC_VERSION(major) 0
-#else
-#   define wxVISUALC_VERSION(major) ( (6 + major) * 100 )
-#   define wxCHECK_VISUALC_VERSION(major) ( __VISUALC__ >= wxVISUALC_VERSION(major) )
-#endif
-
-/*
    This macro can be used to check that the version of mingw32 compiler is
    at least maj.min
  */
@@ -590,18 +564,6 @@
 #else
 #    undef wxCHECK_W32API_VERSION
 #    define wxCHECK_W32API_VERSION(maj, min) (0)
-#endif
-
-/**
-    This is similar to wxCHECK_GCC_VERSION but for Sun CC compiler.
- */
-#ifdef __SUNCC__
-    /*
-       __SUNCC__ is 0xVRP where V is major version, R release and P patch level
-     */
-    #define wxCHECK_SUNCC_VERSION(maj, min) (__SUNCC__ >= (((maj)<<8) | ((min)<<4)))
-#else
-    #define wxCHECK_SUNCC_VERSION(maj, min) (0)
 #endif
 
 #if defined (__WXMSW__)
@@ -626,62 +588,6 @@
 #elif defined(__WXMAC__) && !defined(WORDS_BIGENDIAN)
 /*  According to Stefan even ancient Mac compilers defined __BIG_ENDIAN__ */
 #    warning "Compiling wxMac with probably wrong endianness"
-#endif
-
-/*
-   check the consistency of the settings in setup.h: note that this must be
-   done after setting wxUSE_UNICODE correctly as it is used in wx/chkconf.h
-   and after defining the compiler macros which are used in it too
- */
-#include "wx/chkconf.h"
-
-
-/*
-   some compilers don't support iostream.h any longer, while some of theme
-   are not updated with <iostream> yet, so override the users setting here
-   in such case.
- */
-#if defined(_MSC_VER) && (_MSC_VER >= 1310)
-#    undef wxUSE_IOSTREAMH
-#    define wxUSE_IOSTREAMH 0
-#elif defined(__DMC__) || defined(__WATCOMC__)
-#    undef wxUSE_IOSTREAMH
-#    define wxUSE_IOSTREAMH 1
-#elif defined(__MINGW32__)
-#    undef wxUSE_IOSTREAMH
-#    define wxUSE_IOSTREAMH 0
-#endif /* compilers with/without iostream.h */
-
-/*
-   old C++ headers (like <iostream.h>) declare classes in the global namespace
-   while the new, standard ones (like <iostream>) do it in std:: namespace,
-   unless it's an old gcc version.
-
-   using this macro allows constuctions like "wxSTD iostream" to work in
-   either case
- */
-#if !wxUSE_IOSTREAMH && (!defined(__GNUC__) || ( __GNUC__ > 2 ) || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95))
-#    define wxSTD std::
-#else
-#    define wxSTD
-#endif
-
-/* On OpenVMS with the most recent HP C++ compiler some function (i.e. wscanf)
- * are only available in the std-namespace. (BUG???)
- */
-#if defined(  __VMS ) && (__DECCXX_VER >= 70100000) && !defined(__STD_CFRONT) && !defined( __NONAMESPACE_STD )
-# define wxVMS_USE_STD std::
-#else
-# define wxVMS_USE_STD
-#endif
-
-#ifdef __VMS
-#define XtDisplay XTDISPLAY
-#ifdef __WXMOTIF__
-#define XtParent XTPARENT
-#define XtScreen XTSCREEN
-#define XtWindow XTWINDOW
-#endif
 #endif
 
 /* Choose which method we will use for updating menus
@@ -726,30 +632,5 @@
 #ifdef __DARWIN__
     #include <AvailabilityMacros.h>
 #endif
-
-#if defined (__WXPALMOS__)
-#include "wx/palmos/missing.h"
-#endif // __WXPALMOS__
-
-#if !defined (__WXPALMOS5__)
-#define POSSEC_APPBASE
-#define POSSEC_ARCHIVE
-#define POSSEC_CLNTDATA
-#define POSSEC_CMDLINE
-#define POSSEC_CONFIG
-#define POSSEC_DATETIME
-#define POSSEC_DATETIME2
-#define POSSEC_DATSTRM
-#define POSSEC_DIRCMN
-#define POSSEC_DYNARRAY
-#define POSSEC_DYNLIB
-#define POSSEC_DYNLOAD
-#define POSSEC_ENCCONV
-#define POSSEC_EXTENDED
-#define POSSEC_FFILE
-#define POSSEC_FILE
-#define POSSEC_FILECONF
-#define POSSEC_FILEFN
-#endif // __WXPALMOS5__
 
 #endif /* _WX_PLATFORM_H_ */

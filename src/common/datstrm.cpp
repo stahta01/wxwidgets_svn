@@ -92,7 +92,7 @@ double wxDataInputStream::ReadDouble()
   char buf[10];
 
   m_input->Read(buf, 10);
-  return wxConvertFromIeeeExtended((const wxInt8 *)buf);
+  return ConvertFromIeeeExtended((const wxInt8 *)buf);
 #else
   return 0.0;
 #endif
@@ -529,7 +529,7 @@ void wxDataOutputStream::WriteDouble(double d)
   char buf[10];
 
 #if wxUSE_APPLE_IEEE
-  wxConvertToIeeeExtended(d, (wxInt8 *)buf);
+  ConvertToIeeeExtended(d, (wxInt8 *)buf);
 #else
 #if !defined(__VMS__) && !defined(__GNUG__)
 # pragma warning "wxDataOutputStream::WriteDouble() not using IeeeExtended - will not work!"
@@ -648,6 +648,13 @@ void wxDataOutputStream::WriteDouble(const double *buffer, size_t size)
   {
     WriteDouble(*(buffer++));
   }
+}
+
+wxDataOutputStream& wxDataOutputStream::operator<<(const wxChar *string)
+{
+  Write32(wxStrlen(string));
+  m_output->Write((const char *)string, wxStrlen(string)*sizeof(wxChar));
+  return *this;
 }
 
 wxDataOutputStream& wxDataOutputStream::operator<<(const wxString& string)

@@ -15,10 +15,9 @@
 #include "wx/string.h"
 #include "wx/bitmap.h"
 #include "wx/icon.h"
-#include "wx/iconbndl.h"
 
-class WXDLLIMPEXP_FWD_CORE wxArtProvidersList;
-class WXDLLIMPEXP_FWD_CORE wxArtProviderCache;
+class WXDLLEXPORT wxArtProvidersList;
+class WXDLLEXPORT wxArtProviderCache;
 class wxArtProviderModule;
 
 // ----------------------------------------------------------------------------
@@ -45,7 +44,6 @@ typedef wxString wxArtID;
 #define wxART_HELP_BROWSER         wxART_MAKE_CLIENT_ID(wxART_HELP_BROWSER)
 #define wxART_MESSAGE_BOX          wxART_MAKE_CLIENT_ID(wxART_MESSAGE_BOX)
 #define wxART_BUTTON               wxART_MAKE_CLIENT_ID(wxART_BUTTON)
-#define wxART_LIST                 wxART_MAKE_CLIENT_ID(wxART_LIST)
 
 #define wxART_OTHER                wxART_MAKE_CLIENT_ID(wxART_OTHER)
 
@@ -148,16 +146,6 @@ public:
                           const wxArtClient& client = wxART_OTHER,
                           const wxSize& size = wxDefaultSize);
 
-    // Helper used by several generic classes: return the icon corresponding to
-    // the standard wxICON_INFORMATION/WARNING/ERROR/QUESTION flags (only one
-    // can be set)
-    static wxIcon GetMessageBoxIcon(int flags);
-
-    // Query the providers for iconbundle with given ID and return it. Return
-    // wxNullIconBundle if no provider provides it.
-    static wxIconBundle GetIconBundle(const wxArtID& id,
-                                      const wxArtClient& client = wxART_OTHER);
-
     // Get the size hint of an icon from a specific wxArtClient, queries
     // the topmost provider if platform_dependent = false
     static wxSize GetSizeHint(const wxArtClient& client, bool platform_dependent = false);
@@ -189,18 +177,12 @@ protected:
         return GetSizeHint(client, true);
     }
 
-    // Derived classes must override CreateBitmap or CreateIconBundle
-    // (or both) to create requested art resource. This method is called
-    // only once per instance's lifetime for each requested wxArtID.
+    // Derived classes must override this method to create requested
+    // art resource. This method is called only once per instance's
+    // lifetime for each requested wxArtID.
     virtual wxBitmap CreateBitmap(const wxArtID& WXUNUSED(id),
                                   const wxArtClient& WXUNUSED(client),
-                                  const wxSize& WXUNUSED(size)) { return wxNullBitmap; }
-
-    virtual wxIconBundle CreateIconBundle(const wxArtID& WXUNUSED(id),
-                                          const wxArtClient& WXUNUSED(client))
-    {
-        return wxNullIconBundle;
-    }
+                                  const wxSize& WXUNUSED(size)) = 0;
 
 private:
     static void CommonAddingProvider();

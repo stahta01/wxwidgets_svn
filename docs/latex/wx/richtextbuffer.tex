@@ -10,15 +10,11 @@ wxRichTextParagraphLayoutBox
 
 <wx/richtext/richtextbuffer.h>
 
-\wxheading{Library}
-
-\helpref{wxRichtext}{librarieslist}
-
 \wxheading{Data structures}
 
 \wxheading{See also}
 
-\helpref{wxTextAttr}{wxtextattr}, \helpref{wxRichTextCtrl}{wxrichtextctrl}
+\helpref{wxTextAttr}{wxtextattr}, \helpref{wxTextAttrEx}{wxtextattrex}, \helpref{wxRichTextAttr}{wxrichtextattr}, \helpref{wxRichTextCtrl}{wxrichtextctrl}
 
 \latexignore{\rtfignore{\wxheading{Members}}}
 
@@ -209,7 +205,7 @@ Begins a right indent, specified in tenths of a millimetre.
 
 \membersection{wxRichTextBuffer::BeginStyle}\label{wxrichtextbufferbeginstyle}
 
-\func{bool}{BeginStyle}{\param{const wxTextAttr\& }{style}}
+\func{bool}{BeginStyle}{\param{const wxTextAttrEx\& }{style}}
 
 Begins using a specified style.
 
@@ -481,7 +477,7 @@ Finds a handler by filename or, if supplied, type.
 
 \membersection{wxRichTextBuffer::GetBasicStyle}\label{wxrichtextbuffergetbasicstyle}
 
-\constfunc{const wxTextAttr\&}{GetBasicStyle}{\void}
+\constfunc{const wxTextAttrEx\&}{GetBasicStyle}{\void}
 
 Gets the basic (overall) style. This is the style of the whole
 buffer before further styles are applied, unlike the default style, which
@@ -503,7 +499,7 @@ initialized.
 
 \membersection{wxRichTextBuffer::GetDefaultStyle}\label{wxrichtextbuffergetdefaultstyle}
 
-\constfunc{const wxTextAttr\&}{GetDefaultStyle}{\void}
+\constfunc{const wxTextAttrEx\&}{GetDefaultStyle}{\void}
 
 Returns the current default style, affecting the style currently being applied (for example, setting the default
 style to bold will cause subsequently inserted text to be bold).
@@ -530,7 +526,9 @@ Returns the object to be used to render certain aspects of the content, such as 
 
 \membersection{wxRichTextBuffer::GetStyle}\label{wxrichtextbuffergetstyle}
 
-\func{bool}{GetStyle}{\param{long }{position}, \param{wxTextAttr\& }{style}}
+\func{bool}{GetStyle}{\param{long }{position}, \param{wxRichTextAttr\& }{style}}
+
+\func{bool}{GetStyle}{\param{long }{position}, \param{wxTextAttrEx\& }{style}}
 
 Gets the attributes at the given position.
 
@@ -540,7 +538,7 @@ or paragraph style alone, use \helpref{GetUncombinedStyle}{wxrichtextbuffergetun
 
 \membersection{wxRichTextBuffer::GetStyleForRange}\label{wxrichtextbuffergetstyleforrange}
 
-\func{bool}{GetStyleForRange}{\param{const wxRichTextRange\&}{ range}, \param{wxTextAttr\& }{style}}
+\func{bool}{GetStyleForRange}{\param{const wxRichTextRange\&}{ range}, \param{wxTextAttrEx\& }{style}}
 
 This function gets a style representing the common, combined attributes in the given range.
 Attributes which have different values within the specified range will not be included the style
@@ -575,7 +573,9 @@ Get the size of the style stack, for example to check correct nesting.
 
 \membersection{wxRichTextBuffer::GetUncombinedStyle}\label{wxrichtextbuffergetuncombinedstyle}
 
-\func{bool}{GetUncombinedStyle}{\param{long }{position}, \param{wxTextAttr\& }{style}}
+\func{bool}{GetUncombinedStyle}{\param{long }{position}, \param{wxRichTextAttr\& }{style}}
+
+\func{bool}{GetUncombinedStyle}{\param{long }{position}, \param{wxTextAttrEx\& }{style}}
 
 Gets the attributes at the given position.
 
@@ -745,7 +745,9 @@ Saves content to a file.
 
 \membersection{wxRichTextBuffer::SetBasicStyle}\label{wxrichtextbuffersetbasicstyle}
 
-\func{void}{SetBasicStyle}{\param{const wxTextAttr\& }{style}}
+\func{void}{SetBasicStyle}{\param{const wxRichTextAttr\& }{style}}
+
+\func{void}{SetBasicStyle}{\param{const wxTextAttrEx\& }{style}}
 
 Sets the basic (overall) style. This is the style of the whole
 buffer before further styles are applied, unlike the default style, which
@@ -754,7 +756,7 @@ style to bold will cause subsequently inserted text to be bold).
 
 \membersection{wxRichTextBuffer::SetDefaultStyle}\label{wxrichtextbuffersetdefaultstyle}
 
-\func{void}{SetDefaultStyle}{\param{const wxTextAttr\& }{style}}
+\func{void}{SetDefaultStyle}{\param{const wxTextAttrEx\& }{style}}
 
 Sets the default style, affecting the style currently being applied (for example, setting the default
 style to bold will cause subsequently inserted text to be bold).
@@ -790,7 +792,9 @@ overriding one or more virtual functions, and setting an instance of the class u
 
 \membersection{wxRichTextBuffer::SetStyle}\label{wxrichtextbuffersetstyle}
 
-\func{bool}{SetStyle}{\param{const wxRichTextRange\& }{range}, \param{const wxTextAttr\& }{style}, \param{int }{flags $=$ wxRICHTEXT\_SETSTYLE\_WITH\_UNDO}}
+\func{bool}{SetStyle}{\param{const wxRichTextRange\& }{range}, \param{const wxRichTextAttr\& }{style}, \param{int }{flags $=$ wxRICHTEXT\_SETSTYLE\_WITH\_UNDO}}
+
+\func{bool}{SetStyle}{\param{const wxRichTextRange\& }{range}, \param{const wxTextAttrEx\& }{style}, \param{int }{flags $=$ wxRICHTEXT\_SETSTYLE\_WITH\_UNDO}}
 
 Sets the attributes for the given range. Pass flags to determine how the attributes are set.
 

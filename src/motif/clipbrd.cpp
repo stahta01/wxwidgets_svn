@@ -287,7 +287,7 @@ bool wxClipboard::AddData( wxDataObject *data )
     Display* xdisplay = wxGlobalDisplay();
     Widget xwidget = (Widget)wxTheApp->GetTopLevelRealizedWidget();
     Window xwindow = XtWindow( xwidget );
-    wxXmString label( wxTheApp->GetAppDisplayName() );
+    wxXmString label( wxTheApp->GetAppName() );
     Time timestamp = XtLastTimestampProcessed( xdisplay );
     long itemId;
 
@@ -312,7 +312,7 @@ bool wxClipboard::AddData( wxDataObject *data )
         wxString id = dfarr[i].GetId();
 
         while( ( retval = XmClipboardCopy( xdisplay, xwindow, itemId,
-                                           id.char_str(),
+                                           wxConstCast(id.c_str(), char),
                                            NULL, size, i, &data_id ) )
                == XmClipboardLocked );
 
@@ -461,7 +461,7 @@ bool wxClipboard::GetData( wxDataObject& data )
     wxString id = chosenFormat.GetId();
 
     while( ( retval = XmClipboardInquireLength( xdisplay, xwindow,
-                                                id.char_str(),
+                                                wxConstCast(id.c_str(), char),
                                                 &length ) )
            == XmClipboardLocked );
     if( retval != XmClipboardSuccess )
@@ -470,7 +470,7 @@ bool wxClipboard::GetData( wxDataObject& data )
     wxCharBuffer buf(length);
 
     while( ( retval = XmClipboardRetrieve( xdisplay, xwindow,
-                                           id.char_str(),
+                                           wxConstCast(id.c_str(), char),
                                            (XtPointer)buf.data(),
                                            length, &dummy1, &dummy2 ) )
            == XmClipboardLocked );

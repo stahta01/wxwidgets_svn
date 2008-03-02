@@ -68,8 +68,7 @@ public:
 
     wxAcceleratorEntry& operator=(const wxAcceleratorEntry& entry)
     {
-        if (&entry != this)
-            Set(entry.m_flags, entry.m_keyCode, entry.m_command, entry.m_item);
+        Set(entry.m_flags, entry.m_keyCode, entry.m_command, entry.m_item);
         return *this;
     }
 
@@ -138,7 +137,7 @@ private:
     wxMenuItem *m_item;
 
     // for compatibility with old code, use accessors now!
-    friend class WXDLLIMPEXP_FWD_CORE wxMenu;
+    friend class WXDLLEXPORT wxMenu;
 };
 
 // ----------------------------------------------------------------------------

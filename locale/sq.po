@@ -4097,7 +4097,6 @@ msgid "Objects must have an id attribute"
 msgstr "Objektet duhet të kenë një atribut id"
 
 #: ../src/common/docview.cpp:1279 ../src/common/docview.cpp:1629
-#: ../src/common/docview.cpp:1589
 msgid "Open File"
 msgstr "Hap Kartelë"
 
@@ -4728,8 +4727,8 @@ msgid "Save &As..."
 msgstr "Ruaj &Si..."
 
 #: ../src/common/docview.cpp:300
-msgid "Save As"
-msgstr "Ruaj Si"
+msgid "Save as"
+msgstr "Ruaj  si"
 
 #: ../src/common/stockitem.cpp:212
 #, fuzzy
@@ -4809,6 +4808,10 @@ msgstr "Përzgjidhni një stampë dokumenti"
 #: ../src/common/docview.cpp:1786
 msgid "Select a document view"
 msgstr "Përzgjidhni parje dokumenti"
+
+#: ../src/common/docview.cpp:1589
+msgid "Select a file"
+msgstr "Përzgjidhni një kartelë"
 
 #: ../src/common/stockitem.cpp:153
 #, fuzzy

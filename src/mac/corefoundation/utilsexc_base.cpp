@@ -28,7 +28,6 @@
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/utils.h"
-    #include "wx/wxcrt.h"
 #endif // WX_PRECOMP
 
 // Mac Includes
@@ -40,7 +39,11 @@
 #include "wx/mac/corefoundation/cfstring.h"
 
 // Default path style
+#ifdef __WXMAC_OSX__
 #define kDefaultPathStyle kCFURLPOSIXPathStyle
+#else
+#define kDefaultPathStyle kCFURLHFSPathStyle
+#endif
 
 //===========================================================================
 //  IMPLEMENTATION
@@ -57,7 +60,7 @@
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 long wxMacExecute(wxChar **argv,
                int flags,
-               wxProcess *WXUNUSED(process))
+               wxProcess *process)
 {
     // Semi-macros used for return value of wxMacExecute
     const long errorCode = ((flags & wxEXEC_SYNC) ? -1 : 0);
@@ -87,7 +90,7 @@ long wxMacExecute(wxChar **argv,
     CFURLRef cfurlApp =
         CFURLCreateWithFileSystemPath(
             kCFAllocatorDefault,
-            wxCFStringRef(path),
+            wxMacCFStringHolder(path),
             kDefaultPathStyle,
             true); //false == not a directory
 
@@ -155,7 +158,7 @@ long wxMacExecute(wxChar **argv,
             // First, try creating as a directory
             cfurlCurrentFile = CFURLCreateWithFileSystemPath(
                                 kCFAllocatorDefault,
-                                wxCFStringRef(*argv),
+                                wxMacCFStringHolder(*argv),
                                 kDefaultPathStyle,
                                 true); //true == directory
         }
@@ -165,7 +168,7 @@ long wxMacExecute(wxChar **argv,
             // as a regular file
             cfurlCurrentFile = CFURLCreateWithFileSystemPath(
                                 kCFAllocatorDefault,
-                                wxCFStringRef(*argv),
+                                wxMacCFStringHolder(*argv),
                                 kDefaultPathStyle,
                                 false); //false == regular file
         }
@@ -176,7 +179,7 @@ long wxMacExecute(wxChar **argv,
             // so try creating it through CFURLCreateWithString
             cfurlCurrentFile = CFURLCreateWithString(
                                 kCFAllocatorDefault,
-                                wxCFStringRef(*argv),
+                                wxMacCFStringHolder(*argv),
                                 NULL);
         }
 

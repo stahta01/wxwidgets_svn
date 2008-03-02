@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/dc.h"
     #include "wx/log.h"
@@ -47,7 +47,6 @@ wxHtmlWinParser::wxHtmlWinParser(wxHtmlWindowInterface *wndIface)
     m_CharHeight = m_CharWidth = 0;
     m_UseLink = false;
 #if !wxUSE_UNICODE
-    m_nbsp = 0;
     m_EncConv = NULL;
     m_InputEnc = wxFONTENCODING_ISO8859_1;
     m_OutputEnc = wxFONTENCODING_DEFAULT;
@@ -200,13 +199,10 @@ void wxHtmlWinParser::InitParser(const wxString& source)
     m_FontBold = m_FontItalic = m_FontUnderlined = m_FontFixed = FALSE;
     m_FontSize = 3; //default one
     CreateCurrentFont();           // we're selecting default font into
-    
-    // we're not using GetCharWidth/Height() because of
-    // differences under X and win
-    wxCoord w,h;
-    m_DC->GetTextExtent( wxT("H"), &w, &h);
-    m_CharWidth = w;
-    m_CharHeight = h;
+    m_DC->GetTextExtent( wxT("H"), &m_CharWidth, &m_CharHeight);
+                /* NOTE : we're not using GetCharWidth/Height() because
+                   of differences under X and win
+                 */
 
     m_UseLink = false;
     m_Link = wxHtmlLinkInfo( wxEmptyString );
@@ -343,12 +339,15 @@ wxFSFile *wxHtmlWinParser::OpenURL(wxHtmlURLType type,
     return GetFS()->OpenFile(myurl, flags);
 }
 
-void wxHtmlWinParser::AddText(const wxString& txt)
+void wxHtmlWinParser::AddText(const wxChar* txt)
 {
+    size_t i = 0,
+           x,
+           lng = wxStrlen(txt);
     register wxChar d;
     int templen = 0;
+    wxChar nbsp = GetEntitiesParser()->GetCharForCode(160 /* nbsp */);
 
-    size_t lng = txt.length();
     if (lng+1 > m_tmpStrBufSize)
     {
         delete[] m_tmpStrBuf;
@@ -357,63 +356,42 @@ void wxHtmlWinParser::AddText(const wxString& txt)
     }
     wxChar *temp = m_tmpStrBuf;
 
-    wxString::const_iterator i = txt.begin();
-    wxString::const_iterator end = txt.end();
-
     if (m_tmpLastWasSpace)
     {
-        while ( (i < end) &&
-                (*i == wxT('\n') || *i == wxT('\r') || *i == wxT(' ') ||
-                 *i == wxT('\t')) )
-        {
-            ++i;
-        }
+        while ((i < lng) &&
+               ((txt[i] == wxT('\n')) || (txt[i] == wxT('\r')) || (txt[i] == wxT(' ')) ||
+                (txt[i] == wxT('\t')))) i++;
     }
 
-    while (i < end)
+    while (i < lng)
     {
-        size_t x = 0;
-        d = temp[templen++] = *i;
+        x = 0;
+        d = temp[templen++] = txt[i];
         if ((d == wxT('\n')) || (d == wxT('\r')) || (d == wxT(' ')) || (d == wxT('\t')))
         {
-            ++i, ++x;
-            while ( (i < end) &&
-                    (*i == wxT('\n') || *i == wxT('\r') ||
-                     *i == wxT(' ') || *i == wxT('\t')) )
-            {
-                ++i;
-                ++x;
-            }
+            i++, x++;
+            while ((i < lng) && ((txt[i] == wxT('\n')) || (txt[i] == wxT('\r')) ||
+                                 (txt[i] == wxT(' ')) || (txt[i] == wxT('\t')))) i++, x++;
         }
-        else
-            ++i;
+        else i++;
 
         if (x)
         {
             temp[templen-1] = wxT(' ');
-            DoAddText(temp, templen);
+            DoAddText(temp, templen, nbsp);
             m_tmpLastWasSpace = true;
         }
     }
 
     if (templen && (templen > 1 || temp[0] != wxT(' ')))
     {
-        DoAddText(temp, templen);
+        DoAddText(temp, templen, nbsp);
         m_tmpLastWasSpace = false;
     }
 }
 
-void wxHtmlWinParser::DoAddText(wxChar *temp, int& templen)
+void wxHtmlWinParser::DoAddText(wxChar *temp, int& templen, wxChar nbsp)
 {
-    #define NBSP_UNICODE_VALUE 160
-#if !wxUSE_UNICODE
-    if ( m_nbsp == 0 )
-        m_nbsp = GetEntitiesParser()->GetCharForCode(NBSP_UNICODE_VALUE);
-    #define CUR_NBSP_VALUE m_nbsp
-#else
-    #define CUR_NBSP_VALUE NBSP_UNICODE_VALUE
-#endif
-
     temp[templen] = 0;
     templen = 0;
 #if !wxUSE_UNICODE
@@ -423,7 +401,7 @@ void wxHtmlWinParser::DoAddText(wxChar *temp, int& templen)
     size_t len = wxStrlen(temp);
     for (size_t j = 0; j < len; j++)
     {
-        if (temp[j] == CUR_NBSP_VALUE)
+        if (temp[j] == nbsp)
             temp[j] = wxT(' ');
     }
 
@@ -552,9 +530,6 @@ void wxHtmlWinParser::ApplyStateToCell(wxHtmlCell *cell)
 #if !wxUSE_UNICODE
 void wxHtmlWinParser::SetInputEncoding(wxFontEncoding enc)
 {
-    // the character used for non-breakable space may change:
-    m_nbsp = 0;
-
     m_InputEnc = m_OutputEnc = wxFONTENCODING_DEFAULT;
     if (m_EncConv)
     {

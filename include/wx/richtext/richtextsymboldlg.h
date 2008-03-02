@@ -18,14 +18,13 @@
 
 #include "wx/dialog.h"
 #include "wx/vscroll.h"
+#include "wx/combobox.h"
+#include "wx/stattext.h"
+#include "wx/textctrl.h"
 
 /*!
  * Forward declarations
  */
-
-class WXDLLIMPEXP_FWD_CORE wxStaticText;
-class WXDLLIMPEXP_FWD_CORE wxComboBox;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
 
 ////@begin forward declarations
 class wxSymbolListCtrl;
@@ -118,9 +117,16 @@ public:
     void OnFromUnicodeSelected( wxCommandEvent& event );
 
 #endif
+#if defined(__WXMSW__) || defined(__WXGTK__) || defined(__WXPM__) || defined(__WXMGL__) || defined(__WXMOTIF__) || defined(__WXCOCOA__) || defined(__WXX11__) || defined(__WXPALMOS__)
     /// wxEVT_UPDATE_UI event handler for wxID_OK
     void OnOkUpdate( wxUpdateUIEvent& event );
 
+#endif
+#if defined(__WXMAC__)
+    /// wxEVT_UPDATE_UI event handler for wxID_OK
+    void OnOkUpdate( wxUpdateUIEvent& event );
+
+#endif
 ////@end wxSymbolPickerDialog event handler declarations
 
 ////@begin wxSymbolPickerDialog member function declarations
@@ -285,7 +291,7 @@ protected:
     virtual void OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const;
 
     // gets the line height
-    virtual wxCoord OnGetRowHeight(size_t line) const;
+    virtual wxCoord OnGetLineHeight(size_t line) const;
 
     // event handlers
     void OnPaint(wxPaintEvent& event);

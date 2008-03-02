@@ -21,8 +21,8 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxPen;
+class WXDLLIMPEXP_CORE wxBitmap;
+class WXDLLIMPEXP_CORE wxPen;
 
 //-----------------------------------------------------------------------------
 // wxPen
@@ -57,9 +57,13 @@ public:
     wxDash* GetDash() const;
     wxBitmap *GetStipple() const;
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
+
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     DECLARE_DYNAMIC_CLASS(wxPen)
 };

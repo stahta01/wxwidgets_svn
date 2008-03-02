@@ -39,10 +39,10 @@ public :
 
 
     virtual bool HasOwnContextMenu() const
-        { return false ; }
+    { return false ; }
 
-    virtual bool SetupCursor( const wxPoint& WXUNUSED(pt) )
-        { return false ; }
+    virtual bool SetupCursor( const wxPoint& pt )
+    { return false ; }
 
     virtual void Clear() ;
     virtual bool CanUndo() const;
@@ -55,9 +55,21 @@ public :
     virtual void ShowPosition(long WXUNUSED(pos)) ;
     virtual int GetLineLength(long lineNo) const ;
     virtual wxString GetLineText(long lineNo) const ;
-    virtual void CheckSpelling(bool WXUNUSED(check)) { }
+    virtual void CheckSpelling(bool check) { }
 
+#ifndef __WXMAC_OSX__
+    virtual void            MacControlUserPaneDrawProc(wxInt16 part) = 0 ;
+    virtual wxInt16         MacControlUserPaneHitTestProc(wxInt16 x, wxInt16 y) = 0 ;
+    virtual wxInt16         MacControlUserPaneTrackingProc(wxInt16 x, wxInt16 y, void* actionProc) = 0 ;
+    virtual void            MacControlUserPaneIdleProc() = 0 ;
+    virtual wxInt16         MacControlUserPaneKeyDownProc(wxInt16 keyCode, wxInt16 charCode, wxInt16 modifiers) = 0 ;
+    virtual void            MacControlUserPaneActivateProc(bool activating) = 0 ;
+    virtual wxInt16         MacControlUserPaneFocusProc(wxInt16 action) = 0 ;
+    virtual void            MacControlUserPaneBackgroundProc(void* info) = 0 ;
+#endif
 } ;
+
+#if TARGET_API_MAC_OSX
 
 class wxMacUnicodeTextControl : public wxMacTextControl
 {
@@ -93,5 +105,7 @@ protected :
 public :
     ControlEditTextSelectionRec m_selection ;
 };
+
+#endif // TARGET_API_MAC_OSX
 
 #endif // _WX_MAC_PRIVATE_MACTEXT_H_

@@ -186,14 +186,9 @@ wxMenuItem::~wxMenuItem()
 // ----
 
 // return the id for calling Win32 API functions
-WXWPARAM wxMenuItem::GetMSWId() const
+int wxMenuItem::GetRealId() const
 {
-    // we must use ids in unsigned short range with Windows functions, if we
-    // pass ids > USHRT_MAX to them they get very confused (e.g. start
-    // generating WM_COMMAND messages with negative high word of wParam), so
-    // use the cast to ensure the id is in range
-    return m_subMenu ? wxPtrToUInt(m_subMenu->GetHMenu())
-                     : wx_static_cast(unsigned short, GetId());
+    return m_subMenu ? (int)m_subMenu->GetHMenu() : GetId();
 }
 
 // get item state
@@ -206,13 +201,13 @@ bool wxMenuItem::IsChecked() const
     if ( GetId() == wxID_SEPARATOR )
         return false ;
 
-    int flag = ::GetMenuState(GetHMenuOf(m_parentMenu), GetMSWId(), MF_BYCOMMAND);
+    int flag = ::GetMenuState(GetHMenuOf(m_parentMenu), GetId(), MF_BYCOMMAND);
 
     return (flag & MF_CHECKED) != 0;
 }
 
 /* static */
-wxString wxMenuItemBase::GetLabelText(const wxString& text)
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }
@@ -250,7 +245,7 @@ void wxMenuItem::Enable(bool enable)
         return;
 
     long rc = EnableMenuItem(GetHMenuOf(m_parentMenu),
-                             GetMSWId(),
+                             GetRealId(),
                              MF_BYCOMMAND |
                              (enable ? MF_ENABLED : MF_GRAYED));
 
@@ -332,7 +327,7 @@ void wxMenuItem::Check(bool check)
     else // check item
     {
         if ( ::CheckMenuItem(hmenu,
-                             GetMSWId(),
+                             GetRealId(),
                              MF_BYCOMMAND | flags) == (DWORD)-1 )
         {
             wxFAIL_MSG( _T("CheckMenuItem() failed, item not in the menu?") );
@@ -342,7 +337,7 @@ void wxMenuItem::Check(bool check)
     wxMenuItemBase::Check(check);
 }
 
-void wxMenuItem::SetItemLabel(const wxString& txt)
+void wxMenuItem::SetText(const wxString& txt)
 {
     wxString text = txt;
 
@@ -351,7 +346,7 @@ void wxMenuItem::SetItemLabel(const wxString& txt)
         return;
 
     // wxMenuItemBase will do stock ID checks
-    wxMenuItemBase::SetItemLabel(text);
+    wxMenuItemBase::SetText(text);
 
     // m_text could now be different from 'text' if we are a stock menu item,
     // so use only m_text below
@@ -369,7 +364,7 @@ void wxMenuItem::SetItemLabel(const wxString& txt)
     m_parentMenu->UpdateAccel(this);
 #endif // wxUSE_ACCEL
 
-    UINT id = GetMSWId();
+    UINT id = GetRealId();
     UINT flagsOld = ::GetMenuState(hMenu, id, MF_BYCOMMAND);
     if ( flagsOld == 0xFFFFFFFF )
     {
@@ -397,7 +392,7 @@ void wxMenuItem::SetItemLabel(const wxString& txt)
 #endif  //owner drawn
         {
             flagsOld |= MF_STRING;
-            data = (wxChar*) m_text.wx_str();
+            data = (wxChar*) m_text.c_str();
         }
 
 #ifdef __WXWINCE__

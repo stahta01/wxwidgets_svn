@@ -19,7 +19,7 @@
 
 #if wxUSE_WXHTML_HELP
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/object.h"
     #include "wx/dynarray.h"
     #include "wx/intl.h"
@@ -40,7 +40,7 @@
     #include "wx/toolbar.h"
     #include "wx/choicdlg.h"
     #include "wx/filedlg.h"
-#endif // WX_PRECOMP
+#endif // WXPRECOMP
 
 #include "wx/html/helpfrm.h"
 #include "wx/html/helpctrl.h"
@@ -55,7 +55,6 @@
 #include "wx/fontenum.h"
 #include "wx/artprov.h"
 #include "wx/spinctrl.h"
-#include "wx/app.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxHtmlHelpFrame, wxFrame)
 
@@ -226,23 +225,16 @@ void wxHtmlHelpFrame::UseConfig(wxConfigBase *config, const wxString& rootPath)
 }
 
 #ifdef __WXMAC__
-void wxHtmlHelpFrame::OnClose(wxCommandEvent& WXUNUSED(event))
+void wxHtmlHelpFrame::OnClose(wxCommandEvent& event)
 {
     Close(true);
 }
 
-void wxHtmlHelpFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void wxHtmlHelpFrame::OnAbout(wxCommandEvent& event)
 {
     wxMessageBox(wxT("wxWidgets HTML Help Viewer (c) 1998-2006, Vaclav Slavik et al"), wxT("HelpView"),
         wxICON_INFORMATION|wxOK, this);
 }
 #endif
-
-// we don't want to prevent the app from closing just because a help window
-// remains opened
-bool wxHtmlHelpFrame::ShouldPreventAppExit() const
-{
-    return (wx_const_cast(wxHtmlHelpFrame*, this) == wxTheApp->GetTopWindow());
-}
 
 #endif // wxUSE_WXHTML_HELP

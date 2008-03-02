@@ -34,7 +34,7 @@
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
 
-BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
+BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, wxNotebook::OnSelChange)
 
     EVT_SIZE(wxNotebook::OnSize)
@@ -42,7 +42,7 @@ BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
     EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
 END_EVENT_TABLE()
 
-IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxBookCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxCommandEvent)
 
 
@@ -105,7 +105,10 @@ bool wxNotebook::Create( wxWindow *parent,
     switch (GetWindowVariant())
     {
         case wxWINDOW_VARIANT_MINI:
-            tabsize = 3 ;
+            if ( UMAGetSystemVersion() >= 0x1030 )
+                tabsize = 3 ;
+            else
+                tabsize = kControlSizeSmall;
             break;
 
         case wxWINDOW_VARIANT_SMALL:
@@ -137,12 +140,12 @@ wxNotebook::~wxNotebook()
 // wxNotebook accessors
 // ----------------------------------------------------------------------------
 
-void wxNotebook::SetPadding(const wxSize& WXUNUSED(padding))
+void wxNotebook::SetPadding(const wxSize& padding)
 {
     // unsupported by OS
 }
 
-void wxNotebook::SetTabSize(const wxSize& WXUNUSED(sz))
+void wxNotebook::SetTabSize(const wxSize& sz)
 {
     // unsupported by OS
 }
@@ -187,7 +190,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
     wxCHECK_MSG( IS_VALID_PAGE(nPage), false, wxT("SetPageText: invalid notebook page") );
 
     wxNotebookPage *page = m_pages[nPage];
-    page->SetLabel(wxStripMenuCodes(strText));
+    page->SetLabel(strText);
     MacSetupTabs();
 
     return true;
@@ -281,7 +284,7 @@ bool wxNotebook::InsertPage(size_t nPage,
     // don't show pages by default (we'll need to adjust their size first)
     pPage->Show( false ) ;
 
-    pPage->SetLabel( wxStripMenuCodes(strText) );
+    pPage->SetLabel( strText );
 
     m_images.Insert( imageId, nPage );
 
@@ -326,6 +329,7 @@ int wxNotebook::HitTest(const wxPoint& pt, long * flags) const
 {
     int resultV = wxNOT_FOUND;
 
+#if TARGET_API_MAC_OSX
     const int countPages = GetPageCount();
 
     // we have to convert from Client to Window relative coordinates
@@ -366,6 +370,7 @@ int wxNotebook::HitTest(const wxPoint& pt, long * flags) const
 
     if ( outPart >= 1 && outPart <= countPages )
         resultV = outPart - 1 ;
+#endif // TARGET_API_MAC_OSX
 
     if (flags != NULL)
     {
@@ -399,11 +404,11 @@ void wxNotebook::MacSetupTabs()
         page = m_pages[ii];
         info.version = kControlTabInfoVersionOne;
         info.iconSuiteID = 0;
-        wxCFStringRef cflabel( page->GetLabel(), GetFont().GetEncoding() ) ;
+        wxMacCFStringHolder cflabel( page->GetLabel(), m_font.GetEncoding() ) ;
         info.name = cflabel ;
         m_peer->SetData<ControlTabInfoRecV1>( ii + 1, kControlTabInfoTag, &info ) ;
 
-        if ( GetImageList() && GetPageImage(ii) >= 0 )
+        if ( GetImageList() && GetPageImage(ii) >= 0 && UMAGetSystemVersion() >= 0x1020 )
         {
             const wxBitmap bmap = GetImageList()->GetBitmap( GetPageImage( ii ) ) ;
             if ( bmap.Ok() )
@@ -422,7 +427,13 @@ void wxNotebook::MacSetupTabs()
         m_peer->SetTabEnabled( ii + 1, true ) ;
     }
 
+#if wxMAC_USE_CORE_GRAPHICS
     Refresh();
+#else
+    Rect bounds;
+    m_peer->GetRectInWindowCoords( &bounds ) ;
+    InvalWindowRect( (WindowRef)MacGetTopLevelWindowRef(), &bounds );
+#endif
 }
 
 wxRect wxNotebook::GetPageRect() const
@@ -509,7 +520,7 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
                 event.SetEventObject( this );
 
                 wxWindow *page = m_pages[m_nSelection];
-                if ( !page->HandleWindowEvent( event ) )
+                if ( !page->GetEventHandler()->ProcessEvent( event ) )
                 {
                     page->SetFocus();
                 }
@@ -527,7 +538,7 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
             if ( parent )
             {
                 event.SetCurrentFocus( this );
-                parent->HandleWindowEvent( event );
+                parent->GetEventHandler()->ProcessEvent( event );
             }
         }
     }
@@ -554,7 +565,7 @@ bool wxNotebook::DoPhase(int WXUNUSED(nPhase))
 
 #endif // wxUSE_CONSTRAINTS
 
-void wxNotebook::Command(wxCommandEvent& WXUNUSED(event))
+void wxNotebook::Command(wxCommandEvent& event)
 {
     wxFAIL_MSG(wxT("wxNotebook::Command not implemented"));
 }
@@ -594,7 +605,7 @@ wxInt32 wxNotebook::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTR
             wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_windowId,
             newSel , m_nSelection );
         changing.SetEventObject( this );
-        HandleWindowEvent( changing );
+        GetEventHandler()->ProcessEvent( changing );
 
         if ( changing.IsAllowed() )
         {
@@ -602,7 +613,7 @@ wxInt32 wxNotebook::MacControlHit(WXEVENTHANDLERREF WXUNUSED(handler) , WXEVENTR
                 wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_windowId,
                 newSel, m_nSelection );
             event.SetEventObject( this );
-            HandleWindowEvent( event );
+            GetEventHandler()->ProcessEvent( event );
         }
         else
         {

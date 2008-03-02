@@ -11,30 +11,48 @@
 
 #include "wx/wxprec.h"
 
-#include "wx/mac/uma.h"
-
 #if wxUSE_GUI
 
 #include "wx/toplevel.h"
 #include "wx/dc.h"
 
+#ifndef __DARWIN__
+#  include <MacTextEditor.h>
+#  include <Navigation.h>
+#  if defined(TARGET_CARBON)
+#    if PM_USE_SESSION_APIS
+#      include <PMCore.h>
+#    endif
+#    include <PMApplication.h>
+#  else
+#    include <Printing.h>
+#  endif
+#endif
+
 #include "wx/mac/uma.h"
+
+// since we have decided that we only support 8.6 upwards we are
+// checking for these minimum requirements in the startup code of
+// the application so all wxWidgets code can safely assume that appearance 1.1
+// windows manager, control manager, navigation services etc. are
+// present
 
 static SInt32 sUMASystemVersion = 0 ;
 
-long UMAGetSystemVersion() 
-{ 
-    if ( sUMASystemVersion == 0 )
-    {
-        verify_noerr(Gestalt(gestaltSystemVersion, &sUMASystemVersion));
-    }
-    return sUMASystemVersion ; 
+long UMAGetSystemVersion() { return sUMASystemVersion ; }
+
+void UMACleanupToolbox()
+{
 }
 
-void UMAInitToolbox( UInt16 WXUNUSED(inMoreMastersCalls),
-                     bool WXUNUSED(isEmbedded) )
+void UMAInitToolbox( UInt16 inMoreMastersCalls, bool isEmbedded )
 {
-#if 0 // ndef __LP64__
+    ::InitCursor();
+
+    if ( Gestalt(gestaltSystemVersion, &sUMASystemVersion) != noErr)
+        sUMASystemVersion = 0x0000 ;
+
+#ifndef __LP64__
     {
         FontFamilyID fontId ;
         Str255 fontName ;
@@ -52,22 +70,57 @@ void UMAInitToolbox( UInt16 WXUNUSED(inMoreMastersCalls),
 
         OptionBits options = 0 ;
 
+        if ( UMAGetSystemVersion() < 0x1000 )
+            options |= kTXNAlwaysUseQuickDrawTextMask ;
+
         TXNInitTextension( fontDescriptions,  noOfFontDescriptions, options );
     }
 #endif
+
+    UMASetSystemIsInitialized( true );
+}
+
+// process manager
+long UMAGetProcessMode()
+{
+    OSErr err ;
+    ProcessInfoRec processinfo;
+    ProcessSerialNumber procno ;
+
+    procno.highLongOfPSN = 0 ;
+    procno.lowLongOfPSN = kCurrentProcess ;
+    processinfo.processInfoLength = sizeof(ProcessInfoRec);
+    processinfo.processName = NULL;
+#ifndef __LP64__
+    processinfo.processAppSpec = NULL;
+#endif
+
+    err = ::GetProcessInformation( &procno , &processinfo ) ;
+    wxASSERT( err == noErr ) ;
+
+    return processinfo.processMode ;
+}
+
+bool UMAGetProcessModeDoesActivateOnFGSwitch()
+{
+    return UMAGetProcessMode() & modeDoesActivateOnFGSwitch ;
 }
 
 // menu manager
-
-#if wxMAC_USE_COCOA == 0
 
 MenuRef UMANewMenu( SInt16 id , const wxString& title , wxFontEncoding encoding )
 {
     wxString str = wxStripMenuCodes( title ) ;
     MenuRef menu ;
 
+#if TARGET_CARBON
     CreateNewMenu( id , 0 , &menu ) ;
-    SetMenuTitleWithCFString( menu , wxCFStringRef(str , encoding ) ) ;
+    SetMenuTitleWithCFString( menu , wxMacCFStringHolder(str , encoding ) ) ;
+#else
+    Str255 ptitle ;
+    wxMacStringToPascal( str , ptitle ) ;
+    menu = ::NewMenu( id , ptitle ) ;
+#endif
 
     return menu ;
 }
@@ -76,7 +129,14 @@ void UMASetMenuTitle( MenuRef menu , const wxString& title , wxFontEncoding enco
 {
     wxString str = wxStripMenuCodes( title ) ;
 
-    SetMenuTitleWithCFString( menu , wxCFStringRef(str , encoding) ) ;
+#if TARGET_CARBON
+    SetMenuTitleWithCFString( menu , wxMacCFStringHolder(str , encoding) ) ;
+
+#else
+    Str255 ptitle ;
+    wxMacStringToPascal( str , ptitle ) ;
+    SetMenuTitle( menu , ptitle ) ;
+#endif
 }
 
 void UMASetMenuItemText( MenuRef menu,  MenuItemIndex item, const wxString& title, wxFontEncoding encoding )
@@ -84,7 +144,19 @@ void UMASetMenuItemText( MenuRef menu,  MenuItemIndex item, const wxString& titl
     // we don't strip the accels here anymore, must be done before
     wxString str = title ;
 
-    SetMenuItemTextWithCFString( menu , item , wxCFStringRef(str , encoding) ) ;
+#if TARGET_CARBON
+    SetMenuItemTextWithCFString( menu , item , wxMacCFStringHolder(str , encoding) ) ;
+
+#else
+    Str255 ptitle ;
+    wxMacStringToPascal( str , ptitle ) ;
+    SetMenuItemText( menu , item , ptitle ) ;
+#endif
+}
+
+UInt32 UMAMenuEvent( EventRecord *inEvent )
+{
+    return MenuEvent( inEvent ) ;
 }
 
 void UMAEnableMenuItem( MenuRef inMenu , MenuItemIndex inItem , bool enable)
@@ -98,7 +170,7 @@ void UMAEnableMenuItem( MenuRef inMenu , MenuItemIndex inItem , bool enable)
 void UMAAppendSubMenuItem( MenuRef menu , const wxString& title, wxFontEncoding encoding , SInt16 id )
 {
     AppendMenuItemTextWithCFString( menu,
-                                CFSTR("A"), 0, 0,NULL);
+                                CFSTR("A"), 0, 0,NULL); 
     UMASetMenuItemText( menu, (SInt16) ::CountMenuItems(menu), title , encoding );
     SetMenuItemHierarchicalID( menu , CountMenuItems( menu ) , id ) ;
 }
@@ -106,8 +178,8 @@ void UMAAppendSubMenuItem( MenuRef menu , const wxString& title, wxFontEncoding 
 void UMAInsertSubMenuItem( MenuRef menu , const wxString& title, wxFontEncoding encoding , MenuItemIndex item , SInt16 id  )
 {
     InsertMenuItemTextWithCFString( menu,
-                CFSTR("A"), item, 0, 0);
-
+                CFSTR("A"), item, 0, 0); 
+                
     UMASetMenuItemText( menu, item+1, title , encoding );
     SetMenuItemHierarchicalID( menu , item+1 , id ) ;
 }
@@ -253,7 +325,7 @@ void UMASetMenuItemShortcut( MenuRef menu , MenuItemIndex item , wxAcceleratorEn
 void UMAAppendMenuItem( MenuRef menu , const wxString& title, wxFontEncoding encoding , wxAcceleratorEntry *entry )
 {
     AppendMenuItemTextWithCFString( menu,
-                                CFSTR("A"), 0, 0,NULL);
+                                CFSTR("A"), 0, 0,NULL); 
     // don't attempt to interpret metacharacters like a '-' at the beginning (would become a separator otherwise)
     ChangeMenuItemAttributes( menu , ::CountMenuItems(menu), kMenuItemAttrIgnoreMeta , 0 ) ;
     UMASetMenuItemText(menu, (SInt16) ::CountMenuItems(menu), title , encoding );
@@ -263,7 +335,7 @@ void UMAAppendMenuItem( MenuRef menu , const wxString& title, wxFontEncoding enc
 void UMAInsertMenuItem( MenuRef menu , const wxString& title, wxFontEncoding encoding , MenuItemIndex item , wxAcceleratorEntry *entry )
 {
     InsertMenuItemTextWithCFString( menu,
-                CFSTR("A"), item, 0, 0);
+                CFSTR("A"), item, 0, 0); 
 
     // don't attempt to interpret metacharacters like a '-' at the beginning (would become a separator otherwise)
     ChangeMenuItemAttributes( menu , item+1, kMenuItemAttrIgnoreMeta , 0 ) ;
@@ -271,46 +343,485 @@ void UMAInsertMenuItem( MenuRef menu , const wxString& title, wxFontEncoding enc
     UMASetMenuItemShortcut( menu , item+1 , entry ) ;
 }
 
+// quickdraw
+
+#if !TARGET_CARBON
+
+int gPrOpenCounter = 0 ;
+
+OSStatus UMAPrOpen()
+{
+    OSErr err = noErr ;
+
+    ++gPrOpenCounter ;
+
+    if ( gPrOpenCounter == 1 )
+    {
+        PrOpen() ;
+        err = PrError() ;
+        wxASSERT( err == noErr ) ;
+    }
+
+    return err ;
+}
+
+OSStatus UMAPrClose()
+{
+    OSErr err = noErr ;
+
+    wxASSERT( gPrOpenCounter >= 1 ) ;
+
+    if ( gPrOpenCounter == 1 )
+    {
+        PrClose() ;
+        err = PrError() ;
+        wxASSERT( err == noErr ) ;
+    }
+
+    --gPrOpenCounter ;
+
+    return err ;
+}
+
+pascal QDGlobalsPtr GetQDGlobalsPtr() ;
+pascal QDGlobalsPtr GetQDGlobalsPtr()
+{
+    return QDGlobalsPtr (* (Ptr*) LMGetCurrentA5 ( ) - 0xCA);
+}
+
 #endif
 
-#if wxMAC_USE_COCOA == 0
-
-static OSStatus UMAGetHelpMenu(
-                               MenuRef *        outHelpMenu,
-                               MenuItemIndex *  outFirstCustomItemIndex,
-                               bool             allowHelpMenuCreation);
-
-static OSStatus UMAGetHelpMenu(
-                               MenuRef *        outHelpMenu,
-                               MenuItemIndex *  outFirstCustomItemIndex,
-                               bool             allowHelpMenuCreation)
+void UMAShowWatchCursor()
 {
-    static bool s_createdHelpMenu = false ;
-    
-    if ( !s_createdHelpMenu && !allowHelpMenuCreation )
-    {
-        return paramErr ;
-    }
-    
-    OSStatus status = HMGetHelpMenu( outHelpMenu , outFirstCustomItemIndex ) ;
-    s_createdHelpMenu = ( status == noErr ) ;
-    return status ;
+    SetThemeCursor(kThemeWatchCursor);
 }
+
+void UMAShowArrowCursor()
+{
+    SetThemeCursor(kThemeArrowCursor);
+}
+
+// window manager
+
+GrafPtr UMAGetWindowPort( WindowRef inWindowRef )
+{
+    wxASSERT( inWindowRef != NULL ) ;
+
+#if TARGET_CARBON
+    return (GrafPtr) GetWindowPort( inWindowRef ) ;
+#else
+    return (GrafPtr) inWindowRef ;
+#endif
+}
+
+void UMADisposeWindow( WindowRef inWindowRef )
+{
+    wxASSERT( inWindowRef != NULL ) ;
+
+    DisposeWindow( inWindowRef ) ;
+}
+
+void UMASetWTitle( WindowRef inWindowRef , const wxString& title , wxFontEncoding encoding )
+{
+#if TARGET_CARBON
+    SetWindowTitleWithCFString( inWindowRef , wxMacCFStringHolder(title , encoding) ) ;
+
+#else
+    Str255 ptitle ;
+    wxMacStringToPascal( title , ptitle ) ;
+    SetWTitle( inWindowRef , ptitle ) ;
+#endif
+}
+
+// appearance additions
+
+void UMASetControlTitle( ControlRef inControl , const wxString& title , wxFontEncoding encoding )
+{
+#if TARGET_CARBON
+    SetControlTitleWithCFString( inControl , wxMacCFStringHolder(title , encoding) ) ;
+
+#else
+    Str255 ptitle ;
+    wxMacStringToPascal( title , ptitle ) ;
+    SetControlTitle( inControl , ptitle ) ;
+#endif
+}
+
+void UMAActivateControl( ControlRef inControl )
+{
+#if TARGET_API_MAC_OSX
+    ::ActivateControl( inControl ) ;
+
+#else
+    // we have to add the control after again to the update rgn
+    // otherwise updates get lost
+    if ( !IsControlActive( inControl ) )
+    {
+        bool visible = IsControlVisible( inControl ) ;
+        if ( visible )
+            SetControlVisibility( inControl , false , false ) ;
+
+        ::ActivateControl( inControl ) ;
+
+        if ( visible )
+        {
+            SetControlVisibility( inControl , true , false ) ;
+
+            Rect ctrlBounds ;
+            InvalWindowRect( GetControlOwner(inControl), UMAGetControlBoundsInWindowCoords(inControl, &ctrlBounds) ) ;
+        }
+    }
+#endif
+}
+
+void UMAMoveControl( ControlRef inControl , short x , short y )
+{
+#if TARGET_API_MAC_OSX
+    ::MoveControl( inControl , x , y ) ;
+
+#else
+    bool visible = IsControlVisible( inControl ) ;
+    if ( visible )
+    {
+        SetControlVisibility( inControl , false , false ) ;
+        Rect ctrlBounds ;
+        InvalWindowRect( GetControlOwner(inControl), GetControlBounds(inControl, &ctrlBounds) ) ;
+    }
+
+    ::MoveControl( inControl , x , y ) ;
+
+    if ( visible )
+    {
+        SetControlVisibility( inControl , true , false ) ;
+        Rect ctrlBounds ;
+        InvalWindowRect( GetControlOwner(inControl), GetControlBounds(inControl, &ctrlBounds) ) ;
+    }
+#endif
+}
+
+void UMASizeControl( ControlRef inControl , short x , short y )
+{
+#if TARGET_API_MAC_OSX
+    ::SizeControl( inControl , x , y ) ;
+
+#else
+    bool visible = IsControlVisible( inControl ) ;
+    if ( visible )
+    {
+        SetControlVisibility( inControl , false , false ) ;
+        Rect ctrlBounds ;
+        InvalWindowRect( GetControlOwner(inControl), GetControlBounds(inControl, &ctrlBounds) ) ;
+    }
+
+    ::SizeControl( inControl , x , y ) ;
+
+    if ( visible )
+    {
+        SetControlVisibility( inControl , true , false ) ;
+        Rect ctrlBounds ;
+        InvalWindowRect( GetControlOwner(inControl), GetControlBounds(inControl, &ctrlBounds) ) ;
+    }
+#endif
+}
+
+void UMADeactivateControl( ControlRef inControl )
+{
+#if TARGET_API_MAC_OSX
+    ::DeactivateControl( inControl ) ;
+
+#else
+    // we have to add the control after again to the update rgn
+    // otherwise updates get lost
+    bool visible = IsControlVisible( inControl ) ;
+    if ( visible )
+        SetControlVisibility( inControl , false , false ) ;
+
+    ::DeactivateControl( inControl ) ;
+
+    if ( visible )
+    {
+        SetControlVisibility( inControl , true , false ) ;
+        Rect ctrlBounds ;
+        InvalWindowRect( GetControlOwner(inControl), UMAGetControlBoundsInWindowCoords(inControl, &ctrlBounds) ) ;
+    }
+#endif
+}
+
+// shows the control and adds the region to the update region
+void UMAShowControl( ControlRef inControl )
+{
+    SetControlVisibility( inControl , true , false ) ;
+    HIViewSetNeedsDisplay( inControl, true );
+}
+
+// hides the control and adds the region to the update region
+void UMAHideControl( ControlRef inControl )
+{
+    SetControlVisibility( inControl , false , false ) ;
+    HIViewSetNeedsDisplay( inControl, true );
+}
+
+// keyboard focus
+OSErr UMASetKeyboardFocus( WindowPtr inWindow,
+                                 ControlRef inControl,
+                                 ControlFocusPart inPart )
+{
+    OSErr err = noErr;
+#ifndef __LP64__
+    GrafPtr port ;
+
+    GetPort( &port ) ;
+    SetPortWindowPort( inWindow ) ;
+#endif
+
+    err = SetKeyboardFocus( inWindow , inControl , inPart ) ;
+#ifndef __LP64__
+    SetPort( port ) ;
+#endif
+
+    return err ;
+}
+
+bool UMAIsWindowFloating( WindowRef inWindow )
+{
+    WindowClass cl ;
+
+    GetWindowClass( inWindow , &cl ) ;
+    return cl == kFloatingWindowClass ;
+}
+
+bool UMAIsWindowModal( WindowRef inWindow )
+{
+    WindowClass cl ;
+
+    GetWindowClass( inWindow , &cl ) ;
+    return cl < kFloatingWindowClass ;
+}
+
+// others
+
+void UMAHighlightAndActivateWindow( WindowRef inWindowRef , bool inActivate )
+{
+    if ( inWindowRef )
+    {
+//        bool isHighlighted = IsWindowHighlited( inWindowRef ) ;
+//        if ( inActivate != isHighlighted )
+#ifndef __LP64__
+        GrafPtr port ;
+        GetPort( &port ) ;
+        SetPortWindowPort( inWindowRef ) ;
+#endif
+        HiliteWindow( inWindowRef , inActivate ) ;
+        ControlRef control = NULL ;
+        ::GetRootControl( inWindowRef , &control ) ;
+        if ( control )
+        {
+            if ( inActivate )
+                UMAActivateControl( control ) ;
+            else
+                UMADeactivateControl( control ) ;
+        }
+#ifndef __LP64__
+        SetPort( port ) ;
+#endif
+    }
+}
+
+OSStatus UMADrawThemePlacard( const Rect *inRect , ThemeDrawState inState )
+{
+#ifndef __LP64__
+    return ::DrawThemePlacard( inRect , inState ) ;
+#else
+    return noErr;
+#endif
+}
+
+#if !TARGET_CARBON
+static OSStatus helpMenuStatus = noErr ;
+static MenuItemIndex firstCustomItemIndex = 0 ;
+#endif
 
 OSStatus UMAGetHelpMenu(
-                        MenuRef *        outHelpMenu,
-                        MenuItemIndex *  outFirstCustomItemIndex)
+    MenuRef *        outHelpMenu,
+    MenuItemIndex *  outFirstCustomItemIndex)
 {
-    return UMAGetHelpMenu( outHelpMenu , outFirstCustomItemIndex , true );
+#if TARGET_CARBON
+    return HMGetHelpMenu( outHelpMenu , outFirstCustomItemIndex ) ;
+
+#else
+    MenuRef helpMenuHandle ;
+
+    helpMenuStatus = HMGetHelpMenuHandle( &helpMenuHandle ) ;
+    if ( firstCustomItemIndex == 0 && helpMenuStatus == noErr )
+        firstCustomItemIndex = CountMenuItems( helpMenuHandle ) + 1 ;
+
+    if ( outFirstCustomItemIndex )
+        *outFirstCustomItemIndex = firstCustomItemIndex ;
+
+    *outHelpMenu = helpMenuHandle ;
+
+    return helpMenuStatus ;
+#endif
 }
 
-OSStatus UMAGetHelpMenuDontCreate(
-                                  MenuRef *        outHelpMenu,
-                                  MenuItemIndex *  outFirstCustomItemIndex)
+#ifndef __LP64__
+
+wxMacPortStateHelper::wxMacPortStateHelper( GrafPtr newport )
 {
-    return UMAGetHelpMenu( outHelpMenu , outFirstCustomItemIndex , false );
+    m_clip = NULL ;
+    Setup( newport ) ;
+}
+
+wxMacPortStateHelper::wxMacPortStateHelper()
+{
+    m_clip = NULL ;
+}
+
+void wxMacPortStateHelper::Setup( GrafPtr newport )
+{
+    GetPort( &m_oldPort ) ;
+    SetPort( newport ) ;
+    SetOrigin(0, 0);
+
+    wxASSERT_MSG( m_clip == NULL , wxT("Cannot call setup twice") ) ;
+    m_clip = NewRgn() ;
+    GetClip( m_clip );
+    m_textFont = GetPortTextFont( (CGrafPtr) newport );
+    m_textSize = GetPortTextSize( (CGrafPtr) newport );
+    m_textStyle = GetPortTextFace( (CGrafPtr) newport );
+    m_textMode = GetPortTextMode( (CGrafPtr) newport );
+    GetThemeDrawingState( &m_drawingState ) ;
+    m_currentPort = newport ;
+}
+
+void wxMacPortStateHelper::Clear()
+{
+    if ( m_clip )
+    {
+        DisposeRgn( m_clip ) ;
+        DisposeThemeDrawingState( m_drawingState ) ;
+        m_clip = NULL ;
+    }
+}
+
+wxMacPortStateHelper::~wxMacPortStateHelper()
+{
+    if ( m_clip )
+    {
+        SetPort( m_currentPort ) ;
+        SetClip( m_clip ) ;
+        DisposeRgn( m_clip ) ;
+        TextFont( m_textFont );
+        TextSize( m_textSize );
+        TextFace( m_textStyle );
+        TextMode( m_textMode );
+        SetThemeDrawingState( m_drawingState , true ) ;
+        SetPort( m_oldPort ) ;
+    }
 }
 
 #endif
 
+Rect * UMAGetControlBoundsInWindowCoords( ControlRef theControl, Rect *bounds )
+{
+    GetControlBounds( theControl , bounds ) ;
+
+#if TARGET_API_MAC_OSX
+    WindowRef tlwref = GetControlOwner( theControl ) ;
+
+    wxTopLevelWindowMac* tlwwx = wxFindWinFromMacWindow( tlwref ) ;
+    if ( tlwwx != NULL )
+    {
+        ControlRef rootControl = tlwwx->GetPeer()->GetControlRef() ;
+        HIPoint hiPoint = CGPointMake( 0 , 0 ) ;
+        HIViewConvertPoint( &hiPoint , HIViewGetSuperview(theControl) , rootControl ) ;
+        OffsetRect( bounds , (short) hiPoint.x , (short) hiPoint.y ) ;
+    }
+#endif
+
+    return bounds ;
+}
+
+size_t UMAPutBytesCFRefCallback( void *info, const void *bytes, size_t count )
+{
+    CFMutableDataRef data = (CFMutableDataRef) info;
+    if ( data )
+    {
+        CFDataAppendBytes( data, (const UInt8*) bytes, count );
+    }
+    return count;
+}
+
+void UMAReleaseCFDataProviderCallback( void *info, const void *data, size_t count )
+{
+    if ( info )
+        CFRelease( (CFDataRef) info );
+}
+
+void UMAReleaseCFDataConsumerCallback( void *info )
+{
+    if ( info )
+        CFRelease( (CFDataRef) info );
+}
+
+CGDataProviderRef UMACGDataProviderCreateWithCFData( CFDataRef data )
+{
+    if ( data == NULL )
+        return NULL;
+        
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if( &CGDataProviderCreateWithCFData != NULL )
+    {
+        return CGDataProviderCreateWithCFData( data );
+    }
+#endif
+
+    // make sure we keep it until done
+    CFRetain( data );
+    CGDataProviderRef provider = CGDataProviderCreateWithData( (void*) data , CFDataGetBytePtr( data ) ,
+        CFDataGetLength( data ), UMAReleaseCFDataProviderCallback );
+    // if provider couldn't be created, release the data again
+    if ( provider == NULL )
+        CFRelease( data );
+    return provider;
+}
+
+CGDataConsumerRef UMACGDataConsumerCreateWithCFData( CFMutableDataRef data )
+{
+    if ( data == NULL )
+        return NULL;
+        
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
+    if( &CGDataConsumerCreateWithCFData != NULL )
+    {
+        return CGDataConsumerCreateWithCFData( data );
+    }
+#endif
+    // make sure we keep it until done
+    CFRetain( data );
+    CGDataConsumerCallbacks callbacks;
+    callbacks.putBytes = UMAPutBytesCFRefCallback;
+    callbacks.releaseConsumer = UMAReleaseCFDataConsumerCallback;
+    CGDataConsumerRef consumer = CGDataConsumerCreate( data , &callbacks );
+    // if consumer couldn't be created, release the data again
+    if ( consumer == NULL )
+        CFRelease( data );
+    return consumer;
+}
 #endif  // wxUSE_GUI
+
+#if wxUSE_BASE
+
+static bool sUMASystemInitialized = false ;
+
+bool UMASystemIsInitialized()
+{
+    return sUMASystemInitialized ;
+}
+
+void UMASetSystemIsInitialized(bool val)
+{
+    sUMASystemInitialized = val;
+}
+
+#endif // wxUSE_BASE

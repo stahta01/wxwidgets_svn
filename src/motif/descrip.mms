@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 19 december 2007                                                    *
+# Date : 21 September 2006                                                   *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -59,6 +59,7 @@ OBJECTS = \
 		menuitem.obj,\
 		minifram.obj,\
 		msgdlg.obj,\
+		palette.obj,\
 		radiobox.obj,\
 		radiobut.obj,\
 		scrolbar.obj,\
@@ -69,7 +70,6 @@ OBJECTS = \
 		statbox.obj,\
 		stattext.obj,\
 		textctrl.obj,\
-		textentry.obj,\
 		toplevel.obj,\
 		timer.obj,\
 		toolbar.obj,\
@@ -111,6 +111,7 @@ SOURCES = \
 		menuitem.cpp,\
 		minifram.cpp,\
 		msgdlg.cpp,\
+		palette.cpp,\
 		radiobox.cpp,\
 		radiobut.cpp,\
 		scrolbar.cpp,\
@@ -121,7 +122,6 @@ SOURCES = \
 		statbox.cpp,\
 		stattext.cpp,\
 		textctrl.cpp,\
-		textentry.cpp,\
 		toplevel.cpp,\
 		timer.cpp,\
 		toolbar.cpp,\
@@ -134,8 +134,6 @@ all : $(SOURCES)
 .ifdef __WXMOTIF__
 	library [--.lib]libwx_motif.olb $(OBJECTS)
 .endif
-
-$(OBJECTS) : [--.include.wx]setup.h
 
 xmcombo.obj : [.xmcombo]xmcombo.c
 	cc $(CFLAGS)$(CC_DEFINE) [.xmcombo]xmcombo.c
@@ -174,6 +172,7 @@ menu.obj : menu.cpp
 menuitem.obj : menuitem.cpp
 minifram.obj : minifram.cpp
 msgdlg.obj : msgdlg.cpp
+palette.obj : palette.cpp
 radiobox.obj : radiobox.cpp
 radiobut.obj : radiobut.cpp
 scrolbar.obj : scrolbar.cpp
@@ -184,7 +183,6 @@ statbmp.obj : statbmp.cpp
 statbox.obj : statbox.cpp
 stattext.obj : stattext.cpp
 textctrl.obj : textctrl.cpp
-textentry.obj : textentry.cpp
 toplevel.obj : toplevel.cpp
 timer.obj : timer.cpp
 toolbar.obj : toolbar.cpp

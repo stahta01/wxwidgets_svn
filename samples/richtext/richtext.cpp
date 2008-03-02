@@ -166,8 +166,6 @@ public:
     void OnDemoteList(wxCommandEvent& event);
     void OnClearList(wxCommandEvent& event);
 
-    void OnReload(wxCommandEvent& event);
-
     void OnViewHTML(wxCommandEvent& event);
 
     void OnSwitchStyleSheets(wxCommandEvent& event);
@@ -183,9 +181,6 @@ public:
 
     // Forward command events to the current rich text control, if any
     bool ProcessEvent(wxEvent& event);
-
-    // Write text
-    void WriteInitialText();
 
 private:
     // any class wishing to process wxWidgets events must use this macro
@@ -211,8 +206,6 @@ enum
     ID_FORMAT_FONT,
     ID_FORMAT_PARAGRAPH,
     ID_FORMAT_CONTENT,
-
-    ID_RELOAD,
 
     ID_INSERT_SYMBOL,
     ID_INSERT_URL,
@@ -299,8 +292,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(ID_FORMAT_PARAGRAPH_SPACING_MORE,  MyFrame::OnParagraphSpacingMore)
     EVT_MENU(ID_FORMAT_PARAGRAPH_SPACING_LESS,  MyFrame::OnParagraphSpacingLess)
 
-    EVT_MENU(ID_RELOAD,  MyFrame::OnReload)
-
     EVT_MENU(ID_INSERT_SYMBOL,  MyFrame::OnInsertSymbol)
     EVT_MENU(ID_INSERT_URL,  MyFrame::OnInsertURL)
 
@@ -342,9 +333,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_HELP
     wxHelpProvider::Set(new wxSimpleHelpProvider);
 #endif
@@ -573,8 +561,6 @@ MyFrame::MyFrame(const wxString& title, wxWindowID id, const wxPoint& pos,
     fileMenu->Append(wxID_SAVE, _T("&Save\tCtrl+S"), _T("Save a file"));
     fileMenu->Append(wxID_SAVEAS, _T("&Save As...\tF12"), _T("Save to a new file"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(ID_RELOAD, _T("&Reload Text\tF2"), _T("Reload the initial text"));
-    fileMenu->AppendSeparator();
     fileMenu->Append(ID_PAGE_SETUP, _T("Page Set&up..."), _T("Page setup"));
     fileMenu->Append(ID_PRINT, _T("&Print...\tCtrl+P"), _T("Print"));
     fileMenu->Append(ID_PREVIEW, _T("Print Pre&view"), _T("Print preview"));
@@ -693,13 +679,13 @@ MyFrame::MyFrame(const wxString& title, wxWindowID id, const wxPoint& pos,
 
     toolBar->Realize();
 
-    wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSP_LIVE_UPDATE);
+    wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSP_NO_XP_THEME|wxSP_3D|wxSP_LIVE_UPDATE);
 
     wxFont textFont = wxFont(12, wxROMAN, wxNORMAL, wxNORMAL);
     wxFont boldFont = wxFont(12, wxROMAN, wxNORMAL, wxBOLD);
     wxFont italicFont = wxFont(12, wxROMAN, wxITALIC, wxNORMAL);
 
-    m_richTextCtrl = new wxRichTextCtrl(splitter, ID_RICHTEXT_CTRL, wxEmptyString, wxDefaultPosition, wxSize(200, 200), wxVSCROLL|wxHSCROLL|wxWANTS_CHARS);
+    m_richTextCtrl = new wxRichTextCtrl(splitter, ID_RICHTEXT_CTRL, wxEmptyString, wxDefaultPosition, wxSize(200, 200), wxVSCROLL|wxHSCROLL|wxNO_BORDER|wxWANTS_CHARS);
     wxFont font(12, wxROMAN, wxNORMAL, wxNORMAL);
 
     m_richTextCtrl->SetFont(font);
@@ -728,15 +714,7 @@ MyFrame::MyFrame(const wxString& title, wxWindowID id, const wxPoint& pos,
     styleListCtrl->SetRichTextCtrl(m_richTextCtrl);
     styleListCtrl->UpdateStyles();
 
-    WriteInitialText();
-}
-
-// Write text
-void MyFrame::WriteInitialText()
-{
     wxRichTextCtrl& r = *m_richTextCtrl;
-
-    r.SetDefaultStyle(wxRichTextAttr());
 
     r.BeginSuppressUndo();
 
@@ -749,8 +727,9 @@ void MyFrame::WriteInitialText()
 
     wxString lineBreak = (wxChar) 29;
 
-    r.WriteText(wxString(wxT("Welcome to wxRichTextCtrl, a wxWidgets control")) + lineBreak + wxT("for editing and presenting styled text and images\n"));
+    r.WriteText(wxString(wxT("Welcome to wxRichTextCtrl, a wxWidgets control")) + lineBreak + wxT("for editing and presenting styled text and images"));
     r.EndFontSize();
+    r.Newline();
 
     r.BeginItalic();
     r.WriteText(wxT("by Julian Smart"));
@@ -761,10 +740,10 @@ void MyFrame::WriteInitialText()
 
     r.WriteImage(wxBitmap(zebra_xpm));
 
-    r.Newline();
-    r.Newline();
-
     r.EndAlignment();
+
+    r.Newline();
+    r.Newline();
 
     r.WriteText(wxT("What can you do with this thing? "));
 
@@ -799,55 +778,57 @@ void MyFrame::WriteInitialText()
 
     r.WriteText(wxT(" Next we'll show an indented paragraph."));
 
-    r.Newline();
-
     r.BeginLeftIndent(60);
-    r.WriteText(wxT("It was in January, the most down-trodden month of an Edinburgh winter. An attractive woman came into the cafe, which is nothing remarkable."));
     r.Newline();
 
+    r.WriteText(wxT("It was in January, the most down-trodden month of an Edinburgh winter. An attractive woman came into the cafe, which is nothing remarkable."));
     r.EndLeftIndent();
+
+    r.Newline();
 
     r.WriteText(wxT("Next, we'll show a first-line indent, achieved using BeginLeftIndent(100, -40)."));
 
-    r.Newline();
-
     r.BeginLeftIndent(100, -40);
+    r.Newline();
 
     r.WriteText(wxT("It was in January, the most down-trodden month of an Edinburgh winter. An attractive woman came into the cafe, which is nothing remarkable."));
-    r.Newline();
-
     r.EndLeftIndent();
 
-    r.WriteText(wxT("Numbered bullets are possible, again using subindents:"));
     r.Newline();
 
+    r.WriteText(wxT("Numbered bullets are possible, again using subindents:"));
+
     r.BeginNumberedBullet(1, 100, 60);
-    r.WriteText(wxT("This is my first item. Note that wxRichTextCtrl can apply numbering and bullets automatically based on list styles, but this list is formatted explicitly by setting indents."));
     r.Newline();
+
+    r.WriteText(wxT("This is my first item. Note that wxRichTextCtrl can apply numbering and bullets automatically based on list styles, but this list is formatted explicitly by setting indents."));
     r.EndNumberedBullet();
 
     r.BeginNumberedBullet(2, 100, 60);
-    r.WriteText(wxT("This is my second item."));
     r.Newline();
+
+    r.WriteText(wxT("This is my second item."));
     r.EndNumberedBullet();
 
-    r.WriteText(wxT("The following paragraph is right-indented:"));
     r.Newline();
+
+    r.WriteText(wxT("The following paragraph is right-indented:"));
 
     r.BeginRightIndent(200);
+    r.Newline();
 
     r.WriteText(wxT("It was in January, the most down-trodden month of an Edinburgh winter. An attractive woman came into the cafe, which is nothing remarkable."));
-    r.Newline();
-
     r.EndRightIndent();
 
-    r.WriteText(wxT("The following paragraph is right-aligned with 1.5 line spacing:"));
     r.Newline();
+
+    r.WriteText(wxT("The following paragraph is right-aligned with 1.5 line spacing:"));
 
     r.BeginAlignment(wxTEXT_ALIGNMENT_RIGHT);
     r.BeginLineSpacing(wxTEXT_ATTR_LINE_SPACING_HALF);
-    r.WriteText(wxT("It was in January, the most down-trodden month of an Edinburgh winter. An attractive woman came into the cafe, which is nothing remarkable."));
     r.Newline();
+
+    r.WriteText(wxT("It was in January, the most down-trodden month of an Edinburgh winter. An attractive woman came into the cafe, which is nothing remarkable."));
     r.EndLineSpacing();
     r.EndAlignment();
 
@@ -861,46 +842,48 @@ void MyFrame::WriteInitialText()
     attr.SetTabs(tabs);
     r.SetDefaultStyle(attr);
 
+    r.Newline();
     r.WriteText(wxT("This line contains tabs:\tFirst tab\tSecond tab\tThird tab"));
-    r.Newline();
 
+    r.Newline();
     r.WriteText(wxT("Other notable features of wxRichTextCtrl include:"));
-    r.Newline();
 
     r.BeginSymbolBullet(wxT('*'), 100, 60);
+    r.Newline();
     r.WriteText(wxT("Compatibility with wxTextCtrl API"));
-    r.Newline();
     r.EndSymbolBullet();
 
     r.BeginSymbolBullet(wxT('*'), 100, 60);
+    r.Newline();
     r.WriteText(wxT("Easy stack-based BeginXXX()...EndXXX() style setting in addition to SetStyle()"));
-    r.Newline();
     r.EndSymbolBullet();
 
     r.BeginSymbolBullet(wxT('*'), 100, 60);
+    r.Newline();
     r.WriteText(wxT("XML loading and saving"));
-    r.Newline();
     r.EndSymbolBullet();
 
     r.BeginSymbolBullet(wxT('*'), 100, 60);
+    r.Newline();
     r.WriteText(wxT("Undo/Redo, with batching option and Undo suppressing"));
-    r.Newline();
     r.EndSymbolBullet();
 
     r.BeginSymbolBullet(wxT('*'), 100, 60);
+    r.Newline();
     r.WriteText(wxT("Clipboard copy and paste"));
-    r.Newline();
     r.EndSymbolBullet();
 
     r.BeginSymbolBullet(wxT('*'), 100, 60);
+    r.Newline();
     r.WriteText(wxT("wxRichTextStyleSheet with named character and paragraph styles, and control for applying named styles"));
-    r.Newline();
     r.EndSymbolBullet();
 
     r.BeginSymbolBullet(wxT('*'), 100, 60);
-    r.WriteText(wxT("A design that can easily be extended to other content types, ultimately with text boxes, tables, controls, and so on"));
     r.Newline();
+    r.WriteText(wxT("A design that can easily be extended to other content types, ultimately with text boxes, tables, controls, and so on"));
     r.EndSymbolBullet();
+
+    r.Newline();
 
     // Make a style suitable for showing a URL
     wxRichTextAttr urlStyle;
@@ -917,12 +900,13 @@ void MyFrame::WriteInitialText()
 
     r.Newline();
 
-    r.WriteText(wxT("Note: this sample content was generated programmatically from within the MyFrame constructor in the demo. The images were loaded from inline XPMs. Enjoy wxRichTextCtrl!\n"));
+    r.WriteText(wxT("Note: this sample content was generated programmatically from within the MyFrame constructor in the demo. The images were loaded from inline XPMs. Enjoy wxRichTextCtrl!"));
 
     r.EndParagraphSpacing();
 
     r.EndSuppressUndo();
 }
+
 
 // event handlers
 
@@ -1197,7 +1181,7 @@ void MyFrame::OnUpdateFormat(wxUpdateUIEvent& event)
 
 void MyFrame::OnIndentMore(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LEFT_INDENT);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1215,7 +1199,7 @@ void MyFrame::OnIndentMore(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnIndentLess(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LEFT_INDENT);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1235,7 +1219,7 @@ void MyFrame::OnIndentLess(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingHalf(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1253,7 +1237,7 @@ void MyFrame::OnLineSpacingHalf(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingDouble(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1271,7 +1255,7 @@ void MyFrame::OnLineSpacingDouble(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingSingle(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1289,7 +1273,7 @@ void MyFrame::OnLineSpacingSingle(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnParagraphSpacingMore(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_PARA_SPACING_AFTER);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1307,7 +1291,7 @@ void MyFrame::OnParagraphSpacingMore(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnParagraphSpacingLess(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_PARA_SPACING_AFTER);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1324,12 +1308,6 @@ void MyFrame::OnParagraphSpacingLess(wxCommandEvent& WXUNUSED(event))
             m_richTextCtrl->SetStyle(range, attr);
         }
     }
-}
-
-void MyFrame::OnReload(wxCommandEvent& WXUNUSED(event))
-{
-    m_richTextCtrl->Clear();
-    WriteInitialText();
 }
 
 void MyFrame::OnViewHTML(wxCommandEvent& WXUNUSED(event))
@@ -1441,7 +1419,7 @@ void MyFrame::OnManageStyles(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnInsertSymbol(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_FONT);
     m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr);
 

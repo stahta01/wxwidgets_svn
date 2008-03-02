@@ -38,7 +38,6 @@
     #include "wx/utils.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/wxcrtvararg.h"
 #endif // WX_PRECOMP
 
 #include "wx/sckaddr.h"
@@ -314,7 +313,7 @@ char wxFTP::GetResult()
             }
             else // subsequent line of multiline reply
             {
-                if ( line.compare(0, LEN_CODE, code) == 0 )
+                if ( wxStrncmp(line, code, LEN_CODE) == 0 )
                 {
                     if ( chMarker == _T(' ') )
                     {
@@ -378,7 +377,7 @@ bool wxFTP::SetTransferMode(TransferMode transferMode)
 
     if ( !DoSimpleCommand(_T("TYPE"), mode) )
     {
-        wxLogError(_("Failed to set FTP transfer mode to %s."),
+        wxLogError(_("Failed to set FTP transfer mode to %s."), (const wxChar*)
                    (transferMode == ASCII ? _("ASCII") : _("binary")));
 
         return false;
@@ -435,20 +434,19 @@ wxString wxFTP::Pwd()
     if ( CheckCommand(wxT("PWD"), '2') )
     {
         // the result is at least that long if CheckCommand() succeeded
-        wxString::const_iterator p = m_lastResult.begin() + LEN_CODE + 1;
+        const wxChar *p = m_lastResult.c_str() + LEN_CODE + 1;
         if ( *p != _T('"') )
         {
-            wxLogDebug(_T("Missing starting quote in reply for PWD: %s"),
-                       wxString(p, m_lastResult.end()));
+            wxLogDebug(_T("Missing starting quote in reply for PWD: %s"), p);
         }
         else
         {
-            for ( ++p; (bool)*p; ++p ) // FIXME-DMARS
+            for ( p++; *p; p++ )
             {
                 if ( *p == _T('"') )
                 {
                     // check if the quote is doubled
-                    ++p;
+                    p++;
                     if ( !*p || *p != _T('"') )
                     {
                         // no, this is the end
@@ -707,20 +705,18 @@ wxSocketBase *wxFTP::GetPassivePort()
         return NULL;
     }
 
-    size_t addrStart = m_lastResult.find(_T('('));
-    size_t addrEnd = (addrStart == wxString::npos)
-                     ? wxString::npos
-                     : m_lastResult.find(_T(')'), addrStart);
-
-    if ( addrEnd == wxString::npos )
+    const wxChar *addrStart = wxStrchr(m_lastResult, _T('('));
+    const wxChar *addrEnd = addrStart ? wxStrchr(addrStart, _T(')')) : NULL;
+    if ( !addrEnd )
     {
         m_lastError = wxPROTO_PROTERR;
+
         return NULL;
     }
 
     // get the port number and address
     int a[6];
-    wxString straddr(m_lastResult, addrStart + 1, addrEnd - (addrStart + 1));
+    wxString straddr(addrStart + 1, addrEnd);
     wxSscanf(straddr, wxT("%d,%d,%d,%d,%d,%d"),
              &a[2],&a[3],&a[4],&a[5],&a[0],&a[1]);
 
@@ -954,7 +950,7 @@ int wxFTP::GetFileSize(const wxString& fileName)
                     bool foundIt = false;
 
                     size_t i;
-                    for ( i = 0; !foundIt && i < fileList.GetCount(); i++ )
+                    for ( i = 0; !foundIt && i < fileList.Count(); i++ )
                     {
                         foundIt = fileList[i].Upper().Contains(fileName.Upper());
                     }

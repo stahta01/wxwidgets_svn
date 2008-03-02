@@ -44,7 +44,7 @@ protected:
     DECLARE_DYNAMIC_CLASS(wxCheckBox)
 };
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
+class WXDLLEXPORT wxBitmap;
 class WXDLLEXPORT wxBitmapCheckBox: public wxCheckBox
 {
 public:

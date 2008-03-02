@@ -27,9 +27,7 @@ use this class directly because it has pure virtual functions, but will need to
 derive your own class, such as \helpref{wxHtmlListBox}{wxhtmllistbox}, from it.
 
 However it emits the same events as \helpref{wxListBox}{wxlistbox} and the same
-event macros may be used with it. Since wxVListBox does not store its items
-itself, the events will only contain the index, not any contents such as the
-string of an item.
+event macros may be used with it.
 
 \wxheading{Derived from}
 
@@ -42,10 +40,6 @@ string of an item.
 \wxheading{Include files}
 
 <wx/vlbox.h>
-
-\wxheading{Library}
-
-\helpref{wxCore}{librarieslist}
 
 \wxheading{See also}
 
@@ -338,7 +332,7 @@ This method is only valid for multi selection listboxes.
 Set the number of items to be shown in the control.
 
 This is just a synonym for
-\helpref{wxVScrolledWindow::SetRowCount()}{wxvarvscrollhelpersetrowcount}.
+\helpref{wxVScrolledWindow::SetLineCount()}{wxvscrolledwindowsetlinecount}.
 
 
 \membersection{wxVListBox::SetMargins}\label{wxvlistboxsetmargins}
@@ -372,10 +366,6 @@ This method may be used both with single and multiple selection listboxes.
 Sets the colour to be used for the selected cells background. The background of
 the standard cells may be changed by simply calling
 \helpref{SetBackgroundColour}{wxwindowsetbackgroundcolour}.
-
-Notice that using non-default background colour may result in control having
-appearance different from the similar native controls and so should in general
-be avoided.
 
 \wxheading{See also}
 

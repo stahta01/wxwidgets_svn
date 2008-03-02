@@ -64,8 +64,8 @@ public:
     void   SetPS(HPS hPS);
 
 protected:
-    virtual wxGDIRefData* CreateGDIRefData(void) const;
-    virtual wxGDIRefData* CloneGDIRefData(const wxGDIRefData* pData) const;
+    virtual wxObjectRefData* CreateData(void) const;
+    virtual wxObjectRefData* CloneData(const wxObjectRefData* pData) const;
 
     virtual bool DoIsEqual(const wxRegion& region) const;
     virtual bool DoGetBox(wxCoord& x, wxCoord& y, wxCoord& w, wxCoord& h) const;
@@ -75,13 +75,14 @@ protected:
     virtual bool DoOffset(wxCoord x, wxCoord y);
     virtual bool DoCombine(const wxRegion& region, wxRegionOp op);
 
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIterator;
+    friend class WXDLLEXPORT wxRegionIterator;
     DECLARE_DYNAMIC_CLASS(wxRegion);
 
 }; // end of CLASS wxRegion
 
 class WXDLLEXPORT wxRegionIterator : public wxObject
 {
+DECLARE_DYNAMIC_CLASS(wxRegionIterator);
 public:
     wxRegionIterator();
     wxRegionIterator(const wxRegion& rRegion);
@@ -109,8 +110,6 @@ private:
     long                            m_lNumRects;
     wxRegion                        m_vRegion;
     wxRect*                         m_pRects;
-
-    DECLARE_DYNAMIC_CLASS(wxRegionIterator)
 }; // end of wxRegionIterator
 
 #endif // _WX_OS2_REGION_H_

@@ -19,8 +19,7 @@
 #endif
 
 #include "wx/apptrait.h"
-#include "wx/gtk1/private/timer.h"
-#include "wx/evtloop.h"
+
 #include "wx/process.h"
 
 #include "wx/unix/execute.h"
@@ -173,11 +172,6 @@ int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
     return tag;
 }
 
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxGTKTimerImpl(timer);
-}
-
 // ----------------------------------------------------------------------------
 // wxPlatformInfo-related
 // ----------------------------------------------------------------------------
@@ -192,15 +186,7 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_GTK;
 }
 
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
+wxString wxGUIAppTraits::GetDesktopEnvironment() const
 {
-    return new wxEventLoop;
+    return wxEmptyString;
 }
-
-#if wxUSE_INTL
-void wxGUIAppTraits::SetLocale()
-{
-    gtk_set_locale();
-}
-#endif
-

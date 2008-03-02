@@ -17,11 +17,15 @@
 #include "wx/gdicmn.h"
 #include "wx/event.h"
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
-class WXDLLIMPEXP_FWD_CORE wxWindowMac;
-class WXDLLIMPEXP_FWD_CORE wxApp ;
-class WXDLLIMPEXP_FWD_CORE wxKeyEvent;
-class WXDLLIMPEXP_FWD_BASE wxLog;
+#ifdef __WXMAC_OSX__
+typedef struct __CFRunLoopSource * CFRunLoopSourceRef;
+#endif
+
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxWindowMac;
+class WXDLLEXPORT wxApp ;
+class WXDLLEXPORT wxKeyEvent;
+class WXDLLEXPORT wxLog;
 
 // Force an exit from main loop
 void WXDLLEXPORT wxExit();
@@ -88,7 +92,9 @@ private:
     WXEVENTHANDLERREF     m_macEventHandler ;
     WXEVENTHANDLERCALLREF m_macCurrentEventHandlerCallRef ;
     WXEVENTREF            m_macCurrentEvent ;
+#ifdef __WXMAC_OSX__
     CFRunLoopSourceRef    m_macEventPosted ;
+#endif
 
 public:
     static long           s_macAboutMenuItemId ;
@@ -107,7 +113,6 @@ public:
     bool    MacSendCharEvent( wxWindow* focus , long keymessage , long modifiers , long when , short wherex , short wherey , wxChar uniChar ) ;
     void    MacCreateKeyEvent( wxKeyEvent& event, wxWindow* focus , long keymessage , long modifiers , long when , short wherex , short wherey , wxChar uniChar ) ;
     virtual short         MacHandleAEODoc(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
-    virtual short         MacHandleAEGURL(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEPDoc(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEOApp(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
     virtual short         MacHandleAEQuit(const WXAPPLEEVENTREF event , WXAPPLEEVENTREF reply) ;
@@ -115,17 +120,12 @@ public:
 
     // in response of an open-document apple event
     virtual void         MacOpenFile(const wxString &fileName) ;
-    // in response of a get-url apple event
-    virtual void         MacOpenURL(const wxString &url) ;
     // in response of a print-document apple event
     virtual void         MacPrintFile(const wxString &fileName) ;
     // in response of a open-application apple event
     virtual void         MacNewFile() ;
     // in response of a reopen-application apple event
     virtual void         MacReopenApp() ;
-
-    // Hide the application windows the same as the system hide command would do it.
-    void MacHideApp();
 
     DECLARE_EVENT_TABLE()
 };

@@ -15,7 +15,6 @@ COMMDIR  = $(WXDIR)/src/common
 HTMLDIR  = $(WXDIR)/src/html
 RICHTEXTDIR = $(WXDIR)/src/richtext
 AUIDIR =   $(WXDIR)/src/aui
-STCDIR =   $(WXDIR)/src/stc
 UNIXDIR  = $(WXDIR)/src/unix
 PNGDIR   = $(WXDIR)/src/png
 JPEGDIR  = $(WXDIR)/src/jpeg
@@ -34,6 +33,7 @@ MSWDIR   = $(WXDIR)/src/msw
 PMDIR    = $(WXDIR)/src/os2
 MACDIR   = $(WXDIR)/src/mac
 COCOADIR = $(WXDIR)/src/cocoa
+ODBCDIR  = $(WXDIR)/src/iodbc
 FTDIR    = $(WXDIR)/src/freetype
 INCDIR   = $(WXDIR)/include
 SAMPDIR  = $(WXDIR)/samples
@@ -120,6 +120,14 @@ ALL_DIST: distrib_clean
 	$(CP_P) $(REGEXDIR)/README $(DISTDIR)/src/regex
 	$(CP_PR) $(EXPATDIR) $(DISTDIR)/src/expat
 	#(cd $(DISTDIR)/src/expat ; rm -rf `find -name CVS`)
+	mkdir $(DISTDIR)/src/iodbc
+	$(CP_P) $(ODBCDIR)/*.h $(DISTDIR)/src/iodbc
+	$(CP_P) $(ODBCDIR)/*.c $(DISTDIR)/src/iodbc
+	$(CP_P) $(ODBCDIR)/*.ci $(DISTDIR)/src/iodbc
+	$(CP_P) $(ODBCDIR)/*.exp $(DISTDIR)/src/iodbc
+	$(CP_P) $(ODBCDIR)/README $(DISTDIR)/src/iodbc
+	$(CP_P) $(ODBCDIR)/NEWS $(DISTDIR)/src/iodbc
+	$(CP_P) $(ODBCDIR)/Changes.log $(DISTDIR)/src/iodbc
 	# copy some files from include/ that are not installed:
 	mkdir $(DISTDIR)/include
 	mkdir $(DISTDIR)/include/wx
@@ -158,7 +166,6 @@ ALL_GUI_DIST: ALL_DIST
 	mkdir $(DISTDIR)/include/wx/html
 	mkdir $(DISTDIR)/include/wx/richtext
 	mkdir $(DISTDIR)/include/wx/aui
-	mkdir $(DISTDIR)/include/wx/stc
 	mkdir $(DISTDIR)/include/wx/protocol
 	mkdir $(DISTDIR)/include/wx/unix
 	mkdir $(DISTDIR)/include/wx/xml
@@ -169,7 +176,6 @@ ALL_GUI_DIST: ALL_DIST
 	$(CP_P) $(INCDIR)/wx/html/*.h $(DISTDIR)/include/wx/html
 	$(CP_P) $(INCDIR)/wx/richtext/*.h $(DISTDIR)/include/wx/richtext
 	$(CP_P) $(INCDIR)/wx/aui/*.h $(DISTDIR)/include/wx/aui
-	$(CP_P) $(INCDIR)/wx/stc/*.h $(DISTDIR)/include/wx/stc
 	$(CP_P) $(INCDIR)/wx/unix/*.h $(DISTDIR)/include/wx/unix
 	$(CP_P) $(INCDIR)/wx/xml/*.h $(DISTDIR)/include/wx/xml
 	$(CP_P) $(INCDIR)/wx/xrc/*.h $(DISTDIR)/include/wx/xrc
@@ -184,14 +190,10 @@ ALL_GUI_DIST: ALL_DIST
 	mkdir $(DISTDIR)/src/html
 	mkdir $(DISTDIR)/src/richtext
 	mkdir $(DISTDIR)/src/aui
-	mkdir $(DISTDIR)/src/stc
 	mkdir $(DISTDIR)/src/$(TOOLKITDIR)
 	mkdir $(DISTDIR)/src/png
 	mkdir $(DISTDIR)/src/jpeg
 	mkdir $(DISTDIR)/src/tiff
-	mkdir $(DISTDIR)/src/tiff/config
-	mkdir $(DISTDIR)/src/tiff/libtiff
-	mkdir $(DISTDIR)/src/tiff/m4
 	mkdir $(DISTDIR)/src/unix
 	mkdir $(DISTDIR)/src/xrc
 	$(CP_P) $(SRCDIR)/xrc/*.cpp $(DISTDIR)/src/xrc
@@ -206,23 +208,15 @@ ALL_GUI_DIST: ALL_DIST
 	$(CP_P) $(HTMLDIR)/*.cpp $(DISTDIR)/src/html
 	$(CP_P) $(RICHTEXTDIR)/*.cpp $(DISTDIR)/src/richtext
 	$(CP_P) $(AUIDIR)/*.cpp $(DISTDIR)/src/aui
-	$(CP_P) $(STCDIR)/*.cpp $(DISTDIR)/src/stc
 	$(CP_P) $(PNGDIR)/*.h $(DISTDIR)/src/png
 	$(CP_P) $(PNGDIR)/*.c $(DISTDIR)/src/png
 	$(CP_P) $(PNGDIR)/README $(DISTDIR)/src/png
 	$(CP_P) $(JPEGDIR)/*.h $(DISTDIR)/src/jpeg
 	$(CP_P) $(JPEGDIR)/*.c $(DISTDIR)/src/jpeg
 	$(CP_P) $(JPEGDIR)/README $(DISTDIR)/src/jpeg
-	$(CP_P) $(TIFFDIR)/config/* $(DISTDIR)/src/tiff/config
-	$(CP_P) $(TIFFDIR)/libtiff/*.c $(DISTDIR)/src/tiff/libtiff
-	$(CP_P) $(TIFFDIR)/libtiff/*.h $(DISTDIR)/src/tiff/libtiff
-	$(CP_P) $(TIFFDIR)/m4/* $(DISTDIR)/src/tiff/m4
+	$(CP_P) $(TIFFDIR)/*.h $(DISTDIR)/src/tiff
+	$(CP_P) $(TIFFDIR)/*.c $(DISTDIR)/src/tiff
 	$(CP_P) $(TIFFDIR)/README $(DISTDIR)/src/tiff
-	$(CP_P) $(TIFFDIR)/VERSION $(DISTDIR)/src/tiff
-	$(CP_P) $(TIFFDIR)/configure* $(DISTDIR)/src/tiff
-	$(CP_P) $(TIFFDIR)/aclocal.m4 $(DISTDIR)/src/tiff
-	$(CP_P) $(TIFFDIR)/autogen.sh $(DISTDIR)/src/tiff
-	$(CP_P) $(TIFFDIR)/Makefile* $(DISTDIR)/src/tiff
 
 BASE_DIST: ALL_DIST INTL_DIST
 	# make --disable-gui the default
@@ -241,7 +235,6 @@ BASE_DIST: ALL_DIST INTL_DIST
 	mkdir $(DISTDIR)/include/wx/html
 	mkdir $(DISTDIR)/include/wx/richtext
 	mkdir $(DISTDIR)/include/wx/aui
-	mkdir $(DISTDIR)/include/wx/stc
 	mkdir $(DISTDIR)/include/wx/mac
 	mkdir $(DISTDIR)/include/wx/mac/carbon
 	mkdir $(DISTDIR)/include/wx/mac/corefoundation
@@ -258,6 +251,7 @@ BASE_DIST: ALL_DIST INTL_DIST
 	mkdir $(DISTDIR)/src/palmos
 	$(CP_P) $(DOCDIR)/base/readme.txt $(DISTDIR)/README.txt
 	$(CP_P) $(WXDIR)/src/common/*.inc $(DISTDIR)/src/common
+	$(CP_P) $(WXDIR)/src/common/base.rc $(DISTDIR)/src/common
 	list='$(ALL_PORTS_BASE_HEADERS)'; for p in $$list; do \
 	  $(CP_P) $(WXDIR)/include/$$p $(DISTDIR)/include/$$p; \
 	done
@@ -325,6 +319,8 @@ GTK_DIST: UNIV_DIST
 	mkdir $(DISTDIR)/include/wx/mac/corefoundation
 	$(CP_P) $(WXDIR)/include/wx/mac/corefoundation/*.h $(DISTDIR)/include/wx/mac/corefoundation
 
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
+
 X11_DIST: UNIV_DIST
 	$(CP_P) $(WXDIR)/wxX11.spec $(DISTDIR)
 	$(CP_P) $(INCDIR)/wx/x11/*.h $(DISTDIR)/include/wx/x11
@@ -339,6 +335,7 @@ X11_DIST: UNIV_DIST
 	mkdir $(DISTDIR)/include/wx/mac
 	mkdir $(DISTDIR)/include/wx/mac/corefoundation
 	$(CP_P) $(WXDIR)/include/wx/mac/corefoundation/*.h $(DISTDIR)/include/wx/mac/corefoundation
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
 
 MOTIF_DIST: ALL_GUI_DIST
 	$(CP_P) $(WXDIR)/wxMotif.spec $(DISTDIR)
@@ -357,6 +354,7 @@ MOTIF_DIST: ALL_GUI_DIST
 	$(CP_P) $(X11INC)/pen.h $(X11INC)/brush.h $(X11INC)/privx.h \
 		$(X11INC)/bitmap.h $(X11INC)/glcanvas.h $(X11INC)/private.h $(X11INC)/region.h \
 		$(DISTDIR)/include/wx/x11
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
 
 MACX_DIST: ALL_GUI_DIST
 	$(CP_P) $(INCDIR)/*.* $(DISTDIR)/include
@@ -388,6 +386,7 @@ MACX_DIST: ALL_GUI_DIST
 	$(CP_P) $(MACDIR)/carbon/morefilex/*.h $(DISTDIR)/src/mac/carbon/morefilex
 	$(CP_P) $(MACDIR)/carbon/morefilex/*.c $(DISTDIR)/src/mac/carbon/morefilex
 	$(CP_P) $(MACDIR)/carbon/morefilex/*.cpp $(DISTDIR)/src/mac/carbon/morefilex
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
 
 COCOA_DIST: ALL_GUI_DIST
 	$(CP_P) $(INCDIR)/wx/cocoa/*.h $(DISTDIR)/include/wx/cocoa
@@ -401,6 +400,7 @@ COCOA_DIST: ALL_GUI_DIST
 	mkdir $(DISTDIR)/src/mac/carbon
 	$(CP_P) $(MACDIR)/carbon/Info.plist.in $(DISTDIR)/src/mac/carbon
 	$(CP_P) $(MACDIR)/carbon/wxmac.icns $(DISTDIR)/src/mac/carbon
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
 
 MSW_DIST: UNIV_DIST
 	mkdir $(DISTDIR)/include/wx/msw/ole
@@ -419,6 +419,7 @@ MSW_DIST: UNIV_DIST
 	$(CP_P) $(MSWDIR)/*.c $(DISTDIR)/src/msw
 	$(CP_P) $(MSWDIR)/*.rc $(DISTDIR)/src/msw
 	$(CP_P) $(MSWDIR)/ole/*.cpp $(DISTDIR)/src/msw/ole
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
 
 MSW_ZIP_TEXT_DIST: ALL_GUI_DIST
 	mkdir $(DISTDIR)/include/wx/msw
@@ -438,6 +439,7 @@ MSW_ZIP_TEXT_DIST: ALL_GUI_DIST
 	$(CP_P) $(MSWDIR)/wince/*.* $(DISTDIR)/src/msw/wince
 	$(CP_P) $(SRCDIR)/*.??? $(DISTDIR)/src
 	$(CP_P) $(SRCDIR)/*.?? $(DISTDIR)/src
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
 
 UNIV_DIST: ALL_GUI_DIST
 	mkdir $(DISTDIR)/include/wx/univ
@@ -457,6 +459,7 @@ MGL_DIST: UNIV_DIST
 	$(CP_P) $(SRCDIR)/mgl/*.cpp $(DISTDIR)/src/mgl
 	mkdir $(DISTDIR)/src/msdos
 	$(CP_P) $(SRCDIR)/msdos/*.cpp $(DISTDIR)/src/msdos
+	$(CP_PR) $(WXDIR)/contrib $(DISTDIR)/contrib
 
 DEMOS_DIST: ALL_GUI_DIST
 	mkdir $(DISTDIR)/demos
@@ -471,6 +474,8 @@ DEMOS_DIST: ALL_GUI_DIST
 	$(CP_P) $(DEMODIR)/bombs/*.ico $(DISTDIR)/demos/bombs
 	$(CP_P) $(DEMODIR)/bombs/*.rc $(DISTDIR)/demos/bombs
 	$(CP_P) $(DEMODIR)/bombs/readme.txt $(DISTDIR)/demos/bombs
+
+	$(CP_PR) $(DEMODIR)/dbbrowse $(DISTDIR)/demos/dbbrowse
 
 	mkdir $(DISTDIR)/demos/forty
 	$(CP_P) $(DEMODIR)/forty/Makefile.in $(DISTDIR)/demos/forty
@@ -730,7 +735,7 @@ distdir: @GUIDIST@
 	@# in other dist targets.
 	find $(DISTDIR) \( -name "CVS" -o -name ".cvsignore" -o -name "*.dsp" -o -name "*.dsw" -o -name "*.hh*" -o \
 			\( -name "makefile.*" -a ! -name "makefile.unx" \) \) \
-			-print | egrep -v '/samples/.*\.hh.$$' | xargs rm -rf
+			-print | egrep -v '/(samples|dbbrowse)/.*\.hh.$$' | xargs rm -rf
 
 dist: distdir
 	@cd _dist_dir && tar ch $(DISTDIRNAME) | gzip -f9 > ../$(WXARCHIVE);
@@ -799,6 +804,7 @@ debian-dist: debian-native-dist debian-msw-dirs MSW_DIST
 	@# in other dist targets.  Ugly and hardly portable but it
 	@# will run on any Debian box and that's enough for now.
 
+	rm -rf $(DISTDIR)/contrib/build
 	find $(DISTDIR) \( -name "CVS" -o -name ".cvsignore" -o -name "*.dsp"    \
 			   -o -name "*.dsw" -o -name "*.hh*" -o -name "*.mms"    \
 			   -o -name "*.mcp" -o -name "*M*.xml" -o -name "*.r"    \

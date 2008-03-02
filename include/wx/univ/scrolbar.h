@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_SCROLBAR_H_
 #define _WX_UNIV_SCROLBAR_H_
 
-class WXDLLIMPEXP_FWD_CORE wxScrollTimer;
+class WXDLLEXPORT wxScrollTimer;
 
 #include "wx/univ/scrarrow.h"
 #include "wx/renderer.h"

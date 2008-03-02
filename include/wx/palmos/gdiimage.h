@@ -3,7 +3,7 @@
 // Purpose:     wxGDIImage class: base class for wxBitmap, wxIcon, wxCursor
 //              under Palm OS
 // Author:      William Osborne - minimal working wxPalmOS port
-// Modified by: Yunhui Fu
+// Modified by:
 // Created:     10/13/04
 // RCS-ID:      $Id$
 // Copyright:   (c) William Osborne
@@ -20,9 +20,9 @@
 #include "wx/gdicmn.h"          // wxBITMAP_TYPE_INVALID
 #include "wx/list.h"
 
-class WXDLLIMPEXP_FWD_CORE wxGDIImageRefData;
-class WXDLLIMPEXP_FWD_CORE wxGDIImageHandler;
-class WXDLLIMPEXP_FWD_CORE wxGDIImage;
+class WXDLLEXPORT wxGDIImageRefData;
+class WXDLLEXPORT wxGDIImageHandler;
+class WXDLLEXPORT wxGDIImage;
 
 WX_DECLARE_EXPORTED_LIST(wxGDIImageHandler, wxGDIImageHandlerList);
 
@@ -41,7 +41,7 @@ public:
     }
 
     // accessors
-    virtual bool IsOk() const { return m_handle != 0; }
+    bool IsOk() const { return m_handle != 0; }
 
     void SetSize(int w, int h) { m_width = w; m_height = h; }
 
@@ -147,6 +147,9 @@ public:
     void SetHandle(WXHANDLE handle)
         { EnsureHasData(); GetGDIImageData()->m_handle = handle; }
 
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return GetHandle() != 0; }
+
     int GetWidth() const { return IsNull() ? 0 : GetGDIImageData()->m_width; }
     int GetHeight() const { return IsNull() ? 0 : GetGDIImageData()->m_height; }
     int GetDepth() const { return IsNull() ? 0 : GetGDIImageData()->m_depth; }
@@ -169,15 +172,6 @@ public:
 protected:
     // create the data for the derived class here
     virtual wxGDIImageRefData *CreateData() const = 0;
-    virtual wxGDIRefData *CreateGDIRefData() const { return CreateData(); }
-    // we can't [efficiently] clone objects of this class
-    virtual wxGDIRefData *
-    CloneGDIRefData(const wxGDIRefData *WXUNUSED(data)) const
-    {
-        wxFAIL_MSG( _T("must be implemented if used") );
-
-        return NULL;
-    }
 
     static wxGDIImageHandlerList ms_handlers;
 };

@@ -57,12 +57,12 @@ bool wxFont::Create(int pointSize,
     return true;
 }
 
-wxGDIRefData *wxFont::CreateGDIRefData() const
+wxObjectRefData *wxFont::CreateRefData() const
 {
     return new wxFontRefData;
 }
 
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxFont::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxFontRefData(*(wxFontRefData *)data);
 }

@@ -27,7 +27,6 @@
 
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/string.h"
-#include "wx/cocoa/ObjcRef.h"
 
 #import <AppKit/NSBitmapImageRep.h>
 #import <AppKit/NSGraphics.h>
@@ -46,8 +45,6 @@ public:
     wxBitmapRefData();
     wxBitmapRefData( const wxBitmapRefData& data );
     virtual ~wxBitmapRefData();
-
-    virtual bool IsOk() const { return m_ok; }
 
 protected:
     int                 m_width;
@@ -77,8 +74,6 @@ wxBitmapRefData::wxBitmapRefData()
 
 wxBitmapRefData::wxBitmapRefData( const wxBitmapRefData& data)
 {
-    wxAutoNSAutoreleasePool pool;
-
     m_width = data.m_width;
     m_height = data.m_height;
     m_depth = data.m_depth;
@@ -86,13 +81,13 @@ wxBitmapRefData::wxBitmapRefData( const wxBitmapRefData& data)
     m_numColors = data.m_numColors;
     m_bitmapPalette = data.m_bitmapPalette;
     m_quality = data.m_quality;
-    m_cocoaNSBitmapImageRep = wxGCSafeRetain([[data.m_cocoaNSBitmapImageRep copyWithZone:nil] autorelease]);
+    m_cocoaNSBitmapImageRep = [data.m_cocoaNSBitmapImageRep copyWithZone:nil];
     m_bitmapMask = data.m_bitmapMask?new wxMask(*data.m_bitmapMask):NULL;
 }
 
 wxBitmapRefData::~wxBitmapRefData()
 {
-    wxGCSafeRelease(m_cocoaNSBitmapImageRep);
+    [m_cocoaNSBitmapImageRep release];
     m_cocoaNSBitmapImageRep = NULL;
 
     delete m_bitmapMask;
@@ -150,12 +145,12 @@ wxBitmap::wxBitmap(const wxString& filename, wxBitmapType type)
     LoadFile(filename, type);
 }
 
-wxGDIRefData *wxBitmap::CreateGDIRefData() const
+wxObjectRefData *wxBitmap::CreateRefData() const
 {
     return new wxBitmapRefData;
 }
 
-wxGDIRefData *wxBitmap::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBitmapRefData(*(wxBitmapRefData*)data);
 }
@@ -198,8 +193,8 @@ void wxBitmap::SetNSBitmapImageRep(WX_NSBitmapImageRep bitmapImageRep)
     if(!M_BITMAPDATA)
         return;
     // NOTE: No checking is done to make sure width/height agree
-    wxGCSafeRetain(bitmapImageRep);
-    wxGCSafeRelease(M_BITMAPDATA->m_cocoaNSBitmapImageRep);
+    [bitmapImageRep retain];
+    [M_BITMAPDATA->m_cocoaNSBitmapImageRep release];
     M_BITMAPDATA->m_cocoaNSBitmapImageRep = bitmapImageRep;
 }
 
@@ -259,6 +254,11 @@ void wxBitmap::SetMask(wxMask *mask)
     M_BITMAPDATA->m_bitmapMask = mask ;
 }
 
+bool wxBitmap::IsOk() const
+{
+    return m_refData && M_BITMAPDATA->m_ok;
+}
+
 wxPalette* wxBitmap::GetPalette() const
 {
     if(!m_refData)
@@ -296,8 +296,6 @@ int wxBitmap::GetHeight() const
 
 bool wxBitmap::Create(int w, int h, int d)
 {
-    wxAutoNSAutoreleasePool pool;
-
     UnRef();
 
     m_refData = new wxBitmapRefData;
@@ -307,7 +305,7 @@ bool wxBitmap::Create(int w, int h, int d)
     M_BITMAPDATA->m_depth = d;
 
     /* TODO: create new bitmap */
-    M_BITMAPDATA->m_cocoaNSBitmapImageRep = wxGCSafeRetain([[[NSBitmapImageRep alloc]
+    M_BITMAPDATA->m_cocoaNSBitmapImageRep = [[NSBitmapImageRep alloc]
             initWithBitmapDataPlanes: NULL
             pixelsWide: w
             pixelsHigh: h
@@ -318,7 +316,7 @@ bool wxBitmap::Create(int w, int h, int d)
             colorSpaceName: NSCalibratedRGBColorSpace
             bytesPerRow: 0  // NOTE: Contrary to Apple documentation Mac OS
                             // 10.4 will add padding bytes when 0 is used here
-            bitsPerPixel: 0] autorelease]);
+            bitsPerPixel: 0];
 
     wxLogTrace(wxTRACE_COCOA,wxT("M_BITMAPDATA=%p NSBitmapImageRep bitmapData=%p"), M_BITMAPDATA, [M_BITMAPDATA->m_cocoaNSBitmapImageRep bitmapData]);
     M_BITMAPDATA->m_ok = true;
@@ -347,7 +345,7 @@ bool wxBitmap::LoadFile(const wxString& filename, wxBitmapType type)
         M_BITMAPDATA->m_ok = true;
         M_BITMAPDATA->m_numColors = 0;
         M_BITMAPDATA->m_quality = 0;
-        M_BITMAPDATA->m_cocoaNSBitmapImageRep = wxGCSafeRetain(imageRep);
+        M_BITMAPDATA->m_cocoaNSBitmapImageRep = [imageRep retain];
         M_BITMAPDATA->m_bitmapMask = NULL;
         return true;
     }
@@ -379,7 +377,7 @@ bool wxBitmap::Create(NSBitmapImageRep *imageRep)
         M_BITMAPDATA->m_ok = true;
         M_BITMAPDATA->m_numColors = 0;
         M_BITMAPDATA->m_quality = 0;
-        M_BITMAPDATA->m_cocoaNSBitmapImageRep = wxGCSafeRetain(imageRep);
+        M_BITMAPDATA->m_cocoaNSBitmapImageRep = [imageRep retain];
         M_BITMAPDATA->m_bitmapMask = NULL;
         return true;
     }
@@ -412,12 +410,12 @@ bool wxBitmap::CopyFromIcon(const wxIcon& icon)
     NSRect imageRect;
     imageRect.origin.x = imageRect.origin.y = 0.0;
     imageRect.size = [icon.GetNSImage() size];
-    NSBitmapImageRep *newBitmapRep = [[[NSBitmapImageRep alloc] initWithFocusedViewRect:imageRect] autorelease];
+    NSBitmapImageRep *newBitmapRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:imageRect];
     [icon.GetNSImage() unlockFocus];
     if(!newBitmapRep)
         return false;
     m_refData = new wxBitmapRefData;
-    M_BITMAPDATA->m_cocoaNSBitmapImageRep = wxGCSafeRetain(newBitmapRep);
+    M_BITMAPDATA->m_cocoaNSBitmapImageRep = newBitmapRep;
     M_BITMAPDATA->m_width = [newBitmapRep pixelsWide];
     M_BITMAPDATA->m_height = [newBitmapRep pixelsHigh];
     M_BITMAPDATA->m_depth = [newBitmapRep bitsPerSample]*[newBitmapRep samplesPerPixel];
@@ -428,26 +426,9 @@ bool wxBitmap::CopyFromIcon(const wxIcon& icon)
     return true;
 }
 
-wxBitmap wxBitmap::GetSubBitmap(const wxRect& rect) const
+wxBitmap wxBitmap::GetSubBitmap(wxRect const&) const
 {
-    wxAutoNSAutoreleasePool pool;
-    if(!Ok())
-        return wxNullBitmap;
-    NSImage *nsimage = GetNSImage(false);
-
-    [nsimage lockFocus];
-    NSRect imageRect = {{0,0}, [nsimage size]};
-    imageRect.origin.x = imageRect.size.width * rect.x / GetWidth();
-    imageRect.origin.y = imageRect.size.height * rect.y / GetHeight();
-    imageRect.size.width *= wx_static_cast(CGFloat, rect.width) / GetWidth();
-    imageRect.size.height *= wx_static_cast(CGFloat, rect.height) / GetHeight();
-
-    NSBitmapImageRep *newBitmapRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:imageRect];
-    [nsimage unlockFocus];
-
-    wxBitmap newBitmap(newBitmapRep);
-
-    return (newBitmap);
+    return wxNullBitmap;
 }
 
 wxImage wxBitmap::ConvertToImage() const
@@ -476,7 +457,6 @@ wxImage wxBitmap::ConvertToImage() const
 
 bool wxBitmap::CreateFromImage(const wxImage& image, int depth)
 {
-    wxAutoNSAutoreleasePool pool;
     UnRef();
 
     wxCHECK_MSG(image.Ok(), false, wxT("invalid image"));
@@ -486,7 +466,7 @@ bool wxBitmap::CreateFromImage(const wxImage& image, int depth)
 
     M_BITMAPDATA->m_width = image.GetWidth();
     M_BITMAPDATA->m_height = image.GetHeight();
-    NSBitmapImageRep *bitmapImage = [[[NSBitmapImageRep alloc]
+    NSBitmapImageRep *bitmapImage = [[NSBitmapImageRep alloc]
             initWithBitmapDataPlanes: NULL
             pixelsWide: image.GetWidth()
             pixelsHigh: image.GetHeight()
@@ -496,7 +476,7 @@ bool wxBitmap::CreateFromImage(const wxImage& image, int depth)
             isPlanar: NO
             colorSpaceName: NSCalibratedRGBColorSpace
             bytesPerRow: image.GetWidth()*3
-            bitsPerPixel: 0] autorelease];
+            bitsPerPixel: 0];
 
     // TODO: Specify bytesPerRow:0 and then use [bitmapImage bytesPerRow]
     // so that the rows are aligned suitably for altivec by the OS (Tiger)
@@ -507,7 +487,7 @@ bool wxBitmap::CreateFromImage(const wxImage& image, int depth)
     M_BITMAPDATA->m_ok = true;
     M_BITMAPDATA->m_numColors = 0;
     M_BITMAPDATA->m_quality = 0;
-    M_BITMAPDATA->m_cocoaNSBitmapImageRep = wxGCSafeRetain(bitmapImage);
+    M_BITMAPDATA->m_cocoaNSBitmapImageRep = bitmapImage;
     M_BITMAPDATA->m_bitmapMask = new wxMask(*this,wxColour(image.GetMaskRed(),image.GetMaskGreen(),image.GetMaskBlue()));
     return true;
 }
@@ -540,6 +520,10 @@ void *wxBitmap::GetRawData(wxPixelDataBase& data, int bpp)
 }
 
 void wxBitmap::UngetRawData(wxPixelDataBase& data)
+{   // TODO
+}
+
+void wxBitmap::UseAlpha()
 {   // TODO
 }
 
@@ -582,13 +566,13 @@ wxMask::wxMask(const wxBitmap& bitmap)
 // Copy constructor
 wxMask::wxMask(const wxMask& src)
 :   wxObject(src)
-,   m_cocoaNSBitmapImageRep(wxGCSafeRetain(src.m_cocoaNSBitmapImageRep))
+,   m_cocoaNSBitmapImageRep([src.m_cocoaNSBitmapImageRep retain])
 {
 }
 
 wxMask::~wxMask()
 {
-    wxGCSafeRelease(m_cocoaNSBitmapImageRep);
+    [m_cocoaNSBitmapImageRep release];
 }
 
 // Create a mask from a mono bitmap (copies the bitmap).
@@ -723,6 +707,6 @@ bool wxMask::Create(const wxBitmap& bitmap, const wxColour& colour)
     {   wxCHECK_MSG(false,false,wxT("Unimplemented pixel format")); }
 
     // maskRep was autoreleased in case we had to exit quickly
-    m_cocoaNSBitmapImageRep = wxGCSafeRetain(maskRep);
+    m_cocoaNSBitmapImageRep = [maskRep retain];
     return true;
 }

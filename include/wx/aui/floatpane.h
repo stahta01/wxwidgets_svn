@@ -20,18 +20,17 @@
 
 #if wxUSE_AUI
 
-#if wxUSE_MINIFRAME
-    #include "wx/minifram.h"
-    #define wxAuiFloatingFrameBaseClass wxMiniFrame
+#include "wx/frame.h"
+
+#if defined( __WXMSW__ ) || defined( __WXMAC__ ) ||  defined( __WXGTK__ )
+#include "wx/minifram.h"
+#define wxAuiFloatingFrameBaseClass wxMiniFrame
 #else
-    #include "wx/frame.h"
-    #define wxAuiFloatingFrameBaseClass wxFrame
+#define wxAuiFloatingFrameBaseClass wxFrame
 #endif
 
 class WXDLLIMPEXP_AUI wxAuiFloatingFrame : public wxAuiFloatingFrameBaseClass
 {
-    friend class wxAuiManager;
-
 public:
     wxAuiFloatingFrame(wxWindow* parent,
                    wxAuiManager* owner_mgr,
@@ -46,7 +45,6 @@ public:
     wxAuiManager* GetOwnerManager() const;
     
 protected:
-    void SetOwnerManager(wxAuiManager* owner_mgr);
     virtual void OnMoveStart();
     virtual void OnMoving(const wxRect& window_rect, wxDirection dir);
     virtual void OnMoveFinished();

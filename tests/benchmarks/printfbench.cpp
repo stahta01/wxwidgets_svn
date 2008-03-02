@@ -31,23 +31,22 @@
 #include <wx/utils.h>
 #include <wx/cmdline.h>
 #include <wx/app.h>
-#include <wx/wxchar.h>
 
 
 // ----------------------------------------------------------------------------
 // command line
 // ----------------------------------------------------------------------------
 
-#define HELP_SWITCH              "h"
-#define NUMBENCHMARK_OPTION           "n"
+#define HELP_SWITCH              wxT("h")
+#define NUMBENCHMARK_OPTION           wxT("n")
 
 static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
-    { wxCMD_LINE_SWITCH, HELP_SWITCH, "help",
-      "displays help on the command line parameters" },
+    { wxCMD_LINE_SWITCH, HELP_SWITCH, wxT("help"),
+      wxT("displays help on the command line parameters") },
 
-    { wxCMD_LINE_OPTION, NUMBENCHMARK_OPTION, "numtest",
-      "the number of wxPrintf() calls to benchmark", wxCMD_LINE_VAL_NUMBER },
+    { wxCMD_LINE_OPTION, NUMBENCHMARK_OPTION, wxT("numtest"),
+      wxT("the number of wxPrintf() calls to benchmark"), wxCMD_LINE_VAL_NUMBER },
 
     { wxCMD_LINE_NONE }
 };
