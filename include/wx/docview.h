@@ -60,7 +60,7 @@ enum
 
 #define wxMAX_FILE_HISTORY 9
 
-class WXDLLIMPEXP_CORE wxDocument : public wxEvtHandler
+class WXDLLEXPORT wxDocument : public wxEvtHandler
 {
 public:
     wxDocument(wxDocument *parent = (wxDocument *) NULL);
@@ -140,17 +140,22 @@ public:
     virtual wxDocTemplate *GetDocumentTemplate() const { return m_documentTemplate; }
     virtual void SetDocumentTemplate(wxDocTemplate *temp) { m_documentTemplate = temp; }
 
-    // Get the document name to be shown to the user: the title if there is
-    // any, otherwise the filename if the document was saved and, finally,
-    // "unnamed" otherwise
-    virtual wxString GetUserReadableName() const;
+    // Get title, or filename if no title, else [unnamed]
+    //
+    // NB: this method will be deprecated in wxWidgets 3.0, you still need to
+    //     override it if you need to modify the existing behaviour in this
+    //     version but use GetUserReadableName() below if you just need to call
+    //     it
+    virtual bool GetPrintableName(wxString& buf) const;
 
-#if WXWIN_COMPATIBILITY_2_8
-    // use GetUserReadableName() instead
-    wxDEPRECATED_BUT_USED_INTERNALLY(
-        virtual bool GetPrintableName(wxString& buf) const
-    );
-#endif // WXWIN_COMPATIBILITY_2_8
+#if wxABI_VERSION >= 20805
+    wxString GetUserReadableName() const
+    {
+        wxString s;
+        GetPrintableName(s);
+        return s;
+    }
+#endif // wxABI 2.8.5+
 
     // Returns a window that can be used as a parent for document-related
     // dialogs. Override if necessary.
@@ -173,15 +178,12 @@ protected:
     virtual bool DoSaveDocument(const wxString& file);
     virtual bool DoOpenDocument(const wxString& file);
 
-    // the default implementation of GetUserReadableName()
-    wxString DoGetUserReadableName() const;
-
 private:
     DECLARE_ABSTRACT_CLASS(wxDocument)
     DECLARE_NO_COPY_CLASS(wxDocument)
 };
 
-class WXDLLIMPEXP_CORE wxView: public wxEvtHandler
+class WXDLLEXPORT wxView: public wxEvtHandler
 {
 public:
     //  wxView(wxDocument *doc = (wxDocument *) NULL);
@@ -241,7 +243,7 @@ private:
 };
 
 // Represents user interface (and other) properties of documents and views
-class WXDLLIMPEXP_CORE wxDocTemplate: public wxObject
+class WXDLLEXPORT wxDocTemplate: public wxObject
 {
 
 friend class WXDLLIMPEXP_FWD_CORE wxDocManager;
@@ -322,7 +324,7 @@ private:
 
 // One object of this class may be created in an application, to manage all
 // the templates and documents.
-class WXDLLIMPEXP_CORE wxDocManager: public wxEvtHandler
+class WXDLLEXPORT wxDocManager: public wxEvtHandler
 {
 public:
     wxDocManager(long flags = wxDEFAULT_DOCMAN_FLAGS, bool initialize = true);
@@ -405,9 +407,22 @@ public:
     wxList& GetDocuments() { return m_docs; }
     wxList& GetTemplates() { return m_templates; }
 
-    // Return the default name for a new document (by default returns strings
-    // in the form "unnamed <counter>" but can be overridden)
-    virtual wxString MakeNewDocumentName();
+    // Make a default document name
+    //
+    // NB: this method is renamed to MakeNewDocumentName() in wx 3.0, you still
+    //     need to override it if your code needs to customize the default name
+    //     generation but if you just use it from your code, prefer the version
+    //     below which is forward-compatible with wx 3.0
+    virtual bool MakeDefaultName(wxString& buf);
+
+#if wxABI_VERSION >= 20808
+    wxString MakeNewDocumentName() const
+    {
+        wxString s;
+        wx_const_cast(wxDocManager *, this)->MakeDefaultName(s);
+        return s;
+    }
+#endif // wx ABI >= 2.8.8
 
     // Make a frame title (override this to do something different)
     virtual wxString MakeFrameTitle(wxDocument* doc);
@@ -423,7 +438,7 @@ public:
     virtual void FileHistoryUseMenu(wxMenu *menu);
     virtual void FileHistoryRemoveMenu(wxMenu *menu);
 #if wxUSE_CONFIG
-    virtual void FileHistoryLoad(const wxConfigBase& config);
+    virtual void FileHistoryLoad(wxConfigBase& config);
     virtual void FileHistorySave(wxConfigBase& config);
 #endif // wxUSE_CONFIG
 
@@ -435,13 +450,6 @@ public:
 
     // Get the current document manager
     static wxDocManager* GetDocumentManager() { return sm_docManager; }
-
-#if WXWIN_COMPATIBILITY_2_8
-    // deprecated, override GetDefaultName() instead
-    wxDEPRECATED_BUT_USED_INTERNALLY(
-        virtual bool MakeDefaultName(wxString& buf)
-    );
-#endif
 
 #if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetHistoryFilesCount() instead
@@ -475,7 +483,7 @@ inline size_t wxDocManager::GetNoHistoryFiles() const
 // A default child frame
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDocChildFrame : public wxFrame
+class WXDLLEXPORT wxDocChildFrame : public wxFrame
 {
 public:
     wxDocChildFrame(wxDocument *doc,
@@ -515,7 +523,7 @@ private:
 // A default parent frame
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDocParentFrame : public wxFrame
+class WXDLLEXPORT wxDocParentFrame : public wxFrame
 {
 public:
     wxDocParentFrame();
@@ -561,7 +569,7 @@ private:
 // ----------------------------------------------------------------------------
 
 #if wxUSE_PRINTING_ARCHITECTURE
-class WXDLLIMPEXP_CORE wxDocPrintout : public wxPrintout
+class WXDLLEXPORT wxDocPrintout : public wxPrintout
 {
 public:
     wxDocPrintout(wxView *view = (wxView *) NULL, const wxString& title = wxT("Printout"));
@@ -585,7 +593,7 @@ private:
 // File history management
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileHistory : public wxObject
+class WXDLLEXPORT wxFileHistory : public wxObject
 {
 public:
     wxFileHistory(size_t maxFiles = 9, wxWindowID idBase = wxID_FILE1);
@@ -601,7 +609,7 @@ public:
     virtual void RemoveMenu(wxMenu *menu);
 
 #if wxUSE_CONFIG
-    virtual void Load(const wxConfigBase& config);
+    virtual void Load(wxConfigBase& config);
     virtual void Save(wxConfigBase& config);
 #endif // wxUSE_CONFIG
 
@@ -609,14 +617,16 @@ public:
     virtual void AddFilesToMenu(wxMenu* menu); // Single menu
 
     // Accessors
-    virtual wxString GetHistoryFile(size_t i) const { return m_fileHistory[i]; }
-    virtual size_t GetCount() const { return m_fileHistory.GetCount(); }
+    virtual wxString GetHistoryFile(size_t i) const;
+    virtual size_t GetCount() const { return m_fileHistoryN; }
 
     const wxList& GetMenus() const { return m_fileMenus; }
 
+#if wxABI_VERSION >= 20802
     // Set/get base id
     void SetBaseId(wxWindowID baseId) { m_idBase = baseId; }
     wxWindowID GetBaseId() const { return m_idBase; }
+#endif // wxABI 2.8.2+
 
 #if WXWIN_COMPATIBILITY_2_6
     // deprecated, use GetCount() instead
@@ -625,11 +635,11 @@ public:
 
 protected:
     // Last n files
-    wxArrayString     m_fileHistory;
-
+    wxChar**          m_fileHistory;
+    // Number of files saved
+    size_t            m_fileHistoryN;
     // Menus to maintain (may need several for an MDI app)
     wxList            m_fileMenus;
-
     // Max files to maintain
     size_t            m_fileMaxFiles;
 
@@ -644,20 +654,20 @@ private:
 #if WXWIN_COMPATIBILITY_2_6
 inline size_t wxFileHistory::GetNoHistoryFiles() const
 {
-    return m_fileHistory.GetCount();
+    return m_fileHistoryN;
 }
 #endif // WXWIN_COMPATIBILITY_2_6
 
 #if wxUSE_STD_IOSTREAM
 // For compatibility with existing file formats:
 // converts from/to a stream to/from a temporary file.
-bool WXDLLIMPEXP_CORE wxTransferFileToStream(const wxString& filename, wxSTD ostream& stream);
-bool WXDLLIMPEXP_CORE wxTransferStreamToFile(wxSTD istream& stream, const wxString& filename);
+bool WXDLLEXPORT wxTransferFileToStream(const wxString& filename, wxSTD ostream& stream);
+bool WXDLLEXPORT wxTransferStreamToFile(wxSTD istream& stream, const wxString& filename);
 #else
 // For compatibility with existing file formats:
 // converts from/to a stream to/from a temporary file.
-bool WXDLLIMPEXP_CORE wxTransferFileToStream(const wxString& filename, wxOutputStream& stream);
-bool WXDLLIMPEXP_CORE wxTransferStreamToFile(wxInputStream& stream, const wxString& filename);
+bool WXDLLEXPORT wxTransferFileToStream(const wxString& filename, wxOutputStream& stream);
+bool WXDLLEXPORT wxTransferStreamToFile(wxInputStream& stream, const wxString& filename);
 #endif // wxUSE_STD_IOSTREAM
 
 #endif // wxUSE_DOC_VIEW_ARCHITECTURE

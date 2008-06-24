@@ -83,6 +83,11 @@ bool wxToggleButton::Create(wxWindow *parent, wxWindowID id,
     return true;
 }
 
+wxBorder wxToggleButton::GetDefaultBorder() const
+{
+    return wxBORDER_NONE;
+}
+
 WXDWORD wxToggleButton::MSWGetStyle(long style, WXDWORD *exstyle) const
 {
     WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);

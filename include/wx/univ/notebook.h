@@ -14,7 +14,7 @@
 
 #include "wx/arrstr.h"
 
-class WXDLLIMPEXP_FWD_CORE wxSpinButton;
+class WXDLLEXPORT wxSpinButton;
 
 // ----------------------------------------------------------------------------
 // the actions supported by this control
@@ -29,7 +29,7 @@ class WXDLLIMPEXP_FWD_CORE wxSpinButton;
 // wxNotebook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebook : public wxNotebookBase
+class WXDLLEXPORT wxNotebook : public wxNotebookBase
 {
 public:
     // ctors and such

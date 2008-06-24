@@ -17,7 +17,7 @@
 // ========================================================================
 // wxNotebook
 // ========================================================================
-class WXDLLIMPEXP_CORE wxNotebook: public wxNotebookBase, protected wxCocoaNSTabView
+class WXDLLEXPORT wxNotebook: public wxNotebookBase, protected wxCocoaNSTabView
 {
     DECLARE_DYNAMIC_CLASS(wxNotebook)
     DECLARE_EVENT_TABLE()
@@ -48,7 +48,7 @@ public:
 // ------------------------------------------------------------------------
 protected:
     // Notebooks cannot be enabled/disabled
-    virtual void CocoaSetEnabled(bool WXUNUSED(enable)) { }
+    virtual void CocoaSetEnabled(bool enable) { }
     virtual void CocoaDelegate_tabView_didSelectTabViewItem(WX_NSTabViewItem tabviewItem);
     virtual bool CocoaDelegate_tabView_shouldSelectTabViewItem(WX_NSTabViewItem tabviewItem);
 // ------------------------------------------------------------------------

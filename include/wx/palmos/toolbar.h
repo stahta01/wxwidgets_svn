@@ -16,7 +16,7 @@
 
 #include "wx/dynarray.h"
 
-class WXDLLIMPEXP_CORE wxToolBar : public wxToolBarBase
+class WXDLLEXPORT wxToolBar : public wxToolBarBase
 {
 public:
     // ctors and dtor
@@ -83,8 +83,7 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     // return the appropriate size and flags for the toolbar control
     virtual wxSize DoGetBestSize() const;

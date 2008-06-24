@@ -19,7 +19,7 @@
 
 class wxOwnerDrawn; // so the compiler knows, it is a class.
 
-class WXDLLIMPEXP_CORE wxCheckListBox : public wxCheckListBoxBase
+class WXDLLEXPORT wxCheckListBox : public wxCheckListBoxBase
 {
 public:
     //
@@ -72,9 +72,7 @@ protected:
     virtual wxOwnerDrawn* CreateItem(size_t n);
     virtual long          OS2OnMeasure(WXMEASUREITEMSTRUCT* pItem);
 
-    virtual int DoInsertItems(const wxArrayStringsAdapter & items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
 
     //
     // Pressing space or clicking the check box toggles the item

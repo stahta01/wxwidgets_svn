@@ -11,7 +11,7 @@
 #define _WX_GTK_BITMAP_H_
 
 typedef struct _GdkPixbuf GdkPixbuf;
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxPixelDataBase;
 
 //-----------------------------------------------------------------------------
 // wxMask
@@ -51,30 +51,29 @@ class WXDLLIMPEXP_CORE wxBitmap: public wxBitmapBase
 {
 public:
     wxBitmap() { }
-    wxBitmap( int width, int height, int depth = wxBITMAP_SCREEN_DEPTH );
+    wxBitmap( int width, int height, int depth = -1 );
     wxBitmap( const char bits[], int width, int height, int depth = 1 );
     wxBitmap( const char* const* bits );
 #ifdef wxNEEDS_CHARPP
     // needed for old GCC
     wxBitmap(char** data)
-    { *this = wxBitmap(wx_const_cast(const char* const*, data)); }
+    {
+        *this = wxBitmap(wx_const_cast(const char* const*, data));
+    }
 #endif
     wxBitmap( const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_XPM );
-#if wxUSE_IMAGE
-    wxBitmap( const wxImage& image, int depth = wxBITMAP_SCREEN_DEPTH )
-        { (void)CreateFromImage(image, depth); }
-#endif // wxUSE_IMAGE
+    wxBitmap( const wxImage& image, int depth = -1 ) { (void)CreateFromImage(image, depth); }
     virtual ~wxBitmap();
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
 
-    bool Create(int width, int height, int depth = wxBITMAP_SCREEN_DEPTH);
+    bool Create(int width, int height, int depth = -1);
 
-    virtual int GetHeight() const;
-    virtual int GetWidth() const;
-    virtual int GetDepth() const;
+    int GetHeight() const;
+    int GetWidth() const;
+    int GetDepth() const;
 
-#if wxUSE_IMAGE
     wxImage ConvertToImage() const;
-#endif // wxUSE_IMAGE
 
     // copies the contents and mask of the given (colour) icon to the bitmap
     virtual bool CopyFromIcon(const wxIcon& icon);
@@ -111,32 +110,26 @@ public:
     GdkPixbuf *GetPixbuf() const;
 
     // Basically, this corresponds to Win32 StretchBlt()
-    wxBitmap Rescale(int clipx, int clipy, int clipwidth, int clipheight,
-                     int width, int height) const;
+    wxBitmap Rescale(int clipx, int clipy, int clipwidth, int clipheight, int width, int height) const;
 
     // raw bitmap access support functions
     void *GetRawData(wxPixelDataBase& data, int bpp);
     void UngetRawData(wxPixelDataBase& data);
 
     bool HasAlpha() const;
+    void UseAlpha();
 
 protected:
-#if wxUSE_IMAGE
     bool CreateFromImage(const wxImage& image, int depth);
-#endif // wxUSE_IMAGE
 
-    virtual wxGDIRefData* CreateGDIRefData() const;
-    virtual wxGDIRefData* CloneGDIRefData(const wxGDIRefData* data) const;
+    virtual wxObjectRefData* CreateRefData() const;
+    virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
 
 private:
-#if wxUSE_IMAGE
     // to be called from CreateFromImage only!
     bool CreateFromImageAsPixmap(const wxImage& image, int depth);
     bool CreateFromImageAsPixbuf(const wxImage& image);
-#endif // wxUSE_IMAGE
 
-public:
-    // implementation only
     enum Representation
     {
         Pixmap,
@@ -146,8 +139,20 @@ public:
     // (wxBitmap may keep same bitmap e.g. as both pixmap and pixbuf):
     void PurgeOtherRepresentations(Representation keep);
 
+    friend class wxMemoryDC;
+    friend class wxBitmapHandler;
+
 private:
     DECLARE_DYNAMIC_CLASS(wxBitmap)
+};
+
+//-----------------------------------------------------------------------------
+// wxBitmapHandler
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
+{
+    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
 };
 
 #endif // _WX_GTK_BITMAP_H_

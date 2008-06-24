@@ -13,36 +13,13 @@
 #define _WX_HASHMAP_H_
 
 #include "wx/string.h"
-#include "wx/wxcrt.h"
-
-// In wxUSE_STL build we prefer to use the standard hash map class but it can
-// be either in non-standard hash_map header (old g++ and some other STL
-// implementations) or in C++0x standard unordered_map which can in turn be
-// available either in std::tr1 or std namespace itself
-//
-// To summarize: if std::unordered_map is available use it, otherwise use tr1
-// and finally fall back to non-standard hash_map
 
 #if (defined(HAVE_EXT_HASH_MAP) || defined(HAVE_HASH_MAP)) \
     && (defined(HAVE_GNU_CXX_HASH_MAP) || defined(HAVE_STD_HASH_MAP))
     #define HAVE_STL_HASH_MAP
 #endif
 
-#if wxUSE_STL && \
-    (defined(HAVE_STD_UNORDERED_MAP) || defined(HAVE_TR1_UNORDERED_MAP))
-
-#if defined(HAVE_STD_UNORDERED_MAP)
-    #include <unordered_map>
-    #define WX_HASH_MAP_NAMESPACE std
-#elif defined(HAVE_TR1_UNORDERED_MAP)
-    #include <tr1/unordered_map>
-    #define WX_HASH_MAP_NAMESPACE std::tr1
-#endif
-
-#define _WX_DECLARE_HASH_MAP( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, CLASSNAME, CLASSEXP ) \
-    typedef WX_HASH_MAP_NAMESPACE::unordered_map< KEY_T, VALUE_T, HASH_T, KEY_EQ_T > CLASSNAME
-
-#elif wxUSE_STL && defined(HAVE_STL_HASH_MAP)
+#if wxUSE_STL && defined(HAVE_STL_HASH_MAP)
 
 #if defined(HAVE_EXT_HASH_MAP)
     #include <ext/hash_map>
@@ -59,9 +36,8 @@
 #define _WX_DECLARE_HASH_MAP( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, CLASSNAME, CLASSEXP ) \
     typedef WX_HASH_MAP_NAMESPACE::hash_map< KEY_T, VALUE_T, HASH_T, KEY_EQ_T > CLASSNAME
 
-#else // !wxUSE_STL || no std::{hash,unordered}_map class available
+#else // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
-#define wxNEEDS_WX_HASH_MAP
 
 #ifdef __WXWINCE__
 typedef int ptrdiff_t;
@@ -72,9 +48,9 @@ typedef int ptrdiff_t;
 // private
 struct WXDLLIMPEXP_BASE _wxHashTable_NodeBase
 {
-    _wxHashTable_NodeBase() : m_next(NULL) {}
+    _wxHashTable_NodeBase() : m_nxt(0) {}
 
-    _wxHashTable_NodeBase* m_next;
+    _wxHashTable_NodeBase* m_nxt;
 
 // Cannot do this:
 //  DECLARE_NO_COPY_CLASS(_wxHashTable_NodeBase)
@@ -98,7 +74,7 @@ protected:
         for( size_t i = 0; i < buckets; ++i )
             if( table[i] )
                 return table[i];
-        return NULL;
+        return 0;
     }
 
     // as static const unsigned prime_count = 31 but works with all compilers
@@ -146,10 +122,11 @@ public: \
     typedef const KEY_T const_key_type; \
     typedef const VALUE_T const_mapped_type; \
 public: \
+    struct Node; \
     typedef KEY_EX_T key_extractor; \
     typedef CLASSNAME Self; \
 protected: \
-    _wxHashTable_NodeBase** m_table; \
+    Node** m_table; \
     size_t m_tableBuckets; \
     size_t m_items; \
     hasher m_hasher; \
@@ -161,15 +138,17 @@ public: \
     public: \
         Node( const value_type& value ) \
             : m_value( value ) {} \
-        Node* next() { return wx_static_cast(Node*, m_next); } \
+        Node* m_next() { return (Node*)this->m_nxt; } \
  \
         value_type m_value; \
     }; \
  \
+    CLASSEXP Iterator; \
+    friend CLASSEXP Iterator; \
 protected: \
     static void DeleteNode( _wxHashTable_NodeBase* node ) \
     { \
-        delete wx_static_cast(Node*, node); \
+        delete (Node*)node; \
     } \
 public: \
     /*                  */ \
@@ -181,9 +160,9 @@ public: \
         Node* m_node; \
         Self* m_ht; \
  \
-        Iterator() : m_node(NULL), m_ht(NULL) {} \
+        Iterator() : m_node(0), m_ht(0) {} \
         Iterator( Node* node, const Self* ht ) \
-            : m_node(node), m_ht(wx_const_cast(Self*, ht)) {} \
+            : m_node(node), m_ht((Self*)ht) {} \
         bool operator ==( const Iterator& it ) const \
             { return m_node == it.m_node; } \
         bool operator !=( const Iterator& it ) const \
@@ -195,18 +174,17 @@ public: \
             for( size_type i = bucket + 1; i < m_ht->m_tableBuckets; ++i ) \
             { \
                 if( m_ht->m_table[i] ) \
-                    return wx_static_cast(Node*, m_ht->m_table[i]); \
+                    return m_ht->m_table[i]; \
             } \
-            return NULL; \
+            return 0; \
         } \
  \
         void PlusPlus() \
         { \
-            Node* next = m_node->next(); \
+            Node* next = m_node->m_next(); \
             m_node = next ? next : GetNextNode(); \
         } \
     }; \
-    friend class Iterator; \
  \
 public: \
     CLASSEXP iterator : public Iterator \
@@ -226,7 +204,7 @@ public: \
         const_iterator() : Iterator() {} \
         const_iterator(iterator i) : Iterator(i) {} \
         const_iterator( Node* node, const Self* ht ) \
-            : Iterator(node, wx_const_cast(Self*, ht)) {} \
+            : Iterator( node, (Self*)ht ) {} \
         const_iterator& operator++() { PlusPlus();return *this; } \
         const_iterator operator++(int) { const_iterator it=*this;PlusPlus();return it; } \
         const_reference operator *() const { return m_node->m_value; } \
@@ -242,11 +220,11 @@ public: \
           m_equals( k_eq ), \
           m_getKey( k_ex ) \
     { \
-        m_table = (_wxHashTable_NodeBase**)AllocTable(m_tableBuckets); \
+        m_table = (Node**)AllocTable( m_tableBuckets ); \
     } \
  \
     CLASSNAME( const Self& ht ) \
-        : m_table(NULL), \
+        : m_table( 0 ), \
           m_tableBuckets( 0 ), \
           m_items( ht.m_items ), \
           m_hasher( ht.m_hasher ), \
@@ -258,15 +236,12 @@ public: \
  \
     const Self& operator=( const Self& ht ) \
     { \
-         if (&ht != this) \
-         { \
-             clear(); \
-             m_hasher = ht.m_hasher; \
-             m_equals = ht.m_equals; \
-             m_getKey = ht.m_getKey; \
-             m_items = ht.m_items; \
-             HashCopy( ht ); \
-         } \
+         clear(); \
+         m_hasher = ht.m_hasher; \
+         m_equals = ht.m_equals; \
+         m_getKey = ht.m_getKey; \
+         m_items = ht.m_items; \
+         HashCopy( ht ); \
          return *this; \
     } \
  \
@@ -284,7 +259,8 @@ public: \
     /* shrink it ( perhaps it should ) */ \
     void clear() \
     { \
-        DeleteNodes(m_tableBuckets, m_table, DeleteNode); \
+        DeleteNodes( m_tableBuckets, (_wxHashTable_NodeBase**)m_table, \
+                     DeleteNode ); \
         m_items = 0; \
     } \
  \
@@ -292,23 +268,23 @@ public: \
     size_type max_size() const { return size_type(-1); } \
     bool empty() const { return size() == 0; } \
  \
-    const_iterator end() const { return const_iterator(NULL, this); } \
-    iterator end() { return iterator(NULL, this); } \
+    const_iterator end() const { return const_iterator( 0, this ); } \
+    iterator end() { return iterator( 0, this ); } \
     const_iterator begin() const \
-        { return const_iterator(wx_static_cast(Node*, GetFirstNode(m_tableBuckets, m_table)), this); } \
+        { return const_iterator( (Node*)GetFirstNode( m_tableBuckets, (_wxHashTable_NodeBase**)m_table ), this ); } \
     iterator begin() \
-        { return iterator(wx_static_cast(Node*, GetFirstNode(m_tableBuckets, m_table)), this); } \
+        { return iterator( (Node*)GetFirstNode( m_tableBuckets, (_wxHashTable_NodeBase**)m_table ), this ); } \
  \
     size_type erase( const const_key_type& key ) \
     { \
-        _wxHashTable_NodeBase** node = GetNodePtr(key); \
+        Node** node = GetNodePtr( key ); \
  \
         if( !node ) \
             return 0; \
  \
         --m_items; \
-        _wxHashTable_NodeBase* temp = (*node)->m_next; \
-        delete wx_static_cast(Node*, *node); \
+        Node* temp = (*node)->m_next(); \
+        delete *node; \
         (*node) = temp; \
         if( SHOULD_SHRINK( m_tableBuckets, m_items ) ) \
             ResizeTable( GetPreviousPrime( (unsigned long) m_tableBuckets ) - 1 ); \
@@ -327,7 +303,7 @@ protected: \
     { \
         const const_key_type& key = m_getKey( value ); \
         size_t bucket = m_hasher( key ) % m_tableBuckets; \
-        Node* node = wx_static_cast(Node*, m_table[bucket]); \
+        Node* node = m_table[bucket]; \
  \
         while( node ) \
         { \
@@ -336,7 +312,7 @@ protected: \
                 created = false; \
                 return node; \
             } \
-            node = node->next(); \
+            node = node->m_next(); \
         } \
         created = true; \
         return CreateNode( value, bucket); \
@@ -344,7 +320,7 @@ protected: \
     Node * CreateNode( const value_type& value, size_t bucket ) \
     {\
         Node* node = new Node( value ); \
-        node->m_next = m_table[bucket]; \
+        node->m_nxt = m_table[bucket]; \
         m_table[bucket] = node; \
  \
         /* must be after the node is inserted */ \
@@ -360,16 +336,17 @@ protected: \
     }\
  \
     /* returns NULL if not found */ \
-    _wxHashTable_NodeBase** GetNodePtr(const const_key_type& key) const \
+    Node** GetNodePtr( const const_key_type& key ) const \
     { \
         size_t bucket = m_hasher( key ) % m_tableBuckets; \
-        _wxHashTable_NodeBase** node = &m_table[bucket]; \
+        Node** node = &m_table[bucket]; \
  \
         while( *node ) \
         { \
-            if (m_equals(m_getKey(wx_static_cast(Node*, *node)->m_value), key)) \
+            if( m_equals( m_getKey( (*node)->m_value ), key ) ) \
                 return node; \
-            node = &(*node)->m_next; \
+            /* Tell the compiler to not do any strict-aliasing assumptions with a void cast? Can we make such a runtime guarantee? */ \
+            node = (Node**)&(*node)->m_nxt; \
         } \
  \
         return NULL; \
@@ -380,28 +357,28 @@ protected: \
     Node* GetNode( const const_key_type& key ) const \
     { \
         size_t bucket = m_hasher( key ) % m_tableBuckets; \
-        Node* node = wx_static_cast(Node*, m_table[bucket]); \
+        Node* node = m_table[bucket]; \
  \
         while( node ) \
         { \
             if( m_equals( m_getKey( node->m_value ), key ) ) \
                 return node; \
-            node = node->next(); \
+            node = node->m_next(); \
         } \
  \
-        return NULL; \
+        return 0; \
     } \
  \
     void ResizeTable( size_t newSize ) \
     { \
         newSize = GetNextPrime( (unsigned long)newSize ); \
-        _wxHashTable_NodeBase** srcTable = m_table; \
+        Node** srcTable = m_table; \
         size_t srcBuckets = m_tableBuckets; \
-        m_table = (_wxHashTable_NodeBase**)AllocTable( newSize ); \
+        m_table = (Node**)AllocTable( newSize ); \
         m_tableBuckets = newSize; \
  \
-        CopyHashTable( srcTable, srcBuckets, \
-                       this, m_table, \
+        CopyHashTable( (_wxHashTable_NodeBase**)srcTable, srcBuckets, \
+                       this, (_wxHashTable_NodeBase**)m_table, \
                        (BucketFromNode)GetBucketForNode,\
                        (ProcessNode)&DummyProcessNode ); \
         FreeTable(srcTable); \
@@ -411,9 +388,9 @@ protected: \
     void HashCopy( const Self& ht ) \
     { \
         ResizeTable( ht.size() ); \
-        CopyHashTable( ht.m_table, ht.m_tableBuckets, \
+        CopyHashTable( (_wxHashTable_NodeBase**)ht.m_table, ht.m_tableBuckets,\
                        (_wxHashTableBase2*)this, \
-                       m_table, \
+                       (_wxHashTable_NodeBase**)m_table, \
                        (BucketFromNode)GetBucketForNode, \
                        (ProcessNode)CopyNode ); \
     } \
@@ -430,8 +407,7 @@ public: \
     typedef const KEY_T const_t1; \
     typedef const VALUE_T const_t2; \
  \
-    CLASSNAME(const const_t1& f, const const_t2& s) \
-        : first(wx_const_cast(t1&, f)), second(wx_const_cast(t2&, s)) {} \
+    CLASSNAME( const const_t1& f, const const_t2& s ):first(t1(f)),second(t2(s)) {} \
  \
     t1 first; \
     t2 second; \
@@ -466,7 +442,7 @@ inline bool grow_lf70( size_t buckets, size_t items )
     return float(items)/float(buckets) >= 0.85;
 }
 
-#endif // various hash map implementations
+#endif // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
 // ----------------------------------------------------------------------------
 // hashing and comparison functors
@@ -476,7 +452,7 @@ inline bool grow_lf70( size_t buckets, size_t items )
 //     operators to suppress warnings about "statement with no effect" from gcc
 //     in the hash table class assignment operator (where they're assigned)
 
-#ifndef wxNEEDS_WX_HASH_MAP
+#if wxUSE_STL && defined(HAVE_STL_HASH_MAP)
 
 // integer types
 class WXDLLIMPEXP_BASE wxIntegerHash
@@ -520,7 +496,7 @@ public:
     wxIntegerHash& operator=(const wxIntegerHash&) { return *this; }
 };
 
-#else // wxNEEDS_WX_HASH_MAP
+#else // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
 // integer types
 class WXDLLIMPEXP_BASE wxIntegerHash
@@ -541,7 +517,7 @@ public:
     wxIntegerHash& operator=(const wxIntegerHash&) { return *this; }
 };
 
-#endif // !wxNEEDS_WX_HASH_MAP/wxNEEDS_WX_HASH_MAP
+#endif // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
 class WXDLLIMPEXP_BASE wxIntegerEqual
 {
@@ -567,10 +543,10 @@ class WXDLLIMPEXP_BASE wxPointerHash
 public:
     wxPointerHash() { }
 
-#ifdef wxNEEDS_WX_HASH_MAP
-    wxUIntPtr operator()( const void* k ) const { return wxPtrToUInt(k); }
-#else
+#if wxUSE_STL && defined(HAVE_STL_HASH_MAP)
     size_t operator()( const void* k ) const { return (size_t)k; }
+#else
+    wxUIntPtr operator()( const void* k ) const { return wxPtrToUInt(k); }
 #endif
 
     wxPointerHash& operator=(const wxPointerHash&) { return *this; }
@@ -585,29 +561,21 @@ public:
     wxPointerEqual& operator=(const wxPointerEqual&) { return *this; }
 };
 
-// wxString, char*, wchar_t*
+// wxString, char*, wxChar*
 class WXDLLIMPEXP_BASE wxStringHash
 {
 public:
     wxStringHash() {}
     unsigned long operator()( const wxString& x ) const
-        { return stringHash( x.wx_str() ); }
-    unsigned long operator()( const wchar_t* x ) const
-        { return stringHash( x ); }
+        { return wxCharStringHash( x.c_str() ); }
+    unsigned long operator()( const wxChar* x ) const
+        { return wxCharStringHash( x ); }
+    static unsigned long wxCharStringHash( const wxChar* );
+#if wxUSE_UNICODE
     unsigned long operator()( const char* x ) const
-        { return stringHash( x ); }
-
-#if WXWIN_COMPATIBILITY_2_8
-    static unsigned long wxCharStringHash( const wxChar* x )
-        { return stringHash(x); }
-    #if wxUSE_UNICODE
-    static unsigned long charStringHash( const char* x )
-        { return stringHash(x); }
-    #endif
-#endif // WXWIN_COMPATIBILITY_2_8
-
-    static unsigned long stringHash( const wchar_t* );
-    static unsigned long stringHash( const char* );
+        { return charStringHash( x ); }
+    static unsigned long charStringHash( const char* );
+#endif // wxUSE_UNICODE
 
     wxStringHash& operator=(const wxStringHash&) { return *this; }
 };
@@ -628,7 +596,7 @@ public:
     wxStringEqual& operator=(const wxStringEqual&) { return *this; }
 };
 
-#ifdef wxNEEDS_WX_HASH_MAP
+#if !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
 #define _WX_DECLARE_HASH_MAP( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, CLASSNAME, CLASSEXP ) \
 _WX_DECLARE_PAIR( KEY_T, VALUE_T, CLASSNAME##_wxImplementation_Pair, CLASSEXP ) \
@@ -687,7 +655,7 @@ public: \
     } \
 }
 
-#endif // wxNEEDS_WX_HASH_MAP
+#endif // !wxUSE_STL || !defined(HAVE_STL_HASH_MAP)
 
 // these macros are to be used in the user code
 #define WX_DECLARE_HASH_MAP( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, CLASSNAME) \
@@ -708,7 +676,7 @@ public: \
 
 #define WX_DECLARE_EXPORTED_HASH_MAP( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, CLASSNAME) \
     WX_DECLARE_HASH_MAP_WITH_DECL( KEY_T, VALUE_T, HASH_T, KEY_EQ_T, \
-                                   CLASSNAME, class WXDLLIMPEXP_CORE )
+                                   CLASSNAME, class WXDLLEXPORT )
 
 #define WX_DECLARE_STRING_HASH_MAP_WITH_DECL( VALUE_T, CLASSNAME, DECL ) \
     _WX_DECLARE_HASH_MAP( wxString, VALUE_T, wxStringHash, wxStringEqual, \
@@ -716,7 +684,7 @@ public: \
 
 #define WX_DECLARE_EXPORTED_STRING_HASH_MAP( VALUE_T, CLASSNAME ) \
     WX_DECLARE_STRING_HASH_MAP_WITH_DECL( VALUE_T, CLASSNAME, \
-                                          class WXDLLIMPEXP_CORE )
+                                          class WXDLLEXPORT )
 
 #define WX_DECLARE_VOIDPTR_HASH_MAP_WITH_DECL( VALUE_T, CLASSNAME, DECL ) \
     _WX_DECLARE_HASH_MAP( void*, VALUE_T, wxPointerHash, wxPointerEqual, \
@@ -724,7 +692,7 @@ public: \
 
 #define WX_DECLARE_EXPORTED_VOIDPTR_HASH_MAP( VALUE_T, CLASSNAME ) \
     WX_DECLARE_VOIDPTR_HASH_MAP_WITH_DECL( VALUE_T, CLASSNAME, \
-                                           class WXDLLIMPEXP_CORE )
+                                           class WXDLLEXPORT )
 
 // delete all hash elements
 //

@@ -16,26 +16,26 @@
 #include "wx/gdicmn.h"
 #include "wx/palette.h"
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxBitmapHandler;
-class WXDLLIMPEXP_FWD_CORE wxBitmapRefData;
-class WXDLLIMPEXP_FWD_CORE wxControl;
-class WXDLLIMPEXP_FWD_CORE wxCursor;
-class WXDLLIMPEXP_FWD_CORE wxDC;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxBitmapHandler;
+class WXDLLEXPORT wxBitmapRefData;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxCursor;
+class WXDLLEXPORT wxDC;
 #if wxUSE_WXDIB
-class WXDLLIMPEXP_FWD_CORE wxDIB;
+class WXDLLEXPORT wxDIB;
 #endif
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxImage;
-class WXDLLIMPEXP_FWD_CORE wxMask;
-class WXDLLIMPEXP_FWD_CORE wxPalette;
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
+class WXDLLEXPORT wxIcon;
+class WXDLLEXPORT wxImage;
+class WXDLLEXPORT wxMask;
+class WXDLLEXPORT wxPalette;
+class WXDLLEXPORT wxPixelDataBase;
 
 // ----------------------------------------------------------------------------
 // wxBitmap: a mono or colour bitmap
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmap : public wxGDIImage
+class WXDLLEXPORT wxBitmap : public wxGDIImage
 {
 public:
     // default ctor creates an invalid bitmap, you must Create() it later
@@ -135,6 +135,7 @@ public:
     // these functions are internal and shouldn't be used, they risk to
     // disappear in the future
     bool HasAlpha() const;
+    void UseAlpha();
 
     // implementation only from now on
     // -------------------------------
@@ -176,7 +177,7 @@ private:
 // wxMask: a mono bitmap used for drawing bitmaps transparently.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMask : public wxObject
+class WXDLLEXPORT wxMask : public wxObject
 {
 public:
     wxMask();
@@ -215,7 +216,7 @@ protected:
 // wxBitmapHandler is a class which knows how to load/save bitmaps to/from file
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapHandler : public wxGDIImageHandler
+class WXDLLEXPORT wxBitmapHandler : public wxGDIImageHandler
 {
 public:
     wxBitmapHandler() { m_type = wxBITMAP_TYPE_INVALID; }

@@ -66,10 +66,7 @@ static const wxChar* const wxOperatingSystemIdNames[] =
     _T("Other Unix"),
 
     _T("DOS"),
-    _T("OS/2"),
-
-    _T("PalmOS"),
-    _T("PalmOS(Over Linux)"),
+    _T("OS/2")
 };
 
 static const wxChar* const wxPortIdNames[] =
@@ -327,11 +324,11 @@ wxArchitecture wxPlatformInfo::GetArch(const wxString &arch)
 
 wxEndianness wxPlatformInfo::GetEndianness(const wxString& end)
 {
-    const wxString endl(end.Lower());
-    if ( endl.StartsWith(wxT("little")) )
+    wxString endl(end.Lower());
+    if ( end.StartsWith(wxT("little")) )
         return wxENDIAN_LITTLE;
 
-    if ( endl.StartsWith(wxT("big")) )
+    if ( end.StartsWith(wxT("big")) )
         return wxENDIAN_BIG;
 
     return wxENDIAN_INVALID;

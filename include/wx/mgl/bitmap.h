@@ -13,8 +13,8 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxMemoryDC;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxMemoryDC;
 
 class MGLDevCtx;
 struct bitmap_t;
@@ -23,7 +23,12 @@ struct bitmap_t;
 // wxBitmap
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmap: public wxBitmapBase
+class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
+{
+    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
+};
+
+class WXDLLEXPORT wxBitmap: public wxBitmapBase
 {
 public:
     wxBitmap() {}
@@ -33,6 +38,8 @@ public:
     wxBitmap(const wxString &filename, wxBitmapType type = wxBITMAP_TYPE_RESOURCE);
     wxBitmap(const wxImage& image, int depth = -1);
     virtual ~wxBitmap() {}
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
 
     bool Create(int width, int height, int depth = -1);
 

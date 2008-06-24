@@ -47,8 +47,8 @@ wxTheme *wxTheme::ms_theme = (wxTheme *)NULL;
 // ----------------------------------------------------------------------------
 
 wxThemeInfo::wxThemeInfo(Constructor c,
-                         const wxString& n,
-                         const wxString& d)
+                         const wxChar *n,
+                         const wxChar *d)
            : name(n), desc(d), ctor(c)
 {
     // insert us (in the head of) the linked list
@@ -152,7 +152,7 @@ wxTheme::~wxTheme()
 // wxDelegateTheme
 // ----------------------------------------------------------------------------
 
-wxDelegateTheme::wxDelegateTheme(const wxString& theme)
+wxDelegateTheme::wxDelegateTheme(const wxChar *theme)
 {
     m_themeName = theme;
     m_theme = NULL;

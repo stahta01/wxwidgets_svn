@@ -128,9 +128,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_LIBPNG
     wxImage::AddHandler(new wxPNGHandler);
 #endif
@@ -266,15 +263,17 @@ void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnPrintSmall(wxCommandEvent& WXUNUSED(event))
 {
-    m_Prn->SetStandardFonts(8);
+    int fontsizes[] = { 4, 6, 8, 10, 12, 20, 24 }; 
+    m_Prn->SetFonts(wxEmptyString, wxEmptyString, fontsizes);
 }
 
 void MyFrame::OnPrintNormal(wxCommandEvent& WXUNUSED(event))
 {
-    m_Prn->SetStandardFonts(12);
+    m_Prn->SetFonts(wxEmptyString, wxEmptyString, 0);
 }
 
 void MyFrame::OnPrintHuge(wxCommandEvent& WXUNUSED(event))
 {
-    m_Prn->SetStandardFonts(28);
+    int fontsizes[] = { 20, 26, 28, 30, 32, 40, 44 }; 
+    m_Prn->SetFonts(wxEmptyString, wxEmptyString, fontsizes);
 }

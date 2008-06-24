@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 3 January 2008                                                      *
+# Date : 3 January 2007                                                      *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -34,7 +34,6 @@ OBJECTS = \
 		bitmap.obj,\
 		brush.obj,\
 		glcanvas.obj,\
-		palette.obj,\
 		pen.obj,\
 		region.obj,\
 		utilsx.obj
@@ -47,6 +46,7 @@ OBJECTS_X11=app.obj,dc.obj,\
 		font.obj,\
 		minifram.obj,\
 		nanox.obj,\
+		palette.obj,\
 		popupwin.obj,\
 		reparent.obj,\
 		settings.obj,\
@@ -100,9 +100,6 @@ all : $(SOURCES)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS_X11)
 .endif
 .endif
-
-$(OBJECTS) : [--.include.wx]setup.h
-$(OBJECTS_X11) : [--.include.wx]setup.h
 
 bitmap.obj : bitmap.cpp
 brush.obj : brush.cpp

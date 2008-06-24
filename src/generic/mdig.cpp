@@ -120,12 +120,11 @@ bool wxGenericMDIParentFrame::Create(wxWindow *parent,
 #endif // wxUSE_MENUS
   }
 
-  if ( !wxFrame::Create( parent, id, title, pos, size, style, name ) )
-      return false;
+  wxFrame::Create( parent, id, title, pos, size, style, name );
 
-  m_pClientWindow = OnCreateClient();
+  OnCreateClient();
 
-  return m_pClientWindow != NULL;
+  return true;
 }
 
 #if wxUSE_MENUS
@@ -249,10 +248,11 @@ wxGenericMDIClientWindow *wxGenericMDIParentFrame::GetClientWindow() const
 wxGenericMDIClientWindow *wxGenericMDIParentFrame::OnCreateClient()
 {
 #if wxUSE_GENERIC_MDI_AS_NATIVE
-    return new wxMDIClientWindow( this );
+    m_pClientWindow = new wxMDIClientWindow( this );
 #else
-    return new wxGenericMDIClientWindow( this );
+    m_pClientWindow = new wxGenericMDIClientWindow( this );
 #endif
+    return m_pClientWindow;
 }
 
 void wxGenericMDIParentFrame::ActivateNext()

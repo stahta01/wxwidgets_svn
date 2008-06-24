@@ -106,7 +106,7 @@ public:
     virtual void SetSelection(long from, long to);
     virtual void SetEditable(bool editable);
 
-    virtual void DoEnable( bool enable );
+    virtual bool Enable( bool enable = true );
 
     // Implementation from now on
     void OnDropFiles( wxDropFilesEvent &event );
@@ -139,6 +139,11 @@ public:
 
     void SetModified() { m_modified = true; }
 
+    // GTK+ textctrl is so dumb that you need to freeze/thaw it manually to
+    // avoid horrible flicker/scrolling back and forth
+    virtual void Freeze();
+    virtual void Thaw();
+
     // textctrl specific scrolling
     virtual bool ScrollLines(int lines);
     virtual bool ScrollPages(int pages);
@@ -148,7 +153,7 @@ public:
     // wxGTK-specific: called recursively by Enable,
     // to give widgets an oppprtunity to correct their colours after they
     // have been changed by Enable
-    virtual void OnEnabled( bool enabled ) ;
+    virtual void OnParentEnable( bool enable ) ;
 
     // tell the control to ignore next text changed signal
     void IgnoreNextTextUpdate();
@@ -164,10 +169,6 @@ protected:
 
     // common part of all ctors
     void Init();
-
-    // overridden wxWindow methods
-    virtual void DoFreeze();
-    virtual void DoThaw();
 
     // get the vertical adjustment, if any, NULL otherwise
     GtkAdjustment *GetVAdj() const;

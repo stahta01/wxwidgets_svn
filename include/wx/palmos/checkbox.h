@@ -13,7 +13,7 @@
 #define _WX_CHECKBOX_H_
 
 // Checkbox item (single checkbox)
-class WXDLLIMPEXP_CORE wxCheckBox : public wxCheckBoxBase
+class WXDLLEXPORT wxCheckBox : public wxCheckBoxBase
 {
 public:
     wxCheckBox() { }
@@ -55,8 +55,6 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxCheckBox)
-    // current state of the checkbox
-    wxCheckBoxState m_state;
 };
 
 #endif

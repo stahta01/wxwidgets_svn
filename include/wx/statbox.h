@@ -18,13 +18,13 @@
 
 #include "wx/control.h"
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxStaticBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStaticBoxNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxStaticBox: a grouping box with a label
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticBoxBase : public wxControl
+class WXDLLEXPORT wxStaticBoxBase : public wxControl
 {
 public:
     wxStaticBoxBase() { }
@@ -46,10 +46,7 @@ public:
         *borderOther = BORDER;
     }
 
-protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
+private:
     DECLARE_NO_COPY_CLASS(wxStaticBoxBase)
 };
 
@@ -64,7 +61,7 @@ protected:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/statbox.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/statbox.h"
+    #include "wx/mac/statbox.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/statbox.h"
 #elif defined(__WXPM__)

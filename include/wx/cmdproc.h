@@ -22,7 +22,7 @@ class WXDLLIMPEXP_FWD_CORE wxMenu;
 // wxCommand: a single command capable of performing itself
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCommand : public wxObject
+class WXDLLEXPORT wxCommand : public wxObject
 {
 public:
     wxCommand(bool canUndoIt = false, const wxString& name = wxEmptyString);
@@ -49,7 +49,7 @@ private:
 // wxCommandProcessor: wxCommand manager
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCommandProcessor : public wxObject
+class WXDLLEXPORT wxCommandProcessor : public wxObject
 {
 public:
     // if max number of commands is -1, it is unlimited

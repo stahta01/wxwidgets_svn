@@ -28,6 +28,7 @@
 
 ////@begin control identifiers
 #define SYMBOL_WXRICHTEXTLISTSTYLEPAGE_STYLE wxRESIZE_BORDER|wxTAB_TRAVERSAL
+#define SYMBOL_WXRICHTEXTLISTSTYLEPAGE_TITLE _("wxRichTextListStylePage")
 #define SYMBOL_WXRICHTEXTLISTSTYLEPAGE_IDNAME ID_RICHTEXTLISTSTYLEPAGE
 #define SYMBOL_WXRICHTEXTLISTSTYLEPAGE_SIZE wxSize(400, 300)
 #define SYMBOL_WXRICHTEXTLISTSTYLEPAGE_POSITION wxDefaultPosition
@@ -64,7 +65,7 @@ public:
     virtual bool TransferDataToWindow();
 
     /// Get attributes for selected level
-    wxTextAttr* GetAttributesForSelection();
+    wxRichTextAttr* GetAttributesForSelection();
 
     /// Update for symbol-related controls
     void OnSymbolUpdate( wxUpdateUIEvent& event );

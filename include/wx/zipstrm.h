@@ -346,7 +346,6 @@ private:
     int m_level;
     wxFileOffset m_offsetAdjustment;
     wxString m_Comment;
-    bool m_endrecWritten;
 
     DECLARE_NO_COPY_CLASS(wxZipOutputStream)
 };

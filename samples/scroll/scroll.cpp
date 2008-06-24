@@ -273,7 +273,6 @@ protected: // event stuff
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseLeftUp(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
-    void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
     void OnScroll(wxScrollWinEvent& event);
 
     DECLARE_EVENT_TABLE()
@@ -535,11 +534,16 @@ MyAutoScrollWindow::MyAutoScrollWindow( wxWindow *parent )
                              wxDefaultPosition,
                              SMALL_BUTTON );
 
+    // We need to do this here, because wxADJUST_MINSIZE below
+    // will cause the initial size to be ignored for Best/Min size.
+    // It would be nice to fix the sizers to handle this a little
+    // more cleanly.
+
     m_button->SetSizeHints( SMALL_BUTTON.GetWidth(), SMALL_BUTTON.GetHeight() );
 
     innersizer->Add( m_button,
                      0,
-                     wxALIGN_CENTER | wxALL,
+                     wxALIGN_CENTER | wxALL | wxADJUST_MINSIZE,
                      20 );
 
     innersizer->Add( new wxStaticText( this, wxID_ANY, _T("This is just") ),
@@ -668,9 +672,6 @@ void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame *frame = new MyFrame();
     frame->Show( true );
 
@@ -739,7 +740,6 @@ BEGIN_EVENT_TABLE(MyAutoTimedScrollingWindow, wxScrolledWindow)
     EVT_LEFT_DOWN(MyAutoTimedScrollingWindow::OnMouseLeftDown)
     EVT_LEFT_UP(MyAutoTimedScrollingWindow::OnMouseLeftUp)
     EVT_MOTION(MyAutoTimedScrollingWindow::OnMouseMove)
-    EVT_MOUSE_CAPTURE_LOST(MyAutoTimedScrollingWindow::OnMouseCaptureLost)
     EVT_SCROLLWIN(MyAutoTimedScrollingWindow::OnScroll)
 END_EVENT_TABLE()
 
@@ -934,9 +934,7 @@ void MyAutoTimedScrollingWindow::OnDraw(wxDC& dc)
     wxBrush selBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT)
             , wxSOLID);
     dc.SetPen(*wxTRANSPARENT_PEN);
-    const wxString str = sm_testData;
-    size_t strLength = str.length();
-    wxString::const_iterator str_i;
+    wxString str = sm_testData;
 
     // draw the characters
     // 1. for each update region
@@ -947,7 +945,6 @@ void MyAutoTimedScrollingWindow::OnDraw(wxDC& dc)
         for (int chY = updRectInGChars.y
                 ; chY <= updRectInGChars.y + updRectInGChars.height; ++chY) {
             // 3. for each character in the row
-            bool isFirstX = true;
             for (int chX = updRectInGChars.x
                     ; chX <= updRectInGChars.x + updRectInGChars.width
                     ; ++chX) {
@@ -969,15 +966,10 @@ void MyAutoTimedScrollingWindow::OnDraw(wxDC& dc)
                 size_t charIndex = chY * sm_lineLen + chX;
                 if (chY < sm_lineCnt &&
                     chX < sm_lineLen &&
-                    charIndex < strLength)
+                    charIndex < str.Length())
                 {
-                    if (isFirstX)
-                    {
-                        str_i = str.begin() + charIndex;
-                        isFirstX = false;
-                    }
-                    dc.DrawText(*str_i, charPos.x, charPos.y);
-                    ++str_i;
+                    dc.DrawText(str.Mid(charIndex,1),
+                                charPos.x, charPos.y);
                 }
             }
         }
@@ -1016,12 +1008,6 @@ void MyAutoTimedScrollingWindow::OnMouseMove(wxMouseEvent& event)
             CaptureMouse();
         }
     }
-}
-
-void MyAutoTimedScrollingWindow::OnMouseCaptureLost(wxMouseCaptureLostEvent& WXUNUSED(event))
-{
-    // we only capture mouse for timed scrolling, so nothing is needed here
-    // other than making sure to not call event.Skip()
 }
 
 void MyAutoTimedScrollingWindow::OnScroll(wxScrollWinEvent& event)

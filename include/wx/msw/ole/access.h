@@ -19,7 +19,7 @@
 // ----------------------------------------------------------------------------
 
 class wxIAccessible;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxWindow;
 
 // ----------------------------------------------------------------------------
 // macros
@@ -29,7 +29,7 @@ class WXDLLIMPEXP_FWD_CORE wxWindow;
 // wxAccessible implements accessibility behaviour.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxAccessible : public wxAccessibleBase
+class WXDLLEXPORT wxAccessible : public wxAccessibleBase
 {
 public:
     wxAccessible(wxWindow *win = NULL);

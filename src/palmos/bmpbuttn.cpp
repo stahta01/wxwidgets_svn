@@ -25,6 +25,8 @@
     #include "wx/dcmemory.h"
 #endif
 
+#include "wx/palmos/private.h"
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -109,6 +111,10 @@ void wxBitmapButton::DrawButtonFocus( WXHDC dc, int left, int top, int right,
 
 void wxBitmapButton::DrawButtonDisable( WXHDC dc, int left, int top, int right,
     int bottom, bool with_marg )
+{
+}
+
+void wxBitmapButton::SetDefault()
 {
 }
 

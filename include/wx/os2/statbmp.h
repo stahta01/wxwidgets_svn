@@ -15,7 +15,7 @@
 #include "wx/control.h"
 #include "wx/icon.h"
 
-class WXDLLIMPEXP_CORE wxStaticBitmap : public wxStaticBitmapBase
+class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
 {
  public:
     inline wxStaticBitmap() { Init(); }

@@ -280,7 +280,6 @@ private:
     char *m_extendedHdr;
     size_t m_extendedSize;
     wxString m_badfit;
-    bool m_endrecWritten;
 
     DECLARE_NO_COPY_CLASS(wxTarOutputStream)
 };

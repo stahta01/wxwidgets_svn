@@ -35,7 +35,6 @@
     #include "wx/window.h"
 
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
 
     #include "wx/button.h"
     #include "wx/bmpbuttn.h"
@@ -2053,7 +2052,7 @@ void wxWin32Renderer::DrawSliderShaft(wxDC& dc,
     */
 
     if (flags & wxCONTROL_FOCUSED) {
-        DrawFocusRect(NULL, dc, rectOrig);
+        DrawFocusRect(dc, rectOrig);
     }
 
     wxRect rect = GetSliderShaftRect(rectOrig, lenThumb, orient, style);
@@ -2505,7 +2504,7 @@ wxMenuGeometryInfo *wxWin32Renderer::GetMenuGeometry(wxWindow *win,
             h = heightText;
 
             wxCoord widthLabel;
-            dc.GetTextExtent(item->GetItemLabelText(), &widthLabel, NULL);
+            dc.GetTextExtent(item->GetLabel(), &widthLabel, NULL);
             if ( widthLabel > widthLabelMax )
             {
                 widthLabelMax = widthLabel;
@@ -2777,7 +2776,7 @@ void wxWin32Renderer::DrawScrollbarShaft(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 /* Copyright (c) Julian Smart */
-static const char *error_xpm[]={
+static char *error_xpm[]={
 /* columns rows colors chars-per-pixel */
 "32 32 70 1",
 "- c #BF0101",
@@ -2886,7 +2885,7 @@ static const char *error_xpm[]={
 };
 
 /* Copyright (c) Julian Smart */
-static const char *info_xpm[]={
+static char *info_xpm[]={
 /* columns rows colors chars-per-pixel */
 "32 32 17 1",
 "* c #A1A3FB",
@@ -2942,7 +2941,7 @@ static const char *info_xpm[]={
 };
 
 /* Copyright (c) Julian Smart */
-static const char *question_xpm[]={
+static char *question_xpm[]={
 /* columns rows colors chars-per-pixel */
 "32 32 16 1",
 "O c #A3A3FF",
@@ -2997,7 +2996,7 @@ static const char *question_xpm[]={
 };
 
 /* Copyright (c) Julian Smart */
-static const char *warning_xpm[]={
+static char *warning_xpm[]={
 /* columns rows colors chars-per-pixel */
 "32 32 9 1",
 "@ c Black",
@@ -3196,9 +3195,10 @@ bool wxWin32InputHandler::HandleMouse(wxInputConsumer *control,
     // clicking on the control gives it focus
     if ( event.ButtonDown() )
     {
-        wxWindow * const win = control->GetInputWindow();
+        wxWindow *win = control->GetInputWindow();
 
-        if ( win->CanAcceptFocus() && wxWindow::FindFocus() != win )
+        if ( (wxWindow::FindFocus() != control->GetInputWindow()) &&
+             win->AcceptsFocus() )
         {
             win->SetFocus();
 

@@ -190,8 +190,6 @@ public:
 #endif // wxUSE_TOOLTIPS
 
     void OnEnableAll(wxCommandEvent& event);
-    void OnHideAll(wxCommandEvent& event);
-    void OnHideList(wxCommandEvent& event);
     void OnContextHelp(wxCommandEvent& event);
 
     void OnIdle( wxIdleEvent& event );
@@ -383,8 +381,6 @@ enum
 
     // panel menu
     CONTROLS_ENABLE_ALL,
-    CONTROLS_HIDE_ALL,
-    CONTROLS_HIDE_LIST,
     CONTROLS_CONTEXT_HELP
 };
 
@@ -644,8 +640,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     wxString choices[] =
     {
         _T("This"),
-        _T("is"),
-        _T("one of my long and"),
+        _T("is one of my"),
+        _T("really"),
         _T("wonderful"),
         _T("examples.")
     };
@@ -736,10 +732,10 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     wxPanel *panel = new wxPanel(m_book);
     m_listbox = new wxListBox( panel, ID_LISTBOX,
                                wxPoint(10,10), wxSize(120,70),
-                               5, choices, wxLB_MULTIPLE | wxLB_ALWAYS_SB | wxHSCROLL );
+                               5, choices, wxLB_MULTIPLE |wxLB_ALWAYS_SB );
     m_listboxSorted = new wxListBox( panel, ID_LISTBOX_SORTED,
                                      wxPoint(10,90), wxSize(120,70),
-                                     3, choices, wxLB_SORT );
+                                     5, choices, wxLB_SORT );
 
     SetListboxClientData(wxT("listbox"), m_listbox);
     SetListboxClientData(wxT("listbox"), m_listboxSorted);
@@ -821,10 +817,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     };
 
     panel = new wxPanel(m_book);
-#if wxUSE_TOOLTIPS
-    wxRadioBox *radio2 =
-#endif // wxUSE_TOOLTIPS
-        new MyRadioBox( panel, ID_RADIOBOX, _T("&That"), wxPoint(10,160), wxDefaultSize, WXSIZEOF(choices2), choices2, 1, wxRA_SPECIFY_ROWS );
+    wxRadioBox *radio2 = new MyRadioBox( panel, ID_RADIOBOX, _T("&That"), wxPoint(10,160), wxDefaultSize, WXSIZEOF(choices2), choices2, 1, wxRA_SPECIFY_ROWS );
     m_radio = new wxRadioBox( panel, ID_RADIOBOX, _T("T&his"), wxPoint(10,10), wxDefaultSize, WXSIZEOF(choices), choices, 1, wxRA_SPECIFY_COLS );
 
 #if wxUSE_TOOLTIPS
@@ -934,7 +927,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     s << initialSpinValue;
     m_spintext = new wxTextCtrl( panel, wxID_ANY, s, wxPoint(20,160), wxSize(80,wxDefaultCoord) );
 #if wxUSE_SPINBTN
-    m_spinbutton = new wxSpinButton( panel, ID_SPIN, wxPoint(103,160), wxSize(-1, m_spintext->GetSize().y) );
+    m_spinbutton = new wxSpinButton( panel, ID_SPIN, wxPoint(103,160) );
     m_spinbutton->SetRange(-40,30);
     m_spinbutton->SetValue(initialSpinValue);
 
@@ -1015,6 +1008,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     // sizer
     panel = new wxPanel(m_book);
+    panel->SetAutoLayout( true );
 
     wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
 
@@ -1191,16 +1185,14 @@ void MyPanel::OnChangeColour(wxCommandEvent& WXUNUSED(event))
 
 void MyPanel::OnListBox( wxCommandEvent &event )
 {
+    if (event.GetInt() == -1)
+    {
+        m_text->AppendText( _T("ListBox has no selections anymore\n") );
+        return;
+    }
+
     wxListBox *listbox = event.GetId() == ID_LISTBOX ? m_listbox
                                                      : m_listboxSorted;
-
-    bool deselect = false;
-    if (listbox->HasFlag(wxLB_MULTIPLE) || listbox->HasFlag(wxLB_EXTENDED))
-    {
-        deselect = !event.IsSelection();
-        if (deselect)
-            m_text->AppendText( _T("ListBox deselection event\n") );
-    }
 
     m_text->AppendText( _T("ListBox event selection string is: '") );
     m_text->AppendText( event.GetString() );
@@ -1208,7 +1200,7 @@ void MyPanel::OnListBox( wxCommandEvent &event )
 
     // can't use GetStringSelection() with multiple selections, there could be
     // more than one of them
-    if ( !listbox->HasFlag(wxLB_MULTIPLE) && !listbox->HasFlag(wxLB_EXTENDED) )
+    if ( !listbox->HasFlag(wxLB_MULTIPLE) )
     {
         m_text->AppendText( _T("ListBox control selection string is: '") );
         m_text->AppendText( listbox->GetStringSelection() );
@@ -1286,8 +1278,8 @@ void MyPanel::OnListBoxButtons( wxCommandEvent &event )
             }
         case ID_LISTBOX_APPEND:
             {
-                m_listbox->Append( _T("Hi kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk!") );
-                m_listboxSorted->Append( _T("Hi hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh!") );
+                m_listbox->Append( _T("Hi!") );
+                m_listboxSorted->Append( _T("Hi!") );
                 break;
             }
         case ID_LISTBOX_DELETE:
@@ -1313,10 +1305,10 @@ void MyPanel::OnListBoxButtons( wxCommandEvent &event )
 
 #if wxUSE_CHOICE
 
-static wxString GetDataString(wxClientData *data)
+static const wxChar *GetDataString(wxClientData *data)
 {
-    return data ? wx_static_cast(wxStringClientData *, data)->GetData()
-                : wxString("none");
+    return data ? wx_static_cast(wxStringClientData *, data)->GetData().c_str()
+                : _T("none");
 }
 
 void MyPanel::OnChoice( wxCommandEvent &event )
@@ -1334,8 +1326,8 @@ void MyPanel::OnChoice( wxCommandEvent &event )
                  _T("data \"%s\"/\"%s\""),
                  (int)event.GetInt(),
                  sel,
-                 event.GetString(),
-                 choice->GetStringSelection(),
+                 event.GetString().c_str(),
+                 choice->GetStringSelection().c_str(),
                  GetDataString(dataEvt),
                  GetDataString(dataCtrl));
 }
@@ -1744,8 +1736,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 #endif // wxUSE_TOOLTIPS
 
     EVT_MENU(CONTROLS_ENABLE_ALL, MyFrame::OnEnableAll)
-    EVT_MENU(CONTROLS_HIDE_ALL,   MyFrame::OnHideAll)
-    EVT_MENU(CONTROLS_HIDE_LIST,   MyFrame::OnHideList)
     EVT_MENU(CONTROLS_CONTEXT_HELP, MyFrame::OnContextHelp)
 
     EVT_ICONIZE(MyFrame::OnIconized)
@@ -1792,10 +1782,6 @@ MyFrame::MyFrame(const wxChar *title, int x, int y)
 
     wxMenu *panel_menu = new wxMenu;
     panel_menu->Append(CONTROLS_ENABLE_ALL, _T("&Disable all\tCtrl-E"),
-                       _T("Enable/disable all panel controls"), true);
-    panel_menu->Append(CONTROLS_HIDE_ALL, _T("&Hide all\tCtrl-I"),
-                       _T("Show/hide thoe whole panel controls"), true);
-    panel_menu->Append(CONTROLS_HIDE_LIST, _T("Hide &list ctrl\tCtrl-S"),
                        _T("Enable/disable all panel controls"), true);
     panel_menu->Append(CONTROLS_CONTEXT_HELP, _T("&Context help...\tCtrl-H"),
                        _T("Get context help for a control"));
@@ -1868,31 +1854,6 @@ void MyFrame::OnEnableAll(wxCommandEvent& WXUNUSED(event))
 
     s_enable = !s_enable;
     m_panel->Enable(s_enable);
-    static bool s_enableCheckbox = true;
-    if ( !s_enable )
-    {
-        // this is a test for correct behaviour of either enabling or disabling
-        // a child when its parent is disabled: the checkbox should have the
-        // correct state when the parent is enabled back
-        m_panel->m_checkbox->Enable(s_enableCheckbox);
-        s_enableCheckbox = !s_enableCheckbox;
-    }
-}
-
-void MyFrame::OnHideAll(wxCommandEvent& WXUNUSED(event))
-{
-    static bool s_show = true;
-
-    s_show = !s_show;
-    m_panel->Show(s_show);
-}
-
-void MyFrame::OnHideList(wxCommandEvent& WXUNUSED(event))
-{
-    static bool s_show = true;
-
-    s_show = !s_show;
-    m_panel->m_listbox->Show(s_show);
 }
 
 void MyFrame::OnContextHelp(wxCommandEvent& WXUNUSED(event))
@@ -1934,30 +1895,24 @@ void MyFrame::OnSize( wxSizeEvent& event )
 void MyFrame::OnIdle( wxIdleEvent& WXUNUSED(event) )
 {
     // track the window which has the focus in the status bar
-    static wxWindow *s_windowFocus = NULL;
+    static wxWindow *s_windowFocus = (wxWindow *)NULL;
     wxWindow *focus = wxWindow::FindFocus();
-    if ( focus != s_windowFocus )
+    if ( focus && (focus != s_windowFocus) )
     {
         s_windowFocus = focus;
 
         wxString msg;
-        if ( focus )
-        {
-            msg.Printf(
-                    _T("Focus: %s")
+        msg.Printf(
 #ifdef __WXMSW__
-                    , _T(", HWND = %08x")
+                _T("Focus: %s, HWND = %08x"),
+#else
+                _T("Focus: %s"),
 #endif
-                    , s_windowFocus->GetName().c_str()
+                s_windowFocus->GetClassInfo()->GetClassName()
 #ifdef __WXMSW__
-                    , (unsigned int) s_windowFocus->GetHWND()
+                , (unsigned int) s_windowFocus->GetHWND()
 #endif
-                      );
-        }
-        else
-        {
-            msg = _T("No focus");
-        }
+                  );
 
 #if wxUSE_STATUSBAR
         SetStatusText(msg);

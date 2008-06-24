@@ -113,7 +113,7 @@ static wxNativeFontInfo MakeNativeFontInfo(int size, int family, int style, int 
  */
 class WXDLLEXPORT wxFontRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxFont;
+    friend class WXDLLEXPORT wxFont;
 public:
     wxFontRefData()
     :   m_cocoaNSFont(nil)
@@ -319,7 +319,7 @@ bool wxFont::Create(wxFontRefData *refData)
 {
     UnRef();
     m_refData = refData;
-
+    
     return m_refData != NULL;
 }
 
@@ -327,18 +327,8 @@ bool wxFont::Create(const wxNativeFontInfo& nativeFontInfo)
 {
     UnRef();
     m_refData = new wxFontRefData(nativeFontInfo);
-
+    
     return true;
-}
-
-wxGDIRefData *wxFont::CreateGDIRefData() const
-{
-    return new wxFontRefData;
-}
-
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxFontRefData(*wx_static_cast(const wxFontRefData *, data));
 }
 
 void wxFont::SetEncoding(wxFontEncoding)
@@ -408,9 +398,24 @@ bool wxFont::RealizeResource()
     return false;
 }
 
+void wxFont::Unshare()
+{
+    // Don't change shared data
+    if (!m_refData)
+    {
+        m_refData = new wxFontRefData();
+    }
+    else
+    {
+        wxFontRefData* ref = new wxFontRefData(*(wxFontRefData*)m_refData);
+        UnRef();
+        m_refData = ref;
+    }
+}
+
 void wxFont::SetPointSize(int pointSize)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.pointSize = pointSize;
 
@@ -419,7 +424,7 @@ void wxFont::SetPointSize(int pointSize)
 
 void wxFont::SetFamily(int family)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.family = static_cast<wxFontFamily>(family);
 
@@ -428,7 +433,7 @@ void wxFont::SetFamily(int family)
 
 void wxFont::SetStyle(int style)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.style = static_cast<wxFontStyle>(style);
 
@@ -437,7 +442,7 @@ void wxFont::SetStyle(int style)
 
 void wxFont::SetWeight(int weight)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.weight = static_cast<wxFontWeight>(weight);
 
@@ -446,7 +451,7 @@ void wxFont::SetWeight(int weight)
 
 bool wxFont::SetFaceName(const wxString& faceName)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.faceName = faceName;
 
@@ -457,7 +462,7 @@ bool wxFont::SetFaceName(const wxString& faceName)
 
 void wxFont::SetUnderlined(bool underlined)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.underlined = underlined;
 

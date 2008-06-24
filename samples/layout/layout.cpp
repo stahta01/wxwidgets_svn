@@ -30,7 +30,6 @@
 #include "wx/statline.h"
 #include "wx/notebook.h"
 #include "wx/spinctrl.h"
-#include "wx/wrapsizer.h"
 
 #include "layout.h"
 
@@ -42,9 +41,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-      return false;
-
   // Create the main frame window
   MyFrame *frame = new MyFrame;
 
@@ -67,7 +63,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(LAYOUT_TEST_GB_SIZER, MyFrame::TestGridBagSizer)
   EVT_MENU(LAYOUT_TEST_SET_MINIMAL, MyFrame::TestSetMinimal)
   EVT_MENU(LAYOUT_TEST_NESTED, MyFrame::TestNested)
-  EVT_MENU(LAYOUT_TEST_WRAP, MyFrame::TestWrap)
 END_EVENT_TABLE()
 
 // Define my frame constructor
@@ -85,7 +80,6 @@ MyFrame::MyFrame()
   file_menu->Append(LAYOUT_TEST_GB_SIZER, _T("Test &gridbag sizer...\tF4"));
   file_menu->Append(LAYOUT_TEST_SET_MINIMAL, _T("Test Set&ItemMinSize...\tF5"));
   file_menu->Append(LAYOUT_TEST_NESTED, _T("Test nested sizer in a wxPanel...\tF6"));
-  file_menu->Append(LAYOUT_TEST_WRAP, _T("Test wrap sizers...\tF6"));
 
   file_menu->AppendSeparator();
   file_menu->Append(LAYOUT_QUIT, _T("E&xit"), _T("Quit program"));
@@ -214,12 +208,6 @@ void MyFrame::TestNested(wxCommandEvent& WXUNUSED(event) )
     newFrame->Show(true);
 }
 
-void MyFrame::TestWrap(wxCommandEvent& WXUNUSED(event) )
-{
-    MyWrapSizerFrame *newFrame = new MyWrapSizerFrame(_T("Wrap Sizer Test Frame"), 50, 50);
-    newFrame->Show(true);
-}
-
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
@@ -315,7 +303,7 @@ void MyFlexSizerFrame::InitFlexSizer(wxFlexGridSizer *sizer, wxWindow* parent)
     }
 }
 
-MyFlexSizerFrame::MyFlexSizerFrame(const wxString &title, int x, int y )
+MyFlexSizerFrame::MyFlexSizerFrame(const wxChar *title, int x, int y )
             : wxFrame(NULL, wxID_ANY, title, wxPoint(x, y) )
 {
     wxFlexGridSizer *sizerFlex;
@@ -396,7 +384,7 @@ MyFlexSizerFrame::MyFlexSizerFrame(const wxString &title, int x, int y )
 // MySizerDialog
 // ----------------------------------------------------------------------------
 
-MySizerDialog::MySizerDialog(wxWindow *parent, const wxString &title)
+MySizerDialog::MySizerDialog(wxWindow *parent, const wxChar *title)
              : wxDialog(parent, wxID_ANY, wxString(title))
 {
     // Begin with first hierarchy: a notebook at the top and
@@ -427,10 +415,12 @@ MySizerDialog::MySizerDialog(wxWindow *parent, const wxString &title)
     wxButton *button2 = new wxButton( panel, wxID_ANY, _T("Hallo") );
     panelsizer->Add( button2, 0, wxALIGN_RIGHT | wxLEFT|wxRIGHT|wxBOTTOM, 30 );
 
+    panel->SetAutoLayout( true );
     panel->SetSizer( panelsizer );
 
     // Tell dialog to use sizer
-    SetSizerAndFit( topsizer );
+    SetSizer( topsizer );
+    topsizer->SetSizeHints( this );
 }
 
 // ----------------------------------------------------------------------------
@@ -468,7 +458,7 @@ BEGIN_EVENT_TABLE(MyGridBagSizerFrame, wxFrame)
 END_EVENT_TABLE()
 
 
-MyGridBagSizerFrame::MyGridBagSizerFrame(const wxString &title, int x, int y )
+MyGridBagSizerFrame::MyGridBagSizerFrame(const wxChar *title, int x, int y )
     : wxFrame( NULL, wxID_ANY, title, wxPoint(x, y) )
 {
     wxPanel* p = new wxPanel(this, wxID_ANY);
@@ -582,7 +572,7 @@ BEGIN_EVENT_TABLE(MySimpleSizerFrame, wxFrame)
     EVT_MENU( ID_SET_BIG, MySimpleSizerFrame::OnSetBigSize)
 END_EVENT_TABLE()
 
-MySimpleSizerFrame::MySimpleSizerFrame(const wxString &title, int x, int y )
+MySimpleSizerFrame::MySimpleSizerFrame(const wxChar *title, int x, int y )
     : wxFrame( NULL, wxID_ANY, title, wxPoint(x, y) )
 {
     wxMenu *menu = new wxMenu;
@@ -628,7 +618,7 @@ void MySimpleSizerFrame::OnSetBigSize( wxCommandEvent& WXUNUSED(event))
 // ----------------------------------------------------------------------------
 
 
-MyNestedSizerFrame::MyNestedSizerFrame(const wxString &title, int x, int y )
+MyNestedSizerFrame::MyNestedSizerFrame(const wxChar *title, int x, int y )
     : wxFrame( NULL, wxID_ANY, title, wxPoint(x, y) )
 {
     wxMenu *menu = new wxMenu;
@@ -661,48 +651,10 @@ MyNestedSizerFrame::MyNestedSizerFrame(const wxString &title, int x, int y )
     m_target = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize( 80, wxDefaultCoord ) );
     main_sizer->Add( m_target, 1, wxALL|wxGROW, 5 );
 
-    SetSizerAndFit( main_sizer);
-}
+    SetSizer( main_sizer);
 
-
-// ----------------------------------------------------------------------------
-// MyWrapSizerFrame
-// ----------------------------------------------------------------------------
-
-
-MyWrapSizerFrame::MyWrapSizerFrame(const wxString &title, int x, int y )
-    : wxFrame( NULL, wxID_ANY, title, wxPoint(x, y) )
-{
-    wxMenu *menu = new wxMenu;
-
-    menu->Append(wxID_ABOUT, "Do nothing");
-
-    wxMenuBar *menu_bar = new wxMenuBar;
-    menu_bar->Append(menu, "&File");
-
-    SetMenuBar( menu_bar );
-
-    wxBoxSizer *root = new wxBoxSizer( wxVERTICAL );
-
-    // A number of checkboxes inside a wrap sizer 
-    wxSizer *ps_mid = new wxStaticBoxSizer( wxVERTICAL, this, "Wrapping check-boxes" );
-    wxSizer *ps_mid_wrap = new wxWrapSizer(wxHORIZONTAL);
-    ps_mid->Add( ps_mid_wrap, 100, wxEXPAND );
-    for( int ix=0; ix<6; ix++ )
-            ps_mid_wrap->Add( new wxCheckBox(this,wxID_ANY,wxString::Format("Option %d",ix+1)), 0, wxALIGN_CENTRE|wxALIGN_CENTER_VERTICAL, 5 );
-    root->Add( ps_mid, 0, wxEXPAND | wxALL, 5 );
-
-    // A shaped item inside a box sizer
-    wxSizer *ps_bottom = new wxStaticBoxSizer( wxVERTICAL, this, "With wxSHAPED item" );
-    wxSizer *ps_bottom_box = new wxBoxSizer(wxHORIZONTAL);
-    ps_bottom->Add( ps_bottom_box, 100, wxEXPAND );
-    ps_bottom_box->Add( new wxListBox(this,wxID_ANY,wxPoint(0,0),wxSize(70,70)), 0, wxEXPAND|wxSHAPED );
-    ps_bottom_box->Add( 10,10 );
-    ps_bottom_box->Add( new wxCheckBox(this,wxID_ANY,"A much longer option..."), 100, 0, 5 );
-    
-    root->Add( ps_bottom, 1, wxEXPAND | wxALL, 5 );
-        
-    // Set sizer for window
-    SetSizerAndFit( root );
+    Layout();
+    GetSizer()->Fit( this );
+    GetSizer()->SetSizeHints( this );
 }
 

@@ -31,7 +31,6 @@
 #endif
 
 #include "wx/gbsizer.h"
-#include "wx/wrapsizer.h"
 #include "wx/notebook.h"
 #include "wx/tokenzr.h"
 
@@ -78,12 +77,9 @@ wxSizerXmlHandler::wxSizerXmlHandler()
     XRC_ADD_STYLE(wxALIGN_CENTER_VERTICAL);
     XRC_ADD_STYLE(wxALIGN_CENTRE_VERTICAL);
 
+    XRC_ADD_STYLE(wxADJUST_MINSIZE);
     XRC_ADD_STYLE(wxFIXED_MINSIZE);
     XRC_ADD_STYLE(wxRESERVE_SPACE_EVEN_IF_HIDDEN);
-
-    // wxWrapSizer-specific flags
-    XRC_ADD_STYLE(wxEXTEND_LAST_ON_EACH_LINE);
-    XRC_ADD_STYLE(wxREMOVE_LEADING_SPACES);
 }
 
 
@@ -118,8 +114,7 @@ bool wxSizerXmlHandler::IsSizerNode(wxXmlNode *node)
            (IsOfClass(node, wxT("wxStaticBoxSizer"))) ||
            (IsOfClass(node, wxT("wxGridSizer"))) ||
            (IsOfClass(node, wxT("wxFlexGridSizer"))) ||
-           (IsOfClass(node, wxT("wxGridBagSizer"))) ||
-           (IsOfClass(node, wxT("wxWrapSizer")));
+           (IsOfClass(node, wxT("wxGridBagSizer")));
 }
 
 
@@ -152,9 +147,9 @@ wxObject* wxSizerXmlHandler::Handle_sizeritem()
         wxWindow *wnd = wxDynamicCast(item, wxWindow);
 
         if (sizer)
-            sitem->AssignSizer(sizer);
+            sitem->SetSizer(sizer);
         else if (wnd)
-            sitem->AssignWindow(wnd);
+            sitem->SetWindow(wnd);
         else
             wxLogError(wxT("Error in resource."));
 
@@ -178,7 +173,7 @@ wxObject* wxSizerXmlHandler::Handle_spacer()
 
     wxSizerItem* sitem = MakeSizerItem();
     SetSizerItemAttributes(sitem);
-    sitem->AssignSpacer(GetSize());
+    sitem->SetSpacer(GetSize());
     AddSizerItem(sitem);
     return NULL;
 }
@@ -211,9 +206,6 @@ wxObject* wxSizerXmlHandler::Handle_sizer()
 
     else if (m_class == wxT("wxGridBagSizer"))
         sizer = Handle_wxGridBagSizer();
-
-    else if (m_class == wxT("wxWrapSizer"))
-        sizer = Handle_wxWrapSizer();
 
     if ( !sizer )
     {
@@ -259,10 +251,8 @@ wxObject* wxSizerXmlHandler::Handle_sizer()
         }
         m_node = nd;
 
-        if (m_parentAsWindow->IsTopLevel())
-        {
+        if (m_parentAsWindow->GetWindowStyle() & (wxMAXIMIZE_BOX | wxRESIZE_BORDER))
             sizer->SetSizeHints(m_parentAsWindow);
-        }
     }
 
     return sizer;
@@ -315,11 +305,6 @@ wxSizer*  wxSizerXmlHandler::Handle_wxGridBagSizer()
     return sizer;
 }
 
-wxSizer*  wxSizerXmlHandler::Handle_wxWrapSizer()
-{
-    wxWrapSizer *sizer = new wxWrapSizer(GetStyle("orient"), GetStyle("flag"));
-    return sizer;
-}
 
 
 
@@ -388,9 +373,6 @@ void wxSizerXmlHandler::SetSizerItemAttributes(wxSizerItem* sitem)
         gbsitem->SetPos(GetGBPos(wxT("cellpos")));
         gbsitem->SetSpan(GetGBSpan(wxT("cellspan")));
     }
-
-    // record the id of the item, if any, for use by XRCSIZERITEM()
-    sitem->SetId(GetID());
 }
 
 void wxSizerXmlHandler::AddSizerItem(wxSizerItem* sitem)

@@ -32,7 +32,7 @@
 // wxRegionRefData: private class containing the information about the region
 // ----------------------------------------------------------------------------
 
-class wxRegionRefData : public wxGDIRefData
+class wxRegionRefData : public wxObjectRefData
 {
 public:
     wxRegionRefData()
@@ -41,7 +41,7 @@ public:
     }
 
     wxRegionRefData(const wxRegionRefData& refData)
-        : wxGDIRefData()
+        : wxObjectRefData()
     {
         m_region = gdk_region_copy(refData.m_region);
     }
@@ -119,12 +119,12 @@ wxRegion::~wxRegion()
     // m_refData unrefed in ~wxObject
 }
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateRefData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }
@@ -459,7 +459,7 @@ wxRect wxRegionIterator::GetRect() const
 wxRegionIterator& wxRegionIterator::operator=(const wxRegionIterator& ri)
 {
     wxDELETEA(m_rects);
-
+    
     m_current = ri.m_current;
     m_numRects = ri.m_numRects;
     if ( m_numRects )

@@ -212,9 +212,6 @@ bool wxDialog::Show( bool bShow )
 
     if (bShow)
     {
-        if (CanDoLayoutAdaptation())
-            DoLayoutAdaptation();
-
         // this usually will result in TransferDataToWindow() being called
         // which will change the controls values so do it before showing as
         // otherwise we could have some flicker
@@ -225,7 +222,7 @@ bool wxDialog::Show( bool bShow )
 
     wxString title = GetTitle();
     if (!title.empty())
-        ::WinSetWindowText((HWND)GetHwnd(), title.c_str());
+        ::WinSetWindowText((HWND)GetHwnd(), (PSZ)title.c_str());
 
     if ( bShow )
     {

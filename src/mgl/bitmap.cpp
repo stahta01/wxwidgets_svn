@@ -60,8 +60,6 @@ public:
     wxBitmapRefData();
     virtual ~wxBitmapRefData();
 
-    virtual bool IsOk() const { return m_bitmap != NULL; }
-
     int             m_width;
     int             m_height;
     int             m_bpp;
@@ -92,6 +90,8 @@ wxBitmapRefData::~wxBitmapRefData()
 
 #define M_BMPDATA ((wxBitmapRefData *)m_refData)
 
+
+IMPLEMENT_ABSTRACT_CLASS(wxBitmapHandler, wxBitmapHandlerBase)
 IMPLEMENT_DYNAMIC_CLASS(wxBitmap,wxBitmapBase)
 
 wxBitmap::wxBitmap(int width, int height, int depth)
@@ -265,6 +265,11 @@ wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
     bdc->clearDevice();
     bdc->putMonoImage(0, 0, width, (width + 7) / 8, height, (void*)bits);
     delete bdc;
+}
+
+bool wxBitmap::IsOk() const
+{
+    return (m_refData != NULL && M_BMPDATA->m_bitmap != NULL);
 }
 
 int wxBitmap::GetHeight() const

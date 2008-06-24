@@ -144,6 +144,19 @@ src/regex/tests
 src/regex/regex.3
 src/regex/regex.7
 
+src/iodbc/AUTHORS
+src/iodbc/COPYING
+src/iodbc/autoconfig
+src/iodbc/Changes.log
+src/iodbc/IAFA-PACKAGE
+src/iodbc/INSTALL
+src/iodbc/NEWS
+src/iodbc/README
+src/iodbc/*.c
+src/iodbc/*.h
+src/iodbc/*.ci
+src/iodbc/*.exp
+
 include/wx/*.h
 include/wx/*.inl
 include/wx/*.cpp
@@ -152,6 +165,7 @@ include/wx/wx_setup.vms
 include/wx/common/*.h
 include/wx/generic/*.h
 include/wx/generic/*.xpm
+include/wx/private/*.h
 include/wx/unix/*.h
 include/wx/html/*.h
 include/wx/html/msw/*.bmp
@@ -207,6 +221,15 @@ samples/artprov/*.rc
 samples/artprov/*.wav
 samples/artprov/*.pro
 samples/artprov/*.bkl
+
+samples/aui/*.cpp
+samples/aui/makefile*
+samples/aui/*.xbm
+samples/aui/*.xpm
+samples/aui/*.ico
+samples/aui/*.rc
+samples/aui/*.pro
+samples/aui/*.bkl
 
 samples/richtext/*.cpp
 samples/richtext/makefile*

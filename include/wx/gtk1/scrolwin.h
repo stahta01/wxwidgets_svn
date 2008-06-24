@@ -16,7 +16,7 @@
 // wxScrolledWindow
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxScrollHelperNative : public wxScrollHelper
+class WXDLLEXPORT wxScrollHelperNative : public wxScrollHelper
 {
 public:
     // default ctor doesn't do anything

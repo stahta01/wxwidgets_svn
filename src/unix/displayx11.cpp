@@ -252,9 +252,9 @@ bool wxDisplayImplX11::ChangeMode(const wxVideoMode& mode)
         for (int i = 0; i < nNumModes; ++i)
         {
             if (!bRet &&
-                ppXModes[i]->hdisplay == mode.GetWidth() &&
-                ppXModes[i]->vdisplay == mode.GetHeight() &&
-                wxCRR((*ppXModes[i])) == mode.GetRefresh())
+                ppXModes[i]->hdisplay == mode.w &&
+                ppXModes[i]->vdisplay == mode.h &&
+                wxCRR((*ppXModes[i])) == mode.refresh)
             {
                 //switch!
                 bRet = XF86VidModeSwitchToMode((Display*)wxGetDisplay(), DefaultScreen((Display*)wxGetDisplay()),
@@ -324,25 +324,9 @@ bool wxDisplayImplX11::ChangeMode(const wxVideoMode& WXUNUSED(mode))
 
 #endif /* wxUSE_DISPLAY */
 
+#if defined(__WXGTK__) || defined(__X__)
+
 #include "wx/utils.h"
-
-#if wxUSE_LIBHILDON
-
-void wxClientDisplayRect(int *x, int *y, int *width, int *height)
-{
-    // TODO: don't hardcode display size
-    if ( x )
-        *x = 0;
-    if ( y )
-        *y = 0;
-    if ( width )
-        *width = 672;
-    if ( height )
-        *height = 396;
-}
-
-#else // !wxUSE_LIBHILDON
-
 #include "wx/log.h"
 
 #include <X11/Xlib.h>
@@ -365,7 +349,7 @@ private:
 //     by wxGTK[12], wxX11 and wxMotif ports
 void wxClientDisplayRect(int *x, int *y, int *width, int *height)
 {
-    Display * const dpy = wxGetX11Display();
+    Display * const dpy = (Display *)wxGetDisplay();
     wxCHECK_RET( dpy, _T("can't be called before initializing the GUI") );
 
     const Atom atomWorkArea = XInternAtom(dpy, "_NET_WORKAREA", True);
@@ -428,4 +412,15 @@ void wxClientDisplayRect(int *x, int *y, int *width, int *height)
     wxDisplaySize(width, height);
 }
 
-#endif // wxUSE_LIBHILDON/!wxUSE_LIBHILDON
+#else // !(wxGTK or X)
+
+void wxClientDisplayRect(int *x, int *y, int *width, int *height)
+{
+    if (x)
+        *x = 0;
+    if (y)
+        *y = 0;
+    wxDisplaySize(width, height);
+}
+
+#endif // wxGTK or X

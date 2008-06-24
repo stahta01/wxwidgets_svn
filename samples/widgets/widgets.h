@@ -40,7 +40,6 @@
     #define USE_ICONS_IN_BOOK 0
 #else
     #define USE_ICONS_IN_BOOK 1
-    #define ICON_SIZE         16
 #endif
 
 class WXDLLIMPEXP_FWD_CORE wxCheckBox;
@@ -92,7 +91,7 @@ class WidgetsPage : public wxPanel
 public:
     WidgetsPage(WidgetsBookCtrl *book,
                 wxImageList *imaglist,
-                const char *const icon[]);
+                const char* icon[]);
 
     // return the control shown by this page
     virtual wxControl *GetWidget() const = 0;

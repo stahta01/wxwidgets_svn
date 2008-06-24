@@ -93,8 +93,8 @@ public:
         Init();
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         Init();
     }
@@ -155,10 +155,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int id,
 }
 
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 void wxToolBarTool::Init()
@@ -200,9 +199,10 @@ bool wxToolBar::Create(wxWindow *parent,
     if( !wxControl::CreateControl( parent, id, pos, size, style,
                                    wxDefaultValidator, name ) )
         return false;
-    PreCreation();
 
     FixupStyle();
+
+    m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE);
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -227,6 +227,8 @@ bool wxToolBar::Create(wxWindow *parent,
 
     m_mainWidget = (WXWidget) toolbar;
 
+    ChangeFont(false);
+
     wxPoint rPos = pos;
     wxSize  rSize = size;
 
@@ -235,9 +237,10 @@ bool wxToolBar::Create(wxWindow *parent,
     if( rSize.x == -1 && GetParent() )
         rSize.x = GetParent()->GetSize().x;
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   rPos.x, rPos.y, rSize.x, rSize.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }

@@ -38,7 +38,9 @@
 // --------------------------------------------------------------------------
 
 // the application icon
-#include "mondrian.xpm"
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#  include "mondrian.xpm"
+#endif
 
 // --------------------------------------------------------------------------
 // classes
@@ -73,11 +75,6 @@ public:
   // event handlers for Protocols menu
   void OnTestURL(wxCommandEvent& event);
 #endif
-#if wxUSE_IPV6
-  void OnOpenConnectionIPv6(wxCommandEvent& event);
-#endif
-
-  void OpenConnection(int family = AF_INET);
 
   // event handlers for DatagramSocket menu (stub)
   void OnDatagram(wxCommandEvent& event);
@@ -113,9 +110,6 @@ enum
   CLIENT_QUIT = wxID_EXIT,
   CLIENT_ABOUT = wxID_ABOUT,
   CLIENT_OPEN = 100,
-#if wxUSE_IPV6
-  CLIENT_OPENIPV6,
-#endif
   CLIENT_TEST1,
   CLIENT_TEST2,
   CLIENT_TEST3,
@@ -137,9 +131,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
   EVT_MENU(CLIENT_QUIT,     MyFrame::OnQuit)
   EVT_MENU(CLIENT_ABOUT,    MyFrame::OnAbout)
   EVT_MENU(CLIENT_OPEN,     MyFrame::OnOpenConnection)
-#if wxUSE_IPV6
-  EVT_MENU(CLIENT_OPENIPV6, MyFrame::OnOpenConnectionIPv6)
-#endif
   EVT_MENU(CLIENT_TEST1,    MyFrame::OnTest1)
   EVT_MENU(CLIENT_TEST2,    MyFrame::OnTest2)
   EVT_MENU(CLIENT_TEST3,    MyFrame::OnTest3)
@@ -163,9 +154,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-      return false;
-
   // Create the main application window
   MyFrame *frame = new MyFrame();
 
@@ -197,9 +185,6 @@ MyFrame::MyFrame() : wxFrame((wxFrame *)NULL, wxID_ANY,
 
   m_menuSocket = new wxMenu();
   m_menuSocket->Append(CLIENT_OPEN, _("&Open session"), _("Connect to server"));
-#if wxUSE_IPV6
-  m_menuSocket->Append(CLIENT_OPENIPV6, _("&Open session(IPv6)"), _("Connect to server(IPv6)"));
-#endif
   m_menuSocket->AppendSeparator();
   m_menuSocket->Append(CLIENT_TEST1, _("Test &1"), _("Test basic functionality"));
   m_menuSocket->Append(CLIENT_TEST2, _("Test &2"), _("Test ReadMsg and WriteMsg"));
@@ -273,34 +258,9 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnOpenConnection(wxCommandEvent& WXUNUSED(event))
 {
-    OpenConnection(AF_INET);
-}
-#if wxUSE_IPV6
-void MyFrame::OnOpenConnectionIPv6(wxCommandEvent& WXUNUSED(event))
-{
-    OpenConnection(AF_INET6);
-}
-#endif // wxUSE_IPV6
-
-void MyFrame::OpenConnection(int family)
-{
-  wxIPaddress * addr;
-  wxIPV4address addr4;
-#if wxUSE_IPV6
-  wxIPV6address addr6;
-  if ( family==AF_INET6 )
-    addr = &addr6;
-  else
-    addr = &addr4;
-#else
-  wxUnusedVar(family);
-  addr = &addr4;
-#endif
+  wxIPV4address addr;
 
   m_menuSocket->Enable(CLIENT_OPEN, false);
-#if wxUSE_IPV6
-  m_menuSocket->Enable(CLIENT_OPENIPV6, false);
-#endif
   m_menuSocket->Enable(CLIENT_CLOSE, false);
 
   // Ask user for server address
@@ -309,8 +269,8 @@ void MyFrame::OpenConnection(int family)
     _("Connect ..."),
     _("localhost"));
 
-  addr->Hostname(hostname);
-  addr->Service(3000);
+  addr.Hostname(hostname);
+  addr.Service(3000);
 
   // Mini-tutorial for Connect() :-)
   // ---------------------------
@@ -362,7 +322,7 @@ void MyFrame::OpenConnection(int family)
   // And that's all :-)
 
   m_text->AppendText(_("\nTrying to connect (timeout = 10 sec) ...\n"));
-  m_sock->Connect(*addr, false);
+  m_sock->Connect(addr, false);
   m_sock->WaitOnConnect(10);
 
   if (m_sock->IsConnected())
@@ -379,6 +339,10 @@ void MyFrame::OpenConnection(int family)
 
 void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
 {
+  const wxChar *buf1;
+  wxChar       *buf2;
+  unsigned char len;
+
   // Disable socket menu entries (exception: Close Session)
   m_busy = true;
   UpdateStatusBar();
@@ -403,9 +367,9 @@ void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
 
   m_sock->SetFlags(wxSOCKET_WAITALL);
 
-  const wxChar *buf1 = _T("Test string (less than 256 chars!)");
-  unsigned char len  = (unsigned char)((wxStrlen(buf1) + 1)*sizeof(wxChar));
-  wxChar *buf2 = new wxChar[wxStrlen(buf1) + 1];
+  buf1 = _("Test string (less than 256 chars!)");
+  len  = (unsigned char)((wxStrlen(buf1) + 1) * sizeof(wxChar));
+  buf2 = new wxChar[wxStrlen(buf1) + 1];
 
   m_text->AppendText(_("Sending a test buffer to the server ..."));
   m_sock->Write(&len, 1);
@@ -663,11 +627,7 @@ void MyFrame::UpdateStatusBar()
   }
   else
   {
-#if wxUSE_IPV6
-    wxIPV6address addr;
-#else
     wxIPV4address addr;
-#endif
 
     m_sock->GetPeer(addr);
     s.Printf(_("%s : %d"), (addr.Hostname()).c_str(), addr.Service());
@@ -678,9 +638,6 @@ void MyFrame::UpdateStatusBar()
 #endif // wxUSE_STATUSBAR
 
   m_menuSocket->Enable(CLIENT_OPEN, !m_sock->IsConnected() && !m_busy);
-#if wxUSE_IPV6
-  m_menuSocket->Enable(CLIENT_OPENIPV6, !m_sock->IsConnected() && !m_busy);
-#endif
   m_menuSocket->Enable(CLIENT_TEST1, m_sock->IsConnected() && !m_busy);
   m_menuSocket->Enable(CLIENT_TEST2, m_sock->IsConnected() && !m_busy);
   m_menuSocket->Enable(CLIENT_TEST3, m_sock->IsConnected() && !m_busy);

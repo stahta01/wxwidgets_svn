@@ -38,6 +38,8 @@
     #include "wx/math.h"
 #endif
 
+#include "wx/palmos/private.h"
+
 #include <stdlib.h>
 #include <string.h>
 

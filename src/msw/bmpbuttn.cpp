@@ -27,7 +27,6 @@
 #endif
 
 #include "wx/msw/private.h"
-#include "wx/msw/dc.h"          // for wxDCTemp
 
 #include "wx/msw/uxtheme.h"
 
@@ -131,7 +130,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
     const wxValidator& wxVALIDATOR_PARAM(validator),
     const wxString& name)
 {
-    SetBitmapLabel(bitmap);
+    m_bmpNormal = bitmap;
     SetName(name);
 
 #if wxUSE_VALIDATORS
@@ -176,7 +175,7 @@ bool wxBitmapButton::Create(wxWindow *parent, wxWindowID id,
                     msStyle,
                     0, 0, 0, 0,
                     GetWinHwnd(parent),
-                    (HMENU)wxUIntToPtr(m_windowId.GetValue()),
+                    (HMENU)m_windowId,
                     wxGetInstance(),
                     NULL
                    );
@@ -225,19 +224,7 @@ void wxBitmapButton::OnMouseEnterOrLeave(wxMouseEvent& event)
     event.Skip();
 }
 
-void wxBitmapButton::SetBitmapLabel(const wxBitmap& bitmap)
-{
-#if wxUSE_IMAGE
-    if ( !HasFlag(wxBU_AUTODRAW) && !m_disabledSetByUser && bitmap.IsOk() )
-    {
-        m_bmpDisabled = wxBitmap(bitmap.ConvertToImage().ConvertToGreyscale());
-    }
-#endif // wxUSE_IMAGE
-
-    wxBitmapButtonBase::SetBitmapLabel(bitmap);
-}
-
-void wxBitmapButton::SetBitmapFocus(const wxBitmap& focus)
+void wxBitmapButton::OnSetBitmap()
 {
     // if the focus bitmap is specified but hover one isn't, use the focus
     // bitmap for hovering as well if this is consistent with the current
@@ -246,26 +233,15 @@ void wxBitmapButton::SetBitmapFocus(const wxBitmap& focus)
     // rationale: this is compatible with the old wxGTK behaviour and also
     // makes it much easier to do "the right thing" for all platforms (some of
     // them, such as Windows XP, have "hot" buttons while others don't)
-    if ( focus.Ok() && !m_hoverSetByUser )
+    if ( !m_bmpHover.Ok() &&
+            m_bmpFocus.Ok() &&
+                wxUxThemeEngine::GetIfActive() )
+    {
         m_bmpHover = m_bmpFocus;
+    }
 
-    wxBitmapButtonBase::SetBitmapFocus(focus);
-}
-
-void wxBitmapButton::SetBitmapDisabled(const wxBitmap& disabled)
-{
-    if ( disabled.IsOk() )
-        m_disabledSetByUser = true;
-
-    wxBitmapButtonBase::SetBitmapDisabled(disabled);
-}
-
-void wxBitmapButton::SetBitmapHover(const wxBitmap& hover)
-{
-    if ( hover.IsOk() )
-        m_hoverSetByUser = true;
-
-    wxBitmapButtonBase::SetBitmapHover(hover);
+    // this will redraw us
+    wxBitmapButtonBase::OnSetBitmap();
 }
 
 #if wxUSE_UXTHEME
@@ -604,6 +580,11 @@ wxBitmapButton::DrawButtonDisable( WXHDC dc,
     }
 
     ::PatBlt( (HDC) dc, left, top, right, bottom, PATTERNPAINT);
+}
+
+void wxBitmapButton::SetDefault()
+{
+    wxButton::SetDefault();
 }
 
 wxSize wxBitmapButton::DoGetBestSize() const

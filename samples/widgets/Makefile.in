@@ -35,7 +35,6 @@ EXTRALIBS_XML = @EXTRALIBS_XML@
 EXTRALIBS_HTML = @EXTRALIBS_HTML@
 EXTRALIBS_GUI = @EXTRALIBS_GUI@
 EXTRALIBS_SDL = @EXTRALIBS_SDL@
-CXXWARNINGS = @CXXWARNINGS@
 HOST_SUFFIX = @HOST_SUFFIX@
 SAMPLES_RPATH_FLAG = @SAMPLES_RPATH_FLAG@
 SAMPLES_RPATH_POSTLINK = @SAMPLES_RPATH_POSTLINK@
@@ -44,30 +43,26 @@ wx_top_builddir = @wx_top_builddir@
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.9
-WX_VERSION = $(WX_RELEASE).0
+WX_RELEASE = 2.8
+WX_VERSION = $(WX_RELEASE).8
 LIBDIRNAME = $(wx_top_builddir)/lib
 WIDGETS_CXXFLAGS = -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
-	-I$(srcdir) $(__DLLFLAG_p) -I$(srcdir)/../../samples $(CXXWARNINGS) \
-	$(CPPFLAGS) $(CXXFLAGS)
+	-I$(srcdir) $(__DLLFLAG_p) -I$(srcdir)/../../samples $(CPPFLAGS) $(CXXFLAGS)
 WIDGETS_OBJECTS =  \
 	$(__widgets_os2_lib_res) \
 	widgets_bmpcombobox.o \
 	widgets_button.o \
 	widgets_checkbox.o \
-	widgets_choice.o \
 	widgets_clrpicker.o \
 	widgets_combobox.o \
 	widgets_datepick.o \
 	widgets_dirctrl.o \
 	widgets_dirpicker.o \
-	widgets_filectrl.o \
 	widgets_filepicker.o \
 	widgets_fontpicker.o \
 	widgets_gauge.o \
 	widgets_hyperlnk.o \
-	widgets_itemcontainer.o \
 	widgets_listbox.o \
 	widgets_notebook.o \
 	widgets_odcombobox.o \
@@ -76,7 +71,6 @@ WIDGETS_OBJECTS =  \
 	widgets_slider.o \
 	widgets_spinbtn.o \
 	widgets_static.o \
-	widgets_statbmp.o \
 	widgets_textctrl.o \
 	widgets_toggle.o \
 	widgets_widgets.o \
@@ -163,6 +157,8 @@ COND_MONOLITHIC_1___WXLIB_MONO_p = \
 @COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@	-lwxpng$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_WXUSE_ZLIB_BUILTIN@__LIB_ZLIB_p = \
 @COND_WXUSE_ZLIB_BUILTIN@	-lwxzlib$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
+@COND_WXUSE_ODBC_BUILTIN@__LIB_ODBC_p = \
+@COND_WXUSE_ODBC_BUILTIN@	-lwxodbc$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 COND_WXUSE_REGEX_BUILTIN___LIB_REGEX_p = \
 	-lwxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_WXUSE_REGEX_BUILTIN@__LIB_REGEX_p = $(COND_WXUSE_REGEX_BUILTIN___LIB_REGEX_p)
@@ -195,13 +191,13 @@ distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 widgets$(EXEEXT): $(WIDGETS_OBJECTS) $(__widgets___win32rc)
-	$(CXX) -o $@ $(WIDGETS_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI) $(SAMPLES_RPATH_FLAG)  $(LIBS) $(__WXLIB_XML_p) $(EXTRALIBS_XML) $(__WXLIB_ADV_p) $(PLUGIN_ADV_EXTRALIBS) $(__WXLIB_HTML_p) $(EXTRALIBS_HTML) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+	$(CXX) -o $@ $(WIDGETS_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI) $(SAMPLES_RPATH_FLAG)  $(LIBS) $(__WXLIB_XML_p) $(EXTRALIBS_XML) $(__WXLIB_ADV_p) $(PLUGIN_ADV_EXTRALIBS) $(__WXLIB_HTML_p) $(EXTRALIBS_HTML) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
 	$(__widgets___mac_rezcmd)
 	$(__widgets___mac_setfilecmd)
 	$(__widgets___os2_emxbindcmd)
 	$(SAMPLES_RPATH_POSTLINK)
 
-@COND_PLATFORM_MACOSX_1@widgets.app/Contents/PkgInfo: widgets$(EXEEXT) $(top_srcdir)/src/osx/carbon/Info.plist.in $(top_srcdir)/src/osx/carbon/wxmac.icns
+@COND_PLATFORM_MACOSX_1@widgets.app/Contents/PkgInfo: widgets$(EXEEXT) $(top_srcdir)/src/mac/carbon/Info.plist.in $(top_srcdir)/src/mac/carbon/wxmac.icns
 @COND_PLATFORM_MACOSX_1@	mkdir -p widgets.app/Contents
 @COND_PLATFORM_MACOSX_1@	mkdir -p widgets.app/Contents/MacOS
 @COND_PLATFORM_MACOSX_1@	mkdir -p widgets.app/Contents/Resources
@@ -210,7 +206,7 @@ widgets$(EXEEXT): $(WIDGETS_OBJECTS) $(__widgets___win32rc)
 @COND_PLATFORM_MACOSX_1@	sed -e "s/IDENTIFIER/`echo $(srcdir) | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
 @COND_PLATFORM_MACOSX_1@	-e "s/EXECUTABLE/widgets/" \
 @COND_PLATFORM_MACOSX_1@	-e "s/VERSION/$(WX_VERSION)/" \
-@COND_PLATFORM_MACOSX_1@	$(top_srcdir)/src/osx/carbon/Info.plist.in >widgets.app/Contents/Info.plist
+@COND_PLATFORM_MACOSX_1@	$(top_srcdir)/src/mac/carbon/Info.plist.in >widgets.app/Contents/Info.plist
 @COND_PLATFORM_MACOSX_1@	
 @COND_PLATFORM_MACOSX_1@	
 @COND_PLATFORM_MACOSX_1@	echo -n "APPL????" >widgets.app/Contents/PkgInfo
@@ -219,7 +215,7 @@ widgets$(EXEEXT): $(WIDGETS_OBJECTS) $(__widgets___win32rc)
 @COND_PLATFORM_MACOSX_1@	ln -f widgets$(EXEEXT) widgets.app/Contents/MacOS/widgets
 @COND_PLATFORM_MACOSX_1@	
 @COND_PLATFORM_MACOSX_1@	
-@COND_PLATFORM_MACOSX_1@	cp -f $(top_srcdir)/src/osx/carbon/wxmac.icns widgets.app/Contents/Resources/wxmac.icns
+@COND_PLATFORM_MACOSX_1@	cp -f $(top_srcdir)/src/mac/carbon/wxmac.icns widgets.app/Contents/Resources/wxmac.icns
 
 @COND_PLATFORM_MACOSX_1@widgets_bundle: $(____widgets_BUNDLE_TGT_REF_DEP)
 
@@ -231,9 +227,6 @@ widgets_button.o: $(srcdir)/button.cpp
 
 widgets_checkbox.o: $(srcdir)/checkbox.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/checkbox.cpp
-
-widgets_choice.o: $(srcdir)/choice.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/choice.cpp
 
 widgets_clrpicker.o: $(srcdir)/clrpicker.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/clrpicker.cpp
@@ -250,9 +243,6 @@ widgets_dirctrl.o: $(srcdir)/dirctrl.cpp
 widgets_dirpicker.o: $(srcdir)/dirpicker.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/dirpicker.cpp
 
-widgets_filectrl.o: $(srcdir)/filectrl.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/filectrl.cpp
-
 widgets_filepicker.o: $(srcdir)/filepicker.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/filepicker.cpp
 
@@ -264,9 +254,6 @@ widgets_gauge.o: $(srcdir)/gauge.cpp
 
 widgets_hyperlnk.o: $(srcdir)/hyperlnk.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/hyperlnk.cpp
-
-widgets_itemcontainer.o: $(srcdir)/itemcontainer.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/itemcontainer.cpp
 
 widgets_listbox.o: $(srcdir)/listbox.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/listbox.cpp
@@ -292,9 +279,6 @@ widgets_spinbtn.o: $(srcdir)/spinbtn.cpp
 widgets_static.o: $(srcdir)/static.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/static.cpp
 
-widgets_statbmp.o: $(srcdir)/statbmp.cpp
-	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/statbmp.cpp
-
 widgets_textctrl.o: $(srcdir)/textctrl.cpp
 	$(CXXC) -c -o $@ $(WIDGETS_CXXFLAGS) $(srcdir)/textctrl.cpp
 
@@ -307,15 +291,6 @@ widgets_widgets.o: $(srcdir)/widgets.cpp
 widgets_sample_rc.o: $(srcdir)/../sample.rc
 	$(WINDRES) -i$< -o$@    --define __WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p_2)  $(__EXCEPTIONS_DEFINE_p_2) $(__RTTI_DEFINE_p_2) $(__THREAD_DEFINE_p_2)   --include-dir $(srcdir) $(__DLLFLAG_p_2) --include-dir $(srcdir)/../../samples $(__RCDEFDIR_p_1) --include-dir $(top_srcdir)/include
 
-
-$(srcdir)/include/wx/stc/stc.h: \
-$(srcdir)/src/stc/scintilla/include/Scintilla.iface \
-$(srcdir)/src/stc/stc.cpp.in \
-$(srcdir)/src/stc/stc.h.in \
-$(srcdir)/src/stc/gen_iface.py
-	cd $(srcdir)/src/stc && ./gen_iface.py
-monolib_stc.o monodll_stc.o stcdll_stc.o stclib_stc.o: \
-$(srcdir)/include/wx/stc/stc.h
 
 # Include dependency info, if present:
 @IF_GNU_MAKE@-include .deps/*.d

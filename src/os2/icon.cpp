@@ -61,7 +61,7 @@ wxIcon::wxIcon( const char WXUNUSED(bits)[],
 }
 
 wxIcon::wxIcon( const wxString& rIconFile,
-                wxBitmapType    lFlags,
+                long            lFlags,
                 int             nDesiredWidth,
                 int             nDesiredHeight )
        :m_bIsXpm(false)
@@ -85,7 +85,9 @@ wxIcon::~wxIcon()
 {
 }
 
-void wxIcon::CreateIconFromXpm(const char* const* ppData)
+void wxIcon::CreateIconFromXpm(
+  const char**                      ppData
+)
 {
     wxBitmap                        vBmp(ppData);
 
@@ -257,7 +259,7 @@ void wxIcon::CopyFromBitmap( const wxBitmap& rBmp )
 } // end of wxIcon::CopyFromBitmap
 
 bool wxIcon::LoadFile( const wxString& rFilename,
-                       wxBitmapType lType,
+                       long lType,
                        int nDesiredWidth,
                        int nDesiredHeight )
 {

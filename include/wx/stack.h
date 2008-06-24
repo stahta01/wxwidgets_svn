@@ -13,27 +13,30 @@
 
 #include "wx/vector.h"
 
-#define WX_DECLARE_STACK(obj, cls) \
-class cls : public wxVector<obj> \
+#define WX_DECLARE_STACK(obj, cls)\
+class cls : public wxVectorBase\
 {\
+    WX_DECLARE_VECTORBASE(obj, cls);\
 public:\
     void push(const obj& o)\
     {\
-        push_back(o); \
+        bool rc = Alloc(size() + 1);\
+        wxASSERT(rc);\
+        Append(new obj(o));\
     };\
 \
     void pop()\
     {\
-        pop_back(); \
+        RemoveAt(size() - 1);\
     };\
 \
     obj& top()\
     {\
-        return at(size() - 1);\
+        return *(obj *) GetItem(size() - 1);\
     };\
     const obj& top() const\
     {\
-        return at(size() - 1); \
+        return *(obj *) GetItem(size() - 1);\
     };\
 }
 

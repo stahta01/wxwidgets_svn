@@ -77,7 +77,7 @@ protected:
     wxArtProvider::Push(new wxDefaultArtProvider);
 }
 
-#if !(defined(__WXGTK20__) || defined(__WXMAC__)) || defined(__WXUNIVERSAL__)
+#if !defined(__WXGTK20__) || defined(__WXUNIVERSAL__)
 /*static*/ void wxArtProvider::InitNativeProvider()
 {
 }
@@ -87,6 +87,7 @@ protected:
 // ----------------------------------------------------------------------------
 // XPMs with the art
 // ----------------------------------------------------------------------------
+
 
 #if defined(__WXGTK__)
     #include "../../art/gtk/info.xpm"
@@ -148,6 +149,8 @@ protected:
 #include "../../art/quit.xpm"
 #include "../../art/find.xpm"
 #include "../../art/findrepl.xpm"
+
+
 
 wxBitmap wxDefaultArtProvider_CreateBitmap(const wxArtID& id)
 {

@@ -77,8 +77,7 @@ wxNumberEntryDialog::wxNumberEntryDialog(wxWindow *parent,
                                          long min,
                                          long max,
                                          const wxPoint& pos)
-                   : wxDialog(GetParentForModalDialog(parent),
-                              wxID_ANY, caption,
+                   : wxDialog(parent, wxID_ANY, caption,
                               pos, wxDefaultSize)
 {
     m_value = value;
@@ -105,7 +104,10 @@ wxNumberEntryDialog::wxNumberEntryDialog(wxWindow *parent,
     // spin ctrl
     wxString valStr;
     valStr.Printf(wxT("%ld"), m_value);
-    m_spinctrl = new wxSpinCtrl(this, wxID_ANY, valStr, wxDefaultPosition, wxSize( 140, wxDefaultCoord ), wxSP_ARROW_KEYS, (int)m_min, (int)m_max, (int)m_value);
+    m_spinctrl = new wxSpinCtrl(this, wxID_ANY, valStr, wxDefaultPosition, wxSize( 140, wxDefaultCoord ) );
+#if wxUSE_SPINCTRL
+    m_spinctrl->SetRange((int)m_min, (int)m_max);
+#endif
     inputsizer->Add( m_spinctrl, 1, wxCENTER | wxLEFT | wxRIGHT, 10 );
     // add both
     topsizer->Add( inputsizer, 0, wxEXPAND | wxLEFT|wxRIGHT, 5 );

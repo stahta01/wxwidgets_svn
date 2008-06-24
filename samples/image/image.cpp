@@ -118,7 +118,6 @@ public:
 
     void OnAbout( wxCommandEvent &event );
     void OnNewFrame( wxCommandEvent &event );
-    void OnImageInfo( wxCommandEvent &event );
 #ifdef wxHAVE_RAW_BITMAP
     void OnTestRawBitmap( wxCommandEvent &event );
 #endif // wxHAVE_RAW_BITMAP
@@ -132,55 +131,20 @@ public:
     MyCanvas         *m_canvas;
 
 private:
-    // ask user for the file name and try to load an image from it
-    //
-    // return the file path on success, empty string if we failed to load the
-    // image or were cancelled by user
-    static wxString LoadUserImage(wxImage& image);
-
-
     DECLARE_DYNAMIC_CLASS(MyFrame)
     DECLARE_EVENT_TABLE()
-};
-
-// ----------------------------------------------------------------------------
-// Frame used for showing a standalone image
-// ----------------------------------------------------------------------------
-
-enum
-{
-    ID_ROTATE_LEFT = 100,
-    ID_ROTATE_RIGHT,
-    ID_RESIZE
 };
 
 class MyImageFrame : public wxFrame
 {
 public:
-    MyImageFrame(wxFrame *parent, const wxString& desc, const wxBitmap& bitmap)
-        : wxFrame(parent, wxID_ANY,
-                  wxString::Format(_T("Image from %s"), desc.c_str()),
+    MyImageFrame(wxFrame *parent, const wxBitmap& bitmap)
+        : wxFrame(parent, wxID_ANY, _T("Double click to save"),
                   wxDefaultPosition, wxDefaultSize,
-                  wxDEFAULT_FRAME_STYLE | wxFULL_REPAINT_ON_RESIZE),
+                  wxCAPTION | wxSYSTEM_MENU | wxCLOSE_BOX),
                   m_bitmap(bitmap)
     {
-        wxMenu *menu = new wxMenu;
-        menu->Append(wxID_SAVE);
-        menu->AppendSeparator();
-        menu->Append(ID_RESIZE, _T("&Fit to window\tCtrl-F"));
-        menu->AppendSeparator();
-        menu->Append(ID_ROTATE_LEFT, _T("Rotate &left\tCtrl-L"));
-        menu->Append(ID_ROTATE_RIGHT, _T("Rotate &right\tCtrl-R"));
-
-        wxMenuBar *mbar = new wxMenuBar;
-        mbar->Append(menu, _T("&Image"));
-        SetMenuBar(mbar);
-
-        CreateStatusBar();
-
         SetClientSize(bitmap.GetWidth(), bitmap.GetHeight());
-
-        UpdateStatusBar();
     }
 
     void OnEraseBackground(wxEraseEvent& WXUNUSED(event))
@@ -190,15 +154,11 @@ public:
 
     void OnPaint(wxPaintEvent& WXUNUSED(event))
     {
-        wxPaintDC dc(this);
-        const wxSize size = GetClientSize();
-        dc.DrawBitmap(m_bitmap,
-                      (size.x - m_bitmap.GetWidth())/2,
-                      (size.y - m_bitmap.GetHeight())/2,
-                      true /* use mask */);
+        wxPaintDC dc( this );
+        dc.DrawBitmap( m_bitmap, 0, 0, true /* use mask */ );
     }
 
-    void OnSave(wxCommandEvent& WXUNUSED(event))
+    void OnSave(wxMouseEvent& WXUNUSED(event))
     {
 #if wxUSE_FILEDLG
         wxImage image = m_bitmap.ConvertToImage();
@@ -324,46 +284,7 @@ public:
 #endif // wxUSE_FILEDLG
     }
 
-    void OnResize(wxCommandEvent& WXUNUSED(event))
-    {
-        wxImage img(m_bitmap.ConvertToImage());
-
-        const wxSize size = GetClientSize();
-        img.Rescale(size.x, size.y, wxIMAGE_QUALITY_HIGH);
-        m_bitmap = wxBitmap(img);
-
-        UpdateStatusBar();
-        Refresh();
-    }
-
-    void OnRotate(wxCommandEvent& event)
-    {
-        double angle = 5;
-        if ( event.GetId() == ID_ROTATE_LEFT )
-            angle = -angle;
-
-        wxImage img(m_bitmap.ConvertToImage());
-        img = img.Rotate(angle, wxPoint(img.GetWidth() / 2, img.GetHeight() / 2));
-        if ( !img.Ok() )
-        {
-            wxLogWarning(_T("Rotation failed"));
-            return;
-        }
-
-        m_bitmap = wxBitmap(img);
-
-        UpdateStatusBar();
-        Refresh();
-    }
-
 private:
-    void UpdateStatusBar()
-    {
-        wxLogStatus(this, _T("Image size: (%d, %d)"),
-                    m_bitmap.GetWidth(),
-                    m_bitmap.GetHeight());
-    }
-
     wxBitmap m_bitmap;
 
     DECLARE_EVENT_TABLE()
@@ -405,6 +326,7 @@ public:
                 wxLogError(_T("Failed to gain raw access to bitmap data"));
                 return;
             }
+            data.UseAlpha();
             wxAlphaPixelData::Iterator p(data);
             for ( int y = 0; y < SIZE; ++y )
             {
@@ -428,6 +350,7 @@ public:
             return;
         }
 
+        data.UseAlpha();
         wxAlphaPixelData::Iterator p(data);
 
         for ( int y = 0; y < REAL_SIZE; ++y )
@@ -525,10 +448,7 @@ IMPLEMENT_APP(MyApp)
 BEGIN_EVENT_TABLE(MyImageFrame, wxFrame)
     EVT_ERASE_BACKGROUND(MyImageFrame::OnEraseBackground)
     EVT_PAINT(MyImageFrame::OnPaint)
-
-    EVT_MENU(wxID_SAVE, MyImageFrame::OnSave)
-    EVT_MENU_RANGE(ID_ROTATE_LEFT, ID_ROTATE_RIGHT, MyImageFrame::OnRotate)
-    EVT_MENU(ID_RESIZE, MyImageFrame::OnResize)
+    EVT_LEFT_DCLICK(MyImageFrame::OnSave)
 END_EVENT_TABLE()
 
 #ifdef wxHAVE_RAW_BITMAP
@@ -1109,19 +1029,17 @@ enum
     ID_QUIT  = wxID_EXIT,
     ID_ABOUT = wxID_ABOUT,
     ID_NEW = 100,
-    ID_INFO,
-    ID_SHOWRAW
+    ID_SHOWRAW = 101
 };
 
 IMPLEMENT_DYNAMIC_CLASS( MyFrame, wxFrame )
 
-BEGIN_EVENT_TABLE(MyFrame, wxFrame)
+BEGIN_EVENT_TABLE(MyFrame,wxFrame)
   EVT_MENU    (ID_ABOUT, MyFrame::OnAbout)
   EVT_MENU    (ID_QUIT,  MyFrame::OnQuit)
-  EVT_MENU    (ID_NEW,   MyFrame::OnNewFrame)
-  EVT_MENU    (ID_INFO,  MyFrame::OnImageInfo)
+  EVT_MENU    (ID_NEW,  MyFrame::OnNewFrame)
 #ifdef wxHAVE_RAW_BITMAP
-  EVT_MENU    (ID_SHOWRAW, MyFrame::OnTestRawBitmap)
+  EVT_MENU    (ID_SHOWRAW,  MyFrame::OnTestRawBitmap)
 #endif
 
 #if wxUSE_CLIPBOARD
@@ -1138,9 +1056,8 @@ MyFrame::MyFrame()
 
   wxMenu *menuImage = new wxMenu;
   menuImage->Append( ID_NEW, _T("&Show any image...\tCtrl-O"));
-  menuImage->Append( ID_INFO, _T("Show image &information...\tCtrl-I"));
+
 #ifdef wxHAVE_RAW_BITMAP
-  menuImage->AppendSeparator();
   menuImage->Append( ID_SHOWRAW, _T("Test &raw bitmap...\tCtrl-R"));
 #endif
   menuImage->AppendSeparator();
@@ -1182,71 +1099,23 @@ void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
                       _T("About wxImage Demo"), wxICON_INFORMATION | wxOK );
 }
 
-wxString MyFrame::LoadUserImage(wxImage& image)
-{
-    wxString filename;
-
-#if wxUSE_FILEDLG
-    filename = wxFileSelector(_T("Select image file"));
-    if ( !filename.empty() )
-    {
-        if ( !image.LoadFile(filename) )
-        {
-            wxLogError(_T("Couldn't load image from '%s'."), filename.c_str());
-
-            return wxEmptyString;
-        }
-    }
-#endif // wxUSE_FILEDLG
-
-    return filename;
-}
-
 void MyFrame::OnNewFrame( wxCommandEvent &WXUNUSED(event) )
 {
-    wxImage image;
-    wxString filename = LoadUserImage(image);
-    if ( !filename.empty() )
-        (new MyImageFrame(this, filename, wxBitmap(image)))->Show();
-}
+#if wxUSE_FILEDLG
+    wxString filename = wxFileSelector(_T("Select image file"));
+    if ( !filename )
+        return;
 
-void MyFrame::OnImageInfo( wxCommandEvent &WXUNUSED(event) )
-{
     wxImage image;
-    if ( !LoadUserImage(image).empty() )
+    if ( !image.LoadFile(filename) )
     {
-        // TODO: show more information about the file
-        wxString info = wxString::Format("Image size: %dx%d",
-                                         image.GetWidth(),
-                                         image.GetHeight());
+        wxLogError(_T("Couldn't load image from '%s'."), filename.c_str());
 
-        int xres = image.GetOptionInt(wxIMAGE_OPTION_RESOLUTIONX),
-            yres = image.GetOptionInt(wxIMAGE_OPTION_RESOLUTIONY);
-        if ( xres || yres )
-        {
-            info += wxString::Format("\nResolution: %dx%d", xres, yres);
-            switch ( image.GetOptionInt(wxIMAGE_OPTION_RESOLUTIONUNIT) )
-            {
-                default:
-                    wxFAIL_MSG( "unknown image resolution units" );
-                    // fall through
-
-                case wxIMAGE_RESOLUTION_NONE:
-                    info += " in default units";
-                    break;
-
-                case wxIMAGE_RESOLUTION_INCHES:
-                    info += " in";
-                    break;
-
-                case wxIMAGE_RESOLUTION_CM:
-                    info += " cm";
-                    break;
-            }
-        }
-
-        wxLogMessage("%s", info);
+        return;
     }
+
+    (new MyImageFrame(this, wxBitmap(image)))->Show();
+#endif // wxUSE_FILEDLG
 }
 
 #ifdef wxHAVE_RAW_BITMAP
@@ -1286,7 +1155,7 @@ void MyFrame::OnPaste(wxCommandEvent& WXUNUSED(event))
     }
     else
     {
-        (new MyImageFrame(this, _T("Clipboard"), dobjBmp.GetBitmap()))->Show();
+        (new MyImageFrame(this, dobjBmp.GetBitmap()))->Show();
     }
     wxTheClipboard->Close();
 }
@@ -1299,9 +1168,6 @@ void MyFrame::OnPaste(wxCommandEvent& WXUNUSED(event))
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxInitAllImageHandlers();
 
     wxFrame *frame = new MyFrame();

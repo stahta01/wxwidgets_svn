@@ -66,10 +66,8 @@ public:
         m_button = NULL;
     }
 
-    wxButtonToolBarTool(wxButtonToolBar *tbar,
-                        wxControl *control,
-                        const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxButtonToolBarTool(wxButtonToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         m_x = m_y = wxDefaultCoord;
         m_width =
@@ -273,10 +271,9 @@ wxToolBarToolBase *wxButtonToolBar::CreateTool(int id,
                              clientData, shortHelp, longHelp);
 }
 
-wxToolBarToolBase *wxButtonToolBar::CreateTool(wxControl *control,
-                                               const wxString& label)
+wxToolBarToolBase *wxButtonToolBar::CreateTool(wxControl *control)
 {
-    return new wxButtonToolBarTool(this, control, label);
+    return new wxButtonToolBarTool(this, control);
 }
 
 // ----------------------------------------------------------------------------
@@ -493,7 +490,7 @@ void wxButtonToolBar::OnCommand(wxCommandEvent& event)
 }
 
 // paints a border
-void wxButtonToolBar::OnPaint(wxPaintEvent& WXUNUSED(event))
+void wxButtonToolBar::OnPaint(wxPaintEvent& event)
 {
     wxPaintDC dc(this);
 
@@ -549,7 +546,7 @@ void wxButtonToolBar::OnLeftUp(wxMouseEvent& event)
         {
             wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, tool->GetId());
             event.SetEventObject(tool->GetButton());
-            if (!GetEventHandler()->ProcessEvent(event))
+            if (!ProcessEvent(event))
                 event.Skip();
         }
     }

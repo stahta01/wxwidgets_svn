@@ -17,7 +17,7 @@
 
 #include <mspack.h>
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/module.h"
@@ -825,11 +825,13 @@ wxFSFile* wxChmFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
     // Open a stream to read the content of the chm-file
     s = new wxChmInputStream(leftFilename.GetFullPath(), right, true);
 
+    wxString mime = GetMimeTypeFromExt(location);
+
     if ( s )
     {
         return new wxFSFile(s,
                             left + _T("#chm:") + right,
-                            wxEmptyString,
+                            mime,
                             GetAnchor(location),
                             wxDateTime(wxFileModificationTime(left)));
     }

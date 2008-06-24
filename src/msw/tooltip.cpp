@@ -31,6 +31,7 @@
     #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
     #include "wx/app.h"
     #include "wx/control.h"
+    #include "wx/combobox.h"
 #endif
 
 #include "wx/tokenzr.h"
@@ -105,7 +106,7 @@ public:
             uFlags |= TTF_TRANSPARENT;
         }
 
-        uId = (UINT_PTR)hwndOwner;
+        uId = (UINT)hwndOwner;
     }
 };
 
@@ -201,18 +202,6 @@ void wxToolTip::SetDelay(long milliseconds)
 {
     SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
                             TTDT_INITIAL, milliseconds);
-}
-
-void wxToolTip::SetAutoPop(long milliseconds)
-{
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_AUTOPOP, milliseconds);
-}
-
-void wxToolTip::SetReshow(long milliseconds)
-{
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_RESHOW, milliseconds);
 }
 
 // ---------------------------------------------------------------------------
@@ -315,7 +304,7 @@ void wxToolTip::Add(WXHWND hWnd)
     // NMTTDISPINFO struct -- and setting the tooltip here we can have tooltips
     // of any length
     ti.hwnd = hwnd;
-    ti.lpszText = (wxChar *)m_text.wx_str(); // const_cast
+    ti.lpszText = (wxChar *)m_text.c_str(); // const_cast
 
     if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, &ti) )
     {
@@ -363,7 +352,7 @@ void wxToolTip::Add(WXHWND hWnd)
                 while (token.length())
                 {
                     SIZE sz;
-                    if ( !::GetTextExtentPoint32(hdc, token.wx_str(), token.length(), &sz) )
+                    if ( !::GetTextExtentPoint32(hdc, token, token.length(), &sz) )
                     {
                         wxLogLastError(wxT("GetTextExtentPoint32"));
                     }
@@ -374,12 +363,9 @@ void wxToolTip::Add(WXHWND hWnd)
                 }
 
                 // only set a new width if it is bigger than the current setting
-                if ( max > SendTooltipMessage(GetToolTipCtrl(),
-                                              TTM_GETMAXTIPWIDTH, 0) )
-                {
+                if (max > SendTooltipMessage(GetToolTipCtrl(), TTM_GETMAXTIPWIDTH, 0))
                     SendTooltipMessage(GetToolTipCtrl(), TTM_SETMAXTIPWIDTH,
-                                       wxUIntToPtr(max));
-                }
+                                       (void *)max);
             }
             else
 #endif // comctl32.dll >= 4.70
@@ -387,7 +373,7 @@ void wxToolTip::Add(WXHWND hWnd)
                 // replace the '\n's with spaces because otherwise they appear as
                 // unprintable characters in the tooltip string
                 m_text.Replace(_T("\n"), _T(" "));
-                ti.lpszText = (wxChar *)m_text.wx_str(); // const_cast
+                ti.lpszText = (wxChar *)m_text.c_str(); // const_cast
 
                 if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, &ti) )
                 {
@@ -410,7 +396,7 @@ void wxToolTip::SetWindow(wxWindow *win)
         Add(m_window->GetHWND());
     }
 #if !defined(__WXUNIVERSAL__)
-    // and all of its subcontrols (e.g. radio buttons in a radiobox) as well
+    // and all of its subcontrols (e.g. radiobuttons in a radiobox) as well
     wxControl *control = wxDynamicCast(m_window, wxControl);
     if ( control )
     {
@@ -434,6 +420,22 @@ void wxToolTip::SetWindow(wxWindow *win)
             Add((WXHWND)hwnd);
         }
     }
+
+    // VZ: it's ugly to do it here, but I don't want any major changes right
+    //     now, later we will probably want to have wxWindow::OnGotToolTip() or
+    //     something like this where the derived class can do such things
+    //     itself instead of wxToolTip "knowing" about them all
+    wxComboBox *combo = wxDynamicCast(control, wxComboBox);
+    if ( combo )
+    {
+        WXHWND hwndComboEdit = combo->GetWindowStyle() & wxCB_READONLY
+                                ? combo->GetHWND()
+                                : combo->GetEditHWND();
+        if ( hwndComboEdit )
+        {
+            Add(hwndComboEdit);
+        }
+    }
 #endif // !defined(__WXUNIVERSAL__)
 }
 
@@ -445,7 +447,7 @@ void wxToolTip::SetTip(const wxString& tip)
     {
         // update the tip text shown by the control
         wxToolInfo ti(GetHwndOf(m_window));
-        ti.lpszText = (wxChar *)m_text.wx_str();
+        ti.lpszText = (wxChar *)m_text.c_str();
 
         (void)SendTooltipMessage(GetToolTipCtrl(), TTM_UPDATETIPTEXT, &ti);
     }

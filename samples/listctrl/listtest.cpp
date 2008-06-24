@@ -75,7 +75,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(LIST_VIRTUAL_VIEW, MyFrame::OnVirtualView)
     EVT_MENU(LIST_SMALL_VIRTUAL_VIEW, MyFrame::OnSmallVirtualView)
 
-    EVT_MENU(LIST_GOTO, MyFrame::OnGoTo)
     EVT_MENU(LIST_FOCUS_LAST, MyFrame::OnFocusLast)
     EVT_MENU(LIST_TOGGLE_FIRST, MyFrame::OnToggleFirstSel)
     EVT_MENU(LIST_DESELECT_ALL, MyFrame::OnDeselectAll)
@@ -106,6 +105,10 @@ BEGIN_EVENT_TABLE(MyListCtrl, wxListCtrl)
     EVT_LIST_END_LABEL_EDIT(LIST_CTRL, MyListCtrl::OnEndLabelEdit)
     EVT_LIST_DELETE_ITEM(LIST_CTRL, MyListCtrl::OnDeleteItem)
     EVT_LIST_DELETE_ALL_ITEMS(LIST_CTRL, MyListCtrl::OnDeleteAllItems)
+#if WXWIN_COMPATIBILITY_2_4
+    EVT_LIST_GET_INFO(LIST_CTRL, MyListCtrl::OnGetInfo)
+    EVT_LIST_SET_INFO(LIST_CTRL, MyListCtrl::OnSetInfo)
+#endif
     EVT_LIST_ITEM_SELECTED(LIST_CTRL, MyListCtrl::OnSelected)
     EVT_LIST_ITEM_DESELECTED(LIST_CTRL, MyListCtrl::OnDeselected)
     EVT_LIST_KEY_DOWN(LIST_CTRL, MyListCtrl::OnListKeyDown)
@@ -131,7 +134,7 @@ END_EVENT_TABLE()
 IMPLEMENT_APP(MyApp)
 
 // number of items in list/report view
-static const int NUM_ITEMS = 10;
+static const int NUM_ITEMS = 30;
 
 // number of items in icon/small icon view
 static const int NUM_ICONS = 9;
@@ -150,9 +153,6 @@ int wxCALLBACK MyCompareFunction(long item1, long item2, long WXUNUSED(sortData)
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-      return false;
-
   // Create the main frame window
   MyFrame *frame = new MyFrame(wxT("wxListCtrl Test"));
 
@@ -166,11 +166,14 @@ bool MyApp::OnInit()
 
 // My frame constructor
 MyFrame::MyFrame(const wxChar *title)
-       : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(600, 500))
+       : wxFrame(NULL, wxID_ANY, title)
 {
     m_listCtrl = NULL;
     m_logWindow = NULL;
     m_smallVirtual = false;
+
+    if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_SMALL)
+        SetSize(wxSize(450, 340));
 
     // Give it an icon
     SetIcon( wxICON(mondrian) );
@@ -226,7 +229,6 @@ MyFrame::MyFrame(const wxChar *title)
 #endif
 
     wxMenu *menuList = new wxMenu;
-    menuList->Append(LIST_GOTO, _T("&Go to item #3\tCtrl-3"));
     menuList->Append(LIST_FOCUS_LAST, _T("&Make last item current\tCtrl-L"));
     menuList->Append(LIST_TOGGLE_FIRST, _T("To&ggle first item\tCtrl-G"));
     menuList->Append(LIST_DESELECT_ALL, _T("&Deselect All\tCtrl-D"));
@@ -235,7 +237,7 @@ MyFrame::MyFrame(const wxChar *title)
     menuList->Append(LIST_SHOW_COL_INFO, _T("Show &column info\tCtrl-C"));
     menuList->Append(LIST_SHOW_SEL_INFO, _T("Show &selected items\tCtrl-S"));
     menuList->AppendSeparator();
-    menuList->Append(LIST_SORT, _T("Sor&t\tCtrl-T"));
+    menuList->Append(LIST_SORT, _T("&Sort\tCtrl-S"));
     menuList->AppendSeparator();
     menuList->Append(LIST_ADD, _T("&Append an item\tCtrl-P"));
     menuList->Append(LIST_EDIT, _T("&Edit the item\tCtrl-E"));
@@ -263,14 +265,14 @@ MyFrame::MyFrame(const wxChar *title)
     m_panel = new wxPanel(this, wxID_ANY);
     m_logWindow = new wxTextCtrl(m_panel, wxID_ANY, wxEmptyString,
                                  wxDefaultPosition, wxDefaultSize,
-                                 wxTE_READONLY | wxTE_MULTILINE | wxSUNKEN_BORDER);
+                                 wxTE_MULTILINE | wxSUNKEN_BORDER);
 
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_logWindow));
 
     RecreateList(wxLC_REPORT | wxLC_SINGLE_SEL);
 
 #if wxUSE_STATUSBAR
-    CreateStatusBar();
+    CreateStatusBar(3);
 #endif // wxUSE_STATUSBAR
 }
 
@@ -346,18 +348,6 @@ void MyFrame::OnToggleLines(wxCommandEvent& event)
 void MyFrame::OnToggleMacUseGeneric(wxCommandEvent& event)
 {
     wxSystemOptions::SetOption(wxT("mac.listctrl.always_use_generic"), event.IsChecked());
-}
-
-void MyFrame::OnGoTo(wxCommandEvent& WXUNUSED(event))
-{
-    long index = 3;
-    m_listCtrl->SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
-
-    long sel = m_listCtrl->GetNextItem(-1, wxLIST_NEXT_ALL,
-                                        wxLIST_STATE_SELECTED);
-    if ( sel != -1 )
-        m_listCtrl->SetItemState(sel, 0, wxLIST_STATE_SELECTED);
-    m_listCtrl->SetItemState(index, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
 }
 
 void MyFrame::OnFocusLast(wxCommandEvent& WXUNUSED(event))
@@ -830,27 +820,13 @@ void MyListCtrl::OnBeginRDrag(wxListEvent& event)
 void MyListCtrl::OnBeginLabelEdit(wxListEvent& event)
 {
     wxLogMessage( wxT("OnBeginLabelEdit: %s"), event.m_item.m_text.c_str());
-
-    wxTextCtrl * const text = GetEditControl();
-    if ( !text )
-    {
-        wxLogMessage("BUG: started to edit but no edit control");
-    }
-    else
-    {
-        wxLogMessage("Edit control value: \"%s\"", text->GetValue());
-    }
 }
 
 void MyListCtrl::OnEndLabelEdit(wxListEvent& event)
 {
     wxLogMessage( wxT("OnEndLabelEdit: %s"),
-        (
-            event.IsEditCancelled() ? 
-            wxString("[cancelled]") : 
-            event.m_item.m_text
-        ).c_str()
-    );
+                  event.IsEditCancelled() ? _T("[cancelled]")
+                                          : event.m_item.m_text.c_str());
 }
 
 void MyListCtrl::OnDeleteItem(wxListEvent& event)
@@ -863,6 +839,41 @@ void MyListCtrl::OnDeleteAllItems(wxListEvent& event)
 {
     LogEvent(event, _T("OnDeleteAllItems"));
 }
+
+#if WXWIN_COMPATIBILITY_2_4
+void MyListCtrl::OnGetInfo(wxListEvent& event)
+{
+    wxString msg;
+
+    msg << _T("OnGetInfo (") << event.m_item.m_itemId << _T(", ") << event.m_item.m_col << _T(")");
+    if ( event.m_item.m_mask & wxLIST_MASK_STATE )
+        msg << _T(" wxLIST_MASK_STATE");
+    if ( event.m_item.m_mask & wxLIST_MASK_TEXT )
+        msg << _T(" wxLIST_MASK_TEXT");
+    if ( event.m_item.m_mask & wxLIST_MASK_IMAGE )
+        msg << _T(" wxLIST_MASK_IMAGE");
+    if ( event.m_item.m_mask & wxLIST_MASK_DATA )
+        msg << _T(" wxLIST_MASK_DATA");
+    if ( event.m_item.m_mask & wxLIST_SET_ITEM )
+        msg << _T(" wxLIST_SET_ITEM");
+    if ( event.m_item.m_mask & wxLIST_MASK_WIDTH )
+        msg << _T(" wxLIST_MASK_WIDTH");
+    if ( event.m_item.m_mask & wxLIST_MASK_FORMAT )
+        msg << _T(" wxLIST_MASK_WIDTH");
+
+    if ( event.m_item.m_mask & wxLIST_MASK_TEXT )
+    {
+        event.m_item.m_text = _T("My callback text");
+    }
+
+    wxLogMessage(msg);
+}
+
+void MyListCtrl::OnSetInfo(wxListEvent& event)
+{
+    LogEvent(event, _T("OnSetInfo"));
+}
+#endif
 
 void MyListCtrl::OnSelected(wxListEvent& event)
 {
@@ -909,7 +920,8 @@ void MyListCtrl::OnListKeyDown(wxListEvent& event)
 
     switch ( event.GetKeyCode() )
     {
-        case 'C': // colorize
+        case 'c': // colorize
+        case 'C':
             {
                 wxListItem info;
                 info.m_itemId = event.GetIndex();
@@ -933,7 +945,8 @@ void MyListCtrl::OnListKeyDown(wxListEvent& event)
             }
             break;
 
-        case 'N': // next
+        case 'n': // next
+        case 'N':
             item = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
             if ( item++ == GetItemCount() - 1 )
             {
@@ -946,7 +959,8 @@ void MyListCtrl::OnListKeyDown(wxListEvent& event)
             EnsureVisible(item);
             break;
 
-        case 'R': // show bounding rectangle
+        case 'r': // show bounding Rect
+        case 'R':
             {
                 item = event.GetIndex();
                 wxRect r;
@@ -961,27 +975,7 @@ void MyListCtrl::OnListKeyDown(wxListEvent& event)
             }
             break;
 
-        case 'U': // update
-            if ( !IsVirtual() )
-                break;
-
-            if ( m_updated != -1 )
-                RefreshItem(m_updated);
-
-            m_updated = event.GetIndex();
-            if ( m_updated != -1 )
-            {
-                // we won't see changes to this item as it's selected, update
-                // the next one (or the first one if we're on the last item)
-                if ( ++m_updated == GetItemCount() )
-                    m_updated = 0;
-
-                wxLogMessage("Updating colour of the item %ld", m_updated);
-                RefreshItem(m_updated);
-            }
-            break;
-
-        case 'D': // delete
+        case WXK_DELETE:
             item = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
             while ( item != -1 )
             {
@@ -995,7 +989,7 @@ void MyListCtrl::OnListKeyDown(wxListEvent& event)
             }
             break;
 
-        case 'I': // insert
+        case WXK_INSERT:
             if ( GetWindowStyle() & wxLC_REPORT )
             {
                 if ( GetWindowStyle() & wxLC_VIRTUAL )
@@ -1026,14 +1020,6 @@ void MyListCtrl::OnChar(wxKeyEvent& event)
         case 'N':
         case 'c':
         case 'C':
-        case 'r':
-        case 'R':
-        case 'u':
-        case 'U':
-        case 'd':
-        case 'D':
-        case 'i':
-        case 'I':
             // these are the keys we process ourselves
             break;
 
@@ -1085,7 +1071,7 @@ wxString MyListCtrl::OnGetItemText(long item, long column) const
     {
         return SMALL_VIRTUAL_VIEW_ITEMS[item][column];
     }
-    else // "big" virtual control
+    else
     {
         return wxString::Format(_T("Column %ld of item %ld"), column, item);
     }
@@ -1096,7 +1082,7 @@ int MyListCtrl::OnGetItemColumnImage(long item, long column) const
     if (!column)
         return 0;
 
-    if (!(item % 3) && column == 1)
+    if (!(item %3) && column == 1)
         return 0;
 
     return -1;
@@ -1104,14 +1090,6 @@ int MyListCtrl::OnGetItemColumnImage(long item, long column) const
 
 wxListItemAttr *MyListCtrl::OnGetItemAttr(long item) const
 {
-    // test to check that RefreshItem() works correctly: when m_updated is
-    // set to some item and it is refreshed, we highlight the item
-    if ( item == m_updated )
-    {
-        static wxListItemAttr s_attrHighlight(*wxRED, wxNullColour, wxNullFont);
-        return &s_attrHighlight;
-    }
-
     return item % 2 ? NULL : (wxListItemAttr *)&m_attr;
 }
 
@@ -1132,29 +1110,16 @@ void MyListCtrl::InsertItemInReportView(int i)
 #if USE_CONTEXT_MENU
 void MyListCtrl::OnContextMenu(wxContextMenuEvent& event)
 {
-    if (GetEditControl() == NULL)
-    {
-        wxPoint point = event.GetPosition();
-        // If from keyboard
-        if ( (point.x == -1) && (point.y == -1) )
-        {
-            wxSize size = GetSize();
-            point.x = size.x / 2;
-            point.y = size.y / 2;
-        }
-        else
-        {
-            point = ScreenToClient(point);
-        }
-        ShowContextMenu(point);
+    wxPoint point = event.GetPosition();
+    // If from keyboard
+    if (point.x == -1 && point.y == -1) {
+        wxSize size = GetSize();
+        point.x = size.x / 2;
+        point.y = size.y / 2;
+    } else {
+        point = ScreenToClient(point);
     }
-    else
-    {
-        // the user is editing:
-        // allow the text control to display its context menu
-        // if it has one (it has on Windows) rather than display our one
-        event.Skip();
-    }
+    ShowContextMenu(point);
 }
 #endif
 

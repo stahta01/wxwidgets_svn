@@ -48,13 +48,11 @@
     extern GtkWidget *wxGetRootWindow();
 
     #define wxPANGO_CONV wxGTK_CONV_SYS
-    #define wxPANGO_CONV_BACK wxGTK_CONV_BACK_SYS
 #else
     #include "wx/x11/private.h"
     #include "wx/gtk/private/string.h"
 
     #define wxPANGO_CONV(s) (wxConvUTF8.cWX2MB((s)))
-    #define wxPANGO_CONV_BACK(s) (wxConvUTF8.cMB2WX((s)))
 #endif
 
 // ----------------------------------------------------------------------------
@@ -138,7 +136,9 @@ bool wxNativeFontInfo::GetUnderlined() const
 
 wxString wxNativeFontInfo::GetFaceName() const
 {
-    return wxPANGO_CONV_BACK(pango_font_description_get_family(description));
+    wxString tmp = wxGTK_CONV_BACK( pango_font_description_get_family( description ) );
+
+    return tmp;
 }
 
 wxFontFamily wxNativeFontInfo::GetFamily() const
@@ -158,9 +158,9 @@ wxFontFamily wxNativeFontInfo::GetFamily() const
         ret = wxFONTFAMILY_TELETYPE; // begins with "Monospace"
     else if (strncmp( family_text, "courier", 7 ) == 0)
         ret = wxFONTFAMILY_TELETYPE; // begins with "Courier"
-#if defined(__WXGTK20__) || defined(HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE)
+#if defined(__WXGTK24__) || defined(HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE)
     else
-#ifdef __WXGTK20__
+#ifdef __WXGTK24__
     if (!gtk_check_version(2,4,0))
 #endif
     {
@@ -196,7 +196,7 @@ wxFontFamily wxNativeFontInfo::GetFamily() const
         if (family != NULL && pango_font_family_is_monospace( family ))
             ret = wxFONTFAMILY_TELETYPE; // is deemed a monospace font by pango
     }
-#endif // GTK+ 2 || HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE
+#endif // gtk24 || HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE
 
     if (ret == wxFONTFAMILY_DEFAULT)
     {
@@ -316,11 +316,9 @@ bool wxNativeFontInfo::FromString(const wxString& s)
 
     description = pango_font_description_from_string(wxPANGO_CONV(str));
 
-#if wxUSE_FONTENUM
     // ensure a valid facename is selected
     if (!wxFontEnumerator::IsValidFacename(GetFaceName()))
         SetFaceName(wxNORMAL_FONT->GetFaceName());
-#endif // wxUSE_FONTENUM
 
     return true;
 }
@@ -329,7 +327,7 @@ wxString wxNativeFontInfo::ToString() const
 {
     wxGtkString str(pango_font_description_to_string( description ));
 
-    return wxPANGO_CONV_BACK(str);
+    return wxGTK_CONV_BACK(str);
 }
 
 bool wxNativeFontInfo::FromUserString(const wxString& s)
@@ -340,6 +338,36 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
 wxString wxNativeFontInfo::ToUserString() const
 {
     return ToString();
+}
+
+// ----------------------------------------------------------------------------
+// wxNativeEncodingInfo
+// ----------------------------------------------------------------------------
+
+bool wxNativeEncodingInfo::FromString(const wxString& WXUNUSED(s))
+{
+    return false;
+}
+
+wxString wxNativeEncodingInfo::ToString() const
+{
+    return wxEmptyString;
+}
+
+bool wxTestFontEncoding(const wxNativeEncodingInfo& WXUNUSED(info))
+{
+    return true;
+}
+
+bool wxGetNativeFontEncoding(wxFontEncoding encoding,
+                             wxNativeEncodingInfo *info)
+{
+    // all encodings are available in GTK+ 2 because we translate text in any
+    // encoding to UTF-8 internally anyhow
+    info->facename.clear();
+    info->encoding = encoding;
+
+    return true;
 }
 
 #else // GTK+ 1.x
@@ -644,7 +672,7 @@ wxFontStyle wxNativeFontInfo::GetStyle() const
         return wxFONTSTYLE_NORMAL;
     }
 
-    switch ( s[0].GetValue() )
+    switch ( s[0] )
     {
         default:
             // again, unknown but consider normal by default

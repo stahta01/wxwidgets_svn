@@ -67,7 +67,7 @@ void wxGLContext::SetCurrent()
 {
 }
 
-void wxGLContext::SetColour(const wxString& colour)
+void wxGLContext::SetColour(const wxChar *colour)
 {
 }
 
@@ -133,6 +133,13 @@ void wxGLCanvas::SetupPixelFormat(int *attribList) // (HDC hDC)
 
 void wxGLCanvas::SetupPalette(const wxPalette& palette)
 {
+}
+
+wxPalette wxGLCanvas::CreateDefaultPalette()
+{
+    wxPalette palette;
+
+    return palette;
 }
 
 void wxGLCanvas::SwapBuffers()

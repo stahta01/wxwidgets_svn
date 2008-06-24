@@ -21,6 +21,7 @@ public:
     wxDataFormat();
     wxDataFormat( wxDataFormatId type );
     wxDataFormat( const wxString &id );
+    wxDataFormat( const wxChar *id );
     wxDataFormat( NativeFormat format );
 
     wxDataFormat& operator=(NativeFormat format)
@@ -47,7 +48,7 @@ public:
     // string ids are used for custom types - this SetId() must be used for
     // application-specific formats
     wxString GetId() const;
-    void SetId( const wxString& id );
+    void SetId( const wxChar *id );
 
     // implementation
     wxDataFormatId GetType() const;

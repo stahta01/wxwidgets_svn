@@ -857,7 +857,7 @@ wxString wxNativeFontInfo::ToString() const
                 fa.usCodePage,
                 fa.lMatch,
                 fn.usWeightClass,
-                (char *)fa.szFacename);
+                fa.szFacename);
     return sStr;
 } // end of wxNativeFontInfo::ToString
 
@@ -931,16 +931,6 @@ wxFont::~wxFont()
 //   here, but we may check that font definition is true
 // ----------------------------------------------------------------------------
 
-wxGDIRefData *wxFont::CreateGDIRefData() const
-{
-    return new wxFontRefData();
-}
-
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxFontRefData(*wx_static_cast(const wxFontRefData *, data));
-}
-
 bool wxFont::RealizeResource()
 {
     if ( GetResourceHandle() )
@@ -975,6 +965,21 @@ bool wxFont::IsFree() const
     return M_FONTDATA && (M_FONTDATA->GetHFONT() == 0);
 } // end of wxFont::IsFree
 
+void wxFont::Unshare()
+{
+    // Don't change shared data
+    if ( !m_refData )
+    {
+        m_refData = new wxFontRefData();
+    }
+    else
+    {
+        wxFontRefData* ref = new wxFontRefData(*M_FONTDATA);
+        UnRef();
+        m_refData = ref;
+    }
+} // end of wxFont::Unshare
+
 // ----------------------------------------------------------------------------
 // change font attribute: we recreate font when doing it
 // ----------------------------------------------------------------------------
@@ -983,7 +988,7 @@ void wxFont::SetPointSize(
   int                               nPointSize
 )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetPointSize(nPointSize);
 
@@ -994,7 +999,7 @@ void wxFont::SetFamily(
   int                               nFamily
 )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetFamily(nFamily);
 
@@ -1005,7 +1010,7 @@ void wxFont::SetStyle(
   int                               nStyle
 )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetStyle(nStyle);
 
@@ -1016,7 +1021,7 @@ void wxFont::SetWeight(
   int                               nWeight
 )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetWeight(nWeight);
 
@@ -1027,7 +1032,7 @@ bool wxFont::SetFaceName(
   const wxString&                   rsFaceName
 )
 {
-    AllocExclusive();
+    Unshare();
 
     bool refdataok = M_FONTDATA->SetFaceName(rsFaceName);
 
@@ -1040,7 +1045,7 @@ void wxFont::SetUnderlined(
   bool                              bUnderlined
 )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetUnderlined(bUnderlined);
 
@@ -1051,7 +1056,7 @@ void wxFont::SetEncoding(
   wxFontEncoding                    vEncoding
 )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetEncoding(vEncoding);
 
@@ -1062,7 +1067,7 @@ void wxFont::DoSetNativeFontInfo(
   const wxNativeFontInfo&           rInfo
 )
 {
-    AllocExclusive();
+    Unshare();
 
     FreeResource();
 
@@ -1142,7 +1147,7 @@ void wxFont::SetFM( PFONTMETRICS pFM, int nNumFonts )
 
 void wxFont::SetPS( HPS hPS )
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->SetPS(hPS);
 

@@ -23,7 +23,7 @@
 // wxNotebook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebook : public wxNotebookBase
+class WXDLLEXPORT wxNotebook : public wxNotebookBase
 {
 public:
     //

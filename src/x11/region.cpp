@@ -31,7 +31,7 @@
 // wxRegionRefData: private class containing the information about the region
 // ----------------------------------------------------------------------------
 
-class wxRegionRefData : public wxGDIRefData
+class wxRegionRefData : public wxObjectRefData
 {
 public:
     wxRegionRefData()
@@ -115,12 +115,12 @@ wxRegion::~wxRegion()
     // m_refData unrefed in ~wxObject
 }
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateRefData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }
@@ -361,7 +361,7 @@ struct _XRegion {
     _XBox *rects, extents;
 };
 
-class wxRIRefData: public wxGDIRefData
+class wxRIRefData: public wxObjectRefData
 {
 public:
 

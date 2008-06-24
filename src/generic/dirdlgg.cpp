@@ -33,7 +33,6 @@
 #include "wx/dirctrl.h"
 #include "wx/generic/dirdlgg.h"
 #include "wx/artprov.h"
-#include "wx/menu.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -78,8 +77,6 @@ bool wxGenericDirDialog::Create(wxWindow* parent,
                                 const wxString& name)
 {
     wxBusyCursor cursor;
-
-    parent = GetParentForModalDialog(parent);
 
     if (!wxDirDialogBase::Create(parent, title, defaultPath, style, pos, sz, name))
         return false;

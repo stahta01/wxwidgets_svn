@@ -28,7 +28,6 @@
 #include "wx/combobox.h"
 #include "wx/checkbox.h"
 #include "wx/stattext.h"
-#include "wx/hash.h"
 #include "wx/html/htmlwin.h"
 #include "wx/html/htmprint.h"
 

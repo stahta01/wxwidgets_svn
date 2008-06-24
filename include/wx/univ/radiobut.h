@@ -18,7 +18,7 @@
 // wxRadioButton
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRadioButton : public wxCheckBox
+class WXDLLEXPORT wxRadioButton : public wxCheckBox
 {
 public:
     // constructors
@@ -51,8 +51,6 @@ public:
     virtual void ChangeValue(bool value);
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // implement our own drawing
     virtual void DoDraw(wxControlRenderer *renderer);
 

@@ -18,7 +18,7 @@
 
 #include "wx/dialog.h"
 
-class WXDLLIMPEXP_CORE wxProgressDialog : public wxDialog
+class WXDLLEXPORT wxProgressDialog : public wxDialog
 {
 DECLARE_DYNAMIC_CLASS(wxProgressDialog)
 public:

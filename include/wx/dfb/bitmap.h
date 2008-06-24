@@ -13,15 +13,18 @@
 
 #include "wx/dfb/dfbptr.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPixelDataBase;
-
 wxDFB_DECLARE_INTERFACE(IDirectFBSurface);
 
 //-----------------------------------------------------------------------------
 // wxBitmap
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmap : public wxBitmapBase
+class WXDLLIMPEXP_CORE wxBitmapHandler: public wxBitmapHandlerBase
+{
+    DECLARE_ABSTRACT_CLASS(wxBitmapHandler)
+};
+
+class WXDLLIMPEXP_CORE wxBitmap: public wxBitmapBase
 {
 public:
     wxBitmap() {}
@@ -33,6 +36,9 @@ public:
 #if wxUSE_IMAGE
     wxBitmap(const wxImage& image, int depth = -1);
 #endif
+
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const;
 
     bool Create(const wxIDirectFBSurfacePtr& surface);
     bool Create(int width, int height, int depth = -1);
@@ -50,8 +56,7 @@ public:
 
     virtual wxBitmap GetSubBitmap(const wxRect& rect) const;
 
-    virtual bool SaveFile(const wxString &name, wxBitmapType type,
-                          const wxPalette *palette = (wxPalette *) NULL) const;
+    virtual bool SaveFile(const wxString &name, wxBitmapType type, const wxPalette *palette = (wxPalette *) NULL) const;
     virtual bool LoadFile(const wxString &name, wxBitmapType type = wxBITMAP_TYPE_RESOURCE);
 
 #if wxUSE_PALETTE
@@ -64,12 +69,6 @@ public:
 
     static void InitStandardHandlers();
 
-    // raw bitmap access support functions
-    void *GetRawData(wxPixelDataBase& data, int bpp);
-    void UngetRawData(wxPixelDataBase& data);
-
-    bool HasAlpha() const;
-
     // implementation:
     virtual void SetHeight(int height);
     virtual void SetWidth(int width);
@@ -79,10 +78,9 @@ public:
     wxIDirectFBSurfacePtr GetDirectFBSurface() const;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
-    bool CreateWithFormat(int width, int height, int dfbFormat);
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     DECLARE_DYNAMIC_CLASS(wxBitmap)
 };

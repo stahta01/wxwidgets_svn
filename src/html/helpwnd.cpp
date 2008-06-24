@@ -19,7 +19,7 @@
 
 #if wxUSE_WXHTML_HELP
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/object.h"
     #include "wx/dynarray.h"
     #include "wx/intl.h"
@@ -40,7 +40,7 @@
     #include "wx/toolbar.h"
     #include "wx/choicdlg.h"
     #include "wx/filedlg.h"
-#endif // WX_PRECOMP
+#endif // WXPRECOMP
 
 #include "wx/html/helpfrm.h"
 #include "wx/html/helpdlg.h"
@@ -352,7 +352,7 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
     wxSizer *navigSizer = NULL;
 
 #ifdef __WXMSW__
-    wxBorder htmlWindowBorder = GetDefaultBorder();
+    wxBorder htmlWindowBorder = GetThemedBorderStyle();
     if (htmlWindowBorder == wxBORDER_SUNKEN)
         htmlWindowBorder = wxBORDER_SIMPLE;
 #else
@@ -830,8 +830,6 @@ void wxHtmlHelpWindow::DisplayIndexItem(const wxHtmlHelpMergedIndexItem *it)
 bool wxHtmlHelpWindow::KeywordSearch(const wxString& keyword,
                                     wxHelpSearchMode mode)
 {
-    wxCHECK_MSG( !keyword.empty(), false, "must have a non empty keyword" );
-
     if (mode == wxHELP_SEARCH_ALL)
     {
         if ( !(m_SearchList &&
@@ -1233,11 +1231,18 @@ public:
         topsizer->Add(new wxStaticText(this, wxID_ANY, _("Preview:")),
                         0, wxLEFT | wxTOP, 10);
 
+        int style = wxHW_SCROLLBAR_AUTO;
+
+#ifdef __WXMSW__
+        style |= GetThemedBorderStyle();
+#else
+        style |= wxBORDER_SUNKEN;
+#endif
         topsizer->AddSpacer(5);
 
         topsizer->Add(TestWin = new wxHtmlWindow(this, wxID_ANY, wxDefaultPosition, wxSize(20, 150),
-                                                 wxHW_SCROLLBAR_AUTO|wxBORDER_THEME),
-                        1, wxEXPAND | wxLEFT | wxRIGHT, 10);
+                                                 style),
+                        1, wxEXPAND | wxLEFT|wxRIGHT, 10);
 
         wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
         wxButton *ok;

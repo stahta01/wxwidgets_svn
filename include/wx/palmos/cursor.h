@@ -14,10 +14,10 @@
 
 #include "wx/palmos/gdiimage.h"
 
-class WXDLLIMPEXP_FWD_CORE wxImage;
+class WXDLLEXPORT wxImage;
 
 // Cursor
-class WXDLLIMPEXP_CORE wxCursor : public wxGDIImage
+class WXDLLEXPORT wxCursor : public wxGDIImage
 {
 public:
     // constructors

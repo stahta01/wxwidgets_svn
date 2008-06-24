@@ -23,7 +23,7 @@ enum ETemplateID
 // wxTopLevelWindowOS2
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTopLevelWindowOS2 : public wxTopLevelWindowBase
+class WXDLLEXPORT wxTopLevelWindowOS2 : public wxTopLevelWindowBase
 {
 public:
     // constructors and such
@@ -67,6 +67,7 @@ public:
     virtual void Maximize(bool bMaximize = true);
     virtual void Restore(void);
     virtual void SendSizeEvent(void);
+    virtual void SetIcon(const wxIcon& rIcon);
     virtual void SetIcons(const wxIconBundle& rIcons);
 
     virtual bool Show(bool bShow = true);

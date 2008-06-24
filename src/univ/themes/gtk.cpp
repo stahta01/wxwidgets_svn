@@ -32,7 +32,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
     #include "wx/window.h"
 
     #include "wx/menu.h"
@@ -66,7 +65,7 @@
 #include "wx/univ/inphand.h"
 #include "wx/univ/colschem.h"
 
-class wxGTKMenuGeometryInfo;
+class WXDLLEXPORT wxGTKMenuGeometryInfo;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -85,7 +84,7 @@ public:
     wxGTKRenderer(const wxColourScheme *scheme);
 
     // wxRenderer methods
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0);
+    virtual void DrawFocusRect(wxDC& dc, const wxRect& rect, int flags = 0);
     virtual void DrawTextBorder(wxDC& dc,
                                 wxBorder border,
                                 const wxRect& rect,
@@ -814,7 +813,7 @@ void wxGTKRenderer::DrawSunkenBorder(wxDC& dc, wxRect *rect)
 }
 
 void
-wxGTKRenderer::DrawFocusRect(wxWindow* WXUNUSED(win), wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
+wxGTKRenderer::DrawFocusRect(wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
 {
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     wxRect rectFocus = rect;
@@ -925,7 +924,7 @@ void wxGTKRenderer::DrawFrameWithLabel(wxDC& dc,
 }
 
 // ----------------------------------------------------------------------------
-// check/radio buttons
+// check/radion buttons
 // ----------------------------------------------------------------------------
 
 void wxGTKRenderer::DrawCheckItemBitmap(wxDC& dc,
@@ -1573,7 +1572,7 @@ void wxGTKRenderer::DrawSliderThumb(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 // wxGTKMenuGeometryInfo: the wxMenuGeometryInfo used by wxGTKRenderer
-class wxGTKMenuGeometryInfo : public wxMenuGeometryInfo
+class WXDLLEXPORT wxGTKMenuGeometryInfo : public wxMenuGeometryInfo
 {
 public:
     virtual wxSize GetSize() const { return m_size; }
@@ -1782,7 +1781,7 @@ wxMenuGeometryInfo *wxGTKRenderer::GetMenuGeometry(wxWindow *win,
             h = heightText;
 
             wxCoord widthLabel;
-            dc.GetTextExtent(item->GetItemLabelText(), &widthLabel, NULL);
+            dc.GetTextExtent(item->GetLabel(), &widthLabel, NULL);
             if ( widthLabel > widthLabelMax )
             {
                 widthLabelMax = widthLabel;

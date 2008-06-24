@@ -41,10 +41,17 @@
 static const int wxDEFAULT_FONT_SIZE = 12;
 
 // ----------------------------------------------------------------------------
+// wxScaledFontList: maps the font sizes to the GDK fonts for the given font
+// ----------------------------------------------------------------------------
+
+WX_DECLARE_HASH_MAP(int, GdkFont *, wxIntegerHash, wxIntegerEqual,
+                    wxScaledFontList);
+
+// ----------------------------------------------------------------------------
 // wxFontRefData
 // ----------------------------------------------------------------------------
 
-class wxFontRefData : public wxGDIRefData
+class wxFontRefData : public wxObjectRefData
 {
 public:
     // from broken down font parameters, also default ctor
@@ -150,8 +157,6 @@ void wxFontRefData::Init(int pointSize,
 
     m_underlined = underlined;
     m_encoding = encoding;
-    if ( m_encoding == wxFONTENCODING_DEFAULT )
-        m_encoding = wxFont::GetDefaultEncoding();
 
     m_noAA = false;
 
@@ -196,7 +201,7 @@ void wxFontRefData::InitFromNative()
     PangoFontDescription *desc = m_nativeFontInfo.description;
 
     // init fields
-    m_faceName = wxGTK_CONV_BACK_SYS(pango_font_description_get_family(desc));
+    m_faceName = wxGTK_CONV_BACK( pango_font_description_get_family( desc ) );
 
     // Pango sometimes needs to have a size
     int pango_size = pango_font_description_get_size( desc );
@@ -232,7 +237,7 @@ void wxFontRefData::InitFromNative()
 }
 
 wxFontRefData::wxFontRefData( const wxFontRefData& data )
-             : wxGDIRefData()
+             : wxObjectRefData()
 {
     m_pointSize = data.m_pointSize;
     m_family = data.m_family;
@@ -544,12 +549,12 @@ void wxFont::SetNoAntiAliasing( bool no )
     M_FONTDATA->SetNoAntiAliasing( no );
 }
 
-wxGDIRefData* wxFont::CreateGDIRefData() const
+wxObjectRefData* wxFont::CreateRefData() const
 {
     return new wxFontRefData;
 }
 
-wxGDIRefData* wxFont::CloneGDIRefData(const wxGDIRefData* data) const
+wxObjectRefData* wxFont::CloneRefData(const wxObjectRefData* data) const
 {
     return new wxFontRefData(*wx_static_cast(const wxFontRefData*, data));
 }

@@ -13,9 +13,9 @@
 #define _WX_RADIOBOX_H_
 
 // List box item
-class WXDLLIMPEXP_FWD_CORE wxBitmap ;
+class WXDLLEXPORT wxBitmap ;
 
-class WXDLLIMPEXP_CORE wxRadioBox: public wxControl, public wxRadioBoxBase
+class WXDLLEXPORT wxRadioBox: public wxControl, public wxRadioBoxBase
 {
 public:
     wxRadioBox();
@@ -165,7 +165,6 @@ public:
     wxString GetLabel(int nItem) const;
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
     virtual wxSize DoGetBestSize(void) const;
     virtual void   DoSetSize( int nX
                              ,int nY

@@ -302,8 +302,11 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
 
 wxListBoxBase *wxAnyChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
 {
+	wxSize size = wxDefaultSize;
+	if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
+		size = wxSize(300, 200);
     return new wxListBox( this, wxID_LISTBOX,
-                          wxDefaultPosition, wxDefaultSize,
+                          wxDefaultPosition, size,
                           n, choices,
                           styleLbox );
 }
@@ -538,8 +541,12 @@ bool wxMultiChoiceDialog::TransferDataFromWindow()
 
 wxListBoxBase *wxMultiChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
 {
+	wxSize size = wxDefaultSize;
+	if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
+		size = wxSize(300, 200);
+
     return new wxCheckListBox( this, wxID_LISTBOX,
-                               wxDefaultPosition, wxDefaultSize,
+                               wxDefaultPosition, size,
                                n, choices,
                                styleLbox );
 }

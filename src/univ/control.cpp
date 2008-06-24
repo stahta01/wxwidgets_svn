@@ -93,19 +93,17 @@ int wxControl::FindAccelIndex(const wxString& label, wxString *labelOnly)
     }
 
     int indexAccel = -1;
-    for ( wxString::const_iterator pc = label.begin(); pc != label.end(); ++pc )
+    for ( const wxChar *pc = label; *pc != wxT('\0'); pc++ )
     {
         if ( *pc == MNEMONIC_PREFIX )
         {
-            ++pc; // skip it
-            if ( pc == label.end() )
-                break;
-            else if ( *pc != MNEMONIC_PREFIX )
+            pc++; // skip it
+            if ( *pc != MNEMONIC_PREFIX )
             {
                 if ( indexAccel == -1 )
                 {
                     // remember it (-1 is for MNEMONIC_PREFIX itself
-                    indexAccel = pc - label.begin() - 1;
+                    indexAccel = pc - label.c_str() - 1;
                 }
                 else
                 {
@@ -125,14 +123,6 @@ int wxControl::FindAccelIndex(const wxString& label, wxString *labelOnly)
 
 void wxControl::SetLabel(const wxString& label)
 {
-    // save original label
-    wxControlBase::SetLabel(label);
-
-    UnivDoSetLabel(label);
-}
-
-void wxControl::UnivDoSetLabel(const wxString& label)
-{
     wxString labelOld = m_label;
     m_indexAccel = FindAccelIndex(label, &m_label);
 
@@ -140,6 +130,11 @@ void wxControl::UnivDoSetLabel(const wxString& label)
     {
         Refresh();
     }
+}
+
+wxString wxControl::GetLabel() const
+{
+    return m_label;
 }
 
 #endif // wxUSE_CONTROLS

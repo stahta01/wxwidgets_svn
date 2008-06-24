@@ -69,7 +69,7 @@ enum
 #endif
 
 // All sockets will be created with the following flags
-#define SCKIPC_FLAGS (wxSOCKET_WAITALL|wxSOCKET_REUSEADDR)
+#define SCKIPC_FLAGS (wxSOCKET_WAITALL)
 
 // headers needed for umask()
 #ifdef __UNIX_LIKE__
@@ -86,7 +86,7 @@ static wxSockAddress *
 GetAddressFromName(const wxString& serverName, const wxString& host = wxEmptyString)
 {
     // we always use INET sockets under non-Unix systems
-#if defined(__UNIX__) && !defined(__WINDOWS__) && !defined(__WINE__)
+#if defined(__UNIX__) && !defined(__WINDOWS__) && !defined(__WINE__) && (!defined(__WXMAC__) || defined(__DARWIN__))
     // under Unix, if the server name looks like a path, create a AF_UNIX
     // socket instead of AF_INET one
     if ( serverName.Find(_T('/')) != wxNOT_FOUND )
@@ -344,7 +344,7 @@ wxTCPConnection::wxTCPConnection () : wxConnectionBase()
   m_codeco   = NULL;
 }
 
-wxTCPConnection::wxTCPConnection(void *buffer, size_t size)
+wxTCPConnection::wxTCPConnection(wxChar *buffer, int size)
        : wxConnectionBase(buffer, size)
 {
   m_sock     = NULL;
@@ -381,19 +381,14 @@ bool wxTCPConnection::Disconnect ()
       return true;
   // Send the the disconnect message to the peer.
   m_codeco->Write8(IPC_DISCONNECT);
-
-  if ( m_sock )
-  {
-      m_sock->Notify(false);
-      m_sock->Close();
-  }
-
+  m_sock->Notify(false);
+  m_sock->Close();
   SetConnected(false);
 
   return true;
 }
 
-bool wxTCPConnection::DoExecute(const void *data, size_t size, wxIPCFormat format)
+bool wxTCPConnection::Execute(const wxChar *data, int size, wxIPCFormat format)
 {
   if (!m_sock->IsConnected())
     return false;
@@ -402,13 +397,16 @@ bool wxTCPConnection::DoExecute(const void *data, size_t size, wxIPCFormat forma
   m_codeco->Write8(IPC_EXECUTE);
   m_codeco->Write8(format);
 
+  if (size < 0)
+    size = (wxStrlen(data) + 1) * sizeof(wxChar);    // includes final NUL
+
   m_codeco->Write32(size);
   m_sockstrm->Write(data, size);
 
   return true;
 }
 
-const void *wxTCPConnection::Request (const wxString& item, size_t *size, wxIPCFormat format)
+wxChar *wxTCPConnection::Request (const wxString& item, int *size, wxIPCFormat format)
 {
   if (!m_sock->IsConnected())
     return NULL;
@@ -425,9 +423,11 @@ const void *wxTCPConnection::Request (const wxString& item, size_t *size, wxIPCF
     return NULL;
   else
   {
-    size_t s = m_codeci->Read32();
+    size_t s;
 
-    void *data = GetBufferAtLeast( s );
+    s = m_codeci->Read32();
+
+    wxChar *data = GetBufferAtLeast( s );
     wxASSERT_MSG(data != NULL,
                  _T("Buffer too small in wxTCPConnection::Request") );
     m_sockstrm->Read(data, s);
@@ -438,7 +438,7 @@ const void *wxTCPConnection::Request (const wxString& item, size_t *size, wxIPCF
   }
 }
 
-bool wxTCPConnection::DoPoke (const wxString& item, const void *data, size_t size, wxIPCFormat format)
+bool wxTCPConnection::Poke (const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
   if (!m_sock->IsConnected())
     return false;
@@ -446,6 +446,9 @@ bool wxTCPConnection::DoPoke (const wxString& item, const void *data, size_t siz
   m_codeco->Write8(IPC_POKE);
   m_codeco->WriteString(item);
   m_codeco->Write8(format);
+
+  if (size < 0)
+    size = (wxStrlen(data) + 1) * sizeof(wxChar);    // includes final NUL
 
   m_codeco->Write32(size);
   m_sockstrm->Write(data, size);
@@ -490,8 +493,8 @@ bool wxTCPConnection::StopAdvise (const wxString& item)
 }
 
 // Calls that SERVER can make
-bool wxTCPConnection::DoAdvise (const wxString& item,
-                                const void *data, size_t size, wxIPCFormat format)
+bool wxTCPConnection::Advise (const wxString& item,
+                              wxChar *data, int size, wxIPCFormat format)
 {
   if (!m_sock->IsConnected())
     return false;
@@ -499,6 +502,9 @@ bool wxTCPConnection::DoAdvise (const wxString& item,
   m_codeco->Write8(IPC_ADVISE);
   m_codeco->WriteString(item);
   m_codeco->Write8(format);
+
+  if (size < 0)
+    size = (wxStrlen(data) + 1) * sizeof(wxChar);    // includes final NUL
 
   m_codeco->Write32(size);
   m_sockstrm->Write(data, size);
@@ -553,7 +559,7 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
   {
   case IPC_EXECUTE:
   {
-    void *data;
+    wxChar *data;
     size_t size;
     wxIPCFormat format;
 
@@ -571,10 +577,14 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
   }
   case IPC_ADVISE:
   {
+    wxChar *data;
+    size_t size;
+    wxIPCFormat format;
+
     item = codeci->ReadString();
-    wxIPCFormat format = (wxIPCFormat)codeci->Read8();
-    size_t size = codeci->Read32();
-    void *data = connection->GetBufferAtLeast( size );
+    format = (wxIPCFormat)codeci->Read8();
+    size = codeci->Read32();
+    data = connection->GetBufferAtLeast( size );
     wxASSERT_MSG(data != NULL,
                  _T("Buffer too small in wxTCPEventHandler::Client_OnRequest") );
     sockstrm->Read(data, size);
@@ -609,10 +619,14 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
   }
   case IPC_POKE:
   {
+    wxIPCFormat format;
+    size_t size;
+    wxChar *data;
+
     item = codeci->ReadString();
-    wxIPCFormat format = (wxIPCFormat)codeci->Read8();
-    size_t size = codeci->Read32();
-    void *data = connection->GetBufferAtLeast( size );
+    format = (wxIPCFormat)codeci->Read8();
+    size = codeci->Read32();
+    data = connection->GetBufferAtLeast( size );
     wxASSERT_MSG(data != NULL,
                  _T("Buffer too small in wxTCPEventHandler::Client_OnRequest") );
     sockstrm->Read(data, size);
@@ -628,28 +642,15 @@ void wxTCPEventHandler::Client_OnRequest(wxSocketEvent &event)
     item = codeci->ReadString();
     format = (wxIPCFormat)codeci->Read8();
 
-    size_t user_size = wxNO_LEN;
-    const void *user_data = connection->OnRequest (topic_name, item, &user_size, format);
+    int user_size = -1;
+    wxChar *user_data = connection->OnRequest (topic_name, item, &user_size, format);
 
     if (user_data)
     {
       codeco->Write8(IPC_REQUEST_REPLY);
 
-      if (user_size == wxNO_LEN)
-      {
-        switch (format)
-        {
-          case wxIPC_TEXT:
-          case wxIPC_UTF8TEXT:
-            user_size = strlen((const char *)user_data) + 1;  // includes final NUL
-            break;
-          case wxIPC_UNICODETEXT:
-            user_size = (wcslen((const wchar_t *)user_data) + 1) * sizeof(wchar_t);  // includes final NUL
-            break;
-          default:
-            user_size = 0;
-        }
-      }
+      if (user_size == -1)
+        user_size = (wxStrlen(user_data) + 1) * sizeof(wxChar);    // includes final NUL
 
       codeco->Write32(user_size);
       sockstrm->Write(user_data, user_size);

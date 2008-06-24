@@ -28,17 +28,14 @@
             archive/ziptest.cpp
             archive/tartest.cpp
             arrays/arrays.cpp
-            base64/base64.cpp
-            cmdline/cmdlinetest.cpp
-            config/fileconf.cpp
             datetime/datetimetest.cpp
+            fileconf/fileconftest.cpp
             filekind/filekind.cpp
             filename/filenametest.cpp
             filesys/filesystest.cpp
             fontmap/fontmaptest.cpp
             formatconverter/formatconvertertest.cpp
             hashes/hashes.cpp
-            intl/intltest.cpp
             lists/lists.cpp
             longlong/longlongtest.cpp
             mbconv/convautotest.cpp
@@ -46,13 +43,10 @@
             regex/regextest.cpp
             regex/wxregextest.cpp
             scopeguard/scopeguardtest.cpp
-            strings/iostream.cpp
             strings/strings.cpp
             strings/stdstrings.cpp
             strings/tokenizer.cpp
-            strings/unichar.cpp
             strings/unicode.cpp
-            strings/vararg.cpp
             strings/crt.cpp
             strings/vsnprintf.cpp
             streams/bstream.cpp
@@ -60,7 +54,6 @@
             streams/ffilestream.cpp
             streams/fileback.cpp
             streams/filestream.cpp
-            streams/iostreams.cpp
             streams/largefile.cpp
             streams/memstream.cpp
             streams/sstream.cpp
@@ -68,18 +61,10 @@
             streams/textstreamtest.cpp
             streams/zlibstream.cpp
             textfile/textfiletest.cpp
-            thread/atomic.cpp
-            thread/queue.cpp
             uris/uris.cpp
-            vectors/vectors.cpp
-            weakref/evtconnection.cpp
-            weakref/weakref.cpp
-            xlocale/xlocale.cpp
-            xml/xmltest.cpp
         </sources>
         <wx-lib>net</wx-lib>
         <wx-lib>base</wx-lib>
-        <wx-lib>xml</wx-lib>
     </exe>
 
 
@@ -95,12 +80,6 @@
             geometry/rect.cpp
             geometry/size.cpp
             geometry/point.cpp
-            config/config.cpp
-            controls/textctrltest.cpp
-            image/rawbmp.cpp
-            misc/selstoretest.cpp
-            window/clientsize.cpp
-            window/setsize.cpp
         </sources>
         <wx-lib>core</wx-lib>
         <wx-lib>base</wx-lib>
@@ -111,13 +90,6 @@
         <files>testdata.fc</files>
     </wx-data>
 
-    <template id="catalog">
-        <dstdir>$(BUILDDIR)/intl/$(id)</dstdir>
-        <srcdir>$(SRCDIR)/intl/$(id)</srcdir>
-        <files>internat.po internat.mo</files>
-    </template>
-
-    <wx-data id="fr" template="catalog"/>
 
 
     <!-- BENCHMARKS -->

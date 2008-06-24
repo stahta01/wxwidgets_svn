@@ -107,9 +107,9 @@ wxFileOffset wxFileInputStream::OnSysTell() const
     return m_file->Tell();
 }
 
-bool wxFileInputStream::IsOk() const
-{
-    return wxInputStream::IsOk() && m_file->IsOpened();
+bool wxFileInputStream::IsOk() const 
+{ 
+    return (wxStreamBase::IsOk() && m_file->IsOpened()); 
 }
 
 // ----------------------------------------------------------------------------
@@ -183,9 +183,9 @@ wxFileOffset wxFileOutputStream::GetLength() const
     return m_file->Length();
 }
 
-bool wxFileOutputStream::IsOk() const
-{
-    return wxOutputStream::IsOk() && m_file->IsOpened();
+bool wxFileOutputStream::IsOk() const 
+{ 
+    return (wxStreamBase::IsOk() && m_file->IsOpened()); 
 }
 
 // ----------------------------------------------------------------------------
@@ -220,24 +220,12 @@ size_t wxTempFileOutputStream::OnSysWrite(const void *buffer, size_t size)
 // ----------------------------------------------------------------------------
 
 wxFileStream::wxFileStream(const wxString& fileName)
-            : wxFileInputStream(),
-              wxFileOutputStream()
+            : wxFileInputStream(fileName)
 {
-    wxFileOutputStream::m_file =
-    wxFileInputStream::m_file = new wxFile(fileName, wxFile::read_write);
-
-    // this is a bit ugly as streams are symmetric but we still have to delete
-    // the file we created above exactly once so we decide to (arbitrarily) do
-    // it in wxFileInputStream
-    wxFileInputStream::m_file_destroy = true;
+    wxFileOutputStream::m_file = wxFileInputStream::m_file;
 }
 
-bool wxFileStream::IsOk() const
-{
-    return wxFileOutputStream::IsOk() && wxFileInputStream::IsOk();
-}
-
-#endif // wxUSE_FILE
+#endif //wxUSE_FILE
 
 #if wxUSE_FFILE
 
@@ -246,7 +234,7 @@ bool wxFileStream::IsOk() const
 // ----------------------------------------------------------------------------
 
 wxFFileInputStream::wxFFileInputStream(const wxString& fileName,
-                                       const wxString& mode)
+                                       const wxChar *mode)
                   : wxInputStream()
 {
     m_file = new wxFFile(fileName, mode);
@@ -312,9 +300,9 @@ wxFileOffset wxFFileInputStream::OnSysTell() const
     return m_file->Tell();
 }
 
-bool wxFFileInputStream::IsOk() const
-{
-    return wxStreamBase::IsOk() && m_file->IsOpened();
+bool wxFFileInputStream::IsOk() const 
+{ 
+    return (wxStreamBase::IsOk() && m_file->IsOpened()); 
 }
 
 // ----------------------------------------------------------------------------
@@ -322,7 +310,7 @@ bool wxFFileInputStream::IsOk() const
 // ----------------------------------------------------------------------------
 
 wxFFileOutputStream::wxFFileOutputStream(const wxString& fileName,
-                                         const wxString& mode)
+                                         const wxChar *mode)
 {
     m_file = new wxFFile(fileName, mode);
     m_file_destroy = true;
@@ -398,32 +386,19 @@ wxFileOffset wxFFileOutputStream::GetLength() const
     return m_file->Length();
 }
 
-bool wxFFileOutputStream::IsOk() const
-{
-    return wxStreamBase::IsOk() && m_file->IsOpened();
+bool wxFFileOutputStream::IsOk() const 
+{ 
+    return (wxStreamBase::IsOk() && m_file->IsOpened()); 
 }
 
 // ----------------------------------------------------------------------------
 // wxFFileStream
 // ----------------------------------------------------------------------------
 
-wxFFileStream::wxFFileStream(const wxString& fileName, const wxString& mode)
-             : wxFFileInputStream(),
-               wxFFileOutputStream()
+wxFFileStream::wxFFileStream(const wxString& fileName)
+             : wxFFileInputStream(fileName)
 {
-    wxASSERT_MSG( mode.find_first_of('+') != wxString::npos,
-                  "must be opened in read-write mode for this class to work" );
-
-    wxFFileOutputStream::m_file =
-    wxFFileInputStream::m_file = new wxFFile(fileName, mode);
-
-    // see comment in wxFileStream ctor
-    wxFFileInputStream::m_file_destroy = true;
-}
-
-bool wxFFileStream::IsOk() const
-{
-    return wxFFileOutputStream::IsOk() && wxFFileInputStream::IsOk();
+    wxFFileOutputStream::m_file = wxFFileInputStream::m_file;
 }
 
 #endif //wxUSE_FFILE

@@ -13,7 +13,7 @@
 #define _WX_MSW_STATBOX_H_
 
 // Group box
-class WXDLLIMPEXP_CORE wxStaticBox : public wxStaticBoxBase
+class WXDLLEXPORT wxStaticBox : public wxStaticBoxBase
 {
 public:
     wxStaticBox() { }
@@ -40,11 +40,11 @@ public:
 
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
-
 protected:
     virtual wxSize DoGetBestSize() const;
+
+    // choose the default border for this window
+    virtual wxBorder GetDefaultBorder() const;
 
 #ifndef __WXWINCE__
 public:

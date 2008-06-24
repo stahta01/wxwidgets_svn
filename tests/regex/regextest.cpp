@@ -158,7 +158,7 @@ int wxWcscmp(const wchar_t* s1, const wchar_t* s2)
     if (nLen1 != nLen2)
         return nLen1 - nLen2;
 
-    return memcmp(s1, s2, nLen1*sizeof(wchar_t));
+    return wxTmemcmp(s1, s2, nLen1);
 }
 
 // convert a string from UTF8 to the internal encoding
@@ -178,9 +178,8 @@ wxString RegExTestCase::Conv(const char *str)
 //
 void RegExTestCase::parseFlags(const wxString& flags)
 {
-    for ( wxString::const_iterator p = flags.begin(); p != flags.end(); ++p )
-    {
-        switch ( (*p).GetValue() ) {
+    for (const wxChar *p = flags; *p; p++) {
+        switch (*p) {
             // noop
             case '-': break;
 
@@ -324,7 +323,7 @@ wxString RegExTestCase::quote(const wxString& arg)
     wxString str;
 
     for (size_t i = 0; i < arg.length(); i++) {
-        wxChar ch = (wxChar)arg[i];
+        wxUChar ch = arg[i];
         const wxChar *p = wxStrchr(needEscape, ch);
 
         if (p)
@@ -332,7 +331,7 @@ wxString RegExTestCase::quote(const wxString& arg)
         else if (wxIscntrl(ch))
             str += wxString::Format(_T("\\%03o"), ch);
         else
-            str += (wxChar)ch;
+            str += ch;
     }
 
     return str.length() == arg.length() && str.find(' ') == wxString::npos ?

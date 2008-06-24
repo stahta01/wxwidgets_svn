@@ -40,7 +40,6 @@
 
 #include "wx/fontutil.h"    // for wxNativeFontInfo
 #include "wx/tokenzr.h"
-#include "wx/fontenum.h"
 
 #include "wx/x11/private.h"
 
@@ -93,7 +92,7 @@ wxXFont::~wxXFont()
 // wxFontRefData
 // ----------------------------------------------------------------------------
 
-class wxFontRefData: public wxGDIRefData
+class wxFontRefData: public wxObjectRefData
 {
 friend class wxFont;
 
@@ -187,47 +186,37 @@ void wxFontRefData::Init(int pointSize,
     m_style = style == wxDEFAULT ? wxFONTSTYLE_NORMAL : style;
     m_weight = weight == wxDEFAULT ? wxFONTWEIGHT_NORMAL : weight;
 
+    // and here, do we really want to forbid creation of the font of the size
+    // 90 (the value of wxDEFAULT)??
+    m_pointSize = pointSize == wxDEFAULT || pointSize == -1
+                    ? wxDEFAULT_FONT_SIZE
+                    : pointSize;
+
     m_underlined = underlined;
     m_encoding = encoding;
 
 #if wxUSE_UNICODE
-    if ( m_nativeFontInfo.description )
-        pango_font_description_free(m_nativeFontInfo.description);
-
     // Create native font info
     m_nativeFontInfo.description = pango_font_description_new();
 
-    // if a face name is specified, use it if it's available, otherwise use
-    // just the family
-    if ( faceName.empty() || !wxFontEnumerator::IsValidFacename(faceName) )
+    // And set its values
+    switch (m_family)
     {
-        // TODO: scan system for valid fonts matching the given family instead
-        //       of hardcoding them here
-        switch ( m_family )
-        {
-            case wxFONTFAMILY_TELETYPE:
-                m_faceName = wxT("monospace");
-                break;
-
-            case wxFONTFAMILY_ROMAN:
-                m_faceName = wxT("serif");
-                break;
-
-            default:
-                m_faceName = wxT("sans");
-        }
+        case wxFONTFAMILY_MODERN:
+        case wxFONTFAMILY_TELETYPE:
+           pango_font_description_set_family( m_nativeFontInfo.description, "monospace" );
+           break;
+        case wxFONTFAMILY_ROMAN:
+           pango_font_description_set_family( m_nativeFontInfo.description, "serif" );
+           break;
+        default:
+           pango_font_description_set_family( m_nativeFontInfo.description, "sans" );
+           break;
     }
-    else // specified face name is available, use it
-    {
-        m_faceName = faceName;
-    }
-
-    m_nativeFontInfo.SetFaceName(m_faceName);
-    m_nativeFontInfo.SetWeight((wxFontWeight)m_weight);
-    m_nativeFontInfo.SetStyle((wxFontStyle)m_style);
-#endif // wxUSE_UNICODE
-
-    SetPointSize(pointSize);
+    SetStyle( m_style );
+    SetPointSize( m_pointSize );
+    SetWeight( m_weight );
+#endif
 }
 
 void wxFontRefData::InitFromNative()
@@ -325,8 +314,8 @@ void wxFontRefData::InitFromNative()
         }
     }
 
-    switch ( wxToupper( m_nativeFontInfo.
-			GetXFontComponent(wxXLFD_SLANT)[0u]).GetValue() )
+    switch ( wxToupper(*m_nativeFontInfo.
+                            GetXFontComponent(wxXLFD_SLANT).c_str()) )
     {
         case _T('I'):   // italique
             m_style = wxFONTSTYLE_ITALIC;
@@ -402,7 +391,7 @@ void wxFontRefData::InitFromNative()
 }
 
 wxFontRefData::wxFontRefData( const wxFontRefData& data )
-             : wxGDIRefData()
+             : wxObjectRefData()
 {
     m_pointSize = data.m_pointSize;
     m_family = data.m_family;
@@ -465,12 +454,13 @@ wxFontRefData::~wxFontRefData()
 
 void wxFontRefData::SetPointSize(int pointSize)
 {
-    // NB: Pango doesn't support point sizes less than 1
-    m_pointSize = pointSize == wxDEFAULT || pointSize < 1 ? wxDEFAULT_FONT_SIZE
-                                                          : pointSize;
+    m_pointSize = pointSize;
 
 #if wxUSE_UNICODE
-    m_nativeFontInfo.SetPointSize(m_pointSize);
+    // Get native info
+    PangoFontDescription *desc = m_nativeFontInfo.description;
+
+    pango_font_description_set_size( desc, m_pointSize * PANGO_SCALE );
 #endif
 }
 
@@ -684,16 +674,6 @@ bool wxFont::Create(const wxString& fontname, wxFontEncoding enc)
 
 wxFont::~wxFont()
 {
-}
-
-wxGDIRefData *wxFont::CreateGDIRefData() const
-{
-    return new wxFontRefData;
-}
-
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxFontRefData(*wx_static_cast(const wxFontRefData *, data));
 }
 
 // ----------------------------------------------------------------------------

@@ -50,7 +50,7 @@ static void gtk_bmpbutton_clicked_callback( GtkWidget *WXUNUSED(widget), wxBitma
 
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, button->GetId());
     event.SetEventObject(button);
-    button->HandleWindowEvent(event);
+    button->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -172,6 +172,14 @@ bool wxBitmapButton::Create( wxWindow *parent,
     return true;
 }
 
+void wxBitmapButton::SetDefault()
+{
+    GTK_WIDGET_SET_FLAGS( m_widget, GTK_CAN_DEFAULT );
+    gtk_widget_grab_default( m_widget );
+
+    SetSize( m_x, m_y, m_width, m_height );
+}
+
 void wxBitmapButton::SetLabel( const wxString &label )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid button") );
@@ -194,7 +202,7 @@ void wxBitmapButton::OnSetBitmap()
     InvalidateBestSize();
 
     wxBitmap the_one;
-    if (!IsThisEnabled())
+    if (!m_isEnabled)
         the_one = m_bmpDisabled;
     else if (m_isSelected)
         the_one = m_bmpSelected;

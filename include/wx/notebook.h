@@ -54,13 +54,17 @@ enum
 
 typedef wxWindow wxNotebookPage;  // so far, any window can be a page
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxNotebookNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxNotebookNameStr[];
+
+#if WXWIN_COMPATIBILITY_2_4
+    #define wxNOTEBOOK_NAME wxNotebookNameStr
+#endif
 
 // ----------------------------------------------------------------------------
 // wxNotebookBase: define wxNotebook interface
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebookBase : public wxBookCtrlBase
+class WXDLLEXPORT wxNotebookBase : public wxBookCtrlBase
 {
 public:
     // ctors
@@ -106,9 +110,6 @@ public:
     // new is -1)
     void SendPageChangedEvent(int nPageOld, int nPageNew = -1);
 
-    // wxBookCtrlBase overrides this method to return false but we do need
-    // focus because we have tabs
-    virtual bool AcceptsFocus() const { return wxControl::AcceptsFocus(); }
 
 protected:
     DECLARE_NO_COPY_CLASS(wxNotebookBase)
@@ -118,7 +119,7 @@ protected:
 // notebook event class and related stuff
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebookEvent : public wxBookCtrlBaseEvent
+class WXDLLEXPORT wxNotebookEvent : public wxBookCtrlBaseEvent
 {
 public:
     wxNotebookEvent(wxEventType commandType = wxEVT_NULL, int winid = 0,
@@ -138,8 +139,10 @@ private:
     DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxNotebookEvent)
 };
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, 802)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, 803)
+END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxNotebookEventFunction)(wxNotebookEvent&);
 
@@ -167,7 +170,7 @@ typedef void (wxEvtHandler::*wxNotebookEventFunction)(wxNotebookEvent&);
 #elif defined(__WXGTK__)
     #include  "wx/gtk1/notebook.h"
 #elif defined(__WXMAC__)
-    #include  "wx/osx/notebook.h"
+    #include  "wx/mac/notebook.h"
 #elif defined(__WXCOCOA__)
     #include  "wx/cocoa/notebook.h"
 #elif defined(__WXPM__)

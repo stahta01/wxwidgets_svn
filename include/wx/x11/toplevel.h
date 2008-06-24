@@ -16,7 +16,7 @@
 // wxTopLevelWindowX11
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTopLevelWindowX11 : public wxTopLevelWindowBase
+class WXDLLEXPORT wxTopLevelWindowX11 : public wxTopLevelWindowBase
 {
 public:
     // constructors and such
@@ -50,6 +50,7 @@ public:
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
     virtual bool IsIconized() const;
+    virtual void SetIcon(const wxIcon& icon) { SetIcons( wxIconBundle( icon ) ); }
     virtual void SetIcons(const wxIconBundle& icons);
     virtual void Restore();
 
@@ -112,6 +113,6 @@ protected:
 };
 
 // list of all frames and modeless dialogs
-//extern WXDLLIMPEXP_DATA_CORE(wxWindowList) wxModelessWindows;
+//extern WXDLLEXPORT_DATA(wxWindowList) wxModelessWindows;
 
 #endif // _WX_X11_TOPLEVEL_H_

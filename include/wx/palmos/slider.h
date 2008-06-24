@@ -13,7 +13,7 @@
 #define _SLIDERPALM_H_
 
 // Slider
-class WXDLLIMPEXP_CORE wxSlider : public wxSliderBase
+class WXDLLEXPORT wxSlider : public wxSliderBase
 {
 public:
     wxSlider()

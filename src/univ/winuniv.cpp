@@ -61,29 +61,6 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// scrollbars class
-// ----------------------------------------------------------------------------
-
-// This is scrollbar class used to implement wxWindow's "built-in" scrollbars;
-// unlike the standard wxScrollBar class, this one is positioned outside of its
-// parent's client area
-class wxWindowScrollBar : public wxScrollBar
-{
-public:
-    wxWindowScrollBar(wxWindow *parent,
-                      wxWindowID id,
-                      const wxPoint& pos = wxDefaultPosition,
-                      const wxSize& size = wxDefaultSize,
-                      long style = wxSB_HORIZONTAL)
-        : wxScrollBar(parent, id, pos, size, style)
-    {
-    }
-
-    virtual bool CanBeOutsideClientArea() const { return true; }
-};
-
-
-// ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
@@ -100,6 +77,8 @@ public:
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowX11)
 #elif defined(__WXPM__)
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowOS2)
+#elif defined(__WXMAC__)
+    IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowMac)
 #endif
 
 BEGIN_EVENT_TABLE(wxWindow, wxWindowNative)
@@ -145,11 +124,6 @@ bool wxWindow::Create(wxWindow *parent,
                       long style,
                       const wxString& name)
 {
-    // Get default border
-    wxBorder border = GetBorder(style);
-    style &= ~wxBORDER_MASK;
-    style |= border;
-
     long actualStyle = style;
 
     // we add wxCLIP_CHILDREN to get the same ("natural") behaviour under MSW
@@ -184,9 +158,9 @@ bool wxWindow::Create(wxWindow *parent,
         SetInsertIntoMain( true );
 #endif
 #if wxUSE_SCROLLBAR
-        m_scrollbarVert = new wxWindowScrollBar(this, wxID_ANY,
-                                                wxDefaultPosition, wxDefaultSize,
-                                                wxSB_VERTICAL);
+        m_scrollbarVert = new wxScrollBar(this, wxID_ANY,
+                                          wxDefaultPosition, wxDefaultSize,
+                                          wxSB_VERTICAL);
 #endif // wxUSE_SCROLLBAR
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( false );
@@ -200,9 +174,9 @@ bool wxWindow::Create(wxWindow *parent,
         SetInsertIntoMain( true );
 #endif
 #if wxUSE_SCROLLBAR
-        m_scrollbarHorz = new wxWindowScrollBar(this, wxID_ANY,
-                                                wxDefaultPosition, wxDefaultSize,
-                                                wxSB_HORIZONTAL);
+        m_scrollbarHorz = new wxScrollBar(this, wxID_ANY,
+                                          wxDefaultPosition, wxDefaultSize,
+                                          wxSB_HORIZONTAL);
 #endif // wxUSE_SCROLLBAR
 #if wxUSE_TWO_WINDOWS
         SetInsertIntoMain( false );
@@ -366,11 +340,6 @@ bool wxWindow::DoDrawBackground(wxDC& dc)
     wxWindow * const parent = GetParent();
     if ( HasTransparentBackground() && !UseBgCol() && parent )
     {
-        // DirectFB paints the parent first, then its child windows, so by
-        // the time this code is called, parent's background was already
-        // drawn and there's no point in (imperfectly!) duplicating the work
-        // here:
-#ifndef __WXDFB__
         wxASSERT( !IsTopLevel() );
 
         wxPoint pos = GetPosition();
@@ -393,7 +362,6 @@ bool wxWindow::DoDrawBackground(wxDC& dc)
 
         // Restore DC logical origin
         dc.SetLogicalOrigin( org_x, org_y );
-#endif // !__WXDFB__
     }
     else
     {
@@ -670,7 +638,7 @@ void wxWindow::OnSize(wxSizeEvent& event)
             }
         }
         else
-        if (HasFlag( wxSUNKEN_BORDER ) || HasFlag( wxRAISED_BORDER ) || HasFlag( wxBORDER_THEME ))
+        if (HasFlag( wxSUNKEN_BORDER ) || HasFlag( wxRAISED_BORDER ))
         {
             if (newSize.y > m_oldSize.y)
             {
@@ -937,10 +905,10 @@ void wxWindow::SetScrollbar(int orient,
 #if wxUSE_TWO_WINDOWS
             SetInsertIntoMain( true );
 #endif
-            scrollbar = new wxWindowScrollBar(this, wxID_ANY,
-                                              wxDefaultPosition, wxDefaultSize,
-                                              orient & wxVERTICAL ? wxSB_VERTICAL
-                                                                  : wxSB_HORIZONTAL);
+            scrollbar = new wxScrollBar(this, wxID_ANY,
+                                        wxDefaultPosition, wxDefaultSize,
+                                        orient & wxVERTICAL ? wxSB_VERTICAL
+                                                            : wxSB_HORIZONTAL);
 #if wxUSE_TWO_WINDOWS
             SetInsertIntoMain( false );
 #endif
@@ -1422,25 +1390,6 @@ void wxWindow::OnChar(wxKeyEvent& event)
             }
         }
     }
-
-    // if Return was pressed, see if there's a default button to activate
-    if ( !event.HasModifiers() && event.GetKeyCode() == WXK_RETURN )
-    {
-        wxTopLevelWindow *
-            tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
-        if ( tlw )
-        {
-            wxButton *btn = wxDynamicCast(tlw->GetDefaultItem(), wxButton);
-            if ( btn )
-            {
-                wxCommandEvent evt(wxEVT_COMMAND_BUTTON_CLICKED, btn->GetId());
-                evt.SetEventObject(btn);
-                btn->Command(evt);
-                return;
-            }
-        }
-    }
-
 
     event.Skip();
 }

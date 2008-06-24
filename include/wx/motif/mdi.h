@@ -23,14 +23,14 @@ but wxMDIChildFrame::GetParent should return the parent frame.
 #include "wx/frame.h"
 #include "wx/notebook.h"
 
-class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+class WXDLLEXPORT wxMDIClientWindow;
+class WXDLLEXPORT wxMDIChildFrame;
 
-class WXDLLIMPEXP_CORE wxMDIParentFrame: public wxFrame
+class WXDLLEXPORT wxMDIParentFrame: public wxFrame
 {
     DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
 
-        friend class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+        friend class WXDLLEXPORT wxMDIChildFrame;
 public:
 
     wxMDIParentFrame();
@@ -112,7 +112,7 @@ protected:
     DECLARE_EVENT_TABLE()
 };
 
-class WXDLLIMPEXP_CORE wxMDIChildFrame: public wxFrame
+class WXDLLEXPORT wxMDIChildFrame: public wxFrame
 {
     DECLARE_DYNAMIC_CLASS(wxMDIChildFrame)
 
@@ -152,6 +152,12 @@ public:
     void ReleaseMouse();
     void Raise();
     void Lower(void);
+    void DoSetSizeHints(int minW = wxDefaultCoord,
+                        int minH = wxDefaultCoord,
+                        int maxW = wxDefaultCoord,
+                        int maxH = wxDefaultCoord,
+                        int incW = wxDefaultCoord,
+                        int incH = wxDefaultCoord);
 
     // MDI operations
     virtual void Maximize();
@@ -193,9 +199,6 @@ protected:
     void DoGetClientSize(int *width, int *height) const;
     void DoGetSize(int *width, int *height) const;
     void DoGetPosition(int *x, int *y) const ;
-    void DoSetSizeHints(int minW, int minH,
-                        int maxW, int maxH,
-                        int incW, int incH);
 };
 
 /* The client window is a child of the parent MDI frame, and itself
@@ -205,7 +208,7 @@ protected:
 * of the children. Phew! So the children are sort of 'adopted'...
 */
 
-class WXDLLIMPEXP_CORE wxMDIClientWindow: public wxNotebook
+class WXDLLEXPORT wxMDIClientWindow: public wxNotebook
 {
     DECLARE_DYNAMIC_CLASS(wxMDIClientWindow)
 

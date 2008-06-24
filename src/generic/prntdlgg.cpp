@@ -69,12 +69,7 @@
     wxFORCE_LINK_MODULE(gnome_print)
 #endif
 
-#if wxUSE_GTKPRINT
-    #include "wx/link.h"
-    wxFORCE_LINK_MODULE(gtk_print)
-#endif
-
-#endif // !wxUniv
+#endif // !__WXUNIVERSAL__
 
 // ----------------------------------------------------------------------------
 // global vars
@@ -145,8 +140,7 @@ END_EVENT_TABLE()
 
 wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
                                            wxPrintDialogData* data)
-                    : wxPrintDialogBase(GetParentForModalDialog(parent), 
-                               wxID_ANY, _("Print"),
+                    : wxPrintDialogBase(parent, wxID_ANY, _("Print"),
                                wxPoint(0,0), wxSize(600, 600),
                                wxDEFAULT_DIALOG_STYLE |
                                wxTAB_TRAVERSAL)
@@ -159,8 +153,7 @@ wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
 
 wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
                                            wxPrintData* data)
-                    : wxPrintDialogBase(GetParentForModalDialog(parent), 
-                                wxID_ANY, _("Print"),
+                    : wxPrintDialogBase(parent, wxID_ANY, _("Print"),
                                wxPoint(0,0), wxSize(600, 600),
                                wxDEFAULT_DIALOG_STYLE |
                                wxTAB_TRAVERSAL)
@@ -208,9 +201,9 @@ void wxGenericPrintDialog::Init(wxWindow * WXUNUSED(parent))
     if (factory->HasStatusLine())
     {
         flex->Add( new wxStaticText( this, wxID_ANY, _("Status:") ),
-            0, wxALIGN_CENTER_VERTICAL|(wxALL-wxTOP), 5 );
+            0, wxALIGN_CENTER_VERTICAL|wxALL-wxTOP, 5 );
         flex->Add( new wxStaticText( this, wxID_ANY, factory->CreateStatusLine() ),
-            0, wxALIGN_CENTER_VERTICAL|(wxALL-wxTOP), 5 );
+            0, wxALIGN_CENTER_VERTICAL|wxALL-wxTOP, 5 );
     }
 
     mainsizer->Add( topsizer, 0, wxLEFT|wxTOP|wxRIGHT|wxGROW, 10 );
@@ -361,12 +354,10 @@ bool wxGenericPrintDialog::TransferDataToWindow()
              if (m_printDialogData.GetToPage() > 0)
                 m_toText->SetValue(wxString::Format(_T("%d"), m_printDialogData.GetToPage()));
              if(m_rangeRadioBox)
-             {
                 if (m_printDialogData.GetAllPages() || m_printDialogData.GetFromPage() == 0)
                    m_rangeRadioBox->SetSelection(0);
                 else
                    m_rangeRadioBox->SetSelection(1);
-             }
           }
           else
           {
@@ -718,9 +709,9 @@ bool wxGenericPrintSetupDialog::TransferDataToWindow()
     wxPostScriptPrintNativeData *data =
         (wxPostScriptPrintNativeData *) m_printData.GetNativeData();
 
-    if (m_printerCommandText && !data->GetPrinterCommand().empty())
+    if (m_printerCommandText && data->GetPrinterCommand())
         m_printerCommandText->SetValue(data->GetPrinterCommand());
-    if (m_printerOptionsText && !data->GetPrinterOptions().empty())
+    if (m_printerOptionsText && data->GetPrinterOptions())
         m_printerOptionsText->SetValue(data->GetPrinterOptions());
     if (m_colourCheckBox)
         m_colourCheckBox->SetValue(m_printData.GetColour());

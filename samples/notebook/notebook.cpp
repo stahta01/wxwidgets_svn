@@ -34,9 +34,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_HELP
     wxHelpProvider::Set( new wxSimpleHelpProvider );
 #endif
@@ -332,6 +329,7 @@ MyFrame::MyFrame()
 
     m_panel->SetSizer(m_sizerFrame);
 
+    m_sizerFrame->Fit(this);
     m_sizerFrame->SetSizeHints(this);
 
     Centre(wxBOTH);

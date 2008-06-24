@@ -14,7 +14,7 @@
 
 #include "wx/frame.h"
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
 
 class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
 class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
@@ -23,7 +23,7 @@ class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
 // wxMDIParentFrame
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIParentFrame : public wxFrame
+class WXDLLEXPORT wxMDIParentFrame : public wxFrame
 {
 public:
     wxMDIParentFrame();
@@ -92,9 +92,6 @@ public:
     virtual WXLRESULT MSWDefWindowProc(WXUINT, WXWPARAM, WXLPARAM);
     virtual bool MSWTranslateMessage(WXMSG* msg);
 
-    // override wxFrameBase function to also look in the active child menu bar
-    virtual const wxMenuItem *FindItemInMenuBar(int menuId) const;
-
 protected:
 #if wxUSE_MENUS_NATIVE
     virtual void InternalSetMenuBar();
@@ -125,7 +122,7 @@ private:
 // wxMDIChildFrame
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIChildFrame : public wxFrame
+class WXDLLEXPORT wxMDIChildFrame : public wxFrame
 {
 public:
     wxMDIChildFrame() { Init(); }
@@ -161,11 +158,6 @@ public:
 
     // Implementation only from now on
     // -------------------------------
-
-    wxMDIParentFrame* GetMDIParent() const
-    {
-        return wxStaticCast(wxFrame::GetParent(), wxMDIParentFrame);
-    }
 
     // Handlers
     bool HandleMDIActivate(long bActivate, WXHWND, WXHWND);
@@ -210,7 +202,7 @@ private:
 // wxMDIClientWindow
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIClientWindow : public wxWindow
+class WXDLLEXPORT wxMDIClientWindow : public wxWindow
 {
 public:
     wxMDIClientWindow() { Init(); }

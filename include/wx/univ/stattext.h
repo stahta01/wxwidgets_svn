@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_STATTEXT_H_
 #define _WX_UNIV_STATTEXT_H_
 
-class WXDLLIMPEXP_CORE wxStaticText : public wxStaticTextBase
+class WXDLLEXPORT wxStaticText : public wxStaticTextBase
 {
 public:
     wxStaticText() { }
@@ -59,9 +59,6 @@ protected:
 
     // draw the control
     virtual void DoDraw(wxControlRenderer *renderer);
-
-    virtual void DoSetLabel(const wxString& str);
-    virtual wxString DoGetLabel() const;
 
     DECLARE_ABSTRACT_CLASS(wxStaticText)
 };

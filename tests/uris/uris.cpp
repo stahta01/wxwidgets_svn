@@ -27,10 +27,8 @@
 // Test wxURL & wxURI compat?
 #define TEST_URL wxUSE_URL
 
-// Define this as 1 to test network connections, this is disabled by default as
-// some machines running automatic builds don't allow outgoing connections and
-// so the tests fail
-#define TEST_NETWORK 0
+// Set this to 1 to test stuff requiring real network access
+#define TEST_NET 0
 
 // ----------------------------------------------------------------------------
 // test class
@@ -343,11 +341,11 @@ void URITestCase::URLCompat()
 
     CPPUNIT_ASSERT(url.GetError() == wxURL_NOERR);
 
-#if TEST_NETWORK
+#if TEST_NET
     wxInputStream* pInput = url.GetInputStream();
 
     CPPUNIT_ASSERT( pInput != NULL );
-#endif
+#endif // TEST_NET
 
     CPPUNIT_ASSERT( url == wxURL(wxT("http://user:password@wxwidgets.org")) );
 
@@ -365,6 +363,9 @@ void URITestCase::URLCompat()
     CPPUNIT_ASSERT( uricopy == url );
     CPPUNIT_ASSERT( uricopy == urlcopy );
     CPPUNIT_ASSERT( uricopy == uri );
+#if WXWIN_COMPATIBILITY_2_4
+    CPPUNIT_ASSERT( wxURL::ConvertFromURI(wxT("%20%41%20")) == wxT(" A ") );
+#endif
     CPPUNIT_ASSERT( wxURI::Unescape(wxT("%20%41%20")) == wxT(" A ") );
 
     wxURI test(wxT("file:\"myf\"ile.txt"));

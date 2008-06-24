@@ -36,7 +36,7 @@ extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING;
 // wxListbook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxListbook : public wxBookCtrlBase
+class WXDLLEXPORT wxListbook : public wxBookCtrlBase
 {
 public:
     wxListbook()
@@ -97,10 +97,6 @@ protected:
     wxBookCtrlBaseEvent* CreatePageChangingEvent() const;
     void MakeChangedEvent(wxBookCtrlBaseEvent &event);
 
-    // get flags for different list control modes
-    long GetListCtrlIconViewFlags() const;
-    long GetListCtrlReportViewFlags() const;
-
     // event handlers
     void OnListSelected(wxListEvent& event);
     void OnSize(wxSizeEvent& event);
@@ -120,7 +116,7 @@ private:
 // listbook event class and related stuff
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxListbookEvent : public wxBookCtrlBaseEvent
+class WXDLLEXPORT wxListbookEvent : public wxBookCtrlBaseEvent
 {
 public:
     wxListbookEvent(wxEventType commandType = wxEVT_NULL, int id = 0,

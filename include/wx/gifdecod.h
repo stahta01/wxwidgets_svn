@@ -46,7 +46,7 @@ enum wxGIFErrorCode
 // wxGIFDecoder class
 // --------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGIFDecoder : public wxAnimationDecoder
+class WXDLLEXPORT wxGIFDecoder : public wxAnimationDecoder
 {
 public:
     // constructor, destructor, etc.
@@ -105,6 +105,6 @@ private:
     DECLARE_NO_COPY_CLASS(wxGIFDecoder)
 };
 
-#endif // wxUSE_STREAMS && wxUSE_GIF
+#endif // wxUSE_STREAM && wxUSE_GIF
 
 #endif // _WX_GIFDECOD_H_

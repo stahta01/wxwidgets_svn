@@ -13,7 +13,6 @@
 #define _WX_PALMOS_ENHMETA_H_
 
 #include "wx/dc.h"
-#include "wx/gdiobj.h"
 
 #if wxUSE_DRAG_AND_DROP
     #include "wx/dataobj.h"
@@ -23,7 +22,7 @@
 // wxEnhMetaFile: encapsulation of Win32 HENHMETAFILE
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxEnhMetaFile : public wxGDIObject
+class WXDLLEXPORT wxEnhMetaFile : public wxObject
 {
 public:
     wxEnhMetaFile(const wxString& file = wxEmptyString) : m_filename(file)
@@ -40,7 +39,8 @@ public:
     bool Play(wxDC *dc, wxRect *rectBound = (wxRect *)NULL);
 
     // accessors
-    virtual bool IsOk() const { return m_hMF != 0; }
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_hMF != 0; }
 
     wxSize GetSize() const;
     int GetWidth() const { return GetSize().x; }
@@ -73,7 +73,7 @@ private:
 // wxEnhMetaFileDC: allows to create a wxEnhMetaFile
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxEnhMetaFileDC : public wxDC
+class WXDLLEXPORT wxEnhMetaFileDC : public wxDC
 {
 public:
     // the ctor parameters specify the filename (empty for memory metafiles),
@@ -99,7 +99,7 @@ private:
 
 // notice that we want to support both CF_METAFILEPICT and CF_ENHMETAFILE and
 // so we derive from wxDataObject and not from wxDataObjectSimple
-class WXDLLIMPEXP_CORE wxEnhMetaFileDataObject : public wxDataObject
+class WXDLLEXPORT wxEnhMetaFileDataObject : public wxDataObject
 {
 public:
     // ctors
@@ -137,7 +137,7 @@ protected:
 // CF_ENHMETAFILE
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxEnhMetaFileSimpleDataObject : public wxDataObjectSimple
+class WXDLLEXPORT wxEnhMetaFileSimpleDataObject : public wxDataObjectSimple
 {
 public:
     // ctors

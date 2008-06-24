@@ -22,7 +22,6 @@
 #include "wx/scrolwin.h"
 #include "wx/dialog.h"
 #include "wx/frame.h"
-#include "wx/dc.h"
 
 class WXDLLIMPEXP_FWD_CORE wxDC;
 class WXDLLIMPEXP_FWD_CORE wxButton;
@@ -55,7 +54,7 @@ enum wxPrinterError
 // wxPrintFactory
 //----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrintFactory
+class WXDLLEXPORT wxPrintFactory
 {
 public:
     wxPrintFactory() {}
@@ -78,7 +77,7 @@ public:
     virtual wxPageSetupDialogBase *CreatePageSetupDialog( wxWindow *parent,
                                                           wxPageSetupDialogData * data = NULL ) = 0;
 
-    virtual wxDCImpl* CreatePrinterDCImpl( wxPrinterDC *owner, const wxPrintData& data ) = 0;
+    virtual wxDC* CreatePrinterDC( const wxPrintData& data ) = 0;
 
     // What to do and what to show in the wxPrintDialog
     // a) Use the generic print setup dialog or a native one?
@@ -102,7 +101,7 @@ private:
     static wxPrintFactory *m_factory;
 };
 
-class WXDLLIMPEXP_CORE wxNativePrintFactory: public wxPrintFactory
+class WXDLLEXPORT wxNativePrintFactory: public wxPrintFactory
 {
 public:
     virtual wxPrinterBase *CreatePrinter( wxPrintDialogData *data );
@@ -122,7 +121,7 @@ public:
     virtual wxPageSetupDialogBase *CreatePageSetupDialog( wxWindow *parent,
                                                           wxPageSetupDialogData * data = NULL );
 
-    virtual wxDCImpl* CreatePrinterDCImpl( wxPrinterDC *owner, const wxPrintData& data );
+    virtual wxDC* CreatePrinterDC( const wxPrintData& data );
 
     virtual bool HasPrintSetupDialog();
     virtual wxDialog *CreatePrintSetupDialog( wxWindow *parent, wxPrintData *data );
@@ -139,7 +138,7 @@ public:
 // wxPrintNativeDataBase
 //----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrintNativeDataBase: public wxObject
+class WXDLLEXPORT wxPrintNativeDataBase: public wxObject
 {
 public:
     wxPrintNativeDataBase();
@@ -166,7 +165,7 @@ private:
  * Represents the printer: manages printing a wxPrintout object
  */
 
-class WXDLLIMPEXP_CORE wxPrinterBase: public wxObject
+class WXDLLEXPORT wxPrinterBase: public wxObject
 {
 public:
     wxPrinterBase(wxPrintDialogData *data = (wxPrintDialogData *) NULL);
@@ -206,7 +205,7 @@ private:
 // wxPrinter
 //----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrinter: public wxPrinterBase
+class WXDLLEXPORT wxPrinter: public wxPrinterBase
 {
 public:
     wxPrinter(wxPrintDialogData *data = (wxPrintDialogData *) NULL);
@@ -240,7 +239,7 @@ private:
  * object for previewing.
  */
 
-class WXDLLIMPEXP_CORE wxPrintout: public wxObject
+class WXDLLEXPORT wxPrintout: public wxObject
 {
 public:
     wxPrintout(const wxString& title = wxT("Printout"));
@@ -327,7 +326,7 @@ private:
  * Canvas upon which a preview is drawn.
  */
 
-class WXDLLIMPEXP_CORE wxPreviewCanvas: public wxScrolledWindow
+class WXDLLEXPORT wxPreviewCanvas: public wxScrolledWindow
 {
 public:
     wxPreviewCanvas(wxPrintPreviewBase *preview,
@@ -338,8 +337,6 @@ public:
                     const wxString& name = wxT("canvas"));
     virtual ~wxPreviewCanvas();
 
-    void SetPreview(wxPrintPreviewBase *preview) { m_printPreview = preview; }
-
     void OnPaint(wxPaintEvent& event);
     void OnChar(wxKeyEvent &event);
     // Responds to colour changes
@@ -349,7 +346,6 @@ private:
 #if wxUSE_MOUSEWHEEL
     void OnMouseWheel(wxMouseEvent& event);
 #endif // wxUSE_MOUSEWHEEL
-    void OnIdle(wxIdleEvent& event);
 
     wxPrintPreviewBase* m_printPreview;
 
@@ -366,7 +362,7 @@ private:
  * Default frame for showing preview.
  */
 
-class WXDLLIMPEXP_CORE wxPreviewFrame: public wxFrame
+class WXDLLEXPORT wxPreviewFrame: public wxFrame
 {
 public:
     wxPreviewFrame(wxPrintPreviewBase *preview,
@@ -392,10 +388,8 @@ protected:
     wxWindowDisabler*     m_windowDisabler;
 
 private:
-    void OnChar(wxKeyEvent& event);
-
-    DECLARE_EVENT_TABLE()
     DECLARE_CLASS(wxPreviewFrame)
+    DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxPreviewFrame)
 };
 
@@ -430,7 +424,7 @@ private:
 #define wxID_PREVIEW_LAST       7
 #define wxID_PREVIEW_GOTO       8
 
-class WXDLLIMPEXP_CORE wxPreviewControlBar: public wxPanel
+class WXDLLEXPORT wxPreviewControlBar: public wxPanel
 {
     DECLARE_CLASS(wxPreviewControlBar)
 
@@ -491,7 +485,7 @@ private:
  * Programmer creates an object of this class to preview a wxPrintout.
  */
 
-class WXDLLIMPEXP_CORE wxPrintPreviewBase: public wxObject
+class WXDLLEXPORT wxPrintPreviewBase: public wxObject
 {
 public:
     wxPrintPreviewBase(wxPrintout *printout,
@@ -521,10 +515,6 @@ public:
 
     // The preview canvas should call this from OnPaint
     virtual bool PaintPage(wxPreviewCanvas *canvas, wxDC& dc);
-
-    // Updates rendered page by calling RenderPage() if needed, returns true
-    // if there was some change. Preview canvas should call it at idle time
-    virtual bool UpdatePageRendering();
 
     // This draws a blank page onto the preview canvas
     virtual bool DrawBlankPage(wxPreviewCanvas *canvas, wxDC& dc);
@@ -562,19 +552,10 @@ public:
     virtual void DetermineScaling() = 0;
 
 protected:
-    // helpers for RenderPage():
-    virtual bool RenderPageIntoDC(wxDC& dc, int pageNum);
-    // renders preview into m_previewBitmap
-    virtual bool RenderPageIntoBitmap(wxBitmap& bmp, int pageNum);
-
-    void InvalidatePreviewBitmap();
-
-protected:
     wxPrintDialogData m_printDialogData;
     wxPreviewCanvas*  m_previewCanvas;
     wxFrame*          m_previewFrame;
     wxBitmap*         m_previewBitmap;
-    bool              m_previewFailed;
     wxPrintout*       m_previewPrintout;
     wxPrintout*       m_printPrintout;
     int               m_currentPage;
@@ -602,7 +583,7 @@ private:
 // wxPrintPreview
 //----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrintPreview: public wxPrintPreviewBase
+class WXDLLEXPORT wxPrintPreview: public wxPrintPreviewBase
 {
 public:
     wxPrintPreview(wxPrintout *printout,
@@ -624,7 +605,6 @@ public:
     virtual wxFrame *GetFrame() const;
     virtual wxPreviewCanvas *GetCanvas() const;
     virtual bool PaintPage(wxPreviewCanvas *canvas, wxDC& dc);
-    virtual bool UpdatePageRendering();
     virtual bool DrawBlankPage(wxPreviewCanvas *canvas, wxDC& dc);
     virtual void AdjustScrollbars(wxPreviewCanvas *canvas);
     virtual bool RenderPage(int pageNum);
@@ -655,7 +635,7 @@ private:
 // wxPrintAbortDialog
 //----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrintAbortDialog: public wxDialog
+class WXDLLEXPORT wxPrintAbortDialog: public wxDialog
 {
 public:
     wxPrintAbortDialog(wxWindow *parent,

@@ -30,7 +30,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/list.h"
-    #include "wx/crt.h"
 #endif
 
 #if !wxUSE_STL
@@ -54,7 +53,7 @@ bool wxListKey::operator==(wxListKeyValue value) const
             // by not putting return here...
 
         case wxKEY_STRING:
-            return *m_key.string == *value.string;
+            return wxStrcmp(m_key.string, value.string) == 0;
 
         case wxKEY_INTEGER:
             return m_key.integer == value.integer;
@@ -85,7 +84,7 @@ wxNodeBase::wxNodeBase(wxListBase *list,
 
         case wxKEY_STRING:
             // to be free()d later
-            m_key.string = new wxString(key.GetString());
+            m_key.string = wxStrdup(key.GetString());
             break;
 
         default:
@@ -108,7 +107,7 @@ wxNodeBase::~wxNodeBase()
     {
         if ( m_list->m_keyType == wxKEY_STRING )
         {
-            delete m_key.string;
+            free(m_key.string);
         }
 
         m_list->DetachNode(this);
@@ -258,7 +257,7 @@ wxNodeBase *wxListBase::Append(long key, void *object)
     return AppendCommon(node);
 }
 
-wxNodeBase *wxListBase::Append (const wxString& key, void *object)
+wxNodeBase *wxListBase::Append (const wxChar *key, void *object)
 {
     wxCHECK_MSG( (m_keyType == wxKEY_STRING) ||
                  (m_keyType == wxKEY_NONE && m_count == 0),
@@ -574,6 +573,8 @@ void wxListBase::DeleteNodes(wxNodeBase* first, wxNodeBase* last)
 // wxList (a.k.a. wxObjectList)
 // -----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxList, wxObject)
+
 wxList::wxList( int key_type )
     : wxObjectList( (wxKeyType)key_type )
 {
@@ -593,6 +594,8 @@ static inline wxChar* MYcopystring(const wxChar* s)
     wxChar* copy = new wxChar[wxStrlen(s) + 1];
     return wxStrcpy(copy, s);
 }
+
+IMPLEMENT_DYNAMIC_CLASS(wxStringList, wxObject)
 
 // instead of WX_DEFINE_LIST(wxStringListBase) we define this function
 // ourselves

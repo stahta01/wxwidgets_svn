@@ -14,7 +14,7 @@
 #ifndef   _WX_OLEUUID_H
 #define   _WX_OLEUUID_H
 
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 // ------------------------------------------------------------------
 // UUID (Universally Unique IDentifier) definition
 // ------------------------------------------------------------------
@@ -44,7 +44,7 @@ typedef unsigned char uchar;
 // ------------------------------------------------------------------
 
 // uses RPC functions to create/convert Universally Unique Identifiers
-class WXDLLIMPEXP_CORE Uuid
+class WXDLLEXPORT Uuid
 {
 private:
   UUID  m_uuid;

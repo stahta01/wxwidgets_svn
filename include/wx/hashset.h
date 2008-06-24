@@ -14,25 +14,7 @@
 
 #include "wx/hashmap.h"
 
-// see comment in wx/hashmap.h which also applies to different standard hash
-// set classes
-
-#if wxUSE_STL && \
-    (defined(HAVE_STD_UNORDERED_SET) || defined(HAVE_TR1_UNORDERED_SET))
-
-#if defined(HAVE_STD_UNORDERED_SET)
-    #include <unordered_set>
-    #define _WX_DECLARE_HASH_SET( KEY_T, HASH_T, KEY_EQ_T, CLASSNAME, CLASSEXP )\
-        typedef std::unordered_set< KEY_T, HASH_T, KEY_EQ_T > CLASSNAME
-#elif defined(HAVE_TR1_UNORDERED_SET)
-    #include <tr1/unordered_set>
-    #define _WX_DECLARE_HASH_SET( KEY_T, HASH_T, KEY_EQ_T, CLASSNAME, CLASSEXP )\
-        typedef std::tr1::unordered_set< KEY_T, HASH_T, KEY_EQ_T > CLASSNAME
-#else
-#error Update this code: unordered_set is available, but I do not know where.
-#endif
-
-#elif wxUSE_STL && defined(HAVE_STL_HASH_MAP)
+#if wxUSE_STL && defined(HAVE_STL_HASH_MAP)
 
 #if defined(HAVE_EXT_HASH_MAP)
     #include <ext/hash_set>
@@ -116,7 +98,7 @@ public:                                                                      \
 
 #define WX_DECLARE_EXPORTED_HASH_SET( KEY_T, HASH_T, KEY_EQ_T, CLASSNAME) \
     WX_DECLARE_HASH_SET_WITH_DECL( KEY_T, HASH_T, KEY_EQ_T, \
-                                   CLASSNAME, class WXDLLIMPEXP_CORE )
+                                   CLASSNAME, class WXDLLEXPORT )
 
 // delete all hash elements
 //

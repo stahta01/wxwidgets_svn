@@ -20,7 +20,7 @@
  * Font dialog
  */
 
-class WXDLLIMPEXP_CORE wxFontDialog: public wxFontDialogBase
+class WXDLLEXPORT wxFontDialog: public wxFontDialogBase
 {
 public:
     wxFontDialog() : wxFontDialogBase() { /* must be Create()d later */ }

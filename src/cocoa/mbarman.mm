@@ -28,14 +28,6 @@
 #import <AppKit/NSApplication.h>
 #import <AppKit/NSWindow.h>
 
-#ifndef wxUSE_FSCRIPT
-#define wxUSE_FSCRIPT 0
-#endif
-
-#if wxUSE_FSCRIPT
-    #import <FScript/FScriptMenuItem.h>
-#endif
-
 // Declare setAppleMenu: in an NSApplication category since Tiger and later
 // releases support it but don't declare it as it's considered deprecated.
 @interface NSApplication(wxDeprecatedMethodsWeWantToUse)
@@ -117,17 +109,6 @@ WX_IMPLEMENT_GET_OBJC_CLASS(wxMenuBarManagerObserver,NSObject)
 // ============================================================================
 wxMenuBarManager *wxMenuBarManager::sm_mbarmanInstance = NULL;
 
-static void AddFScriptItem(NSMenu *menu)
-#if wxUSE_FSCRIPT
-{
-    NSMenuItem *item = [[FScriptMenuItem alloc] init];
-    [menu addItem: item];
-    [item release];
-}
-#else
-{}
-#endif
-
 wxMenuBarManager::wxMenuBarManager()
 {
     m_observer = [[WX_GET_OBJC_CLASS(wxMenuBarManagerObserver) alloc]
@@ -174,7 +155,6 @@ wxMenuBarManager::wxMenuBarManager()
 
 /**/[m_menuApp addItemWithTitle:@"Preferences..." action:nil keyEquivalent:@""];
 /**/[m_menuApp addItem: [NSMenuItem separatorItem]];
-/**/AddFScriptItem(m_menuApp);
 /**/menuitem = [[NSMenuItem alloc] initWithTitle: @"Services" action:nil keyEquivalent:@""];
     [menuitem setSubmenu:m_menuServices];
     [m_menuApp addItem: menuitem];

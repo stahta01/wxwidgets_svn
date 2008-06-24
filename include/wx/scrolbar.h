@@ -18,13 +18,13 @@
 
 #include "wx/control.h"
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxScrollBarNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxScrollBarNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxScrollBar: a scroll bar control
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxScrollBarBase : public wxControl
+class WXDLLEXPORT wxScrollBarBase : public wxControl
 {
 public:
     wxScrollBarBase() { }
@@ -52,9 +52,6 @@ public:
                               int range, int pageSize,
                               bool refresh = true) = 0;
 
-    // implementation-only
-    bool IsNeeded() const { return GetRange() > GetThumbSize(); }
-
 private:
     DECLARE_NO_COPY_CLASS(wxScrollBarBase)
 };
@@ -70,7 +67,7 @@ private:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/scrolbar.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/scrolbar.h"
+    #include "wx/mac/scrolbar.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/scrolbar.h"
 #elif defined(__WXPM__)

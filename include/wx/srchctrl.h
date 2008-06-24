@@ -17,7 +17,8 @@
 
 #include "wx/textctrl.h"
 
-#if !defined(__WXUNIVERSAL__) && defined(__WXMAC__) 
+#if !defined(__WXUNIVERSAL__) && defined(__WXMAC__) && defined(__WXMAC_OSX__) \
+        && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_3)
     // search control was introduced in Mac OS X 10.3 Panther
     #define wxUSE_NATIVE_SEARCH_CONTROL 1
 
@@ -26,27 +27,26 @@
     // no native version, use the generic one
     #define wxUSE_NATIVE_SEARCH_CONTROL 0
 
-    class WXDLLIMPEXP_CORE wxSearchCtrlBaseBaseClass : public wxControl,
-                                                       public wxTextCtrlIface
-    {
-    };
+    #define wxSearchCtrlBaseBaseClass wxTextCtrlBase
 #endif
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxSearchCtrlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxSearchCtrlNameStr[];
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN, 1119)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN, 1120)
+END_DECLARE_EVENT_TYPES()
 
 // ----------------------------------------------------------------------------
 // a search ctrl is a text control with a search button and a cancel button
 // it is based on the MacOSX 10.3 control HISearchFieldCreate
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSearchCtrlBase : public wxSearchCtrlBaseBaseClass
+class WXDLLEXPORT wxSearchCtrlBase : public wxSearchCtrlBaseBaseClass
 {
 public:
     wxSearchCtrlBase() { }
@@ -70,7 +70,7 @@ public:
 // include the platform-dependent class implementation
 #if wxUSE_NATIVE_SEARCH_CONTROL
     #if defined(__WXMAC__)
-        #include "wx/osx/srchctrl.h"
+        #include "wx/mac/srchctrl.h"
     #endif
 #else
     #include "wx/generic/srchctlg.h"

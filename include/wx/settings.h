@@ -125,8 +125,7 @@ enum wxSystemMetric
     wxSYS_NETWORK_PRESENT,
     wxSYS_PENWINDOWS_PRESENT,
     wxSYS_SHOW_SOUNDS,
-    wxSYS_SWAP_BUTTONS,
-    wxSYS_DCLICK_MSEC
+    wxSYS_SWAP_BUTTONS
 };
 
 // possible values for wxSystemSettings::HasFeature() parameter
@@ -159,7 +158,7 @@ enum wxSystemScreenType
 // files (i.e. this is not a real base class as we can't override its virtual
 // functions because it doesn't have any)
 
-class WXDLLIMPEXP_CORE wxSystemSettingsNative
+class WXDLLEXPORT wxSystemSettingsNative
 {
 public:
     // get a standard system colour
@@ -179,7 +178,7 @@ public:
 // include the declaration of the real platform-dependent class
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSystemSettings : public wxSystemSettingsNative
+class WXDLLEXPORT wxSystemSettings : public wxSystemSettingsNative
 {
 public:
 #ifdef __WXUNIVERSAL__
@@ -187,10 +186,6 @@ public:
     // system ones, otherwise wxSystemSettings is just the same as
     // wxSystemSettingsNative
     static wxColour GetColour(wxSystemColour index);
-
-    // some metrics are toolkit-dependent and provided by wxUniv, some are
-    // lowlevel
-    static int GetMetric(wxSystemMetric index, wxWindow *win = NULL);
 #endif // __WXUNIVERSAL__
 
     // Get system screen design (desktop, pda, ..) used for
@@ -203,6 +198,13 @@ public:
     // Value
     static wxSystemScreenType ms_screen;
 
+#if WXWIN_COMPATIBILITY_2_4
+    // the backwards compatible versions of wxSystemSettingsNative functions,
+    // don't use these methods in the new code!
+    wxDEPRECATED(static wxColour GetSystemColour(int index));
+    wxDEPRECATED(static wxFont GetSystemFont(int index));
+    wxDEPRECATED(static int GetSystemMetric(int index));
+#endif
 };
 
 #endif

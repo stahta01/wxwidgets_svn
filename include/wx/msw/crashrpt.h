@@ -94,10 +94,10 @@ struct WXDLLIMPEXP_BASE wxCrashReport
 {
     // set the name of the file to which the report is written, it is
     // constructed from the .exe name by default
-    static void SetFileName(const wxString& filename);
+    static void SetFileName(const wxChar *filename);
 
     // return the current file name
-    static wxString GetFileName();
+    static const wxChar *GetFileName();
 
     // write the exception report to the file, return true if it could be done
     // or false otherwise

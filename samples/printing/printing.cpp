@@ -40,10 +40,6 @@
 #include "wx/generic/prntdlgg.h"
 #endif
 
-#if wxUSE_GRAPHICS_CONTEXT
-#include "wx/graphics.h"
-#endif
-
 #ifdef __WXMAC__
 #include "wx/mac/printdlg.h"
 #endif
@@ -53,6 +49,12 @@
 #ifndef __WXMSW__
 #include "mondrian.xpm"
 #endif
+
+#if wxUSE_LIBGNOMEPRINT
+#include "wx/html/forcelnk.h"
+FORCE_LINK(gnome_print)
+#endif
+
 
 // Declare a frame
 MyFrame   *frame = (MyFrame *) NULL;
@@ -75,9 +77,6 @@ bool WritePageHeader(wxPrintout *printout, wxDC *dc, const wxChar *text, float m
 
 bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxInitAllImageHandlers();
 
     m_testFont.Create(10, wxSWISS, wxNORMAL, wxNORMAL);
@@ -335,14 +334,13 @@ void MyFrame::Draw(wxDC& dc)
     // between the screen image, the print preview image (at various zoom
     // levels), and the printed page.
     dc.SetBackground(*wxWHITE_BRUSH);
-    // dc.Clear();
+    dc.Clear();
     dc.SetFont(wxGetApp().m_testFont);
 
-    // dc.SetBackgroundMode(wxTRANSPARENT);
+    dc.SetBackgroundMode(wxTRANSPARENT);
 
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxLIGHT_GREY_BRUSH);
-    
     dc.DrawRectangle(0, 0, 230, 350);
     dc.DrawLine(0, 0, 229, 349);
     dc.DrawLine(229, 0, 0, 349);
@@ -352,7 +350,7 @@ void MyFrame::Draw(wxDC& dc)
     dc.SetPen(*wxRED_PEN);
 
     dc.DrawRoundedRectangle(0, 20, 200, 80, 20);
-    
+
     dc.DrawText( wxT("Rectangle 200 by 80"), 40, 40);
 
     dc.SetPen( wxPen(*wxBLACK,0,wxDOT_DASH) );
@@ -362,7 +360,7 @@ void MyFrame::Draw(wxDC& dc)
     dc.DrawText( wxT("Test message: this is in 10 point text"), 10, 180);
     
 #if wxUSE_UNICODE
-    const char *test = "Hebrew    שלום -- Japanese (日本語)";
+    char *test = "Hebrew    שלום -- Japanese (日本語)";
     wxString tmp = wxConvUTF8.cMB2WC( test );
     dc.DrawText( tmp, 10, 200 );
 #endif
@@ -410,38 +408,6 @@ void MyFrame::Draw(wxDC& dc)
 
     if (m_bitmap.Ok())
         dc.DrawBitmap( m_bitmap, 10, 10 );
-
-#if wxUSE_GRAPHICS_CONTEXT
-    wxGraphicsContext *gc = NULL;
-
-    wxPrinterDC *printer_dc = wxDynamicCast( &dc, wxPrinterDC );
-    if (printer_dc)
-        gc = wxGraphicsContext::Create( *printer_dc );
-
-    wxWindowDC *window_dc = wxDynamicCast( &dc, wxWindowDC );
-    if (window_dc)
-        gc = wxGraphicsContext::Create( *window_dc );
-   
-    if (gc)
-    {
-        // make a path that contains a circle and some lines, centered at 100,100
-        gc->SetPen( *wxRED_PEN );
-        gc->SetFont( wxGetApp().m_testFont, *wxGREEN );
-        wxGraphicsPath path = gc->CreatePath();
-        path.AddCircle( 50.0, 50.0, 50.0 );
-        path.MoveToPoint(0.0, 50.0);
-        path.AddLineToPoint(100.0, 50.0);
-        path.MoveToPoint(50.0, 0.0);
-        path.AddLineToPoint(50.0, 100.0 );
-        path.CloseSubpath();
-        path.AddRectangle(25.0, 25.0, 50.0, 50.0);
-        
-        gc->StrokePath(path);
-        
-        delete gc;
-    }
-#endif
-
 }
 
 void MyFrame::OnSize(wxSizeEvent& event )
@@ -640,7 +606,7 @@ void MyPrintout::DrawPageTwo()
 
     { // GetTextExtent demo:
         wxString words[7] = {_T("This "), _T("is "), _T("GetTextExtent "), _T("testing "), _T("string. "), _T("Enjoy "), _T("it!")};
-        wxCoord w, h;
+        long w, h;
         long x = 200, y= 250;
         wxFont fnt(15, wxSWISS, wxNORMAL, wxNORMAL);
 
@@ -712,7 +678,7 @@ dc->SetFont(headerFont);
     float topMarginLogical = (float)(mmToLogical*topMargin);
     float rightMarginLogical = (float)(mmToLogical*(pageWidthMM - rightMargin));
 
-    wxCoord xExtent, yExtent;
+    long xExtent, yExtent;
     dc->GetTextExtent(text, &xExtent, &yExtent);
     float xPos = (float)(((((pageWidthMM - leftMargin - rightMargin)/2.0)+leftMargin)*mmToLogical) - (xExtent/2.0));
     dc->DrawText(text, (long)xPos, (long)topMarginLogical);

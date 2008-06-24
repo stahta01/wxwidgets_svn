@@ -53,11 +53,6 @@ void wxDialog::Init()
 
 wxDialog::~wxDialog()
 {
-    m_isBeingDeleted = true;
-
-    // if the dialog is modal, this will end its event loop
-    Show(false);
-
     delete m_eventLoop;
 }
 
@@ -76,7 +71,7 @@ bool wxDialog::Create(wxWindow *parent,
 
 void wxDialog::OnApply(wxCommandEvent &WXUNUSED(event))
 {
-    if ( Validate() )
+    if ( Validate() ) 
         TransferDataFromWindow();
 }
 
@@ -155,12 +150,9 @@ bool wxDialog::Show(bool show)
             EndModal(wxID_CANCEL);
     }
 
-    if (show && CanDoLayoutAdaptation())
-        DoLayoutAdaptation();
-
     bool ret = wxDialogBase::Show(show);
 
-    if ( show )
+    if ( show ) 
         InitDialog();
 
     return ret;
@@ -183,7 +175,7 @@ int wxDialog::ShowModal()
     // forbidden
     if ( !GetParent() && !(GetWindowStyleFlag() & wxDIALOG_NO_PARENT) )
     {
-        wxWindow * const parent = GetParentForModalDialog();
+        wxWindow *parent = wxTheApp->GetTopWindow();
         if ( parent && parent != this )
         {
             m_parent = parent;

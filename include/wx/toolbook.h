@@ -26,21 +26,13 @@ extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_TOOLBOOK_PAGE_CHANGING;
 
 
 // Use wxButtonToolBar
-#define wxTBK_BUTTONBAR            0x0100
-
-// Use wxTB_HORZ_LAYOUT style for the controlling toolbar
-#define wxTBK_HORZ_LAYOUT          0x8000
-
-// deprecated synonym, don't use
-#if WXWIN_COMPATIBILITY_2_8
-    #define wxBK_BUTTONBAR wxTBK_BUTTONBAR
-#endif
+#define wxBK_BUTTONBAR            0x0100
 
 // ----------------------------------------------------------------------------
 // wxToolbook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxToolbook : public wxBookCtrlBase
+class WXDLLEXPORT wxToolbook : public wxBookCtrlBase
 {
 public:
     wxToolbook()
@@ -135,7 +127,7 @@ private:
 // listbook event class and related stuff
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxToolbookEvent : public wxBookCtrlBaseEvent
+class WXDLLEXPORT wxToolbookEvent : public wxBookCtrlBaseEvent
 {
 public:
     wxToolbookEvent(wxEventType commandType = wxEVT_NULL, int id = 0,

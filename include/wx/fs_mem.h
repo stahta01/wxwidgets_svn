@@ -16,7 +16,8 @@
 #include "wx/filesys.h"
 
 #if wxUSE_GUI
-    #include "wx/bitmap.h"
+    class WXDLLIMPEXP_FWD_CORE wxBitmap;
+    class WXDLLIMPEXP_FWD_CORE wxImage;
 #endif // wxUSE_GUI
 
 // ----------------------------------------------------------------------------
@@ -34,12 +35,14 @@ public:
     // name "memory:" + filename
     static void AddFile(const wxString& filename, const wxString& textdata);
     static void AddFile(const wxString& filename, const void *binarydata, size_t size);
+#if wxABI_VERSION >= 20805
     static void AddFileWithMimeType(const wxString& filename,
                                     const wxString& textdata,
                                     const wxString& mimetype);
     static void AddFileWithMimeType(const wxString& filename,
                                     const void *binarydata, size_t size,
                                     const wxString& mimetype);
+#endif // wxABI_VERSION >= 20805
 
     // Remove file from memory FS and free occupied memory
     static void RemoveFile(const wxString& filename);
@@ -78,6 +81,7 @@ public:
     {
         wxMemoryFSHandlerBase::AddFile(filename, binarydata, size);
     }
+#if wxABI_VERSION >= 20805
     static void AddFileWithMimeType(const wxString& filename,
                                     const wxString& textdata,
                                     const wxString& mimetype)
@@ -94,15 +98,16 @@ public:
                                                    binarydata, size,
                                                    mimetype);
     }
+#endif // wxABI_VERSION >= 20805
 
 #if wxUSE_IMAGE
     static void AddFile(const wxString& filename,
                         const wxImage& image,
-                        wxBitmapType type);
+                        long type);
 
     static void AddFile(const wxString& filename,
                         const wxBitmap& bitmap,
-                        wxBitmapType type);
+                        long type);
 #endif // wxUSE_IMAGE
 
 };

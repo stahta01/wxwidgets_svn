@@ -40,8 +40,6 @@ public:
         : wxListCtrl(parent, id, pos, size, style),
           m_attr(*wxBLUE, *wxLIGHT_GREY, wxNullFont)
         {
-            m_updated = -1;
-
 #ifdef __POCKETPC__
             EnableContextMenu();
 #endif
@@ -61,6 +59,10 @@ public:
     void OnEndLabelEdit(wxListEvent& event);
     void OnDeleteItem(wxListEvent& event);
     void OnDeleteAllItems(wxListEvent& event);
+#if WXWIN_COMPATIBILITY_2_4
+    void OnGetInfo(wxListEvent& event);
+    void OnSetInfo(wxListEvent& event);
+#endif
     void OnSelected(wxListEvent& event);
     void OnDeselected(wxListEvent& event);
     void OnListKeyDown(wxListEvent& event);
@@ -90,9 +92,6 @@ private:
 
     wxListItemAttr m_attr;
 
-    long m_updated;
-
-
     DECLARE_NO_COPY_CLASS(MyListCtrl)
     DECLARE_EVENT_TABLE()
 };
@@ -120,7 +119,6 @@ protected:
     void OnVirtualView(wxCommandEvent& event);
     void OnSmallVirtualView(wxCommandEvent& event);
 
-    void OnGoTo(wxCommandEvent& event);
     void OnFocusLast(wxCommandEvent& event);
     void OnToggleFirstSel(wxCommandEvent& event);
     void OnDeselectAll(wxCommandEvent& event);
@@ -202,7 +200,6 @@ enum
     LIST_TOGGLE_FIRST,
     LIST_SHOW_COL_INFO,
     LIST_SHOW_SEL_INFO,
-    LIST_GOTO,
     LIST_FOCUS_LAST,
     LIST_FREEZE,
     LIST_THAW,

@@ -49,16 +49,15 @@ WX_DECLARE_LIST(wxXCursor, wxXCursorList);
 #include "wx/listimpl.cpp"
 WX_DEFINE_LIST(wxXCursorList)
 
-class WXDLLEXPORT wxCursorRefData: public wxGDIRefData
+class WXDLLEXPORT wxCursorRefData: public wxObjectRefData
 {
+    friend class WXDLLEXPORT wxCursor;
 public:
     wxCursorRefData();
     virtual ~wxCursorRefData();
 
     wxXCursorList m_cursors;  // wxXCursor objects, one per display
     wxStockCursor m_cursorId; // wxWidgets standard cursor id
-
-    friend class wxCursor;
 };
 
 #define M_CURSORDATA ((wxCursorRefData *)m_refData)
@@ -260,7 +259,7 @@ wxCursor::wxCursor(const wxString& name, long flags, int hotSpotX, int hotSpotY)
     int screen_num =  DefaultScreen (dpy);
 
     int value = XReadBitmapFile (dpy, RootWindow (dpy, screen_num),
-                                 name.mb_str(),
+                                 wxConstCast(name.c_str(), char),
                                  &w, &h, &pixmap, &hotX, &hotY);
 
     if (value == BitmapSuccess)
@@ -294,14 +293,9 @@ wxCursor::~wxCursor()
 {
 }
 
-wxGDIRefData *wxCursor::CreateGDIRefData() const
+bool wxCursor::IsOk() const
 {
-    return new wxCursorRefData;
-}
-
-wxGDIRefData *wxCursor::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxCursorRefData(*wx_static_cast(const wxCursorRefData *, data));
+    return m_refData != NULL;
 }
 
 // Motif-specific: create/get a cursor for the current display

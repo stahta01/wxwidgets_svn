@@ -10,13 +10,13 @@
 #ifndef __GTKFILEDLGH__
 #define __GTKFILEDLGH__
 
-#include "wx/gtk/filectrl.h"    // for wxGtkFileChooser
+#include "wx/generic/filedlgg.h"
 
 //-------------------------------------------------------------------------
 // wxFileDialog
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileDialog: public wxFileDialogBase
+class WXDLLIMPEXP_CORE wxFileDialog: public wxGenericFileDialog
 {
 public:
     wxFileDialog() { }
@@ -30,7 +30,8 @@ public:
                  const wxPoint& pos = wxDefaultPosition,
                  const wxSize& sz = wxDefaultSize,
                  const wxString& name = wxFileDialogNameStr);
-    virtual ~wxFileDialog() { delete m_extraControl; }
+
+    virtual ~wxFileDialog() {}
 
     virtual wxString GetPath() const;
     virtual void GetPaths(wxArrayString& paths) const;
@@ -47,8 +48,8 @@ public:
     virtual void SetFilterIndex(int filterIndex);
 
     virtual int ShowModal();
+    virtual bool Show( bool show = true );
 
-    virtual bool SupportsExtraControl() const { return true; }
 
 
 protected:
@@ -63,8 +64,6 @@ private:
     DECLARE_DYNAMIC_CLASS(wxFileDialog)
     DECLARE_EVENT_TABLE()
     void OnFakeOk( wxCommandEvent &event );
-
-    wxGtkFileChooser    m_fc;
 };
 
 #endif // __GTKFILEDLGH__

@@ -48,6 +48,9 @@ bool wxFileButton::Create( wxWindow *parent, wxWindowID id,
         // VERY IMPORTANT: this code is identic to relative code in wxDirButton;
         //                 if you find a problem here, fix it also in wxDirButton !
 
+        m_needParent = true;
+        m_acceptsFocus = true;
+
         if (!PreCreation( parent, pos, size ) ||
             !wxControl::CreateBase(parent, id, pos, size, style & wxWINDOW_STYLE_MASK,
                                     validator, name))
@@ -81,7 +84,7 @@ bool wxFileButton::Create( wxWindow *parent, wxWindowID id,
         // NOTE: we deliberately ignore the given label as GtkFileChooserButton
         //       use as label the currently selected file
         m_widget = gtk_file_chooser_button_new_with_dialog( m_dialog->m_widget );
-        gtk_widget_show(m_widget);
+        gtk_widget_show( GTK_WIDGET(m_widget) );
 
         // we need to know when the dialog has been dismissed clicking OK...
         // NOTE: the "clicked" signal is not available for a GtkFileChooserButton
@@ -108,7 +111,7 @@ wxFileButton::~wxFileButton()
     // Thus we have to set its m_widget to NULL to avoid
     // double destruction on same widget
     if (m_dialog)
-        m_dialog->m_widget = NULL;
+    	m_dialog->m_widget = NULL;
 }
 
 void wxFileButton::OnDialogOK(wxCommandEvent& ev)
@@ -122,7 +125,7 @@ void wxFileButton::OnDialogOK(wxCommandEvent& ev)
 
         // ...and fire an event
         wxFileDirPickerEvent event(wxEVT_COMMAND_FILEPICKER_CHANGED, this, GetId(), m_path);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
     }
 }
 
@@ -130,7 +133,7 @@ void wxFileButton::SetPath(const wxString &str)
 {
     m_path = str;
     if (m_dialog)
-        UpdateDialogPath(m_dialog);
+    	UpdateDialogPath(m_dialog);
 }
 
 #endif      // wxUSE_FILEPICKERCTRL && defined(__WXGTK26__)
@@ -174,7 +177,7 @@ static void gtk_dirbutton_currentfolderchanged_callback(GtkFileChooserButton *wi
 
     // ...and fire an event
     wxFileDirPickerEvent event(wxEVT_COMMAND_DIRPICKER_CHANGED, p, p->GetId(), p->GetPath());
-    p->HandleWindowEvent(event);
+    p->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -196,6 +199,9 @@ bool wxDirButton::Create( wxWindow *parent, wxWindowID id,
     {
         // VERY IMPORTANT: this code is identic to relative code in wxFileButton;
         //                 if you find a problem here, fix it also in wxFileButton !
+
+        m_needParent = true;
+        m_acceptsFocus = true;
 
         if (!PreCreation( parent, pos, size ) ||
             !wxControl::CreateBase(parent, id, pos, size, style & wxWINDOW_STYLE_MASK,
@@ -230,7 +236,7 @@ bool wxDirButton::Create( wxWindow *parent, wxWindowID id,
         //       use as label the currently selected file
         m_widget = gtk_file_chooser_button_new_with_dialog( m_dialog->m_widget );
 
-        gtk_widget_show(m_widget);
+        gtk_widget_show( GTK_WIDGET(m_widget) );
 
         // GtkFileChooserButton signals
         g_signal_connect(m_widget, "current-folder-changed",
@@ -254,7 +260,7 @@ wxDirButton::~wxDirButton()
     // Thus we have to set its m_widget to NULL to avoid
     // double destruction on same widget
     if (m_dialog)
-        m_dialog->m_widget = NULL;
+    	m_dialog->m_widget = NULL;
 }
 
 void wxDirButton::SetPath(const wxString &str)
@@ -268,8 +274,8 @@ void wxDirButton::SetPath(const wxString &str)
     // general with all wxWidgets control-manipulation functions which do not send events).
     m_bIgnoreNextChange = true;
 
-    if (m_dialog)
-        UpdateDialogPath(m_dialog);
+	if (m_dialog)
+    	UpdateDialogPath(m_dialog);
 }
 
 #endif      // wxUSE_DIRPICKERCTRL && defined(__WXGTK26__)

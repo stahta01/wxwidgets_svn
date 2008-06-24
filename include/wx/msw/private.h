@@ -42,13 +42,13 @@ class WXDLLIMPEXP_FWD_CORE wxWindowBase;
 
 #if wxUSE_GUI
 
-extern WXDLLIMPEXP_DATA_CORE(HICON) wxSTD_FRAME_ICON;
-extern WXDLLIMPEXP_DATA_CORE(HICON) wxSTD_MDIPARENTFRAME_ICON;
-extern WXDLLIMPEXP_DATA_CORE(HICON) wxSTD_MDICHILDFRAME_ICON;
-extern WXDLLIMPEXP_DATA_CORE(HICON) wxDEFAULT_FRAME_ICON;
-extern WXDLLIMPEXP_DATA_CORE(HICON) wxDEFAULT_MDIPARENTFRAME_ICON;
-extern WXDLLIMPEXP_DATA_CORE(HICON) wxDEFAULT_MDICHILDFRAME_ICON;
-extern WXDLLIMPEXP_DATA_CORE(HFONT) wxSTATUS_LINE_FONT;
+extern WXDLLEXPORT_DATA(HICON) wxSTD_FRAME_ICON;
+extern WXDLLEXPORT_DATA(HICON) wxSTD_MDIPARENTFRAME_ICON;
+extern WXDLLEXPORT_DATA(HICON) wxSTD_MDICHILDFRAME_ICON;
+extern WXDLLEXPORT_DATA(HICON) wxDEFAULT_FRAME_ICON;
+extern WXDLLEXPORT_DATA(HICON) wxDEFAULT_MDIPARENTFRAME_ICON;
+extern WXDLLEXPORT_DATA(HICON) wxDEFAULT_MDICHILDFRAME_ICON;
+extern WXDLLEXPORT_DATA(HFONT) wxSTATUS_LINE_FONT;
 
 #endif // wxUSE_GUI
 
@@ -251,7 +251,7 @@ enum wxSTD_COLOUR
     wxSTD_COL_MAX
 };
 
-struct WXDLLIMPEXP_CORE wxCOLORMAP
+struct WXDLLEXPORT wxCOLORMAP
 {
     COLORREF from, to;
 };
@@ -311,32 +311,21 @@ HCURSOR wxBitmapToHCURSOR(const wxBitmap& bmp, int hotSpotX, int hotSpotY);
     #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 #endif // GET_X_LPARAM
 
-// get the current state of SHIFT/CTRL/ALT keys
-inline bool wxIsModifierDown(int vk)
-{
-    // GetKeyState() returns different negative values on WinME and WinNT,
-    // so simply test for negative value.
-    return ::GetKeyState(vk) < 0;
-}
-
+// get the current state of SHIFT/CTRL keys
 inline bool wxIsShiftDown()
 {
-    return wxIsModifierDown(VK_SHIFT);
+//    return (::GetKeyState(VK_SHIFT) & 0x100) != 0;
+    // Returns different negative values on WinME and WinNT,
+    // so simply test for negative value.
+    return ::GetKeyState(VK_SHIFT) < 0;
 }
 
 inline bool wxIsCtrlDown()
 {
-    return wxIsModifierDown(VK_CONTROL);
-}
-
-inline bool wxIsAltDown()
-{
-    return wxIsModifierDown(VK_MENU);
-}
-
-inline bool wxIsAnyModifierDown()
-{
-    return wxIsShiftDown() || wxIsCtrlDown() || wxIsAltDown();
+//    return (::GetKeyState(VK_CONTROL) & 0x100) != 0;
+    // Returns different negative values on WinME and WinNT,
+    // so simply test for negative value.
+    return ::GetKeyState(VK_CONTROL) < 0;
 }
 
 // wrapper around GetWindowRect() and GetClientRect() APIs doing error checking
@@ -597,7 +586,7 @@ private:
         HDCMapModeChanger wxMAKE_UNIQUE_NAME(wxHDCMapModeChanger)(hdc, mm)
 #endif // __WXWINCE__/!__WXWINCE__
 
-// smart pointer using GlobalAlloc/GlobalFree()
+// smart buffeer using GlobalAlloc/GlobalFree()
 class GlobalPtr
 {
 public:
@@ -630,36 +619,16 @@ private:
 class GlobalPtrLock
 {
 public:
-    // default ctor, use Init() later -- should only be used if the HGLOBAL can
-    // be NULL (in which case Init() shouldn't be called)
-    GlobalPtrLock()
+    GlobalPtrLock(HGLOBAL hGlobal) : m_hGlobal(hGlobal)
     {
-        m_hGlobal = NULL;
-        m_ptr = NULL;
-    }
-
-    // initialize the object, may be only called if we were created using the
-    // default ctor; HGLOBAL must not be NULL
-    void Init(HGLOBAL hGlobal)
-    {
-        m_hGlobal = hGlobal;
-
-        // NB: GlobalLock() is a macro, not a function, hence don't use the
-        //     global scope operator with it (and neither with GlobalUnlock())
         m_ptr = GlobalLock(hGlobal);
         if ( !m_ptr )
             wxLogLastError(_T("GlobalLock"));
     }
 
-    // initialize the object, HGLOBAL must not be NULL
-    GlobalPtrLock(HGLOBAL hGlobal)
-    {
-        Init(hGlobal);
-    }
-
     ~GlobalPtrLock()
     {
-        if ( m_hGlobal && !GlobalUnlock(m_hGlobal) )
+        if ( !GlobalUnlock(m_hGlobal) )
         {
 #ifdef __WXDEBUG__
             // this might happen simply because the block became unlocked
@@ -672,7 +641,6 @@ public:
         }
     }
 
-    void *Get() const { return m_ptr; }
     operator void *() const { return m_ptr; }
 
 private:
@@ -724,7 +692,7 @@ public:
     {
         if ( IsRegistered() )
         {
-            if ( !::UnregisterClass(m_clsname.wx_str(), wxhInstance) )
+            if ( !::UnregisterClass(m_clsname, wxhInstance) )
             {
                 wxLogLastError(_T("UnregisterClass"));
             }
@@ -856,8 +824,7 @@ enum wxWinVersion
     wxWinVersion_2003 = 0x0502,
 
     wxWinVersion_6 = 0x0600,
-    wxWinVersion_Vista = wxWinVersion_6,
-    wxWinVersion_NT6 = wxWinVersion_6
+    wxWinVersion_NT6 = 0x0600
 };
 
 WXDLLIMPEXP_BASE wxWinVersion wxGetWinVersion();
@@ -868,30 +835,30 @@ WXDLLIMPEXP_BASE wxWinVersion wxGetWinVersion();
 extern HCURSOR wxGetCurrentBusyCursor();    // from msw/utils.cpp
 extern const wxCursor *wxGetGlobalCursor(); // from msw/cursor.cpp
 
-WXDLLIMPEXP_CORE void wxGetCharSize(WXHWND wnd, int *x, int *y, const wxFont& the_font);
-WXDLLIMPEXP_CORE void wxFillLogFont(LOGFONT *logFont, const wxFont *font);
-WXDLLIMPEXP_CORE wxFont wxCreateFontFromLogFont(const LOGFONT *logFont);
-WXDLLIMPEXP_CORE wxFontEncoding wxGetFontEncFromCharSet(int charset);
+WXDLLEXPORT void wxGetCharSize(WXHWND wnd, int *x, int *y, const wxFont& the_font);
+WXDLLEXPORT void wxFillLogFont(LOGFONT *logFont, const wxFont *font);
+WXDLLEXPORT wxFont wxCreateFontFromLogFont(const LOGFONT *logFont);
+WXDLLEXPORT wxFontEncoding wxGetFontEncFromCharSet(int charset);
 
-WXDLLIMPEXP_CORE void wxSliderEvent(WXHWND control, WXWORD wParam, WXWORD pos);
-WXDLLIMPEXP_CORE void wxScrollBarEvent(WXHWND hbar, WXWORD wParam, WXWORD pos);
+WXDLLEXPORT void wxSliderEvent(WXHWND control, WXWORD wParam, WXWORD pos);
+WXDLLEXPORT void wxScrollBarEvent(WXHWND hbar, WXWORD wParam, WXWORD pos);
 
 // Find maximum size of window/rectangle
-extern WXDLLIMPEXP_CORE void wxFindMaxSize(WXHWND hwnd, RECT *rect);
+extern WXDLLEXPORT void wxFindMaxSize(WXHWND hwnd, RECT *rect);
 
 // Safely get the window text (i.e. without using fixed size buffer)
-extern WXDLLIMPEXP_CORE wxString wxGetWindowText(WXHWND hWnd);
+extern WXDLLEXPORT wxString wxGetWindowText(WXHWND hWnd);
 
 // get the window class name
-extern WXDLLIMPEXP_CORE wxString wxGetWindowClass(WXHWND hWnd);
+extern WXDLLEXPORT wxString wxGetWindowClass(WXHWND hWnd);
 
 // get the window id (should be unsigned, hence this is not wxWindowID which
 // is, for mainly historical reasons, signed)
-extern WXDLLIMPEXP_CORE int wxGetWindowId(WXHWND hWnd);
+extern WXDLLEXPORT WXWORD wxGetWindowId(WXHWND hWnd);
 
 // check if hWnd's WNDPROC is wndProc. Return true if yes, false if they are
 // different
-extern WXDLLIMPEXP_CORE bool wxCheckWindowWndProc(WXHWND hWnd, WXFARPROC wndProc);
+extern WXDLLEXPORT bool wxCheckWindowWndProc(WXHWND hWnd, WXFARPROC wndProc);
 
 // Does this window style specify any border?
 inline bool wxStyleHasBorder(long style)
@@ -904,28 +871,22 @@ inline bool wxStyleHasBorder(long style)
 // functions mapping HWND to wxWindow
 // ----------------------------------------------------------------------------
 
-// this function simply checks whether the given hwnd corresponds to a wxWindow
+// this function simply checks whether the given hWnd corresponds to a wxWindow
 // and returns either that window if it does or NULL otherwise
-extern WXDLLIMPEXP_CORE wxWindow* wxFindWinFromHandle(HWND hwnd);
-
-// without STRICT WXHWND is the same as HWND anyhow
-inline wxWindow* wxFindWinFromHandle(WXHWND hWnd)
-{
-    return wxFindWinFromHandle(wx_static_cast(HWND, hWnd));
-}
+extern WXDLLEXPORT wxWindow* wxFindWinFromHandle(WXHWND hWnd);
 
 // find the window for HWND which is part of some wxWindow, i.e. unlike
 // wxFindWinFromHandle() above it will also work for "sub controls" of a
 // wxWindow.
 //
 // returns the wxWindow corresponding to the given HWND or NULL.
-extern WXDLLIMPEXP_CORE wxWindow *wxGetWindowFromHWND(WXHWND hwnd);
+extern WXDLLEXPORT wxWindow *wxGetWindowFromHWND(WXHWND hwnd);
 
 // Get the size of an icon
-extern WXDLLIMPEXP_CORE wxSize wxGetHiconSize(HICON hicon);
+extern WXDLLEXPORT wxSize wxGetHiconSize(HICON hicon);
 
 // Lines are drawn differently for WinCE and regular WIN32
-WXDLLIMPEXP_CORE void wxDrawLine(HDC hdc, int x1, int y1, int x2, int y2);
+WXDLLEXPORT void wxDrawLine(HDC hdc, int x1, int y1, int x2, int y2);
 
 // fill the client rect of the given window on the provided dc using this brush
 inline void wxFillRect(HWND hwnd, HDC hdc, HBRUSH hbr)

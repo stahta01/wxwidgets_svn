@@ -74,12 +74,10 @@ bool wxApp::Yield(bool onlyIfNeeded)
 
     wxLog::Suspend();
 
-    wxEventLoopBase * const eventLoop = wxEventLoop::GetActive();
-    if ( eventLoop )
-    {
-        while (eventLoop->Pending())
-            eventLoop->Dispatch();
-    }
+    // A guarentee that there will be an active event loop:
+    wxEventLoopGuarantor dummyLoopIfNeeded;
+    while (wxEventLoop::GetActive()->Pending())
+        wxEventLoop::GetActive()->Dispatch();
 
     /* it's necessary to call ProcessIdle() to update the frames sizes which
        might have been changed (it also will update other things set from
@@ -200,6 +198,11 @@ static void wxDestroyMGL_WM()
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxApp,wxEvtHandler)
+
+BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxAppBase::OnIdle)
+END_EVENT_TABLE()
+
 
 wxApp::wxApp()
 {

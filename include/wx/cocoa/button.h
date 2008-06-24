@@ -17,7 +17,7 @@
 // ========================================================================
 // wxButton
 // ========================================================================
-class WXDLLIMPEXP_CORE wxButton : public wxButtonBase, protected wxCocoaNSButton
+class WXDLLEXPORT wxButton : public wxButtonBase, protected wxCocoaNSButton
 {
     DECLARE_DYNAMIC_CLASS(wxButton)
     DECLARE_EVENT_TABLE()
@@ -59,6 +59,7 @@ public:
     wxString GetLabel() const;
     void SetLabel(const wxString& label);
     wxSize DoGetBestSize() const;
+    virtual void SetDefault();
 };
 
 #endif

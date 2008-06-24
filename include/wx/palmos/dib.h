@@ -12,8 +12,8 @@
 #ifndef _WX_PALMOS_DIB_H_
 #define _WX_PALMOS_DIB_H_
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxPalette;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxPalette;
 
 #include "wx/msw/private.h"
 
@@ -23,7 +23,7 @@ class WXDLLIMPEXP_FWD_CORE wxPalette;
 // wxDIB: represents a DIB section
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDIB
+class WXDLLEXPORT wxDIB
 {
 public:
     // ctors and such

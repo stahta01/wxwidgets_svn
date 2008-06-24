@@ -33,7 +33,7 @@ class WXDLLIMPEXP_FWD_CORE wxWindowBase;
  Note that wxValidator and derived classes use reference counting.
 */
 
-class WXDLLIMPEXP_CORE wxValidator : public wxEvtHandler
+class WXDLLEXPORT wxValidator : public wxEvtHandler
 {
 public:
     wxValidator();
@@ -77,7 +77,7 @@ private:
     DECLARE_NO_COPY_CLASS(wxValidator)
 };
 
-extern WXDLLIMPEXP_DATA_CORE(const wxValidator) wxDefaultValidator;
+extern WXDLLEXPORT_DATA(const wxValidator) wxDefaultValidator;
 
 #define wxVALIDATOR_PARAM(val) val
 
@@ -86,7 +86,7 @@ extern WXDLLIMPEXP_DATA_CORE(const wxValidator) wxDefaultValidator;
     // want to be able to pass wxDefaultValidator to the functions which take
     // a wxValidator parameter to avoid using "#if wxUSE_VALIDATORS"
     // everywhere
-    class WXDLLIMPEXP_FWD_CORE wxValidator;
+    class WXDLLEXPORT wxValidator;
     #define wxDefaultValidator (*((wxValidator *)NULL))
 
     // this macro allows to avoid warnings about unused parameters when

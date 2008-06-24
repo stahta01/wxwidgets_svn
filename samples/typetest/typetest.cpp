@@ -72,9 +72,6 @@ wxString file_name2 = wxString(_T("test_wx2.dat"));
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame((wxFrame *) NULL, _T("wxWidgets Types Demo"),
                                  wxPoint(50, 50), wxSize(450, 340));
@@ -922,12 +919,12 @@ void MyApp::DoMIMEDemo(wxCommandEvent& WXUNUSED(event))
                                _T("XyZ %s"),
                                _T("XyZ -p %s"),
                                _T("The one and only XYZ format file"),
-                               _T("xyz"), _T("123"), wxNullPtr),
+                               _T("xyz"), _T("123"), NULL),
                 wxFileTypeInfo(_T("text/html"),
                                _T("lynx %s"),
                                _T("lynx -dump %s | lpr"),
                                _T("HTML document (from fallback)"),
-                               _T("htm"), _T("html"), wxNullPtr),
+                               _T("htm"), _T("html"), NULL),
 
                 // must terminate the table with this!
                 wxFileTypeInfo()
@@ -955,10 +952,11 @@ void MyApp::DoMIMEDemo(wxCommandEvent& WXUNUSED(event))
             filetype->GetOpenCommand(&open, params);
 
             textCtrl << _T("MIME information about extension '") << ext << _T('\n')
-                     << _T("\tMIME type: ") << ( !type ? wxString("unknown") : type ) << _T('\n')
-                     << _T("\tDescription: ") << ( !desc ? wxString(wxEmptyString) : desc )
+                     << _T("\tMIME type: ") << ( !type ? wxT("unknown")
+                                                   : type.c_str() ) << _T('\n')
+                     << _T("\tDescription: ") << ( !desc ? wxEmptyString : desc.c_str() )
                         << _T('\n')
-                     << _T("\tCommand to open: ") << ( !open ? wxString("no") : open )
+                     << _T("\tCommand to open: ") << ( !open ? wxT("no") : open.c_str() )
                         << _T('\n');
 
             delete filetype;

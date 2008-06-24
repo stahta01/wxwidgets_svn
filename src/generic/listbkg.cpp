@@ -36,12 +36,6 @@
 #include "wx/statline.h"
 #include "wx/imaglist.h"
 
-// FIXME: native OS X wxListCtrl hangs if this code is used for it so disable
-//        it for now
-#if !defined(__WXMAC__)
-    #define CAN_USE_REPORT_VIEW
-#endif
-
 // ----------------------------------------------------------------------------
 // various wxWidgets macros
 // ----------------------------------------------------------------------------
@@ -56,8 +50,10 @@
 IMPLEMENT_DYNAMIC_CLASS(wxListbook, wxBookCtrlBase)
 IMPLEMENT_DYNAMIC_CLASS(wxListbookEvent, wxNotifyEvent)
 
+#if !WXWIN_COMPATIBILITY_EVENT_TYPES
 const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING = wxNewEventType();
 const wxEventType wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED = wxNewEventType();
+#endif
 
 BEGIN_EVENT_TABLE(wxListbook, wxBookCtrlBase)
     EVT_SIZE(wxListbook::OnSize)
@@ -109,17 +105,9 @@ wxListbook::Create(wxWindow *parent,
                     wxID_ANY,
                     wxDefaultPosition,
                     wxDefaultSize,
-                    wxLC_SINGLE_SEL |
-#ifdef CAN_USE_REPORT_VIEW
-                    GetListCtrlReportViewFlags()
-#else // !CAN_USE_REPORT_VIEW
-                    GetListCtrlIconViewFlags()
-#endif // CAN_USE_REPORT_VIEW/!CAN_USE_REPORT_VIEW
+                    wxLC_ICON | wxLC_SINGLE_SEL |
+                        (IsVertical() ? wxLC_ALIGN_LEFT : wxLC_ALIGN_TOP)
                  );
-
-#ifdef CAN_USE_REPORT_VIEW
-    GetListView()->InsertColumn(0, wxT("Pages"));
-#endif // CAN_USE_REPORT_VIEW
 
 #ifdef __WXMSW__
     // On XP with themes enabled the GetViewRect used in GetControllerSize() to
@@ -133,24 +121,6 @@ wxListbook::Create(wxWindow *parent,
 #endif
     return true;
 }
-
-// ----------------------------------------------------------------------------
-// wxListCtrl flags
-// ----------------------------------------------------------------------------
-
-long wxListbook::GetListCtrlIconViewFlags() const
-{
-    return (IsVertical() ? wxLC_ALIGN_LEFT : wxLC_ALIGN_TOP) | wxLC_ICON;
-}
-
-#ifdef CAN_USE_REPORT_VIEW
-
-long wxListbook::GetListCtrlReportViewFlags() const
-{
-    return wxLC_REPORT | wxLC_NO_HEADER;
-}
-
-#endif // CAN_USE_REPORT_VIEW
 
 // ----------------------------------------------------------------------------
 // wxListbook geometry management
@@ -264,19 +234,11 @@ wxString wxListbook::GetPageText(size_t n) const
     return GetListView()->GetItemText(n);
 }
 
-int wxListbook::GetPageImage(size_t n) const
+int wxListbook::GetPageImage(size_t WXUNUSED(n)) const
 {
-    wxListItem item;
-    item.SetId(n);
+    wxFAIL_MSG( _T("wxListbook::GetPageImage() not implemented") );
 
-    if (GetListView()->GetItem(item))
-    {
-       return item.GetImage();
-    }
-    else
-    {
-       return wxNOT_FOUND;
-    }
+    return wxNOT_FOUND;
 }
 
 bool wxListbook::SetPageImage(size_t n, int imageId)
@@ -290,57 +252,7 @@ bool wxListbook::SetPageImage(size_t n, int imageId)
 
 void wxListbook::SetImageList(wxImageList *imageList)
 {
-    wxListView * const list = GetListView();
-
-#ifdef CAN_USE_REPORT_VIEW
-    // If imageList presence has changed, we update the list control view
-    if ( (imageList != NULL) != (GetImageList() != NULL) )
-    {
-        wxArrayString labels;
-        labels.Alloc(GetPageCount());
-
-        wxArrayInt imageIds;
-        imageIds.Alloc(GetPageCount());
-
-        const int oldSel = GetSelection();
-        size_t i;
-
-        // Grab snapshot of all list control items before changing the window
-        // style (which deletes the items)
-        for ( i = 0; i < GetPageCount(); i++ )
-        {
-           labels.Add(GetPageText(i));
-           imageIds.Add(GetPageImage(i));
-        }
-
-        // Update the style to use icon view for images, report view otherwise
-        long style = wxLC_SINGLE_SEL;
-        if ( imageList )
-        {
-            style |= GetListCtrlIconViewFlags();
-        }
-        else // no image list
-        {
-            style |= GetListCtrlReportViewFlags();
-        }
-
-        list->SetWindowStyleFlag(style);
-        if ( !imageList )
-            list->InsertColumn(0, wxT("Pages"));
-
-        // Add back the list control items
-        for ( i = 0; i < GetPageCount(); i++ )
-        {
-           list->InsertItem(i, labels[i], imageIds[i]);
-        }
-
-        // Restore selection
-        if ( oldSel != wxNOT_FOUND )
-           SetSelection(oldSel);
-    }
-
-    list->SetImageList(imageList, wxIMAGE_LIST_NORMAL);
-#endif // CAN_USE_REPORT_VIEW
+    GetListView()->SetImageList(imageList, wxIMAGE_LIST_NORMAL);
 
     wxBookCtrlBase::SetImageList(imageList);
 }
@@ -414,7 +326,7 @@ wxListbook::InsertPage(size_t n,
 
     wxSizeEvent sz(GetSize(), GetId());
     GetEventHandler()->ProcessEvent(sz);
-    
+
     return true;
 }
 
@@ -447,7 +359,7 @@ wxWindow *wxListbook::DoRemovePage(size_t page)
         if (GetPageCount() == 0)
         {
             wxSizeEvent sz(GetSize(), GetId());
-            GetEventHandler()->ProcessEvent(sz);
+            ProcessEvent(sz);
         }
     }
 
@@ -464,7 +376,7 @@ bool wxListbook::DeleteAllPages()
     m_selection = -1;
 
     wxSizeEvent sz(GetSize(), GetId());
-    GetEventHandler()->ProcessEvent(sz);
+    ProcessEvent(sz);
 
     return true;
 }

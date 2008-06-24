@@ -15,7 +15,7 @@
   #pragma hdrstop
 #endif  //__BORLANDC__
 
-#if wxUSE_ANIMATIONCTRL
+#if wxUSE_ANIMATIONCTRL && (!defined(__WXGTK20__) || defined(__WXUNIVERSAL__))
 
 #include "wx/animate.h"
 
@@ -147,17 +147,16 @@ bool wxAnimation::Load(wxInputStream &stream, wxAnimationType type)
 
     handler = FindHandler(type);
 
+    // do a copy of the handler from the static list which we will own
+    // as our reference data
+    m_refData = handler->Clone();
+
     if (handler == NULL)
     {
         wxLogWarning( _("No animation handler for type %ld defined."), type );
 
         return false;
     }
-
-
-    // do a copy of the handler from the static list which we will own
-    // as our reference data
-    m_refData = handler->Clone();
 
     if (stream.IsSeekable() && !M_ANIMDATA->CanRead(stream))
     {
@@ -308,14 +307,9 @@ wxAnimationCtrl::~wxAnimationCtrl()
 
 bool wxAnimationCtrl::LoadFile(const wxString& filename, wxAnimationType type)
 {
-    wxFileInputStream fis(filename);
-    return Load(fis, type);
-}
-
-bool wxAnimationCtrl::Load(wxInputStream& stream, wxAnimationType type)
-{
     wxAnimation anim;
-    if ( !anim.Load(stream, type) || !anim.IsOk() )
+    if (!anim.LoadFile(filename, type) ||
+        !anim.IsOk())
         return false;
 
     SetAnimation(anim);
@@ -692,5 +686,5 @@ void wxAnimationCtrl::OnSize(wxSizeEvent &WXUNUSED(event))
     }
 }
 
-#endif // wxUSE_ANIMATIONCTRL
+#endif      // wxUSE_ANIMATIONCTRL
 

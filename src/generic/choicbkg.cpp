@@ -50,8 +50,10 @@
 IMPLEMENT_DYNAMIC_CLASS(wxChoicebook, wxBookCtrlBase)
 IMPLEMENT_DYNAMIC_CLASS(wxChoicebookEvent, wxNotifyEvent)
 
+#if !WXWIN_COMPATIBILITY_EVENT_TYPES
 const wxEventType wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING = wxNewEventType();
 const wxEventType wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED = wxNewEventType();
+#endif
 
 BEGIN_EVENT_TABLE(wxChoicebook, wxBookCtrlBase)
     EVT_CHOICE(wxID_ANY, wxChoicebook::OnChoiceSelected)
@@ -259,28 +261,28 @@ wxChoicebook::InsertPage(size_t n,
 
 wxWindow *wxChoicebook::DoRemovePage(size_t page)
 {
+    const size_t page_count = GetPageCount();
     wxWindow *win = wxBookCtrlBase::DoRemovePage(page);
 
     if ( win )
     {
         GetChoiceCtrl()->Delete(page);
 
-        if ( m_selection >= (int)page )
+        if (m_selection >= (int)page)
         {
-            // ensure that the selection is valid
-            int sel;
-            if ( GetPageCount() == 0 )
+            // force new sel valid if possible
+            int sel = m_selection - 1;
+            if (page_count == 1)
                 sel = wxNOT_FOUND;
-            else
-                sel = m_selection ? m_selection - 1 : 0;
+            else if ((page_count == 2) || (sel == -1))
+                sel = 0;
 
-            // if deleting current page we shouldn't try to hide it
-            m_selection = m_selection == (int)page ? wxNOT_FOUND
-                                                   : m_selection - 1;
+            // force sel invalid if deleting current page - don't try to hide it
+            m_selection = (m_selection == (int)page) ? wxNOT_FOUND : m_selection - 1;
 
-            if ( sel != wxNOT_FOUND && sel != m_selection )
+            if ((sel != wxNOT_FOUND) && (sel != m_selection))
                 SetSelection(sel);
-        }
+           }
     }
 
     return win;

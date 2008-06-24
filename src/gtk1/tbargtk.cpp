@@ -88,8 +88,8 @@ public:
         Init();
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         Init();
     }
@@ -246,10 +246,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int id,
                              clientData, shortHelpString, longHelpString);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 //-----------------------------------------------------------------------------
@@ -482,26 +481,19 @@ bool wxToolBar::DoInsertTool(size_t pos, wxToolBarToolBase *toolBase)
     return true;
 }
 
-bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
+bool wxToolBar::DoDeleteTool(size_t pos, wxToolBarToolBase *toolBase)
 {
     wxToolBarTool *tool = (wxToolBarTool *)toolBase;
 
     switch ( tool->GetStyle() )
     {
         case wxTOOL_STYLE_CONTROL:
-            // don't destroy the control here as we can be called from
-            // RemoveTool() and then we need to keep the control alive;
-            // while if we're called from DeleteTool() the control will
-            // be destroyed when wxToolBarToolBase itself is deleted
+            tool->GetControl()->Destroy();
             break;
 
         case wxTOOL_STYLE_BUTTON:
             gtk_widget_destroy( tool->m_item );
             break;
-
-        default:
-            wxFAIL_MSG( "unknown tool style" );
-            return false;
     }
 
     InvalidateBestSize();

@@ -33,7 +33,6 @@
     #include "wx/font.h"
 #endif
 
-#include "wx/os2/dc.h"
 #include "wx/ownerdrw.h"
 
 #define INCL_PM
@@ -113,9 +112,7 @@ bool wxCheckListBoxItem::OnDrawItem ( wxDC& rDc,
 {
     wxRect vRect = rRect;
 
-
-    wxPMDCImpl *impl = (wxPMDCImpl*) rDc.GetImpl();
-    ::WinQueryWindowRect( m_pParent->GetHWND(), &impl->m_vRclPaint );
+    ::WinQueryWindowRect( m_pParent->GetHWND(), &rDc.m_vRclPaint );
     if (IsChecked())
         eStat = (wxOwnerDrawn::wxODStatus)(eStat | wxOwnerDrawn::wxODChecked);
 
@@ -170,8 +167,8 @@ bool wxCheckListBoxItem::OnDrawItem ( wxDC& rDc,
             //
             HBITMAP hChkBmp = ::WinGetSysBitmap( HWND_DESKTOP, SBMP_MENUCHECK );
             POINTL  vPoint = {nX, nOldY + 3};
-            wxPMDCImpl *impl = (wxPMDCImpl*) rDc.GetImpl();
-            ::WinDrawBitmap( impl->GetHPS(),
+
+            ::WinDrawBitmap( rDc.GetHPS(),
                              hChkBmp,
                              NULL,
                              &vPoint,
@@ -287,13 +284,10 @@ void wxCheckListBox::Delete(unsigned int n)
     m_aItems.RemoveAt(n);
 } // end of wxCheckListBox::Delete
 
-int wxCheckListBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                                  unsigned int pos,
-                                  void **clientData,
-                                  wxClientDataType type)
+void wxCheckListBox::DoInsertItems(const wxArrayString& items, unsigned int pos)
 {
     // pos is validated in wxListBox
-    int result = wxListBox::DoInsertItems( items, pos, clientData, type );
+    wxListBox::DoInsertItems( items, pos );
     unsigned int n = items.GetCount();
     for (unsigned int i = 0; i < n; i++)
     {
@@ -307,8 +301,7 @@ int wxCheckListBox::DoInsertItems(const wxArrayStringsAdapter& items,
                       MPFROMP(pNewItem)
                     );
     }
-    return result;
-} // end of wxCheckListBox::DoInsertItems
+} // end of wxCheckListBox::InsertItems
 
 bool wxCheckListBox::SetFont ( const wxFont& rFont )
 {

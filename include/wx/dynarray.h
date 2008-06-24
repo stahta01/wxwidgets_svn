@@ -120,10 +120,6 @@ classexp name : public std::vector<T>                               \
 public:                                                             \
   typedef wxArray_SortFunction<T>::CMPFUNC CMPFUNC;                 \
 public:                                                             \
-  name() : std::vector<T>() { }                                     \
-  name(size_type n) : std::vector<T>(n) { }                         \
-  name(size_type n, const_reference v) : std::vector<T>(n, v) { }   \
-                                                                    \
   void Empty() { clear(); }                                         \
   void Clear() { clear(); }                                         \
   void Alloc(size_t uiSize) { reserve(uiSize); }                    \
@@ -286,16 +282,12 @@ typedef int (CMPFUNC_CONV *CMPFUNC##T)(T *pItem1, T *pItem2);         \
 classexp name : public base                                           \
 {                                                                     \
 public:                                                               \
-  name() : base() { }                                                 \
-  name(size_type n) : base(n) { }                                     \
-  name(size_type n, const_reference v) : base(n, v) { }               \
-                                                                      \
   T& operator[](size_t uiIndex) const                                 \
     { return (T&)(base::operator[](uiIndex)); }                       \
   T& Item(size_t uiIndex) const                                       \
     { return (T&)/*const cast*/base::operator[](uiIndex); }           \
   T& Last() const                                                     \
-    { return Item(GetCount() - 1); }                                  \
+    { return Item(Count() - 1); }                                     \
                                                                       \
   int Index(T e, bool bFromEnd = false) const                         \
     { return base::Index(e, bFromEnd); }                              \
@@ -334,12 +326,17 @@ public:                                                               \
   name() { }                                                          \
   ~name() { }                                                         \
                                                                       \
+  name& operator=(const name& src)                                    \
+    { base* temp = (base*) this;                                      \
+      (*temp) = ((const base&)src);                                   \
+      return *this; }                                                 \
+                                                                      \
   T& operator[](size_t uiIndex) const                                 \
     { return (T&)(base::operator[](uiIndex)); }                       \
   T& Item(size_t uiIndex) const                                       \
     { return (T&)(base::operator[](uiIndex)); }                       \
   T& Last() const                                                     \
-    { return (T&)(base::operator[](GetCount() - 1)); }                \
+    { return (T&)(base::operator[](Count() - 1)); }                   \
                                                                       \
   int Index(T lItem, bool bFromEnd = false) const                     \
     { return base::Index((base_type)lItem, bFromEnd); }               \
@@ -441,7 +438,6 @@ public:                                                               \
     bool operator !=(const itor& it) const { return m_ptr != it.m_ptr; }\
   };                                                                  \
                                                                       \
-  name(size_type n) { assign(n, value_type()); }                      \
   name(size_type n, const_reference v) { assign(n, v); }              \
   name(const_iterator first, const_iterator last)                     \
     { assign(first, last); }                                          \
@@ -561,8 +557,7 @@ public:                                                                  \
                                                                          \
   ~name();                                                               \
                                                                          \
-  void Alloc(size_t count) { base::reserve(count); }                     \
-  void reserve(size_t count) { base::reserve(count); }                   \
+  void Alloc(size_t count) { reserve(count); }                           \
   size_t GetCount() const { return base_array::size(); }                 \
   size_t size() const { return base_array::size(); }                     \
   bool IsEmpty() const { return base_array::empty(); }                   \
@@ -633,7 +628,7 @@ private:                                                                 \
     WX_DECLARE_USER_EXPORTED_BASEARRAY(T, name, wxARRAY_DEFAULT_EXPORT)
 
 #define WX_DECLARE_EXPORTED_BASEARRAY(T, name)                    \
-    WX_DECLARE_USER_EXPORTED_BASEARRAY(T, name, WXDLLIMPEXP_CORE)
+    WX_DECLARE_USER_EXPORTED_BASEARRAY(T, name, WXDLLEXPORT)
 
 #define WX_DECLARE_USER_EXPORTED_BASEARRAY(T, name, expmode)      \
     typedef T _wxArray##name;                                     \
@@ -654,10 +649,10 @@ private:                                                                 \
     WX_DEFINE_TYPEARRAY_WITH_DECL_PTR(T, name, base, class wxARRAY_DEFAULT_EXPORT)
 
 #define WX_DEFINE_EXPORTED_TYPEARRAY(T, name, base)               \
-    WX_DEFINE_TYPEARRAY_WITH_DECL(T, name, base, class WXDLLIMPEXP_CORE)
+    WX_DEFINE_TYPEARRAY_WITH_DECL(T, name, base, class WXDLLEXPORT)
 
 #define WX_DEFINE_EXPORTED_TYPEARRAY_PTR(T, name, base)               \
-    WX_DEFINE_TYPEARRAY_WITH_DECL_PTR(T, name, base, class WXDLLIMPEXP_CORE)
+    WX_DEFINE_TYPEARRAY_WITH_DECL_PTR(T, name, base, class WXDLLEXPORT)
 
 #define WX_DEFINE_USER_EXPORTED_TYPEARRAY(T, name, base, expdecl) \
     WX_DEFINE_TYPEARRAY_WITH_DECL(T, name, base, class expdecl)
@@ -710,7 +705,7 @@ private:                                                                 \
                                              wxARRAY_DEFAULT_EXPORT)
 
 #define WX_DEFINE_SORTED_EXPORTED_TYPEARRAY(T, name, base)                \
-    WX_DEFINE_SORTED_USER_EXPORTED_TYPEARRAY(T, name, base, WXDLLIMPEXP_CORE)
+    WX_DEFINE_SORTED_USER_EXPORTED_TYPEARRAY(T, name, base, WXDLLEXPORT)
 
 #define WX_DEFINE_SORTED_USER_EXPORTED_TYPEARRAY(T, name, base, expmode)  \
     typedef T _wxArray##name;                                             \
@@ -736,7 +731,7 @@ private:                                                                 \
 
 #define WX_DEFINE_SORTED_EXPORTED_TYPEARRAY_CMP(T, cmpfunc, name, base)      \
     WX_DEFINE_SORTED_USER_EXPORTED_TYPEARRAY_CMP(T, cmpfunc, name, base,     \
-                                                 WXDLLIMPEXP_CORE)
+                                                 WXDLLEXPORT)
 
 #define WX_DEFINE_SORTED_USER_EXPORTED_TYPEARRAY_CMP(T, cmpfunc, name, base, \
                                                      expmode)                \
@@ -789,7 +784,7 @@ private:                                                                 \
     WX_DECLARE_USER_EXPORTED_OBJARRAY(T, name, wxARRAY_DEFAULT_EXPORT)
 
 #define WX_DECLARE_EXPORTED_OBJARRAY(T, name)               \
-    WX_DECLARE_USER_EXPORTED_OBJARRAY(T, name, WXDLLIMPEXP_CORE)
+    WX_DECLARE_USER_EXPORTED_OBJARRAY(T, name, WXDLLEXPORT)
 
 #define WX_DECLARE_OBJARRAY_WITH_DECL(T, name, decl) \
     typedef T _wxObjArray##name;                            \
@@ -1011,7 +1006,7 @@ WX_DEFINE_USER_EXPORTED_ARRAY_PTR(void *, wxArrayPtrVoid, class WXDLLIMPEXP_BASE
 #define WX_PREPEND_ARRAY(array, other)                                        \
     {                                                                         \
         size_t wxAAcnt = (other).size();                                      \
-        (array).reserve(wxAAcnt);                                             \
+        (array).Alloc(wxAAcnt);                                               \
         for ( size_t wxAAn = 0; wxAAn < wxAAcnt; wxAAn++ )                    \
         {                                                                     \
             (array).Insert((other)[wxAAn], wxAAn);                            \
@@ -1022,7 +1017,7 @@ WX_DEFINE_USER_EXPORTED_ARRAY_PTR(void *, wxArrayPtrVoid, class WXDLLIMPEXP_BASE
 #define WX_APPEND_ARRAY(array, other)                                         \
     {                                                                         \
         size_t wxAAcnt = (other).size();                                      \
-        (array).reserve(wxAAcnt);                                             \
+        (array).Alloc(wxAAcnt);                                               \
         for ( size_t wxAAn = 0; wxAAn < wxAAcnt; wxAAn++ )                    \
         {                                                                     \
             (array).push_back((other)[wxAAn]);                                \

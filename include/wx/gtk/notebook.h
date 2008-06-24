@@ -15,7 +15,7 @@
 // internal class
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxGtkNotebookPage;
+class WXDLLIMPEXP_CORE wxGtkNotebookPage;
 
 #include "wx/list.h"
 WX_DECLARE_LIST(wxGtkNotebookPage, wxGtkNotebookPagesList);

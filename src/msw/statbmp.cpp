@@ -174,10 +174,15 @@ bool wxStaticBitmap::Create(wxWindow *parent,
     // than check if we have an image with alpha or not
     if ( wxGetWinVersion() <= wxWinVersion_2000 )
     {
-        Connect(wxEVT_PAINT, wxPaintEventHandler(wxStaticBitmap::DoPaintManually));
+	Connect(wxEVT_PAINT, wxPaintEventHandler(wxStaticBitmap::DoPaintManually));
     }
 
     return true;
+}
+
+wxBorder wxStaticBitmap::GetDefaultBorder() const
+{
+    return wxBORDER_NONE;
 }
 
 WXDWORD wxStaticBitmap::MSWGetStyle(long style, WXDWORD *exstyle) const

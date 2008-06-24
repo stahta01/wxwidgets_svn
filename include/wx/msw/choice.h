@@ -16,7 +16,7 @@
 // Choice item
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxChoice : public wxChoiceBase
+class WXDLLEXPORT wxChoice : public wxChoiceBase
 {
 public:
     // ctors
@@ -68,6 +68,9 @@ public:
 
     virtual void SetLabel(const wxString& label);
 
+    virtual void Delete(unsigned int n);
+    virtual void Clear();
+
     virtual unsigned int GetCount() const;
     virtual int GetSelection() const;
     virtual int GetCurrentSelection() const;
@@ -84,26 +87,17 @@ public:
     virtual bool MSWShouldPreProcessMessage(WXMSG *pMsg);
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
-
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // common part of all ctors
     void Init() { m_lastAcceptedSelection = wxID_NONE; }
 
-    virtual void DoDeleteOneItem(unsigned int n);
-    virtual void DoClear();
-
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
-
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
     virtual void DoMoveWindow(int x, int y, int width, int height);
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
 
     // MSW implementation
     virtual wxSize DoGetBestSize() const;

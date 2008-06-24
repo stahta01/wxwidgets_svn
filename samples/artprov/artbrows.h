@@ -30,7 +30,7 @@ public:
 private:
     void OnSelectItem(wxListEvent &event);
     void OnChooseClient(wxCommandEvent &event);
-
+    
     wxListCtrl *m_list;
     wxStaticBitmap *m_canvas;
     wxStaticText *m_text;

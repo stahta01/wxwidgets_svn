@@ -267,9 +267,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("wxStatusBar sample"),
                                  wxPoint(50, 50), wxSize(450, 340));
@@ -576,7 +573,10 @@ MyAboutDialog::MyAboutDialog(wxWindow *parent)
     sizerTop->Add(-1, 10, 1, wxGROW);
     sizerTop->Add(statbarBottom, 0, wxGROW);
 
-    SetSizerAndFit(sizerTop);
+    SetSizer(sizerTop);
+
+    sizerTop->Fit(this);
+    sizerTop->SetSizeHints(this);
 }
 
 // ----------------------------------------------------------------------------

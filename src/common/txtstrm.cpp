@@ -19,12 +19,16 @@
 #if wxUSE_STREAMS
 
 #include "wx/txtstrm.h"
-
-#ifndef WX_PRECOMP
-    #include "wx/crt.h"
-#endif
-
 #include <ctype.h>
+
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// Unix: "\n"
+// Dos:  "\r\n"
+// Mac:  "\r"
 
 // ----------------------------------------------------------------------------
 // wxTextInputStream
@@ -101,7 +105,7 @@ wxChar wxTextInputStream::NextNonSeparators()
 
         if (c != wxT('\n') &&
             c != wxT('\r') &&
-            m_separators.Find(c) < 0)
+            !m_separators.Contains(c))
           return c;
     }
 
@@ -221,7 +225,7 @@ wxString wxTextInputStream::ReadWord()
         if(c == wxEOT)
             break;
 
-        if (m_separators.Find(c) >= 0)
+        if (m_separators.Contains(c))
             break;
 
         if (EatEOL(c))
@@ -314,6 +318,8 @@ wxTextOutputStream::wxTextOutputStream(wxOutputStream& s, wxEOL mode)
     {
 #if defined(__WXMSW__) || defined(__WXPM__)
         m_mode = wxEOL_DOS;
+#elif defined(__WXMAC__) && !defined(__DARWIN__)
+        m_mode = wxEOL_MAC;
 #else
         m_mode = wxEOL_UNIX;
 #endif
@@ -334,6 +340,8 @@ void wxTextOutputStream::SetMode(wxEOL mode)
     {
 #if defined(__WXMSW__) || defined(__WXPM__)
         m_mode = wxEOL_DOS;
+#elif defined(__WXMAC__) && !defined(__DARWIN__)
+        m_mode = wxEOL_MAC;
 #else
         m_mode = wxEOL_UNIX;
 #endif
@@ -408,8 +416,7 @@ void wxTextOutputStream::WriteString(const wxString& string)
     }
 
 #if wxUSE_UNICODE
-    // FIXME-UTF8: use wxCharBufferWithLength if/when we have it
-    wxCharBuffer buffer = m_conv->cWC2MB(out.wc_str(), out.length(), &len);
+    wxCharBuffer buffer = m_conv->cWC2MB(out, out.length(), &len);
     m_output.Write(buffer, len);
 #else
     m_output.Write(out.c_str(), out.length() );
@@ -426,17 +433,10 @@ wxTextOutputStream& wxTextOutputStream::PutChar(wxChar c)
     return *this;
 }
 
-void wxTextOutputStream::Flush()
+wxTextOutputStream& wxTextOutputStream::operator<<(const wxChar *string)
 {
-#if wxUSE_UNICODE
-    const size_t len = m_conv->FromWChar(NULL, 0, L"", 1);
-    if ( len > m_conv->GetMBNulLen() )
-    {
-        wxCharBuffer buf(len);
-        m_conv->FromWChar(buf.data(), len, L"", 1);
-        m_output.Write(buf, len - m_conv->GetMBNulLen());
-    }
-#endif // wxUSE_UNICODE
+    WriteString( wxString(string) );
+    return *this;
 }
 
 wxTextOutputStream& wxTextOutputStream::operator<<(const wxString& string)

@@ -57,11 +57,11 @@ wxString wxDataFormat::GetId() const
 } // end of wxDataFormat::GetId()
 
 void wxDataFormat::SetId (
-  const wxString&                     zId
+  const wxChar*                     zId
 )
 {
     m_uFormat = ::WinAddAtom( ::WinQuerySystemAtomTable()
-                             ,zId.char_str()
+                             ,(PSZ)zId
                             );
 } // end of wxDataFormat::SetId
 

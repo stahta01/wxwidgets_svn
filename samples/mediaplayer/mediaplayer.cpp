@@ -409,9 +409,6 @@ IMPLEMENT_APP(wxMediaPlayerApp)
 // ----------------------------------------------------------------------------
 bool wxMediaPlayerApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // SetAppName() lets wxConfig and others know where to write
     SetAppName(wxT("wxMediaPlayer"));
 
@@ -428,7 +425,7 @@ bool wxMediaPlayerApp::OnInit()
     cmdLineDesc[0].kind = wxCMD_LINE_PARAM;
     cmdLineDesc[0].shortName = NULL;
     cmdLineDesc[0].longName = NULL;
-    cmdLineDesc[0].description = "input files";
+    cmdLineDesc[0].description = wxT("input files");
     cmdLineDesc[0].type = wxCMD_LINE_VAL_STRING;
     cmdLineDesc[0].flags = wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE;
 
@@ -1534,6 +1531,7 @@ wxMediaPlayerNotebookPage::wxMediaPlayerNotebookPage(wxMediaPlayerFrame* parentF
     //
     wxFlexGridSizer* sizer = new wxFlexGridSizer(2, 1, 0, 0);
     this->SetSizer(sizer);
+    this->SetAutoLayout(true);
     sizer->AddGrowableRow(0);
     sizer->AddGrowableCol(0);
 
@@ -1643,7 +1641,6 @@ wxMediaPlayerNotebookPage::wxMediaPlayerNotebookPage(wxMediaPlayerFrame* parentF
     m_gauge->Create(this, wxID_GAUGE, 0, wxDefaultPosition, wxDefaultSize,
                         wxGA_HORIZONTAL | wxGA_SMOOTH);
     sizer->Add(m_gauge, 0, wxALIGN_CENTER_HORIZONTAL|wxALL|wxEXPAND , 5);
-    
 
     //
     //  Create the speed/volume sliders

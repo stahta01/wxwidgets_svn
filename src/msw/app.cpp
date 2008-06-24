@@ -40,7 +40,7 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/log.h"
     #include "wx/module.h"
 #endif
@@ -49,12 +49,9 @@
 #include "wx/filename.h"
 #include "wx/dynlib.h"
 #include "wx/evtloop.h"
-#include "wx/thread.h"
 
 #include "wx/msw/private.h"
-#include "wx/msw/dc.h"
 #include "wx/msw/ole/oleutils.h"
-#include "wx/msw/private/timer.h"
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -62,7 +59,7 @@
 
 // OLE is used for drag-and-drop, clipboard, OLE Automation..., but some
 // compilers don't support it (missing headers, libs, ...)
-#if defined(__GNUWIN32_OLD__) || defined(__SYMANTEC__)
+#if defined(__GNUWIN32_OLD__) || defined(__SYMANTEC__) || defined(__SALFORDC__)
     #undef wxUSE_OLE
 
     #define  wxUSE_OLE 0
@@ -80,7 +77,10 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "wx/msw/missing.h"
+// For MB_TASKMODAL
+#ifdef __WXWINCE__
+#include "wx/msw/wince/missing.h"
+#endif
 
 // instead of including <shlwapi.h> which is not part of the core SDK and not
 // shipped at all with other compilers, we always define the parts of it we
@@ -103,9 +103,6 @@
     typedef HRESULT (CALLBACK* DLLGETVERSIONPROC)(DLLVERSIONINFO *);
 #endif // defined(DLLVERSIONINFO)
 
-#ifndef ATTACH_PARENT_PROCESS
-    #define ATTACH_PARENT_PROCESS ((DWORD)-1)
-#endif
 
 // ---------------------------------------------------------------------------
 // global variables
@@ -121,13 +118,13 @@ extern void wxSetKeyboardHook(bool doIt);
 WXDLLIMPEXP_CORE       wxChar *wxCanvasClassName;
 WXDLLIMPEXP_CORE       wxChar *wxCanvasClassNameNR;
 #else
-WXDLLIMPEXP_CORE const wxChar *wxCanvasClassName = NULL;
-WXDLLIMPEXP_CORE const wxChar *wxCanvasClassNameNR = NULL;
+WXDLLIMPEXP_CORE const wxChar *wxCanvasClassName        = wxT("wxWindowClass");
+WXDLLIMPEXP_CORE const wxChar *wxCanvasClassNameNR      = wxT("wxWindowClassNR");
 #endif
-WXDLLIMPEXP_CORE const wxChar *wxMDIFrameClassName = NULL;
-WXDLLIMPEXP_CORE const wxChar *wxMDIFrameClassNameNoRedraw = NULL;
-WXDLLIMPEXP_CORE const wxChar *wxMDIChildFrameClassName = NULL;
-WXDLLIMPEXP_CORE const wxChar *wxMDIChildFrameClassNameNoRedraw = NULL;
+WXDLLIMPEXP_CORE const wxChar *wxMDIFrameClassName      = wxT("wxMDIFrameClass");
+WXDLLIMPEXP_CORE const wxChar *wxMDIFrameClassNameNoRedraw = wxT("wxMDIFrameClassNR");
+WXDLLIMPEXP_CORE const wxChar *wxMDIChildFrameClassName = wxT("wxMDIChildFrameClass");
+WXDLLIMPEXP_CORE const wxChar *wxMDIChildFrameClassNameNoRedraw = wxT("wxMDIChildFrameClassNR");
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -218,7 +215,7 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
 {
     // we should return false only if the app should exit, i.e. only if
     // Dispatch() determines that the main event loop should terminate
-    wxEventLoopBase * const evtLoop = wxEventLoop::GetActive();
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
     if ( !evtLoop || !evtLoop->Pending() )
     {
         // no events means no quit event
@@ -226,26 +223,6 @@ bool wxGUIAppTraits::DoMessageFromThreadWait()
     }
 
     return evtLoop->Dispatch();
-}
-
-DWORD wxGUIAppTraits::WaitForThread(WXHANDLE hThread)
-{
-    // if we don't have a running event loop, we shouldn't wait for the
-    // messages as we never remove them from the message queue and so we enter
-    // an infinite loop as MsgWaitForMultipleObjects() keeps returning
-    // WAIT_OBJECT_0 + 1
-    if ( !wxEventLoop::GetActive() )
-        return DoSimpleWaitForThread(hThread);
-
-    return ::MsgWaitForMultipleObjects
-             (
-               1,                   // number of objects to wait for
-               (HANDLE *)&hThread,  // the objects
-               false,               // wait for any objects, not all
-               INFINITE,            // no timeout
-               QS_ALLINPUT |        // return as soon as there are any events
-               QS_ALLPOSTMESSAGE
-             );
 }
 
 wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
@@ -270,304 +247,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
     return wxPORT_MSW;
 #endif
 }
-
-#if wxUSE_TIMER
-
-wxTimerImpl *wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxMSWTimerImpl(timer);
-}
-
-#endif // wxUSE_TIMER
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
-}
-
-// ---------------------------------------------------------------------------
-// Stuff for using console from the GUI applications
-// ---------------------------------------------------------------------------
-
-#ifndef __WXWINCE__
-
-#include <wx/dynlib.h>
-
-namespace
-{
-
-/*
-    Helper class to manipulate console from a GUI app.
-
-    Notice that console output is available in the GUI app only if:
-    - AttachConsole() returns TRUE (which means it never works under pre-XP)
-    - we have a valid STD_ERROR_HANDLE
-    - command history hasn't been changed since our startup
-
-    To check if all these conditions are verified, you need to simple call
-    IsOkToUse(). It will check the first two conditions above the first time it
-    is called (and if this fails, the subsequent calls will return immediately)
-    and also recheck the last one every time it is called.
- */
-class wxConsoleStderr
-{
-public:
-    // default ctor does nothing, call Init() before using this class
-    wxConsoleStderr()
-    {
-        m_hStderr = INVALID_HANDLE_VALUE;
-        m_historyLen =
-        m_dataLen =
-        m_dataLine = 0;
-
-        m_ok = -1;
-    }
-
-    ~wxConsoleStderr()
-    {
-        if ( m_hStderr != INVALID_HANDLE_VALUE )
-        {
-            if ( !::FreeConsole() )
-            {
-                wxLogLastError(_T("FreeConsole"));
-            }
-        }
-    }
-
-    // return true if we were successfully initialized and there had been no
-    // console activity which would interfere with our output since then
-    bool IsOkToUse() const
-    {
-        if ( m_ok == -1 )
-        {
-            wxConsoleStderr * const self = wx_const_cast(wxConsoleStderr *, this);
-            self->m_ok = self->DoInit();
-
-            // no need to call IsHistoryUnchanged() as we just initialized
-            // m_history anyhow
-            return m_ok == 1;
-        }
-
-        return m_ok && IsHistoryUnchanged();
-    }
-
-
-    // output the provided text on the console, return true if ok
-    bool Write(const wxString& text);
-
-private:
-    // called by Init() once only to do the real initialization
-    bool DoInit();
-
-    // retrieve the command line history into the provided buffer and return
-    // its length
-    int GetCommandHistory(wxWxCharBuffer& buf) const;
-
-    // check if the console history has changed
-    bool IsHistoryUnchanged() const;
-
-    int m_ok;                   // initially -1, set to true or false by Init()
-
-    wxDynamicLibrary m_dllKernel32;
-
-    HANDLE m_hStderr;           // console handle, if it's valid we must call
-                                // FreeConsole() (even if m_ok != 1)
-
-    wxWxCharBuffer m_history;   // command history on startup
-    int m_historyLen;           // length command history buffer
-
-    wxCharBuffer m_data;        // data between empty line and cursor position
-    int m_dataLen;              // length data buffer
-    int m_dataLine;             // line offset
-
-    typedef DWORD (WINAPI *GetConsoleCommandHistory_t)(LPTSTR sCommands,
-                                                       DWORD nBufferLength,
-                                                       LPCTSTR sExeName);
-    typedef DWORD (WINAPI *GetConsoleCommandHistoryLength_t)(LPCTSTR sExeName);
-
-    GetConsoleCommandHistory_t m_pfnGetConsoleCommandHistory;
-    GetConsoleCommandHistoryLength_t m_pfnGetConsoleCommandHistoryLength;
-
-    DECLARE_NO_COPY_CLASS(wxConsoleStderr)
-};
-
-bool wxConsoleStderr::DoInit()
-{
-    HANDLE hStderr = ::GetStdHandle(STD_ERROR_HANDLE);
-
-    if ( hStderr == INVALID_HANDLE_VALUE || !hStderr )
-        return false;
-
-    if ( !m_dllKernel32.Load(_T("kernel32.dll")) )
-        return false;
-
-    typedef BOOL (WINAPI *AttachConsole_t)(DWORD dwProcessId);
-    AttachConsole_t wxDL_INIT_FUNC(pfn, AttachConsole, m_dllKernel32);
-
-    if ( !pfnAttachConsole || !pfnAttachConsole(ATTACH_PARENT_PROCESS) )
-        return false;
-
-    // console attached, set m_hStderr now to ensure that we free it in the
-    // dtor
-    m_hStderr = hStderr;
-
-    wxDL_INIT_FUNC_AW(m_pfn, GetConsoleCommandHistory, m_dllKernel32);
-    if ( !m_pfnGetConsoleCommandHistory )
-        return false;
-
-    wxDL_INIT_FUNC_AW(m_pfn, GetConsoleCommandHistoryLength, m_dllKernel32);
-    if ( !m_pfnGetConsoleCommandHistoryLength )
-        return false;
-
-    // remember the current command history to be able to compare with it later
-    // in IsHistoryUnchanged()
-    m_historyLen = GetCommandHistory(m_history);
-    if ( !m_history )
-        return false;
-
-
-    // now find the first blank line above the current position
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-    if ( !::GetConsoleScreenBufferInfo(m_hStderr, &csbi) )
-    {
-        wxLogLastError(_T("GetConsoleScreenBufferInfo"));
-        return false;
-    }
-
-    COORD pos;
-    pos.X = 0;
-    pos.Y = csbi.dwCursorPosition.Y + 1;
-
-    // we decide that a line is empty if first 4 characters are spaces
-    DWORD ret;
-    char buf[4];
-    do
-    {
-        pos.Y--;
-        if ( !::ReadConsoleOutputCharacterA(m_hStderr, buf, WXSIZEOF(buf),
-                                            pos, &ret) )
-        {
-            wxLogLastError(_T("ReadConsoleOutputCharacterA"));
-            return false;
-        }
-    } while ( wxStrncmp("    ", buf, WXSIZEOF(buf)) != 0 );
-
-    // calculate line offset and length of data
-    m_dataLine = csbi.dwCursorPosition.Y - pos.Y;
-    m_dataLen = m_dataLine*csbi.dwMaximumWindowSize.X + csbi.dwCursorPosition.X;
-
-    if ( m_dataLen > 0 )
-    {
-        m_data.extend(m_dataLen);
-        if ( !::ReadConsoleOutputCharacterA(m_hStderr, m_data.data(), m_dataLen,
-                                            pos, &ret) )
-        {
-            wxLogLastError(_T("ReadConsoleOutputCharacterA"));
-            return false;
-        }
-    }
-
-    return true;
-}
-
-int wxConsoleStderr::GetCommandHistory(wxWxCharBuffer& buf) const
-{
-    // these functions are internal and may only be called by cmd.exe
-    static const wxChar *CMD_EXE = _T("cmd.exe");
-
-    const int len = m_pfnGetConsoleCommandHistoryLength(CMD_EXE);
-    if ( len )
-    {
-        buf.extend(len);
-
-        int len2 = m_pfnGetConsoleCommandHistory(buf.data(), len, CMD_EXE);
-
-#if !wxUSE_UNICODE
-        // there seems to be a bug in the GetConsoleCommandHistoryA(), it
-        // returns the length of Unicode string and not ANSI one
-        len2 /= 2;
-#endif // !wxUSE_UNICODE
-
-        if ( len2 != len )
-        {
-            wxFAIL_MSG( _T("failed getting history?") );
-        }
-    }
-
-    return len;
-}
-
-bool wxConsoleStderr::IsHistoryUnchanged() const
-{
-    wxASSERT_MSG( m_ok == 1, _T("shouldn't be called if not initialized") );
-
-    // get (possibly changed) command history
-    wxWxCharBuffer history;
-    const int historyLen = GetCommandHistory(history);
-
-    // and compare it with the original one
-    return historyLen == m_historyLen && history &&
-                memcmp(m_history, history, historyLen) == 0;
-}
-
-bool wxConsoleStderr::Write(const wxString& text)
-{
-    wxASSERT_MSG( m_hStderr != INVALID_HANDLE_VALUE,
-                    _T("should only be called if Init() returned true") );
-
-    // get current position
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    if ( !::GetConsoleScreenBufferInfo(m_hStderr, &csbi) )
-    {
-        wxLogLastError(_T("GetConsoleScreenBufferInfo"));
-        return false;
-    }
-
-    // and calculate new position (where is empty line)
-    csbi.dwCursorPosition.X = 0;
-    csbi.dwCursorPosition.Y -= m_dataLine;
-
-    if ( !::SetConsoleCursorPosition(m_hStderr, csbi.dwCursorPosition) )
-    {
-        wxLogLastError(_T("SetConsoleCursorPosition"));
-        return false;
-    }
-
-    DWORD ret;
-    if ( !::FillConsoleOutputCharacter(m_hStderr, _T(' '), m_dataLen,
-                                       csbi.dwCursorPosition, &ret) )
-    {
-        wxLogLastError(_T("FillConsoleOutputCharacter"));
-        return false;
-    }
-
-    if ( !::WriteConsole(m_hStderr, text.wx_str(), text.length(), &ret, NULL) )
-    {
-        wxLogLastError(_T("WriteConsole"));
-        return false;
-    }
-
-    WriteConsoleA(m_hStderr, m_data, m_dataLen, &ret, 0);
-
-    return true;
-}
-
-wxConsoleStderr s_consoleStderr;
-
-} // anonymous namespace
-
-bool wxGUIAppTraits::CanUseStderr()
-{
-    return s_consoleStderr.IsOkToUse();
-}
-
-bool wxGUIAppTraits::WriteToStderr(const wxString& text)
-{
-    return s_consoleStderr.IsOkToUse() && s_consoleStderr.Write(text);
-}
-
-#endif // !__WXWINCE__
 
 // ===========================================================================
 // wxApp implementation
@@ -613,9 +292,9 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 #ifdef __WXWINCE__
     wxString tmp = GetAppName();
     tmp += wxT("ClassName");
-    wxCanvasClassName = wxStrdup( tmp.wc_str() );
+    wxCanvasClassName = wxStrdup( tmp.c_str() );
     tmp += wxT("NR");
-    wxCanvasClassNameNR = wxStrdup( tmp.wc_str() );
+    wxCanvasClassNameNR = wxStrdup( tmp.c_str() );
     HWND hWnd = FindWindow( wxCanvasClassNameNR, NULL );
     if (hWnd)
     {
@@ -642,6 +321,8 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 
     RegisterWindowClasses();
 
+    wxWinHandleHash = new wxWinHashTable(wxKEY_INTEGER, 100);
+
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
     wxSetKeyboardHook(true);
 #endif
@@ -655,54 +336,6 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
 // RegisterWindowClasses
 // ---------------------------------------------------------------------------
 
-// This function registers the given class name and stores a pointer to a
-// heap-allocated copy of it at the specified location, it must be deleted
-// later.
-static void RegisterAndStoreClassName(const wxString& uniqueClassName,
-                                      const wxChar **className,
-                                      WNDCLASS *lpWndClass)
-{
-    const size_t length = uniqueClassName.length() + 1; // for trailing NUL
-    wxChar *newChars = new wxChar[length];
-    wxStrncpy(newChars, uniqueClassName, length);
-    *className = newChars;
-    lpWndClass->lpszClassName = *className;
-
-    if ( !::RegisterClass(lpWndClass) )
-    {
-        wxLogLastError(wxString::Format(wxT("RegisterClass(%s)"), newChars));
-    }
-}
-
-// This function registers the class defined by the provided WNDCLASS struct
-// contents using a unique name constructed from the specified base name and
-// and a suffix unique to this library instance. It also stores the generated
-// unique names for normal and "no redraw" versions of the class in the
-// provided variables, caller must delete their contents later.
-static void RegisterClassWithUniqueNames(const wxString& baseName,
-                                         const wxChar **className,
-                                         const wxChar **classNameNR,
-                                         WNDCLASS *lpWndClass)
-{
-    // for each class we register one with CS_(V|H)REDRAW style and one
-    // without for windows created with wxNO_FULL_REDRAW_ON_REPAINT flag
-    static const long styleNormal = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-    static const long styleNoRedraw = CS_DBLCLKS;
-
-    const wxString uniqueSuffix(wxString::Format(wxT("@%p"), className));
-
-    wxString uniqueClassName(baseName + uniqueSuffix);
-    lpWndClass->style = styleNormal;
-    RegisterAndStoreClassName(uniqueClassName, className, lpWndClass);
-
-    // NB: remember that code elsewhere supposes that no redraw class names
-    //     use the same names as normal classes with "NR" suffix so we must put
-    //     "NR" at the end instead of using more natural baseName+"NR"+suffix
-    wxString uniqueClassNameNR(uniqueClassName + wxT("NR"));
-    lpWndClass->style = styleNoRedraw;
-    RegisterAndStoreClassName(uniqueClassNameNR, classNameNR, lpWndClass);
-}
-
 // TODO we should only register classes really used by the app. For this it
 //      would be enough to just delay the class registration until an attempt
 //      to create a window of this class is made.
@@ -711,31 +344,72 @@ bool wxApp::RegisterWindowClasses()
     WNDCLASS wndclass;
     wxZeroMemory(wndclass);
 
+    // for each class we register one with CS_(V|H)REDRAW style and one
+    // without for windows created with wxNO_FULL_REDRAW_ON_REPAINT flag
+    static const long styleNormal = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+    static const long styleNoRedraw = CS_DBLCLKS;
+
     // the fields which are common to all classes
     wndclass.lpfnWndProc   = (WNDPROC)wxWndProc;
     wndclass.hInstance     = wxhInstance;
     wndclass.hCursor       = ::LoadCursor((HINSTANCE)NULL, IDC_ARROW);
 
-    // register the class for all normal windows and "no redraw" frames
+    // register the class for all normal windows
     wndclass.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
-    RegisterClassWithUniqueNames(wxT("wxWindowClass"),
-                                 &wxCanvasClassName,
-                                 &wxCanvasClassNameNR,
-                                 &wndclass);
+    wndclass.lpszClassName = wxCanvasClassName;
+    wndclass.style         = styleNormal;
 
-    // Register the MDI frame window class and "no redraw" MDI frame
+    if ( !RegisterClass(&wndclass) )
+    {
+        wxLogLastError(wxT("RegisterClass(frame)"));
+    }
+
+    // "no redraw" frame
+    wndclass.lpszClassName = wxCanvasClassNameNR;
+    wndclass.style         = styleNoRedraw;
+
+    if ( !RegisterClass(&wndclass) )
+    {
+        wxLogLastError(wxT("RegisterClass(no redraw frame)"));
+    }
+
+    // Register the MDI frame window class.
     wndclass.hbrBackground = (HBRUSH)NULL; // paint MDI frame ourselves
-    RegisterClassWithUniqueNames(wxT("wxMDIFrameClass"),
-                                 &wxMDIFrameClassName,
-                                 &wxMDIFrameClassNameNoRedraw,
-                                 &wndclass);
+    wndclass.lpszClassName = wxMDIFrameClassName;
+    wndclass.style         = styleNormal;
 
-    // Register the MDI child frame window class and "no redraw" MDI child frame
+    if ( !RegisterClass(&wndclass) )
+    {
+        wxLogLastError(wxT("RegisterClass(MDI parent)"));
+    }
+
+    // "no redraw" MDI frame
+    wndclass.lpszClassName = wxMDIFrameClassNameNoRedraw;
+    wndclass.style         = styleNoRedraw;
+
+    if ( !RegisterClass(&wndclass) )
+    {
+        wxLogLastError(wxT("RegisterClass(no redraw MDI parent frame)"));
+    }
+
+    // Register the MDI child frame window class.
     wndclass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    RegisterClassWithUniqueNames(wxT("wxMDIChildFrameClass"),
-                                 &wxMDIChildFrameClassName,
-                                 &wxMDIChildFrameClassNameNoRedraw,
-                                 &wndclass);
+    wndclass.lpszClassName = wxMDIChildFrameClassName;
+    wndclass.style         = styleNormal;
+
+    if ( !RegisterClass(&wndclass) )
+    {
+        wxLogLastError(wxT("RegisterClass(MDI child)"));
+    }
+
+    // "no redraw" MDI child frame
+    wndclass.lpszClassName = wxMDIChildFrameClassNameNoRedraw;
+    wndclass.style         = styleNoRedraw;
+
+    if ( !RegisterClass(&wndclass) )
+    {
+        wxLogLastError(wxT("RegisterClass(no redraw MDI child)"));
+    }
 
     return true;
 }
@@ -744,48 +418,57 @@ bool wxApp::RegisterWindowClasses()
 // UnregisterWindowClasses
 // ---------------------------------------------------------------------------
 
-// This function unregisters the class with the given name and frees memory
-// allocated for it by RegisterAndStoreClassName().
-static bool UnregisterAndFreeClassName(const wxChar **ppClassName)
-{
-    bool retval = true;
-
-    if ( !::UnregisterClass(*ppClassName, wxhInstance) )
-    {
-        wxLogLastError(
-                wxString::Format(wxT("UnregisterClass(%s)"), *ppClassName));
-
-        retval = false;
-    }
-
-    delete [] (wxChar*) *ppClassName;
-    *ppClassName = NULL;
-
-    return retval;
-}
-
 bool wxApp::UnregisterWindowClasses()
 {
     bool retval = true;
 
 #ifndef __WXMICROWIN__
-    if ( !UnregisterAndFreeClassName(&wxMDIFrameClassName) )
-        retval = false;
+    // MDI frame window class.
+    if ( !::UnregisterClass(wxMDIFrameClassName, wxhInstance) )
+    {
+        wxLogLastError(wxT("UnregisterClass(MDI parent)"));
 
-    if ( !UnregisterAndFreeClassName(&wxMDIFrameClassNameNoRedraw) )
         retval = false;
+    }
 
-    if ( !UnregisterAndFreeClassName(&wxMDIChildFrameClassName) )
-        retval = false;
+    // "no redraw" MDI frame
+    if ( !::UnregisterClass(wxMDIFrameClassNameNoRedraw, wxhInstance) )
+    {
+        wxLogLastError(wxT("UnregisterClass(no redraw MDI parent frame)"));
 
-    if ( !UnregisterAndFreeClassName(&wxMDIChildFrameClassNameNoRedraw) )
         retval = false;
+    }
 
-    if ( !UnregisterAndFreeClassName(&wxCanvasClassName) )
-        retval = false;
+    // MDI child frame window class.
+    if ( !::UnregisterClass(wxMDIChildFrameClassName, wxhInstance) )
+    {
+        wxLogLastError(wxT("UnregisterClass(MDI child)"));
 
-    if ( !UnregisterAndFreeClassName(&wxCanvasClassNameNR) )
         retval = false;
+    }
+
+    // "no redraw" MDI child frame
+    if ( !::UnregisterClass(wxMDIChildFrameClassNameNoRedraw, wxhInstance) )
+    {
+        wxLogLastError(wxT("UnregisterClass(no redraw MDI child)"));
+
+        retval = false;
+    }
+
+    // canvas class name
+    if ( !::UnregisterClass(wxCanvasClassName, wxhInstance) )
+    {
+        wxLogLastError(wxT("UnregisterClass(canvas)"));
+
+        retval = false;
+    }
+
+    if ( !::UnregisterClass(wxCanvasClassNameNR, wxhInstance) )
+    {
+        wxLogLastError(wxT("UnregisterClass(no redraw canvas)"));
+
+        retval = false;
+    }
 #endif // __WXMICROWIN__
 
     return retval;
@@ -793,10 +476,10 @@ bool wxApp::UnregisterWindowClasses()
 
 void wxApp::CleanUp()
 {
-    // all objects pending for deletion must be deleted first, otherwise
-    // UnregisterWindowClasses() call wouldn't succeed (because windows
-    // using the classes being unregistered still exist), so call the base
-    // class method first and only then do our clean up
+    // all objects pending for deletion must be deleted first, otherwise we
+    // would crash when they use wxWinHandleHash (and UnregisterWindowClasses()
+    // call wouldn't succeed as long as any windows still exist), so call the
+    // base class method first and only then do our clean up
     wxAppBase::CleanUp();
 
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
@@ -810,6 +493,9 @@ void wxApp::CleanUp()
     // which case the registration will fail after the first time if we don't
     // unregister the classes now
     UnregisterWindowClasses();
+
+    delete wxWinHandleHash;
+    wxWinHandleHash = NULL;
 
 #ifdef __WXWINCE__
     free( wxCanvasClassName );
@@ -834,14 +520,16 @@ wxApp::~wxApp()
 // wxApp idle handling
 // ----------------------------------------------------------------------------
 
-void wxApp::OnIdle(wxIdleEvent& WXUNUSED(event))
+void wxApp::OnIdle(wxIdleEvent& event)
 {
+    wxAppBase::OnIdle(event);
+
 #if wxUSE_DC_CACHEING
     // automated DC cache management: clear the cached DCs and bitmap
     // if it's likely that the app has finished with them, that is, we
     // get an idle event and we're not dragging anything.
     if (!::GetKeyState(MK_LBUTTON) && !::GetKeyState(MK_MBUTTON) && !::GetKeyState(MK_RBUTTON))
-        wxMSWDCImpl::ClearCache();
+        wxDC::ClearCache();
 #endif // wxUSE_DC_CACHEING
 }
 
@@ -883,24 +571,8 @@ void wxApp::WakeUpIdle()
 
 void wxApp::OnEndSession(wxCloseEvent& WXUNUSED(event))
 {
-    // Windows will terminate the process soon after we return from
-    // WM_ENDSESSION handler or when we delete our last window, so make sure we
-    // at least execute our cleanup code before
-
-    // prevent the window from being destroyed when the corresponding wxTLW is
-    // destroyed: this will result in a leak of a HWND, of course, but who
-    // cares when the process is being killed anyhow
-    if ( !wxTopLevelWindows.empty() )
-        wxTopLevelWindows[0]->SetHWND(0);
-
-    const int rc = OnExit();
-
-    wxEntryCleanup();
-
-    // calling exit() instead of ExitProcess() or not doing anything at all and
-    // being killed by Windows has the advantage of executing the dtors of
-    // global objects
-    exit(rc);
+    if (GetTopWindow())
+        GetTopWindow()->Close(true);
 }
 
 // Default behaviour: close the application with prompts. The
@@ -915,45 +587,15 @@ void wxApp::OnQueryEndSession(wxCloseEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// system DLL versions
+// miscellaneous
 // ----------------------------------------------------------------------------
-
-// these functions have trivial inline implementations for CE
-#ifndef __WXWINCE__
-
-#if wxUSE_DYNLIB_CLASS
-
-namespace
-{
-
-// helper function: retrieve the DLL version by using DllGetVersion(), returns
-// 0 if the DLL doesn't export such function
-int CallDllGetVersion(wxDynamicLibrary& dll)
-{
-    // now check if the function is available during run-time
-    wxDYNLIB_FUNCTION( DLLGETVERSIONPROC, DllGetVersion, dll );
-    if ( !pfnDllGetVersion )
-        return 0;
-
-    DLLVERSIONINFO dvi;
-    dvi.cbSize = sizeof(dvi);
-
-    HRESULT hr = (*pfnDllGetVersion)(&dvi);
-    if ( FAILED(hr) )
-    {
-        wxLogApiError(_T("DllGetVersion"), hr);
-
-        return 0;
-    }
-
-    return 100*dvi.dwMajorVersion + dvi.dwMinorVersion;
-}
-
-} // anonymous namespace
 
 /* static */
 int wxApp::GetComCtl32Version()
 {
+#if defined(__WXMICROWIN__) || defined(__WXWINCE__)
+    return 0;
+#else
     // cache the result
     //
     // NB: this is MT-ok as in the worst case we'd compute s_verComCtl32 twice,
@@ -962,105 +604,78 @@ int wxApp::GetComCtl32Version()
 
     if ( s_verComCtl32 == -1 )
     {
+        // initally assume no comctl32.dll at all
+        s_verComCtl32 = 0;
+
         // we're prepared to handle the errors
         wxLogNull noLog;
 
-        // the DLL should really be available
+#if wxUSE_DYNLIB_CLASS
+        // do we have it?
         wxDynamicLibrary dllComCtl32(_T("comctl32.dll"), wxDL_VERBATIM);
-        if ( !dllComCtl32.IsLoaded() )
-        {
-            s_verComCtl32 = 0;
-            return 0;
-        }
 
-        // try DllGetVersion() for recent DLLs
-        s_verComCtl32 = CallDllGetVersion(dllComCtl32);
-
-        // if DllGetVersion() is unavailable either during compile or
-        // run-time, try to guess the version otherwise
-        if ( !s_verComCtl32 )
+        // if so, then we can check for the version
+        if ( dllComCtl32.IsLoaded() )
         {
-            // InitCommonControlsEx is unique to 4.70 and later
-            void *pfn = dllComCtl32.GetSymbol(_T("InitCommonControlsEx"));
-            if ( !pfn )
+            // now check if the function is available during run-time
+            wxDYNLIB_FUNCTION( DLLGETVERSIONPROC, DllGetVersion, dllComCtl32 );
+            if ( pfnDllGetVersion )
             {
-                // not found, must be 4.00
-                s_verComCtl32 = 400;
-            }
-            else // 4.70+
-            {
-                // many symbols appeared in comctl32 4.71, could use any of
-                // them except may be DllInstall()
-                pfn = dllComCtl32.GetSymbol(_T("InitializeFlatSB"));
-                if ( !pfn )
+                DLLVERSIONINFO dvi;
+                dvi.cbSize = sizeof(dvi);
+
+                HRESULT hr = (*pfnDllGetVersion)(&dvi);
+                if ( FAILED(hr) )
                 {
-                    // not found, must be 4.70
-                    s_verComCtl32 = 470;
+                    wxLogApiError(_T("DllGetVersion"), hr);
                 }
                 else
                 {
-                    // found, must be 4.71 or later
-                    s_verComCtl32 = 471;
+                    // this is incompatible with _WIN32_IE values, but
+                    // compatible with the other values returned by
+                    // GetComCtl32Version()
+                    s_verComCtl32 = 100*dvi.dwMajorVersion +
+                                        dvi.dwMinorVersion;
+                }
+            }
+
+            // if DllGetVersion() is unavailable either during compile or
+            // run-time, try to guess the version otherwise
+            if ( !s_verComCtl32 )
+            {
+                // InitCommonControlsEx is unique to 4.70 and later
+                void *pfn = dllComCtl32.GetSymbol(_T("InitCommonControlsEx"));
+                if ( !pfn )
+                {
+                    // not found, must be 4.00
+                    s_verComCtl32 = 400;
+                }
+                else // 4.70+
+                {
+                    // many symbols appeared in comctl32 4.71, could use any of
+                    // them except may be DllInstall()
+                    pfn = dllComCtl32.GetSymbol(_T("InitializeFlatSB"));
+                    if ( !pfn )
+                    {
+                        // not found, must be 4.70
+                        s_verComCtl32 = 470;
+                    }
+                    else
+                    {
+                        // found, must be 4.71 or later
+                        s_verComCtl32 = 471;
+                    }
                 }
             }
         }
+#endif
     }
 
     return s_verComCtl32;
+#endif // Microwin/!Microwin
 }
 
-/* static */
-int wxApp::GetShell32Version()
-{
-    static int s_verShell32 = -1;
-    if ( s_verShell32 == -1 )
-    {
-        // we're prepared to handle the errors
-        wxLogNull noLog;
-
-        wxDynamicLibrary dllShell32(_T("shell32.dll"), wxDL_VERBATIM);
-        if ( dllShell32.IsLoaded() )
-        {
-            s_verShell32 = CallDllGetVersion(dllShell32);
-
-            if ( !s_verShell32 )
-            {
-                // there doesn't seem to be any way to distinguish between 4.00
-                // and 4.70 (starting from 4.71 we have DllGetVersion()) so
-                // just assume it is 4.0
-                s_verShell32 = 400;
-            }
-        }
-        else // failed load the DLL?
-        {
-            s_verShell32 = 0;
-        }
-    }
-
-    return s_verShell32;
-}
-
-#else // !wxUSE_DYNLIB_CLASS
-
-/* static */
-int wxApp::GetComCtl32Version()
-{
-    return 0;
-}
-
-/* static */
-int wxApp::GetShell32Version()
-{
-    return 0;
-}
-
-#endif // wxUSE_DYNLIB_CLASS/!wxUSE_DYNLIB_CLASS
-
-#endif // !__WXWINCE__
-
-// ----------------------------------------------------------------------------
 // Yield to incoming messages
-// ----------------------------------------------------------------------------
 
 bool wxApp::Yield(bool onlyIfNeeded)
 {
@@ -1153,3 +768,30 @@ terminate the program,\r\n\
 }
 
 #endif // wxUSE_EXCEPTIONS
+
+// ----------------------------------------------------------------------------
+// deprecated event loop functions
+// ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxApp::DoMessage(WXMSG *pMsg)
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    if ( evtLoop )
+        evtLoop->ProcessMessage(pMsg);
+}
+
+bool wxApp::DoMessage()
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    return evtLoop ? evtLoop->Dispatch() : false;
+}
+
+bool wxApp::ProcessMessage(WXMSG* pMsg)
+{
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
+    return evtLoop && evtLoop->PreProcessMessage(pMsg);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4

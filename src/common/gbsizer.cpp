@@ -453,7 +453,7 @@ wxSize wxGridBagSizer::CalcMin()
     while (node)
     {
         wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
-        if ( item->IsShown() )
+        if ( item->ShouldAccountFor() )
         {
             int row, col, endrow, endcol;
 
@@ -508,7 +508,7 @@ void wxGridBagSizer::RecalcSizes()
     m_cols = m_colWidths.GetCount();
     int idx, width, height;
 
-    AdjustForGrowables(sz);
+    AdjustForGrowables(sz, m_calculatedMinSize, m_rows, m_cols);
 
     // Find the start positions on the window of the rows and columns
     wxArrayInt rowpos;
@@ -539,7 +539,7 @@ void wxGridBagSizer::RecalcSizes()
         int row, col, endrow, endcol;
         wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
 
-        if ( item->IsShown() )
+        if ( item->ShouldAccountFor() )
         {
             item->GetPos(row, col);
             item->GetEndPos(endrow, endcol);
@@ -651,8 +651,6 @@ void wxGridBagSizer::AdjustForOverflow()
         if ( colExtra && colExtra != INT_MAX )
             m_colWidths[col] -= colExtra;
     }
-
-    
 }
 
 //---------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 #include "wx/scrolbar.h"
 
 // Scrollbar item
-class WXDLLIMPEXP_CORE wxScrollBar : public wxScrollBarBase
+class WXDLLEXPORT wxScrollBar : public wxScrollBarBase
 {
 public:
     inline wxScrollBar()

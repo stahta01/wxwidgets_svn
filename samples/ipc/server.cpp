@@ -66,9 +66,6 @@ END_EVENT_TABLE()
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     m_frame = new MyFrame(NULL, _T("Server"));
     m_frame->Show(true);
@@ -285,18 +282,18 @@ void MyServer::Advise()
     if (CanAdvise())
     {
         wxString s = wxDateTime::Now().Format();
-        m_connection->Advise(m_connection->m_sAdvise, s);
+        m_connection->Advise(m_connection->m_sAdvise, (wxChar *)s.c_str());
         s = wxDateTime::Now().FormatTime() + _T(" ") + wxDateTime::Now().FormatDate();
-        m_connection->Advise(m_connection->m_sAdvise, (const char *)s.c_str(), s.Length() + 1);
+        m_connection->Advise(m_connection->m_sAdvise, (wxChar *)s.c_str(), (s.Length() + 1) * sizeof(wxChar));
 
 #if wxUSE_DDE_FOR_IPC
         wxLogMessage(_T("DDE Advise type argument cannot be wxIPC_PRIVATE. The client will receive it as wxIPC_TEXT, and receive the correct no of bytes, but not print a correct log entry."));
 #endif
         char bytes[3];
         bytes[0] = '1'; bytes[1] = '2'; bytes[2] = '3';
-        m_connection->Advise(m_connection->m_sAdvise, bytes, 3, wxIPC_PRIVATE);
+        m_connection->Advise(m_connection->m_sAdvise, (wxChar *)bytes, 3, wxIPC_PRIVATE);
         // this works, but the log treats it as a string now
-//        m_connection->Advise(m_connection->m_sAdvise, bytes, 3, wxIPC_TEXT );
+//        m_connection->Advise(m_connection->m_sAdvise, (wxChar *)bytes, 3, wxIPC_TEXT );
     }
 }
 
@@ -304,39 +301,48 @@ void MyServer::Advise()
 // MyConnection
 // ----------------------------------------------------------------------------
 
+MyConnection::MyConnection()
+            : wxConnection()
+{
+}
+
+MyConnection::~MyConnection()
+{
+}
+
 bool MyConnection::OnExecute(const wxString& topic,
-    const void *data, size_t size, wxIPCFormat format)
+    wxChar *data, int size, wxIPCFormat format)
 {
     Log(_T("OnExecute"), topic, _T(""), data, size, format);
     return true;
 }
 
 bool MyConnection::OnPoke(const wxString& topic,
-    const wxString& item, const void *data, size_t size, wxIPCFormat format)
+    const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
     Log(_T("OnPoke"), topic, item, data, size, format);
     return wxConnection::OnPoke(topic, item, data, size, format);
 }
 
-const void *MyConnection::OnRequest(const wxString& topic,
-    const wxString& item, size_t *size, wxIPCFormat format)
+wxChar *MyConnection::OnRequest(const wxString& topic,
+    const wxString& item, int * size, wxIPCFormat format)
 {
-    const void *data;
+    wxChar *data;
     if (item == _T("Date"))
     {
         m_sRequestDate = wxDateTime::Now().Format();
-        data = m_sRequestDate.c_str();
-        *size = wxNO_LEN;
+        data = (wxChar *)m_sRequestDate.c_str();
+        *size = -1;
     }    
     else if (item == _T("Date+len"))
     {
         m_sRequestDate = wxDateTime::Now().FormatTime() + _T(" ") + wxDateTime::Now().FormatDate();
-        data = m_sRequestDate.c_str();
-        *size = m_sRequestDate.Length() + 1;
+        data = (wxChar *)m_sRequestDate.c_str();
+        *size = (m_sRequestDate.Length() + 1) * sizeof(wxChar);
     }    
     else if (item == _T("bytes[3]"))
     {
-        data = m_achRequestBytes;
+        data = (wxChar *)m_achRequestBytes;
         m_achRequestBytes[0] = '1'; m_achRequestBytes[1] = '2'; m_achRequestBytes[2] = '3';
         *size = 3;
     }
@@ -345,7 +351,7 @@ const void *MyConnection::OnRequest(const wxString& topic,
         data = NULL;
         *size = 0;
     }
-    Log(_T("OnRequest"), topic, item, data, *size, format);
+     Log(_T("OnRequest"), topic, item, data, *size, format);
     return data;
 }
 
@@ -369,10 +375,39 @@ bool MyConnection::OnStopAdvise(const wxString& topic,
     return true;
 }
 
-bool MyConnection::DoAdvise(const wxString& item, const void *data, size_t size, wxIPCFormat format)
+void MyConnection::Log(const wxString& command, const wxString& topic,
+    const wxString& item, wxChar *data, int size, wxIPCFormat format)
+{
+    wxString s;
+    if (topic.IsEmpty() && item.IsEmpty())
+        s.Printf(_T("%s("), command.c_str());
+    else if (topic.IsEmpty())
+        s.Printf(_T("%s(\"%s\","), command.c_str(), item.c_str());
+    else if (item.IsEmpty())
+        s.Printf(_T("%s(\"%s\","), command.c_str(), topic.c_str());
+    else
+        s.Printf(_T("%s(\"%s\",\"%s\","), command.c_str(), topic.c_str(), item.c_str());
+
+    if (format == wxIPC_TEXT || format == wxIPC_UNICODETEXT) 
+        wxLogMessage(_T("%s\"%s\",%d)"), s.c_str(), data, size);
+    else if (format == wxIPC_PRIVATE)
+    {
+        if (size == 3)
+        {
+            char *bytes = (char *)data;
+            wxLogMessage(_T("%s'%c%c%c',%d)"), s.c_str(), bytes[0], bytes[1], bytes[2], size);
+        }
+        else
+            wxLogMessage(_T("%s...,%d)"), s.c_str(), size);
+    }
+    else if (format == wxIPC_INVALID) 
+        wxLogMessage(_T("%s[invalid data],%d)"), s.c_str(), size);
+}
+
+bool MyConnection::Advise(const wxString& item, wxChar *data, int size, wxIPCFormat format)
 {
     Log(_T("Advise"), _T(""), item, data, size, format);
-    return wxConnection::DoAdvise(item, data, size, format);
+    return wxConnection::Advise(item, data, size, format);
 }
 
 bool MyConnection::OnDisconnect()

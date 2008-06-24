@@ -20,25 +20,22 @@
 #include "wx/panel.h"
 #include "wx/notebook.h"
 
-class WXDLLIMPEXP_FWD_CORE wxIcon;
-class WXDLLIMPEXP_FWD_CORE wxIconBundle;
-
-extern WXDLLIMPEXP_DATA_CORE(const char) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
 
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIParentFrame;
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxGenericMDIChildFrame;
+class WXDLLEXPORT wxGenericMDIParentFrame;
+class WXDLLEXPORT wxGenericMDIClientWindow;
+class WXDLLEXPORT wxGenericMDIChildFrame;
 
 //-----------------------------------------------------------------------------
 // wxGenericMDIParentFrame
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGenericMDIParentFrame: public wxFrame
+class WXDLLEXPORT wxGenericMDIParentFrame: public wxFrame
 {
 public:
     wxGenericMDIParentFrame();
@@ -111,7 +108,7 @@ private:
 // wxGenericMDIChildFrame
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGenericMDIChildFrame: public wxPanel
+class WXDLLEXPORT wxGenericMDIChildFrame: public wxPanel
 {
 public:
     wxGenericMDIChildFrame();
@@ -155,6 +152,14 @@ public:
     virtual void SetStatusWidths( int WXUNUSED(n), const int WXUNUSED(widths_field)[] ) {}
 #endif
 
+    // no size hints
+    virtual void DoSetSizeHints( int WXUNUSED(minW),
+                               int WXUNUSED(minH),
+                               int WXUNUSED(maxW) = wxDefaultCoord,
+                               int WXUNUSED(maxH) = wxDefaultCoord,
+                               int WXUNUSED(incW) = wxDefaultCoord,
+                               int WXUNUSED(incH) = wxDefaultCoord) {}
+
 #if wxUSE_TOOLBAR
     // no toolbar bars
     virtual wxToolBar* CreateToolBar( long WXUNUSED(style),
@@ -165,8 +170,8 @@ public:
 #endif
 
     // no icon
-    void SetIcon(const wxIcon& WXUNUSED(icon)) { }
-    virtual void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
+    void SetIcon( const wxIcon& WXUNUSED(icon) ) { }
+    void SetIcons( const wxIconBundle& WXUNUSED(icons) ) { }
 
     // no maximize etc
     virtual void Maximize( bool WXUNUSED(maximize) = true) { /* Has no effect */ }
@@ -203,11 +208,6 @@ protected:
 
     virtual void DoMoveWindow(int x, int y, int width, int height);
 
-    // no size hints
-    virtual void DoSetSizeHints(int WXUNUSED(minW), int WXUNUSED(minH),
-                                int WXUNUSED(maxW), int WXUNUSED(maxH),
-                                int WXUNUSED(incW), int WXUNUSED(incH)) {}
-
     // This function needs to be called when a size change is confirmed,
     // we needed this function to prevent any body from the outside
     // changing the panel... it messes the UI layout when we would allow it.
@@ -224,7 +224,7 @@ private:
 // wxGenericMDIClientWindow
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGenericMDIClientWindow: public wxNotebook
+class WXDLLEXPORT wxGenericMDIClientWindow: public wxNotebook
 {
 public:
     wxGenericMDIClientWindow();
@@ -266,7 +266,7 @@ class wxMDIChildFrame ;
 // wxMDIParentFrame
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIParentFrame: public wxGenericMDIParentFrame
+class WXDLLEXPORT wxMDIParentFrame: public wxGenericMDIParentFrame
 {
 public:
     wxMDIParentFrame() {}
@@ -292,7 +292,7 @@ private:
 // wxMDIChildFrame
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIChildFrame: public wxGenericMDIChildFrame
+class WXDLLEXPORT wxMDIChildFrame: public wxGenericMDIChildFrame
 {
 public:
     wxMDIChildFrame() {}
@@ -315,7 +315,7 @@ private:
 // wxMDIClientWindow
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIClientWindow: public wxGenericMDIClientWindow
+class WXDLLEXPORT wxMDIClientWindow: public wxGenericMDIClientWindow
 {
 public:
     wxMDIClientWindow() {}

@@ -50,9 +50,9 @@ static struct FileNameInfo
 } filenames[] =
 {
     // the empty string
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_UNIX },
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_DOS },
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_VMS },
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_UNIX }, 
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_DOS }, 
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_VMS }, 
 
     // Unix file names
     { _T("/usr/bin/ls"), _T(""), _T("/usr/bin"), _T("ls"), _T(""), true, wxPATH_UNIX },
@@ -72,9 +72,9 @@ static struct FileNameInfo
     { _T("c:\\foo.bar"), _T("c"), _T("\\"), _T("foo"), _T("bar"), true, wxPATH_DOS },
     { _T("c:\\Windows\\command.com"), _T("c"), _T("\\Windows"), _T("command"), _T("com"), true, wxPATH_DOS },
 
-    // NB: when using the wxFileName::GetLongPath() function on these two
-    //     strings, the program will hang for several seconds blocking inside
-    //     Win32 GetLongPathName() function
+    // NB: when using the wxFileName::GetLongPath() function on these two strings,
+    //     the program will hang various seconds. All those time is taken by the
+    //     call to the win32 API GetLongPathName()...
     { _T("\\\\server\\foo.bar"), _T("server"), _T("\\"), _T("foo"), _T("bar"), true, wxPATH_DOS },
     { _T("\\\\server\\dir\\foo.bar"), _T("server"), _T("\\dir"), _T("foo"), _T("bar"), true, wxPATH_DOS },
 
@@ -286,49 +286,38 @@ void FileNameTestCase::TestNormalize()
     if (cwd.Contains(wxT(':')))
         cwd = cwd.AfterFirst(wxT(':'));
 
-    static const struct FileNameTest
+    static struct FileNameTest
     {
-        wxString original;
+        const wxChar *original;
         int flags;
         wxString expected;
-        wxPathFormat fmt;
     } tests[] =
     {
         // test wxPATH_NORM_ENV_VARS
 #ifdef __WXMSW__
-        { "%ABCDEF%/g/h/i", wxPATH_NORM_ENV_VARS, "abcdef/g/h/i", wxPATH_UNIX },
+        { wxT("%ABCDEF%/g/h/i"), wxPATH_NORM_ENV_VARS, wxT("abcdef/g/h/i") },
 #else
-        { "$(ABCDEF)/g/h/i", wxPATH_NORM_ENV_VARS, "abcdef/g/h/i", wxPATH_UNIX },
+        { wxT("$(ABCDEF)/g/h/i"), wxPATH_NORM_ENV_VARS, wxT("abcdef/g/h/i") },
 #endif
 
         // test wxPATH_NORM_DOTS
-        { "a/.././b/c/../../", wxPATH_NORM_DOTS, "", wxPATH_UNIX },
+        { wxT("a/.././b/c/../../"), wxPATH_NORM_DOTS, wxT("") },
 
         // test wxPATH_NORM_TILDE
         // NB: do the tilde expansion also under Windows to test if it works there too
-        { "/a/b/~", wxPATH_NORM_TILDE, "/a/b/~", wxPATH_UNIX },
-        { "/~/a/b", wxPATH_NORM_TILDE, home + "a/b", wxPATH_UNIX },
-        { "~/a/b", wxPATH_NORM_TILDE, home + "a/b", wxPATH_UNIX },
-
-        // test wxPATH_NORM_CASE
-        { "Foo", wxPATH_NORM_CASE, "Foo", wxPATH_UNIX },
-        { "Foo", wxPATH_NORM_CASE, "foo", wxPATH_DOS },
-        { "C:\\Program Files\\wx", wxPATH_NORM_CASE,
-          "c:\\program files\\wx", wxPATH_DOS },
-        { "C:/Program Files/wx", wxPATH_NORM_ALL | wxPATH_NORM_CASE,
-          "c:\\program files\\wx", wxPATH_DOS },
-        { "C:\\Users\\zeitlin", wxPATH_NORM_ALL | wxPATH_NORM_CASE,
-          "c:\\users\\zeitlin", wxPATH_DOS },
+        { wxT("/a/b/~"), wxPATH_NORM_TILDE, wxT("/a/b/~") },
+        { wxT("/~/a/b"), wxPATH_NORM_TILDE, home + wxT("a/b") },
+        { wxT("~/a/b"), wxPATH_NORM_TILDE, home + wxT("a/b") },
 
         // test wxPATH_NORM_ABSOLUTE
-        { "a/b/", wxPATH_NORM_ABSOLUTE, cwd + "a/b/", wxPATH_UNIX },
-        { "a/b/c.ext", wxPATH_NORM_ABSOLUTE, cwd + "a/b/c.ext", wxPATH_UNIX },
-        { "/a", wxPATH_NORM_ABSOLUTE, "/a", wxPATH_UNIX },
+        { wxT("a/b/"), wxPATH_NORM_ABSOLUTE, cwd + wxT("a/b/") },
+        { wxT("a/b/c.ext"), wxPATH_NORM_ABSOLUTE, cwd + wxT("a/b/c.ext") },
+        { wxT("/a"), wxPATH_NORM_ABSOLUTE, wxT("/a") },
 
         // test giving no flags at all to Normalize()
-        { "a/b/", 0, "a/b/", wxPATH_UNIX },
-        { "a/b/c.ext", 0, "a/b/c.ext", wxPATH_UNIX },
-        { "/a", 0, "/a", wxPATH_UNIX }
+        { wxT("a/b/"), 0, wxT("a/b/") },
+        { wxT("a/b/c.ext"), 0, wxT("a/b/c.ext") },
+        { wxT("/a"), 0, wxT("/a") }
     };
 
     // set the env var ABCDEF
@@ -336,18 +325,17 @@ void FileNameTestCase::TestNormalize()
 
     for ( size_t i = 0; i < WXSIZEOF(tests); i++ )
     {
-        const FileNameTest& fnt = tests[i];
-        wxFileName fn(fnt.original, fnt.fmt);
+        wxFileName fn(tests[i].original, wxPATH_UNIX);
 
         // be sure this normalization does not fail
         CPPUNIT_ASSERT_MESSAGE
         (
-            (const char *)wxString::Format(_T("Normalize(%s) failed"), fnt.original).mb_str(),
-            fn.Normalize(fnt.flags, cwd, fnt.fmt)
+            (const char *)wxString::Format(_T("Normalize(%s) failed"), tests[i].original).mb_str(),
+            fn.Normalize(tests[i].flags, cwd, wxPATH_UNIX)
         );
 
         // compare result with expected string
-        WX_ASSERT_STR_EQUAL( fnt.expected, fn.GetFullPath(fnt.fmt) );
+        CPPUNIT_ASSERT_EQUAL( tests[i].expected, fn.GetFullPath(wxPATH_UNIX) );
     }
 }
 

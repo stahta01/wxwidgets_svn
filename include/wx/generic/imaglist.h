@@ -15,12 +15,12 @@
 #include "wx/list.h"
 #include "wx/icon.h"
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxColour;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxColour;
 
 
-class WXDLLIMPEXP_CORE wxGenericImageList: public wxObject
+class WXDLLEXPORT wxGenericImageList: public wxObject
 {
 public:
     wxGenericImageList() { m_width = m_height = 0; }
@@ -64,7 +64,7 @@ private:
  * the run-time information.
  */
 
-class WXDLLIMPEXP_CORE wxImageList: public wxGenericImageList
+class WXDLLEXPORT wxImageList: public wxGenericImageList
 {
     DECLARE_DYNAMIC_CLASS(wxImageList)
 

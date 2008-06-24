@@ -32,7 +32,7 @@
 #elif defined(__WXDFB__)
   #include "wx/generic/icon.h"
 #elif defined(__WXMAC__)
-  #include "wx/osx/icon.h"
+  #include "wx/mac/icon.h"
 #elif defined(__WXCOCOA__)
   #include "wx/cocoa/icon.h"
 #elif defined(__WXPM__)
@@ -45,7 +45,7 @@
 
 #if wxUSE_VARIANT
 #include "wx/variant.h"
-DECLARE_VARIANT_OBJECT_EXPORTED(wxIcon,WXDLLIMPEXP_CORE)
+DECLARE_VARIANT_OBJECT_EXPORTED(wxIcon,WXDLLEXPORT)
 #endif
 
 

@@ -24,15 +24,9 @@
 WX_DECLARE_LIST(wxFontInstance, wxFontInstanceList);
 WX_DEFINE_LIST(wxFontInstanceList)
 WX_DEFINE_LIST(wxFontBundleList)
-
 WX_DECLARE_HASH_MAP(wxString, wxFontBundle*,
                     wxStringHash, wxStringEqual,
-                    wxFontBundleHashBase);
-// in STL build, hash class is typedef to a template, so it can't be forward
-// declared, as we do; solve it by having a dummy class:
-class wxFontBundleHash : public wxFontBundleHashBase
-{
-};
+                    wxFontBundleHash);
 
 // ============================================================================
 // implementation
@@ -71,14 +65,17 @@ wxFontInstance *wxFontFaceBase::GetFontInstance(float ptSize, bool aa)
 {
     wxASSERT_MSG( m_refCnt > 0, _T("font library not loaded!") );
 
-    for ( wxFontInstanceList::const_iterator i = m_instances->begin();
-          i != m_instances->end(); ++i )
+    wxFontInstance *i;
+    wxFontInstanceList::Node *node;
+
+    for ( node = m_instances->GetFirst(); node; node = node->GetNext() )
     {
-        if ( (*i)->GetPointSize() == ptSize && (*i)->IsAntiAliased() == aa )
-            return *i;
+        i = node->GetData();
+        if ( i->GetPointSize() == ptSize && i->IsAntiAliased() == aa )
+            return i;
     }
 
-    wxFontInstance *i = CreateFontInstance(ptSize, aa);
+    i = CreateFontInstance(ptSize, aa);
     m_instances->Append(i);
     return i;
 }
@@ -113,8 +110,7 @@ wxFontFace *wxFontBundleBase::GetFace(FaceType type) const
 wxFontFace *
 wxFontBundleBase::GetFaceForFont(const wxFontMgrFontRefData& font) const
 {
-    wxASSERT_MSG( font.GetFaceName().empty() ||
-                  GetName().CmpNoCase(font.GetFaceName()) == 0,
+    wxASSERT_MSG( font.GetFaceName().empty() || font.GetFaceName() == GetName(),
                   _T("calling GetFaceForFont for incompatible font") );
 
     int type = FaceType_Regular;
@@ -133,8 +129,6 @@ wxFontBundleBase::GetFaceForFont(const wxFontMgrFontRefData& font) const
 
     if ( !HasFace((FaceType)type) )
     {
-        // if we can't get the exact font requested, substitute it with
-        // some other variant:
         for (int i = 0; i < FaceType_Max; i++)
         {
             if ( HasFace((FaceType)i) )

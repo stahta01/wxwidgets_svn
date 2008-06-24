@@ -63,8 +63,7 @@ enum
     SpinBtnPage_MinText,
     SpinBtnPage_MaxText,
     SpinBtnPage_SpinBtn,
-    SpinBtnPage_SpinCtrl,
-    SpinBtnPage_SpinCtrlDouble
+    SpinBtnPage_SpinCtrl
 };
 
 // ----------------------------------------------------------------------------
@@ -79,7 +78,6 @@ public:
 
     virtual wxControl *GetWidget() const { return m_spinbtn; }
     virtual wxControl *GetWidget2() const { return m_spinctrl; }
-    virtual wxControl *GetWidget3() const { return m_spinctrldbl; }
     virtual void RecreateWidget() { CreateSpin(); }
 
     // lazy creation of the content
@@ -98,9 +96,6 @@ protected:
     void OnSpinBtnUp(wxSpinEvent& event);
     void OnSpinBtnDown(wxSpinEvent& event);
     void OnSpinCtrl(wxSpinEvent& event);
-    void OnSpinCtrlDouble(wxSpinDoubleEvent& event);
-    void OnSpinText(wxCommandEvent& event);
-    void OnSpinTextEnter(wxCommandEvent& event);
 
     void OnUpdateUIValueButton(wxUpdateUIEvent& event);
     void OnUpdateUIMinMaxButton(wxUpdateUIEvent& event);
@@ -132,7 +127,6 @@ protected:
     // the spinbtn and the spinctrl and the sizer containing them
     wxSpinButton *m_spinbtn;
     wxSpinCtrl *m_spinctrl;
-    wxSpinCtrlDouble *m_spinctrldbl;
 
     wxSizer *m_sizerSpin;
 
@@ -166,10 +160,6 @@ BEGIN_EVENT_TABLE(SpinBtnWidgetsPage, WidgetsPage)
     EVT_SPIN_UP(SpinBtnPage_SpinBtn, SpinBtnWidgetsPage::OnSpinBtnUp)
     EVT_SPIN_DOWN(SpinBtnPage_SpinBtn, SpinBtnWidgetsPage::OnSpinBtnDown)
     EVT_SPINCTRL(SpinBtnPage_SpinCtrl, SpinBtnWidgetsPage::OnSpinCtrl)
-    EVT_SPINCTRLDOUBLE(SpinBtnPage_SpinCtrlDouble, SpinBtnWidgetsPage::OnSpinCtrlDouble)
-    EVT_TEXT(SpinBtnPage_SpinCtrl, SpinBtnWidgetsPage::OnSpinText)
-    EVT_TEXT_ENTER(SpinBtnPage_SpinCtrl, SpinBtnWidgetsPage::OnSpinTextEnter)
-    EVT_TEXT(SpinBtnPage_SpinCtrlDouble, SpinBtnWidgetsPage::OnSpinText)
 
     EVT_CHECKBOX(wxID_ANY, SpinBtnWidgetsPage::OnCheckOrRadioBox)
     EVT_RADIOBOX(wxID_ANY, SpinBtnWidgetsPage::OnCheckOrRadioBox)
@@ -197,7 +187,6 @@ SpinBtnWidgetsPage::SpinBtnWidgetsPage(WidgetsBookCtrl *book,
     m_chkWrap = NULL;
     m_spinbtn = NULL;
     m_spinctrl = NULL;
-    m_spinctrldbl = NULL;
     m_textValue = NULL;
     m_textMin = NULL;
     m_textMax = NULL;
@@ -313,17 +302,14 @@ void SpinBtnWidgetsPage::CreateSpin()
 
         m_sizerSpin->Detach( m_spinbtn );
         m_sizerSpin->Detach( m_spinctrl );
-        m_sizerSpin->Detach( m_spinctrldbl );
 
-        // there are 4 spacers left
-        m_sizerSpin->Remove( 0 );
+        // there are 3 spacers left
         m_sizerSpin->Remove( 0 );
         m_sizerSpin->Remove( 0 );
         m_sizerSpin->Remove( 0 );
 
         delete m_spinbtn;
         delete m_spinctrl;
-        delete m_spinctrldbl;
     }
 
     m_spinbtn = new wxSpinButton(this, SpinBtnPage_SpinBtn,
@@ -339,18 +325,10 @@ void SpinBtnWidgetsPage::CreateSpin()
                                 flags,
                                 m_min, m_max, val);
 
-    m_spinctrldbl = new wxSpinCtrlDouble(this, SpinBtnPage_SpinCtrlDouble,
-                                         wxString::Format(_T("%d"), val),
-                                         wxDefaultPosition, wxDefaultSize,
-                                         flags,
-                                         m_min, m_max, val, 0.1);
-
     m_sizerSpin->Add(0, 0, 1);
     m_sizerSpin->Add(m_spinbtn, 0, wxALIGN_CENTRE | wxALL, 5);
     m_sizerSpin->Add(0, 0, 1);
     m_sizerSpin->Add(m_spinctrl, 0, wxALIGN_CENTRE | wxALL, 5);
-    m_sizerSpin->Add(0, 0, 1);
-    m_sizerSpin->Add(m_spinctrldbl, 0, wxALIGN_CENTRE | wxALL, 5);
     m_sizerSpin->Add(0, 0, 1);
 
     m_sizerSpin->Layout();
@@ -385,7 +363,6 @@ void SpinBtnWidgetsPage::OnButtonSetMinAndMax(wxCommandEvent& WXUNUSED(event))
 
     m_spinbtn->SetRange(minNew, maxNew);
     m_spinctrl->SetRange(minNew, maxNew);
-    m_spinctrldbl->SetRange(minNew, maxNew);
 }
 
 void SpinBtnWidgetsPage::OnButtonSetValue(wxCommandEvent& WXUNUSED(event))
@@ -400,7 +377,6 @@ void SpinBtnWidgetsPage::OnButtonSetValue(wxCommandEvent& WXUNUSED(event))
 
     m_spinbtn->SetValue(val);
     m_spinctrl->SetValue(val);
-    m_spinctrldbl->SetValue(val);
 }
 
 void SpinBtnWidgetsPage::OnUpdateUIValueButton(wxUpdateUIEvent& event)
@@ -456,6 +432,8 @@ void SpinBtnWidgetsPage::OnSpinBtnDown(wxSpinEvent& event)
 
 void SpinBtnWidgetsPage::OnSpinCtrl(wxSpinEvent& event)
 {
+    if (!m_spinctrl)
+        return;
     int value = event.GetInt();
 
     wxASSERT_MSG( value == m_spinctrl->GetValue(),
@@ -463,24 +441,5 @@ void SpinBtnWidgetsPage::OnSpinCtrl(wxSpinEvent& event)
 
     wxLogMessage(_T("Spin control value changed, now %d"), value);
 }
-
-void SpinBtnWidgetsPage::OnSpinCtrlDouble(wxSpinDoubleEvent& event)
-{
-    double value = event.GetValue();
-
-    wxLogMessage(_T("Spin control value changed, now %g"), value);
-}
-
-void SpinBtnWidgetsPage::OnSpinText(wxCommandEvent& event)
-{
-    wxLogMessage(_T("Text changed in spin control, now \"%s\""),
-                 event.GetString().c_str());
-}
-
-void SpinBtnWidgetsPage::OnSpinTextEnter(wxCommandEvent& event)
-{
-    wxLogMessage("\"Enter\" pressed in spin control, text is \"%s\"",
-                 event.GetString());
-}
-
-#endif // wxUSE_SPINBTN
+#endif
+    // wxUSE_SPINBTN

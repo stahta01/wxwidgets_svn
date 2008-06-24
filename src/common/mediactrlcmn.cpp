@@ -12,11 +12,11 @@
 // TODO: Platform specific backend defaults?
 
 //===========================================================================
-// Declarations
+// Definitions
 //===========================================================================
 
 //---------------------------------------------------------------------------
-// Includes
+// Pre-compiled header stuff
 //---------------------------------------------------------------------------
 
 #include "wx/wxprec.h"
@@ -29,9 +29,11 @@
 
 #ifndef WX_PRECOMP
     #include "wx/hash.h"
-    #include "wx/log.h"
 #endif
 
+//---------------------------------------------------------------------------
+// Includes
+//---------------------------------------------------------------------------
 #include "wx/mediactrl.h"
 
 //===========================================================================
@@ -118,13 +120,12 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
     }
     else
     {
-        wxClassInfo::const_iterator it = wxClassInfo::begin_classinfo();
+        wxClassInfo::sm_classTable->BeginFind();
 
-        const wxClassInfo* classInfo;
+        wxClassInfo* classInfo;
 
-        while((classInfo = NextBackend(&it)) != NULL)
+        while((classInfo = NextBackend()) != NULL)
         {
-            wxLogMessage( classInfo->GetClassName() );
             if(!DoCreate(classInfo, parent, id,
                          pos, size, style, validator, name))
                 continue;
@@ -182,11 +183,11 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
     }
     else
     {
-        wxClassInfo::const_iterator it  = wxClassInfo::begin_classinfo();
+        wxClassInfo::sm_classTable->BeginFind();
 
-        const wxClassInfo* classInfo;
+        wxClassInfo* classInfo;
 
-        while((classInfo = NextBackend(&it)) != NULL)
+        while((classInfo = NextBackend()) != NULL)
         {
             if(!DoCreate(classInfo, parent, id,
                          pos, size, style, validator, name))
@@ -211,7 +212,7 @@ bool wxMediaCtrl::Create(wxWindow* parent, wxWindowID id,
 //
 // Attempts to create the control from a backend
 //---------------------------------------------------------------------------
-bool wxMediaCtrl::DoCreate(const wxClassInfo* classInfo,
+bool wxMediaCtrl::DoCreate(wxClassInfo* classInfo,
                             wxWindow* parent, wxWindowID id,
                             const wxPoint& pos,
                             const wxSize& size,
@@ -245,18 +246,19 @@ bool wxMediaCtrl::DoCreate(const wxClassInfo* classInfo,
 // incompatible with the old 2.4 stable version - but since
 // we're in 2.5+ only we don't need to worry about the new version
 //---------------------------------------------------------------------------
-const wxClassInfo* wxMediaCtrl::NextBackend(wxClassInfo::const_iterator* it)
+wxClassInfo* wxMediaCtrl::NextBackend()
 {
-    for ( wxClassInfo::const_iterator end = wxClassInfo::end_classinfo();
-          *it != end; ++(*it) )
+    wxHashTable::compatibility_iterator
+            node = wxClassInfo::sm_classTable->Next();
+    while (node)
     {
-        const wxClassInfo* classInfo = **it;
+        wxClassInfo* classInfo = (wxClassInfo *)node->GetData();
         if ( classInfo->IsKindOf(CLASSINFO(wxMediaBackend)) &&
              classInfo != CLASSINFO(wxMediaBackend) )
         {
-            ++(*it);
             return classInfo;
         }
+        node = wxClassInfo::sm_classTable->Next();
     }
 
     //

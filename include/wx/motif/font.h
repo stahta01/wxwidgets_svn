@@ -13,11 +13,12 @@
 #define _WX_FONT_H_
 
 #if __WXMOTIF20__ && !__WXLESSTIF__
+    #define wxMOTIF_NEW_FONT_HANDLING 1
     #define wxMOTIF_USE_RENDER_TABLE 1
 #else
+    #define wxMOTIF_NEW_FONT_HANDLING 0
     #define wxMOTIF_USE_RENDER_TABLE 0
 #endif
-#define wxMOTIF_NEW_FONT_HANDLING wxMOTIF_USE_RENDER_TABLE
 
 class wxXFont;
 
@@ -92,26 +93,25 @@ public:
         WXDisplay* display = NULL) const;
 
     // These two are helper functions for convenient access of the above.
-#if wxMOTIF_USE_RENDER_TABLE
+#if wxMOTIF_NEW_FONT_HANDLING
     WXFontSet GetFontSet(double scale, WXDisplay* display = NULL) const;
-    WXRenderTable GetRenderTable(WXDisplay* display) const;
-#else // if !wxMOTIF_USE_RENDER_TABLE
+#else // if !wxMOTIF_NEW_FONT_HANDLING
     WXFontStructPtr GetFontStruct(double scale = 1.0,
         WXDisplay* display = NULL) const;
+#endif // wxMOTIF_NEW_FONT_HANDLING
+#if wxMOTIF_USE_RENDER_TABLE
+    WXRenderTable GetRenderTable(WXDisplay* display) const;
+#else // if !wxMOTIF_USE_RENDER_TABLE
     WXFontList GetFontList(double scale = 1.0,
         WXDisplay* display = NULL) const;
-#endif // !wxMOTIF_USE_RENDER_TABLE
+#endif // wxMOTIF_USE_RENDER_TABLE
     // returns either a XmFontList or XmRenderTable, depending
     // on Motif version
     WXFontType GetFontType(WXDisplay* display) const;
     // like the function above but does a copy for XmFontList
     WXFontType GetFontTypeC(WXDisplay* display) const;
     static WXString GetFontTag();
-
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
     virtual void DoSetNativeFontInfo( const wxNativeFontInfo& info );
 
     void Unshare();
@@ -120,4 +120,5 @@ private:
     DECLARE_DYNAMIC_CLASS(wxFont)
 };
 
-#endif // _WX_FONT_H_
+#endif
+// _WX_FONT_H_

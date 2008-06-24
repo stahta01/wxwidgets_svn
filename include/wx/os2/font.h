@@ -15,13 +15,13 @@
 #include "wx/gdiobj.h"
 #include "wx/os2/private.h"
 
-WXDLLIMPEXP_DATA_CORE(extern const wxChar*) wxEmptyString;
+WXDLLEXPORT_DATA(extern const wxChar*) wxEmptyString;
 
 // ----------------------------------------------------------------------------
 // wxFont
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFont : public wxFontBase
+class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
@@ -113,9 +113,7 @@ public:
 protected:
     virtual void DoSetNativeFontInfo(const wxNativeFontInfo& rInfo);
 
-    // implement wxObject virtuals which are used by AllocExclusive()
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    void Unshare(void);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxFont)

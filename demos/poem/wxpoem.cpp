@@ -33,7 +33,7 @@
 #include "corner4.xpm"
 #include "wxpoem.xpm"
 
-#define         BUFFER_SIZE 10000
+#define         buf_size 10000
 #define         DEFAULT_POETRY_DAT "wxpoem"
 #define         DEFAULT_POETRY_IND "wxpoem"
 #define         DEFAULT_CHAR_HEIGHT 18
@@ -48,7 +48,7 @@
 #define         X_SIZE 30
 #define         Y_SIZE 20
 
-static wxChar   *poem_buffer;                   // Storage for each poem
+static wxChar   *poem_buffer;          // Storage for each poem
 static wxChar   line[150];                      // Storage for a line
 static int      pages[30];                      // For multipage poems -
                                                 // store the start of each page
@@ -79,8 +79,8 @@ static int      current_page = 0;               // Currently viewed page
 // Backing bitmap
 wxBitmap        *backingBitmap = NULL;
 
-void            PoetryError(const wxChar *, const wxChar *caption=_T("wxPoem Error"));
-void            PoetryNotify(const wxChar *Msg, const wxChar *caption=_T("wxPoem"));
+void            PoetryError(wxChar *, wxChar *caption=_T("wxPoem Error"));
+void            PoetryNotify(wxChar *Msg, wxChar *caption=_T("wxPoem"));
 void            TryLoadIndex();
 bool            LoadPoem(wxChar *, long);
 int             GetIndex();
@@ -179,8 +179,8 @@ void MainWindow::ScanBuffer(wxDC *dc, bool DrawIt, int *max_x, int *max_y)
     // See what ACTUAL char height is
     if(m_normalFont)
         dc->SetFont(*m_normalFont);
-    wxCoord xx;
-    wxCoord yy;
+    long xx;
+    long yy;
     dc->GetTextExtent(_T("X"), &xx, &yy);
     char_height = (int)yy;
 
@@ -325,7 +325,7 @@ void MainWindow::ScanBuffer(wxDC *dc, bool DrawIt, int *max_x, int *max_y)
     // Write (cont'd)
     if (page_break)
     {
-        const wxChar *cont = _T("(cont'd)");
+        wxChar *cont = _T("(cont'd)");
 
         dc->SetFont(* m_normalFont);
 
@@ -517,7 +517,7 @@ void MainWindow::Search(bool ask)
 
 bool MyApp::OnInit()
 {
-    poem_buffer = new wxChar[BUFFER_SIZE];
+    poem_buffer = new wxChar[buf_size];
 
     // Seed the random number generator
 #ifdef __WXWINCE__
@@ -751,13 +751,11 @@ int GetIndex()
 // Read preferences
 void MainWindow::ReadPreferences()
 {
-/* TODO: convert this code to use wxConfig
 #if wxUSE_RESOURCES
     wxGetResource(_T("wxPoem"), _T("FontSize"), &pointSize);
     wxGetResource(_T("wxPoem"), _T("X"), &XPos);
     wxGetResource(_T("wxPoem"), _T("Y"), &YPos);
 #endif
-*/
 }
 
 // Write preferences to disk
@@ -765,13 +763,11 @@ void MainWindow::WritePreferences()
 {
 #ifdef __WXMSW__
     TheMainWindow->GetPosition(&XPos, &YPos);
-/* TODO: convert this code to use wxConfig
 #if wxUSE_RESOURCES
     wxWriteResource(_T("wxPoem"), _T("FontSize"), pointSize);
     wxWriteResource(_T("wxPoem"), _T("X"), XPos);
     wxWriteResource(_T("wxPoem"), _T("Y"), YPos);
 #endif
-*/
 #endif
 }
 
@@ -828,7 +824,7 @@ bool LoadPoem(wxChar *file_name, long position)
         poem_buffer[i] = (wxChar)ch;
         i ++;
 
-        if (i == BUFFER_SIZE)
+        if (i == buf_size)
         {
             wxSprintf(error_buf, _T("%s"), _T("Poetry buffer exceeded."));
             PoetryError(error_buf);
@@ -888,7 +884,7 @@ long MainWindow::DoSearch(void)
 
         // Only match if we're looking at a different poem
         // (no point in displaying the same poem again)
-        if ((m_searchString[i] == ch) && (last_poem_start != previous_poem_start))
+        if ((ch == m_searchString[i]) && (last_poem_start != previous_poem_start))
         {
             if (i == 0)
                 last_find = ftell(file);
@@ -934,13 +930,13 @@ void TryLoadIndex()
 }
 
 // Error message
-void PoetryError(const wxChar *msg, const wxChar *caption)
+void PoetryError(wxChar *msg, wxChar *caption)
 {
     wxMessageBox(msg, caption, wxOK|wxICON_EXCLAMATION);
 }
 
 // Notification (change icon to something appropriate!)
-void PoetryNotify(const wxChar *Msg, const wxChar *caption)
+void PoetryNotify(wxChar *Msg, wxChar *caption)
 {
     wxMessageBox(Msg, caption, wxOK | wxICON_INFORMATION);
 }

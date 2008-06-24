@@ -180,7 +180,7 @@ bool wxMenuItem::IsChecked() const
     return (uFlag & MIA_CHECKED) == MIA_CHECKED ;
 } // end of wxMenuItem::IsChecked
 
-wxString wxMenuItemBase::GetLabelText(
+wxString wxMenuItemBase::GetLabelFromText(
   const wxString&                   rsText
 )
 {
@@ -199,7 +199,7 @@ wxString wxMenuItemBase::GetLabelText(
         sLabel += *zPc;
     }
     return sLabel;
-} // end of wxMenuItemBase::GetLabelText
+} // end of wxMenuItemBase::GetLabelFromText
 
 //
 // Radio group stuff
@@ -363,7 +363,7 @@ void wxMenuItem::Check(
     wxMenuItemBase::Check(bCheck);
 } // end of wxMenuItem::Check
 
-void wxMenuItem::SetItemLabel( const wxString& rText )
+void wxMenuItem::SetText( const wxString& rText )
 {
     //
     // Don't do anything if label didn't change
@@ -374,7 +374,7 @@ void wxMenuItem::SetItemLabel( const wxString& rText )
         return;
 
     // wxMenuItemBase will do stock ID checks
-    wxMenuItemBase::SetItemLabel(sText);
+    wxMenuItemBase::SetText(sText);
 
     // m_text could now be different from 'text' if we are a stock menu item,
     // so use only m_text below
@@ -415,19 +415,19 @@ void wxMenuItem::SetItemLabel( const wxString& rText )
             uFlagsOld |= MIS_SUBMENU;
         }
 
-        char*                       pData;
+        BYTE*                       pData;
 
 #if wxUSE_OWNER_DRAWN
         if (IsOwnerDrawn())
         {
             uFlagsOld |= MIS_OWNERDRAW;
-            pData = (char*)this;
+            pData = (BYTE*)this;
         }
         else
 #endif  //owner drawn
         {
             uFlagsOld |= MIS_TEXT;
-            pData = (char*) m_text.wx_str();
+            pData = (BYTE*)m_text.c_str();
         }
 
         //

@@ -201,7 +201,7 @@ protected:
 
 
 /// wxFontMgrFontRefData implementation using wxFontsManager classes
-class wxFontMgrFontRefData : public wxGDIRefData
+class wxFontMgrFontRefData : public wxObjectRefData
 {
 public:
     wxFontMgrFontRefData(int size = wxDEFAULT,

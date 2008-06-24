@@ -32,7 +32,6 @@
 #include "wx/url.h"
 #include "wx/protocol/http.h"
 #include "wx/sckstrm.h"
-#include "wx/thread.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxHTTP, wxProtocol)
 IMPLEMENT_PROTOCOL(wxHTTP, wxT("http"), wxT("80"), true)
@@ -76,7 +75,7 @@ wxHTTP::wxHeaderIterator wxHTTP::FindHeader(const wxString& header)
     wxHeaderIterator it = m_headers.begin();
     for ( wxHeaderIterator en = m_headers.end(); it != en; ++it )
     {
-        if ( header.CmpNoCase(it->first) == 0 )
+        if ( wxStricmp(it->first, header) == 0 )
             break;
     }
 
@@ -88,7 +87,7 @@ wxHTTP::wxHeaderConstIterator wxHTTP::FindHeader(const wxString& header) const
     wxHeaderConstIterator it = m_headers.begin();
     for ( wxHeaderConstIterator en = m_headers.end(); it != en; ++it )
     {
-        if ( header.CmpNoCase(it->first) == 0 )
+        if ( wxStricmp(it->first, header) == 0 )
             break;
     }
 
@@ -142,7 +141,7 @@ wxString wxHTTP::GenerateAuthString(const wxString& user, const wxString& pass) 
         } else {
             buf << wxString::Format(wxT("%c%c"), base64[((from[0] << 4) & 0x30) | ((from[1] >> 4) & 0xf)], base64[(from[1] << 2) & 0x3c]);
         }
-        buf << wxT("=");
+        buf << wxString::Format(wxT("="));
     }
 
     return buf;
@@ -275,8 +274,8 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
 
     wxString buf;
     buf.Printf(wxT("%s %s HTTP/1.0\r\n"), request, path.c_str());
-    const wxWX2MBbuf pathbuf = buf.mb_str();
-    Write(pathbuf, strlen(pathbuf));
+    const wxWX2MBbuf pathbuf = wxConvLocal.cWX2MB(buf);
+    Write(pathbuf, strlen(wxMBSTRINGCAST pathbuf));
     SendHeaders();
     Write("\r\n", 2);
 
@@ -310,7 +309,7 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
 
     m_http_response = wxAtoi(tmp_str2);
 
-    switch ( tmp_str2[0u].GetValue() )
+    switch (tmp_str2[0u])
     {
         case wxT('1'):
             /* INFORMATION / SUCCESS */
@@ -408,7 +407,7 @@ wxInputStream *wxHTTP::GetInputStream(const wxString& path)
     inp_stream = new wxHTTPStream(this);
 
     if (!GetHeader(wxT("Content-Length")).empty())
-        inp_stream->m_httpsize = wxAtoi(GetHeader(wxT("Content-Length")));
+        inp_stream->m_httpsize = wxAtoi(WXSTRINGCAST GetHeader(wxT("Content-Length")));
     else
         inp_stream->m_httpsize = (size_t)-1;
 

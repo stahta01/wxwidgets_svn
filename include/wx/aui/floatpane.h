@@ -17,16 +17,16 @@
 // ----------------------------------------------------------------------------
 
 #include "wx/defs.h"
-#include "wx/weakref.h"
 
 #if wxUSE_AUI
 
-#if wxUSE_MINIFRAME
-    #include "wx/minifram.h"
-    #define wxAuiFloatingFrameBaseClass wxMiniFrame
+#include "wx/frame.h"
+
+#if defined( __WXMSW__ ) || defined( __WXMAC__ ) ||  defined( __WXGTK__ )
+#include "wx/minifram.h"
+#define wxAuiFloatingFrameBaseClass wxMiniFrame
 #else
-    #include "wx/frame.h"
-    #define wxAuiFloatingFrameBaseClass wxFrame
+#define wxAuiFloatingFrameBaseClass wxFrame
 #endif
 
 class WXDLLIMPEXP_AUI wxAuiFloatingFrame : public wxAuiFloatingFrameBaseClass
@@ -67,7 +67,7 @@ private:
     wxSize m_last_size;
     wxDirection m_lastDirection;
 
-    wxWeakRef<wxAuiManager> m_owner_mgr;
+    wxAuiManager* m_owner_mgr;
     wxAuiManager m_mgr;
 
 #ifndef SWIG

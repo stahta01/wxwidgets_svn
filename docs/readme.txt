@@ -1,4 +1,4 @@
-wxWidgets 2.9.x
+wxWidgets 2.8.8
 ---------------------------------------------------------
 
 Welcome to wxWidgets, a sophisticated cross-platform C++
@@ -22,7 +22,7 @@ for a list of important documents and samples.
 Changes in this release
 -----------------------
 
-Please see changes.txt and "Changes since 2.8" in the manual
+Please see changes.txt and "Changes since 2.6" in the manual
 for details.
 
 Platforms supported
@@ -162,5 +162,5 @@ web site.
 
 Have fun!
 
-The wxWidgets Team, January 2007
+The wxWidgets Team, June 2008
 

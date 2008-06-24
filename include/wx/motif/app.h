@@ -23,14 +23,14 @@
 // forward declarations
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxApp;
-class WXDLLIMPEXP_FWD_CORE wxKeyEvent;
-class WXDLLIMPEXP_FWD_BASE wxLog;
-class WXDLLIMPEXP_FWD_CORE wxEventLoop;
-class WXDLLIMPEXP_FWD_CORE wxXVisualInfo;
-class WXDLLIMPEXP_FWD_CORE wxPerDisplayData;
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxApp;
+class WXDLLEXPORT wxKeyEvent;
+class WXDLLEXPORT wxLog;
+class WXDLLEXPORT wxEventLoop;
+class WXDLLEXPORT wxXVisualInfo;
+class WXDLLEXPORT wxPerDisplayData;
 
 // ----------------------------------------------------------------------------
 // the wxApp class for Motif - see wxAppBase for more details
@@ -38,7 +38,7 @@ class WXDLLIMPEXP_FWD_CORE wxPerDisplayData;
 
 WX_DECLARE_VOIDPTR_HASH_MAP( wxPerDisplayData*, wxPerDisplayDataMap );
 
-class WXDLLIMPEXP_CORE wxApp : public wxAppBase
+class WXDLLEXPORT wxApp : public wxAppBase
 {
     DECLARE_DYNAMIC_CLASS(wxApp)
 
@@ -55,6 +55,8 @@ public:
 
     virtual bool Yield(bool onlyIfNeeded = false);
     virtual void WakeUpIdle(); // implemented in motif/evtloop.cpp
+
+    virtual bool OnInitGui();
 
     // implementation from now on
     // --------------------------
@@ -89,6 +91,8 @@ private:
     WXColormap            m_mainColormap;
     WXDisplay*            m_initialDisplay;
     wxPerDisplayDataMap*  m_perDisplayData;
+
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

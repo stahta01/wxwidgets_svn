@@ -12,7 +12,7 @@
 #ifndef _WX_PALMOS_REGION_H_
 #define _WX_PALMOS_REGION_H_
 
-class WXDLLIMPEXP_CORE wxRegion : public wxRegionWithCombine
+class WXDLLEXPORT wxRegion : public wxRegionWithCombine
 {
 public:
     wxRegion();
@@ -44,8 +44,8 @@ public:
     WXHRGN GetHRGN() const;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     virtual bool DoIsEqual(const wxRegion& region) const;
     virtual bool DoGetBox(wxCoord& x, wxCoord& y, wxCoord& w, wxCoord& h) const;
@@ -55,12 +55,12 @@ protected:
     virtual bool DoOffset(wxCoord x, wxCoord y);
     virtual bool DoCombine(const wxRegion& region, wxRegionOp op);
 
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIterator;
+    friend class WXDLLEXPORT wxRegionIterator;
 
     DECLARE_DYNAMIC_CLASS(wxRegion)
 };
 
-class WXDLLIMPEXP_CORE wxRegionIterator : public wxObject
+class WXDLLEXPORT wxRegionIterator : public wxObject
 {
 public:
     wxRegionIterator() { Init(); }

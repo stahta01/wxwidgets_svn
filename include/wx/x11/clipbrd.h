@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/clipbrd.h
+// Name:        clipbrd.h
 // Purpose:     Clipboard functionality.
 // Author:      Robert Roebling
 // Created:     17/09/98
@@ -8,8 +8,8 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_X11_CLIPBRD_H_
-#define _WX_X11_CLIPBRD_H_
+#ifndef __X11CLIPBOARDH__
+#define __X11CLIPBOARDH__
 
 #if wxUSE_CLIPBOARD
 
@@ -53,6 +53,11 @@ public:
     // clears wxTheClipboard and the system's clipboard if possible
     virtual void Clear();
 
+    // If primary == TRUE, use primary selection in all further ops,
+    // primary == FALSE resets it.
+    virtual void UsePrimarySelection(bool primary = TRUE)
+        { m_usePrimary = primary; }
+    
     // implementation from now on
     bool              m_open;
     bool              m_ownsClipboard;
@@ -65,12 +70,15 @@ public:
 
     bool              m_formatSupported;
     Atom              m_targetRequested;
+    bool              m_usePrimary;
     wxDataObject     *m_receivedData;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxClipboard)
 };
 
-#endif // wxUSE_CLIPBOARD
+#endif
+   // wxUSE_CLIPBOARD
 
-#endif // _WX_X11_CLIPBRD_H_
+#endif
+    // __X11CLIPBOARDH__

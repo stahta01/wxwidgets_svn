@@ -45,7 +45,9 @@ protected:
     wxWindowCocoa *m_owner;
     WX_NSScrollView m_cocoaNSScrollView;
     virtual void Cocoa_FrameChanged(void);
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     virtual void Cocoa_synthesizeMouseMoved(void) {}
+#endif
     /*!
         Flag as to whether we're scrolling for a native view or a custom
         wxWindow.  This controls the scrolling behavior.  When providing

@@ -31,7 +31,7 @@ typedef unsigned short* WXBSTR;
  * Wraps up an IDispatch pointer and invocation; does variant conversion.
  */
 
-class WXDLLIMPEXP_CORE wxAutomationObject: public wxObject
+class WXDLLEXPORT wxAutomationObject: public wxObject
 {
 public:
     wxAutomationObject(WXIDISPATCH* dispatchPtr = NULL);

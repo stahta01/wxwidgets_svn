@@ -50,20 +50,23 @@ void wxModule::UnregisterModule(wxModule* module)
 // and register them.
 void wxModule::RegisterModules()
 {
-    for (wxClassInfo::const_iterator it  = wxClassInfo::begin_classinfo(),
-                                     end = wxClassInfo::end_classinfo();
-         it != end; ++it)
-    {
-        const wxClassInfo* classInfo = *it;
+    wxHashTable::compatibility_iterator node;
+    wxClassInfo* classInfo;
 
+    wxClassInfo::sm_classTable->BeginFind();
+    node = wxClassInfo::sm_classTable->Next();
+    while (node)
+    {
+        classInfo = (wxClassInfo *)node->GetData();
         if ( classInfo->IsKindOf(CLASSINFO(wxModule)) &&
-             (classInfo != (& (wxModule::ms_classInfo))) )
+            (classInfo != (& (wxModule::ms_classInfo))) )
         {
             wxLogTrace(TRACE_MODULE, wxT("Registering module %s"),
                        classInfo->GetClassName());
             wxModule* module = (wxModule *)classInfo->CreateObject();
-            wxModule::RegisterModule(module);
+            RegisterModule(module);
         }
+        node = wxClassInfo::sm_classTable->Next();
     }
 }
 
@@ -78,10 +81,6 @@ bool wxModule::DoInitializeModule(wxModule *module,
     }
 
     module->m_state = State_Initializing;
-
-    // translate named dependencies to the normal ones first
-    if ( !module->ResolveNamedDependencies() )
-      return false;
 
     const wxArrayClassInfo& dependencies = module->m_dependencies;
 
@@ -200,26 +199,4 @@ void wxModule::DoCleanUpModules(const wxModuleList& modules)
 
     // clear all modules, even the non-initialized ones
     WX_CLEAR_LIST(wxModuleList, m_modules);
-}
-
-bool wxModule::ResolveNamedDependencies()
-{
-    // first resolve required dependencies
-    for ( size_t i = 0; i < m_namedDependencies.size(); ++i )
-    {
-        wxClassInfo *info = wxClassInfo::FindClass(m_namedDependencies[i]);
-
-        if ( !info )
-        {
-            // required dependency not found
-            return false;
-        }
-
-        // add it even if it is not derived from wxModule because
-        // DoInitializeModule() will make sure a module with the same class
-        // info exists and fail if it doesn't
-        m_dependencies.Add(info);
-    }
-
-    return true;
 }

@@ -61,6 +61,12 @@ wxDataFormat::wxDataFormat( wxDataFormatId type )
     SetType( type );
 }
 
+wxDataFormat::wxDataFormat( const wxChar *id )
+{
+    PrepareFormats();
+    SetId( id );
+}
+
 wxDataFormat::wxDataFormat( const wxString &id )
 {
     PrepareFormats();
@@ -123,12 +129,13 @@ void wxDataFormat::SetId( NativeFormat format )
         m_type = wxDF_PRIVATE;
 }
 
-void wxDataFormat::SetId( const wxString& id )
+void wxDataFormat::SetId( const wxChar *id )
 {
     PrepareFormats();
     m_type = wxDF_PRIVATE;
+    wxString tmp( id );
     m_format = XInternAtom( wxGlobalDisplay(),
-                            id.mbc_str(), False );
+                            tmp.mbc_str(), False );
 }
 
 void wxDataFormat::PrepareFormats()

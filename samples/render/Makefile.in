@@ -40,7 +40,6 @@ TOOLKIT_VERSION = @TOOLKIT_VERSION@
 TOOLCHAIN_FULLNAME = @TOOLCHAIN_FULLNAME@
 EXTRALIBS = @EXTRALIBS@
 EXTRALIBS_GUI = @EXTRALIBS_GUI@
-CXXWARNINGS = @CXXWARNINGS@
 HOST_SUFFIX = @HOST_SUFFIX@
 SAMPLES_RPATH_FLAG = @SAMPLES_RPATH_FLAG@
 SAMPLES_RPATH_POSTLINK = @SAMPLES_RPATH_POSTLINK@
@@ -49,23 +48,21 @@ wx_top_builddir = @wx_top_builddir@
 ### Variables: ###
 
 DESTDIR = 
-WX_RELEASE = 2.9
-WX_RELEASE_NODOT = 29
-WX_VERSION = $(WX_RELEASE).0
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
+WX_RELEASE = 2.8
+WX_RELEASE_NODOT = 28
+WX_VERSION = $(WX_RELEASE).8
 LIBDIRNAME = $(wx_top_builddir)/lib
 PLUGINS_INST_DIR = $(libdir)/wx/$(PLUGIN_VERSION0)
 RENDER_CXXFLAGS = -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
-	-I$(srcdir) $(__DLLFLAG_p) -I$(srcdir)/../../samples $(CXXWARNINGS) \
-	$(CPPFLAGS) $(CXXFLAGS)
+	-I$(srcdir) $(__DLLFLAG_p) -I$(srcdir)/../../samples $(CPPFLAGS) $(CXXFLAGS)
 RENDER_OBJECTS =  \
 	$(__render___win32rc) \
 	$(__render_os2_lib_res) \
 	render_render.o
 RENDDLL_CXXFLAGS = -D__WX$(TOOLKIT)__ $(__WXUNIV_DEFINE_p) \
 	$(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) \
-	-DWXUSINGDLL $(PIC_FLAG) $(CXXWARNINGS) $(CPPFLAGS) $(CXXFLAGS)
+	-DWXUSINGDLL $(PIC_FLAG) $(CPPFLAGS) $(CXXFLAGS)
 RENDDLL_OBJECTS =  \
 	renddll_renddll.o
 
@@ -85,8 +82,8 @@ RENDDLL_OBJECTS =  \
 @COND_MONOLITHIC_1@EXTRALIBS_FOR_BASE = $(EXTRALIBS) $(EXTRALIBS_GUI)
 @COND_MONOLITHIC_0@EXTRALIBS_FOR_GUI = $(EXTRALIBS_GUI)
 @COND_MONOLITHIC_1@EXTRALIBS_FOR_GUI = 
-@COND_PLATFORM_UNIX_0@PLUGIN_VERSION0 = $(WX_VERSION_NODOT)
-@COND_PLATFORM_UNIX_1@PLUGIN_VERSION0 = $(WX_VERSION)
+@COND_PLATFORM_UNIX_0@PLUGIN_VERSION0 = $(WX_RELEASE_NODOT)
+@COND_PLATFORM_UNIX_1@PLUGIN_VERSION0 = $(WX_RELEASE)
 @COND_PLATFORM_UNIX_0@PLUGVERDELIM = 
 @COND_PLATFORM_UNIX_1@PLUGVERDELIM = -
 @COND_BUILD_RELEASE_UNICODE_0@PLUGINSUFFIX = 
@@ -160,6 +157,8 @@ COND_MONOLITHIC_1___WXLIB_MONO_p = \
 @COND_USE_GUI_1_WXUSE_LIBPNG_BUILTIN@	-lwxpng$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_WXUSE_ZLIB_BUILTIN@__LIB_ZLIB_p = \
 @COND_WXUSE_ZLIB_BUILTIN@	-lwxzlib$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
+@COND_WXUSE_ODBC_BUILTIN@__LIB_ODBC_p = \
+@COND_WXUSE_ODBC_BUILTIN@	-lwxodbc$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 COND_WXUSE_REGEX_BUILTIN___LIB_REGEX_p = \
 	-lwxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)-$(WX_RELEASE)$(HOST_SUFFIX)
 @COND_WXUSE_REGEX_BUILTIN@__LIB_REGEX_p = $(COND_WXUSE_REGEX_BUILTIN___LIB_REGEX_p)
@@ -188,13 +187,13 @@ distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
 render$(EXEEXT): $(RENDER_OBJECTS) $(__render___win32rc)
-	$(CXX) -o $@ $(RENDER_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI) $(SAMPLES_RPATH_FLAG)  $(LIBS) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+	$(CXX) -o $@ $(RENDER_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME) $(LDFLAGS_GUI) $(SAMPLES_RPATH_FLAG)  $(LIBS) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
 	$(__render___mac_rezcmd)
 	$(__render___mac_setfilecmd)
 	$(__render___os2_emxbindcmd)
 	$(SAMPLES_RPATH_POSTLINK)
 
-@COND_PLATFORM_MACOSX_1@render.app/Contents/PkgInfo: render$(EXEEXT) $(top_srcdir)/src/osx/carbon/Info.plist.in $(top_srcdir)/src/osx/carbon/wxmac.icns
+@COND_PLATFORM_MACOSX_1@render.app/Contents/PkgInfo: render$(EXEEXT) $(top_srcdir)/src/mac/carbon/Info.plist.in $(top_srcdir)/src/mac/carbon/wxmac.icns
 @COND_PLATFORM_MACOSX_1@	mkdir -p render.app/Contents
 @COND_PLATFORM_MACOSX_1@	mkdir -p render.app/Contents/MacOS
 @COND_PLATFORM_MACOSX_1@	mkdir -p render.app/Contents/Resources
@@ -203,7 +202,7 @@ render$(EXEEXT): $(RENDER_OBJECTS) $(__render___win32rc)
 @COND_PLATFORM_MACOSX_1@	sed -e "s/IDENTIFIER/`echo $(srcdir) | sed -e 's,\.\./,,g' | sed -e 's,/,.,g'`/" \
 @COND_PLATFORM_MACOSX_1@	-e "s/EXECUTABLE/render/" \
 @COND_PLATFORM_MACOSX_1@	-e "s/VERSION/$(WX_VERSION)/" \
-@COND_PLATFORM_MACOSX_1@	$(top_srcdir)/src/osx/carbon/Info.plist.in >render.app/Contents/Info.plist
+@COND_PLATFORM_MACOSX_1@	$(top_srcdir)/src/mac/carbon/Info.plist.in >render.app/Contents/Info.plist
 @COND_PLATFORM_MACOSX_1@	
 @COND_PLATFORM_MACOSX_1@	
 @COND_PLATFORM_MACOSX_1@	echo -n "APPL????" >render.app/Contents/PkgInfo
@@ -212,12 +211,12 @@ render$(EXEEXT): $(RENDER_OBJECTS) $(__render___win32rc)
 @COND_PLATFORM_MACOSX_1@	ln -f render$(EXEEXT) render.app/Contents/MacOS/render
 @COND_PLATFORM_MACOSX_1@	
 @COND_PLATFORM_MACOSX_1@	
-@COND_PLATFORM_MACOSX_1@	cp -f $(top_srcdir)/src/osx/carbon/wxmac.icns render.app/Contents/Resources/wxmac.icns
+@COND_PLATFORM_MACOSX_1@	cp -f $(top_srcdir)/src/mac/carbon/wxmac.icns render.app/Contents/Resources/wxmac.icns
 
 @COND_PLATFORM_MACOSX_1@render_bundle: $(____render_BUNDLE_TGT_REF_DEP)
 
 @COND_SHARED_1@$(DLLPREFIX_MODULE)renddll_$(PORTNAME)$(WXUNIVNAME)$(PLUGINSUFFIX)$(PLUGVERDELIM)$(PLUGIN_VERSION0)$(WXCOMPILER).$(SO_SUFFIX_MODULE): $(RENDDLL_OBJECTS)
-@COND_SHARED_1@	$(SHARED_LD_MODULE_CXX) $@ $(RENDDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME)  $(LIBS) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
+@COND_SHARED_1@	$(SHARED_LD_MODULE_CXX) $@ $(RENDDLL_OBJECTS) $(LDFLAGS)   -L$(LIBDIRNAME)  $(LIBS) $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p) $(EXTRALIBS_FOR_GUI) $(__LIB_ZLIB_p) $(__LIB_ODBC_p) $(__LIB_REGEX_p) $(__LIB_EXPAT_p) $(EXTRALIBS_FOR_BASE)
 
 @COND_SHARED_1@install_renddll: 
 @COND_SHARED_1@	$(INSTALL_DIR) $(DESTDIR)$(PLUGINS_INST_DIR)

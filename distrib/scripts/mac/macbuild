@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# you need to change this if you run from outside this dir.
+# you need to change this if you run from outside this dir. 
 if [ "$WXROOT" = "" ]; then
   scriptDir="$(cd $(dirname $0);pwd)"
   WXROOT=$scriptDir/../../..

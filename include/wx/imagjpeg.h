@@ -20,7 +20,7 @@
 
 #include "wx/image.h"
 
-class WXDLLIMPEXP_CORE wxJPEGHandler: public wxImageHandler
+class WXDLLEXPORT wxJPEGHandler: public wxImageHandler
 {
 public:
     inline wxJPEGHandler()

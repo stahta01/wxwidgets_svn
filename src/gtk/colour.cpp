@@ -20,7 +20,7 @@
 // wxColour
 //-----------------------------------------------------------------------------
 
-class wxColourRefData : public wxGDIRefData
+class wxColourRefData: public wxObjectRefData
 {
 public:
     wxColourRefData(guint16 red, guint16 green, guint16 blue, guint16 alpha)
@@ -169,14 +169,18 @@ int wxColour::GetPixel() const
     return M_COLDATA->m_color.pixel;
 }
 
+#ifdef __WXGTK24__
 const GdkColor *wxColour::GetColor() const
+#else
+      GdkColor *wxColour::GetColor() const
+#endif
 {
     wxCHECK_MSG( Ok(), NULL, wxT("invalid colour") );
 
     return &M_COLDATA->m_color;
 }
 
-bool wxColour::FromString(const wxString& str)
+bool wxColour::FromString(const wxChar *str)
 {
     GdkColor colGDK;
     if ( gdk_color_parse( wxGTK_CONV_SYS( str ), &colGDK ) )

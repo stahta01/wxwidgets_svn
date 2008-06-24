@@ -96,7 +96,7 @@ bool wxGetEnv(const wxString& var, wxString *value)
     return true;
 }
 
-static bool wxDoSetEnv(const wxString& variable, const char *value)
+bool wxSetEnv(const wxString& variable, const wxChar *value)
 {
     wxString s = variable;
     if ( value )
@@ -111,17 +111,6 @@ static bool wxDoSetEnv(const wxString& variable, const char *value)
 
     return putenv(buf) == 0;
 }
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.mb_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
-}
-
 
 //----------------------------------------------------------------------------
 // Hostname, username, home directory
@@ -211,14 +200,14 @@ const wxChar* wxGetHomeDir(wxString *home)
     return strDir.c_str();
 }
 
-wxString wxGetUserHome(const wxString& user)
+wxChar *wxGetUserHome(const wxString& user)
 {
-    wxString home;
+    static wxString home;
 
     if (user.empty() || user == wxGetUserId())
-        wxGetHomeDir(&home);
-
-    return home;
+        return wx_const_cast(wxChar*, wxGetHomeDir(&home));
+    else
+        return _T("");
 }
 
 // returns %UserName%, $USER or just "user"
@@ -321,7 +310,7 @@ long wxExecute(const wxString& command, int flags, wxProcess *process)
 
     argv[n] = NULL;
     while (n-- > 0)
-        argv[n] = wx_const_cast(wxChar*, (const char *)args[n].c_str());
+        argv[n] = wx_const_cast(wxChar*, args[n].c_str());
 
     long result = wxExecute(argv, flags, process);
 

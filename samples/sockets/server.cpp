@@ -36,7 +36,9 @@
 // --------------------------------------------------------------------------
 
 // the application icon
-#include "mondrian.xpm"
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#  include "mondrian.xpm"
+#endif
 
 // --------------------------------------------------------------------------
 // classes
@@ -121,9 +123,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-      return false;
-
   // Create the main application window
   MyFrame *frame = new MyFrame();
 
@@ -171,11 +170,7 @@ MyFrame::MyFrame() : wxFrame((wxFrame *)NULL, wxID_ANY,
                            wxTE_MULTILINE | wxTE_READONLY);
 
   // Create the address - defaults to localhost:0 initially
-#if wxUSE_IPV6
-  wxIPV6address addr;
-#else
   wxIPV4address addr;
-#endif
   addr.Service(3000);
 
   // Create the socket

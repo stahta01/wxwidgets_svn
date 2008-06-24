@@ -20,8 +20,8 @@ MAKEARGS = LINK_DLL_FLAGS="$(LINK_DLL_FLAGS)" \
 	DEBUG_INFO="$(DEBUG_INFO)" DEBUG_FLAG="$(DEBUG_FLAG)" \
 	MONOLITHIC="$(MONOLITHIC)" USE_GUI="$(USE_GUI)" USE_HTML="$(USE_HTML)" \
 	USE_MEDIA="$(USE_MEDIA)" USE_XRC="$(USE_XRC)" USE_AUI="$(USE_AUI)" \
-	USE_RICHTEXT="$(USE_RICHTEXT)" USE_STC="$(USE_STC)" \
-	USE_OPENGL="$(USE_OPENGL)" USE_QA="$(USE_QA)" \
+	USE_RICHTEXT="$(USE_RICHTEXT)" USE_OPENGL="$(USE_OPENGL)" \
+	USE_ODBC="$(USE_ODBC)" USE_QA="$(USE_QA)" \
 	USE_EXCEPTIONS="$(USE_EXCEPTIONS)" USE_RTTI="$(USE_RTTI)" \
 	USE_THREADS="$(USE_THREADS)" USE_GDIPLUS="$(USE_GDIPLUS)" \
 	OFFICIAL_BUILD="$(OFFICIAL_BUILD)" VENDOR="$(VENDOR)" \
@@ -35,7 +35,7 @@ MAKEARGS = LINK_DLL_FLAGS="$(LINK_DLL_FLAGS)" \
 
 ### Targets: ###
 
-all: access animate artprov aui calendar caret collpane config combo console controls dataview dialogs dialup display dnd docview docvwmdi dragimag drawing erase event exec except font grid help htlbox html image internat ipc joytest keyboard layout listctrl mdi mediaplayer memcheck menu minimal mobile nativdlg notebook oleauto opengl ownerdrw popup printing regtest render richtext sashtest scroll scrollsub shaped sockets sound splash splitter statbar stc taskbar text thread toolbar treectrl typetest validate vscroll widgets wizard wrapsizer mfc
+all: access animate artprov aui calendar caret checklst collpane config combo console controls dataview db dialogs dialup display dnd docview docvwmdi dragimag drawing dynamic erase event exec except font grid help htlbox html image internat ipc joytest keyboard layout listbox listctrl mdi mediaplayer memcheck menu minifram minimal mobile multimon nativdlg notebook oleauto opengl ownerdrw png popup printing propsize regtest render richtext rotate sashtest scroll scrollsub shaped sockets sound splash splitter statbar taskbar text thread toolbar treectrl typetest validate vscroll widgets wizard mfc
 
 clean: 
 	-if exist .\*.o del .\*.o
@@ -46,12 +46,14 @@ clean:
 	$(MAKE) -C aui -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C calendar -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C caret -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C checklst -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C collpane -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C config -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C combo -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C console -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C controls -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C dataview -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C db -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C dialogs -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C dialup -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C display -f makefile.gcc $(MAKEARGS) clean
@@ -60,6 +62,7 @@ clean:
 	$(MAKE) -C docvwmdi -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C dragimag -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C drawing -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C dynamic -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C erase -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C event -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C exec -f makefile.gcc $(MAKEARGS) clean
@@ -75,23 +78,29 @@ clean:
 	$(MAKE) -C joytest -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C keyboard -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C layout -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C listbox -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C listctrl -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C mdi -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C mediaplayer -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C memcheck -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C menu -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C minifram -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C minimal -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C mobile -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C multimon -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C nativdlg -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C notebook -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C oleauto -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C opengl -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C ownerdrw -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C png -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C popup -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C printing -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C propsize -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C regtest -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C render -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C richtext -f makefile.gcc $(MAKEARGS) clean
+	$(MAKE) -C rotate -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C sashtest -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C scroll -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C scrollsub -f makefile.gcc $(MAKEARGS) clean
@@ -101,7 +110,6 @@ clean:
 	$(MAKE) -C splash -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C splitter -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C statbar -f makefile.gcc $(MAKEARGS) clean
-	$(MAKE) -C stc -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C taskbar -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C text -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C thread -f makefile.gcc $(MAKEARGS) clean
@@ -112,7 +120,6 @@ clean:
 	$(MAKE) -C vscroll -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C widgets -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C wizard -f makefile.gcc $(MAKEARGS) clean
-	$(MAKE) -C wrapsizer -f makefile.gcc $(MAKEARGS) clean
 	$(MAKE) -C mfc -f makefile.gcc $(MAKEARGS) clean
 
 access: 
@@ -133,6 +140,9 @@ calendar:
 caret: 
 	$(MAKE) -C caret -f makefile.gcc $(MAKEARGS) all
 
+checklst: 
+	$(MAKE) -C checklst -f makefile.gcc $(MAKEARGS) all
+
 collpane: 
 	$(MAKE) -C collpane -f makefile.gcc $(MAKEARGS) all
 
@@ -150,6 +160,9 @@ controls:
 
 dataview: 
 	$(MAKE) -C dataview -f makefile.gcc $(MAKEARGS) all
+
+db: 
+	$(MAKE) -C db -f makefile.gcc $(MAKEARGS) all
 
 dialogs: 
 	$(MAKE) -C dialogs -f makefile.gcc $(MAKEARGS) all
@@ -174,6 +187,9 @@ dragimag:
 
 drawing: 
 	$(MAKE) -C drawing -f makefile.gcc $(MAKEARGS) all
+
+dynamic: 
+	$(MAKE) -C dynamic -f makefile.gcc $(MAKEARGS) all
 
 erase: 
 	$(MAKE) -C erase -f makefile.gcc $(MAKEARGS) all
@@ -220,6 +236,9 @@ keyboard:
 layout: 
 	$(MAKE) -C layout -f makefile.gcc $(MAKEARGS) all
 
+listbox: 
+	$(MAKE) -C listbox -f makefile.gcc $(MAKEARGS) all
+
 listctrl: 
 	$(MAKE) -C listctrl -f makefile.gcc $(MAKEARGS) all
 
@@ -235,11 +254,17 @@ memcheck:
 menu: 
 	$(MAKE) -C menu -f makefile.gcc $(MAKEARGS) all
 
+minifram: 
+	$(MAKE) -C minifram -f makefile.gcc $(MAKEARGS) all
+
 minimal: 
 	$(MAKE) -C minimal -f makefile.gcc $(MAKEARGS) all
 
 mobile: 
 	$(MAKE) -C mobile -f makefile.gcc $(MAKEARGS) all
+
+multimon: 
+	$(MAKE) -C multimon -f makefile.gcc $(MAKEARGS) all
 
 nativdlg: 
 	$(MAKE) -C nativdlg -f makefile.gcc $(MAKEARGS) all
@@ -256,11 +281,17 @@ opengl:
 ownerdrw: 
 	$(MAKE) -C ownerdrw -f makefile.gcc $(MAKEARGS) all
 
+png: 
+	$(MAKE) -C png -f makefile.gcc $(MAKEARGS) all
+
 popup: 
 	$(MAKE) -C popup -f makefile.gcc $(MAKEARGS) all
 
 printing: 
 	$(MAKE) -C printing -f makefile.gcc $(MAKEARGS) all
+
+propsize: 
+	$(MAKE) -C propsize -f makefile.gcc $(MAKEARGS) all
 
 regtest: 
 	$(MAKE) -C regtest -f makefile.gcc $(MAKEARGS) all
@@ -270,6 +301,9 @@ render:
 
 richtext: 
 	$(MAKE) -C richtext -f makefile.gcc $(MAKEARGS) all
+
+rotate: 
+	$(MAKE) -C rotate -f makefile.gcc $(MAKEARGS) all
 
 sashtest: 
 	$(MAKE) -C sashtest -f makefile.gcc $(MAKEARGS) all
@@ -297,9 +331,6 @@ splitter:
 
 statbar: 
 	$(MAKE) -C statbar -f makefile.gcc $(MAKEARGS) all
-
-stc: 
-	$(MAKE) -C stc -f makefile.gcc $(MAKEARGS) all
 
 taskbar: 
 	$(MAKE) -C taskbar -f makefile.gcc $(MAKEARGS) all
@@ -331,13 +362,10 @@ widgets:
 wizard: 
 	$(MAKE) -C wizard -f makefile.gcc $(MAKEARGS) all
 
-wrapsizer: 
-	$(MAKE) -C wrapsizer -f makefile.gcc $(MAKEARGS) all
-
 mfc: 
 	$(MAKE) -C mfc -f makefile.gcc $(MAKEARGS) all
 
-.PHONY: all clean access animate artprov aui calendar caret collpane config combo console controls dataview dialogs dialup display dnd docview docvwmdi dragimag drawing erase event exec except font grid help htlbox html image internat ipc joytest keyboard layout listctrl mdi mediaplayer memcheck menu minimal mobile nativdlg notebook oleauto opengl ownerdrw popup printing regtest render richtext sashtest scroll scrollsub shaped sockets sound splash splitter statbar stc taskbar text thread toolbar treectrl typetest validate vscroll widgets wizard wrapsizer mfc
+.PHONY: all clean access animate artprov aui calendar caret checklst collpane config combo console controls dataview db dialogs dialup display dnd docview docvwmdi dragimag drawing dynamic erase event exec except font grid help htlbox html image internat ipc joytest keyboard layout listbox listctrl mdi mediaplayer memcheck menu minifram minimal mobile multimon nativdlg notebook oleauto opengl ownerdrw png popup printing propsize regtest render richtext rotate sashtest scroll scrollsub shaped sockets sound splash splitter statbar taskbar text thread toolbar treectrl typetest validate vscroll widgets wizard mfc
 
 
 SHELL := $(COMSPEC)

@@ -28,6 +28,9 @@ extern bool      g_blockEventsOnDrag;
 extern "C" {
 static void gtk_togglebutton_clicked_callback(GtkWidget *WXUNUSED(widget), wxToggleButton *cb)
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (!cb->m_hasVMT || g_blockEventsOnDrag)
         return;
 
@@ -37,30 +40,33 @@ static void gtk_togglebutton_clicked_callback(GtkWidget *WXUNUSED(widget), wxTog
     wxCommandEvent event(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, cb->GetId());
     event.SetInt(cb->GetValue());
     event.SetEventObject(cb);
-    cb->HandleWindowEvent(event);
+    cb->GetEventHandler()->ProcessEvent(event);
 }
 }
 
 DEFINE_EVENT_TYPE(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED)
 
 // ------------------------------------------------------------------------
-// wxBitmapToggleButton
+// wxToggleBitmapButton
 // ------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxBitmapToggleButton, wxControl)
+IMPLEMENT_DYNAMIC_CLASS(wxToggleBitmapButton, wxControl)
 
-bool wxBitmapToggleButton::Create(wxWindow *parent, wxWindowID id,
+bool wxToggleBitmapButton::Create(wxWindow *parent, wxWindowID id,
                             const wxBitmap &label, const wxPoint &pos,
                             const wxSize &size, long style,
                             const wxValidator& validator,
                             const wxString &name)
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     m_blockEvent = false;
 
     if (!PreCreation(parent, pos, size) ||
        !CreateBase(parent, id, pos, size, style, validator, name ))
     {
-        wxFAIL_MSG(wxT("wxBitmapToggleButton creation failed"));
+        wxFAIL_MSG(wxT("wxToggleBitmapButton creation failed"));
         return false;
     }
 
@@ -86,7 +92,7 @@ bool wxBitmapToggleButton::Create(wxWindow *parent, wxWindowID id,
 
 // void SetValue(bool state)
 // Set the value of the toggle button.
-void wxBitmapToggleButton::SetValue(bool state)
+void wxToggleBitmapButton::SetValue(bool state)
 {
     wxCHECK_RET(m_widget != NULL, wxT("invalid toggle button"));
 
@@ -102,14 +108,14 @@ void wxBitmapToggleButton::SetValue(bool state)
 
 // bool GetValue() const
 // Get the value of the toggle button.
-bool wxBitmapToggleButton::GetValue() const
+bool wxToggleBitmapButton::GetValue() const
 {
     wxCHECK_MSG(m_widget != NULL, false, wxT("invalid toggle button"));
 
     return gtk_toggle_button_get_active((GtkToggleButton*)m_widget);
 }
 
-void wxBitmapToggleButton::SetLabel(const wxBitmap& label)
+void wxToggleBitmapButton::SetLabel(const wxBitmap& label)
 {
     wxCHECK_RET(m_widget != NULL, wxT("invalid toggle button"));
 
@@ -119,7 +125,7 @@ void wxBitmapToggleButton::SetLabel(const wxBitmap& label)
     OnSetBitmap();
 }
 
-void wxBitmapToggleButton::OnSetBitmap()
+void wxToggleBitmapButton::OnSetBitmap()
 {
     if (!m_bitmap.Ok()) return;
 
@@ -137,7 +143,7 @@ void wxBitmapToggleButton::OnSetBitmap()
     }
 }
 
-bool wxBitmapToggleButton::Enable(bool enable /*=true*/)
+bool wxToggleBitmapButton::Enable(bool enable /*=true*/)
 {
     if (!wxControl::Enable(enable))
         return false;
@@ -147,20 +153,20 @@ bool wxBitmapToggleButton::Enable(bool enable /*=true*/)
     return true;
 }
 
-void wxBitmapToggleButton::DoApplyWidgetStyle(GtkRcStyle *style)
+void wxToggleBitmapButton::DoApplyWidgetStyle(GtkRcStyle *style)
 {
     gtk_widget_modify_style(m_widget, style);
     gtk_widget_modify_style(GTK_BIN(m_widget)->child, style);
 }
 
 GdkWindow *
-wxBitmapToggleButton::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
+wxToggleBitmapButton::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
 {
     return GTK_BUTTON(m_widget)->event_window;
 }
 
 // Get the "best" size for this control.
-wxSize wxBitmapToggleButton::DoGetBestSize() const
+wxSize wxToggleBitmapButton::DoGetBestSize() const
 {
     wxSize best;
 
@@ -177,7 +183,7 @@ wxSize wxBitmapToggleButton::DoGetBestSize() const
 
 // static
 wxVisualAttributes
-wxBitmapToggleButton::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
+wxToggleBitmapButton::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 {
     return GetDefaultAttributesFromGTKWidget(gtk_toggle_button_new);
 }
@@ -195,6 +201,9 @@ bool wxToggleButton::Create(wxWindow *parent, wxWindowID id,
                             const wxValidator& validator,
                             const wxString &name)
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     m_blockEvent = false;
 
     if (!PreCreation(parent, pos, size) ||

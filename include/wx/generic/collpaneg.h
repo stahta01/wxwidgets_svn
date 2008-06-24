@@ -15,11 +15,9 @@
 // forward declared
 class WXDLLIMPEXP_FWD_CORE wxButton;
 class WXDLLIMPEXP_FWD_CORE wxStaticLine;
-#ifdef __WXMAC__
-class WXDLLIMPEXP_FWD_CORE wxDisclosureTriangle;
-#endif
 
-#include "wx/containr.h"
+// class name
+extern WXDLLIMPEXP_DATA_CORE(const wxChar) wxCollapsiblePaneNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxGenericCollapsiblePane
@@ -44,7 +42,15 @@ public:
         Create(parent, winid, label, pos, size, style, val, name);
     }
 
-    virtual ~wxGenericCollapsiblePane();
+    void Init()
+    {
+        m_pButton = NULL;
+        m_pPane = NULL;
+        m_pStaticLine = NULL;
+        m_sz = NULL;
+    }
+
+    ~wxGenericCollapsiblePane();
 
     bool Create(wxWindow *parent,
                 wxWindowID winid,
@@ -79,11 +85,7 @@ protected:
     int GetBorder() const;
 
     // child controls
-#ifdef __WXMAC__
-    wxDisclosureTriangle *m_pButton;
-#else
     wxButton *m_pButton;
-#endif
     wxStaticLine *m_pStaticLine;
     wxWindow *m_pPane;
     wxSizer *m_sz;
@@ -92,13 +94,10 @@ protected:
     wxString m_strLabel;
 
 private:
-    void Init();
-
     // event handlers
     void OnButton(wxCommandEvent &ev);
     void OnSize(wxSizeEvent &ev);
 
-    WX_DECLARE_CONTROL_CONTAINER();
     DECLARE_DYNAMIC_CLASS(wxGenericCollapsiblePane)
     DECLARE_EVENT_TABLE()
 };

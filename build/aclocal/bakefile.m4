@@ -126,7 +126,7 @@ AC_DEFUN([AC_BAKEFILE_PLATFORM],
                 PLATFORM_BEOS=1
             ;;
             * )
-	        dnl wxWidgets-specific: allow unknown Unix systems
+                dnl wxWidgets-specific: allow unknown Unix systems
                 dnl AC_MSG_ERROR([Unknown platform: $BAKEFILE_FORCE_PLATFORM])
             ;;
         esac

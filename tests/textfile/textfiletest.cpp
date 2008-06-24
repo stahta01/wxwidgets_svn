@@ -22,7 +22,6 @@
 #ifndef WX_PRECOMP
 #endif // WX_PRECOMP
 
-#include "wx/ffile.h"
 #include "wx/textfile.h"
 
 // ----------------------------------------------------------------------------
@@ -47,7 +46,6 @@ private:
         CPPUNIT_TEST( ReadUTF8 );
         CPPUNIT_TEST( ReadUTF16 );
 #endif // wxUSE_UNICODE
-        CPPUNIT_TEST( ReadBig );
     CPPUNIT_TEST_SUITE_END();
 
     void ReadEmpty();
@@ -59,7 +57,6 @@ private:
     void ReadUTF8();
     void ReadUTF16();
 #endif // wxUSE_UNICODE
-    void ReadBig();
 
     // return the name of the test file we use
     static const char *GetTestFileName() { return "textfiletest.txt"; }
@@ -67,7 +64,7 @@ private:
     // create the test file with the given contents
     static void CreateTestFile(const char *contents)
     {
-        CreateTestFile(strlen(contents), contents);
+        return CreateTestFile(strlen(contents), contents);
     }
 
     // create the test file with the given contents (version must be used if
@@ -203,29 +200,6 @@ void TextFileTestCase::ReadUTF16()
 }
 
 #endif // wxUSE_UNICODE
-
-void TextFileTestCase::ReadBig()
-{
-    static const size_t NUM_LINES = 10000;
-
-    {
-        wxFFile f(GetTestFileName(), "w");
-        for ( size_t n = 0; n < NUM_LINES; n++ )
-        {
-            fprintf(f.fp(), "Line %lu\n", (unsigned long)n + 1);
-        }
-    }
-
-    wxTextFile f;
-    CPPUNIT_ASSERT( f.Open(GetTestFileName()) );
-
-    CPPUNIT_ASSERT_EQUAL( NUM_LINES, f.GetLineCount() );
-    CPPUNIT_ASSERT_EQUAL( wxString("Line 1"), f[0] );
-    CPPUNIT_ASSERT_EQUAL( wxString("Line 999"), f[998] );
-    CPPUNIT_ASSERT_EQUAL( wxString("Line 1000"), f[999] );
-    CPPUNIT_ASSERT_EQUAL( wxString::Format("Line %lu", (unsigned long)NUM_LINES),
-                          f[NUM_LINES - 1] );
-}
 
 #endif // wxUSE_TEXTFILE
 

@@ -21,6 +21,13 @@
 #define wxIMAGE_OPTION_CUR_HOTSPOT_X  wxT("HotSpotX")
 #define wxIMAGE_OPTION_CUR_HOTSPOT_Y  wxT("HotSpotY")
 
+#if WXWIN_COMPATIBILITY_2_4
+    // Do not use these macros, they are deprecated
+    #define wxBMP_FORMAT    wxIMAGE_OPTION_BMP_FORMAT
+    #define wxCUR_HOTSPOT_X wxIMAGE_OPTION_CUR_HOTSPOT_X
+    #define wxCUR_HOTSPOT_Y wxIMAGE_OPTION_CUR_HOTSPOT_Y
+#endif
+
 
 enum
 {
@@ -40,7 +47,7 @@ enum
 // wxBMPHandler
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBMPHandler : public wxImageHandler
+class WXDLLEXPORT wxBMPHandler : public wxImageHandler
 {
 public:
     wxBMPHandler()
@@ -74,7 +81,7 @@ private:
 // wxICOHandler
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxICOHandler : public wxBMPHandler
+class WXDLLEXPORT wxICOHandler : public wxBMPHandler
 {
 public:
     wxICOHandler()
@@ -103,7 +110,7 @@ private:
 // wxCURHandler
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCURHandler : public wxICOHandler
+class WXDLLEXPORT wxCURHandler : public wxICOHandler
 {
 public:
     wxCURHandler()
@@ -130,7 +137,7 @@ private:
 // wxANIHandler
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxANIHandler : public wxCURHandler
+class WXDLLEXPORT wxANIHandler : public wxCURHandler
 {
 public:
     wxANIHandler()

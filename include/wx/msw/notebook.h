@@ -23,7 +23,7 @@
 // wxNotebook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebookPageInfo : public wxObject
+class WXDLLEXPORT wxNotebookPageInfo : public wxObject
 {
 public :
     wxNotebookPageInfo() { m_page = NULL; m_imageId = -1; m_selected = false; }
@@ -57,7 +57,7 @@ private:
 
 WX_DECLARE_EXPORTED_LIST(wxNotebookPageInfo, wxNotebookPageInfoList );
 
-class WXDLLIMPEXP_CORE wxNotebook : public wxNotebookBase
+class WXDLLEXPORT wxNotebook : public wxNotebookBase
 {
 public:
   // ctors
