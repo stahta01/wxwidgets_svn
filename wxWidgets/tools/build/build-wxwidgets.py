@@ -28,6 +28,7 @@ option_dict = {
             "rebake"    : (False, "Regenerate Bakefile and autoconf files"),
             "unicode"   : (False, "Build the library with unicode support"),
             "wxpython"  : (False, "Build the wxWidgets library with all options needed by wxPython"),
+            "cocoa"     : (False, "Build the Cooca port (Mac only currently)."),
           }
           
 toggle_opts = {
@@ -70,6 +71,9 @@ if format == "autoconf":
         
     if options.mac_fat_binary: 
         configure_opts.append("--enable-universal_binary")
+        
+    if options.cocoa:
+        configure_opts.append("--with-cocoa")
     
 
     wxpy_configure_opts = [
