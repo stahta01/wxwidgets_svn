@@ -124,14 +124,14 @@ if options.clean:
     
 exitIfError(wxBuilder.build(), "Error building")
     
-if options.wxpython:
+if options.wxpython and os.path.exists(contribDir):
     exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos")), "Error building gizmos")
     exitIfError(wxBuilder.build(os.path.join(contribDir, "stc")), "Error building stc")
     
 if options.install:
     wxBuilder.install()
     
-    if options.wxpython:
+    if options.wxpython and os.path.exists(contribDir):
         exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos")), "Error building gizmos")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "stc")), "Error building stc")
     
