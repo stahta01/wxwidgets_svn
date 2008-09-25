@@ -9,77 +9,69 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef __VIEW_H__
-#define __VIEW_H__
+#ifndef __VIEWSAMPLEH__
+#define __VIEWSAMPLEH__
 
 #include "wx/docview.h"
 
-class DrawingView;
-class MyCanvas : public wxScrolledWindow
+class MyCanvas: public wxScrolledWindow
 {
 public:
-    DrawingView* m_view;
+    wxView *view;
+    
+    MyCanvas(wxView *v, wxMDIChildFrame *frame, const wxPoint& pos, const wxSize& size, long style);
+    virtual void OnDraw(wxDC& dc);
+    void OnMouseEvent(wxMouseEvent& event);
 
-    MyCanvas(DrawingView*, wxMDIChildFrame*, const wxPoint&, const wxSize&, long style);
-    virtual void OnDraw(wxDC&);
-protected:
-    void OnMouseEvent(wxMouseEvent&);
+private:
     DECLARE_EVENT_TABLE()
 };
 
 class MyTextWindow: public wxTextCtrl
 {
 public:
-    wxView* m_view;
-
-    MyTextWindow(wxView*, wxMDIChildFrame*, const wxPoint&, const wxSize&, long style);
+    wxView *view;
+    
+    MyTextWindow(wxView *v, wxMDIChildFrame *frame, const wxPoint& pos, const wxSize& size, long style);
 };
 
-class DrawingDocument;
-class DrawingView : public wxView
+class DrawingView: public wxView
 {
-    DECLARE_DYNAMIC_CLASS(DrawingView)
 public:
-    wxMDIChildFrame* m_frame;
-    MyCanvas* m_canvas;
+    wxMDIChildFrame *frame;
+    MyCanvas *canvas;
+  
+    DrawingView() { canvas = (MyCanvas *) NULL; frame = (wxMDIChildFrame *) NULL; }
+    ~DrawingView() {}
 
-    DrawingView() { m_canvas = NULL; m_frame = NULL; }
-    virtual ~DrawingView() {}
+    bool OnCreate(wxDocument *doc, long flags);
+    void OnDraw(wxDC *dc);
+    void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    bool OnClose(bool deleteWindow = true);
 
-    virtual bool OnCreate(wxDocument *doc, long flags);
-    virtual void OnDraw(wxDC *dc);
-    virtual void OnUpdate(wxView *sender, wxObject *hint = NULL);
-    virtual bool OnClose(bool deleteWindow = true);
-
-    DrawingDocument* GetDocument();
-
-protected:
     void OnCut(wxCommandEvent& event);
+
+private:
+    DECLARE_DYNAMIC_CLASS(DrawingView)
     DECLARE_EVENT_TABLE()
 };
 
 class TextEditView: public wxView
 {
 public:
-    wxMDIChildFrame* m_frame;
-    MyTextWindow* m_textsw;
+    wxMDIChildFrame *frame;
+    MyTextWindow *textsw;
+  
+    TextEditView(): wxView() { frame = (wxMDIChildFrame *) NULL; textsw = (MyTextWindow *) NULL; }
+    ~TextEditView() {}
 
-    TextEditView() : wxView() { m_frame = NULL; m_textsw = NULL; }
-    virtual ~TextEditView() {}
-
-    virtual bool OnCreate(wxDocument*, long flags);
-    virtual void OnDraw(wxDC* dc);
-    virtual void OnUpdate(wxView *sender, wxObject *hint = NULL);
-    virtual bool OnClose(bool deleteWindow = true);
-    virtual bool ProcessEvent(wxEvent&);
-
+    bool OnCreate(wxDocument *doc, long flags);
+    void OnDraw(wxDC *dc);
+    void OnUpdate(wxView *sender, wxObject *hint = (wxObject *) NULL);
+    bool OnClose(bool deleteWindow = true);
+    
 private:
-    void OnCopy(wxCommandEvent& WXUNUSED(event)) { m_textsw->Copy(); }
-    void OnPaste(wxCommandEvent& WXUNUSED(event)) { m_textsw->Paste(); }
-    void OnSelectAll(wxCommandEvent& WXUNUSED(event)) { m_textsw->SelectAll(); }
-
-    DECLARE_EVENT_TABLE()
-    DECLARE_DYNAMIC_CLASS(TextEditView)
+  DECLARE_DYNAMIC_CLASS(TextEditView)
 };
 
 #endif

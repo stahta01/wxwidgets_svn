@@ -22,7 +22,7 @@ struct IDataObject;
 // wxDataObject is a "smart" and polymorphic piece of data.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDataObject : public wxDataObjectBase
+class WXDLLEXPORT wxDataObject : public wxDataObjectBase
 {
 public:
     // ctor & dtor

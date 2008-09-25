@@ -12,10 +12,6 @@
 class wxConsoleAppTraits : public wxConsoleAppTraitsBase
 {
 public:
-    virtual wxEventLoopBase *CreateEventLoop() { return NULL; }
-#if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *) { return NULL; }
-#endif // wxUSE_TIMER
 };
 
 #if wxUSE_GUI
@@ -23,12 +19,7 @@ public:
 class wxGUIAppTraits : public wxGUIAppTraitsBase
 {
 public:
-    virtual wxEventLoopBase *CreateEventLoop();
-    virtual wxPortId GetToolkitVersion(int *majVer = NULL, int *minVer = NULL) const;
-
-#if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer);
-#endif // wxUSE_TIMER
+    virtual wxPortId GetToolkitVersion(int *majVer, int *minVer) const;
 };
 
 #endif // wxUSE_GUI

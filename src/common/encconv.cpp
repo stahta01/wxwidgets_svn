@@ -32,8 +32,15 @@
 #endif
 
 #ifdef __WXMAC__
-    #include "wx/osx/core/cfstring.h"
-    #include <CoreFoundation/CFStringEncodingExt.h>
+#ifdef __DARWIN__
+#include <Carbon/Carbon.h>
+#else
+#include <ATSUnicode.h>
+#include <TextCommon.h>
+#include <TextEncodingConverter.h>
+#endif
+    #include "wx/fontutil.h"
+    #include "wx/mac/private.h"  // includes mac headers
 
     wxUint16 gMacEncodings[wxFONTENCODING_MACMAX-wxFONTENCODING_MACMIN+1][128] ;
     bool gMacEncodingsInited[wxFONTENCODING_MACMAX-wxFONTENCODING_MACMIN+1] ;
@@ -51,20 +58,20 @@ static const wxUint16* GetEncTable(wxFontEncoding enc)
         int i = enc-wxFONTENCODING_MACMIN ;
         if ( gMacEncodingsInited[i] == false )
         {
-            // create 
-            CFStringEncoding cfencoding = wxMacGetSystemEncFromFontEnc( enc ) ;
-            if( !CFStringIsEncodingAvailable( cfencoding ) )
-                return NULL;
-                
-            memset( gMacEncodings[i] , 0 , 128 * 2 );
-            char s[2] = { 0 , 0 };
-            CFRange firstchar = CFRangeMake( 0, 1 );
+            TECObjectRef converter ;
+            TextEncodingBase code = wxMacGetSystemEncFromFontEnc( enc ) ;
+            TextEncodingBase unicode = CreateTextEncoding(kTextEncodingUnicodeDefault,0,kUnicode16BitFormat) ;
+            OSStatus status = TECCreateConverter(&converter,code,unicode);
+            char s[2] ;
+            s[1] = 0 ;
+            ByteCount byteInLen, byteOutLen ;
             for( unsigned char c = 255 ; c >= 128 ; --c )
             {
                 s[0] = c ;
-                wxCFStringRef cfref( CFStringCreateWithCStringNoCopy( NULL, s, cfencoding , kCFAllocatorNull ) );
-                CFStringGetCharacters( cfref, firstchar, (UniChar*)  &gMacEncodings[i][c-128] );
+                status = TECConvertText(converter, (ConstTextPtr) &s , 1, &byteInLen,
+                (TextPtr) &gMacEncodings[i][c-128] , 2, &byteOutLen);
             }
+            status = TECDisposeConverter(converter);
             gMacEncodingsInited[i]=true;
         }
         return gMacEncodings[i] ;

@@ -31,7 +31,6 @@
 #ifndef WX_PRECOMP
     #include "wx/settings.h"
     #include "wx/dcscreen.h"
-    #include "wx/toplevel.h"
 #endif
 
 #include "wx/msw/private.h"
@@ -154,108 +153,82 @@ bool wxRadioButton::Create(wxWindow *parent,
 
 void wxRadioButton::SetValue(bool value)
 {
-    ::SendMessage(GetHwnd(), BM_SETCHECK,
-                  value ? BST_CHECKED : BST_UNCHECKED, 0);
+    (void)::SendMessage(GetHwnd(), BM_SETCHECK, (value?BST_CHECKED:BST_UNCHECKED), 0L);
 
     m_isChecked = value;
 
-    if ( !value )
-        return;
-
     // if we set the value of one radio button we also must clear all the other
     // buttons in the same group: Windows doesn't do it automatically
-    //
-    // moreover, if another radiobutton in the group currently has the focus,
-    // we have to set it to this radiobutton, else the old radiobutton will be
-    // reselected automatically, if a parent window loses the focus and regains
-    // it.
-    wxWindow * const focus = FindFocus();
-    wxTopLevelWindow * const
-        tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
-    wxCHECK_RET( tlw, _T("radio button outside of TLW?") );
-    wxWindow * const focusInTLW = tlw->GetLastFocus();
-
-    const wxWindowList& siblings = GetParent()->GetChildren();
-    wxWindowList::compatibility_iterator nodeThis = siblings.Find(this);
-    wxCHECK_RET( nodeThis, _T("radio button not a child of its parent?") );
-
-    // this will be set to true in the code below if the focus is in our TLW
-    // and belongs to one of the other buttons in the same group
-    bool shouldSetFocus = false;
-
-    // this will be set to true if the focus is outside of our TLW currently
-    // but the remembered focus of this TLW is one of the other buttons in the
-    // same group
-    bool shouldSetTLWFocus = false;
-
-    // if it's not the first item of the group ...
-    if ( !HasFlag(wxRB_GROUP) )
+    if ( m_isChecked )
     {
-        // ... turn off all radio buttons before it
-        for ( wxWindowList::compatibility_iterator nodeBefore = nodeThis->GetPrevious();
-              nodeBefore;
-              nodeBefore = nodeBefore->GetPrevious() )
-        {
-            wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
-                                               wxRadioButton);
-            if ( !btn )
-            {
-                // don't stop on non radio buttons, we could have intermixed
-                // buttons and e.g. static labels
-                continue;
-            }
+        // If another radiobutton in the group currently has the focus, we have to
+        // set it to this radiobutton, else the old radiobutton will be reselected
+        // automatically, if a parent window loses the focus and regains it.
+        bool shouldSetFocus = false;
+        wxWindow* pFocusWnd = FindFocus();
 
-            if ( btn->HasFlag(wxRB_SINGLE) )
+        const wxWindowList& siblings = GetParent()->GetChildren();
+        wxWindowList::compatibility_iterator nodeThis = siblings.Find(this);
+        wxCHECK_RET( nodeThis, _T("radio button not a child of its parent?") );
+
+        // if it's not the first item of the group ...
+        if ( !HasFlag(wxRB_GROUP) )
+        {
+            // ... turn off all radio buttons before it
+            for ( wxWindowList::compatibility_iterator nodeBefore = nodeThis->GetPrevious();
+                  nodeBefore;
+                  nodeBefore = nodeBefore->GetPrevious() )
+            {
+                wxRadioButton *btn = wxDynamicCast(nodeBefore->GetData(),
+                                                   wxRadioButton);
+                if ( btn && btn->HasFlag(wxRB_SINGLE) )
                 {
                     // A wxRB_SINGLE button isn't part of this group
                     break;
                 }
 
-            if ( btn == focus )
-                shouldSetFocus = true;
-            else if ( btn == focusInTLW )
-                shouldSetTLWFocus = true;
+                if (btn)
+                {
+                    if (btn == pFocusWnd)
+                        shouldSetFocus = true;
 
-            btn->SetValue(false);
+                    btn->SetValue(false);
 
-            if ( btn->HasFlag(wxRB_GROUP) )
-            {
-                // even if there are other radio buttons before this one,
-                // they're not in the same group with us
-                break;
+                    if ( btn->HasFlag(wxRB_GROUP) )
+                    {
+                        // even if there are other radio buttons before this one,
+                        // they're not in the same group with us
+                        break;
+                    }
+                }
             }
         }
-    }
 
-    // ... and also turn off all buttons after this one
-    for ( wxWindowList::compatibility_iterator nodeAfter = nodeThis->GetNext();
-          nodeAfter;
-          nodeAfter = nodeAfter->GetNext() )
-    {
-        wxRadioButton *btn = wxDynamicCast(nodeAfter->GetData(),
-                                           wxRadioButton);
-
-        if ( !btn )
-            continue;
-
-        if ( btn->HasFlag(wxRB_GROUP | wxRB_SINGLE) )
+        // ... and also turn off all buttons after this one
+        for ( wxWindowList::compatibility_iterator nodeAfter = nodeThis->GetNext();
+              nodeAfter;
+              nodeAfter = nodeAfter->GetNext() )
         {
-            // no more buttons or the first button of the next group
-            break;
+            wxRadioButton *btn = wxDynamicCast(nodeAfter->GetData(),
+                                               wxRadioButton);
+
+            if ( btn && (btn->HasFlag(wxRB_GROUP) || btn->HasFlag(wxRB_SINGLE) ) )
+            {
+                // no more buttons or the first button of the next group
+                break;
+            }
+
+            if (btn)
+            {
+                if (btn == pFocusWnd)
+                        shouldSetFocus = true;
+
+                btn->SetValue(false);
+            }
         }
-
-        if ( btn == focus )
-            shouldSetFocus = true;
-        else if ( btn == focusInTLW )
-            shouldSetTLWFocus = true;
-
-        btn->SetValue(false);
+        if (shouldSetFocus)
+            SetFocus();
     }
-
-    if ( shouldSetFocus )
-        SetFocus();
-    else if ( shouldSetTLWFocus )
-        tlw->SetLastFocus(this);
 }
 
 bool wxRadioButton::GetValue() const
@@ -312,13 +285,6 @@ wxSize wxRadioButton::DoGetBestSize() const
         dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
         s_radioSize = dc.GetCharHeight();
-
-        // radio button bitmap size under CE is bigger than the font height,
-        // adding just one pixel seems to work fine for the default font but it
-        // would be nice to find some better way to find the correct height
-#ifdef __WXWINCE__
-        s_radioSize++;
-#endif // __WXWINCE__
     }
 
     wxString str = GetLabel();

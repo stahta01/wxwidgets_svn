@@ -225,7 +225,7 @@ void wxCaret::Refresh()
     }
     else
     {
-        DoDraw( &dcWin, GetWindow() );
+        DoDraw( &dcWin );
     }
 #else
     wxMemoryDC dcMem;
@@ -261,28 +261,44 @@ void wxCaret::Refresh()
         //      more
 
         // and draw the caret there
-        DoDraw(&dcWin, GetWindow());
+        DoDraw(&dcWin);
     }
 #endif
 }
 
-void wxCaret::DoDraw(wxDC *dc, wxWindow* win)
+void wxCaret::DoDraw(wxDC *dc)
 {
-    wxPen pen(*wxBLACK_PEN);
-    wxBrush brush(*wxBLACK_BRUSH);
-    if (win)
+#if defined(__WXGTK__) || defined(__WXMAC__)
+    wxClientDC* clientDC = wxDynamicCast(dc, wxClientDC);
+    if (clientDC)
     {
-        wxColour backgroundColour(win->GetBackgroundColour());
-        if (backgroundColour.Red() < 100 &&
-            backgroundColour.Green() < 100 &&
-            backgroundColour.Blue() < 100)
+        wxPen pen(*wxBLACK_PEN);
+        wxBrush brush(*wxBLACK_BRUSH);
+#ifdef __WXGTK__
+        wxWindow* win = clientDC->m_owner;
+#else
+        wxWindow* win = clientDC->GetWindow();
+#endif
+        if (win)
         {
-            pen = *wxWHITE_PEN;
-            brush = *wxWHITE_BRUSH;
+            wxColour backgroundColour(win->GetBackgroundColour());
+            if (backgroundColour.Red() < 100 &&
+                backgroundColour.Green() < 100 &&
+                backgroundColour.Blue() < 100)
+            {
+                pen = *wxWHITE_PEN;
+                brush = *wxWHITE_BRUSH;
+            }
         }
+        dc->SetPen( pen );
+        dc->SetBrush(m_hasFocus ? brush : *wxTRANSPARENT_BRUSH);
     }
-    dc->SetPen( pen );
-    dc->SetBrush(m_hasFocus ? brush : *wxTRANSPARENT_BRUSH);
+    else
+#endif
+    {
+        dc->SetBrush(*(m_hasFocus ? wxBLACK_BRUSH : wxTRANSPARENT_BRUSH));
+        dc->SetPen(*wxBLACK_PEN);
+    }
 
     // VZ: unfortunately, the rectangle comes out a pixel smaller when this is
     //     done under wxGTK - no idea why

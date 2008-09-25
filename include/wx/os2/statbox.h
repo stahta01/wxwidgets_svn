@@ -15,7 +15,7 @@
 #include "wx/control.h"
 
 // Group box
-class WXDLLIMPEXP_CORE wxStaticBox : public wxStaticBoxBase
+class WXDLLEXPORT wxStaticBox : public wxStaticBoxBase
 {
 public:
     inline wxStaticBox() {}

@@ -30,7 +30,7 @@ enum
     wxPNG_TYPE_GREY_RED = 3
 };
 
-class WXDLLIMPEXP_CORE wxPNGHandler: public wxImageHandler
+class WXDLLEXPORT wxPNGHandler: public wxImageHandler
 {
 public:
     inline wxPNGHandler()

@@ -26,7 +26,7 @@
 // wxColour
 //-----------------------------------------------------------------------------
 
-class wxColourRefData : public wxGDIRefData
+class wxColourRefData: public wxObjectRefData
 {
 public:
     wxColourRefData()
@@ -40,6 +40,7 @@ public:
     }
 
     wxColourRefData(const wxColourRefData& data)
+        : wxObjectRefData()
     {
         m_color = data.m_color;
         m_colormap = data.m_colormap;
@@ -158,12 +159,12 @@ bool wxColour::operator == ( const wxColour& col ) const
                      own->green == other->green;
 }
 
-wxGDIRefData *wxColour::CreateGDIRefData() const
+wxObjectRefData *wxColour::CreateRefData() const
 {
     return new wxColourRefData;
 }
 
-wxGDIRefData *wxColour::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxColour::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxColourRefData(*(wxColourRefData *)data);
 }
@@ -224,10 +225,10 @@ GdkColor *wxColour::GetColor() const
     return &M_COLDATA->m_color;
 }
 
-bool wxColour::FromString(const wxString& str)
+bool wxColour::FromString(const wxChar *str)
 {
     GdkColor colGDK;
-    if ( gdk_color_parse( wxGTK_CONV(str), &colGDK ) )
+    if ( gdk_color_parse( str, &colGDK ) )
     {
         UnRef();
 

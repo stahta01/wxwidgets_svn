@@ -58,6 +58,11 @@
 #   define wxUSE_DYNAMIC_LOADER 0
 #endif /* wxUSE_DYNAMIC_LOADER */
 
+#if wxUSE_ODBC
+#   undef wxUSE_ODBC
+#   define wxUSE_ODBC 0
+#endif /* wxUSE_ODBC */
+
 #if wxUSE_DATAOBJ
 #   undef wxUSE_DATAOBJ
 #   define wxUSE_DATAOBJ 0

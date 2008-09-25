@@ -14,14 +14,14 @@
 
 #include "wx/panel.h"
 
-WXDLLIMPEXP_DATA_CORE(extern const char) wxDialogNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
 
-class WXDLLIMPEXP_FWD_CORE wxDialogModalData;
+class WXDLLEXPORT wxDialogModalData;
 
 //
 // Dialog boxes
 //
-class WXDLLIMPEXP_CORE wxDialog: public wxDialogBase
+class WXDLLEXPORT wxDialog: public wxDialogBase
 {
 public:
 

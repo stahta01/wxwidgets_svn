@@ -16,10 +16,10 @@
 #include "wx/icon.h"
 #include "wx/bitmap.h"
 
-WXDLLIMPEXP_DATA_CORE(extern const wxChar) wxStaticBitmapNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxStaticBitmapNameStr[];
 
 // a control showing an icon or a bitmap
-class WXDLLIMPEXP_CORE wxStaticBitmap : public wxStaticBitmapBase
+class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
 {
 public:
     wxStaticBitmap() { Init(); }

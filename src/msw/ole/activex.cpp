@@ -30,8 +30,6 @@
     #include "wx/math.h"
 #endif
 
-#include "wx/msw/dc.h"
-
 #include "wx/msw/ole/activex.h"
 // autointerfaces that we only use here
 WX_DECLARE_AUTOOLE(wxAutoIOleInPlaceSite, IOleInPlaceSite)
@@ -1125,9 +1123,8 @@ void wxActiveXContainer::OnPaint(wxPaintEvent& WXUNUSED(event))
         ::InvalidateRect(m_oleObjectHWND, NULL, false);
 #endif
         RECTL *prcBounds = (RECTL *) &posRect;
-        wxMSWDCImpl *msw = wxDynamicCast( dc.GetImpl() , wxMSWDCImpl );
         m_viewObject->Draw(DVASPECT_CONTENT, -1, NULL, NULL, NULL,
-            (HDC)msw->GetHDC(), prcBounds, NULL, NULL, 0);
+            (HDC)dc.GetHDC(), prcBounds, NULL, NULL, 0);
     }
 }
 

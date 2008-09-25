@@ -17,7 +17,7 @@
 #include "wx/dc.h"
 #include "wx/cmndata.h"
 
-class WXDLLIMPEXP_CORE wxPrinterDC : public wxDC
+class WXDLLEXPORT wxPrinterDC : public wxDC
 {
 public:
     // Create a printer DC (obsolete function: use wxPrintData version now)
@@ -54,10 +54,10 @@ private:
 };
 
 // Gets an HDC for the default printer configuration
-// WXHDC WXDLLIMPEXP_CORE wxGetPrinterDC(int orientation);
+// WXHDC WXDLLEXPORT wxGetPrinterDC(int orientation);
 
 // Gets an HDC for the specified printer configuration
-WXHDC WXDLLIMPEXP_CORE wxGetPrinterDC(const wxPrintData& data);
+WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& data);
 
 #endif // wxUSE_PRINTING_ARCHITECTURE
 

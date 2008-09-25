@@ -379,15 +379,22 @@ int wxIFFDecoder::ReadIFF()
     // main decoding loop. searches IFF chunks and handles them.
     // terminates when BODY chunk was found or dataptr ran over end of file
     //
-    bool BMHDok = false, CAMGok = false;
+    bool BMHDok = false, CMAPok = false, CAMGok = false;
     int bmhd_width = 0, bmhd_height = 0, bmhd_bitplanes = 0, bmhd_transcol = -1;
-    byte bmhd_compression = 0;
+    byte bmhd_masking = 0, bmhd_compression = 0;
     long camg_viewmode = 0;
     int colors = 0;
     while (dataptr + 8 <= dataend) {
     // get chunk length and make even
-    long chunkLen = (iff_getlong(dataptr + 4) + 1) & 0xfffffffe;
-    if (chunkLen < 0) {     // format error?
+    size_t chunkLen = (iff_getlong(dataptr + 4) + 1) & 0xfffffffe;
+#ifdef __VMS
+       // Silence compiler warning
+       int chunkLen_;
+       chunkLen_ = chunkLen;
+       if (chunkLen_ < 0) {     // format error?
+#else
+       if (chunkLen < 0) {     // format error?
+#endif
          break;
     }
     bool truncated = (dataptr + 8 + chunkLen > dataend);
@@ -399,7 +406,7 @@ int wxIFFDecoder::ReadIFF()
         bmhd_width = iff_getword(dataptr + 8);      // width of picture
         bmhd_height= iff_getword(dataptr + 8 + 2);  // height of picture
         bmhd_bitplanes = *(dataptr + 8 + 8);        // # of bitplanes
-        // bmhd_masking  = *(dataptr + 8 + 9); -- unused currently
+        bmhd_masking  = *(dataptr + 8 + 9);
         bmhd_compression = *(dataptr + 8 + 10);     // get compression
         bmhd_transcol    = iff_getword(dataptr + 8 + 12);
         BMHDok = true;                              // got BMHD
@@ -433,6 +440,7 @@ int wxIFFDecoder::ReadIFF()
         wxLogTrace(_T("iff"), _T("Read %d colors from IFF file."),
             colors);
 
+        CMAPok = true;                              // got CMAP
         dataptr += 8 + chunkLen;                    // to next chunk
     } else if (strncmp((char *)dataptr, "CAMG", 4) == 0) { // CAMG ?
         if (chunkLen < 4 || truncated) {

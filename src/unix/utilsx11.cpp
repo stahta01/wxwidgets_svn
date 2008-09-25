@@ -41,6 +41,7 @@
 #endif
 
 // Various X11 Atoms used in this file:
+static Atom _NET_WM_ICON = 0;
 static Atom _NET_WM_STATE = 0;
 static Atom _NET_WM_STATE_FULLSCREEN = 0;
 static Atom _NET_WM_STATE_STAYS_ON_TOP = 0;
@@ -105,35 +106,31 @@ private:
 // Setting icons for window manager:
 // ----------------------------------------------------------------------------
 
-#if wxUSE_IMAGE && !wxUSE_NANOX
-
-static Atom _NET_WM_ICON = 0;
-
-void
-wxSetIconsX11(WXDisplay* display, WXWindow window, const wxIconBundle& ib)
+void wxSetIconsX11( WXDisplay* display, WXWindow window,
+                    const wxIconBundle& ib )
 {
+#if !wxUSE_NANOX
     size_t size = 0;
+    size_t i, max = ib.m_icons.GetCount();
 
-    const size_t numIcons = ib.GetIconCount();
-    for ( size_t i = 0; i < numIcons; ++i )
-    {
-        const wxIcon icon = ib.GetIconByIndex(i);
-
-        size += 2 + icon.GetWidth() * icon.GetHeight();
-    }
+    for( i = 0; i < max; ++i )
+        if( ib.m_icons[i].Ok() )
+            size += 2 + ib.m_icons[i].GetWidth() * ib.m_icons[i].GetHeight();
 
     wxMAKE_ATOM(_NET_WM_ICON, (Display*)display);
 
-    if ( size > 0 )
+    if( size > 0 )
     {
+//       The code below is correct for 64-bit machines also.
+//       wxUint32* data = new wxUint32[size];
+//       wxUint32* ptr = data;
         unsigned long* data = new unsigned long[size];
         unsigned long* ptr = data;
 
-        for ( size_t i = 0; i < numIcons; ++i )
+        for( i = 0; i < max; ++i )
         {
-            const wxImage image = ib.GetIconByIndex(i).ConvertToImage();
-            int width = image.GetWidth(),
-                height = image.GetHeight();
+            const wxImage image = ib.m_icons[i].ConvertToImage();
+            int width = image.GetWidth(), height = image.GetHeight();
             unsigned char* imageData = image.GetData();
             unsigned char* imageDataEnd = imageData + ( width * height * 3 );
             bool hasMask = image.HasMask();
@@ -156,8 +153,7 @@ wxSetIconsX11(WXDisplay* display, WXWindow window, const wxIconBundle& ib)
             *ptr++ = width;
             *ptr++ = height;
 
-            while ( imageData < imageDataEnd )
-            {
+            while( imageData < imageDataEnd ) {
                 r = imageData[0];
                 g = imageData[1];
                 b = imageData[2];
@@ -186,9 +182,9 @@ wxSetIconsX11(WXDisplay* display, WXWindow window, const wxIconBundle& ib)
                          WindowCast(window),
                          _NET_WM_ICON );
     }
+#endif // !wxUSE_NANOX
 }
 
-#endif // wxUSE_IMAGE && !wxUSE_NANOX
 
 // ----------------------------------------------------------------------------
 // Fullscreen mode:
@@ -382,20 +378,20 @@ static bool wxKwinRunning(Display *display, Window rootWnd)
 {
     wxMAKE_ATOM(KWIN_RUNNING, display);
 
-    unsigned char* data;
+    long *data;
     Atom type;
     int format;
     unsigned long nitems, after;
     if (XGetWindowProperty(display, rootWnd,
                            KWIN_RUNNING, 0, 1, False, KWIN_RUNNING,
                            &type, &format, &nitems, &after,
-                           &data) != Success)
+                           (unsigned char**)&data) != Success)
     {
         return false;
     }
 
     bool retval = (type == KWIN_RUNNING &&
-                   nitems == 1 && data && ((long*)data)[0] == 1);
+                   nitems == 1 && data && data[0] == 1);
     XFree(data);
     return retval;
 }

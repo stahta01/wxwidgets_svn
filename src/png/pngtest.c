@@ -1,7 +1,7 @@
 
 /* pngtest.c - a simple test program to test libpng
  *
- * Last changed in libpng 1.2.6 - August 15, 2004
+ * libpng 1.2.7 - September 12, 2004
  * For conditions of distribution and use, see copyright notice in png.h
  * Copyright (c) 1998-2004 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
@@ -44,6 +44,7 @@
 #else
 #  include <stdio.h>
 #  include <stdlib.h>
+#  include <assert.h>
 #  define READFILE(file, data, length, check) \
      check=(png_size_t)fread(data,(png_size_t)1,length,file)
 #  define WRITEFILE(file, data, length, check) \
@@ -81,6 +82,18 @@ static float t_start, t_stop, t_decode, t_encode, t_misc;
 #include <time.h>
 #endif
 
+/* Define png_jmpbuf() in case we are using a pre-1.0.6 version of libpng */
+#ifndef png_jmpbuf
+#  define png_jmpbuf(png_ptr) png_ptr->jmpbuf
+#endif
+
+#ifdef PNGTEST_TIMING
+static float t_start, t_stop, t_decode, t_encode, t_misc;
+#if !defined(PNG_tIME_SUPPORTED)
+#include <time.h>
+#endif
+#endif
+
 #if defined(PNG_TIME_RFC1123_SUPPORTED)
 static int tIME_chunk_present=0;
 static char tIME_string[30] = "no tIME chunk present in file";
@@ -102,16 +115,6 @@ int test_one_file PNGARG((PNG_CONST char *inname, PNG_CONST char *outname));
 static int status_pass=1;
 static int status_dots_requested=0;
 static int status_dots=1;
-
-/* In case a system header (e.g., on AIX) defined jmpbuf */
-#ifdef jmpbuf
-#  undef jmpbuf
-#endif
-
-/* Define png_jmpbuf() in case we are using a pre-1.0.6 version of libpng */
-#ifndef png_jmpbuf
-#  define png_jmpbuf(png_ptr) png_ptr->jmpbuf
-#endif
 
 void
 #ifdef PNG_1_0_X
@@ -434,9 +437,8 @@ pngtest_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
       png_error(png_ptr, "Write Error");
    }
 }
+
 #endif /* USE_FAR_KEYWORD */
-#endif /* PNG_NO_STDIO */
-/* END of code to validate stdio-free compilation */
 
 /* This function is called when there is a warning, but the library thinks
  * it can continue anyway.  Replacement functions don't have to do anything
@@ -464,6 +466,8 @@ pngtest_error(png_structp png_ptr, png_const_charp message)
    /* We can return because png_error calls the default handler, which is
     * actually OK in this case. */
 }
+#endif /* PNG_NO_STDIO */
+/* END of code to validate stdio-free compilation */
 
 /* START of code to validate memory allocation and deallocation */
 #if defined(PNG_USER_MEM_SUPPORTED) && PNG_DEBUG
@@ -533,8 +537,8 @@ png_debug_malloc(png_structp png_ptr, png_uint_32 size)
       /* Make sure the caller isn't assuming zeroed memory. */
       png_memset(pinfo->pointer, 0xdd, pinfo->size);
       if(verbose)
-         printf("png_malloc %lu bytes at %x\n",(unsigned long)size,
-          pinfo->pointer);
+         printf("png_malloc %lu bytes at %x\n",size,pinfo->pointer);
+      assert(pinfo->size != 12345678);
       return (png_voidp)(pinfo->pointer);
    }
 }
@@ -657,8 +661,10 @@ test_one_file(PNG_CONST char *inname, PNG_CONST char *outname)
    read_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, png_voidp_NULL,
       png_error_ptr_NULL, png_error_ptr_NULL);
 #endif
+#if defined(PNG_NO_STDIO)
    png_set_error_fn(read_ptr, (png_voidp)inname, pngtest_error,
        pngtest_warning);
+#endif
 #ifdef PNG_WRITE_SUPPORTED
 #if defined(PNG_USER_MEM_SUPPORTED) && PNG_DEBUG
    write_ptr = png_create_write_struct_2(PNG_LIBPNG_VER_STRING, png_voidp_NULL,
@@ -668,8 +674,10 @@ test_one_file(PNG_CONST char *inname, PNG_CONST char *outname)
    write_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, png_voidp_NULL,
       png_error_ptr_NULL, png_error_ptr_NULL);
 #endif
+#if defined(PNG_NO_STDIO)
    png_set_error_fn(write_ptr, (png_voidp)inname, pngtest_error,
        pngtest_warning);
+#endif
 #endif
    png_debug(0, "Allocating read_info, write_info and end_info structures\n");
    read_info_ptr = png_create_info_struct(read_ptr);
@@ -1002,11 +1010,10 @@ test_one_file(PNG_CONST char *inname, PNG_CONST char *outname)
       {
          png_set_tIME(write_ptr, write_info_ptr, mod_time);
 #if defined(PNG_TIME_RFC1123_SUPPORTED)
-         /* we have to use png_strncpy instead of "=" because the string
+         /* we have to use png_strcpy instead of "=" because the string
             pointed to by png_convert_to_rfc1123() gets free'ed before
             we use it */
-         png_strncpy(tIME_string,png_convert_to_rfc1123(read_ptr,
-            mod_time),30);
+         png_strcpy(tIME_string,png_convert_to_rfc1123(read_ptr, mod_time));
          tIME_chunk_present++;
 #endif /* PNG_TIME_RFC1123_SUPPORTED */
       }
@@ -1143,11 +1150,10 @@ test_one_file(PNG_CONST char *inname, PNG_CONST char *outname)
       {
          png_set_tIME(write_ptr, write_end_info_ptr, mod_time);
 #if defined(PNG_TIME_RFC1123_SUPPORTED)
-         /* we have to use png_strncpy instead of "=" because the string
+         /* we have to use png_strcpy instead of "=" because the string
             pointed to by png_convert_to_rfc1123() gets free'ed before
             we use it */
-         png_strncpy(tIME_string,png_convert_to_rfc1123(read_ptr,
-            mod_time),30);
+         png_strcpy(tIME_string,png_convert_to_rfc1123(read_ptr, mod_time));
          tIME_chunk_present++;
 #endif /* PNG_TIME_RFC1123_SUPPORTED */
       }
@@ -1184,7 +1190,7 @@ test_one_file(PNG_CONST char *inname, PNG_CONST char *outname)
       iwidth = png_get_image_width(write_ptr, write_info_ptr);
       iheight = png_get_image_height(write_ptr, write_info_ptr);
       fprintf(STDERR, "Image width = %lu, height = %lu\n",
-         (unsigned long)iwidth, (unsigned long)iheight);
+         iwidth, iheight);
    }
 #endif
 
@@ -1308,8 +1314,7 @@ main(int argc, char *argv[])
    fprintf(STDERR, "   with zlib   version %s\n", ZLIB_VERSION);
    fprintf(STDERR,"%s",png_get_copyright(NULL));
    /* Show the version of libpng used in building the library */
-   fprintf(STDERR," library (%lu):%s",
-      (unsigned long)png_access_version_number(),
+   fprintf(STDERR," library (%lu):%s", png_access_version_number(),
       png_get_header_version(NULL));
    /* Show the version of libpng used in building the application */
    fprintf(STDERR," pngtest (%lu):%s", (unsigned long)PNG_LIBPNG_VER,
@@ -1397,8 +1402,7 @@ main(int argc, char *argv[])
          if (kerror == 0)
          {
 #if defined(PNG_WRITE_USER_TRANSFORM_SUPPORTED)
-            fprintf(STDERR, "\n PASS (%lu zero samples)\n",
-               (unsigned long)zero_samples);
+            fprintf(STDERR, "\n PASS (%lu zero samples)\n",zero_samples);
 #else
             fprintf(STDERR, " PASS\n");
 #endif
@@ -1406,7 +1410,7 @@ main(int argc, char *argv[])
             for (k=0; k<256; k++)
                if(filters_used[k])
                   fprintf(STDERR, " Filter %d was used %lu times\n",
-                     k,(unsigned long)filters_used[k]);
+                     k,filters_used[k]);
 #endif
 #if defined(PNG_TIME_RFC1123_SUPPORTED)
          if(tIME_chunk_present != 0)
@@ -1431,7 +1435,7 @@ main(int argc, char *argv[])
                current_allocation);
             while (pinfo != NULL)
             {
-               fprintf(STDERR, " %lu bytes at %x\n", (unsigned long)pinfo->size,
+               fprintf(STDERR, " %lu bytes at %x\n", pinfo->size, 
                  (unsigned int) pinfo->pointer);
                pinfo = pinfo->next;
             }
@@ -1471,8 +1475,7 @@ main(int argc, char *argv[])
                 int k;
 #endif
 #if defined(PNG_WRITE_USER_TRANSFORM_SUPPORTED)
-                fprintf(STDERR, "\n PASS (%lu zero samples)\n",
-                   (unsigned long)zero_samples);
+                fprintf(STDERR, "\n PASS (%lu zero samples)\n",zero_samples);
 #else
                 fprintf(STDERR, " PASS\n");
 #endif
@@ -1480,7 +1483,7 @@ main(int argc, char *argv[])
                 for (k=0; k<256; k++)
                    if(filters_used[k])
                       fprintf(STDERR, " Filter %d was used %lu times\n",
-                         k,(unsigned long)filters_used[k]);
+                         k,filters_used[k]);
 #endif
 #if defined(PNG_TIME_RFC1123_SUPPORTED)
              if(tIME_chunk_present != 0)
@@ -1508,7 +1511,7 @@ main(int argc, char *argv[])
              while (pinfo != NULL)
              {
                 fprintf(STDERR," %lu bytes at %x\n",
-                   (unsigned long)pinfo->size, (unsigned int)pinfo->pointer);
+                   pinfo->size, (unsigned int)pinfo->pointer);
                 pinfo = pinfo->next;
              }
           }
@@ -1548,4 +1551,4 @@ main(int argc, char *argv[])
 }
 
 /* Generate a compiler error if there is an old png.h in the search path. */
-typedef version_1_2_20 your_png_h_is_not_version_1_2_20;
+typedef version_1_2_7 your_png_h_is_not_version_1_2_7;

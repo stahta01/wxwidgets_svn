@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/brush.h"
     #include "wx/pen.h"
     #include "wx/dc.h"
@@ -54,8 +54,8 @@ void wxHtmlLineCell::Draw(wxDC& dc, int x, int y,
                           int WXUNUSED(view_y1), int WXUNUSED(view_y2),
                           wxHtmlRenderingInfo& WXUNUSED(info))
 {
-    wxBrush mybrush(wxT("GREY"), (m_HasShading) ? wxBRUSHSTYLE_TRANSPARENT : wxBRUSHSTYLE_SOLID);
-    wxPen mypen(wxT("GREY"), 1, wxPENSTYLE_SOLID);
+    wxBrush mybrush(wxT("GREY"), (m_HasShading) ? wxTRANSPARENT : wxSOLID);
+    wxPen mypen(wxT("GREY"), 1, wxSOLID);
     dc.SetBrush(mybrush);
     dc.SetPen(mypen);
     dc.DrawRectangle(x + m_PosX, y + m_PosY, m_Width, m_Height);

@@ -16,7 +16,7 @@
 #include <wx/ipc.h>
 #include <wx/html/helpctrl.h>
 
-class WXDLLIMPEXP_FWD_BASE wxConfigBase;
+class WXDLLEXPORT wxConfigBase;
 
 class rhhcConnection : public wxConnection
 {

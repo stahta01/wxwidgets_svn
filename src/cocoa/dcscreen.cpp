@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/cocoa/dcscreen.cpp
-// Purpose:     wxScreenDCImpl class
+// Purpose:     wxScreenDC class
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/03/16
@@ -11,7 +11,7 @@
 
 #include "wx/wxprec.h"
 
-#include "wx/cocoa/dcscreen.h"
+#include "wx/dcscreen.h"
 
 #ifndef WX_PRECOMP
 #endif //WX_PRECOMP
@@ -20,20 +20,18 @@
 // wxMemoryDC
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxScreenDCImpl,wxCocoaDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC,wxDC)
 
-wxScreenDCImpl::wxScreenDCImpl(wxScreenDC *owner)
-:   wxCocoaDCImpl(owner)
+wxScreenDC::wxScreenDC(void)
 {
     m_ok = false;
 }
 
-wxScreenDCImpl::wxScreenDCImpl(wxScreenDC *owner, wxDC *WXUNUSED(dc) )
-:   wxCocoaDCImpl(owner)
+wxScreenDC::wxScreenDC( wxDC *WXUNUSED(dc) )
 {
     m_ok = false;
 }
 
-wxScreenDCImpl::~wxScreenDCImpl(void)
+wxScreenDC::~wxScreenDC(void)
 {
 }

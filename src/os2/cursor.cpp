@@ -53,6 +53,15 @@ wxCursor::wxCursor(void)
 {
 }
 
+wxCursor::wxCursor(const char WXUNUSED(bits)[],
+                   int WXUNUSED(width),
+                   int WXUNUSED(height),
+                   int WXUNUSED(hotSpotX),
+                   int WXUNUSED(hotSpotY),
+                   const char WXUNUSED(maskBits)[])
+{
+}
+
 wxCursor::wxCursor(const wxImage& rImage)
 {
     wxImage  vImage32 = rImage.Scale(32,32);
@@ -85,7 +94,7 @@ wxCursor::wxCursor(const wxImage& rImage)
 } // end of wxCursor::wxCursor
 
 wxCursor::wxCursor( const wxString& WXUNUSED(rsCursorFile),
-                    wxBitmapType type,
+                    long lFlags,
                     int WXUNUSED(nHotSpotX),
                     int WXUNUSED(nHotSpotY) )
 {
@@ -94,19 +103,17 @@ wxCursor::wxCursor( const wxString& WXUNUSED(rsCursorFile),
     pRefData = new wxCursorRefData;
     m_refData = pRefData;
     pRefData->m_bDestroyCursor = false;
-    if (type == wxBITMAP_TYPE_CUR_RESOURCE)
+    if (lFlags == wxBITMAP_TYPE_CUR_RESOURCE)
     {
         pRefData->m_hCursor = (WXHCURSOR) ::WinLoadPointer( HWND_DESKTOP
                                                            ,0
-                                                           ,(ULONG)type // if OS/2 this should be the resource Id
+                                                           ,(ULONG)lFlags // if OS/2 this should be the resource Id
                                                           );
     }
-    else
-        wxLogError("Invalid cursor bitmap type '%d'", type);
 } // end of wxCursor::wxCursor
 
 // Cursors by stock number
-void wxCursor::InitFromStock(wxStockCursor nCursorType)
+wxCursor::wxCursor(int nCursorType)
 {
     wxCursorRefData*                pRefData = new wxCursorRefData;
 

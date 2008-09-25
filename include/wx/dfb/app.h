@@ -41,6 +41,7 @@ private:
     wxVideoMode m_videoMode;
 
     DECLARE_DYNAMIC_CLASS(wxApp)
+    DECLARE_EVENT_TABLE()
 };
 
 #endif // _WX_DFB_APP_H_

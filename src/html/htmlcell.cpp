@@ -15,14 +15,13 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/dynarray.h"
     #include "wx/brush.h"
     #include "wx/colour.h"
     #include "wx/dc.h"
     #include "wx/settings.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/html/htmlcell.h"
@@ -356,11 +355,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxHtmlWordCell, wxHtmlCell)
 wxHtmlWordCell::wxHtmlWordCell(const wxString& word, const wxDC& dc) : wxHtmlCell()
 {
     m_Word = word;
-    wxCoord w, h, d;
-    dc.GetTextExtent(m_Word, &w, &h, &d);
-    m_Width = w;
-    m_Height = h;
-    m_Descent = d;
+    dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
     SetCanLiveOnPagebreak(false);
     m_allowLinebreak = true;
 }
@@ -464,8 +459,6 @@ void wxHtmlWordCell::Split(const wxDC& dc,
 
     pos1 = i;
     pos2 = j;
-
-    wxASSERT( pos2 >= pos1 );
 }
 
 void wxHtmlWordCell::SetSelectionPrivPos(const wxDC& dc, wxHtmlSelection *s) const
@@ -499,18 +492,18 @@ static void SwitchSelState(wxDC& dc, wxHtmlRenderingInfo& info,
 
     if ( toSelection )
     {
-        dc.SetBackgroundMode(wxBRUSHSTYLE_SOLID);
+        dc.SetBackgroundMode(wxSOLID);
         dc.SetTextForeground(info.GetStyle().GetSelectedTextColour(fg));
         dc.SetTextBackground(info.GetStyle().GetSelectedTextBgColour(bg));
         dc.SetBackground(wxBrush(info.GetStyle().GetSelectedTextBgColour(bg),
-                                 wxBRUSHSTYLE_SOLID));
+                                 wxSOLID));
     }
     else
     {
-        dc.SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
+        dc.SetBackgroundMode(wxTRANSPARENT);
         dc.SetTextForeground(fg);
         dc.SetTextBackground(bg);
-        dc.SetBackground(wxBrush(bg, wxBRUSHSTYLE_SOLID));
+        dc.SetBackground(wxBrush(bg, wxSOLID));
     }
 }
 
@@ -581,12 +574,12 @@ void wxHtmlWordCell::Draw(wxDC& dc, int x, int y,
         wxHtmlSelectionState selstate = info.GetState().GetSelectionState();
         // Not changing selection state, draw the word in single mode:
         if ( selstate != wxHTML_SEL_OUT &&
-             dc.GetBackgroundMode() != wxBRUSHSTYLE_SOLID )
+             dc.GetBackgroundMode() != wxSOLID )
         {
             SwitchSelState(dc, info, true);
         }
         else if ( selstate == wxHTML_SEL_OUT &&
-                  dc.GetBackgroundMode() == wxBRUSHSTYLE_SOLID )
+                  dc.GetBackgroundMode() == wxSOLID )
         {
             SwitchSelState(dc, info, false);
         }
@@ -619,17 +612,6 @@ void wxHtmlWordCell::Draw(wxDC& dc, int x, int y,
     }
 }
 
-wxCursor wxHtmlWordCell::GetMouseCursor(wxHtmlWindowInterface *window) const
-{
-    if ( !GetLink() )
-    {
-        return window->GetHTMLCursor(wxHtmlWindowInterface::HTMLCursor_Text);
-    }
-    else
-    {
-        return wxHtmlCell::GetMouseCursor(window);
-    }
-}
 
 wxString wxHtmlWordCell::ConvertToText(wxHtmlSelection *s) const
 {
@@ -647,75 +629,29 @@ wxString wxHtmlWordCell::ConvertToText(wxHtmlSelection *s) const
         // TODO: but this really needs to be fixed in some better way later...
         if ( priv != wxDefaultPosition )
         {
-            const int part1 = priv.x;
-            const int part2 = priv.y;
+            int part1 = priv.x;
+            int part2 = priv.y;
             if ( part1 == part2 )
                 return wxEmptyString;
-            return GetPartAsText(part1, part2);
+            return m_Word.Mid(part1, part2-part1);
         }
         //else: return the whole word below
     }
 
-    return GetAllAsText();
+    return m_Word;
 }
 
-wxString wxHtmlWordWithTabsCell::GetAllAsText() const
+wxCursor wxHtmlWordCell::GetMouseCursor(wxHtmlWindowInterface *window) const
 {
-    return m_wordOrig;
-}
-
-wxString wxHtmlWordWithTabsCell::GetPartAsText(int begin, int end) const
-{
-    // NB: The 'begin' and 'end' positions are in the _displayed_ text
-    //     (stored in m_Word) and not in the text with tabs that should
-    //     be copied to clipboard (m_wordOrig).
-    //
-    // NB: Because selection is performed on displayed text, it's possible
-    //     to select e.g. "half of TAB character" -- IOW, 'begin' and 'end'
-    //     may be in the middle of TAB character expansion into ' 's. In this
-    //     case, we copy the TAB character to clipboard once.
-
-    wxASSERT( begin < end );
-
-    const unsigned SPACES_PER_TAB = 8;
-
-    wxString sel;
-
-    int pos = 0;
-    wxString::const_iterator i = m_wordOrig.begin();
-
-    // find the beginning of text to copy:
-    for ( ; pos < begin; ++i )
+    if ( !GetLink() )
     {
-        if ( *i == '\t' )
-        {
-            pos += 8 - (m_linepos + pos) % SPACES_PER_TAB;
-            if ( pos >= begin )
-            {
-                sel += '\t';
-            }
-        }
-        else
-        {
-            ++pos;
-        }
+        return window->GetHTMLCursor(wxHtmlWindowInterface::HTMLCursor_Text);
     }
-
-    // copy the content until we reach 'end':
-    for ( ; pos < end; ++i )
+    else
     {
-        const wxChar c = *i;
-        sel += c;
-
-        if ( c == '\t' )
-            pos += 8 - (m_linepos + pos) % SPACES_PER_TAB;
-        else
-            ++pos;
+        return wxHtmlCell::GetMouseCursor(window);
     }
-
-    return sel;
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -1114,7 +1050,7 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
 
     if (m_UseBkColour)
     {
-        wxBrush myb = wxBrush(m_BkColour, wxBRUSHSTYLE_SOLID);
+        wxBrush myb = wxBrush(m_BkColour, wxSOLID);
 
         int real_y1 = mMax(ylocal, view_y1);
         int real_y2 = mMin(ylocal + m_Height - 1, view_y2);
@@ -1126,8 +1062,8 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
 
     if (m_UseBorder)
     {
-        wxPen mypen1(m_BorderColour1, 1, wxPENSTYLE_SOLID);
-        wxPen mypen2(m_BorderColour2, 1, wxPENSTYLE_SOLID);
+        wxPen mypen1(m_BorderColour1, 1, wxSOLID);
+        wxPen mypen2(m_BorderColour2, 1, wxSOLID);
 
         dc.SetPen(mypen1);
         dc.DrawLine(xlocal, ylocal, xlocal, ylocal + m_Height - 1);
@@ -1514,13 +1450,13 @@ void wxHtmlColourCell::DrawInvisible(wxDC& dc,
         if (state.GetSelectionState() != wxHTML_SEL_IN)
         {
             dc.SetTextBackground(m_Colour);
-            dc.SetBackground(wxBrush(m_Colour, wxBRUSHSTYLE_SOLID));
+            dc.SetBackground(wxBrush(m_Colour, wxSOLID));
         }
         else
         {
             wxColour c = info.GetStyle().GetSelectedTextBgColour(m_Colour);
             dc.SetTextBackground(c);
-            dc.SetBackground(wxBrush(c, wxBRUSHSTYLE_SOLID));
+            dc.SetBackground(wxBrush(c, wxSOLID));
         }
     }
 }

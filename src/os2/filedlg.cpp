@@ -131,6 +131,11 @@ int wxFileDialog::ShowModal()
     else
         lFlags = FDS_OPEN_DIALOG;
 
+#if WXWIN_COMPATIBILITY_2_4
+    if (m_windowStyle & wxHIDE_READONLY)
+        lFlags |= FDS_SAVEAS_DIALOG;
+#endif
+
     if (m_windowStyle & wxFD_SAVE)
         lFlags |= FDS_SAVEAS_DIALOG;
     if (m_windowStyle & wxFD_MULTIPLE)
@@ -193,7 +198,7 @@ int wxFileDialog::ShowModal()
     else
         sTheFilter = m_wildCard;
 
-    wxStrtok(sTheFilter.wchar_str(), wxT("|"), &pzFilterBuffer);
+    wxStrtok((wxChar*)sTheFilter.c_str(), wxT("|"), &pzFilterBuffer);
     while(pzFilterBuffer != NULL)
     {
         if (nCount > 0 && !(nCount % 2))

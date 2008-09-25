@@ -29,11 +29,11 @@
 #ifndef WX_PRECOMP
     #include "wx/window.h"
     #include "wx/dc.h"
+    #include "wx/dcclient.h"
 #endif
 
 #include <gtk/gtk.h>
 #include "wx/gtk1/win_gtk.h"
-#include "wx/gtk1/dcclient.h"
 
 // RR: After a correction to the orientation of the sash
 //     this doesn't seem to be required anymore and it
@@ -141,7 +141,7 @@ wxRendererGTK::DrawHeaderButton(wxWindow *win,
         NULL,
         button,
         "button",
-        dc.LogicalToDeviceX(rect.x) -1, rect.y -1, rect.width +2, rect.height +2
+        dc.XLOG2DEV(rect.x) -1, rect.y -1, rect.width +2, rect.height +2
     );
 }
 
@@ -183,7 +183,7 @@ wxRendererGTK::DrawSplitterBorder(wxWindow * WXUNUSED(win),
 
 void
 wxRendererGTK::DrawSplitterSash(wxWindow *win,
-                                wxDC& WXUNUSED(dc),
+                                wxDC& dc,
                                 const wxSize& size,
                                 wxCoord position,
                                 wxOrientation orient,
@@ -297,7 +297,7 @@ wxRendererGTK::DrawSplitterSash(wxWindow *win,
 }
 
 void
-wxRendererGTK::DrawDropArrow(wxWindow *WXUNUSED(win),
+wxRendererGTK::DrawDropArrow(wxWindow *win,
                              wxDC& dc,
                              const wxRect& rect,
                              int flags)
@@ -309,10 +309,9 @@ wxRendererGTK::DrawDropArrow(wxWindow *WXUNUSED(win),
     // work for wxMemoryDC. So that is why we assume wxDC
     // is wxWindowDC (wxClientDC, wxMemoryDC and wxPaintDC
     // are derived from it) and use its m_window.
-    wxWindowDCImpl * const impl = wxDynamicCast(dc.GetImpl(), wxWindowDCImpl);
-    wxCHECK_RET( impl, "must have a window DC" );
-
-    GdkWindow* gdk_window = impl->GetGDKWindow();
+    GdkWindow* gdk_window = dc.GetGDKWindow();
+    wxASSERT_MSG( gdk_window,
+                  wxT("cannot use wxRendererNative on wxDC of this type") );
 
     // draw arrow so that there is even space horizontally
     // on both sides
@@ -363,10 +362,9 @@ wxRendererGTK::DrawComboBoxDropButton(wxWindow *win,
     GtkWidget *button = GetButtonWidget();
 
     // for reason why we do this, see DrawDropArrow
-    wxWindowDCImpl * const impl = wxDynamicCast(dc.GetImpl(), wxWindowDCImpl);
-    wxCHECK_RET( impl, "must have a window DC" );
-
-    GdkWindow* gdk_window = impl->GetGDKWindow();
+    GdkWindow* gdk_window = dc.GetGDKWindow();
+    wxASSERT_MSG( gdk_window,
+                  wxT("cannot use wxRendererNative on wxDC of this type") );
 
     // draw button
     GtkStateType state;

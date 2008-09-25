@@ -13,10 +13,10 @@
 #ifndef _WX_TOGGLEBUTTON_H_
 #define _WX_TOGGLEBUTTON_H_
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxCheckBoxNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxCheckBoxNameStr[];
 
 // Checkbox item (single checkbox)
-class WXDLLIMPEXP_CORE wxToggleButton : public wxToggleButtonBase
+class WXDLLEXPORT wxToggleButton : public wxControl
 {
 public:
     wxToggleButton() {}
@@ -44,19 +44,13 @@ public:
     virtual void SetValue(bool value);
     virtual bool GetValue() const ;
 
-    virtual void SetLabel(const wxString& label);
-
     virtual bool MSWCommand(WXUINT param, WXWORD id);
     virtual void Command(wxCommandEvent& event);
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
+    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
     virtual wxSize DoGetBestSize() const;
-
-    virtual WXDWORD MSWGetStyle(long flags, WXDWORD *exstyle = NULL) const;
+    virtual wxBorder GetDefaultBorder() const;
 
 private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxToggleButton)

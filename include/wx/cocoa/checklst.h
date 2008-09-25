@@ -17,7 +17,7 @@
 // ========================================================================
 // wxCheckListBox
 // ========================================================================
-class WXDLLIMPEXP_CORE wxCheckListBox: public wxCheckListBoxBase //, protected wxCocoaNSTableView
+class WXDLLEXPORT wxCheckListBox: public wxCheckListBoxBase //, protected wxCocoaNSTableView
 {
     DECLARE_DYNAMIC_CLASS(wxCheckListBox)
     DECLARE_EVENT_TABLE()

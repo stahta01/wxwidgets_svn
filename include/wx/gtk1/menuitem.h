@@ -28,8 +28,7 @@ public:
     virtual ~wxMenuItem();
 
     // implement base class virtuals
-    virtual void SetItemLabel( const wxString& str );
-    virtual wxString GetItemLabel() const;
+    virtual void SetText( const wxString& str );
     virtual void Enable( bool enable = TRUE );
     virtual void Check( bool check = TRUE );
     virtual bool IsChecked() const;
@@ -59,7 +58,7 @@ public:
 
 private:
     // common part of all ctors
-    void Init();
+    void Init(const wxString& text);
 
     // DoSetText() transforms the accel mnemonics in our label from MSW/wxWin
     // style to GTK+ and is called from ctor and SetText()
@@ -72,7 +71,16 @@ private:
     GtkWidget* m_labelWidget; // Label widget
 
     DECLARE_DYNAMIC_CLASS(wxMenuItem)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // return the item label including any mnemonics and accelerators.
+    // This used to be called GetText.
+    wxString GetItemLabel() const;
+#endif
 };
+
 
 #endif
         //__GTKMENUITEMH__

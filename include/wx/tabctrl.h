@@ -16,17 +16,19 @@
 
 #if wxUSE_TAB_DIALOG
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_TAB_SEL_CHANGED;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_TAB_SEL_CHANGING;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TAB_SEL_CHANGED, 800)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_TAB_SEL_CHANGING, 801)
+END_DECLARE_EVENT_TYPES()
 
 #if defined(__WXMSW__)
     #include "wx/msw/tabctrl.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/tabctrl.h"
+    #include "wx/mac/tabctrl.h"
 #elif defined(__WXPM__)
     #include "wx/os2/tabctrl.h"
 #endif
 
 #endif // wxUSE_TAB_DIALOG
-
-#endif // _WX_TABCTRL_H_BASE_
+#endif
+    // _WX_TABCTRL_H_BASE_

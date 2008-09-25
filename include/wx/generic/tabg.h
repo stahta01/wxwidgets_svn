@@ -20,14 +20,14 @@
 #include "wx/panel.h"
 #include "wx/list.h"
 
-class WXDLLIMPEXP_FWD_CORE wxTabView;
+class WXDLLEXPORT wxTabView;
 
 /*
  * A wxTabControl is the internal and visual representation
  * of the tab.
  */
 
-class WXDLLIMPEXP_CORE wxTabControl: public wxObject
+class WXDLLEXPORT wxTabControl: public wxObject
 {
 DECLARE_DYNAMIC_CLASS(wxTabControl)
 public:
@@ -81,7 +81,7 @@ protected:
  * are 3 layers in the MS Word Options dialog.
  */
 
-class WXDLLIMPEXP_CORE wxTabLayer: public wxList
+class WXDLLEXPORT wxTabLayer: public wxList
 {
 };
 
@@ -94,7 +94,7 @@ WX_DECLARE_LIST(wxTabLayer, wxTabLayerList);
 #define wxTAB_STYLE_DRAW_BOX         1   // Draws 3D boxes round tab layers
 #define wxTAB_STYLE_COLOUR_INTERIOR  2   // Colours interior of tabs, otherwise draws outline
 
-class WXDLLIMPEXP_CORE wxTabView: public wxObject
+class WXDLLEXPORT wxTabView: public wxObject
 {
 DECLARE_DYNAMIC_CLASS(wxTabView)
 public:
@@ -102,7 +102,11 @@ public:
   virtual ~wxTabView();
 
   inline int GetNumberOfLayers() const { return m_layers.GetCount(); }
+#if WXWIN_COMPATIBILITY_2_4
+  inline wxList& GetLayers() { return *(wxList *)&m_layers; }
+#else
   inline wxTabLayerList& GetLayers() { return m_layers; }
+#endif
 
   inline void SetWindow(wxWindow* wnd) { m_window = wnd; }
   inline wxWindow* GetWindow(void) const { return m_window; }
@@ -266,7 +270,7 @@ protected:
  * A dialog box class that is tab-friendly
  */
 
-class WXDLLIMPEXP_CORE wxTabbedDialog : public wxDialog
+class WXDLLEXPORT wxTabbedDialog : public wxDialog
 {
     DECLARE_DYNAMIC_CLASS(wxTabbedDialog)
 
@@ -298,7 +302,7 @@ private:
  * A panel class that is tab-friendly
  */
 
-class WXDLLIMPEXP_CORE wxTabbedPanel : public wxPanel
+class WXDLLEXPORT wxTabbedPanel : public wxPanel
 {
     DECLARE_DYNAMIC_CLASS(wxTabbedPanel)
 
@@ -327,7 +331,7 @@ private:
 WX_DECLARE_HASH_MAP(int, wxWindow*, wxIntegerHash, wxIntegerEqual,
                     wxIntToWindowHashMap);
 
-class WXDLLIMPEXP_CORE wxPanelTabView : public wxTabView
+class WXDLLEXPORT wxPanelTabView : public wxTabView
 {
     DECLARE_DYNAMIC_CLASS(wxPanelTabView)
 

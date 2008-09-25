@@ -12,7 +12,6 @@
 # PARTICULAR PURPOSE.
 
 m4_include([build/aclocal/ac_raf_func_which_getservbyname_r.m4])
-m4_include([build/aclocal/atomic_builtins.m4])
 m4_include([build/aclocal/ax_func_which_gethostbyname_r.m4])
 m4_include([build/aclocal/bakefile-dllar.m4])
 m4_include([build/aclocal/bakefile-lang.m4])
@@ -22,5 +21,4 @@ m4_include([build/aclocal/gtk-2.0.m4])
 m4_include([build/aclocal/gtk.m4])
 m4_include([build/aclocal/pkg.m4])
 m4_include([build/aclocal/sdl.m4])
-m4_include([build/aclocal/visibility.m4])
 m4_include([acinclude.m4])

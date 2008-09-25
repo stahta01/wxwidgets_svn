@@ -13,10 +13,10 @@
 
 #include "wx/textctrl.h"
 
-class WXDLLIMPEXP_FWD_CORE wxImageList;
+class WXDLLIMPEXP_CORE wxImageList;
 
 #if wxUSE_DRAG_AND_DROP
-class WXDLLIMPEXP_FWD_CORE wxDropTarget;
+class WXDLLEXPORT wxDropTarget;
 #endif
 
 // ----------------------------------------------------------------------------
@@ -28,14 +28,14 @@ class WXDLLIMPEXP_FWD_CORE wxDropTarget;
 // internal classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxListHeaderWindow;
-class WXDLLIMPEXP_FWD_CORE wxListMainWindow;
+class WXDLLEXPORT wxListHeaderWindow;
+class WXDLLEXPORT wxListMainWindow;
 
 //-----------------------------------------------------------------------------
 // wxListCtrl
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGenericListCtrl: public wxControl
+class WXDLLEXPORT wxGenericListCtrl: public wxControl
 {
 public:
 
@@ -77,10 +77,11 @@ public:
     wxString GetItemText( long item ) const;
     void SetItemText( long item, const wxString& str );
     wxUIntPtr GetItemData( long item ) const;
+#if wxABI_VERSION >= 20804
     bool SetItemPtrData(long item, wxUIntPtr data);
-    bool SetItemData(long item, long data) { return SetItemPtrData(item, data); }
+#endif // wxABI 2.8.4+
+    bool SetItemData(long item, long data);
     bool GetItemRect( long item, wxRect& rect, int code = wxLIST_RECT_BOUNDS ) const;
-    bool GetSubItemRect( long item, long subItem, wxRect& rect, int code = wxLIST_RECT_BOUNDS ) const;
     bool GetItemPosition( long item, wxPoint& pos ) const;
     bool SetItemPosition( long item, const wxPoint& pos ); // not supported in wxGLC
     int GetItemCount() const;
@@ -175,6 +176,9 @@ public:
     virtual void Refresh(bool eraseBackground = true,
                          const wxRect *rect = NULL);
 
+    virtual void Freeze();
+    virtual void Thaw();
+
     virtual bool SetBackgroundColour( const wxColour &colour );
     virtual bool SetForegroundColour( const wxColour &colour );
     virtual wxColour GetBackgroundColour() const;
@@ -231,7 +235,7 @@ protected:
     virtual wxListItemAttr *OnGetItemAttr(long item) const;
 
     // it calls our OnGetXXX() functions
-    friend class WXDLLIMPEXP_FWD_CORE wxListMainWindow;
+    friend class WXDLLEXPORT wxListMainWindow;
 
 private:
     // create the header window
@@ -248,13 +252,13 @@ private:
     DECLARE_DYNAMIC_CLASS(wxGenericListCtrl)
 };
 
-#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && (!(defined(__WXMAC__) && wxOSX_USE_CARBON) || defined(__WXUNIVERSAL__ ))
+#if (!defined(__WXMSW__) || defined(__WXUNIVERSAL__)) && (!defined(__WXMAC__) || defined(__WXUNIVERSAL__))
 /*
  * wxListCtrl has to be a real class or we have problems with
  * the run-time information.
  */
 
-class WXDLLIMPEXP_CORE wxListCtrl: public wxGenericListCtrl
+class WXDLLEXPORT wxListCtrl: public wxGenericListCtrl
 {
     DECLARE_DYNAMIC_CLASS(wxListCtrl)
 

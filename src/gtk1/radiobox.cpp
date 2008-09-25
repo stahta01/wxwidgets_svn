@@ -57,7 +57,7 @@ static void gtk_radiobutton_clicked_callback( GtkToggleButton *button, wxRadioBo
     event.SetInt( rb->GetSelection() );
     event.SetString( rb->GetStringSelection() );
     event.SetEventObject( rb );
-    rb->HandleWindowEvent(event);
+    rb->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -115,7 +115,7 @@ static gint gtk_radiobox_keypress_callback( GtkWidget *widget, GdkEventKey *gdk_
 }
 
 extern "C" {
-static gint gtk_radiobutton_focus_in( GtkWidget *WXUNUSED(widget),
+static gint gtk_radiobutton_focus_in( GtkWidget *widget,
                                       GdkEvent *WXUNUSED(event),
                                       wxRadioBox *win )
 {
@@ -133,7 +133,7 @@ static gint gtk_radiobutton_focus_in( GtkWidget *WXUNUSED(widget),
 
         // never stop the signal emission, it seems to break the kbd handling
         // inside the radiobox
-        (void)win->HandleWindowEvent( event );
+        (void)win->GetEventHandler()->ProcessEvent( event );
     }
 
     return FALSE;
@@ -141,7 +141,7 @@ static gint gtk_radiobutton_focus_in( GtkWidget *WXUNUSED(widget),
 }
 
 extern "C" {
-static gint gtk_radiobutton_focus_out( GtkWidget *WXUNUSED(widget),
+static gint gtk_radiobutton_focus_out( GtkWidget *widget,
                                        GdkEvent *WXUNUSED(event),
                                        wxRadioBox *win )
 {
@@ -586,7 +586,7 @@ void wxRadioBox::OnInternalIdle()
         wxFocusEvent event( wxEVT_KILL_FOCUS, GetId() );
         event.SetEventObject( this );
 
-        (void)HandleWindowEvent( event );
+        (void)GetEventHandler()->ProcessEvent( event );
     }
 
     if (g_delayedFocus == this)

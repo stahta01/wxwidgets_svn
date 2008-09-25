@@ -33,7 +33,7 @@
 
 class wxDfbWrapperBase;
 
-class WXDLLIMPEXP_CORE wxDfbPtrBase
+class wxDfbPtrBase
 {
 protected:
     static void DoAddRef(wxDfbWrapperBase *ptr);

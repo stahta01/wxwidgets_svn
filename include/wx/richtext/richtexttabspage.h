@@ -32,6 +32,7 @@
 
 ////@begin control identifiers
 #define SYMBOL_WXRICHTEXTTABSPAGE_STYLE wxRESIZE_BORDER|wxTAB_TRAVERSAL
+#define SYMBOL_WXRICHTEXTTABSPAGE_TITLE _("wxRichTextFontPage")
 #define SYMBOL_WXRICHTEXTTABSPAGE_IDNAME ID_RICHTEXTTABSPAGE
 #define SYMBOL_WXRICHTEXTTABSPAGE_SIZE wxSize(400, 300)
 #define SYMBOL_WXRICHTEXTTABSPAGE_POSITION wxDefaultPosition
@@ -68,7 +69,7 @@ public:
     virtual void SortTabs();
 
     /// Gets the attributes associated with the main formatting dialog
-    wxTextAttr* GetAttributes();
+    wxTextAttrEx* GetAttributes();
 
 ////@begin wxRichTextTabsPage event handler declarations
 

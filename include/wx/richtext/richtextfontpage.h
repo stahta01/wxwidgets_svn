@@ -34,10 +34,10 @@ class wxRichTextFontPreviewCtrl;
  */
 
 ////@begin control identifiers
-#define SYMBOL_WXRICHTEXTFONTPAGE_STYLE wxTAB_TRAVERSAL
+#define SYMBOL_WXRICHTEXTFONTPAGE_STYLE wxRESIZE_BORDER|wxTAB_TRAVERSAL
 #define SYMBOL_WXRICHTEXTFONTPAGE_TITLE _("wxRichTextFontPage")
 #define SYMBOL_WXRICHTEXTFONTPAGE_IDNAME ID_RICHTEXTFONTPAGE
-#define SYMBOL_WXRICHTEXTFONTPAGE_SIZE wxSize(200, 100)
+#define SYMBOL_WXRICHTEXTFONTPAGE_SIZE wxSize(400, 300)
 #define SYMBOL_WXRICHTEXTFONTPAGE_POSITION wxDefaultPosition
 ////@end control identifiers
 
@@ -75,7 +75,7 @@ public:
     void OnColourClicked( wxCommandEvent& event );
 
     /// Gets the attributes associated with the main formatting dialog
-    wxTextAttr* GetAttributes();
+    wxTextAttrEx* GetAttributes();
 
 ////@begin wxRichTextFontPage event handler declarations
 

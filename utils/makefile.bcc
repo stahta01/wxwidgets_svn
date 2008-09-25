@@ -29,7 +29,7 @@ MAKEARGS = -DCC="$(CC)" -DCXX="$(CXX)" -DCFLAGS="$(CFLAGS)" \
 	-DMONOLITHIC="$(MONOLITHIC)" -DUSE_GUI="$(USE_GUI)" \
 	-DUSE_HTML="$(USE_HTML)" -DUSE_MEDIA="$(USE_MEDIA)" -DUSE_XRC="$(USE_XRC)" \
 	-DUSE_AUI="$(USE_AUI)" -DUSE_RICHTEXT="$(USE_RICHTEXT)" \
-	-DUSE_STC="$(USE_STC)" -DUSE_OPENGL="$(USE_OPENGL)" -DUSE_QA="$(USE_QA)" \
+	-DUSE_OPENGL="$(USE_OPENGL)" -DUSE_ODBC="$(USE_ODBC)" -DUSE_QA="$(USE_QA)" \
 	-DUSE_EXCEPTIONS="$(USE_EXCEPTIONS)" -DUSE_RTTI="$(USE_RTTI)" \
 	-DUSE_THREADS="$(USE_THREADS)" -DUSE_GDIPLUS="$(USE_GDIPLUS)" \
 	-DOFFICIAL_BUILD="$(OFFICIAL_BUILD)" -DVENDOR="$(VENDOR)" \
@@ -43,7 +43,7 @@ MAKEARGS = -DCC="$(CC)" -DCXX="$(CXX)" -DCFLAGS="$(CFLAGS)" \
 
 ### Targets: ###
 
-all: emulator helpview ifacecheck
+all: emulator helpview tex2rtf helpgen
 
 clean: 
 	-if exist .\*.obj del .\*.obj
@@ -57,10 +57,14 @@ clean:
 	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>helpview.bat
 	call helpview.bat
 	@del helpview.bat
-	@echo cd ifacecheck\src >ifacecheck.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>ifacecheck.bat
-	call ifacecheck.bat
-	@del ifacecheck.bat
+	@echo cd tex2rtf\src >tex2rtf.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>tex2rtf.bat
+	call tex2rtf.bat
+	@del tex2rtf.bat
+	@echo cd HelpGen\src >helpgen.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>helpgen.bat
+	call helpgen.bat
+	@del helpgen.bat
 
 emulator: 
 	@echo cd emulator\src >emulator.bat
@@ -74,9 +78,15 @@ helpview:
 	call helpview.bat
 	@del helpview.bat
 
-ifacecheck: 
-	@echo cd ifacecheck\src >ifacecheck.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>ifacecheck.bat
-	call ifacecheck.bat
-	@del ifacecheck.bat
+tex2rtf: 
+	@echo cd tex2rtf\src >tex2rtf.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>tex2rtf.bat
+	call tex2rtf.bat
+	@del tex2rtf.bat
+
+helpgen: 
+	@echo cd HelpGen\src >helpgen.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>helpgen.bat
+	call helpgen.bat
+	@del helpgen.bat
 

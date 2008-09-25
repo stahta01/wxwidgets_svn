@@ -12,13 +12,12 @@
 
 #include "wx/image.h"
 
-#if wxUSE_XPM
 
 //-----------------------------------------------------------------------------
 // wxXPMHandler
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxXPMHandler : public wxImageHandler
+class WXDLLEXPORT wxXPMHandler : public wxImageHandler
 {
 public:
     inline wxXPMHandler()
@@ -40,7 +39,6 @@ private:
     DECLARE_DYNAMIC_CLASS(wxXPMHandler)
 };
 
-#endif // wxUSE_XPM
 
 #endif
   // _WX_IMAGXPM_H_

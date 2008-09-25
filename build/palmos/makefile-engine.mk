@@ -65,7 +65,6 @@
 
 ###############################################################################
 # Defaults
-FN_DEPEND=.dependencies
 
 comma:= ,
 
@@ -161,55 +160,28 @@ endif
 ###############################################################################
 # Compile and Link Settings
 
-ifeq ($(TARGET_FORMAT), )
 TARGET_FORMAT=PalmOS6
-endif
 
 # Compiler settings... compiler + optimizations + debug
 # This is a makefile for Palm OS 6 so the compilers used are as follows:
 # Device target compiler is pacc
 # Simulator target compiler is gcc
 
-UNAME :=$(shell uname)
-ifeq ($(UNAME),Linux)
-# Linux Settings
-PELF2BIN:=wine "$(TOOLS_DIR)/pelf2bin.exe"
-PSLIB:=wine "$(TOOLS_DIR)/pslib.exe"
-PRCMERGE :=wine "$(TOOLS_DIR)/PRCMerge.exe"
-PALMRC :=wine "$(TOOLS_DIR)/PalmRc.exe"
-CYGPATH_WA:=echo
-CYGPATH_MF:=echo
-CC = wine "$(TOOLS_DIR)pacc"
-CXX = wine "$(TOOLS_DIR)pacc"
-LD = wine "$(TOOLS_DIR)pacc"
-else
-# Cygwin Settings
-PELF2BIN:="$(TOOLS_DIR)/pelf2bin"
-PSLIB:="$(TOOLS_DIR)/pslib.exe"
-PRCMERGE :="$(TOOLS_DIR)/PRCMerge.exe"
-PALMRC :="$(TOOLS_DIR)/PalmRc.exe"
-CYGPATH_WA:=cygpath -w -a
-CYGPATH_MF:=cygpath -m -f
 CC = "$(TOOLS_DIR)pacc"
-CXX = "$(TOOLS_DIR)pacc"
-LD = "$(TOOLS_DIR)pacc"
-endif
-
 SIM_CC = gcc
-SIM_LD = gcc
 
-DEV_CFLAGS += -D__PALMOS_KERNEL__=1 -D__PALMOS__=0x06000000
-SIM_CFLAGS += -fexceptions -D__PALMOS_KERNEL__=1 -D__PALMOS__=0x06000000 -D_SUPPORTS_NAMESPACE=0 -D_SUPPORTS_RTTI=1 -DTARGET_PLATFORM=TARGET_PLATFORM_PALMSIM_WIN32 -DTARGET_HOST=TARGET_HOST_PALMOS #-mno-cygwin -mwindows
+CFLAGS += -D__PALMOS_KERNEL__=1 -D__PALMOS__=0x06000000
+SIM_CFLAGS += -fexceptions -mno-cygwin -mwindows -D__PALMOS_KERNEL__=1 -D__PALMOS__=0x06000000 -D_SUPPORTS_NAMESPACE=0 -D_SUPPORTS_RTTI=1 -DTARGET_PLATFORM=TARGET_PLATFORM_PALMSIM_WIN32 -DTARGET_HOST=TARGET_HOST_PALMOS
 
 # Warning level for device target
 ifeq ($(WARNING_LEVEL), ALL)
-	DEV_CFLAGS += -W4
+	CFLAGS += -W4
 else
 ifeq ($(WARNING_LEVEL), SOME)
-	DEV_CFLAGS += -W2
+	CFLAGS += -W2
 else
 ifeq ($(WARNING_LEVEL), NONE)
-	DEV_CFLAGS += -W0
+	CFLAGS += -W0
 endif
 endif
 endif
@@ -225,7 +197,7 @@ endif
 
 # Warnings as errors for device builds
 ifeq ($(WARNING_AS_ERROR), TRUE)
-	DEV_CFLAGS += -Werror
+	CFLAGS += -Werror
 endif
 
 # Warnings as errors for simulator builds
@@ -238,7 +210,7 @@ SIM_CFLAGS += -Wno-multichar
 
 # Verbose output for device build
 ifeq ($(VERBOSE), TRUE)
-	DEV_CFLAGS += -v
+	CFLAGS += -v
 endif
 
 # Verbose output for simulator build
@@ -248,27 +220,27 @@ endif
 
 # Dislay logo
 ifeq ($(ARM_LOGO), TRUE)
-	DEV_CFLAGS += -logo
+	CFLAGS += -logo
 else
-	DEV_CFLAGS += -nologo
+	CFLAGS += -nologo
 endif
 
 # Exception handling support
 ifeq ($(ENABLE_EXCEPTIONS), TRUE)
-	DEV_CFLAGS += -ex
-	DEV_LDFLAGS += -ex
+	CFLAGS += -ex
+	LDFLAGS += -ex
 endif
 
 # Assertion handling support
 ifeq ($(ENABLE_ASSERTIONS), TRUE)
-	DEV_CFLAGS += -UNDEBUG
+	CFLAGS += -UNDEBUG
 else
-	DEV_CFLAGS += -DNDEBUG=1
+	CFLAGS += -DNDEBUG=1
 endif
 
 # Additional linker flags
 ifdef ADDITIONAL_PALINK_FLAGS
-	DEV_LDFLAGS += $(ADDITIONAL_PALINK_FLAGS)
+	LDFLAGS += $(ADDITIONAL_PALINK_FLAGS)
 endif
 
 # Optimization settings
@@ -330,19 +302,21 @@ else
 endif
 
 
-DEV_CFLAGS += $(OPTIMIZER_FLAG) $(DEBUG_FLAG) $(BUILD_TYPE_FLAG) $(TRACE_OUTPUT_FLAG)
+CFLAGS += $(OPTIMIZER_FLAG) $(DEBUG_FLAG) $(BUILD_TYPE_FLAG) $(TRACE_OUTPUT_FLAG)
 SIM_CFLAGS += $(SIM_OPTIMIZER_FLAG) $(DEBUG_FLAG) $(BUILD_TYPE_FLAG) $(TRACE_OUTPUT_FLAG)
 
 # Linker settings (must come after setting DEBUG_FLAG)
+LD = "$(TOOLS_DIR)pacc"
+SIM_LD = gcc
 
-DEV_LDFLAGS += $(DEBUG_FLAG) -nologo -Wl,-nolocals
+LDFLAGS += $(DEBUG_FLAG) -nologo -Wl,-nolocals
 SIM_LDFLAGS += $(DEBUG_FLAG) -mno-cygwin -mwindows $(SIM_OBJ_DIR)/gcc_link.def -shared -nostdlib -u___divdi3 -u___moddi3 -u___udivdi3 -u___umoddi3
 SIM_LIBS = -L "$(TOOLS_DIR)misclibs" -lpxstlport -lpxsupc++ -lpxgcc -lgcc
 ifeq ($(DEBUG_OR_RELEASE), Debug)
-	DEV_LDFLAGS += -Wl,-debug -Wl,-libpath -Wl,"$(SDK_LOCATION)libraries/ARM_4T/Debug/Default"
+	LDFLAGS += -Wl,-debug -Wl,-libpath -Wl,"$(SDK_LOCATION)libraries/ARM_4T/Debug/Default"
 	SIM_LIBS += "$(SDK_LOCATION)libraries/Simulator/Debug/PalmOS.lib"
 else
-	DEV_LDFLAGS += -Wl,-libpath -Wl,"$(SDK_LOCATION)libraries/ARM_4T/Release/Default"
+	LDFLAGS += -Wl,-libpath -Wl,"$(SDK_LOCATION)libraries/ARM_4T/Release/Default"
 	SIM_LIBS += "$(SDK_LOCATION)libraries/Simulator/Release/PalmOS.lib" 
 endif
 
@@ -441,7 +415,8 @@ define RESOURCE_LIST_TO_OBJS
 	$(addprefix $(RSC_OBJ_DIR)/, $(addsuffix .trc, $(foreach file, $(RESOURCES), \
 	$(basename $(file)))))
 endef
-DEV_OBJS = $(SOURCE_LIST_TO_OBJS)
+
+OBJS = $(SOURCE_LIST_TO_OBJS)
 SIM_OBJS = $(SOURCE_LIST_TO_SIM_OBJS)
 SOURCE_PATHS += $(sort $(foreach file, $(SOURCES), $(dir $(file))))
 RESOURCE_OBJS = $(RESOURCE_LIST_TO_OBJS)
@@ -453,23 +428,21 @@ SLD_SIM_OBJ := $(addprefix $(SIM_OBJ_DIR)/, $(addsuffix .o, $(SLD_BASENAME)))
 VPATH :=
 VPATH += $(addprefix :, $(subst  ,:, $(filter-out $($(subst, :, ,$(VPATH))), $(SOURCE_PATHS) $(RESOURCE_PATHS) )))
 
-# -I "$(SDK_LOCATION)include" -I "$(SDK_LOCATION)include/Core/System" #
 SYSTEM_INCLUDES = $(SYSTEM_INCLUDE_PATHS) -I "$(SDK_LOCATION)headers" -I "$(SDK_LOCATION)headers/posix"
 INCLUDES = $(LOCAL_INCLUDE_PATHS) $(foreach path, $(SOURCE_PATHS), $(addprefix -I, $(path))) $(SYSTEM_INCLUDES) $(PRE_INCLUDE_PATHS)
-DEV_CPP_INCLUDES = -I "$(TOOLS_DIR)include/stlport"
+CPP_INCLUDES = -I "$(TOOLS_DIR)include/stlport"
 
 SIM_SYSTEM_INCLUDES = $(SYSTEM_SIM_INCLUDE_PATHS) -I "$(SDK_LOCATION)headers" -I "$(SDK_LOCATION)headers/posix"
 SIM_INCLUDES = $(LOCAL_SIM_INCLUDE_PATHS) $(foreach path, $(SOURCE_PATHS), $(addprefix -I, $(path))) $(SIM_SYSTEM_INCLUDES) $(SIM_PRE_INCLUDE_PATHS)
 SIM_CPP_INCLUDES = -I "$(TOOLS_DIR)include/stlport"
 
 # Now add additional settings specified by user
-DEV_LDFLAGS += $(ADDITIONAL_LINK_LIBRARIES)
-DEV_LDFLAGS += $(foreach libpath, $(ADDITIONAL_LINK_LIBPATH), $(addprefix -libpath , $(libpath)))
-DEV_LDFLAGS += $(foreach option, $(ADDITIONAL_LINKER_FLAGS), $(addprefix -Wl$(comma), $(option)))
-DEV_CFLAGS += $(foreach define, $(DEFINES), $(addprefix -D, $(define)))
-DEV_CFLAGS += $(foreach define, $(UNDEFINES), $(addprefix -U, $(define)))
-DEV_CFLAGS += $(ADDITIONAL_COMPILER_FLAGS)
-DEV_CFLAGS += $(INCLUDES)
+LDFLAGS += $(ADDITIONAL_LINK_LIBRARIES)
+LDFLAGS += $(foreach libpath, $(ADDITIONAL_LINK_LIBPATH), $(addprefix -libpath , $(libpath)))
+LDFLAGS += $(foreach option, $(ADDITIONAL_LINKER_FLAGS), $(addprefix -Wl$(comma), $(option)))
+CFLAGS += $(foreach define, $(DEFINES), $(addprefix -D, $(define)))
+CFLAGS += $(foreach define, $(UNDEFINES), $(addprefix -U, $(define)))
+CFLAGS += $(ADDITIONAL_COMPILER_FLAGS)
 
 SIM_LDFLAGS += $(ADDITIONAL_SIM_LINK_LIBRARIES)
 SIM_LDFLAGS += $(ADDITIONAL_SIM_LINKER_FLAGS)
@@ -477,7 +450,6 @@ SIM_LDFLAGS += $(foreach libpath, $(ADDITIONAL_SIM_LINK_LIBPATH), $(addprefix -L
 SIM_CFLAGS += $(foreach define, $(SIM_DEFINES), $(addprefix -D, $(define)))
 SIM_CFLAGS += $(foreach define, $(SIM_UNDEFINES), $(addprefix -U, $(define)))
 SIM_CFLAGS += $(ADDITIONAL_SIM_COMPILER_FLAGS)
-SIM_CFLAGS += $(SIM_INCLUDES)
 
 # Specifyc additional archival flags (for static libraries)
 ARFLAGS += $(ADDITIONAL_AR_FLAGS)
@@ -485,21 +457,6 @@ SIM_ARFLAGS += $(ADDITIONAL_SIM_AR_FLAGS)
 
 RFLAGS += $(ADDITIONAL_PRC_FLAGS)
 PRCFLAGS += $(ADDITIONAL_PRCMERGE_FLAGS)
-
-DEV_CXXFLAGS = $(DEV_CPP_INCLUDES) $(DEV_CFLAGS)
-SIM_CXXFLAGS = $(SIM_CPP_INCLUDES) $(SIM_CFLAGS)
-
-ifeq ($(TARGET_PLATFORM), Device)
-OBJS=$(DEV_OBJS)
-CFLAGS=$(DEV_CFLAGS)
-CXXFLAGS=$(DEV_CXXFLAGS)
-LDFLAGS=$(DEV_LDFLAGS)
-else
-OBJS=$(SIM_OBJS)
-CFLAGS=$(SIM_CFLAGS)
-CXXFLAGS=$(SIM_CXXFLAGS)
-LDFLAGS=$(SIM_LDFLAGS)
-endif
 
 ###############################################################################
 # Flags for PRC creation
@@ -518,6 +475,8 @@ ifeq ($(PROJECT_TYPE), slib)
 	PSLIB_DEV_FLAGS += -outEntryNums $(OBJ_DIR)/$(DATABASE_NAME)_Client.h -outObjStubs $(OBJ_DIR)/$(DATABASE_NAME)_Client.sa 
 	PSLIB_SIM_FLAGS += -outEntryNums $(SIM_OBJ_DIR)/$(DATABASE_NAME)_Client.h -outSimStubs $(SIM_OBJ_DIR)/$(DATABASE_NAME)_Client.slib
 endif
+
+
 
 ###############################################################################
 # Project make target determination
@@ -559,7 +518,7 @@ endif
 ###############################################################################
 #	Eclipse requires an all target to get the work done
 
-all: $(FN_DEPEND).1 $(PROJECT_TARGET)
+all:  $(PROJECT_TARGET)
 
 #	This rule is only valid for projects created as application projects.
 #	Don't invoke this make target directly; instead change the value of
@@ -598,45 +557,55 @@ $(OBJ_DIR):
 
 $(SIM_OBJ_DIR):
 	@[ -d $(SIM_OBJ_DIR) ] || mkdir $(SIM_OBJ_DIR) > /dev/null 2>&1
+	
+# main C/C++ sources
+$(OBJ_DIR)/%.o : %.c makefile
+	$(CC) -c $< $(INCLUDES) $(CFLAGS) -o $@
+$(OBJ_DIR)/%.o : %.cpp makefile
+	$(CC) -c $< $(INCLUDES) $(CPP_INCLUDES) $(CFLAGS) -o $@
+$(OBJ_DIR)/%.o : %.cp makefile
+	$(CC) -c $< $(INCLUDES) $(CPP_INCLUDES) $(CFLAGS) -o $@
+$(OBJ_DIR)/%.o : %.cc makefile
+	$(CC) -c $< $(INCLUDES) $(CPP_INCLUDES) $(CFLAGS) -o $@
+$(OBJ_DIR)/%.o : %.C makefile
+	$(CC) -c $< $(INCLUDES) $(CFLAGS) -o $@
+$(OBJ_DIR)/%.o : %.CC makefile
+	$(CC) -c $< $(INCLUDES) $(CPP_INCLUDES) $(CFLAGS) -o $@
+$(OBJ_DIR)/%.o : %.CPP makefile
+	$(CC) -c $< $(INCLUDES) $(CPP_INCLUDES) $(CFLAGS) -o $@
 
 # Simulator C/C++ sources
-$(SIM_OBJ_DIR)/%.o : %.c #makefile
-	$(SIM_CC) -c $< -std=c99 $(SIM_CFLAGS) -o $@
-$(SIM_OBJ_DIR)/%.o : %.cpp #makefile
-	$(SIM_CC) -c $< -frtti $(SIM_CXXFLAGS) -o $@
-$(SIM_OBJ_DIR)/%.o : %.cp #makefile
-	$(SIM_CC) -c $< -frtti $(SIM_CXXFLAGS) -o $@
-$(SIM_OBJ_DIR)/%.o : %.cc #makefile
-	$(SIM_CC) -c $< -frtti $(SIM_CXXFLAGS) -o $@
-$(SIM_OBJ_DIR)/%.o : %.C #makefile
-	$(SIM_CC) -c $< -std=c99 $(SIM_CFLAGS) -o $@
-$(SIM_OBJ_DIR)/%.o : %.CC #makefile
-	$(SIM_CC) -c $< -frtti $(SIM_CXXFLAGS) -o $@
-$(SIM_OBJ_DIR)/%.o : %.CPP #makefile
-	$(SIM_CC) -c $< -frtti $(SIM_CXXFLAGS) -o $@
+$(SIM_OBJ_DIR)/%.o : %.c makefile
+	$(SIM_CC) -c $< $(SIM_INCLUDES) -std=c99 $(SIM_CFLAGS) -o $@
+$(SIM_OBJ_DIR)/%.o : %.cpp makefile
+	$(SIM_CC) -c $< $(SIM_INCLUDES) $(SIM_CPP_INCLUDES) -frtti $(SIM_CFLAGS) -o $@
+$(SIM_OBJ_DIR)/%.o : %.cp makefile
+	$(SIM_CC) -c $< $(SIM_INCLUDES) $(SIM_CPP_INCLUDES) -frtti $(SIM_CFLAGS) -o $@
+$(SIM_OBJ_DIR)/%.o : %.cc makefile
+	$(SIM_CC) -c $< $(SIM_INCLUDES) $(SIM_CPP_INCLUDES) -frtti $(SIM_CFLAGS) -o $@
+$(SIM_OBJ_DIR)/%.o : %.C makefile
+	$(SIM_CC) -c $< $(SIM_INCLUDES)  -std=c99 $(SIM_CFLAGS) -o $@
+$(SIM_OBJ_DIR)/%.o : %.CC makefile
+	$(SIM_CC) -c $< $(SIM_INCLUDES) $(SIM_CPP_INCLUDES) -frtti $(SIM_CFLAGS) -o $@
+$(SIM_OBJ_DIR)/%.o : %.CPP makefile
+	$(SIM_CC) -c $< $(SIM_INCLUDES) $(SIM_CPP_INCLUDES) -frtti $(SIM_CFLAGS) -o $@
 
 
 # XRD source processing
 $(RSC_OBJ_DIR)/%.trc : %.xrd makefile
-	$(PALMRC) -p $(TARGET_FORMAT) -makeDeps $(@D)/$(*F).deps $(RFLAGS) -locale $(LOCALE) "`$(CYGPATH_WA) ./$<`" -o $@
+	"$(TOOLS_DIR)PalmRC" -p $(TARGET_FORMAT) -makeDeps $(@D)/$(*F).deps $(RFLAGS) -locale $(LOCALE) "`cygpath -w -a ./$<`" -o $@
 $(RSC_OBJ_DIR)/%.trc : %.XRD makefile
-	$(PALMRC) -p $(TARGET_FORMAT) -makeDeps $(@D)/$(*F).deps $(RFLAGS) -locale $(LOCALE) "`$(CYGPATH_WA) ./$<`" -o $@
+	"$(TOOLS_DIR)PalmRC" -p $(TARGET_FORMAT) -makeDeps $(@D)/$(*F).deps $(RFLAGS) -locale $(LOCALE) "`cygpath -w -a ./$<`" -o $@
 
 
 # Definition file source processing
 $(SLD_OBJ) : makefile
 	@echo "...Processing definition file for Device..."
-	$(PSLIB) -inDef "$(SLD_FILE)" $(PSLIB_DEV_FLAGS) -outObjStartup $@ -type '$(DB_TYPE)' -creator '$(CREATOR_ID)' -execName $(DATABASE_NAME)
-#	$(INSTALL_DIR) $(INCDIR_WXPALM)/wx/
-#	$(INSTALL_DATA) $(TOPDIR)/include/wx/palmos/setup0.h $(INCDIR_WXPALM)/wx/setup.h
-
-
+	"$(TOOLS_DIR)pslib" -inDef "$(SLD_FILE)" $(PSLIB_DEV_FLAGS) -outObjStartup $@ -type '$(DB_TYPE)' -creator '$(CREATOR_ID)' -execName $(DATABASE_NAME)
+	
 $(SLD_SIM_OBJ) : makefile
 	@echo "...Processing definition file for Simulator..."
-	$(PSLIB) -inDef "$(SLD_FILE)" $(PSLIB_SIM_FLAGS) -outSimStartup $@ -outSimRsrc $(SIM_OBJ_DIR)/acod0000.bin  -outSimDefs $(SIM_OBJ_DIR)/gcc_link.def -type '$(DB_TYPE)' -creator '$(CREATOR_ID)' -execName $(DATABASE_NAME)
-#	$(INSTALL_DIR) $(INCDIR_WXPALM)/wx/
-#	$(INSTALL_DATA) $(TOPDIR)/include/wx/palmos/setup0.h $(INCDIR_WXPALM)/wx/setup.h
-
+	"$(TOOLS_DIR)pslib" -inDef "$(SLD_FILE)" $(PSLIB_SIM_FLAGS) -outSimStartup $@ -outSimRsrc $(SIM_OBJ_DIR)/acod0000.bin  -outSimDefs $(SIM_OBJ_DIR)/gcc_link.def -type '$(DB_TYPE)' -creator '$(CREATOR_ID)' -execName $(DATABASE_NAME)
 
 # Linking step
 $(LINKER_OUTPUT) : $(OBJS)
@@ -651,15 +620,15 @@ $(SIM_LINKER_OUTPUT) : $(SIM_OBJS)
 # Final target creation
 $(TARGET): $(SLD_OBJ) $(LINKER_OUTPUT) $(RESOURCE_OBJS) 
 	@echo "...Creating PRC for Device: $(TARGET)"
-	$(PELF2BIN) -format 6 -directory $(OBJ_DIR) -code acod -data adat -rsrc 0x0000 $(LINKER_OUTPUT)
-	$(PRCMERGE) -dbType '$(DB_TYPE)' -dbCreator '$(CREATOR_ID)' -dbName $(DATABASE_NAME) $(PRCFLAGS) -o $(TARGET) $(RESOURCE_OBJS) $(OBJ_DIR)/adat0000.bin $(OBJ_DIR)/acod0000.bin
+	"$(TOOLS_DIR)pelf2bin" -format 6 -directory $(OBJ_DIR) -code acod -data adat -rsrc 0x0000 $(LINKER_OUTPUT)
+	"$(TOOLS_DIR)PRCMerge" -dbType '$(DB_TYPE)' -dbCreator '$(CREATOR_ID)' -dbName $(DATABASE_NAME) $(PRCFLAGS) -o $(TARGET) $(RESOURCE_OBJS) $(OBJ_DIR)/adat0000.bin $(OBJ_DIR)/acod0000.bin
 	@echo ...Done with Device build...
 	@echo 
 
 $(SIM_TARGET): $(SLD_SIM_OBJ) $(SIM_LINKER_OUTPUT) $(RESOURCE_OBJS)
 	@echo "...Creating PRC for Simulator: $(SIM_TARGET)"
 	cp -f "$(SDK_LOCATION)misctools/Resources/amdd_fake" $(SIM_OBJ_DIR)/adat0000.bin
-	$(PRCMERGE) -dbType '$(DB_TYPE)' -dbCreator '$(CREATOR_ID)' -dbName $(DATABASE_NAME) $(PRCFLAGS) -o $(SIM_TARGET) $(RESOURCE_OBJS) $(SIM_OBJ_DIR)/adat0000.bin $(SIM_OBJ_DIR)/acod0000.bin
+	"$(TOOLS_DIR)PRCMerge" -dbType '$(DB_TYPE)' -dbCreator '$(CREATOR_ID)' -dbName $(DATABASE_NAME) $(PRCFLAGS) -o $(SIM_TARGET) $(RESOURCE_OBJS) $(SIM_OBJ_DIR)/adat0000.bin $(SIM_OBJ_DIR)/acod0000.bin
 	@echo ...Done with Simulator build...
 	@echo 
 
@@ -677,7 +646,7 @@ FORCE:
 # Eclipse requires a clean command
 clean :: FORCE
 	-rm -rf $(NATIVE_OBJ_DIR)/*
-	-rm -f $(OBJS)
+
 
 printvars :: FORCE
 	@echo "SDK_LOCATION"
@@ -755,43 +724,23 @@ ESCAPE_SPACES_SEDSCRIPT = sed 's/ /\\\ /g'
 RESOURCE_PREREQ_SEDSCRIPT = tr '\r\n' ' '
 
 depend :: FORCE
-	@echo "" > $(FN_DEPEND)
-#	@echo "$(SIM_CC) $(SIM_CXXFLAGS) $(DEPFLAG) $(SOURCES) to $(FN_DEPEND).tmp"
-	@$(SIM_CC) $(SIM_CXXFLAGS) $(DEPFLAG) $(SOURCES) > $(FN_DEPEND).tmp
-	@cat $(FN_DEPEND).tmp | $(SOURCE_SEDSCRIPT) >> $(FN_DEPEND)
-	@cat $(FN_DEPEND).tmp | $(SOURCE_SIM_SEDSCRIPT) >> $(FN_DEPEND)
-	-rm -f $(FN_DEPEND).tmp
+	@echo "" > .dependencies
+	@$(SIM_CC) $(SIM_INCLUDES) $(SIM_CFLAGS) $(DEPFLAG) $(SOURCES) | $(SOURCE_SIM_SEDSCRIPT) >> .dependencies
+	@$(SIM_CC) $(SIM_INCLUDES) $(SIM_CFLAGS) $(DEPFLAG) $(SOURCES) | $(SOURCE_SEDSCRIPT) >> .dependencies
 	@for i in $(RESOURCES); do \
 		echo "$$i: \\" | $(RESOURCE_TARGET_SEDSCRIPT) >> .resdependencies; \
-		$(PALMRC) -p $(TARGET_FORMAT) $(RFLAGS) -locale $(LOCALE) -makedeps $$i.tmp "`$(CYGPATH_WA) ./$$i`"; \
-		$(CYGPATH_MF) $$i.tmp | $(ESCAPE_SPACES_SEDSCRIPT) >> $$i.deps; \
+		"$(TOOLS_DIR)PalmRC" -p $(TARGET_FORMAT) $(RFLAGS) -locale $(LOCALE) -makedeps $$i.tmp "`cygpath -w -a ./$$i`"; \
+		cygpath -m -f $$i.tmp | $(ESCAPE_SPACES_SEDSCRIPT) >> $$i.deps; \
 		rm -rf $$i.tmp; \
 		cat $$i.deps | $(RESOURCE_PREREQ_SEDSCRIPT) >> .resdependencies; \
 		echo "" >> .resdependencies; \
 		rm -rf $$i.deps; \
-		cat .resdependencies >>  $(FN_DEPEND); \
+		cat .resdependencies >> .dependencies; \
 		rm -rf .resdependencies; \
 	done
-	@for i in $(SOURCES); do \
-		echo "`basename $$i`.o: $$i" | $(SOURCE_SEDSCRIPT) | sed "s/\.cpp\.o/.o/" | sed "s/\.c\.o/.o/" >> $(FN_DEPEND); \
-		echo "	\$$(CC) -c \$$< \$$(CXXFLAGS) -o \$$@" >> $(FN_DEPEND); \
-		echo "`basename $$i`.o: $$i" | $(SOURCE_SIM_SEDSCRIPT) | sed "s/\.cpp\.o/.o/" | sed "s/\.c\.o/.o/" >> $(FN_DEPEND); \
-		echo "	\$$(SIM_CC) -c \$$< \$$(CXXFLAGS) -o \$$@" >> $(FN_DEPEND); \
-	done
 
-$(FN_DEPEND).1: $(FN_DEPEND)
-	@touch $(FN_DEPEND).1
-	@$(MAKE) all
-
-$(FN_DEPEND): #makefile #$(SOURCES)
-	@rm -f $(FN_DEPEND).2
-	@$(MAKE) depend
-	@cp $(FN_DEPEND) $(FN_DEPEND).2
 
 cleandepend :: FORCE
-	@rm -f $(FN_DEPEND) $(FN_DEPEND).1 $(FN_DEPEND).2 $(FN_DEPEND).tmp
-	@rm -f $(INCDIR_WXPALM)/wx/setup.h
+	-rm -f .dependencies
 
-distclean: cleandepend clean
-
--include $(FN_DEPEND).2
+-include .dependencies

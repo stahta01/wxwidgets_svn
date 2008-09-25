@@ -34,7 +34,7 @@ typedef enum {
 } wxURLError;
 
 #if wxUSE_URL_NATIVE
-class WXDLLIMPEXP_FWD_NET wxURL;
+class WXDLLIMPEXP_NET wxURL;
 
 class WXDLLIMPEXP_NET wxURLNativeImp : public wxObject
 {
@@ -70,6 +70,22 @@ public:
     static void SetDefaultProxy(const wxString& url_proxy);
     void SetProxy(const wxString& url_proxy);
 #endif // wxUSE_PROTOCOL_HTTP
+
+#if WXWIN_COMPATIBILITY_2_4
+    //Use the proper wxURI accessors instead
+    wxDEPRECATED( wxString GetProtocolName() const );
+    wxDEPRECATED( wxString GetHostName() const );
+    wxDEPRECATED( wxString GetPath() const );
+
+    //Use wxURI instead - this does not work that well
+    wxDEPRECATED( static wxString ConvertToValidURI(
+                        const wxString& uri,
+                        const wxChar* delims = wxT(";/?:@&=+$,")
+                  ) );
+
+    //Use wxURI::Unescape instead
+    wxDEPRECATED( static wxString ConvertFromURI(const wxString& uri) );
+#endif
 
 protected:
     static wxProtoInfo *ms_protocols;

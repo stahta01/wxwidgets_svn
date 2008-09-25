@@ -21,13 +21,13 @@
 
 class WXDLLIMPEXP_FWD_CORE wxControlContainer;
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxPanelNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxPanelNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxPanel contains other controls and implements TAB traversal between them
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPanel : public wxWindow
+class WXDLLEXPORT wxPanel : public wxWindow
 {
 public:
     wxPanel() { Init(); }
@@ -79,15 +79,14 @@ public:
     virtual bool IsCanvasWindow() const { return true; }
 #endif
 
+
     WX_DECLARE_CONTROL_CONTAINER();
 
 protected:
     // common part of all ctors
     void Init();
 
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxWindowBase::GetDefaultBorder(); }
-
+private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxPanel)
     DECLARE_EVENT_TABLE()
 };

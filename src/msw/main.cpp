@@ -61,7 +61,6 @@
 
 // defined in common/init.cpp
 extern int wxEntryReal(int& argc, wxChar **argv);
-extern int wxEntryCleanupReal(int& argc, wxChar **argv);
 
 // ============================================================================
 // implementation: various entry points
@@ -69,15 +68,7 @@ extern int wxEntryCleanupReal(int& argc, wxChar **argv);
 
 #if wxUSE_BASE
 
-// ----------------------------------------------------------------------------
-// wrapper wxEntry catching all Win32 exceptions occurring in a wx program
-// ----------------------------------------------------------------------------
-
-// wrap real wxEntry in a try-except block to be able to call
-// OnFatalException() if necessary
-#if wxUSE_ON_FATAL_EXCEPTION
-
-#if defined(__VISUALC__) && !defined(__WXWINCE__)
+#if wxUSE_ON_FATAL_EXCEPTION && defined(__VISUALC__) && !defined(__WXWINCE__)
     // VC++ (at least from 4.0 up to version 7.1) is incredibly broken in that
     // a "catch ( ... )" will *always* catch SEH exceptions in it even though
     // it should have never been the case... to prevent such catches from
@@ -98,6 +89,14 @@ extern int wxEntryCleanupReal(int& argc, wxChar **argv);
 #else // !__VISUALC__
     #define DisableAutomaticSETranslator()
 #endif // __VISUALC__/!__VISUALC__
+
+// ----------------------------------------------------------------------------
+// wrapper wxEntry catching all Win32 exceptions occurring in a wx program
+// ----------------------------------------------------------------------------
+
+// wrap real wxEntry in a try-except block to be able to call
+// OnFatalException() if necessary
+#if wxUSE_ON_FATAL_EXCEPTION
 
 // global pointer to exception information, only valid inside OnFatalException,
 // used by wxStackWalker and wxCrashReport
@@ -186,7 +185,7 @@ bool wxHandleFatalExceptions(bool doit)
         wxString name = wxString::Format
                         (
                             _T("%s_%s_%lu.dmp"),
-                            wxTheApp ? (const wxChar*)wxTheApp->GetAppDisplayName().c_str()
+                            wxTheApp ? wxTheApp->GetAppName().c_str()
                                      : _T("wxwindows"),
                             wxDateTime::Now().Format(_T("%Y%m%dT%H%M%S")).c_str(),
                             ::GetCurrentProcessId()
@@ -214,8 +213,21 @@ int wxEntry(int& argc, wxChar **argv)
 
 #else // !wxUSE_ON_FATAL_EXCEPTION
 
+#if defined(__VISUALC__) && !defined(__WXWINCE__)
+
+static void
+wxSETranslator(unsigned int WXUNUSED(code), EXCEPTION_POINTERS * WXUNUSED(ep))
+{
+    // see wxSETranslator() version for wxUSE_ON_FATAL_EXCEPTION above
+    throw;
+}
+
+#endif // __VISUALC__
+
 int wxEntry(int& argc, wxChar **argv)
 {
+    DisableAutomaticSETranslator();
+
     return wxEntryReal(argc, argv);
 }
 
@@ -307,56 +319,31 @@ static bool wxIsUnicodeAvailable()
 // Windows-specific wxEntry
 // ----------------------------------------------------------------------------
 
-struct wxMSWCommandLineArguments
+// helper function used to clean up in wxEntry() just below
+//
+// notice that argv elements are supposed to be allocated using malloc() while
+// argv array itself is allocated with new
+static void wxFreeArgs(int argc, wxChar **argv)
 {
-    wxMSWCommandLineArguments() { argc = 0; argv = NULL; }
-
-    void Init(const wxArrayString& args)
+    for ( int i = 0; i < argc; i++ )
     {
-        argc = args.size();
-
-        // +1 here for the terminating NULL
-        argv = new wxChar *[argc + 1];
-        for ( int i = 0; i < argc; i++ )
-        {
-            argv[i] = wxStrdup(args[i].wx_str());
-        }
-
-        // argv[] must be NULL-terminated
-        argv[argc] = NULL;
+        free(argv[i]);
     }
 
-    void Free()
-    {
-        if ( !argc )
-            return;
+    delete [] argv;
+}
 
-        for ( int i = 0; i < argc; i++ )
-        {
-            free(argv[i]);
-        }
-
-        delete [] argv;
-        argv = NULL;
-        argc = 0;
-    }
-
-    int argc;
-    wxChar **argv;
-};
-
-static wxMSWCommandLineArguments wxArgs;
-
-// common part of wxMSW-specific wxEntryStart() and wxEntry() overloads
-static bool
-wxMSWEntryCommon(HINSTANCE hInstance, int nCmdShow)
+WXDLLEXPORT int wxEntry(HINSTANCE hInstance,
+                        HINSTANCE WXUNUSED(hPrevInstance),
+                        wxCmdLineArgType WXUNUSED(pCmdLine),
+                        int nCmdShow)
 {
     // the first thing to do is to check if we're trying to run an Unicode
     // program under Win9x w/o MSLU emulation layer - if so, abort right now
     // as it has no chance to work and has all chances to crash
 #ifdef NEED_UNICODE_CHECK
     if ( !wxIsUnicodeAvailable() )
-        return false;
+        return -1;
 #endif // NEED_UNICODE_CHECK
 
 
@@ -382,33 +369,21 @@ wxMSWEntryCommon(HINSTANCE hInstance, int nCmdShow)
     args.Insert(wxGetFullModuleName(), 0);
 #endif
 
-    wxArgs.Init(args);
+    int argc = args.GetCount();
 
-    return true;
-}
+    // +1 here for the terminating NULL
+    wxChar **argv = new wxChar *[argc + 1];
+    for ( int i = 0; i < argc; i++ )
+    {
+        argv[i] = wxStrdup(args[i]);
+    }
 
-WXDLLEXPORT bool wxEntryStart(HINSTANCE hInstance,
-                              HINSTANCE WXUNUSED(hPrevInstance),
-                              wxCmdLineArgType WXUNUSED(pCmdLine),
-                              int nCmdShow)
-{
-    if ( !wxMSWEntryCommon(hInstance, nCmdShow) )
-       return false;
+    // argv[] must be NULL-terminated
+    argv[argc] = NULL;
 
-    return wxEntryStart(wxArgs.argc, wxArgs.argv);
-}
+    wxON_BLOCK_EXIT2(wxFreeArgs, argc, argv);
 
-WXDLLEXPORT int wxEntry(HINSTANCE hInstance,
-                        HINSTANCE WXUNUSED(hPrevInstance),
-                        wxCmdLineArgType WXUNUSED(pCmdLine),
-                        int nCmdShow)
-{
-    if ( !wxMSWEntryCommon(hInstance, nCmdShow) )
-        return -1;
-
-    wxON_BLOCK_EXIT_OBJ0(wxArgs, wxMSWCommandLineArguments::Free);
-
-    return wxEntry(wxArgs.argc, wxArgs.argv);
+    return wxEntry(argc, argv);
 }
 
 #endif // wxUSE_GUI && __WXMSW__

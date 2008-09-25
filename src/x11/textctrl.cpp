@@ -1901,7 +1901,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
                 event.SetEventObject(this);
                 event.SetString(GetValue());
-                if (HandleWindowEvent(event)) return;
+                if (GetEventHandler()->ProcessEvent(event)) return;
             }
 
             if (IsSingleLine())
@@ -2373,6 +2373,18 @@ wxSize wxTextCtrl::DoGetBestSize() const
     {
         return wxSize(80, 60);
     }
+}
+
+// ----------------------------------------------------------------------------
+// freeze/thaw
+// ----------------------------------------------------------------------------
+
+void wxTextCtrl::Freeze()
+{
+}
+
+void wxTextCtrl::Thaw()
+{
 }
 
 void wxTextCtrl::OnSetFocus( wxFocusEvent& event )

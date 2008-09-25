@@ -57,7 +57,7 @@ WXUNIV = 0
 
 # Compile Unicode build of wxWidgets? [0,1]
 !ifndef UNICODE
-UNICODE = 1
+UNICODE = 0
 !endif
 
 # Use MSLU library when building Unicode version. [0,1]
@@ -113,24 +113,19 @@ USE_XRC = 1
 USE_AUI = 1
 !endif
 
-# Build wxPropertyGrid library (USE_GUI must be 1)? [0,1]
-!ifndef USE_PROPGRID
-USE_PROPGRID = 1
-!endif
-
 # Build wxRichTextCtrl library (USE_GUI must be 1)? [0,1]
 !ifndef USE_RICHTEXT
 USE_RICHTEXT = 1
 !endif
 
-# Build wxStyledTextCtrl library (USE_GUI must be 1)? [0,1]
-!ifndef USE_STC
-USE_STC = 1
-!endif
-
 # Build OpenGL canvas library (USE_GUI must be 1)? [0,1]
 !ifndef USE_OPENGL
 USE_OPENGL = 0
+!endif
+
+# Build ODBC database classes (USE_GUI must be 1)? [0,1]
+!ifndef USE_ODBC
+USE_ODBC = 0
 !endif
 
 # Build quality assurance classes library (USE_GUI must be 1)? [0,1]

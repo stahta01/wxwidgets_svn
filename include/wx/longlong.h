@@ -67,8 +67,8 @@
         #define wxUSE_LONGLONG_NATIVE 0
     #endif
 
-    class WXDLLIMPEXP_FWD_BASE wxLongLongWx;
-    class WXDLLIMPEXP_FWD_BASE wxULongLongWx;
+    class WXDLLIMPEXP_BASE wxLongLongWx;
+    class WXDLLIMPEXP_BASE wxULongLongWx;
 #if defined(__VISUALC__) && !defined(__WIN32__)
     #define wxLongLong wxLongLongWx
     #define wxULongLong wxULongLongWx

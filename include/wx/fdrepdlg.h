@@ -60,7 +60,7 @@ enum wxFindReplaceDialogStyles
 // wxFindReplaceData: holds Setup Data/Feedback Data for wxFindReplaceDialog
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFindReplaceData : public wxObject
+class WXDLLEXPORT wxFindReplaceData : public wxObject
 {
 public:
     wxFindReplaceData() { Init(); }
@@ -93,7 +93,7 @@ private:
 // wxFindReplaceDialogBase
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFindReplaceDialogBase : public wxDialog
+class WXDLLEXPORT wxFindReplaceDialogBase : public wxDialog
 {
 public:
     // ctors and such
@@ -137,7 +137,7 @@ protected:
 // wxFindReplaceDialog events
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFindDialogEvent : public wxCommandEvent
+class WXDLLEXPORT wxFindDialogEvent : public wxCommandEvent
 {
 public:
     wxFindDialogEvent(wxEventType commandType = wxEVT_NULL, int id = 0)
@@ -161,11 +161,13 @@ private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxFindDialogEvent)
 };
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_NEXT;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_REPLACE;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_REPLACE_ALL;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_FIND_CLOSE;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND, 510)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_NEXT, 511)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_REPLACE, 512)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_REPLACE_ALL, 513)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_FIND_CLOSE, 514)
+END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxFindDialogEventFunction)(wxFindDialogEvent&);
 

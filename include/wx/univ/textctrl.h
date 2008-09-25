@@ -12,8 +12,8 @@
 #ifndef _WX_UNIV_TEXTCTRL_H_
 #define _WX_UNIV_TEXTCTRL_H_
 
-class WXDLLIMPEXP_FWD_CORE wxCaret;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrlCommandProcessor;
+class WXDLLEXPORT wxCaret;
+class WXDLLEXPORT wxTextCtrlCommandProcessor;
 
 #include "wx/scrolwin.h"    // for wxScrollHelper
 
@@ -66,7 +66,7 @@ class WXDLLIMPEXP_FWD_CORE wxTextCtrlCommandProcessor;
 // wxTextCtrl
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTextCtrl : public wxTextCtrlBase,
+class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase,
                                public wxScrollHelper
 {
 public:

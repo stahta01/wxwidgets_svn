@@ -29,7 +29,7 @@
 #include "wx/filefn.h"
 #include "wx/ffile.h"
 #include "wx/process.h"
-#include "wx/crt.h"
+#include "wx/wxchar.h"
 
 #include <stdlib.h>
 
@@ -677,7 +677,6 @@ wxDialUpManagerImpl::CheckIfconfig()
         wxString cmd = wxT("/bin/sh -c \'");
         cmd << m_IfconfigPath;
 #if defined(__AIX__) || \
-    defined(__NETBSD__) || \
     defined(__OSF__) || \
     defined(__SOLARIS__) || defined (__SUNOS__)
         // need to add -a flag

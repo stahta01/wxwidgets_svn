@@ -80,7 +80,7 @@ bool wxButton::Create( wxWindow*          pParent,
 
     m_hWnd = (WXHWND)::WinCreateWindow( GetHwndOf(pParent)   // Parent handle
                                        ,WC_BUTTON            // A Button class window
-                                       ,sLabel.c_str()  // Button text
+                                       ,(PSZ)sLabel.c_str()  // Button text
                                        ,lStyle               // Button style
                                        ,0, 0, 0, 0           // Location and size
                                        ,GetHwndOf(pParent)   // Owner handle
@@ -231,17 +231,19 @@ bool wxButton::SendClickEvent()
     return ProcessCommand(vEvent);
 } // end of wxButton::SendClickEvent
 
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+
+    wxCHECK_RET( tlw, _T("button without top level window?") );
+
     //
     // Set this one as the default button both for wxWidgets and Windows
     //
-    wxWindow* pWinOldDefault = wxButtonBase::SetDefault();
+    wxWindow*                       pWinOldDefault = tlw->SetDefaultItem(this);
 
     SetDefaultStyle( wxDynamicCast(pWinOldDefault, wxButton), false);
     SetDefaultStyle( this, true );
-
-    return pWinOldDefault;
 } // end of wxButton::SetDefault
 
 void wxButton::SetTmpDefault()

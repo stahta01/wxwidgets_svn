@@ -19,7 +19,6 @@
 #ifndef WX_PRECOMP
 #endif
 
-#include "wx/os2/dcclient.h"
 #include "wx/os2/private.h"
 
 
@@ -130,9 +129,8 @@ bool wxBitmapButton::OS2OnDraw( WXDRAWITEMSTRUCT* pItem)
     //
     int                             nX1        = 0;
     int                             nY1        = 0;
-    wxPMDCImpl                      *impl = (wxPMDCImpl*) vDc.GetImpl();
-    int                             nWidth     = impl->m_vRclPaint.xRight - impl->m_vRclPaint.xLeft;
-    int                             nHeight    = impl->m_vRclPaint.yTop - impl->m_vRclPaint.yBottom;
+    int                             nWidth     = vDc.m_vRclPaint.xRight - vDc.m_vRclPaint.xLeft;
+    int                             nHeight    = vDc.m_vRclPaint.yTop - vDc.m_vRclPaint.yBottom;
     int                             nBmpWidth  = pBitmap->GetWidth();
     int                             nBmpHeight = pBitmap->GetHeight();
 
@@ -191,32 +189,31 @@ void wxBitmapButton::DrawFace (wxClientDC& rDC, bool bSel)
     // Note: DrawLine expects wxWidgets coordinate system so swap
     //
     rDC.SetPen(bSel ? vDarkShadowPen : vHiLitePen);
-    wxPMDCImpl                      *impl = (wxPMDCImpl*) rDC.GetImpl();
     // top
-    rDC.DrawLine( impl->m_vRclPaint.xLeft + 1
-                 ,impl->m_vRclPaint.yBottom + 1
-                 ,impl->m_vRclPaint.xRight - 1
-                 ,impl->m_vRclPaint.yBottom + 1
+    rDC.DrawLine( rDC.m_vRclPaint.xLeft + 1
+                 ,rDC.m_vRclPaint.yBottom + 1
+                 ,rDC.m_vRclPaint.xRight - 1
+                 ,rDC.m_vRclPaint.yBottom + 1
                 );
     // left
-    rDC.DrawLine( impl->m_vRclPaint.xLeft + 1
-                 ,impl->m_vRclPaint.yBottom + 1
-                 ,impl->m_vRclPaint.xLeft + 1
-                 ,impl->m_vRclPaint.yTop - 1
+    rDC.DrawLine( rDC.m_vRclPaint.xLeft + 1
+                 ,rDC.m_vRclPaint.yBottom + 1
+                 ,rDC.m_vRclPaint.xLeft + 1
+                 ,rDC.m_vRclPaint.yTop - 1
                 );
 
     rDC.SetPen(bSel ? vHiLitePen : vDarkShadowPen);
     // bottom
-    rDC.DrawLine( impl->m_vRclPaint.xLeft + 1
-                 ,impl->m_vRclPaint.yTop - 1
-                 ,impl->m_vRclPaint.xRight - 1
-                 ,impl->m_vRclPaint.yTop - 1
+    rDC.DrawLine( rDC.m_vRclPaint.xLeft + 1
+                 ,rDC.m_vRclPaint.yTop - 1
+                 ,rDC.m_vRclPaint.xRight - 1
+                 ,rDC.m_vRclPaint.yTop - 1
                 );
     // right
-    rDC.DrawLine( impl->m_vRclPaint.xRight - 1
-                 ,impl->m_vRclPaint.yBottom + 1
-                 ,impl->m_vRclPaint.xRight - 1
-                 ,impl->m_vRclPaint.yTop - 1
+    rDC.DrawLine( rDC.m_vRclPaint.xRight - 1
+                 ,rDC.m_vRclPaint.yBottom + 1
+                 ,rDC.m_vRclPaint.xRight - 1
+                 ,rDC.m_vRclPaint.yTop - 1
                 );
 
 } // end of wxBitmapButton::DrawFace
@@ -232,30 +229,29 @@ void wxBitmapButton::DrawButtonFocus (
     // Note: DrawLine expects wxWidgets coordinate system so swap
     //
     rDC.SetPen(vBlackPen);
-    wxPMDCImpl                      *impl = (wxPMDCImpl*) rDC.GetImpl();
     // top
-    rDC.DrawLine( impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yBottom
-                 ,impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yBottom
+    rDC.DrawLine( rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yBottom
+                 ,rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yBottom
                 );
     // right
-    rDC.DrawLine( impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yBottom
-                 ,impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yTop
+    rDC.DrawLine( rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yBottom
+                 ,rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yTop
                 );
     // bottom
-    rDC.DrawLine( impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yTop
-                 ,impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yTop
+    rDC.DrawLine( rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yTop
+                 ,rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yTop
                 );
     // left
-    rDC.DrawLine( impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yTop
-                 ,impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yBottom
+    rDC.DrawLine( rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yTop
+                 ,rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yBottom
                 );
 } // end of wxBitmapButton::DrawButtonFocus
 
@@ -269,32 +265,36 @@ void wxBitmapButton::DrawButtonDisable( wxClientDC& rDC,
     // Note: DrawLine expects wxWidgets coordinate system so swap
     //
     rDC.SetPen(vGreyPen);
-    wxPMDCImpl                      *impl = (wxPMDCImpl*) rDC.GetImpl();
     // top
-    rDC.DrawLine( impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yBottom
-                 ,impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yBottom
+    rDC.DrawLine( rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yBottom
+                 ,rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yBottom
                 );
     // right
-    rDC.DrawLine( impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yBottom
-                 ,impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yTop
+    rDC.DrawLine( rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yBottom
+                 ,rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yTop
                 );
     // bottom
-    rDC.DrawLine( impl->m_vRclPaint.xRight
-                 ,impl->m_vRclPaint.yTop
-                 ,impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yTop
+    rDC.DrawLine( rDC.m_vRclPaint.xRight
+                 ,rDC.m_vRclPaint.yTop
+                 ,rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yTop
                 );
     // left
-    rDC.DrawLine( impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yTop
-                 ,impl->m_vRclPaint.xLeft
-                 ,impl->m_vRclPaint.yBottom
+    rDC.DrawLine( rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yTop
+                 ,rDC.m_vRclPaint.xLeft
+                 ,rDC.m_vRclPaint.yBottom
                 );
     wxDisableBitmap(rBmp, vGreyPen.GetColour().GetPixel());
 } // end of wxBitmapButton::DrawButtonDisable
+
+void wxBitmapButton::SetDefault()
+{
+    wxButton::SetDefault();
+}
 
 #endif // ndef for wxUSE_BMPBUTTON

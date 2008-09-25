@@ -31,6 +31,13 @@
 
 #include <gdk/gdkkeysyms.h>
 
+// ----------------------------------------------------------------------------
+// events
+// ----------------------------------------------------------------------------
+
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
+
 //-----------------------------------------------------------------------------
 // idle system
 //-----------------------------------------------------------------------------
@@ -105,7 +112,7 @@ static void gtk_notebook_page_change_callback(GtkNotebook *WXUNUSED(widget),
         notebook->m_skipNextPageChangeEvent = false;
 
         // make wxNotebook::GetSelection() return the correct (i.e. consistent
-        // with wxBookCtrlEvent::GetSelection()) value even though the page is
+        // with wxNotebookEvent::GetSelection()) value even though the page is
         // not really changed in GTK+
         notebook->m_selection = page;
     }
@@ -119,7 +126,7 @@ static void gtk_notebook_page_change_callback(GtkNotebook *WXUNUSED(widget),
         else // change allowed
         {
             // make wxNotebook::GetSelection() return the correct (i.e. consistent
-            // with wxBookCtrlEvent::GetSelection()) value even though the page is
+            // with wxNotebookEvent::GetSelection()) value even though the page is
             // not really changed in GTK+
             notebook->m_selection = page;
 
@@ -242,7 +249,7 @@ static gint gtk_notebook_key_press_callback( GtkWidget *widget, GdkEventKey *gdk
         event.SetCurrentFocus( notebook );
 
         wxNotebookPage *client = notebook->GetPage(sel);
-        if ( !client->HandleWindowEvent( event ) )
+        if ( !client->GetEventHandler()->ProcessEvent( event ) )
         {
              client->SetFocus();
         }
@@ -857,5 +864,11 @@ wxNotebook::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 {
     return GetDefaultAttributesFromGTKWidget(gtk_notebook_new);
 }
+
+//-----------------------------------------------------------------------------
+// wxNotebookEvent
+//-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
 
 #endif

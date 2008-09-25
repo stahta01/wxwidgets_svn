@@ -22,7 +22,7 @@ extern MRESULT EXPENTRY wxSpinCtrlWndProc(
 , MPARAM                            lParam
 );
 
-class WXDLLIMPEXP_CORE wxSpinButton: public wxSpinButtonBase
+class WXDLLEXPORT wxSpinButton: public wxSpinButtonBase
 {
 public:
     // Construction

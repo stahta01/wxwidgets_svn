@@ -22,13 +22,13 @@
 
 #include "wx/window.h"      // base class
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxControlNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxControlNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxControl is the base class for all controls
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxControlBase : public wxWindow
+class WXDLLEXPORT wxControlBase : public wxWindow
 {
 public:
     wxControlBase() { }
@@ -46,33 +46,11 @@ public:
     // get the control alignment (left/right/centre, top/bottom/centre)
     int GetAlignment() const { return m_windowStyle & wxALIGN_MASK; }
 
-    // get just the text of the label, without mnemonic characters ('&')
-    wxString GetLabelText() const { return GetLabelText(GetLabel()); }
-
-    virtual void SetLabel(const wxString& label)
-    {
-        m_labelOrig = label;
-
-        InvalidateBestSize();
-
-        wxWindow::SetLabel(label);
-    }
-
-    virtual wxString GetLabel() const
-    {
-        // return the original string, as it was passed to SetLabel()
-        // (i.e. with wx-style mnemonics)
-        return m_labelOrig;
-    }
-
-    // static utilities:
-
     // get the string without mnemonic characters ('&')
     static wxString GetLabelText(const wxString& label);
 
-    // removes the mnemonics characters
-    static wxString RemoveMnemonics(const wxString& str);
-
+    // get just the text of the label, without mnemonic characters ('&')
+    wxString GetLabelText() const { return GetLabelText(GetLabel()); }
 
     // controls by default inherit the colours of their parents, if a
     // particular control class doesn't want to do it, it can override
@@ -86,15 +64,13 @@ public:
     // if the button was clicked)
     virtual void Command(wxCommandEvent &event);
 
+    virtual void SetLabel( const wxString &label );
     virtual bool SetFont(const wxFont& font);
 
     // wxControl-specific processing after processing the update event
     virtual void DoUpdateWindowUI(wxUpdateUIEvent& event);
 
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const;
-
     // creates the control (calls wxWindowBase::CreateBase inside) and adds it
     // to the list of parents children
     bool CreateControl(wxWindowBase *parent,
@@ -107,9 +83,6 @@ protected:
 
     // initialize the common fields of wxCommandEvent
     void InitCommandEvent(wxCommandEvent& event) const;
-
-    // this field contains the label in wx format, i.e. with '&' mnemonics
-    wxString m_labelOrig;
 
     DECLARE_NO_COPY_CLASS(wxControlBase)
 };
@@ -131,7 +104,7 @@ protected:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/control.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/control.h"
+    #include "wx/mac/control.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/control.h"
 #elif defined(__WXPM__)

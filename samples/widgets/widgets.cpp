@@ -30,7 +30,6 @@
     #include "wx/log.h"
     #include "wx/frame.h"
     #include "wx/menu.h"
-    #include "wx/image.h"
 
     #include "wx/button.h"
     #include "wx/checkbox.h"
@@ -87,14 +86,7 @@ enum
     Widgets_BusyCursor,
 
     Widgets_GoToPage,
-    Widgets_GoToPageLast = Widgets_GoToPage + 100,
-
-
-    TextEntry_Begin,
-    TextEntry_DisableAutoComplete = TextEntry_Begin,
-    TextEntry_AutoCompleteFixed,
-    TextEntry_AutoCompleteFilenames,
-    TextEntry_End
+    Widgets_GoToPageLast = Widgets_GoToPage + 100
 };
 
 const wxChar *WidgetsCategories[MAX_PAGES] = {
@@ -160,15 +152,6 @@ protected:
 
     void OnToggleGlobalBusyCursor(wxCommandEvent& event);
     void OnToggleBusyCursor(wxCommandEvent& event);
-
-    void OnDisableAutoComplete(wxCommandEvent& event);
-    void OnAutoCompleteFixed(wxCommandEvent& event);
-    void OnAutoCompleteFilenames(wxCommandEvent& event);
-
-    void OnUpdateTextUI(wxUpdateUIEvent& event)
-    {
-        event.Enable( CurrentPage()->GetTextEntry() != NULL );
-    }
 #endif // wxUSE_MENUS
 
     // initialize the book: add all pages to it
@@ -222,7 +205,7 @@ public:
 
 private:
     // implement sink functions
-    virtual void DoLog(wxLogLevel level, const wxString& str, time_t t)
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
     {
         // don't put trace messages into listbox or we can get into infinite
         // recursion
@@ -231,20 +214,20 @@ private:
             if ( m_logOld )
             {
                 // cast is needed to call protected method
-                ((LboxLogger *)m_logOld)->DoLog(level, str, t);
+                ((LboxLogger *)m_logOld)->DoLog(level, szString, t);
             }
         }
         else
         {
-            wxLog::DoLog(level, str, t);
+            wxLog::DoLog(level, szString, t);
         }
     }
 
-    virtual void DoLogString(const wxString& str, time_t WXUNUSED(t))
+    virtual void DoLogString(const wxChar *szString, time_t WXUNUSED(t))
     {
         wxString msg;
         TimeStamp(&msg);
-        msg += str;
+        msg += szString;
 
         #ifdef __WXUNIVERSAL__
             m_lbox->AppendAndEnsureVisible(msg);
@@ -301,13 +284,6 @@ BEGIN_EVENT_TABLE(WidgetsFrame, wxFrame)
     EVT_MENU(Widgets_GlobalBusyCursor,  WidgetsFrame::OnToggleGlobalBusyCursor)
     EVT_MENU(Widgets_BusyCursor,        WidgetsFrame::OnToggleBusyCursor)
 
-    EVT_MENU(TextEntry_DisableAutoComplete,   WidgetsFrame::OnDisableAutoComplete)
-    EVT_MENU(TextEntry_AutoCompleteFixed,     WidgetsFrame::OnAutoCompleteFixed)
-    EVT_MENU(TextEntry_AutoCompleteFilenames, WidgetsFrame::OnAutoCompleteFilenames)
-
-    EVT_UPDATE_UI_RANGE(TextEntry_Begin, TextEntry_End - 1,
-                        WidgetsFrame::OnUpdateTextUI)
-
     EVT_MENU(wxID_EXIT, WidgetsFrame::OnExit)
 #endif // wxUSE_MENUS
 END_EVENT_TABLE()
@@ -340,10 +316,6 @@ bool WidgetsApp::OnInit()
     title += _T("wxMAC");
 #elif defined(__WXMOTIF__)
     title += _T("wxMOTIF");
-#elif __WXPALMOS5__
-    title += _T("wxPALMOS5");
-#elif __WXPALMOS6__
-    title += _T("wxPALMOS6");
 #else
     title += _T("wxWidgets");
 #endif
@@ -407,17 +379,6 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
     menuWidget->AppendSeparator();
     menuWidget->Append(wxID_EXIT, _T("&Quit\tCtrl-Q"));
     mbar->Append(menuWidget, _T("&Widget"));
-
-    wxMenu *menuTextEntry = new wxMenu;
-    menuTextEntry->AppendRadioItem(TextEntry_DisableAutoComplete,
-                                   _T("&Disable auto-completion"));
-    menuTextEntry->AppendRadioItem(TextEntry_AutoCompleteFixed,
-                                   _T("Fixed-&list auto-completion"));
-    menuTextEntry->AppendRadioItem(TextEntry_AutoCompleteFilenames,
-                                   _T("&Files names auto-completion"));
-
-    mbar->Append(menuTextEntry, _T("&Text"));
-
     SetMenuBar(mbar);
 
     mbar->Check(Widgets_Enable, true);
@@ -482,6 +443,7 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
 
     m_panel->SetSizer(sizerTop);
 
+    sizerTop->Fit(this);
     sizerTop->SetSizeHints(this);
 
 #if USE_LOG && !defined(__WXCOCOA__)
@@ -496,10 +458,9 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
 void WidgetsFrame::InitBook()
 {
 #if USE_ICONS_IN_BOOK
-    wxImageList *imageList = new wxImageList(ICON_SIZE, ICON_SIZE);
+    wxImageList *imageList = new wxImageList(32, 32);
 
-    wxImage img(sample_xpm);
-    imageList->Add(wxBitmap(img.Scale(ICON_SIZE, ICON_SIZE)));
+    imageList->Add(wxBitmap(sample_xpm));
 #else
     wxImageList *imageList = NULL;
 #endif
@@ -892,50 +853,6 @@ void WidgetsFrame::OnToggleBusyCursor(wxCommandEvent& event)
                                                 : wxSTANDARD_CURSOR));
 }
 
-void WidgetsFrame::OnDisableAutoComplete(wxCommandEvent& WXUNUSED(event))
-{
-    wxTextEntryBase *entry = CurrentPage()->GetTextEntry();
-    wxCHECK_RET( entry, "menu item should be disabled" );
-
-    if ( entry->AutoComplete(wxArrayString()) )
-        wxLogMessage("Disabled auto completion.");
-    else
-        wxLogMessage("AutoComplete() failed.");
-}
-
-void WidgetsFrame::OnAutoCompleteFixed(wxCommandEvent& WXUNUSED(event))
-{
-    wxTextEntryBase *entry = CurrentPage()->GetTextEntry();
-    wxCHECK_RET( entry, "menu item should be disabled" );
-
-    wxArrayString completion_choices;
-
-    // add a few strings so a completion occurs on any letter typed
-    for ( char idxc = 'a'; idxc < 'z'; ++idxc )
-        completion_choices.push_back(wxString::Format("%c%c", idxc, idxc));
-
-    completion_choices.push_back("is this string for test?");
-    completion_choices.push_back("this is a test string");
-    completion_choices.push_back("this is another test string");
-    completion_choices.push_back("this string is for test");
-
-    if ( entry->AutoComplete(completion_choices) )
-        wxLogMessage("Enabled auto completion of a set of fixed strings.");
-    else
-        wxLogMessage("AutoComplete() failed.");
-}
-
-void WidgetsFrame::OnAutoCompleteFilenames(wxCommandEvent& WXUNUSED(event))
-{
-    wxTextEntryBase *entry = CurrentPage()->GetTextEntry();
-    wxCHECK_RET( entry, "menu item should be disabled" );
-
-    if ( entry->AutoCompleteFileNames() )
-        wxLogMessage("Enable auto completion of file names.");
-    else
-        wxLogMessage("AutoCompleteFileNames() failed.");
-}
-
 #endif // wxUSE_MENUS
 
 // ----------------------------------------------------------------------------
@@ -1004,7 +921,7 @@ WidgetsPageInfo *WidgetsPage::ms_widgetPages = NULL;
 
 WidgetsPage::WidgetsPage(WidgetsBookCtrl *book,
                          wxImageList *imaglist,
-                         const char *const icon[])
+                         const char* icon[])
            : wxPanel(book, wxID_ANY,
                      wxDefaultPosition, wxDefaultSize,
                      wxNO_FULL_REPAINT_ON_RESIZE |
@@ -1012,7 +929,7 @@ WidgetsPage::WidgetsPage(WidgetsBookCtrl *book,
                      wxTAB_TRAVERSAL)
 {
 #if USE_ICONS_IN_BOOK
-    imaglist->Add(wxBitmap(wxImage(icon).Scale(ICON_SIZE, ICON_SIZE)));
+    imaglist->Add(wxBitmap(icon));
 #else
     wxUnusedVar(imaglist);
     wxUnusedVar(icon);

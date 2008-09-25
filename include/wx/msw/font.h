@@ -18,7 +18,7 @@
 // wxFont
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFont : public wxFontBase
+class WXDLLEXPORT wxFont : public wxFontBase
 {
 public:
     // ctors and such
@@ -120,6 +120,11 @@ public:
     // for consistency with other wxMSW classes
     WXHFONT GetHFONT() const;
 
+    /*
+       virtual bool UseResource();
+       virtual bool ReleaseResource();
+     */
+
 protected:
     // real font creation function, used in all cases
     bool DoCreate(int size,
@@ -134,9 +139,7 @@ protected:
 
     virtual void DoSetNativeFontInfo(const wxNativeFontInfo& info);
 
-    // implement wxObject virtuals which are used by AllocExclusive()
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    void Unshare();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxFont)

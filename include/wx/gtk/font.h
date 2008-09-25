@@ -84,8 +84,8 @@ protected:
     // common part of all ctors
     void Init();
 
-    virtual wxGDIRefData* CreateGDIRefData() const;
-    virtual wxGDIRefData* CloneGDIRefData(const wxGDIRefData* data) const;
+    virtual wxObjectRefData* CreateRefData() const;
+    virtual wxObjectRefData* CloneRefData(const wxObjectRefData* data) const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxFont)

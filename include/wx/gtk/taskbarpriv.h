@@ -14,6 +14,10 @@
 
 #include "wx/toplevel.h"
 
+#ifdef __WXGTK20__
+#include <gtk/gtkversion.h>
+#if GTK_CHECK_VERSION(2, 1, 0)
+
 class WXDLLIMPEXP_ADV wxTaskBarIconAreaBase : public wxTopLevelWindow
 {
 public:
@@ -21,13 +25,15 @@ public:
 
     // Returns true if SYSTRAY protocol is supported by the desktop
     bool IsProtocolSupported();
-
+    
     wxEvtHandler *m_invokingWindow;
 
 protected:
 #if wxUSE_MENUS_NATIVE
-    virtual void DoPopupMenuUpdateUI(wxMenu* menu);
+    virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
 #endif // wxUSE_MENUS_NATIVE
 };
 
+#endif // __WXGTK20__
+#endif // GTK_CHECK_VERSION(2, 1, 0)
 #endif // _WX_GTK_TASKBARPRIV_H_

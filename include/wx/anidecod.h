@@ -20,7 +20,7 @@
 #include "wx/dynarray.h"
 
 
-class /*WXDLLIMPEXP_CORE*/ wxANIFrameInfo;      // private implementation detail
+class /*WXDLLEXPORT*/ wxANIFrameInfo;
 
 WX_DECLARE_EXPORTED_OBJARRAY(wxANIFrameInfo, wxANIFrameInfoArray);
 WX_DECLARE_EXPORTED_OBJARRAY(wxImage, wxImageArray);
@@ -29,7 +29,7 @@ WX_DECLARE_EXPORTED_OBJARRAY(wxImage, wxImageArray);
 // wxANIDecoder class
 // --------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxANIDecoder : public wxAnimationDecoder
+class WXDLLEXPORT wxANIDecoder : public wxAnimationDecoder
 {
 public:
     // constructor, destructor, etc.
@@ -72,6 +72,6 @@ private:
 };
 
 
-#endif  // wxUSE_STREAMS && wxUSE_ICO_CUR
+#endif  // wxUSE_STREAM && wxUSE_ICO_CUR
 
 #endif  // _WX_ANIDECOD_H

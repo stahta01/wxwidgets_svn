@@ -34,6 +34,7 @@ class wxRichTextCtrl;
 
 ////@begin control identifiers
 #define SYMBOL_WXRICHTEXTINDENTSSPACINGPAGE_STYLE wxRESIZE_BORDER|wxTAB_TRAVERSAL
+#define SYMBOL_WXRICHTEXTINDENTSSPACINGPAGE_TITLE _("wxRichTextFontPage")
 #define SYMBOL_WXRICHTEXTINDENTSSPACINGPAGE_IDNAME ID_RICHTEXTINDENTSSPACINGPAGE
 #define SYMBOL_WXRICHTEXTINDENTSSPACINGPAGE_SIZE wxSize(400, 300)
 #define SYMBOL_WXRICHTEXTINDENTSSPACINGPAGE_POSITION wxDefaultPosition
@@ -70,7 +71,7 @@ public:
     void UpdatePreview();
 
     /// Gets the attributes associated with the main formatting dialog
-    wxTextAttr* GetAttributes();
+    wxTextAttrEx* GetAttributes();
 
 ////@begin wxRichTextIndentsSpacingPage event handler declarations
 

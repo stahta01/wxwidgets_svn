@@ -14,10 +14,10 @@
 
 #include "wx/dynarray.h"
 
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+class WXDLLEXPORT wxTextCtrl;
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxTextCtrl *, wxArrayTextSpins);
 
-class WXDLLIMPEXP_CORE wxTextCtrl : public wxTextCtrlBase
+class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
 {
 public:
     // creation

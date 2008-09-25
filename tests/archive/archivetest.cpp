@@ -269,12 +269,10 @@ size_t TestInputStream::OnSysRead(void *buffer, size_t size)
     }
 
     if (((m_eoftype & AtLast) != 0 && m_pos >= m_size) || count < size)
-    {
         if ((m_eoftype & WithError) != 0)
             m_lasterror = wxSTREAM_READ_ERROR;
         else
             m_lasterror = wxSTREAM_EOF;
-    }
 
     return count;
 }
@@ -1204,8 +1202,7 @@ void CorruptionTestCase::runTest()
     wxFileOffset len = in.GetLength();
 
     // try flipping one byte in the archive
-    int pos;
-    for (pos = 0; pos < len; pos++) {
+    for (int pos = 0; pos < len; pos++) {
         char n = in[pos];
         in[pos] = ~n;
         ExtractArchive(in);
@@ -1214,7 +1211,7 @@ void CorruptionTestCase::runTest()
     }
 
     // try zeroing one byte in the archive
-    for (pos = 0; pos < len; pos++) {
+    for (int pos = 0; pos < len; pos++) {
         char n = in[pos];
         in[pos] = 0;
         ExtractArchive(in);

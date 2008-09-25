@@ -34,22 +34,20 @@ const long ID_INSERT_NEW = 101;
 // a trivial example
 // ----------------------------------------------------------------------
 
-// MySimpleCanvas: a scrolled window which draws a simple rectangle
+class MySimpleFrame;
+class MySimpleCanvas;
+
+// MySimpleCanvas
+
 class MySimpleCanvas: public wxScrolledWindow
 {
 public:
     MySimpleCanvas() { }
-    MySimpleCanvas(wxWindow *parent);
+    MySimpleCanvas( wxWindow *parent, wxWindowID, const wxPoint &pos, const wxSize &size );
+
+    void OnPaint( wxPaintEvent &event );
 
 private:
-    void OnPaint(wxPaintEvent& event);
-
-    enum
-    {
-        CANVAS_WIDTH = 292,
-        CANVAS_HEIGHT = 297
-    };
-
     DECLARE_DYNAMIC_CLASS(MyCanvas)
     DECLARE_EVENT_TABLE()
 };
@@ -60,14 +58,12 @@ BEGIN_EVENT_TABLE(MySimpleCanvas, wxScrolledWindow)
   EVT_PAINT(      MySimpleCanvas::OnPaint)
 END_EVENT_TABLE()
 
-MySimpleCanvas::MySimpleCanvas(wxWindow *parent)
-              : wxScrolledWindow(parent, wxID_ANY,
-                                 wxDefaultPosition,
-                                 wxDefaultSize,
-                                 wxSUNKEN_BORDER)
+MySimpleCanvas::MySimpleCanvas( wxWindow *parent, wxWindowID id,
+                    const wxPoint &pos, const wxSize &size )
+    : wxScrolledWindow( parent, id, pos, size, wxSUNKEN_BORDER, _T("test canvas") )
 {
     SetScrollRate( 10, 10 );
-    SetVirtualSize( CANVAS_WIDTH, CANVAS_HEIGHT );
+    SetVirtualSize( 92, 97 );
     SetBackgroundColour( *wxWHITE );
 }
 
@@ -78,18 +74,21 @@ void MySimpleCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
 
     dc.SetPen( *wxRED_PEN );
     dc.SetBrush( *wxTRANSPARENT_BRUSH );
-    dc.DrawRectangle( 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT );
+    dc.DrawRectangle( 0,0,92,97 );
 }
 
-// MySimpleFrame: a frame which contains a MySimpleCanvas
+// MySimpleFrame
+
 class MySimpleFrame: public wxFrame
 {
 public:
     MySimpleFrame();
 
-private:
-    void OnClose(wxCommandEvent& WXUNUSED(event)) { Close(true); }
+    void OnQuit( wxCommandEvent &event );
 
+    MySimpleCanvas         *m_canvas;
+
+private:
     DECLARE_DYNAMIC_CLASS(MySimpleFrame)
     DECLARE_EVENT_TABLE()
 };
@@ -98,22 +97,27 @@ private:
 IMPLEMENT_DYNAMIC_CLASS( MySimpleFrame, wxFrame )
 
 BEGIN_EVENT_TABLE(MySimpleFrame,wxFrame)
-  EVT_MENU(wxID_CLOSE, MySimpleFrame::OnClose)
+  EVT_MENU    (ID_QUIT,  MySimpleFrame::OnQuit)
 END_EVENT_TABLE()
 
 MySimpleFrame::MySimpleFrame()
-             : wxFrame(NULL, wxID_ANY, _T("wxScrolledWindow sample"),
-                       wxDefaultPosition, wxSize(200, 200))
+       : wxFrame( (wxFrame *)NULL, wxID_ANY, _T("wxScrolledWindow sample"),
+                  wxPoint(120,120), wxSize(150,150) )
 {
     wxMenu *file_menu = new wxMenu();
-    file_menu->Append(wxID_CLOSE);
+    file_menu->Append( ID_QUIT,       _T("E&xit\tAlt-X"));
 
     wxMenuBar *menu_bar = new wxMenuBar();
     menu_bar->Append(file_menu, _T("&File"));
 
     SetMenuBar( menu_bar );
 
-    new MySimpleCanvas(this);
+    m_canvas = new MySimpleCanvas( this, wxID_ANY, wxPoint(0,0), wxSize(100,100) );
+}
+
+void MySimpleFrame::OnQuit( wxCommandEvent &WXUNUSED(event) )
+{
+  Close( true );
 }
 
 // ----------------------------------------------------------------------
@@ -269,7 +273,6 @@ protected: // event stuff
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseLeftUp(wxMouseEvent& event);
     void OnMouseMove(wxMouseEvent& event);
-    void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
     void OnScroll(wxScrollWinEvent& event);
 
     DECLARE_EVENT_TABLE()
@@ -531,11 +534,16 @@ MyAutoScrollWindow::MyAutoScrollWindow( wxWindow *parent )
                              wxDefaultPosition,
                              SMALL_BUTTON );
 
+    // We need to do this here, because wxADJUST_MINSIZE below
+    // will cause the initial size to be ignored for Best/Min size.
+    // It would be nice to fix the sizers to handle this a little
+    // more cleanly.
+
     m_button->SetSizeHints( SMALL_BUTTON.GetWidth(), SMALL_BUTTON.GetHeight() );
 
     innersizer->Add( m_button,
                      0,
-                     wxALIGN_CENTER | wxALL,
+                     wxALIGN_CENTER | wxALL | wxADJUST_MINSIZE,
                      20 );
 
     innersizer->Add( new wxStaticText( this, wxID_ANY, _T("This is just") ),
@@ -664,9 +672,6 @@ void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame *frame = new MyFrame();
     frame->Show( true );
 
@@ -735,7 +740,6 @@ BEGIN_EVENT_TABLE(MyAutoTimedScrollingWindow, wxScrolledWindow)
     EVT_LEFT_DOWN(MyAutoTimedScrollingWindow::OnMouseLeftDown)
     EVT_LEFT_UP(MyAutoTimedScrollingWindow::OnMouseLeftUp)
     EVT_MOTION(MyAutoTimedScrollingWindow::OnMouseMove)
-    EVT_MOUSE_CAPTURE_LOST(MyAutoTimedScrollingWindow::OnMouseCaptureLost)
     EVT_SCROLLWIN(MyAutoTimedScrollingWindow::OnScroll)
 END_EVENT_TABLE()
 
@@ -930,9 +934,7 @@ void MyAutoTimedScrollingWindow::OnDraw(wxDC& dc)
     wxBrush selBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT)
             , wxSOLID);
     dc.SetPen(*wxTRANSPARENT_PEN);
-    const wxString str = sm_testData;
-    size_t strLength = str.length();
-    wxString::const_iterator str_i;
+    wxString str = sm_testData;
 
     // draw the characters
     // 1. for each update region
@@ -943,7 +945,6 @@ void MyAutoTimedScrollingWindow::OnDraw(wxDC& dc)
         for (int chY = updRectInGChars.y
                 ; chY <= updRectInGChars.y + updRectInGChars.height; ++chY) {
             // 3. for each character in the row
-            bool isFirstX = true;
             for (int chX = updRectInGChars.x
                     ; chX <= updRectInGChars.x + updRectInGChars.width
                     ; ++chX) {
@@ -965,15 +966,10 @@ void MyAutoTimedScrollingWindow::OnDraw(wxDC& dc)
                 size_t charIndex = chY * sm_lineLen + chX;
                 if (chY < sm_lineCnt &&
                     chX < sm_lineLen &&
-                    charIndex < strLength)
+                    charIndex < str.Length())
                 {
-                    if (isFirstX)
-                    {
-                        str_i = str.begin() + charIndex;
-                        isFirstX = false;
-                    }
-                    dc.DrawText(*str_i, charPos.x, charPos.y);
-                    ++str_i;
+                    dc.DrawText(str.Mid(charIndex,1),
+                                charPos.x, charPos.y);
                 }
             }
         }
@@ -1012,12 +1008,6 @@ void MyAutoTimedScrollingWindow::OnMouseMove(wxMouseEvent& event)
             CaptureMouse();
         }
     }
-}
-
-void MyAutoTimedScrollingWindow::OnMouseCaptureLost(wxMouseCaptureLostEvent& WXUNUSED(event))
-{
-    // we only capture mouse for timed scrolling, so nothing is needed here
-    // other than making sure to not call event.Skip()
 }
 
 void MyAutoTimedScrollingWindow::OnScroll(wxScrollWinEvent& event)

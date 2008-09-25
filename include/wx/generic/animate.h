@@ -23,10 +23,6 @@ WX_DECLARE_LIST_WITH_DECL(wxAnimationDecoder, wxAnimationDecoderList, class WXDL
 class WXDLLIMPEXP_ADV wxAnimation : public wxAnimationBase
 {
 public:
-    wxAnimation() {}
-    wxAnimation(const wxString &name, wxAnimationType type = wxANIMATION_TYPE_ANY)
-        { LoadFile(name, type); }
-
     virtual bool IsOk() const
         { return m_refData != NULL; }
 
@@ -72,12 +68,12 @@ class WXDLLIMPEXP_ADV wxAnimationCtrl: public wxAnimationCtrlBase
 public:
     wxAnimationCtrl() { Init(); }
     wxAnimationCtrl(wxWindow *parent,
-                    wxWindowID id,
-                    const wxAnimation& anim = wxNullAnimation,
-                    const wxPoint& pos = wxDefaultPosition,
-                    const wxSize& size = wxDefaultSize,
-                    long style = wxAC_DEFAULT_STYLE,
-                    const wxString& name = wxAnimationCtrlNameStr)
+            wxWindowID id,
+            const wxAnimation& anim = wxNullAnimation,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxAC_DEFAULT_STYLE,
+            const wxString& name = wxAnimationCtrlNameStr)
     {
         Init();
 
@@ -97,7 +93,6 @@ public:
 
 public:
     virtual bool LoadFile(const wxString& filename, wxAnimationType type = wxANIMATION_TYPE_ANY);
-    virtual bool Load(wxInputStream& stream, wxAnimationType type = wxANIMATION_TYPE_ANY);
 
     virtual void Stop();
     virtual bool Play()

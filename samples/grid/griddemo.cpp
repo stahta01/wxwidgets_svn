@@ -71,7 +71,6 @@ BEGIN_EVENT_TABLE( GridFrame, wxFrame )
     EVT_MENU( ID_TOGGLECOLMOVING, GridFrame::ToggleColMoving )
     EVT_MENU( ID_TOGGLEGRIDSIZING, GridFrame::ToggleGridSizing )
     EVT_MENU( ID_TOGGLEGRIDDRAGCELL, GridFrame::ToggleGridDragCell )
-    EVT_MENU( ID_TOGGLENATIVEHEADER, GridFrame::ToggleNativeHeader )
     EVT_MENU( ID_TOGGLEGRIDLINES, GridFrame::ToggleGridLines )
     EVT_MENU( ID_AUTOSIZECOLS, GridFrame::AutoSizeCols )
     EVT_MENU( ID_CELLOVERFLOW, GridFrame::CellOverflow )
@@ -92,7 +91,6 @@ BEGIN_EVENT_TABLE( GridFrame, wxFrame )
     EVT_MENU( ID_SELCELLS,  GridFrame::SelectCells )
     EVT_MENU( ID_SELROWS,  GridFrame::SelectRows )
     EVT_MENU( ID_SELCOLS,  GridFrame::SelectCols )
-    EVT_MENU( ID_SELROWSORCOLS,  GridFrame::SelectRowsOrCols )
 
     EVT_MENU( ID_SET_CELL_FG_COLOUR, GridFrame::SetCellFgColour )
     EVT_MENU( ID_SET_CELL_BG_COLOUR, GridFrame::SetCellBgColour )
@@ -102,7 +100,6 @@ BEGIN_EVENT_TABLE( GridFrame, wxFrame )
     EVT_MENU( ID_VTABLE, GridFrame::OnVTable)
     EVT_MENU( ID_BUGS_TABLE, GridFrame::OnBugsTable)
     EVT_MENU( ID_SMALL_GRID, GridFrame::OnSmallGrid)
-    EVT_MENU( ID_TABULAR_GRID, GridFrame::OnTabularGrid)
 
     EVT_MENU( ID_DESELECT_CELL, GridFrame::DeselectCell)
     EVT_MENU( ID_DESELECT_COL, GridFrame::DeselectCol)
@@ -114,14 +111,6 @@ BEGIN_EVENT_TABLE( GridFrame, wxFrame )
     EVT_MENU( ID_SELECT_ALL, GridFrame::SelectAll)
     EVT_MENU( ID_SELECT_UNSELECT, GridFrame::OnAddToSelectToggle)
     EVT_MENU( ID_SHOW_SELECTION, GridFrame::OnShowSelection)
-
-    EVT_MENU( ID_SIZE_ROW, GridFrame::AutoSizeRow )
-    EVT_MENU( ID_SIZE_COL, GridFrame::AutoSizeCol )
-    EVT_MENU( ID_SIZE_ROW_LABEL, GridFrame::AutoSizeRowLabel )
-    EVT_MENU( ID_SIZE_COL_LABEL, GridFrame::AutoSizeColLabel )
-    EVT_MENU( ID_SIZE_LABELS_COL, GridFrame::AutoSizeLabelsCol )
-    EVT_MENU( ID_SIZE_LABELS_ROW, GridFrame::AutoSizeLabelsRow )
-    EVT_MENU( ID_SIZE_GRID, GridFrame::AutoSizeTable )
 
     EVT_MENU( ID_SET_HIGHLIGHT_WIDTH, GridFrame::OnSetHighlightWidth)
     EVT_MENU( ID_SET_RO_HIGHLIGHT_WIDTH, GridFrame::OnSetROHighlightWidth)
@@ -149,26 +138,24 @@ GridFrame::GridFrame()
     fileMenu->Append( ID_VTABLE, _T("&Virtual table test\tCtrl-V"));
     fileMenu->Append( ID_BUGS_TABLE, _T("&Bugs table test\tCtrl-B"));
     fileMenu->Append( ID_SMALL_GRID, _T("&Small Grid test\tCtrl-S"));
-    fileMenu->Append( ID_TABULAR_GRID, _T("&Tabular Grid test\tCtrl-T"));
     fileMenu->AppendSeparator();
     fileMenu->Append( wxID_EXIT, _T("E&xit\tAlt-X") );
 
     wxMenu *viewMenu = new wxMenu;
-    viewMenu->AppendCheckItem(ID_TOGGLEROWLABELS, "&Row labels");
-    viewMenu->AppendCheckItem(ID_TOGGLECOLLABELS, "&Col labels");
-    viewMenu->AppendCheckItem(ID_TOGGLEEDIT,"&Editable");
-    viewMenu->AppendCheckItem(ID_TOGGLEROWSIZING, "Ro&w drag-resize");
-    viewMenu->AppendCheckItem(ID_TOGGLECOLSIZING, "C&ol drag-resize");
-    viewMenu->AppendCheckItem(ID_TOGGLECOLMOVING, "Col drag-&move");
-    viewMenu->AppendCheckItem(ID_TOGGLEGRIDSIZING, "&Grid drag-resize");
-    viewMenu->AppendCheckItem(ID_TOGGLEGRIDDRAGCELL, "&Grid drag-cell");
-    viewMenu->AppendCheckItem(ID_TOGGLENATIVEHEADER, "&Native column headers");
-    viewMenu->AppendCheckItem(ID_TOGGLEGRIDLINES, "&Grid Lines");
-    viewMenu->AppendCheckItem(ID_SET_HIGHLIGHT_WIDTH, "&Set Cell Highlight Width...");
-    viewMenu->AppendCheckItem(ID_SET_RO_HIGHLIGHT_WIDTH, "&Set Cell RO Highlight Width...");
-    viewMenu->AppendCheckItem(ID_AUTOSIZECOLS, "&Auto-size cols");
-    viewMenu->AppendCheckItem(ID_CELLOVERFLOW, "&Overflow cells");
-    viewMenu->AppendCheckItem(ID_RESIZECELL, "&Resize cell (7,1)");
+    viewMenu->Append( ID_TOGGLEROWLABELS,  _T("&Row labels"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLECOLLABELS,  _T("&Col labels"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLEEDIT,  _T("&Editable"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLEROWSIZING, _T("Ro&w drag-resize"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLECOLSIZING, _T("C&ol drag-resize"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLECOLMOVING, _T("Col drag-&move"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLEGRIDSIZING, _T("&Grid drag-resize"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLEGRIDDRAGCELL, _T("&Grid drag-cell"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_TOGGLEGRIDLINES, _T("&Grid Lines"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_SET_HIGHLIGHT_WIDTH, _T("&Set Cell Highlight Width...") );
+    viewMenu->Append( ID_SET_RO_HIGHLIGHT_WIDTH, _T("&Set Cell RO Highlight Width...") );
+    viewMenu->Append( ID_AUTOSIZECOLS, _T("&Auto-size cols") );
+    viewMenu->Append( ID_CELLOVERFLOW, _T("&Overflow cells"), wxEmptyString, wxITEM_CHECK );
+    viewMenu->Append( ID_RESIZECELL, _T("&Resize cell (7,1)"), wxEmptyString, wxITEM_CHECK );
 
     wxMenu *rowLabelMenu = new wxMenu;
 
@@ -224,30 +211,20 @@ GridFrame::GridFrame()
                       selectionMenu,
                       _T("Change selection mode") );
 
-    selectionMenu->Append( ID_SELCELLS, _T("Select &cells") );
-    selectionMenu->Append( ID_SELROWS, _T("Select &rows") );
-    selectionMenu->Append( ID_SELCOLS, _T("Select col&umns") );
-    selectionMenu->Append( ID_SELROWSORCOLS, _T("Select rows &or columns") );
+    selectionMenu->Append( ID_SELCELLS, _T("Select &Cells") );
+    selectionMenu->Append( ID_SELROWS, _T("Select &Rows") );
+    selectionMenu->Append( ID_SELCOLS, _T("Select C&ols") );
 
-    wxMenu *autosizeMenu = new wxMenu;
-    autosizeMenu->Append( ID_SIZE_ROW, _T("Selected &row data") );
-    autosizeMenu->Append( ID_SIZE_COL, _T("Selected &column data") );
-    autosizeMenu->Append( ID_SIZE_ROW_LABEL, _T("Selected row la&bel") );
-    autosizeMenu->Append( ID_SIZE_COL_LABEL, _T("Selected column &label") );
-    autosizeMenu->Append( ID_SIZE_LABELS_COL, _T("Column la&bels") );
-    autosizeMenu->Append( ID_SIZE_LABELS_ROW, _T("Row label&s") );
-    autosizeMenu->Append( ID_SIZE_GRID, _T("Entire &grid") );
 
     wxMenu *helpMenu = new wxMenu;
     helpMenu->Append( wxID_ABOUT, _T("&About wxGrid demo") );
 
     wxMenuBar *menuBar = new wxMenuBar;
     menuBar->Append( fileMenu, _T("&File") );
-    menuBar->Append( viewMenu, _T("&Grid") );
+    menuBar->Append( viewMenu, _T("&View") );
     menuBar->Append( colMenu,  _T("&Colours") );
     menuBar->Append( editMenu, _T("&Edit") );
     menuBar->Append( selectMenu, _T("&Select") );
-    menuBar->Append( autosizeMenu, _T("&Autosize") );
     menuBar->Append( helpMenu, _T("&Help") );
 
     SetMenuBar( menuBar );
@@ -272,7 +249,7 @@ GridFrame::GridFrame()
 
     logger = new wxLogTextCtrl( logWin );
     m_logOld = wxLog::SetActiveTarget( logger );
-    wxLog::DisableTimestamp();
+    wxLog::SetTimestamp( NULL );
 #endif // wxUSE_LOG
 
     // this will create a grid and, by default, an associated grid
@@ -320,6 +297,7 @@ GridFrame::GridFrame()
     grid->SetCellAlignment(4, 4, wxALIGN_CENTRE, wxALIGN_CENTRE);
     grid->SetCellRenderer(4, 4, new MyGridCellRenderer);
 
+    grid->SetCellValue(3, 0, _T("0"));
     grid->SetCellRenderer(3, 0, new wxGridCellBoolRenderer);
     grid->SetCellEditor(3, 0, new wxGridCellBoolEditor);
 
@@ -340,19 +318,14 @@ GridFrame::GridFrame()
     grid->SetCellValue(5, 5, _T("Bg from row attr Text col from col attr and this text is so long that it covers over many many empty cells but is broken by one that isn't"));
 
     grid->SetColFormatFloat(6);
-    grid->SetCellValue(0, 6, wxString::Format(wxT("%g"), 3.1415));
-    grid->SetCellValue(1, 6, wxString::Format(wxT("%g"), 1415.0));
-    grid->SetCellValue(2, 6, wxString::Format(wxT("%g"), 12345.67890));
+    grid->SetCellValue(0, 6, _T("3.1415"));
+    grid->SetCellValue(1, 6, _T("1415"));
+    grid->SetCellValue(2, 6, _T("12345.67890"));
 
     grid->SetColFormatFloat(7, 6, 2);
-    grid->SetCellValue(0, 7, wxString::Format(wxT("%g"), 3.1415));
-    grid->SetCellValue(1, 7, wxString::Format(wxT("%g"), 1415.0));
-    grid->SetCellValue(2, 7, wxString::Format(wxT("%g"), 12345.67890));
-
-    grid->SetColFormatNumber(8);
-    grid->SetCellValue(0, 8, "17");
-    grid->SetCellValue(1, 8, "0");
-    grid->SetCellValue(2, 8, "-666");
+    grid->SetCellValue(0, 7, _T("3.1415"));
+    grid->SetCellValue(1, 7, _T("1415"));
+    grid->SetCellValue(2, 7, _T("12345.67890"));
 
     const wxString choices[] =
     {
@@ -369,12 +342,6 @@ GridFrame::GridFrame()
     grid->SetCellAlignment(7, 1, wxALIGN_CENTRE, wxALIGN_CENTRE);
     grid->SetCellValue(7, 1, _T("Big box!"));
 
-    // this does exactly nothing except testing that SetAttr() handles NULL
-    // attributes and does reference counting correctly
-    grid->SetAttr(11, 11, NULL);
-    grid->SetAttr(11, 11, new wxGridCellAttr);
-    grid->SetAttr(11, 11, NULL);
-
     wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
     topSizer->Add( grid,
                    1,
@@ -386,7 +353,10 @@ GridFrame::GridFrame()
                    wxEXPAND );
 #endif // wxUSE_LOG
 
-    SetSizerAndFit( topSizer );
+    SetAutoLayout(true);
+    SetSizer( topSizer );
+
+    topSizer->Fit( this );
 
     Centre();
     SetDefaults();
@@ -411,7 +381,6 @@ void GridFrame::SetDefaults()
     GetMenuBar()->Check( ID_TOGGLECOLMOVING, false );
     GetMenuBar()->Check( ID_TOGGLEGRIDSIZING, true );
     GetMenuBar()->Check( ID_TOGGLEGRIDDRAGCELL, false );
-    GetMenuBar()->Check( ID_TOGGLENATIVEHEADER, false );
     GetMenuBar()->Check( ID_TOGGLEGRIDLINES, true );
     GetMenuBar()->Check( ID_CELLOVERFLOW, true );
 }
@@ -479,12 +448,6 @@ void GridFrame::ToggleGridDragCell( wxCommandEvent& WXUNUSED(ev) )
 {
     grid->EnableDragCell(
         GetMenuBar()->IsChecked( ID_TOGGLEGRIDDRAGCELL ) );
-}
-
-void GridFrame::ToggleNativeHeader( wxCommandEvent& WXUNUSED(ev) )
-{
-    grid->SetUseNativeColLabels(
-        GetMenuBar()->IsChecked( ID_TOGGLENATIVEHEADER ) );
 }
 
 void GridFrame::ToggleGridLines( wxCommandEvent& WXUNUSED(ev) )
@@ -705,7 +668,7 @@ void GridFrame::DeleteSelectedRows( wxCommandEvent& WXUNUSED(ev) )
 {
     if ( grid->IsSelection() )
     {
-        wxGridUpdateLocker locker(grid);
+        grid->BeginBatch();
         for ( int n = 0; n < grid->GetNumberRows(); )
         {
             if ( grid->IsInSelection( n , 0 ) )
@@ -713,63 +676,8 @@ void GridFrame::DeleteSelectedRows( wxCommandEvent& WXUNUSED(ev) )
             else
                 n++;
         }
+        grid->EndBatch();
     }
-}
-
-
-void GridFrame::AutoSizeRow(wxCommandEvent& WXUNUSED(event))
-{
-    wxGridUpdateLocker locker(grid);
-    const wxArrayInt sels  = grid->GetSelectedRows();
-    for ( size_t n = 0, count = sels.size(); n < count; n++ )
-    {
-        grid->AutoSizeRow( sels[n], false );
-    }
-}
-
-void GridFrame::AutoSizeCol(wxCommandEvent& WXUNUSED(event))
-{
-    wxGridUpdateLocker locker(grid);
-    const wxArrayInt sels  = grid->GetSelectedCols();
-    for ( size_t n = 0, count = sels.size(); n < count; n++ )
-    {
-        grid->AutoSizeColumn( sels[n], false );
-    }
-}
-
-void GridFrame::AutoSizeRowLabel(wxCommandEvent& WXUNUSED(event))
-{
-    wxGridUpdateLocker locker(grid);
-    const wxArrayInt sels  = grid->GetSelectedRows();
-    for ( size_t n = 0, count = sels.size(); n < count; n++ )
-    {
-        grid->AutoSizeRowLabelSize( sels[n] );
-    }
-}
-
-void GridFrame::AutoSizeColLabel(wxCommandEvent& WXUNUSED(event))
-{
-    wxGridUpdateLocker locker(grid);
-    const wxArrayInt sels  = grid->GetSelectedCols();
-    for ( size_t n = 0, count = sels.size(); n < count; n++ )
-    {
-        grid->AutoSizeColLabelSize( sels[n] );
-    }
-}
-
-void GridFrame::AutoSizeLabelsCol(wxCommandEvent& WXUNUSED(event))
-{
-    grid->SetColLabelSize( wxGRID_AUTOSIZE );
-}
-
-void GridFrame::AutoSizeLabelsRow(wxCommandEvent& WXUNUSED(event))
-{
-    grid->SetRowLabelSize( wxGRID_AUTOSIZE );
-}
-
-void GridFrame::AutoSizeTable(wxCommandEvent& WXUNUSED(event))
-{
-    grid->AutoSize();
 }
 
 
@@ -777,7 +685,7 @@ void GridFrame::DeleteSelectedCols( wxCommandEvent& WXUNUSED(ev) )
 {
     if ( grid->IsSelection() )
     {
-        wxGridUpdateLocker locker(grid);
+        grid->BeginBatch();
         for ( int n = 0; n < grid->GetNumberCols(); )
         {
             if ( grid->IsInSelection( 0 , n ) )
@@ -785,6 +693,7 @@ void GridFrame::DeleteSelectedCols( wxCommandEvent& WXUNUSED(ev) )
             else
                 n++;
         }
+        grid->EndBatch();
     }
 }
 
@@ -807,11 +716,6 @@ void GridFrame::SelectRows( wxCommandEvent& WXUNUSED(ev) )
 void GridFrame::SelectCols( wxCommandEvent& WXUNUSED(ev) )
 {
     grid->SetSelectionMode( wxGrid::wxGridSelectColumns );
-}
-
-void GridFrame::SelectRowsOrCols( wxCommandEvent& WXUNUSED(ev) )
-{
-    grid->SetSelectionMode( wxGrid::wxGridSelectRowsOrColumns );
 }
 
 void GridFrame::SetCellFgColour( wxCommandEvent& WXUNUSED(ev) )
@@ -987,8 +891,9 @@ void GridFrame::OnShowSelection(wxCommandEvent& WXUNUSED(event))
                     single = _T("column");
                 }
 
-                const wxArrayInt sels((const wxArrayInt)(rows ? grid->GetSelectedRows()
-                                           : grid->GetSelectedCols()));
+                // NB: extra parentheses needed to avoid bcc 5.82 errors
+                const wxArrayInt sels((rows ? grid->GetSelectedRows()
+                                            : grid->GetSelectedCols()));
                 size_t count = sels.size();
                 wxLogMessage(_T("%lu %s selected:"),
                              (unsigned long)count, plural);
@@ -1143,65 +1048,6 @@ void GridFrame::OnSmallGrid(wxCommandEvent& )
     frame->Show(true);
 }
 
-// ----------------------------------------------------------------------------
-// MyGridCellAttrProvider
-// ----------------------------------------------------------------------------
-
-MyGridCellAttrProvider::MyGridCellAttrProvider()
-{
-    m_attrForOddRows = new wxGridCellAttr;
-    m_attrForOddRows->SetBackgroundColour(*wxLIGHT_GREY);
-}
-
-MyGridCellAttrProvider::~MyGridCellAttrProvider()
-{
-    m_attrForOddRows->DecRef();
-}
-
-wxGridCellAttr *MyGridCellAttrProvider::GetAttr(int row, int col,
-                           wxGridCellAttr::wxAttrKind  kind /* = wxGridCellAttr::Any */) const
-{
-    wxGridCellAttr *attr = wxGridCellAttrProvider::GetAttr(row, col, kind);
-
-    if ( row % 2 )
-    {
-        if ( !attr )
-        {
-            attr = m_attrForOddRows;
-            attr->IncRef();
-        }
-        else
-        {
-            if ( !attr->HasBackgroundColour() )
-            {
-                wxGridCellAttr *attrNew = attr->Clone();
-                attr->DecRef();
-                attr = attrNew;
-                attr->SetBackgroundColour(*wxLIGHT_GREY);
-            }
-        }
-    }
-
-    return attr;
-}
-
-// ----------------------------------------------------------------------------
-
-void GridFrame::OnTabularGrid(wxCommandEvent& )
-{
-    wxFrame* frame = new wxFrame(NULL, wxID_ANY, _T("A small tabular Grid"),
-                                 wxDefaultPosition, wxSize(640, 480));
-    wxGrid* grid = new wxGrid(frame, wxID_ANY, wxPoint(10,10), wxSize(40,40),
-                              wxWANTS_CHARS | wxBORDER_SUNKEN);
-    grid->SetRowLabelSize( 0 );
-    grid->DisableDragRowSize();
-    grid->SetUseNativeColLabels();
-    grid->CreateGrid(10,10);
-    grid->SetSelectionMode( wxGrid::wxGridSelectRows );
-
-    frame->Show(true);
-}
-
 void GridFrame::OnVTable(wxCommandEvent& )
 {
     static long s_sizeGrid = 10000;
@@ -1250,6 +1096,48 @@ void MyGridCellRenderer::Draw(wxGrid& grid,
     dc.SetPen(*wxGREEN_PEN);
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     dc.DrawEllipse(rect);
+}
+
+// ----------------------------------------------------------------------------
+// MyGridCellAttrProvider
+// ----------------------------------------------------------------------------
+
+MyGridCellAttrProvider::MyGridCellAttrProvider()
+{
+    m_attrForOddRows = new wxGridCellAttr;
+    m_attrForOddRows->SetBackgroundColour(*wxLIGHT_GREY);
+}
+
+MyGridCellAttrProvider::~MyGridCellAttrProvider()
+{
+    m_attrForOddRows->DecRef();
+}
+
+wxGridCellAttr *MyGridCellAttrProvider::GetAttr(int row, int col,
+                           wxGridCellAttr::wxAttrKind  kind /* = wxGridCellAttr::Any */) const
+{
+    wxGridCellAttr *attr = wxGridCellAttrProvider::GetAttr(row, col, kind);
+
+    if ( row % 2 )
+    {
+        if ( !attr )
+        {
+            attr = m_attrForOddRows;
+            attr->IncRef();
+        }
+        else
+        {
+            if ( !attr->HasBackgroundColour() )
+            {
+                wxGridCellAttr *attrNew = attr->Clone();
+                attr->DecRef();
+                attr = attrNew;
+                attr->SetBackgroundColour(*wxLIGHT_GREY);
+            }
+        }
+    }
+
+    return attr;
 }
 
 // ============================================================================

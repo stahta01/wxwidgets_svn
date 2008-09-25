@@ -7,12 +7,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////// */
 
-#ifdef __VMS
-#include <types.h>
-typedef pid_t GPid;
-#define G_GNUC_INTERNAL 
-#endif
-
 #include "wx/gtk/treeentry_gtk.h"
 
 /*
@@ -52,7 +46,7 @@ gtk_tree_entry_get_type ()
 
     if (!tree_entry_type)
     {
-        const GTypeInfo tree_entry_info =
+        static const GTypeInfo tree_entry_info =
         {
             sizeof (GtkTreeEntryClass),
             NULL,           /* base_init */

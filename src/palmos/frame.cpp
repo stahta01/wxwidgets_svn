@@ -222,7 +222,7 @@ bool wxFrame::HandleMenuSelect(WXEVENTPTR event)
     wxCommandEvent commandEvent(wxEVT_COMMAND_MENU_SELECTED, item);
     commandEvent.SetEventObject(this);
 
-    HandleWindowEvent(commandEvent);
+    GetEventHandler()->ProcessEvent(commandEvent);
     return true;
 }
 

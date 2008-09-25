@@ -12,7 +12,7 @@
 #ifndef _WX_FRAME_H_
 #define _WX_FRAME_H_
 
-class WXDLLIMPEXP_CORE wxFrame : public wxFrameBase
+class WXDLLEXPORT wxFrame : public wxFrameBase
 {
 public:
     // construction
@@ -80,6 +80,7 @@ public:
 #endif // wxUSE_MENUS
 
     // event handlers
+    bool HandlePaint();
     bool HandleSize(int x, int y, WXUINT flag);
     bool HandleCommand(WXWORD id, WXWORD cmd, WXHWND control);
     bool HandleMenuSelect(WXWORD nItem, WXWORD nFlags, WXHMENU hMenu);
@@ -91,8 +92,9 @@ public:
     void SetToolTipCtrl(WXHWND hwndTT) { m_hwndToolTip = hwndTT; }
 #endif // tooltips
 
-    // override the base class function to handle iconized/maximized frames
-    virtual void SendSizeEvent(int flags = 0);
+    // a MSW only function which sends a size event to the window using its
+    // current size - this has an effect of refreshing the window layout
+    virtual void SendSizeEvent();
 
     virtual wxPoint GetClientAreaOrigin() const;
 

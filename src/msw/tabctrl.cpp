@@ -98,7 +98,7 @@ bool wxTabCtrl::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos, cons
     tabStyle,    // Styles and defaults.
     x, y, width, height,                    // Standard size and position.
     (HWND) parent->GetHWND(),               // Parent window
-    (HMENU)m_windowId.GetValue(),           // ID.
+    (HMENU)m_windowId,                      // ID.
     wxGetInstance(),                        // Current instance.
     NULL );                                 // No class data.
 
@@ -149,7 +149,7 @@ bool wxTabCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
     event.SetInt(idCtrl) ;
     event.SetSelection(idCtrl);
 
-    return HandleWindowEvent(event);
+    return ProcessEvent(event);
 }
 
 // Responds to colour changes, and passes event on to children.

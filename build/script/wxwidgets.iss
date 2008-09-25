@@ -3,7 +3,7 @@
 
 #if GetEnv("WXW_VER") == "CVS"
     #define INFOFILE  "C:\wx\inno\wxWidgets\BuildSVN.txt"
-    #define WX_VERSION "SVN"
+    #define WX_VERSION "SVN28b"
 #else
     #define INFOFILE "C:\wx\inno\wxWidgets\docs\msw\install.txt"
     #define WX_VERSION GetENV("WXW_VER")
@@ -11,7 +11,7 @@
 
 #define SETUPFILENAME  "wxMSW-" + GetENV("WXW_VER") + "-Setup"
 
-#define INNODIR "C:\wx\inno\wxWidgets"
+#define INNODIR "C:\wx\inno\wxw28b"
 
 [Setup]
 AppName=wxWidgets
@@ -27,7 +27,7 @@ DisableProgramGroupPage=yes
 LicenseFile={#INNODIR}\docs\licence.txt
 InfoBeforeFile={#INNODIR}\docs\readme.txt
 InfoAfterFile={#INFOFILE}
-OutputDir=c:\daily
+OutputDir=c:\daily28b
 OutputBaseFilename={#SETUPFILENAME}
 SetupIconFile={#INNODIR}\art\wxwin.ico
 Compression=lzma
@@ -35,7 +35,7 @@ SolidCompression=yes
 
 [Files]
 ; source files
-Source: "{#INNODIR}\*"; DestDir: "{app}"; Excludes: ".cvsignore,cocoa,dfb,mac,gtk,gtk1,mgl,motif,msdos,os2,palmos,wxWindows.xcod*,x11,contrib,debian,distrib,docs,misc,tests,wxPython,*.pch,*.pch++,*.pchmm"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#INNODIR}\*"; DestDir: "{app}"; Excludes: ".cvsignore,cocoa,dfb,mac,gtk,gtk1,mgl,motif,msdos,os2,palmos,wxWindows.xcod*,x11,debian,distrib,docs,misc,tests,wxPython,*.pch,*.pch++,*.pchmm"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; docs and helpfile
 Source: "{#INNODIR}\docs\htmlhelp\*"; DestDir: "{app}\docs\htmlhelp\";  Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#INNODIR}\docs\licence.txt"; DestDir: "{app}\docs\";  Flags: ignoreversion recursesubdirs createallsubdirs

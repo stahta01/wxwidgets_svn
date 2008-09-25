@@ -20,7 +20,7 @@
 // wxCheckListBox: a listbox whose items may be checked
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCheckListBoxBase : public
+class WXDLLEXPORT wxCheckListBoxBase : public
                                               #ifdef __WXWINCE__
                                                   // keep virtuals synchronised
                                                   wxListBoxBase
@@ -51,7 +51,7 @@ public:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/checklst.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/checklst.h"
+    #include "wx/mac/checklst.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/checklst.h"
 #elif defined(__WXPM__)

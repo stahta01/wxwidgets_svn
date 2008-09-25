@@ -55,8 +55,6 @@
 #include <cppunit/CompilerOutputter.h>
 #include "wx/afterstd.h"
 
-#include "wx/string.h"
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Set of helpful test macros.
@@ -83,104 +81,28 @@
 #define WXTEST_FAIL_WITH_CONDITION(suiteName, Condition, testMethod) \
     WXTEST_ANY_WITH_CONDITION(suiteName, Condition, testMethod, CPPUNIT_TEST_FAIL(testMethod))
 
-CPPUNIT_NS_BEGIN
+// Use this macro to compare a wxString with a literal string.
+#define WX_ASSERT_STR_EQUAL(p, s) CPPUNIT_ASSERT_EQUAL(wxString(p), s)
 
-// provide an overload of cppunit assertEquals(T, T) which can be used to
-// compare wxStrings directly with C strings
-inline void
-assertEquals(const char *expected,
-             const wxString& actual,
-             CppUnit::SourceLine sourceLine,
-             const std::string& message)
-{
-    assertEquals(wxString(expected), actual, sourceLine, message);
-}
+// Use this macro to compare a size_t with a literal integer
+#define WX_ASSERT_SIZET_EQUAL(n, m) CPPUNIT_ASSERT_EQUAL(((size_t)n), m)
 
-inline void
-assertEquals(const wchar_t *expected,
-             const wxString& actual,
-             CppUnit::SourceLine sourceLine,
-             const std::string& message)
-{
-    assertEquals(wxString(expected), actual, sourceLine, message);
-}
+// Use this macro to compare the expected time_t value with the result of not
+// necessarily time_t type
+#define WX_ASSERT_TIME_T_EQUAL(t, n) CPPUNIT_ASSERT_EQUAL((t), (time_t)(n))
 
-// and another to be able to specify (usually literal) ints as expected values
-// for functions returning size_t
-inline void
-assertEquals(int expected,
-             size_t actual,
-             CppUnit::SourceLine sourceLine,
-             const std::string& message)
-{
-    assertEquals(size_t(expected), actual, sourceLine, message);
-}
-
-CPPUNIT_NS_END
-
-// Use this macro to compare a wxArrayString with the pipe-separated elements
-// of the given string
-//
-// NB: it's a macro and not a function to have the correct line numbers in the
-//     test failure messages
-#define WX_ASSERT_STRARRAY_EQUAL(s, a)                                        \
-    {                                                                         \
-        wxArrayString expected(wxSplit(s, '|', '\0'));                        \
-                                                                              \
-        CPPUNIT_ASSERT_EQUAL( expected.size(), a.size() );                    \
-                                                                              \
-        for ( size_t n = 0; n < a.size(); n++ )                               \
-        {                                                                     \
-            CPPUNIT_ASSERT_EQUAL( expected[n], a[n] );                        \
-        }                                                                     \
-    }
-
-// Use this macro to assert with the given formatted message (it should contain
-// the format string and arguments in a separate pair of parentheses)
-#define WX_ASSERT_MESSAGE(msg, cond) \
-    CPPUNIT_ASSERT_MESSAGE(std::string(wxString::Format msg .mb_str()), (cond))
 
 ///////////////////////////////////////////////////////////////////////////////
-// define stream inserter for wxString if it's not defined in the main library,
-// we need it to output the test failures involving wxString
-#if !wxUSE_STD_IOSTREAM
+// stream inserter for wxString
+//
 
 #include "wx/string.h"
 
-#include <iostream>
-
 inline std::ostream& operator<<(std::ostream& o, const wxString& s)
 {
-#if wxUSE_UNICODE
-    return o << (const char *)wxSafeConvertWX2MB(s.wc_str());
-#else
-    return o << s.c_str();
-#endif
+    return o << s.mb_str();
 }
 
-// VC6 doesn't provide overloads for operator<<(__int64) in its stream classes
-// so do it ourselves
-#if defined(__VISUALC6__) && defined(wxLongLong_t)
-
-#include "wx/longlong.h"
-
-inline std::ostream& operator<<(std::ostream& ostr, wxLongLong_t ll)
-{
-    ostr << wxLongLong(ll).ToString();
-
-    return ostr;
-}
-
-inline std::ostream& operator<<(std::ostream& ostr, unsigned wxLongLong_t llu)
-{
-    ostr << wxULongLong(llu).ToString();
-
-    return ostr;
-}
-
-#endif // VC6 && wxLongLong_t
-
-#endif // !wxUSE_STD_IOSTREAM
 
 ///////////////////////////////////////////////////////////////////////////////
 // Some more compiler warning tweaking and auto linking.

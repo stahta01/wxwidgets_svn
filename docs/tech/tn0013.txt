@@ -16,7 +16,17 @@ below.
 
 a) Do a fresh checkout using the command
 
-   svn checkout http://svn.wxwidgets.org/svn/wx/wxWidgets/trunk wxWidgets
+   cvs -d :pserver:anoncvs@cvs.wxwidgets.org:/packs/cvsroots/wxwidgets co wxGTK
+
+   NB: if you realize later that some needed files were not checked out
+       by this command, please modify CVSROOT/modules to include the missing
+       files so that it works for the next release!
+
+   You also need the samples, demos and contrib directories, so change to
+   wxWidgets directory created by the first cvs command and do "cvs up -d"
+   for each of them. Of course, you can also check out everything (use
+   wxWidgets module name instead of wxGTK) if the bandwidth and disk space
+   are not a problem.
 
 b) Create a build directory under wxWidgets, e.g. I use "gtk-release",
    "cd" to it and run configure: the options don't really matter, you can use

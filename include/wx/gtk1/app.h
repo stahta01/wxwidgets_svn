@@ -18,8 +18,8 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxApp;
-class WXDLLIMPEXP_FWD_BASE wxLog;
+class WXDLLIMPEXP_CORE wxApp;
+class WXDLLIMPEXP_BASE wxLog;
 
 //-----------------------------------------------------------------------------
 // wxApp
@@ -72,6 +72,7 @@ private:
 #endif // __WXDEBUG__
 
     DECLARE_DYNAMIC_CLASS(wxApp)
+    DECLARE_EVENT_TABLE()
 };
 
 #endif // __GTKAPPH__

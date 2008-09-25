@@ -43,7 +43,7 @@ class WXDLLIMPEXP_FWD_BASE wxArrayString;
  *    main thread?
  */
 
-class WXDLLIMPEXP_CORE wxDialUpManager
+class WXDLLEXPORT wxDialUpManager
 {
 public:
     // this function should create and return the object of the
@@ -152,11 +152,13 @@ public:
 // wxDialUpManager events
 // ----------------------------------------------------------------------------
 
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_DIALUP_CONNECTED;
-extern WXDLLIMPEXP_CORE const wxEventType wxEVT_DIALUP_DISCONNECTED;
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_DIALUP_CONNECTED, 450)
+    DECLARE_EVENT_TYPE(wxEVT_DIALUP_DISCONNECTED, 451)
+END_DECLARE_EVENT_TYPES()
 
 // the event class for the dialup events
-class WXDLLIMPEXP_CORE wxDialUpEvent : public wxEvent
+class WXDLLEXPORT wxDialUpEvent : public wxEvent
 {
 public:
     wxDialUpEvent(bool isConnected, bool isOwnEvent) : wxEvent(isOwnEvent)

@@ -265,7 +265,7 @@ void wxBookCtrlBase::DoSize()
 
     // resize all pages to fit the new control size
     const wxRect pageRect = GetPageRect();
-    const unsigned pagesCount = m_pages.GetCount();
+    const unsigned pagesCount = m_pages.Count();
     for ( unsigned int i = 0; i < pagesCount; ++i )
     {
         wxWindow * const page = m_pages[i];
@@ -455,7 +455,7 @@ int wxBookCtrlBase::DoSetSelection(size_t n, int flags)
 
     if ( n != (size_t)oldSel )
     {
-        wxBookCtrlEvent *event = CreatePageChangingEvent();
+        wxBookCtrlBaseEvent *event = CreatePageChangingEvent();
         bool allowed = false;
 
         if ( flags & SetSelection_SendEvent )
@@ -493,6 +493,5 @@ int wxBookCtrlBase::DoSetSelection(size_t n, int flags)
     return oldSel;
 }
 
-IMPLEMENT_DYNAMIC_CLASS(wxBookCtrlEvent, wxNotifyEvent)
 
 #endif // wxUSE_BOOKCTRL

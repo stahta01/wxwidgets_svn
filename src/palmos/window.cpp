@@ -76,12 +76,15 @@
 #include "wx/notebook.h"
 #include "wx/listctrl.h"
 
-#ifndef __WXUNIVERSAL__
 #include <Window.h>
 
 // ---------------------------------------------------------------------------
 // global variables
 // ---------------------------------------------------------------------------
+
+#if wxUSE_MENUS_NATIVE
+wxMenu *wxCurrentPopupMenu = NULL;
+#endif // wxUSE_MENUS_NATIVE
 
 // ---------------------------------------------------------------------------
 // private functions
@@ -244,7 +247,7 @@ bool wxGetKeyState(wxKeyCode key)
 
 void wxWindowPalm::Init()
 {
-    m_hWnd = 0;
+    m_handle = 0;
 }
 
 // Destructor
@@ -432,12 +435,19 @@ bool wxWindowPalm::Reparent(wxWindowBase *parent)
     return false;
 }
 
+void wxWindowPalm::Freeze()
+{
+}
+
+void wxWindowPalm::Thaw()
+{
+}
+
 void wxWindowPalm::Refresh(bool eraseBack, const wxRect *rect)
 {
-    WinHandle handle = (WinHandle)GetHWND();
+    WinHandle handle = (WinHandle)GetWinHandle();
     if(handle)
     {
-#ifdef __WXPALMOS6__
         if(rect)
         {
             RectangleType dirtyRect;
@@ -451,10 +461,6 @@ void wxWindowPalm::Refresh(bool eraseBack, const wxRect *rect)
         {
             WinInvalidateWindow(handle);
         }
-#else // __WXPALMOS5__
-        WinSetActiveWindow (handle);
-#endif
-
     }
 }
 
@@ -748,5 +754,5 @@ bool wxWindowPalm::UnregisterHotKey(int hotkeyId)
 {
     return false;
 }
-#endif // # __WXUNIVERSAL__
+
 #endif // wxUSE_HOTKEY

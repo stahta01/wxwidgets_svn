@@ -1,3 +1,12 @@
+utils/HelpGen/src/*.h
+utils/HelpGen/src/*.cpp
+utils/HelpGen/src/*.rc
+utils/HelpGen/src/makefile*
+utils/HelpGen/src/*.bkl
+utils/HelpGen/src/*.xbm
+utils/HelpGen/src/*.xpm
+utils/HelpGen/src/*.txt
+
 utils/emulator/Makefile.in
 utils/emulator/src/*.cpp
 utils/emulator/src/*.h
@@ -35,8 +44,3 @@ utils/helpview/src/*.xml
 utils/helpview/src/*.bkl
 utils/helpview/src/test.zip
 utils/helpview/src/bitmaps/*.xpm
-
-utils/ifacecheck/src/*.*
-utils/ifacecheck/gcc*.*
-utils/ifacecheck/rungccxml.sh.in
-

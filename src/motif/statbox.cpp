@@ -89,9 +89,8 @@ bool wxStaticBox::Create(wxWindow *parent, wxWindowID id,
     if( !CreateControl( parent, id, pos, size, style,
                         wxDefaultValidator, name ) )
         return false;
-    m_labelWidget = (WXWidget) 0;
-    PreCreation();
 
+    m_labelWidget = (WXWidget) 0;
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
     m_mainWidget = XtVaCreateManagedWidget ("staticboxframe",
@@ -117,9 +116,9 @@ bool wxStaticBox::Create(wxWindow *parent, wxWindowID id,
 #endif
                 NULL);
     }
-    
-    PostCreation();
+
     AttachWidget (parent, m_mainWidget, NULL, pos.x, pos.y, size.x, size.y);
+    ChangeBackgroundColour();
 
     return true;
 }

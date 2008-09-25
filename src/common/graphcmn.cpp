@@ -18,7 +18,7 @@
 
 #if wxUSE_GRAPHICS_CONTEXT
 
-#include "wx/private/graphics.h"
+#include "wx/graphics.h"
 
 #ifndef WX_PRECOMP
     #include "wx/icon.h"
@@ -26,6 +26,10 @@
     #include "wx/dcmemory.h"
     #include "wx/region.h"
     #include "wx/log.h"
+#endif
+
+#if !defined(wxMAC_USE_CORE_GRAPHICS_BLEND_MODES)
+#define wxMAC_USE_CORE_GRAPHICS_BLEND_MODES 0
 #endif
 
 //-----------------------------------------------------------------------------
@@ -116,12 +120,10 @@ wxObjectRefData* wxGraphicsObject::CloneRefData(const wxObjectRefData* data) con
 IMPLEMENT_DYNAMIC_CLASS(wxGraphicsPen, wxGraphicsObject)
 IMPLEMENT_DYNAMIC_CLASS(wxGraphicsBrush, wxGraphicsObject)
 IMPLEMENT_DYNAMIC_CLASS(wxGraphicsFont, wxGraphicsObject)
-IMPLEMENT_DYNAMIC_CLASS(wxGraphicsBitmap, wxGraphicsObject)
 
 WXDLLIMPEXP_DATA_CORE(wxGraphicsPen) wxNullGraphicsPen;
 WXDLLIMPEXP_DATA_CORE(wxGraphicsBrush) wxNullGraphicsBrush;
 WXDLLIMPEXP_DATA_CORE(wxGraphicsFont) wxNullGraphicsFont;
-WXDLLIMPEXP_DATA_CORE(wxGraphicsBitmap) wxNullGraphicsBitmap;
 
 //-----------------------------------------------------------------------------
 // matrix
@@ -425,9 +427,6 @@ void wxGraphicsPathData::AddCircle( wxDouble x, wxDouble y, wxDouble r )
 
 void wxGraphicsPathData::AddEllipse( wxDouble x, wxDouble y, wxDouble w, wxDouble h)
 {
-    if (w <= 0. || h <= 0.)
-      return;
-      
     wxDouble rw = w/2;
     wxDouble rh = h/2;
     wxDouble xc = x + rw;
@@ -508,51 +507,6 @@ wxGraphicsContext::wxGraphicsContext(wxGraphicsRenderer* renderer) : wxGraphicsO
 
 wxGraphicsContext::~wxGraphicsContext() 
 {
-}
-
-bool wxGraphicsContext::StartDoc(const wxString& WXUNUSED(message)) 
-{
-    return true;
-}
-    
-void wxGraphicsContext::EndDoc()
-{
-}
-
-void wxGraphicsContext::StartPage(wxDouble WXUNUSED(width),
-                                  wxDouble WXUNUSED(height))
-{
-}
-    
-void wxGraphicsContext::EndPage()
-{
-}
-
-void wxGraphicsContext::Flush()
-{
-}
-
-#if 0
-void wxGraphicsContext::SetAlpha( wxDouble WXUNUSED(alpha) )
-{
-}
-    
-wxDouble wxGraphicsContext::GetAlpha() const
-{
-    return 1.0;
-}
-#endif
-
-void wxGraphicsContext::GetSize( wxDouble* width, wxDouble* height)
-{
-    *width = 10000.0;
-    *height = 10000.0;
-}
-
-void wxGraphicsContext::GetDPI( wxDouble* dpiX, wxDouble* dpiY)
-{
-    *dpiX = 72.0;
-    *dpiY = 72.0;
 }
 
 // sets the pen
@@ -775,36 +729,12 @@ wxGraphicsFont wxGraphicsContext::CreateFont( const wxFont &font , const wxColou
     return GetRenderer()->CreateFont(font,col);
 }
 
-wxGraphicsBitmap wxGraphicsContext::CreateBitmap( const wxBitmap& bmp ) const
-{
-#ifndef __WXGTK20__
-    return GetRenderer()->CreateBitmap(bmp);
-#else
-    return wxNullGraphicsBitmap;
-#endif
-}
-
-wxGraphicsBitmap wxGraphicsContext::CreateSubBitmap( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h   ) const
-{
-#ifndef __WXGTK20__
-    return GetRenderer()->CreateSubBitmap(bmp,x,y,w,h);
-#else
-    return wxNullGraphicsBitmap;
-#endif
-}
-
-/* static */ wxGraphicsContext* wxGraphicsContext::Create( const wxWindowDC& dc) 
+wxGraphicsContext* wxGraphicsContext::Create( const wxWindowDC& dc) 
 {
     return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
 }
-
-/* static */ wxGraphicsContext* wxGraphicsContext::Create( const wxMemoryDC& dc) 
-{
-    return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
-}
-
-#if wxUSE_PRINTING_ARCHITECTURE
-/* static */ wxGraphicsContext* wxGraphicsContext::Create( const wxPrinterDC& dc) 
+#ifdef __WXMSW__
+wxGraphicsContext* wxGraphicsContext::Create( const wxMemoryDC& dc) 
 {
     return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
 }

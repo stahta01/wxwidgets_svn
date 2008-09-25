@@ -108,6 +108,33 @@ Package=<4>
 
 ###############################################################################
 
+Project: "dbgrid"=.\wx_dbgrid.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name odbc
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxtiff
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxjpeg
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxpng
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name adv
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "gl"=.\wx_gl.dsp - Package Owner=<4>
 
 Package=<5>
@@ -222,6 +249,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "odbc"=.\wx_odbc.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name wxzlib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxregex
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxexpat
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name base
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "qa"=.\wx_qa.dsp - Package Owner=<4>
 
 Package=<5>
@@ -294,21 +345,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "stc"=wx_stc.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-Begin Project Dependency
-Project_Dep_Name wxscintilla
-End Project Dependency
-}}}
-
-###############################################################################
-
 Project: "wxexpat"=.\wx_wxexpat.dsp - Package Owner=<4>
 
 Package=<5>
@@ -349,18 +385,6 @@ Package=<4>
 ###############################################################################
 
 Project: "wxregex"=.\wx_wxregex.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "wxscintilla"=wx_wxscintilla.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

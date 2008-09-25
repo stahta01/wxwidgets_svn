@@ -45,7 +45,7 @@ protected:
             :m_pCleanup(value)
         {}
         ~CleanupHelper()
-        {
+        { 
             m_pCleanup->DeleteInStream();
             m_pCleanup->DeleteOutStream();
         }
@@ -68,7 +68,7 @@ public:
         // Prevent mem leaks!
         delete m_pCurrentIn;
         delete m_pCurrentOut;
-    }
+    }   
 
 protected:
     /*
@@ -108,7 +108,7 @@ protected:
 
         // Note: the input stream should at least be of min size +10!
 
-        char buf[10];
+        char buf[10];        
         (void)stream_in.Read(buf, 10);
 
         CPPUNIT_ASSERT(!stream_in.Eof());
@@ -122,7 +122,7 @@ protected:
         CPPUNIT_ASSERT(stream_in.Eof());
     }
 
-    // Test and see what happens to the EOF when we
+    // Test and see what happens to the EOF when we 
     // read after EOF was encountered.
     void Input_Eof()
     {
@@ -135,9 +135,6 @@ protected:
         // Travel to the end of the stream.
         while(!stream_in.Eof())
         {
-            CPPUNIT_ASSERT_MESSAGE( "unexpected non-EOF stream error",
-                                    stream_in.IsOk() );
-
             // Read, we move one byte along.
             (void)stream_in.GetC();
 #if 0
@@ -153,7 +150,7 @@ protected:
         }
 
         // Check EOF stream state.
-        CPPUNIT_ASSERT_MESSAGE("EOF is not EOF?", stream_in.Eof());
+        CPPUNIT_ASSERT_MESSAGE("EOF is not EOF?", stream_in.Eof());        
 
         // Ok we found the end, lets see if we can go past it.
         for (size_t i = 0; i < 100; i++)
@@ -178,26 +175,11 @@ protected:
         CPPUNIT_ASSERT(stream_in.LastRead() == 1);
     }
 
-    void Input_CanRead()
-    {
-        CleanupHelper cleanup(this);
-        TStreamIn &stream_in = CreateInStream();
-
-        CPPUNIT_ASSERT( stream_in.CanRead() );
-
-        // read the entire contents
-        (void)stream_in.Read(CreateOutStream());
-
-        CPPUNIT_ASSERT( !stream_in.CanRead() );
-    }
-
     // Just try to perform a SeekI() on the input stream.
     void Input_SeekI()
     {
         CleanupHelper cleanup(this);
         TStreamIn &stream_in = CreateInStream();
-
-        CPPUNIT_ASSERT( stream_in.IsSeekable() );
         CPPUNIT_ASSERT(!stream_in.Eof());
 
         // Try to Seek in the stream...
@@ -217,10 +199,6 @@ protected:
     {
         CleanupHelper cleanup(this);
         TStreamIn &stream_in = CreateInStream();
-
-        // this test shouldn't be used at all if the stream isn't seekable
-        CPPUNIT_ASSERT( stream_in.IsSeekable() );
-
         CPPUNIT_ASSERT(!stream_in.Eof());
 
         // Try to Get the location in the stream...
@@ -239,7 +217,7 @@ protected:
             CPPUNIT_ASSERT(stream_in.TellI() == pos);
         }
     }
-
+    
     // Just try to perform a Peek() on the input stream.
     void Input_Peek()
     {
@@ -262,7 +240,7 @@ protected:
         CleanupHelper cleanup(this);
         TStreamIn &stream_in = CreateInStream();
         CPPUNIT_ASSERT(!stream_in.Eof());
-
+        
         const char *ungetstr = "test";
         size_t ungetsize = stream_in.Ungetch(ungetstr, strlen(ungetstr) + 1);
         if (ungetsize != 0)
@@ -289,13 +267,13 @@ protected:
         CleanupHelper cleanup(this);
         TStreamOut &stream_out = CreateOutStream();
 
-        const char *buf = "Some text";
-        const wxFileOffset len = strlen(buf);
-        for ( int i = 0; i < len; i++ )
+        char *buf = "Some text";
+        int i;
+        int len = strlen(buf);
+        for (i = 0; i < len; i++)
             stream_out.PutC(buf[i]);
 
-        if ( stream_out.IsSeekable() )
-            CPPUNIT_ASSERT_EQUAL(len, stream_out.TellO());
+        CPPUNIT_ASSERT(i == stream_out.TellO());
     }
 
     // Just try to perform a Write() on the output stream.
@@ -305,18 +283,15 @@ protected:
         TStreamOut &stream_out = CreateOutStream();
 
         // Do the buffer version.
-        const char *buf = "Some text";
-        const wxFileOffset len = strlen(buf);
+        char *buf = "Some text";
+        int len = strlen(buf);
         (void)stream_out.Write(buf, len);
-        if ( stream_out.IsSeekable() )
-            CPPUNIT_ASSERT_EQUAL( len, stream_out.TellO() );
+        CPPUNIT_ASSERT(stream_out.TellO() == len);
 
         // Do the Stream version.
         TStreamIn &stream_in = CreateInStream();
         (void)stream_out.Write(stream_in);
-
-        if ( stream_out.IsSeekable() )
-            CPPUNIT_ASSERT(stream_out.TellO() > len);
+        CPPUNIT_ASSERT(stream_out.TellO() > len);
     }
 
     // Just try to perform a LastWrite() on the output stream.
@@ -325,7 +300,7 @@ protected:
         CleanupHelper cleanup(this);
         TStreamOut &stream_out = CreateOutStream();
 
-        const char *buf = "12345";
+        char *buf = "12345";
         (void)stream_out.Write(buf, 5);
         CPPUNIT_ASSERT(stream_out.LastWrite() == 5);
         (void)stream_out.PutC('1');
@@ -337,11 +312,9 @@ protected:
     {
         CleanupHelper cleanup(this);
         TStreamOut &stream_out = CreateOutStream();
-
-        CPPUNIT_ASSERT( stream_out.IsSeekable() );
-
+        
         // First put some data in the stream, so it is not empty.
-        const char *buf = "1234567890";
+        char *buf = "1234567890";
         (void)stream_out.Write(buf, 10);
 
         // Try to Seek in the stream...
@@ -362,9 +335,6 @@ protected:
         CleanupHelper cleanup(this);
         TStreamOut &stream_out = CreateOutStream();
 
-        // If this test is used, the stream must be seekable
-        CPPUNIT_ASSERT( stream_out.IsSeekable() );
-
         // Try to Get the location in the stream...
         CPPUNIT_ASSERT(stream_out.TellO() == 0);
         (void)stream_out.PutC('1');
@@ -372,9 +342,9 @@ protected:
         if (!m_bSimpleTellOTest)
         {
             // First put some extra data in the stream, so it's not empty.
-            const char *buf = "1234567890";
+            char *buf = "1234567890";
             (void)stream_out.Write(buf, 10);
-
+            
             off_t pos = stream_out.SeekO(5, wxFromStart);
             CPPUNIT_ASSERT(stream_out.TellO() == pos);
             (void)stream_out.PutC('1');
@@ -388,9 +358,9 @@ protected:
 
 protected:
     // Some tests can be configured... here you can find the config settings
-    bool m_bSimpleTellITest;    // if true, no SeekI will be used by the TellI test.
+    bool m_bSimpleTellITest;    // if true, no SeekI will be used by the TellI test. 
                                 // Default false.
-    bool m_bSimpleTellOTest;    // if true, no SeekO will be used by the TellI test.
+    bool m_bSimpleTellOTest;    // if true, no SeekO will be used by the TellI test. 
                                 // Default false.
     bool m_bSeekInvalidBeyondEnd; // if true a SeekI|O beyond the end of the stream should return wxInvalidOffset
                                   // Default true.
@@ -398,7 +368,7 @@ protected:
                                 // Default true.
 protected:
     TStreamIn &CreateInStream()
-    {
+    { 
         if (m_pCurrentIn)
         {
             wxFAIL_MSG(_T("Error in test case, the previouse input stream needs to be delete first!"));
@@ -409,7 +379,7 @@ protected:
         return *m_pCurrentIn;
     }
     TStreamOut &CreateOutStream()
-    {
+    { 
         if (m_pCurrentOut)
         {
             wxFAIL_MSG(_T("Error in test case, the previouse output stream needs to be delete first!"));
@@ -419,7 +389,7 @@ protected:
         wxASSERT(m_pCurrentOut != NULL);
         return *m_pCurrentOut;
     }
-
+    
     void DeleteInStream()
     {
         if (m_pCurrentIn == NULL)
@@ -430,12 +400,12 @@ protected:
         DoDeleteInStream();
     }
     void DeleteOutStream()
-    {
+    {        
         if (m_pCurrentOut == NULL)
             return;
-
+        
         CPPUNIT_ASSERT(m_pCurrentOut->Close());
-
+        
         delete m_pCurrentOut;
         m_pCurrentOut = NULL;
         // Incase something extra needs to be done.

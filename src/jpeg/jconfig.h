@@ -1,4 +1,8 @@
-#if defined(_WIN32) || defined(__OS2__)
+/* This test added by JACS as a quick fix. What should we do
+ * to make it work with configure?
+ */
+
+#if defined(_MSC_VER) || defined(__BORLANDC__) || defined (__DMC__)
 #include "jconfig.vc"
 #else
 

@@ -128,7 +128,7 @@ void ScoreFile::ReadPlayersScore(
 
 void ScoreFile::WritePlayersScore(const wxString& player, int wins, int games, int score)
 {
-    if (!player.empty())
+    if (player)
     {
         m_config->SetPath(_T("/General"));
         m_config->Write(_T("LastPlayer"), wxString(player)); // Without wxString tmp, thinks it's bool in VC++

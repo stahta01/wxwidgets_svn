@@ -17,13 +17,13 @@
 #include "wx/dialog.h"
 #include "wx/cmndata.h"
 
-class WXDLLIMPEXP_FWD_CORE wxDC;
+class WXDLLEXPORT wxDC;
 
 // ---------------------------------------------------------------------------
 // wxPrinterDialog: the common dialog for printing.
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrintDialog : public wxDialog
+class WXDLLEXPORT wxPrintDialog : public wxDialog
 {
     DECLARE_DYNAMIC_CLASS(wxPrintDialog)
 
@@ -49,7 +49,7 @@ private:
     DECLARE_NO_COPY_CLASS(wxPrintDialog)
 };
 
-class WXDLLIMPEXP_CORE wxPageSetupDialog: public wxDialog
+class WXDLLEXPORT wxPageSetupDialog: public wxDialog
 {
     DECLARE_DYNAMIC_CLASS(wxPageSetupDialog)
 

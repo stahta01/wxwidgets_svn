@@ -25,7 +25,7 @@
 #include "wx/clipbrd.h"
 #include "wx/colordlg.h"
 #include "wx/metafile.h"
-#include "wx/dirctrl.h"
+#include "wx/file.h"
 
 #if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
     #include "../sample.xpm"
@@ -57,7 +57,7 @@ private:
 class DnDFile : public wxFileDropTarget
 {
 public:
-    DnDFile(wxListBox *pOwner = NULL) { m_pOwner = pOwner; }
+    DnDFile(wxListBox *pOwner) { m_pOwner = pOwner; }
 
     virtual bool OnDropFiles(wxCoord x, wxCoord y,
                              const wxArrayString& filenames);
@@ -200,13 +200,14 @@ private:
 class DnDFrame : public wxFrame
 {
 public:
-    DnDFrame();
+    DnDFrame(wxFrame *frame, const wxChar *title, int x, int y, int w, int h);
     virtual ~DnDFrame();
 
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnQuit(wxCommandEvent& event);
     void OnAbout(wxCommandEvent& event);
+    void OnOpenFile(wxCommandEvent& event);
     void OnDrag(wxCommandEvent& event);
     void OnDragMoveByDefault(wxCommandEvent& event);
     void OnDragMoveAllow(wxCommandEvent& event);
@@ -228,31 +229,20 @@ public:
 
     void OnCopyFiles(wxCommandEvent& event);
 
-    void OnUsePrimary(wxCommandEvent& event);
-
     void OnLeftDown(wxMouseEvent& event);
     void OnRightDown(wxMouseEvent& event);
-
-#if wxUSE_DRAG_AND_DROP
-    void OnBeginDrag(wxTreeEvent& event);
-#endif // wxUSE_DRAG_AND_DROP
 
     void OnUpdateUIMoveByDefault(wxUpdateUIEvent& event);
 
     void OnUpdateUIPasteText(wxUpdateUIEvent& event);
     void OnUpdateUIPasteBitmap(wxUpdateUIEvent& event);
 
+    DECLARE_EVENT_TABLE()
+
 private:
-#if wxUSE_DRAG_AND_DROP
-    // show the result of a dnd operation in the status bar
-    void LogDragResult(wxDragResult result);
-#endif // wxUSE_DRAG_AND_DROP
-
-
     // GUI controls
     wxListBox  *m_ctrlFile,
                *m_ctrlText;
-    wxGenericDirCtrl *m_ctrlDir;
 
 #if wxUSE_LOG
     wxTextCtrl *m_ctrlLog;
@@ -268,10 +258,7 @@ private:
     bool m_moveAllow;
 
     // the text we drag
-    wxString m_strText;
-
-
-    DECLARE_EVENT_TABLE()
+    wxString  m_strText;
 };
 
 // ----------------------------------------------------------------------------
@@ -808,6 +795,7 @@ enum
     Menu_DragMoveAllow,
     Menu_NewFrame,
     Menu_About = 101,
+    Menu_OpenFile,
     Menu_Help,
     Menu_Clear,
     Menu_Copy,
@@ -816,7 +804,6 @@ enum
     Menu_PasteBitmap,
     Menu_PasteMFile,
     Menu_CopyFiles,
-    Menu_UsePrimary,
     Menu_Shape_New = 500,
     Menu_Shape_Edit,
     Menu_Shape_Clear,
@@ -828,6 +815,7 @@ enum
 BEGIN_EVENT_TABLE(DnDFrame, wxFrame)
     EVT_MENU(Menu_Quit,       DnDFrame::OnQuit)
     EVT_MENU(Menu_About,      DnDFrame::OnAbout)
+    EVT_MENU(Menu_OpenFile,      DnDFrame::OnOpenFile)
     EVT_MENU(Menu_Drag,       DnDFrame::OnDrag)
     EVT_MENU(Menu_DragMoveDef,  DnDFrame::OnDragMoveByDefault)
     EVT_MENU(Menu_DragMoveAllow,DnDFrame::OnDragMoveAllow)
@@ -844,7 +832,6 @@ BEGIN_EVENT_TABLE(DnDFrame, wxFrame)
     EVT_MENU(Menu_PasteMFile, DnDFrame::OnPasteMetafile)
 #endif // wxUSE_METAFILE
     EVT_MENU(Menu_CopyFiles,  DnDFrame::OnCopyFiles)
-    EVT_MENU(Menu_UsePrimary, DnDFrame::OnUsePrimary)
 
     EVT_UPDATE_UI(Menu_DragMoveDef, DnDFrame::OnUpdateUIMoveByDefault)
 
@@ -900,9 +887,6 @@ END_EVENT_TABLE()
 // `Main program' equivalent, creating windows and returning main app frame
 bool DnDApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_DRAG_AND_DROP || wxUSE_CLIPBOARD
     // switch on trace messages
 #if wxUSE_LOG
@@ -917,8 +901,19 @@ bool DnDApp::OnInit()
     wxImage::AddHandler( new wxPNGHandler );
 #endif
 
+    // under X we usually want to use the primary selection by default (which
+    // is shared with other apps)
+    wxTheClipboard->UsePrimarySelection();
+
     // create the main frame window
-    new DnDFrame();
+    DnDFrame *frame = new DnDFrame((wxFrame  *) NULL,
+                                   _T("Drag-and-Drop/Clipboard wxWidgets Sample"),
+                                   10, 100, 750, 540);
+
+    // activate it
+    frame->Show(true);
+
+    SetTopWindow(frame);
 
     return true;
 #else
@@ -929,9 +924,8 @@ bool DnDApp::OnInit()
 
 #if wxUSE_DRAG_AND_DROP || wxUSE_CLIPBOARD
 
-DnDFrame::DnDFrame()
-        : wxFrame(NULL, wxID_ANY, _T("Drag-and-Drop/Clipboard wxWidgets Sample"),
-                  wxPoint(10, 100)),
+DnDFrame::DnDFrame(wxFrame *frame, const wxChar *title, int x, int y, int w, int h)
+        : wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h)),
           m_strText(_T("wxWidgets drag & drop works :-)"))
 
 {
@@ -949,6 +943,8 @@ DnDFrame::DnDFrame()
     file_menu->AppendCheckItem(Menu_DragMoveAllow, _T("&Allow moving"));
     file_menu->AppendSeparator();
     file_menu->Append(Menu_NewFrame, _T("&New frame\tCtrl-N"));
+    file_menu->AppendSeparator();
+    file_menu->Append(Menu_OpenFile, _T("&Open file..."));
     file_menu->AppendSeparator();
     file_menu->Append(Menu_Quit, _T("E&xit\tCtrl-Q"));
 
@@ -974,8 +970,6 @@ DnDFrame::DnDFrame()
 #endif // wxUSE_METAFILE
     clip_menu->AppendSeparator();
     clip_menu->Append(Menu_CopyFiles, _T("Copy &files\tCtrl-F"));
-    clip_menu->AppendSeparator();
-    clip_menu->AppendCheckItem(Menu_UsePrimary, _T("Use &primary selection\tCtrl-P"));
 
     wxMenuBar *menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, _T("&File"));
@@ -987,20 +981,16 @@ DnDFrame::DnDFrame()
 
     SetMenuBar(menu_bar);
 
-    // create the child controls
-    SetBackgroundColour(*wxWHITE); // labels read better on this background
-
+    // make a panel with 3 subwindows
     wxString strFile(_T("Drop files here!")), strText(_T("Drop text on me"));
 
     m_ctrlFile  = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 1, &strFile,
                                 wxLB_HSCROLL | wxLB_ALWAYS_SB );
     m_ctrlText  = new wxListBox(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 1, &strText,
                                 wxLB_HSCROLL | wxLB_ALWAYS_SB );
-    m_ctrlDir   = new wxGenericDirCtrl(this);
 
 #if wxUSE_LOG
-    m_ctrlLog   = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
-                                 wxDefaultPosition, wxDefaultSize,
+    m_ctrlLog   = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                  wxTE_MULTILINE | wxTE_READONLY |
                                  wxSUNKEN_BORDER );
 
@@ -1013,18 +1003,6 @@ DnDFrame::DnDFrame()
     // associate drop targets with the controls
     m_ctrlFile->SetDropTarget(new DnDFile(m_ctrlFile));
     m_ctrlText->SetDropTarget(new DnDText(m_ctrlText));
-
-#if wxUSE_DRAG_AND_DROP
-    m_ctrlDir->Connect
-    (
-        wxID_ANY,
-        wxEVT_COMMAND_TREE_BEGIN_DRAG,
-        wxTreeEventHandler(DnDFrame::OnBeginDrag),
-        NULL,
-        this
-    );
-#endif // wxUSE_DRAG_AND_DROP
-
 #if wxUSE_LOG
     m_ctrlLog->SetDropTarget(new URLDropTarget);
 #endif // wxUSE_LOG
@@ -1034,32 +1012,21 @@ DnDFrame::DnDFrame()
     sizer_top->Add(m_ctrlFile, 1, wxEXPAND );
     sizer_top->Add(m_ctrlText, 1, wxEXPAND );
 
-    wxBoxSizer *sizerDirCtrl = new wxBoxSizer(wxVERTICAL);
-    sizerDirCtrl->Add(new wxStaticText(this, wxID_ANY, "Drag files from here"),
-                      wxSizerFlags().Centre().Border());
-    sizerDirCtrl->Add(m_ctrlDir, wxSizerFlags(1).Expand());
-    sizer_top->Add(sizerDirCtrl, 1, wxEXPAND );
-
-    // make all columns of reasonable minimal size
-    for ( unsigned n = 0; n < sizer_top->GetChildren().size(); n++ )
-        sizer_top->SetItemMinSize(n, 200, 300);
-
     wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
-    sizer->Add(sizer_top, 1, wxEXPAND );
+    sizer->Add(sizer_top, 2, wxEXPAND );
 #if wxUSE_LOG
-    sizer->Add(m_ctrlLog, 2, wxEXPAND);
-    sizer->SetItemMinSize(m_ctrlLog, 450, 200);
+    sizer->Add(m_ctrlLog, 1, wxEXPAND);
+    sizer->SetItemMinSize(m_ctrlLog, 450, 100);
 #endif // wxUSE_LOG
     sizer->AddSpacer(50);
+
+    SetSizer(sizer);
+    sizer->SetSizeHints( this );
 
     // copy data by default but allow moving it as well
     m_moveByDefault = false;
     m_moveAllow = true;
     menu_bar->Check(Menu_DragMoveAllow, true);
-
-    // set the correct size and show the frame
-    SetSizerAndFit(sizer);
-    Show();
 }
 
 void DnDFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -1149,6 +1116,18 @@ void DnDFrame::OnDragMoveAllow(wxCommandEvent& event)
     m_moveAllow = event.IsChecked();
 }
 
+
+void DnDFrame::OnOpenFile(wxCommandEvent& WXUNUSED(event))
+{
+    wxFileDialog dialog(this, _T("Open a file"), wxEmptyString, wxEmptyString, _T("Files (*.*)|*.*"), wxFD_MULTIPLE);
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString str;
+        str.Printf( _T("File opened: %s"), dialog.GetPath().c_str() );
+        m_ctrlFile->Append( str );
+    }
+}
+
 void DnDFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxMessageBox(_T("Drag-&-Drop Demo\n")
@@ -1196,30 +1175,6 @@ void DnDFrame::OnLogClear(wxCommandEvent& /* event */ )
 }
 #endif // wxUSE_LOG
 
-#if wxUSE_DRAG_AND_DROP
-
-void DnDFrame::LogDragResult(wxDragResult result)
-{
-#if wxUSE_STATUSBAR
-    const wxChar *pc;
-    switch ( result )
-    {
-        case wxDragError:   pc = _T("Error!");    break;
-        case wxDragNone:    pc = _T("Nothing");   break;
-        case wxDragCopy:    pc = _T("Copied");    break;
-        case wxDragMove:    pc = _T("Moved");     break;
-        case wxDragCancel:  pc = _T("Cancelled"); break;
-        default:            pc = _T("Huh?");      break;
-    }
-
-    SetStatusText(wxString(_T("Drag result: ")) + pc);
-#else
-    wxUnusedVar(result);
-#endif // wxUSE_STATUSBAR
-}
-
-#endif // wxUSE_DRAG_AND_DROP
-
 void DnDFrame::OnLeftDown(wxMouseEvent &WXUNUSED(event) )
 {
 #if wxUSE_DRAG_AND_DROP
@@ -1238,7 +1193,24 @@ void DnDFrame::OnLeftDown(wxMouseEvent &WXUNUSED(event) )
         else if ( m_moveAllow )
             flags |= wxDrag_AllowMove;
 
-        LogDragResult(source.DoDragDrop(flags));
+        wxDragResult result = source.DoDragDrop(flags);
+
+#if wxUSE_STATUSBAR
+        const wxChar *pc;
+        switch ( result )
+        {
+            case wxDragError:   pc = _T("Error!");    break;
+            case wxDragNone:    pc = _T("Nothing");   break;
+            case wxDragCopy:    pc = _T("Copied");    break;
+            case wxDragMove:    pc = _T("Moved");     break;
+            case wxDragCancel:  pc = _T("Cancelled"); break;
+            default:            pc = _T("Huh?");      break;
+        }
+
+        SetStatusText(wxString(_T("Drag result: ")) + pc);
+#else
+        wxUnusedVar(result);
+#endif // wxUSE_STATUSBAR
     }
 #endif // wxUSE_DRAG_AND_DROP
 }
@@ -1263,30 +1235,6 @@ DnDFrame::~DnDFrame()
     }
 #endif // wxUSE_LOG
 }
-
-void DnDFrame::OnUsePrimary(wxCommandEvent& event)
-{
-    const bool usePrimary = event.IsChecked();
-    wxTheClipboard->UsePrimarySelection(usePrimary);
-
-    wxLogStatus(_T("Now using %s selection"), usePrimary ? _T("primary")
-                                                         : _T("clipboard"));
-}
-
-#if wxUSE_DRAG_AND_DROP
-
-void DnDFrame::OnBeginDrag(wxTreeEvent& WXUNUSED(event))
-{
-    wxFileDataObject data;
-    data.AddFile(m_ctrlDir->GetPath());
-
-    wxDropSource dragSource(this);
-    dragSource.SetData(data);
-
-    LogDragResult(dragSource.DoDragDrop());
-}
-
-#endif // wxUSE_DRAG_AND_DROP
 
 // ---------------------------------------------------------------------------
 // bitmap clipboard
@@ -1559,12 +1507,15 @@ bool DnDFile::OnDropFiles(wxCoord, wxCoord, const wxArrayString& filenames)
     size_t nFiles = filenames.GetCount();
     wxString str;
     str.Printf( _T("%d files dropped"), (int)nFiles);
-
-    if (m_pOwner != NULL)
+    m_pOwner->Append(str);
+    for ( size_t n = 0; n < nFiles; n++ )
     {
-        m_pOwner->Append(str);
-        for ( size_t n = 0; n < nFiles; n++ )
-            m_pOwner->Append(filenames[n]);
+        m_pOwner->Append(filenames[n]);
+        if (wxFile::Exists(filenames[n]))
+            m_pOwner->Append(wxT("  This file exists.") );
+        else
+            m_pOwner->Append(wxT("  This file doesn't exist.") );
+            
     }
 
     return true;
@@ -1638,7 +1589,8 @@ DnDShapeDialog::DnDShapeDialog(wxFrame *parent, DnDShape *shape)
     buttonSizer->Add( bt, 0, wxALL, 2 );
     topSizer->Add( buttonSizer, 0, wxALL|wxALIGN_RIGHT, 2 );
 
-    SetSizerAndFit( topSizer );
+    SetSizer( topSizer );
+    topSizer->Fit( this );
 }
 
 DnDShape *DnDShapeDialog::GetShape() const

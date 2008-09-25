@@ -87,13 +87,13 @@ protected:
 static inline void
 HexProperty(wxXmlNode *node, const wxChar *name, unsigned long value)
 {
-    node->AddAttribute(name, wxString::Format(_T("%08lx"), value));
+    node->AddProperty(name, wxString::Format(_T("%08lx"), value));
 }
 
 static inline void
 NumProperty(wxXmlNode *node, const wxChar *name, unsigned long value)
 {
-    node->AddAttribute(name, wxString::Format(_T("%lu"), value));
+    node->AddProperty(name, wxString::Format(_T("%lu"), value));
 }
 
 static inline void
@@ -129,13 +129,13 @@ void XmlStackWalker::OnStackFrame(const wxStackFrame& frame)
     wxString func = frame.GetName();
     if ( !func.empty() )
     {
-        nodeFrame->AddAttribute(_T("function"), func);
+        nodeFrame->AddProperty(_T("function"), func);
         HexProperty(nodeFrame, _T("offset"), frame.GetOffset());
     }
 
     if ( frame.HasSourceLocation() )
     {
-        nodeFrame->AddAttribute(_T("file"), frame.GetFileName());
+        nodeFrame->AddProperty(_T("file"), frame.GetFileName());
         NumProperty(nodeFrame, _T("line"), frame.GetLine());
     }
 
@@ -253,7 +253,7 @@ wxDebugReport::~wxDebugReport()
 wxString wxDebugReport::GetReportName() const
 {
     if(wxTheApp)
-        return wxTheApp->GetAppDisplayName();
+        return wxTheApp->GetAppName();
 
     return _T("wx");
 }
@@ -348,7 +348,7 @@ void wxDebugReport::AddAll(Context context)
 
 bool wxDebugReport::DoAddSystemInfo(wxXmlNode *nodeSystemInfo)
 {
-    nodeSystemInfo->AddAttribute(_T("description"), wxGetOsDescription());
+    nodeSystemInfo->AddProperty(_T("description"), wxGetOsDescription());
 
     return true;
 }
@@ -371,7 +371,7 @@ bool wxDebugReport::DoAddLoadedModules(wxXmlNode *nodeModules)
         if ( path.empty() )
             path = info.GetName();
         if ( !path.empty() )
-            nodeModule->AddAttribute(_T("path"), path);
+            nodeModule->AddProperty(_T("path"), path);
 
         void *addr = NULL;
         size_t len = 0;
@@ -384,7 +384,7 @@ bool wxDebugReport::DoAddLoadedModules(wxXmlNode *nodeModules)
         wxString ver = info.GetVersion();
         if ( !ver.empty() )
         {
-            nodeModule->AddAttribute(_T("version"), ver);
+            nodeModule->AddProperty(_T("version"), ver);
         }
     }
 
@@ -402,7 +402,7 @@ bool wxDebugReport::DoAddExceptionInfo(wxXmlNode *nodeContext)
     nodeContext->AddChild(nodeExc);
 
     HexProperty(nodeExc, _T("code"), c.code);
-    nodeExc->AddAttribute(_T("name"), c.GetExceptionString());
+    nodeExc->AddProperty(_T("name"), c.GetExceptionString());
     HexProperty(nodeExc, _T("address"), wxPtrToUInt(c.addr));
 
 #ifdef __INTEL__
@@ -445,8 +445,8 @@ bool wxDebugReport::AddContext(wxDebugReport::Context ctx)
     wxXmlDocument xmldoc;
     wxXmlNode *nodeRoot = new wxXmlNode(wxXML_ELEMENT_NODE, _T("report"));
     xmldoc.SetRoot(nodeRoot);
-    nodeRoot->AddAttribute(_T("version"), _T("1.0"));
-    nodeRoot->AddAttribute(_T("kind"), ctx == Context_Current ? _T("user")
+    nodeRoot->AddProperty(_T("version"), _T("1.0"));
+    nodeRoot->AddProperty(_T("kind"), ctx == Context_Current ? _T("user")
                                                              : _T("exception"));
 
     // add system information
@@ -478,13 +478,11 @@ bool wxDebugReport::AddContext(wxDebugReport::Context ctx)
 #if wxUSE_STACKWALKER
     wxXmlNode *nodeStack = new wxXmlNode(wxXML_ELEMENT_NODE, _T("stack"));
     XmlStackWalker sw(nodeStack);
-#if wxUSE_ON_FATAL_EXCEPTION
     if ( ctx == Context_Exception )
     {
         sw.WalkFromException();
     }
     else // Context_Current
-#endif // wxUSE_ON_FATAL_EXCEPTION
     {
         sw.Walk();
     }
@@ -574,7 +572,7 @@ bool wxDebugReport::DoProcess()
     for ( size_t n = 0; n < count; n++ )
     {
         GetFile(n, &name, &desc);
-        msg += wxString::Format("\t%s: %s\n", name, desc);
+        msg += wxString::Format(_("\t%s: %s\n"), name.c_str(), desc.c_str());
     }
 
     msg += _("\nPlease send this report to the program maintainer, thank you!\n");

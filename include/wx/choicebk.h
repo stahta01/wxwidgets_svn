@@ -36,7 +36,7 @@ extern WXDLLIMPEXP_CORE const wxEventType wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING
 // wxChoicebook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxChoicebook : public wxBookCtrlBase
+class WXDLLEXPORT wxChoicebook : public wxBookCtrlBase
 {
 public:
     wxChoicebook()
@@ -97,8 +97,8 @@ protected:
         GetChoiceCtrl()->Select(newsel);
     }
 
-    wxBookCtrlEvent* CreatePageChangingEvent() const;
-    void MakeChangedEvent(wxBookCtrlEvent &event);
+    wxBookCtrlBaseEvent* CreatePageChangingEvent() const;
+    void MakeChangedEvent(wxBookCtrlBaseEvent &event);
 
     // event handlers
     void OnChoiceSelected(wxCommandEvent& event);
@@ -118,16 +118,36 @@ private:
 // choicebook event class and related stuff
 // ----------------------------------------------------------------------------
 
-// wxChoicebookEvent is obsolete and defined for compatibility only
-typedef wxBookCtrlEvent wxChoicebookEvent;
-typedef wxBookCtrlEventFunction wxChoicebookEventFunction;
-#define wxChoicebookEventHandler(func) wxBookCtrlEventHandler(func)
+class WXDLLEXPORT wxChoicebookEvent : public wxBookCtrlBaseEvent
+{
+public:
+    wxChoicebookEvent(wxEventType commandType = wxEVT_NULL, int id = 0,
+                      int nSel = -1, int nOldSel = -1)
+        : wxBookCtrlBaseEvent(commandType, id, nSel, nOldSel)
+    {
+    }
+
+    wxChoicebookEvent(const wxChoicebookEvent& event)
+        : wxBookCtrlBaseEvent(event)
+    {
+    }
+
+    virtual wxEvent *Clone() const { return new wxChoicebookEvent(*this); }
+
+private:
+    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxChoicebookEvent)
+};
+
+typedef void (wxEvtHandler::*wxChoicebookEventFunction)(wxChoicebookEvent&);
+
+#define wxChoicebookEventHandler(func) \
+    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxChoicebookEventFunction, &func)
 
 #define EVT_CHOICEBOOK_PAGE_CHANGED(winid, fn) \
-    wx__DECLARE_EVT1(wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED, winid, wxBookCtrlEventHandler(fn))
+    wx__DECLARE_EVT1(wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGED, winid, wxChoicebookEventHandler(fn))
 
 #define EVT_CHOICEBOOK_PAGE_CHANGING(winid, fn) \
-    wx__DECLARE_EVT1(wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING, winid, wxBookCtrlEventHandler(fn))
+    wx__DECLARE_EVT1(wxEVT_COMMAND_CHOICEBOOK_PAGE_CHANGING, winid, wxChoicebookEventHandler(fn))
 
 #endif // wxUSE_CHOICEBOOK
 

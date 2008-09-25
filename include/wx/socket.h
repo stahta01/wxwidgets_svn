@@ -71,9 +71,7 @@ enum
   wxSOCKET_NOWAIT = 1,
   wxSOCKET_WAITALL = 2,
   wxSOCKET_BLOCK = 4,
-  wxSOCKET_REUSEADDR = 8,
-  wxSOCKET_BROADCAST = 16,
-  wxSOCKET_NOBIND = 32
+  wxSOCKET_REUSEADDR = 8
 };
 
 enum wxSocketType
@@ -110,22 +108,21 @@ public:
   bool Destroy();
 
   // state
-  bool Ok() const { return IsOk(); }
-  bool IsOk() const { return (m_socket != NULL); }
-  bool Error() const { return m_error; }
-  bool IsClosed() const { return m_closed; }
-  bool IsConnected() const { return m_connected; }
-  bool IsData() { return WaitForRead(0, 0); }
-  bool IsDisconnected() const { return !IsConnected(); }
-  wxUint32 LastCount() const { return m_lcount; }
-  wxSocketError LastError() const { return (wxSocketError)m_socket->GetError(); }
+  inline bool Ok() const { return IsOk(); }
+  inline bool IsOk() const { return (m_socket != NULL); }
+  inline bool Error() const { return m_error; }
+  inline bool IsConnected() const { return m_connected; }
+  inline bool IsData() { return WaitForRead(0, 0); }
+  inline bool IsDisconnected() const { return !IsConnected(); }
+  inline wxUint32 LastCount() const { return m_lcount; }
+  inline wxSocketError LastError() const { return (wxSocketError)m_socket->GetError(); }
   void SaveState();
   void RestoreState();
 
   // addresses
   virtual bool GetLocal(wxSockAddress& addr_man) const;
   virtual bool GetPeer(wxSockAddress& addr_man) const;
-  virtual bool SetLocal(const wxIPV4address& local);
+  virtual bool SetLocal(wxIPV4address& local);
 
   // base IO
   virtual bool  Close();
@@ -143,13 +140,13 @@ public:
   bool WaitForWrite(long seconds = -1, long milliseconds = 0);
   bool WaitForLost(long seconds = -1, long milliseconds = 0);
 
-  wxSocketFlags GetFlags() const { return m_flags; }
+  inline wxSocketFlags GetFlags() const { return m_flags; }
   void SetFlags(wxSocketFlags flags);
   void SetTimeout(long seconds);
 
   bool GetOption(int level, int optname, void *optval, int *optlen);
   bool SetOption(int level, int optname, const void *optval, int optlen);
-  wxUint32 GetLastIOSize() const { return m_lcount; }
+  inline wxUint32 GetLastIOSize() const { return m_lcount; }
 
   // event handling
   void *GetClientData() const { return m_clientData; }
@@ -171,8 +168,8 @@ public:
   void OnRequest(wxSocketNotify notify);
 
   // do not use, not documented nor supported
-  bool IsNoWait() const { return ((m_flags & wxSOCKET_NOWAIT) != 0); }
-  wxSocketType GetType() const { return m_type; }
+  inline bool IsNoWait() const { return ((m_flags & wxSOCKET_NOWAIT) != 0); }
+  inline wxSocketType GetType() const { return m_type; }
 
 private:
   friend class wxSocketClient;
@@ -200,8 +197,7 @@ private:
   bool          m_reading;          // busy reading?
   bool          m_writing;          // busy writing?
   bool          m_error;            // did last IO call fail?
-  bool          m_closed;           // was the other end closed?
-                                    // (notice that m_error is also set then)
+  wxSocketError m_lasterror;        // last error (not cleared on success)
   wxUint32      m_lcount;           // last IO transaction size
   unsigned long m_timeout;          // IO timeout value
   wxList        m_states;           // stack of states
@@ -260,28 +256,13 @@ public:
   wxSocketClient(wxSocketFlags flags = wxSOCKET_NONE);
   virtual ~wxSocketClient();
 
-  virtual bool Connect(const wxSockAddress& addr, bool wait = true);
-  bool Connect(const wxSockAddress& addr, const wxSockAddress& local,
-               bool wait = true);
+  virtual bool Connect(wxSockAddress& addr, bool wait = true);
+  bool Connect(wxSockAddress& addr, wxSockAddress& local, bool wait = true);
 
   bool WaitOnConnect(long seconds = -1, long milliseconds = 0);
 
-  // Sets initial socket buffer sizes using the SO_SNDBUF and SO_RCVBUF options
-  // before calling connect (either one can be -1 to leave it unchanged)
-  void SetInitialSocketBuffers(int recv, int send)
-  {
-      m_initialRecvBufferSize = recv;
-      m_initialSendBufferSize = send;
-  }
-
 private:
-  virtual bool DoConnect(const wxSockAddress& addr,
-                         const wxSockAddress* local,
-                         bool wait = true);
-
-  // buffer sizes, -1 if unset and defaults should be used
-  int m_initialRecvBufferSize;
-  int m_initialSendBufferSize;
+  virtual bool DoConnect(wxSockAddress& addr, wxSockAddress* local, bool wait = true);
 
   DECLARE_NO_COPY_CLASS(wxSocketClient)
 };

@@ -160,8 +160,9 @@ void wxGridSelection::SetSelectionMode( wxGrid::wxGridSelectionModes selmode )
                 {
                     m_blockSelectionTopLeft.RemoveAt(n);
                     m_blockSelectionBottomRight.RemoveAt(n);
-                    SelectBlockNoEvent( topRow, 0,
-                                 bottomRow, m_grid->GetNumberCols() - 1);
+                    SelectBlock( topRow, 0,
+                                 bottomRow, m_grid->GetNumberCols() - 1,
+                                 false, false, false, false, false );
                 }
             }
             else // selmode == wxGridSelectColumns)
@@ -170,8 +171,9 @@ void wxGridSelection::SetSelectionMode( wxGrid::wxGridSelectionModes selmode )
                 {
                     m_blockSelectionTopLeft.RemoveAt(n);
                     m_blockSelectionBottomRight.RemoveAt(n);
-                    SelectBlockNoEvent(0, leftCol,
-                                 m_grid->GetNumberRows() - 1, rightCol);
+                    SelectBlock( 0, leftCol,
+                                 m_grid->GetNumberRows() - 1, rightCol,
+                                 false, false, false, false, false );
                 }
             }
         }
@@ -180,7 +182,9 @@ void wxGridSelection::SetSelectionMode( wxGrid::wxGridSelectionModes selmode )
     }
 }
 
-void wxGridSelection::SelectRow(int row, const wxKeyboardState& kbd)
+void wxGridSelection::SelectRow( int row,
+                                 bool ControlDown,  bool ShiftDown,
+                                 bool AltDown, bool MetaDown )
 {
     if ( m_selectionMode == wxGrid::wxGridSelectColumns )
         return;
@@ -271,12 +275,15 @@ void wxGridSelection::SelectRow(int row, const wxKeyboardState& kbd)
                                     wxGridCellCoords( row, 0 ),
                                     wxGridCellCoords( row, m_grid->GetNumberCols() - 1 ),
                                     true,
-                                    kbd);
+                                    ControlDown,  ShiftDown,
+                                    AltDown, MetaDown );
 
     m_grid->GetEventHandler()->ProcessEvent( gridEvt );
 }
 
-void wxGridSelection::SelectCol(int col, const wxKeyboardState& kbd)
+void wxGridSelection::SelectCol( int col,
+                                 bool ControlDown,  bool ShiftDown,
+                                 bool AltDown, bool MetaDown )
 {
     if ( m_selectionMode == wxGrid::wxGridSelectRows )
         return;
@@ -365,41 +372,28 @@ void wxGridSelection::SelectCol(int col, const wxKeyboardState& kbd)
                                     wxGridCellCoords( 0, col ),
                                     wxGridCellCoords( m_grid->GetNumberRows() - 1, col ),
                                     true,
-                                    kbd );
+                                    ControlDown,  ShiftDown,
+                                    AltDown, MetaDown );
 
     m_grid->GetEventHandler()->ProcessEvent( gridEvt );
 }
 
 void wxGridSelection::SelectBlock( int topRow, int leftCol,
                                    int bottomRow, int rightCol,
-                                   const wxKeyboardState& kbd,
+                                   bool ControlDown, bool ShiftDown,
+                                   bool AltDown, bool MetaDown,
                                    bool sendEvent )
 {
     // Fix the coordinates of the block if needed.
-    switch ( m_selectionMode )
+    if ( m_selectionMode == wxGrid::wxGridSelectRows )
     {
-        default:
-            wxFAIL_MSG( "unknown selection mode" );
-            // fall through
-
-        case wxGrid::wxGridSelectCells:
-            // nothing to do -- in this mode arbitrary blocks can be selected
-            break;
-
-        case wxGrid::wxGridSelectRows:
-            leftCol = 0;
-            rightCol = m_grid->GetNumberCols() - 1;
-            break;
-
-        case wxGrid::wxGridSelectColumns:
-            topRow = 0;
-            bottomRow = m_grid->GetNumberRows() - 1;
-            break;
-
-        case wxGrid::wxGridSelectRowsOrColumns:
-            // block selection doesn't make sense for this mode, we could only
-            // select the entire grid but this wouldn't be useful
-            return;
+        leftCol = 0;
+        rightCol = m_grid->GetNumberCols() - 1;
+    }
+    else if ( m_selectionMode == wxGrid::wxGridSelectColumns )
+    {
+        topRow = 0;
+        bottomRow = m_grid->GetNumberRows() - 1;
     }
 
     if ( topRow > bottomRow )
@@ -423,7 +417,8 @@ void wxGridSelection::SelectBlock( int topRow, int leftCol,
     if ( m_selectionMode == wxGrid::wxGridSelectCells &&
          topRow == bottomRow && leftCol == rightCol )
     {
-        SelectCell( topRow, leftCol, kbd, sendEvent );
+        SelectCell( topRow, leftCol, ControlDown,  ShiftDown,
+                    AltDown, MetaDown, sendEvent );
     }
 
     size_t count, n;
@@ -543,24 +538,28 @@ void wxGridSelection::SelectBlock( int topRow, int leftCol,
             wxGridCellCoords( topRow, leftCol ),
             wxGridCellCoords( bottomRow, rightCol ),
             true,
-            kbd);
+            ControlDown, ShiftDown,
+            AltDown, MetaDown );
         m_grid->GetEventHandler()->ProcessEvent( gridEvt );
     }
 }
 
 void wxGridSelection::SelectCell( int row, int col,
-                                  const wxKeyboardState& kbd,
+                                  bool ControlDown, bool ShiftDown,
+                                  bool AltDown, bool MetaDown,
                                   bool sendEvent )
 {
     if ( m_selectionMode == wxGrid::wxGridSelectRows )
     {
-        SelectBlock(row, 0, row, m_grid->GetNumberCols() - 1, kbd, sendEvent);
+        SelectBlock(row, 0, row, m_grid->GetNumberCols() - 1,
+                    ControlDown, ShiftDown, AltDown, MetaDown, sendEvent);
 
         return;
     }
     else if ( m_selectionMode == wxGrid::wxGridSelectColumns )
     {
-        SelectBlock(0, col, m_grid->GetNumberRows() - 1, col, kbd, sendEvent);
+        SelectBlock(0, col, m_grid->GetNumberRows() - 1, col,
+                    ControlDown, ShiftDown, AltDown, MetaDown, sendEvent);
 
         return;
     }
@@ -587,19 +586,20 @@ void wxGridSelection::SelectCell( int row, int col,
             wxGridCellCoords( row, col ),
             wxGridCellCoords( row, col ),
             true,
-            kbd);
+            ControlDown, ShiftDown,
+            AltDown, MetaDown );
         m_grid->GetEventHandler()->ProcessEvent( gridEvt );
     }
 }
 
-void
-wxGridSelection::ToggleCellSelection(int row, int col,
-                                     const wxKeyboardState& kbd)
+void wxGridSelection::ToggleCellSelection( int row, int col,
+                                           bool ControlDown, bool ShiftDown,
+                                           bool AltDown, bool MetaDown )
 {
     // if the cell is not selected, select it
     if ( !IsInSelection ( row, col ) )
     {
-        SelectCell(row, col, kbd);
+        SelectCell( row, col, ControlDown, ShiftDown, AltDown, MetaDown );
 
         return;
     }
@@ -636,7 +636,8 @@ wxGridSelection::ToggleCellSelection(int row, int col,
                                                 wxGridCellCoords( row, col ),
                                                 wxGridCellCoords( row, col ),
                                                 false,
-                                                kbd );
+                                                ControlDown, ShiftDown,
+                                                AltDown, MetaDown );
                 m_grid->GetEventHandler()->ProcessEvent( gridEvt );
 
                 return;
@@ -685,17 +686,21 @@ wxGridSelection::ToggleCellSelection(int row, int col,
             if ( m_selectionMode != wxGrid::wxGridSelectColumns )
             {
                 if ( topRow < row )
-                    SelectBlockNoEvent(topRow, leftCol, row - 1, rightCol);
+                    SelectBlock( topRow, leftCol, row - 1, rightCol,
+                                 false, false, false, false, false );
                 if ( bottomRow > row )
-                    SelectBlockNoEvent(row + 1, leftCol, bottomRow, rightCol);
+                    SelectBlock( row + 1, leftCol, bottomRow, rightCol,
+                                 false, false, false, false, false );
             }
 
             if ( m_selectionMode != wxGrid::wxGridSelectRows )
             {
                 if ( leftCol < col )
-                    SelectBlockNoEvent(row, leftCol, row, col - 1);
+                    SelectBlock( row, leftCol, row, col - 1,
+                                 false, false, false, false, false );
                 if ( rightCol > col )
-                    SelectBlockNoEvent(row, col + 1, row, rightCol);
+                    SelectBlock( row, col + 1, row, rightCol,
+                                 false, false, false, false, false );
             }
         }
     }
@@ -715,10 +720,12 @@ wxGridSelection::ToggleCellSelection(int row, int col,
                 if (m_selectionMode == wxGrid::wxGridSelectCells)
                 {
                     if ( col > 0 )
-                        SelectBlockNoEvent(row, 0, row, col - 1);
+                        SelectBlock( row, 0, row, col - 1,
+                                     false, false, false, false, false );
                     if ( col < m_grid->GetNumberCols() - 1 )
-                        SelectBlockNoEvent( row, col + 1,
-                                     row, m_grid->GetNumberCols() - 1);
+                        SelectBlock( row, col + 1,
+                                     row, m_grid->GetNumberCols() - 1,
+                                     false, false, false, false, false );
                 }
             }
         }
@@ -739,10 +746,12 @@ wxGridSelection::ToggleCellSelection(int row, int col,
                 if (m_selectionMode == wxGrid::wxGridSelectCells)
                 {
                     if ( row > 0 )
-                        SelectBlockNoEvent(0, col, row - 1, col);
+                        SelectBlock( 0, col, row - 1, col,
+                                     false, false, false, false, false );
                     if ( row < m_grid->GetNumberRows() - 1 )
-                        SelectBlockNoEvent(row + 1, col,
-                                     m_grid->GetNumberRows() - 1, col);
+                        SelectBlock( row + 1, col,
+                                     m_grid->GetNumberRows() - 1, col,
+                                     false, false, false, false, false );
                 }
             }
         }
@@ -769,7 +778,8 @@ wxGridSelection::ToggleCellSelection(int row, int col,
                 wxGridCellCoords( row, col ),
                 wxGridCellCoords( row, col ),
                 false,
-                kbd );
+                ControlDown, ShiftDown,
+                AltDown, MetaDown );
             m_grid->GetEventHandler()->ProcessEvent( gridEvt );
         }
             break;
@@ -790,7 +800,8 @@ wxGridSelection::ToggleCellSelection(int row, int col,
                 wxGridCellCoords( row, 0 ),
                 wxGridCellCoords( row, m_grid->GetNumberCols() - 1 ),
                 false,
-                kbd );
+                ControlDown, ShiftDown,
+                AltDown, MetaDown );
             m_grid->GetEventHandler()->ProcessEvent( gridEvt );
         }
             break;
@@ -811,7 +822,8 @@ wxGridSelection::ToggleCellSelection(int row, int col,
                 wxGridCellCoords( 0, col ),
                 wxGridCellCoords( m_grid->GetNumberRows() - 1, col ),
                 false,
-                kbd );
+                ControlDown, ShiftDown,
+                AltDown, MetaDown );
             m_grid->GetEventHandler()->ProcessEvent( gridEvt );
         }
             break;

@@ -66,9 +66,11 @@ bool wxStaticText::Create( wxWindow*        pParent,
     else
         lSstyle |= DT_LEFT;
 
+    wxString sLabel = ::wxPMTextToLabel(rsLabel);
+
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
                                        ,WC_STATIC                // Window class
-                                       ,NULL                     // Initial Text
+                                       ,(PSZ)sLabel.c_str()      // Initial Text
                                        ,(ULONG)lSstyle           // Style flags
                                        ,0L, 0L, 0L, 0L           // Origin -- 0 size
                                        ,(HWND)GetHwndOf(pParent) // owner window handle (same as parent
@@ -101,14 +103,12 @@ bool wxStaticText::Create( wxWindow*        pParent,
     SetYComp(0);
     SetSize( nX, nY, nWidth, nHeight );
 
-    SetLabel(rsLabel);
-
     return true;
 } // end of wxStaticText::Create
 
 wxSize wxStaticText::DoGetBestSize() const
 {
-    wxString sText(GetLabel());
+    wxString sText(wxGetWindowText(GetHWND()));
     int      nWidthTextMax = 0;
     int      nWidthLine = 0;
     int      nHeightTextTotal = 0;
@@ -205,10 +205,6 @@ void wxStaticText::DoSetSize(
                                 ,nHeight
                                 ,nSizeFlags
                                );
-
-    // eventually update label (if ellipsizing is on):
-    UpdateLabel();
-
     Refresh();
 } // end of wxStaticText::DoSetSize
 
@@ -233,18 +229,14 @@ void wxStaticText::SetLabel(
   const wxString&                   rsLabel
 )
 {
-    m_labelOrig = rsLabel;       // save original label
-
-    // OS/2 does not support neither ellipsize nor markup in static text:
-    DoSetLabel(rsLabel);
-    DoSetLabel(GetEllipsizedLabelWithoutMarkup());
+    wxString                        sLabel = ::wxPMTextToLabel(rsLabel);
+    ::WinSetWindowText(GetHwnd(), (PSZ)sLabel.c_str());
 
     //
     // Adjust the size of the window to fit to the label unless autoresizing is
     // disabled
     //
-    if (!(GetWindowStyle() & wxST_NO_AUTORESIZE) &&
-        !IsEllipsized())
+    if (!(GetWindowStyle() & wxST_NO_AUTORESIZE))
     {
         wxCoord                     vX;
         wxCoord                     vY;
@@ -271,18 +263,3 @@ MRESULT wxStaticText::OS2WindowProc(
                                    ,lParam
                                   );
 } // end of wxStaticText::OS2WindowProc
-
-
-// for wxST_ELLIPSIZE_* support:
-
-void wxStaticText::DoSetLabel(const wxString& str)
-{
-    wxString sLabel = ::wxPMTextToLabel(str);
-    ::WinSetWindowText(GetHwnd(), sLabel.c_str());
-}
-
-wxString wxStaticText::DoGetLabel() const
-{
-    return wxGetWindowText(GetHwnd());
-}
-

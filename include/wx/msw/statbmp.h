@@ -16,10 +16,10 @@
 #include "wx/icon.h"
 #include "wx/bitmap.h"
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxStaticBitmapNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStaticBitmapNameStr[];
 
 // a control showing an icon or a bitmap
-class WXDLLIMPEXP_CORE wxStaticBitmap : public wxStaticBitmapBase
+class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
 {
 public:
     wxStaticBitmap() { Init(); }
@@ -54,10 +54,8 @@ public:
 
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
-
 protected:
+    virtual wxBorder GetDefaultBorder() const;
     virtual wxSize DoGetBestSize() const;
 
     // ctor/dtor helpers
@@ -70,10 +68,11 @@ protected:
     void SetImage(const wxGDIImage* image);
     void SetImageNoCopy( wxGDIImage* image );
 
+#if wxABI_VERSION >= 20808
     // draw the bitmap ourselves here if the OS can't do it correctly (if it
     // can we leave it to it)
     void DoPaintManually(wxPaintEvent& event);
-
+#endif
 
     // we can have either an icon or a bitmap
     bool m_isIcon;

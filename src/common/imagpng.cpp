@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagpng.cpp
+// Name:        src/common/imagepng.cpp
 // Purpose:     wxImage PNG handler
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
@@ -28,15 +28,25 @@
 
 #ifndef WX_PRECOMP
     #include "wx/log.h"
-    #include "wx/intl.h"
-    #include "wx/palette.h"
-    #include "wx/stream.h"
+    #include "wx/app.h"
+    #include "wx/bitmap.h"
+    #include "wx/module.h"
 #endif
 
 #include "png.h"
+#include "wx/filefn.h"
+#include "wx/wfstream.h"
+#include "wx/intl.h"
+#include "wx/palette.h"
 
 // For memcpy
 #include <string.h>
+
+#ifdef __SALFORDC__
+#ifdef FAR
+#undef FAR
+#endif
+#endif
 
 // ----------------------------------------------------------------------------
 // constants
@@ -739,33 +749,6 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
 
     if ( iBitDepth == 16 )
         iElements *= 2;
-
-    // save the image resolution if we have it
-    int resX, resY;
-    switch ( GetResolutionFromOptions(*image, &resX, &resY) )
-    {
-        case wxIMAGE_RESOLUTION_INCHES:
-            {
-                const double INCHES_IN_METER = 10000.0 / 254;
-                resX = int(resX * INCHES_IN_METER);
-                resY = int(resY * INCHES_IN_METER);
-            }
-            break;
-
-        case wxIMAGE_RESOLUTION_CM:
-            resX *= 100;
-            resY *= 100;
-            break;
-
-        case wxIMAGE_RESOLUTION_NONE:
-            break;
-
-        default:
-            wxFAIL_MSG( _T("unsupported image resolution units") );
-    }
-
-    if ( resX && resY )
-        png_set_pHYs( png_ptr, info_ptr, resX, resY, PNG_RESOLUTION_METER );
 
     png_set_sBIT( png_ptr, info_ptr, &sig_bit );
     png_write_info( png_ptr, info_ptr );

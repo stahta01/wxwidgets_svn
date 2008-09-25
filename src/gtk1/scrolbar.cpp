@@ -70,13 +70,13 @@ static void gtk_scrollbar_callback( GtkAdjustment *adjust,
     {
         wxScrollEvent event( g_currentUpDownEvent, win->GetId(), value, orient );
         event.SetEventObject( win );
-        win->HandleWindowEvent( event );
+        win->GetEventHandler()->ProcessEvent( event );
     }
 
     // throw other event (wxEVT_SCROLL_THUMBTRACK)
     wxScrollEvent event( command, win->GetId(), value, orient );
     event.SetEventObject( win );
-    win->HandleWindowEvent( event );
+    win->GetEventHandler()->ProcessEvent( event );
 
 /*
     wxCommandEvent cevent( wxEVT_COMMAND_SCROLLBAR_UPDATED, win->GetId() );
@@ -149,7 +149,7 @@ gtk_scrollbar_button_release_callback( GtkRange *WXUNUSED(widget),
 
         wxScrollEvent event( command, win->GetId(), value, orient );
         event.SetEventObject( win );
-        win->HandleWindowEvent( event );
+        win->GetEventHandler()->ProcessEvent( event );
     }
 
     win->m_isScrolling = false;

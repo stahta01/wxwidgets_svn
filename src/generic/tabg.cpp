@@ -85,8 +85,7 @@ void wxTabControl::OnDraw(wxDC& dc, bool lastInRow)
   // Draw grey background
   if (m_view->GetTabStyle() & wxTAB_STYLE_COLOUR_INTERIOR)
   {
-    if(m_view->GetBackgroundBrush())
-      dc.SetBrush(*m_view->GetBackgroundBrush());
+    dc.SetBrush(*m_view->GetBackgroundBrush());
 
     // Add 1 because the pen is transparent. Under Motif, may be different.
 #ifdef __WXMOTIF__
@@ -207,7 +206,7 @@ void wxTabControl::OnDraw(wxDC& dc, bool lastInRow)
   wxColour col(m_view->GetTextColour());
   dc.SetTextForeground(col);
   dc.SetBackgroundMode(wxTRANSPARENT);
-  wxCoord textWidth, textHeight;
+  long textWidth, textHeight;
   dc.GetTextExtent(GetLabel(), &textWidth, &textHeight);
 
   int textX = (int)(tabX + (GetWidth() - textWidth)/2.0);
@@ -524,11 +523,11 @@ wxTabView::wxTabView(long style)
   m_tabViewRect.x = 300;
   m_highlightColour = *wxWHITE;
   m_shadowColour = wxColour(128, 128, 128);
-  // m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
+  m_backgroundColour = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
   m_textColour = *wxBLACK;
   m_highlightPen = wxWHITE_PEN;
   m_shadowPen = wxGREY_PEN;
-  // SetBackgroundColour(m_backgroundColour);
+  SetBackgroundColour(m_backgroundColour);
   m_tabFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
   m_tabSelectedFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
   m_window = (wxWindow *) NULL;
@@ -798,8 +797,7 @@ void wxTabView::Draw(wxDC& dc)
     if (GetTabStyle() & wxTAB_STYLE_COLOUR_INTERIOR)
     {
         dc.SetPen(*wxTRANSPARENT_PEN);
-        if(GetBackgroundBrush())
-            dc.SetBrush(*GetBackgroundBrush());
+        dc.SetBrush(*GetBackgroundBrush());
 
         // Add 1 because the pen is transparent. Under Motif, may be different.
         dc.DrawRectangle(
@@ -1011,20 +1009,20 @@ void wxTabView::OnTabActivate(int /*activateId*/, int /*deactivateId*/)
 void wxTabView::SetHighlightColour(const wxColour& col)
 {
   m_highlightColour = col;
-  m_highlightPen = wxThePenList->FindOrCreatePen(col);
+  m_highlightPen = wxThePenList->FindOrCreatePen(col, 1, wxSOLID);
 }
 
 void wxTabView::SetShadowColour(const wxColour& col)
 {
   m_shadowColour = col;
-  m_shadowPen = wxThePenList->FindOrCreatePen(col);
+  m_shadowPen = wxThePenList->FindOrCreatePen(col, 1, wxSOLID);
 }
 
 void wxTabView::SetBackgroundColour(const wxColour& col)
 {
   m_backgroundColour = col;
-  m_backgroundPen = wxThePenList->FindOrCreatePen(col);
-  m_backgroundBrush = wxTheBrushList->FindOrCreateBrush(col);
+  m_backgroundPen = wxThePenList->FindOrCreatePen(col, 1, wxSOLID);
+  m_backgroundBrush = wxTheBrushList->FindOrCreateBrush(col, wxSOLID);
 }
 
 // this may be called with sel = zero (which doesn't match any page)

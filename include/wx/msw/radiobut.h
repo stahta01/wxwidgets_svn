@@ -12,7 +12,7 @@
 #ifndef _WX_RADIOBUT_H_
 #define _WX_RADIOBUT_H_
 
-class WXDLLIMPEXP_CORE wxRadioButton: public wxControl
+class WXDLLEXPORT wxRadioButton: public wxControl
 {
 public:
     // ctors and creation functions
@@ -53,7 +53,6 @@ public:
     virtual WXDWORD MSWGetStyle(long style, WXDWORD *exstyle) const;
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
     virtual wxSize DoGetBestSize() const;
 
 private:

@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/image.h"
 #endif
 
@@ -100,7 +100,7 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_page
     // vertical position. Otherwise we'd be setting a pagebreak above
     // the current cell, which is incorrect, or duplicating a
     // pagebreak that has already been set.
-    if( known_pagebreaks.GetCount() == 0 || *pagebreak <= m_PosY)
+    if( known_pagebreaks.Count() == 0 || *pagebreak <= m_PosY)
     {
         return false;
     }
@@ -108,12 +108,7 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_page
     // m_PosY is only the vertical offset from the parent. The pagebreak
     // required here is the total page offset, so m_PosY must be added
     // to the parent's offset and height.
-    int total_height = m_PosY;
-    for ( wxHtmlCell *parent = GetParent(); parent; parent = parent->GetParent() )
-    {
-        total_height += parent->GetPosY();
-    }
-
+    int total_height = m_PosY + GetParent()->GetPosY() + GetParent()->GetHeight();
 
     // Search the array of pagebreaks to see whether we've already set
     // a pagebreak here. The standard bsearch() function is appropriate
@@ -294,7 +289,9 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
         wxHtmlWindowInterface *winIface = m_WParser->GetWindowInterface();
         if (winIface)
         {
-            wxString title(tag.GetBeginIter(), tag.GetEndIter1());
+            wxString title = m_WParser->GetSource()->Mid(
+                                    tag.GetBeginPos(),
+                                    tag.GetEndPos1()-tag.GetBeginPos());
 #if !wxUSE_UNICODE && wxUSE_WCHAR_T
             const wxFontEncoding enc = m_WParser->GetInputEncoding();
             if ( enc != wxFONTENCODING_DEFAULT )
@@ -349,9 +346,11 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
                 wxInputStream *is = fileBgImage->GetStream();
                 if ( is )
                 {
+#if !defined(__WXMSW__) || wxUSE_WXDIB
                     wxImage image(*is);
                     if ( image.Ok() )
                         winIface->SetHTMLBackgroundImage(image);
+#endif
                 }
 
                 delete fileBgImage;

@@ -12,10 +12,10 @@
 #ifndef _WX_DIALOG_H_
 #define _WX_DIALOG_H_
 
-class WXDLLIMPEXP_FWD_CORE wxEventLoop;
+class WXDLLEXPORT wxEventLoop;
 
 // Dialog boxes
-class WXDLLIMPEXP_CORE wxDialog : public wxDialogBase
+class WXDLLEXPORT wxDialog : public wxDialogBase
 {
 public:
     wxDialog();

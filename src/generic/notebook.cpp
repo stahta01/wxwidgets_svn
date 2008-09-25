@@ -49,6 +49,9 @@
 // event table
 // ----------------------------------------------------------------------------
 
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
+
 BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
     EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, wxNotebook::OnSelChange)
     EVT_SIZE(wxNotebook::OnSize)
@@ -59,6 +62,7 @@ BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxBookCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxCommandEvent)
 
 // ============================================================================
 // implementation
@@ -153,6 +157,8 @@ bool wxNotebook::Create(wxWindow *parent,
 
     if (!wxControl::Create(parent, id, pos, size, style|wxNO_BORDER, wxDefaultValidator, name))
         return false;
+
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 
     SetTabView(new wxNotebookTabView(this));
 
@@ -541,7 +547,7 @@ bool wxNotebook::RefreshLayout(bool force)
     return true;
 }
 
-void wxNotebook::OnSelChange(wxBookCtrlEvent& event)
+void wxNotebook::OnSelChange(wxNotebookEvent& event)
 {
     // is it our tab control?
     if ( event.GetEventObject() == this )
@@ -709,7 +715,7 @@ void wxNotebookTabView::OnTabActivate(int activateId, int deactivateId)
   if (!m_notebook)
     return;
 
-  wxBookCtrlEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_notebook->GetId());
+  wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_notebook->GetId());
 
   // Translate from wxTabView's ids (which aren't position-dependent)
   // to wxNotebook's (which are).
@@ -732,7 +738,7 @@ bool wxNotebookTabView::OnTabPreActivate(int activateId, int deactivateId)
 
   if (m_notebook)
   {
-    wxBookCtrlEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_notebook->GetId());
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_notebook->GetId());
 
     // Translate from wxTabView's ids (which aren't position-dependent)
     // to wxNotebook's (which are).

@@ -46,7 +46,3 @@
     #endif
 #endif
 
-// see beforestd.h for explanation
-#if defined(HAVE_VISIBILITY) && defined(HAVE_BROKEN_LIBSTDCXX_VISIBILITY)
-    #pragma GCC visibility pop
-#endif

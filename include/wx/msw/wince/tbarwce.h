@@ -19,7 +19,7 @@
 // Smartphones don't have toolbars, so use a dummy class
 #ifdef __SMARTPHONE__
 
-class WXDLLIMPEXP_CORE wxToolBar : public wxToolBarBase
+class WXDLLEXPORT wxToolBar : public wxToolBarBase
 {
 public:
     // ctors and dtor
@@ -63,8 +63,7 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
 private:
     DECLARE_EVENT_TABLE()
@@ -78,7 +77,7 @@ private:
 
 #include "wx/msw/tbar95.h"
 
-class WXDLLIMPEXP_CORE wxToolMenuBar : public wxToolBar
+class WXDLLEXPORT wxToolMenuBar : public wxToolBar
 {
 public:
     // ctors and dtor
@@ -149,8 +148,7 @@ protected:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     // The menubar associated with this toolbar
     wxMenuBar*  m_menuBar;

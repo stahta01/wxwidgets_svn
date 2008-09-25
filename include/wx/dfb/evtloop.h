@@ -20,10 +20,10 @@ struct wxDFBEvent;
 // wxEventLoop
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGUIEventLoop : public wxEventLoopManual
+class WXDLLIMPEXP_CORE wxEventLoop : public wxEventLoopManual
 {
 public:
-    wxGUIEventLoop();
+    wxEventLoop();
 
     virtual bool Pending() const;
     virtual bool Dispatch();
@@ -50,7 +50,7 @@ private:
 private:
     static wxIDirectFBEventBufferPtr ms_buffer;
 
-    DECLARE_NO_COPY_CLASS(wxGUIEventLoop)
+    DECLARE_NO_COPY_CLASS(wxEventLoop)
 };
 
 #endif // _WX_DFB_EVTLOOP_H_

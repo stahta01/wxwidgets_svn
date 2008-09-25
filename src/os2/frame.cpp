@@ -54,6 +54,12 @@ END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxWindow)
 
+#if wxUSE_MINIFRAME
+#include "wx/minifram.h"
+IMPLEMENT_DYNAMIC_CLASS(wxMiniFrame, wxFrame)
+#endif // wxUSE_MINIFRAME
+
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -433,7 +439,7 @@ void wxFrame::OnSysColourChanged(
         wxSysColourChangedEvent     vEvent2;
 
         vEvent2.SetEventObject(m_frameStatusBar);
-        m_frameStatusBar->HandleWindowEvent(vEvent2);
+        m_frameStatusBar->GetEventHandler()->ProcessEvent(vEvent2);
     }
 #endif //wxUSE_STATUSBAR
 
@@ -570,7 +576,7 @@ bool wxFrame::ShowFullScreen( bool bShow, long lStyle )
         wxSize sz( nWidth, nHeight );
         wxSizeEvent vEvent( sz, GetId() );
 
-        HandleWindowEvent(vEvent);
+        GetEventHandler()->ProcessEvent(vEvent);
         return true;
     }
     else
@@ -1051,11 +1057,11 @@ bool wxFrame::HandleMenuSelect( WXWORD nItem,
             wxMenuEvent                     vEvent(wxEVT_MENU_HIGHLIGHT, nItem);
 
             vEvent.SetEventObject(this);
-            HandleWindowEvent(vEvent); // return value would be ignored by PM
+            GetEventHandler()->ProcessEvent(vEvent); // return value would be ignored by PM
         }
         else
         {
-            DoGiveHelp(wxEmptyString, true);
+            DoGiveHelp(wxEmptyString, false);
             return false;
         }
     }
@@ -1379,3 +1385,20 @@ wxWindow* wxFrame::GetClient()
     return wxFindWinFromHandle((WXHWND)::WinWindowFromID(m_hFrame, FID_CLIENT));
 }
 
+void wxFrame::SendSizeEvent()
+{
+    if (!m_bIconized)
+    {
+        RECTL                       vRect = wxGetWindowRect(GetHwnd());
+
+        ::WinPostMsg( GetHwnd()
+                     ,WM_SIZE
+                     ,MPFROM2SHORT( vRect.xRight - vRect.xLeft
+                                   ,vRect.xRight - vRect.xLeft
+                                  )
+                     ,MPFROM2SHORT( vRect.yTop - vRect.yBottom
+                                   ,vRect.yTop - vRect.yBottom
+                                  )
+                    );
+    }
+}

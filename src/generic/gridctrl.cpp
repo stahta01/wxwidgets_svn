@@ -65,8 +65,7 @@ wxString wxGridCellDateTimeRenderer::GetString(const wxGrid& grid, int row, int 
     {
         void * tempval = table->GetValueAsCustom(row, col,wxGRID_VALUE_DATETIME);
 
-        if (tempval)
-        {
+        if (tempval){
             val = *((wxDateTime *)tempval);
             hasDatetime = true;
             delete (wxDateTime *)tempval;
@@ -77,14 +76,13 @@ wxString wxGridCellDateTimeRenderer::GetString(const wxGrid& grid, int row, int 
     if (!hasDatetime )
     {
         text = table->GetValue(row, col);
-        const char * const end = val.ParseFormat(text, m_iformat, m_dateDef);
-        hasDatetime = end && !*end;
+        hasDatetime = (val.ParseFormat( text, m_iformat, m_dateDef ) != (wxChar *)NULL) ;
     }
 
     if ( hasDatetime )
         text = val.Format(m_oformat, m_tz );
 
-    // If we failed to parse string just show what we where given?
+    //If we faild to parse string just show what we where given?
     return text;
 }
 
@@ -294,8 +292,12 @@ wxGridCellAutoWrapStringEditor::Create(wxWindow* parent,
                                        wxWindowID id,
                                        wxEvtHandler* evtHandler)
 {
-  wxGridCellTextEditor::DoCreate(parent, id, evtHandler,
-                                 wxTE_MULTILINE | wxTE_RICH);
+  m_control = new wxTextCtrl(parent, id, wxEmptyString,
+                             wxDefaultPosition, wxDefaultSize,
+                             wxTE_MULTILINE | wxTE_RICH);
+
+
+  wxGridCellEditor::Create(parent, id, evtHandler);
 }
 
 void

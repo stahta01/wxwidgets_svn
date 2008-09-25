@@ -13,7 +13,7 @@
 #define _WX_STATBOX_H_
 
 // Group box
-class WXDLLIMPEXP_CORE wxStaticBox: public wxStaticBoxBase
+class WXDLLEXPORT wxStaticBox: public wxStaticBoxBase
 {
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
 

@@ -55,13 +55,13 @@ void wxToolTip::Apply( wxWindow *win )
     m_window = win;
 
     if (m_text.empty())
-        m_window->ApplyToolTip( gs_tooltips, NULL );
+        m_window->ApplyToolTip( gs_tooltips, (wxChar*) NULL );
     else
-        m_window->ApplyToolTip( gs_tooltips, wxGTK_CONV_SYS(m_text) );
+        m_window->ApplyToolTip( gs_tooltips, m_text );
 }
 
 /* static */
-void wxToolTip::Apply(GtkWidget *w, const gchar *tip)
+void wxToolTip::Apply(GtkWidget *w, const wxCharBuffer& tip)
 {
     if ( !gs_tooltips )
         gs_tooltips = gtk_tooltips_new();
@@ -93,14 +93,6 @@ void wxToolTip::SetDelay( long msecs )
     // FIXME: This is a deprecated function and might not even have an effect.
     // Try to not use it, after which remove the prototype above.
     gtk_tooltips_set_delay( gs_tooltips, (int)msecs );
-}
-
-void wxToolTip::SetAutoPop( long WXUNUSED(msecs) )
-{
-}
-
-void wxToolTip::SetReshow( long WXUNUSED(msecs) )
-{
 }
 
 #endif // wxUSE_TOOLTIPS

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/motif/dcmemory.cpp
-// Purpose:     wxMemoryDCImpl class
+// Purpose:     wxMemoryDC class
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
@@ -12,11 +12,11 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/dcmemory.h"
+
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/settings.h"
-    #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
 #endif
 
 #ifdef __VMS__
@@ -28,15 +28,14 @@
 #endif
 
 #include "wx/motif/private.h"
-#include "wx/motif/dcmemory.h"
 
 //-----------------------------------------------------------------------------
-// wxMemoryDCImpl
+// wxMemoryDC
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxMemoryDCImpl, wxWindowDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC, wxWindowDC)
 
-void wxMemoryDCImpl::Init()
+void wxMemoryDC::Init()
 {
     m_ok = true;
     m_display = wxGetDisplay();
@@ -60,12 +59,11 @@ void wxMemoryDCImpl::Init()
     SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 }
 
-wxMemoryDCImpl::wxMemoryDCImpl(wxMemoryDC *owner, wxDC* dc)
-              : wxWindowDCImpl(owner)
+wxMemoryDC::wxMemoryDC( wxDC* dc )
 {
     m_ok = true;
     if (dc && dc->IsKindOf(CLASSINFO(wxWindowDC)))
-        m_display = ((wxWindowDCImpl *)dc->GetImpl())->GetDisplay();
+        m_display = ((wxWindowDC*)dc)->GetDisplay();
     else
         m_display = wxGetDisplay();
 
@@ -87,11 +85,11 @@ wxMemoryDCImpl::wxMemoryDCImpl(wxMemoryDC *owner, wxDC* dc)
     SetPen (* wxBLACK_PEN);
 }
 
-wxMemoryDCImpl::~wxMemoryDCImpl(void)
+wxMemoryDC::~wxMemoryDC(void)
 {
 }
 
-void wxMemoryDCImpl::DoSelect( const wxBitmap& bitmap )
+void wxMemoryDC::DoSelect( const wxBitmap& bitmap )
 {
     m_bitmap = bitmap;
 
@@ -127,7 +125,7 @@ void wxMemoryDCImpl::DoSelect( const wxBitmap& bitmap )
     };
 }
 
-void wxMemoryDCImpl::DoGetSize( int *width, int *height ) const
+void wxMemoryDC::DoGetSize( int *width, int *height ) const
 {
     if (m_bitmap.Ok())
     {

@@ -37,7 +37,7 @@ WX_DECLARE_LIST(wxString, wxListString);
 // wxStatusBar: a window near the bottom of the frame used for status info
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStatusBarBase : public wxWindow
+class WXDLLEXPORT wxStatusBarBase : public wxWindow
 {
 public:
     wxStatusBarBase();
@@ -97,11 +97,7 @@ public:
     // don't want status bars to accept the focus at all
     virtual bool AcceptsFocus() const { return false; }
 
-    virtual bool CanBeOutsideClientArea() const { return true; }
-
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // set the widths array to NULL
     void InitWidths();
 
@@ -158,12 +154,14 @@ protected:
 
     #include "wx/palmos/statusbr.h"
 #elif defined(__WIN32__) && wxUSE_NATIVE_STATUSBAR
-    #include "wx/msw/statusbar.h"
+    #define wxStatusBar95 wxStatusBar
+
+    #include "wx/msw/statbr95.h"
 #elif defined(__WXMAC__)
     #define wxStatusBarMac wxStatusBar
 
     #include "wx/generic/statusbr.h"
-    #include "wx/osx/statusbr.h"
+    #include "wx/mac/statusbr.h"
 #else
     #define wxStatusBarGeneric wxStatusBar
 

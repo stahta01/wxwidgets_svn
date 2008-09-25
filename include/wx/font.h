@@ -19,7 +19,6 @@
 #include "wx/defs.h"        // for wxDEFAULT &c
 #include "wx/fontenc.h"     // the font encoding constants
 #include "wx/gdiobj.h"      // the base class
-#include "wx/gdicmn.h"      // for wxGDIObjListBase
 
 // ----------------------------------------------------------------------------
 // forward declarations
@@ -108,7 +107,7 @@ enum
 
 class WXDLLIMPEXP_FWD_CORE wxNativeFontInfo;
 
-class WXDLLIMPEXP_CORE wxFontBase : public wxGDIObject
+class WXDLLEXPORT wxFontBase : public wxGDIObject
 {
 public:
     // creator function
@@ -156,9 +155,13 @@ public:
     // from the string representation of wxNativeFontInfo
     static wxFont *New(const wxString& strNativeFontDesc);
 
+    // was the font successfully created?
+    bool Ok() const { return IsOk(); }
+    bool IsOk() const { return m_refData != NULL; }
+
     // comparison
-    bool operator==(const wxFont& font) const;
-    bool operator!=(const wxFont& font) const { return !(*this == font); }
+    bool operator == (const wxFont& font) const;
+    bool operator != (const wxFont& font) const;
 
     // accessors: get the font characteristics
     virtual int GetPointSize() const = 0;
@@ -219,12 +222,6 @@ private:
     static wxFontEncoding ms_encodingDefault;
 };
 
-// wxFontBase <-> wxString utilities, used by wxConfig
-WXDLLIMPEXP_CORE wxString wxToString(const wxFontBase& font);
-WXDLLIMPEXP_CORE bool wxFromString(const wxString& str, wxFontBase* font);
-
-
-
 // include the real class declaration
 #if defined(__WXPALMOS__)
     #include "wx/palmos/font.h"
@@ -243,40 +240,12 @@ WXDLLIMPEXP_CORE bool wxFromString(const wxString& str, wxFontBase* font);
 #elif defined(__WXDFB__)
     #include "wx/dfb/font.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/font.h"
+    #include "wx/mac/font.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/font.h"
 #elif defined(__WXPM__)
     #include "wx/os2/font.h"
 #endif
-
-class WXDLLIMPEXP_CORE wxFontList: public wxGDIObjListBase
-{
-public:
-    wxFont *FindOrCreateFont(int pointSize,
-                             wxFontFamily family,
-                             wxFontStyle style,
-                             wxFontWeight weight,
-                             bool underline = false,
-                             const wxString& face = wxEmptyString,
-                             wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
-
-#if FUTURE_WXWIN_COMPATIBILITY_3_0
-     wxFont *FindOrCreateFont(int pointSize, int family, int style, int weight,
-                              bool underline = false,
-                              const wxString& face = wxEmptyString,
-                              wxFontEncoding encoding = wxFONTENCODING_DEFAULT)
-        { return FindOrCreateFont(pointSize, (wxFontFamily)family, (wxFontStyle)style,
-                                  (wxFontWeight)weight, underline, face, encoding); }
-#endif
-
-#if WXWIN_COMPATIBILITY_2_6
-    wxDEPRECATED( void AddFont(wxFont*) );
-    wxDEPRECATED( void RemoveFont(wxFont*) );
-#endif
-};
-
-extern WXDLLIMPEXP_DATA_CORE(wxFontList*)    wxTheFontList;
 
 #endif
     // _WX_FONT_H_BASE_

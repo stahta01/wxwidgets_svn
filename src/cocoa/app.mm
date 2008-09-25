@@ -15,17 +15,21 @@
 #include "wx/app.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/dc.h"
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/module.h"
 #endif
 
 #include "wx/cocoa/ObjcRef.h"
+#include "wx/cocoa/ObjcPose.h"
 #include "wx/cocoa/autorelease.h"
 #include "wx/cocoa/mbarman.h"
 #include "wx/cocoa/NSApplication.h"
 
-#include "wx/cocoa/dc.h"
+#if wxUSE_WX_RESOURCES
+#  include "wx/resource.h"
+#endif
 
 #import <AppKit/NSApplication.h>
 #import <Foundation/NSRunLoop.h>
@@ -39,6 +43,16 @@ bool      wxApp::sm_isEmbedded = false; // Normally we're not a plugin
 
 // wxNSApplicationObserver singleton.
 static wxObjcAutoRefFromAlloc<wxNSApplicationObserver*> sg_cocoaAppObserver = [[WX_GET_OBJC_CLASS(wxNSApplicationObserver) alloc] init];
+
+// The following two are supposed to be wxApp members but because of 2.8 ABI compatibility
+// we must make them static.  No problem since wxApp is a singleton anyway.
+static wxCFRef<CFRunLoopObserverRef> m_cfRunLoopIdleObserver;
+static wxCFRef<CFStringRef> m_cfObservedRunLoopMode;
+
+// ========================================================================
+// wxPoseAsInitializer
+// ========================================================================
+wxPoseAsInitializer *wxPoseAsInitializer::sm_first = NULL;
 
 // ========================================================================
 // wxNSApplicationDelegate
@@ -102,6 +116,11 @@ WX_IMPLEMENT_GET_OBJC_CLASS(wxNSApplicationObserver,NSObject)
 // wxApp Static member initialization
 // ----------------------------------------------------------------------------
 IMPLEMENT_DYNAMIC_CLASS(wxApp, wxEvtHandler)
+BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxAppBase::OnIdle)
+//    EVT_END_SESSION(wxApp::OnEndSession)
+//    EVT_QUERY_END_SESSION(wxApp::OnQueryEndSession)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // wxApp initialization/cleanup
@@ -124,6 +143,10 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
             memmove(argv + 1, argv + 2, argc * sizeof(wxChar *));
         }
     }
+
+    // Posing must be completed before any instances of the Objective-C
+    // classes being posed as are created.
+    wxPoseAsInitializer::InitializePosers();
 
     /*
         Cocoa supports -Key value options which set the user defaults key "Key"
@@ -163,7 +186,7 @@ void wxApp::CleanUp()
 {
     wxAutoNSAutoreleasePool pool;
 
-    wxCocoaDCImpl::CocoaShutdownTextSystem();
+    wxDC::CocoaShutdownTextSystem();
     wxMenuBarManager::DestroyInstance();
 
     [[NSNotificationCenter defaultCenter] removeObserver:sg_cocoaAppObserver];
@@ -175,6 +198,16 @@ void wxApp::CleanUp()
     }
 
     wxAppBase::CleanUp();
+
+    // Program built against < 2.8.5 hack: Destroy the idle observer here in
+    // case the formerly inline virtual destructor was inlined by an old app.
+    if(m_cfRunLoopIdleObserver != NULL)
+    {
+        // Invalidate the observer which also removes it from the run loop.
+        CFRunLoopObserverInvalidate(m_cfRunLoopIdleObserver);
+        // Release the ref as we don't need it anymore.
+        m_cfRunLoopIdleObserver.reset();
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -189,9 +222,7 @@ wxApp::wxApp()
 #endif // __WXDEBUG__
 
     argc = 0;
-#if !wxUSE_UNICODE
     argv = NULL;
-#endif
     m_cocoaApp = NULL;
     m_cocoaAppDelegate = NULL;
 }
@@ -258,7 +289,7 @@ bool wxApp::OnInitGui()
     if(!sm_isEmbedded)
         wxMenuBarManager::CreateInstance();
 
-    wxCocoaDCImpl::CocoaInitializeTextSystem();
+    wxDC::CocoaInitializeTextSystem();
     return true;
 }
 

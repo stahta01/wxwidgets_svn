@@ -12,10 +12,10 @@
 #ifndef _WX_COCOA_FRAME_H_
 #define _WX_COCOA_FRAME_H_
 
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
-class WXDLLIMPEXP_FWD_CORE wxStatusBar;
+class WXDLLEXPORT wxMenuBar;
+class WXDLLEXPORT wxStatusBar;
 
-class WXDLLIMPEXP_CORE wxFrame: public wxFrameBase
+class WXDLLEXPORT wxFrame: public wxFrameBase
 {
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxFrame)

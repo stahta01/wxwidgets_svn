@@ -39,7 +39,6 @@ class GridFrame : public wxFrame
     void ToggleColMoving( wxCommandEvent& );
     void ToggleGridSizing( wxCommandEvent& );
     void ToggleGridDragCell ( wxCommandEvent& );
-    void ToggleNativeHeader ( wxCommandEvent& );
     void ToggleGridLines( wxCommandEvent& );
     void AutoSizeCols( wxCommandEvent& );
     void CellOverflow( wxCommandEvent& );
@@ -64,7 +63,6 @@ class GridFrame : public wxFrame
     void SelectCells( wxCommandEvent& );
     void SelectRows( wxCommandEvent& );
     void SelectCols( wxCommandEvent& );
-    void SelectRowsOrCols( wxCommandEvent& );
 
     void DeselectCell(wxCommandEvent& event);
     void DeselectCol(wxCommandEvent& event);
@@ -76,14 +74,6 @@ class GridFrame : public wxFrame
     void SelectAll(wxCommandEvent& event);
     void OnAddToSelectToggle(wxCommandEvent& event);
     void OnShowSelection(wxCommandEvent& event);
-
-    void AutoSizeRow(wxCommandEvent& event);
-    void AutoSizeCol(wxCommandEvent& event);
-    void AutoSizeRowLabel(wxCommandEvent& event);
-    void AutoSizeColLabel(wxCommandEvent& event);
-    void AutoSizeLabelsCol(wxCommandEvent& event);
-    void AutoSizeLabelsRow(wxCommandEvent& event);
-    void AutoSizeTable(wxCommandEvent& event);
 
     void OnLabelLeftClick( wxGridEvent& );
     void OnCellLeftClick( wxGridEvent& );
@@ -109,7 +99,6 @@ public:
     void OnVTable( wxCommandEvent& );
     void OnBugsTable( wxCommandEvent& );
     void OnSmallGrid( wxCommandEvent& );
-    void OnTabularGrid( wxCommandEvent& );
 
     enum
     {
@@ -121,7 +110,6 @@ public:
         ID_TOGGLECOLMOVING,
         ID_TOGGLEGRIDSIZING,
         ID_TOGGLEGRIDDRAGCELL,
-        ID_TOGGLENATIVEHEADER,
         ID_TOGGLEGRIDLINES,
         ID_AUTOSIZECOLS,
         ID_CELLOVERFLOW,
@@ -145,13 +133,11 @@ public:
         ID_SELCELLS,
         ID_SELROWS,
         ID_SELCOLS,
-        ID_SELROWSORCOLS,
         ID_SET_CELL_FG_COLOUR,
         ID_SET_CELL_BG_COLOUR,
         ID_VTABLE,
         ID_BUGS_TABLE,
         ID_SMALL_GRID,
-        ID_TABULAR_GRID,
         ID_SELECT_UNSELECT,
         ID_SHOW_SELECTION,
         ID_SELECT_ALL,
@@ -162,13 +148,6 @@ public:
         ID_DESELECT_ROW,
         ID_DESELECT_COL,
         ID_DESELECT_CELL,
-        ID_SIZE_ROW,
-        ID_SIZE_COL,
-        ID_SIZE_ROW_LABEL,
-        ID_SIZE_COL_LABEL,
-        ID_SIZE_LABELS_COL,
-        ID_SIZE_LABELS_ROW,
-        ID_SIZE_GRID,
 
         ID_SET_HIGHLIGHT_WIDTH,
         ID_SET_RO_HIGHLIGHT_WIDTH,

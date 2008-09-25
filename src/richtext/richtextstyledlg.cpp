@@ -145,6 +145,10 @@ bool wxRichTextStyleOrganiserDialog::Create( int flags, wxRichTextStyleSheet* sh
 
 void wxRichTextStyleOrganiserDialog::CreateControls()
 {
+#ifdef __WXMAC__
+    SetWindowVariant(wxWINDOW_VARIANT_SMALL);
+#endif
+
     bool hideTypeSelector = false;
     wxRichTextStyleListBox::wxRichTextStyleType typesToShow = wxRichTextStyleListBox::wxRICHTEXT_STYLE_ALL;
 
@@ -188,7 +192,7 @@ void wxRichTextStyleOrganiserDialog::CreateControls()
     m_buttonSizerParent->Add(itemBoxSizer5, 1, wxGROW, 5);
 
     wxStaticText* itemStaticText6 = new wxStaticText( itemDialog1, wxID_STATIC, _("&Styles:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 5);
+    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP|wxADJUST_MINSIZE, 5);
 
     m_stylesListBox = new wxRichTextStyleListCtrl( itemDialog1, ID_RICHTEXTSTYLEORGANISERDIALOG_STYLES, wxDefaultPosition, wxSize(280, 260), listCtrlStyle );
     m_stylesListBox->SetHelpText(_("The available styles."));
@@ -200,7 +204,7 @@ void wxRichTextStyleOrganiserDialog::CreateControls()
     m_buttonSizerParent->Add(itemBoxSizer8, 0, wxGROW, 5);
 
     wxStaticText* itemStaticText9 = new wxStaticText( itemDialog1, ID_RICHTEXTSTYLEORGANISERDIALOG_CURRENT_STYLE, _(" "), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer8->Add(itemStaticText9, 0, wxGROW|wxLEFT|wxRIGHT|wxTOP, 5);
+    itemBoxSizer8->Add(itemStaticText9, 0, wxGROW|wxLEFT|wxRIGHT|wxTOP|wxADJUST_MINSIZE, 5);
 
     m_previewCtrl = new wxRichTextCtrl( itemDialog1, ID_RICHTEXTSTYLEORGANISERDIALOG_PREVIEW, wxEmptyString, wxDefaultPosition, wxSize(250, 200), wxVSCROLL|wxTE_READONLY );
     m_previewCtrl->SetHelpText(_("The style preview."));
@@ -212,7 +216,7 @@ void wxRichTextStyleOrganiserDialog::CreateControls()
     m_buttonSizerParent->Add(m_buttonSizer, 0, wxGROW, 5);
 
     wxStaticText* itemStaticText12 = new wxStaticText( itemDialog1, wxID_STATIC, _(" "), wxDefaultPosition, wxDefaultSize, 0 );
-    m_buttonSizer->Add(itemStaticText12, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 5);
+    m_buttonSizer->Add(itemStaticText12, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP|wxADJUST_MINSIZE, 5);
 
     m_newCharacter = new wxButton( itemDialog1, ID_RICHTEXTSTYLEORGANISERDIALOG_NEW_CHAR, _("New &Character Style..."), wxDefaultPosition, wxDefaultSize, 0 );
     m_newCharacter->SetHelpText(_("Click to create a new character style."));
@@ -430,13 +434,13 @@ iaculis malesuada. Donec bibendum ipsum ut ante porta fringilla.\n");
     if (labelCtrl)
         labelCtrl->SetLabel(def->GetName() + wxT(":"));
 
-    wxTextAttr attr(def->GetStyleMergedWithBase(GetStyleSheet()));
+    wxTextAttrEx attr(def->GetStyleMergedWithBase(GetStyleSheet()));
 
     wxFont font(m_previewCtrl->GetFont());
     font.SetPointSize(9);
     m_previewCtrl->SetFont(font);
 
-    wxTextAttr normalParaAttr;
+    wxTextAttrEx normalParaAttr;
     normalParaAttr.SetFont(font);
     normalParaAttr.SetTextColour(wxColour(wxT("LIGHT GREY")));
 
@@ -455,7 +459,7 @@ iaculis malesuada. Donec bibendum ipsum ut ante porta fringilla.\n");
         int i;
         for (i = 0; i < 10; i++)
         {
-            wxTextAttr levelAttr = * listDef->GetLevelAttributes(i);
+            wxTextAttrEx levelAttr = * listDef->GetLevelAttributes(i);
             levelAttr.SetBulletNumber(1);
             m_previewCtrl->BeginStyle(levelAttr);
             m_previewCtrl->WriteText(wxString::Format(wxT("List level %d. "), i+1) + s_para2List);
@@ -731,7 +735,7 @@ void wxRichTextStyleOrganiserDialog::OnDeleteClick( wxCommandEvent& WXUNUSED(eve
     {
         wxRichTextStyleDefinition* def = m_stylesListBox->GetStyleListBox()->GetStyle(sel);
         wxString name(def->GetName());
-        if (wxYES == wxMessageBox(wxString::Format(_("Delete style %s?"), name), _("Delete Style"), wxYES_NO|wxICON_QUESTION, this))
+        if (wxYES == wxMessageBox(wxString::Format(_("Delete style %s?"), (const wxChar*) name), _("Delete Style"), wxYES_NO|wxICON_QUESTION, this))
         {
             m_stylesListBox->GetStyleListBox()->SetItemCount(0);
 

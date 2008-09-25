@@ -36,7 +36,6 @@
 #include "wx/sysopt.h"
 
 #include "wx/msw/private.h"
-#include "wx/msw/dc.h"
 
 #include <windowsx.h>
 #include "wx/msw/winundef.h"
@@ -120,7 +119,10 @@ static bool HasTroubleWithNonTopTabs()
 
 WX_DEFINE_LIST( wxNotebookPageInfoList )
 
-BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
+
+BEGIN_EVENT_TABLE(wxNotebook, wxControl)
     EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, wxNotebook::OnSelChange)
     EVT_SIZE(wxNotebook::OnSize)
     EVT_NAVIGATION_KEY(wxNotebook::OnNavigationKey)
@@ -184,8 +186,8 @@ template<> void wxCollectionToVariantArray( wxNotebookPageInfoList const &theLis
 }
 
 wxBEGIN_PROPERTIES_TABLE(wxNotebook)
-    wxEVENT_PROPERTY( PageChanging , wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING , wxBookCtrlEvent )
-    wxEVENT_PROPERTY( PageChanged , wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED , wxBookCtrlEvent )
+    wxEVENT_PROPERTY( PageChanging , wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING , wxNotebookEvent )
+    wxEVENT_PROPERTY( PageChanged , wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED , wxNotebookEvent )
 
     wxPROPERTY_COLLECTION( PageInfos , wxNotebookPageInfoList , wxNotebookPageInfo* , AddPageInfo , GetPageInfos , 0 /*flags*/ , wxT("Helpstring") , wxT("group"))
     wxPROPERTY_FLAGS( WindowStyle , wxNotebookStyle , long , SetWindowStyleFlag , GetWindowStyleFlag , EMPTY_MACROVALUE , 0 /*flags*/ , wxT("Helpstring") , wxT("group")) // style
@@ -213,6 +215,7 @@ wxCONSTRUCTOR_4( wxNotebookPageInfo , wxNotebookPage* , Page , wxString , Text ,
 IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxBookCtrlBase)
 IMPLEMENT_DYNAMIC_CLASS(wxNotebookPageInfo, wxObject )
 #endif
+IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
 
 // ============================================================================
 // implementation
@@ -516,7 +519,7 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
     TC_ITEM tcItem;
     tcItem.mask = TCIF_TEXT;
-    tcItem.pszText = (wxChar *)strText.wx_str();
+    tcItem.pszText = (wxChar *)strText.c_str();
 
     if ( !HasFlag(wxNB_MULTILINE) )
         return TabCtrl_SetItem(GetHwnd(), nPage, &tcItem) != 0;
@@ -784,7 +787,7 @@ bool wxNotebook::InsertPage(size_t nPage,
     if ( !strText.empty() )
     {
         tcItem.mask |= TCIF_TEXT;
-        tcItem.pszText = (wxChar *)strText.wx_str(); // const_cast
+        tcItem.pszText = (wxChar *)strText.c_str(); // const_cast
     }
 
     // hide the page: unless it is selected, it shouldn't be shown (and if it
@@ -942,11 +945,9 @@ void wxNotebook::OnPaint(wxPaintEvent& WXUNUSED(event))
         hbr = GetHbrushOf(brush);
     }
 
-    wxMSWDCImpl *impl = (wxMSWDCImpl*) memdc.GetImpl();
+    ::FillRect(GetHdcOf(memdc), &rc, hbr);
 
-    ::FillRect(GetHdcOf(*impl), &rc, hbr);
-
-    MSWDefWindowProc(WM_PAINT, (WPARAM)(impl->GetHDC()), 0);
+    MSWDefWindowProc(WM_PAINT, (WPARAM)memdc.GetHDC(), 0);
 
     // For some reason in RTL mode, source offset has to be -1, otherwise the
     // right border (physical) remains unpainted.
@@ -1087,7 +1088,7 @@ void wxNotebook::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
-void wxNotebook::OnSelChange(wxBookCtrlEvent& event)
+void wxNotebook::OnSelChange(wxNotebookEvent& event)
 {
     // is it our tab control?
     if ( event.GetEventObject() == this )
@@ -1142,7 +1143,7 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
                 event.SetEventObject(this);
 
                 wxWindow *page = m_pages[m_nSelection];
-                if ( !page->HandleWindowEvent(event) )
+                if ( !page->GetEventHandler()->ProcessEvent(event) )
                 {
                     page->SetFocus();
                 }
@@ -1166,7 +1167,7 @@ void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
             else if ( parent )
             {
                 event.SetCurrentFocus(this);
-                parent->HandleWindowEvent(event);
+                parent->GetEventHandler()->ProcessEvent(event);
             }
         }
     }
@@ -1419,7 +1420,7 @@ bool wxNotebook::MSWOnScroll(int orientation, WXWORD nSBCode,
 
 bool wxNotebook::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM* result)
 {
-  wxBookCtrlEvent event(wxEVT_NULL, m_windowId);
+  wxNotebookEvent event(wxEVT_NULL, m_windowId);
 
   NMHDR* hdr = (NMHDR *)lParam;
   switch ( hdr->code ) {
@@ -1440,7 +1441,7 @@ bool wxNotebook::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM* result)
   event.SetEventObject(this);
   event.SetInt(idCtrl);
 
-  bool processed = HandleWindowEvent(event);
+  bool processed = GetEventHandler()->ProcessEvent(event);
   *result = !event.IsAllowed();
   return processed;
 }

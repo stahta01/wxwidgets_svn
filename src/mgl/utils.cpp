@@ -24,7 +24,6 @@
 
 #include "wx/apptrait.h"
 #include "wx/process.h"
-#include "wx/evtloop.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -123,12 +122,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_MGL;
 }
 
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
-}
-
-
 void wxGetMousePosition(int* x, int* y)
 {
     MS_getPos(x, y);
@@ -164,3 +157,21 @@ wxMouseState wxGetMouseState()
     return ms;
 }
 
+
+#ifdef __UNIX__
+
+int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
+{
+    wxFAIL_MSG(wxT("wxAddProcessCallback not implemented in wxMGL!"));
+    return 0;
+#if 0 // FIXME_MGL -do we need it at all?
+    int tag = gdk_input_add(fd,
+                            GDK_INPUT_READ,
+                            GTK_EndProcessDetector,
+                            (gpointer)proc_data);
+
+    return tag;
+#endif
+}
+
+#endif

@@ -15,15 +15,15 @@
 #include "wx/event.h"
 #include "wx/icon.h"
 
-class WXDLLIMPEXP_FWD_CORE wxFrame;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxApp;
-class WXDLLIMPEXP_FWD_CORE wxKeyEvent;
-class WXDLLIMPEXP_FWD_BASE wxLog;
+class WXDLLIMPEXP_CORE wxFrame;
+class WXDLLIMPEXP_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxApp;
+class WXDLLIMPEXP_CORE wxKeyEvent;
+class WXDLLIMPEXP_BASE wxLog;
 
 // Represents the application. Derive OnInit and declare
 // a new App object to start application
-class WXDLLIMPEXP_CORE wxApp : public wxAppBase
+class WXDLLEXPORT wxApp : public wxAppBase
 {
     DECLARE_DYNAMIC_CLASS(wxApp)
 
@@ -42,6 +42,7 @@ public:
     virtual int GetPrintMode() const { return m_printMode; }
 
     // implementation only
+    void OnIdle(wxIdleEvent& event);
     void OnEndSession(wxCloseEvent& event);
     void OnQueryEndSession(wxCloseEvent& event);
 
@@ -84,7 +85,8 @@ protected:
     #define SW_SHOWNORMAL 1
 #endif
 
-extern WXDLLIMPEXP_CORE int wxEntry();
+extern int WXDLLEXPORT
+wxEntry();
 
 #define IMPLEMENT_WXWIN_MAIN                                              \
                                                                           \

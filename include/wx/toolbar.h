@@ -71,7 +71,7 @@ enum
     #elif defined(__WXPALMOS__)
        #include "wx/palmos/toolbar.h"
     #elif defined(__WXMSW__) && (!defined(_WIN32_WCE) || (_WIN32_WCE >= 400 && !defined(__POCKETPC__) && !defined(__SMARTPHONE__)))
-       #include "wx/msw/toolbar.h"
+       #include "wx/msw/tbar95.h"
     #elif defined(__WXWINCE__)
        #include "wx/msw/wince/tbarwce.h"
     #elif defined(__WXMOTIF__)
@@ -81,7 +81,7 @@ enum
     #elif defined(__WXGTK__)
         #include "wx/gtk1/tbargtk.h"
     #elif defined(__WXMAC__)
-       #include "wx/osx/toolbar.h"
+       #include "wx/mac/toolbar.h"
     #elif defined(__WXCOCOA__)
        #include "wx/cocoa/toolbar.h"
     #elif defined(__WXPM__)

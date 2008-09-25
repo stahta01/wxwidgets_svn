@@ -36,7 +36,7 @@
     #include "wx/utils.h"       // for wxStripMenuCodes()
 #endif
 
-const char wxControlNameStr[] = "control";
+const wxChar wxControlNameStr[] = wxT("control");
 
 // ============================================================================
 // implementation
@@ -120,6 +120,13 @@ void wxControlBase::InitCommandEvent(wxCommandEvent& event) const
     }
 }
 
+
+void wxControlBase::SetLabel( const wxString &label )
+{
+    InvalidateBestSize();
+    wxWindow::SetLabel(label);
+}
+
 bool wxControlBase::SetFont(const wxFont& font)
 {
     InvalidateBestSize();
@@ -151,18 +158,6 @@ void wxControlBase::DoUpdateWindowUI(wxUpdateUIEvent& event)
     }
 #endif // wxUSE_RADIOBTN
 }
-
-/* static */
-wxString wxControlBase::RemoveMnemonics(const wxString& str)
-{
-    return wxStripMenuCodes(str, wxStrip_Mnemonics);
-}
-
-wxBorder wxControlBase::GetDefaultBorder() const
-{
-    return wxBORDER_THEME;
-}
-
 
 // ----------------------------------------------------------------------------
 // wxStaticBitmap

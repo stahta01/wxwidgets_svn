@@ -31,7 +31,6 @@
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif //WX_PRECOMP
 
 #if defined(__WXMSW__)
@@ -99,11 +98,10 @@ static wxFontEncoding gs_encodings[] =
     wxFONTENCODING_BIG5,
     wxFONTENCODING_SHIFT_JIS,
     wxFONTENCODING_GB2312,
-    wxFONTENCODING_ISO2022_JP,
 };
 
 // the descriptions for them
-static const char* gs_encodingDescs[] =
+static const wxChar* gs_encodingDescs[] =
 {
     wxTRANSLATE( "Western European (ISO-8859-1)" ),
     wxTRANSLATE( "Central European (ISO-8859-2)" ),
@@ -154,7 +152,6 @@ static const char* gs_encodingDescs[] =
     wxTRANSLATE( "BIG5" ),
     wxTRANSLATE( "SHIFT-JIS" ),
     wxTRANSLATE( "GB-2312" ),
-    wxTRANSLATE( "ISO-2022-JP" ),
 };
 
 // and the internal names (these are not translated on purpose!)
@@ -184,33 +181,33 @@ static const wxChar* gs_encodingNames[WXSIZEOF(gs_encodingDescs)][9] =
     { wxT( "KOI8-R" ), wxT( "KOI8-RU" ), NULL },
     { wxT( "KOI8-U" ), NULL },
 
-    { wxT( "WINDOWS-874" ), wxT( "CP874" ), wxT( "MS874" ), wxT( "IBM-874" ), NULL },
-    { wxT( "WINDOWS-932" ), wxT( "CP932" ), wxT( "MS932" ), wxT( "IBM-932" ), NULL },
-    { wxT( "WINDOWS-936" ), wxT( "CP936" ), wxT( "MS936" ), wxT( "IBM-936" ), NULL },
-    { wxT( "WINDOWS-949" ), wxT( "CP949" ), wxT( "MS949" ), wxT( "IBM-949" ), wxT( "EUC-KR" ), wxT( "eucKR" ), wxT( "euc_kr" ), NULL },
-    { wxT( "WINDOWS-950" ), wxT( "CP950" ), wxT( "MS950" ), wxT( "IBM-950" ), NULL },
-    { wxT( "WINDOWS-1250" ),wxT( "CP1250" ),wxT( "MS1250" ),wxT( "IBM-1250" ),NULL },
-    { wxT( "WINDOWS-1251" ),wxT( "CP1251" ),wxT( "MS1251" ),wxT( "IBM-1251" ),NULL },
-    { wxT( "WINDOWS-1252" ),wxT( "CP1252" ),wxT( "MS1252" ),wxT( "IBM-1252" ),NULL },
-    { wxT( "WINDOWS-1253" ),wxT( "CP1253" ),wxT( "MS1253" ),wxT( "IBM-1253" ),NULL },
-    { wxT( "WINDOWS-1254" ),wxT( "CP1254" ),wxT( "MS1254" ),wxT( "IBM-1254" ),NULL },
-    { wxT( "WINDOWS-1255" ),wxT( "CP1255" ),wxT( "MS1255" ),wxT( "IBM-1255" ),NULL },
-    { wxT( "WINDOWS-1256" ),wxT( "CP1256" ),wxT( "MS1256" ),wxT( "IBM-1256" ),NULL },
-    { wxT( "WINDOWS-1257" ),wxT( "CP1257" ),wxT( "MS1257" ),wxT( "IBM-1257" ),NULL },
-    { wxT( "WINDOWS-437" ), wxT( "CP437" ), wxT( "MS437" ), wxT( "IBM-437" ), NULL },
+    { wxT( "WINDOWS-874" ), wxT( "CP-874" ), NULL },
+    { wxT( "WINDOWS-932" ), wxT( "CP-932" ), NULL },
+    { wxT( "WINDOWS-936" ), wxT( "CP-936" ), NULL },
+    { wxT( "WINDOWS-949" ), wxT( "CP-949" ), wxT( "EUC-KR" ), wxT( "eucKR" ), wxT( "euc_kr" ), NULL },
+    { wxT( "WINDOWS-950" ), wxT( "CP-950" ), NULL },
+    { wxT( "WINDOWS-1250" ),wxT( "CP-1250" ), NULL },
+    { wxT( "WINDOWS-1251" ),wxT( "CP-1251" ), NULL },
+    { wxT( "WINDOWS-1252" ),wxT( "CP-1252" ), wxT("IBM-1252"), NULL },
+    { wxT( "WINDOWS-1253" ),wxT( "CP-1253" ), NULL },
+    { wxT( "WINDOWS-1254" ),wxT( "CP-1254" ), NULL },
+    { wxT( "WINDOWS-1255" ),wxT( "CP-1255" ), NULL },
+    { wxT( "WINDOWS-1256" ),wxT( "CP-1256" ), NULL },
+    { wxT( "WINDOWS-1257" ),wxT( "CP-1257" ), NULL },
+    { wxT( "WINDOWS-437" ), wxT( "CP-437" ), NULL },
 
-    { wxT( "UTF-7" ), wxT("UTF7"), NULL },
-    { wxT( "UTF-8" ), wxT("UTF8"), NULL },
+    { wxT( "UTF-7" ), wxT("utf7"), NULL },
+    { wxT( "UTF-8" ), wxT("utf8"), NULL },
 #ifdef WORDS_BIGENDIAN
-    { wxT( "UTF-16BE" ), wxT("UTF16BE"), wxT("UCS-2BE"), wxT("UCS2BE"), wxT("UTF-16"), wxT("UTF16"), wxT("UCS-2"), wxT("UCS2"), NULL },
-    { wxT( "UTF-16LE" ), wxT("UTF16LE"), wxT("UCS-2LE"), wxT("UCS2LE"), NULL },
-    { wxT( "UTF-32BE" ), wxT("UTF32BE"), wxT("UCS-4BE" ), wxT("UTF-32"), wxT("UTF32"), wxT("UCS-4"), wxT("UCS4"), NULL },
-    { wxT( "UTF-32LE" ), wxT("UTF32LE"), wxT("UCS-4LE"), wxT("UCS4LE"), NULL },
+    { wxT( "UTF-16BE" ), wxT("UCS-2BE"), wxT( "UTF-16" ), wxT("UCS-2"), wxT("UCS2"), NULL },
+    { wxT( "UTF-16LE" ), wxT("UCS-2LE"), NULL },
+    { wxT( "UTF-32BE" ), wxT( "UCS-4BE" ), wxT( "UTF-32" ), wxT( "UCS-4" ), wxT("UCS4"), NULL },
+    { wxT( "UTF-32LE" ), wxT( "UCS-4LE" ), NULL },
 #else // WORDS_BIGENDIAN
-    { wxT("UTF-16BE"), wxT("UTF16BE"), wxT("UCS-2BE"), wxT("UCS2BE"), NULL },
-    { wxT("UTF-16LE"), wxT("UTF16LE"), wxT("UCS-2LE"), wxT("UTF-16"), wxT("UTF16"), wxT("UCS-2"), wxT("UCS2"), NULL },
-    { wxT("UTF-32BE"), wxT("UTF32BE"), wxT("UCS-4BE"), wxT("UCS4BE"), NULL },
-    { wxT("UTF-32LE"), wxT("UTF32LE"), wxT("UCS-4LE"), wxT("UCS4LE"), wxT("UTF-32"), wxT("UTF32"), wxT("UCS-4"), wxT("UCS4"), NULL },
+    { wxT( "UTF-16BE" ), wxT("UCS-2BE"), NULL },
+    { wxT( "UTF-16LE" ), wxT("UCS-2LE"), wxT( "UTF-16" ), wxT("UCS-2"), wxT("UCS2"), NULL },
+    { wxT( "UTF-32BE" ), wxT( "UCS-4BE" ), NULL },
+    { wxT( "UTF-32LE" ), wxT( "UCS-4LE" ), wxT( "UTF-32" ), wxT( "UCS-4" ), wxT("UCS4"), NULL },
 #endif // WORDS_BIGENDIAN
 
     { wxT( "EUC-JP" ), wxT( "eucJP" ), wxT( "euc_jp" ), wxT( "IBM-eucJP" ), NULL },
@@ -222,7 +219,6 @@ static const wxChar* gs_encodingNames[WXSIZEOF(gs_encodingDescs)][9] =
     { wxT( "BIG5" ), wxT("big5"), NULL },
     { wxT( "SJIS" ), wxT( "SHIFT-JIS" ), wxT( "SHIFT_JIS" ), NULL },
     { wxT( "GB2312" ), NULL },
-    { wxT( "ISO-2022-JP" ), NULL },
 };
 
 wxCOMPILE_TIME_ASSERT( WXSIZEOF(gs_encodingDescs) == WXSIZEOF(gs_encodings), EncodingsArraysNotInSync );
@@ -340,15 +336,10 @@ void wxFontMapperBase::Reset()
 // config usage customisation
 // ----------------------------------------------------------------------------
 
-
-static wxString gs_defaultConfigPath(FONTMAPPER_ROOT_PATH);
-
 /* static */
-const wxString& wxFontMapperBase::GetDefaultConfigPath()
+const wxChar *wxFontMapperBase::GetDefaultConfigPath()
 {
-    // NB: we return const wxString& and not wxString for compatibility
-    //     with 2.8 that returned const wxChar*
-    return gs_defaultConfigPath;
+    return FONTMAPPER_ROOT_PATH;
 }
 
 void wxFontMapperBase::SetConfigPath(const wxString& prefix)
@@ -530,14 +521,18 @@ wxFontMapperBase::NonInteractiveCharsetToEncoding(const wxString& charset)
         if ( cs.Left(3) == wxT("ISO") )
         {
             // the dash is optional (or, to be exact, it is not, but
-            // several broken programs "forget" it)
+            // several brokenmails "forget" it)
             const wxChar *p = cs.c_str() + 3;
             if ( *p == wxT('-') )
                 p++;
 
+            // printf( "iso %s\n", (const char*) cs.ToAscii() );
+
             unsigned int value;
             if ( wxSscanf(p, wxT("8859-%u"), &value) == 1 )
             {
+                // printf( "value %d\n", (int)value );
+
                 // make it 0 based and check that it is strictly positive in
                 // the process (no such thing as iso8859-0 encoding)
                 if ( (value-- > 0) &&
@@ -557,6 +552,8 @@ wxFontMapperBase::NonInteractiveCharsetToEncoding(const wxString& charset)
             unsigned int value;
             if ( wxSscanf(p, wxT("8859-%u"), &value) == 1 )
             {
+                // printf( "value %d\n", (int)value );
+
                 // make it 0 based and check that it is strictly positive in
                 // the process (no such thing as iso8859-0 encoding)
                 if ( (value-- > 0) &&

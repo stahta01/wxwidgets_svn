@@ -32,7 +32,7 @@
 // to create a font of non-standard encoding (like KOI8) under Windows - the
 // facename specifies the encoding then)
 
-struct WXDLLIMPEXP_CORE wxNativeEncodingInfo
+struct WXDLLEXPORT wxNativeEncodingInfo
 {
     wxString facename;          // may be empty meaning "any"
 #ifndef __WXPALMOS__
@@ -53,10 +53,13 @@ struct WXDLLIMPEXP_CORE wxNativeEncodingInfo
 #elif defined(_WX_X_FONTLIKE)
     wxString xregistry,
              xencoding;
-#elif defined(wxHAS_UTF8_FONTS)
-    // ports using UTF-8 for text don't need encoding information for fonts
+#elif defined(__WXGTK20__)
+    // No way to specify this in Pango as this
+    // seems to be handled internally.
 #elif defined(__WXMGL__)
     int      mglEncoding;
+#elif defined(__WXDFB__)
+    // DirectFB uses UTF-8 internally, doesn't use font encodings
 #else
     #error "Unsupported toolkit"
 #endif

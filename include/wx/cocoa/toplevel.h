@@ -15,12 +15,12 @@
 #include "wx/hashmap.h"
 #include "wx/cocoa/NSWindow.h"
 
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
+class WXDLLEXPORT wxMenuBar;
 
 // ========================================================================
 // wxTopLevelWindowCocoa
 // ========================================================================
-class WXDLLIMPEXP_CORE wxTopLevelWindowCocoa : public wxTopLevelWindowBase, protected wxCocoaNSWindow
+class WXDLLEXPORT wxTopLevelWindowCocoa : public wxTopLevelWindowBase, protected wxCocoaNSWindow
 {
     DECLARE_EVENT_TABLE();
     DECLARE_NO_COPY_CLASS(wxTopLevelWindowCocoa);
@@ -111,7 +111,8 @@ public:
     wxWindow *SetDefaultItem(wxWindow *win);
 
 // Things I may/may not do
-//    virtual void SetIcons(const wxIconBundle& icons);
+//    virtual void SetIcon(const wxIcon& icon);
+//    virtual void SetIcons(const wxIconBundle& icons) { SetIcon( icons.GetIcon( -1 ) ); }
 //    virtual void Clear() ;
 //    virtual void Raise();
 //    virtual void Lower();
@@ -126,6 +127,6 @@ protected:
 };
 
 // list of all frames and modeless dialogs
-extern WXDLLIMPEXP_DATA_CORE(wxWindowList) wxModelessWindows;
+extern WXDLLEXPORT_DATA(wxWindowList) wxModelessWindows;
 
 #endif // __WX_COCOA_TOPLEVEL_H__

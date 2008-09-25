@@ -268,7 +268,7 @@ void wxTopLevelWindowX11::OnInternalIdle()
     {
         wxSizeEvent event( GetClientSize(), GetId() );
         event.SetEventObject( this );
-        HandleWindowEvent( event );
+        GetEventHandler()->ProcessEvent( event );
 
         m_needResizeInIdle = false;
     }
@@ -285,7 +285,7 @@ bool wxTopLevelWindowX11::Show(bool show)
         wxSizeEvent event(GetSize(), GetId());
 
         event.SetEventObject(this);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
 
         m_needResizeInIdle = false;
     }
@@ -299,7 +299,7 @@ bool wxTopLevelWindowX11::Show(bool show)
 // wxTopLevelWindowX11 maximize/minimize
 // ----------------------------------------------------------------------------
 
-void wxTopLevelWindowX11::Maximize(bool WXUNUSED(maximize))
+void wxTopLevelWindowX11::Maximize(bool maximize)
 {
     // TODO
 }
@@ -312,12 +312,6 @@ bool wxTopLevelWindowX11::IsMaximized() const
 
 void wxTopLevelWindowX11::Iconize(bool iconize)
 {
-    if ( !iconize )
-    {
-        Restore();
-        return;
-    }
-
     if (!m_iconized && GetMainWindow())
     {
         if (XIconifyWindow(wxGlobalDisplay(),
@@ -379,7 +373,8 @@ void wxTopLevelWindowX11::DoSetIcon(const wxIcon& icon)
 {
     if (icon.Ok() && GetMainWindow())
     {
-#if !wxUSE_NANOX
+#if wxUSE_NANOX
+#else
         XWMHints *wmHints = XAllocWMHints();
         wmHints->icon_pixmap = (Pixmap) icon.GetPixmap();
 

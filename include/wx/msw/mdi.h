@@ -14,7 +14,7 @@
 
 #include "wx/frame.h"
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
 
 class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
 class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
@@ -23,7 +23,7 @@ class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
 // wxMDIParentFrame
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIParentFrame : public wxFrame
+class WXDLLEXPORT wxMDIParentFrame : public wxFrame
 {
 public:
     wxMDIParentFrame();
@@ -51,7 +51,7 @@ public:
     // accessors
     // ---------
 
-    // Get the active MDI child window
+    // Get the active MDI child window (Windows only)
     wxMDIChildFrame *GetActiveChild() const;
 
     // Get the client window
@@ -59,20 +59,11 @@ public:
 
     // Create the client window class (don't Create the window,
     // just return a new class)
-    virtual wxMDIClientWindow *OnCreateClient();
+    virtual wxMDIClientWindow *OnCreateClient(void);
 
-    // MDI windows menu functions
-    // --------------------------
-
-    // return the pointer to the current window menu or NULL if we don't have
-    // because of wxFRAME_NO_WINDOW_MENU style
-    wxMenu *GetWindowMenu() const { return m_windowMenu; }
-
-    // use the given menu instead of the default window menu
-    //
-    // menu can be NULL to disable the window menu completely
+    // MDI windows menu
+    wxMenu* GetWindowMenu() const { return m_windowMenu; }
     void SetWindowMenu(wxMenu* menu) ;
-
     virtual void DoMenuUpdates(wxMenu* menu = NULL);
 
     // MDI operations
@@ -82,18 +73,6 @@ public:
     virtual void ArrangeIcons();
     virtual void ActivateNext();
     virtual void ActivatePrevious();
-
-
-    // implementation only from now on
-
-    // MDI helpers
-    // -----------
-
-    // called by wxMDIChildFrame after it was successfully created
-    virtual void AddMDIChild(wxMDIChildFrame *child);
-
-    // called by wxMDIChildFrame just before it is destroyed
-    virtual void RemoveMDIChild(wxMDIChildFrame *child);
 
     // handlers
     // --------
@@ -113,9 +92,6 @@ public:
     virtual WXLRESULT MSWDefWindowProc(WXUINT, WXWPARAM, WXLPARAM);
     virtual bool MSWTranslateMessage(WXMSG* msg);
 
-    // override wxFrameBase function to also look in the active child menu bar
-    virtual const wxMenuItem *FindItemInMenuBar(int menuId) const;
-
 protected:
 #if wxUSE_MENUS_NATIVE
     virtual void InternalSetMenuBar();
@@ -129,21 +105,12 @@ protected:
 
     wxMDIClientWindow *             m_clientWindow;
     wxMDIChildFrame *               m_currentChild;
-
-    // the current window menu or NULL if we are not using it
-    wxMenu *m_windowMenu;
+    wxMenu*                         m_windowMenu;
 
     // true if MDI Frame is intercepting commands, not child
     bool m_parentFrameActive;
 
 private:
-    // add/remove window menu if we have it (i.e. m_windowMenu != NULL)
-    void AddWindowMenu();
-    void RemoveWindowMenu();
-
-    // return the number of child frames we currently have (maybe 0)
-    int GetChildFramesCount() const;
-
     friend class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
 
     DECLARE_EVENT_TABLE()
@@ -155,7 +122,7 @@ private:
 // wxMDIChildFrame
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIChildFrame : public wxFrame
+class WXDLLEXPORT wxMDIChildFrame : public wxFrame
 {
 public:
     wxMDIChildFrame() { Init(); }
@@ -191,11 +158,6 @@ public:
 
     // Implementation only from now on
     // -------------------------------
-
-    wxMDIParentFrame* GetMDIParent() const
-    {
-        return wxStaticCast(wxFrame::GetParent(), wxMDIParentFrame);
-    }
 
     // Handlers
     bool HandleMDIActivate(long bActivate, WXHWND, WXHWND);
@@ -240,7 +202,7 @@ private:
 // wxMDIClientWindow
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIClientWindow : public wxWindow
+class WXDLLEXPORT wxMDIClientWindow : public wxWindow
 {
 public:
     wxMDIClientWindow() { Init(); }

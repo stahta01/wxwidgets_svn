@@ -21,7 +21,7 @@
 // Represents the printer: manages printing a wxPrintout object
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPostScriptPrinter : public wxPrinterBase
+class WXDLLEXPORT wxPostScriptPrinter : public wxPrinterBase
 {
 public:
     wxPostScriptPrinter(wxPrintDialogData *data = (wxPrintDialogData *) NULL);
@@ -40,7 +40,7 @@ private:
 // wxPrintout.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPostScriptPrintPreview : public wxPrintPreviewBase
+class WXDLLEXPORT wxPostScriptPrintPreview : public wxPrintPreviewBase
 {
 public:
     wxPostScriptPrintPreview(wxPrintout *printout,

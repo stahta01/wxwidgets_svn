@@ -249,7 +249,7 @@ face            comma-separated list of faces
 encoding        charset of the font (meaningless in Unicode build), as string
 sysfont         symbolic name of system standard font
                 (one of wxSYS_*_FONT constants)
-relativesize    Float, font size relative to chosen system font's size;
+relativesize    Float, font size relative to choosen system font's size;
                 can only be used when 'sysfont' is used and when 'size' is not
                 used
 
@@ -404,30 +404,6 @@ wxMenuBar and wxStatusBar children; objects of these types are automatically
 set as frame's tool-, menu- and statusbar respectively.
 
 
-wxMenu
-------
-
-wxMenu objects can contain objects of class "separator" and "break" as well as
-normal menu items, of class "wxMenuItem" described below. The menu itself can
-also have the following elements:
-
-label                      I18nString              ""
-help                       I18nString              ""
-enabled                    Boolean                 true
-style                      Style[wxMenu]           only wxMENU_TEAROFF currently
-
-wxMenuItem
-----------
-
-label                      I18nString              ""
-accel                      String                  ""
-bitmap                     Bitmap                  (empty)
-bitmap2                    Bitmap                  checked bitmap, wxMSW only
-checkable                  Boolean                 false
-radio                      Boolean                 false
-enabled                    Boolean                 true
-checked                    Boolean                 false ("checkable" and "radio")
-
 wxMDIParentFrame
 ----------------
 
@@ -445,13 +421,10 @@ wxRadioBox
 ----------
 
 This control may have "dimension" (major dimension) and (initial) "selection"
-Integer subelements and a composite "content" element similar to wxCheckList
-except that <item> subelements can have additional attributes:
-
-tooltip                    I18nString              ""
-helptext                   I18nString              ""
-enabled                    Boolean                 1
-hidden                     Boolean                 0
+Integer subelements and a composite "content" element similar to wxCheckList.
+The only difference is that the "item" subelements can have an optional
+"tooltip=I18nString" and "helptext=I18nString" attributes to specify
+the per-item tooltip and helptext.
 
 
 wxScrolledWindow
@@ -481,14 +454,6 @@ and the splitter is created unsplit. If there are two children, the
 splitter is created split, either horizontally or vertically depending
 on the value of "orientation" attribute.
 
-
-wxStaticText
-------------
-
-wxStaticText supports one class-specific attribute which wraps the controls
-contents at the specified boundary:
-
-wrap                       Integer, in pixels     None
 
 wxStatusBar
 -----------
@@ -528,9 +493,17 @@ appear within wxToolBar node. Their attributes are as follows:
     label                  I18nString              ""
     tooltip                I18nString              ""
     longhelp               I18nString              ""
+    pos                    Position                -1,-1
 
     Constraints:
       At most one of "toggle" and "radio" attributes may be 1.
+      Attribute "pos" may not appear if "label" or "radio" attributes
+      are used or if parent wxToolBar's style contains wxTB_TEXT.
+
+    Note:
+      Use of "pos" attribute is strongly discouraged, it is deprecated
+      usage of wxToolBar and it is not supported by MSW and GTK
+      implementations.
 
 Children objects are added to the toolbar using AddTool for "tool" class,
 AddSeparator for "separator" and AddControl for other classes.

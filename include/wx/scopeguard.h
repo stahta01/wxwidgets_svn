@@ -51,12 +51,9 @@
 
 #else
 
+#if !defined(__GNUC__) || wxCHECK_GCC_VERSION(2, 95)
 // namespace support was first implemented in gcc-2.95,
 // so avoid using it for older versions.
-#if !defined(__GNUC__) || wxCHECK_GCC_VERSION(2, 95)
-
-#define wxHAS_NAMESPACES
-
 namespace wxPrivate
 {
 #else
@@ -106,12 +103,6 @@ class wxScopeGuardImplBase
 public:
     wxScopeGuardImplBase() : m_wasDismissed(false) { }
 
-    wxScopeGuardImplBase(const wxScopeGuardImplBase& other)
-        : m_wasDismissed(other.m_wasDismissed)
-    {
-        other.Dismiss();
-    }
-
     void Dismiss() const { m_wasDismissed = true; }
 
     // for OnScopeExit() only (we can't make it friend, unfortunately)!
@@ -120,15 +111,18 @@ public:
 protected:
     ~wxScopeGuardImplBase() { }
 
+    wxScopeGuardImplBase(const wxScopeGuardImplBase& other)
+        : m_wasDismissed(other.m_wasDismissed)
+    {
+        other.Dismiss();
+    }
+
     // must be mutable for copy ctor to work
     mutable bool m_wasDismissed;
 
 private:
     wxScopeGuardImplBase& operator=(const wxScopeGuardImplBase&);
 };
-
-// wxScopeGuard is just a reference, see the explanation in CUJ article
-typedef const wxScopeGuardImplBase& wxScopeGuard;
 
 // ----------------------------------------------------------------------------
 // wxScopeGuardImpl0: scope guard for actions without parameters
@@ -324,98 +318,21 @@ wxMakeObjGuard(Obj& obj, MemFun memFun, P1 p1, P2 p2)
                                             MakeObjGuard(obj, memFun, p1, p2);
 }
 
-// ----------------------------------------------------------------------------
-// wxVariableSetter: use the same technique as for wxScopeGuard to allow
-//                   setting a variable to some value on block exit
-// ----------------------------------------------------------------------------
-
-#ifdef wxHAS_NAMESPACES
-
-namespace wxPrivate
-{
-
-// empty class just to be able to define a reference to it
-class VariableSetterBase { };
-
-typedef const VariableSetterBase& VariableSetter;
-
-template <typename T, typename U>
-class VariableSetterImpl : public VariableSetterBase
-{
-public:
-    VariableSetterImpl(T& var, const U& value)
-        : m_var(var),
-          m_value(value)
-    {
-    }
-
-    ~VariableSetterImpl()
-    {
-        m_var = m_value;
-    }
-
-private:
-    T& m_var;
-    const U& m_value;
-
-    // suppress the warning about assignment operator not being generated
-    VariableSetterImpl<T, U>& operator=(const VariableSetterImpl<T, U>&);
-};
-
-template <typename T>
-class VariableNullerImpl : public VariableSetterBase
-{
-public:
-    VariableNullerImpl(T& var)
-        : m_var(var)
-    {
-    }
-
-    ~VariableNullerImpl()
-    {
-        m_var = NULL;
-    }
-
-private:
-    T& m_var;
-
-    VariableNullerImpl<T>& operator=(const VariableNullerImpl<T>&);
-};
-
-} // namespace wxPrivate
-
-template <typename T, typename U>
-inline
-wxPrivate::VariableSetterImpl<T, U> wxMakeVarSetter(T& var, const U& value)
-{
-      return wxPrivate::VariableSetterImpl<T, U>(var, value);
-}
-
-// calling wxMakeVarSetter(ptr, NULL) doesn't work because U is deduced to be
-// "int" and subsequent assignment of "U" to "T *" fails, so provide a special
-// function for this special case
-template <typename T>
-inline
-wxPrivate::VariableNullerImpl<T> wxMakeVarNuller(T& var)
-{
-    return wxPrivate::VariableNullerImpl<T>(var);
-}
-
-#endif // wxHAS_NAMESPACES
-
 // ============================================================================
-// macros for declaring unnamed scoped guards (which can't be dismissed)
+// public stuff
 // ============================================================================
 
+// wxScopeGuard is just a reference, see the explanation in CUJ article
+typedef const wxScopeGuardImplBase& wxScopeGuard;
+
+// when an unnamed scope guard is needed, the macros below may be used
+//
 // NB: the original code has a single (and much nicer) ON_BLOCK_EXIT macro
 //     but this results in compiler warnings about unused variables and I
 //     didn't find a way to work around this other than by having different
-//     macros with different names or using a less natural syntax for passing
-//     the arguments (e.g. as Boost preprocessor sequences, which would mean
-//     having to write wxON_BLOCK_EXIT(fwrite, (buf)(size)(n)(fp)) instead of
-//     wxON_BLOCK_EXIT4(fwrite, buf, size, n, fp)).
+//     macros with different names
 
-#define wxGuardName    wxMAKE_UNIQUE_NAME(wxScopeGuard)
+#define wxGuardName    wxMAKE_UNIQUE_NAME(scopeGuard)
 
 #define wxON_BLOCK_EXIT0_IMPL(n, f) \
     wxScopeGuard n = wxMakeGuard(f); \
@@ -429,10 +346,6 @@ wxPrivate::VariableNullerImpl<T> wxMakeVarNuller(T& var)
 #define wxON_BLOCK_EXIT_OBJ0(o, m) \
     wxON_BLOCK_EXIT_OBJ0_IMPL(wxGuardName, o, &m)
 
-#define wxON_BLOCK_EXIT_THIS0(m) \
-    wxON_BLOCK_EXIT_OBJ0(*this, m)
-
-
 #define wxON_BLOCK_EXIT1_IMPL(n, f, p1) \
     wxScopeGuard n = wxMakeGuard(f, p1); \
     wxPrivateUse(n)
@@ -445,10 +358,6 @@ wxPrivate::VariableNullerImpl<T> wxMakeVarNuller(T& var)
 #define wxON_BLOCK_EXIT_OBJ1(o, m, p1) \
     wxON_BLOCK_EXIT_OBJ1_IMPL(wxGuardName, o, &m, p1)
 
-#define wxON_BLOCK_EXIT_THIS1(m, p1) \
-    wxON_BLOCK_EXIT_OBJ1(*this, m, p1)
-
-
 #define wxON_BLOCK_EXIT2_IMPL(n, f, p1, p2) \
     wxScopeGuard n = wxMakeGuard(f, p1, p2); \
     wxPrivateUse(n)
@@ -460,25 +369,5 @@ wxPrivate::VariableNullerImpl<T> wxMakeVarNuller(T& var)
     wxPrivateUse(n)
 #define wxON_BLOCK_EXIT_OBJ2(o, m, p1, p2) \
     wxON_BLOCK_EXIT_OBJ2_IMPL(wxGuardName, o, &m, p1, p2)
-
-#define wxON_BLOCK_EXIT_THIS2(m, p1, p2) \
-    wxON_BLOCK_EXIT_OBJ2(*this, m, p1, p2)
-
-
-#define wxSetterName wxMAKE_UNIQUE_NAME(wxVarSetter)
-
-#define wxON_BLOCK_EXIT_SET_IMPL(n, var, value) \
-    wxPrivate::VariableSetter n = wxMakeVarSetter(var, value); \
-    wxPrivateUse(n)
-
-#define wxON_BLOCK_EXIT_SET(var, value) \
-    wxON_BLOCK_EXIT_SET_IMPL(wxSetterName, var, value)
-
-#define wxON_BLOCK_EXIT_NULL_IMPL(n, var) \
-    wxPrivate::VariableSetter n = wxMakeVarNuller(var); \
-    wxPrivateUse(n)
-
-#define wxON_BLOCK_EXIT_NULL(ptr) \
-    wxON_BLOCK_EXIT_NULL_IMPL(wxSetterName, ptr)
 
 #endif // _WX_SCOPEGUARD_H_

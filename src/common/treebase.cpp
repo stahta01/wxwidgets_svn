@@ -106,31 +106,6 @@ wxTreeCtrlBase::~wxTreeCtrlBase()
         delete m_imageListState;
 }
 
-void wxTreeCtrlBase::SetItemState(const wxTreeItemId& item, int state)
-{
-    if ( state == wxTREE_ITEMSTATE_NEXT )
-    {
-        int current = GetItemState(item);
-        if ( current == wxTREE_ITEMSTATE_NONE )
-            return;
-        state = current + 1;
-        if ( m_imageListState && state >= m_imageListState->GetImageCount() )
-            state = 0;
-    }
-    else if ( state == wxTREE_ITEMSTATE_PREV )
-    {
-        int current = GetItemState(item);
-        if ( current == wxTREE_ITEMSTATE_NONE )
-            return;
-        state = current - 1;
-        if ( state == -1 )
-            state = m_imageListState ? m_imageListState->GetImageCount() - 1 : 0;
-    }
-    // else: wxTREE_ITEMSTATE_NONE depending on platform
-
-    DoSetItemState(item, state);
-}
-
 static void
 wxGetBestTreeSize(const wxTreeCtrlBase* treeCtrl, wxTreeItemId id, wxSize& size)
 {
@@ -216,7 +191,6 @@ void wxTreeCtrlBase::ExpandAll()
 
 void wxTreeCtrlBase::ExpandAllChildren(const wxTreeItemId& item)
 {
-    Freeze();
     // expand this item first, this might result in its children being added on
     // the fly
     if ( item != GetRootItem() || !HasFlag(wxTR_HIDE_ROOT) )
@@ -231,7 +205,6 @@ void wxTreeCtrlBase::ExpandAllChildren(const wxTreeItemId& item)
     {
         ExpandAllChildren(idCurr);
     }
-    Thaw();
 }
 
 void wxTreeCtrlBase::CollapseAll()
@@ -244,7 +217,6 @@ void wxTreeCtrlBase::CollapseAll()
 
 void wxTreeCtrlBase::CollapseAllChildren(const wxTreeItemId& item)
 {
-    Freeze();
     // first (recursively) collapse all the children
     wxTreeItemIdValue cookie;
     for ( wxTreeItemId idCurr = GetFirstChild(item, cookie);
@@ -256,7 +228,6 @@ void wxTreeCtrlBase::CollapseAllChildren(const wxTreeItemId& item)
 
     // then collapse this element too
     Collapse(item);
-    Thaw();
 }
 
 bool wxTreeCtrlBase::IsEmpty() const
@@ -265,3 +236,4 @@ bool wxTreeCtrlBase::IsEmpty() const
 }
 
 #endif // wxUSE_TREECTRL
+

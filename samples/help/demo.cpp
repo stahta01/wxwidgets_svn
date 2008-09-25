@@ -287,9 +287,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create a simple help provider to make SetHelpText() do something.
     // Note that this must be set before any SetHelpText() calls are made.
 #if USE_SIMPLE_HELP_PROVIDER
@@ -711,7 +708,10 @@ MyModalDialog::MyModalDialog(wxWindow *parent)
     sizerTop->Add(text, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
     sizerTop->Add(sizerRow, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-    SetSizerAndFit(sizerTop);
+    SetSizer(sizerTop);
+
+    sizerTop->SetSizeHints(this);
+    sizerTop->Fit(this);
 
     btnOK->SetFocus();
     btnOK->SetDefault();

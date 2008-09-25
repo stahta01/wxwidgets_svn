@@ -619,7 +619,7 @@ void wxPopupMenuWindow::DoDraw(wxControlRenderer *renderer)
                      dc,
                      y,
                      gi,
-                     item->GetItemLabelText(),
+                     item->GetLabel(),
                      item->GetAccelString(),
                      bmp,
                      flags,
@@ -992,7 +992,7 @@ bool wxPopupMenuWindow::ProcessKeyDown(int key)
 
                     int idxAccel = item->GetAccelIndex();
                     if ( idxAccel != -1 &&
-                         (wxChar)wxTolower(item->GetItemLabelText()[(size_t)idxAccel])
+                         (wxChar)wxTolower(item->GetLabel()[(size_t)idxAccel])
                             == chAccel )
                     {
                         // ok, found an item with this accel
@@ -1519,6 +1519,12 @@ wxMenuItem *wxMenuItemBase::New(wxMenu *parentMenu,
     return new wxMenuItem(parentMenu, id, name, help, kind, subMenu);
 }
 
+/* static */
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
+{
+    return wxStripMenuCodes(text);
+}
+
 // ----------------------------------------------------------------------------
 // wxMenuItem operations
 // ----------------------------------------------------------------------------
@@ -1536,13 +1542,13 @@ void wxMenuItem::UpdateAccelInfo()
     m_strAccel = m_text.AfterFirst(_T('\t'));
 }
 
-void wxMenuItem::SetItemLabel(const wxString& text)
+void wxMenuItem::SetText(const wxString& text)
 {
     if ( text != m_text )
     {
         // first call the base class version to change m_text
         // (and also check if we don't have a stock menu item)
-        wxMenuItemBase::SetItemLabel(text);
+        wxMenuItemBase::SetText(text);
 
         UpdateAccelInfo();
 
@@ -1818,9 +1824,9 @@ bool wxMenuBar::IsEnabledTop(size_t pos) const
     return m_menuInfos[pos].IsEnabled();
 }
 
-void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
+void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)
 {
-    wxCHECK_RET( pos < GetCount(), _T("invalid index in SetMenuLabel") );
+    wxCHECK_RET( pos < GetCount(), _T("invalid index in SetLabelTop") );
 
     if ( label != m_menuInfos[pos].GetOriginalLabel() )
     {
@@ -1831,12 +1837,22 @@ void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
     //else: nothing to do
 }
 
+wxString wxMenuBar::GetLabelTop(size_t pos) const
+{
+    wxCHECK_MSG( pos < GetCount(), wxEmptyString, _T("invalid index in GetLabelTop") );
+
+    return m_menuInfos[pos].GetLabel();
+}
+
+// Gets the original label at the top-level of the menubar
 wxString wxMenuBar::GetMenuLabel(size_t pos) const
 {
-    wxCHECK_MSG( pos < GetCount(), wxEmptyString, _T("invalid index in GetMenuLabel") );
+    wxCHECK_MSG( pos < GetMenuCount(), wxEmptyString,
+                 wxT("invalid menu index in wxMenuBar::GetMenuLabel") );
 
     return m_menuInfos[pos].GetOriginalLabel();
 }
+
 
 // ----------------------------------------------------------------------------
 // wxMenuBar drawing
@@ -1958,7 +1974,7 @@ wxSize wxMenuBar::DoGetBestClientSize() const
     {
         wxClientDC dc(wxConstCast(this, wxMenuBar));
         dc.SetFont(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
-        dc.GetTextExtent(GetMenuLabel(0), &size.x, &size.y);
+        dc.GetTextExtent(GetLabelTop(0), &size.x, &size.y);
 
         // adjust for the renderer we use
         size = GetRenderer()->GetMenuBarItemSize(size);

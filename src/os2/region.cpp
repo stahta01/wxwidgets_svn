@@ -233,12 +233,12 @@ wxRegion::~wxRegion()
 {
 } // end of wxRegion::~wxRegion
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }

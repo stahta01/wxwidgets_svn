@@ -1004,7 +1004,7 @@ size_t wxZipEntry::ReadLocal(wxInputStream& stream, wxMBConv& conv)
 size_t wxZipEntry::WriteLocal(wxOutputStream& stream, wxMBConv& conv) const
 {
     wxString unixName = GetName(wxPATH_UNIX);
-    const wxWX2MBbuf name_buf = unixName.mb_str(conv);
+    const wxWX2MBbuf name_buf = conv.cWX2MB(unixName);
     const char *name = name_buf;
     if (!name) name = "";
     wxUint16 nameLen = wx_truncate_cast(wxUint16, strlen(name));
@@ -1080,12 +1080,12 @@ size_t wxZipEntry::ReadCentral(wxInputStream& stream, wxMBConv& conv)
 size_t wxZipEntry::WriteCentral(wxOutputStream& stream, wxMBConv& conv) const
 {
     wxString unixName = GetName(wxPATH_UNIX);
-    const wxWX2MBbuf name_buf = unixName.mb_str(conv);
+    const wxWX2MBbuf name_buf = conv.cWX2MB(unixName);
     const char *name = name_buf;
     if (!name) name = "";
     wxUint16 nameLen = wx_truncate_cast(wxUint16, strlen(name));
 
-    const wxWX2MBbuf comment_buf = m_Comment.mb_str(conv);
+    const wxWX2MBbuf comment_buf = conv.cWX2MB(m_Comment);
     const char *comment = comment_buf;
     if (!comment) comment = "";
     wxUint16 commentLen = wx_truncate_cast(wxUint16, strlen(comment));
@@ -1235,7 +1235,7 @@ wxZipEndRec::wxZipEndRec()
 
 bool wxZipEndRec::Write(wxOutputStream& stream, wxMBConv& conv) const
 {
-    const wxWX2MBbuf comment_buf = m_Comment.mb_str(conv);
+    const wxWX2MBbuf comment_buf = conv.cWX2MB(m_Comment);
     const char *comment = comment_buf;
     if (!comment) comment = "";
     wxUint16 commentLen = (wxUint16)strlen(comment);
@@ -1463,13 +1463,11 @@ bool wxZipInputStream::LoadEndRecord()
     m_TotalEntries = endrec.GetTotalEntries();
     m_Comment = endrec.GetComment();
 
-    wxUint32 magic = m_TotalEntries ? CENTRAL_MAGIC : END_MAGIC;
-
     // Now find the central-directory. we have the file offset of
     // the CD, so look there first.
     if (m_parent_i_stream->SeekI(endrec.GetOffset()) != wxInvalidOffset &&
-            ReadSignature() == magic) {
-        m_signature = magic;
+            ReadSignature() == CENTRAL_MAGIC) {
+        m_signature = CENTRAL_MAGIC;
         m_position = endrec.GetOffset();
         m_offsetAdjustment = 0;
         return true;
@@ -1479,8 +1477,8 @@ bool wxZipInputStream::LoadEndRecord()
     // to a self extractor, so take the CD size (also in endrec), subtract
     // it from the file offset of the end-central-directory and look there.
     if (m_parent_i_stream->SeekI(endPos - endrec.GetSize())
-            != wxInvalidOffset && ReadSignature() == magic) {
-        m_signature = magic;
+            != wxInvalidOffset && ReadSignature() == CENTRAL_MAGIC) {
+        m_signature = CENTRAL_MAGIC;
         m_position = endPos - endrec.GetSize();
         m_offsetAdjustment = m_position - endrec.GetOffset();
         return true;
@@ -1990,7 +1988,6 @@ void wxZipOutputStream::Init(int level)
     m_comp = NULL;
     m_level = level;
     m_offsetAdjustment = wxInvalidOffset;
-    m_endrecWritten = false;
 }
 
 wxZipOutputStream::~wxZipOutputStream()
@@ -2290,9 +2287,7 @@ bool wxZipOutputStream::Close()
 {
     CloseEntry();
 
-    if (m_lasterror == wxSTREAM_WRITE_ERROR
-        || (m_entries.size() == 0 && m_endrecWritten))
-    {
+    if (m_lasterror == wxSTREAM_WRITE_ERROR || m_entries.size() == 0) {
         wxFilterOutputStream::Close();
         return false;
     }
@@ -2317,7 +2312,6 @@ bool wxZipOutputStream::Close()
     endrec.Write(*m_parent_o_stream, GetConv());
 
     m_lasterror = m_parent_o_stream->GetLastError();
-    m_endrecWritten = true;
     
     if (!wxFilterOutputStream::Close() || !IsOk())
         return false;

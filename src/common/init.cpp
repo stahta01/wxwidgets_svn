@@ -27,12 +27,12 @@
     #include "wx/app.h"
     #include "wx/filefn.h"
     #include "wx/log.h"
+    #include "wx/thread.h"
     #include "wx/intl.h"
     #include "wx/module.h"
 #endif
 
 #include "wx/init.h"
-#include "wx/thread.h"
 
 #include "wx/ptr_scpd.h"
 #include "wx/except.h"
@@ -297,12 +297,6 @@ bool wxEntryStart(int& argc, wxChar **argv)
     {
         return false;
     }
-
-    // remember, possibly modified (e.g. due to removal of toolkit-specific
-    // parameters), command line arguments in member variables
-    app->argc = argc;
-    app->argv = argv;
-
 
     wxCallAppCleanup callAppCleanup(app.get());
 

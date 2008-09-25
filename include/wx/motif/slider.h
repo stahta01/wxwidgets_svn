@@ -15,7 +15,7 @@
 #include "wx/control.h"
 
 // Slider
-class WXDLLIMPEXP_CORE wxSlider: public wxSliderBase
+class WXDLLEXPORT wxSlider: public wxSliderBase
 {
     DECLARE_DYNAMIC_CLASS(wxSlider)
 

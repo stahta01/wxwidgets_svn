@@ -16,13 +16,13 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxScreenDC;
+class WXDLLEXPORT wxScreenDC;
 
 //-----------------------------------------------------------------------------
 // wxScreenDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxScreenDC: public wxDC
+class WXDLLEXPORT wxScreenDC: public wxDC
 {
 public:
     wxScreenDC();
