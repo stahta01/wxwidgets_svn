@@ -1,6 +1,8 @@
 import os
-import sys
 import string
+import subprocess
+import sys
+import time
 
 class BuildError(Exception):
     def __init__(self, value):
@@ -13,9 +15,10 @@ def runInDir(command, dir=None):
     if dir:
         olddir = os.getcwd()
         os.chdir(dir)
-        
-    result = os.system(command)
-    
+
+    commandStr = string.join(command, " ")
+    result = os.system(commandStr)
+
     if dir:
         os.chdir(olddir)
         
@@ -50,7 +53,6 @@ class Builder:
         """
         Run sanity checks before attempting to build with this format
         """
-
         # Make sure the builder program exists
         programPath = self.getProgramPath()
         if os.path.exists(programPath):
@@ -59,6 +61,9 @@ class Builder:
             # check the PATH for the program
             # TODO: How do we check if we're in Cygwin?
             if sys.platform.startswith("win"):
+                result = os.system(self.name)
+                if result == 0:
+                    return True
                 dirs = os.environ["PATH"].split(":")
                 
                 for dir in dirs:
@@ -98,7 +103,14 @@ class Builder:
         if self.isAvailable():
             optionsStr = string.join(targets, " ") if targets else ""
             optionsStr += string.join(options, " ") if options else ""
-            result = runInDir("%s %s" % (self.getProgramPath(), optionsStr), dir)
+            
+            print "Options %r" % options
+            
+            optionList = list(options)
+                
+            optionList.insert(0, self.getProgramPath())
+            
+            result = runInDir(optionList, dir)
 
             return result
         
@@ -154,6 +166,8 @@ class MSVCBuilder(Builder):
     def __init__(self):
         Builder.__init__(self, commandName="nmake", formatName="msvc")
         
+    def isAvailable(self):
+        return os.system("%s /help" % self.name) == 0
 
 builders = [GNUMakeBuilder, XCodeBuilder, AutoconfBuilder, MSVCBuilder]
 

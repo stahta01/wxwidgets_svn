@@ -6,6 +6,7 @@
 ###################################
 
 import os
+import re
 import sys
 import builder
 import optparse
@@ -14,10 +15,17 @@ import types
 # builder object
 wxBuilder = None
 
-scriptDir = os.path.join(sys.path[0])
+scriptDir = os.path.abspath(sys.path[0])
+wxRootDir = os.path.abspath(os.path.join(scriptDir, "..", ".."))
 contribDir = os.path.join("contrib", "src")
+if sys.platform.startswith("win"):
+    contribDir = os.path.join(wxRootDir, "contrib", "build")
 
-format = "autoconf"
+if sys.platform.startswith("win"):
+    toolkit = "msvc"
+else:
+    toolkit = "autoconf"
+
 option_dict = { 
             "clean"     : (False, "Clean all files from the build directory"),
             "debug"     : (False, "Build the library in debug symbols"),
@@ -30,10 +38,6 @@ option_dict = {
             "wxpython"  : (False, "Build the wxWidgets library with all options needed by wxPython"),
             "cocoa"     : (False, "Build the Cooca port (Mac only currently)."),
           }
-          
-toggle_opts = {
-        "unicode": [{"unicode": "store_true", "ansi": "store_false"}]  
-        }
     
 parser = optparse.OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
 
@@ -51,16 +55,20 @@ options, arguments = parser.parse_args()
 #if len(sys.argv) > 1:
 #    for arg in sys.argv[1:]:
 #        if arg[0:2] == "no-":
-#            options[arg[3:]] = False
+#            flags[arg[3:]] = False
 #        else:
-#            options[arg] = True
+#            flags[arg] = True
 
 def exitIfError(code, msg):
     if code != 0:
         print msg
         sys.exit(code)
 
-if format == "autoconf":
+# compiler / build system specific args
+buildDir = None
+args = None
+
+if toolkit == "autoconf":
     configure_opts = []
     
     if options.unicode:
@@ -75,7 +83,6 @@ if format == "autoconf":
     if options.cocoa:
         configure_opts.append("--with-cocoa")
     
-
     wxpy_configure_opts = [
                         "--with-opengl",
                         "--enable-sound",
@@ -105,6 +112,60 @@ if format == "autoconf":
     wxBuilder = builder.AutoconfBuilder()
     if not options.no_config and not options.clean:
         exitIfError(wxBuilder.configure(configure_opts), "Error running configure")
+
+elif toolkit == "msvc":
+    flags = {}
+    buildDir = os.path.join(scriptDir, "..", "msw")
+    args = ["-f makefile.vc"]
+    if options.unicode:
+        flags["wxUSE_UNICODE"] = "1"
+        flags["wxUSE_UNICODE_MSLU"] = "1"
+        args.append("UNICODE=1")
+        args.append("MSLU=1")
+
+    if options.wxpython:
+        args.append("OFFICIAL_BUILD=1")
+        args.append("SHARED=1")
+        args.append("MONOLITHIC=0")
+        args.append("USE_OPENGL=1")
+        args.append("USE_GDIPLUS=1")
+        flags["wxDIALOG_UNIT_COMPATIBILITY "] = "0"
+        flags["wxUSE_DEBUG_CONTEXT"] = "1"
+        flags["wxUSE_MEMORY_TRACING"] = "1"
+        flags["wxUSE_DIALUP_MANAGER"] = "0"
+        flags["wxUSE_GLCANVAS"] = "1"
+        flags["wxUSE_POSTSCRIPT"] = "1"
+        flags["wxUSE_AFM_FOR_POSTSCRIPT"] = "0"
+        flags["wxUSE_DISPLAY"] = "1"
+        flags["wxUSE_DIB_FOR_BITMAP"] = "1"
+        flags["wxUSE_DEBUGREPORT"] = "0"
+        flags["wxUSE_GRAPHICS_CONTEXT"] = "1"
+        flags["wxUSE_DATEPICKCTRL_GENERIC"] = "1"
+    
+        # setup the wxPython 'hybrid' build
+        if not options.debug:
+            args.append("DEBUG_FLAG=1")
+            args.append("CXXFLAGS=/D__NO_VC_CRTDBG__")
+            args.append("WXDEBUGFLAG=h")
+            args.append("BUILD=release")
+            flags["wxUSE_MEMORY_TRACING"] = "0"
+            flags["wxUSE_DEBUG_CONTEXT"] = "0"
+
+    mswIncludeDir = os.path.join(wxRootDir, "include", "wx", "msw")
+    setup0File = os.path.join(mswIncludeDir, "setup0.h")
+    setupText = open(setup0File, "rb").read()
+    
+    for flag in flags:
+        setupText, subsMade = re.subn(flag + "\s+?\d", "%s %s" % (flag, flags[flag]), setupText)
+        if subsMade == 0:
+            print "Flag %s wasn't found!" % flag
+            sys.exit(1)
+
+    setupFile = open(os.path.join(mswIncludeDir, "setup.h"), "wb")
+    setupFile.write(setupText)
+    setupFile.close()
+    
+    wxBuilder = builder.MSVCBuilder()
     
 if not wxBuilder:
     print "Builder not available for your specified platform/compiler."
@@ -120,13 +181,11 @@ if options.clean:
     
     sys.exit(0)
     
-
-    
-exitIfError(wxBuilder.build(), "Error building")
+exitIfError(wxBuilder.build(dir=buildDir, options=args), "Error building")
     
 if options.wxpython and os.path.exists(contribDir):
-    exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos")), "Error building gizmos")
-    exitIfError(wxBuilder.build(os.path.join(contribDir, "stc")), "Error building stc")
+    exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
+    exitIfError(wxBuilder.build(os.path.join(contribDir, "stc"),options=args), "Error building stc")
     
 if options.install:
     wxBuilder.install()
