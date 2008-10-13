@@ -35,7 +35,8 @@ option_dict = {
             "debug"     : (False, "Build the library in debug symbols"),
             "install"   : (False, "Install the toolkit to the installdir directory, or the default dir."),
             "installdir" : (".", "Directory where built wxWidgets will be installed"),
-            "mac_fat_binary" : (False, "Build Mac version as a universal (fat) binary"),
+            "mac_universal_binary" : (False, "Build Mac version as a universal binary"),
+            "mac_lipo" : (False, "EXPERIMENTAL: Create a universal binary by merging a PPC and Intel build together."),
             "mac_framework" : (False, "Install the Mac build as a framework"),
             "no_config" : (False, "Turn off configure step on autoconf builds"),
             "rebake"    : (False, "Regenerate Bakefile and autoconf files"),
@@ -69,10 +70,32 @@ def exitIfError(code, msg):
     if code != 0:
         print msg
         sys.exit(code)
+        
+def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler="gcc-4.0", target="10.4", flags=""):
+    # PPC build
+    archInstallDir = installDir + "/" + arch
+    os.environ["CXX"] = "%s -arch %s %s" % (cxxcompiler, arch, flags)
+    os.environ["CC"] = "%s -arch %s %s" % (cccompiler, arch, flags)
+    os.environ["MACOSX_DEPLOYMENT_TARGET"] = target
+    archArgs = ["prefix=" + archInstallDir]
+    if args:
+        archArgs.extend(args)
+    exitIfError(wxBuilder.configure(configure_opts), "Error running configure")
+    exitIfError(wxBuilder.build(dir=buildDir, options=archArgs), "Error building")
+    exitIfError(wxBuilder.install(options=["prefix=" + archInstallDir]), "Error Installing")
+    
+    if options.wxpython and os.path.exists(contribDir):
+        exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
+        exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos"), options=["prefix=" + archInstallDir]), "Error Installing gizmos")
+        
+        exitIfError(wxBuilder.build(os.path.join(contribDir, "stc"),options=args), "Error building stc")
+        exitIfError(wxBuilder.install(os.path.join(contribDir, "stc"),options=["prefix=" + archInstallDir]), "Error installing stc")
+
 
 # compiler / build system specific args
 buildDir = None
 args = None
+installDir = options.installdir
 
 if toolkit == "autoconf":
     configure_opts = []
@@ -83,7 +106,7 @@ if toolkit == "autoconf":
     if options.debug:
         configure_opts.append("--enable-debug")
         
-    if options.mac_fat_binary: 
+    if options.mac_universal_binary: 
         configure_opts.append("--enable-universal_binary")
         
     if options.cocoa:
@@ -108,7 +131,6 @@ if toolkit == "autoconf":
                         ]
                         
     if not options.mac_framework and options.installdir != option_dict["installdir"][0]:
-        installDir = options.installdir
         configure_opts.append("--prefix=" + installDir)
 
     if options.wxpython:
@@ -127,7 +149,7 @@ if toolkit == "autoconf":
         
     print "Configure options: " + `configure_opts`
     wxBuilder = builder.AutoconfBuilder()
-    if not options.no_config and not options.clean:
+    if not options.no_config and not options.clean and not options.mac_lipo:
         exitIfError(wxBuilder.configure(configure_opts), "Error running configure")
 
 elif toolkit == "msvc":
@@ -197,34 +219,60 @@ if options.clean:
         exitIfError(wxBuilder.clean(os.path.join(contribDir, "stc")), "Error building stc")
     
     sys.exit(0)
-    
-exitIfError(wxBuilder.build(dir=buildDir, options=args), "Error building")
-    
-if options.wxpython and os.path.exists(contribDir):
-    exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
-    exitIfError(wxBuilder.build(os.path.join(contribDir, "stc"),options=args), "Error building stc")
-    
-if options.install:
-    wxBuilder.install()
+
+isLipo = False    
+if options.mac_lipo:
+    if options.mac_universal_binary:
+        print "WARNING: Cannot specify both mac_lipo and mac_universal_binary, as they conflict."
+        print "         Using mac_universal_binary..."
+    else:
+        isLipo = True
+        # TODO: Add 64-bit when we're building OS X Cocoa
+        
+        # 2.8, use gcc 3.3 on PPC for 10.3 support...
+        if os.path.exists(contribDir):
+            doMacLipoBuild("ppc", buildDir, installDir, cxxcompiler="g++-3.3", cccompiler="gcc-3.3", 
+                        target="10.3", flags="-DMAC_OS_X_VERSION_MAX_ALLOWED=1040")
+        else:
+            doMacLipoBuild("ppc", buildDir, installDir)
+
+        doMacLipoBuild("i386", buildDir, installDir)
+
+        result = os.system("python %s/distrib/scripts/mac/lipo-dir.py %s %s %s" % (wxRootDir, installDir + "/ppc", installDir + "/i386", installDir))
+        fname = os.path.abspath(installDir + '/bin/wx-config') 
+        data = open(fname).read()
+        data = data.replace('ppc/', '')
+        data = data.replace('i386/', '')
+        open(fname, 'w').write(data)
+  
+if not isLipo:
+    exitIfError(wxBuilder.build(dir=buildDir, options=args), "Error building")
     
     if options.wxpython and os.path.exists(contribDir):
-        exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos")), "Error building gizmos")
-        exitIfError(wxBuilder.install(os.path.join(contribDir, "stc")), "Error building stc")
+        exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
+        exitIfError(wxBuilder.build(os.path.join(contribDir, "stc"),options=args), "Error building stc")
+        
+    if options.install:
+        wxBuilder.install()
+        
+        if options.wxpython and os.path.exists(contribDir):
+            exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos")), "Error building gizmos")
+            exitIfError(wxBuilder.install(os.path.join(contribDir, "stc")), "Error building stc")
+        
+if options.mac_framework:
+    os.chdir(installDir)
+    build_string = ""
+    if options.debug:
+        build_string = "d"
+    version = commands.getoutput("bin/wx-config --version")
+    os.system("ln -s -f bin Resources")
+    os.system("ln -s -f lib/libwx_osx_cocoau%s-%s.dylib ./wx" % (build_string, version))
+    os.system("ln -s -f include Headers")
     
-    if options.mac_framework:
-        os.chdir(installDir)
-        build_string = ""
-        if options.debug:
-            build_string = "d"
-        version = commands.getoutput("bin/wx-config --version")
-        os.system("ln -s -f bin Resources")
-        os.system("ln -s -f lib/libwx_osx_cocoau%s-%s.dylib ./wx" % (build_string, version))
-        os.system("ln -s -f include Headers")
-        
-        os.chdir("include")
-        
-        header_template = """
-        
+    os.chdir("include")
+    
+    header_template = """
+    
 #ifndef __WX_FRAMEWORK_HEADER__
 #define __WX_FRAMEWORK_HEADER__
 
@@ -232,13 +280,13 @@ if options.install:
 
 #endif // __WX_FRAMEWORK_HEADER__
 """
-        headers = ""
-        for include in glob.glob("./*.h"):
-            headers += include + "\n"
-            
-        framework_header = open("wx.h", "w")
-        framework_header.write(header_template % headers)
-        framework_header.close()
+    headers = ""
+    for include in glob.glob("./*.h"):
+        headers += include + "\n"
         
-        os.system("ln -s -f wx-%s/wx wx" % version[0:2])
-        
+    framework_header = open("wx.h", "w")
+    framework_header.write(header_template % headers)
+    framework_header.close()
+    
+    os.system("ln -s -f wx-%s/wx wx" % version[0:2])
+    
