@@ -9,6 +9,8 @@ import os
 import re
 import sys
 import builder
+import commands
+import glob
 import optparse
 import types
 
@@ -18,6 +20,8 @@ wxBuilder = None
 scriptDir = os.path.abspath(sys.path[0])
 wxRootDir = os.path.abspath(os.path.join(scriptDir, "..", ".."))
 contribDir = os.path.join("contrib", "src")
+installDir = None
+
 if sys.platform.startswith("win"):
     contribDir = os.path.join(wxRootDir, "contrib", "build")
 
@@ -32,11 +36,13 @@ option_dict = {
             "install"   : (False, "Install the toolkit to the installdir directory, or the default dir."),
             "installdir" : (".", "Directory where built wxWidgets will be installed"),
             "mac_fat_binary" : (False, "Build Mac version as a universal (fat) binary"),
+            "mac_framework" : (False, "Install the Mac build as a framework"),
             "no_config" : (False, "Turn off configure step on autoconf builds"),
             "rebake"    : (False, "Regenerate Bakefile and autoconf files"),
             "unicode"   : (False, "Build the library with unicode support"),
             "wxpython"  : (False, "Build the wxWidgets library with all options needed by wxPython"),
             "cocoa"     : (False, "Build the Cooca port (Mac only currently)."),
+            "osx_cocoa" : (False, "Build the new Cocoa port"), 
           }
     
 parser = optparse.OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
@@ -82,6 +88,9 @@ if toolkit == "autoconf":
         
     if options.cocoa:
         configure_opts.append("--with-cocoa")
+        
+    if options.osx_cocoa:
+        configure_opts.append("--with-osx_cocoa")
     
     wxpy_configure_opts = [
                         "--with-opengl",
@@ -98,8 +107,9 @@ if toolkit == "autoconf":
                         "--enable-monolithic"
                         ]
                         
-    if options.installdir != option_dict["installdir"][0]:
-        configure_opts.append("--prefix=" + options.installdir)
+    if not options.mac_framework and options.installdir != option_dict["installdir"][0]:
+        installDir = options.installdir
+        configure_opts.append("--prefix=" + installDir)
 
     if options.wxpython:
         configure_opts.extend(wxpy_configure_opts)
@@ -107,6 +117,13 @@ if toolkit == "autoconf":
     if options.rebake:
         retval = os.system("make -f autogen.mk")
         exitIfError(retval, "Error running autogen.mk")
+        
+    if options.mac_framework:
+        installDir = "/Library/Frameworks/wx.Framework/Versions/Current"
+        configure_opts.append("--prefix=" + installDir)
+        # framework builds always need to be monolithic
+        if not "--enable-monolithic" in configure_opts:
+            configure_opts.append("--enable-monolithic")
         
     print "Configure options: " + `configure_opts`
     wxBuilder = builder.AutoconfBuilder()
@@ -194,3 +211,34 @@ if options.install:
         exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos")), "Error building gizmos")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "stc")), "Error building stc")
     
+    if options.mac_framework:
+        os.chdir(installDir)
+        build_string = ""
+        if options.debug:
+            build_string = "d"
+        version = commands.getoutput("bin/wx-config --version")
+        os.system("ln -s -f bin Resources")
+        os.system("ln -s -f lib/libwx_osx_cocoau%s-%s.dylib ./wx" % (build_string, version))
+        os.system("ln -s -f include Headers")
+        
+        os.chdir("include")
+        
+        header_template = """
+        
+#ifndef __WX_FRAMEWORK_HEADER__
+#define __WX_FRAMEWORK_HEADER__
+
+%s
+
+#endif // __WX_FRAMEWORK_HEADER__
+"""
+        headers = ""
+        for include in glob.glob("./*.h"):
+            headers += include + "\n"
+            
+        framework_header = open("wx.h", "w")
+        framework_header.write(header_template % headers)
+        framework_header.close()
+        
+        os.system("ln -s -f wx-%s/wx wx" % version[0:2])
+        
