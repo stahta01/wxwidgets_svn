@@ -116,9 +116,10 @@ class Builder:
         
         return False
 
-    def install(self, dir=None):
+    def install(self, dir=None, options=None):
         if self.isAvailable():
-            result = runInDir("make install", dir)
+            optionsStr = string.join(options, " ") if options else ""
+            result = runInDir("make install %s" % optionsStr, dir)
             return result
             
         return False
