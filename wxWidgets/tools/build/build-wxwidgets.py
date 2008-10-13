@@ -84,7 +84,7 @@ def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler
     exitIfError(wxBuilder.build(dir=buildDir, options=archArgs), "Error building")
     exitIfError(wxBuilder.install(options=["prefix=" + archInstallDir]), "Error Installing")
     
-    if options.wxpython and os.path.exists(contribDir):
+    if options.wxpython and os.path.exists(wxRootDir, contribDir):
         exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos"), options=["prefix=" + archInstallDir]), "Error Installing gizmos")
         
@@ -230,7 +230,7 @@ if options.mac_lipo:
         # TODO: Add 64-bit when we're building OS X Cocoa
         
         # 2.8, use gcc 3.3 on PPC for 10.3 support...
-        if os.path.exists(contribDir):
+        if os.path.exists(os.path.join(wxRootDir, contribDir)):
             doMacLipoBuild("ppc", buildDir, installDir, cxxcompiler="g++-3.3", cccompiler="gcc-3.3", 
                         target="10.3", flags="-DMAC_OS_X_VERSION_MAX_ALLOWED=1040")
         else:
