@@ -80,11 +80,13 @@ def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler
     archArgs = ["prefix=" + archInstallDir]
     if args:
         archArgs.extend(args)
-    exitIfError(wxBuilder.configure(configure_opts), "Error running configure")
+    
+    if not options.no_config:
+    	exitIfError(wxBuilder.configure(configure_opts), "Error running configure")
     exitIfError(wxBuilder.build(dir=buildDir, options=archArgs), "Error building")
     exitIfError(wxBuilder.install(options=["prefix=" + archInstallDir]), "Error Installing")
     
-    if options.wxpython and os.path.exists(wxRootDir, contribDir):
+    if options.wxpython and os.path.exists(os.path.join(wxRootDir, contribDir)):
         exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos"), options=["prefix=" + archInstallDir]), "Error Installing gizmos")
         

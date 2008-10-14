@@ -100,14 +100,13 @@ class Builder:
         return True
             
     def build(self, dir=None, projectFile=None, targets=None, options=None):
-        if self.isAvailable():
-            optionsStr = string.join(targets, " ") if targets else ""
-            optionsStr += string.join(options, " ") if options else ""
-            
+        if self.isAvailable():            
             print "Options %r" % options
-            
-            optionList = list(options)
-                
+            if options:
+            	optionList = list(options)
+            else:
+            	optionList = []
+
             optionList.insert(0, self.getProgramPath())
             
             result = runInDir(optionList, dir)
@@ -118,8 +117,11 @@ class Builder:
 
     def install(self, dir=None, options=None):
         if self.isAvailable():
-            optionsStr = string.join(options, " ") if options else ""
-            result = runInDir("make install %s" % optionsStr, dir)
+            
+            args = ["make", "install"]
+            if options:
+            	args.extend(options)
+            result = runInDir(args, dir)
             return result
             
         return False
