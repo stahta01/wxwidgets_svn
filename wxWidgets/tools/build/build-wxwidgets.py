@@ -12,6 +12,8 @@ import builder
 import commands
 import glob
 import optparse
+import platform
+import shutil
 import types
 
 # builder object
@@ -71,6 +73,15 @@ def exitIfError(code, msg):
         print msg
         sys.exit(code)
         
+def getWxRelease():
+    global wxRootDir
+    configureText = open(os.path.join(wxRootDir, "configure.in"), "r").read()
+    
+    majorVersion = re.search("wx_major_version_number=(\d)", configureText).group(1)
+    minorVersion = re.search("wx_minor_version_number=(\d)", configureText).group(1)
+    
+    return "%s.%s" % (majorVersion, minorVersion)
+        
 def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler="gcc-4.0", target="10.4", flags=""):
     # PPC build
     archInstallDir = installDir + "/" + arch
@@ -78,22 +89,32 @@ def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler
     os.environ["CC"] = "%s -arch %s %s" % (cccompiler, arch, flags)
     os.environ["MACOSX_DEPLOYMENT_TARGET"] = target
     archArgs = ["prefix=" + archInstallDir]
+    buildRoot = "bld-" + arch
+    if buildDir:
+        buildRoot = buildDir + "/" + buildRoot
+    
+    if not os.path.exists(buildRoot):
+        os.makedirs(buildRoot)
+    
+    olddir = os.getcwd()
+    os.chdir(buildRoot)
     if args:
         archArgs.extend(args)
     
     if not options.no_config:
-    	exitIfError(wxBuilder.configure(configure_opts), "Error running configure")
-    exitIfError(wxBuilder.build(dir=buildDir, options=archArgs), "Error building")
+    	exitIfError(wxBuilder.configure(options=configure_opts), "Error running configure")
+    exitIfError(wxBuilder.build(options=archArgs), "Error building")
     exitIfError(wxBuilder.install(options=["prefix=" + archInstallDir]), "Error Installing")
     
     if options.wxpython and os.path.exists(os.path.join(wxRootDir, contribDir)):
-        exitIfError(wxBuilder.build(os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
+        exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos"), options=["prefix=" + archInstallDir]), "Error Installing gizmos")
         
-        exitIfError(wxBuilder.build(os.path.join(contribDir, "stc"),options=args), "Error building stc")
+        exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "stc"),options=args), "Error building stc")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "stc"),options=["prefix=" + archInstallDir]), "Error installing stc")
 
-
+    os.chdir(olddir)
+    
 # compiler / build system specific args
 buildDir = None
 args = None
@@ -143,7 +164,7 @@ if toolkit == "autoconf":
         exitIfError(retval, "Error running autogen.mk")
         
     if options.mac_framework:
-        installDir = "/Library/Frameworks/wx.Framework/Versions/Current"
+        installDir = "/Library/Frameworks/wx.Framework/Versions/%s" %  getWxRelease()
         configure_opts.append("--prefix=" + installDir)
         # framework builds always need to be monolithic
         if not "--enable-monolithic" in configure_opts:
@@ -152,7 +173,7 @@ if toolkit == "autoconf":
     print "Configure options: " + `configure_opts`
     wxBuilder = builder.AutoconfBuilder()
     if not options.no_config and not options.clean and not options.mac_lipo:
-        exitIfError(wxBuilder.configure(configure_opts), "Error running configure")
+        exitIfError(wxBuilder.configure(options=configure_opts), "Error running configure")
 
 elif toolkit == "msvc":
     flags = {}
@@ -232,7 +253,10 @@ if options.mac_lipo:
         # TODO: Add 64-bit when we're building OS X Cocoa
         
         # 2.8, use gcc 3.3 on PPC for 10.3 support...
-        if os.path.exists(os.path.join(wxRootDir, contribDir)):
+        macVersion = platform.mac_ver()[0]
+        isLeopard = macVersion.find("10.5") != -1
+        
+        if not isLeopard and os.path.exists(os.path.join(wxRootDir, contribDir)):
             doMacLipoBuild("ppc", buildDir, installDir, cxxcompiler="g++-3.3", cccompiler="gcc-3.3", 
                         target="10.3", flags="-DMAC_OS_X_VERSION_MAX_ALLOWED=1040")
         else:
@@ -246,6 +270,9 @@ if options.mac_lipo:
         data = data.replace('ppc/', '')
         data = data.replace('i386/', '')
         open(fname, 'w').write(data)
+        
+        shutil.rmtree(installDir + "/ppc")
+        shutil.rmtree(installDir + "/i386")
   
 if not isLipo:
     exitIfError(wxBuilder.build(dir=buildDir, options=args), "Error building")
@@ -266,10 +293,19 @@ if options.mac_framework:
     build_string = ""
     if options.debug:
         build_string = "d"
-    version = commands.getoutput("bin/wx-config --version")
+    version = commands.getoutput("bin/wx-config --release")
+    basename = commands.getoutput("bin/wx-config --basename")
     os.system("ln -s -f bin Resources")
-    os.system("ln -s -f lib/libwx_osx_cocoau%s-%s.dylib ./wx" % (build_string, version))
+    os.system("ln -s -f lib/lib%s-%s.dylib ./wx" % (basename, version))
     os.system("ln -s -f include Headers")
+    
+    for lib in ["GL", "STC", "Gizmos"]:  
+        libfile = "lib/lib%s_%s-%s.dylib" % (basename, lib.lower(), version)
+        if os.path.exists(libfile):
+            frameworkDir = "Framework/wx%s/%s" % (lib, version)
+            if not os.path.exists(frameworkDir):
+                os.makedirs(frameworkDir)
+            os.system("ln -s -f ../../../%s %s/wx%s" % (libfile, frameworkDir, lib))        
     
     os.chdir("include")
     
@@ -283,12 +319,12 @@ if options.mac_framework:
 #endif // __WX_FRAMEWORK_HEADER__
 """
     headers = ""
-    for include in glob.glob("./*.h"):
-        headers += include + "\n"
+    header_dir = "wx-%s/wx" % version
+    for include in glob.glob(header_dir + "/*.h"):
+        headers += "wx/" + os.path.basename(include) + "\n"
         
     framework_header = open("wx.h", "w")
     framework_header.write(header_template % headers)
     framework_header.close()
     
-    os.system("ln -s -f wx-%s/wx wx" % version[0:2])
-    
+    os.system("ln -s -f %s wx" % header_dir)
