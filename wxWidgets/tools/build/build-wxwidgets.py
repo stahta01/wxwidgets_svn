@@ -334,7 +334,7 @@ if options.mac_framework:
     
     os.system("ln -s -f %s wx" % header_dir)
     
-    os.chdir(os.path.join(installDir, "..", "..")
+    os.chdir(os.path.join(installDir, "..", ".."))
     os.system("ln -s -f Versions/%s Versions/Current" % os.path.basename(installDir))
     os.system("ln -s -f Versions/Current/Headers Headers" % os.path.basename(installDir))
     os.system("ln -s -f Versions/Current/Resources Resources" % os.path.basename(installDir))
