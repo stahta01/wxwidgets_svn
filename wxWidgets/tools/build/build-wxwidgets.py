@@ -297,6 +297,11 @@ if options.mac_framework:
     basename = commands.getoutput("bin/wx-config --basename")
     os.system("ln -s -f bin Resources")
     os.system("ln -s -f lib/lib%s-%s.dylib ./wx" % (basename, version))
+    
+    for lib in glob.glob("lib/*.dylib"):
+        if not os.path.islink(lib):
+            os.system("install_name_tool -id %s/%s" % (installDir, lib))
+    
     os.system("ln -s -f include/wx Headers")
     
     for lib in ["GL", "STC", "Gizmos"]:  
