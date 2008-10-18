@@ -164,7 +164,7 @@ if toolkit == "autoconf":
         exitIfError(retval, "Error running autogen.mk")
         
     if options.mac_framework:
-        installDir = "/Library/Frameworks/wx.Framework/Versions/%s" %  getWxRelease()
+        installDir = "/Library/Frameworks/wx.framework/Versions/%s" %  getWxRelease()
         configure_opts.append("--prefix=" + installDir)
         # framework builds always need to be monolithic
         if not "--enable-monolithic" in configure_opts:
@@ -297,12 +297,12 @@ if options.mac_framework:
     basename = commands.getoutput("bin/wx-config --basename")
     os.system("ln -s -f bin Resources")
     os.system("ln -s -f lib/lib%s-%s.dylib ./wx" % (basename, version))
-    os.system("ln -s -f include Headers")
+    os.system("ln -s -f include/wx Headers")
     
     for lib in ["GL", "STC", "Gizmos"]:  
         libfile = "lib/lib%s_%s-%s.dylib" % (basename, lib.lower(), version)
         if os.path.exists(libfile):
-            frameworkDir = "Framework/wx%s/%s" % (lib, version)
+            frameworkDir = "framework/wx%s/%s" % (lib, version)
             if not os.path.exists(frameworkDir):
                 os.makedirs(frameworkDir)
             os.system("ln -s -f ../../../%s %s/wx%s" % (libfile, frameworkDir, lib))        
@@ -328,3 +328,9 @@ if options.mac_framework:
     framework_header.close()
     
     os.system("ln -s -f %s wx" % header_dir)
+    
+    os.chdir(os.path.join(installDir, "..", "..")
+    os.system("ln -s -f Versions/%s Versions/Current" % os.path.basename(installDir))
+    os.system("ln -s -f Versions/Current/Headers Headers" % os.path.basename(installDir))
+    os.system("ln -s -f Versions/Current/Resources Resources" % os.path.basename(installDir))
+    
