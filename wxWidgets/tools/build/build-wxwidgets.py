@@ -300,7 +300,7 @@ if options.mac_framework:
     
     for lib in glob.glob("lib/*.dylib"):
         if not os.path.islink(lib):
-            os.system("install_name_tool -id %s/%s" % (installDir, lib))
+            os.system("install_name_tool -id %s %s" % (os.path.join(installDir, lib), lib))
     
     os.system("ln -s -f include/wx Headers")
     
@@ -335,8 +335,8 @@ if options.mac_framework:
     os.system("ln -s -f %s wx" % header_dir)
     
     os.chdir(os.path.join(installDir, "..", ".."))
-    os.system("ln -s -f Versions/%s Versions/Current" % os.path.basename(installDir))
-    os.system("ln -s -f Versions/Current/Headers Headers" % os.path.basename(installDir))
-    os.system("ln -s -f Versions/Current/Resources Resources" % os.path.basename(installDir))
-    os.system("ln -s -f Versions/Current/wx wx" % os.path.basename(installDir))
+    os.system("ln -s -f %s Versions/Current" % os.path.basename(installDir))
+    os.system("ln -s -f Versions/Current/Headers Headers")
+    os.system("ln -s -f Versions/Current/Resources Resources")
+    os.system("ln -s -f Versions/Current/wx wx")
     
