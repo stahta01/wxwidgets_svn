@@ -45,7 +45,9 @@ option_dict = {
             "unicode"   : (False, "Build the library with unicode support"),
             "wxpython"  : (False, "Build the wxWidgets library with all options needed by wxPython"),
             "cocoa"     : (False, "Build the Cooca port (Mac only currently)."),
-            "osx_cocoa" : (False, "Build the new Cocoa port"), 
+            "osx_cocoa" : (False, "Build the new Cocoa port"),
+            "shared"    : (False, "Build wx as a dynamic library"),
+            "cairo"     : (False, "Build support for wxCairoContext (always true on GTK+)"),
           }
     
 parser = optparse.OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
@@ -175,22 +177,18 @@ if toolkit == "autoconf":
     if not options.no_config and not options.clean and not options.mac_lipo:
         exitIfError(wxBuilder.configure(options=configure_opts), "Error running configure")
 
-elif toolkit == "msvc":
+elif toolkit in ["msvc", "msvcProject"]:
     flags = {}
     buildDir = os.path.join(scriptDir, "..", "msw")
-    args = ["-f makefile.vc"]
+
     if options.unicode:
         flags["wxUSE_UNICODE"] = "1"
         flags["wxUSE_UNICODE_MSLU"] = "1"
-        args.append("UNICODE=1")
-        args.append("MSLU=1")
+
+    if options.cairo:
+        flags["wxUSE_CAIRO"] = "1"
 
     if options.wxpython:
-        args.append("OFFICIAL_BUILD=1")
-        args.append("SHARED=1")
-        args.append("MONOLITHIC=0")
-        args.append("USE_OPENGL=1")
-        args.append("USE_GDIPLUS=1")
         flags["wxDIALOG_UNIT_COMPATIBILITY "] = "0"
         flags["wxUSE_DEBUG_CONTEXT"] = "1"
         flags["wxUSE_MEMORY_TRACING"] = "1"
@@ -206,10 +204,6 @@ elif toolkit == "msvc":
     
         # setup the wxPython 'hybrid' build
         if not options.debug:
-            args.append("DEBUG_FLAG=1")
-            args.append("CXXFLAGS=/D__NO_VC_CRTDBG__")
-            args.append("WXDEBUGFLAG=h")
-            args.append("BUILD=release")
             flags["wxUSE_MEMORY_TRACING"] = "0"
             flags["wxUSE_DEBUG_CONTEXT"] = "0"
 
@@ -226,8 +220,38 @@ elif toolkit == "msvc":
     setupFile = open(os.path.join(mswIncludeDir, "setup.h"), "wb")
     setupFile.write(setupText)
     setupFile.close()
-    
-    wxBuilder = builder.MSVCBuilder()
+    args = []
+    if toolkit == "msvc":
+        print "setting args..."
+        args.append("-f makefile.vc")
+        if options.unicode:
+            args.append("UNICODE=1")
+            args.append("MSLU=1")
+
+        if options.wxpython:
+            args.append("OFFICIAL_BUILD=1")
+            args.append("SHARED=1")
+            args.append("MONOLITHIC=0")
+            args.append("USE_OPENGL=1")
+            args.append("USE_GDIPLUS=1")
+            
+            if not options.debug:
+                args.append("DEBUG_FLAG=1")
+                args.append("CXXFLAGS=/D__NO_VC_CRTDBG__")
+                args.append("WXDEBUGFLAG=h")
+                args.append("BUILD=release")
+
+        wxBuilder = builder.MSVCBuilder()
+        
+    if toolkit == "msvcProject":
+        args = []
+        if options.shared or options.wxpython:
+            args.append("wx_dll.dsw")
+        else:
+            args.append("wx.dsw")
+            
+        # TODO:
+        wxBuilder = builder.MSVCProjectBuilder()
     
 if not wxBuilder:
     print "Builder not available for your specified platform/compiler."

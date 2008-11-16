@@ -80,7 +80,10 @@ class Builder:
         
     def getProgramPath(self):
         if self.programDir:
-            return os.path.join(self.programDir, self.name)
+            path = os.path.join(self.programDir, self.name)
+            if sys.platform.startswith("win"):
+                path = '"%s"' % path
+            return path
         else:
             return self.name
         
@@ -100,10 +103,10 @@ class Builder:
         return True
             
     def build(self, dir=None, projectFile=None, targets=None, options=None):
-        if self.isAvailable():            
-            print "Options %r" % options
+        if self.isAvailable():
             if options:
-            	optionList = list(options)
+                print "Options %r" % string.join(options, " ")
+                optionList = list(options)
             else:
             	optionList = []
 
@@ -172,8 +175,35 @@ class MSVCBuilder(Builder):
     def isAvailable(self):
         return os.system("%s /help" % self.name) == 0
 
-builders = [GNUMakeBuilder, XCodeBuilder, AutoconfBuilder, MSVCBuilder]
+class MSVCProjectBuilder(Builder):
+    def __init__(self):
+        Builder.__init__(self, commandName="VCExpress.exe", formatName="msvcProject")
+        for key in ["VS90COMNTOOLS", "VC80COMNTOOLS", "VC71COMNTOOLS"]:
+            if os.environ.has_key(key):
+                self.prgoramDir = os.path.join(os.environ[key], "..", "IDE")
+                
+        if self.programDir == None:
+            for version in ["9.0", "8", ".NET 2003"]:
+                msvcDir = "C:\\Program Files\\Microsoft Visual Studio %s\\Common7\\IDE" % version
+                if os.path.exists(msvcDir):
+                    self.programDir = msvcDir
 
+    def isAvailable(self):
+        if self.programDir:
+            path = os.path.join(self.programDir, self.name)
+            if os.path.exists(path):
+                return True
+            else:
+                # I don't have commercial versions of MSVC so I can't test this
+                name = "devenv.com"
+                path = os.path.join(self.programDir, name)
+                if os.path.exists(path):
+                    self.name = "devenv.com"
+                    return True
+        
+        return False
+
+builders = [GNUMakeBuilder, XCodeBuilder, AutoconfBuilder, MSVCBuilder, MSVCProjectBuilder]
 
 def getAvailableBuilders():
     availableBuilders = {}
