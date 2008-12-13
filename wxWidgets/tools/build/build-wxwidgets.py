@@ -21,7 +21,7 @@ wxBuilder = None
 
 scriptDir = os.path.abspath(sys.path[0])
 wxRootDir = os.path.abspath(os.path.join(scriptDir, "..", ".."))
-contribDir = os.path.join("contrib", "src")
+contribDir = os.path.join(wxRootDir, "contrib", "src")
 installDir = None
 
 if sys.platform.startswith("win"):
@@ -61,14 +61,6 @@ for opt in option_dict:
     parser.add_option("--" + opt, default=default, action=action, dest=opt, help=option_dict[opt][1])
 
 options, arguments = parser.parse_args()
-
-
-#if len(sys.argv) > 1:
-#    for arg in sys.argv[1:]:
-#        if arg[0:2] == "no-":
-#            flags[arg[3:]] = False
-#        else:
-#            flags[arg] = True
 
 def exitIfError(code, msg):
     if code != 0:
@@ -313,15 +305,36 @@ if not isLipo:
             exitIfError(wxBuilder.install(os.path.join(contribDir, "stc")), "Error building stc")
         
 if options.mac_framework:
+
+    def renameLibrary(libname, frameworkname):
+        reallib = libname
+        links = []
+        while os.path.islink(reallib):
+            links.append(reallib)
+            reallib = "lib/" + os.readlink(reallib)
+            
+        print "reallib is %s" % reallib
+        os.system("mv -f %s lib/%s.dylib" % (reallib, frameworkname))
+        
+        for link in links:
+            os.system("ln -s -f %s.dylib %s" % (frameworkname, link))
+
     os.chdir(installDir)
     build_string = ""
     if options.debug:
         build_string = "d"
     version = commands.getoutput("bin/wx-config --release")
     basename = commands.getoutput("bin/wx-config --basename")
-    os.system("ln -s -f bin Resources")
-    os.system("ln -s -f lib/lib%s-%s.dylib ./wx" % (basename, version))
+    configname = commands.getoutput("bin/wx-config --selected-config")
     
+    os.system("ln -s -f bin Resources")
+    
+    # we make wx the "actual" library file and link to it from libwhatever.dylib
+    # so that things can link to wx and survive minor version changes
+    renameLibrary("lib/lib%s-%s.dylib" % (basename, version), "wx")
+    os.system("ln -s -f lib/wx.dylib wx")
+
+   
     for lib in glob.glob("lib/*.dylib"):
         if not os.path.islink(lib):
             os.system("install_name_tool -id %s %s" % (os.path.join(installDir, lib), lib))
@@ -334,6 +347,7 @@ if options.mac_framework:
             frameworkDir = "framework/wx%s/%s" % (lib, version)
             if not os.path.exists(frameworkDir):
                 os.makedirs(frameworkDir)
+            renameLibrary(libfile, "wx" + lib)
             os.system("ln -s -f ../../../%s %s/wx%s" % (libfile, frameworkDir, lib))        
     
     os.chdir("include")
@@ -357,6 +371,7 @@ if options.mac_framework:
     framework_header.close()
     
     os.system("ln -s -f %s wx" % header_dir)
+    os.system("ln -s -f ../../../lib/wx/include/%s/wx/setup.h wx/setup.h" % configname)
     
     os.chdir(os.path.join(installDir, "..", ".."))
     os.system("ln -s -f %s Versions/Current" % os.path.basename(installDir))
