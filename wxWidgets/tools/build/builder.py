@@ -145,22 +145,29 @@ class AutoconfBuilder(GNUMakeBuilder):
     def __init__(self, formatName="autoconf"):
         GNUMakeBuilder.__init__(self, formatName=formatName)
         
-    def configure(self, options=None):
+    def configure(self, dir=None, options=None):
         #olddir = os.getcwd()
         #os.chdir(dir)
         
-        configdir = os.getcwd()
+        configdir = dir
+        if not dir:
+            configdir = os.getcwd()
+        
         configure_cmd = ""
         while os.path.exists(configdir):
             config_cmd = os.path.join(configdir, "configure")
             if not os.path.exists(config_cmd):
-                configdir = os.path.abspath(os.path.join(configdir, ".."))
+                parentdir = os.path.abspath(os.path.join(configdir, ".."))
+                if configdir == parentdir:
+                    break
+                
+                configdir = parentdir 
             else:
                 configure_cmd = config_cmd
                 break
                 
         if not configure_cmd:
-            raise BuildError, "Could not find configure script at %s. Have you run autoconf?" % dir
+            raise BuildError, "Could not find configure script at %r. Have you run autoconf?" % dir
         
         optionsStr = string.join(options, " ") if options else ""
         result = os.system("%s %s" % (configure_cmd, optionsStr))
