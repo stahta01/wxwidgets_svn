@@ -21,7 +21,7 @@ wxBuilder = None
 
 scriptDir = os.path.abspath(sys.path[0])
 wxRootDir = os.path.abspath(os.path.join(scriptDir, "..", ".."))
-contribDir = os.path.join(wxRootDir, "contrib", "src")
+contribDir = os.path.join("contrib", "src")
 installDir = None
 
 if sys.platform.startswith("win"):
@@ -92,8 +92,6 @@ def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler
     
     olddir = os.getcwd()
     os.chdir(buildRoot)
-    if args:
-        archArgs.extend(args)
     
     if not options.no_config:
     	exitIfError(wxBuilder.configure(options=configure_opts), "Error running configure")
@@ -101,10 +99,10 @@ def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler
     exitIfError(wxBuilder.install(options=["prefix=" + archInstallDir]), "Error Installing")
     
     if options.wxpython and os.path.exists(os.path.join(wxRootDir, contribDir)):
-        exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "gizmos"), options=args), "Error building gizmos")
+        exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "gizmos"), options=archArgs), "Error building gizmos")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos"), options=["prefix=" + archInstallDir]), "Error Installing gizmos")
         
-        exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "stc"),options=args), "Error building stc")
+        exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "stc"),options=archArgs), "Error building stc")
         exitIfError(wxBuilder.install(os.path.join(contribDir, "stc"),options=["prefix=" + archInstallDir]), "Error installing stc")
 
     os.chdir(olddir)
@@ -333,15 +331,10 @@ if options.mac_framework:
     # so that things can link to wx and survive minor version changes
     renameLibrary("lib/lib%s-%s.dylib" % (basename, version), "wx")
     os.system("ln -s -f lib/wx.dylib wx")
-
-   
-    for lib in glob.glob("lib/*.dylib"):
-        if not os.path.islink(lib):
-            os.system("install_name_tool -id %s %s" % (os.path.join(installDir, lib), lib))
     
     os.system("ln -s -f include/wx Headers")
     
-    for lib in ["GL", "STC", "Gizmos"]:  
+    for lib in ["GL", "STC", "Gizmos", "Gizmos_xrc"]:  
         libfile = "lib/lib%s_%s-%s.dylib" % (basename, lib.lower(), version)
         if os.path.exists(libfile):
             frameworkDir = "framework/wx%s/%s" % (lib, version)
@@ -350,6 +343,12 @@ if options.mac_framework:
             renameLibrary(libfile, "wx" + lib)
             os.system("ln -s -f ../../../%s %s/wx%s" % (libfile, frameworkDir, lib))        
     
+    for lib in glob.glob("lib/*.dylib"):
+        if not os.path.islink(lib):
+            corelibname = "lib/lib%s-%s.0.dylib" % (basename, version)
+            os.system("install_name_tool -id %s %s" % (os.path.join(installDir, lib), lib))
+            os.system("install_name_tool -change %s %s %s" % (os.path.join(installDir, "i386", corelibname), os.path.join(installDir, corelibname), lib))
+            
     os.chdir("include")
     
     header_template = """
