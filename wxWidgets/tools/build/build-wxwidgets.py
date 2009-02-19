@@ -65,7 +65,7 @@ options, arguments = parser.parse_args()
 def exitIfError(code, msg):
     if code != 0:
         print msg
-        sys.exit(code)
+        sys.exit(1)
         
 def getWxRelease():
     global wxRootDir
