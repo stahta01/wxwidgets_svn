@@ -156,6 +156,8 @@ if toolkit == "autoconf":
         exitIfError(retval, "Error running autogen.mk")
         
     if options.mac_framework:
+        # Framework build is always a universal binary
+        options.mac_lipo = True
         installDir = "/Library/Frameworks/wx.framework/Versions/%s" %  getWxRelease()
         configure_opts.append("--prefix=" + installDir)
         # framework builds always need to be monolithic
@@ -212,7 +214,7 @@ elif toolkit in ["msvc", "msvcProject"]:
     setupFile.close()
     args = []
     if toolkit == "msvc":
-        print "setting args..."
+        print "setting build options..."
         args.append("-f makefile.vc")
         if options.unicode:
             args.append("UNICODE=1")

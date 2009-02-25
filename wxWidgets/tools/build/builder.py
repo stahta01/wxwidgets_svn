@@ -116,7 +116,7 @@ class Builder:
 
             return result
         
-        return False
+        return 1
 
     def install(self, dir=None, options=None):
         if self.isAvailable():
@@ -127,7 +127,7 @@ class Builder:
             result = runInDir(args, dir)
             return result
             
-        return False
+        return 1
 
 # Concrete subclasses of abstract Builder interface
 
