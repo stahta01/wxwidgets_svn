@@ -94,7 +94,7 @@ def doMacLipoBuild(arch, buildDir, installDir, cxxcompiler="g++-4.0", cccompiler
     os.chdir(buildRoot)
     
     if not options.no_config:
-    	exitIfError(wxBuilder.configure(options=configure_opts), "Error running configure")
+        exitIfError(wxBuilder.configure(options=configure_opts), "Error running configure")
     exitIfError(wxBuilder.build(options=archArgs), "Error building")
     exitIfError(wxBuilder.install(options=["prefix=" + archInstallDir]), "Error Installing")
     
@@ -158,7 +158,10 @@ if toolkit == "autoconf":
     if options.mac_framework:
         # Framework build is always a universal binary
         options.mac_lipo = True
-        installDir = "/Library/Frameworks/wx.framework/Versions/%s" %  getWxRelease()
+        name = "wx"
+        if options.osx_cocoa:
+            name += "OSXCocoa"
+        installDir = "/Library/Frameworks/%s.framework/Versions/%s" % (name, getWxRelease())
         configure_opts.append("--prefix=" + installDir)
         # framework builds always need to be monolithic
         if not "--enable-monolithic" in configure_opts:
