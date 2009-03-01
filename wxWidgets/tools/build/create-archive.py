@@ -24,11 +24,13 @@ dirsToIgnore = [".svn", "CVS"]
 excludeExtensions = [".rej", ".orig", ".mine", ".tmp"]
 
 option_dict = {
-            "tarball_name"  : ("wxAll", "Name given to the tarball created (default: wxAll)"),
+            "name"          : ("wxWidgets", "Name given to the tarball created (default: wxWidgets)"),
+            "postfix"       : ("", "String appended to the version to indicate a special release (default: none)"),
             "compression"   : ("gzip", "Compression to use. Values are: gzip, bzip, zip, all (default: gzip)"),
             }
 
-nativeLineEndingFiles = [".cpp", ".h", ".c", ".txt", ".vcproj", ".sln", ".dsp", ".dsw"]
+mswProjectFiles = [ ".vcproj", ".sln", ".dsp", ".dsw", ".vc", ".bat"]
+nativeLineEndingFiles = [".cpp", ".h", ".c", ".txt"]
 
 
 
@@ -37,7 +39,8 @@ nativeLineEndingFiles = [".cpp", ".h", ".c", ".txt", ".vcproj", ".sln", ".dsp", 
 usage="""usage: %prog [options] <output directory>\n
 Create a wxWidgets archive and store it in <output directory>.
 The output directory must be an absolute, existing path.
-The available options are:\n""" + str(option_dict)
+Type %prog --help for options.
+"""
 
 parser = optparse.OptionParser(usage, version="%prog 1.0")
 
@@ -63,14 +66,13 @@ wxVersion = None
 VERSION_FILE = os.path.join(rootDir, 'include/wx/version.h')
 
 
-
 ## HELPER FUNCTIONS
 
-def makeDOSLineEndings(dir):
+def makeDOSLineEndings(dir, extensions):
     fileList = []
     for root, subFolders, files in os.walk(dir):
         for file in files:
-            if os.path.splitext(file)[1] in nativeLineEndingFiles:
+            if os.path.splitext(file)[1] in extensions:
                 os.system("unix2dos %s" % os.path.join(root, file))
 
 def getVersion():
@@ -137,28 +139,38 @@ for afile in fileList:
         os.makedirs(dirName)
     shutil.copy(os.path.join(rootDir, afile), destFile)
 
+# copy include/wx/msw/setup0.h -> include/wx/msw/setup.h
+mswSetup0 = os.path.join(copyDir, "include","wx","msw","setup0.h") 
+shutil.copy(mswSetup0, mswSetup0.replace("setup0.h", "setup.h")), 
+    
 all = True if options.compression == "all" else False
 
 str_version = "%d.%d.%d" % getVersion()
+if options.postfix != "":
+    str_version += "-" + options.postfix
+    
+# make sure they have the DOS line endings everywhere
+print "Setting MSW Project files to use DOS line endings..."
+makeDOSLineEndings(copyDir, mswProjectFiles)
 
 if all or options.compression == "gzip":
     print "Creating gzip archive..."
     os.chdir(copyDir)
-    os.system("tar -czvf %s/%s-%s.tar.gz %s" % (destDir, options.tarball_name, str_version, "*"))
+    os.system("tar -czvf %s/%s-%s.tar.gz %s" % (destDir, options.name, str_version, "*"))
     os.chdir(rootDir)
 
 if all or options.compression == "bzip":
     print "Creating bzip archive..."
     os.chdir(copyDir)
-    os.system("tar -cjvf %s/%s-%s.tar.bz2 %s" % (destDir, options.tarball_name, str_version, "*"))
+    os.system("tar -cjvf %s/%s-%s.tar.bz2 %s" % (destDir, options.name, str_version, "*"))
     os.chdir(rootDir)
 
 if all or options.compression == "zip":
     os.chdir(copyDir)
-    print "Setting DOS line endings..."
-    makeDOSLineEndings(copyDir)
+    print "Setting DOS line endings on source and text files..."
+    makeDOSLineEndings(copyDir, nativeLineEndingFiles)
     print "Creating zip archive..."
-    os.system("zip -r %s/%s-%s.zip %s" % (destDir, options.tarball_name, str_version, "*"))
+    os.system("zip -9 -r %s/%s-%s.zip %s" % (destDir, options.name, str_version, "*"))
     os.chdir(rootDir)
 
 shutil.rmtree(copyDir)
