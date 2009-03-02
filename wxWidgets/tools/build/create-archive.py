@@ -118,7 +118,16 @@ def allFilesRecursive(dir):
 
 ## MAKE THE RELEASE!
 
+str_version = "%d.%d.%d" % getVersion()
+if options.postfix != "":
+    str_version += "-" + options.postfix
+    
+full_name = options.name + "-" + str_version
+
 copyDir = tempfile.mkdtemp()
+wxCopyDir = os.path.join(copyDir, full_name) 
+
+os.makedirs(wxCopyDir)
 
 os.chdir(rootDir)
 fileList = []
@@ -133,36 +142,32 @@ for dir in dirsToCopy:
 
 print "Copying files to the temporary folder %s..." % copyDir
 for afile in fileList:
-    destFile = os.path.join(copyDir, afile)
+    destFile = os.path.join(wxCopyDir, afile)
     dirName = os.path.dirname(destFile)
     if not os.path.exists(dirName):
         os.makedirs(dirName)
     shutil.copy(os.path.join(rootDir, afile), destFile)
 
 # copy include/wx/msw/setup0.h -> include/wx/msw/setup.h
-mswSetup0 = os.path.join(copyDir, "include","wx","msw","setup0.h") 
+mswSetup0 = os.path.join(wxCopyDir, "include","wx","msw","setup0.h") 
 shutil.copy(mswSetup0, mswSetup0.replace("setup0.h", "setup.h")), 
     
 all = True if options.compression == "all" else False
-
-str_version = "%d.%d.%d" % getVersion()
-if options.postfix != "":
-    str_version += "-" + options.postfix
     
 # make sure they have the DOS line endings everywhere
 print "Setting MSW Project files to use DOS line endings..."
-makeDOSLineEndings(copyDir, mswProjectFiles)
+makeDOSLineEndings(wxCopyDir, mswProjectFiles)
 
 if all or options.compression == "gzip":
     print "Creating gzip archive..."
     os.chdir(copyDir)
-    os.system("tar -czvf %s/%s-%s.tar.gz %s" % (destDir, options.name, str_version, "*"))
+    os.system("tar -czvf %s/%s.tar.gz %s" % (destDir, full_name, "*"))
     os.chdir(rootDir)
 
 if all or options.compression == "bzip":
     print "Creating bzip archive..."
     os.chdir(copyDir)
-    os.system("tar -cjvf %s/%s-%s.tar.bz2 %s" % (destDir, options.name, str_version, "*"))
+    os.system("tar -cjvf %s/%s.tar.bz2 %s" % (destDir, full_name, "*"))
     os.chdir(rootDir)
 
 if all or options.compression == "zip":
@@ -170,7 +175,7 @@ if all or options.compression == "zip":
     print "Setting DOS line endings on source and text files..."
     makeDOSLineEndings(copyDir, nativeLineEndingFiles)
     print "Creating zip archive..."
-    os.system("zip -9 -r %s/%s-%s.zip %s" % (destDir, options.name, str_version, "*"))
+    os.system("zip -9 -r %s/%s.zip %s" % (destDir, full_name, "*"))
     os.chdir(rootDir)
 
 shutil.rmtree(copyDir)
