@@ -17,7 +17,7 @@ scriptDir = os.path.join(sys.path[0])
 rootDir = os.path.abspath(os.path.join(scriptDir, "..", ".."))
 contribDir = os.path.join("contrib", "src")
 
-dirsToCopy = ["art", "build", "debian", "docs", "include", "interface", "lib",
+dirsToCopy = ["art", "build", "debian", "demos", "docs", "include", "interface", "lib",
                 "locale", "samples", "src", "utils"]
 
 dirsToIgnore = [".svn", "CVS"]
