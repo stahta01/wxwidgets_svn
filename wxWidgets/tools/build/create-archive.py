@@ -24,9 +24,11 @@ dirsToIgnore = [".svn", "CVS"]
 excludeExtensions = [".rej", ".orig", ".mine", ".tmp"]
 
 option_dict = {
+            "compression"   : ("gzip", "Compression to use. Values are: gzip, bzip, zip, all (default: gzip)"),
+            "docs"          : ("html", "Doc formats to build. Comma separated. Values are: none, html (default: html)"), 
             "name"          : ("wxWidgets", "Name given to the tarball created (default: wxWidgets)"),
             "postfix"       : ("", "String appended to the version to indicate a special release (default: none)"),
-            "compression"   : ("gzip", "Compression to use. Values are: gzip, bzip, zip, all (default: gzip)"),
+            
             }
 
 mswProjectFiles = [ ".vcproj", ".sln", ".dsp", ".dsw", ".vc", ".bat"]
@@ -179,3 +181,19 @@ if all or options.compression == "zip":
     os.chdir(rootDir)
 
 shutil.rmtree(copyDir)
+
+# build any docs packages:
+doc_formats = string.split(options.docs, ",")
+doxy_dir = "docs/doxygen"
+output_dir = doxy_dir + "/out"
+for format in doc_formats:
+    if not format == "none":
+        os.system("%s/regen.sh %s" % (doxy_dir, format))
+        os.chdir(output_dir)
+        docs_full_name = "%s-%s" % (full_name, format.upper())
+        os.rename(format, docs_full_name)
+        os.system("zip -9 -r %s/%s.zip %s" % (destDir, docs_full_name, "*"))
+
+os.chdir(rootDir)
+if os.path.exists(output_dir):
+    shutil.rmtree(output_dir)
