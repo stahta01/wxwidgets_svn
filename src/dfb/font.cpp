@@ -48,9 +48,9 @@ bool wxFont::Create(const wxNativeFontInfo& info)
 }
 
 bool wxFont::Create(int pointSize,
-                    wxFontFamily family,
-                    wxFontStyle style,
-                    wxFontWeight weight,
+                    int family,
+                    int style,
+                    int weight,
                     bool underlined,
                     const wxString& face,
                     wxFontEncoding encoding)
@@ -60,12 +60,12 @@ bool wxFont::Create(int pointSize,
     return true;
 }
 
-wxGDIRefData *wxFont::CreateGDIRefData() const
+wxObjectRefData *wxFont::CreateRefData() const
 {
     return new wxFontRefData;
 }
 
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxFont::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxFontRefData(*(wxFontRefData *)data);
 }
@@ -98,23 +98,23 @@ wxString wxFont::GetFaceName() const
     return M_FONTDATA->GetFaceName();
 }
 
-wxFontFamily wxFont::GetFamily() const
+int wxFont::GetFamily() const
 {
-    wxCHECK_MSG( Ok(), wxFONTFAMILY_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->GetFamily();
 }
 
-wxFontStyle wxFont::GetStyle() const
+int wxFont::GetStyle() const
 {
-    wxCHECK_MSG( Ok(), wxFONTSTYLE_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->GetStyle();
 }
 
-wxFontWeight wxFont::GetWeight() const
+int wxFont::GetWeight() const
 {
-    wxCHECK_MSG( Ok(), wxFONTWEIGHT_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->GetWeight();
 }
@@ -165,19 +165,19 @@ void wxFont::SetPointSize(int pointSize)
     M_FONTDATA->SetPointSize(pointSize);
 }
 
-void wxFont::SetFamily(wxFontFamily family)
+void wxFont::SetFamily(int family)
 {
     AllocExclusive();
     M_FONTDATA->SetFamily(family);
 }
 
-void wxFont::SetStyle(wxFontStyle style)
+void wxFont::SetStyle(int style)
 {
     AllocExclusive();
     M_FONTDATA->SetStyle(style);
 }
 
-void wxFont::SetWeight(wxFontWeight weight)
+void wxFont::SetWeight(int weight)
 {
     AllocExclusive();
     M_FONTDATA->SetWeight(weight);

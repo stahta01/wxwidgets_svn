@@ -16,7 +16,7 @@
 
 #include "wx/frame.h"
 
-class WXDLLIMPEXP_CORE wxMiniFrame: public wxFrame {
+class WXDLLEXPORT wxMiniFrame: public wxFrame {
 
   DECLARE_DYNAMIC_CLASS(wxMiniFrame)
 

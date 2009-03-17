@@ -215,16 +215,23 @@ bool wxMenuBar::IsEnabledTop(size_t pos) const
     return false;
 }
 
-void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
+void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)
 {
 }
 
-wxString wxMenuBar::GetMenuLabel(size_t pos) const
+wxString wxMenuBar::GetLabelTop(size_t pos) const
 {
     wxMenu *menu = GetMenu(pos);
     int itemindex = [m_cocoaNSMenu indexOfItemWithSubmenu:menu->GetNSMenu()];
     wxASSERT(itemindex>=0);
     return wxStringWithNSString([[m_cocoaNSMenu itemAtIndex:itemindex] title]);
+}
+
+// Gets the original label at the top-level of the menubar
+wxString wxMenuBar::GetMenuLabel(size_t pos) const
+{
+    // TODO: restore the original mnemonics
+    return GetLabelTop(pos);
 }
 
 void wxMenuBar::Attach(wxFrame *frame)

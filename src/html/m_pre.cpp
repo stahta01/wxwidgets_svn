@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
 #endif
 
 #include "wx/html/forcelnk.h"
@@ -33,42 +33,40 @@ static wxString LINKAGEMODE HtmlizeLinebreaks(const wxString& str)
     wxString out;
     out.reserve(str.length()); // we'll certainly need at least that
 
-    const wxString::const_iterator end = str.end();
-    for ( wxString::const_iterator i = str.begin(); i != end; ++i )
+    size_t len = str.Len();
+
+    for (size_t i = 0; i < len; i++)
     {
-        switch ( (*i).GetValue() )
+        switch (str[i])
         {
-            case '<':
-                while ( i != end && *i != '>' )
+            case wxT('<'):
+                while (i < len && str[i] != wxT('>'))
                 {
-                    out << *i++;
+                    out << str[i++];
                 }
-                out << '>';
-                if ( i == end )
-                    return out;
+                out << wxT('>');
                 break;
 
             // We need to translate any line break into exactly one <br>.
             // Quoting HTML spec: "A line break is defined to be a carriage
             // return (&#x000D;), a line feed (&#x000A;), or a carriage
             // return/line feed pair."
-            case '\r':
+            case wxT('\r'):
                 {
-                    wxString::const_iterator j(i + 1);
-                    if ( j != end && *j == '\n' )
+                    size_t j = i + 1;
+                    if ( j < len && str[j] == wxT('\n') )
                         i = j;
                 }
                 // fall through
-            case '\n':
-                out << "<br>";
+            case wxT('\n'):
+                out << wxT("<br>");
                 break;
 
             default:
-                out << *i;
+                out << str[i];
                 break;
         }
     }
-
     return out;
 }
 

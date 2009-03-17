@@ -19,12 +19,11 @@
 #include "wx/toplevel.h"      // the base class
 
 // the default names for various classs
-extern WXDLLIMPEXP_DATA_CORE(const char) wxStatusLineNameStr[];
-extern WXDLLIMPEXP_DATA_CORE(const char) wxToolBarNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxStatusLineNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxToolBarNameStr[];
 
 class WXDLLIMPEXP_FWD_CORE wxFrame;
 class WXDLLIMPEXP_FWD_CORE wxMenuBar;
-class WXDLLIMPEXP_FWD_CORE wxMenuItem;
 class WXDLLIMPEXP_FWD_CORE wxStatusBar;
 class WXDLLIMPEXP_FWD_CORE wxToolBar;
 
@@ -50,7 +49,7 @@ class WXDLLIMPEXP_FWD_CORE wxToolBar;
 // CreateXXXBar() is called.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFrameBase : public wxTopLevelWindow
+class WXDLLEXPORT wxFrameBase : public wxTopLevelWindow
 {
 public:
     // construction
@@ -72,6 +71,9 @@ public:
     // if the frame has a toolbar) in client coordinates
     virtual wxPoint GetClientAreaOrigin() const;
 
+    // sends a size event to the window using its current size -- this has an
+    // effect of refreshing the window layout
+    virtual void SendSizeEvent();
 
     // menu bar functions
     // ------------------
@@ -79,24 +81,10 @@ public:
 #if wxUSE_MENUS
     virtual void SetMenuBar(wxMenuBar *menubar);
     virtual wxMenuBar *GetMenuBar() const { return m_frameMenuBar; }
-
-    // find the item by id in the frame menu bar: this is an internal function
-    // and exists mainly in order to be overridden in the MDI parent frame
-    // which also looks at its active child menu bar
-    virtual wxMenuItem *FindItemInMenuBar(int menuId) const;
-
-    // generate menu command corresponding to the given menu item
-    //
-    // returns true if processed
-    bool ProcessCommand(wxMenuItem *item);
-
-    // generate menu command corresponding to the given menu command id
-    //
-    // returns true if processed
-    bool ProcessCommand(int winid);
-#else
-    bool ProcessCommand(int WXUNUSED(winid)) { return false; }
 #endif // wxUSE_MENUS
+
+    // process menu command: returns true if processed
+    bool ProcessCommand(int winid);
 
     // status bar functions
     // --------------------
@@ -181,16 +169,10 @@ public:
 #endif // no wxTopLevelWindowNative
 
 #if wxUSE_MENUS || wxUSE_TOOLBAR
-    // show help text for the currently selected menu or toolbar item
-    // (typically in the status bar) or hide it and restore the status bar text
-    // originally shown before the menu was opened if show == false
+    // show help text (typically in the statusbar); show is false
+    // if you are hiding the help, true otherwise
     virtual void DoGiveHelp(const wxString& text, bool show);
 #endif
-
-    virtual bool IsClientAreaChild(const wxWindow *child) const
-    {
-        return !IsOneOfBars(child) && wxTopLevelWindow::IsClientAreaChild(child);
-    }
 
 protected:
     // the frame main menu/status/tool bars
@@ -228,10 +210,9 @@ protected:
     // something changes
     virtual void PositionStatusBar() { }
 
-    // show the help string for the given menu item using DoGiveHelp() if the
-    // given item does have a help string (as determined by FindInMenuBar()),
-    // return false if there is no help for such item
-    bool ShowMenuHelp(int helpid);
+    // show the help string for this menu item in the given status bar: the
+    // status bar pointer can be NULL; return true if help was shown
+    bool ShowMenuHelp(wxStatusBar *statbar, int helpid);
 
     wxStatusBar *m_frameStatusBar;
 #endif // wxUSE_STATUSBAR
@@ -251,7 +232,7 @@ protected:
     DECLARE_EVENT_TABLE()
 #endif // wxUSE_MENUS && wxUSE_STATUSBAR
 
-    wxDECLARE_NO_COPY_CLASS(wxFrameBase);
+    DECLARE_NO_COPY_CLASS(wxFrameBase)
 };
 
 // include the real class declaration
@@ -269,7 +250,7 @@ protected:
     #elif defined(__WXMOTIF__)
         #include "wx/motif/frame.h"
     #elif defined(__WXMAC__)
-        #include "wx/osx/frame.h"
+        #include "wx/mac/frame.h"
     #elif defined(__WXCOCOA__)
         #include "wx/cocoa/frame.h"
     #elif defined(__WXPM__)

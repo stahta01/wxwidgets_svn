@@ -27,8 +27,6 @@
 #include "wx/filefn.h"
 #include "wx/datetime.h"
 #include "wx/intl.h"
-#include "wx/longlong.h"
-#include "wx/file.h"
 
 #if wxUSE_FILE
 class WXDLLIMPEXP_FWD_BASE wxFile;
@@ -36,12 +34,6 @@ class WXDLLIMPEXP_FWD_BASE wxFile;
 
 #if wxUSE_FFILE
 class WXDLLIMPEXP_FWD_BASE wxFFile;
-#endif
-
-// this symbol is defined for the platforms where file systems use volumes in
-// paths
-#if defined(__WXMSW__) || defined(__DOS__) || defined(__OS2__)
-    #define wxHAS_FILESYSTEM_VOLUMES
 #endif
 
 // ----------------------------------------------------------------------------
@@ -82,28 +74,18 @@ enum wxPathNormalize
 // what exactly should GetPath() return?
 enum
 {
-    wxPATH_NO_SEPARATOR  = 0x0000,  // for symmetry with wxPATH_GET_SEPARATOR
     wxPATH_GET_VOLUME    = 0x0001,  // include the volume if applicable
     wxPATH_GET_SEPARATOR = 0x0002   // terminate the path with the separator
 };
 
-// Mkdir flags
+// MkDir flags
 enum
 {
     wxPATH_MKDIR_FULL    = 0x0001   // create directories recursively
 };
 
-// Rmdir flags
-enum
-{
-    wxPATH_RMDIR_FULL       = 0x0001,  // delete with subdirectories if empty
-    wxPATH_RMDIR_RECURSIVE  = 0x0002   // delete all recursively (dangerous!)
-};
-
-#if wxUSE_LONGLONG
 // error code of wxFileName::GetSize()
-extern WXDLLIMPEXP_DATA_BASE(const wxULongLong) wxInvalidSize;
-#endif // wxUSE_LONGLONG
+extern WXDLLIMPEXP_DATA_BASE(wxULongLong) wxInvalidSize;
 
 
 
@@ -182,7 +164,7 @@ public:
         // assorted assignment operators
 
     wxFileName& operator=(const wxFileName& filename)
-        { if (this != &filename) Assign(filename); return *this; }
+        { Assign(filename); return *this; }
 
     wxFileName& operator=(const wxString& filename)
         { Assign(filename); return *this; }
@@ -263,7 +245,7 @@ public:
     }
 #endif // wxUSE_DATETIME
 
-#if defined( __WXOSX_MAC__ ) && wxOSX_USE_CARBON
+#ifdef __WXMAC__
     bool MacSetTypeAndCreator( wxUint32 type , wxUint32 creator ) ;
     bool MacGetTypeAndCreator( wxUint32 *type , wxUint32 *creator ) ;
     // gets the 'common' type and creator for a certain extension
@@ -316,12 +298,11 @@ public:
 #endif // wxUSE_FFILE
 
     // directory creation and removal.
-    bool Mkdir(int perm = wxS_DIR_DEFAULT, int flags = 0);
-    static bool Mkdir(const wxString &dir, int perm = wxS_DIR_DEFAULT,
-                      int flags = 0);
+    bool Mkdir( int perm = 0777, int flags = 0);
+    static bool Mkdir( const wxString &dir, int perm = 0777, int flags = 0 );
 
-    bool Rmdir(int flags = 0);
-    static bool Rmdir(const wxString &dir, int flags = 0);
+    bool Rmdir();
+    static bool Rmdir( const wxString &dir );
 
     // operations on the path
 
@@ -360,25 +341,6 @@ public:
                            wxString& targetFilename,
                            wxString* arguments = NULL);
 #endif
-
-#ifndef __WXWINCE__
-        // if the path contains the value of the environment variable named envname
-        // then this function replaces it with the string obtained from
-        //    wxString::Format(replacementFmtString, value_of_envname_variable)
-        //
-        // Example:
-        //    wxFileName fn("/usr/openwin/lib/someFile");
-        //    fn.ReplaceEnvVariable("OPENWINHOME");
-        //         // now fn.GetFullPath() == "$OPENWINHOME/lib/someFile"
-    bool ReplaceEnvVariable(const wxString& envname,
-                            const wxString& replacementFmtString = "$%s",
-                            wxPathFormat format = wxPATH_NATIVE);
-#endif
-
-        // replaces, if present in the path, the home directory for the given user
-        // (see wxGetHomeDir) with a tilde
-    bool ReplaceHomeDir(wxPathFormat format = wxPATH_NATIVE);
-
 
     // Comparison
 
@@ -427,7 +389,7 @@ public:
     static wxString GetPathTerminators(wxPathFormat format = wxPATH_NATIVE);
 
     // get the canonical path separator for this format
-    static wxUniChar GetPathSeparator(wxPathFormat format = wxPATH_NATIVE)
+    static wxChar GetPathSeparator(wxPathFormat format = wxPATH_NATIVE)
         { return GetPathSeparators(format)[0u]; }
 
     // is the char a path separator for this format?
@@ -519,14 +481,8 @@ public:
                             wxString *path,
                             wxPathFormat format = wxPATH_NATIVE);
 
-#ifdef wxHAS_FILESYSTEM_VOLUMES
-        // return the string representing a file system volume, or drive
-    static wxString GetVolumeString(char drive, int flags = wxPATH_GET_SEPARATOR);
-#endif // wxHAS_FILESYSTEM_VOLUMES
+    // Filesize
 
-    // File size
-
-#if wxUSE_LONGLONG
         // returns the size of the given filename
     wxULongLong GetSize() const;
     static wxULongLong GetSize(const wxString &file);
@@ -537,7 +493,6 @@ public:
     static wxString GetHumanReadableSize(const wxULongLong &sz,
                                          const wxString &nullsize = wxGetTranslation(_T("Not available")),
                                          int precision = 1);
-#endif // wxUSE_LONGLONG
 
 
     // deprecated methods, don't use any more

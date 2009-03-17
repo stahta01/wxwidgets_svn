@@ -65,7 +65,7 @@ enum wxXLFDField
 // functions, the user code can only get the objects of this type from
 // somewhere and pass it somewhere else (possibly save them somewhere using
 // ToString() and restore them using FromString())
-class WXDLLIMPEXP_CORE wxNativeFontInfo
+class WXDLLEXPORT wxNativeFontInfo
 {
 public:
 #if wxUSE_PANGO
@@ -105,8 +105,6 @@ public:
     // set the XFLD
     void SetXFontName(const wxString& xFontName);
 #elif defined(__WXMSW__)
-    wxNativeFontInfo(const LOGFONT& lf_) : lf(lf_) { }
-
     LOGFONT      lf;
 #elif defined(__WXPM__)
     // OS/2 native structures that define a font
@@ -143,11 +141,8 @@ public:
 
     wxNativeFontInfo& operator=(const wxNativeFontInfo& info)
     {
-        if (this != &info)
-        {
-            Free();
-            Init(info);
-        }
+        Free();
+        Init(info);
         return *this;
     }
 #endif // wxUSE_PANGO
@@ -229,12 +224,12 @@ public:
 // translate a wxFontEncoding into native encoding parameter (defined above),
 // returning true if an (exact) macth could be found, false otherwise (without
 // attempting any substitutions)
-WXDLLIMPEXP_CORE bool wxGetNativeFontEncoding(wxFontEncoding encoding,
-                                              wxNativeEncodingInfo *info);
+extern bool wxGetNativeFontEncoding(wxFontEncoding encoding,
+                                    wxNativeEncodingInfo *info);
 
 // test for the existence of the font described by this facename/encoding,
 // return true if such font(s) exist, false otherwise
-WXDLLIMPEXP_CORE bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
+extern bool wxTestFontEncoding(const wxNativeEncodingInfo& info);
 
 // ----------------------------------------------------------------------------
 // font-related functions (X and GTK)

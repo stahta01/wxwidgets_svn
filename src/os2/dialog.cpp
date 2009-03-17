@@ -25,7 +25,7 @@
 
 #include "wx/os2/private.h"
 #include "wx/evtloop.h"
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 
 #define wxDIALOG_DEFAULT_X 300
 #define wxDIALOG_DEFAULT_Y 300
@@ -72,9 +72,9 @@ wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 
 void wxDialog::Init()
 {
-    m_pOldFocus = NULL;
+    m_pOldFocus = (wxWindow *)NULL;
     m_isShown = false;
-    m_pWindowDisabler = NULL;
+    m_pWindowDisabler = (wxWindowDisabler *)NULL;
     m_modalData = NULL;
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 } // end of wxDialog::Init
@@ -147,7 +147,7 @@ void wxDialog::SetModal(bool WXUNUSED(bFlag))
 
 wxDialog::~wxDialog()
 {
-    SendDestroyEvent();
+    m_isBeingDeleted = true;
 
     // this will also reenable all the other windows for a modal dialog
     Show(false);
@@ -212,9 +212,6 @@ bool wxDialog::Show( bool bShow )
 
     if (bShow)
     {
-        if (CanDoLayoutAdaptation())
-            DoLayoutAdaptation();
-
         // this usually will result in TransferDataToWindow() being called
         // which will change the controls values so do it before showing as
         // otherwise we could have some flicker
@@ -225,7 +222,7 @@ bool wxDialog::Show( bool bShow )
 
     wxString title = GetTitle();
     if (!title.empty())
-        ::WinSetWindowText((HWND)GetHwnd(), title.c_str());
+        ::WinSetWindowText((HWND)GetHwnd(), (PSZ)title.c_str());
 
     if ( bShow )
     {

@@ -49,8 +49,7 @@
     /* so, override wxButton::GTKGetWindow and return NULL as GTK+ doesn't */ \
     /* give us access to the internal GdkWindow of a GtkFileChooserButton  */ \
 protected:                                                                    \
-    virtual GdkWindow *                                                       \
-    GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const                  \
+    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const \
         { return NULL; }
 
 
@@ -98,6 +97,15 @@ public:     // overrides
 
     // event handler for the click
     void OnDialogOK(wxCommandEvent &);
+
+    // GtkFileChooserButton does not support GTK_FILE_CHOOSER_ACTION_SAVE
+    // so we replace it with GTK_FILE_CHOOSER_ACTION_OPEN; since wxFD_SAVE
+    // is not supported, wxFD_OVERWRITE_PROMPT isn't too...
+    virtual long GetDialogStyle() const
+    {
+         return (wxGenericFileButton::GetDialogStyle() &
+                     ~(wxFD_SAVE | wxFD_OVERWRITE_PROMPT)) | wxFD_OPEN;
+    }
 
     virtual void SetPath(const wxString &str);
 
@@ -180,7 +188,8 @@ public:    // used by the GTK callback only
 
     bool m_bIgnoreNextChange;
 
-    void GTKUpdatePath(const char *gtkpath);
+    void UpdatePath(const char *gtkpath)
+        { m_path = wxString::FromAscii(gtkpath); }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxDirButton)

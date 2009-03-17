@@ -12,12 +12,10 @@
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 29
-COMPILER_PREFIX = vc
+WX_RELEASE_NODOT = 28
 OBJS = \
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)$(DIR_SUFFIX_CPU)
-LIBDIRNAME = \
-	.\..\..\lib\$(COMPILER_PREFIX)$(DIR_SUFFIX_CPU)_$(LIBTYPE_SUFFIX)$(CFG)
+	vc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)$(DIR_SUFFIX_CPU)
+LIBDIRNAME = .\..\..\lib\vc$(DIR_SUFFIX_CPU)_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = \
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 WIDGETS_CXXFLAGS = /M$(__RUNTIME_LIBS_8)$(__DEBUGRUNTIME_3) /DWIN32 \
@@ -32,19 +30,15 @@ WIDGETS_OBJECTS =  \
 	$(OBJS)\widgets_bmpcombobox.obj \
 	$(OBJS)\widgets_button.obj \
 	$(OBJS)\widgets_checkbox.obj \
-	$(OBJS)\widgets_choice.obj \
 	$(OBJS)\widgets_clrpicker.obj \
 	$(OBJS)\widgets_combobox.obj \
 	$(OBJS)\widgets_datepick.obj \
 	$(OBJS)\widgets_dirctrl.obj \
 	$(OBJS)\widgets_dirpicker.obj \
-	$(OBJS)\widgets_editlbox.obj \
-	$(OBJS)\widgets_filectrl.obj \
 	$(OBJS)\widgets_filepicker.obj \
 	$(OBJS)\widgets_fontpicker.obj \
 	$(OBJS)\widgets_gauge.obj \
 	$(OBJS)\widgets_hyperlnk.obj \
-	$(OBJS)\widgets_itemcontainer.obj \
 	$(OBJS)\widgets_listbox.obj \
 	$(OBJS)\widgets_notebook.obj \
 	$(OBJS)\widgets_odcombobox.obj \
@@ -53,7 +47,6 @@ WIDGETS_OBJECTS =  \
 	$(OBJS)\widgets_slider.obj \
 	$(OBJS)\widgets_spinbtn.obj \
 	$(OBJS)\widgets_static.obj \
-	$(OBJS)\widgets_statbmp.obj \
 	$(OBJS)\widgets_textctrl.obj \
 	$(OBJS)\widgets_toggle.obj \
 	$(OBJS)\widgets_widgets.obj \
@@ -256,14 +249,8 @@ __THREAD_DEFINE_p = /DwxNO_THREADS
 !if "$(USE_THREADS)" == "0"
 __THREAD_DEFINE_p_1 = /d wxNO_THREADS
 !endif
-!if "$(UNICODE)" == "0"
-__UNICODE_DEFINE_p = /DwxUSE_UNICODE=0
-!endif
 !if "$(UNICODE)" == "1"
 __UNICODE_DEFINE_p = /D_UNICODE
-!endif
-!if "$(UNICODE)" == "0"
-__UNICODE_DEFINE_p_1 = /d wxUSE_UNICODE=0
 !endif
 !if "$(UNICODE)" == "1"
 __UNICODE_DEFINE_p_1 = /d _UNICODE
@@ -287,8 +274,16 @@ __DLLFLAG_p = /DWXUSINGDLL
 __DLLFLAG_p_1 = /d WXUSINGDLL
 !endif
 !if "$(MONOLITHIC)" == "0"
+__WXLIB_XML_p = \
+	wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib
+!endif
+!if "$(MONOLITHIC)" == "0"
 __WXLIB_ADV_p = \
 	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib
+!endif
+!if "$(MONOLITHIC)" == "0"
+__WXLIB_HTML_p = \
+	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib
 !endif
 !if "$(MONOLITHIC)" == "0"
 __WXLIB_CORE_p = \
@@ -337,7 +332,7 @@ clean:
 
 $(OBJS)\widgets.exe: $(WIDGETS_OBJECTS) $(OBJS)\widgets_sample.res
 	link /NOLOGO /OUT:$@  $(__DEBUGINFO_1) /pdb:"$(OBJS)\widgets.pdb"  $(LINK_TARGET_CPU) /LIBPATH:$(LIBDIRNAME) /SUBSYSTEM:WINDOWS $(LDFLAGS) @<<
-	$(WIDGETS_OBJECTS)  $(__WXLIB_ADV_p)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib
+	$(WIDGETS_OBJECTS)  $(__WXLIB_XML_p)  $(__WXLIB_ADV_p)  $(__WXLIB_HTML_p)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib
 <<
 
 $(OBJS)\widgets_bmpcombobox.obj: .\bmpcombobox.cpp
@@ -348,9 +343,6 @@ $(OBJS)\widgets_button.obj: .\button.cpp
 
 $(OBJS)\widgets_checkbox.obj: .\checkbox.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\checkbox.cpp
-
-$(OBJS)\widgets_choice.obj: .\choice.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\choice.cpp
 
 $(OBJS)\widgets_clrpicker.obj: .\clrpicker.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\clrpicker.cpp
@@ -367,12 +359,6 @@ $(OBJS)\widgets_dirctrl.obj: .\dirctrl.cpp
 $(OBJS)\widgets_dirpicker.obj: .\dirpicker.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\dirpicker.cpp
 
-$(OBJS)\widgets_editlbox.obj: .\editlbox.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\editlbox.cpp
-
-$(OBJS)\widgets_filectrl.obj: .\filectrl.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\filectrl.cpp
-
 $(OBJS)\widgets_filepicker.obj: .\filepicker.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\filepicker.cpp
 
@@ -384,9 +370,6 @@ $(OBJS)\widgets_gauge.obj: .\gauge.cpp
 
 $(OBJS)\widgets_hyperlnk.obj: .\hyperlnk.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\hyperlnk.cpp
-
-$(OBJS)\widgets_itemcontainer.obj: .\itemcontainer.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\itemcontainer.cpp
 
 $(OBJS)\widgets_listbox.obj: .\listbox.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\listbox.cpp
@@ -411,9 +394,6 @@ $(OBJS)\widgets_spinbtn.obj: .\spinbtn.cpp
 
 $(OBJS)\widgets_static.obj: .\static.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\static.cpp
-
-$(OBJS)\widgets_statbmp.obj: .\statbmp.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\statbmp.cpp
 
 $(OBJS)\widgets_textctrl.obj: .\textctrl.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(WIDGETS_CXXFLAGS) .\textctrl.cpp

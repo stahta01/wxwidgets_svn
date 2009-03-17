@@ -16,7 +16,7 @@
 // wxFileDialog
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileDialog: public wxFileDialogBase
+class WXDLLEXPORT wxFileDialog: public wxFileDialogBase
 {
 public:
     wxFileDialog(wxWindow *parent,
@@ -39,7 +39,7 @@ private:
     wxArrayString m_fileNames;
 
     DECLARE_DYNAMIC_CLASS(wxFileDialog)
-    wxDECLARE_NO_COPY_CLASS(wxFileDialog);
+    DECLARE_NO_COPY_CLASS(wxFileDialog)
 };
 
 #endif // _WX_FILEDLG_H_

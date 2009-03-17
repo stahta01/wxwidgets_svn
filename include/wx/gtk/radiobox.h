@@ -12,7 +12,7 @@
 
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_FWD_CORE wxGTKRadioButtonInfo;
+class WXDLLIMPEXP_CORE wxGTKRadioButtonInfo;
 
 #include "wx/list.h"
 
@@ -128,17 +128,20 @@ public:
     // implementation
     // --------------
 
+    void SetFocus();
     void GtkDisableEvents();
     void GtkEnableEvents();
 #if wxUSE_TOOLTIPS
-    void GTKApplyToolTip( GtkTooltips *tips, const gchar *tip );
+    void ApplyToolTip( GtkTooltips *tips, const wxChar *tip );
 #endif // wxUSE_TOOLTIPS
 
+    virtual void OnInternalIdle();
+
+    bool                        m_hasFocus,
+                                m_lostFocus;
     wxRadioBoxButtonsInfoList   m_buttonsInfo;
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
 #if wxUSE_TOOLTIPS
     virtual void DoSetItemToolTip(unsigned int n, wxToolTip *tooltip);
 #endif
@@ -146,10 +149,11 @@ protected:
     virtual void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
-    virtual bool GTKNeedsToFilterSameWindowFocus() const { return true; }
-
     virtual bool GTKWidgetNeedsMnemonic() const;
     virtual void GTKWidgetDoSetMnemonic(GtkWidget* w);
+
+    // common part of all ctors
+    void Init();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxRadioBox)

@@ -41,8 +41,8 @@
 
 #include "wx/dynlib.h"
 
-wxDEFINE_EVENT( wxEVT_DIALUP_CONNECTED, wxDialUpEvent );
-wxDEFINE_EVENT( wxEVT_DIALUP_DISCONNECTED, wxDialUpEvent );
+DEFINE_EVENT_TYPE(wxEVT_DIALUP_CONNECTED)
+DEFINE_EVENT_TYPE(wxEVT_DIALUP_DISCONNECTED)
 
 // Doesn't yet compile under VC++ 4, BC++, Watcom C++,
 // Wine: no wininet.h
@@ -237,7 +237,7 @@ private:
     private:
         wxDialUpManagerMSW *m_dialUpManager;
 
-        wxDECLARE_NO_COPY_CLASS(RasTimer);
+        DECLARE_NO_COPY_CLASS(RasTimer)
     } m_timerStatusPolling;
 
     // thread handle for the thread sitting on connection change event
@@ -288,7 +288,7 @@ private:
     // this flag tells us whether a call to RasDial() is in progress
     static wxDialUpManagerMSW *ms_dialer;
 
-    wxDECLARE_NO_COPY_CLASS(wxDialUpManagerMSW);
+    DECLARE_NO_COPY_CLASS(wxDialUpManagerMSW)
 };
 
 // module to destroy helper window created by wxDialUpManagerMSW
@@ -452,10 +452,12 @@ wxDialUpManagerMSW::wxDialUpManagerMSW()
 exit:
         if ( funcName )
         {
-            wxLogError(_("The version of remote access service (RAS) installed "
-                          "on this machine is too old, please upgrade (the "
-                          "following required function is missing: %s)."),
-                       funcName);
+            static const wxChar *msg = wxTRANSLATE(
+"The version of remote access service (RAS) installed on this machine is too\
+old, please upgrade (the following required function is missing: %s)."
+                                                   );
+
+            wxLogError(wxGetTranslation(msg), funcName);
             m_dllRas.Unload();
             return;
         }
@@ -807,7 +809,7 @@ bool wxDialUpManagerMSW::Dial(const wxString& nameOfISP,
 
     RASDIALPARAMS rasDialParams;
     rasDialParams.dwSize = sizeof(rasDialParams);
-    wxStrlcpy(rasDialParams.szEntryName, entryName.c_str(), RAS_MaxEntryName);
+    wxStrncpy(rasDialParams.szEntryName, entryName, RAS_MaxEntryName);
 
     // do we have the username and password?
     if ( !username || !password )
@@ -829,8 +831,8 @@ bool wxDialUpManagerMSW::Dial(const wxString& nameOfISP,
     }
     else
     {
-        wxStrlcpy(rasDialParams.szUserName, username.c_str(), UNLEN);
-        wxStrlcpy(rasDialParams.szPassword, password.c_str(), PWLEN);
+        wxStrncpy(rasDialParams.szUserName, username, UNLEN);
+        wxStrncpy(rasDialParams.szPassword, password, PWLEN);
     }
 
     // default values for other fields
@@ -882,12 +884,9 @@ bool wxDialUpManagerMSW::Dial(const wxString& nameOfISP,
     if ( dwRet != 0 )
     {
         // can't pass a wxWCharBuffer through ( ... )
-        if ( async )
-            wxLogError(_("Failed to initiate dialup connection: %s"),
-                       GetErrorString(dwRet).c_str());
-        else
-            wxLogError(_("Failed to establish dialup connection: %s"),
-                       GetErrorString(dwRet).c_str());
+        wxLogError(_("Failed to %s dialup connection: %s"),
+                   wxString(async ? _("initiate") : _("establish")).c_str(),
+                   GetErrorString(dwRet).c_str());
 
         // we should still call RasHangUp() if we got a non 0 connection
         if ( ms_hRasConnection )

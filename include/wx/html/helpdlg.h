@@ -81,7 +81,7 @@ protected:
     wxHtmlHelpController* m_helpController;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpDialog);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpDialog)
 };
 
 #endif

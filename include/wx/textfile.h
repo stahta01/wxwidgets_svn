@@ -46,7 +46,7 @@ private:
 
     wxFile m_file;
 
-    wxDECLARE_NO_COPY_CLASS(wxTextFile);
+    DECLARE_NO_COPY_CLASS(wxTextFile)
 };
 
 #else // !wxUSE_TEXTFILE

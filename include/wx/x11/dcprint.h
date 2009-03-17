@@ -14,7 +14,7 @@
 
 #include "wx/dc.h"
 
-class WXDLLIMPEXP_CORE wxPrinterDC: public wxDC
+class WXDLLEXPORT wxPrinterDC: public wxDC
 {
 public:
     DECLARE_CLASS(wxPrinterDC)

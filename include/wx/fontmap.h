@@ -50,7 +50,7 @@ class WXDLLIMPEXP_FWD_CORE wxFontMapper;
 class WXDLLIMPEXP_BASE wxFontMapperBase
 {
 public:
-    // constructor and such
+    // constructtor and such
     // ---------------------
 
     // default ctor
@@ -122,7 +122,7 @@ public:
     void SetConfigPath(const wxString& prefix);
 
     // return default config path
-    static const wxString& GetDefaultConfigPath();
+    static const wxChar *GetDefaultConfigPath();
 #endif // wxUSE_CONFIG
 
 
@@ -170,7 +170,7 @@ private:
 
     friend class wxFontMapperPathChanger;
 
-    wxDECLARE_NO_COPY_CLASS(wxFontMapperBase);
+    DECLARE_NO_COPY_CLASS(wxFontMapperBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -264,7 +264,7 @@ protected:
     wxWindow *m_windowParent;
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxFontMapper);
+    DECLARE_NO_COPY_CLASS(wxFontMapper)
 };
 
 #endif // wxUSE_GUI

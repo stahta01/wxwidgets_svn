@@ -269,12 +269,10 @@ size_t TestInputStream::OnSysRead(void *buffer, size_t size)
     }
 
     if (((m_eoftype & AtLast) != 0 && m_pos >= m_size) || count < size)
-    {
         if ((m_eoftype & WithError) != 0)
             m_lasterror = wxSTREAM_READ_ERROR;
         else
             m_lasterror = wxSTREAM_EOF;
-    }
 
     return count;
 }
@@ -1202,9 +1200,9 @@ void CorruptionTestCase::runTest()
     CreateArchive(out);
     TestInputStream in(out, 0);
     wxFileOffset len = in.GetLength();
+    int pos, size;
 
     // try flipping one byte in the archive
-    int pos;
     for (pos = 0; pos < len; pos++) {
         char n = in[pos];
         in[pos] = ~n;
@@ -1223,7 +1221,7 @@ void CorruptionTestCase::runTest()
     }
 
     // try chopping the archive off
-    for (int size = 1; size <= len; size++) {
+    for (size = 1; size <= len; size++) {
         in.Chop(size);
         ExtractArchive(in);
         in.Rewind();
@@ -1243,10 +1241,11 @@ void CorruptionTestCase::ExtractArchive(wxInputStream& in)
 {
     auto_ptr<wxArchiveInputStream> arc(m_factory->NewStream(in));
     auto_ptr<wxArchiveEntry> entry(arc->GetNextEntry());
-
+        
     while (entry.get() != NULL) {
+        wxString name = entry->GetName();
         char buf[1024];
-
+        
         while (arc->IsOk())
             arc->Read(buf, sizeof(buf));
 
@@ -1328,7 +1327,7 @@ ArchiveTestSuite *ArchiveTestSuite::makeSuite()
                         addTest(test);
                 }
 
-    for (int options = 0; options <= PipeIn; options += PipeIn)
+    for (int options = 0; options <= PipeIn; options += PipeIn) 
     {
         wxObject *pObj = wxCreateDynamicObject(m_name + _T("ClassFactory"));
         wxArchiveClassFactory *factory;

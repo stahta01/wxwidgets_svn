@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/list.h"
     #include "wx/log.h"
     #include "wx/intl.h"
@@ -25,7 +25,6 @@
     #include "wx/timer.h"
     #include "wx/settings.h"
     #include "wx/dataobj.h"
-    #include "wx/statusbr.h"
 #endif
 
 #include "wx/html/htmlwin.h"
@@ -39,9 +38,9 @@
 IMPLEMENT_DYNAMIC_CLASS(wxHtmlLinkEvent, wxCommandEvent)
 IMPLEMENT_DYNAMIC_CLASS(wxHtmlCellEvent, wxCommandEvent)
 
-wxDEFINE_EVENT( wxEVT_COMMAND_HTML_CELL_CLICKED, wxHtmlCellEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_HTML_CELL_HOVER, wxHtmlCellEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_HTML_LINK_CLICKED, wxHtmlLinkEvent );
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_HTML_CELL_CLICKED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_HTML_CELL_HOVER)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_HTML_LINK_CLICKED)
 
 
 #if wxUSE_CLIPBOARD
@@ -71,7 +70,7 @@ private:
     int m_pos,
         m_orient;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlWinAutoScrollTimer);
+    DECLARE_NO_COPY_CLASS(wxHtmlWinAutoScrollTimer)
 };
 
 void wxHtmlWinAutoScrollTimer::Notify()
@@ -292,8 +291,7 @@ void wxHtmlWindow::Init()
     m_tmpCanDrawLocks = 0;
     m_FS = new wxFileSystem();
 #if wxUSE_STATUSBAR
-    m_RelatedStatusBar = NULL;
-    m_RelatedStatusBarIndex = -1;
+    m_RelatedStatusBar = -1;
 #endif // wxUSE_STATUSBAR
     m_RelatedFrame = NULL;
     m_TitleFormat = wxT("%s");
@@ -365,17 +363,10 @@ void wxHtmlWindow::SetRelatedFrame(wxFrame* frame, const wxString& format)
 
 
 #if wxUSE_STATUSBAR
-void wxHtmlWindow::SetRelatedStatusBar(int index)
+void wxHtmlWindow::SetRelatedStatusBar(int bar)
 {
-    m_RelatedStatusBarIndex = index;
+    m_RelatedStatusBar = bar;
 }
-
-void wxHtmlWindow::SetRelatedStatusBar(wxStatusBar* statusbar, int index)
-{
-    m_RelatedStatusBar =  statusbar;
-    m_RelatedStatusBarIndex = index;
-}
-
 #endif // wxUSE_STATUSBAR
 
 
@@ -477,10 +468,9 @@ bool wxHtmlWindow::AppendToPage(const wxString& source)
 
 bool wxHtmlWindow::LoadPage(const wxString& location)
 {
-    wxCHECK_MSG( !location.empty(), false, "location must be non-empty" );
-
     wxBusyCursor busyCursor;
 
+    wxFSFile *f;
     bool rt_val;
     bool needs_refresh = false;
 
@@ -493,40 +483,43 @@ bool wxHtmlWindow::LoadPage(const wxString& location)
         (*m_History)[m_HistoryPos].SetPos(y);
     }
 
-    // first check if we're moving to an anchor in the same page
-    size_t posLocalAnchor = location.Find('#');
-    if ( posLocalAnchor != wxString::npos && posLocalAnchor != 0 )
+    if (location[0] == wxT('#'))
     {
-        // check if the part before the anchor is the same as the (either
-        // relative or absolute) URI of the current page
-        const wxString beforeAnchor = location.substr(0, posLocalAnchor);
-        if ( beforeAnchor != m_OpenedPage &&
-                m_FS->GetPath() + beforeAnchor != m_OpenedPage )
-        {
-            // indicate that we're not moving to a local anchor
-            posLocalAnchor = wxString::npos;
-        }
-    }
-
-    if ( posLocalAnchor != wxString::npos )
-    {
+        // local anchor:
+        wxString anch = location.Mid(1) /*1 to end*/;
         m_tmpCanDrawLocks--;
-        rt_val = ScrollToAnchor(location.substr(posLocalAnchor + 1));
+        rt_val = ScrollToAnchor(anch);
         m_tmpCanDrawLocks++;
     }
-    else // moving to another page
+    else if (location.Find(wxT('#')) != wxNOT_FOUND && location.BeforeFirst(wxT('#')) == m_OpenedPage)
+    {
+        wxString anch = location.AfterFirst(wxT('#'));
+        m_tmpCanDrawLocks--;
+        rt_val = ScrollToAnchor(anch);
+        m_tmpCanDrawLocks++;
+    }
+    else if (location.Find(wxT('#')) != wxNOT_FOUND &&
+             (m_FS->GetPath() + location.BeforeFirst(wxT('#'))) == m_OpenedPage)
+    {
+        wxString anch = location.AfterFirst(wxT('#'));
+        m_tmpCanDrawLocks--;
+        rt_val = ScrollToAnchor(anch);
+        m_tmpCanDrawLocks++;
+    }
+
+    else
     {
         needs_refresh = true;
 #if wxUSE_STATUSBAR
         // load&display it:
-        if (m_RelatedStatusBarIndex != -1)
+        if (m_RelatedStatusBar != -1)
         {
-            SetHTMLStatusText(_("Connecting..."));
+            m_RelatedFrame->SetStatusText(_("Connecting..."), m_RelatedStatusBar);
             Refresh(false);
         }
 #endif // wxUSE_STATUSBAR
 
-        wxFSFile *f = m_Parser->OpenURL(wxHTML_URL_PAGE, location);
+        f = m_Parser->OpenURL(wxHTML_URL_PAGE, location);
 
         // try to interpret 'location' as filename instead of URL:
         if (f == NULL)
@@ -550,10 +543,10 @@ bool wxHtmlWindow::LoadPage(const wxString& location)
             wxString src = wxEmptyString;
 
 #if wxUSE_STATUSBAR
-            if (m_RelatedStatusBarIndex != -1)
+            if (m_RelatedStatusBar != -1)
             {
                 wxString msg = _("Loading : ") + location;
-                SetHTMLStatusText(msg);
+                m_RelatedFrame->SetStatusText(msg, m_RelatedStatusBar);
                 Refresh(false);
             }
 #endif // wxUSE_STATUSBAR
@@ -586,10 +579,8 @@ bool wxHtmlWindow::LoadPage(const wxString& location)
             delete f;
 
 #if wxUSE_STATUSBAR
-            if (m_RelatedStatusBarIndex != -1)
-            {
-                SetHTMLStatusText(_("Done"));
-            }
+            if (m_RelatedStatusBar != -1)
+                m_RelatedFrame->SetStatusText(_("Done"), m_RelatedStatusBar);
 #endif // wxUSE_STATUSBAR
         }
     }
@@ -904,7 +895,7 @@ wxString wxHtmlWindow::DoSelectionToText(wxHtmlSelection *sel)
         // is to check if the parent container changed -- if it did, we moved
         // to a new paragraph.
         if ( prev && prev->GetParent() != i->GetParent() )
-            text << '\n';
+            text << wxT('\n');
 
         // NB: we don't need to pass the selection to ConvertToText() in the
         //     middle of the selected text; it's only useful when only part of
@@ -999,7 +990,7 @@ void wxHtmlWindow::OnEraseBackground(wxEraseEvent& event)
     // completely covered anyhow
     if ( m_bmpBg.GetMask() )
     {
-        dc.SetBackground(wxBrush(GetBackgroundColour(), wxBRUSHSTYLE_SOLID));
+        dc.SetBackground(wxBrush(GetBackgroundColour(), wxSOLID));
         dc.Clear();
     }
 
@@ -1033,7 +1024,7 @@ void wxHtmlWindow::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     if ( m_eraseBgInOnPaint )
     {
-        dcm.SetBackground(wxBrush(GetBackgroundColour(), wxBRUSHSTYLE_SOLID));
+        dcm.SetBackground(wxBrush(GetBackgroundColour(), wxSOLID));
         dcm.Clear();
 
         m_eraseBgInOnPaint = false;
@@ -1051,7 +1042,7 @@ void wxHtmlWindow::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     PrepareDC(dcm);
     dcm.SetMapMode(wxMM_TEXT);
-    dcm.SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
+    dcm.SetBackgroundMode(wxTRANSPARENT);
 
     wxHtmlRenderingInfo rinfo;
     wxDefaultHtmlRenderingStyle rstyle;
@@ -1152,10 +1143,9 @@ void wxHtmlWindow::OnMouseDown(wxMouseEvent& event)
             CaptureMouse();
         }
     }
+#else
+    wxUnusedVar(event);
 #endif // wxUSE_CLIPBOARD
-
-    // in any case, let the default handler set focus to this window
-    event.Skip();
 }
 
 void wxHtmlWindow::OnMouseUp(wxMouseEvent& event)
@@ -1179,6 +1169,8 @@ void wxHtmlWindow::OnMouseUp(wxMouseEvent& event)
         }
     }
 #endif // wxUSE_CLIPBOARD
+
+    SetFocus();
 
     wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
     wxHtmlWindowMouseHelper::HandleMouseClick(m_Cell, pos, event);
@@ -1629,17 +1621,8 @@ void wxHtmlWindow::SetHTMLBackgroundImage(const wxBitmap& bmpBg)
 void wxHtmlWindow::SetHTMLStatusText(const wxString& text)
 {
 #if wxUSE_STATUSBAR
-    if (m_RelatedStatusBarIndex != -1)
-    {
-        if (m_RelatedStatusBar)
-        {
-            m_RelatedStatusBar->SetStatusText(text, m_RelatedStatusBarIndex);
-        }
-        else if (m_RelatedFrame)
-        {
-            m_RelatedFrame->SetStatusText(text, m_RelatedStatusBarIndex);
-        }
-    }
+    if (m_RelatedStatusBar != -1)
+        m_RelatedFrame->SetStatusText(text, m_RelatedStatusBar);
 #else
     wxUnusedVar(text);
 #endif // wxUSE_STATUSBAR

@@ -54,7 +54,7 @@ wxObject *wxCollapsiblePaneXmlHandler::DoCreateResource()
         }
         else
         {
-            ReportError("no control within panewindow");
+            wxLogError(wxT("Error in resource: no control within collapsible pane's <panewindow> tag."));
             return NULL;
         }
     }
@@ -65,7 +65,7 @@ wxObject *wxCollapsiblePaneXmlHandler::DoCreateResource()
         wxString label = GetParamValue(wxT("label"));
         if (label.empty())
         {
-            ReportParamError("label", "label cannot be empty");
+            wxLogError(wxT("Error in resource: empty label for wxCollapsiblePane"));
             return NULL;
         }
 

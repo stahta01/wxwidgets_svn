@@ -19,7 +19,7 @@
 
 #if wxUSE_GIF
 
-class WXDLLIMPEXP_CORE wxGIFHandler : public wxImageHandler
+class WXDLLEXPORT wxGIFHandler : public wxImageHandler
 {
 public:
     inline wxGIFHandler()

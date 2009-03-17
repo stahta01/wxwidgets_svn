@@ -69,12 +69,7 @@
     wxFORCE_LINK_MODULE(gnome_print)
 #endif
 
-#if wxUSE_GTKPRINT
-    #include "wx/link.h"
-    wxFORCE_LINK_MODULE(gtk_print)
-#endif
-
-#endif // !wxUniv
+#endif // !__WXUNIVERSAL__
 
 // ----------------------------------------------------------------------------
 // global vars
@@ -145,8 +140,7 @@ END_EVENT_TABLE()
 
 wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
                                            wxPrintDialogData* data)
-                    : wxPrintDialogBase(GetParentForModalDialog(parent), 
-                               wxID_ANY, _("Print"),
+                    : wxPrintDialogBase(parent, wxID_ANY, _("Print"),
                                wxPoint(0,0), wxSize(600, 600),
                                wxDEFAULT_DIALOG_STYLE |
                                wxTAB_TRAVERSAL)
@@ -159,8 +153,7 @@ wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
 
 wxGenericPrintDialog::wxGenericPrintDialog(wxWindow *parent,
                                            wxPrintData* data)
-                    : wxPrintDialogBase(GetParentForModalDialog(parent), 
-                                wxID_ANY, _("Print"),
+                    : wxPrintDialogBase(parent, wxID_ANY, _("Print"),
                                wxPoint(0,0), wxSize(600, 600),
                                wxDEFAULT_DIALOG_STYLE |
                                wxTAB_TRAVERSAL)
@@ -221,9 +214,9 @@ void wxGenericPrintDialog::Init(wxWindow * WXUNUSED(parent))
     choices[0] = _("All");
     choices[1] = _("Pages");
 
-    m_fromText = NULL;
-    m_toText = NULL;
-    m_rangeRadioBox = NULL;
+    m_fromText = (wxTextCtrl*)NULL;
+    m_toText = (wxTextCtrl*)NULL;
+    m_rangeRadioBox = (wxRadioBox *)NULL;
 
     if (m_printDialogData.GetFromPage() != 0)
     {
@@ -718,9 +711,9 @@ bool wxGenericPrintSetupDialog::TransferDataToWindow()
     wxPostScriptPrintNativeData *data =
         (wxPostScriptPrintNativeData *) m_printData.GetNativeData();
 
-    if (m_printerCommandText && !data->GetPrinterCommand().empty())
+    if (m_printerCommandText && data->GetPrinterCommand())
         m_printerCommandText->SetValue(data->GetPrinterCommand());
-    if (m_printerOptionsText && !data->GetPrinterOptions().empty())
+    if (m_printerOptionsText && data->GetPrinterOptions())
         m_printerOptionsText->SetValue(data->GetPrinterOptions());
     if (m_colourCheckBox)
         m_colourCheckBox->SetValue(m_printData.GetColour());

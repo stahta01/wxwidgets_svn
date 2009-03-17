@@ -33,7 +33,7 @@ public:
     virtual wxString FindNext();
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxFilterFSHandler);
+    DECLARE_NO_COPY_CLASS(wxFilterFSHandler)
 };
 
 #endif // wxUSE_FILESYSTEM

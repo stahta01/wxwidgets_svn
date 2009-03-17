@@ -26,10 +26,10 @@
     #include "wx/timer.h"
 #endif // !PCH
 
-#include "wx/filename.h"
+#include "wx/filefn.h"
 #include "wx/ffile.h"
 #include "wx/process.h"
-#include "wx/crt.h"
+#include "wx/wxchar.h"
 
 #include <stdlib.h>
 
@@ -43,8 +43,8 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-wxDEFINE_EVENT( wxEVT_DIALUP_CONNECTED, wxDialUpEvent );
-wxDEFINE_EVENT( wxEVT_DIALUP_DISCONNECTED, wxDialUpEvent );
+DEFINE_EVENT_TYPE(wxEVT_DIALUP_CONNECTED)
+DEFINE_EVENT_TYPE(wxEVT_DIALUP_DISCONNECTED)
 
 // ----------------------------------------------------------------------------
 // A class which groups functions dealing with connecting to the network from a
@@ -673,11 +673,10 @@ wxDialUpManagerImpl::CheckIfconfig()
         wxASSERT_MSG( m_IfconfigPath.length(),
                       _T("can't use ifconfig if it wasn't found") );
 
-        wxString tmpfile = wxFileName::CreateTempFileName( wxT("_wxdialuptest") );
+        wxString tmpfile = wxGetTempFileName( wxT("_wxdialuptest") );
         wxString cmd = wxT("/bin/sh -c \'");
         cmd << m_IfconfigPath;
 #if defined(__AIX__) || \
-    defined(__NETBSD__) || \
     defined(__OSF__) || \
     defined(__SOLARIS__) || defined (__SUNOS__)
         // need to add -a flag
@@ -721,8 +720,8 @@ wxDialUpManagerImpl::CheckIfconfig()
 
 #if defined(__SOLARIS__) || defined (__SUNOS__)
                     // dialup device under SunOS/Solaris
-                    hasModem = strstr(output.fn_str(),"ipdptp") != NULL;
-                    hasLAN = strstr(output.fn_str(), "hme") != NULL;
+                    hasModem = strstr(output.fn_str(),"ipdptp") != (char *)NULL;
+                    hasLAN = strstr(output.fn_str(), "hme") != (char *)NULL;
 #elif defined(__LINUX__) || defined (__FREEBSD__)
                     hasModem = strstr(output.fn_str(),"ppp")    // ppp
                         || strstr(output.fn_str(),"sl")  // slip

@@ -30,7 +30,7 @@ public:
 private:
     wxWindow *m_win;
 
-    wxDECLARE_NO_COPY_CLASS(wxWindowUpdateLocker);
+    DECLARE_NO_COPY_CLASS(wxWindowUpdateLocker)
 };
 
 #endif // _WX_WUPDLOCK_H_

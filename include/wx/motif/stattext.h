@@ -12,7 +12,7 @@
 #ifndef _WX_STATTEXT_H_
 #define _WX_STATTEXT_H_
 
-class WXDLLIMPEXP_CORE wxStaticText: public wxStaticTextBase
+class WXDLLEXPORT wxStaticText: public wxStaticTextBase
 {
     DECLARE_DYNAMIC_CLASS(wxStaticText)
 
@@ -52,10 +52,6 @@ public:
     virtual WXWidget GetLabelWidget() const
         { return m_labelWidget; }
 
-    virtual void DoSetLabel(const wxString& str);
-    virtual wxString DoGetLabel() const;
-
-    virtual wxSize DoGetBestSize() const;
 protected:
     WXWidget              m_labelWidget;
 };

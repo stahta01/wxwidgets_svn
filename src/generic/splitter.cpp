@@ -39,10 +39,10 @@
 
 #include <stdlib.h>
 
-wxDEFINE_EVENT( wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED, wxSplitterEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING, wxSplitterEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_SPLITTER_DOUBLECLICKED, wxSplitterEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_SPLITTER_UNSPLIT, wxSplitterEvent );
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGING)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_DOUBLECLICKED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_SPLITTER_UNSPLIT)
 
 IMPLEMENT_DYNAMIC_CLASS(wxSplitterWindow, wxWindow)
 
@@ -84,7 +84,7 @@ bool wxSplitterWindow::Create(wxWindow *parent, wxWindowID id,
     style &= ~wxBORDER_MASK;
     style |= wxBORDER_NONE;
 
-#ifdef __WXMAC__
+#if defined(__WXMAC__) && wxMAC_USE_CORE_GRAPHICS
     // CoreGraphics can't paint sash feedback
     style |= wxSP_LIVE_UPDATE;
 #endif
@@ -112,12 +112,12 @@ bool wxSplitterWindow::Create(wxWindow *parent, wxWindowID id,
 
 void wxSplitterWindow::Init()
 {
-    WX_INIT_CONTROL_CONTAINER();
+    m_container.SetContainerWindow(this);
 
     m_splitMode = wxSPLIT_VERTICAL;
     m_permitUnsplitAlways = true;
-    m_windowOne = NULL;
-    m_windowTwo = NULL;
+    m_windowOne = (wxWindow *) NULL;
+    m_windowTwo = (wxWindow *) NULL;
     m_dragMode = wxSPLIT_DRAG_NONE;
     m_oldX = 0;
     m_oldY = 0;
@@ -131,7 +131,7 @@ void wxSplitterWindow::Init()
     m_minimumPaneSize = 0;
     m_sashCursorWE = wxCursor(wxCURSOR_SIZEWE);
     m_sashCursorNS = wxCursor(wxCURSOR_SIZENS);
-    m_sashTrackerPen = new wxPen(*wxBLACK, 2, wxPENSTYLE_SOLID);
+    m_sashTrackerPen = new wxPen(*wxBLACK, 2, wxSOLID);
 
     m_needUpdating = false;
     m_isHot = false;
@@ -221,10 +221,8 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
     // following the mouse movement while it drags the sash, without it we only
     // draw the sash at the new position but only resize the windows when the
     // dragging is finished
-#if defined( __WXMAC__ )
-    // FIXME : this should be usable also with no live update, but then this
-    // currently is not visible
-    bool isLive = true;
+#if defined( __WXMAC__ ) && defined(TARGET_API_MAC_OSX) && TARGET_API_MAC_OSX == 1
+    bool isLive = true ; // FIXME: why?
 #else
     bool isLive = HasFlag(wxSP_LIVE_UPDATE);
 #endif
@@ -297,7 +295,7 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
                 // We remove the first window from the view
                 wxWindow *removedWindow = m_windowOne;
                 m_windowOne = m_windowTwo;
-                m_windowTwo = NULL;
+                m_windowTwo = (wxWindow *) NULL;
                 OnUnsplit(removedWindow);
                 wxSplitterEvent eventUnsplit(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
                 eventUnsplit.m_data.win = removedWindow;
@@ -308,7 +306,7 @@ void wxSplitterWindow::OnMouseEvent(wxMouseEvent& event)
             {
                 // We remove the second window from the view
                 wxWindow *removedWindow = m_windowTwo;
-                m_windowTwo = NULL;
+                m_windowTwo = (wxWindow *) NULL;
                 OnUnsplit(removedWindow);
                 wxSplitterEvent eventUnsplit(wxEVT_COMMAND_SPLITTER_UNSPLIT, this);
                 eventUnsplit.m_data.win = removedWindow;
@@ -731,14 +729,14 @@ void wxSplitterWindow::SizeWindows()
 // Set pane for unsplit window
 void wxSplitterWindow::Initialize(wxWindow *window)
 {
-    wxASSERT_MSG( (!window || window->GetParent() == this),
+    wxASSERT_MSG( (!window || (window && window->GetParent() == this)),
                   _T("windows in the splitter should have it as parent!") );
 
     if (window && !window->IsShown())
         window->Show();
 
     m_windowOne = window;
-    m_windowTwo = NULL;
+    m_windowTwo = (wxWindow *) NULL;
     DoSetSashPosition(0);
 }
 
@@ -808,13 +806,13 @@ bool wxSplitterWindow::Unsplit(wxWindow *toRemove)
     if ( toRemove == NULL || toRemove == m_windowTwo)
     {
         win = m_windowTwo ;
-        m_windowTwo = NULL;
+        m_windowTwo = (wxWindow *) NULL;
     }
     else if ( toRemove == m_windowOne )
     {
         win = m_windowOne ;
         m_windowOne = m_windowTwo;
-        m_windowTwo = NULL;
+        m_windowTwo = (wxWindow *) NULL;
     }
     else
     {
@@ -924,12 +922,9 @@ wxSize wxSplitterWindow::DoGetBestSize() const
         pSash = &sizeBest.y;
     }
 
-    // account for the sash if the window is actually split
-    if ( m_windowOne && m_windowTwo )
-        *pSash += GetSashSize();
-
-    // account for the border too
+    // account for the border and the sash
     int border = 2*GetBorderSize();
+    *pSash += GetSashSize();
     sizeBest.x += border;
     sizeBest.y += border;
 

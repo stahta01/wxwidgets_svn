@@ -15,23 +15,43 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/log.h"
     #include "wx/intl.h"
 #endif
 
 #include "wx/strconv.h"
-#include "wx/sstream.h"
 #include "wx/html/htmlfilt.h"
 #include "wx/html/htmlwin.h"
 
-// utility function: read entire contents of an wxInputStream into a wxString
-//
-// TODO: error handling?
+// utility function: read a wxString from a wxInputStream
 static void ReadString(wxString& str, wxInputStream* s, wxMBConv& conv)
 {
-    wxStringOutputStream out(&str, conv);
-    s->Read(out);
+    size_t streamSize = s->GetSize();
+
+    if (streamSize == ~(size_t)0)
+    {
+        const size_t bufSize = 4095;
+        char buffer[bufSize+1];
+        size_t lastRead;
+
+        do
+        {
+            s->Read(buffer, bufSize);
+            lastRead = s->LastRead();
+            buffer[lastRead] = 0;
+            str.Append(wxString(buffer, conv));
+        }
+        while (lastRead == bufSize);
+    }
+    else
+    {
+        char* src = new char[streamSize+1];
+        s->Read(src, streamSize);
+        src[streamSize] = 0;
+        str = wxString(src, conv);
+        delete[] src;
+    }
 }
 
 /*
@@ -153,19 +173,15 @@ wxString wxHtmlFilterHTML::ReadFile(const wxFSFile& file) const
     }
     else
     {
-        size_t size = s->GetSize();
-        wxCharBuffer buf( size+1 );
-        s->Read( buf.data(), size );
-        *(buf.data() + size) = 0;
-        wxString tmpdoc( buf, wxConvISO8859_1);
-        
+        wxString tmpdoc;
+        ReadString(tmpdoc, s, wxConvISO8859_1);
         wxString charset = wxHtmlParser::ExtractCharsetInformation(tmpdoc);
         if (charset.empty())
             doc = tmpdoc;
         else
         {
             wxCSConv conv(charset);
-            doc = wxString( buf, conv );
+            doc = wxString(tmpdoc.mb_str(wxConvISO8859_1), conv);
         }
     }
 #else // !wxUSE_UNICODE

@@ -188,6 +188,11 @@ bool wxStaticBitmap::Create(wxWindow *parent,
     return true;
 }
 
+wxBorder wxStaticBitmap::GetDefaultBorder() const
+{
+    return wxBORDER_NONE;
+}
+
 WXDWORD wxStaticBitmap::MSWGetStyle(long style, WXDWORD *exstyle) const
 {
     WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);
@@ -257,8 +262,6 @@ wxSize wxStaticBitmap::DoGetBestSize() const
     return wxSize(16, 16);
 }
 
-#ifndef __WXWINCE__
-
 void wxStaticBitmap::DoPaintManually(wxPaintEvent& WXUNUSED(event))
 {
     wxPaintDC dc(this);
@@ -280,8 +283,6 @@ void wxStaticBitmap::DoPaintManually(wxPaintEvent& WXUNUSED(event))
                   (size.GetHeight() - bmp.GetHeight()) / 2,
                   true /* use mask */);
 }
-
-#endif // !__WXWINCE__
 
 void wxStaticBitmap::SetImage( const wxGDIImage* image )
 {

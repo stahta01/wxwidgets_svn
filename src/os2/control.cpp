@@ -22,7 +22,6 @@
     #include "wx/log.h"
 #endif
 
-#include "wx/os2/dc.h"
 #include "wx/os2/private.h"
 
 IMPLEMENT_ABSTRACT_CLASS(wxControl, wxWindow)
@@ -59,6 +58,11 @@ bool wxControl::Create( wxWindow*           pParent,
     }
     return bRval;
 } // end of wxControl::Create
+
+wxControl::~wxControl()
+{
+    m_isBeingDeleted = true;
+}
 
 bool wxControl::OS2CreateControl( const wxChar* zClassname,
                                   const wxString& rsLabel,
@@ -131,8 +135,8 @@ bool wxControl::OS2CreateControl( const wxChar*   zClassname,
     dwStyle &= ~WS_CLIPSIBLINGS;
 
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
-                                       ,zClass              // Window class
-                                       ,label.c_str()       // Initial Text
+                                       ,(PSZ)zClass              // Window class
+                                       ,(PSZ)label.c_str()       // Initial Text
                                        ,(ULONG)dwStyle           // Style flags
                                        ,(LONG)0                  // X pos of origin
                                        ,(LONG)0                  // Y pos of origin
@@ -180,7 +184,7 @@ wxSize wxControl::DoGetBestSize() const
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 WXHBRUSH wxControl::OnCtlColor(WXHDC    hWxDC,
@@ -211,8 +215,7 @@ WXHBRUSH wxControl::OnCtlColor(WXHDC    hWxDC,
 void wxControl::OnEraseBackground( wxEraseEvent& rEvent )
 {
     RECTL                           vRect;
-    wxPMDCImpl                     *impl = (wxPMDCImpl*) rEvent.GetDC()->GetImpl();
-    HPS                             hPS = impl->GetHPS();
+    HPS                             hPS = rEvent.GetDC()->GetHPS();
     SIZEL                           vSize = {0,0};
 
     ::GpiSetPS(hPS, &vSize, PU_PELS | GPIF_DEFAULT);
@@ -224,7 +227,7 @@ WXDWORD wxControl::OS2GetStyle( long lStyle, WXDWORD* pdwExstyle ) const
 {
     long dwStyle = wxWindow::OS2GetStyle( lStyle, pdwExstyle );
 
-    if (AcceptsFocusFromKeyboard())
+    if (AcceptsFocus())
     {
         dwStyle |= WS_TABSTOP;
     }
@@ -241,7 +244,7 @@ void wxControl::SetLabel( const wxString& rsLabel )
             label = ::wxPMTextToLabel(m_label);
         else
             label = m_label;
-        ::WinSetWindowText(GetHwnd(), label.c_str());
+        ::WinSetWindowText(GetHwnd(), (PSZ)label.c_str());
     }
 } // end of wxControl::SetLabel
 

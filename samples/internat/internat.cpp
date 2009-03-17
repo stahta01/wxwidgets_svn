@@ -9,10 +9,6 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-// NOTE: don't miss the "readme.txt" file which comes with this sample!
-
-
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -29,13 +25,12 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+#include "wx/wx.h"
 #endif
 
 #include "wx/intl.h"
 #include "wx/file.h"
 #include "wx/log.h"
-#include "wx/cmdline.h"
 
 #if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__)
 #include "mondrian.xpm"
@@ -49,15 +44,10 @@
 class MyApp: public wxApp
 {
 public:
-    MyApp() { m_lang = wxLANGUAGE_UNKNOWN; }
-
-    virtual void OnInitCmdLine(wxCmdLineParser& parser);
-    virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
     virtual bool OnInit();
 
 protected:
-    wxLanguage m_lang;  // language specified by user
-    wxLocale m_locale;  // locale we'll be using
+    wxLocale m_locale; // locale we'll be using
 };
 
 // Define a new frame type
@@ -101,7 +91,6 @@ static const wxLanguage langIds[] =
 {
     wxLANGUAGE_DEFAULT,
     wxLANGUAGE_FRENCH,
-    wxLANGUAGE_ITALIAN,
     wxLANGUAGE_GERMAN,
     wxLANGUAGE_RUSSIAN,
     wxLANGUAGE_BULGARIAN,
@@ -124,24 +113,23 @@ static const wxLanguage langIds[] =
 // shown before we set the locale anyhow
 const wxString langNames[] =
 {
-    "System default",
-    "French",
-    "Italian",
-    "German",
-    "Russian",
-    "Bulgarian",
-    "Czech",
-    "Polish",
-    "Swedish",
+    _T("System default"),
+    _T("French"),
+    _T("German"),
+    _T("Russian"),
+    _T("Bulgarian"),
+    _T("Czech"),
+    _T("Polish"),
+    _T("Swedish"),
 #if wxUSE_UNICODE || defined(__WXMOTIF__)
-    "Japanese",
+    _T("Japanese"),
 #endif
 #if wxUSE_UNICODE
-    "Georgian",
-    "English",
-    "English (U.S.)",
-    "Arabic",
-    "Arabic (Egypt)"
+    _T("Georgian"),
+    _T("English"),
+    _T("English (U.S.)"),
+    _T("Arabic"),
+    _T("Arabic (Egypt)")
 #endif
 };
 
@@ -175,78 +163,48 @@ IMPLEMENT_APP(MyApp)
 // MyApp
 // ----------------------------------------------------------------------------
 
-// command line arguments handling
-void MyApp::OnInitCmdLine(wxCmdLineParser& parser)
-{
-    parser.AddParam(_("locale"),
-                    wxCMD_LINE_VAL_STRING,
-                    wxCMD_LINE_PARAM_OPTIONAL);
-
-    wxApp::OnInitCmdLine(parser);
-}
-
-bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser)
-{
-    if ( !wxApp::OnCmdLineParsed(parser) )
-        return false;
-
-    if ( parser.GetParamCount() )
-    {
-        const wxString loc = parser.GetParam();
-        const wxLanguageInfo * const lang = wxLocale::FindLanguageInfo(loc);
-        if ( !lang )
-        {
-            wxLogError(_("Locale \"%s\" is unknown."), loc);
-            return false;
-        }
-
-        m_lang = static_cast<wxLanguage>(lang->Language);
-    }
-
-    return true;
-}
-
 // `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
+    long lng = -1;
 
-    if ( m_lang == wxLANGUAGE_UNKNOWN )
+    if ( argc == 2 )
     {
-        int lng = wxGetSingleChoiceIndex
-                  (
-                    _("Please choose language:"),
-                    _("Language"),
-                    WXSIZEOF(langNames),
-                    langNames
-                  );
-        m_lang = lng == -1 ? wxLANGUAGE_DEFAULT : langIds[lng];
+        // the parameter must be the lang index
+        wxString tmp(argv[1]);
+        tmp.ToLong(&lng);
     }
 
-    // don't use wxLOCALE_LOAD_DEFAULT flag so that Init() doesn't return
-    // false just because it failed to load wxstd catalog
-    if ( !m_locale.Init(m_lang, wxLOCALE_CONV_ENCODING) )
+    if ( lng == -1 )
     {
-        wxLogWarning(_("This language is not supported by the system."));
+        lng = wxGetSingleChoiceIndex
+              (
+                _T("Please choose language:"),
+                _T("Language"),
+                WXSIZEOF(langNames),
+                langNames
+              );
+    }
 
-        // continue nevertheless
+    if ( lng != -1 )
+    {
+        // don't use wxLOCALE_LOAD_DEFAULT flag so that Init() doesn't return
+        // false just because it failed to load wxstd catalog
+        if ( !m_locale.Init(langIds[lng], wxLOCALE_CONV_ENCODING) )
+        {
+            wxLogError(_T("This language is not supported by the system."));
+            return false;
+        }
     }
 
     // normally this wouldn't be necessary as the catalog files would be found
     // in the default locations, but when the program is not installed the
     // catalogs are in the build directory where we wouldn't find them by
     // default
-    wxLocale::AddCatalogLookupPathPrefix(".");
+    wxLocale::AddCatalogLookupPathPrefix(wxT("."));
 
     // Initialize the catalogs we'll be using
-    if (!m_locale.AddCatalog("internat"))
-        wxLogError(_("Couldn't find/load the 'internat' catalog."));
-
-    // Now try to add wxstd.mo so that loading "NOTEXIST.ING" file will produce
-    // a localized error message:
-    m_locale.AddCatalog("wxstd.mo");
-        // NOTE: it's not an error if we couldn't find it!
+    m_locale.AddCatalog(wxT("internat"));
 
     // this catalog is installed in standard location on Linux systems and
     // shows that you may make use of the standard message catalogs as well
@@ -255,12 +213,36 @@ bool MyApp::OnInit()
 #ifdef __LINUX__
     {
         wxLogNull noLog;
-        m_locale.AddCatalog("fileutils");
+        m_locale.AddCatalog(_T("fileutils"));
     }
 #endif
 
     // Create the main frame window
     MyFrame *frame = new MyFrame(m_locale);
+
+    // Give it an icon
+    frame->SetIcon(wxICON(mondrian));
+
+    // Make a menubar
+    wxMenu *file_menu = new wxMenu;
+    file_menu->Append(INTERNAT_TEST, _("&Test locale availability...\tCtrl-T"));
+    file_menu->AppendSeparator();
+    file_menu->Append(wxID_ABOUT, _("&About..."));
+    file_menu->AppendSeparator();
+    file_menu->Append(wxID_EXIT, _("E&xit"));
+
+    wxMenu *test_menu = new wxMenu;
+    test_menu->Append(wxID_OPEN, _("&Open bogus file"));
+    test_menu->Append(INTERNAT_PLAY, _("&Play a game"));
+    test_menu->AppendSeparator();
+    test_menu->Append(INTERNAT_TEST_1, _("&1 _() (gettext)"));
+    test_menu->Append(INTERNAT_TEST_2, _("&2 _N() (ngettext)"));
+    test_menu->Append(INTERNAT_TEST_3, _("&3 wxTRANSLATE() (gettext_noop)"));
+
+    wxMenuBar *menu_bar = new wxMenuBar;
+    menu_bar->Append(file_menu, _("&File"));
+    menu_bar->Append(test_menu, _("&Test"));
+    frame->SetMenuBar(menu_bar);
 
     // Show the frame
     frame->Show(true);
@@ -280,35 +262,6 @@ MyFrame::MyFrame(wxLocale& locale)
                  _("International wxWidgets App")),
          m_locale(locale)
 {
-    SetIcon(wxICON(mondrian));
-
-    // Make a menubar
-    wxMenu *file_menu = new wxMenu;
-    file_menu->Append(INTERNAT_TEST, _("&Test locale availability...\tCtrl-T"));
-    file_menu->AppendSeparator();
-
-    // since wxID_ABOUT and wxID_EXIT are stock IDs they will automatically get
-    // translated help strings; nice isn't it?
-    file_menu->Append(wxID_ABOUT, _("&About..."));
-    file_menu->AppendSeparator();
-    file_menu->Append(wxID_EXIT, _("E&xit"));
-
-    wxMenu *test_menu = new wxMenu;
-    test_menu->Append(wxID_OPEN, _("&Open bogus file"), _("Shows a wxWidgets localized error message"));
-    test_menu->Append(INTERNAT_PLAY, _("&Play a game"), _("A little game; hint: 17 is a lucky number for many"));
-    test_menu->AppendSeparator();
-    test_menu->Append(INTERNAT_TEST_1, _("&1 _() (gettext)"), _("Tests the _() macro"));
-    test_menu->Append(INTERNAT_TEST_2, _("&2 _N() (ngettext)"), _("Tests the _N() macro"));
-    test_menu->Append(INTERNAT_TEST_3, _("&3 wxTRANSLATE() (gettext_noop)"), _("Tests the wxTRANSLATE() macro"));
-
-    wxMenuBar *menu_bar = new wxMenuBar;
-    menu_bar->Append(file_menu, _("&File"));
-    menu_bar->Append(test_menu, _("&Test"));
-    SetMenuBar(menu_bar);
-
-    // this demonstrates RTL support in wxStatusBar:
-    CreateStatusBar(1);
-
     // this demonstrates RTL layout mirroring for Arabic locales
     wxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
     sizer->Add(new wxStaticText(this, wxID_ANY, _("First")),
@@ -336,7 +289,7 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
     wxMessageDialog dlg(
                         this,
                         wxString(_("I18n sample\n(c) 1998, 1999 Vadim Zeitlin and Julian Smart"))
-                                 + "\n\n"
+                                 + wxT("\n\n")
                                  + localeInfo,
                                  _("About Internat"),
                         wxOK | wxICON_INFORMATION
@@ -384,15 +337,9 @@ void MyFrame::OnPlay(wxCommandEvent& WXUNUSED(event))
     {
         // this is a more implicit way to write _() but note that if you use it
         // you must ensure that the strings get extracted in the message
-        // catalog as by default xgettext won't do it; it only knows of _(),
-        // not of wxTRANSLATE(). As internat's readme.txt says you should thus
-        // call xgettext with -kwxTRANSLATE.
-        str = wxGetTranslation(wxTRANSLATE("Bad luck! try again..."));
-
-        // note also that if we want 'str' to contain a localized string
-        // we need to use wxGetTranslation explicitely as wxTRANSLATE just
-        // tells xgettext to extract the string but has no effect on the
-        // runtime of the program!
+        // catalog as by default xgettext won't do it (it only knows of _(),
+        // not wxGetTranslation())
+        str = wxGetTranslation(_T("Bad luck! try again..."));
     }
 
     wxMessageBox(str, _("Result"), wxOK | wxICON_INFORMATION);
@@ -428,51 +375,42 @@ void MyFrame::OnTestLocaleAvail(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 {
     // open a bogus file -- the error message should be also translated if
-    // you've got wxstd.mo somewhere in the search path (see MyApp::OnInit)
-    wxFile file("NOTEXIST.ING");
+    // you've got wxstd.mo somewhere in the search path
+    wxFile file(wxT("NOTEXIST.ING"));
 }
 
 void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
 {
-    const wxString& title = _("Testing _() (gettext)");
-
-    // NOTE: using the wxTRANSLATE() macro here we won't show a localized
-    //       string in the text entry dialog; we'll simply show the un-translated
-    //       string; however if the user press "ok" without altering the text,
-    //       since the "default value" string has been extracted by xgettext
-    //       the wxGetTranslation call later will manage to return a localized
-    //       string
+    const wxChar* title = _("Testing _() (gettext)");
     wxTextEntryDialog d(this, _("Please enter text to translate"),
-                        title, wxTRANSLATE("default value"));
-
+        title, wxTRANSLATE("default value"));
     if (d.ShowModal() == wxID_OK)
     {
         wxString v = d.GetValue();
         wxString s(title);
-        s << "\n" << v << " -> "
-            << wxGetTranslation(v.c_str()) << "\n";
+        s << _T("\n") << v << _T(" -> ")
+            << wxGetTranslation(v.c_str()) << _T("\n");
         wxMessageBox(s);
     }
 }
 
 void MyFrame::OnTest2(wxCommandEvent& WXUNUSED(event))
 {
-    const wxString& title = _("Testing _N() (ngettext)");
+    const wxChar* title = _("Testing _N() (ngettext)");
     wxTextEntryDialog d(this,
         _("Please enter range for plural forms of \"n files deleted\" phrase"),
-        title, "0-10");
-
+        title, _T("0-10"));
     if (d.ShowModal() == wxID_OK)
     {
         int first, last;
-        wxSscanf(d.GetValue(), "%d-%d", &first, &last);
+        wxSscanf(d.GetValue(), _T("%d-%d"), &first, &last);
         wxString s(title);
-        s << "\n";
+        s << _T("\n");
         for (int n = first; n <= last; ++n)
         {
-            s << n << " " <<
+            s << n << _T(" ") <<
                 wxPLURAL("file deleted", "files deleted", n) <<
-                "\n";
+                _T("\n");
         }
         wxMessageBox(s);
     }
@@ -480,18 +418,17 @@ void MyFrame::OnTest2(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnTest3(wxCommandEvent& WXUNUSED(event))
 {
-    const char* lines[] =
+    const wxChar* lines[] =
     {
         wxTRANSLATE("line 1"),
         wxTRANSLATE("line 2"),
         wxTRANSLATE("line 3"),
     };
-
     wxString s(_("Testing wxTRANSLATE() (gettext_noop)"));
-    s << "\n";
+    s << _T("\n");
     for (size_t i = 0; i < WXSIZEOF(lines); ++i)
     {
-        s << lines[i] << " -> " << wxGetTranslation(lines[i]) << "\n";
+        s << lines[i] << _T(" -> ") << wxGetTranslation(lines[i]) << _T("\n");
     }
     wxMessageBox(s);
 }

@@ -36,7 +36,9 @@
 // --------------------------------------------------------------------------
 
 // the application icon
-#include "mondrian.xpm"
+#if defined(__WXGTK__) || defined(__WXX11__) || defined(__WXMOTIF__) || defined(__WXMAC__)
+#  include "mondrian.xpm"
+#endif
 
 // --------------------------------------------------------------------------
 // classes
@@ -81,24 +83,6 @@ private:
   DECLARE_EVENT_TABLE()
 };
 
-// simple helper class to log start and end of each test
-class TestLogger
-{
-public:
-    TestLogger(const wxString& name) : m_name(name)
-    {
-        wxLogMessage("=== %s begins ===", m_name);
-    }
-
-    ~TestLogger()
-    {
-        wxLogMessage("=== %s ends ===", m_name);
-    }
-
-private:
-    const wxString m_name;
-};
-
 // --------------------------------------------------------------------------
 // constants
 // --------------------------------------------------------------------------
@@ -139,9 +123,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-  if ( !wxApp::OnInit() )
-      return false;
-
   // Create the main application window
   MyFrame *frame = new MyFrame();
 
@@ -187,14 +168,9 @@ MyFrame::MyFrame() : wxFrame((wxFrame *)NULL, wxID_ANY,
                            _("Welcome to wxSocket demo: Server\n"),
                            wxDefaultPosition, wxDefaultSize,
                            wxTE_MULTILINE | wxTE_READONLY);
-  delete wxLog::SetActiveTarget(new wxLogTextCtrl(m_text));
 
   // Create the address - defaults to localhost:0 initially
-#if wxUSE_IPV6
-  wxIPV6address addr;
-#else
   wxIPV4address addr;
-#endif
   addr.Service(3000);
 
   // Create the socket
@@ -203,12 +179,12 @@ MyFrame::MyFrame() : wxFrame((wxFrame *)NULL, wxID_ANY,
   // We use Ok() here to see if the server is really listening
   if (! m_server->Ok())
   {
-    wxLogMessage("Could not listen at the specified port !");
+    m_text->AppendText(_("Could not listen at the specified port !\n\n"));
     return;
   }
   else
   {
-    wxLogMessage("Server listening.");
+    m_text->AppendText(_("Server listening.\n\n"));
   }
 
   // Setup the event handler and subscribe to connection events
@@ -244,7 +220,10 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::Test1(wxSocketBase *sock)
 {
-  TestLogger logtest("Test 1");
+  unsigned char len;
+  char *buf;
+
+  m_text->AppendText(_("Test 1 begins\n"));
 
   // Receive data from socket and send it back. We will first
   // get a byte with the buffer size, so we can specify the
@@ -255,45 +234,54 @@ void MyFrame::Test1(wxSocketBase *sock)
   sock->SetFlags(wxSOCKET_WAITALL);
 
   // Read the size
-  unsigned char len;
   sock->Read(&len, 1);
-  wxCharBuffer buf(len);
+  buf = new char[len];
 
   // Read the data
-  sock->Read(buf.data(), len);
-  wxLogMessage("Got the data, sending it back");
+  sock->Read(buf, len);
+  m_text->AppendText(_("Got the data, sending it back\n"));
 
   // Write it back
   sock->Write(buf, len);
+  delete[] buf;
+
+  m_text->AppendText(_("Test 1 ends\n\n"));
 }
 
 void MyFrame::Test2(wxSocketBase *sock)
 {
-  char buf[4096];
+#define MAX_MSG_SIZE 10000
 
-  TestLogger logtest("Test 2");
+  wxString s;
+  wxChar *buf = new wxChar[MAX_MSG_SIZE];
+  wxUint32 len;
+
+  m_text->AppendText(_("Test 2 begins\n"));
 
   // We don't need to set flags because ReadMsg and WriteMsg
   // are not affected by them anyway.
 
   // Read the message
-  wxUint32 len = sock->ReadMsg(buf, sizeof(buf)).LastCount();
-  if ( !len )
-  {
-      wxLogError("Failed to read message.");
-      return;
-  }
-
-  wxLogMessage("Got \"%s\" from client.", wxString::FromUTF8(buf, len));
-  wxLogMessage("Sending the data back");
+  len = sock->ReadMsg(buf, MAX_MSG_SIZE * sizeof(wxChar)).LastCount();
+  s.Printf(_("Client says: %s\n"), buf);
+  m_text->AppendText(s);
+  m_text->AppendText(_("Sending the data back\n"));
 
   // Write it back
   sock->WriteMsg(buf, len);
+  delete[] buf;
+
+  m_text->AppendText(_("Test 2 ends\n\n"));
+
+#undef MAX_MSG_SIZE
 }
 
 void MyFrame::Test3(wxSocketBase *sock)
 {
-  TestLogger logtest("Test 3");
+  unsigned char len;
+  char *buf;
+
+  m_text->AppendText(_("Test 3 begins\n"));
 
   // This test is similar to the first one, but the len is
   // expressed in kbytes - this tests large data transfers.
@@ -301,16 +289,18 @@ void MyFrame::Test3(wxSocketBase *sock)
   sock->SetFlags(wxSOCKET_WAITALL);
 
   // Read the size
-  unsigned char len;
   sock->Read(&len, 1);
-  wxCharBuffer buf(len*1024);
+  buf = new char[len * 1024];
 
   // Read the data
-  sock->Read(buf.data(), len * 1024);
-  wxLogMessage("Got the data, sending it back");
+  sock->Read(buf, len * 1024);
+  m_text->AppendText(_("Got the data, sending it back\n"));
 
   // Write it back
   sock->Write(buf, len * 1024);
+  delete[] buf;
+
+  m_text->AppendText(_("Test 3 ends\n\n"));
 }
 
 void MyFrame::OnServerEvent(wxSocketEvent& event)
@@ -335,11 +325,11 @@ void MyFrame::OnServerEvent(wxSocketEvent& event)
 
   if (sock)
   {
-    wxLogMessage("New client connection accepted");
+    m_text->AppendText(_("New client connection accepted\n\n"));
   }
   else
   {
-    wxLogMessage("Error: couldn't accept a new connection");
+    m_text->AppendText(_("Error: couldn't accept a new connection\n\n"));
     return;
   }
 
@@ -385,7 +375,7 @@ void MyFrame::OnSocketEvent(wxSocketEvent& event)
         case 0xCE: Test2(sock); break;
         case 0xDE: Test3(sock); break;
         default:
-          wxLogMessage("Unknown test id received from client");
+          m_text->AppendText(_("Unknown test id received from client\n\n"));
       }
 
       // Enable input events again.
@@ -405,7 +395,7 @@ void MyFrame::OnSocketEvent(wxSocketEvent& event)
       // middle of a test or something. Destroy() takes care of all
       // this for us.
 
-      wxLogMessage("Deleting socket.");
+      m_text->AppendText(_("Deleting socket.\n\n"));
       sock->Destroy();
       break;
     }

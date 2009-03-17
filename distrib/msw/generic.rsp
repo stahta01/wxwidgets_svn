@@ -102,8 +102,6 @@ src/richtext/*.cpp
 
 src/aui/*.cpp
 
-src/propgrid/*.cpp
-
 src/unix/*.cpp
 src/unix/*.c
 
@@ -146,6 +144,19 @@ src/regex/tests
 src/regex/regex.3
 src/regex/regex.7
 
+src/iodbc/AUTHORS
+src/iodbc/COPYING
+src/iodbc/autoconfig
+src/iodbc/Changes.log
+src/iodbc/IAFA-PACKAGE
+src/iodbc/INSTALL
+src/iodbc/NEWS
+src/iodbc/README
+src/iodbc/*.c
+src/iodbc/*.h
+src/iodbc/*.ci
+src/iodbc/*.exp
+
 include/wx/*.h
 include/wx/*.inl
 include/wx/*.cpp
@@ -154,6 +165,7 @@ include/wx/wx_setup.vms
 include/wx/common/*.h
 include/wx/generic/*.h
 include/wx/generic/*.xpm
+include/wx/private/*.h
 include/wx/unix/*.h
 include/wx/html/*.h
 include/wx/html/msw/*.bmp
@@ -161,7 +173,6 @@ include/wx/html/msw/*.ico
 include/wx/html/msw/*.rc
 include/wx/richtext/*.h
 include/wx/aui/*.h
-include/wx/propgrid/*.h
 lib/dummy
 
 tools/gettext/*.*
@@ -210,6 +221,15 @@ samples/artprov/*.rc
 samples/artprov/*.wav
 samples/artprov/*.pro
 samples/artprov/*.bkl
+
+samples/aui/*.cpp
+samples/aui/makefile*
+samples/aui/*.xbm
+samples/aui/*.xpm
+samples/aui/*.ico
+samples/aui/*.rc
+samples/aui/*.pro
+samples/aui/*.bkl
 
 samples/richtext/*.cpp
 samples/richtext/makefile*
@@ -885,6 +905,20 @@ samples/minifram/bitmaps/*.bmp
 samples/minifram/bitmaps/*.xpm
 samples/minifram/*.bkl
 
+samples/mobile/styles/*.cpp
+samples/mobile/styles/*.h
+samples/mobile/styles/*.xpm
+samples/mobile/styles/*.jpg
+samples/mobile/styles/*.bkl
+samples/mobile/styles/makefile.*
+samples/mobile/wxedit/*.cpp
+samples/mobile/wxedit/*.h
+samples/mobile/wxedit/*.xpm
+samples/mobile/wxedit/*.bkl
+samples/mobile/wxedit/makefile.*
+samples/mobile/make*
+samples/mobile/*.bkl
+
 samples/multimon/*.h
 samples/multimon/*.cpp
 samples/multimon/*.rc
@@ -1061,6 +1095,19 @@ samples/scroll/*.ico
 samples/scroll/*.txt
 samples/scroll/*.pro
 samples/scroll/*.bkl
+
+samples/scrollsub/*.cpp
+samples/scrollsub/*.h
+samples/scrollsub/makefile*
+samples/scrollsub/*.rc
+samples/scrollsub/*.bmp
+samples/scrollsub/*.xpm
+samples/scrollsub/*.xbm
+samples/scrollsub/*.png
+samples/scrollsub/*.ico
+samples/scrollsub/*.txt
+samples/scrollsub/*.pro
+samples/scrollsub/*.bkl
 
 samples/shaped/*.cpp
 samples/shaped/*.h

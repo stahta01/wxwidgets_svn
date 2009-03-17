@@ -32,10 +32,6 @@
 
 #include "wx/html/webkit.h"
 
-#ifndef __WXMSW__
-    #include "../../sample.xpm"
-#endif
-
 // ----------------------------------------------------------------------------
 // resources
 // ----------------------------------------------------------------------------
@@ -51,7 +47,7 @@ enum {
     ID_OPEN = wxID_HIGHEST + 8,
     ID_SAVE = wxID_HIGHEST + 9,
     ID_SET_SOURCE = wxID_HIGHEST + 10
-};
+    };
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -129,9 +125,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("wxWebKit Sample"));
 
@@ -153,22 +146,20 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString& title)
        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500,500))
 {
-    SetIcon(wxICON(sample));
-
     wxMenuBar* myBar = new wxMenuBar();
     wxMenu* fileMenu = new wxMenu;
     fileMenu->Append(ID_OPEN, _("&Open"));
     fileMenu->Append(ID_SAVE, _("&Save"));
     myBar->Append(fileMenu, _("&File"));
-
+    
     wxMenu* editMenu = new wxMenu;
     editMenu->Append(ID_SET_SOURCE, _("Set Page Source"));
     myBar->Append(editMenu, _("&Edit"));
-
+    
     //wxMenu* viewMenu = new wxMenu(_("View"));
     //viewMenu->Append(ID_VIEW_SOURCE, _("View Source"));
     //myBar->Append(viewMenu, _("View"));
-
+    
     SetMenuBar(myBar);
 
     wxToolBar* myToolbar = CreateToolBar();
@@ -206,7 +197,7 @@ MyFrame::MyFrame(const wxString& title)
 #else
     mySafari = new wxWebKitCtrl(this, ID_WEBKIT, _T("http://www.wxwidgets.org"), wxDefaultPosition, wxSize(200, 200));
 #endif
-
+    
 #if wxUSE_STATUSBAR
     CreateStatusBar(2);
 #endif // wxUSE_STATUSBAR

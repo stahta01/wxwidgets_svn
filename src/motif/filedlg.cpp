@@ -166,15 +166,12 @@ int wxFileDialog::ShowModal()
     Arg args[10];
     int ac = 0;
 
-    if (m_backgroundColour.Ok())
-    {
-        wxComputeColours (dpy, & m_backgroundColour, NULL);
+    wxComputeColours (dpy, & m_backgroundColour, (wxColour*) NULL);
 
-        XtSetArg(args[ac], XmNbackground, g_itemColors[wxBACK_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNtopShadowColor, g_itemColors[wxTOPS_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNbottomShadowColor, g_itemColors[wxBOTS_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNforeground, g_itemColors[wxFORE_INDEX].pixel); ac++;
-    }
+    XtSetArg(args[ac], XmNbackground, g_itemColors[wxBACK_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNtopShadowColor, g_itemColors[wxTOPS_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNbottomShadowColor, g_itemColors[wxBOTS_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNforeground, g_itemColors[wxFORE_INDEX].pixel); ac++;
 
     wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 
@@ -231,7 +228,7 @@ int wxFileDialog::ShowModal()
 
     if (!m_message.IsNull())
         XtVaSetValues(shell,
-                      XmNtitle, (const char*)m_message.mb_str(),
+                      XmNtitle, wxConstCast(m_message.c_str(), char),
                       NULL);
 
     if (!m_wildCard.empty())
@@ -244,7 +241,7 @@ int wxFileDialog::ShowModal()
         else
             filter = wildCard;
 
-        XmTextSetString(filterWidget, filter.char_str());
+        XmTextSetString(filterWidget, wxConstCast(filter.c_str(), char));
         XmFileSelectionDoSearch(fileSel, NULL);
     }
 
@@ -272,7 +269,8 @@ int wxFileDialog::ShowModal()
 
     if (!entirePath.empty())
     {
-        XmTextSetString(selectionWidget, entirePath.char_str());
+        XmTextSetString(selectionWidget,
+                        wxConstCast(entirePath.c_str(), char));
     }
 
     XtAddCallback(fileSel, XmNcancelCallback,

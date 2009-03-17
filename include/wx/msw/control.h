@@ -15,7 +15,7 @@
 #include "wx/dynarray.h"
 
 // General item class
-class WXDLLIMPEXP_CORE wxControl : public wxControlBase
+class WXDLLEXPORT wxControl : public wxControlBase
 {
 public:
     wxControl() { }
@@ -35,6 +35,7 @@ public:
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxControlNameStr);
 
+    virtual ~wxControl();
 
     // Simulates an event
     virtual void Command(wxCommandEvent& event) { ProcessCommand(event); }

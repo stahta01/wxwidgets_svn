@@ -30,6 +30,10 @@
     #include "wx/module.h"
 #endif
 
+#ifdef __WXMSW__
+    #include "wx/msw/wrapwin.h"
+#endif
+
 // ===========================================================================
 // implementation
 // ===========================================================================
@@ -43,7 +47,6 @@ WX_DEFINE_LIST(wxArtProvidersList)
 // ----------------------------------------------------------------------------
 
 WX_DECLARE_EXPORTED_STRING_HASH_MAP(wxBitmap, wxArtProviderBitmapsHash);
-WX_DECLARE_EXPORTED_STRING_HASH_MAP(wxIconBundle, wxArtProviderIconBundlesHash);
 
 class WXDLLEXPORT wxArtProviderCache
 {
@@ -52,22 +55,14 @@ public:
     void PutBitmap(const wxString& full_id, const wxBitmap& bmp)
         { m_bitmapsHash[full_id] = bmp; }
 
-    bool GetIconBundle(const wxString& full_id, wxIconBundle* bmp);
-    void PutIconBundle(const wxString& full_id, const wxIconBundle& iconbundle)
-        { m_iconBundlesHash[full_id] = iconbundle; }
-
     void Clear();
 
     static wxString ConstructHashID(const wxArtID& id,
                                     const wxArtClient& client,
                                     const wxSize& size);
 
-    static wxString ConstructHashID(const wxArtID& id,
-                                    const wxArtClient& client);
-
 private:
-    wxArtProviderBitmapsHash m_bitmapsHash;         // cache of wxBitmaps
-    wxArtProviderIconBundlesHash m_iconBundlesHash; // cache of wxIconBundles
+    wxArtProviderBitmapsHash m_bitmapsHash;
 };
 
 bool wxArtProviderCache::GetBitmap(const wxString& full_id, wxBitmap* bmp)
@@ -84,42 +79,20 @@ bool wxArtProviderCache::GetBitmap(const wxString& full_id, wxBitmap* bmp)
     }
 }
 
-bool wxArtProviderCache::GetIconBundle(const wxString& full_id, wxIconBundle* bmp)
-{
-    wxArtProviderIconBundlesHash::iterator entry = m_iconBundlesHash.find(full_id);
-    if ( entry == m_iconBundlesHash.end() )
-    {
-        return false;
-    }
-    else
-    {
-        *bmp = entry->second;
-        return true;
-    }
-}
-
 void wxArtProviderCache::Clear()
 {
     m_bitmapsHash.clear();
-    m_iconBundlesHash.clear();
 }
 
-/* static */ wxString
-wxArtProviderCache::ConstructHashID(const wxArtID& id,
-                                    const wxArtClient& client)
+/*static*/ wxString wxArtProviderCache::ConstructHashID(
+                                const wxArtID& id, const wxArtClient& client,
+                                const wxSize& size)
 {
-    return id + _T('-') + client;
+    wxString str;
+    str.Printf(wxT("%s-%s-%i-%i"), id.c_str(), client.c_str(), size.x, size.y);
+    return str;
 }
 
-
-/* static */ wxString
-wxArtProviderCache::ConstructHashID(const wxArtID& id,
-                                    const wxArtClient& client,
-                                    const wxSize& size)
-{
-    return ConstructHashID(id, client) + _T('-') +
-            wxString::Format(_T("%d-%d"), size.x, size.y);
-}
 
 // ============================================================================
 // wxArtProvider class
@@ -160,10 +133,15 @@ wxArtProvider::~wxArtProvider()
     sm_providers->Insert(provider);
 }
 
-/*static*/ void wxArtProvider::PushBack(wxArtProvider *provider)
+/*static*/ void wxArtProvider::Insert(wxArtProvider *provider)
 {
     CommonAddingProvider();
     sm_providers->Append(provider);
+}
+
+/*static*/ void wxArtProvider::PushBack(wxArtProvider *provider)
+{
+    Insert(provider);
 }
 
 /*static*/ bool wxArtProvider::Pop()
@@ -247,39 +225,12 @@ wxArtProvider::~wxArtProvider()
 #endif
                 break;
             }
-            // We could try the IconBundles here and convert what we find
-            // to a bitmap.
         }
+
         sm_cache->PutBitmap(hashId, bmp);
-        }
-
-    return bmp;
-}
-
-/*static*/ wxIconBundle wxArtProvider::GetIconBundle(const wxArtID& id, const wxArtClient& client)
-{
-    // safety-check against writing client,id,size instead of id,client,size:
-    wxASSERT_MSG( client.Last() == _T('C'), _T("invalid 'client' parameter") );
-
-    wxCHECK_MSG( sm_providers, wxNullIconBundle, _T("no wxArtProvider exists") );
-
-    wxString hashId = wxArtProviderCache::ConstructHashID(id, client);
-
-    wxIconBundle iconbundle;
-    if ( !sm_cache->GetIconBundle(hashId, &iconbundle) )
-    {
-        for (wxArtProvidersList::compatibility_iterator node = sm_providers->GetFirst();
-             node; node = node->GetNext())
-        {
-            iconbundle = node->GetData()->CreateIconBundle(id, client);
-            if ( iconbundle.IsOk() )
-                break;
-        }
-
-        sm_cache->PutIconBundle(hashId, iconbundle);
     }
 
-    return iconbundle;
+    return bmp;
 }
 
 /*static*/ wxIcon wxArtProvider::GetIcon(const wxArtID& id,
@@ -288,12 +239,6 @@ wxArtProvider::~wxArtProvider()
 {
     wxCHECK_MSG( sm_providers, wxNullIcon, _T("no wxArtProvider exists") );
 
-    // First look for an appropriate icon bundle - this will give us the best icon
-    wxIconBundle iconBundle = GetIconBundle(id, client);
-    if ( iconBundle.IsOk() )
-        return iconBundle.GetIcon(size);
-
-    // If there is no icon bundle then look for a bitmap
     wxBitmap bmp = GetBitmap(id, client, size);
     if ( !bmp.Ok() )
         return wxNullIcon;
@@ -303,35 +248,10 @@ wxArtProvider::~wxArtProvider()
     return icon;
 }
 
-/* static */
-wxIcon wxArtProvider::GetMessageBoxIcon(int flags)
-{
-    wxIcon icon;
-    switch ( flags & wxICON_MASK )
-    {
-        default:
-            wxFAIL_MSG(_T("incorrect message box icon flags"));
-            // fall through
-
-        case wxICON_ERROR:
-            icon = wxArtProvider::GetIcon(wxART_ERROR, wxART_MESSAGE_BOX);
-            break;
-
-        case wxICON_INFORMATION:
-            icon = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_MESSAGE_BOX);
-            break;
-
-        case wxICON_WARNING:
-            icon = wxArtProvider::GetIcon(wxART_WARNING, wxART_MESSAGE_BOX);
-            break;
-
-        case wxICON_QUESTION:
-            icon = wxArtProvider::GetIcon(wxART_QUESTION, wxART_MESSAGE_BOX);
-            break;
-    }
-
-    return icon;
-}
+#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
+    #include "wx/gtk/private.h"
+    extern GtkIconSize wxArtClientToIconSize(const wxArtClient& client);
+#endif // defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
 
 /*static*/ wxSize wxArtProvider::GetSizeHint(const wxArtClient& client,
                                          bool platform_dependent)
@@ -343,33 +263,41 @@ wxIcon wxArtProvider::GetMessageBoxIcon(int flags)
             return node->GetData()->DoGetSizeHint(client);
     }
 
-    return GetNativeSizeHint(client);
-}
+        // else return platform dependent size
 
-#ifndef wxHAS_NATIVE_ART_PROVIDER_IMPL
-/*static*/
-wxSize wxArtProvider::GetNativeSizeHint(const wxArtClient& WXUNUSED(client))
-{
-    // rather than returning some arbitrary value that doesn't make much
-    // sense (as 2.8 used to do), tell the caller that we don't have a clue:
-    return wxDefaultSize;
-}
-
-/*static*/
-void wxArtProvider::InitNativeProvider()
-{
-}
-#endif // !wxHAS_NATIVE_ART_PROVIDER_IMPL
-
-
-/* static */
-bool wxArtProvider::HasNativeProvider()
-{
-#ifdef __WXGTK20__
-    return true;
+#if defined(__WXGTK20__) && !defined(__WXUNIVERSAL__)
+    // Gtk has specific sizes for each client, see artgtk.cpp
+    GtkIconSize gtk_size = wxArtClientToIconSize(client);
+    // no size hints for this client
+    if (gtk_size == GTK_ICON_SIZE_INVALID)
+        return wxDefaultSize;
+    gint width, height;
+    gtk_icon_size_lookup( gtk_size, &width, &height);
+    return wxSize(width, height);
+#else // !GTK+ 2
+    // NB: These size hints may have to be adjusted per platform
+    if (client == wxART_TOOLBAR)
+        return wxSize(16, 15);
+    else if (client == wxART_MENU)
+        return wxSize(16, 15);
+    else if (client == wxART_FRAME_ICON)
+    {
+#ifdef __WXMSW__
+        return wxSize(::GetSystemMetrics(SM_CXSMICON),
+                      ::GetSystemMetrics(SM_CYSMICON));
 #else
-    return false;
-#endif
+        return wxSize(16, 16);
+#endif // __WXMSW__/!__WXMSW__
+    }
+    else if (client == wxART_CMN_DIALOG || client == wxART_MESSAGE_BOX)
+        return wxSize(32, 32);
+    else if (client == wxART_HELP_BROWSER)
+        return wxSize(16, 15);
+    else if (client == wxART_BUTTON)
+        return wxSize(16, 15);
+    else // wxART_OTHER or perhaps a user's client, no specified size
+        return wxDefaultSize;
+#endif // GTK+ 2/else
 }
 
 // ----------------------------------------------------------------------------
@@ -401,13 +329,6 @@ bool wxArtProvider::HasNativeProvider()
 }
 
 #endif // WXWIN_COMPATIBILITY_2_6
-
-#if WXWIN_COMPATIBILITY_2_8
-/* static */ void wxArtProvider::Insert(wxArtProvider *provider)
-{
-    PushBack(provider);
-}
-#endif // WXWIN_COMPATIBILITY_2_8
 
 // ============================================================================
 // wxArtProviderModule

@@ -81,42 +81,47 @@
                                 <object class="wxToolBar">
                                     <style>wxTB_FLAT|wxTB_NODIVIDER</style>
                                     <margins>2,2</margins>
-                                    <object class="tool" name="New">
-                                        <bitmap stock_id="wxART_NEW"/>
-                                        <label>New</label>
+                                    <object class="tool" name="non_derived_dialog_tool_or_menuitem">
+                                        <tooltip>Non-Derived Dialog Example</tooltip>
+                                        <bitmap>basicdlg.xpm</bitmap>
+                                        <longhelp>The basic instance of wxDialog loaded via XRC</longhelp>
                                     </object>
-                                    <object class="tool" name="view_auto">
-                                        <bitmap stock_id="wxART_FILE_OPEN"/>
-                                        <label>View</label>
-                                        <dropdown>
-                                            <object class="wxMenu">
-                                                <object class="wxMenuItem" name="view_as_text">
-                                                    <label>View as text</label>
-                                                </object>
-                                                <object class="wxMenuItem" name="view_as_hex">
-                                                    <label>View as binary</label>
-                                                </object>
-                                            </object>
-                                        </dropdown>
+                                    <object class="tool" name="derived_tool_or_menuitem">
+                                        <tooltip>Derived Dialog Example</tooltip>
+                                        <bitmap>derivdlg.xpm</bitmap>
+                                        <longhelp>The most important example: load an XRC for a derived dialog</longhelp>
                                     </object>
-                                    <object class="separator"/>
-                                    <object class="tool" name="home">
-                                        <toggle>1</toggle>
-                                        <bitmap stock_id="wxART_GO_HOME"/>
-                                        <label>Home</label>
+                                    <object class="tool" name="controls_tool_or_menuitem">
+                                        <tooltip>Controls Example</tooltip>
+                                        <bitmap>controls.xpm</bitmap>
+                                        <longhelp>A notebook displaying all the wxWidgets controls</longhelp>
                                     </object>
-                                    <object class="separator"/>
-                                    <object class="tool" name="up">
-                                        <radio>1</radio>
-                                        <bitmap stock_id="wxART_GO_UP"/>
-                                        <label>Up</label>
+                                    <object class="tool" name="uncentered_tool_or_menuitem">
+                                        <tooltip>Uncentered Example</tooltip>
+                                        <bitmap>uncenter.xpm</bitmap>
+                                        <longhelp>Disable autocentering of a dialog on its parent</longhelp>
                                     </object>
-                                    <object class="tool" name="down">
-                                        <radio>1</radio>
-                                        <bitmap stock_id="wxART_GO_DOWN"/>
-                                        <label>Down</label>
+                                    <separator/>
+                                     <object class="tool" name="custom_class_tool_or_menuitem">
+                                        <tooltip>Custom Class Example</tooltip>
+                                        <bitmap>custclas.xpm</bitmap>
+                                        <longhelp>Embed your own custom classes into an XRC</longhelp>
                                     </object>
-                                    <object class="separator"/>
+                                    <object class="tool" name="platform_property_tool_or_menuitem">
+                                        <tooltip>Platform Specific Example</tooltip>
+                                        <bitmap>platform.xpm</bitmap>
+                                        <longhelp>Customize parts of an interface for a desired platform</longhelp>
+                                    </object>
+                                    <object class="tool" name="art_provider_tool_or_menuitem">
+                                        <tooltip>wxArtProvider Example</tooltip>
+                                        <bitmap>artprov.xpm</bitmap>
+                                        <longhelp>Use wxArtProvider to insert desired icons at runtime</longhelp>
+                                    </object>
+                                    <object class="tool" name="variable_expansion_tool_or_menuitem">
+                                        <tooltip>Variable Expansion Example</tooltip>
+                                        <bitmap>variable.xpm</bitmap>
+                                        <longhelp>Replace variables in the XRC file at runtime</longhelp>
+                                    </object>
                                     <object class="wxComboBox">
                                         <content>
                                             <item>Just</item>
@@ -147,41 +152,47 @@
                                     <style>wxTB_FLAT|wxTB_NODIVIDER</style>
                                     <bg>#bbbbff</bg>
                                     <margins>2,2</margins>
-                                    <object class="tool" name="New">
-                                        <bitmap stock_id="wxART_NEW"/>
-                                        <label>New</label>
+                                    <object class="tool" name="non_derived_dialog_tool_or_menuitem">
+                                        <tooltip>Non-Derived Dialog Example</tooltip>
+                                        <bitmap>basicdlg.xpm</bitmap>
+                                        <longhelp>The basic instance of wxDialog loaded via XRC</longhelp>
                                     </object>
-                                    <object class="tool" name="view_auto">
-                                        <bitmap stock_id="wxART_FILE_OPEN"/>
-                                        <label>View</label>
-                                        <dropdown>
-                                            <object class="wxMenu">
-                                                <object class="wxMenuItem" name="view_as_text">
-                                                    <label>View as text</label>
-                                                </object>
-                                                <object class="wxMenuItem" name="view_as_hex">
-                                                    <label>View as binary</label>
-                                                </object>
-                                            </object>
-                                        </dropdown>
+                                    <object class="tool" name="derived_tool_or_menuitem">
+                                        <tooltip>Derived Dialog Example</tooltip>
+                                        <bitmap>derivdlg.xpm</bitmap>
+                                        <longhelp>The most important example: load an XRC for a derived dialog</longhelp>
                                     </object>
-                                    <object class="tool" name="home">
-                                        <toggle>1</toggle>
-                                        <bitmap stock_id="wxART_GO_HOME"/>
-                                        <label>Home</label>
+                                    <object class="tool" name="controls_tool_or_menuitem">
+                                        <tooltip>Controls Example</tooltip>
+                                        <bitmap>controls.xpm</bitmap>
+                                        <longhelp>A notebook displaying all the wxWidgets controls</longhelp>
                                     </object>
-                                    <object class="separator"/>
-                                    <object class="tool" name="up">
-                                        <radio>1</radio>
-                                        <bitmap stock_id="wxART_GO_UP"/>
-                                        <label>Up</label>
+                                    <object class="tool" name="uncentered_tool_or_menuitem">
+                                        <tooltip>Uncentered Example</tooltip>
+                                        <bitmap>uncenter.xpm</bitmap>
+                                        <longhelp>Disable autocentering of a dialog on its parent</longhelp>
                                     </object>
-                                    <object class="tool" name="down">
-                                        <radio>1</radio>
-                                        <bitmap stock_id="wxART_GO_DOWN"/>
-                                        <label>Down</label>
+                                    <separator/>
+                                     <object class="tool" name="custom_class_tool_or_menuitem">
+                                        <tooltip>Custom Class Example</tooltip>
+                                        <bitmap>custclas.xpm</bitmap>
+                                        <longhelp>Embed your own custom classes into an XRC</longhelp>
                                     </object>
-                                    <object class="separator"/>
+                                    <object class="tool" name="platform_property_tool_or_menuitem">
+                                        <tooltip>Platform Specific Example</tooltip>
+                                        <bitmap>platform.xpm</bitmap>
+                                        <longhelp>Customize parts of an interface for a desired platform</longhelp>
+                                    </object>
+                                    <object class="tool" name="art_provider_tool_or_menuitem">
+                                        <tooltip>wxArtProvider Example</tooltip>
+                                        <bitmap>artprov.xpm</bitmap>
+                                        <longhelp>Use wxArtProvider to insert desired icons at runtime</longhelp>
+                                    </object>
+                                    <object class="tool" name="variable_expansion_tool_or_menuitem">
+                                        <tooltip>Variable Expansion Example</tooltip>
+                                        <bitmap>variable.xpm</bitmap>
+                                        <longhelp>Replace variables in the XRC file at runtime</longhelp>
+                                    </object>
                                     <object class="wxComboBox">
                                         <content>
                                             <item>Just</item>
@@ -693,12 +704,10 @@
                                     <selection>0</selection>
                                     <content>
                                         <item tooltip="Powerful radio station" helptext="This station is for amateurs of hard rock and heavy metal">Power 108</item>
-                                        <item tooltip="Disabled radio station" enabled="0">Power 0</item>
                                         <item tooltip="">WMMS 100.7</item>
                                         <item tooltip="E=mc^2">Energy 98.3</item>
                                         <item helptext="Favourite chukcha's radio">CHUM FM</item>
                                         <item>92FM</item>
-                                        <item hidden="1">Very quite station</item>
                                     </content>
                                 </object>
                             </object>
@@ -965,21 +974,6 @@
                                     <size>180,90</size>
                                     <style>wxTE_MULTILINE</style>
                                     <value>"So many pretty widgets" said Pooh, said he. "So many pretty widgets", said Pooh.</value>
-                                </object>
-                            </object>
-                            <object class="sizeritem">
-                                <flag>wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL|wxALL</flag>
-                                <border>5</border>
-                                <object class="wxStaticText" name="controls_textctrl4_statictext">
-                                    <label>Search for:</label>
-                                </object>
-                            </object>
-                            <object class="sizeritem">
-                                <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
-                                <border>5</border>
-                                <object class="wxSearchCtrl" name="controls_multiline_searchctrl">
-                                    <size>180,-1</size>
-                                    <value>true love</value>
                                 </object>
                             </object>
                         </object>

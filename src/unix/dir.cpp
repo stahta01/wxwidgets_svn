@@ -115,7 +115,7 @@ wxDirData::~wxDirData()
 
 bool wxDirData::Read(wxString *filename)
 {
-    dirent *de = NULL;    // just to silence compiler warnings
+    dirent *de = (dirent *)NULL;    // just to silence compiler warnings
     bool matches = false;
 
     // speed up string concatenation in the loop a bit
@@ -132,7 +132,7 @@ bool wxDirData::Read(wxString *filename)
             return false;
 
 #if wxUSE_UNICODE
-        de_d_name = wxString(de->d_name, *wxConvFileName);
+        de_d_name = wxConvFileName->cMB2WC( de->d_name );
 #else
         de_d_name = de->d_name;
 #endif
@@ -287,7 +287,7 @@ bool wxDir::GetNext(wxString *filename) const
     return M_DIR->Read(filename);
 }
 
-bool wxDir::HasSubDirs(const wxString& spec) const
+bool wxDir::HasSubDirs(const wxString& spec)
 {
     wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
 

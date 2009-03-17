@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if !defined(__MWERKS__)
+#if !defined(__MWERKS__) && !defined(__SALFORDC__)
     #include <memory.h>
 #endif
 
@@ -96,32 +96,38 @@ bool wxDIB::Create(int width, int height, int depth)
         depth = 24;
 
     // allocate memory for bitmap structures
-    BITMAPINFO info;
-    wxZeroMemory(info);
+    static const int sizeHeader = sizeof(BITMAPINFOHEADER);
 
-    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    info.bmiHeader.biWidth = width;
+    BITMAPINFO *info = (BITMAPINFO *)malloc(sizeHeader);
+    wxCHECK_MSG( info, false, _T("malloc(BITMAPINFO) failed") );
+
+    memset(info, 0, sizeHeader);
+
+    info->bmiHeader.biSize = sizeHeader;
+    info->bmiHeader.biWidth = width;
 
     // we use positive height here which corresponds to a DIB with normal, i.e.
     // bottom to top, order -- normally using negative height (which means
     // reversed for MS and hence natural for all the normal people top to
     // bottom line scan order) could be used to avoid the need for the image
     // reversal in Create(image) but this doesn't work under NT, only Win9x!
-    info.bmiHeader.biHeight = height;
+    info->bmiHeader.biHeight = height;
 
-    info.bmiHeader.biPlanes = 1;
-    info.bmiHeader.biBitCount = (WORD)depth;
-    info.bmiHeader.biSizeImage = GetLineSize(width, depth)*height;
+    info->bmiHeader.biPlanes = 1;
+    info->bmiHeader.biBitCount = (WORD)depth;
+    info->bmiHeader.biSizeImage = GetLineSize(width, depth)*height;
 
     m_handle = ::CreateDIBSection
                  (
                     0,              // hdc (unused with DIB_RGB_COLORS)
-                    &info,          // bitmap description
+                    info,           // bitmap description
                     DIB_RGB_COLORS, // use RGB, not palette
                     &m_data,        // [out] DIB bits
                     NULL,           // don't use file mapping
                     0               // file mapping offset (not used here)
                  );
+
+    free(info);
 
     if ( !m_handle )
     {
@@ -280,7 +286,7 @@ bool wxDIB::Load(const wxString& filename)
     m_handle = (HBITMAP)::LoadImage
                          (
                             wxGetInstance(),
-                            filename.fn_str(),
+                            filename,
                             IMAGE_BITMAP,
                             0, 0, // don't specify the size
                             LR_CREATEDIBSECTION | LR_LOADFROMFILE
@@ -301,7 +307,6 @@ bool wxDIB::Save(const wxString& filename)
 {
     wxCHECK_MSG( m_handle, false, _T("wxDIB::Save(): invalid object") );
 
-#if wxUSE_FILE
     wxFile file(filename, wxFile::write);
     bool ok = file.IsOpened();
     if ( ok )
@@ -330,9 +335,6 @@ bool wxDIB::Save(const wxString& filename)
                         file.Write(ds.dsBm.bmBits, sizeImage) == sizeImage;
         }
     }
-#else // !wxUSE_FILE
-    bool ok = false;
-#endif // wxUSE_FILE/!wxUSE_FILE
 
     if ( !ok )
     {

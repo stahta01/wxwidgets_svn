@@ -72,7 +72,7 @@ public:
 
 private:
 // Cannot use
-//  wxDECLARE_NO_COPY_CLASS(wxRegionRefData);
+//  DECLARE_NO_COPY_CLASS(wxRegionRefData)
 // because copy constructor is explicitly declared above;
 // but no copy assignment operator is defined, so declare
 // it private to prevent the compiler from defining it:
@@ -92,7 +92,7 @@ private:
 
 wxRegion::wxRegion()
 {
-    m_refData = NULL;
+    m_refData = (wxRegionRefData *)NULL;
 }
 
 wxRegion::wxRegion(WXHRGN hRegion)
@@ -119,7 +119,7 @@ wxRegion::wxRegion(const wxRect& rect)
     M_REGION = ::CreateRectRgn(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 }
 
-wxRegion::wxRegion(size_t n, const wxPoint *points, wxPolygonFillMode fillStyle)
+wxRegion::wxRegion(size_t n, const wxPoint *points, int fillStyle)
 {
 #if defined(__WXMICROWIN__) || defined(__WXWINCE__)
     wxUnusedVar(n);
@@ -143,12 +143,12 @@ wxRegion::~wxRegion()
     // m_refData unrefed in ~wxObject
 }
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateRefData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }

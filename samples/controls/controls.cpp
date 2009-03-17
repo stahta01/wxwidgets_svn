@@ -28,10 +28,7 @@
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
-#ifdef __WXMSW__
-    #include "wx/numdlg.h"
-#endif // __WXMSW__
-#endif // wxUSE_TOOLTIPS
+#endif
 
 #if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
     #define USE_XPM
@@ -77,10 +74,6 @@ class MyPanel: public wxPanel
 public:
     MyPanel(wxFrame *frame, int x, int y, int w, int h);
     virtual ~MyPanel();
-
-#if wxUSE_TOOLTIPS
-    void SetAllToolTips();
-#endif // wxUSE_TOOLTIPS
 
     void OnIdle( wxIdleEvent &event );
     void OnListBox( wxCommandEvent &event );
@@ -194,14 +187,9 @@ public:
 #if wxUSE_TOOLTIPS
     void OnSetTooltipDelay(wxCommandEvent& event);
     void OnToggleTooltips(wxCommandEvent& event);
-#ifdef __WXMSW__
-    void OnSetMaxTooltipWidth(wxCommandEvent& event);
-#endif // __WXMSW__
 #endif // wxUSE_TOOLTIPS
 
     void OnEnableAll(wxCommandEvent& event);
-    void OnHideAll(wxCommandEvent& event);
-    void OnHideList(wxCommandEvent& event);
     void OnContextHelp(wxCommandEvent& event);
 
     void OnIdle( wxIdleEvent& event );
@@ -390,12 +378,9 @@ enum
     // tooltip menu
     CONTROLS_SET_TOOLTIP_DELAY = 200,
     CONTROLS_ENABLE_TOOLTIPS,
-    CONTROLS_SET_TOOLTIPS_MAX_WIDTH,
 
     // panel menu
     CONTROLS_ENABLE_ALL,
-    CONTROLS_HIDE_ALL,
-    CONTROLS_HIDE_LIST,
     CONTROLS_CONTEXT_HELP
 };
 
@@ -466,7 +451,7 @@ const int  ID_RADIOBOX_SEL_NUM  = 161;
 const int  ID_RADIOBOX_SEL_STR  = 162;
 const int  ID_RADIOBOX_FONT     = 163;
 const int  ID_RADIOBOX_ENABLE   = 164;
-const int  ID_RADIOBOX2         = 165;
+
 const int  ID_RADIOBUTTON_1     = 166;
 const int  ID_RADIOBUTTON_2     = 167;
 
@@ -541,7 +526,6 @@ EVT_BUTTON    (ID_COMBO_FONT,           MyPanel::OnComboButtons)
 EVT_BUTTON    (ID_COMBO_SET_TEXT,       MyPanel::OnComboButtons)
 EVT_CHECKBOX  (ID_COMBO_ENABLE,         MyPanel::OnComboButtons)
 EVT_RADIOBOX  (ID_RADIOBOX,             MyPanel::OnRadio)
-EVT_RADIOBOX  (ID_RADIOBOX2,            MyPanel::OnRadio)
 EVT_BUTTON    (ID_RADIOBOX_SEL_NUM,     MyPanel::OnRadioButtons)
 EVT_BUTTON    (ID_RADIOBOX_SEL_STR,     MyPanel::OnRadioButtons)
 EVT_BUTTON    (ID_RADIOBOX_FONT,        MyPanel::OnRadioButtons)
@@ -656,8 +640,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     wxString choices[] =
     {
         _T("This"),
-        _T("is"),
-        _T("one of my long and"),
+        _T("is one of my"),
+        _T("really"),
         _T("wonderful"),
         _T("examples.")
     };
@@ -748,15 +732,18 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     wxPanel *panel = new wxPanel(m_book);
     m_listbox = new wxListBox( panel, ID_LISTBOX,
                                wxPoint(10,10), wxSize(120,70),
-                               5, choices, wxLB_MULTIPLE | wxLB_ALWAYS_SB | wxHSCROLL );
+                               5, choices, wxLB_MULTIPLE |wxLB_ALWAYS_SB );
     m_listboxSorted = new wxListBox( panel, ID_LISTBOX_SORTED,
                                      wxPoint(10,90), wxSize(120,70),
-                                     3, choices, wxLB_SORT );
+                                     5, choices, wxLB_SORT );
 
     SetListboxClientData(wxT("listbox"), m_listbox);
     SetListboxClientData(wxT("listbox"), m_listboxSorted);
 
     m_listbox->SetCursor(*wxCROSS_CURSOR);
+#if wxUSE_TOOLTIPS
+    m_listbox->SetToolTip( _T("This is a list box") );
+#endif // wxUSE_TOOLTIPS
 
     m_lbSelectNum = new wxButton( panel, ID_LISTBOX_SEL_NUM, _T("Select #&2"), wxPoint(180,30), wxSize(140,30) );
     m_lbSelectThis = new wxButton( panel, ID_LISTBOX_SEL_STR, _T("&Select 'This'"), wxPoint(340,30), wxSize(140,30) );
@@ -767,9 +754,16 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     button->SetDefault();
 
+#if wxUSE_TOOLTIPS
+    button->SetToolTip( _T("Press here to set italic font") );
+#endif // wxUSE_TOOLTIPS
+
     m_checkbox = new wxCheckBox( panel, ID_LISTBOX_ENABLE, _T("&Disable"), wxPoint(20,170) );
     m_checkbox->SetValue(false);
     button->MoveAfterInTabOrder(m_checkbox);
+#if wxUSE_TOOLTIPS
+    m_checkbox->SetToolTip( _T("Click here to disable the listbox") );
+#endif // wxUSE_TOOLTIPS
     (void)new wxCheckBox( panel, ID_CHANGE_COLOUR, _T("&Toggle colour"),
                           wxPoint(110,170) );
     panel->SetCursor(wxCursor(wxCURSOR_HAND));
@@ -823,14 +817,22 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     };
 
     panel = new wxPanel(m_book);
-    new MyRadioBox(panel, ID_RADIOBOX2, _T("&That"),
-                   wxPoint(10,160), wxDefaultSize,
-                   WXSIZEOF(choices2), choices2,
-                   1, wxRA_SPECIFY_ROWS );
-    m_radio = new wxRadioBox(panel, ID_RADIOBOX, _T("T&his"),
-                             wxPoint(10,10), wxDefaultSize,
-                             WXSIZEOF(choices), choices,
-                             1, wxRA_SPECIFY_COLS );
+    wxRadioBox *radio2 = new MyRadioBox( panel, ID_RADIOBOX, _T("&That"), wxPoint(10,160), wxDefaultSize, WXSIZEOF(choices2), choices2, 1, wxRA_SPECIFY_ROWS );
+    m_radio = new wxRadioBox( panel, ID_RADIOBOX, _T("T&his"), wxPoint(10,10), wxDefaultSize, WXSIZEOF(choices), choices, 1, wxRA_SPECIFY_COLS );
+
+#if wxUSE_TOOLTIPS
+    m_combo->SetToolTip(_T("This is a natural\ncombobox - can you believe me?"));
+    radio2->SetToolTip(_T("Ever seen a radiobox?"));
+
+    //m_radio->SetToolTip(_T("Tooltip for the entire radiobox"));
+    for ( unsigned int nb = 0; nb < WXSIZEOF(choices); nb++ )
+    {
+        m_radio->SetItemToolTip(nb, _T("tooltip for\n") + choices[nb]);
+    }
+
+    // remove the tooltip for one of the items
+    m_radio->SetItemToolTip(2, _T(""));
+#endif // wxUSE_TOOLTIPS
 
 #if wxUSE_HELP
     for( unsigned int item = 0; item < WXSIZEOF(choices); ++item )
@@ -870,6 +872,9 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
                              wxDefaultPosition, wxSize(155,wxDefaultCoord),
                              wxSL_AUTOTICKS | wxSL_LABELS);
     m_slider->SetTickFreq(40, 0);
+#if wxUSE_TOOLTIPS
+    m_slider->SetToolTip(_T("This is a sliding slider"));
+#endif // wxUSE_TOOLTIPS
     sz->Add( m_slider, 0, wxALL, 10 );
 
     m_gaugeVert = new wxGauge( panel, wxID_ANY, 100,
@@ -922,7 +927,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     s << initialSpinValue;
     m_spintext = new wxTextCtrl( panel, wxID_ANY, s, wxPoint(20,160), wxSize(80,wxDefaultCoord) );
 #if wxUSE_SPINBTN
-    m_spinbutton = new wxSpinButton( panel, ID_SPIN, wxPoint(103,160), wxSize(-1, m_spintext->GetSize().y) );
+    m_spinbutton = new wxSpinButton( panel, ID_SPIN, wxPoint(103,160) );
     m_spinbutton->SetRange(-40,30);
     m_spinbutton->SetValue(initialSpinValue);
 
@@ -1003,6 +1008,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
 
     // sizer
     panel = new wxPanel(m_book);
+    panel->SetAutoLayout( true );
 
     wxBoxSizer *sizer = new wxBoxSizer( wxVERTICAL );
 
@@ -1062,47 +1068,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     sizer->Add(m_book, wxSizerFlags().Border().Expand());
     sizer->Add(m_text, wxSizerFlags(1).Border().Expand());
     SetSizer(sizer);
-
-#if wxUSE_TOOLTIPS
-    SetAllToolTips();
-#endif // wxUSE_TOOLTIPS
 }
-
-#if wxUSE_TOOLTIPS
-
-namespace
-{
-
-void ResetToolTip(wxWindow *win, const char *tip)
-{
-    wxCHECK_RET( win, "NULL window?" );
-
-    win->UnsetToolTip();
-    win->SetToolTip(tip);
-}
-
-}
-
-void MyPanel::SetAllToolTips()
-{
-    ResetToolTip(FindWindow(ID_LISTBOX_FONT), "Press here to set italic font");
-    ResetToolTip(m_checkbox, "Click here to disable the listbox");
-    ResetToolTip(m_listbox, "This is a list box");
-    ResetToolTip(m_combo, "This is a natural\ncombobox - can you believe me?");
-    ResetToolTip(m_slider, "This is a sliding slider");
-    ResetToolTip(FindWindow(ID_RADIOBOX2), "Ever seen a radiobox?");
-
-    //ResetToolTip(m_radio, "Tooltip for the entire radiobox");
-    for ( unsigned int nb = 0; nb < m_radio->GetCount(); nb++ )
-    {
-        m_radio->SetItemToolTip(nb, "");
-        m_radio->SetItemToolTip(nb, "tooltip for\n" + m_radio->GetString(nb));
-    }
-
-    // remove the tooltip for one of the items
-    m_radio->SetItemToolTip(2, "");
-}
-#endif // wxUSE_TOOLTIPS
 
 void MyPanel::OnIdle(wxIdleEvent& event)
 {
@@ -1219,16 +1185,14 @@ void MyPanel::OnChangeColour(wxCommandEvent& WXUNUSED(event))
 
 void MyPanel::OnListBox( wxCommandEvent &event )
 {
+    if (event.GetInt() == -1)
+    {
+        m_text->AppendText( _T("ListBox has no selections anymore\n") );
+        return;
+    }
+
     wxListBox *listbox = event.GetId() == ID_LISTBOX ? m_listbox
                                                      : m_listboxSorted;
-
-    bool deselect = false;
-    if (listbox->HasFlag(wxLB_MULTIPLE) || listbox->HasFlag(wxLB_EXTENDED))
-    {
-        deselect = !event.IsSelection();
-        if (deselect)
-            m_text->AppendText( _T("ListBox deselection event\n") );
-    }
 
     m_text->AppendText( _T("ListBox event selection string is: '") );
     m_text->AppendText( event.GetString() );
@@ -1236,7 +1200,7 @@ void MyPanel::OnListBox( wxCommandEvent &event )
 
     // can't use GetStringSelection() with multiple selections, there could be
     // more than one of them
-    if ( !listbox->HasFlag(wxLB_MULTIPLE) && !listbox->HasFlag(wxLB_EXTENDED) )
+    if ( !listbox->HasFlag(wxLB_MULTIPLE) )
     {
         m_text->AppendText( _T("ListBox control selection string is: '") );
         m_text->AppendText( listbox->GetStringSelection() );
@@ -1314,8 +1278,8 @@ void MyPanel::OnListBoxButtons( wxCommandEvent &event )
             }
         case ID_LISTBOX_APPEND:
             {
-                m_listbox->Append( _T("Hi kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk!") );
-                m_listboxSorted->Append( _T("Hi hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh!") );
+                m_listbox->Append( _T("Hi!") );
+                m_listboxSorted->Append( _T("Hi!") );
                 break;
             }
         case ID_LISTBOX_DELETE:
@@ -1341,10 +1305,10 @@ void MyPanel::OnListBoxButtons( wxCommandEvent &event )
 
 #if wxUSE_CHOICE
 
-static wxString GetDataString(wxClientData *data)
+static const wxChar *GetDataString(wxClientData *data)
 {
-    return data ? static_cast<wxStringClientData *>(data)->GetData()
-                : wxString("none");
+    return data ? wx_static_cast(wxStringClientData *, data)->GetData().c_str()
+                : _T("none");
 }
 
 void MyPanel::OnChoice( wxCommandEvent &event )
@@ -1362,8 +1326,8 @@ void MyPanel::OnChoice( wxCommandEvent &event )
                  _T("data \"%s\"/\"%s\""),
                  (int)event.GetInt(),
                  sel,
-                 event.GetString(),
-                 choice->GetStringSelection(),
+                 event.GetString().c_str(),
+                 choice->GetStringSelection().c_str(),
                  GetDataString(dataEvt),
                  GetDataString(dataCtrl));
 }
@@ -1769,14 +1733,9 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 #if wxUSE_TOOLTIPS
     EVT_MENU(CONTROLS_SET_TOOLTIP_DELAY,  MyFrame::OnSetTooltipDelay)
     EVT_MENU(CONTROLS_ENABLE_TOOLTIPS,  MyFrame::OnToggleTooltips)
-#ifdef __WXMSW__
-    EVT_MENU(CONTROLS_SET_TOOLTIPS_MAX_WIDTH, MyFrame::OnSetMaxTooltipWidth)
-#endif // __WXMSW__
 #endif // wxUSE_TOOLTIPS
 
     EVT_MENU(CONTROLS_ENABLE_ALL, MyFrame::OnEnableAll)
-    EVT_MENU(CONTROLS_HIDE_ALL,   MyFrame::OnHideAll)
-    EVT_MENU(CONTROLS_HIDE_LIST,   MyFrame::OnHideList)
     EVT_MENU(CONTROLS_CONTEXT_HELP, MyFrame::OnContextHelp)
 
     EVT_ICONIZE(MyFrame::OnIconized)
@@ -1818,18 +1777,11 @@ MyFrame::MyFrame(const wxChar *title, int x, int y)
     tooltip_menu->Append(CONTROLS_ENABLE_TOOLTIPS, _T("&Toggle tooltips\tCtrl-T"),
             _T("enable/disable tooltips"), true);
     tooltip_menu->Check(CONTROLS_ENABLE_TOOLTIPS, true);
-#ifdef __WXMSW__
-    tooltip_menu->Append(CONTROLS_SET_TOOLTIPS_MAX_WIDTH, "Set maximal &width");
-#endif // __WXMSW__
     menu_bar->Append(tooltip_menu, _T("&Tooltips"));
 #endif // wxUSE_TOOLTIPS
 
     wxMenu *panel_menu = new wxMenu;
     panel_menu->Append(CONTROLS_ENABLE_ALL, _T("&Disable all\tCtrl-E"),
-                       _T("Enable/disable all panel controls"), true);
-    panel_menu->Append(CONTROLS_HIDE_ALL, _T("&Hide all\tCtrl-I"),
-                       _T("Show/hide thoe whole panel controls"), true);
-    panel_menu->Append(CONTROLS_HIDE_LIST, _T("Hide &list ctrl\tCtrl-S"),
                        _T("Enable/disable all panel controls"), true);
     panel_menu->Append(CONTROLS_CONTEXT_HELP, _T("&Context help...\tCtrl-H"),
                        _T("Get context help for a control"));
@@ -1894,36 +1846,7 @@ void MyFrame::OnToggleTooltips(wxCommandEvent& WXUNUSED(event))
 
     wxLogStatus(this, _T("Tooltips %sabled"), s_enabled ? _T("en") : _T("dis") );
 }
-
-#ifdef __WXMSW__
-
-void MyFrame::OnSetMaxTooltipWidth(wxCommandEvent& WXUNUSED(event))
-{
-    static int s_maxWidth = 0;
-
-    wxNumberEntryDialog dlg
-                        (
-                         this,
-                         "Change maximal tooltip width",
-                         "&Width in pixels:",
-                         GetTitle(),
-                         s_maxWidth,
-                         -1,
-                         600
-                        );
-    if ( dlg.ShowModal() == wxID_CANCEL )
-        return;
-
-    s_maxWidth = dlg.GetValue();
-    wxToolTip::SetMaxWidth(s_maxWidth);
-
-    // we need to set the tooltip again to test the new width
-    m_panel->SetAllToolTips();
-}
-
-#endif // __WXMSW__
-
-#endif // wxUSE_TOOLTIPS
+#endif // tooltips
 
 void MyFrame::OnEnableAll(wxCommandEvent& WXUNUSED(event))
 {
@@ -1931,31 +1854,6 @@ void MyFrame::OnEnableAll(wxCommandEvent& WXUNUSED(event))
 
     s_enable = !s_enable;
     m_panel->Enable(s_enable);
-    static bool s_enableCheckbox = true;
-    if ( !s_enable )
-    {
-        // this is a test for correct behaviour of either enabling or disabling
-        // a child when its parent is disabled: the checkbox should have the
-        // correct state when the parent is enabled back
-        m_panel->m_checkbox->Enable(s_enableCheckbox);
-        s_enableCheckbox = !s_enableCheckbox;
-    }
-}
-
-void MyFrame::OnHideAll(wxCommandEvent& WXUNUSED(event))
-{
-    static bool s_show = true;
-
-    s_show = !s_show;
-    m_panel->Show(s_show);
-}
-
-void MyFrame::OnHideList(wxCommandEvent& WXUNUSED(event))
-{
-    static bool s_show = true;
-
-    s_show = !s_show;
-    m_panel->m_listbox->Show(s_show);
 }
 
 void MyFrame::OnContextHelp(wxCommandEvent& WXUNUSED(event))
@@ -1975,8 +1873,8 @@ void MyFrame::OnMove( wxMoveEvent& event )
 
 void MyFrame::OnIconized( wxIconizeEvent& event )
 {
-    wxLogMessage(_T("Frame %s"), event.IsIconized() ? _T("iconized")
-                                                    : _T("restored"));
+    wxLogMessage(_T("Frame %s"), event.Iconized() ? _T("iconized")
+                                                  : _T("restored"));
     event.Skip();
 }
 
@@ -1997,30 +1895,24 @@ void MyFrame::OnSize( wxSizeEvent& event )
 void MyFrame::OnIdle( wxIdleEvent& WXUNUSED(event) )
 {
     // track the window which has the focus in the status bar
-    static wxWindow *s_windowFocus = NULL;
+    static wxWindow *s_windowFocus = (wxWindow *)NULL;
     wxWindow *focus = wxWindow::FindFocus();
-    if ( focus != s_windowFocus )
+    if ( focus && (focus != s_windowFocus) )
     {
         s_windowFocus = focus;
 
         wxString msg;
-        if ( focus )
-        {
-            msg.Printf(
-                    _T("Focus: %s")
+        msg.Printf(
 #ifdef __WXMSW__
-                    , _T(", HWND = %08x")
+                _T("Focus: %s, HWND = %08x"),
+#else
+                _T("Focus: %s"),
 #endif
-                    , s_windowFocus->GetName().c_str()
+                s_windowFocus->GetClassInfo()->GetClassName()
 #ifdef __WXMSW__
-                    , (unsigned int) s_windowFocus->GetHWND()
+                , (unsigned int) s_windowFocus->GetHWND()
 #endif
-                      );
-        }
-        else
-        {
-            msg = _T("No focus");
-        }
+                  );
 
 #if wxUSE_STATUSBAR
         SetStatusText(msg);

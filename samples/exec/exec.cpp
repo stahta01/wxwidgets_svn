@@ -53,7 +53,6 @@
 #include "wx/numdlg.h"
 #include "wx/textdlg.h"
 #include "wx/ffile.h"
-#include "wx/stopwatch.h"
 
 #include "wx/process.h"
 
@@ -82,18 +81,14 @@ public:
 
 // Define an array of process pointers used by MyFrame
 class MyPipedProcess;
-WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyPipedProcessesArray);
-
-class MyProcess;
-WX_DEFINE_ARRAY_PTR(MyProcess *, MyProcessesArray);
+WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyProcessesArray);
 
 // Define a new frame type: this is going to be our main frame
 class MyFrame : public wxFrame
 {
 public:
-    // ctor and dtor
+    // ctor(s)
     MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
-    virtual ~MyFrame();
 
     // event handlers (these functions should _not_ be virtual)
     void OnQuit(wxCommandEvent& event);
@@ -102,11 +97,7 @@ public:
 
     void OnClear(wxCommandEvent& event);
 
-    void OnBeginBusyCursor(wxCommandEvent& event);
-    void OnEndBusyCursor(wxCommandEvent& event);
-
     void OnSyncExec(wxCommandEvent& event);
-    void OnSyncNoEventsExec(wxCommandEvent& event);
     void OnAsyncExec(wxCommandEvent& event);
     void OnShell(wxCommandEvent& event);
     void OnExecWithRedirect(wxCommandEvent& event);
@@ -115,7 +106,6 @@ public:
     void OnPOpen(wxCommandEvent& event);
 
     void OnFileExec(wxCommandEvent& event);
-    void OnFileLaunch(wxCommandEvent& event);
     void OnOpenURL(wxCommandEvent& event);
 
     void OnAbout(wxCommandEvent& event);
@@ -128,9 +118,6 @@ public:
     void OnProcessTerminated(MyPipedProcess *process);
     wxListBox *GetLogListBox() const { return m_lbox; }
 
-    // for MyProcess
-    void OnAsyncTermination(MyProcess *process);
-
 private:
     void ShowOutput(const wxString& cmd,
                     const wxArrayString& output,
@@ -138,11 +125,30 @@ private:
 
     void DoAsyncExec(const wxString& cmd);
 
-    void AddAsyncProcess(MyProcess *process) { m_allAsync.push_back(process); }
+    void AddAsyncProcess(MyPipedProcess *process)
+    {
+        if ( m_running.IsEmpty() )
+        {
+            // we want to start getting the timer events to ensure that a
+            // steady stream of idle events comes in -- otherwise we
+            // wouldn't be able to poll the child process input
+            m_timerIdleWakeUp.Start(100);
+        }
+        //else: the timer is already running
 
-    void AddPipedProcess(MyPipedProcess *process);
-    void RemovePipedProcess(MyPipedProcess *process);
+        m_running.Add(process);
+    }
 
+    void RemoveAsyncProcess(MyPipedProcess *process)
+    {
+        m_running.Remove(process);
+
+        if ( m_running.IsEmpty() )
+        {
+            // we don't need to get idle events all the time any more
+            m_timerIdleWakeUp.Stop();
+        }
+    }
 
     // the PID of the last process we launched asynchronously
     long m_pidLast;
@@ -164,11 +170,7 @@ private:
 
     wxListBox *m_lbox;
 
-    // array of running processes with redirected IO
-    MyPipedProcessesArray m_running;
-
-    // array of all asynchrously running processes
-    MyProcessesArray m_allAsync;
+    MyProcessesArray m_running;
 
     // the idle event wake up timer
     wxTimer m_timerIdleWakeUp;
@@ -297,15 +299,11 @@ enum
     Exec_Quit = 100,
     Exec_Kill,
     Exec_ClearLog,
-    Exec_BeginBusyCursor,
-    Exec_EndBusyCursor,
     Exec_SyncExec = 200,
-    Exec_SyncNoEventsExec,
     Exec_AsyncExec,
     Exec_Shell,
     Exec_POpen,
     Exec_OpenFile,
-    Exec_LaunchFile,
     Exec_OpenURL,
     Exec_DDEExec,
     Exec_DDERequest,
@@ -333,11 +331,8 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Exec_Quit,  MyFrame::OnQuit)
     EVT_MENU(Exec_Kill,  MyFrame::OnKill)
     EVT_MENU(Exec_ClearLog,  MyFrame::OnClear)
-    EVT_MENU(Exec_BeginBusyCursor,  MyFrame::OnBeginBusyCursor)
-    EVT_MENU(Exec_EndBusyCursor,  MyFrame::OnEndBusyCursor)
 
     EVT_MENU(Exec_SyncExec, MyFrame::OnSyncExec)
-    EVT_MENU(Exec_SyncNoEventsExec, MyFrame::OnSyncNoEventsExec)
     EVT_MENU(Exec_AsyncExec, MyFrame::OnAsyncExec)
     EVT_MENU(Exec_Shell, MyFrame::OnShell)
     EVT_MENU(Exec_Redirect, MyFrame::OnExecWithRedirect)
@@ -346,7 +341,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Exec_POpen, MyFrame::OnPOpen)
 
     EVT_MENU(Exec_OpenFile, MyFrame::OnFileExec)
-    EVT_MENU(Exec_LaunchFile, MyFrame::OnFileLaunch)
     EVT_MENU(Exec_OpenURL, MyFrame::OnOpenURL)
 
 #ifdef __WINDOWS__
@@ -392,9 +386,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main application window
     MyFrame *frame = new MyFrame(_T("Exec wxWidgets sample"),
                                  wxDefaultPosition, wxSize(500, 140));
@@ -435,19 +426,14 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuFile->Append(Exec_Kill, _T("&Kill process...\tCtrl-K"),
                      _T("Kill a process by PID"));
     menuFile->AppendSeparator();
-    menuFile->Append(Exec_ClearLog, _T("&Clear log\tCtrl-L"),
+    menuFile->Append(Exec_ClearLog, _T("&Clear log\tCtrl-C"),
                      _T("Clear the log window"));
-    menuFile->AppendSeparator();
-    menuFile->Append(Exec_BeginBusyCursor, _T("Show &busy cursor\tCtrl-C"));
-    menuFile->Append(Exec_EndBusyCursor, _T("Show &normal cursor\tShift-Ctrl-C"));
     menuFile->AppendSeparator();
     menuFile->Append(Exec_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     wxMenu *execMenu = new wxMenu;
     execMenu->Append(Exec_SyncExec, _T("Sync &execution...\tCtrl-E"),
                      _T("Launch a program and return when it terminates"));
-    execMenu->Append(Exec_SyncNoEventsExec, _T("Sync execution and &block...\tCtrl-B"),
-                     _T("Launch a program and block until it terminates"));
     execMenu->Append(Exec_AsyncExec, _T("&Async execution...\tCtrl-A"),
                      _T("Launch a program and return immediately"));
     execMenu->Append(Exec_Shell, _T("Execute &shell command...\tCtrl-S"),
@@ -463,8 +449,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     execMenu->AppendSeparator();
     execMenu->Append(Exec_OpenFile, _T("Open &file...\tCtrl-F"),
                      _T("Launch the command to open this kind of files"));
-    execMenu->Append(Exec_LaunchFile, _T("La&unch file...\tShift-Ctrl-F"),
-                     _T("Launch the default application associated with the file"));
     execMenu->Append(Exec_OpenURL, _T("Open &URL...\tCtrl-U"),
                      _T("Launch the default browser with the given URL"));
 #ifdef __WINDOWS__
@@ -499,17 +483,6 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 #endif // wxUSE_STATUSBAR
 }
 
-MyFrame::~MyFrame()
-{
-    // any processes left until now must be deleted manually: normally this is
-    // done when the associated process terminates but it must be still running
-    // if this didn't happen until now
-    for ( size_t n = 0; n < m_allAsync.size(); n++ )
-    {
-        delete m_allAsync[n];
-    }
-}
-
 // ----------------------------------------------------------------------------
 // event handlers: file and help menu
 // ----------------------------------------------------------------------------
@@ -523,16 +496,6 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnClear(wxCommandEvent& WXUNUSED(event))
 {
     m_lbox->Clear();
-}
-
-void MyFrame::OnBeginBusyCursor(wxCommandEvent& WXUNUSED(event))
-{
-    wxBeginBusyCursor();
-}
-
-void MyFrame::OnEndBusyCursor(wxCommandEvent& WXUNUSED(event))
-{
-    wxEndBusyCursor();
 }
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
@@ -646,23 +609,20 @@ void MyFrame::OnKill(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::DoAsyncExec(const wxString& cmd)
 {
-    MyProcess * const process = new MyProcess(this, cmd);
+    wxProcess *process = new MyProcess(this, cmd);
     m_pidLast = wxExecute(cmd, wxEXEC_ASYNC, process);
     if ( !m_pidLast )
     {
-        wxLogError(_T("Execution of '%s' failed."), cmd.c_str());
+        wxLogError( _T("Execution of '%s' failed."), cmd.c_str() );
 
         delete process;
     }
     else
     {
-        wxLogStatus(_T("Process %ld (%s) launched."), m_pidLast, cmd.c_str());
+        wxLogStatus( _T("Process %ld (%s) launched."),
+            m_pidLast, cmd.c_str() );
 
         m_cmdLast = cmd;
-
-        // the parent frame keeps track of all async processes as it needs to
-        // free them if we exit before the child process terminates
-        AddAsyncProcess(process);
     }
 }
 
@@ -678,25 +638,6 @@ void MyFrame::OnSyncExec(wxCommandEvent& WXUNUSED(event))
     wxLogStatus( _T("'%s' is running please wait..."), cmd.c_str() );
 
     int code = wxExecute(cmd, wxEXEC_SYNC);
-
-    wxLogStatus(_T("Process '%s' terminated with exit code %d."),
-        cmd.c_str(), code);
-
-    m_cmdLast = cmd;
-}
-
-void MyFrame::OnSyncNoEventsExec(wxCommandEvent& WXUNUSED(event))
-{
-    wxString cmd = wxGetTextFromUser(_T("Enter the command: "),
-                                     DIALOG_TITLE,
-                                     m_cmdLast);
-
-    if ( !cmd )
-        return;
-
-    wxLogStatus( _T("'%s' is running please wait..."), cmd.c_str() );
-
-    int code = wxExecute(cmd, wxEXEC_BLOCK);
 
     wxLogStatus(_T("Process '%s' terminated with exit code %d."),
         cmd.c_str(), code);
@@ -733,15 +674,6 @@ void MyFrame::OnShell(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnExecWithRedirect(wxCommandEvent& WXUNUSED(event))
 {
-    if ( !m_cmdLast )
-    {
-#ifdef __WXMSW__
-        m_cmdLast = "type Makefile.in";
-#else
-        m_cmdLast = "cat -n Makefile";
-#endif
-    }
-
     wxString cmd = wxGetTextFromUser(_T("Enter the command: "),
                                      DIALOG_TITLE,
                                      m_cmdLast);
@@ -768,15 +700,10 @@ void MyFrame::OnExecWithRedirect(wxCommandEvent& WXUNUSED(event))
 
     if ( sync )
     {
-        wxLogStatus("\"%s\" is running please wait...", cmd);
-
-        wxStopWatch sw;
-
         wxArrayString output, errors;
         int code = wxExecute(cmd, output, errors);
-
-        wxLogStatus("Command \"%s\" terminated after %ldms; exit code %d.",
-                    cmd, sw.Time(), code);
+        wxLogStatus(_T("command '%s' terminated with exit code %d."),
+                    cmd.c_str(), code);
 
         if ( code != -1 )
         {
@@ -795,7 +722,7 @@ void MyFrame::OnExecWithRedirect(wxCommandEvent& WXUNUSED(event))
         }
         else
         {
-            AddPipedProcess(process);
+            AddAsyncProcess(process);
         }
     }
 
@@ -824,9 +751,9 @@ void MyFrame::OnExecWithPipe(wxCommandEvent& WXUNUSED(event))
     long pid = wxExecute(cmd, wxEXEC_ASYNC, process);
     if ( pid )
     {
-        wxLogStatus(_T("Process %ld (%s) launched."), pid, cmd.c_str());
+        wxLogStatus( _T("Process %ld (%s) launched."), pid, cmd.c_str() );
 
-        AddPipedProcess(process);
+        AddAsyncProcess(process);
     }
     else
     {
@@ -872,33 +799,25 @@ void MyFrame::OnPOpen(wxCommandEvent& WXUNUSED(event))
     new MyPipeFrame(this, cmd, process);
 }
 
-static wxString gs_lastFile;
-
-static bool AskUserForFileName()
+void MyFrame::OnFileExec(wxCommandEvent& WXUNUSED(event))
 {
+    static wxString s_filename;
+
     wxString filename;
 
 #if wxUSE_FILEDLG
-    filename = wxLoadFileSelector(_T("any"), wxEmptyString, gs_lastFile);
+    filename = wxLoadFileSelector(_T("any file"), NULL, s_filename, this);
 #else // !wxUSE_FILEDLG
     filename = wxGetTextFromUser(_T("Enter the file name"), _T("exec sample"),
-                                 gs_lastFile);
+                                 s_filename, this);
 #endif // wxUSE_FILEDLG/!wxUSE_FILEDLG
 
     if ( filename.empty() )
-        return false;
-
-    gs_lastFile = filename;
-
-    return true;
-}
-
-void MyFrame::OnFileExec(wxCommandEvent& WXUNUSED(event))
-{
-    if ( !AskUserForFileName() )
         return;
 
-    wxString ext = gs_lastFile.AfterLast(_T('.'));
+    s_filename = filename;
+
+    wxString ext = filename.AfterLast(_T('.'));
     wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
     if ( !ft )
     {
@@ -909,7 +828,7 @@ void MyFrame::OnFileExec(wxCommandEvent& WXUNUSED(event))
 
     wxString cmd;
     bool ok = ft->GetOpenCommand(&cmd,
-                                 wxFileType::MessageParameters(gs_lastFile));
+                                 wxFileType::MessageParameters(filename));
     delete ft;
     if ( !ok )
     {
@@ -921,36 +840,25 @@ void MyFrame::OnFileExec(wxCommandEvent& WXUNUSED(event))
     DoAsyncExec(cmd);
 }
 
-void MyFrame::OnFileLaunch(wxCommandEvent& WXUNUSED(event))
-{
-    if ( !AskUserForFileName() )
-        return;
-
-    if ( !wxLaunchDefaultApplication(gs_lastFile) )
-    {
-        wxLogError("Opening \"%s\" in default application failed.", gs_lastFile);
-    }
-}
-
 void MyFrame::OnOpenURL(wxCommandEvent& WXUNUSED(event))
 {
-    static wxString s_url(_T("http://www.wxwidgets.org/"));
+    static wxString s_filename;
 
     wxString filename = wxGetTextFromUser
                         (
                             _T("Enter the URL"),
                             _T("exec sample"),
-                            s_url,
+                            s_filename,
                             this
                         );
 
     if ( filename.empty() )
         return;
 
-    s_url = filename;
+    s_filename = filename;
 
-    if ( !wxLaunchDefaultBrowser(s_url) )
-        wxLogError(_T("Failed to open URL \"%s\""), s_url.c_str());
+    if ( !wxLaunchDefaultBrowser(s_filename) )
+        wxLogError(_T("Failed to open URL \"%s\""), s_filename.c_str());
 }
 
 // ----------------------------------------------------------------------------
@@ -1061,41 +969,9 @@ void MyFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
 
 void MyFrame::OnProcessTerminated(MyPipedProcess *process)
 {
-    RemovePipedProcess(process);
+    RemoveAsyncProcess(process);
 }
 
-void MyFrame::OnAsyncTermination(MyProcess *process)
-{
-    m_allAsync.Remove(process);
-
-    delete process;
-}
-
-void MyFrame::AddPipedProcess(MyPipedProcess *process)
-{
-    if ( m_running.IsEmpty() )
-    {
-        // we want to start getting the timer events to ensure that a
-        // steady stream of idle events comes in -- otherwise we
-        // wouldn't be able to poll the child process input
-        m_timerIdleWakeUp.Start(100);
-    }
-    //else: the timer is already running
-
-    m_running.Add(process);
-    m_allAsync.Add(process);
-}
-
-void MyFrame::RemovePipedProcess(MyPipedProcess *process)
-{
-    m_running.Remove(process);
-
-    if ( m_running.IsEmpty() )
-    {
-        // we don't need to get idle events all the time any more
-        m_timerIdleWakeUp.Stop();
-    }
-}
 
 void MyFrame::ShowOutput(const wxString& cmd,
                          const wxArrayString& output,
@@ -1126,7 +1002,8 @@ void MyProcess::OnTerminate(int pid, int status)
     wxLogStatus(m_parent, _T("Process %u ('%s') terminated with exit code %d."),
                 pid, m_cmd.c_str(), status);
 
-    m_parent->OnAsyncTermination(this);
+    // we're not needed any more
+    delete this;
 }
 
 // ----------------------------------------------------------------------------

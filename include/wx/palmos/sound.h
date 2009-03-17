@@ -44,7 +44,7 @@ private:
   int   m_waveLength;
   bool  m_isResource;
 
-    wxDECLARE_NO_COPY_CLASS(wxSound);
+    DECLARE_NO_COPY_CLASS(wxSound)
 };
 #endif
 #endif

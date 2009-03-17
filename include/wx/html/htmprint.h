@@ -78,7 +78,7 @@ public:
     //
     // CAUTION! Render() changes DC's user scale and does NOT restore it!
     int Render(int x, int y, wxArrayInt& known_pagebreaks, int from = 0,
-               int dont_render = false, int to = INT_MAX);
+               int dont_render = FALSE, int to = INT_MAX);
 
     // returns total height of the html document
     // (compare Render's return value with this)
@@ -91,7 +91,7 @@ private:
     wxHtmlContainerCell *m_Cells;
     int m_MaxWidth, m_Width, m_Height;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlDCRenderer);
+    DECLARE_NO_COPY_CLASS(wxHtmlDCRenderer)
 };
 
 
@@ -194,7 +194,7 @@ private:
     // list of HTML filters
     static wxList m_Filters;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlPrintout);
+    DECLARE_NO_COPY_CLASS(wxHtmlPrintout)
 };
 
 
@@ -256,10 +256,12 @@ public:
             // return page setting data objects.
             // (You can set their parameters.)
 
+#if wxABI_VERSION >= 20805
     wxWindow* GetParentWindow() const { return m_ParentWindow; }
             // get the parent window
     void SetParentWindow(wxWindow* window) { m_ParentWindow = window; }
             // set the parent window
+#endif
 
 protected:
     virtual wxHtmlPrintout *CreatePrintout();
@@ -284,7 +286,7 @@ private:
     wxString m_Headers[2], m_Footers[2];
     wxWindow *m_ParentWindow;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlEasyPrinting);
+    DECLARE_NO_COPY_CLASS(wxHtmlEasyPrinting)
 };
 
 

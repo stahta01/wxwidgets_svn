@@ -22,7 +22,7 @@ struct IDataObject;
 // wxDataObject is a "smart" and polymorphic piece of data.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDataObject : public wxDataObjectBase
+class WXDLLEXPORT wxDataObject : public wxDataObjectBase
 {
 public:
     // ctor & dtor
@@ -73,7 +73,7 @@ public:
 private:
     IDataObject *m_pIDataObject; // pointer to the COM interface
 
-    wxDECLARE_NO_COPY_CLASS(wxDataObject);
+    DECLARE_NO_COPY_CLASS(wxDataObject)
 };
 
 #endif  //_WX_MSW_OLE_DATAOBJ_H

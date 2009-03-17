@@ -47,7 +47,6 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
     Display* dpy = XtDisplay(parentWidget);
@@ -77,9 +76,10 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
 
     XtManageChild (radioButtonWidget);
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, size.x, size.y);
+
+    ChangeBackgroundColour();
 
     //copied from mac/radiobut.cpp (from here till "return true;")
     m_cycle = this ;
@@ -91,7 +91,7 @@ bool wxRadioButton::Create(wxWindow *parent, wxWindowID id,
     else
     {
         /* search backward for last group start */
-        wxRadioButton *chief = NULL;
+        wxRadioButton *chief = (wxRadioButton*) NULL;
         wxWindowList::compatibility_iterator node = parent->GetChildren().GetLast();
         while (node)
         {

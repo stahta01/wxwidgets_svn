@@ -18,7 +18,7 @@
 
 #ifndef WX_PRECOMP
     #include <stdio.h>
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/string.h"
     #include "wx/bitmap.h"
     #include "wx/brush.h"
@@ -76,7 +76,7 @@ wxRadioBox::wxRadioBox()
 
 wxRadioBox::~wxRadioBox()
 {
-    SendDestroyEvent();
+    m_isBeingDeleted = true;
 
     if (m_hWnd)
         wxRemoveHandleAssociation(this);
@@ -781,7 +781,7 @@ void wxRadioBox::SetString(unsigned int nItem, const wxString& rsLabel)
     wxCHECK_RET( IsValid(nItem), wxT("invalid radiobox index") );
 
     m_pnRadioWidth[nItem] = m_pnRadioHeight[nItem] = -1;
-    ::WinSetWindowText((HWND)m_ahRadioButtons[nItem], rsLabel.c_str());
+    ::WinSetWindowText((HWND)m_ahRadioButtons[nItem], (PSZ)rsLabel.c_str());
 } // end of wxRadioBox::SetString
 
 bool wxRadioBox::SetStringSelection(const wxString& rsStr)

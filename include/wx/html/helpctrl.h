@@ -125,7 +125,7 @@ protected:
     wxHtmlHelpFrame*    m_helpFrame;
     wxHtmlHelpDialog*   m_helpDialog;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpController);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpController)
 };
 
 /*

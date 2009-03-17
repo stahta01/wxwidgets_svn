@@ -80,7 +80,7 @@ void wxSpinButton::CocoaTarget_action()
     wxSpinEvent event(wxEVT_SCROLL_THUMBTRACK, GetId());
     event.SetPosition(GetValue());
     event.SetEventObject(this);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 }
 
 #endif // wxUSE_SPINBTN

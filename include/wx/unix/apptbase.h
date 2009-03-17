@@ -12,42 +12,42 @@
 #ifndef _WX_UNIX_APPTBASE_H_
 #define _WX_UNIX_APPTBASE_H_
 
-struct wxEndProcessData;
 struct wxExecuteData;
+class wxPipe;
 
 // ----------------------------------------------------------------------------
 // wxAppTraits: the Unix version adds extra hooks needed by Unix code
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxAppTraits : public wxAppTraitsBase
+class WXDLLEXPORT wxAppTraits : public wxAppTraitsBase
 {
 public:
     // wxExecute() support methods
     // ---------------------------
 
+    // called before starting the child process and creates the pipe used for
+    // detecting the process termination asynchronously in GUI, does nothing in
+    // wxBase
+    //
+    // if it returns false, we should return from wxExecute() with an error
+    virtual bool CreateEndProcessPipe(wxExecuteData& execData) = 0;
+
+    // test if the given descriptor is the end of the pipe create by the
+    // function above
+    virtual bool IsWriteFDOfEndProcessPipe(wxExecuteData& execData, int fd) = 0;
+
+    // ensure that the write end of the pipe is not closed by wxPipe dtor
+    virtual void DetachWriteFDOfEndProcessPipe(wxExecuteData& execData) = 0;
+
     // wait for the process termination, return whatever wxExecute() must
     // return
-    //
-    // base class implementation handles all cases except wxEXEC_SYNC without
-    // wxEXEC_NOEVENTS one which is implemented at the GUI level
-    virtual int WaitForChild(wxExecuteData& execData);
-
-    // integrate the monitoring of the given fd with the port-specific event
-    // loop: when this fd, which corresponds to a dummy pipe opened between the
-    // parent and child processes, is closed by the child, the parent is
-    // notified about this via a call to wxHandleProcessTermination() function
-    //
-    // the default implementation uses wxFDIODispatcher and so is suitable for
-    // the console applications or ports which don't have any specific event
-    // loop
-    virtual int AddProcessCallback(wxEndProcessData *data, int fd);
+    virtual int WaitForChild(wxExecuteData& execData) = 0;
 
 
-protected:
-    // a helper for the implementation of WaitForChild() in wxGUIAppTraits:
-    // checks the streams used for redirected IO in execData and returns true
-    // if there is any activity in them
-    bool CheckForRedirectedIO(wxExecuteData& execData);
+    // wxThread helpers
+    // ----------------
+
+    // TODO
 };
 
 #endif // _WX_UNIX_APPTBASE_H_

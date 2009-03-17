@@ -31,7 +31,7 @@
 #ifndef WX_PRECOMP
 #endif
 
-const char wxChoiceNameStr[] = "choice";
+const wxChar wxChoiceNameStr[] = wxT("choice");
 
 // ============================================================================
 // implementation
@@ -49,7 +49,7 @@ wxChoiceBase::~wxChoiceBase()
 void wxChoiceBase::Command(wxCommandEvent& event)
 {
     SetSelection(event.GetInt());
-    (void)GetEventHandler()->ProcessEvent(event);
+    (void)ProcessEvent(event);
 }
 
 #endif // wxUSE_CHOICE

@@ -194,7 +194,7 @@ bool wxSpinButton::OS2OnScroll( int    WXUNUSED(nOrientation),
 
     vEvent.SetPosition(nVal);
     vEvent.SetEventObject(this);
-    return(HandleWindowEvent(vEvent));
+    return(GetEventHandler()->ProcessEvent(vEvent));
 } // end of wxSpinButton::OS2OnScroll
 
 bool wxSpinButton::OS2Command( WXUINT WXUNUSED(uCmd),

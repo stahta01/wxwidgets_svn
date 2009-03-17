@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/dynarray.h"
     #include "wx/dc.h"
     #include "wx/scrolwin.h"
@@ -68,7 +68,7 @@ class wxHtmlImageMapAreaCell : public wxHtmlCell
                   wxHtmlRenderingInfo& WXUNUSED(info)) {}
 
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlImageMapAreaCell);
+    DECLARE_NO_COPY_CLASS(wxHtmlImageMapAreaCell)
 };
 
 
@@ -246,7 +246,7 @@ class wxHtmlImageMapCell : public wxHtmlCell
                   int WXUNUSED(view_y1), int WXUNUSED(view_y2),
                   wxHtmlRenderingInfo& WXUNUSED(info)) {}
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlImageMapCell);
+    DECLARE_NO_COPY_CLASS(wxHtmlImageMapCell)
 };
 
 
@@ -315,7 +315,7 @@ private:
     wxHtmlImageMapCell *m_imageMap;
     wxString            m_mapName;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlImageCell);
+    DECLARE_NO_COPY_CLASS(wxHtmlImageCell)
 };
 
 #if wxUSE_GIF && wxUSE_TIMER
@@ -331,7 +331,7 @@ class wxGIFTimer : public wxTimer
     private:
         wxHtmlImageCell *m_cell;
 
-    wxDECLARE_NO_COPY_CLASS(wxGIFTimer);
+    DECLARE_NO_COPY_CLASS(wxGIFTimer)
 };
 #endif
 

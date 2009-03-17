@@ -7,8 +7,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_BMPBUTTON_H_
-#define _WX_GTK_BMPBUTTON_H_
+
+#ifndef __BMPBUTTONH__
+#define __BMPBUTTONH__
 
 // ----------------------------------------------------------------------------
 // wxBitmapButton
@@ -45,15 +46,19 @@ public:
     void SetLabel( const wxString &label );
     virtual void SetLabel( const wxBitmap& bitmap ) { SetBitmapLabel(bitmap); }
 
-    virtual bool Enable(bool enable = true);
+    virtual void SetDefault();
+    virtual bool Enable(bool enable = TRUE);
 
     // implementation
     // --------------
 
-    void GTKMouseEnters();
-    void GTKMouseLeaves();
-    void GTKPressed();
-    void GTKReleased();
+    void HasFocus();
+    void NotFocus();
+    void StartSelect();
+    void EndSelect();
+
+    bool         m_hasFocus:1;
+    bool         m_isSelected:1;
 
 protected:
     virtual void OnSetBitmap();
@@ -65,13 +70,7 @@ protected:
 private:
     void OnFocusChange(wxFocusEvent& event);
 
-    // true iff mouse hovers over the button
-    bool         m_mouseHovers;
-    // true iff the button is in pressed state
-    bool         m_isPressed;
-
     DECLARE_DYNAMIC_CLASS(wxBitmapButton)
-    DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_GTK_BMPBUTTON_H_
+#endif // __BMPBUTTONH__

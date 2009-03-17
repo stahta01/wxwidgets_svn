@@ -19,7 +19,7 @@
 
 #if wxUSE_WXHTML_HELP
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/object.h"
     #include "wx/dynarray.h"
     #include "wx/intl.h"
@@ -40,7 +40,7 @@
     #include "wx/toolbar.h"
     #include "wx/choicdlg.h"
     #include "wx/filedlg.h"
-#endif // WX_PRECOMP
+#endif // WXPRECOMP
 
 #include "wx/html/helpfrm.h"
 #include "wx/html/helpctrl.h"
@@ -81,14 +81,7 @@ void wxHtmlHelpFrame::Init(wxHtmlHelpData* data)
     // Simply pass the pointer on to the help window
     m_Data = data;
     m_HtmlHelpWin = NULL;
-    m_helpController = NULL;
-}
-
-void wxHtmlHelpFrame::SetController(wxHtmlHelpController* controller)
-{
-    m_helpController = controller;
-    if ( m_HtmlHelpWin )
-        m_HtmlHelpWin->SetController(controller);
+    m_helpController = (wxHtmlHelpController*) NULL;
 }
 
 // Create: builds the GUI components.
@@ -233,12 +226,12 @@ void wxHtmlHelpFrame::UseConfig(wxConfigBase *config, const wxString& rootPath)
 }
 
 #ifdef __WXMAC__
-void wxHtmlHelpFrame::OnClose(wxCommandEvent& WXUNUSED(event))
+void wxHtmlHelpFrame::OnClose(wxCommandEvent& event)
 {
     Close(true);
 }
 
-void wxHtmlHelpFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
+void wxHtmlHelpFrame::OnAbout(wxCommandEvent& event)
 {
     wxMessageBox(wxT("wxWidgets HTML Help Viewer (c) 1998-2006, Vaclav Slavik et al"), wxT("HelpView"),
         wxICON_INFORMATION|wxOK, this);

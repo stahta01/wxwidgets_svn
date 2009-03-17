@@ -22,10 +22,10 @@
     #include "wx/frame.h"
     #include "wx/icon.h"
     #include "wx/dialog.h"
+    #include "wx/timer.h"
     #include "wx/memory.h"
     #include "wx/gdicmn.h"
     #include "wx/module.h"
-    #include "wx/crt.h"
 #endif
 
 #include "wx/evtloop.h"
@@ -33,7 +33,6 @@
 
 #include "wx/univ/theme.h"
 #include "wx/univ/renderer.h"
-#include "wx/generic/private/timer.h"
 
 #if wxUSE_THREADS
     #include "wx/thread.h"
@@ -86,6 +85,10 @@ static int wxXErrorHandler(Display *dpy, XErrorEvent *xevent)
 long wxApp::sm_lastMessageTime = 0;
 
 IMPLEMENT_DYNAMIC_CLASS(wxApp, wxEvtHandler)
+
+BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxAppBase::OnIdle)
+END_EVENT_TABLE()
 
 bool wxApp::Initialize(int& argC, wxChar **argV)
 {
@@ -238,7 +241,7 @@ struct wxExposeInfo
 };
 
 extern "C"
-Bool wxX11ExposePredicate (Display *WXUNUSED(display), XEvent *xevent, XPointer arg)
+Bool wxX11ExposePredicate (Display *display, XEvent *xevent, XPointer arg)
 {
     wxExposeInfo *info = (wxExposeInfo*) arg;
 
@@ -389,14 +392,14 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
             // wxLogDebug( "OnKey from %s", win->GetName().c_str() );
 
             // We didn't process wxEVT_KEY_DOWN, so send wxEVT_CHAR
-            if (win->HandleWindowEvent( keyEvent ))
+            if (win->GetEventHandler()->ProcessEvent( keyEvent ))
                 return true;
 
             keyEvent.SetEventType(wxEVT_CHAR);
             // Do the translation again, retaining the ASCII
             // code.
             if (wxTranslateKeyEvent(keyEvent, win, window, event, true) &&
-                win->HandleWindowEvent( keyEvent ))
+                win->GetEventHandler()->ProcessEvent( keyEvent ))
                 return true;
 
             if ( (keyEvent.m_keyCode == WXK_TAB) &&
@@ -409,7 +412,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
                 /* CTRL-TAB changes the (parent) window, i.e. switch notebook page */
                 new_event.SetWindowChange( keyEvent.ControlDown() );
                 new_event.SetCurrentFocus( win );
-                return win->GetParent()->HandleWindowEvent( new_event );
+                return win->GetParent()->GetEventHandler()->ProcessEvent( new_event );
             }
 
             return false;
@@ -422,7 +425,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
             wxKeyEvent keyEvent(wxEVT_KEY_UP);
             wxTranslateKeyEvent(keyEvent, win, window, event);
 
-            return win->HandleWindowEvent( keyEvent );
+            return win->GetEventHandler()->ProcessEvent( keyEvent );
         }
         case ConfigureNotify:
         {
@@ -446,7 +449,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
                     wxSizeEvent sizeEvent( wxSize(XConfigureEventGetWidth(event), XConfigureEventGetHeight(event)), win->GetId() );
                     sizeEvent.SetEventObject( win );
 
-                    return win->HandleWindowEvent( sizeEvent );
+                    return win->GetEventHandler()->ProcessEvent( sizeEvent );
                 }
             }
             return false;
@@ -506,7 +509,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
             wxSizeEvent sizeEvent(sz, win->GetId());
             sizeEvent.SetEventObject(win);
 
-            return win->HandleWindowEvent( sizeEvent );
+            return win->GetEventHandler()->ProcessEvent( sizeEvent );
         }
 #endif
 #endif
@@ -541,7 +544,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 
             if (event->type == ButtonPress)
             {
-                if ((win != wxWindow::FindFocus()) && win->CanAcceptFocus())
+                if ((win != wxWindow::FindFocus()) && win->AcceptsFocus())
                 {
                     // This might actually be done in wxWindow::SetFocus()
                     // and not here. TODO.
@@ -571,7 +574,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 #endif
             wxMouseEvent wxevent;
             wxTranslateMouseEvent(wxevent, win, window, event);
-            return win->HandleWindowEvent( wxevent );
+            return win->GetEventHandler()->ProcessEvent( wxevent );
         }
         case FocusIn:
 #if !wxUSE_NANOX
@@ -597,7 +600,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
                     focusEvent.SetWindow( g_prevFocus );
                     g_prevFocus = NULL;
 
-                    return win->HandleWindowEvent(focusEvent);
+                    return win->GetEventHandler()->ProcessEvent(focusEvent);
                 }
             }
             return false;
@@ -614,7 +617,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
                 focusEvent.SetEventObject(win);
                 focusEvent.SetWindow( g_nextFocus );
                 g_nextFocus = NULL;
-                return win->HandleWindowEvent(focusEvent);
+                return win->GetEventHandler()->ProcessEvent(focusEvent);
             }
             return false;
 
@@ -631,7 +634,7 @@ bool wxApp::ProcessXEvent(WXEvent* _event)
 
 // This should be redefined in a derived class for
 // handling property change events for XAtom IPC.
-bool wxApp::HandlePropertyChange(WXEvent *WXUNUSED(event))
+bool wxApp::HandlePropertyChange(WXEvent *event)
 {
     // by default do nothing special
     // TODO: what to do for X11
@@ -765,6 +768,52 @@ void wxApp::Exit()
     wxApp::CleanUp();
 
     wxAppConsole::Exit();
+}
+
+// Yield to other processes
+
+bool wxApp::Yield(bool onlyIfNeeded)
+{
+    // Sometimes only 2 yields seem
+    // to do the trick, e.g. in the
+    // progress dialog
+    int i;
+    for (i = 0; i < 2; i++)
+    {
+        static bool s_inYield = false;
+
+        if ( s_inYield )
+        {
+            if ( !onlyIfNeeded )
+            {
+                wxFAIL_MSG( wxT("wxYield called recursively" ) );
+            }
+
+            return false;
+        }
+
+        s_inYield = true;
+
+        // Make sure we have an event loop object,
+        // or Pending/Dispatch will fail
+        wxEventLoopGuarantor dummyLoopIfNeeded;
+
+        // Call dispatch at least once so that sockets
+        // can be tested
+        wxTheApp->Dispatch();
+
+        while (wxTheApp && wxTheApp->Pending())
+            wxTheApp->Dispatch();
+
+#if wxUSE_TIMER
+        wxTimer::NotifyTimers();
+#endif
+        ProcessIdle();
+
+        s_inYield = false;
+    }
+
+    return true;
 }
 
 #ifdef __WXDEBUG__

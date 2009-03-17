@@ -17,7 +17,6 @@
 // ----------------------------------------------------------------------------
 
 #include "wx/defs.h"
-#include "wx/os2/private.h"     // for MENUITEM
 
 // an exception to the general rule that a normal header doesn't include other
 // headers - only because ownerdrw.h is not always included and I don't want
@@ -33,7 +32,7 @@
 // ----------------------------------------------------------------------------
 // wxMenuItem: an item in the menu, optionally implements owner-drawn behaviour
 // ----------------------------------------------------------------------------
-class WXDLLIMPEXP_CORE wxMenuItem: public wxMenuItemBase
+class WXDLLEXPORT wxMenuItem: public wxMenuItemBase
 #if wxUSE_OWNER_DRAWN
                             , public wxOwnerDrawn
 #endif
@@ -58,14 +57,14 @@ public:
                ,const wxString& rsText
                ,const wxString& rsHelp
                ,bool            bIsCheckable
-               ,wxMenu*         pSubMenu = NULL
+               ,wxMenu*         pSubMenu = (wxMenu *)NULL
               );
     virtual ~wxMenuItem();
 
     //
     // Override base class virtuals
     //
-    virtual void SetItemLabel(const wxString& rStrName);
+    virtual void SetText(const wxString& rStrName);
     virtual void SetCheckable(bool bCheckable);
 
     virtual void Enable(bool bDoEnable = true);
@@ -118,6 +117,15 @@ private:
     bool                            m_bIsRadioGroupStart;
 
     DECLARE_DYNAMIC_CLASS(wxMenuItem)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // return the item label including any mnemonics and accelerators.
+    // This used to be called GetText.
+    wxString GetItemLabel() const { return GetText(); }
+#endif
+
 }; // end of CLASS wxMenuItem
 
 #endif  //_MENUITEM_H

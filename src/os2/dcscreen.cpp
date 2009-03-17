@@ -12,7 +12,12 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/os2/dcscreen.h"
+#define INCL_DEV
+#define INCL_GPI
+#define INCL_PM
+#include<os2.h>
+
+#include "wx/dcscreen.h"
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
@@ -21,24 +26,23 @@
 
 #include "wx/os2/private.h"
 
-IMPLEMENT_ABSTRACT_CLASS(wxScreenDCImpl, wxPMDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 
 // Create a DC representing the whole screen
-wxScreenDCImpl::wxScreenDCImpl( wxScreenDC *owner ) :
-    wxPMDCImpl( owner )
+wxScreenDC::wxScreenDC()
 {
     m_hDC = ::WinOpenWindowDC(HWND_DESKTOP);
     m_hPS = ::WinGetScreenPS(HWND_DESKTOP);
     ::GpiSetBackMix(m_hPS, BM_LEAVEALONE);
 } // end of wxScreenDC::wxScreenDC()
 
-void wxScreenDCImpl::DoGetSize( int* pnWidth,
-                                int* pnHeight ) const
+void wxScreenDC::DoGetSize( int* pnWidth,
+                            int* pnHeight ) const
 {
     //
     // Skip wxWindowDC version because it doesn't work without a valid m_canvas
     // (which we don't have)
     //
-    wxPMDCImpl::DoGetSize( pnWidth, pnHeight );
+    wxDC::DoGetSize( pnWidth, pnHeight );
 
 } // end of wxScreenDC::DoGetSize

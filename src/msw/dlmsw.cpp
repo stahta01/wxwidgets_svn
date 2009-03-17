@@ -28,7 +28,7 @@
 #include "wx/msw/private.h"
 #include "wx/msw/debughlp.h"
 
-const wxString wxDynamicLibrary::ms_dllext(_T(".dll"));
+const wxChar *wxDynamicLibrary::ms_dllext = _T(".dll");
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -65,7 +65,7 @@ private:
     wxDynamicLibrary m_dll;
 
 
-    wxDECLARE_NO_COPY_CLASS(wxVersionDLL);
+    DECLARE_NO_COPY_CLASS(wxVersionDLL)
 };
 
 // class used to create wxDynamicLibraryDetails objects
@@ -139,12 +139,9 @@ HMODULE wxGetModuleHandle(const char *name, void *addr)
     }
 
     // Windows CE only has Unicode API, so even we have an ANSI string here, we
-    // still need to use GetModuleHandleW() there
-#ifdef __WXWINCE__
-    return ::GetModuleHandleW(wxConvLibc.cMB2WC(name).data());
-#else
-    return ::GetModuleHandleA((char *)name);
-#endif
+    // still need to use GetModuleHandleW() there and so do it everywhere to
+    // avoid #ifdefs -- this code is not performance-critical anyhow...
+    return ::GetModuleHandle(wxString::FromAscii((char *)name));
 }
 
 // ============================================================================
@@ -194,7 +191,7 @@ wxString wxVersionDLL::GetFileVersion(const wxString& filename) const
     wxString ver;
     if ( m_dll.IsLoaded() )
     {
-        wxChar *pc = const_cast<wxChar *>((const wxChar*) filename.t_str());
+        wxChar *pc = wx_const_cast(wxChar *, filename.c_str());
 
         DWORD dummy;
         DWORD sizeVerInfo = m_pfnGetFileVersionInfoSize(pc, &dummy);
@@ -205,10 +202,7 @@ wxString wxVersionDLL::GetFileVersion(const wxString& filename) const
             {
                 void *pVer;
                 UINT sizeInfo;
-                if ( m_pfnVerQueryValue(buf.data(),
-                                        const_cast<wxChar *>(_T("\\")),
-                                        &pVer,
-                                        &sizeInfo) )
+                if ( m_pfnVerQueryValue(buf.data(), _T("\\"), &pVer, &sizeInfo) )
                 {
                     VS_FIXEDFILEINFO *info = (VS_FIXEDFILEINFO *)pVer;
                     ver.Printf(_T("%d.%d.%d.%d"),
@@ -242,11 +236,11 @@ wxDynamicLibraryDetailsCreator::EnumModulesProc(NameStr_t name,
 
     // fill in simple properties
     details->m_name = wxString::FromAscii(name);
-    details->m_address = wxUIntToPtr(base);
+    details->m_address = wx_reinterpret_cast(void *, base);
     details->m_length = size;
 
     // to get the version, we first need the full path
-    HMODULE hmod = wxGetModuleHandle(name, details->m_address);
+    HMODULE hmod = wxGetModuleHandle(name, (void *)base);
     if ( hmod )
     {
         wxString fullname = wxGetFullModuleName(hmod);
@@ -285,8 +279,8 @@ wxDllType
 wxDynamicLibrary::RawLoad(const wxString& libname, int flags)
 {
     return flags & wxDL_GET_LOADED
-            ? ::GetModuleHandle(libname.t_str())
-            : ::LoadLibrary(libname.t_str());
+            ? ::GetModuleHandle(libname)
+            : ::LoadLibrary(libname);
 }
 
 /* static */

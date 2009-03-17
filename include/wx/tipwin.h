@@ -32,7 +32,7 @@ class WXDLLIMPEXP_FWD_CORE wxTipWindowView;
 // wxTipWindow
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTipWindow : public wxTipWindowBase
+class WXDLLEXPORT wxTipWindow : public wxTipWindowBase
 {
 public:
     // the mandatory ctor parameters are: the parent window and the text to
@@ -90,7 +90,7 @@ private:
 
     friend class wxTipWindowView;
 
-    wxDECLARE_NO_COPY_CLASS(wxTipWindow);
+    DECLARE_NO_COPY_CLASS(wxTipWindow)
 };
 
 #endif // wxUSE_TIPWINDOW

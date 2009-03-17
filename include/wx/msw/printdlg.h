@@ -25,7 +25,7 @@ class WXDLLIMPEXP_FWD_CORE wxDC;
 // wxWindowsPrintNativeData
 //----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowsPrintNativeData: public wxPrintNativeDataBase
+class WXDLLEXPORT wxWindowsPrintNativeData: public wxPrintNativeDataBase
 {
 public:
     wxWindowsPrintNativeData();
@@ -56,7 +56,7 @@ private:
 // wxWindowsPrintDialog: the MSW dialog for printing
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowsPrintDialog : public wxPrintDialogBase
+class WXDLLEXPORT wxWindowsPrintDialog : public wxPrintDialogBase
 {
 public:
     wxWindowsPrintDialog(wxWindow *parent, wxPrintDialogData* data = NULL);
@@ -85,7 +85,7 @@ private:
     void*             m_printDlg;
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxWindowsPrintDialog);
+    DECLARE_NO_COPY_CLASS(wxWindowsPrintDialog)
     DECLARE_CLASS(wxWindowsPrintDialog)
 };
 
@@ -93,7 +93,7 @@ private:
 // wxWindowsPageSetupDialog: the MSW page setup dialog 
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowsPageSetupDialog: public wxPageSetupDialogBase
+class WXDLLEXPORT wxWindowsPageSetupDialog: public wxPageSetupDialogBase
 {
 public:
     wxWindowsPageSetupDialog();

@@ -12,7 +12,7 @@
 #ifndef _WX_RADIOBUT_H_
 #define _WX_RADIOBUT_H_
 
-class WXDLLIMPEXP_CORE wxRadioButton: public wxControl
+class WXDLLEXPORT wxRadioButton: public wxControl
 {
     DECLARE_DYNAMIC_CLASS(wxRadioButton)
 public:
@@ -48,8 +48,6 @@ public:
     // clears the selection in the radiobuttons in the cycle
     // and returns the old selection (if any)
     wxRadioButton* ClearSelections();
-protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 private:
     wxRadioButton* AddInCycle(wxRadioButton* cycle);
     void RemoveFromCycle();

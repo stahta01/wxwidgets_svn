@@ -13,11 +13,10 @@ include ../../build/msw/config.gcc
 ### Variables: ###
 
 CPPDEPS = -MT$@ -MF$@.d -MD -MP
-WX_RELEASE_NODOT = 29
-COMPILER_PREFIX = gcc
+WX_RELEASE_NODOT = 28
 OBJS = \
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
-LIBDIRNAME = .\..\..\lib\$(COMPILER_PREFIX)_$(LIBTYPE_SUFFIX)$(CFG)
+	gcc_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
+LIBDIRNAME = .\..\..\lib\gcc_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = \
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 IMAGE_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG) \
@@ -29,7 +28,6 @@ IMAGE_CXXFLAGS = $(__DEBUGINFO) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG) \
 	$(__EXCEPTIONSFLAG_6) -Wno-ctor-dtor-privacy $(CPPFLAGS) $(CXXFLAGS)
 IMAGE_OBJECTS =  \
 	$(OBJS)\image_image.o \
-	$(OBJS)\image_canvas.o \
 	$(OBJS)\image_image_rc.o
 
 ### Conditionally set variables: ###
@@ -130,14 +128,8 @@ endif
 ifeq ($(USE_THREADS),0)
 __THREAD_DEFINE_p_1 = --define wxNO_THREADS
 endif
-ifeq ($(UNICODE),0)
-__UNICODE_DEFINE_p = -DwxUSE_UNICODE=0
-endif
 ifeq ($(UNICODE),1)
 __UNICODE_DEFINE_p = -D_UNICODE
-endif
-ifeq ($(UNICODE),0)
-__UNICODE_DEFINE_p_1 = --define wxUSE_UNICODE=0
 endif
 ifeq ($(UNICODE),1)
 __UNICODE_DEFINE_p_1 = --define _UNICODE
@@ -225,16 +217,13 @@ clean:
 	-if exist $(OBJS)\image.exe del $(OBJS)\image.exe
 
 $(OBJS)\image.exe: $(IMAGE_OBJECTS) $(OBJS)\image_image_rc.o
-	$(CXX) -o $@ $(IMAGE_OBJECTS)  $(__DEBUGINFO) $(__THREADSFLAG) -L$(LIBDIRNAME) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  -lwxzlib$(WXDEBUGFLAG) -lwxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG) -lwxexpat$(WXDEBUGFLAG) $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) $(__GDIPLUS_LIB_p) -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32 -lwininet
+	$(CXX) -o $@ $(IMAGE_OBJECTS)  $(__DEBUGINFO) $(__THREADSFLAG) -L$(LIBDIRNAME) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  -lwxzlib$(WXDEBUGFLAG)  -lwxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG) -lwxexpat$(WXDEBUGFLAG) $(EXTRALIBS_FOR_BASE) $(__UNICOWS_LIB_p) $(__GDIPLUS_LIB_p) -lkernel32 -luser32 -lgdi32 -lcomdlg32 -lwinspool -lwinmm -lshell32 -lcomctl32 -lole32 -loleaut32 -luuid -lrpcrt4 -ladvapi32 -lwsock32 -lodbc32
 
 data: 
 	if not exist $(OBJS) mkdir $(OBJS)
 	for %%f in (horse.png horse.jpg horse.bmp horse.gif horse.pcx horse.pnm horse_ag.pnm horse_rg.pnm horse.tif horse.tga horse.xpm horse.cur horse.ico horse3.ani smile.xbm toucan.png cmyk.jpg) do if not exist $(OBJS)\%%f copy .\%%f $(OBJS)
 
 $(OBJS)\image_image.o: ./image.cpp
-	$(CXX) -c -o $@ $(IMAGE_CXXFLAGS) $(CPPDEPS) $<
-
-$(OBJS)\image_canvas.o: ./canvas.cpp
 	$(CXX) -c -o $@ $(IMAGE_CXXFLAGS) $(CPPDEPS) $<
 
 $(OBJS)\image_image_rc.o: ./image.rc

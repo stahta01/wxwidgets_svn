@@ -35,16 +35,14 @@ void wxColour::Init()
     m_isInit = false;
 }
 
-void wxColour::InitRGBA(unsigned char r,
-                        unsigned char g,
-                        unsigned char b,
-                        unsigned char a)
+wxColour::wxColour()
 {
-    m_red = r;
-    m_green = g;
-    m_blue = b;
-    m_alpha = a;
-    m_isInit = true;
+    Init();
+}
+
+wxColour::wxColour(const wxColour& col)
+{
+    *this = col;
 }
 
 wxColour& wxColour::operator=(const wxColour& col)
@@ -57,3 +55,18 @@ wxColour& wxColour::operator=(const wxColour& col)
     return *this;
 }
 
+wxColour::~wxColour()
+{
+}
+
+void wxColour::InitRGBA(unsigned char r,
+                        unsigned char g,
+                        unsigned char b,
+                        unsigned char a)
+{
+    m_red = r;
+    m_green = g;
+    m_blue = b;
+    m_alpha = a;
+    m_isInit = true;
+}

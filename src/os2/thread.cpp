@@ -96,8 +96,7 @@ public:
     bool IsOk() const { return m_vMutex != NULL; }
 
     wxMutexError Lock() { return LockTimeout(SEM_INDEFINITE_WAIT); }
-    wxMutexError Lock(unsigned long ms) { return LockTimeout(ms); }
-    wxMutexError TryLock();
+    wxMutexError TryLock() { return LockTimeout(SEM_IMMEDIATE_RETURN); }
     wxMutexError Unlock();
 
 private:
@@ -128,14 +127,6 @@ wxMutexInternal::~wxMutexInternal()
     }
 }
 
-wxMutexError wxMutexInternal::TryLock()
-{
-    const wxMutexError rc = LockTimeout( SEM_IMMEDIATE_RETURN );
-
-    // we have a special return code for timeout in this case
-    return rc == wxMUTEX_TIMEOUT ? wxMUTEX_BUSY : rc;
-}
-
 wxMutexError wxMutexInternal::LockTimeout(ULONG ulMilliseconds)
 {
     APIRET                          ulrc;
@@ -145,7 +136,6 @@ wxMutexError wxMutexInternal::LockTimeout(ULONG ulMilliseconds)
     switch (ulrc)
     {
         case ERROR_TIMEOUT:
-            return wxMUTEX_TIMEOUT;
         case ERROR_TOO_MANY_SEM_REQUESTS:
             return wxMUTEX_BUSY;
 
@@ -569,6 +559,13 @@ void wxThread::Yield()
     ::DosSleep(0);
 }
 
+void wxThread::Sleep(
+  unsigned long                     ulMilliseconds
+)
+{
+    ::DosSleep(ulMilliseconds);
+}
+
 int wxThread::GetCPUCount()
 {
     ULONG CPUCount;
@@ -978,7 +975,7 @@ void WXDLLEXPORT wxWakeUpMainThread()
 #endif
 }
 
-void wxMutexGuiEnterImpl()
+void WXDLLEXPORT wxMutexGuiEnter()
 {
     // this would dead lock everything...
     wxASSERT_MSG( !wxThread::IsMain(),
@@ -1000,7 +997,7 @@ void wxMutexGuiEnterImpl()
     gs_pCritsectGui->Enter();
 }
 
-void wxMutexGuiLeaveImpl()
+void WXDLLEXPORT wxMutexGuiLeave()
 {
     wxCriticalSectionLocker enter(*gs_pCritsectWaitingForGui);
 

@@ -31,16 +31,15 @@ typedef unsigned short* WXBSTR;
  * Wraps up an IDispatch pointer and invocation; does variant conversion.
  */
 
-class WXDLLIMPEXP_CORE wxAutomationObject: public wxObject
+class WXDLLEXPORT wxAutomationObject: public wxObject
 {
 public:
     wxAutomationObject(WXIDISPATCH* dispatchPtr = NULL);
     virtual ~wxAutomationObject();
 
     // Set/get dispatch pointer
-    void SetDispatchPtr(WXIDISPATCH* dispatchPtr) { m_dispatchPtr = dispatchPtr; }
-    WXIDISPATCH* GetDispatchPtr() const { return m_dispatchPtr; }
-    bool IsOk() const { return m_dispatchPtr != NULL; }
+    inline void SetDispatchPtr(WXIDISPATCH* dispatchPtr) { m_dispatchPtr = dispatchPtr; }
+    inline WXIDISPATCH* GetDispatchPtr() const { return m_dispatchPtr; }
 
     // Get a dispatch pointer from the current object associated
     // with a class id, such as "Excel.Application"
@@ -65,7 +64,7 @@ public:
         const wxVariant& arg5 = wxNullVariant, const wxVariant& arg6 = wxNullVariant);
 
     // Get/Put property
-    wxVariant GetProperty(const wxString& property, int noArgs = 0, wxVariant args[] = NULL) const;
+    wxVariant GetProperty(const wxString& property, int noArgs = 0, wxVariant args[] = (wxVariant*) NULL) const;
     wxVariant GetPropertyArray(const wxString& property, int noArgs, const wxVariant **args) const;
     wxVariant GetProperty(const wxString& property,
         const wxVariant& arg1, const wxVariant& arg2 = wxNullVariant,
@@ -88,13 +87,13 @@ public:
 
     // A way of initialising another wxAutomationObject with a dispatch object,
     // without having to deal with nasty IDispatch pointers.
-    bool GetObject(wxAutomationObject& obj, const wxString& property, int noArgs = 0, wxVariant args[] = NULL) const;
+    bool GetObject(wxAutomationObject& obj, const wxString& property, int noArgs = 0, wxVariant args[] = (wxVariant*) NULL) const;
     bool GetObject(wxAutomationObject& obj, const wxString& property, int noArgs, const wxVariant **args) const;
 
 public:
     WXIDISPATCH*  m_dispatchPtr;
 
-    wxDECLARE_NO_COPY_CLASS(wxAutomationObject);
+    DECLARE_NO_COPY_CLASS(wxAutomationObject)
 };
 
 #endif // wxUSE_OLE_AUTOMATION

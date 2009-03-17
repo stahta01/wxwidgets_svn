@@ -20,7 +20,7 @@ VERBOSE=0
 ZIPFLAGS=
 
 PROGNAME=$0
-
+##SCRIPTDIR=$WXWIN/distrib/scripts
 . $SCRIPTDIR/utils.inc
 
 MANIFESTDIR=$WXWIN/distrib/scripts/manifests
@@ -31,7 +31,7 @@ fi
 
 # Set this to the required version
 if [ "$VERSION" = "" ]; then
-  VERSION=2.9.0
+  VERSION=2.7.0
 fi
 
 getfilelist(){
@@ -39,15 +39,16 @@ getfilelist(){
   outfile=$2
 
   filelist="base.rsp"
+  contribfiles="stc.rsp contrib.rsp ogl.rsp"
   utilsfiles="tex2rtf.rsp utils.rsp utilmake.rsp"
-  commonfiles="generic.rsp generic_samples.rsp stc.rsp jpeg.rsp tiff.rsp xml.rsp makefile.rsp $utilsfiles"
+  commonfiles="generic.rsp jpeg.rsp tiff.rsp xml.rsp deprecated.rsp makefile.rsp $utilsfiles $contribfiles"
 
   if [ ! $port = "base" ]; then
     filelist="$filelist $commonfiles"
   fi
 
   if [ $port = "msw" ] || [ $port = "all" ]; then
-    filelist="$filelist msw.rsp univ.rsp vc.rsp wince.rsp dmc.rsp"
+    filelist="$filelist msw.rsp univ.rsp vc.rsp mmedia.rsp wince.rsp dmc.rsp"
   fi
 
   if [ $port = "os2" ] || [ $port = "all" ]; then
@@ -61,13 +62,13 @@ getfilelist(){
   if [ $port = "mgl" ] || [ $port = "all" ]; then
     filelist="$filelist univ.rsp mgl.rsp"
   fi
-
+  
   if [ $port = "dfb" ] || [ $port = "all" ]; then
-    filelist="$filelist univ.rsp dfb.rsp"
+    filelist="$filelist univ.rsp dfb.rsp" 
   fi
-
+  
   if [ $port = "gtk" ] || [ $port = "all" ]; then
-    filelist="$filelist gtk.rsp"
+    filelist="$filelist gtk.rsp gtk1.rsp"
   fi
 
   if [ $port = "motif" ] || [ $port = "all" ]; then
@@ -144,26 +145,30 @@ dospinport(){
 
     copyfilelist $portfiles $APPDIR $TMPFILESDIR
 
+# use DOS line endings for text files for MSW archives.
     if [ $port = "msw" ]; then
         FILES=`find . -type f \( -path '*/.svn/*' -prune -o -exec ${SCRIPTDIR}/is_text.sh {} \; -print \)`
-        echo "$FILES" > /tmp/textfiles
+        
+    else
+        FILES=`find . -name \*.ds?`        
     fi
+    echo "$FILES" > /tmp/textfiles
 
     pushd /tmp/wx$port
-    # use DOS line endings for text files for MSW archives.
-    if [ $port = "msw" ]; then
-        pushd /tmp/wx$port/wx$portname-$VERSION
-        for file in `cat /tmp/textfiles`; do
-            unix2dos $file
-        done
-        popd
-    fi
+
+
+    pushd /tmp/wx$port/wx$portname-$VERSION
+    for file in `cat /tmp/textfiles`; do
+        unix2dos $file
+    done
+    popd
+
     echo "Creating wx$portname-$VERSION.zip..."
-    zip $ZIPFLAGS -r -9 $DIST_DIR/wx$portname-$VERSION.zip .
+    zip $ZIPFLAGS -r -9 $APPDIR/deliver/wx$portname-$VERSION.zip .
     echo "Creating wx$portname-$VERSION.tar.gz..."
-    tar czf $DIST_DIR/wx$portname-$VERSION.tar.gz wx$portname-$VERSION
+    tar czf $APPDIR/deliver/wx$portname-$VERSION.tar.gz wx$portname-$VERSION
     echo "Creating wx$portname-$VERSION.tar.bz2..."
-    tar ch wx$portname-$VERSION | bzip2 -f9 > $DIST_DIR//wx$portname-$VERSION.tar.bz2
+    tar ch wx$portname-$VERSION | bzip2 -f9 > $APPDIR/deliver/wx$portname-$VERSION.tar.bz2
     popd
     rm -rf /tmp/wx$port
     rm ${portfiles}
@@ -189,7 +194,7 @@ prepareforrelease()
 
     cp $APPDIR/docs/mgl/readme.txt $APPDIR/readme-mgl.txt
     cp $APPDIR/docs/mgl/install.txt $APPDIR/install-mgl.txt
-
+    
     cp $APPDIR/docs/dfb/install.txt $APPDIR/install-dfb.txt
 
     cp $APPDIR/docs/x11/readme.txt $APPDIR/readme-x11.txt
@@ -211,7 +216,9 @@ prepareforrelease()
     rm -f BuildSVN.txt descrip.mms
     rm -f setup.h_vms
     rm -f docs/html/wxbook.htm docs/html/roadmap.htm
+    rm -f -r contrib/docs/latex/ogl
     rm -f src/mingegcs.bat
+#    rm -f *.spec
     rm -f src/gtk/descrip.mms src/motif/descrip.mms
 
     # Copy setup0.h files to setup.h
@@ -246,19 +253,19 @@ usage()
 for i in "$@"; do
 
     case "$i" in
-        --wxmac) SPINMAC=1; SPINALL=0 ;;
-        --wxmsw) SPINMSW=1; SPINALL=0 ;;
-        --wxos2) SPINOS2=1; SPINALL=0 ;;
-        --wxall) SPINWXALL=1; SPINALL=0 ;;
-        --wxbase) SPINBASE=1; SPINALL=0 ;;
-        --getmakefiles) GETMAKEFILES=1; SPINALL=0 ;;
-        --docs) SPINDOCS=1; SPINALL=0 ;;
-        --all) SPINALL=1 ;;
-        --verbose) VERBOSE=1 ;;
-        *)
-            usage
-            exit
-            ;;
+	--wxmac) SPINMAC=1; SPINALL=0 ;;
+	--wxmsw) SPINMSW=1; SPINALL=0 ;;
+	--wxos2) SPINOS2=1; SPINALL=0 ;;
+	--wxall) SPINWXALL=1; SPINALL=0 ;;
+	--wxbase) SPINBASE=1; SPINALL=0 ;;
+	--getmakefiles) GETMAKEFILES=1; SPINALL=0 ;;
+	--docs) SPINDOCS=1; SPINALL=0 ;;
+	--all) SPINALL=1 ;;
+	--verbose) VERBOSE=1 ;;
+	*)
+	    usage
+	    exit
+	    ;;
     esac
 done
 

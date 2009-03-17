@@ -271,30 +271,13 @@ wxString wxRadioBoxBase::DoGetHelpTextAtPoint(const wxWindow *derived,
                                               const wxPoint& pt,
                                               wxHelpEvent::Origin origin) const
 {
-    int item;
-    switch ( origin )
-    {
-        case wxHelpEvent::Origin_HelpButton:
-            item = GetItemFromPoint(pt);
-            break;
-
-        case wxHelpEvent::Origin_Keyboard:
-            item = GetSelection();
-            break;
-
-        default:
-            wxFAIL_MSG( "unknown help even origin" );
-            // fall through
-
-        case wxHelpEvent::Origin_Unknown:
-            // this value is used when we're called from GetHelpText() for the
-            // radio box itself, so don't return item-specific text in this case
-            item = wxNOT_FOUND;
-    }
+    const int item = origin == wxHelpEvent::Origin_HelpButton
+                        ? GetItemFromPoint(pt)
+                        : GetSelection();
 
     if ( item != wxNOT_FOUND )
     {
-        wxString text = GetItemHelpText(static_cast<unsigned int>(item));
+        wxString text = GetItemHelpText(wx_static_cast(unsigned int, item));
         if( !text.empty() )
             return text;
     }
@@ -303,5 +286,19 @@ wxString wxRadioBoxBase::DoGetHelpTextAtPoint(const wxWindow *derived,
 }
 
 #endif // wxUSE_HELP
+
+#if WXWIN_COMPATIBILITY_2_4
+
+// these functions are deprecated and don't do anything
+int wxRadioBoxBase::GetNumberOfRowsOrCols() const
+{
+    return 1;
+}
+
+void wxRadioBoxBase::SetNumberOfRowsOrCols(int WXUNUSED(n))
+{
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 #endif // wxUSE_RADIOBOX

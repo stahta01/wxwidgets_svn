@@ -25,7 +25,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
 
 class WXDLLEXPORT wxAcceleratorRefData: public wxObjectRefData
 {
-    friend class wxAcceleratorTable;
+    friend class WXDLLEXPORT wxAcceleratorTable;
 public:
     wxAcceleratorRefData();
     virtual ~wxAcceleratorRefData();
@@ -40,19 +40,19 @@ public:
 wxAcceleratorRefData::wxAcceleratorRefData()
 {
     m_count = 0;
-    m_entries = NULL;
+    m_entries = (wxAcceleratorEntry*) NULL;
 }
 
 wxAcceleratorRefData::~wxAcceleratorRefData()
 {
     delete[] m_entries;
-    m_entries = NULL;
+    m_entries = (wxAcceleratorEntry*) NULL;
     m_count = 0;
 }
 
 wxAcceleratorTable::wxAcceleratorTable()
 {
-    m_refData = NULL;
+    m_refData = (wxAcceleratorRefData*) NULL;
 }
 
 wxAcceleratorTable::~wxAcceleratorTable()
@@ -82,7 +82,7 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
 
 bool wxAcceleratorTable::IsOk() const
 {
-    return (m_refData != NULL);
+    return (m_refData != (wxAcceleratorRefData*) NULL);
 }
 
 int wxAcceleratorTable::GetCount() const

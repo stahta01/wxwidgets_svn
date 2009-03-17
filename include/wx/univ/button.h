@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_BUTTON_H_
 #define _WX_UNIV_BUTTON_H_
 
-class WXDLLIMPEXP_FWD_CORE wxInputHandler;
+class WXDLLEXPORT wxInputHandler;
 
 #include "wx/bitmap.h"
 
@@ -29,7 +29,7 @@ class WXDLLIMPEXP_FWD_CORE wxInputHandler;
 // wxButton: a push button
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxButton : public wxButtonBase
+class WXDLLEXPORT wxButton : public wxButtonBase
 {
 public:
     wxButton() { Init(); }
@@ -89,7 +89,7 @@ public:
 
     virtual void SetImageLabel(const wxBitmap& bitmap);
     virtual void SetImageMargins(wxCoord x, wxCoord y);
-    virtual wxWindow *SetDefault();
+    virtual void SetDefault();
 
     virtual bool IsPressed() const { return m_isPressed; }
     virtual bool IsDefault() const { return m_isDefault; }

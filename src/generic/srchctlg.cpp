@@ -134,24 +134,6 @@ public:
         return m_descriptiveText;
     }
 
-
-    // provide access to the base class protected methods to wxSearchCtrl which
-    // needs to forward to them
-    void DoSetValue(const wxString& value, int flags)
-    {
-        wxTextCtrl::DoSetValue(value, flags);
-    }
-
-    bool DoLoadFile(const wxString& file, int fileType)
-    {
-        return wxTextCtrl::DoLoadFile(file, fileType);
-    }
-
-    bool DoSaveFile(const wxString& file, int fileType)
-    {
-        return wxTextCtrl::DoSaveFile(file, fileType);
-    }
-
 protected:
     void OnText(wxCommandEvent& eventText)
     {
@@ -339,21 +321,17 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
             const wxValidator& validator,
             const wxString& name)
 {
-    // force border style for more native appearance
-    style &= ~wxBORDER_MASK;
-#ifdef __WXGTK__
-    style |= wxBORDER_SUNKEN;
-#elif defined(__WXMSW__)
-    // Don't set the style explicitly, let GetDefaultBorder() work it out, unless
-    // we will get a sunken border (e.g. on Windows 200) in which case we must
-    // override with a simple border.
-    if (GetDefaultBorder() == wxBORDER_SUNKEN)
-        style |= wxBORDER_SIMPLE;
-#else
-    style |= wxBORDER_SIMPLE;
+	int borderStyle = wxBORDER_SIMPLE;
+
+#if defined(__WXMSW__)
+    borderStyle = GetThemedBorderStyle();
+    if (borderStyle == wxBORDER_SUNKEN)
+        borderStyle = wxBORDER_SIMPLE;
+#elif defined(__WXGTK__)
+    borderStyle = wxBORDER_SUNKEN;
 #endif
-    if ( !wxSearchCtrlBaseBaseClass::Create(parent, id, pos, size,
-                                            style, validator, name) )
+
+    if ( !wxTextCtrlBase::Create(parent, id, pos, size, borderStyle | (style & ~wxBORDER_MASK), validator, name) )
     {
         return false;
     }
@@ -361,12 +339,10 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
     m_text = new wxSearchTextCtrl(this, value, style & ~wxBORDER_MASK);
     m_text->SetDescriptiveText(_("Search"));
 
-    m_searchButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,
-                                        m_searchBitmap);
-    m_cancelButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,
-                                        m_cancelBitmap);
+    wxSize sizeText = m_text->GetBestSize();
+
+    m_searchButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,m_searchBitmap);
+    m_cancelButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,m_cancelBitmap);
 
     SetForegroundColour( m_text->GetForegroundColour() );
     m_searchButton->SetForegroundColour( m_text->GetForegroundColour() );
@@ -532,8 +508,6 @@ void wxSearchCtrl::LayoutControls(int x, int y, int width, int height)
     y += BORDER;
     width -= horizontalBorder*2;
     height -= BORDER*2;
-    if (width < 0) width = 0;
-    if (height < 0) height = 0;
 
     wxSize sizeSearch(0,0);
     wxSize sizeCancel(0,0);
@@ -560,7 +534,6 @@ void wxSearchCtrl::LayoutControls(int x, int y, int width, int height)
         cancelMargin = 0;
     }
     wxCoord textWidth = width - sizeSearch.x - sizeCancel.x - searchMargin - cancelMargin - 1;
-    if (textWidth < 0) textWidth = 0;
 
     // position the subcontrols inside the client area
 
@@ -577,7 +550,7 @@ void wxSearchCtrl::LayoutControls(int x, int y, int width, int height)
 // accessors
 // ---------
 
-wxString wxSearchCtrl::DoGetValue() const
+wxString wxSearchCtrl::GetValue() const
 {
     wxString value = m_text->GetValue();
     if (value == m_text->GetDescriptiveText())
@@ -585,6 +558,11 @@ wxString wxSearchCtrl::DoGetValue() const
     else
         return value;
 }
+void wxSearchCtrl::SetValue(const wxString& value)
+{
+    m_text->SetValue(value);
+}
+
 wxString wxSearchCtrl::GetRange(long from, long to) const
 {
     return m_text->GetRange(from, to);
@@ -806,7 +784,7 @@ long wxSearchCtrl::GetInsertionPoint() const
 {
     return m_text->GetInsertionPoint();
 }
-long wxSearchCtrl::GetLastPosition() const
+wxTextPos wxSearchCtrl::GetLastPosition() const
 {
     return m_text->GetLastPosition();
 }
@@ -914,17 +892,9 @@ wxTextCtrl& operator<<(const wxChar c);
 
 void wxSearchCtrl::DoSetValue(const wxString& value, int flags)
 {
-    m_text->DoSetValue(value, flags);
-}
-
-bool wxSearchCtrl::DoLoadFile(const wxString& file, int fileType)
-{
-    return m_text->DoLoadFile(file, fileType);
-}
-
-bool wxSearchCtrl::DoSaveFile(const wxString& file, int fileType)
-{
-    return m_text->DoSaveFile(file, fileType);
+    m_text->ChangeValue( value );
+    if ( flags & SetValue_SendEvent )
+        SendTextUpdatedEvent();
 }
 
 // do the window-specific processing after processing the update event

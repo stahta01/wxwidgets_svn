@@ -47,6 +47,7 @@ public:
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
     virtual bool IsIconized() const;
+    virtual void SetIcon(const wxIcon& icon);
     virtual void SetIcons(const wxIconBundle& icons);
     virtual void Restore();
 
@@ -79,80 +80,63 @@ public:
     virtual void RemoveGrab();
     virtual bool IsGrabbed() const { return m_grabbed; }
 
-
-    virtual void Refresh( bool eraseBackground = true,
-                          const wxRect *rect = (const wxRect *) NULL );
-
     // implementation from now on
     // --------------------------
 
     // GTK callbacks
+    virtual void GtkOnSize();
     virtual void OnInternalIdle();
 
     // do *not* call this to iconize the frame, this is a private function!
     void SetIconizeState(bool iconic);
 
+    int           m_miniEdge,
+                  m_miniTitle;
     GtkWidget    *m_mainWidget;
+    bool          m_insertInClientArea;  /* not from within OnCreateXXX */
 
     bool          m_fsIsShowing;         /* full screen */
-    int           m_fsSaveGdkFunc, m_fsSaveGdkDecor;
+    long          m_fsSaveGdkFunc, m_fsSaveGdkDecor;
+    long          m_fsSaveFlag;
     wxRect        m_fsSaveFrame;
 
     // m_windowStyle translated to GDK's terms
-    int           m_gdkFunc,
+    long          m_gdkFunc,
                   m_gdkDecor;
-
-    // size of WM decorations
-    wxSize m_decorSize;
-
-    // shape of the frame
-    wxRegion m_shape;
 
     // private gtk_timeout_add result for mimicing wxUSER_ATTENTION_INFO and
     // wxUSER_ATTENTION_ERROR difference, -2 for no hint, -1 for ERROR hint, rest for GtkTimeout handle.
     int m_urgency_hint;
 
-    // return the size of the window without WM decorations
-    void GTKDoGetSize(int *width, int *height) const;
-
-    void GTKUpdateDecorSize(const wxSize& decorSize);
-
-protected:
     // give hints to the Window Manager for how the size
     // of the TLW can be changed by dragging
     virtual void DoSetSizeHints( int minW, int minH,
-                                 int maxW, int maxH,
-                                 int incW, int incH);
+                                 int maxW = wxDefaultCoord, int maxH = wxDefaultCoord,
+                                 int incW = wxDefaultCoord, int incH = wxDefaultCoord );
+
+protected:
     // common part of all ctors
     void Init();
 
-    // move the window to the specified location and resize it
+    // move the window to the specified location and resize it: this is called
+    // from both DoSetSize() and DoSetClientSize()
     virtual void DoMoveWindow(int x, int y, int width, int height);
 
-    // take into account WM decorations here
+    // override wxWindow methods to take into account tool/menu/statusbars
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);
-
+                                 
     virtual void DoSetClientSize(int width, int height);
-    virtual void DoGetClientSize(int *width, int *height) const;
+    virtual void DoGetClientSize( int *width, int *height ) const;
 
-    // string shown in the title bar
-    wxString m_title;
-
-    bool m_deferShow;
-
-private:
-    wxSize& GetCachedDecorSize();
+    wxString      m_title;
 
     // is the frame currently iconized?
     bool m_isIconized;
-
-    // is the frame currently grabbed explicitly by the application?
+    // is the frame currently grabbed explicitly
+    // by the application?
     bool m_grabbed;
-
-    bool m_updateDecorSize;
-    bool m_deferShowAllowed;
 };
 
 #endif // _WX_GTK_TOPLEVEL_H_

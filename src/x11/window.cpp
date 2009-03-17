@@ -122,11 +122,6 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
 {
     wxCHECK_MSG( parent, false, wxT("can't create wxWindow without parent") );
 
-    // Get default border
-    wxBorder border = GetBorder(style);
-    style &= ~wxBORDER_MASK;
-    style |= border;
-
     CreateBase(parent, id, pos, size, style, wxDefaultValidator, name);
 
     parent->AddChild(this);
@@ -169,7 +164,7 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
 
 #if wxUSE_TWO_WINDOWS
     bool need_two_windows =
-        ((( wxSUNKEN_BORDER | wxBORDER_THEME | wxRAISED_BORDER | wxSIMPLE_BORDER | wxHSCROLL | wxVSCROLL ) & m_windowStyle) != 0);
+        ((( wxSUNKEN_BORDER | wxRAISED_BORDER | wxSIMPLE_BORDER | wxHSCROLL | wxVSCROLL ) & m_windowStyle) != 0);
 #else
     bool need_two_windows = false;
 #endif
@@ -235,7 +230,7 @@ bool wxWindowX11::Create(wxWindow *parent, wxWindowID id,
         }
 #endif
 
-        if (HasFlag(wxSUNKEN_BORDER) || HasFlag(wxRAISED_BORDER) || HasFlag(wxBORDER_THEME))
+        if (HasFlag( wxSUNKEN_BORDER) || HasFlag( wxRAISED_BORDER))
         {
             pos2.x = 2;
             pos2.y = 2;
@@ -349,6 +344,8 @@ wxWindowX11::~wxWindowX11()
 
     if (g_captureWindow == this)
         g_captureWindow = NULL;
+
+    m_isBeingDeleted = true;
 
     DestroyChildren();
 
@@ -810,11 +807,9 @@ void wxWindowX11::DoScreenToClient(int *x, int *y) const
     Window thisWindow = (Window) m_clientWindow;
 
     Window childWindow;
-    int xx = x ? *x : 0;
-    int yy = y ? *y : 0;
-    XTranslateCoordinates(display, rootWindow, thisWindow,
-                          xx, yy, x ? x : &xx, y ? y : &yy,
-                          &childWindow);
+    int xx = *x;
+    int yy = *y;
+    XTranslateCoordinates(display, rootWindow, thisWindow, xx, yy, x, y, &childWindow);
 }
 
 void wxWindowX11::DoClientToScreen(int *x, int *y) const
@@ -824,11 +819,9 @@ void wxWindowX11::DoClientToScreen(int *x, int *y) const
     Window thisWindow = (Window) m_clientWindow;
 
     Window childWindow;
-    int xx = x ? *x : 0;
-    int yy = y ? *y : 0;
-    XTranslateCoordinates(display, thisWindow, rootWindow,
-                          xx, yy, x ? x : &xx, y ? y : &yy,
-                          &childWindow);
+    int xx = *x;
+    int yy = *y;
+    XTranslateCoordinates(display, thisWindow, rootWindow, xx, yy, x, y, &childWindow);
 }
 
 
@@ -1125,7 +1118,7 @@ void wxWindowX11::GetTextExtent(const wxString& string,
     XCharStruct overall;
     int slen = string.length();
 
-    XTextExtents((XFontStruct*) pFontStruct, (const char*) string.c_str(), slen,
+    XTextExtents((XFontStruct*) pFontStruct, (char*) string.c_str(), slen,
                  &direction, &ascent, &descent2, &overall);
 
     if ( x )
@@ -1204,12 +1197,12 @@ void wxWindowX11::SendEraseEvents()
     if (m_clearRegion.IsEmpty()) return;
 
     wxClientDC dc( (wxWindow*)this );
-    dc.SetDeviceClippingRegion( m_clearRegion );
+    dc.SetClippingRegion( m_clearRegion );
 
     wxEraseEvent erase_event( GetId(), &dc );
     erase_event.SetEventObject( this );
 
-    if (!HandleWindowEvent(erase_event) )
+    if (!GetEventHandler()->ProcessEvent(erase_event) )
     {
         Display *xdisplay = wxGlobalDisplay();
         Window xwindow = (Window) GetClientAreaWindow();
@@ -1235,7 +1228,7 @@ void wxWindowX11::SendPaintEvents()
 
     wxPaintEvent paint_event( GetId() );
     paint_event.SetEventObject( this );
-    HandleWindowEvent( paint_event );
+    GetEventHandler()->ProcessEvent( paint_event );
 
     m_updateRegion.Clear();
 
@@ -1277,7 +1270,7 @@ void wxWindowX11::SendNcPaintEvents()
 
     wxNcPaintEvent nc_paint_event( GetId() );
     nc_paint_event.SetEventObject( this );
-    HandleWindowEvent( nc_paint_event );
+    GetEventHandler()->ProcessEvent( nc_paint_event );
 
     m_updateNcArea = false;
 }
@@ -1298,7 +1291,7 @@ void wxWindowX11::OnSysColourChanged(wxSysColourChangedEvent& event)
         {
             wxSysColourChangedEvent event2;
             event.SetEventObject(win);
-            win->HandleWindowEvent(event2);
+            win->GetEventHandler()->ProcessEvent(event2);
         }
 
         node = node->GetNext();
@@ -1419,10 +1412,7 @@ WXWindow wxWindowX11::GetClientAreaWindow() const
 // TranslateXXXEvent() functions
 // ----------------------------------------------------------------------------
 
-bool wxTranslateMouseEvent(wxMouseEvent& wxevent,
-                           wxWindow *win,
-                           Window WXUNUSED(window),
-                           XEvent *xevent)
+bool wxTranslateMouseEvent(wxMouseEvent& wxevent, wxWindow *win, Window window, XEvent *xevent)
 {
     switch (XEventGetType(xevent))
     {
@@ -1470,22 +1460,6 @@ bool wxTranslateMouseEvent(wxMouseEvent& wxevent,
                 {
                     eventType = wxEVT_RIGHT_DOWN;
                     button = 3;
-                }
-                else if ( xevent->xbutton.button == Button4 ||
-                            xevent->xbutton.button == Button5 )
-                {
-                    // this is the same value as used under wxMSW
-                    static const int WHEEL_DELTA = 120;
-
-                    eventType = wxEVT_MOUSEWHEEL;
-                    button = xevent->xbutton.button;
-
-                    wxevent.m_linesPerAction = 3;
-                    wxevent.m_wheelDelta = WHEEL_DELTA;
-
-                    // Button 4 means mousewheel up, 5 means down
-                    wxevent.m_wheelRotation = button == Button4 ? WHEEL_DELTA
-                                                                : -WHEEL_DELTA;
                 }
 
                 // check for a double click
@@ -1654,8 +1628,7 @@ wxWindow *wxWindowBase::GetCapture()
 // position.
 wxWindow* wxFindWindowAtPointer(wxPoint& pt)
 {
-    pt = wxGetMousePosition();
-    return wxFindWindowAtPoint(pt);
+    return wxFindWindowAtPoint(wxGetMousePosition());
 }
 
 void wxGetMouseState(int& rootX, int& rootY, unsigned& maskReturn)

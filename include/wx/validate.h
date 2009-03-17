@@ -33,7 +33,7 @@ class WXDLLIMPEXP_FWD_CORE wxWindowBase;
  Note that wxValidator and derived classes use reference counting.
 */
 
-class WXDLLIMPEXP_CORE wxValidator : public wxEvtHandler
+class WXDLLEXPORT wxValidator : public wxEvtHandler
 {
 public:
     wxValidator();
@@ -44,7 +44,7 @@ public:
     // Another possibility is to always pass a pointer to a new validator
     // (so the calling code can use a copy constructor of the relevant class).
     virtual wxObject *Clone() const
-        { return NULL; }
+        { return (wxValidator *)NULL; }
     bool Copy(const wxValidator& val)
         { m_validatorWindow = val.m_validatorWindow; return true; }
 
@@ -74,10 +74,10 @@ private:
     static bool ms_isSilent;
 
     DECLARE_DYNAMIC_CLASS(wxValidator)
-    wxDECLARE_NO_COPY_CLASS(wxValidator);
+    DECLARE_NO_COPY_CLASS(wxValidator)
 };
 
-extern WXDLLIMPEXP_DATA_CORE(const wxValidator) wxDefaultValidator;
+extern WXDLLEXPORT_DATA(const wxValidator) wxDefaultValidator;
 
 #define wxVALIDATOR_PARAM(val) val
 
@@ -86,8 +86,8 @@ extern WXDLLIMPEXP_DATA_CORE(const wxValidator) wxDefaultValidator;
     // want to be able to pass wxDefaultValidator to the functions which take
     // a wxValidator parameter to avoid using "#if wxUSE_VALIDATORS"
     // everywhere
-    class WXDLLIMPEXP_FWD_CORE wxValidator;
-    #define wxDefaultValidator (*(NULL))
+    class WXDLLEXPORT wxValidator;
+    #define wxDefaultValidator (*((wxValidator *)NULL))
 
     // this macro allows to avoid warnings about unused parameters when
     // wxUSE_VALIDATORS == 0

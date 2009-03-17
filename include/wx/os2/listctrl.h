@@ -20,11 +20,11 @@
 #include "wx/textctrl.h"
 
 
-class WXDLLIMPEXP_FWD_CORE wxImageList;
+class WXDLLEXPORT wxImageList;
 
 typedef int (wxCALLBACK *wxListCtrlCompare)(long lItem1, long lItem2, long lSortData);
 
-class WXDLLIMPEXP_CORE wxListCtrl: public wxControl
+class WXDLLEXPORT wxListCtrl: public wxControl
 {
 public:
     wxListCtrl() { Init(); }
@@ -150,8 +150,9 @@ public:
     // Item data
     //
     long GetItemData(long lItem) const;
-    bool SetItemPtrData(long item, wxUIntPtr data);
-    bool SetItemData(long item, long data) { return SetItemPtrData(item, data); }
+    bool SetItemData( long lItem
+                     ,long lData
+                    );
 
     //
     // Gets the item rectangle
@@ -531,7 +532,7 @@ private:
 
     DECLARE_DYNAMIC_CLASS(wxListCtrl)
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxListCtrl);
+    DECLARE_NO_COPY_CLASS(wxListCtrl)
 }; // end of CLASS wxListCtrl
 
 #endif // wxUSE_LISTCTRL

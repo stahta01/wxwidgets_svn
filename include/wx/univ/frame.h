@@ -16,7 +16,7 @@
 // wxFrame
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFrame : public wxFrameBase
+class WXDLLEXPORT wxFrame : public wxFrameBase
 {
 public:
     wxFrame() {}
@@ -57,6 +57,9 @@ public:
 #endif // wxUSE_TOOLBAR
 
     virtual wxSize GetMinSize() const;
+
+    // sends wxSizeEvent to itself (used after attaching xxxBar)
+    virtual void SendSizeEvent();
 
 protected:
     void OnSize(wxSizeEvent& event);

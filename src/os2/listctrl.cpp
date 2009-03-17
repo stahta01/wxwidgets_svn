@@ -1519,9 +1519,9 @@ long wxListCtrl::GetItemData (
 } // end of wxListCtrl::GetItemData
 
 // Sets the item data
-bool wxListCtrl::SetItemPtrData (
+bool wxListCtrl::SetItemData (
   long                              lItem
-, wxUIntPtr                         lData
+, long                              lData
 )
 {
     wxListItem                      vInfo;
@@ -1530,7 +1530,7 @@ bool wxListCtrl::SetItemPtrData (
     vInfo.m_itemId = lItem;
     vInfo.m_data   = lData;
     return SetItem(vInfo);
-} // end of wxListCtrl::SetItemPtrData
+} // end of wxListCtrl::SetItemData
 
 // Gets the item rectangle
 bool wxListCtrl::GetItemRect ( long lItem,
@@ -2750,7 +2750,7 @@ MRESULT wxListCtrl::OS2WindowProc( WXUINT uMsg,
                     //
             }
             vEvent.SetEventType(vEventType);
-            bProcessed = HandleWindowEvent(vEvent);
+            bProcessed = GetEventHandler()->ProcessEvent(vEvent);
             break;
     }
     if (!bProcessed)

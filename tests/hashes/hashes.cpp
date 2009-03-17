@@ -264,7 +264,16 @@ void HashesTestCase::wxUntypedHashTableDeleteContents()
     CPPUNIT_ASSERT( FooObject::count == 0 );
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+WX_DECLARE_LIST(Foo, wxListFoos);
+#endif
+
 WX_DECLARE_HASH(Foo, wxListFoos, wxHashFoos);
+
+#if WXWIN_COMPATIBILITY_2_4
+#include "wx/listimpl.cpp"
+WX_DEFINE_LIST(wxListFoos)
+#endif
 
 void HashesTestCase::wxTypedHashTableTest()
 {
@@ -356,7 +365,7 @@ IntT MakeKey(size_t i, size_t count)
     IntT max = 1;
     max <<= sizeof(KeyT) * 8 - 2;
     max -= count / 4 + 1;
-
+     
     return max / count * 4 * i + i / 3;
 }
 
@@ -380,7 +389,11 @@ void MakeKeyValuePair(size_t i, size_t count, T*& key, ValueT& value)
 template <class HashMapT>
 void HashMapTest()
 {
+#if wxUSE_STL && defined HAVE_STL_HASH_MAP
     typedef typename HashMapT::value_type::second_type value_type;
+#else
+    typedef typename HashMapT::value_type::t2 value_type;
+#endif
     typedef typename HashMapT::key_type key_type;
     typedef typename HashMapT::iterator Itor;
 
@@ -468,12 +481,6 @@ void HashesTestCase::UShortHashMapTest() { HashMapTest<myTestHashMap4>();    }
 void HashesTestCase::LLongHashMapTest()  { HashMapTest<myLLongHashMap>();    }
 void HashesTestCase::ULLongHashMapTest() { HashMapTest<myULLongHashMap>();   }
 #endif
-
-#ifdef __VISUALC__
-    #if __VISUALC__ <= 1200
-        #pragma warning(disable:4284) // operator->() returns a non-UDT
-    #endif
-#endif // __VISUALC__
 
 // test compilation of basic set types
 WX_DECLARE_HASH_SET( int*, wxPointerHash, wxPointerEqual, myPtrHashSet );

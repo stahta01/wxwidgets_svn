@@ -50,9 +50,9 @@ static struct TestFileNameInfo
 } filenames[] =
 {
     // the empty string
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_UNIX },
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_DOS },
-    { _T(""), _T(""), _T(""), _T(""), _T(""), false, wxPATH_VMS },
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_UNIX }, 
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_DOS }, 
+    { _T(""), _(""), _(""), _(""), _(""), false, wxPATH_VMS }, 
 
     // Unix file names
     { _T("/usr/bin/ls"), _T(""), _T("/usr/bin"), _T("ls"), _T(""), true, wxPATH_UNIX },
@@ -72,13 +72,11 @@ static struct TestFileNameInfo
     { _T("c:\\foo.bar"), _T("c"), _T("\\"), _T("foo"), _T("bar"), true, wxPATH_DOS },
     { _T("c:\\Windows\\command.com"), _T("c"), _T("\\Windows"), _T("command"), _T("com"), true, wxPATH_DOS },
 
-#if 0
-    // NB: when using the wxFileName::GetLongPath() function on these two
-    //     strings, the program will hang for several seconds blocking inside
-    //     Win32 GetLongPathName() function
+    // NB: when using the wxFileName::GetLongPath() function on these two strings,
+    //     the program will hang various seconds. All those time is taken by the
+    //     call to the win32 API GetLongPathName()...
     { _T("\\\\server\\foo.bar"), _T("server"), _T("\\"), _T("foo"), _T("bar"), true, wxPATH_DOS },
     { _T("\\\\server\\dir\\foo.bar"), _T("server"), _T("\\dir"), _T("foo"), _T("bar"), true, wxPATH_DOS },
-#endif
 
     // consecutive [back]slashes should be treated as single occurrences of
     // them and not interpreted as share names if there is a volume name
@@ -96,12 +94,10 @@ static struct TestFileNameInfo
     { _T("File.Ext"), _T(""), _T(""), _T("File"), _T(".Ext"), false, wxPATH_MAC },
 #endif // 0
 
-#if 0
     // VMS file names
     // NB: on Windows they have the same effect of the \\server\\ strings
     //     (see the note above)
     { _T("device:[dir1.dir2.dir3]file.txt"), _T("device"), _T("dir1.dir2.dir3"), _T("file"), _T("txt"), true, wxPATH_VMS },
-#endif
     { _T("file.txt"), _T(""), _T(""), _T("file"), _T("txt"), false, wxPATH_VMS },
 };
 
@@ -120,11 +116,8 @@ private:
         CPPUNIT_TEST( TestComparison );
         CPPUNIT_TEST( TestSplit );
         CPPUNIT_TEST( TestSetPath );
-#if WXWIN_COMPATIBILITY_2_8
         CPPUNIT_TEST( TestStrip );
-#endif
         CPPUNIT_TEST( TestNormalize );
-        CPPUNIT_TEST( TestReplace );
 #ifdef __WINDOWS__
         CPPUNIT_TEST( TestShortLongPath );
 #endif // __WINDOWS__
@@ -134,11 +127,8 @@ private:
     void TestComparison();
     void TestSplit();
     void TestSetPath();
-#if WXWIN_COMPATIBILITY_2_8
     void TestStrip();
-#endif
     void TestNormalize();
-    void TestReplace();
 #ifdef __WINDOWS__
     void TestShortLongPath();
 #endif // __WINDOWS__
@@ -296,62 +286,38 @@ void FileNameTestCase::TestNormalize()
     if (cwd.Contains(wxT(':')))
         cwd = cwd.AfterFirst(wxT(':'));
 
-    static const struct FileNameTest
+    static struct FileNameTest
     {
-        const char *original;
+        const wxChar *original;
         int flags;
-        const char *expected;
-        wxPathFormat fmt;
+        const wxChar * expected;
     } tests[] =
     {
         // test wxPATH_NORM_ENV_VARS
 #ifdef __WXMSW__
-        { "%ABCDEF%/g/h/i", wxPATH_NORM_ENV_VARS, "abcdef/g/h/i", wxPATH_UNIX },
+        { wxT("%ABCDEF%/g/h/i"), wxPATH_NORM_ENV_VARS, wxT("abcdef/g/h/i") },
 #else
-        { "$(ABCDEF)/g/h/i", wxPATH_NORM_ENV_VARS, "abcdef/g/h/i", wxPATH_UNIX },
+        { wxT("$(ABCDEF)/g/h/i"), wxPATH_NORM_ENV_VARS, wxT("abcdef/g/h/i") },
 #endif
 
         // test wxPATH_NORM_DOTS
-        { "a/.././b/c/../../", wxPATH_NORM_DOTS, "", wxPATH_UNIX },
+        { wxT("a/.././b/c/../../"), wxPATH_NORM_DOTS, wxT("") },
 
         // test wxPATH_NORM_TILDE
         // NB: do the tilde expansion also under Windows to test if it works there too
-        { "/a/b/~", wxPATH_NORM_TILDE, "/a/b/~", wxPATH_UNIX },
-        { "/~/a/b", wxPATH_NORM_TILDE, "HOME/a/b", wxPATH_UNIX },
-        { "~/a/b", wxPATH_NORM_TILDE, "HOME/a/b", wxPATH_UNIX },
-
-        // test wxPATH_NORM_CASE
-        { "Foo", wxPATH_NORM_CASE, "Foo", wxPATH_UNIX },
-        { "Foo", wxPATH_NORM_CASE, "foo", wxPATH_DOS },
-        { "C:\\Program Files\\wx", wxPATH_NORM_CASE,
-          "c:\\program files\\wx", wxPATH_DOS },
-        { "C:/Program Files/wx", wxPATH_NORM_ALL | wxPATH_NORM_CASE,
-          "c:\\program files\\wx", wxPATH_DOS },
-        { "C:\\Users\\zeitlin", wxPATH_NORM_ALL | wxPATH_NORM_CASE,
-          "c:\\users\\zeitlin", wxPATH_DOS },
+        { wxT("/a/b/~"), wxPATH_NORM_TILDE, wxT("/a/b/~") },
+        { wxT("/~/a/b"), wxPATH_NORM_TILDE, wxT("HOME/a/b") },
+        { wxT("~/a/b"), wxPATH_NORM_TILDE, wxT("HOME/a/b") },
 
         // test wxPATH_NORM_ABSOLUTE
-        { "a/b/", wxPATH_NORM_ABSOLUTE, "CWD/a/b/", wxPATH_UNIX },
-        { "a/b/c.ext", wxPATH_NORM_ABSOLUTE, "CWD/a/b/c.ext", wxPATH_UNIX },
-        { "/a", wxPATH_NORM_ABSOLUTE, "/a", wxPATH_UNIX },
+        { wxT("a/b/"), wxPATH_NORM_ABSOLUTE, wxT("CWD/a/b/") },
+        { wxT("a/b/c.ext"), wxPATH_NORM_ABSOLUTE, wxT("CWD/a/b/c.ext") },
+        { wxT("/a"), wxPATH_NORM_ABSOLUTE, wxT("/a") },
 
         // test giving no flags at all to Normalize()
-        { "a/b/", 0, "a/b/", wxPATH_UNIX },
-        { "a/b/c.ext", 0, "a/b/c.ext", wxPATH_UNIX },
-        { "/a", 0, "/a", wxPATH_UNIX },
-
-        // test handling dots without wxPATH_NORM_DOTS and wxPATH_NORM_ABSOLUTE
-        // for both existing and non-existent files (this is important under
-        // MSW where GetLongPathName() works only for the former)
-        { "./foo", wxPATH_NORM_LONG, "./foo", wxPATH_UNIX },
-        { "../foo", wxPATH_NORM_LONG, "../foo", wxPATH_UNIX },
-        { ".\\test.bkl", wxPATH_NORM_LONG, ".\\test.bkl", wxPATH_DOS },
-        { ".\\foo", wxPATH_NORM_LONG, ".\\foo", wxPATH_DOS },
-        { "..\\Makefile.in", wxPATH_NORM_LONG, "..\\Makefile.in", wxPATH_DOS },
-        { "..\\foo", wxPATH_NORM_LONG, "..\\foo", wxPATH_DOS },
-#ifdef __WXMSW__
-        { "..\\MKINST~1", wxPATH_NORM_LONG, "..\\mkinstalldirs", wxPATH_DOS },
-#endif
+        { wxT("a/b/"), 0, wxT("a/b/") },
+        { wxT("a/b/c.ext"), 0, wxT("a/b/c.ext") },
+        { wxT("/a"), 0, wxT("/a") }
     };
 
     // set the env var ABCDEF
@@ -359,117 +325,34 @@ void FileNameTestCase::TestNormalize()
 
     for ( size_t i = 0; i < WXSIZEOF(tests); i++ )
     {
-        const FileNameTest& fnt = tests[i];
-        wxFileName fn(fnt.original, fnt.fmt);
+        wxFileName fn(tests[i].original, wxPATH_UNIX);
 
         // be sure this normalization does not fail
-        WX_ASSERT_MESSAGE
+        CPPUNIT_ASSERT_MESSAGE
         (
-            ("#%d: Normalize(%s) failed", (int)i, fnt.original),
-            fn.Normalize(fnt.flags, cwd, fnt.fmt)
+            (const char *)wxString::Format(_T("Normalize(%s) failed"), tests[i].original).mb_str(),
+            fn.Normalize(tests[i].flags, cwd, wxPATH_UNIX)
         );
 
         // compare result with expected string
         wxString expected(tests[i].expected);
         expected.Replace(_T("HOME/"), home);
         expected.Replace(_T("CWD/"), cwd);
-        WX_ASSERT_EQUAL_MESSAGE
+        CPPUNIT_ASSERT_EQUAL_MESSAGE
         (
-            ("array element #%d", (int)i),
-            expected, fn.GetFullPath(fnt.fmt)
+            (const char *)
+            wxString::Format(_T("Test #%lu (\"%s\") failed"),
+                             (unsigned long)i, tests[i].original).mb_str(),
+            expected, fn.GetFullPath(wxPATH_UNIX)
         );
     }
 }
-
-void FileNameTestCase::TestReplace()
-{
-    static const struct FileNameTest
-    {
-        const char *original;
-        const char *env_contents;
-        const char *replace_fmtstring;
-        const char *expected;
-        wxPathFormat fmt;
-    } tests[] =
-    {
-        { "/usr/a/strange path/lib/someFile.ext", "/usr/a/strange path", "$%s", "$TEST_VAR/lib/someFile.ext", wxPATH_UNIX },
-        { "/usr/a/path/lib/someFile.ext", "/usr/a/path", "$%s", "$TEST_VAR/lib/someFile.ext", wxPATH_UNIX },
-        { "/usr/a/path/lib/someFile", "/usr/a/path/", "$%s", "$TEST_VARlib/someFile", wxPATH_UNIX },
-        { "/usr/a/path/lib/", "/usr/a/path/", "$(%s)", "$(TEST_VAR)lib/", wxPATH_UNIX },
-        { "/usr/a/path/lib/", "/usr/a/path/", "${{%s}}", "${{TEST_VAR}}lib/", wxPATH_UNIX },
-        { "/usr/a/path/lib/", "/usr/a/path/", "%s", "TEST_VARlib/", wxPATH_UNIX },
-        { "/usr/a/path/lib/", "/usr/a/path/", "%s//", "TEST_VAR/lib/", wxPATH_UNIX },
-            // note: empty directory components are automatically removed by wxFileName thus
-            //       using // in the replace format string has no effect
-
-        { "/usr/../a/path/lib/", "/usr/a/path/", "%s", "/usr/../a/path/lib/", wxPATH_UNIX },
-        { "/usr/a/path/usr/usr", "/usr", "%s", "TEST_VAR/a/pathTEST_VAR/usr", wxPATH_UNIX },
-        { "/usr/a/path/usr/usr", "/usr", "$%s", "$TEST_VAR/a/path$TEST_VAR/usr", wxPATH_UNIX },
-        { "/a/b/c/d", "a/", "%s", "/TEST_VARb/c/d", wxPATH_UNIX },
-
-        { "C:\\A\\Strange Path\\lib\\someFile", "C:\\A\\Strange Path", "%%%s%%", "%TEST_VAR%\\lib\\someFile", wxPATH_WIN },
-        { "C:\\A\\Path\\lib\\someFile", "C:\\A\\Path", "%%%s%%", "%TEST_VAR%\\lib\\someFile", wxPATH_WIN },
-        { "C:\\A\\Path\\lib\\someFile", "C:\\A\\Path", "$(%s)", "$(TEST_VAR)\\lib\\someFile", wxPATH_WIN }
-    };
-
-    for ( size_t i = 0; i < WXSIZEOF(tests); i++ )
-    {
-        const FileNameTest& fnt = tests[i];
-        wxFileName fn(fnt.original, fnt.fmt);
-
-        // set the environment variable
-        wxSetEnv(_T("TEST_VAR"), fnt.env_contents);
-
-        // be sure this ReplaceEnvVariable does not fail
-        WX_ASSERT_MESSAGE
-        (
-            ("#%d: ReplaceEnvVariable(%s) failed", (int)i, fnt.replace_fmtstring),
-            fn.ReplaceEnvVariable("TEST_VAR", fnt.replace_fmtstring, fnt.fmt)
-        );
-
-        // compare result with expected string
-        wxString expected(fnt.expected);
-        WX_ASSERT_EQUAL_MESSAGE
-        (
-            ("array element #%d", (int)i),
-            expected, fn.GetFullPath(fnt.fmt)
-        );
-    }
-
-    // now test ReplaceHomeDir
-
-    wxFileName fn = wxFileName::DirName(wxGetHomeDir());
-    fn.AppendDir("test1");
-    fn.AppendDir("test2");
-    fn.AppendDir("test3");
-    fn.SetName("some file");
-
-    WX_ASSERT_MESSAGE
-    (
-        ("ReplaceHomeDir(%s) failed", fn.GetFullPath()),
-        fn.ReplaceHomeDir()
-    );
-
-    CPPUNIT_ASSERT_EQUAL( wxString(_T("~/test1/test2/test3/some file")),
-                          fn.GetFullPath(wxPATH_UNIX) );
-}
-
-#if WXWIN_COMPATIBILITY_2_8
-
-#ifdef __VISUALC__
-    // disable warning about using deprecated wxStripExtension()
-    #pragma warning(disable:4996)
-#endif
 
 wxString wxTestStripExtension(wxString szFile)
 {
     wxStripExtension(szFile);
     return szFile;
 }
-
-#ifdef __VISUALC__
-    #pragma warning(default:4996)
-#endif
 
 void FileNameTestCase::TestStrip()
 {
@@ -482,7 +365,6 @@ void FileNameTestCase::TestStrip()
     CPPUNIT_ASSERT_EQUAL( wxString(_T("good")), wxTestStripExtension(_T("good.wav")) );
     CPPUNIT_ASSERT_EQUAL( wxString(_T("good.wav")), wxTestStripExtension(_T("good.wav.wav")) );
 }
-#endif // WXWIN_COMPATIBILITY_2_8
 
 #ifdef __WINDOWS__
 

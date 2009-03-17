@@ -3,7 +3,7 @@
 // Purpose:     graphics context methods common to all platforms
 // Author:      Stefan Csomor
 // Modified by:
-// Created:
+// Created:     
 // RCS-ID:      $Id$
 // Copyright:   (c) Stefan Csomor
 // Licence:     wxWindows licence
@@ -18,7 +18,7 @@
 
 #if wxUSE_GRAPHICS_CONTEXT
 
-#include "wx/private/graphics.h"
+#include "wx/graphics.h"
 
 #ifndef WX_PRECOMP
     #include "wx/icon.h"
@@ -26,6 +26,10 @@
     #include "wx/dcmemory.h"
     #include "wx/region.h"
     #include "wx/log.h"
+#endif
+
+#if !defined(wxMAC_USE_CORE_GRAPHICS_BLEND_MODES)
+#define wxMAC_USE_CORE_GRAPHICS_BLEND_MODES 0
 #endif
 
 //-----------------------------------------------------------------------------
@@ -59,42 +63,42 @@ wxGraphicsObjectRefData::wxGraphicsObjectRefData( const wxGraphicsObjectRefData*
 {
     m_renderer = data->m_renderer;
 }
-wxGraphicsRenderer* wxGraphicsObjectRefData::GetRenderer() const
-{
-    return m_renderer ;
+wxGraphicsRenderer* wxGraphicsObjectRefData::GetRenderer() const 
+{ 
+    return m_renderer ; 
 }
 
-wxGraphicsObjectRefData* wxGraphicsObjectRefData::Clone() const
+wxGraphicsObjectRefData* wxGraphicsObjectRefData::Clone() const 
 {
     return new wxGraphicsObjectRefData(this);
 }
 
-wxGraphicsObject::wxGraphicsObject()
+wxGraphicsObject::wxGraphicsObject() 
 {
 }
 
-wxGraphicsObject::wxGraphicsObject( wxGraphicsRenderer* renderer )
+wxGraphicsObject::wxGraphicsObject( wxGraphicsRenderer* renderer ) 
 {
     SetRefData( new wxGraphicsObjectRefData(renderer));
 }
 
-wxGraphicsObject::~wxGraphicsObject()
+wxGraphicsObject::~wxGraphicsObject() 
 {
 }
 
-bool wxGraphicsObject::IsNull() const
-{
-    return m_refData == NULL;
+bool wxGraphicsObject::IsNull() const 
+{ 
+    return m_refData == NULL; 
 }
 
-wxGraphicsRenderer* wxGraphicsObject::GetRenderer() const
-{
-    return ( IsNull() ? NULL : GetGraphicsData()->GetRenderer() );
+wxGraphicsRenderer* wxGraphicsObject::GetRenderer() const 
+{ 
+    return ( IsNull() ? NULL : GetGraphicsData()->GetRenderer() ); 
 }
 
-wxGraphicsObjectRefData* wxGraphicsObject::GetGraphicsData() const
-{
-    return (wxGraphicsObjectRefData*) m_refData;
+wxGraphicsObjectRefData* wxGraphicsObject::GetGraphicsData() const 
+{ 
+    return (wxGraphicsObjectRefData*) m_refData; 
 }
 
 wxObjectRefData* wxGraphicsObject::CreateRefData() const
@@ -138,7 +142,7 @@ void wxGraphicsMatrix::Concat( const wxGraphicsMatrix *t )
 }
 
 // sets the matrix to the respective values
-void wxGraphicsMatrix::Set(wxDouble a, wxDouble b, wxDouble c, wxDouble d,
+void wxGraphicsMatrix::Set(wxDouble a, wxDouble b, wxDouble c, wxDouble d, 
                            wxDouble tx, wxDouble ty)
 {
     AllocExclusive();
@@ -190,7 +194,7 @@ void wxGraphicsMatrix::Rotate( wxDouble angle )
 {
     AllocExclusive();
     GetMatrixData()->Rotate(angle);
-}
+}  
 
 //
 // apply the transforms
@@ -252,12 +256,12 @@ void wxGraphicsPath::AddArc( const wxPoint2DDouble& c, wxDouble r, wxDouble star
 
 wxRect2DDouble wxGraphicsPath::GetBox() const
 {
-    wxDouble x,y,w,h;
-    GetBox(&x,&y,&w,&h);
-    return wxRect2DDouble( x,y,w,h );
+	wxDouble x,y,w,h;
+	GetBox(&x,&y,&w,&h);
+	return wxRect2DDouble( x,y,w,h );
 }
 
-bool wxGraphicsPath::Contains( const wxPoint2DDouble& c, wxPolygonFillMode fillStyle ) const
+bool wxGraphicsPath::Contains( const wxPoint2DDouble& c, int fillStyle ) const
 {
     return Contains( c.m_x, c.m_y, fillStyle);
 }
@@ -271,7 +275,7 @@ void wxGraphicsPath::MoveToPoint( wxDouble x, wxDouble y )
     GetPathData()->MoveToPoint(x,y);
 }
 
-// adds a straight line from the current point to (x,y)
+// adds a straight line from the current point to (x,y) 
 void wxGraphicsPath::AddLineToPoint( wxDouble x, wxDouble y )
 {
     AllocExclusive();
@@ -313,7 +317,7 @@ void wxGraphicsPath::AddArc( wxDouble x, wxDouble y, wxDouble r, wxDouble startA
 }
 
 //
-// These are convenience functions which - if not available natively will be assembled
+// These are convenience functions which - if not available natively will be assembled 
 // using the primitives from above
 //
 
@@ -324,7 +328,7 @@ void wxGraphicsPath::AddQuadCurveToPoint( wxDouble cx, wxDouble cy, wxDouble x, 
     GetPathData()->AddQuadCurveToPoint(cx,cy,x,y);
 }
 
-// appends a rectangle as a new closed subpath
+// appends a rectangle as a new closed subpath 
 void wxGraphicsPath::AddRectangle( wxDouble x, wxDouble y, wxDouble w, wxDouble h )
 {
     AllocExclusive();
@@ -339,7 +343,7 @@ void wxGraphicsPath::AddCircle( wxDouble x, wxDouble y, wxDouble r )
 }
 
 // appends a an arc to two tangents connecting (current) to (x1,y1) and (x1,y1) to (x2,y2), also a straight line from (current) to (x1,y1)
-void wxGraphicsPath::AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, wxDouble y2, wxDouble r )
+void wxGraphicsPath::AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, wxDouble y2, wxDouble r ) 
 {
     GetPathData()->AddArcToPoint(x1,y1,x2,y2,r);
 }
@@ -383,7 +387,7 @@ void wxGraphicsPath::GetBox(wxDouble *x, wxDouble *y, wxDouble *w, wxDouble *h) 
     GetPathData()->GetBox(x,y,w,h);
 }
 
-bool wxGraphicsPath::Contains( wxDouble x, wxDouble y, wxPolygonFillMode fillStyle ) const
+bool wxGraphicsPath::Contains( wxDouble x, wxDouble y, int fillStyle ) const
 {
     return GetPathData()->Contains(x,y,fillStyle);
 }
@@ -425,9 +429,6 @@ void wxGraphicsPathData::AddCircle( wxDouble x, wxDouble y, wxDouble r )
 
 void wxGraphicsPathData::AddEllipse( wxDouble x, wxDouble y, wxDouble w, wxDouble h)
 {
-    if (w <= 0. || h <= 0.)
-      return;
-
     wxDouble rw = w/2;
     wxDouble rh = h/2;
     wxDouble xc = x + rw;
@@ -458,7 +459,7 @@ void wxGraphicsPathData::AddRoundedRectangle( wxDouble x, wxDouble y, wxDouble w
 
 // draws a an arc to two tangents connecting (current) to (x1,y1) and (x1,y1) to (x2,y2), also a straight line from (current) to (x1,y1)
 void wxGraphicsPathData::AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, wxDouble y2, wxDouble r )
-{
+{   
     wxPoint2DDouble current;
     GetCurrentPoint(&current.m_x,&current.m_y);
     wxPoint2DDouble p1(x1,y1);
@@ -501,64 +502,17 @@ void wxGraphicsPathData::AddArcToPoint( wxDouble x1, wxDouble y1 , wxDouble x2, 
 IMPLEMENT_ABSTRACT_CLASS(wxGraphicsContext, wxObject)
 
 
-wxGraphicsContext::wxGraphicsContext(wxGraphicsRenderer* renderer) : 
-    wxGraphicsObject(renderer),
-      m_antialias(wxANTIALIAS_DEFAULT),
-      m_composition(wxCOMPOSITION_OVER)
+wxGraphicsContext::wxGraphicsContext(wxGraphicsRenderer* renderer) : wxGraphicsObject(renderer) 
 {
+    m_logicalFunction = wxCOPY;
 }
 
-wxGraphicsContext::~wxGraphicsContext()
+wxGraphicsContext::~wxGraphicsContext() 
 {
-}
-
-bool wxGraphicsContext::StartDoc(const wxString& WXUNUSED(message))
-{
-    return true;
-}
-
-void wxGraphicsContext::EndDoc()
-{
-}
-
-void wxGraphicsContext::StartPage(wxDouble WXUNUSED(width),
-                                  wxDouble WXUNUSED(height))
-{
-}
-
-void wxGraphicsContext::EndPage()
-{
-}
-
-void wxGraphicsContext::Flush()
-{
-}
-
-#if 0
-void wxGraphicsContext::SetAlpha( wxDouble WXUNUSED(alpha) )
-{
-}
-
-wxDouble wxGraphicsContext::GetAlpha() const
-{
-    return 1.0;
-}
-#endif
-
-void wxGraphicsContext::GetSize( wxDouble* width, wxDouble* height)
-{
-    *width = 10000.0;
-    *height = 10000.0;
-}
-
-void wxGraphicsContext::GetDPI( wxDouble* dpiX, wxDouble* dpiY)
-{
-    *dpiX = 72.0;
-    *dpiY = 72.0;
 }
 
 // sets the pen
-void wxGraphicsContext::SetPen( const wxGraphicsPen& pen )
+void wxGraphicsContext::SetPen( const wxGraphicsPen& pen ) 
 {
     m_pen = pen;
 }
@@ -570,9 +524,9 @@ void wxGraphicsContext::SetPen( const wxPen& pen )
     else
         SetPen( CreatePen( pen ) );
 }
-
+    
 // sets the brush for filling
-void wxGraphicsContext::SetBrush( const wxGraphicsBrush& brush )
+void wxGraphicsContext::SetBrush( const wxGraphicsBrush& brush ) 
 {
     m_brush = brush;
 }
@@ -586,9 +540,19 @@ void wxGraphicsContext::SetBrush( const wxBrush& brush )
 }
 
 // sets the brush for filling
-void wxGraphicsContext::SetFont( const wxGraphicsFont& font )
+void wxGraphicsContext::SetFont( const wxGraphicsFont& font ) 
 {
     m_font = font;
+}
+
+bool wxGraphicsContext::SetLogicalFunction( int function )
+{
+    if ( function == wxCOPY )
+    {
+        m_logicalFunction = function;
+        return true;
+    }
+    return false;
 }
 
 void wxGraphicsContext::SetFont( const wxFont& font, const wxColour& colour )
@@ -599,17 +563,13 @@ void wxGraphicsContext::SetFont( const wxFont& font, const wxColour& colour )
         SetFont( wxNullGraphicsFont );
 }
 
-void wxGraphicsContext::DrawPath( const wxGraphicsPath& path, wxPolygonFillMode fillStyle )
+void wxGraphicsContext::DrawPath( const wxGraphicsPath& path, int fillStyle )
 {
     FillPath( path , fillStyle );
     StrokePath( path );
 }
 
-void
-wxGraphicsContext::DoDrawRotatedText(const wxString &str,
-                                     wxDouble x,
-                                     wxDouble y,
-                                     wxDouble angle)
+void wxGraphicsContext::DrawText( const wxString &str, wxDouble x, wxDouble y, wxDouble angle )
 {
     Translate(x,y);
     Rotate( -angle );
@@ -618,22 +578,18 @@ wxGraphicsContext::DoDrawRotatedText(const wxString &str,
     Translate(-x,-y);
 }
 
-void
-wxGraphicsContext::DoDrawFilledText(const wxString &str,
-                                    wxDouble x,
-                                    wxDouble y,
-                                    const wxGraphicsBrush& backgroundBrush)
+void wxGraphicsContext::DrawText( const wxString &str, wxDouble x, wxDouble y, const wxGraphicsBrush& backgroundBrush ) 
 {
     wxGraphicsBrush formerBrush = m_brush;
-    wxGraphicsPen formerPen = m_pen;
+	wxGraphicsPen formerPen = m_pen;
     wxDouble width;
     wxDouble height;
     wxDouble descent;
     wxDouble externalLeading;
     GetTextExtent( str , &width, &height, &descent, &externalLeading );
     SetBrush( backgroundBrush );
-    // to make sure our 'OffsetToPixelBoundaries' doesn't move the fill shape
-    SetPen( wxNullGraphicsPen );
+	// to make sure our 'OffsetToPixelBoundaries' doesn't move the fill shape
+	SetPen( wxNullGraphicsPen );
 
     wxGraphicsPath path = CreatePath();
     path.AddRectangle( x , y, width, height );
@@ -641,17 +597,13 @@ wxGraphicsContext::DoDrawFilledText(const wxString &str,
 
     DrawText( str, x ,y);
     SetBrush( formerBrush );
-    SetPen( formerPen );
+	SetPen( formerPen );
 }
 
-void
-wxGraphicsContext::DoDrawRotatedFilledText(const wxString &str,
-                                           wxDouble x, wxDouble y,
-                                           wxDouble angle,
-                                           const wxGraphicsBrush& backgroundBrush)
+void wxGraphicsContext::DrawText( const wxString &str, wxDouble x, wxDouble y, wxDouble angle, const wxGraphicsBrush& backgroundBrush )
 {
     wxGraphicsBrush formerBrush = m_brush;
-    wxGraphicsPen formerPen = m_pen;
+	wxGraphicsPen formerPen = m_pen;
 
     wxDouble width;
     wxDouble height;
@@ -659,8 +611,8 @@ wxGraphicsContext::DoDrawRotatedFilledText(const wxString &str,
     wxDouble externalLeading;
     GetTextExtent( str , &width, &height, &descent, &externalLeading );
     SetBrush( backgroundBrush );
-    // to make sure our 'OffsetToPixelBoundaries' doesn't move the fill shape
-    SetPen( wxNullGraphicsPen );
+	// to make sure our 'OffsetToPixelBoundaries' doesn't move the fill shape
+	SetPen( wxNullGraphicsPen );
 
     wxGraphicsPath path = CreatePath();
     path.MoveToPoint( x , y );
@@ -672,7 +624,7 @@ wxGraphicsContext::DoDrawRotatedFilledText(const wxString &str,
     FillPath( path );
     DrawText( str, x ,y, angle);
     SetBrush( formerBrush );
-    SetPen( formerPen );
+	SetPen( formerPen );
 }
 
 void wxGraphicsContext::StrokeLine( wxDouble x1, wxDouble y1, wxDouble x2, wxDouble y2)
@@ -714,7 +666,7 @@ void wxGraphicsContext::StrokeLines( size_t n, const wxPoint2DDouble *points)
     StrokePath( path );
 }
 
-void wxGraphicsContext::DrawLines( size_t n, const wxPoint2DDouble *points, wxPolygonFillMode fillStyle)
+void wxGraphicsContext::DrawLines( size_t n, const wxPoint2DDouble *points, int fillStyle)
 {
     wxASSERT(n > 1);
     wxGraphicsPath path = CreatePath();
@@ -737,7 +689,7 @@ void wxGraphicsContext::StrokeLines( size_t n, const wxPoint2DDouble *beginPoint
 }
 
 // create a 'native' matrix corresponding to these values
-wxGraphicsMatrix wxGraphicsContext::CreateMatrix( wxDouble a, wxDouble b, wxDouble c, wxDouble d,
+wxGraphicsMatrix wxGraphicsContext::CreateMatrix( wxDouble a, wxDouble b, wxDouble c, wxDouble d, 
     wxDouble tx, wxDouble ty) const
 {
     return GetRenderer()->CreateMatrix(a,b,c,d,tx,ty);
@@ -759,13 +711,13 @@ wxGraphicsBrush wxGraphicsContext::CreateBrush(const wxBrush& brush ) const
 }
 
 // sets the brush to a linear gradient, starting at (x1,y1) with color c1 to (x2,y2) with color c2
-wxGraphicsBrush wxGraphicsContext::CreateLinearGradientBrush( wxDouble x1, wxDouble y1, wxDouble x2, wxDouble y2,
+wxGraphicsBrush wxGraphicsContext::CreateLinearGradientBrush( wxDouble x1, wxDouble y1, wxDouble x2, wxDouble y2, 
                                                    const wxColour&c1, const wxColour&c2) const
 {
     return GetRenderer()->CreateLinearGradientBrush(x1,y1,x2,y2,c1,c2);
 }
 
-// sets the brush to a radial gradient originating at (xo,yc) with color oColor and ends on a circle around (xc,yc)
+// sets the brush to a radial gradient originating at (xo,yc) with color oColor and ends on a circle around (xc,yc) 
 // with radius r and color cColor
 wxGraphicsBrush wxGraphicsContext::CreateRadialGradientBrush( wxDouble xo, wxDouble yo, wxDouble xc, wxDouble yc, wxDouble radius,
                                                    const wxColour &oColor, const wxColour &cColor) const
@@ -781,34 +733,15 @@ wxGraphicsFont wxGraphicsContext::CreateFont( const wxFont &font , const wxColou
 
 wxGraphicsBitmap wxGraphicsContext::CreateBitmap( const wxBitmap& bmp ) const
 {
-#ifndef __WXGTK20__
     return GetRenderer()->CreateBitmap(bmp);
-#else
-    return wxNullGraphicsBitmap;
-#endif
 }
 
-wxGraphicsBitmap wxGraphicsContext::CreateSubBitmap( const wxGraphicsBitmap &bmp, wxDouble x, wxDouble y, wxDouble w, wxDouble h   ) const
-{
-#ifndef __WXGTK20__
-    return GetRenderer()->CreateSubBitmap(bmp,x,y,w,h);
-#else
-    return wxNullGraphicsBitmap;
-#endif
-}
-
-/* static */ wxGraphicsContext* wxGraphicsContext::Create( const wxWindowDC& dc)
+wxGraphicsContext* wxGraphicsContext::Create( const wxWindowDC& dc) 
 {
     return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
 }
-
-/* static */ wxGraphicsContext* wxGraphicsContext::Create( const wxMemoryDC& dc)
-{
-    return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
-}
-
-#if wxUSE_PRINTING_ARCHITECTURE
-/* static */ wxGraphicsContext* wxGraphicsContext::Create( const wxPrinterDC& dc)
+#ifdef __WXMSW__
+wxGraphicsContext* wxGraphicsContext::Create( const wxMemoryDC& dc) 
 {
     return wxGraphicsRenderer::GetDefaultRenderer()->CreateContext(dc);
 }

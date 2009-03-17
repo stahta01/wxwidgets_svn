@@ -201,13 +201,13 @@ protected:
 
 
 /// wxFontMgrFontRefData implementation using wxFontsManager classes
-class wxFontMgrFontRefData : public wxGDIRefData
+class wxFontMgrFontRefData : public wxObjectRefData
 {
 public:
     wxFontMgrFontRefData(int size = wxDEFAULT,
-                  wxFontFamily family = wxFONTFAMILY_DEFAULT,
-                  wxFontStyle style = wxFONTSTYLE_NORMAL,
-                  wxFontWeight weight = wxFONTWEIGHT_NORMAL,
+                  int family = wxDEFAULT,
+                  int style = wxDEFAULT,
+                  int weight = wxDEFAULT,
                   bool underlined = false,
                   const wxString& faceName = wxEmptyString,
                   wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
@@ -223,16 +223,16 @@ public:
 
     int GetPointSize() const { return m_info.pointSize; }
     wxString GetFaceName() const { return m_info.faceName; }
-    wxFontFamily GetFamily() const { return m_info.family; }
-    wxFontStyle GetStyle() const { return m_info.style; }
-    wxFontWeight GetWeight() const { return m_info.weight; }
+    int GetFamily() const { return m_info.family; }
+    int GetStyle() const { return m_info.style; }
+    int GetWeight() const { return m_info.weight; }
     bool GetUnderlined() const { return m_info.underlined; }
     wxFontEncoding GetEncoding() const { return m_info.encoding; }
 
     void SetPointSize(int pointSize);
-    void SetFamily(wxFontFamily family);
-    void SetStyle(wxFontStyle style);
-    void SetWeight(wxFontWeight weight);
+    void SetFamily(int family);
+    void SetStyle(int style);
+    void SetWeight(int weight);
     void SetFaceName(const wxString& faceName);
     void SetUnderlined(bool underlined);
     void SetEncoding(wxFontEncoding encoding);

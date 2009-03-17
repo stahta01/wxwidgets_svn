@@ -58,14 +58,14 @@ bool wxDoSetShape( Display* xdisplay,
     else
     {
         // wxRegion::ConvertToBitmap gives us the wrong Pixmap:
-        // polychrome and with black and white reversed
+        // polichrome and with black and whire reversed
         wxRect box = region.GetBox();
         wxBitmap bmp(box.GetRight(), box.GetBottom(), 1);
         wxMemoryDC dc;
         dc.SelectObject(bmp);
         dc.SetBackground(*wxBLACK_BRUSH);
         dc.Clear();
-        dc.SetDeviceClippingRegion(region);
+        dc.SetClippingRegion(region);
         dc.SetBackground(*wxWHITE_BRUSH);
         dc.Clear();
         dc.SelectObject(wxNullBitmap);

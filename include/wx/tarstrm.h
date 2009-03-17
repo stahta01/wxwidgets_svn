@@ -22,8 +22,7 @@
 // Constants
 
 // TypeFlag values
-enum wxTarType
-{
+enum {
     wxTAR_REGTYPE   = '0',      // regular file
     wxTAR_LNKTYPE   = '1',      // hard link
     wxTAR_SYMTYPE   = '2',      // symbolic link
@@ -200,7 +199,7 @@ private:
     wxTarHeaderRecords *m_HeaderRecs;
     wxTarHeaderRecords *m_GlobalHeaderRecs;
 
-    wxDECLARE_NO_COPY_CLASS(wxTarInputStream);
+    DECLARE_NO_COPY_CLASS(wxTarInputStream)
 };
 
 
@@ -281,9 +280,8 @@ private:
     char *m_extendedHdr;
     size_t m_extendedSize;
     wxString m_badfit;
-    bool m_endrecWritten;
 
-    wxDECLARE_NO_COPY_CLASS(wxTarOutputStream);
+    DECLARE_NO_COPY_CLASS(wxTarOutputStream)
 };
 
 

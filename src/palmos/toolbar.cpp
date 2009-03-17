@@ -112,8 +112,8 @@ public:
     {
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
     }
 
@@ -129,7 +129,7 @@ public:
 private:
     size_t m_nSepCount;
 
-    wxDECLARE_NO_COPY_CLASS(wxToolBarTool);
+    DECLARE_NO_COPY_CLASS(wxToolBarTool)
 };
 
 
@@ -154,10 +154,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int id,
                              clientData, shortHelp, longHelp);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 // ----------------------------------------------------------------------------

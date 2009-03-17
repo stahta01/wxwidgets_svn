@@ -54,14 +54,14 @@ WX_DECLARE_HASH_MAP(int, GdkFont *, wxIntegerHash, wxIntegerEqual,
 // wxFontRefData
 // ----------------------------------------------------------------------------
 
-class wxFontRefData : public wxGDIRefData
+class wxFontRefData : public wxObjectRefData
 {
 public:
     // from broken down font parameters, also default ctor
     wxFontRefData(int size = -1,
-                  wxFontFamily family = wxFONTFAMILY_DEFAULT,
-                  wxFontStyle style = wxFONTSTYLE_NORMAL,
-                  wxFontWeight weight = wxFONTWEIGHT_NORMAL,
+                  int family = wxFONTFAMILY_DEFAULT,
+                  int style = wxFONTSTYLE_NORMAL,
+                  int weight = wxFONTWEIGHT_NORMAL,
                   bool underlined = false,
                   const wxString& faceName = wxEmptyString,
                   wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
@@ -84,9 +84,9 @@ public:
     // setters: all of them also take care to modify m_nativeFontInfo if we
     // have it so as to not lose the information not carried by our fields
     void SetPointSize(int pointSize);
-    void SetFamily(wxFontFamily family);
-    void SetStyle(wxFontStyle style);
-    void SetWeight(wxFontWeight weight);
+    void SetFamily(int family);
+    void SetStyle(int style);
+    void SetWeight(int weight);
     void SetUnderlined(bool underlined);
     bool SetFaceName(const wxString& facename);
     void SetEncoding(wxFontEncoding encoding);
@@ -120,9 +120,9 @@ public:
 protected:
     // common part of all ctors
     void Init(int pointSize,
-              wxFontFamily family,
-              wxFontStyle style,
-              wxFontWeight weight,
+              int family,
+              int style,
+              int weight,
               bool underlined,
               const wxString& faceName,
               wxFontEncoding encoding);
@@ -138,9 +138,9 @@ private:
     wxScaledFontList  m_scaled_xfonts;
 
     int             m_pointSize;
-    wxFontFamily    m_family;
-    wxFontStyle     m_style;
-    wxFontWeight    m_weight;
+    int             m_family,
+                    m_style,
+                    m_weight;
     bool            m_underlined;
     wxString        m_faceName;
     wxFontEncoding  m_encoding;  // Unused under GTK 2.0
@@ -160,9 +160,9 @@ private:
 // ----------------------------------------------------------------------------
 
 void wxFontRefData::Init(int pointSize,
-                         wxFontFamily family,
-                         wxFontStyle style,
-                         wxFontWeight weight,
+                         int family,
+                         int style,
+                         int weight,
                          bool underlined,
                          const wxString& faceName,
                          wxFontEncoding encoding)
@@ -215,8 +215,8 @@ void wxFontRefData::InitFromNative()
         }
     }
 
-    switch ( wxToupper(m_nativeFontInfo.
-                           GetXFontComponent(wxXLFD_SLANT)[0u]).GetValue() )
+    switch ( wxToupper(*m_nativeFontInfo.
+                            GetXFontComponent(wxXLFD_SLANT).c_str()) )
     {
         case _T('I'):   // italique
             m_style = wxFONTSTYLE_ITALIC;
@@ -291,7 +291,7 @@ void wxFontRefData::InitFromNative()
 }
 
 wxFontRefData::wxFontRefData( const wxFontRefData& data )
-             : wxGDIRefData()
+             : wxObjectRefData()
 {
     m_pointSize = data.m_pointSize;
     m_family = data.m_family;
@@ -311,8 +311,8 @@ wxFontRefData::wxFontRefData( const wxFontRefData& data )
     m_nativeFontInfo.FromString(data.m_nativeFontInfo.ToString());
 }
 
-wxFontRefData::wxFontRefData(int size, wxFontFamily family, wxFontStyle style,
-                             wxFontWeight weight, bool underlined,
+wxFontRefData::wxFontRefData(int size, int family, int style,
+                             int weight, bool underlined,
                              const wxString& faceName,
                              wxFontEncoding encoding)
 {
@@ -365,14 +365,14 @@ void wxFontRefData::SetPointSize(int pointSize)
     }
 }
 
-void wxFontRefData::SetFamily(wxFontFamily family)
+void wxFontRefData::SetFamily(int family)
 {
     m_family = family;
 
     // TODO: what are we supposed to do with m_nativeFontInfo here?
 }
 
-void wxFontRefData::SetStyle(wxFontStyle style)
+void wxFontRefData::SetStyle(int style)
 {
     m_style = style;
 
@@ -401,7 +401,7 @@ void wxFontRefData::SetStyle(wxFontStyle style)
     }
 }
 
-void wxFontRefData::SetWeight(wxFontWeight weight)
+void wxFontRefData::SetWeight(int weight)
 {
     m_weight = weight;
 
@@ -488,9 +488,9 @@ wxFont::wxFont(const wxNativeFontInfo& info)
 }
 
 bool wxFont::Create( int pointSize,
-                    wxFontFamily family,
-                    wxFontStyle style,
-                    wxFontWeight weight,
+                     int family,
+                     int style,
+                     int weight,
                      bool underlined,
                      const wxString& face,
                      wxFontEncoding encoding)
@@ -536,16 +536,6 @@ wxFont::~wxFont()
 {
 }
 
-wxGDIRefData *wxFont::CreateGDIRefData() const
-{
-    return new wxFontRefData;
-}
-
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxFontRefData(*static_cast<const wxFontRefData *>(data));
-}
-
 // ----------------------------------------------------------------------------
 // accessors
 // ----------------------------------------------------------------------------
@@ -564,23 +554,23 @@ wxString wxFont::GetFaceName() const
     return M_FONTDATA->m_faceName;
 }
 
-wxFontFamily wxFont::GetFamily() const
+int wxFont::GetFamily() const
 {
-    wxCHECK_MSG( Ok(), wxFONTFAMILY_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->m_family;
 }
 
-wxFontStyle wxFont::GetStyle() const
+int wxFont::GetStyle() const
 {
-    wxCHECK_MSG( Ok(), wxFONTSTYLE_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->m_style;
 }
 
-wxFontWeight wxFont::GetWeight() const
+int wxFont::GetWeight() const
 {
-    wxCHECK_MSG( Ok(), wxFONTWEIGHT_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->m_weight;
 }
@@ -609,7 +599,7 @@ bool wxFont::GetNoAntiAliasing() const
 
 const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
 {
-    wxCHECK_MSG( Ok(), NULL, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), (wxNativeFontInfo *)NULL, wxT("invalid font") );
 
     if ( !M_FONTDATA->HasNativeFont() )
     {
@@ -649,21 +639,21 @@ void wxFont::SetPointSize(int pointSize)
     M_FONTDATA->SetPointSize(pointSize);
 }
 
-void wxFont::SetFamily(wxFontFamily family)
+void wxFont::SetFamily(int family)
 {
     Unshare();
 
     M_FONTDATA->SetFamily(family);
 }
 
-void wxFont::SetStyle(wxFontStyle style)
+void wxFont::SetStyle(int style)
 {
     Unshare();
 
     M_FONTDATA->SetStyle(style);
 }
 
-void wxFont::SetWeight(wxFontWeight weight)
+void wxFont::SetWeight(int weight)
 {
     Unshare();
 
@@ -710,7 +700,7 @@ void wxFont::SetNoAntiAliasing( bool no )
 // get internal representation of font
 // ----------------------------------------------------------------------------
 
-static GdkFont *g_systemDefaultGuiFont = NULL;
+static GdkFont *g_systemDefaultGuiFont = (GdkFont*) NULL;
 
 // this is also used from tbargtk.cpp and tooltip.cpp, hence extern
 extern GdkFont *GtkGetDefaultGuiFont()
@@ -742,7 +732,7 @@ extern GdkFont *GtkGetDefaultGuiFont()
 
 GdkFont *wxFont::GetInternalFont( float scale ) const
 {
-    GdkFont *font = NULL;
+    GdkFont *font = (GdkFont *) NULL;
 
     wxCHECK_MSG( Ok(), font, wxT("invalid font") );
 

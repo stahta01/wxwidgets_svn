@@ -28,14 +28,14 @@
 class WXDLLIMPEXP_FWD_CORE wxDC;
 class WXDLLIMPEXP_FWD_CORE wxWindow;
 
-#include "wx/gdicmn.h" // for wxPoint, wxSize
+#include "wx/gdicmn.h" // for wxPoint
 #include "wx/colour.h"
 #include "wx/font.h"
 #include "wx/bitmap.h"
 #include "wx/string.h"
 
 // some platforms have their own renderers, others use the generic one
-#if defined(__WXMSW__) || ( defined(__WXMAC__) && wxOSX_USE_COCOA_OR_CARBON ) || defined(__WXGTK__)
+#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXGTK__)
     #define wxHAS_NATIVE_RENDERER
 #else
     #undef wxHAS_NATIVE_RENDERER
@@ -56,7 +56,6 @@ enum
     wxCONTROL_ISSUBMENU  = wxCONTROL_SPECIAL, // only for the menu items
     wxCONTROL_EXPANDED   = wxCONTROL_SPECIAL, // only for the tree items
     wxCONTROL_SIZEGRIP   = wxCONTROL_SPECIAL, // only for the status bar panes
-    wxCONTROL_FLAT       = wxCONTROL_SPECIAL, // checkboxes only: flat border
     wxCONTROL_CURRENT    = 0x00000010,  // mouse is currently over the control
     wxCONTROL_SELECTED   = 0x00000020,  // selected item in e.g. listbox
     wxCONTROL_CHECKED    = 0x00000040,  // (check/radio button) is checked
@@ -75,7 +74,7 @@ enum
 // ----------------------------------------------------------------------------
 
 // wxSplitterWindow parameters
-struct WXDLLIMPEXP_CORE wxSplitterRenderParams
+struct WXDLLEXPORT wxSplitterRenderParams
 {
     // the only way to initialize this struct is by using this ctor
     wxSplitterRenderParams(wxCoord widthSash_, wxCoord border_, bool isSens_)
@@ -95,7 +94,7 @@ struct WXDLLIMPEXP_CORE wxSplitterRenderParams
 
 
 // extra optional parameters for DrawHeaderButton
-struct WXDLLIMPEXP_CORE wxHeaderButtonParams
+struct WXDLLEXPORT wxHeaderButtonParams
 {
     wxHeaderButtonParams()
         : m_labelAlignment(wxALIGN_LEFT)
@@ -110,16 +109,15 @@ struct WXDLLIMPEXP_CORE wxHeaderButtonParams
     int         m_labelAlignment;
 };
 
-enum wxHeaderSortIconType
-{
+enum wxHeaderSortIconType {
     wxHDR_SORT_ICON_NONE,        // Header button has no sort arrow
-    wxHDR_SORT_ICON_UP,          // Header button an up sort arrow icon
-    wxHDR_SORT_ICON_DOWN         // Header button a down sort arrow icon
+    wxHDR_SORT_ICON_UP,          // Header button an an up sort arrow icon
+    wxHDR_SORT_ICON_DOWN         // Header button an a down sort arrow icon
 };
 
 
 // wxRendererNative interface version
-struct WXDLLIMPEXP_CORE wxRendererVersion
+struct WXDLLEXPORT wxRendererVersion
 {
     wxRendererVersion(int version_, int age_) : version(version_), age(age_) { }
 
@@ -153,7 +151,7 @@ struct WXDLLIMPEXP_CORE wxRendererVersion
 // wxRendererNative: abstracts drawing methods needed by the native controls
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRendererNative
+class WXDLLEXPORT wxRendererNative
 {
 public:
     // drawing functions
@@ -228,9 +226,6 @@ public:
                               const wxRect& rect,
                               int flags = 0) = 0;
 
-    // Returns the default size of a check box.
-    virtual wxSize GetCheckBoxSize(wxWindow *win) = 0;
-
     // draw blank button
     //
     // flags may use wxCONTROL_PRESSED, wxCONTROL_CURRENT and wxCONTROL_ISDEFAULT
@@ -250,38 +245,6 @@ public:
                                        wxDC& dc,
                                        const wxRect& rect,
                                        int flags = 0) = 0;
-
-    // draw the focus rectangle around the label contained in the given rect
-    //
-    // only wxCONTROL_SELECTED makes sense in flags here
-    virtual void DrawFocusRect(wxWindow* win,
-                               wxDC& dc,
-                               const wxRect& rect,
-                               int flags = 0) = 0;
-
-    // Draw a native wxChoice
-    virtual void DrawChoice(wxWindow* win,
-                            wxDC& dc,
-                            const wxRect& rect,
-                            int flags = 0) = 0;
-
-    // Draw a native wxComboBox
-    virtual void DrawComboBox(wxWindow* win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0) = 0;
-
-    // Draw a native wxTextCtrl frame
-    virtual void DrawTextCtrl(wxWindow* win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0) = 0;
-
-    // Draw a native wxRadioButton (just the graphical portion)
-    virtual void DrawRadioButton(wxWindow* win,
-                                  wxDC& dc,
-                                  const wxRect& rect,
-                                  int flags = 0) = 0;
 
     // geometry functions
     // ------------------
@@ -336,7 +299,7 @@ public:
 // wxDelegateRendererNative: allows reuse of renderers code
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDelegateRendererNative : public wxRendererNative
+class WXDLLEXPORT wxDelegateRendererNative : public wxRendererNative
 {
 public:
     wxDelegateRendererNative()
@@ -401,53 +364,20 @@ public:
     virtual void DrawCheckBox(wxWindow *win,
                               wxDC& dc,
                               const wxRect& rect,
-                              int flags = 0)
+                              int flags = 0 )
         { m_rendererNative.DrawCheckBox( win, dc, rect, flags ); }
-
-    virtual wxSize GetCheckBoxSize(wxWindow *win)
-        { return m_rendererNative.GetCheckBoxSize(win); }
 
     virtual void DrawPushButton(wxWindow *win,
                                 wxDC& dc,
                                 const wxRect& rect,
-                                int flags = 0)
+                                int flags = 0 )
         { m_rendererNative.DrawPushButton( win, dc, rect, flags ); }
 
     virtual void DrawItemSelectionRect(wxWindow *win,
                                        wxDC& dc,
                                        const wxRect& rect,
-                                       int flags = 0)
+                                       int flags = 0 )
         { m_rendererNative.DrawItemSelectionRect( win, dc, rect, flags ); }
-
-    virtual void DrawFocusRect(wxWindow* win,
-                               wxDC& dc,
-                               const wxRect& rect,
-                               int flags = 0)
-        { m_rendererNative.DrawFocusRect( win, dc, rect, flags ); }
-
-    virtual void DrawChoice(wxWindow* win,
-                            wxDC& dc,
-                            const wxRect& rect,
-                            int flags = 0)
-        { m_rendererNative.DrawChoice( win, dc, rect, flags); }
-
-    virtual void DrawComboBox(wxWindow* win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0)
-        { m_rendererNative.DrawComboBox( win, dc, rect, flags); }
-
-    virtual void DrawTextCtrl(wxWindow* win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int flags = 0)
-        { m_rendererNative.DrawTextCtrl( win, dc, rect, flags); }
-
-    virtual void DrawRadioButton(wxWindow* win,
-                                  wxDC& dc,
-                                  const wxRect& rect,
-                                  int flags = 0)
-        { m_rendererNative.DrawRadioButton( win, dc, rect, flags); }
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win)
         { return m_rendererNative.GetSplitterParams(win); }
@@ -458,7 +388,7 @@ public:
 protected:
     wxRendererNative& m_rendererNative;
 
-    wxDECLARE_NO_COPY_CLASS(wxDelegateRendererNative);
+    DECLARE_NO_COPY_CLASS(wxDelegateRendererNative)
 };
 
 // ----------------------------------------------------------------------------
@@ -475,5 +405,32 @@ wxRendererNative& wxRendererNative::GetDefault()
 }
 
 #endif // !wxHAS_NATIVE_RENDERER
+
+
+// ----------------------------------------------------------------------------
+// Other renderer functions to be merged in to wxRenderer class in 2.9, but
+// they are standalone functions here to protect the ABI.
+// ----------------------------------------------------------------------------
+
+#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXGTK20__)
+#if wxABI_VERSION >= 20808
+
+// Draw a native wxChoice
+void WXDLLEXPORT wxRenderer_DrawChoice(wxWindow* win, wxDC& dc,
+                                       const wxRect& rect, int flags=0);
+
+// Draw a native wxComboBox
+void WXDLLEXPORT wxRenderer_DrawComboBox(wxWindow* win, wxDC& dc,
+                                         const wxRect& rect, int flags=0);
+
+// Draw a native wxTextCtrl frame
+void WXDLLEXPORT wxRenderer_DrawTextCtrl(wxWindow* win, wxDC& dc,
+                                         const wxRect& rect, int flags=0);
+
+// Draw a native wxRadioButton (just the graphical portion)
+void WXDLLEXPORT wxRenderer_DrawRadioButton(wxWindow* win, wxDC& dc,
+                                            const wxRect& rect, int flags=0);
+#endif // wxABI_VERSION
+#endif // (platforms)
 
 #endif // _WX_RENDERER_H_

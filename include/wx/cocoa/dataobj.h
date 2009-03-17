@@ -12,7 +12,7 @@
 #ifndef __WX_COCOA_DATAOBJ_H__
 #define __WX_COCOA_DATAOBJ_H__
 
-class WXDLLIMPEXP_CORE wxDataObject : public wxDataObjectBase
+class wxDataObject : public wxDataObjectBase
 {
 public:
     wxDataObject();

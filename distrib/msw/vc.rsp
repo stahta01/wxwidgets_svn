@@ -129,6 +129,10 @@ samples/minimal/minimal.dsp
 
 samples/minifram/minifram.dsp
 
+samples/mobile/styles/styles.dsp
+
+samples/mobile/wxedit/wxedit.dsp
+
 samples/multimon/multimon.dsp
 
 samples/nativdlg/nativdlg.dsp
@@ -145,8 +149,6 @@ samples/popup/popup.dsp
 
 samples/printing/printing.dsp
 
-samples/propgrid/propgrid.dsp
-
 samples/propsize/propsize.dsp
 
 samples/regtest/regtest.dsp
@@ -162,6 +164,8 @@ samples/rotate/rotate.dsp
 samples/sashtest/sashtest.dsp
 
 samples/scroll/scroll.dsp
+
+samples/scrollsub/scrollsub.dsp
 
 samples/shaped/shaped.dsp
 

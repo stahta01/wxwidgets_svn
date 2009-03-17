@@ -230,7 +230,7 @@ public:
 
     virtual unsigned GetCount() { return unsigned(m_displays.size()); }
     virtual int GetFromPoint(const wxPoint& pt);
-    virtual int GetFromWindow(const wxWindow *window);
+    virtual int GetFromWindow(wxWindow *window);
 
 protected:
     // ctor checks if the current system supports multimon API and dynamically
@@ -256,7 +256,7 @@ protected:
     wxDisplayInfoArray m_displays;
 
 
-    wxDECLARE_NO_COPY_CLASS(wxDisplayFactoryWin32Base);
+    DECLARE_NO_COPY_CLASS(wxDisplayFactoryWin32Base)
 };
 
 // ----------------------------------------------------------------------------
@@ -275,7 +275,7 @@ public:
     virtual bool ChangeMode(const wxVideoMode& mode);
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxDisplayImplMultimon);
+    DECLARE_NO_COPY_CLASS(wxDisplayImplMultimon)
 };
 
 class wxDisplayFactoryMultimon : public wxDisplayFactoryWin32Base
@@ -327,7 +327,7 @@ struct wxDisplayInfoDirectDraw : wxDisplayInfo
     const GUID m_guid;
 
 
-    wxDECLARE_NO_COPY_CLASS(wxDisplayInfoDirectDraw);
+    DECLARE_NO_COPY_CLASS(wxDisplayInfoDirectDraw)
 };
 
 class wxDisplayImplDirectDraw : public wxDisplayImplWin32Base
@@ -351,7 +351,7 @@ public:
 private:
     IDirectDraw2 *m_pDD2;
 
-    wxDECLARE_NO_COPY_CLASS(wxDisplayImplDirectDraw);
+    DECLARE_NO_COPY_CLASS(wxDisplayImplDirectDraw)
 };
 
 class wxDisplayFactoryDirectDraw : public wxDisplayFactoryWin32Base
@@ -380,7 +380,7 @@ private:
     // dynamically resolved DirectDrawCreate()
     DirectDrawCreate_t m_pfnDirectDrawCreate;
 
-    wxDECLARE_NO_COPY_CLASS(wxDisplayFactoryDirectDraw);
+    DECLARE_NO_COPY_CLASS(wxDisplayFactoryDirectDraw)
 };
 
 #endif // wxUSE_DIRECTDRAW
@@ -489,9 +489,7 @@ wxVideoMode wxDisplayImplWin32Base::GetCurrentMode() const
     // according to MSDN.  The version of GetName() we implement for Win95
     // returns an empty string.
     const wxString name = GetName();
-    const wxChar * const deviceName = name.empty()
-                                          ? (const wxChar*)NULL
-                                          : (const wxChar*)name.c_str();
+    const wxChar * const deviceName = name.empty() ? NULL : name.c_str();
 
     DEVMODE dm;
     dm.dmSize = sizeof(dm);
@@ -520,17 +518,29 @@ wxDisplayFactoryWin32Base::wxDisplayFactoryWin32Base()
     {
         ms_supportsMultimon = 0;
 
-        wxDynamicLibrary dllDisplay(displayDllName, wxDL_VERBATIM | wxDL_QUIET);
+        wxLogNull noLog;
 
-        if ( (wxDL_INIT_FUNC(gs_, MonitorFromPoint, dllDisplay)) == NULL ||
-             (wxDL_INIT_FUNC(gs_, MonitorFromWindow, dllDisplay)) == NULL ||
-             (wxDL_INIT_FUNC_AW(gs_, GetMonitorInfo, dllDisplay)) == NULL )
+        wxDynamicLibrary dllDisplay(displayDllName, wxDL_VERBATIM);
+
+        gs_MonitorFromPoint = (MonitorFromPoint_t)
+            dllDisplay.GetSymbol(wxT("MonitorFromPoint"));
+        if ( !gs_MonitorFromPoint )
+            return;
+
+        gs_MonitorFromWindow = (MonitorFromWindow_t)
+            dllDisplay.GetSymbol(wxT("MonitorFromWindow"));
+        if ( !gs_MonitorFromWindow )
+            return;
+
+        gs_GetMonitorInfo = (GetMonitorInfo_t)
+            dllDisplay.GetSymbolAorW(wxT("GetMonitorInfo"));
+        if ( !gs_GetMonitorInfo )
             return;
 
         ms_supportsMultimon = 1;
 
         // we can safely let dllDisplay go out of scope, the DLL itself will
-        // still remain loaded as all programs link to it statically anyhow
+        // still remain loaded as all Win32 programs use it
     }
 }
 
@@ -570,7 +580,7 @@ int wxDisplayFactoryWin32Base::GetFromPoint(const wxPoint& pt)
                                                        MONITOR_DEFAULTTONULL));
 }
 
-int wxDisplayFactoryWin32Base::GetFromWindow(const wxWindow *window)
+int wxDisplayFactoryWin32Base::GetFromWindow(wxWindow *window)
 {
     return FindDisplayFromHMONITOR(gs_MonitorFromWindow(GetHwndOf(window),
                                                         MONITOR_DEFAULTTONULL));
@@ -593,8 +603,12 @@ wxDisplayFactoryMultimon::wxDisplayFactoryMultimon()
     // implementation
     EnumDisplayMonitors_t pfnEnumDisplayMonitors;
     {
-        wxDynamicLibrary dllDisplay(displayDllName, wxDL_VERBATIM | wxDL_QUIET);
-        if ( (wxDL_INIT_FUNC(pfn, EnumDisplayMonitors, dllDisplay)) == NULL )
+        wxLogNull noLog;
+
+        wxDynamicLibrary dllDisplay(displayDllName, wxDL_VERBATIM);
+        pfnEnumDisplayMonitors = (EnumDisplayMonitors_t)
+            dllDisplay.GetSymbol(wxT("EnumDisplayMonitors"));
+        if ( !pfnEnumDisplayMonitors )
             return;
     }
 
@@ -662,9 +676,7 @@ wxDisplayImplMultimon::GetModes(const wxVideoMode& modeMatch) const
     // according to MSDN.  The version of GetName() we implement for Win95
     // returns an empty string.
     const wxString name = GetName();
-    const wxChar * const deviceName = name.empty()
-                                            ? (const wxChar*)NULL
-                                            : (const wxChar*)name.c_str();
+    const wxChar * const deviceName = name.empty() ? NULL : name.c_str();
 
     DEVMODE dm;
     dm.dmSize = sizeof(dm);
@@ -699,26 +711,26 @@ bool wxDisplayImplMultimon::ChangeMode(const wxVideoMode& mode)
     }
     else // change to the given mode
     {
-        wxCHECK_MSG( mode.GetWidth() && mode.GetHeight(), false,
+        wxCHECK_MSG( mode.w && mode.h, false,
                         _T("at least the width and height must be specified") );
 
         wxZeroMemory(dm);
         dm.dmSize = sizeof(dm);
         dm.dmDriverExtra = 0;
         dm.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
-        dm.dmPelsWidth = mode.GetWidth();
-        dm.dmPelsHeight = mode.GetHeight();
+        dm.dmPelsWidth = mode.w;
+        dm.dmPelsHeight = mode.h;
 
-        if ( mode.GetDepth() )
+        if ( mode.bpp )
         {
             dm.dmFields |= DM_BITSPERPEL;
-            dm.dmBitsPerPel = mode.GetDepth();
+            dm.dmBitsPerPel = mode.bpp;
         }
 
-        if ( mode.GetRefresh() )
+        if ( mode.refresh )
         {
             dm.dmFields |= DM_DISPLAYFREQUENCY;
-            dm.dmDisplayFrequency = mode.GetRefresh();
+            dm.dmDisplayFrequency = mode.refresh;
         }
 
         pDevMode = &dm;
@@ -738,12 +750,13 @@ bool wxDisplayImplMultimon::ChangeMode(const wxVideoMode& mode)
     static ChangeDisplaySettingsEx_t pfnChangeDisplaySettingsEx = NULL;
     if ( !pfnChangeDisplaySettingsEx )
     {
-        wxDynamicLibrary dllDisplay(displayDllName, wxDL_VERBATIM | wxDL_QUIET);
+        wxDynamicLibrary dllDisplay(displayDllName, wxDL_VERBATIM);
         if ( dllDisplay.IsLoaded() )
         {
-            wxDL_INIT_FUNC_AW(pfn, ChangeDisplaySettingsEx, dllDisplay);
+            pfnChangeDisplaySettingsEx = (ChangeDisplaySettingsEx_t)
+                dllDisplay.GetSymbolAorW(_T("ChangeDisplaySettingsEx"));
         }
-        //else: huh, no this DLL must always be present, what's going on??
+        //else: huh, no user32.dll??
 
 #ifndef __WXWINCE__
         if ( !pfnChangeDisplaySettingsEx )
@@ -758,11 +771,11 @@ bool wxDisplayImplMultimon::ChangeMode(const wxVideoMode& mode)
     // do change the mode
     switch ( pfnChangeDisplaySettingsEx
              (
-                GetName().wx_str(), // display name
-                pDevMode,           // dev mode or NULL to reset
-                NULL,               // reserved
+                GetName(),      // display name
+                pDevMode,       // dev mode or NULL to reset
+                NULL,           // reserved
                 flags,
-                NULL                // pointer to video parameters (not used)
+                NULL            // pointer to video parameters (not used)
              ) )
     {
         case DISP_CHANGE_SUCCESSFUL:
@@ -776,7 +789,7 @@ bool wxDisplayImplMultimon::ChangeMode(const wxVideoMode& mode)
                 if (frameTop && frameTop->IsFullScreen())
                 {
                     wxVideoMode current = GetCurrentMode();
-                    frameTop->SetClientSize(current.GetWidth(), current.GetHeight());
+                    frameTop->SetClientSize(current.w, current.h);
                 }
             }
             return true;
@@ -808,24 +821,32 @@ wxDisplayFactoryDirectDraw::wxDisplayFactoryDirectDraw()
     if ( !ms_supportsMultimon )
         return;
 
-    m_dllDDraw.Load(_T("ddraw.dll"), wxDL_VERBATIM | wxDL_QUIET);
+#if wxUSE_LOG
+    // suppress the errors if ddraw.dll is not found, we're prepared to handle
+    // this
+    wxLogNull noLog;
+#endif
+
+    m_dllDDraw.Load(_T("ddraw.dll"));
 
     if ( !m_dllDDraw.IsLoaded() )
         return;
 
-    DirectDrawEnumerateEx_t
-        wxDL_INIT_FUNC_AW(pfn, DirectDrawEnumerateEx, m_dllDDraw);
-    if ( !pfnDirectDrawEnumerateEx )
+    DirectDrawEnumerateEx_t pDDEnumEx = (DirectDrawEnumerateEx_t)
+        m_dllDDraw.GetSymbolAorW(_T("DirectDrawEnumerateEx"));
+    if ( !pDDEnumEx )
         return;
 
     // we can't continue without DirectDrawCreate() later, so resolve it right
     // now and fail the initialization if it's not available
-    if ( !wxDL_INIT_FUNC(m_pfn, DirectDrawCreate, m_dllDDraw) )
+    m_pfnDirectDrawCreate = (DirectDrawCreate_t)
+        m_dllDDraw.GetSymbol(_T("DirectDrawCreate"));
+    if ( !m_pfnDirectDrawCreate )
         return;
 
-    if ( (*pfnDirectDrawEnumerateEx)(DDEnumExCallback,
-                                     this,
-                                     DDENUM_ATTACHEDSECONDARYDEVICES) != DD_OK )
+    if ( (*pDDEnumEx)(DDEnumExCallback,
+                      this,
+                      DDENUM_ATTACHEDSECONDARYDEVICES) != DD_OK )
     {
         wxLogLastError(_T("DirectDrawEnumerateEx"));
     }
@@ -852,7 +873,7 @@ wxDisplayFactoryDirectDraw::DDEnumExCallback(GUID *pGuid,
     if ( pGuid )
     {
         wxDisplayFactoryDirectDraw * self =
-            static_cast<wxDisplayFactoryDirectDraw *>(lpContext);
+            wx_static_cast(wxDisplayFactoryDirectDraw *, lpContext);
         self->AddDisplay(*pGuid, hmon, driverName);
     }
     //else: we're called for the primary monitor, skip it
@@ -881,7 +902,7 @@ wxDisplayImpl *wxDisplayFactoryDirectDraw::CreateDisplay(unsigned n)
     wxCHECK_MSG( n < m_displays.size(), NULL, _T("invalid display index") );
 
     wxDisplayInfoDirectDraw *
-        info = static_cast<wxDisplayInfoDirectDraw *>(m_displays[n]);
+        info = wx_static_cast(wxDisplayInfoDirectDraw *, m_displays[n]);
 
     if ( !info->m_pDD2 )
     {
@@ -944,7 +965,7 @@ private:
     wxArrayVideoModes& m_modes;
     const wxVideoMode& m_modeMatch;
 
-    wxDECLARE_NO_COPY_CLASS(wxDDVideoModesAdder);
+    DECLARE_NO_COPY_CLASS(wxDDVideoModesAdder)
 };
 
 HRESULT WINAPI wxDDEnumModesCallback(LPDDSURFACEDESC lpDDSurfaceDesc,
@@ -955,7 +976,7 @@ HRESULT WINAPI wxDDEnumModesCallback(LPDDSURFACEDESC lpDDSurfaceDesc,
     if ( (lpDDSurfaceDesc->dwFlags & FLAGS_REQUIRED) == FLAGS_REQUIRED )
     {
         wxDDVideoModesAdder * const vmodes =
-            static_cast<wxDDVideoModesAdder *>(lpContext);
+            wx_static_cast(wxDDVideoModesAdder *, lpContext);
 
         vmodes->Add(wxVideoMode(lpDDSurfaceDesc->dwWidth,
                                 lpDDSurfaceDesc->dwHeight,

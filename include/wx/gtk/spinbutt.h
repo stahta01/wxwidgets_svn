@@ -45,17 +45,12 @@ public:
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
     
-    virtual bool Enable( bool enable = true );
-
     // implementation
     void OnSize( wxSizeEvent &event );
 
     int m_pos;
 
 protected:
-    void GtkDisableEvents() const;
-    void GtkEnableEvents() const;
-    
     virtual wxSize DoGetBestSize() const;
     virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 

@@ -77,8 +77,7 @@ of MSW, MAC and OS2
 #define USE_DIRDLG_GENERIC \
     ((USE_WXMSW || USE_WXMAC) && USE_GENERIC_DIALOGS && wxUSE_DIRDLG)
 #define USE_FILEDLG_GENERIC \
-    ((((USE_WXMSW || USE_WXMAC || USE_WXPM || USE_WXGTK) \
-                    && USE_GENERIC_DIALOGS) || USE_WXWINCE) && wxUSE_FILEDLG)
+    ((((USE_WXMSW || USE_WXMAC || USE_WXPM) && USE_GENERIC_DIALOGS) || USE_WXWINCE) && wxUSE_FILEDLG)
 #define USE_FONTDLG_GENERIC \
     ((USE_WXMSW || USE_WXMACFONTDLG || USE_WXPM) && USE_GENERIC_DIALOGS && wxUSE_FONTDLG)
 
@@ -98,31 +97,15 @@ of MSW, MAC and OS2
     #define USE_SETTINGS_DIALOG 0
 #endif
 
-#if wxUSE_LOG
-
-// Custom application traits class which we use to override the default log
-// target creation
-class MyAppTraits : public wxGUIAppTraits
-{
-public:
-    virtual wxLog *CreateLogTarget();
-};
-
-#endif // wxUSE_LOG
 
 // Define a new application type
 class MyApp: public wxApp
 {
 public:
-    virtual bool OnInit();
+    bool OnInit();
 
     wxFont       m_canvasFont;
     wxColour     m_canvasTextColour;
-
-protected:
-#if wxUSE_LOG
-    virtual wxAppTraits *CreateTraits() { return new MyAppTraits; }
-#endif // wxUSE_LOG
 };
 
 #if USE_MODAL_PRESENTATION
@@ -157,95 +140,6 @@ private:
 };
 
 #endif // USE_MODAL_PRESENTATION
-
-// A class demonstrating CreateStdDialogButtonSizer()
-class StdButtonSizerDialog : public wxDialog
-{
-public:
-    StdButtonSizerDialog(wxWindow *parent);
-
-    void OnEvent(wxCommandEvent& event);
-
-private:
-    void EnableDisableControls();
-
-    wxCheckBox *m_chkboxAffirmativeButton;
-    wxRadioButton *m_radiobtnOk,
-                  *m_radiobtnYes;
-
-    wxCheckBox *m_chkboxDismissButton;
-    wxRadioButton *m_radiobtnClose,
-                  *m_radiobtnCancel;
-
-    wxCheckBox *m_chkboxApply,
-               *m_chkboxNo,
-               *m_chkboxHelp,
-               *m_chkboxNoDefault;
-
-    wxSizer *m_buttonsSizer;
-
-    DECLARE_EVENT_TABLE()
-};
-
-// Test harness for wxMessageDialog.
-class TestMessageBoxDialog : public wxDialog
-{
-public:
-    TestMessageBoxDialog(wxWindow *parent);
-
-private:
-    void OnApply(wxCommandEvent& event);
-    void OnClose(wxCommandEvent& event);
-    void OnUpdateLabelUI(wxUpdateUIEvent& event);
-    void OnUpdateNoDefaultUI(wxUpdateUIEvent& event);
-
-    enum
-    {
-        Btn_Yes,
-        Btn_No,
-        Btn_Ok,
-        Btn_Cancel,
-        Btn_Max
-    };
-
-    struct BtnInfo
-    {
-        int flag;
-        const char *name;
-    };
-
-    static const BtnInfo ms_btnInfo[Btn_Max];
-
-    wxTextCtrl *m_textMsg,
-               *m_textExtMsg;
-
-    wxCheckBox *m_buttons[Btn_Max];
-    wxTextCtrl *m_labels[Btn_Max];
-
-    wxRadioBox *m_icons;
-
-    wxCheckBox *m_chkNoDefault,
-               *m_chkCentre;
-
-    DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(TestMessageBoxDialog);
-};
-
-class TestDefaultActionDialog: public wxDialog
-{
-public:
-    TestDefaultActionDialog( wxWindow *parent );
-
-    void OnListBoxDClick(wxCommandEvent& event);
-    void OnCatchListBoxDClick(wxCommandEvent& event);
-
-private:
-    bool   m_catchListBoxDClick;
-
-private:
-    DECLARE_EVENT_TABLE()
-};
-
 
 #if USE_SETTINGS_DIALOG
 // Property sheet dialog
@@ -284,17 +178,11 @@ class MyFrame: public wxFrame
 {
 public:
     MyFrame(wxWindow *parent, const wxString& title);
-    virtual ~MyFrame();
 
-#if wxUSE_MSGDLG
     void MessageBox(wxCommandEvent& event);
-    void MessageBoxDialog(wxCommandEvent& event);
-    void MessageBoxInfo(wxCommandEvent& event);
-#endif // wxUSE_MSGDLG
 
 #if wxUSE_COLOURDLG
     void ChooseColour(wxCommandEvent& event);
-    void GetColour(wxCommandEvent& event);
 #endif // wxUSE_COLOURDLG
 
 #if wxUSE_FONTDLG
@@ -309,8 +197,6 @@ public:
     void SingleChoice(wxCommandEvent& event);
     void MultiChoice(wxCommandEvent& event);
 #endif // wxUSE_CHOICEDLG
-
-    void Rearrange(wxCommandEvent& event);
 
 #if wxUSE_TEXTDLG
     void TextEntry(wxCommandEvent& event);
@@ -349,12 +235,10 @@ public:
 
 #if USE_MODAL_PRESENTATION
     void ModalDlg(wxCommandEvent& event);
-#endif // USE_MODAL_PRESENTATION
     void ModelessDlg(wxCommandEvent& event);
     void DlgCenteredScreen(wxCommandEvent& event);
     void DlgCenteredParent(wxCommandEvent& event);
-    void MiniFrame(wxCommandEvent& event);
-    void DlgOnTop(wxCommandEvent& event);
+#endif // USE_MODAL_PRESENTATION
 
 #if wxUSE_PROGRESSDLG
     void ShowProgress(wxCommandEvent& event);
@@ -386,18 +270,7 @@ public:
 #endif // USE_FONTDLG_GENERIC
 
     void OnPropertySheet(wxCommandEvent& event);
-
     void OnRequestUserAttention(wxCommandEvent& event);
-#if wxUSE_NOTIFICATION_MESSAGE
-    void OnNotifMsgAuto(wxCommandEvent& event);
-    void OnNotifMsgShow(wxCommandEvent& event);
-    void OnNotifMsgHide(wxCommandEvent& event);
-#endif // wxUSE_NOTIFICATION_MESSAGE
-
-    void OnStandardButtonsSizerDialog(wxCommandEvent& event);
-
-    void OnTestDefaultActionDialog(wxCommandEvent& event);
-
     void OnExit(wxCommandEvent& event);
 
 private:
@@ -415,10 +288,6 @@ private:
     wxFindReplaceDialog *m_dlgFind,
                         *m_dlgReplace;
 #endif // wxUSE_FINDREPLDLG
-
-#if wxUSE_NOTIFICATION_MESSAGE
-    wxNotificationMessage *m_notifMsg;
-#endif // wxUSE_NOTIFICATION_MESSAGE
 
     wxColourData m_clrData;
 
@@ -441,16 +310,12 @@ public:
 enum
 {
     DIALOGS_CHOOSE_COLOUR = wxID_HIGHEST,
-    DIALOGS_GET_COLOUR,
     DIALOGS_CHOOSE_COLOUR_GENERIC,
     DIALOGS_CHOOSE_FONT,
     DIALOGS_CHOOSE_FONT_GENERIC,
     DIALOGS_MESSAGE_BOX,
-    DIALOGS_MESSAGE_DIALOG,
-    DIALOGS_MESSAGE_BOX_WXINFO,
     DIALOGS_SINGLE_CHOICE,
     DIALOGS_MULTI_CHOICE,
-    DIALOGS_REARRANGE,
     DIALOGS_TEXT_ENTRY,
     DIALOGS_PASSWORD_ENTRY,
     DIALOGS_FILE_OPEN,
@@ -470,8 +335,6 @@ enum
     DIALOGS_MODELESS,
     DIALOGS_CENTRE_SCREEN,
     DIALOGS_CENTRE_PARENT,
-    DIALOGS_MINIFRAME,
-    DIALOGS_ONTOP,
     DIALOGS_MODELESS_BTN,
     DIALOGS_PROGRESS,
     DIALOGS_ABOUTDLG_SIMPLE,
@@ -482,14 +345,9 @@ enum
     DIALOGS_FIND,
     DIALOGS_REPLACE,
     DIALOGS_REQUEST,
-    DIALOGS_NOTIFY_AUTO,
-    DIALOGS_NOTIFY_SHOW,
-    DIALOGS_NOTIFY_HIDE,
     DIALOGS_PROPERTY_SHEET,
     DIALOGS_PROPERTY_SHEET_TOOLBOOK,
-    DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK,
-    DIALOGS_STANDARD_BUTTON_SIZER_DIALOG,
-    DIALOGS_TEST_DEFAULT_ACTION
+    DIALOGS_PROPERTY_SHEET_BUTTONTOOLBOOK
 };
 
 #endif

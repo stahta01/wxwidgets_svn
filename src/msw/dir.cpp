@@ -40,63 +40,55 @@
 // define the types and functions used for file searching
 // ----------------------------------------------------------------------------
 
-namespace
-{
-
 typedef WIN32_FIND_DATA FIND_STRUCT;
 typedef HANDLE FIND_DATA;
 typedef DWORD FIND_ATTR;
 
-inline FIND_DATA InitFindData()
-{
-    return INVALID_HANDLE_VALUE;
-}
+static inline FIND_DATA InitFindData() { return INVALID_HANDLE_VALUE; }
 
-inline bool IsFindDataOk(FIND_DATA fd)
+static inline bool IsFindDataOk(FIND_DATA fd)
 {
         return fd != INVALID_HANDLE_VALUE;
 }
 
-inline void FreeFindData(FIND_DATA fd)
+static inline void FreeFindData(FIND_DATA fd)
 {
-    if ( !::FindClose(fd) )
-    {
-        wxLogLastError(_T("FindClose"));
-    }
+        if ( !::FindClose(fd) )
+        {
+            wxLogLastError(_T("FindClose"));
+        }
 }
 
-inline FIND_DATA FindFirst(const wxString& spec,
-                           FIND_STRUCT *finddata)
+static inline FIND_DATA FindFirst(const wxString& spec,
+                                      FIND_STRUCT *finddata)
 {
-    return ::FindFirstFile(spec.fn_str(), finddata);
+        return ::FindFirstFile(spec, finddata);
 }
 
-inline bool FindNext(FIND_DATA fd, FIND_STRUCT *finddata)
+static inline bool FindNext(FIND_DATA fd, FIND_STRUCT *finddata)
 {
-    return ::FindNextFile(fd, finddata) != 0;
+        return ::FindNextFile(fd, finddata) != 0;
 }
 
-const wxChar *GetNameFromFindData(FIND_STRUCT *finddata)
+static const wxChar *GetNameFromFindData(FIND_STRUCT *finddata)
 {
-    return finddata->cFileName;
+        return finddata->cFileName;
 }
 
-inline FIND_ATTR GetAttrFromFindData(FIND_STRUCT *finddata)
+static const FIND_ATTR GetAttrFromFindData(FIND_STRUCT *finddata)
 {
-    return finddata->dwFileAttributes;
+        return finddata->dwFileAttributes;
 }
 
-inline bool IsDir(FIND_ATTR attr)
+static inline bool IsDir(FIND_ATTR attr)
 {
-    return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
+        return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
-inline bool IsHidden(FIND_ATTR attr)
+static inline bool IsHidden(FIND_ATTR attr)
 {
-    return (attr & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)) != 0;
+        return (attr & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)) != 0;
 }
-
-} // anonymous namespace
 
 // ----------------------------------------------------------------------------
 // constants
@@ -140,7 +132,7 @@ private:
 
     int      m_flags;
 
-    wxDECLARE_NO_COPY_CLASS(wxDirData);
+    DECLARE_NO_COPY_CLASS(wxDirData)
 };
 
 // ============================================================================
@@ -192,10 +184,7 @@ bool wxDirData::Read(wxString *filename)
         {
             filespec += _T('\\');
         }
-        if ( !m_filespec )
-            filespec += _T("*.*");
-        else
-            filespec += m_filespec;
+        filespec += (!m_filespec ? _T("*.*") : m_filespec.c_str());
 
         m_finddata = FindFirst(filespec, PTR_TO_FINDDATA);
 
@@ -311,20 +300,9 @@ wxDir::wxDir(const wxString& dirname)
 bool wxDir::Open(const wxString& dirname)
 {
     delete M_DIR;
-    
-    // The Unix code does a similar test
-    if (wxDirExists(dirname))
-    {
-        m_data = new wxDirData(dirname);
+    m_data = new wxDirData(dirname);
 
-        return true;
-    }
-    else
-    {
-        m_data = NULL;
-    
-        return false;
-    }
+    return true;
 }
 
 bool wxDir::IsOpened() const

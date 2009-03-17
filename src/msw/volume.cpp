@@ -33,7 +33,6 @@
     #endif
     #include "wx/intl.h"
     #include "wx/hashmap.h"
-    #include "wx/filefn.h"
 #endif // WX_PRECOMP
 
 #include "wx/dir.h"
@@ -152,13 +151,11 @@ static unsigned GetBasicFlags(const wxChar* filename)
     // this information.
     //-----------------------------------------------------------------------
     SHFILEINFO fi;
-    long rc = SHGetFileInfo(filename, 0, &fi, sizeof(fi), SHGFI_ATTRIBUTES);
+    long rc;
+    rc = SHGetFileInfo(filename, 0, &fi, sizeof(fi), SHGFI_ATTRIBUTES );
     if (!rc)
     {
-        // this error is not fatal, so don't show a message to the user about
-        // it, otherwise it would appear every time a generic directory picker
-        // dialog is used and there is a connected network drive
-        wxLogLastError(_T("SHGetFileInfo"));
+        wxLogError(_("Cannot read typename from '%s'!"), filename);
     }
     else
     {
@@ -265,17 +262,6 @@ static void BuildListFromNN(wxArrayString& list, NETRESOURCE* pResSrc,
                 {
                     wxString filename(pRes->lpRemoteName);
 
-                    // if the drive is unavailable, FilteredAdd() can hang for
-                    // a long time and, moreover, its failure appears to be not
-                    // cached so this will happen every time we use it, so try
-                    // a much quicker wxDirExists() test (which still hangs but
-                    // for much shorter time) for locally mapped drives first
-                    // to try to avoid this
-                    if ( pRes->lpLocalName &&
-                            *pRes->lpLocalName &&
-                                !wxDirExists(pRes->lpLocalName) )
-                        continue;
-
                     if (!filename.empty())
                     {
                         if (filename.Last() != '\\')
@@ -284,7 +270,7 @@ static void BuildListFromNN(wxArrayString& list, NETRESOURCE* pResSrc,
                         // The filter function will not know mounted from unmounted, and neither do we unless
                         // we are iterating using RESOURCE_CONNECTED, in which case they all are mounted.
                         // Volumes on disconnected servers, however, will correctly show as unmounted.
-                        FilteredAdd(list, filename.wx_str(), flagsSet, flagsUnset&~wxFS_VOL_MOUNTED);
+                        FilteredAdd(list, filename, flagsSet, flagsUnset&~wxFS_VOL_MOUNTED);
                         if (scope == RESOURCE_GLOBALNET)
                             s_fileInfo[filename].m_flags &= ~wxFS_VOL_MOUNTED;
                     }
@@ -498,7 +484,7 @@ bool wxFSVolumeBase::Create(const wxString& name)
 
     // Display name.
     SHFILEINFO fi;
-    long rc = SHGetFileInfo(m_volName.wx_str(), 0, &fi, sizeof(fi), SHGFI_DISPLAYNAME);
+    long rc = SHGetFileInfo(m_volName, 0, &fi, sizeof(fi), SHGFI_DISPLAYNAME);
     if (!rc)
     {
         wxLogError(_("Cannot read typename from '%s'!"), m_volName.c_str());
@@ -608,7 +594,7 @@ wxIcon wxFSVolume::GetIcon(wxFSIconType type) const
         }
 
         SHFILEINFO fi;
-        long rc = SHGetFileInfo(m_volName.wx_str(), 0, &fi, sizeof(fi), flags);
+        long rc = SHGetFileInfo(m_volName, 0, &fi, sizeof(fi), flags);
         m_icons[type].SetHICON((WXHICON)fi.hIcon);
         if (!rc || !fi.hIcon)
             wxLogError(_("Cannot load icon from '%s'."), m_volName.c_str());

@@ -45,13 +45,13 @@ enum wxLayoutDirection
 // --keyword="_" --keyword="wxPLURAL:1,2" options
 // to extract the strings from the sources)
 #ifndef WXINTL_NO_GETTEXT_MACRO
-    #define _(s)                     wxGetTranslation((s))
-    #define wxPLURAL(sing, plur, n)  wxGetTranslation((sing), (plur), n)
+    #define _(s)                     wxGetTranslation(_T(s))
+    #define wxPLURAL(sing, plur, n)  wxGetTranslation(_T(sing), _T(plur), n)
 #endif
 
 // another one which just marks the strings for extraction, but doesn't
 // perform the translation (use -kwxTRANSLATE with xgettext!)
-#define wxTRANSLATE(str) str
+#define wxTRANSLATE(str) _T(str)
 
 // ----------------------------------------------------------------------------
 // forward decls
@@ -236,7 +236,6 @@ enum wxLanguage
     wxLANGUAGE_ROMANIAN,
     wxLANGUAGE_RUSSIAN,
     wxLANGUAGE_RUSSIAN_UKRAINE,
-    wxLANGUAGE_SAMI,
     wxLANGUAGE_SAMOAN,
     wxLANGUAGE_SANGHO,
     wxLANGUAGE_SANSKRIT,
@@ -300,7 +299,6 @@ enum wxLanguage
     wxLANGUAGE_UZBEK,
     wxLANGUAGE_UZBEK_CYRILLIC,
     wxLANGUAGE_UZBEK_LATIN,
-    wxLANGUAGE_VALENCIAN,
     wxLANGUAGE_VIETNAMESE,
     wxLANGUAGE_VOLAPUK,
     wxLANGUAGE_WELSH,
@@ -313,6 +311,16 @@ enum wxLanguage
 
     // for custom, user-defined languages:
     wxLANGUAGE_USER_DEFINED
+
+
+#if wxABI_VERSION >= 20808
+    // For binary compatibility, we can't put new items in their normal
+    // position in the enum, because it would change other values.  We have to
+    // put it somewhere well outside normal range -- the particular value used
+    // is arbitrary:
+    , wxLANGUAGE_VALENCIAN = 0x1fffffff,
+    wxLANGUAGE_SAMI
+#endif
 };
 
 // --- --- --- generated code ends here --- --- ---
@@ -326,28 +334,13 @@ struct WXDLLIMPEXP_BASE wxLanguageInfo
 {
     int Language;                   // wxLanguage id
     wxString CanonicalName;         // Canonical name, e.g. fr_FR
-#ifdef __WXMSW__
+#ifdef __WIN32__
     wxUint32 WinLang,               // Win32 language identifiers
              WinSublang;
-#endif // __WXMSW__
+#endif // __WIN32__
     wxString Description;           // human-readable name of the language
     wxLayoutDirection LayoutDirection;
-
-#ifdef __WXMSW__
-    // return the LCID corresponding to this language
-    wxUint32 GetLCID() const;
-#endif // __WXMSW__
-
-    // return the locale name corresponding to this language usable with
-    // setlocale() on the current system
-    wxString GetLocaleName() const;
 };
-
-// for Unix systems GetLocaleName() is trivial so implement it inline here, for
-// MSW it's implemented in intl.cpp
-#ifndef __WXMSW__
-inline wxString wxLanguageInfo::GetLocaleName() const { return CanonicalName; }
-#endif // !__WXMSW__
 
 // ----------------------------------------------------------------------------
 // wxLocaleCategory: the category of locale settings
@@ -402,15 +395,15 @@ public:
     wxLocale() { DoCommonInit(); }
 
         // the ctor has a side effect of changing current locale
-    wxLocale(const wxString& name,                               // name (for messages)
-             const wxString& shortName = wxEmptyString,      // dir prefix (for msg files)
-             const wxString& locale = wxEmptyString,     // locale (for setlocale)
+    wxLocale(const wxChar *szName,                               // name (for messages)
+             const wxChar *szShort = (const wxChar *) NULL,      // dir prefix (for msg files)
+             const wxChar *szLocale = (const wxChar *) NULL,     // locale (for setlocale)
              bool bLoadDefault = true,                           // preload wxstd.mo?
              bool bConvertEncoding = false)                      // convert Win<->Unix if necessary?
         {
             DoCommonInit();
 
-            Init(name, shortName, locale, bLoadDefault, bConvertEncoding);
+            Init(szName, szShort, szLocale, bLoadDefault, bConvertEncoding);
         }
 
     wxLocale(int language, // wxLanguage id or custom language
@@ -422,9 +415,9 @@ public:
         }
 
         // the same as a function (returns true on success)
-    bool Init(const wxString& name,
-              const wxString& shortName = wxEmptyString,
-              const wxString& locale = wxEmptyString,
+    bool Init(const wxChar *szName,
+              const wxChar *szShort = (const wxChar *) NULL,
+              const wxChar *szLocale = (const wxChar *) NULL,
               bool bLoadDefault = true,
               bool bConvertEncoding = false);
 
@@ -455,7 +448,7 @@ public:
     bool IsOk() const { return m_pszOldLocale != NULL; }
 
     // returns locale name
-    const wxString& GetLocale() const { return m_strLocale; }
+    const wxChar *GetLocale() const { return m_strLocale; }
 
     // return current locale wxLanguage value
     int GetLanguage() const { return m_language; }
@@ -482,15 +475,15 @@ public:
     // The loaded catalog will be used for message lookup by GetString().
     //
     // Returns 'true' if it was successfully loaded
-    bool AddCatalog(const wxString& domain);
-    bool AddCatalog(const wxString& domain,
-                    wxLanguage msgIdLanguage, const wxString& msgIdCharset);
+    bool AddCatalog(const wxChar *szDomain);
+    bool AddCatalog(const wxChar *szDomain,
+                    wxLanguage msgIdLanguage, const wxChar *msgIdCharset);
 
     // check if the given locale is provided by OS and C run time
     static bool IsAvailable(int lang);
 
     // check if the given catalog is loaded
-    bool IsLoaded(const wxString& domain) const;
+    bool IsLoaded(const wxChar *szDomain) const;
 
     // Retrieve the language info struct for the given language
     //
@@ -524,25 +517,20 @@ public:
     //
     // domains are searched in the last to first order, i.e. catalogs
     // added later override those added before.
-    virtual const wxString& GetString(const wxString& origString,
-                                      const wxString& domain = wxEmptyString) const;
+    virtual const wxChar *GetString(const wxChar *szOrigString,
+                                    const wxChar *szDomain = NULL) const;
     // plural form version of the same:
-    virtual const wxString& GetString(const wxString& origString,
-                                      const wxString& origString2,
-                                      size_t n,
-                                      const wxString& domain = wxEmptyString) const;
-
-    // this is hack to work around a problem with wxGetTranslation() which
-    // returns const wxString& and not wxString, so when it returns untranslated
-    // string, it needs to have a copy of it somewhere
-    static const wxString& GetUntranslatedString(const wxString& str);
+    virtual const wxChar *GetString(const wxChar *szOrigString,
+                                    const wxChar *szOrigString2,
+                                    size_t n,
+                                    const wxChar *szDomain = NULL) const;
 
     // Returns the current short name for the locale
     const wxString& GetName() const { return m_strShort; }
 
     // return the contents of .po file header
-    wxString GetHeaderValue(const wxString& header,
-                            const wxString& domain = wxEmptyString) const;
+    wxString GetHeaderValue( const wxChar* szHeader,
+                             const wxChar* szDomain = NULL ) const;
 
     // These two methods are for internal use only. First one creates
     // ms_languagesDB if it doesn't already exist, second one destroys
@@ -552,7 +540,7 @@ public:
 
 private:
     // find catalog by name in a linked list, return NULL if !found
-    wxMsgCatalog *FindCatalog(const wxString& domain) const;
+    wxMsgCatalog  *FindCatalog(const wxChar *szDomain) const;
 
     // copy default table of languages from global static array to
     // m_langugagesInfo, called by InitLanguagesDB
@@ -565,7 +553,7 @@ private:
                    m_strShort;        // short name for the locale
     int            m_language;        // this locale wxLanguage value
 
-    const char  *m_pszOldLocale;      // previous locale from setlocale()
+    const wxChar  *m_pszOldLocale;    // previous locale from setlocale()
     wxLocale      *m_pOldLocale;      // previous wxLocale
 
     wxMsgCatalog  *m_pMsgCat;         // pointer to linked list of catalogs
@@ -576,7 +564,7 @@ private:
 
     static wxLanguageInfoArray *ms_languagesDB;
 
-    wxDECLARE_NO_COPY_CLASS(wxLocale);
+    DECLARE_NO_COPY_CLASS(wxLocale)
 };
 
 // ----------------------------------------------------------------------------
@@ -587,31 +575,26 @@ private:
 extern WXDLLIMPEXP_BASE wxLocale* wxGetLocale();
 
 // get the translation of the string in the current locale
-inline const wxString& wxGetTranslation(const wxString& str,
-                                        const wxString& domain = wxEmptyString)
+inline const wxChar *
+wxGetTranslation(const wxChar *sz, const wxChar* domain = NULL)
 {
     wxLocale *pLoc = wxGetLocale();
     if (pLoc)
-        return pLoc->GetString(str, domain);
+        return pLoc->GetString(sz, domain);
     else
-        // NB: this function returns reference to a string, so we have to keep
-        //     a copy of it somewhere
-        return wxLocale::GetUntranslatedString(str);
+        return sz;
 }
-inline const wxString& wxGetTranslation(const wxString& str1,
-                                        const wxString& str2,
-                                        size_t n,
-                                        const wxString& domain = wxEmptyString)
+
+inline const wxChar *
+wxGetTranslation(const wxChar *sz1, const wxChar *sz2,
+                 size_t n,
+                 const wxChar *domain = NULL)
 {
     wxLocale *pLoc = wxGetLocale();
     if (pLoc)
-        return pLoc->GetString(str1, str2, n, domain);
+        return pLoc->GetString(sz1, sz2, n, domain);
     else
-        // NB: this function returns reference to a string, so we have to keep
-        //     a copy of it somewhere
-        return n == 1
-               ? wxLocale::GetUntranslatedString(str1)
-               : wxLocale::GetUntranslatedString(str2);
+        return n == 1 ? sz1 : sz2;
 }
 
 #else // !wxUSE_INTL
@@ -620,34 +603,18 @@ inline const wxString& wxGetTranslation(const wxString& str1,
 
 #if !defined(WXINTL_NO_GETTEXT_MACRO)
     #if !defined(_)
-        #define _(s)                 (s)
+        #define _(s)                 (_T(s))
     #endif
-    #define wxPLURAL(sing, plur, n)  ((n) == 1 ? (sing) : (plur))
+    #define wxPLURAL(sing, plur, n)  ((n) == 1 ? _T(sing) : _T(plur))
 #endif
 
-#define wxTRANSLATE(str) str
+#define wxTRANSLATE(str) _T(str)
 
-// NB: we use a template here in order to avoid using
-//     wxLocale::GetUntranslatedString() above, which would be required if
-//     we returned const wxString&; this way, the compiler should be able to
-//     optimize wxGetTranslation() away
-
-template<typename TString>
-inline TString wxGetTranslation(TString str)
-    { return str; }
-
-template<typename TString, typename TDomain>
-inline TString wxGetTranslation(TString str, TDomain WXUNUSED(domain))
-    { return str; }
-
-template<typename TString, typename TDomain>
-inline TString wxGetTranslation(TString str1, TString str2, size_t n)
-    { return n == 1 ? str1 : str2; }
-
-template<typename TString, typename TDomain>
-inline TString wxGetTranslation(TString str1, TString str2, size_t n,
-                                TDomain WXUNUSED(domain))
-    { return n == 1 ? str1 : str2; }
+inline const wxChar *
+wxGetTranslation(const wxChar *sz, const wxChar * WXUNUSED(domain) = NULL)
+{
+    return sz;
+}
 
 #endif // wxUSE_INTL/!wxUSE_INTL
 
@@ -655,10 +622,10 @@ inline TString wxGetTranslation(TString str1, TString str2, size_t n,
 // wxTRANSLATE) too
 #if !defined(WXINTL_NO_GETTEXT_MACRO)
     #if !defined(gettext_noop)
-        #define gettext_noop(str) (str)
+        #define gettext_noop(str) _T(str)
     #endif
     #if !defined(N_)
-        #define N_(s)             (s)
+        #define N_(s)             _T(s)
     #endif
 #endif
 

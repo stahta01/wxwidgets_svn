@@ -33,7 +33,7 @@ class WXDLLIMPEXP_NET wxSocketOutputStream : public wxOutputStream
 
   size_t OnSysWrite(const void *buffer, size_t bufsize);
 
-    wxDECLARE_NO_COPY_CLASS(wxSocketOutputStream);
+    DECLARE_NO_COPY_CLASS(wxSocketOutputStream)
 };
 
 class WXDLLIMPEXP_NET wxSocketInputStream : public wxInputStream
@@ -52,7 +52,7 @@ class WXDLLIMPEXP_NET wxSocketInputStream : public wxInputStream
 
   size_t OnSysRead(void *buffer, size_t bufsize);
 
-    wxDECLARE_NO_COPY_CLASS(wxSocketInputStream);
+    DECLARE_NO_COPY_CLASS(wxSocketInputStream)
 };
 
 class WXDLLIMPEXP_NET wxSocketStream : public wxSocketInputStream,
@@ -62,7 +62,7 @@ class WXDLLIMPEXP_NET wxSocketStream : public wxSocketInputStream,
   wxSocketStream(wxSocketBase& s);
   virtual ~wxSocketStream();
 
-  wxDECLARE_NO_COPY_CLASS(wxSocketStream);
+  DECLARE_NO_COPY_CLASS(wxSocketStream)
 };
 
 #endif

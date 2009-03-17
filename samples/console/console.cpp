@@ -9,57 +9,6 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-// IMPORTANT NOTE FOR WXWIDGETS USERS:
-// If you're a wxWidgets user and you're looking at this file to learn how to
-// structure a wxWidgets console application, then you don't have much to learn.
-// This application is used more for testing rather than as sample but
-// basically the following simple block is enough for you to start your
-// own console application:
-
-/*
-    int main(int argc, char **argv)
-    {
-        wxApp::CheckBuildOptions(WX_BUILD_OPTIONS_SIGNATURE, "program");
-
-        wxInitializer initializer;
-        if ( !initializer )
-        {
-            fprintf(stderr, "Failed to initialize the wxWidgets library, aborting.");
-            return -1;
-        }
-
-        static const wxCmdLineEntryDesc cmdLineDesc[] =
-        {
-            { wxCMD_LINE_SWITCH, "h", "help", "show this help message",
-                wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-            // ... your other command line options here...
-
-            { wxCMD_LINE_NONE }
-        };
-
-        wxCmdLineParser parser(cmdLineDesc, argc, wxArgv);
-        switch ( parser.Parse() )
-        {
-            case -1:
-                wxLogMessage(_T("Help was given, terminating."));
-                break;
-
-            case 0:
-                // everything is ok; proceed
-                break;
-
-            default:
-                wxLogMessage(_T("Syntax error detected, aborting."));
-                break;
-        }
-
-        // do something useful here
-
-        return 0;
-    }
-*/
-
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -74,12 +23,10 @@
 
 #include "wx/string.h"
 #include "wx/file.h"
-#include "wx/filename.h"
 #include "wx/app.h"
 #include "wx/log.h"
 #include "wx/apptrait.h"
 #include "wx/platinfo.h"
-#include "wx/wxchar.h"
 
 // without this pragma, the stupid compiler precompiles #defines below so that
 // changing them doesn't "take place" later!
@@ -101,7 +48,7 @@
 
 // what to test (in alphabetic order)? Define TEST_ALL to 0 to do a single
 // test, define it to 1 to do all tests.
-#define TEST_ALL 1
+#define TEST_ALL 0
 
 
 #if TEST_ALL
@@ -115,13 +62,14 @@
     #define TEST_FILECONF
     #define TEST_FILENAME
     #define TEST_FILETIME
-    #define TEST_FTP
+ //   #define TEST_FTP  --FIXME! (RN)
     #define TEST_INFO_FUNCTIONS
     #define TEST_LOCALE
     #define TEST_LOG
     #define TEST_MIME
     #define TEST_MODULE
     #define TEST_PATHLIST
+    #define TEST_ODBC
     #define TEST_PRINTF
     #define TEST_REGCONF
     #define TEST_REGEX
@@ -140,7 +88,7 @@
     #define TEST_WCHAR
     #define TEST_ZIP
 #else // #if TEST_ALL
-    #define TEST_FTP
+    #define TEST_STDPATHS
 #endif
 
 // some tests are interactive, define this to run them
@@ -202,7 +150,6 @@ static void ShowCmdLine(const wxCmdLineParser& parser)
 
     wxString strVal;
     long lVal;
-    double dVal;
     wxDateTime dt;
     if ( parser.Found(_T("o"), &strVal) )
         s << _T("Output file:\t") << strVal << '\n';
@@ -210,8 +157,6 @@ static void ShowCmdLine(const wxCmdLineParser& parser)
         s << _T("Input dir:\t") << strVal << '\n';
     if ( parser.Found(_T("s"), &lVal) )
         s << _T("Size:\t") << lVal << '\n';
-    if ( parser.Found(_T("f"), &dVal) )
-        s << _T("Double:\t") << dVal << '\n';
     if ( parser.Found(_T("d"), &dt) )
         s << _T("Date:\t") << dt.FormatISODate() << '\n';
     if ( parser.Found(_T("project_name"), &strVal) )
@@ -356,7 +301,7 @@ public:
     virtual wxDirTraverseResult OnDir(const wxString& dirname)
     {
         wxString path, name, ext;
-        wxFileName::SplitPath(dirname, &path, &name, &ext);
+        wxSplitPath(dirname, &path, &name, &ext);
 
         if ( !ext.empty() )
             name << _T('.') << ext;
@@ -520,7 +465,7 @@ static void TestDllListLoaded()
     for ( size_t n = 0; n < count; ++n )
     {
         const wxDynamicLibraryDetails& details = dlls[n];
-        printf("%-45s", (const char *)details.GetPath().mb_str());
+        printf("%-45s", details.GetPath().mb_str());
 
         void *addr;
         size_t len;
@@ -530,7 +475,7 @@ static void TestDllListLoaded()
                    (unsigned long)addr, (unsigned long)((char *)addr + len));
         }
 
-        printf(" %s\n", (const char *)details.GetVersion().mb_str());
+        printf(" %s\n", details.GetVersion().mb_str());
     }
 }
 
@@ -588,13 +533,11 @@ static void TestExecute()
     wxPuts(_T("*** testing wxExecute ***"));
 
 #ifdef __UNIX__
-    #define COMMAND "echo hi"
-    #define ASYNC_COMMAND "xclock"
+    #define COMMAND "cat -n ../../Makefile" // "echo hi"
     #define SHELL_COMMAND "echo hi from shell"
-    #define REDIRECT_COMMAND "cat -n Makefile"
+    #define REDIRECT_COMMAND COMMAND // "date"
 #elif defined(__WXMSW__)
     #define COMMAND "command.com /c echo hi"
-    #define ASYNC_COMMAND "notepad"
     #define SHELL_COMMAND "echo hi"
     #define REDIRECT_COMMAND COMMAND
 #else
@@ -610,22 +553,19 @@ static void TestExecute()
 
     wxPrintf(_T("Testing wxExecute: "));
     fflush(stdout);
-    if ( wxExecute(_T(COMMAND), wxEXEC_SYNC) == 0 )
+    if ( wxExecute(_T(COMMAND), true /* sync */) == 0 )
         wxPuts(_T("Ok."));
     else
         wxPuts(_T("ERROR."));
 
+#if 0 // no, it doesn't work (yet?)
     wxPrintf(_T("Testing async wxExecute: "));
     fflush(stdout);
-    int pid = wxExecute(ASYNC_COMMAND);
-    if ( pid != 0 )
-    {
+    if ( wxExecute(COMMAND) != 0 )
         wxPuts(_T("Ok (command launched)."));
-        if ( wxKill(pid) == -1 )
-            wxPuts("ERROR: failed to kill child process.");
-    }
     else
         wxPuts(_T("ERROR."));
+#endif // 0
 
     wxPrintf(_T("Testing wxExecute with redirection:\n"));
     wxArrayString output;
@@ -635,25 +575,10 @@ static void TestExecute()
     }
     else
     {
-        // don't show too much output, MAX_LINES is enough
-        static const unsigned MAX_LINES = 20;
-
-        const unsigned count = output.size();
-        for ( unsigned n = 0;
-              n < (count > MAX_LINES ? MAX_LINES/2 : count);
-              n++ )
+        size_t count = output.GetCount();
+        for ( size_t n = 0; n < count; n++ )
         {
-            wxPrintf("%04u:\t%s\n", n + 1, output[n]);
-        }
-
-        if ( count > MAX_LINES )
-        {
-            wxPrintf("... skipping %u lines...\n", count - MAX_LINES);
-
-            for ( unsigned n = count - MAX_LINES/2; n < count; n++ )
-            {
-                wxPrintf("%04u:\t%s\n", n + 1, output[n]);
-            }
+            wxPrintf(_T("\t%s\n"), output[n].c_str());
         }
 
         wxPuts(_T("Ok."));
@@ -1039,10 +964,7 @@ static void TestFileSetTimes()
 #include "wx/intl.h"
 #include "wx/utils.h"   // for wxSetEnv
 
-static wxLocale gs_localeDefault;
-    // NOTE: don't init it here as it needs a wxAppTraits object
-    //       and thus must be init-ed after creation of the wxInitializer
-    //       class in the main()
+static wxLocale gs_localeDefault(wxLANGUAGE_ENGLISH);
 
 // find the name of the language from its value
 static const wxChar *GetLangName(int lang)
@@ -1291,8 +1213,6 @@ static void TestDefaultLang()
 {
     wxPuts(_T("*** Testing wxLocale::GetSystemLanguage ***"));
 
-    gs_localeDefault.Init(wxLANGUAGE_ENGLISH);
-
     static const wxChar *langStrings[] =
     {
         NULL,               // system default
@@ -1382,6 +1302,32 @@ static void TestMimeEnum()
     wxPuts(wxEmptyString);
 }
 
+static void TestMimeOverride()
+{
+    wxPuts(_T("*** Testing wxMimeTypesManager additional files loading ***\n"));
+
+    static const wxChar *mailcap = _T("/tmp/mailcap");
+    static const wxChar *mimetypes = _T("/tmp/mime.types");
+
+    if ( wxFile::Exists(mailcap) )
+        wxPrintf(_T("Loading mailcap from '%s': %s\n"),
+                 mailcap,
+                 wxTheMimeTypesManager->ReadMailcap(mailcap) ? _T("ok") : _T("ERROR"));
+    else
+        wxPrintf(_T("WARN: mailcap file '%s' doesn't exist, not loaded.\n"),
+                 mailcap);
+
+    if ( wxFile::Exists(mimetypes) )
+        wxPrintf(_T("Loading mime.types from '%s': %s\n"),
+                 mimetypes,
+                 wxTheMimeTypesManager->ReadMimeTypes(mimetypes) ? _T("ok") : _T("ERROR"));
+    else
+        wxPrintf(_T("WARN: mime.types file '%s' doesn't exist, not loaded.\n"),
+                 mimetypes);
+
+    wxPuts(wxEmptyString);
+}
+
 static void TestMimeFilename()
 {
     wxPuts(_T("*** Testing MIME type from filename query ***\n"));
@@ -1426,35 +1372,6 @@ static void TestMimeFilename()
     wxPuts(wxEmptyString);
 }
 
-// these tests were broken by wxMimeTypesManager changes, temporarily disabling
-#if 0
-
-static void TestMimeOverride()
-{
-    wxPuts(_T("*** Testing wxMimeTypesManager additional files loading ***\n"));
-
-    static const wxChar *mailcap = _T("/tmp/mailcap");
-    static const wxChar *mimetypes = _T("/tmp/mime.types");
-
-    if ( wxFile::Exists(mailcap) )
-        wxPrintf(_T("Loading mailcap from '%s': %s\n"),
-                 mailcap,
-                 wxTheMimeTypesManager->ReadMailcap(mailcap) ? _T("ok") : _T("ERROR"));
-    else
-        wxPrintf(_T("WARN: mailcap file '%s' doesn't exist, not loaded.\n"),
-                 mailcap);
-
-    if ( wxFile::Exists(mimetypes) )
-        wxPrintf(_T("Loading mime.types from '%s': %s\n"),
-                 mimetypes,
-                 wxTheMimeTypesManager->ReadMimeTypes(mimetypes) ? _T("ok") : _T("ERROR"));
-    else
-        wxPrintf(_T("WARN: mime.types file '%s' doesn't exist, not loaded.\n"),
-                 mimetypes);
-
-    wxPuts(wxEmptyString);
-}
-
 static void TestMimeAssociate()
 {
     wxPuts(_T("*** Testing creation of filetype association ***\n"));
@@ -1465,7 +1382,7 @@ static void TestMimeAssociate()
                             _T(""),             // print cmd
                             _T("XYZ File"),     // description
                             _T(".xyz"),         // extensions
-                            wxNullPtr           // end of extensions
+                            NULL                // end of extensions
                          );
     ftInfo.SetShortDesc(_T("XYZFile")); // used under Win32 only
 
@@ -1482,8 +1399,6 @@ static void TestMimeAssociate()
 
     wxPuts(wxEmptyString);
 }
-
-#endif // 0
 
 #endif // TEST_MIME
 
@@ -1683,7 +1598,7 @@ static void TestPathList()
 // regular expressions
 // ----------------------------------------------------------------------------
 
-#if defined TEST_REGEX && TEST_INTERACTIVE
+#ifdef TEST_REGEX
 
 #include "wx/regex.h"
 
@@ -1744,6 +1659,26 @@ static void TestRegExInteractive()
 #endif // TEST_REGEX
 
 // ----------------------------------------------------------------------------
+// database
+// ----------------------------------------------------------------------------
+
+#if !wxUSE_ODBC
+    #undef TEST_ODBC
+#endif
+
+#ifdef TEST_ODBC
+
+#include "wx/db.h"
+
+static void TestDbOpen()
+{
+    HENV henv;
+    wxDb db(henv);
+}
+
+#endif // TEST_ODBC
+
+// ----------------------------------------------------------------------------
 // printf() tests
 // ----------------------------------------------------------------------------
 
@@ -1760,7 +1695,7 @@ static void TestRegExInteractive()
     #undef wxPrintf
     #undef wxSprintf
 
-    // NB: do _not_ use WX_ATTRIBUTE_PRINTF here, we have some invalid formats
+    // NB: do _not_ use ATTRIBUTE_PRINTF here, we have some invalid formats
     //     in the tests below
     int wxPrintf( const wxChar *format, ... );
     int wxSprintf( wxChar *str, const wxChar *format, ... );
@@ -2145,7 +2080,7 @@ static void TestRegConfWrite()
 
 static void TestRegConfRead()
 {
-    wxRegConfig *config = new wxRegConfig(_T("myapp"));
+    wxConfig *config = new wxConfig(_T("myapp"));
 
     wxString str;
     long dummy;
@@ -2455,11 +2390,10 @@ static void TestSocketClient()
 #ifdef TEST_FTP
 
 #include "wx/protocol/ftp.h"
-#include "wx/protocol/log.h"
+
+static wxFTP ftp;
 
 #define FTP_ANONYMOUS
-
-static wxFTP *ftp;
 
 #ifdef FTP_ANONYMOUS
     static const wxChar *directory = _T("/pub");
@@ -2483,18 +2417,18 @@ static bool TestFtpConnect()
     wxChar user[256];
     wxFgets(user, WXSIZEOF(user), stdin);
     user[wxStrlen(user) - 1] = '\0'; // chop off '\n'
-    ftp->SetUser(user);
+    ftp.SetUser(user);
 
     wxChar password[256];
     wxPrintf(_T("Password for %s: "), password);
     wxFgets(password, WXSIZEOF(password), stdin);
     password[wxStrlen(password) - 1] = '\0'; // chop off '\n'
-    ftp->SetPassword(password);
+    ftp.SetPassword(password);
 
     wxPrintf(_T("--- Attempting to connect to %s:21 as %s...\n"), hostname, user);
 #endif // FTP_ANONYMOUS/!FTP_ANONYMOUS
 
-    if ( !ftp->Connect(hostname) )
+    if ( !ftp.Connect(hostname) )
     {
         wxPrintf(_T("ERROR: failed to connect to %s\n"), hostname);
 
@@ -2503,11 +2437,49 @@ static bool TestFtpConnect()
     else
     {
         wxPrintf(_T("--- Connected to %s, current directory is '%s'\n"),
-                 hostname, ftp->Pwd().c_str());
-        ftp->Close();
+                 hostname, ftp.Pwd().c_str());
+        ftp.Close();
     }
 
     return true;
+}
+
+// test (fixed?) wxFTP bug with wu-ftpd >= 2.6.0?
+static void TestFtpWuFtpd()
+{
+    wxFTP ftp;
+    static const wxChar *hostname = _T("ftp.eudora.com");
+    if ( !ftp.Connect(hostname) )
+    {
+        wxPrintf(_T("ERROR: failed to connect to %s\n"), hostname);
+    }
+    else
+    {
+        static const wxChar *filename = _T("eudora/pubs/draft-gellens-submit-09.txt");
+        wxInputStream *in = ftp.GetInputStream(filename);
+        if ( !in )
+        {
+            wxPrintf(_T("ERROR: couldn't get input stream for %s\n"), filename);
+        }
+        else
+        {
+            size_t size = in->GetSize();
+            wxPrintf(_T("Reading file %s (%u bytes)..."), filename, size);
+
+            wxChar *data = new wxChar[size];
+            if ( !in->Read(data, size) )
+            {
+                wxPuts(_T("ERROR: read error"));
+            }
+            else
+            {
+                wxPrintf(_T("Successfully retrieved the file.\n"));
+            }
+
+            delete [] data;
+            delete in;
+        }
+    }
 }
 
 static void TestFtpList()
@@ -2515,22 +2487,22 @@ static void TestFtpList()
     wxPuts(_T("*** Testing wxFTP file listing ***\n"));
 
     // test CWD
-    if ( !ftp->ChDir(directory) )
+    if ( !ftp.ChDir(directory) )
     {
         wxPrintf(_T("ERROR: failed to cd to %s\n"), directory);
     }
 
-    wxPrintf(_T("Current directory is '%s'\n"), ftp->Pwd().c_str());
+    wxPrintf(_T("Current directory is '%s'\n"), ftp.Pwd().c_str());
 
     // test NLIST and LIST
     wxArrayString files;
-    if ( !ftp->GetFilesList(files) )
+    if ( !ftp.GetFilesList(files) )
     {
         wxPuts(_T("ERROR: failed to get NLIST of files"));
     }
     else
     {
-        wxPrintf(_T("Brief list of files under '%s':\n"), ftp->Pwd().c_str());
+        wxPrintf(_T("Brief list of files under '%s':\n"), ftp.Pwd().c_str());
         size_t count = files.GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
@@ -2539,13 +2511,13 @@ static void TestFtpList()
         wxPuts(_T("End of the file list"));
     }
 
-    if ( !ftp->GetDirList(files) )
+    if ( !ftp.GetDirList(files) )
     {
         wxPuts(_T("ERROR: failed to get LIST of files"));
     }
     else
     {
-        wxPrintf(_T("Detailed list of files under '%s':\n"), ftp->Pwd().c_str());
+        wxPrintf(_T("Detailed list of files under '%s':\n"), ftp.Pwd().c_str());
         size_t count = files.GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
@@ -2554,12 +2526,12 @@ static void TestFtpList()
         wxPuts(_T("End of the file list"));
     }
 
-    if ( !ftp->ChDir(_T("..")) )
+    if ( !ftp.ChDir(_T("..")) )
     {
         wxPuts(_T("ERROR: failed to cd to .."));
     }
 
-    wxPrintf(_T("Current directory is '%s'\n"), ftp->Pwd().c_str());
+    wxPrintf(_T("Current directory is '%s'\n"), ftp.Pwd().c_str());
 }
 
 static void TestFtpDownload()
@@ -2567,7 +2539,7 @@ static void TestFtpDownload()
     wxPuts(_T("*** Testing wxFTP download ***\n"));
 
     // test RETR
-    wxInputStream *in = ftp->GetInputStream(filename);
+    wxInputStream *in = ftp.GetInputStream(filename);
     if ( !in )
     {
         wxPrintf(_T("ERROR: couldn't get input stream for %s\n"), filename);
@@ -2597,16 +2569,16 @@ static void TestFtpFileSize()
 {
     wxPuts(_T("*** Testing FTP SIZE command ***"));
 
-    if ( !ftp->ChDir(directory) )
+    if ( !ftp.ChDir(directory) )
     {
         wxPrintf(_T("ERROR: failed to cd to %s\n"), directory);
     }
 
-    wxPrintf(_T("Current directory is '%s'\n"), ftp->Pwd().c_str());
+    wxPrintf(_T("Current directory is '%s'\n"), ftp.Pwd().c_str());
 
-    if ( ftp->FileExists(filename) )
+    if ( ftp.FileExists(filename) )
     {
-        int size = ftp->GetFileSize(filename);
+        int size = ftp.GetFileSize(filename);
         if ( size == -1 )
             wxPrintf(_T("ERROR: couldn't get size of '%s'\n"), filename);
         else
@@ -2622,27 +2594,25 @@ static void TestFtpMisc()
 {
     wxPuts(_T("*** Testing miscellaneous wxFTP functions ***"));
 
-    if ( ftp->SendCommand(_T("STAT")) != '2' )
+    if ( ftp.SendCommand(_T("STAT")) != '2' )
     {
         wxPuts(_T("ERROR: STAT failed"));
     }
     else
     {
-        wxPrintf(_T("STAT returned:\n\n%s\n"), ftp->GetLastResult().c_str());
+        wxPrintf(_T("STAT returned:\n\n%s\n"), ftp.GetLastResult().c_str());
     }
 
-    if ( ftp->SendCommand(_T("HELP SITE")) != '2' )
+    if ( ftp.SendCommand(_T("HELP SITE")) != '2' )
     {
         wxPuts(_T("ERROR: HELP SITE failed"));
     }
     else
     {
         wxPrintf(_T("The list of site-specific commands:\n\n%s\n"),
-               ftp->GetLastResult().c_str());
+               ftp.GetLastResult().c_str());
     }
 }
-
-#if TEST_INTERACTIVE
 
 static void TestFtpInteractive()
 {
@@ -2669,14 +2639,14 @@ static void TestFtpInteractive()
                 wildcard = buf + 5;
 
             wxArrayString files;
-            if ( !ftp->GetList(files, wildcard, start == _T("LIST")) )
+            if ( !ftp.GetList(files, wildcard, start == _T("LIST")) )
             {
                 wxPrintf(_T("ERROR: failed to get %s of files\n"), start.c_str());
             }
             else
             {
                 wxPrintf(_T("--- %s of '%s' under '%s':\n"),
-                       start.c_str(), wildcard.c_str(), ftp->Pwd().c_str());
+                       start.c_str(), wildcard.c_str(), ftp.Pwd().c_str());
                 size_t count = files.GetCount();
                 for ( size_t n = 0; n < count; n++ )
                 {
@@ -2687,21 +2657,19 @@ static void TestFtpInteractive()
         }
         else // !list
         {
-            wxChar ch = ftp->SendCommand(buf);
+            wxChar ch = ftp.SendCommand(buf);
             wxPrintf(_T("Command %s"), ch ? _T("succeeded") : _T("failed"));
             if ( ch )
             {
                 wxPrintf(_T(" (return code %c)"), ch);
             }
 
-            wxPrintf(_T(", server reply:\n%s\n\n"), ftp->GetLastResult().c_str());
+            wxPrintf(_T(", server reply:\n%s\n\n"), ftp.GetLastResult().c_str());
         }
     }
 
     wxPuts(_T("\n*** done ***"));
 }
-
-#endif // TEST_INTERACTIVE
 
 static void TestFtpUpload()
 {
@@ -2710,7 +2678,7 @@ static void TestFtpUpload()
     // upload a file
     static const wxChar *file1 = _T("test1");
     static const wxChar *file2 = _T("test2");
-    wxOutputStream *out = ftp->GetOutputStream(file1);
+    wxOutputStream *out = ftp.GetOutputStream(file1);
     if ( out )
     {
         wxPrintf(_T("--- Uploading to %s ---\n"), file1);
@@ -2719,17 +2687,17 @@ static void TestFtpUpload()
     }
 
     // send a command to check the remote file
-    if ( ftp->SendCommand(wxString(_T("STAT ")) + file1) != '2' )
+    if ( ftp.SendCommand(wxString(_T("STAT ")) + file1) != '2' )
     {
         wxPrintf(_T("ERROR: STAT %s failed\n"), file1);
     }
     else
     {
         wxPrintf(_T("STAT %s returned:\n\n%s\n"),
-               file1, ftp->GetLastResult().c_str());
+               file1, ftp.GetLastResult().c_str());
     }
 
-    out = ftp->GetOutputStream(file2);
+    out = ftp.GetOutputStream(file2);
     if ( out )
     {
         wxPrintf(_T("--- Uploading to %s ---\n"), file1);
@@ -2758,22 +2726,22 @@ public:
     {
     }
 
-    virtual void Walk(size_t skip = 1, size_t maxdepth = wxSTACKWALKER_MAX_DEPTH)
+    virtual void Walk(size_t skip = 1)
     {
         wxPuts(_T("Stack dump:"));
 
-        wxStackWalker::Walk(skip, maxdepth);
+        wxStackWalker::Walk(skip);
     }
 
 protected:
     virtual void OnStackFrame(const wxStackFrame& frame)
     {
-        printf("[%2d] ", (int) frame.GetLevel());
+        printf("[%2d] ", frame.GetLevel());
 
         wxString name = frame.GetName();
         if ( !name.empty() )
         {
-            printf("%-20.40s", (const char*)name.mb_str());
+            printf("%-20.40s", name.mb_str());
         }
         else
         {
@@ -2783,8 +2751,8 @@ protected:
         if ( frame.HasSourceLocation() )
         {
             printf("\t%s:%d",
-                   (const char*)frame.GetFileName().mb_str(),
-                   (int)frame.GetLine());
+                   frame.GetFileName().mb_str(),
+                   frame.GetLine());
         }
 
         puts("");
@@ -2792,9 +2760,7 @@ protected:
         wxString type, val;
         for ( size_t n = 0; frame.GetParam(n, &type, &name, &val); n++ )
         {
-            printf("\t%s %s = %s\n", (const char*)type.mb_str(),
-                                     (const char*)name.mb_str(),
-                                     (const char*)val.mb_str());
+            printf("\t%s %s = %s\n", type.mb_str(), name.mb_str(), val.mb_str());
         }
     }
 };
@@ -2818,7 +2784,6 @@ static void TestStackWalk(const char *argv0)
 #ifdef TEST_STDPATHS
 
 #include "wx/stdpaths.h"
-#include "wx/wxchar.h"      // wxPrintf
 
 static void TestStandardPaths()
 {
@@ -2871,10 +2836,9 @@ static void TestFileStream()
     {
         wxFileInputStream fsIn(filename);
         wxPrintf(_T("File stream size: %u\n"), fsIn.GetSize());
-        int c;
-        while ( (c=fsIn.GetC()) != wxEOF  )
+        while ( !fsIn.Eof() )
         {
-            wxPutchar(c);
+            wxPutchar(fsIn.GetC());
         }
     }
 
@@ -2909,10 +2873,9 @@ static void TestMemoryStream()
 
     wxMemoryInputStream memInpStream(buf, len);
     wxPrintf(_T("Memory stream size: %u\n"), memInpStream.GetSize());
-    int c;
-    while ( (c=memInpStream.GetC()) != wxEOF )
+    while ( !memInpStream.Eof() )
     {
-        wxPutchar(c);
+        wxPutchar(memInpStream.GetC());
     }
 
     wxPuts(_T("\n*** wxMemoryInputStream test done ***"));
@@ -2977,52 +2940,6 @@ static void TestStopWatch()
     }
 
     wxPuts(_T(", ok."));
-}
-
-#include "wx/timer.h"
-#include "wx/evtloop.h"
-
-void TestTimer()
-{
-    wxPuts(_T("*** Testing wxTimer ***\n"));
-
-    class MyTimer : public wxTimer
-    {
-    public:
-        MyTimer() : wxTimer() { m_num = 0; }
-
-        virtual void Notify()
-        {
-            wxPrintf(_T("%d"), m_num++);
-            fflush(stdout);
-
-            if ( m_num == 10 )
-            {
-                wxPrintf(_T("... exiting the event loop"));
-                Stop();
-
-                wxEventLoop::GetActive()->Exit(0);
-                wxPuts(_T(", ok."));
-            }
-
-            fflush(stdout);
-        }
-
-    private:
-        int m_num;
-    };
-
-    wxEventLoop loop;
-
-    wxTimer timer1;
-    timer1.Start(100, true /* one shot */);
-    timer1.Stop();
-    timer1.Start(100, true /* one shot */);
-
-    MyTimer timer;
-    timer.Start(500);
-
-    loop.Run();
 }
 
 #endif // TEST_TIMER
@@ -3461,18 +3378,13 @@ static void TestZipStreamRead()
     wxPuts(_T("*** Testing ZIP reading ***\n"));
 
     static const wxString filename = _T("foo");
-    wxFFileInputStream in(TESTFILE_ZIP);
-    wxZipInputStream istr(in);
-    wxZipEntry entry(filename);
-    istr.OpenEntry(entry);
-
+    wxZipInputStream istr(TESTFILE_ZIP, filename);
     wxPrintf(_T("Archive size: %u\n"), istr.GetSize());
 
     wxPrintf(_T("Dumping the file '%s':\n"), filename.c_str());
-    int c;
-    while ( (c=istr.GetC()) != wxEOF )
+    while ( !istr.Eof() )
     {
-        wxPutchar(c);
+        wxPutchar(istr.GetC());
         fflush(stdout);
     }
 
@@ -4149,6 +4061,39 @@ static void TestThreadConditions()
     wxThread::Sleep(500);
 }
 
+#include "wx/utils.h"
+
+class MyExecThread : public wxThread
+{
+public:
+    MyExecThread(const wxString& command) : wxThread(wxTHREAD_JOINABLE),
+                                            m_command(command)
+    {
+        Create();
+    }
+
+    virtual ExitCode Entry()
+    {
+        return (ExitCode)wxExecute(m_command, wxEXEC_SYNC);
+    }
+
+private:
+    wxString m_command;
+};
+
+static void TestThreadExec()
+{
+    wxPuts(_T("*** Testing wxExecute interaction with threads ***\n"));
+
+    MyExecThread thread(_T("true"));
+    thread.Run();
+
+    wxPrintf(_T("Main program exit code: %ld.\n"),
+             wxExecute(_T("false"), wxEXEC_SYNC));
+
+    wxPrintf(_T("Thread exit code: %ld.\n"), (long)thread.Wait());
+}
+
 // semaphore tests
 #include "wx/datetime.h"
 
@@ -4279,21 +4224,19 @@ int main(int argc, char **argv)
 #if wxUSE_CMDLINE_PARSER
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
-        { wxCMD_LINE_SWITCH, "h", "help", "show this help message",
+        { wxCMD_LINE_SWITCH, _T("h"), _T("help"), _T("show this help message"),
             wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-        { wxCMD_LINE_SWITCH, "v", "verbose", "be verbose" },
-        { wxCMD_LINE_SWITCH, "q", "quiet",   "be quiet" },
+        { wxCMD_LINE_SWITCH, _T("v"), _T("verbose"), _T("be verbose") },
+        { wxCMD_LINE_SWITCH, _T("q"), _T("quiet"),   _T("be quiet") },
 
-        { wxCMD_LINE_OPTION, "o", "output",  "output file" },
-        { wxCMD_LINE_OPTION, "i", "input",   "input dir" },
-        { wxCMD_LINE_OPTION, "s", "size",    "output block size",
+        { wxCMD_LINE_OPTION, _T("o"), _T("output"),  _T("output file") },
+        { wxCMD_LINE_OPTION, _T("i"), _T("input"),   _T("input dir") },
+        { wxCMD_LINE_OPTION, _T("s"), _T("size"),    _T("output block size"),
             wxCMD_LINE_VAL_NUMBER },
-        { wxCMD_LINE_OPTION, "d", "date",    "output file date",
+        { wxCMD_LINE_OPTION, _T("d"), _T("date"),    _T("output file date"),
             wxCMD_LINE_VAL_DATE },
-        { wxCMD_LINE_OPTION, "f", "double",  "output double",
-            wxCMD_LINE_VAL_DOUBLE },
 
-        { wxCMD_LINE_PARAM,  NULL, NULL, "input file",
+        { wxCMD_LINE_PARAM,  NULL, NULL, _T("input file"),
             wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_MULTIPLE },
 
         { wxCMD_LINE_NONE }
@@ -4400,12 +4343,6 @@ int main(int argc, char **argv)
 
 #ifdef TEST_FTP
     wxLog::AddTraceMask(FTP_TRACE_MASK);
-
-    // wxFTP cannot be a static variable as its ctor needs to access
-    // wxWidgets internals after it has been initialized
-    ftp = new wxFTP;
-    ftp->SetLog(new wxProtocolLog(FTP_TRACE_MASK));
-
     if ( TestFtpConnect() )
     {
         #if TEST_ALL
@@ -4417,21 +4354,23 @@ int main(int argc, char **argv)
         #endif // TEST_ALL
 
         #if TEST_INTERACTIVE
-            //TestFtpInteractive();
+            TestFtpInteractive();
         #endif
     }
     //else: connecting to the FTP server failed
 
-    delete ftp;
+    #if 0
+        TestFtpWuFtpd();
+    #endif
 #endif // TEST_FTP
 
 #ifdef TEST_MIME
-    //wxLog::AddTraceMask(_T("mime"));
-    TestMimeEnum();
-#if 0
-    TestMimeOverride();
-    TestMimeAssociate();
-#endif
+    wxLog::AddTraceMask(_T("mime"));
+    #if TEST_ALL
+        TestMimeEnum();
+    #endif
+        TestMimeOverride();
+        TestMimeAssociate();
     TestMimeFilename();
 #endif // TEST_MIME
 
@@ -4448,6 +4387,10 @@ int main(int argc, char **argv)
 #ifdef TEST_PATHLIST
     TestPathList();
 #endif // TEST_PATHLIST
+
+#ifdef TEST_ODBC
+    TestDbOpen();
+#endif // TEST_ODBC
 
 #ifdef TEST_PRINTF
     TestPrintf();
@@ -4499,13 +4442,13 @@ int main(int argc, char **argv)
         TestThreadSuspend();
         TestThreadDelete();
         TestThreadConditions();
+        TestThreadExec();
         TestSemaphore();
     #endif
 #endif // TEST_THREADS
 
 #ifdef TEST_TIMER
     TestStopWatch();
-    TestTimer();
 #endif // TEST_TIMER
 
 #ifdef TEST_DATETIME

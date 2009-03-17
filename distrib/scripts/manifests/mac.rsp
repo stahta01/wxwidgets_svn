@@ -51,17 +51,32 @@ src/mac/carbon/morefilex/*.h
 src/mac/carbon/Info.plist.in
 src/mac/carbon/wxmac.icns
 
+src/mac/classic/*.cpp
+src/mac/classic/*.c
+src/mac/classic/*.r
+src/mac/classic/*.h
+src/mac/classic/morefile/*.c
+src/mac/classic/morefile/*.cpp
+src/mac/classic/morefile/*.h
+src/mac/classic/Info.plist.in
+src/mac/classic/wxmac.icns
+
+src/mac/common/*.c
+include/wx/mac/common/*.h
+
 src/mac/corefoundation/*.cpp
 
 include/wx_pb.h
 include/wx/mac/*.h
 include/wx/mac/carbon/*.h
 include/wx/mac/carbon/private/*.h
+include/wx/mac/classic/*.h
+include/wx/mac/classic/private/*.h
 include/wx/mac/private/*.h
 
 include/wx/mac/corefoundation/*.h
-include/wx/mac/corefoundation/private/*.h
 
+samples/minimal/minimal.pbproj/project.pbxproj
 samples/minimal/minimal.xcode/project.pbxproj
 samples/minimal/minimal.xcodeproj/project.pbxproj
 

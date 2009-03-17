@@ -257,7 +257,7 @@ void wxSpinButton::SetValue(int val)
 }
 
 void wxSpinButton::NormalizeValue()
-{
+{ 
     SetValue( GetValue() );
 }
 
@@ -308,7 +308,7 @@ bool wxSpinButton::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
     event.SetPosition((short)pos);    // cast is important for negative values!
     event.SetEventObject(this);
 
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 bool wxSpinButton::MSWOnNotify(int WXUNUSED(idCtrl), WXLPARAM lParam, WXLPARAM *result)
@@ -324,7 +324,7 @@ bool wxSpinButton::MSWOnNotify(int WXUNUSED(idCtrl), WXLPARAM lParam, WXLPARAM *
     event.SetPosition(lpnmud->iPos + lpnmud->iDelta);
     event.SetEventObject(this);
 
-    bool processed = HandleWindowEvent(event);
+    bool processed = GetEventHandler()->ProcessEvent(event);
 
     *result = event.IsAllowed() ? 0 : 1;
 

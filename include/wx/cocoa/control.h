@@ -18,7 +18,7 @@
 // wxControl
 // ========================================================================
 
-class WXDLLIMPEXP_CORE wxControl : public wxControlBase, public wxCocoaNSControl
+class WXDLLEXPORT wxControl : public wxControlBase, public wxCocoaNSControl
 {
     DECLARE_ABSTRACT_CLASS(wxControl)
     WX_DECLARE_COCOA_OWNER(NSControl,NSView,NSView)
@@ -61,6 +61,9 @@ public:
 
     // Enables the control
     virtual void CocoaSetEnabled(bool enable);
+
+    wxString GetLabel() const;
+    void SetLabel(const wxString& label);
 protected:
     virtual wxSize DoGetBestSize() const;
 

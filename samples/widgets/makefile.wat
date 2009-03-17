@@ -18,7 +18,11 @@
 !  loaddll wpp      wppdi86
 !  loaddll wppaxp   wppdaxp
 !  loaddll wpp386   wppd386
+! if $(__VERSION__) >= 1280
+!  loaddll wlink    wlinkd
+! else
 !  loaddll wlink    wlink
+! endif
 !  loaddll wlib     wlibd
 !endif
 
@@ -138,10 +142,20 @@ __EXCEPTIONSFLAG_8 =
 !ifeq USE_EXCEPTIONS 1
 __EXCEPTIONSFLAG_8 = -xs
 !endif
+__WXLIB_XML_p =
+!ifeq MONOLITHIC 0
+__WXLIB_XML_p = &
+	wxbase$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_xml.lib
+!endif
 __WXLIB_ADV_p =
 !ifeq MONOLITHIC 0
 __WXLIB_ADV_p = &
 	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_adv.lib
+!endif
+__WXLIB_HTML_p =
+!ifeq MONOLITHIC 0
+__WXLIB_HTML_p = &
+	wx$(PORTNAME)$(WXUNIVNAME)$(WX_RELEASE_NODOT)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WX_LIB_FLAVOUR)_html.lib
 !endif
 __WXLIB_CORE_p =
 !ifeq MONOLITHIC 0
@@ -200,9 +214,6 @@ __THREAD_DEFINE_p =
 __THREAD_DEFINE_p = -dwxNO_THREADS
 !endif
 __UNICODE_DEFINE_p =
-!ifeq UNICODE 0
-__UNICODE_DEFINE_p = -dwxUSE_UNICODE=0
-!endif
 !ifeq UNICODE 1
 __UNICODE_DEFINE_p = -d_UNICODE
 !endif
@@ -217,11 +228,10 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 29
-COMPILER_PREFIX = wat
+WX_RELEASE_NODOT = 28
 OBJS = &
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
-LIBDIRNAME = .\..\..\lib\$(COMPILER_PREFIX)_$(LIBTYPE_SUFFIX)$(CFG)
+	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
+LIBDIRNAME = .\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = &
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 WIDGETS_CXXFLAGS = $(__DEBUGINFO_0) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG_5) &
@@ -235,19 +245,15 @@ WIDGETS_OBJECTS =  &
 	$(OBJS)\widgets_bmpcombobox.obj &
 	$(OBJS)\widgets_button.obj &
 	$(OBJS)\widgets_checkbox.obj &
-	$(OBJS)\widgets_choice.obj &
 	$(OBJS)\widgets_clrpicker.obj &
 	$(OBJS)\widgets_combobox.obj &
 	$(OBJS)\widgets_datepick.obj &
 	$(OBJS)\widgets_dirctrl.obj &
 	$(OBJS)\widgets_dirpicker.obj &
-	$(OBJS)\widgets_editlbox.obj &
-	$(OBJS)\widgets_filectrl.obj &
 	$(OBJS)\widgets_filepicker.obj &
 	$(OBJS)\widgets_fontpicker.obj &
 	$(OBJS)\widgets_gauge.obj &
 	$(OBJS)\widgets_hyperlnk.obj &
-	$(OBJS)\widgets_itemcontainer.obj &
 	$(OBJS)\widgets_listbox.obj &
 	$(OBJS)\widgets_notebook.obj &
 	$(OBJS)\widgets_odcombobox.obj &
@@ -256,7 +262,6 @@ WIDGETS_OBJECTS =  &
 	$(OBJS)\widgets_slider.obj &
 	$(OBJS)\widgets_spinbtn.obj &
 	$(OBJS)\widgets_static.obj &
-	$(OBJS)\widgets_statbmp.obj &
 	$(OBJS)\widgets_textctrl.obj &
 	$(OBJS)\widgets_toggle.obj &
 	$(OBJS)\widgets_widgets.obj
@@ -285,7 +290,7 @@ $(OBJS)\widgets.exe :  $(WIDGETS_OBJECTS) $(OBJS)\widgets_sample.res
 	@%append $(OBJS)\widgets.lbc option caseexact
 	@%append $(OBJS)\widgets.lbc  $(__DEBUGINFO_1)  libpath $(LIBDIRNAME) system nt_win ref '_WinMain@16' $(LDFLAGS)
 	@for %i in ($(WIDGETS_OBJECTS)) do @%append $(OBJS)\widgets.lbc file %i
-	@for %i in ( $(__WXLIB_ADV_p)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib) do @%append $(OBJS)\widgets.lbc library %i
+	@for %i in ( $(__WXLIB_XML_p)  $(__WXLIB_ADV_p)  $(__WXLIB_HTML_p)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib) do @%append $(OBJS)\widgets.lbc library %i
 	@%append $(OBJS)\widgets.lbc option resource=$(OBJS)\widgets_sample.res
 	@for %i in () do @%append $(OBJS)\widgets.lbc option stack=%i
 	wlink @$(OBJS)\widgets.lbc
@@ -297,9 +302,6 @@ $(OBJS)\widgets_button.obj :  .AUTODEPEND .\button.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_checkbox.obj :  .AUTODEPEND .\checkbox.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
-$(OBJS)\widgets_choice.obj :  .AUTODEPEND .\choice.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_clrpicker.obj :  .AUTODEPEND .\clrpicker.cpp
@@ -317,12 +319,6 @@ $(OBJS)\widgets_dirctrl.obj :  .AUTODEPEND .\dirctrl.cpp
 $(OBJS)\widgets_dirpicker.obj :  .AUTODEPEND .\dirpicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
-$(OBJS)\widgets_editlbox.obj :  .AUTODEPEND .\editlbox.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
-$(OBJS)\widgets_filectrl.obj :  .AUTODEPEND .\filectrl.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
 $(OBJS)\widgets_filepicker.obj :  .AUTODEPEND .\filepicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
@@ -333,9 +329,6 @@ $(OBJS)\widgets_gauge.obj :  .AUTODEPEND .\gauge.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_hyperlnk.obj :  .AUTODEPEND .\hyperlnk.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
-$(OBJS)\widgets_itemcontainer.obj :  .AUTODEPEND .\itemcontainer.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_listbox.obj :  .AUTODEPEND .\listbox.cpp
@@ -360,9 +353,6 @@ $(OBJS)\widgets_spinbtn.obj :  .AUTODEPEND .\spinbtn.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_static.obj :  .AUTODEPEND .\static.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
-
-$(OBJS)\widgets_statbmp.obj :  .AUTODEPEND .\statbmp.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(WIDGETS_CXXFLAGS) $<
 
 $(OBJS)\widgets_textctrl.obj :  .AUTODEPEND .\textctrl.cpp

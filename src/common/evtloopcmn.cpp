@@ -9,6 +9,14 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -22,78 +30,27 @@
     #include "wx/app.h"
 #endif //WX_PRECOMP
 
+// see the comment near the declaration of wxRunningEventLoopCount in
+// src/msw/thread.cpp for the explanation of this hack
+#if defined(__WXMSW__) && wxUSE_THREADS
+
+extern WXDLLIMPEXP_DATA_BASE(int) wxRunningEventLoopCount;
+struct wxRunningEventLoopCounter
+{
+    wxRunningEventLoopCounter() { wxRunningEventLoopCount++; }
+    ~wxRunningEventLoopCounter() { wxRunningEventLoopCount--; }
+};
+
+#endif // __WXMSW__
+
 // ----------------------------------------------------------------------------
-// wxEventLoopBase
+// globals
 // ----------------------------------------------------------------------------
 
-wxEventLoopBase *wxEventLoopBase::ms_activeLoop = NULL;
-
-wxEventLoopBase::wxEventLoopBase()
-{
-    m_isInsideYield = false;
-    m_eventsToProcessInsideYield = wxEVT_CATEGORY_ALL;
-}
-
-bool wxEventLoopBase::IsMain() const
-{
-    if (wxTheApp)
-        return wxTheApp->GetMainLoop() == this;
-    return false;
-}
-
-/* static */
-void wxEventLoopBase::SetActive(wxEventLoopBase* loop)
-{
-    ms_activeLoop = loop;
-
-    if (wxTheApp)
-        wxTheApp->OnEventLoopEnter(loop);
-}
-
-void wxEventLoopBase::OnExit()
-{
-    if (wxTheApp)
-        wxTheApp->OnEventLoopExit(this);
-}
-
-void wxEventLoopBase::WakeUpIdle()
-{
-    WakeUp();
-}
-
-bool wxEventLoopBase::ProcessIdle()
-{
-    if (!wxTheApp)
-        return false;
-
-    // process pending wx events before sending idle events
-    wxTheApp->ProcessPendingEvents();
-
-    // synthetize an idle event and send it to wxApp
-    wxIdleEvent event;
-    event.SetEventObject(wxTheApp);
-    wxTheApp->ProcessEvent(event);
-
-    return event.MoreRequested();
-}
-
-bool wxEventLoopBase::Yield(bool onlyIfNeeded)
-{
-    if ( m_isInsideYield )
-    {
-        if ( !onlyIfNeeded )
-        {
-            wxFAIL_MSG( wxT("wxYield called recursively" ) );
-        }
-
-        return false;
-    }
-
-    return YieldFor(wxEVT_CATEGORY_ALL);
-}
+wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
 
 // wxEventLoopManual is unused in the other ports
-#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXDFB__) || (defined(__UNIX__) && wxUSE_BASE)
+#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXDFB__)
 
 // ============================================================================
 // wxEventLoopManual implementation
@@ -113,7 +70,11 @@ int wxEventLoopManual::Run()
     // ProcessIdle() and Dispatch() below may throw so the code here should
     // be exception-safe, hence we must use local objects for all actions we
     // should undo
-    wxEventLoopActivator activate(this);
+    wxEventLoopActivator activate(wx_static_cast(wxEventLoop *, this));
+
+#if defined(__WXMSW__) && wxUSE_THREADS
+    wxRunningEventLoopCounter evtLoopCounter;
+#endif // __WXMSW__
 
     // we must ensure that OnExit() is called even if an exception is thrown
     // from inside Dispatch() but we must call it from Exit() in normal
@@ -209,4 +170,3 @@ void wxEventLoopManual::Exit(int rc)
 }
 
 #endif // __WXMSW__ || __WXMAC__ || __WXDFB__
-

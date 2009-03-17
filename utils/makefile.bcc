@@ -28,9 +28,8 @@ MAKEARGS = -DCC="$(CC)" -DCXX="$(CXX)" -DCFLAGS="$(CFLAGS)" \
 	-DDEBUG_INFO="$(DEBUG_INFO)" -DDEBUG_FLAG="$(DEBUG_FLAG)" \
 	-DMONOLITHIC="$(MONOLITHIC)" -DUSE_GUI="$(USE_GUI)" \
 	-DUSE_HTML="$(USE_HTML)" -DUSE_MEDIA="$(USE_MEDIA)" -DUSE_XRC="$(USE_XRC)" \
-	-DUSE_AUI="$(USE_AUI)" -DUSE_PROPGRID="$(USE_PROPGRID)" \
-	-DUSE_RICHTEXT="$(USE_RICHTEXT)" -DUSE_STC="$(USE_STC)" \
-	-DUSE_OPENGL="$(USE_OPENGL)" -DUSE_QA="$(USE_QA)" \
+	-DUSE_AUI="$(USE_AUI)" -DUSE_RICHTEXT="$(USE_RICHTEXT)" \
+	-DUSE_OPENGL="$(USE_OPENGL)" -DUSE_ODBC="$(USE_ODBC)" -DUSE_QA="$(USE_QA)" \
 	-DUSE_EXCEPTIONS="$(USE_EXCEPTIONS)" -DUSE_RTTI="$(USE_RTTI)" \
 	-DUSE_THREADS="$(USE_THREADS)" -DUSE_GDIPLUS="$(USE_GDIPLUS)" \
 	-DOFFICIAL_BUILD="$(OFFICIAL_BUILD)" -DVENDOR="$(VENDOR)" \
@@ -44,7 +43,7 @@ MAKEARGS = -DCC="$(CC)" -DCXX="$(CXX)" -DCFLAGS="$(CFLAGS)" \
 
 ### Targets: ###
 
-all: emulator helpview hhp2cached ifacecheck screenshotgen wxrc
+all: emulator helpview tex2rtf helpgen
 
 clean: 
 	-if exist .\*.obj del .\*.obj
@@ -58,22 +57,14 @@ clean:
 	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>helpview.bat
 	call helpview.bat
 	@del helpview.bat
-	@echo cd hhp2cached >hhp2cached.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>hhp2cached.bat
-	call hhp2cached.bat
-	@del hhp2cached.bat
-	@echo cd ifacecheck\src >ifacecheck.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>ifacecheck.bat
-	call ifacecheck.bat
-	@del ifacecheck.bat
-	@echo cd screenshotgen\src >screenshotgen.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>screenshotgen.bat
-	call screenshotgen.bat
-	@del screenshotgen.bat
-	@echo cd wxrc >wxrc.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>wxrc.bat
-	call wxrc.bat
-	@del wxrc.bat
+	@echo cd tex2rtf\src >tex2rtf.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>tex2rtf.bat
+	call tex2rtf.bat
+	@del tex2rtf.bat
+	@echo cd HelpGen\src >helpgen.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) clean >>helpgen.bat
+	call helpgen.bat
+	@del helpgen.bat
 
 emulator: 
 	@echo cd emulator\src >emulator.bat
@@ -87,27 +78,15 @@ helpview:
 	call helpview.bat
 	@del helpview.bat
 
-hhp2cached: 
-	@echo cd hhp2cached >hhp2cached.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>hhp2cached.bat
-	call hhp2cached.bat
-	@del hhp2cached.bat
+tex2rtf: 
+	@echo cd tex2rtf\src >tex2rtf.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>tex2rtf.bat
+	call tex2rtf.bat
+	@del tex2rtf.bat
 
-ifacecheck: 
-	@echo cd ifacecheck\src >ifacecheck.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>ifacecheck.bat
-	call ifacecheck.bat
-	@del ifacecheck.bat
-
-screenshotgen: 
-	@echo cd screenshotgen\src >screenshotgen.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>screenshotgen.bat
-	call screenshotgen.bat
-	@del screenshotgen.bat
-
-wxrc: 
-	@echo cd wxrc >wxrc.bat
-	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>wxrc.bat
-	call wxrc.bat
-	@del wxrc.bat
+helpgen: 
+	@echo cd HelpGen\src >helpgen.bat
+	@echo $(MAKE) -f makefile.bcc $(MAKEARGS) all >>helpgen.bat
+	call helpgen.bat
+	@del helpgen.bat
 

@@ -27,17 +27,21 @@
     #include "wx/bitmap.h"
     #include "wx/palette.h"
     #include "wx/intl.h"
-    #include "wx/math.h"
 #endif
 
 #include "wx/filefn.h"
 #include "wx/wfstream.h"
 #include "wx/quantize.h"
-#include "wx/scopeguard.h"
 #include "wx/anidecod.h"
 
 // For memcpy
 #include <string.h>
+
+#ifdef __SALFORDC__
+#ifdef FAR
+#undef FAR
+#endif
+#endif
 
 //-----------------------------------------------------------------------------
 // wxBMPHandler
@@ -150,7 +154,7 @@ bool wxBMPHandler::SaveDib(wxImage *image,
         wxUint16  bpp;            // bits per pixel
         wxUint32  compression;    // compression method
         wxUint32  size_of_bmp;    // size of the bitmap
-        wxUint32  h_res, v_res;   // image resolution in pixels-per-meter
+        wxUint32  h_res, v_res;   // image resolution in dpi
         wxUint32  num_clrs;       // number of colors used
         wxUint32  num_signif_clrs;// number of significant colors
     } hdr;
@@ -177,36 +181,7 @@ bool wxBMPHandler::SaveDib(wxImage *image,
     hdr.bpp = wxUINT16_SWAP_ON_BE(bpp);
     hdr.compression = 0; // RGB uncompressed
     hdr.size_of_bmp = wxUINT32_SWAP_ON_BE(row_width * image->GetHeight());
-
-    // get the resolution from the image options  or fall back to 72dpi standard
-    // for the BMP format if not specified
-    int hres, vres;
-    switch ( GetResolutionFromOptions(*image, &hres, &vres) )
-    {
-        default:
-            wxFAIL_MSG( _T("unexpected image resolution units") );
-            // fall through
-
-        case wxIMAGE_RESOLUTION_NONE:
-            hres =
-            vres = 72;
-            // fall through to convert it to correct units
-
-        case wxIMAGE_RESOLUTION_INCHES:
-            // convert resolution in inches to resolution in centimeters
-            hres = (int)(10*mm2inches*hres);
-            vres = (int)(10*mm2inches*vres);
-            // fall through to convert it to resolution in meters
-
-        case wxIMAGE_RESOLUTION_CM:
-            // convert resolution in centimeters to resolution in meters
-            hres *= 100;
-            vres *= 100;
-            break;
-    }
-
-    hdr.h_res = wxUINT32_SWAP_ON_BE(hres);
-    hdr.v_res = wxUINT32_SWAP_ON_BE(vres);
+    hdr.h_res = hdr.v_res = wxUINT32_SWAP_ON_BE(72);  // 72dpi is standard
     hdr.num_clrs = wxUINT32_SWAP_ON_BE(palette_size); // # colors in colormap
     hdr.num_signif_clrs = 0;     // all colors are significant
 
@@ -469,12 +444,10 @@ bool wxBMPHandler::SaveDib(wxImage *image,
 }
 
 
-struct BMPPalette
+typedef struct
 {
-    static void Free(BMPPalette* pal) { delete [] pal; }
-
     unsigned char r, g, b;
-};
+}  _cmap;
 
 bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
                              int bpp, int ncolors, int comp,
@@ -483,18 +456,18 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
 {
     wxInt32         aDword, rmask = 0, gmask = 0, bmask = 0, amask = 0;
     int             rshift = 0, gshift = 0, bshift = 0, ashift = 0;
-    int             rbits = 0, gbits = 0, bbits = 0;
+    int             rbits = 0, gbits = 0, bbits = 0, abits = 0;
     wxInt32         dbuf[4];
     wxInt8          bbuf[4];
     wxUint8         aByte;
     wxUint16        aWord;
 
     // allocate space for palette if needed:
-    BMPPalette *cmap;
+    _cmap *cmap;
 
     if ( bpp < 16 )
     {
-        cmap = new BMPPalette[ncolors];
+        cmap = new _cmap[ncolors];
         if ( !cmap )
         {
             if (verbose)
@@ -502,12 +475,8 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
             return false;
         }
     }
-    else // no palette
-    {
+    else
         cmap = NULL;
-    }
-
-    wxON_BLOCK_EXIT1(&BMPPalette::Free, cmap);
 
     // destroy existing here instead of:
     image->Destroy();
@@ -519,6 +488,7 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
     {
         if ( verbose )
             wxLogError( _("BMP: Couldn't allocate memory.") );
+        delete[] cmap;
         return false;
     }
 
@@ -532,6 +502,7 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
         {
             if ( verbose )
                 wxLogError(_("BMP: Couldn't allocate memory."));
+            delete[] cmap;
             return false;
         }
     }
@@ -630,6 +601,7 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
             rshift = 16;
             gshift = 8;
             bshift = 0;
+            abits = 8;
             rbits = 8;
             gbits = 8;
             bbits = 8;
@@ -640,11 +612,7 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
      * Reading the image data
      */
     if ( IsBmp )
-    {
-        if (stream.SeekI(bmpOffset) == wxInvalidOffset)
-            return false;
-        //else: icon, just carry on
-    }
+        stream.SeekI(bmpOffset); // else icon, just carry on
 
     unsigned char *data = ptr;
 
@@ -886,6 +854,8 @@ bool wxBMPHandler::DoLoadDib(wxImage * image, int width, int height,
         }
     }
 
+    delete[] cmap;
+
     image->SetMask(false);
 
     const wxStreamError err = stream.GetLastError();
@@ -963,7 +933,6 @@ bool wxBMPHandler::LoadDib(wxImage *image, wxInputStream& stream,
     }
 
     stream.Read(dbuf, 4 * 2);
-
     int ncolors = wxINT32_SWAP_ON_BE( (int)dbuf[0] );
     if (ncolors == 0)
         ncolors = 1 << bpp;
@@ -1001,11 +970,6 @@ bool wxBMPHandler::LoadDib(wxImage *image, wxInputStream& stream,
         image->SetMaskFromImage(mask, 255, 255, 255);
 
     }
-
-    // the resolution in the bitmap header is in meters, convert to centimeters
-    image->SetOption(wxIMAGE_OPTION_RESOLUTIONUNIT, wxIMAGE_RESOLUTION_CM);
-    image->SetOption(wxIMAGE_OPTION_RESOLUTIONX, dbuf[2]/100);
-    image->SetOption(wxIMAGE_OPTION_RESOLUTIONY, dbuf[3]/100);
 
     return true;
 }
@@ -1259,8 +1223,7 @@ bool wxICOHandler::SaveFile(wxImage *image,
 bool wxICOHandler::LoadFile(wxImage *image, wxInputStream& stream,
                             bool verbose, int index)
 {
-    if (stream.SeekI(0) == wxInvalidOffset)
-        return false;
+    stream.SeekI(0);
     return DoLoadFile(image, stream, verbose, index);
 }
 
@@ -1320,8 +1283,7 @@ bool wxICOHandler::DoLoadFile(wxImage *image, wxInputStream& stream,
     {
         // seek to selected icon:
         pCurrentEntry = pIconDirEntry + iSel;
-        if (stream.SeekI(iPos + wxUINT32_SWAP_ON_BE(pCurrentEntry->dwImageOffset), wxFromStart) == wxInvalidOffset)
-            return false;
+        stream.SeekI(iPos + wxUINT32_SWAP_ON_BE(pCurrentEntry->dwImageOffset), wxFromStart);
         bResult = LoadDib(image, stream, true, IsBmp);
         bool bIsCursorType = (this->GetType() == wxBITMAP_TYPE_CUR) || (this->GetType() == wxBITMAP_TYPE_ANI);
         if ( bResult && bIsCursorType && nType == 2 )
@@ -1339,20 +1301,16 @@ int wxICOHandler::GetImageCount(wxInputStream& stream)
 {
     ICONDIR IconDir;
     wxFileOffset iPos = stream.TellI();
-    if (stream.SeekI(0) == wxInvalidOffset)
-        return 0;
-    if (stream.Read(&IconDir, sizeof(IconDir)).LastRead() != sizeof(IconDir))
-        return 0;
+    stream.SeekI(0);
+    stream.Read(&IconDir, sizeof(IconDir));
     wxUint16 nIcons = wxUINT16_SWAP_ON_BE(IconDir.idCount);
-    if (stream.SeekI(iPos) == wxInvalidOffset)
-        return 0;
+    stream.SeekI(iPos);
     return (int)nIcons;
 }
 
 bool wxICOHandler::DoCanRead(wxInputStream& stream)
 {
-    if (stream.SeekI(0) == wxInvalidOffset)
-        return false;
+    stream.SeekI(0);
     unsigned char hdr[4];
     if ( !stream.Read(hdr, WXSIZEOF(hdr)) )
         return false;
@@ -1374,8 +1332,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxCURHandler, wxICOHandler)
 
 bool wxCURHandler::DoCanRead(wxInputStream& stream)
 {
-    if (stream.SeekI(0) == wxInvalidOffset)
-        return false;
+    stream.SeekI(0);
     unsigned char hdr[4];
     if ( !stream.Read(hdr, WXSIZEOF(hdr)) )
         return false;

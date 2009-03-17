@@ -675,7 +675,6 @@ public:
     wxSize m_bestSize;              // Actual movie size
 
     bool m_bWasStateChanged;        // See the "introduction"
-    wxEvtHandler* m_evthandler;
 
     friend class wxWMP10MediaEvtHandler;
     DECLARE_DYNAMIC_CLASS(wxWMP10MediaBackend)
@@ -700,7 +699,7 @@ public:
 private:
     wxWMP10MediaBackend *m_amb;
 
-    wxDECLARE_NO_COPY_CLASS(wxWMP10MediaEvtHandler);
+    DECLARE_NO_COPY_CLASS(wxWMP10MediaEvtHandler)
 };
 #endif
 
@@ -727,7 +726,6 @@ wxWMP10MediaBackend::wxWMP10MediaBackend()
                 m_pWMPPlayer(NULL)
 
 {
-    m_evthandler = NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -741,11 +739,7 @@ wxWMP10MediaBackend::~wxWMP10MediaBackend()
         m_pAX->DissociateHandle();
         delete m_pAX;
 
-        if (m_evthandler)
-        {
-            m_ctrl->RemoveEventHandler(m_evthandler);
-            delete m_evthandler;
-        }
+        m_ctrl->PopEventHandler(true);
 #else
         AtlAxWinTerm();
         _Module.Term();
@@ -818,8 +812,7 @@ bool wxWMP10MediaBackend::CreateControl(wxControl* ctrl, wxWindow* parent,
     m_pAX = new wxActiveXContainer(ctrl, IID_IWMPPlayer, m_pWMPPlayer);
 
     // Connect for events
-    m_evthandler = new wxWMP10MediaEvtHandler(this);
-    m_ctrl->PushEventHandler(m_evthandler);
+    m_ctrl->PushEventHandler(new wxWMP10MediaEvtHandler(this));
 #else
     _Module.Init(NULL, ::GetModuleHandle(NULL));
     AtlAxWinInit();

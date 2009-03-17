@@ -28,7 +28,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
-    #include "wx/log.h"
 #endif // WX_PRECOMP
 
 #include <gtk/gtk.h>
@@ -53,19 +52,19 @@ private:
 };
 
 // ============================================================================
-// wxGUIEventLoop implementation
+// wxEventLoop implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// wxGUIEventLoop running and exiting
+// wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
@@ -85,7 +84,7 @@ int wxGUIEventLoop::Run()
     return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
     wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
@@ -98,7 +97,7 @@ void wxGUIEventLoop::Exit(int rc)
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     if (wxTheApp)
     {
@@ -110,60 +109,11 @@ bool wxGUIEventLoop::Pending() const
     return gtk_events_pending();
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
     wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
 
     gtk_main_iteration();
-
-    return true;
-}
-
-//-----------------------------------------------------------------------------
-// wxYield
-//-----------------------------------------------------------------------------
-
-bool wxGUIEventLoop::YieldFor(long eventsToProcess)
-{
-#if wxUSE_THREADS
-    if ( !wxThread::IsMain() )
-    {
-        // can't call gtk_main_iteration() from other threads like this
-        return true;
-    }
-#endif // wxUSE_THREADS
-
-    m_isInsideYield = true;
-    m_eventsToProcessInsideYield = eventsToProcess;
-
-    // We need to remove idle callbacks or the loop will
-    // never finish.
-    wxTheApp->RemoveIdleTag();
-
-#if wxUSE_LOG
-    // disable log flushing from here because a call to wxYield() shouldn't
-    // normally result in message boxes popping up &c
-    wxLog::Suspend();
-#endif
-
-    // TODO: implement event filtering using the eventsToProcess mask
-    while (gtk_events_pending())
-        gtk_main_iteration();
-
-    // It's necessary to call ProcessIdle() to update the frames sizes which
-    // might have been changed (it also will update other things set from
-    // OnUpdateUI() which is a nice (and desired) side effect). But we
-    // call ProcessIdle() only once since this is not meant for longish
-    // background jobs (controlled by wxIdleEvent::RequestMore() and the
-    // return value of Processidle().
-    ProcessIdle();
-
-#if wxUSE_LOG
-    // let the logs be flashed again
-    wxLog::Resume();
-#endif
-
-    m_isInsideYield = false;
 
     return true;
 }

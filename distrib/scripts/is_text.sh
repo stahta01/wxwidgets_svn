@@ -32,8 +32,7 @@ fi
 if [ `basename $1` = "config.wat" ] ; then
     exit 1
 fi
-
-
+	
 if  svn proplist $1 | grep -q "eol-style"  ; then
     exit 0
 fi    

@@ -26,7 +26,7 @@
 // wxPrintDialogBase: interface for the dialog for printing
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrintDialogBase : public wxDialog
+class WXDLLEXPORT wxPrintDialogBase : public wxDialog
 {
 public:
     wxPrintDialogBase() { }
@@ -43,14 +43,14 @@ public:
     
 private:
     DECLARE_ABSTRACT_CLASS(wxPrintDialogBase)
-    wxDECLARE_NO_COPY_CLASS(wxPrintDialogBase);
+    DECLARE_NO_COPY_CLASS(wxPrintDialogBase)
 };
 
 // ---------------------------------------------------------------------------
 // wxPrintDialog: the dialog for printing.
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPrintDialog : public wxObject
+class WXDLLEXPORT wxPrintDialog : public wxObject
 {
 public:
     wxPrintDialog(wxWindow *parent, wxPrintDialogData* data = NULL);
@@ -68,14 +68,14 @@ private:
     
 private:
     DECLARE_DYNAMIC_CLASS(wxPrintDialog)
-    wxDECLARE_NO_COPY_CLASS(wxPrintDialog);
+    DECLARE_NO_COPY_CLASS(wxPrintDialog)
 };
 
 // ---------------------------------------------------------------------------
 // wxPageSetupDialogBase: interface for the page setup dialog
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPageSetupDialogBase: public wxDialog
+class WXDLLEXPORT wxPageSetupDialogBase: public wxDialog
 {
 public:
     wxPageSetupDialogBase() { }
@@ -90,14 +90,14 @@ public:
 
 private:
     DECLARE_ABSTRACT_CLASS(wxPageSetupDialogBase)
-    wxDECLARE_NO_COPY_CLASS(wxPageSetupDialogBase);
+    DECLARE_NO_COPY_CLASS(wxPageSetupDialogBase)
 };
 
 // ---------------------------------------------------------------------------
 // wxPageSetupDialog: the page setup dialog
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPageSetupDialog: public wxObject
+class WXDLLEXPORT wxPageSetupDialog: public wxObject
 {
 public:
     wxPageSetupDialog(wxWindow *parent, wxPageSetupDialogData *data = NULL);
@@ -113,7 +113,7 @@ private:
     
 private:
     DECLARE_DYNAMIC_CLASS(wxPageSetupDialog)
-    wxDECLARE_NO_COPY_CLASS(wxPageSetupDialog);
+    DECLARE_NO_COPY_CLASS(wxPageSetupDialog)
 };
 
 #endif

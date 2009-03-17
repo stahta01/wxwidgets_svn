@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/unix/utilsx11.cpp
-// Purpose:     Miscellaneous X11 functions (for wxCore)
+// Purpose:     Miscellaneous X11 functions
 // Author:      Mattia Barbon, Vaclav Slavik, Robert Roebling
 // Modified by:
 // Created:     25.03.02
@@ -24,7 +24,6 @@
 #endif
 
 #include "wx/iconbndl.h"
-#include "wx/apptrait.h"
 
 #ifdef __VMS
 #pragma message disable nosimpint
@@ -42,6 +41,7 @@
 #endif
 
 // Various X11 Atoms used in this file:
+static Atom _NET_WM_ICON = 0;
 static Atom _NET_WM_STATE = 0;
 static Atom _NET_WM_STATE_FULLSCREEN = 0;
 static Atom _NET_WM_STATE_STAYS_ON_TOP = 0;
@@ -106,35 +106,31 @@ private:
 // Setting icons for window manager:
 // ----------------------------------------------------------------------------
 
-#if wxUSE_IMAGE && !wxUSE_NANOX
-
-static Atom _NET_WM_ICON = 0;
-
-void
-wxSetIconsX11(WXDisplay* display, WXWindow window, const wxIconBundle& ib)
+void wxSetIconsX11( WXDisplay* display, WXWindow window,
+                    const wxIconBundle& ib )
 {
+#if !wxUSE_NANOX
     size_t size = 0;
+    size_t i, max = ib.m_icons.GetCount();
 
-    const size_t numIcons = ib.GetIconCount();
-    for ( size_t i = 0; i < numIcons; ++i )
-    {
-        const wxIcon icon = ib.GetIconByIndex(i);
-
-        size += 2 + icon.GetWidth() * icon.GetHeight();
-    }
+    for( i = 0; i < max; ++i )
+        if( ib.m_icons[i].Ok() )
+            size += 2 + ib.m_icons[i].GetWidth() * ib.m_icons[i].GetHeight();
 
     wxMAKE_ATOM(_NET_WM_ICON, (Display*)display);
 
-    if ( size > 0 )
+    if( size > 0 )
     {
+//       The code below is correct for 64-bit machines also.
+//       wxUint32* data = new wxUint32[size];
+//       wxUint32* ptr = data;
         unsigned long* data = new unsigned long[size];
         unsigned long* ptr = data;
 
-        for ( size_t i = 0; i < numIcons; ++i )
+        for( i = 0; i < max; ++i )
         {
-            const wxImage image = ib.GetIconByIndex(i).ConvertToImage();
-            int width = image.GetWidth(),
-                height = image.GetHeight();
+            const wxImage image = ib.m_icons[i].ConvertToImage();
+            int width = image.GetWidth(), height = image.GetHeight();
             unsigned char* imageData = image.GetData();
             unsigned char* imageDataEnd = imageData + ( width * height * 3 );
             bool hasMask = image.HasMask();
@@ -157,8 +153,7 @@ wxSetIconsX11(WXDisplay* display, WXWindow window, const wxIconBundle& ib)
             *ptr++ = width;
             *ptr++ = height;
 
-            while ( imageData < imageDataEnd )
-            {
+            while( imageData < imageDataEnd ) {
                 r = imageData[0];
                 g = imageData[1];
                 b = imageData[2];
@@ -187,9 +182,9 @@ wxSetIconsX11(WXDisplay* display, WXWindow window, const wxIconBundle& ib)
                          WindowCast(window),
                          _NET_WM_ICON );
     }
+#endif // !wxUSE_NANOX
 }
 
-#endif // wxUSE_IMAGE && !wxUSE_NANOX
 
 // ----------------------------------------------------------------------------
 // Fullscreen mode:
@@ -383,20 +378,20 @@ static bool wxKwinRunning(Display *display, Window rootWnd)
 {
     wxMAKE_ATOM(KWIN_RUNNING, display);
 
-    unsigned char* data;
+    long *data;
     Atom type;
     int format;
     unsigned long nitems, after;
     if (XGetWindowProperty(display, rootWnd,
                            KWIN_RUNNING, 0, 1, False, KWIN_RUNNING,
                            &type, &format, &nitems, &after,
-                           &data) != Success)
+                           (unsigned char**)&data) != Success)
     {
         return false;
     }
 
     bool retval = (type == KWIN_RUNNING &&
-                   nitems == 1 && data && ((long*)data)[0] == 1);
+                   nitems == 1 && data && data[0] == 1);
     XFree(data);
     return retval;
 }
@@ -847,82 +842,6 @@ bool wxGetKeyState(wxKeyCode key)
     char key_vector[32];
     XQueryKeymap(pDisplay, key_vector);
     return key_vector[keyCode >> 3] & (1 << (keyCode & 7));
-}
-
-// ----------------------------------------------------------------------------
-// Launch document with default app
-// ----------------------------------------------------------------------------
-
-bool wxLaunchDefaultApplication(const wxString& document, int flags)
-{
-    wxUnusedVar(flags);
-
-    // Our best best is to use xdg-open from freedesktop.org cross-desktop
-    // compatibility suite xdg-utils
-    // (see http://portland.freedesktop.org/wiki/) -- this is installed on
-    // most modern distributions and may be tweaked by them to handle
-    // distribution specifics.
-    wxString path, xdg_open;
-    if ( wxGetEnv("PATH", &path) &&
-         wxFindFileInPath(&xdg_open, path, "xdg-open") )
-    {
-        if ( wxExecute(xdg_open + " " + document) )
-            return true;
-    }
-
-    return false;
-}
-
-// ----------------------------------------------------------------------------
-// Launch default browser
-// ----------------------------------------------------------------------------
-
-bool wxDoLaunchDefaultBrowser(const wxString& url, int flags)
-{
-    wxUnusedVar(flags);
-
-    // Our best best is to use xdg-open from freedesktop.org cross-desktop
-    // compatibility suite xdg-utils
-    // (see http://portland.freedesktop.org/wiki/) -- this is installed on
-    // most modern distributions and may be tweaked by them to handle
-    // distribution specifics. Only if that fails, try to find the right
-    // browser ourselves.
-    wxString path, xdg_open;
-    if ( wxGetEnv("PATH", &path) &&
-         wxFindFileInPath(&xdg_open, path, "xdg-open") )
-    {
-        if ( wxExecute(xdg_open + " " + url) )
-            return true;
-    }
-
-    wxString desktop = wxTheApp->GetTraits()->GetDesktopEnvironment();
-
-    // GNOME and KDE desktops have some applications which should be always installed
-    // together with their main parts, which give us the
-    if (desktop == wxT("GNOME"))
-    {
-        wxArrayString errors;
-        wxArrayString output;
-
-        // gconf will tell us the path of the application to use as browser
-        long res = wxExecute( wxT("gconftool-2 --get /desktop/gnome/applications/browser/exec"),
-                              output, errors, wxEXEC_NODISABLE );
-        if (res >= 0 && errors.GetCount() == 0)
-        {
-            wxString cmd = output[0];
-            cmd << _T(' ') << url;
-            if (wxExecute(cmd))
-                return true;
-        }
-    }
-    else if (desktop == wxT("KDE"))
-    {
-        // kfmclient directly opens the given URL
-        if (wxExecute(wxT("kfmclient openURL ") + url))
-            return true;
-    }
-
-    return false;
 }
 
 #endif // __WXX11__ || __WXGTK__ || __WXMOTIF__

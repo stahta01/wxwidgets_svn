@@ -31,6 +31,7 @@
     #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
     #include "wx/app.h"
     #include "wx/control.h"
+    #include "wx/combobox.h"
 #endif
 
 #include "wx/tokenzr.h"
@@ -60,9 +61,6 @@
 
 // the tooltip parent window
 WXHWND wxToolTip::ms_hwndTT = (WXHWND)NULL;
-
-// new tooltip maximum width, default value is set on first call to wxToolTip::Add()
-int wxToolTip::ms_maxWidth = 0;
 
 #if wxUSE_TTM_WINDOWFROMPOINT
 
@@ -108,7 +106,7 @@ public:
             uFlags |= TTF_TRANSPARENT;
         }
 
-        uId = (UINT_PTR)hwndOwner;
+        uId = (UINT)hwndOwner;
     }
 };
 
@@ -204,25 +202,6 @@ void wxToolTip::SetDelay(long milliseconds)
 {
     SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
                             TTDT_INITIAL, milliseconds);
-}
-
-void wxToolTip::SetAutoPop(long milliseconds)
-{
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_AUTOPOP, milliseconds);
-}
-
-void wxToolTip::SetReshow(long milliseconds)
-{
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_RESHOW, milliseconds);
-}
-
-void wxToolTip::SetMaxWidth(int width)
-{
-    wxASSERT_MSG( width == -1 || width >= 0, _T("invalid width value") );
-
-    ms_maxWidth = width;
 }
 
 // ---------------------------------------------------------------------------
@@ -325,98 +304,82 @@ void wxToolTip::Add(WXHWND hWnd)
     // NMTTDISPINFO struct -- and setting the tooltip here we can have tooltips
     // of any length
     ti.hwnd = hwnd;
-    ti.lpszText = const_cast<wxChar *>(m_text.wx_str());
+    ti.lpszText = (wxChar *)m_text.c_str(); // const_cast
 
     if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, &ti) )
     {
         wxLogDebug(_T("Failed to create the tooltip '%s'"), m_text.c_str());
-
-        return;
-    }
-
-#ifdef TTM_SETMAXTIPWIDTH
-    if ( wxApp::GetComCtl32Version() >= 470 )
-    {
-        // use TTM_SETMAXTIPWIDTH to make tooltip multiline using the
-        // extent of its first line as max value
-        HFONT hfont = (HFONT)
-            SendTooltipMessage(GetToolTipCtrl(), WM_GETFONT, 0);
-
-        if ( !hfont )
-        {
-            hfont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
-            if ( !hfont )
-            {
-                wxLogLastError(wxT("GetStockObject(DEFAULT_GUI_FONT)"));
-            }
-        }
-
-        MemoryHDC hdc;
-        if ( !hdc )
-        {
-            wxLogLastError(wxT("CreateCompatibleDC(NULL)"));
-        }
-
-        if ( !SelectObject(hdc, hfont) )
-        {
-            wxLogLastError(wxT("SelectObject(hfont)"));
-        }
-
-        // find the width of the widest line
-        int maxWidth = 0;
-        wxStringTokenizer tokenizer(m_text, _T("\n"));
-        while ( tokenizer.HasMoreTokens() )
-        {
-            const wxString token = tokenizer.GetNextToken();
-
-            SIZE sz;
-            if ( !::GetTextExtentPoint32(hdc, token.wx_str(),
-                                         token.length(), &sz) )
-            {
-                wxLogLastError(wxT("GetTextExtentPoint32"));
-            }
-
-            if ( sz.cx > maxWidth )
-                maxWidth = sz.cx;
-        }
-
-        // limit size to ms_maxWidth, if set
-        if ( ms_maxWidth == 0 )
-        {
-            // this is more or less arbitrary but seems to work well
-            static const int DEFAULT_MAX_WIDTH = 400;
-
-            ms_maxWidth = wxGetClientDisplayRect().width / 2;
-
-            if ( ms_maxWidth > DEFAULT_MAX_WIDTH )
-                ms_maxWidth = DEFAULT_MAX_WIDTH;
-        }
-
-        if ( ms_maxWidth != -1 && maxWidth > ms_maxWidth )
-            maxWidth = ms_maxWidth;
-
-        // only set a new width if it is bigger than the current setting:
-        // otherwise adding a tooltip with shorter line(s) than a previous
-        // one would result in breaking the longer lines unnecessarily as
-        // all our tooltips share the same maximal width
-        if ( maxWidth > SendTooltipMessage(GetToolTipCtrl(),
-                                           TTM_GETMAXTIPWIDTH, 0) )
-        {
-            SendTooltipMessage(GetToolTipCtrl(), TTM_SETMAXTIPWIDTH,
-                               wxUIntToPtr(maxWidth));
-        }
     }
     else
-#endif // TTM_SETMAXTIPWIDTH
     {
-        // replace the '\n's with spaces because otherwise they appear as
-        // unprintable characters in the tooltip string
-        m_text.Replace(_T("\n"), _T(" "));
-        ti.lpszText = const_cast<wxChar *>(m_text.wx_str());
+        // check for multiline toopltip
+        int index = m_text.Find(_T('\n'));
 
-        if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, &ti) )
+        if ( index != wxNOT_FOUND )
         {
-            wxLogDebug(_T("Failed to create the tooltip '%s'"), m_text.c_str());
+#ifdef TTM_SETMAXTIPWIDTH
+            if ( wxApp::GetComCtl32Version() >= 470 )
+            {
+                // use TTM_SETMAXTIPWIDTH to make tooltip multiline using the
+                // extent of its first line as max value
+                HFONT hfont = (HFONT)
+                    SendTooltipMessage(GetToolTipCtrl(), WM_GETFONT, 0);
+
+                if ( !hfont )
+                {
+                    hfont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+                    if ( !hfont )
+                    {
+                        wxLogLastError(wxT("GetStockObject(DEFAULT_GUI_FONT)"));
+                    }
+                }
+
+                MemoryHDC hdc;
+                if ( !hdc )
+                {
+                    wxLogLastError(wxT("CreateCompatibleDC(NULL)"));
+                }
+
+                if ( !SelectObject(hdc, hfont) )
+                {
+                    wxLogLastError(wxT("SelectObject(hfont)"));
+                }
+
+                // find the width of the widest line
+                int max = 0;
+                wxStringTokenizer tokenizer(m_text, _T("\n"));
+                wxString token = tokenizer.GetNextToken();
+                while (token.length())
+                {
+                    SIZE sz;
+                    if ( !::GetTextExtentPoint32(hdc, token, token.length(), &sz) )
+                    {
+                        wxLogLastError(wxT("GetTextExtentPoint32"));
+                    }
+                    if ( sz.cx > max )
+                        max = sz.cx;
+
+                    token = tokenizer.GetNextToken();
+                }
+
+                // only set a new width if it is bigger than the current setting
+                if (max > SendTooltipMessage(GetToolTipCtrl(), TTM_GETMAXTIPWIDTH, 0))
+                    SendTooltipMessage(GetToolTipCtrl(), TTM_SETMAXTIPWIDTH,
+                                       (void *)max);
+            }
+            else
+#endif // comctl32.dll >= 4.70
+            {
+                // replace the '\n's with spaces because otherwise they appear as
+                // unprintable characters in the tooltip string
+                m_text.Replace(_T("\n"), _T(" "));
+                ti.lpszText = (wxChar *)m_text.c_str(); // const_cast
+
+                if ( !SendTooltipMessage(GetToolTipCtrl(), TTM_ADDTOOL, &ti) )
+                {
+                    wxLogDebug(_T("Failed to create the tooltip '%s'"), m_text.c_str());
+                }
+            }
         }
     }
 }
@@ -433,7 +396,7 @@ void wxToolTip::SetWindow(wxWindow *win)
         Add(m_window->GetHWND());
     }
 #if !defined(__WXUNIVERSAL__)
-    // and all of its subcontrols (e.g. radio buttons in a radiobox) as well
+    // and all of its subcontrols (e.g. radiobuttons in a radiobox) as well
     wxControl *control = wxDynamicCast(m_window, wxControl);
     if ( control )
     {
@@ -457,6 +420,22 @@ void wxToolTip::SetWindow(wxWindow *win)
             Add((WXHWND)hwnd);
         }
     }
+
+    // VZ: it's ugly to do it here, but I don't want any major changes right
+    //     now, later we will probably want to have wxWindow::OnGotToolTip() or
+    //     something like this where the derived class can do such things
+    //     itself instead of wxToolTip "knowing" about them all
+    wxComboBox *combo = wxDynamicCast(control, wxComboBox);
+    if ( combo )
+    {
+        WXHWND hwndComboEdit = combo->GetWindowStyle() & wxCB_READONLY
+                                ? combo->GetHWND()
+                                : combo->GetEditHWND();
+        if ( hwndComboEdit )
+        {
+            Add(hwndComboEdit);
+        }
+    }
 #endif // !defined(__WXUNIVERSAL__)
 }
 
@@ -468,14 +447,8 @@ void wxToolTip::SetTip(const wxString& tip)
     {
         // update the tip text shown by the control
         wxToolInfo ti(GetHwndOf(m_window));
+        ti.lpszText = (wxChar *)m_text.c_str();
 
-        // for some reason, changing the tooltip text directly results in
-        // repaint of the controls under it, see #10520 -- but this doesn't
-        // happen if we reset it first
-        ti.lpszText = const_cast<wxChar *>(_T(""));
-        (void)SendTooltipMessage(GetToolTipCtrl(), TTM_UPDATETIPTEXT, &ti);
-
-        ti.lpszText = const_cast<wxChar *>(m_text.wx_str());
         (void)SendTooltipMessage(GetToolTipCtrl(), TTM_UPDATETIPTEXT, &ti);
     }
 }

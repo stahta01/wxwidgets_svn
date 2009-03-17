@@ -34,7 +34,6 @@
     #include "wx/log.h"
 #endif //WX_PRECOMP
 
-#include "wx/display.h"
 #include "wx/recguard.h"
 
 #ifdef __WXUNIVERSAL__
@@ -76,7 +75,7 @@ private:
     wxPopupTransientWindow *m_popup;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxPopupWindowHandler);
+    DECLARE_NO_COPY_CLASS(wxPopupWindowHandler)
 };
 
 class wxPopupFocusHandler : public wxEvtHandler
@@ -92,7 +91,7 @@ private:
     wxPopupTransientWindow *m_popup;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxPopupFocusHandler);
+    DECLARE_NO_COPY_CLASS(wxPopupFocusHandler)
 };
 
 // ----------------------------------------------------------------------------
@@ -109,7 +108,7 @@ BEGIN_EVENT_TABLE(wxPopupFocusHandler, wxEvtHandler)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxPopupTransientWindow, wxPopupWindow)
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#if defined( __WXMSW__ ) || defined( __WXMAC__ )
     EVT_IDLE(wxPopupTransientWindow::OnIdle)
 #endif
 END_EVENT_TABLE()
@@ -135,31 +134,13 @@ bool wxPopupWindowBase::Create(wxWindow* WXUNUSED(parent), int WXUNUSED(flags))
 void wxPopupWindowBase::Position(const wxPoint& ptOrigin,
                                  const wxSize& size)
 {
-    // determine the position and size of the screen we clamp the popup to
-    wxPoint posScreen;
-    wxSize sizeScreen;
-
-    const int displayNum = wxDisplay::GetFromPoint(ptOrigin);
-    if ( displayNum != wxNOT_FOUND )
-    {
-        const wxRect rectScreen = wxDisplay(displayNum).GetGeometry();
-        posScreen = rectScreen.GetPosition();
-        sizeScreen = rectScreen.GetSize();
-    }
-    else // outside of any display?
-    {
-        // just use the primary one then
-        posScreen = wxPoint(0, 0);
-        sizeScreen = wxGetDisplaySize();
-    }
-
-
-    const wxSize sizeSelf = GetSize();
+    wxSize sizeScreen = wxGetDisplaySize(),
+           sizeSelf = GetSize();
 
     // is there enough space to put the popup below the window (where we put it
     // by default)?
     wxCoord y = ptOrigin.y + size.y;
-    if ( y + sizeSelf.y > posScreen.y + sizeScreen.y )
+    if ( y + sizeSelf.y > sizeScreen.y )
     {
         // check if there is enough space above
         if ( ptOrigin.y > sizeSelf.y )
@@ -172,7 +153,7 @@ void wxPopupWindowBase::Position(const wxPoint& ptOrigin,
 
     // now check left/right too
     wxCoord x = ptOrigin.x;
-
+            
     if ( wxTheApp->GetLayoutDirection() == wxLayout_RightToLeft )
     {
         // shift the window to the left instead of the right.
@@ -182,8 +163,8 @@ void wxPopupWindowBase::Position(const wxPoint& ptOrigin,
     else
         x += size.x;
 
-
-    if ( x + sizeSelf.x > posScreen.x + sizeScreen.x )
+    
+    if ( x + sizeSelf.x > sizeScreen.x )
     {
         // check if there is enough space to the left
         if ( ptOrigin.x > sizeSelf.x )
@@ -204,7 +185,7 @@ void wxPopupWindowBase::Position(const wxPoint& ptOrigin,
 void wxPopupTransientWindow::Init()
 {
     m_child =
-    m_focus = NULL;
+    m_focus = (wxWindow *)NULL;
 
     m_handlerFocus = NULL;
     m_handlerPopup = NULL;
@@ -271,7 +252,7 @@ void wxPopupTransientWindow::Popup(wxWindow *winFocus)
 
     Show();
 
-    // There is a problem if these are still in use
+    // There is is a problem if these are still in use
     wxASSERT(!m_handlerFocus || !m_handlerFocus->GetNextHandler());
     wxASSERT(!m_handlerPopup || !m_handlerPopup->GetNextHandler());
 
@@ -291,7 +272,7 @@ void wxPopupTransientWindow::Popup(wxWindow *winFocus)
         m_focus->SetFocus();
     }
 
-#if defined( __WXMSW__ ) || (defined( __WXMAC__) && wxOSX_USE_CARBON)
+#if defined( __WXMSW__ ) || defined( __WXMAC__ )
     // MSW doesn't allow to set focus to the popup window, but we need to
     // subclass the window which has the focus, and not winFocus passed in or
     // otherwise everything else breaks down
@@ -329,7 +310,7 @@ bool wxPopupTransientWindow::Show( bool show )
     }
 #endif
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#if defined( __WXMSW__ ) || defined( __WMAC__ )
     if (!show && m_child && m_child->HasCapture())
     {
         m_child->ReleaseMouse();
@@ -349,8 +330,8 @@ bool wxPopupTransientWindow::Show( bool show )
                              GDK_BUTTON_RELEASE_MASK |
                              GDK_POINTER_MOTION_HINT_MASK |
                              GDK_POINTER_MOTION_MASK),
-                          NULL,
-                          NULL,
+                          (GdkWindow *) NULL,
+                          (GdkCursor *) NULL,
                           (guint32)GDK_CURRENT_TIME );
     }
 #endif
@@ -371,7 +352,7 @@ bool wxPopupTransientWindow::Show( bool show )
     }
 #endif
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#if defined( __WXMSW__ ) || defined( __WMAC__ )
     if (show && m_child)
     {
         // Assume that the mouse is outside the popup to begin with
@@ -405,7 +386,7 @@ bool wxPopupTransientWindow::ProcessLeftDown(wxMouseEvent& WXUNUSED(event))
     return false;
 }
 
-#if defined( __WXMSW__ ) || defined( __WXMAC__)
+#if defined( __WXMSW__ ) || defined( __WXMAC__ )
 void wxPopupTransientWindow::OnIdle(wxIdleEvent& event)
 {
     event.Skip();
@@ -483,7 +464,7 @@ void wxPopupComboWindow::OnDismiss()
 
 void wxPopupComboWindow::OnKeyDown(wxKeyEvent& event)
 {
-    m_combo->ProcessWindowEvent(event);
+    m_combo->ProcessEvent(event);
 }
 
 #endif // wxUSE_COMBOBOX && defined(__WXUNIVERSAL__)
@@ -535,7 +516,7 @@ void wxPopupWindowHandler::OnLeftDown(wxMouseEvent& event)
                     winUnder->ScreenToClient(&event2.m_x, &event2.m_y);
 
                     event2.SetEventObject(winUnder);
-                    wxPostEvent(winUnder->GetEventHandler(), event2);
+                    wxPostEvent(winUnder, event2);
                 }
             }
             break;

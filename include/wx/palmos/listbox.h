@@ -19,7 +19,7 @@
 // ----------------------------------------------------------------------------
 
 #if wxUSE_OWNER_DRAWN
-  class WXDLLIMPEXP_FWD_CORE wxOwnerDrawn;
+  class WXDLLEXPORT wxOwnerDrawn;
 
   // define the array of list box items
   #include  "wx/dynarray.h"
@@ -34,7 +34,7 @@ class wxArrayInt;
 // List box control
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxListBox : public wxListBoxBase
+class WXDLLEXPORT wxListBox : public wxListBoxBase
 {
 public:
     // ctors and such
@@ -78,8 +78,8 @@ public:
     virtual ~wxListBox();
 
     // implement base class pure virtuals
-    virtual void DoClear();
-    virtual void DoDeleteOneItem(unsigned int n);
+    virtual void Clear();
+    virtual void Delete(unsigned int n);
 
     virtual unsigned int GetCount() const;
     virtual wxString GetString(unsigned int n) const;
@@ -90,14 +90,16 @@ public:
     virtual int GetSelection() const;
     virtual int GetSelections(wxArrayInt& aSelections) const;
 
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
+    virtual void DoInsertItems(const wxArrayString& items, unsigned int pos);
+    virtual void DoSetItems(const wxArrayString& items, void **clientData);
 
     virtual void DoSetFirstItem(int n);
 
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
 
     // wxCheckListBox support
 #if wxUSE_OWNER_DRAWN

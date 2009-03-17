@@ -39,12 +39,7 @@
     #include "wx/ownerdrw.h"
 #endif
 
-#ifdef __WXPALMOS6__
 #include <Loader.h>
-#else // __WXPALMOS5__
-#include <UIResources.h> // MenuRscType
-#endif
-
 #include <Form.h>
 #include <Menu.h>
 
@@ -157,7 +152,7 @@ const wxMenuInfoList& wxMenuBar::GetMenuInfos() const
     for( size_t i = 0 ; i < GetMenuCount() ; ++i )
     {
         wxMenuInfo* info = new wxMenuInfo() ;
-        info->Create( const_cast<wxMenuBar*>(this)->GetMenu(i) , GetMenuLabel(i) ) ;
+        info->Create( const_cast<wxMenuBar*>(this)->GetMenu(i) , GetLabelTop(i) ) ;
         list->Append( info ) ;
     }
     return m_menuInfos ;
@@ -377,11 +372,11 @@ void wxMenuBar::EnableTop(size_t pos, bool enable)
     // Palm OS does not have support for grayed or disabled items
 }
 
-void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
+void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)
 {
     wxCHECK_RET( pos < GetMenuCount(), wxT("invalid menu index") );
 
-    m_titles[pos] = label;
+    m_titles[pos]=wxStripMenuCodes(label);
 
     if ( !IsAttached() )
     {
@@ -392,6 +387,15 @@ void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
     Refresh();
 }
 
+wxString wxMenuBar::GetLabelTop(size_t pos) const
+{
+    wxCHECK_MSG( pos < GetMenuCount(), wxEmptyString,
+                 wxT("invalid menu index in wxMenuBar::GetLabelTop") );
+
+    return wxMenuItem::GetLabelFromText(m_titles[pos]);
+}
+
+// Gets the original label at the top-level of the menubar
 wxString wxMenuBar::GetMenuLabel(size_t pos) const
 {
     wxCHECK_MSG( pos < GetMenuCount(), wxEmptyString,
@@ -410,7 +414,7 @@ wxMenu *wxMenuBar::Replace(size_t pos, wxMenu *menu, const wxString& title)
     if ( !menuOld )
         return NULL;
 
-    m_titles[pos] = title;
+    m_titles[pos]=wxStripMenuCodes(title);
 
     if ( IsAttached() )
     {
@@ -426,7 +430,7 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
     if ( !wxMenuBarBase::Insert(pos, menu, title) )
         return false;
 
-    m_titles.Insert(title, pos);
+    m_titles.Insert(wxStripMenuCodes(title), pos);
 
     if ( IsAttached() )
     {
@@ -442,7 +446,7 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
     if ( !wxMenuBarBase::Append(menu, title) )
         return false;
 
-    m_titles.Add(title);
+    m_titles.Add(wxStripMenuCodes(title));
 
     if(IsAttached())
     {
@@ -542,13 +546,12 @@ void wxMenuBar::LoadMenu()
 {
     int i=0;
     int j=0;
-#ifdef __WXPALMOS6__
+
     // Handle to the currently running application database
     DmOpenRef    AppDB;
 
     // Get app database reference - needed for some Palm OS Menu API calls.
     SysGetModuleDatabase(SysGetRefNum(), NULL, &AppDB);
-#endif // __WXPALMOS6__
 
     // Get the number of menus
     int NumMenus=GetMenuCount();
@@ -560,24 +563,24 @@ void wxMenuBar::LoadMenu()
     // Load the menu template and set up the menu pointers
     if(NumMenus==1)
     {
-        PalmOSMenuBar = POS_DmGetResource (AppDB, MenuRscType, 1000);
-        PalmOSMenuBarPtr = (char *)MemHandleLock (PalmOSMenuBar);
+        PalmOSMenuBar=DmGetResource(AppDB,'MBAR',1000);
+        PalmOSMenuBarPtr=(char *)MemHandleLock(PalmOSMenuBar);
 
-        PalmOSMenuBarPtr += 74;
+        PalmOSMenuBarPtr+=74;
     }
     else if(NumMenus==2)
     {
-        PalmOSMenuBar = POS_DmGetResource (AppDB, MenuRscType, 2000);
-        PalmOSMenuBarPtr = (char *)MemHandleLock (PalmOSMenuBar);
+        PalmOSMenuBar=DmGetResource(AppDB,'MBAR',2000);
+        PalmOSMenuBarPtr=(char *)MemHandleLock(PalmOSMenuBar);
 
-        PalmOSMenuBarPtr += 116;
+        PalmOSMenuBarPtr+=116;
     }
     else if(NumMenus==3)
     {
-        PalmOSMenuBar = POS_DmGetResource (AppDB, MenuRscType, 3000);
-        PalmOSMenuBarPtr = (char *)MemHandleLock (PalmOSMenuBar);
+        PalmOSMenuBar=DmGetResource(AppDB,'MBAR',3000);
+        PalmOSMenuBarPtr=(char *)MemHandleLock(PalmOSMenuBar);
 
-        PalmOSMenuBarPtr += 158;
+        PalmOSMenuBarPtr+=158;
     }
     else
     {
@@ -585,10 +588,10 @@ void wxMenuBar::LoadMenu()
         // more than we can handle.
         NumMenus=4;
 
-        PalmOSMenuBar = POS_DmGetResource (AppDB, MenuRscType, 4000);
-        PalmOSMenuBarPtr = (char *)MemHandleLock (PalmOSMenuBar);
+        PalmOSMenuBar=DmGetResource(AppDB,'MBAR',4000);
+        PalmOSMenuBarPtr=(char *)MemHandleLock(PalmOSMenuBar);
 
-        PalmOSMenuBarPtr += 200;
+        PalmOSMenuBarPtr+=200;
     }
 
     // Set the proper names for the drop-down triggers.
@@ -601,11 +604,11 @@ void wxMenuBar::LoadMenu()
         wxString MenuTitle=m_titles.Item(i);
 
         // Make sure we don't copy more than 8 bytes for the label
-        int LengthToCopy = MenuTitle.length();
-        if(LengthToCopy > 8)
-            LengthToCopy = 8;
+        int LengthToCopy=MenuTitle.length();
+        if(LengthToCopy>8)
+            LengthToCopy=8;
 
-        MemMove(PalmOSMenuBarPtr,(char*)(&MenuTitle),LengthToCopy);
+        MemMove(PalmOSMenuBarPtr,MenuTitle,LengthToCopy);
         PalmOSMenuBarPtr+=11;
     }
 
@@ -615,7 +618,7 @@ void wxMenuBar::LoadMenu()
 
     // We must make the menu active before we can add items to the drop-down
     // triggers.
-    POS_FrmSetMenu (FrmGetActiveForm(), AppDB, NumMenus * 1000);
+    FrmSetMenu(FrmGetActiveForm(),AppDB,NumMenus*1000);
 
     /* Add the menu items to the drop-down triggers.  This must be done after
      * setting the triggers, because setting the names of drop-down triggers
@@ -643,9 +646,9 @@ void wxMenuBar::LoadMenu()
             else
             {
                 if(j==0)
-                    MenuAddItem(9000+i,((i*1000)+1000)+j,0x00,(char *)(&ItemLabel));
+                    MenuAddItem(9000+i,((i*1000)+1000)+j,0x00,ItemLabel);
                 else
-                    MenuAddItem(((i*1000)+1000)+j-1,((i*1000)+1000)+j,0x00,(char *)(&ItemLabel));
+                    MenuAddItem(((i*1000)+1000)+j-1,((i*1000)+1000)+j,0x00,ItemLabel);
             }
         }
 

@@ -53,7 +53,7 @@ public:
 private:
     CGDirectDisplayID m_id;
 
-    wxDECLARE_NO_COPY_CLASS(wxDisplayImplMacOSX);
+    DECLARE_NO_COPY_CLASS(wxDisplayImplMacOSX)
 };
 
 class wxDisplayFactoryMacOSX : public wxDisplayFactory
@@ -66,7 +66,7 @@ public:
     virtual int GetFromPoint(const wxPoint& pt);
 
 protected:
-    wxDECLARE_NO_COPY_CLASS(wxDisplayFactoryMacOSX);
+    DECLARE_NO_COPY_CLASS(wxDisplayFactoryMacOSX)
 };
 
 // ============================================================================

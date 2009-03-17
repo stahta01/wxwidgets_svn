@@ -29,6 +29,7 @@
 #include "wx/menu.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
     #include "wx/frame.h"
     #include "wx/utils.h"
     #include "wx/intl.h"
@@ -39,10 +40,7 @@
     #include "wx/ownerdrw.h"
 #endif
 
-#include "wx/scopedarray.h"
-
 #include "wx/msw/private.h"
-#include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
 
 #ifdef __WXWINCE__
 #include <windows.h>
@@ -61,7 +59,7 @@
 // other standard headers
 #include <string.h>
 
-#if wxUSE_OWNER_DRAWN
+#if wxUSE_OWNER_DRAWN && defined(MIIM_BITMAP)
     #include "wx/dynlib.h"
 #endif
 
@@ -81,18 +79,15 @@
 // ----------------------------------------------------------------------------
 
 // the (popup) menu title has this special id
-static const UINT idMenuTitle = (UINT)-3;
+static const int idMenuTitle = -3;
 
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
-namespace
-{
-
 // make the given menu item default
-void SetDefaultMenuItem(HMENU WXUNUSED_IN_WINCE(hmenu),
-                        UINT WXUNUSED_IN_WINCE(id))
+static void SetDefaultMenuItem(HMENU WXUNUSED_IN_WINCE(hmenu),
+                               UINT WXUNUSED_IN_WINCE(id))
 {
 #ifndef __WXWINCE__
     MENUITEMINFO mii;
@@ -120,18 +115,7 @@ UINT GetMenuState(HMENU hMenu, UINT id, UINT flags)
         wxLogLastError(wxT("GetMenuItemInfo"));
     return info.fState;
 }
-#endif // __WXWINCE__
-
-bool IsLessThanStdSize(const wxBitmap& bmp)
-{
-    // FIXME: these +4 are chosen so that 16*16 bitmaps pass this test with
-    //        default SM_CXMENUCHECK value but I have no idea what do we really
-    //        need to use here
-    return bmp.GetWidth() < ::GetSystemMetrics(SM_CXMENUCHECK) + 4 &&
-            bmp.GetHeight() < ::GetSystemMetrics(SM_CYMENUCHECK) + 4;
-}
-
-} // anonymous namespace
+#endif
 
 // ============================================================================
 // implementation
@@ -225,7 +209,7 @@ const wxMenuInfoList& wxMenuBar::GetMenuInfos() const
     for( size_t i = 0 ; i < GetMenuCount() ; ++i )
     {
         wxMenuInfo* info = new wxMenuInfo() ;
-        info->Create( const_cast<wxMenuBar*>(this)->GetMenu(i) , GetMenuLabel(i) ) ;
+        info->Create( const_cast<wxMenuBar*>(this)->GetMenu(i) , GetLabelTop(i) ) ;
         list->Append( info ) ;
     }
     return m_menuInfos ;
@@ -329,7 +313,7 @@ void wxMenu::UpdateAccel(wxMenuItem *item)
         }
 
         // find the (new) accel for this item
-        wxAcceleratorEntry *accel = wxAcceleratorEntry::Create(item->GetItemLabel());
+        wxAcceleratorEntry *accel = wxAcceleratorEntry::Create(item->GetText());
         if ( accel )
             accel->m_command = item->GetId();
 
@@ -386,24 +370,24 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 
     // id is the numeric id for normal menu items and HMENU for submenus as
     // required by ::AppendMenu() API
-    UINT_PTR id;
+    UINT id;
     wxMenu *submenu = pItem->GetSubMenu();
     if ( submenu != NULL ) {
         wxASSERT_MSG( submenu->GetHMenu(), wxT("invalid submenu") );
 
         submenu->SetParent(this);
 
-        id = (UINT_PTR)submenu->GetHMenu();
+        id = (UINT)submenu->GetHMenu();
 
         flags |= MF_POPUP;
     }
     else {
-        id = pItem->GetMSWId();
+        id = pItem->GetId();
     }
 
 
     // prepare to insert the item in the menu
-    wxString itemText = pItem->GetItemLabel();
+    wxString itemText = pItem->GetText();
     LPCTSTR pData = NULL;
     if ( pos == (size_t)-1 )
     {
@@ -444,100 +428,93 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 #if wxUSE_OWNER_DRAWN
     if ( pItem->IsOwnerDrawn() )
     {
-#ifndef __DMC__
-        // if the item is owner-drawn just because of the [checked] bitmap and
-        // the bitmap uses standard menu bitmap size we can avoid making it
-        // owner-drawn and use built-in support for menu bitmaps instead
-        bool mustUseOwnerDrawn = pItem->GetTextColour().Ok() ||
-                                 pItem->GetBackgroundColour().Ok() ||
-                                 pItem->GetFont().Ok();
-        if ( !mustUseOwnerDrawn )
+        // is the item owner-drawn just because of the [checked] bitmap?
+        if ( (pItem->GetBitmap(false).Ok() || pItem->GetBitmap(true).Ok()) &&
+                !pItem->GetTextColour().Ok() &&
+                    !pItem->GetBackgroundColour().Ok() &&
+                        !pItem->GetFont().Ok() )
         {
-            const wxBitmap& bmpUnchecked = pItem->GetBitmap(false),
-                            bmpChecked = pItem->GetBitmap(true);
-            if ( (bmpUnchecked.Ok() && !IsLessThanStdSize(bmpUnchecked)) ||
-                    (bmpChecked.Ok() && !IsLessThanStdSize(bmpChecked)) )
-            {
-                mustUseOwnerDrawn = true;
-            }
-        }
+            // try to use InsertMenuItem() as it's guaranteed to look correct
+            // while our owner-drawn code is not
 
-        // MIIM_BITMAP only works under WinME/2000+
-        if ( !mustUseOwnerDrawn && wxGetWinVersion() >= wxWinVersion_98 )
-        {
-            // use InsertMenuItem() as it's guaranteed to look correct while
-            // our owner-drawn code is not
-            WinStruct<MENUITEMINFO> mii;
-            mii.fMask = MIIM_STRING | MIIM_DATA | MIIM_BITMAP;
-            if ( pItem->IsCheckable() )
+            // first compile-time check
+            // MIIM_BITMAP only works under Win98/2000+
+#if defined(MIIM_BITMAP) && (_WIN32_WINNT >= 0x0500)
+            WinStruct<wxMENUITEMINFO_> mii;
+            if ( wxGetWinVersion() >= wxWinVersion_98 )
             {
-                // need to set checked/unchecked bitmaps as otherwise our
-                // MSWOnDrawItem() item is not called
-                mii.fMask |= MIIM_CHECKMARKS;
-            }
-
-            mii.cch = itemText.length();
-            mii.dwTypeData = const_cast<wxChar *>(itemText.wx_str());
-
-            if (flags & MF_POPUP)
-            {
-                mii.fMask |= MIIM_SUBMENU;
-                mii.hSubMenu = (HMENU)pItem->GetSubMenu()->GetHMenu();
-            }
-            else
-            {
-                mii.fMask |= MIIM_ID;
-                mii.wID = id;
-            }
-
-            // we can't pass HBITMAP directly as hbmpItem for 2 reasons:
-            //  1. we can't draw it with transparency then (this is not
-            //     very important now but would be with themed menu bg)
-            //  2. worse, Windows inverts the bitmap for the selected
-            //     item and this looks downright ugly
-            //
-            // so instead draw it ourselves in MSWOnDrawItem()
-            mii.dwItemData = reinterpret_cast<ULONG_PTR>(pItem);
-            if ( pItem->IsCheckable() )
-            {
-                mii.hbmpChecked =
-                mii.hbmpUnchecked = HBMMENU_CALLBACK;
-            }
-            mii.hbmpItem = HBMMENU_CALLBACK;
-
-            ok = ::InsertMenuItem(GetHmenu(), pos, TRUE /* by pos */, &mii);
-            if ( !ok )
-            {
-                wxLogLastError(wxT("InsertMenuItem()"));
-            }
-            else // InsertMenuItem() ok
-            {
-                // we need to remove the extra indent which is reserved for
-                // the checkboxes by default as it looks ugly unless check
-                // boxes are used together with bitmaps and this is not the
-                // case in wx API
-                WinStruct<MENUINFO> mi;
-
-                // don't call SetMenuInfo() directly, this would prevent
-                // the app from starting up under Windows 95/NT 4
-                typedef BOOL (WINAPI *SetMenuInfo_t)(HMENU, MENUINFO *);
-
-                wxDynamicLibrary dllUser(_T("user32"));
-                wxDYNLIB_FUNCTION(SetMenuInfo_t, SetMenuInfo, dllUser);
-                if ( pfnSetMenuInfo )
+                mii.fMask = MIIM_STRING | MIIM_DATA | MIIM_BITMAP;
+                if ( pItem->IsCheckable() )
                 {
-                    mi.fMask = MIM_STYLE;
-                    mi.dwStyle = MNS_CHECKORBMP;
-                    if ( !(*pfnSetMenuInfo)(GetHmenu(), &mi) )
-                        wxLogLastError(_T("SetMenuInfo(MNS_NOCHECK)"));
+                    // need to set checked/unchecked bitmaps as otherwise our
+                    // MSWOnDrawItem() item is not called
+                    mii.fMask |= MIIM_CHECKMARKS;
                 }
 
-                // tell the item that it's not really owner-drawn but only
-                // needs to draw its bitmap, the rest is done by Windows
-                pItem->ResetOwnerDrawn();
+                mii.cch = itemText.length();
+                mii.dwTypeData = wx_const_cast(wxChar *, itemText.c_str());
+
+                if (flags & MF_POPUP)
+                {
+                    mii.fMask |= MIIM_SUBMENU;
+                    mii.hSubMenu = (HMENU)pItem->GetSubMenu()->GetHMenu();
+                }
+                else
+                {
+                    mii.fMask |= MIIM_ID;
+                    mii.wID = id;
+                }
+
+                // we can't pass HBITMAP directly as hbmpItem for 2 reasons:
+                //  1. we can't draw it with transparency then (this is not
+                //     very important now but would be with themed menu bg)
+                //  2. worse, Windows inverts the bitmap for the selected
+                //     item and this looks downright ugly
+                //
+                // so instead draw it ourselves in MSWOnDrawItem()
+                mii.dwItemData = wx_reinterpret_cast(ULONG_PTR, pItem);
+                if ( pItem->IsCheckable() )
+                {
+                    mii.hbmpChecked =
+                    mii.hbmpUnchecked = HBMMENU_CALLBACK;
+                }
+                mii.hbmpItem = HBMMENU_CALLBACK;
+
+                ok = ::InsertMenuItem(GetHmenu(), pos, TRUE /* by pos */,
+                                      (MENUITEMINFO*)&mii);
+                if ( !ok )
+                {
+                    wxLogLastError(wxT("InsertMenuItem()"));
+                }
+                else // InsertMenuItem() ok
+                {
+                    // we need to remove the extra indent which is reserved for
+                    // the checkboxes by default as it looks ugly unless check
+                    // boxes are used together with bitmaps and this is not the
+                    // case in wx API
+                    WinStruct<MENUINFO> mi;
+
+                    // don't call SetMenuInfo() directly, this would prevent
+                    // the app from starting up under Windows 95/NT 4
+                    typedef BOOL (WINAPI *SetMenuInfo_t)(HMENU, MENUINFO *);
+
+                    wxDynamicLibrary dllUser(_T("user32"));
+                    wxDYNLIB_FUNCTION(SetMenuInfo_t, SetMenuInfo, dllUser);
+                    if ( pfnSetMenuInfo )
+                    {
+                        mi.fMask = MIM_STYLE;
+                        mi.dwStyle = MNS_CHECKORBMP;
+                        if ( !(*pfnSetMenuInfo)(GetHmenu(), &mi) )
+                            wxLogLastError(_T("SetMenuInfo(MNS_NOCHECK)"));
+                    }
+
+                    // tell the item that it's not really owner-drawn but only
+                    // needs to draw its bitmap, the rest is done by Windows
+                    pItem->ResetOwnerDrawn();
+                }
             }
+#endif // defined(MIIM_BITMAP) && (_WIN32_WINNT >= 0x0500)
         }
-#endif // __DMC__
 
         if ( !ok )
         {
@@ -553,10 +530,10 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
         flags |= MF_STRING;
 
 #ifdef __WXWINCE__
-        itemText = wxMenuItem::GetLabelText(itemText);
+        itemText = wxMenuItem::GetLabelFromText(itemText);
 #endif
 
-        pData = (wxChar*)itemText.wx_str();
+        pData = (wxChar*)itemText.c_str();
     }
 
     // item might have already been inserted by InsertMenuItem() above
@@ -572,7 +549,7 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
 
 
     // if we just appended the title, highlight it
-    if ( id == idMenuTitle )
+    if ( (int)id == idMenuTitle )
     {
         // visually select the menu title
         SetDefaultMenuItem(GetHmenu(), id);
@@ -721,15 +698,6 @@ size_t wxMenu::CopyAccels(wxAcceleratorEntry *accels) const
     return count;
 }
 
-wxAcceleratorTable *wxMenu::CreateAccelTable() const
-{
-    const size_t count = m_accels.size();
-    wxScopedArray<wxAcceleratorEntry> accels(new wxAcceleratorEntry[count]);
-    CopyAccels(accels.get());
-
-    return new wxAcceleratorTable(count, accels.get());
-}
-
 #endif // wxUSE_ACCEL
 
 // ---------------------------------------------------------------------------
@@ -748,7 +716,7 @@ void wxMenu::SetTitle(const wxString& label)
         if ( !label.empty() )
         {
             if ( !::InsertMenu(hMenu, 0u, MF_BYPOSITION | MF_STRING,
-                               idMenuTitle, m_title.wx_str()) ||
+                               (unsigned)idMenuTitle, m_title) ||
                  !::InsertMenu(hMenu, 1u, MF_BYPOSITION, (unsigned)-1, NULL) )
             {
                 wxLogLastError(wxT("InsertMenu"));
@@ -776,7 +744,7 @@ void wxMenu::SetTitle(const wxString& label)
             info.fMask = MIIM_TYPE;
             info.fType = MFT_STRING;
             info.cch = m_title.length();
-            info.dwTypeData = const_cast<wxChar *>(m_title.wx_str());
+            info.dwTypeData = (LPTSTR) m_title.c_str();
             if ( !SetMenuItemInfo(hMenu, 0, TRUE, & info) )
             {
                 wxLogLastError(wxT("SetMenuItemInfo"));
@@ -784,7 +752,7 @@ void wxMenu::SetTitle(const wxString& label)
 #else
             if ( !ModifyMenu(hMenu, 0u,
                              MF_BYPOSITION | MF_STRING,
-                             idMenuTitle, m_title.wx_str()) )
+                             (unsigned)idMenuTitle, m_title) )
             {
                 wxLogLastError(wxT("ModifyMenu"));
             }
@@ -796,7 +764,7 @@ void wxMenu::SetTitle(const wxString& label)
     // put the title string in bold face
     if ( !m_title.empty() )
     {
-        SetDefaultMenuItem(GetHmenu(), idMenuTitle);
+        SetDefaultMenuItem(GetHmenu(), (UINT)idMenuTitle);
     }
 #endif // Win32
 }
@@ -805,12 +773,10 @@ void wxMenu::SetTitle(const wxString& label)
 // event processing
 // ---------------------------------------------------------------------------
 
-bool wxMenu::MSWCommand(WXUINT WXUNUSED(param), WXWORD id_)
+bool wxMenu::MSWCommand(WXUINT WXUNUSED(param), WXWORD id)
 {
-    const int id = (signed short)id_;
-
     // ignore commands from the menu title
-    if ( id != (int)idMenuTitle )
+    if ( id != (WXWORD)idMenuTitle )
     {
         // update the check item when it's clicked
         wxMenuItem * const item = FindItem(id);
@@ -946,41 +912,41 @@ WXHMENU wxMenuBar::Create()
     if ( m_hMenu != 0 )
         return m_hMenu;
 
-    wxToolMenuBar * const bar = static_cast<wxToolMenuBar *>(GetToolBar());
-    if ( !bar )
-        return NULL;
+    if (!GetToolBar())
+        return 0;
 
-    HWND hCommandBar = GetHwndOf(bar);
+    HWND hCommandBar = (HWND) GetToolBar()->GetHWND();
+    HMENU hMenu = (HMENU)::SendMessage(hCommandBar, SHCMBM_GETMENU, (WPARAM)0, (LPARAM)0);
 
-    // notify comctl32.dll about the version of the headers we use before using
-    // any other TB_XXX messages
-    SendMessage(hCommandBar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-
-    TBBUTTON tbButton;
-    wxZeroMemory(tbButton);
-    tbButton.iBitmap = I_IMAGENONE;
-    tbButton.fsState = TBSTATE_ENABLED;
-    tbButton.fsStyle = TBSTYLE_DROPDOWN |
-                       TBSTYLE_NO_DROPDOWN_ARROW |
-                       TBSTYLE_AUTOSIZE;
-
-    for ( unsigned i = 0; i < GetMenuCount(); i++ )
+    // hMenu may be zero on Windows Mobile 5. So add the menus anyway.
+    if (1) // (hMenu)
     {
-        HMENU hPopupMenu = (HMENU) GetMenu(i)->GetHMenu();
-        tbButton.dwData = (DWORD)hPopupMenu;
-        wxString label = wxStripMenuCodes(GetMenuLabel(i));
-        tbButton.iString = (int) label.wx_str();
+        TBBUTTON tbButton;
+        memset(&tbButton, 0, sizeof(TBBUTTON));
+        tbButton.iBitmap = I_IMAGENONE;
+        tbButton.fsState = TBSTATE_ENABLED;
+        tbButton.fsStyle = TBSTYLE_DROPDOWN | TBSTYLE_NO_DROPDOWN_ARROW | TBSTYLE_AUTOSIZE;
 
-        tbButton.idCommand = NewControlId();
-        if ( !::SendMessage(hCommandBar, TB_INSERTBUTTON, i, (LPARAM)&tbButton) )
+        size_t i;
+        for (i = 0; i < GetMenuCount(); i++)
         {
-            wxLogLastError(wxT("TB_INSERTBUTTON"));
+            HMENU hPopupMenu = (HMENU) GetMenu(i)->GetHMenu() ;
+            tbButton.dwData = (DWORD)hPopupMenu;
+            wxString label = wxStripMenuCodes(GetLabelTop(i));
+            tbButton.iString = (int) label.c_str();
+
+            int position = i;
+
+            tbButton.idCommand = NewControlId();
+            if (!::SendMessage(hCommandBar, TB_INSERTBUTTON, position, (LPARAM)&tbButton))
+            {
+                wxLogLastError(wxT("TB_INSERTBUTTON"));
+            }
         }
     }
-
-    m_hMenu = bar->GetHMenu();
+    m_hMenu = (WXHMENU) hMenu;
     return m_hMenu;
-#else // !__WXWINCE__
+#else
     if ( m_hMenu != 0 )
         return m_hMenu;
 
@@ -997,8 +963,8 @@ WXHMENU wxMenuBar::Create()
         for ( i = 0, it = m_menus.begin(); i < count; i++, it++ )
         {
             if ( !::AppendMenu((HMENU)m_hMenu, MF_POPUP | MF_STRING,
-                               (UINT_PTR)(*it)->GetHMenu(),
-                               m_titles[i].wx_str()) )
+                               (UINT)(*it)->GetHMenu(),
+                               m_titles[i]) )
             {
                 wxLogLastError(wxT("AppendMenu"));
             }
@@ -1006,7 +972,7 @@ WXHMENU wxMenuBar::Create()
     }
 
     return m_hMenu;
-#endif // __WXWINCE__/!__WXWINCE__
+#endif
 }
 
 int wxMenuBar::MSWPositionForWxMenu(wxMenu *menu, int wxpos)
@@ -1055,7 +1021,7 @@ void wxMenuBar::EnableTop(size_t pos, bool enable)
     Refresh();
 }
 
-void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
+void wxMenuBar::SetLabelTop(size_t pos, const wxString& label)
 {
     wxCHECK_RET( pos < GetMenuCount(), wxT("invalid menu index") );
 
@@ -1069,7 +1035,7 @@ void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
 
     int mswpos = MSWPositionForWxMenu(GetMenu(pos),pos);
 
-    UINT_PTR id;
+    UINT id;
     UINT flagsOld = ::GetMenuState((HMENU)m_hMenu, mswpos, MF_BYPOSITION);
     if ( flagsOld == 0xFFFFFFFF )
     {
@@ -1082,7 +1048,7 @@ void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
     {
         // HIBYTE contains the number of items in the submenu in this case
         flagsOld &= 0xff;
-        id = (UINT_PTR)::GetSubMenu((HMENU)m_hMenu, mswpos);
+        id = (UINT)::GetSubMenu((HMENU)m_hMenu, mswpos);
     }
     else
     {
@@ -1096,15 +1062,15 @@ void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
     info.fMask = MIIM_TYPE;
     info.fType = MFT_STRING;
     info.cch = label.length();
-    info.dwTypeData = const_cast<wxChar *>(label.wx_str());
-    if ( !SetMenuItemInfo(GetHmenu(), id, TRUE, &info) )
+    info.dwTypeData = (LPTSTR) label.c_str();
+    if ( !SetMenuItemInfo(GetHmenu(), id, TRUE, & info) )
     {
         wxLogLastError(wxT("SetMenuItemInfo"));
     }
 
 #else
     if ( ::ModifyMenu(GetHmenu(), mswpos, MF_BYPOSITION | MF_STRING | flagsOld,
-                      id, label.wx_str()) == (int)0xFFFFFFFF )
+        id, label) == (int)0xFFFFFFFF )
     {
         wxLogLastError(wxT("ModifyMenu"));
     }
@@ -1113,6 +1079,15 @@ void wxMenuBar::SetMenuLabel(size_t pos, const wxString& label)
     Refresh();
 }
 
+wxString wxMenuBar::GetLabelTop(size_t pos) const
+{
+    wxCHECK_MSG( pos < GetMenuCount(), wxEmptyString,
+                 wxT("invalid menu index in wxMenuBar::GetLabelTop") );
+
+    return wxMenuItem::GetLabelFromText(m_titles[pos]);
+}
+
+// Gets the original label at the top-level of the menubar
 wxString wxMenuBar::GetMenuLabel(size_t pos) const
 {
     wxCHECK_MSG( pos < GetMenuCount(), wxEmptyString,
@@ -1149,7 +1124,7 @@ wxMenu *wxMenuBar::Replace(size_t pos, wxMenu *menu, const wxString& title)
 
         if ( !::InsertMenu(GetHmenu(), (UINT)mswpos,
                            MF_BYPOSITION | MF_POPUP | MF_STRING,
-                           (UINT_PTR)GetHmenuOf(menu), title.wx_str()) )
+                           (UINT)GetHmenuOf(menu), title) )
         {
             wxLogLastError(wxT("InsertMenu"));
         }
@@ -1204,7 +1179,7 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
         HMENU hPopupMenu = (HMENU) menu->GetHMenu() ;
         tbButton.dwData = (DWORD)hPopupMenu;
         wxString label = wxStripMenuCodes(title);
-        tbButton.iString = (int) label.wx_str();
+        tbButton.iString = (int) label.c_str();
 
         tbButton.idCommand = NewControlId();
         if (!::SendMessage((HWND) GetToolBar()->GetHWND(), TB_INSERTBUTTON, pos, (LPARAM)&tbButton))
@@ -1216,7 +1191,7 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
 #else
         if ( !::InsertMenu(GetHmenu(), mswpos,
                            MF_BYPOSITION | MF_POPUP | MF_STRING,
-                           (UINT_PTR)GetHmenuOf(menu), title.wx_str()) )
+                           (UINT)GetHmenuOf(menu), title) )
         {
             wxLogLastError(wxT("InsertMenu"));
         }
@@ -1265,7 +1240,7 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
         HMENU hPopupMenu = (HMENU) menu->GetHMenu() ;
         tbButton.dwData = (DWORD)hPopupMenu;
         wxString label = wxStripMenuCodes(title);
-        tbButton.iString = (int) label.wx_str();
+        tbButton.iString = (int) label.c_str();
 
         tbButton.idCommand = NewControlId();
         if (!::SendMessage((HWND) GetToolBar()->GetHWND(), TB_INSERTBUTTON, pos, (LPARAM)&tbButton))
@@ -1275,7 +1250,7 @@ bool wxMenuBar::Append(wxMenu *menu, const wxString& title)
         }
 #else
         if ( !::AppendMenu(GetHmenu(), MF_POPUP | MF_STRING,
-                           (UINT_PTR)submenu, title.wx_str()) )
+                           (UINT)submenu, title) )
         {
             wxLogLastError(wxT("AppendMenu"));
         }
@@ -1363,7 +1338,7 @@ void wxMenuBar::RebuildAccelTable()
             nAccelCount += (*it)->CopyAccels(&accelEntries[nAccelCount]);
         }
 
-        SetAcceleratorTable(wxAcceleratorTable(nAccelCount, accelEntries));
+        m_accelTable = wxAcceleratorTable(nAccelCount, accelEntries);
 
         delete [] accelEntries;
     }

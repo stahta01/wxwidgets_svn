@@ -40,7 +40,7 @@ protected:
     HACCEL      m_hAccel;
     bool        m_ok;
 
-    wxDECLARE_NO_COPY_CLASS(wxAcceleratorRefData);
+    DECLARE_NO_COPY_CLASS(wxAcceleratorRefData)
 };
 
 #define M_ACCELDATA ((wxAcceleratorRefData *)m_refData)

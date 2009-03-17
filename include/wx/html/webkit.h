@@ -60,28 +60,28 @@ public:
     bool CanGetPageSource();
     wxString GetPageSource();
     void SetPageSource(const wxString& source, const wxString& baseUrl = wxEmptyString);
-    wxString GetPageURL(){ return m_currentURL; }
+	wxString GetPageURL(){ return m_currentURL; }
     void SetPageTitle(const wxString& title) { m_pageTitle = title; }
-    wxString GetPageTitle(){ return m_pageTitle; }
-
+	wxString GetPageTitle(){ return m_pageTitle; }
+    
     // since these worked in 2.6, add wrappers
     void SetTitle(const wxString& title) { SetPageTitle(title); }
     wxString GetTitle() { return GetPageTitle(); }
-
+    
     wxString GetSelection();
-
+    
     bool CanIncreaseTextSize();
     void IncreaseTextSize();
     bool CanDecreaseTextSize();
     void DecreaseTextSize();
-
+    
     void Print(bool showPrompt=FALSE);
-
+    
     void MakeEditable(bool enable=TRUE);
     bool IsEditable();
-
+    
     wxString RunScript(const wxString& javascript);
-
+    
     void SetScrollPos(int pos);
     int GetScrollPos();
 
@@ -98,9 +98,9 @@ private:
     wxWindowID m_windowID;
     wxString m_currentURL;
     wxString m_pageTitle;
-
+    
     struct objc_object *m_webView;
-
+    
     // we may use this later to setup our own mouse events,
     // so leave it in for now.
     void* m_webKitCtrlEventHandler;
@@ -136,7 +136,7 @@ enum {
 class wxWebKitBeforeLoadEvent : public wxCommandEvent
 {
     DECLARE_DYNAMIC_CLASS( wxWebKitBeforeLoadEvent )
-
+    
 public:
     bool IsCancelled() { return m_cancelled; }
     void Cancel(bool cancel = true) { m_cancelled = cancel; }
@@ -145,7 +145,7 @@ public:
     void SetNavigationType(int navType) { m_navType = navType; }
     int GetNavigationType() { return m_navType; }
 
-    wxWebKitBeforeLoadEvent( wxWindow* win = NULL );
+    wxWebKitBeforeLoadEvent( wxWindow* win = (wxWindow*) NULL );
     wxEvent *Clone(void) const { return new wxWebKitBeforeLoadEvent(*this); }
 
 protected:
@@ -164,7 +164,7 @@ public:
     wxString GetURL() { return m_url; }
     void SetURL(const wxString& url) { m_url = url; }
 
-    wxWebKitStateChangedEvent( wxWindow* win = NULL );
+    wxWebKitStateChangedEvent( wxWindow* win = (wxWindow*) NULL );
     wxEvent *Clone(void) const { return new wxWebKitStateChangedEvent(*this); }
 
 protected:
@@ -173,6 +173,7 @@ protected:
 };
 
 
+#if wxABI_VERSION >= 20808
 class wxWebKitNewWindowEvent : public wxCommandEvent
 {
     DECLARE_DYNAMIC_CLASS( wxWebViewNewWindowEvent )
@@ -189,44 +190,41 @@ private:
     wxString m_url;
     wxString m_targetName;
 };
+#endif
 
 typedef void (wxEvtHandler::*wxWebKitStateChangedEventFunction)(wxWebKitStateChangedEvent&);
 typedef void (wxEvtHandler::*wxWebKitBeforeLoadEventFunction)(wxWebKitBeforeLoadEvent&);
 typedef void (wxEvtHandler::*wxWebKitNewWindowEventFunction)(wxWebKitNewWindowEvent&);
 
-#define wxWebKitStateChangedEventHandler( func ) \
-    wxEVENT_HANDLER_CAST( wxWebKitStateChangedEventFunction, func )
-
-#define wxWebKitBeforeLoadEventHandler( func ) \
-    wxEVENT_HANDLER_CAST( wxWebKitBeforeLoadEventFunction, func )
-
-#define wxWebKitNewWindowEventHandler( func ) \
-    wxEVENT_HANDLER_CAST( wxWebKitNewWindowEventFunction, func )
-
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_CORE, wxEVT_WEBKIT_STATE_CHANGED, wxWebKitStateChangedEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_CORE, wxEVT_WEBKIT_BEFORE_LOAD, wxWebKitBeforeLoadEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_CORE, wxEVT_WEBKIT_NEW_WINDOW, wxWebKitNewWindowEvent );
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_WEBKIT_BEFORE_LOAD, wxID_ANY)
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_WEBKIT_STATE_CHANGED, wxID_ANY)
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_WEBKIT_NEW_WINDOW, wxID_ANY)
+END_DECLARE_EVENT_TYPES()
 
 #define EVT_WEBKIT_STATE_CHANGED(func) \
             DECLARE_EVENT_TABLE_ENTRY( wxEVT_WEBKIT_STATE_CHANGED, \
                             wxID_ANY, \
                             wxID_ANY, \
-                            wxWebKitStateChangedEventHandler( func ), \
-                            NULL ),
-
+                            (wxObjectEventFunction)   \
+                            (wxWebKitStateChangedEventFunction) & func, \
+                            (wxObject *) NULL ),
+                            
 #define EVT_WEBKIT_BEFORE_LOAD(func) \
             DECLARE_EVENT_TABLE_ENTRY( wxEVT_WEBKIT_BEFORE_LOAD, \
                             wxID_ANY, \
                             wxID_ANY, \
-                            wxWebKitBeforeLoadEventHandler( func ), \
-                            NULL ),
+                            (wxObjectEventFunction)   \
+                            (wxWebKitBeforeLoadEventFunction) & func, \
+                            (wxObject *) NULL ),
 
 #define EVT_WEBKIT_NEW_WINDOW(func)                              \
             DECLARE_EVENT_TABLE_ENTRY( wxEVT_WEBKIT_NEW_WINDOW, \
                             wxID_ANY, \
                             wxID_ANY, \
-                            wxWebKitNewWindowEventFunction( func ), \
-                            NULL ),
+                            (wxObjectEventFunction)   \
+                            (wxWebKitNewWindowEventFunction) & func, \
+                            (wxObject *) NULL ),
 #endif // wxUSE_WEBKIT
 
 #endif

@@ -34,6 +34,8 @@
     #include "wx/settings.h"
 #endif
 
+#include "wx/palmos/private.h"
+
 #if wxUSE_EXTENDED_RTTI
 WX_DEFINE_FLAGS( wxChoiceStyle )
 
@@ -83,7 +85,7 @@ wxEND_HANDLERS_TABLE()
 
 wxCONSTRUCTOR_4( wxChoice , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size )
 #else
-IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControlWithItems)
+IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
 #endif
 
 // ============================================================================
@@ -130,6 +132,16 @@ bool wxChoice::Create(wxWindow *parent,
     return false;
 }
 
+bool wxChoice::MSWShouldPreProcessMessage(WXMSG *pMsg)
+{
+    return false;
+}
+
+WXDWORD wxChoice::MSWGetStyle(long style, WXDWORD *exstyle) const
+{
+    return 0;
+}
+
 wxChoice::~wxChoice()
 {
 }
@@ -138,19 +150,21 @@ wxChoice::~wxChoice()
 // adding/deleting items to/from the list
 // ----------------------------------------------------------------------------
 
-int wxChoice::DoInsertItems(const wxArrayStringsAdapter& items,
-                            unsigned int pos,
-                            void **clientData,
-                            wxClientDataType type)
+int wxChoice::DoAppend(const wxString& item)
 {
     return 0;
 }
 
-void wxChoice::DoDeleteOneItem(unsigned int n)
+int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+{
+    return 0;
+}
+
+void wxChoice::Delete(unsigned int n)
 {
 }
 
-void wxChoice::DoClear()
+void wxChoice::Clear()
 {
 }
 
@@ -199,7 +213,16 @@ void wxChoice::DoSetItemClientData(unsigned int n, void* clientData)
 
 void* wxChoice::DoGetItemClientData(unsigned int n) const
 {
-    return NULL;
+    return (void *)NULL;
+}
+
+void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData )
+{
+}
+
+wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData *)DoGetItemClientData(n);
 }
 
 // ----------------------------------------------------------------------------
@@ -227,6 +250,16 @@ void wxChoice::DoSetSize(int x, int y,
 wxSize wxChoice::DoGetBestSize() const
 {
     return wxSize(0,0);
+}
+
+WXLRESULT wxChoice::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
+{
+    return 0;
+}
+
+bool wxChoice::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
+{
+    return false;
 }
 
 #endif // wxUSE_CHOICE

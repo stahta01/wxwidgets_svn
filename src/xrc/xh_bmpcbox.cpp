@@ -21,7 +21,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
-    #include "wx/log.h"
 #endif
 
 #include "wx/bmpcbox.h"
@@ -42,11 +41,7 @@ wxObject *wxBitmapComboBoxXmlHandler::DoCreateResource()
 {
     if (m_class == wxT("ownerdrawnitem"))
     {
-        if ( !m_combobox )
-        {
-            ReportError("ownerdrawnitem only allowed within a wxBitmapComboBox");
-            return NULL;
-        }
+        wxCHECK_MSG(m_combobox, NULL, wxT("Incorrect syntax of XRC resource: ownerdrawnitem not within a bitmapcombobox!"));
 
         m_combobox->Append(GetText(wxT("text")),
                            GetBitmap(wxT("bitmap")));

@@ -39,7 +39,6 @@
 #endif
 
 #include "wx/imaglist.h"
-#include "wx/vector.h"
 
 #include "wx/msw/private.h"
 
@@ -82,33 +81,6 @@ static void wxConvertToMSWListCol(HWND hwndList,
                                   int col,
                                   const wxListItem& item,
                                   LV_COLUMN& lvCol);
-
-namespace
-{
-
-// replacement for ListView_GetSubItemRect() which provokes warnings like
-// "the address of 'rc' will always evaluate as 'true'" when used with mingw32
-// 4.3+
-//
-// this function does no error checking on item and subitem parameters, notice
-// that subitem 0 means the whole item so there is no way to retrieve the
-// rectangle of the first subitem using this function, in particular notice
-// that the index is *not* 1-based, in spite of what MSDN says
-inline bool
-wxGetListCtrlSubItemRect(HWND hwnd, int item, int subitem, int flags, RECT& rect)
-{
-    rect.top = subitem;
-    rect.left = flags;
-    return ::SendMessage(hwnd, LVM_GETSUBITEMRECT, item, (LPARAM)&rect) != 0;
-}
-
-inline bool
-wxGetListCtrlItemRect(HWND hwnd, int item, int flags, RECT& rect)
-{
-    return wxGetListCtrlSubItemRect(hwnd, item, 0, flags, rect);
-}
-
-} // anonymous namespace
 
 // ----------------------------------------------------------------------------
 // private helper classes
@@ -187,7 +159,7 @@ private:
     LV_ITEM_NATIVE *m_pItem;
     LV_ITEM_NATIVE m_item;
 
-    wxDECLARE_NO_COPY_CLASS(wxLV_ITEM);
+    DECLARE_NO_COPY_CLASS(wxLV_ITEM)
 };
 
 ///////////////////////////////////////////////////////
@@ -235,7 +207,7 @@ public:
            delete attr;
    }
 
-    wxDECLARE_NO_COPY_CLASS(wxListItemInternalData);
+    DECLARE_NO_COPY_CLASS(wxListItemInternalData)
 };
 
 // Get the internal data structure
@@ -378,21 +350,8 @@ void wxListCtrl::MSWSetExListStyles()
     // styles because it's prettier (and also because wxGTK does it like this)
     if ( wxApp::GetComCtl32Version() >= 470 )
     {
-        ::SendMessage
-        (
-            GetHwnd(), LVM_SETEXTENDEDLISTVIEWSTYLE, 0,
-            // LVS_EX_LABELTIP shouldn't be used under Windows CE where it's
-            // not defined in the SDK headers
-#ifdef LVS_EX_LABELTIP
-            LVS_EX_LABELTIP |
-#endif
-            LVS_EX_FULLROWSELECT |
-            LVS_EX_SUBITEMIMAGES |
-            // normally this should be governed by a style as it's probably not
-            // always appropriate, but we don't have any free styles left and
-            // it seems better to enable it by default than disable
-            LVS_EX_HEADERDRAGDROP
-        );
+        ::SendMessage(GetHwnd(), LVM_SETEXTENDEDLISTVIEWSTYLE,
+                      0, LVS_EX_LABELTIP | LVS_EX_FULLROWSELECT | LVS_EX_SUBITEMIMAGES);
     }
 }
 
@@ -720,67 +679,6 @@ bool wxListCtrl::SetColumnWidth(int col, int width)
     return ListView_SetColumnWidth(GetHwnd(), col, width) != 0;
 }
 
-// ----------------------------------------------------------------------------
-// columns order
-// ----------------------------------------------------------------------------
-
-int wxListCtrl::GetColumnIndexFromOrder(int order) const
-{
-    const int numCols = GetColumnCount();
-    wxCHECK_MSG( order >= 0 && order < numCols, -1,
-                _T("Column position out of bounds") );
-
-    wxArrayInt indexArray(numCols);
-    if ( !ListView_GetColumnOrderArray(GetHwnd(), numCols, &indexArray[0]) )
-        return -1;
-
-    return indexArray[order];
-}
-
-int wxListCtrl::GetColumnOrder(int col) const
-{
-    const int numCols = GetColumnCount();
-    wxASSERT_MSG( col >= 0 && col < numCols, _T("Column index out of bounds") );
-
-    wxArrayInt indexArray(numCols);
-    if ( !ListView_GetColumnOrderArray(GetHwnd(), numCols, &indexArray[0]) )
-        return -1;
-
-    for ( int pos = 0; pos < numCols; pos++ )
-    {
-        if ( indexArray[pos] == col )
-            return pos;
-    }
-
-    wxFAIL_MSG( _T("no column with with given order?") );
-
-    return -1;
-}
-
-// Gets the column order for all columns
-wxArrayInt wxListCtrl::GetColumnsOrder() const
-{
-    const int numCols = GetColumnCount();
-
-    wxArrayInt orders(numCols);
-    if ( !ListView_GetColumnOrderArray(GetHwnd(), numCols, &orders[0]) )
-        orders.clear();
-
-    return orders;
-}
-
-// Sets the column order for all columns
-bool wxListCtrl::SetColumnsOrder(const wxArrayInt& orders)
-{
-    const int numCols = GetColumnCount();
-
-    wxCHECK_MSG( orders.size() == (size_t)numCols, false,
-                    _T("wrong number of elements in column orders array") );
-
-    return ListView_SetColumnOrderArray(GetHwnd(), numCols, &orders[0]) != 0;
-}
-
-
 // Gets the number of items that can fit vertically in the
 // visible area of the list control (list or report view)
 // or the total number of items in the list control (icon
@@ -804,7 +702,7 @@ wxTextCtrl* wxListCtrl::GetEditControl() const
         HWND hwndEdit = ListView_GetEditControl(GetHwnd());
         if ( hwndEdit )
         {
-            wxListCtrl * const self = const_cast<wxListCtrl *>(this);
+            wxListCtrl * const self = wx_const_cast(wxListCtrl *, this);
 
             if ( !m_textCtrl )
                 self->m_textCtrl = new wxTextCtrl;
@@ -989,15 +887,14 @@ bool wxListCtrl::SetItemState(long item, long state, long stateMask)
 
     wxConvertToMSWFlags(state, stateMask, lvItem);
 
-    const bool changingFocus = (stateMask & wxLIST_STATE_FOCUSED) &&
-                                    (state & wxLIST_STATE_FOCUSED);
-
     // for the virtual list controls we need to refresh the previously focused
     // item manually when changing focus without changing selection
     // programmatically because otherwise it keeps its focus rectangle until
     // next repaint (yet another comctl32 bug)
     long focusOld;
-    if ( IsVirtual() && changingFocus )
+    if ( IsVirtual() &&
+         (stateMask & wxLIST_STATE_FOCUSED) &&
+         (state & wxLIST_STATE_FOCUSED) )
     {
         focusOld = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
     }
@@ -1023,16 +920,6 @@ bool wxListCtrl::SetItemState(long item, long state, long stateMask)
         {
             RefreshItem(focusOld);
         }
-    }
-
-    // we expect the selection anchor, i.e. the item from which multiple
-    // selection (such as performed with e.g. Shift-arrows) starts, to be the
-    // same as the currently focused item but the native control doesn't update
-    // it when we change focus and leaves at the last item it set itself focus
-    // to, so do it explicitly
-    if ( changingFocus && !HasFlag(wxLC_SINGLE_SEL) )
-    {
-        ListView_SetSelectionMark(GetHwnd(), item);
     }
 
     return true;
@@ -1107,42 +994,26 @@ bool wxListCtrl::SetItemPtrData(long item, wxUIntPtr data)
     return SetItem(info);
 }
 
+bool wxListCtrl::SetItemData(long item, long data)
+{
+    return SetItemPtrData(item, data);
+}
+
 wxRect wxListCtrl::GetViewRect() const
 {
+    wxASSERT_MSG( !HasFlag(wxLC_REPORT | wxLC_LIST),
+                    _T("wxListCtrl::GetViewRect() only works in icon mode") );
+
+    RECT rc;
+    if ( !ListView_GetViewRect(GetHwnd(), &rc) )
+    {
+        wxLogDebug(_T("ListView_GetViewRect() failed."));
+
+        wxZeroMemory(rc);
+    }
+
     wxRect rect;
-
-    // ListView_GetViewRect() can only be used in icon and small icon views
-    // (this is documented in MSDN and, indeed, it returns bogus results in
-    // report view, at least with comctl32.dll v6 under Windows 2003)
-    if ( HasFlag(wxLC_ICON | wxLC_SMALL_ICON) )
-    {
-        RECT rc;
-        if ( !ListView_GetViewRect(GetHwnd(), &rc) )
-        {
-            wxLogDebug(_T("ListView_GetViewRect() failed."));
-
-            wxZeroMemory(rc);
-        }
-
-        wxCopyRECTToRect(rc, rect);
-    }
-    else if ( HasFlag(wxLC_REPORT) )
-    {
-        const long count = GetItemCount();
-        if ( count )
-        {
-            GetItemRect(wxMin(GetTopItem() + GetCountPerPage(), count - 1), rect);
-
-            // extend the rectangle to start at the top (we include the column
-            // headers, if any, for compatibility with the generic version)
-            rect.height += rect.y;
-            rect.y = 0;
-        }
-    }
-    else
-    {
-        wxFAIL_MSG( _T("not implemented in this mode") );
-    }
+    wxCopyRECTToRect(rc, rect);
 
     return rect;
 }
@@ -1153,18 +1024,22 @@ bool wxListCtrl::GetItemRect(long item, wxRect& rect, int code) const
     return GetSubItemRect( item, wxLIST_GETSUBITEMRECT_WHOLEITEM, rect, code) ;
 }
 
+/*!
+ * Retrieve coordinates and size of a specified subitem of a listview control.
+ * This function only works if the listview control is in the report mode.
+ *
+ * @param item : Item number
+ * @param subItem : Subitem or column number, use -1 for the whole row including
+ *                  all columns or subitems
+ * @param rect : A pointer to an allocated wxRect object
+ * @param code : Specify the part of the subitem coordinates you need. Choices are
+ *               wxLIST_RECT_BOUNDS, wxLIST_RECT_ICON, wxLIST_RECT_LABEL
+ *
+ * @return bool  : True if successful.
+ */
 bool wxListCtrl::GetSubItemRect(long item, long subItem, wxRect& rect, int code) const
 {
-    // ListView_GetSubItemRect() doesn't do subItem error checking and returns
-    // true even for the out of range values of it (even if the results are
-    // completely bogus in this case), so we check item validity ourselves
-    wxCHECK_MSG( subItem == wxLIST_GETSUBITEMRECT_WHOLEITEM ||
-                    (subItem >= 0 && subItem < GetColumnCount()),
-                 false, _T("invalid sub item index") );
-
-    // use wxCHECK_MSG against "item" too, for coherency with the generic implementation:
-    wxCHECK_MSG( item >= 0 && item < GetItemCount(), false,
-                 _T("invalid item in GetSubItemRect") );
+    RECT rectWin;
 
     int codeWin;
     if ( code == wxLIST_RECT_BOUNDS )
@@ -1179,28 +1054,27 @@ bool wxListCtrl::GetSubItemRect(long item, long subItem, wxRect& rect, int code)
         codeWin = LVIR_BOUNDS;
     }
 
-    RECT rectWin;
-    if ( !wxGetListCtrlSubItemRect
-          (
-            GetHwnd(),
-            item,
-            subItem == wxLIST_GETSUBITEMRECT_WHOLEITEM ? 0 : subItem,
-            codeWin,
-            rectWin
-          ) )
+    bool success;
+    if( subItem == wxLIST_GETSUBITEMRECT_WHOLEITEM)
     {
-        return false;
+      success = ListView_GetItemRect(GetHwnd(), (int) item, &rectWin, codeWin) != 0;
+    }
+    else if( subItem >= 0)
+    {
+      success = ListView_GetSubItemRect( GetHwnd(), (int) item, (int) subItem, codeWin, &rectWin) != 0;
+    }
+    else
+    {
+      wxFAIL_MSG( _T("incorrect subItem number in GetSubItemRect()") );
+      return false;
     }
 
-    wxCopyRECTToRect(rectWin, rect);
+    rect.x = rectWin.left;
+    rect.y = rectWin.top;
+    rect.width = rectWin.right - rectWin.left;
+    rect.height = rectWin.bottom - rectWin.top;
 
-    // there is no way to retrieve the first sub item bounding rectangle using
-    // wxGetListCtrlSubItemRect() as 0 means the whole item, so we need to
-    // truncate it at first column ourselves
-    if ( subItem == 0 )
-        rect.width = GetColumnWidth(0);
-
-    return true;
+    return success;
 }
 
 
@@ -1535,7 +1409,7 @@ void wxListCtrl::InitEditControl(WXHWND hWnd)
 wxTextCtrl* wxListCtrl::EditLabel(long item, wxClassInfo* textControlClass)
 {
     wxCHECK_MSG( textControlClass->IsKindOf(CLASSINFO(wxTextCtrl)), NULL,
-                  "control used for label editing must be a wxTextCtrl" );
+                  wxT("control used for label editing must be a wxTextCtrl") );
 
     // ListView_EditLabel requires that the list has focus.
     SetFocus();
@@ -1601,7 +1475,7 @@ long wxListCtrl::FindItem(long start, const wxString& str, bool partial)
     findInfo.flags = LVFI_STRING;
     if ( partial )
         findInfo.flags |= LVFI_PARTIAL;
-    findInfo.psz = str.wx_str();
+    findInfo.psz = str;
 
     // ListView_FindItem() excludes the first item from search and to look
     // through all the items you need to start from -1 which is unnatural and
@@ -1912,20 +1786,22 @@ bool wxListCtrl::MSWShouldPreProcessMessage(WXMSG* msg)
 {
     if ( msg->message == WM_KEYDOWN )
     {
-        // Only eat VK_RETURN if not being used by the application in
-        // conjunction with modifiers
-        if ( msg->wParam == VK_RETURN && !wxIsAnyModifierDown() )
+        if ( msg->wParam == VK_RETURN )
         {
-            // we need VK_RETURN to generate wxEVT_COMMAND_LIST_ITEM_ACTIVATED
+            // We need VK_RETURN to generate wxEVT_COMMAND_LIST_ITEM_ACTIVATED,
+            // but only if none of the modifiers is down.  We'll let normal
+            // accelerators handle those.
+            if ( !wxIsCtrlDown() && !wxIsShiftDown() &&
+                 !((HIWORD(msg->lParam) & KF_ALTDOWN) == KF_ALTDOWN))
             return false;
         }
     }
+
     return wxControl::MSWShouldPreProcessMessage(msg);
 }
 
-bool wxListCtrl::MSWCommand(WXUINT cmd, WXWORD id_)
+bool wxListCtrl::MSWCommand(WXUINT cmd, WXWORD id)
 {
-    const int id = (signed short)id_;
     if (cmd == EN_UPDATE)
     {
         wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, id);
@@ -1942,55 +1818,6 @@ bool wxListCtrl::MSWCommand(WXUINT cmd, WXWORD id_)
     }
     else
         return false;
-}
-
-// utility used by wxListCtrl::MSWOnNotify and by wxDataViewHeaderWindowMSW::MSWOnNotify
-int WXDLLIMPEXP_CORE wxMSWGetColumnClicked(NMHDR *nmhdr, POINT *ptClick)
-{
-    // find the column clicked: we have to search for it ourselves as the
-    // notification message doesn't provide this info
-
-    // where did the click occur?
-#if defined(__WXWINCE__) && !defined(__HANDHELDPC__) && _WIN32_WCE < 400
-    if ( nmhdr->code == GN_CONTEXTMENU )
-    {
-        *ptClick = ((NMRGINFO*)nmhdr)->ptAction;
-    }
-    else
-#endif //__WXWINCE__
-    if ( !::GetCursorPos(ptClick) )
-    {
-        wxLogLastError(_T("GetCursorPos"));
-    }
-
-    // we need to use listctrl coordinates for the event point so this is what
-    // we return in ptClick, but for comparison with Header_GetItemRect()
-    // result below we need to use header window coordinates
-    POINT ptClickHeader = *ptClick;
-    if ( !::ScreenToClient(nmhdr->hwndFrom, &ptClickHeader) )
-    {
-        wxLogLastError(_T("ScreenToClient(listctrl header)"));
-    }
-
-    if ( !::ScreenToClient(::GetParent(nmhdr->hwndFrom), ptClick) )
-    {
-        wxLogLastError(_T("ScreenToClient(listctrl)"));
-    }
-
-    const int colCount = Header_GetItemCount(nmhdr->hwndFrom);
-    for ( int col = 0; col < colCount; col++ )
-    {
-        RECT rect;
-        if ( Header_GetItemRect(nmhdr->hwndFrom, col, &rect) )
-        {
-            if ( ::PtInRect(&rect, ptClickHeader) )
-            {
-                return col;
-            }
-        }
-    }
-
-    return wxNOT_FOUND;
 }
 
 bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
@@ -2060,12 +1887,59 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 #endif //__WXWINCE__
             case NM_RCLICK:
                 {
-                    POINT ptClick;
-
                     eventType = wxEVT_COMMAND_LIST_COL_RIGHT_CLICK;
-                    event.m_col = wxMSWGetColumnClicked(nmhdr, &ptClick);
-                    event.m_pointDrag.x = ptClick.x;
-                    event.m_pointDrag.y = ptClick.y;
+                    event.m_col = -1;
+
+                    // find the column clicked: we have to search for it
+                    // ourselves as the notification message doesn't provide
+                    // this info
+
+                    // where did the click occur?
+                    POINT ptClick;
+#if defined(__WXWINCE__) && !defined(__HANDHELDPC__) && _WIN32_WCE < 400
+                    if ( nmhdr->code == GN_CONTEXTMENU )
+                    {
+                        ptClick = ((NMRGINFO*)nmhdr)->ptAction;
+                    }
+                    else
+#endif //__WXWINCE__
+                    if ( !::GetCursorPos(&ptClick) )
+                    {
+                        wxLogLastError(_T("GetCursorPos"));
+                    }
+
+                    // we need to use listctrl coordinates for the event point
+                    // but for comparison with Header_GetItemRect() result
+                    // below we need to use header window coordinates
+                    POINT ptClickList = ptClick;
+                    if ( ::ScreenToClient(GetHwnd(), &ptClickList) )
+                    {
+                        event.m_pointDrag.x = ptClickList.x;
+                        event.m_pointDrag.y = ptClickList.y;
+                    }
+                    else
+                    {
+                        wxLogLastError(_T("ScreenToClient(listctrl)"));
+                    }
+
+                    if ( !::ScreenToClient(hwndHdr, &ptClick) )
+                    {
+                        wxLogLastError(_T("ScreenToClient(listctrl header)"));
+                    }
+
+                    const int colCount = Header_GetItemCount(hwndHdr);
+                    for ( int col = 0; col < colCount; col++ )
+                    {
+                        RECT rect;
+                        if ( Header_GetItemRect(hwndHdr, col, &rect) )
+                        {
+                            if ( ::PtInRect(&rect, ptClick) )
+                            {
+                                event.m_col = col;
+                                break;
+                            }
+                        }
+                    }
                 }
                 break;
 
@@ -2075,7 +1949,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 // parameters
                 //
                 // I have no idea what is the real cause of the bug (which is,
-                // just to make things interesting, impossible to reproduce
+                // just to make things interesting, is impossible to reproduce
                 // reliably) but ignoring all these messages does fix it and
                 // doesn't seem to have any negative consequences
                 return true;
@@ -2173,9 +2047,16 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                     const LV_ITEM& lvi = (LV_ITEM)item;
                     if ( !lvi.pszText || lvi.iItem == -1 )
                     {
-                        // EDIT control will be deleted by the list control
-                        // itself so prevent us from deleting it as well
-                        DeleteEditControl();
+                        // don't keep a stale wxTextCtrl around
+                        if ( m_textCtrl )
+                        {
+                            // EDIT control will be deleted by the list control itself so
+                            // prevent us from deleting it as well
+                            m_textCtrl->UnsubclassWin();
+                            m_textCtrl->SetHWND(0);
+                            delete m_textCtrl;
+                            m_textCtrl = NULL;
+                        }
 
                         event.SetEditCanceled(true);
                     }
@@ -2210,6 +2091,16 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                 // delete the assoicated internal data
                 wxDeleteInternalData(this, iItem);
                 break;
+
+#if WXWIN_COMPATIBILITY_2_4
+            case LVN_SETDISPINFO:
+                {
+                    eventType = wxEVT_COMMAND_LIST_SET_INFO;
+                    LV_DISPINFO *info = (LV_DISPINFO *)lParam;
+                    wxConvertFromMSWListItem(GetHwnd(), event.m_item, info->item);
+                }
+                break;
+#endif
 
             case LVN_INSERTITEM:
                 eventType = wxEVT_COMMAND_LIST_INSERT_ITEM;
@@ -2250,7 +2141,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                             // focus event from here and the selection one
                             // below
                             event.SetEventType(eventType);
-                            (void)HandleWindowEvent(event);
+                            (void)GetEventHandler()->ProcessEvent(event);
                         }
                         else // no focus event to send
                         {
@@ -2284,11 +2175,12 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                                              wxLIST_STATE_SELECTED);
 
                     // <Enter> or <Space> activate the selected item if any (but
-                    // not with any modifiers as they have a predefined meaning
-                    // then)
+                    // not with modified keys pressed as they have a predefined
+                    // meaning for the list view then)
                     if ( lItem != -1 &&
                          (wVKey == VK_RETURN || wVKey == VK_SPACE) &&
-                         !wxIsAnyModifierDown() )
+                         !(wxIsShiftDown() || wxIsCtrlDown() ||
+                             (GetKeyState(VK_MENU) < 0)) )
                     {
                         eventType = wxEVT_COMMAND_LIST_ITEM_ACTIVATED;
                     }
@@ -2481,7 +2373,8 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
                     if ( lvi.mask & LVIF_TEXT )
                     {
                         wxString text = OnGetItemText(item, lvi.iSubItem);
-                        wxStrlcpy(lvi.pszText, text.c_str(), lvi.cchTextMax);
+                        wxStrncpy(lvi.pszText, text, lvi.cchTextMax - 1);
+                        lvi.pszText[lvi.cchTextMax - 1] = _T('\0');
                     }
 
                     // see comment at the end of wxListCtrl::GetColumn()
@@ -2522,7 +2415,7 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 
     event.SetEventType(eventType);
 
-    bool processed = HandleWindowEvent(event);
+    bool processed = GetEventHandler()->ProcessEvent(event);
 
     // post processing
     // ---------------
@@ -2548,9 +2441,16 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             // logic here is inverted compared to all the other messages
             *result = event.IsAllowed();
 
-            // EDIT control will be deleted by the list control itself so
-            // prevent us from deleting it as well
-            DeleteEditControl();
+            // don't keep a stale wxTextCtrl around
+            if ( m_textCtrl )
+            {
+                // EDIT control will be deleted by the list control itself so
+                // prevent us from deleting it as well
+                m_textCtrl->UnsubclassWin();
+                m_textCtrl->SetHWND(0);
+                delete m_textCtrl;
+                m_textCtrl = NULL;
+            }
 
             return true;
     }
@@ -2568,13 +2468,19 @@ bool wxListCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
 // see comment at the end of wxListCtrl::GetColumn()
 #ifdef NM_CUSTOMDRAW // _WIN32_IE >= 0x0300
 
+#if defined(__VISUALC__) && __VISUALC__ >= 1400 && __VISUALC__ < 1500
+// Turn off optimizations for this function to avoid an ICE in the MSVC8
+// 64-bit compiler, observed with the compiler included with the PDSK-2003.
+// If there is a better way to test for this please do.
+#pragma optimize( "", off )
+#endif
 static RECT GetCustomDrawnItemRect(const NMCUSTOMDRAW& nmcd)
 {
     RECT rc;
-    wxGetListCtrlItemRect(nmcd.hdr.hwndFrom, nmcd.dwItemSpec, LVIR_BOUNDS, rc);
+    ListView_GetItemRect(nmcd.hdr.hwndFrom, nmcd.dwItemSpec, &rc, LVIR_BOUNDS);
 
     RECT rcIcon;
-    wxGetListCtrlItemRect(nmcd.hdr.hwndFrom, nmcd.dwItemSpec, LVIR_ICON, rcIcon);
+    ListView_GetItemRect(nmcd.hdr.hwndFrom, nmcd.dwItemSpec, &rcIcon, LVIR_ICON);
 
     // exclude the icon part, neither the selection background nor focus rect
     // should cover it
@@ -2582,6 +2488,12 @@ static RECT GetCustomDrawnItemRect(const NMCUSTOMDRAW& nmcd)
 
     return rc;
 }
+
+#if defined(__VISUALC__) && __VISUALC__ >= 1400 && __VISUALC__ < 1500
+// Reset optimizations to their former setting
+#pragma optimize( "", on )
+#endif
+
 
 static
 bool HandleSubItemPrepaint(LPNMLVCUSTOMDRAW pLVCD, HFONT hfont, int colCount)
@@ -2597,10 +2509,22 @@ bool HandleSubItemPrepaint(LPNMLVCUSTOMDRAW pLVCD, HFONT hfont, int colCount)
     SelectInHDC selFont(hdc, hfont);
 
     // get the rectangle to paint
-    int subitem = colCount ? col + 1 : col;
     RECT rc;
-    wxGetListCtrlSubItemRect(hwndList, item, subitem, LVIR_BOUNDS, rc);
-    rc.left += 6;
+    ListView_GetSubItemRect(hwndList, item, col, LVIR_BOUNDS, &rc);
+    if ( !col && colCount > 1 )
+    {
+        // broken ListView_GetSubItemRect() returns the entire item rect for
+        // 0th subitem while we really need just the part for this column
+        RECT rc2;
+        ListView_GetSubItemRect(hwndList, item, 1, LVIR_BOUNDS, &rc2);
+
+        rc.right = rc2.left;
+        rc.left += 4;
+    }
+    else // not first subitem
+    {
+        rc.left += 6;
+    }
 
     // get the image and text to draw
     wxChar text[512];
@@ -2713,12 +2637,8 @@ static void HandleItemPaint(LPNMLVCUSTOMDRAW pLVCD, HFONT hfont)
     }
 
     // same thing for CDIS_FOCUS (except simpler as there is only one of them)
-    //
-    // NB: cast is needed to work around the bug in mingw32 headers which don't
-    //     have it inside ListView_GetNextItem() itself (unlike SDK ones)
     if ( ::GetFocus() == hwndList &&
-            ListView_GetNextItem(
-                hwndList, static_cast<WPARAM>(-1), LVNI_FOCUSED) == item )
+            ListView_GetNextItem(hwndList, (WPARAM)-1, LVNI_FOCUSED) == item )
     {
         nmcd.uItemState |= CDIS_FOCUS;
     }
@@ -2825,22 +2745,14 @@ WXLPARAM wxListCtrl::OnCustomDraw(WXLPARAM lParam)
             break;
 
         case CDDS_ITEMPREPAINT:
-            // get a message for each subitem
-            return CDRF_NOTIFYITEMDRAW;
-
-        case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
             const int item = nmcd.dwItemSpec;
-            const int column = pLVCD->iSubItem;
 
             // we get this message with item == 0 for an empty control, we
             // must ignore it as calling OnGetItemAttr() would be wrong
             if ( item < 0 || item >= GetItemCount() )
                 break;
-            // same for columns
-            if ( column < 0 || column >= GetColumnCount() )
-                break;
 
-            return HandleItemPrepaint(this, pLVCD, DoGetItemColumnAttr(item, column));
+            return HandleItemPrepaint(this, pLVCD, DoGetItemAttr(item));
     }
 
     return CDRF_DODEFAULT;
@@ -2851,11 +2763,10 @@ WXLPARAM wxListCtrl::OnCustomDraw(WXLPARAM lParam)
 // Necessary for drawing hrules and vrules, if specified
 void wxListCtrl::OnPaint(wxPaintEvent& event)
 {
-    const int itemCount = GetItemCount();
-    const bool drawHRules = HasFlag(wxLC_HRULES);
-    const bool drawVRules = HasFlag(wxLC_VRULES);
+    bool drawHRules = HasFlag(wxLC_HRULES);
+    bool drawVRules = HasFlag(wxLC_VRULES);
 
-    if (!InReportView() || !(drawHRules || drawVRules) || !itemCount)
+    if (!InReportView() || !drawHRules && !drawVRules)
     {
         event.Skip();
         return;
@@ -2868,17 +2779,19 @@ void wxListCtrl::OnPaint(wxPaintEvent& event)
     // Reset the device origin since it may have been set
     dc.SetDeviceOrigin(0, 0);
 
-    wxPen pen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT));
+    wxPen pen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DLIGHT), 1, wxSOLID);
     dc.SetPen(pen);
     dc.SetBrush(* wxTRANSPARENT_BRUSH);
 
     wxSize clientSize = GetClientSize();
     wxRect itemRect;
 
+    int itemCount = GetItemCount();
+    int i;
     if (drawHRules)
     {
-        const long top = GetTopItem();
-        for ( int i = top; i < top + GetCountPerPage() + 1; i++ )
+        long top = GetTopItem();
+        for (i = top; i < top + GetCountPerPage() + 1; i++)
         {
             if (GetItemRect(i, itemRect))
             {
@@ -2892,18 +2805,17 @@ void wxListCtrl::OnPaint(wxPaintEvent& event)
                 {
                     cy = itemRect.GetBottom();
                     dc.DrawLine(0, cy, clientSize.x, cy);
-                    break;
                 }
             }
         }
     }
-
-    if (drawVRules)
+    i = itemCount - 1;
+    if (drawVRules && (i > -1))
     {
         wxRect firstItemRect;
         GetItemRect(0, firstItemRect);
 
-        if (GetItemRect(itemCount - 1, itemRect))
+        if (GetItemRect(i, itemRect))
         {
             // this is a fix for bug 673394: erase the pixels which we would
             // otherwise leave on the screen
@@ -2915,21 +2827,10 @@ void wxListCtrl::OnPaint(wxPaintEvent& event)
 
             dc.SetPen(pen);
             dc.SetBrush(*wxTRANSPARENT_BRUSH);
-
-            const int numCols = GetColumnCount();
-            wxVector<int> indexArray(numCols);
-            if ( !ListView_GetColumnOrderArray(GetHwnd(),
-                                               numCols,
-                                               &indexArray[0]) )
-            {
-                wxFAIL_MSG( _T("invalid column index array in OnPaint()") );
-                return;
-            }
-
             int x = itemRect.GetX();
-            for (int col = 0; col < numCols; col++)
+            for (int col = 0; col < GetColumnCount(); col++)
             {
-                int colWidth = GetColumnWidth(indexArray[col]);
+                int colWidth = GetColumnWidth(col);
                 x += colWidth ;
                 dc.DrawLine(x-1, firstItemRect.GetY() - gap,
                             x-1, itemRect.GetBottom());
@@ -3002,9 +2903,9 @@ wxListItemAttr *wxListCtrl::OnGetItemAttr(long WXUNUSED_UNLESS_DEBUG(item)) cons
     return NULL;
 }
 
-wxListItemAttr *wxListCtrl::DoGetItemColumnAttr(long item, long column) const
+wxListItemAttr *wxListCtrl::DoGetItemAttr(long item) const
 {
-    return IsVirtual() ? OnGetItemColumnAttr(item, column)
+    return IsVirtual() ? OnGetItemAttr(item)
                        : wxGetInternalDataAttr(this, item);
 }
 
@@ -3024,12 +2925,30 @@ void wxListCtrl::SetItemCount(long count)
 
 void wxListCtrl::RefreshItem(long item)
 {
-    RefreshItems(item, item);
+    // strangely enough, ListView_Update() results in much more flicker here
+    // than a dumb Refresh() -- why?
+#if 0
+    if ( !ListView_Update(GetHwnd(), item) )
+    {
+        wxLogLastError(_T("ListView_Update"));
+    }
+#else // 1
+    wxRect rect;
+    GetItemRect(item, rect);
+    RefreshRect(rect);
+#endif // 0/1
 }
 
 void wxListCtrl::RefreshItems(long itemFrom, long itemTo)
 {
-    ListView_RedrawItems(GetHwnd(), itemFrom, itemTo);
+    wxRect rect1, rect2;
+    GetItemRect(itemFrom, rect1);
+    GetItemRect(itemTo, rect2);
+
+    wxRect rect = rect1;
+    rect.height = rect2.GetBottom() - rect1.GetTop();
+
+    RefreshRect(rect);
 }
 
 // ----------------------------------------------------------------------------
@@ -3226,7 +3145,7 @@ static void wxConvertToMSWListItem(const wxListCtrl *ctrl,
         else
         {
             // pszText is not const, hence the cast
-            lvItem.pszText = (wxChar *)info.m_text.wx_str();
+            lvItem.pszText = (wxChar *)info.m_text.c_str();
             if ( lvItem.pszText )
                 lvItem.cchTextMax = info.m_text.length();
             else
@@ -3247,7 +3166,7 @@ static void wxConvertToMSWListCol(HWND hwndList,
     if ( item.m_mask & wxLIST_MASK_TEXT )
     {
         lvCol.mask |= LVCF_TEXT;
-        lvCol.pszText = (wxChar *)item.m_text.wx_str(); // cast is safe
+        lvCol.pszText = (wxChar *)item.m_text.c_str(); // cast is safe
     }
 
     if ( item.m_mask & wxLIST_MASK_FORMAT )

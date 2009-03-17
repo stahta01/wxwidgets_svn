@@ -60,7 +60,7 @@ private:
 #if wxUSE_CLIPBOARD
     DECLARE_EVENT_TABLE()
 #endif // wxUSE_CLIPBOARD
-    wxDECLARE_NO_COPY_CLASS(MyHtmlWindow);
+    DECLARE_NO_COPY_CLASS(MyHtmlWindow)
 };
 
 // Define a new frame type: this is going to be our main frame
@@ -154,9 +154,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_SYSTEM_OPTIONS
     wxSystemOptions::SetOption(wxT("no-maskblt"), 1);
 #endif
@@ -367,6 +364,7 @@ void MyHtmlWindow::OnClipboardEvent(wxClipboardTextEvent& WXUNUSED(event))
                         wxString(text, maxTextLength).c_str(),
                         (text.length() > maxTextLength) ? _T("...")
                                                         : _T("")));
+
             wxTheClipboard->Close();
 
             return;

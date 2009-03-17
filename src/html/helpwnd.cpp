@@ -19,7 +19,7 @@
 
 #if wxUSE_WXHTML_HELP
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/object.h"
     #include "wx/dynarray.h"
     #include "wx/intl.h"
@@ -40,7 +40,7 @@
     #include "wx/toolbar.h"
     #include "wx/choicdlg.h"
     #include "wx/filedlg.h"
-#endif // WX_PRECOMP
+#endif // WXPRECOMP
 
 #include "wx/html/helpfrm.h"
 #include "wx/html/helpdlg.h"
@@ -144,7 +144,7 @@ public:
 private:
     wxHtmlHelpWindow *m_Window;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpHtmlWindow);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpHtmlWindow)
     DECLARE_EVENT_TABLE()
 };
 
@@ -297,7 +297,7 @@ void wxHtmlHelpWindow::Init(wxHtmlHelpData* data)
     m_PagesHash = NULL;
     m_UpdateContents = true;
     m_toolBar = NULL;
-    m_helpController = NULL;
+    m_helpController = (wxHtmlHelpController*) NULL;
 }
 
 // Create: builds the GUI components.
@@ -342,7 +342,6 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
                                            wxTB_DOCKABLE | wxTB_NODIVIDER |
                                            (helpStyle & wxHF_FLAT_TOOLBAR ? wxTB_FLAT : 0));
         toolBar->SetMargins( 2, 2 );
-        toolBar->SetToolBitmapSize( wxSize(22,22) );
         AddToolbarButtons(toolBar, helpStyle);
         toolBar->Realize();
         topWindowSizer->Add(toolBar, 0, wxEXPAND);
@@ -353,7 +352,7 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
     wxSizer *navigSizer = NULL;
 
 #ifdef __WXMSW__
-    wxBorder htmlWindowBorder = GetDefaultBorder();
+    wxBorder htmlWindowBorder = GetThemedBorderStyle();
     if (htmlWindowBorder == wxBORDER_SUNKEN)
         htmlWindowBorder = wxBORDER_SIMPLE;
 #else
@@ -438,7 +437,7 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
 
         m_ContentsBox = new wxTreeCtrl(dummy, wxID_HTML_TREECTRL,
                                        wxDefaultPosition, wxDefaultSize,
-#if defined(__WXGTK20__) || defined(__WXMAC__)
+#ifdef __WXGTK20__
                                        wxSUNKEN_BORDER |
                                        wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT |
                                        wxTR_NO_LINES
@@ -534,7 +533,7 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
         m_SearchWholeWords = new wxCheckBox(dummy, wxID_ANY, _("Whole words only"));
         m_SearchButton = new wxButton(dummy, wxID_HTML_SEARCHBUTTON, _("Search"));
 #if wxUSE_TOOLTIPS
-        m_SearchButton->SetToolTip(_("Search contents of help book(s) for all occurrences of the text you typed above"));
+        m_SearchButton->SetToolTip(_("Search contents of help book(s) for all occurences of the text you typed above"));
 #endif //wxUSE_TOOLTIPS
         m_SearchList = new wxListBox(dummy, wxID_HTML_SEARCHLIST,
                                      wxDefaultPosition, wxDefaultSize,
@@ -586,7 +585,7 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
     // Reduce flicker by updating the splitter pane sizes before the
     // frame is shown
     wxSizeEvent sizeEvent(GetSize(), GetId());
-    GetEventHandler()->ProcessEvent(sizeEvent);
+    ProcessEvent(sizeEvent);
 
     if (m_Splitter)
         m_Splitter->UpdateSize();
@@ -655,28 +654,48 @@ void wxHtmlHelpWindow::AddToolbarButtons(wxToolBar *toolBar, int style)
                   wxT("One or more HTML help frame toolbar bitmap could not be loaded.")) ;
 
 
-    toolBar->AddTool(wxID_HTML_PANEL, wxEmptyString, wpanelBitmap, _("Show/hide navigation panel"));
+    toolBar->AddTool(wxID_HTML_PANEL, wpanelBitmap, wxNullBitmap,
+                       false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                       _("Show/hide navigation panel"));
+
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_HTML_BACK, wxEmptyString, wbackBitmap, _("Go back"));
-    toolBar->AddTool(wxID_HTML_FORWARD, wxEmptyString, wforwardBitmap, _("Go forward"));
+    toolBar->AddTool(wxID_HTML_BACK, wbackBitmap, wxNullBitmap,
+                       false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                       _("Go back"));
+    toolBar->AddTool(wxID_HTML_FORWARD, wforwardBitmap, wxNullBitmap,
+                       false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                       _("Go forward"));
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_HTML_UPNODE, wxEmptyString, wupnodeBitmap, _("Go one level up in document hierarchy"));
-    toolBar->AddTool(wxID_HTML_UP, wxEmptyString, wupBitmap, _("Previous page"));
-    toolBar->AddTool(wxID_HTML_DOWN, wxEmptyString, wdownBitmap, _("Next page"));
+
+    toolBar->AddTool(wxID_HTML_UPNODE, wupnodeBitmap, wxNullBitmap,
+                       false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                       _("Go one level up in document hierarchy"));
+    toolBar->AddTool(wxID_HTML_UP, wupBitmap, wxNullBitmap,
+                       false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                       _("Previous page"));
+    toolBar->AddTool(wxID_HTML_DOWN, wdownBitmap, wxNullBitmap,
+                       false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                       _("Next page"));
 
     if ((style & wxHF_PRINT) || (style & wxHF_OPEN_FILES))
         toolBar->AddSeparator();
 
     if (style & wxHF_OPEN_FILES)
-        toolBar->AddTool(wxID_HTML_OPENFILE, wxEmptyString, wopenBitmap, _("Open HTML document"));
+        toolBar->AddTool(wxID_HTML_OPENFILE, wopenBitmap, wxNullBitmap,
+                           false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                           _("Open HTML document"));
 
 #if wxUSE_PRINTING_ARCHITECTURE
     if (style & wxHF_PRINT)
-        toolBar->AddTool(wxID_HTML_PRINT, wxEmptyString, wprintBitmap, _("Print this page"));
+        toolBar->AddTool(wxID_HTML_PRINT, wprintBitmap, wxNullBitmap,
+                           false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                           _("Print this page"));
 #endif
 
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_HTML_OPTIONS, wxEmptyString, woptionsBitmap, _("Display options dialog"));
+    toolBar->AddTool(wxID_HTML_OPTIONS, woptionsBitmap, wxNullBitmap,
+                       false, wxDefaultCoord, wxDefaultCoord, (wxObject *) NULL,
+                       _("Display options dialog"));
 
     // Allow application to add custom buttons
     wxHtmlHelpFrame* parentFrame = wxDynamicCast(GetParent(), wxHtmlHelpFrame);
@@ -814,8 +833,6 @@ void wxHtmlHelpWindow::DisplayIndexItem(const wxHtmlHelpMergedIndexItem *it)
 bool wxHtmlHelpWindow::KeywordSearch(const wxString& keyword,
                                     wxHelpSearchMode mode)
 {
-    wxCHECK_MSG( !keyword.empty(), false, "must have a non empty keyword" );
-
     if (mode == wxHELP_SEARCH_ALL)
     {
         if ( !(m_SearchList &&
@@ -1217,11 +1234,18 @@ public:
         topsizer->Add(new wxStaticText(this, wxID_ANY, _("Preview:")),
                         0, wxLEFT | wxTOP, 10);
 
+        int style = wxHW_SCROLLBAR_AUTO;
+
+#ifdef __WXMSW__
+        style |= GetThemedBorderStyle();
+#else
+        style |= wxBORDER_SUNKEN;
+#endif
         topsizer->AddSpacer(5);
 
         topsizer->Add(TestWin = new wxHtmlWindow(this, wxID_ANY, wxDefaultPosition, wxSize(20, 150),
-                                                 wxHW_SCROLLBAR_AUTO|wxBORDER_THEME),
-                        1, wxEXPAND | wxLEFT | wxRIGHT, 10);
+                                                 style),
+                        1, wxEXPAND | wxLEFT|wxRIGHT, 10);
 
         wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
         wxButton *ok;
@@ -1279,7 +1303,7 @@ public:
     }
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpWindowOptionsDialog);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpWindowOptionsDialog)
 };
 
 BEGIN_EVENT_TABLE(wxHtmlHelpWindowOptionsDialog, wxDialog)

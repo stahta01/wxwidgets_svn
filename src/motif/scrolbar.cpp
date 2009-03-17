@@ -39,7 +39,6 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     wxSize newSize =
         ( style & wxHORIZONTAL ) ? wxSize( 140, 16 ) : wxSize( 16, 140 );
@@ -53,9 +52,9 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
                            (wxOrientation)(style & (wxHORIZONTAL|wxVERTICAL)),
                            (void (*)())wxScrollBarCallback );
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, newSize.x, newSize.y);
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -125,8 +124,6 @@ static void wxScrollBarCallback(Widget widget, XtPointer clientData,
                                 XmScaleCallbackStruct *cbs)
 {
     wxScrollBar *scrollBar = (wxScrollBar*)wxGetWindowFromTable(widget);
-    wxCHECK_RET( scrollBar, _T("invalid widget in scrollbar callback") );
-
     wxOrientation orientation = (wxOrientation)wxPtrToUInt(clientData);
     wxEventType eventType = wxEVT_NULL;
 
@@ -183,5 +180,5 @@ static void wxScrollBarCallback(Widget widget, XtPointer clientData,
     wxScrollEvent event(eventType, scrollBar->GetId(),
                         cbs->value, orientation);
     event.SetEventObject(scrollBar);
-    scrollBar->HandleWindowEvent(event);
+    scrollBar->GetEventHandler()->ProcessEvent(event);
 }

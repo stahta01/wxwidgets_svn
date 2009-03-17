@@ -37,15 +37,15 @@
 // implementation
 // ============================================================================
 
-const char wxFilePickerCtrlNameStr[] = "filepicker";
-const char wxFilePickerWidgetNameStr[] = "filepickerwidget";
-const char wxDirPickerCtrlNameStr[] = "dirpicker";
-const char wxDirPickerWidgetNameStr[] = "dirpickerwidget";
-const char wxFilePickerWidgetLabel[] = wxTRANSLATE("Browse");
-const char wxDirPickerWidgetLabel[] = wxTRANSLATE("Browse");
+const wxChar wxFilePickerCtrlNameStr[] = wxT("filepicker");
+const wxChar wxFilePickerWidgetNameStr[] = wxT("filepickerwidget");
+const wxChar wxDirPickerCtrlNameStr[] = wxT("dirpicker");
+const wxChar wxDirPickerWidgetNameStr[] = wxT("dirpickerwidget");
+const wxChar wxFilePickerWidgetLabel[] = wxT("Browse");
+const wxChar wxDirPickerWidgetLabel[] = wxT("Browse");
 
-wxDEFINE_EVENT( wxEVT_COMMAND_FILEPICKER_CHANGED, wxFileDirPickerEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_DIRPICKER_CHANGED,  wxFileDirPickerEvent );
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_FILEPICKER_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_DIRPICKER_CHANGED)
 IMPLEMENT_DYNAMIC_CLASS(wxFileDirPickerEvent, wxCommandEvent)
 
 // ----------------------------------------------------------------------------
@@ -91,7 +91,9 @@ bool wxFileDirPickerCtrlBase::CreateBase(wxWindow *parent,
     // complete sizer creation
     wxPickerBase::PostCreation();
 
-    DoConnect( m_picker, this );
+    m_picker->Connect(GetEventType(),
+            wxFileDirPickerEventHandler(wxFileDirPickerCtrlBase::OnFileDirChange),
+            NULL, this);
 
     // default's wxPickerBase textctrl limit is too small for this control:
     // make it bigger

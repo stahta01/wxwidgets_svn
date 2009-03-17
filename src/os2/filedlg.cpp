@@ -23,7 +23,6 @@
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/msgdlg.h"
-    #include "wx/filename.h"
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/app.h"
@@ -132,6 +131,11 @@ int wxFileDialog::ShowModal()
     else
         lFlags = FDS_OPEN_DIALOG;
 
+#if WXWIN_COMPATIBILITY_2_4
+    if (m_windowStyle & wxHIDE_READONLY)
+        lFlags |= FDS_SAVEAS_DIALOG;
+#endif
+
     if (m_windowStyle & wxFD_SAVE)
         lFlags |= FDS_SAVEAS_DIALOG;
     if (m_windowStyle & wxFD_MULTIPLE)
@@ -194,7 +198,7 @@ int wxFileDialog::ShowModal()
     else
         sTheFilter = m_wildCard;
 
-    wxStrtok(sTheFilter.wchar_str(), wxT("|"), &pzFilterBuffer);
+    wxStrtok((wxChar*)sTheFilter.c_str(), wxT("|"), &pzFilterBuffer);
     while(pzFilterBuffer != NULL)
     {
         if (nCount > 0 && !(nCount % 2))
@@ -249,11 +253,11 @@ int wxFileDialog::ShowModal()
             int                     nIdx = wxStrlen(zFileNameBuffer) - 1;
             wxString                sExt;
 
-            wxFileName::SplitPath( zFileNameBuffer
-                                    ,&m_path
-                                    ,&m_fileName
-                                    ,&sExt
-                                  );
+            wxSplitPath( zFileNameBuffer
+                        ,&m_path
+                        ,&m_fileName
+                        ,&sExt
+                       );
             if (zFileNameBuffer[nIdx] == wxT('.') || sExt.empty())
             {
                 zFileNameBuffer[nIdx] = wxT('\0');

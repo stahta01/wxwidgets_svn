@@ -28,7 +28,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/dataobj.h"
@@ -90,7 +89,7 @@ private:
     ULONG       m_nCount,   // number of formats we support
                 m_nCurrent; // current enum position
 
-    wxDECLARE_NO_COPY_CLASS(wxIEnumFORMATETC);
+    DECLARE_NO_COPY_CLASS(wxIEnumFORMATETC)
 };
 
 // ----------------------------------------------------------------------------
@@ -126,7 +125,7 @@ private:
 
     bool m_mustDelete;
 
-    wxDECLARE_NO_COPY_CLASS(wxIDataObject);
+    DECLARE_NO_COPY_CLASS(wxIDataObject)
 };
 
 // ============================================================================
@@ -137,9 +136,9 @@ private:
 // wxDataFormat
 // ----------------------------------------------------------------------------
 
-void wxDataFormat::SetId(const wxString& format)
+void wxDataFormat::SetId(const wxChar *format)
 {
-    m_format = (wxDataFormat::NativeFormat)::RegisterClipboardFormat(format.wx_str());
+    m_format = (wxDataFormat::NativeFormat)::RegisterClipboardFormat(format);
     if ( !m_format )
     {
         wxLogError(_("Couldn't register clipboard format '%s'."), format);
@@ -688,12 +687,12 @@ size_t wxDataObject::GetBufferOffset(const wxDataFormat& format )
 
 const void *wxDataObject::GetSizeFromBuffer(const void *buffer,
                                             size_t *size,
-                                            const wxDataFormat& WXUNUSED(format))
+                                            const wxDataFormat& format)
 {
     // hack: the third parameter is declared non-const in Wine's headers so
     // cast away the const
     const size_t realsz = ::HeapSize(::GetProcessHeap(), 0,
-                                     const_cast<void*>(buffer));
+                                     wx_const_cast(void*, buffer));
     if ( realsz == (size_t)-1 )
     {
         // note that HeapSize() does not set last error
@@ -703,7 +702,22 @@ const void *wxDataObject::GetSizeFromBuffer(const void *buffer,
 
     *size = realsz;
 
-    return buffer;
+    // check if this data has its size prepended (as it was by default for wx
+    // programs prior 2.6.3): notice that we may still mistakenly interpret the
+    // start of the real data as size (e.g. suppose the object contains 2 ints
+    // and the first of them is 8...) but there is no way around it as long as
+    // we want to keep this compatibility hack (it won't be there any more in
+    // the next major wx version)
+    DWORD *p = (DWORD *)buffer;
+    if ( *p == realsz && realsz > sizeof(DWORD) )
+    {
+        if ( NeedsVerbatimData(format) )
+            wxLogDebug(wxT("Apparent data format mismatch: size not needed"));
+
+        p++; // this data has its size prepended; skip first DWORD
+    }
+
+    return p;
 }
 
 void* wxDataObject::SetSizeInBuffer( void* buffer, size_t size,
@@ -1072,7 +1086,7 @@ size_t wxFileDataObject::GetDataSize() const
         size_t len;
 #if wxUSE_UNICODE_MSLU
         if ( sizeOfChar == sizeof(char) )
-            len = strlen(m_filenames[i].mb_str(*wxConvFileName));
+            len = strlen(wxConvFileName->cWC2MB(m_filenames[i]));
         else
 #endif // wxUSE_UNICODE_MSLU
             len = m_filenames[i].length();
@@ -1121,7 +1135,7 @@ bool wxFileDataObject::GetDataHere(void *WXUNUSED_IN_WINCE(pData)) const
 #if wxUSE_UNICODE_MSLU
         if ( sizeOfChar == sizeof(char) )
         {
-            wxCharBuffer buf(m_filenames[i].mb_str(*wxConvFileName));
+            wxCharBuffer buf(wxConvFileName->cWC2MB(m_filenames[i]));
             len = strlen(buf);
             memcpy(pbuf, buf, len*sizeOfChar);
         }
@@ -1129,7 +1143,7 @@ bool wxFileDataObject::GetDataHere(void *WXUNUSED_IN_WINCE(pData)) const
 #endif // wxUSE_UNICODE_MSLU
         {
             len = m_filenames[i].length();
-            memcpy(pbuf, m_filenames[i].wx_str(), len*sizeOfChar);
+            memcpy(pbuf, m_filenames[i].c_str(), len*sizeOfChar);
         }
 
         pbuf += len*sizeOfChar;
@@ -1199,16 +1213,16 @@ public:
         { return GetDataHere(buf); }
 #endif
 
-    wxDECLARE_NO_COPY_CLASS(CFSTR_SHELLURLDataObject);
+    DECLARE_NO_COPY_CLASS(CFSTR_SHELLURLDataObject)
 };
 
 
 
 wxURLDataObject::wxURLDataObject(const wxString& url)
 {
-    // we support CF_TEXT and CFSTR_SHELLURL formats which are basically the
-    // same but it seems that some browsers only provide one of them so we have
-    // to support both
+    // we support CF_TEXT and CFSTR_SHELLURL formats which are basicly the same
+    // but it seems that some browsers only provide one of them so we have to
+    // support both
     Add(new wxTextDataObject);
     Add(new CFSTR_SHELLURLDataObject());
 
@@ -1245,19 +1259,13 @@ wxString wxURLDataObject::GetURL() const
 
 void wxURLDataObject::SetURL(const wxString& url)
 {
-    wxCharBuffer urlMB(url.mb_str());
-    if ( urlMB )
-    {
-        const size_t len = strlen(urlMB) + 1; // size with trailing NUL
-#if !wxUSE_UNICODE
-        SetData(wxDF_TEXT, len, urlMB);
-#endif
-        SetData(wxDataFormat(CFSTR_SHELLURL), len, urlMB);
-    }
+    SetData(wxDataFormat(wxUSE_UNICODE ? wxDF_UNICODETEXT : wxDF_TEXT),
+            url.Length()+1, url.c_str());
 
-#if wxUSE_UNICODE
-    SetData(wxDF_UNICODETEXT, url.length() + 1, url.wc_str());
-#endif
+    // CFSTR_SHELLURL is always supposed to be ANSI...
+    wxWX2MBbuf urlA = (wxWX2MBbuf)url.mbc_str();
+    size_t len = strlen(urlA);
+    SetData(wxDataFormat(CFSTR_SHELLURL), len+1, (const char*)urlA);
 }
 
 // ----------------------------------------------------------------------------

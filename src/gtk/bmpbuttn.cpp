@@ -14,7 +14,7 @@
 
 #include "wx/bmpbuttn.h"
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // classes
@@ -35,12 +35,15 @@ extern bool   g_blockEventsOnDrag;
 extern "C" {
 static void gtk_bmpbutton_clicked_callback( GtkWidget *WXUNUSED(widget), wxBitmapButton *button )
 {
+    if (g_isIdle)
+        wxapp_install_idle_handler();
+
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, button->GetId());
     event.SetEventObject(button);
-    button->HandleWindowEvent(event);
+    button->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -54,7 +57,7 @@ static void gtk_bmpbutton_enter_callback( GtkWidget *WXUNUSED(widget), wxBitmapB
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
-    button->GTKMouseEnters();
+    button->HasFocus();
 }
 }
 
@@ -68,7 +71,7 @@ static void gtk_bmpbutton_leave_callback( GtkWidget *WXUNUSED(widget), wxBitmapB
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
-    button->GTKMouseLeaves();
+    button->NotFocus();
 }
 }
 
@@ -82,7 +85,7 @@ static void gtk_bmpbutton_press_callback( GtkWidget *WXUNUSED(widget), wxBitmapB
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
-    button->GTKPressed();
+    button->StartSelect();
 }
 }
 
@@ -96,7 +99,7 @@ static void gtk_bmpbutton_release_callback( GtkWidget *WXUNUSED(widget), wxBitma
     if (!button->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
-    button->GTKReleased();
+    button->EndSelect();
 }
 }
 
@@ -106,16 +109,10 @@ static void gtk_bmpbutton_release_callback( GtkWidget *WXUNUSED(widget), wxBitma
 
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapButton,wxButton)
 
-BEGIN_EVENT_TABLE(wxBitmapButton, wxButton)
-    EVT_SET_FOCUS(wxBitmapButton::OnFocusChange)
-    EVT_KILL_FOCUS(wxBitmapButton::OnFocusChange)
-END_EVENT_TABLE()
-
-
 void wxBitmapButton::Init()
 {
-    m_mouseHovers =
-    m_isPressed = false;
+    m_hasFocus =
+    m_isSelected = false;
 }
 
 bool wxBitmapButton::Create( wxWindow *parent,
@@ -127,6 +124,9 @@ bool wxBitmapButton::Create( wxWindow *parent,
                              const wxValidator& validator,
                              const wxString &name )
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -137,7 +137,6 @@ bool wxBitmapButton::Create( wxWindow *parent,
     m_bmpNormal = bitmap;
 
     m_widget = gtk_button_new();
-    g_object_ref(m_widget);
 
     if (style & wxNO_BORDER)
        gtk_button_set_relief( GTK_BUTTON(m_widget), GTK_RELIEF_NONE );
@@ -164,7 +163,22 @@ bool wxBitmapButton::Create( wxWindow *parent,
 
     PostCreation(size);
 
+    Connect(wxEVT_SET_FOCUS,
+            wxFocusEventHandler(wxBitmapButton::OnFocusChange),
+            NULL, this);
+    Connect(wxEVT_KILL_FOCUS,
+            wxFocusEventHandler(wxBitmapButton::OnFocusChange),
+            NULL, this);
+
     return true;
+}
+
+void wxBitmapButton::SetDefault()
+{
+    GTK_WIDGET_SET_FLAGS( m_widget, GTK_CAN_DEFAULT );
+    gtk_widget_grab_default( m_widget );
+
+    SetSize( m_x, m_y, m_width, m_height );
 }
 
 void wxBitmapButton::SetLabel( const wxString &label )
@@ -189,32 +203,39 @@ void wxBitmapButton::OnSetBitmap()
     InvalidateBestSize();
 
     wxBitmap the_one;
-    if (!IsThisEnabled())
+    if (!m_isEnabled)
         the_one = m_bmpDisabled;
-    else if (m_isPressed)
+    else if (m_isSelected)
         the_one = m_bmpSelected;
-    else if (m_mouseHovers)
+    else if (m_hasFocus)
+    {
+        // NB: this is misnomer, m_hasFocus doesn't mean "has focus", but
+        //     "mouse is over the window"
         the_one = m_bmpHover;
-    else if (HasFocus())
+    }
+    else if (FindFocus() == this)
         the_one = m_bmpFocus;
     else
         the_one = m_bmpNormal;
 
-    if (!the_one.Ok())
-        the_one = m_bmpNormal;
-    if (!the_one.Ok())
-        return;
+    if (!the_one.Ok()) the_one = m_bmpNormal;
+    if (!the_one.Ok()) return;
 
-    GtkWidget* image = GTK_BIN(m_widget)->child;
-    if (image == NULL)
+    GtkWidget *child = GTK_BIN(m_widget)->child;
+    if (child == NULL)
     {
-        image = gtk_image_new();
-        gtk_widget_show(image);
-        gtk_container_add(GTK_CONTAINER(m_widget), image);
+        // initial bitmap
+        GtkWidget *pixmap = 
+            gtk_image_new_from_pixbuf(the_one.GetPixbuf());
+
+        gtk_widget_show(pixmap);
+        gtk_container_add(GTK_CONTAINER(m_widget), pixmap);
     }
-    // always use pixbuf, because pixmap mask does not
-    // work with disabled images in some themes
-    gtk_image_set_from_pixbuf(GTK_IMAGE(image), the_one.GetPixbuf());
+    else
+    {   // subsequent bitmaps
+        GtkImage *pixmap = GTK_IMAGE(child);
+        gtk_image_set_from_pixbuf(pixmap, the_one.GetPixbuf());
+    }
 }
 
 wxSize wxBitmapButton::DoGetBestSize() const
@@ -232,27 +253,27 @@ bool wxBitmapButton::Enable( bool enable )
     return true;
 }
 
-void wxBitmapButton::GTKMouseEnters()
+void wxBitmapButton::HasFocus()
 {
-    m_mouseHovers = true;
+    m_hasFocus = true;
     OnSetBitmap();
 }
 
-void wxBitmapButton::GTKMouseLeaves()
+void wxBitmapButton::NotFocus()
 {
-    m_mouseHovers = false;
+    m_hasFocus = false;
     OnSetBitmap();
 }
 
-void wxBitmapButton::GTKPressed()
+void wxBitmapButton::StartSelect()
 {
-    m_isPressed = true;
+    m_isSelected = true;
     OnSetBitmap();
 }
 
-void wxBitmapButton::GTKReleased()
+void wxBitmapButton::EndSelect()
 {
-    m_isPressed = false;
+    m_isSelected = false;
     OnSetBitmap();
 }
 

@@ -19,14 +19,14 @@
 #include "wx/bitmap.h"
 #include "wx/button.h"
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxButtonNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxButtonNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxBitmapButton: a button which shows bitmaps instead of the usual string.
 // It has different bitmaps for different states (focused/disabled/pressed)
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapButtonBase : public wxButton
+class WXDLLEXPORT wxBitmapButtonBase : public wxButton
 {
 public:
     wxBitmapButtonBase()
@@ -36,15 +36,15 @@ public:
     }
 
     // set the bitmaps
-    virtual void SetBitmapLabel(const wxBitmap& bitmap)
+    void SetBitmapLabel(const wxBitmap& bitmap)
         { m_bmpNormal = bitmap; OnSetBitmap(); }
-    virtual void SetBitmapSelected(const wxBitmap& sel)
+    void SetBitmapSelected(const wxBitmap& sel)
         { m_bmpSelected = sel; OnSetBitmap(); }
-    virtual void SetBitmapFocus(const wxBitmap& focus)
+    void SetBitmapFocus(const wxBitmap& focus)
         { m_bmpFocus = focus; OnSetBitmap(); }
-    virtual void SetBitmapDisabled(const wxBitmap& disabled)
+    void SetBitmapDisabled(const wxBitmap& disabled)
         { m_bmpDisabled = disabled; OnSetBitmap(); }
-    virtual void SetBitmapHover(const wxBitmap& hover)
+    void SetBitmapHover(const wxBitmap& hover)
         { m_bmpHover = hover; OnSetBitmap(); }
 
     // retrieve the bitmaps
@@ -89,7 +89,7 @@ protected:
         m_marginY;
 
 
-    wxDECLARE_NO_COPY_CLASS(wxBitmapButtonBase);
+    DECLARE_NO_COPY_CLASS(wxBitmapButtonBase)
 };
 
 #if WXWIN_COMPATIBILITY_2_6
@@ -110,13 +110,11 @@ inline void wxBitmapButtonBase::SetLabel(const wxBitmap& bitmap)
 #elif defined(__WXGTK__)
     #include "wx/gtk1/bmpbuttn.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/bmpbuttn.h"
+    #include "wx/mac/bmpbuttn.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/bmpbuttn.h"
 #elif defined(__WXPM__)
     #include "wx/os2/bmpbuttn.h"
-#elif defined(__WXPALMOS__)
-    #include "wx/palmos/bmpbuttn.h"
 #endif
 
 #endif // wxUSE_BMPBUTTON

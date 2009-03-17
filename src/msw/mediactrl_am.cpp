@@ -1483,7 +1483,6 @@ public:
     LPAMGETERRORTEXT m_lpAMGetErrorText;
     wxString GetErrorString(HRESULT hrdsv);
 #endif // __WXDEBUG__
-    wxEvtHandler* m_evthandler;
 
     friend class wxAMMediaEvtHandler;
     DECLARE_DYNAMIC_CLASS(wxAMMediaBackend)
@@ -1509,7 +1508,7 @@ private:
     bool m_bLoadEventSent; // Whether or not FinishLoaded was already called
                            // prevents it being called multiple times
 
-    wxDECLARE_NO_COPY_CLASS(wxAMMediaEvtHandler);
+    DECLARE_NO_COPY_CLASS(wxAMMediaEvtHandler)
 };
 
 //===========================================================================
@@ -1574,7 +1573,6 @@ wxAMMediaBackend::wxAMMediaBackend()
 #endif
                   m_bestSize(wxDefaultSize)
 {
-   m_evthandler = NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -1593,11 +1591,7 @@ wxAMMediaBackend::~wxAMMediaBackend()
         if (GetMP())
             GetMP()->Release();
 
-        if (m_evthandler)
-        {
-            m_ctrl->RemoveEventHandler(m_evthandler);
-            delete m_evthandler;
-        }
+        m_ctrl->PopEventHandler(true);
     }
 }
 
@@ -1689,8 +1683,7 @@ bool wxAMMediaBackend::CreateControl(wxControl* ctrl, wxWindow* parent,
 #endif
                                   );
     // Connect for events
-    m_evthandler = new wxAMMediaEvtHandler(this);
-    m_ctrl->PushEventHandler(m_evthandler);
+    m_ctrl->PushEventHandler(new wxAMMediaEvtHandler(this));
 
     //
     //  Here we set up wx-specific stuff for the default
@@ -1956,12 +1949,12 @@ wxLongLong wxAMMediaBackend::GetPosition()
 }
 
 //---------------------------------------------------------------------------
-// wxAMMediaBackend::GetVolume and SetVolume()
+// wxAMMediaBackend::GetVolume
 //
-// Notice that for the IActiveMovie interface value ranges from 0 (MAX volume)
-// to -10000 (minimum volume) and the scale is logarithmic in 0.01db per step.
+// Gets the volume through the IActiveMovie interface -
+// value ranges from 0 (MAX volume) to -10000 (minimum volume).
+// -100 per decibel (Logorithmic in 0.01db per step).
 //---------------------------------------------------------------------------
-
 double wxAMMediaBackend::GetVolume()
 {
     long lVolume;
@@ -1972,20 +1965,37 @@ double wxAMMediaBackend::GetVolume()
         return 0.0;
     }
 
-    double dVolume = lVolume / 2000.; // volume is now in [-5..0] range
-    dVolume = pow(10.0, dVolume);     //                 [10^-5, 1]
-    dVolume -= 0.00001;               //                [0, 1-10^-5]
-    dVolume /= 1 - 0.00001;           //                   [0, 1]
+    // Volume conversion from Greg Hazel
+    double dVolume = (double)lVolume / 100;
 
+    // convert to 0 to 1
+    dVolume = pow(10.0, dVolume/20.0);
+    // handle -INF
+    dVolume *= 1 + pow(10.0, -5.0);
+    dVolume -= pow(10.0, -5.0);
     return dVolume;
 }
 
+//---------------------------------------------------------------------------
+// wxAMMediaBackend::SetVolume
+//
+// Sets the volume through the IActiveMovie interface -
+// value ranges from 0 (MAX volume) to -10000 (minimum volume).
+// -100 per decibel (Logorithmic in 0.01db per step).
+//---------------------------------------------------------------------------
 bool wxAMMediaBackend::SetVolume(double dVolume)
 {
-    // inverse the transformation above
-    long lVolume = static_cast<long>(2000*log10(dVolume + (1 - dVolume)*0.00001));
+    // Volume conversion from Greg Hazel
+    long lVolume;
+    // handle -INF
+    dVolume *= 1 - pow(10.0, -5.0);
+    dVolume += pow(10.0, -5.0);
+    // convert to -100db to 0db
+    dVolume = 20 * log10(dVolume);
+    // scale to -10000 to 0
+    lVolume = (long)(100 * dVolume);
 
-    HRESULT hr = GetAM()->put_Volume(lVolume);
+    HRESULT hr = GetAM()->put_Volume( lVolume );
     if(FAILED(hr))
     {
         wxAMLOG(hr);

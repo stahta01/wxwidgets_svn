@@ -7,6 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef __VMS
+// vms_jackets.h should for proper working be included before anything else
+# include <vms_jackets.h>
+#undef ConnectionNumber
+#endif
+
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -85,7 +91,7 @@
 bool   g_mainThreadLocked = false;
 gint   g_pendingTag = 0;
 
-static GtkWidget *gs_RootWindow = NULL;
+static GtkWidget *gs_RootWindow = (GtkWidget*) NULL;
 
 //-----------------------------------------------------------------------------
 // idle system
@@ -99,6 +105,67 @@ void wxapp_install_idle_handler();
 static wxMutex gs_idleTagsMutex;
 #endif
 
+//-----------------------------------------------------------------------------
+// wxYield
+//-----------------------------------------------------------------------------
+
+// not static because used by textctrl.cpp
+//
+// MT-FIXME
+bool wxIsInsideYield = false;
+
+bool wxApp::Yield(bool onlyIfNeeded)
+{
+    if ( wxIsInsideYield )
+    {
+        if ( !onlyIfNeeded )
+        {
+            wxFAIL_MSG( wxT("wxYield called recursively" ) );
+        }
+
+        return false;
+    }
+
+#if wxUSE_THREADS
+    if ( !wxThread::IsMain() )
+    {
+        // can't call gtk_main_iteration() from other threads like this
+        return true;
+    }
+#endif // wxUSE_THREADS
+
+    wxIsInsideYield = true;
+
+    // We need to remove idle callbacks or the loop will
+    // never finish.
+    wxTheApp->RemoveIdleTag();
+
+#if wxUSE_LOG
+    // disable log flushing from here because a call to wxYield() shouldn't
+    // normally result in message boxes popping up &c
+    wxLog::Suspend();
+#endif
+
+    while (gtk_events_pending())
+        gtk_main_iteration();
+
+    // It's necessary to call ProcessIdle() to update the frames sizes which
+    // might have been changed (it also will update other things set from
+    // OnUpdateUI() which is a nice (and desired) side effect). But we
+    // call ProcessIdle() only once since this is not meant for longish
+    // background jobs (controlled by wxIdleEvent::RequestMore() and the
+    // return value of Processidle().
+    ProcessIdle();
+
+#if wxUSE_LOG
+    // let the logs be flashed again
+    wxLog::Resume();
+#endif
+
+    wxIsInsideYield = false;
+
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 // wxWakeUpIdle
@@ -116,14 +183,14 @@ void wxApp::WakeUpIdle()
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
         wxMutexGuiEnter();
-#endif // wxUSE_THREADS
+#endif // wxUSE_THREADS_
 
     wxapp_install_idle_handler();
 
 #if wxUSE_THREADS
     if (!wxThread::IsMain())
         wxMutexGuiLeave();
-#endif // wxUSE_THREADS
+#endif // wxUSE_THREADS_
 }
 
 //-----------------------------------------------------------------------------
@@ -338,28 +405,6 @@ void wxapp_install_idle_handler()
     wxTheApp->m_idleTag = gtk_idle_add_priority( 1000, wxapp_idle_callback, (gpointer) NULL );
 }
 
-static bool wxOKlibc()
-{
-#if defined(__UNIX__) && defined(__GLIBC__)
-    // glibc 2.0 uses UTF-8 even when it shouldn't
-    wchar_t res = 0;
-    if ((MB_CUR_MAX == 2) &&
-        (wxMB2WC(&res, "\xdd\xa5", 1) == 1) &&
-        (res==0x765))
-    {
-        // this is UTF-8 allright, check whether that's what we want
-        char *cur_locale = setlocale(LC_CTYPE, NULL);
-        if ((strlen(cur_locale) < 4) ||
-        (strcasecmp(cur_locale + strlen(cur_locale) - 4, "utf8")) ||
-        (strcasecmp(cur_locale + strlen(cur_locale) - 5, "utf-8"))) {
-        // nope, don't use libc conversion
-        return false;
-        }
-    }
-#endif
-    return true;
-}
-
 //-----------------------------------------------------------------------------
 // Access to the root window global
 //-----------------------------------------------------------------------------
@@ -380,6 +425,10 @@ GtkWidget* wxGetRootWindow()
 
 IMPLEMENT_DYNAMIC_CLASS(wxApp,wxEvtHandler)
 
+BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxAppBase::OnIdle)
+END_EVENT_TABLE()
+
 wxApp::wxApp()
 {
 #ifdef __WXDEBUG__
@@ -397,8 +446,8 @@ wxApp::wxApp()
     m_colorCube = (unsigned char*) NULL;
 
     // this is NULL for a "regular" wxApp, but is set (and freed) by a wxGLApp
-    m_glVisualInfo = NULL;
-    m_glFBCInfo = NULL;
+    m_glVisualInfo = (void *) NULL;
+    m_glFBCInfo = (void *) NULL;
 }
 
 wxApp::~wxApp()
@@ -534,8 +583,13 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
     gtk_set_locale();
 
     // We should have the wxUSE_WCHAR_T test on the _outside_
+#if wxUSE_WCHAR_T
+        if (!wxOKlibc())
+            wxConvCurrent = &wxConvLocal;
+#else // !wxUSE_WCHAR_T
     if (!wxOKlibc())
-        wxConvCurrent = &wxConvLocal;
+        wxConvCurrent = (wxMBConv*) NULL;
+#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
 
 #if wxUSE_UNICODE
     // gtk_init() wants UTF-8, not wchar_t, so convert

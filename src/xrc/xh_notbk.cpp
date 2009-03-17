@@ -40,12 +40,13 @@ wxNotebookXmlHandler::wxNotebookXmlHandler()
     XRC_ADD_STYLE(wxBK_TOP);
     XRC_ADD_STYLE(wxBK_BOTTOM);
 
-    // provide the old synonyms for these fields as well
+#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxNB_DEFAULT);
     XRC_ADD_STYLE(wxNB_LEFT);
     XRC_ADD_STYLE(wxNB_RIGHT);
     XRC_ADD_STYLE(wxNB_TOP);
     XRC_ADD_STYLE(wxNB_BOTTOM);
+#endif
 
     XRC_ADD_STYLE(wxNB_FIXEDWIDTH);
     XRC_ADD_STYLE(wxNB_MULTILINE);
@@ -89,14 +90,12 @@ wxObject *wxNotebookXmlHandler::DoCreateResource()
                 }
             }
             else
-            {
-                ReportError(n, "notebookpage child must be a window");
-            }
+                wxLogError(wxT("Error in resource."));
             return wnd;
         }
         else
         {
-            ReportError("notebookpage must have a window child");
+            wxLogError(wxT("Error in resource: no control within notebook's <page> tag."));
             return NULL;
         }
     }

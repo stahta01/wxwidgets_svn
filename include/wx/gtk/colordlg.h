@@ -15,15 +15,15 @@
 #include "wx/dialog.h"
 #include "wx/cmndata.h"
 
-class WXDLLIMPEXP_CORE wxColourDialog : public wxDialog
+class WXDLLEXPORT wxColourDialog : public wxDialog
 {
 public:
     wxColourDialog() {}
     wxColourDialog(wxWindow *parent,
-                   wxColourData *data = NULL);
+                   wxColourData *data = (wxColourData *)NULL);
     virtual ~wxColourDialog() {}
 
-    bool Create(wxWindow *parent, wxColourData *data = NULL);
+    bool Create(wxWindow *parent, wxColourData *data = (wxColourData *)NULL);
 
     wxColourData &GetColourData() { return m_data; }
 

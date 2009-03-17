@@ -26,7 +26,7 @@ public:
     virtual bool OnInit();
 
 private:
-    wxDECLARE_NO_COPY_CLASS(MyApp);
+    DECLARE_NO_COPY_CLASS(MyApp)
 };
 
 class MyListCtrl: public wxListCtrl
@@ -40,8 +40,6 @@ public:
         : wxListCtrl(parent, id, pos, size, style),
           m_attr(*wxBLUE, *wxLIGHT_GREY, wxNullFont)
         {
-            m_updated = -1;
-
 #ifdef __POCKETPC__
             EnableContextMenu();
 #endif
@@ -61,6 +59,10 @@ public:
     void OnEndLabelEdit(wxListEvent& event);
     void OnDeleteItem(wxListEvent& event);
     void OnDeleteAllItems(wxListEvent& event);
+#if WXWIN_COMPATIBILITY_2_4
+    void OnGetInfo(wxListEvent& event);
+    void OnSetInfo(wxListEvent& event);
+#endif
     void OnSelected(wxListEvent& event);
     void OnDeselected(wxListEvent& event);
     void OnListKeyDown(wxListEvent& event);
@@ -90,10 +92,7 @@ private:
 
     wxListItemAttr m_attr;
 
-    long m_updated;
-
-
-    wxDECLARE_NO_COPY_CLASS(MyListCtrl);
+    DECLARE_NO_COPY_CLASS(MyListCtrl)
     DECLARE_EVENT_TABLE()
 };
 
@@ -120,7 +119,6 @@ protected:
     void OnVirtualView(wxCommandEvent& event);
     void OnSmallVirtualView(wxCommandEvent& event);
 
-    void OnGoTo(wxCommandEvent& event);
     void OnFocusLast(wxCommandEvent& event);
     void OnToggleFirstSel(wxCommandEvent& event);
     void OnDeselectAll(wxCommandEvent& event);
@@ -135,11 +133,6 @@ protected:
     void OnToggleMultiSel(wxCommandEvent& event);
     void OnShowColInfo(wxCommandEvent& event);
     void OnShowSelInfo(wxCommandEvent& event);
-    void OnShowViewRect(wxCommandEvent& event);
-#ifdef wxHAS_LISTCTRL_COLUMN_ORDER
-    void OnSetColOrder(wxCommandEvent& event);
-    void OnGetColOrder(wxCommandEvent& event);
-#endif // wxHAS_LISTCTRL_COLUMN_ORDER
     void OnFreeze(wxCommandEvent& event);
     void OnThaw(wxCommandEvent& event);
     void OnToggleLines(wxCommandEvent& event);
@@ -174,7 +167,7 @@ private:
 
     bool m_smallVirtual;
 
-    wxDECLARE_NO_COPY_CLASS(MyFrame);
+    DECLARE_NO_COPY_CLASS(MyFrame)
     DECLARE_EVENT_TABLE()
 };
 
@@ -207,12 +200,6 @@ enum
     LIST_TOGGLE_FIRST,
     LIST_SHOW_COL_INFO,
     LIST_SHOW_SEL_INFO,
-    LIST_SHOW_VIEW_RECT,
-#ifdef wxHAS_LISTCTRL_COLUMN_ORDER
-    LIST_SET_COL_ORDER,
-    LIST_GET_COL_ORDER,
-#endif // wxHAS_LISTCTRL_COLUMN_ORDER
-    LIST_GOTO,
     LIST_FOCUS_LAST,
     LIST_FREEZE,
     LIST_THAW,

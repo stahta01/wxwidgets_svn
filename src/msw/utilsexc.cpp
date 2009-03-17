@@ -36,16 +36,15 @@
 #endif
 
 #include "wx/process.h"
-#include "wx/thread.h"
+
 #include "wx/apptrait.h"
-#include "wx/vector.h"
 
 
 #include "wx/msw/private.h"
 
 #include <ctype.h>
 
-#if !defined(__GNUWIN32__) && !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
+#if !defined(__GNUWIN32__) && !defined(__SALFORDC__) && !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
     #include <direct.h>
 #ifndef __MWERKS__
     #include <dos.h>
@@ -102,13 +101,6 @@ wxCreateHiddenWindow(LPCTSTR *pclassname, LPCTSTR classname, WNDPROC wndproc);
 static const wxChar *wxMSWEXEC_WNDCLASSNAME = wxT("_wxExecute_Internal_Class");
 static const wxChar *gs_classForHiddenWindow = NULL;
 
-// event used to wake up threads waiting in wxExecuteThread
-static HANDLE gs_heventShutdown = NULL;
-
-// handles of all threads monitoring the execution of asynchronously running
-// processes
-static wxVector<HANDLE> gs_asyncThreads;
-
 // ----------------------------------------------------------------------------
 // private types
 // ----------------------------------------------------------------------------
@@ -139,44 +131,7 @@ public:
     virtual bool OnInit() { return true; }
     virtual void OnExit()
     {
-        if ( gs_heventShutdown )
-        {
-            // stop any threads waiting for the termination of asynchronously
-            // running processes
-            if ( !::SetEvent(gs_heventShutdown) )
-            {
-                wxLogDebug(_T("Failed to set shutdown event in wxExecuteModule"));
-            }
-
-            ::CloseHandle(gs_heventShutdown);
-            gs_heventShutdown = NULL;
-
-            // now wait until they terminate
-            if ( !gs_asyncThreads.empty() )
-            {
-                const size_t numThreads = gs_asyncThreads.size();
-
-                if ( ::WaitForMultipleObjects
-                       (
-                        numThreads,
-                        &gs_asyncThreads[0],
-                        TRUE,   // wait for all of them to become signalled
-                        3000    // long but finite value
-                       ) == WAIT_TIMEOUT )
-                {
-                    wxLogDebug(_T("Failed to stop all wxExecute monitor threads"));
-                }
-
-                for ( size_t n = 0; n < numThreads; n++ )
-                {
-                    ::CloseHandle(gs_asyncThreads[n]);
-                }
-
-                gs_asyncThreads.clear();
-            }
-        }
-
-        if ( gs_classForHiddenWindow )
+        if ( *gs_classForHiddenWindow )
         {
             if ( !::UnregisterClass(wxMSWEXEC_WNDCLASSNAME, wxGetInstance()) )
             {
@@ -190,8 +145,6 @@ public:
 private:
     DECLARE_DYNAMIC_CLASS(wxExecuteModule)
 };
-
-IMPLEMENT_DYNAMIC_CLASS(wxExecuteModule, wxModule)
 
 #if wxUSE_STREAMS && !defined(__WXWINCE__)
 
@@ -217,7 +170,7 @@ protected:
 protected:
     HANDLE m_hInput;
 
-    wxDECLARE_NO_COPY_CLASS(wxPipeInputStream);
+    DECLARE_NO_COPY_CLASS(wxPipeInputStream)
 };
 
 class wxPipeOutputStream: public wxOutputStream
@@ -233,7 +186,7 @@ protected:
 protected:
     HANDLE m_hOutput;
 
-    wxDECLARE_NO_COPY_CLASS(wxPipeOutputStream);
+    DECLARE_NO_COPY_CLASS(wxPipeOutputStream)
 };
 
 // define this to let wxexec.cpp know that we know what we're doing
@@ -328,48 +281,22 @@ static DWORD __stdcall wxExecuteThread(void *arg)
 {
     wxExecuteData * const data = (wxExecuteData *)arg;
 
-    // create the shutdown event if we're the first thread starting to wait
-    if ( !gs_heventShutdown )
+    if ( ::WaitForSingleObject(data->hProcess, INFINITE) != WAIT_OBJECT_0 )
     {
-        // create a manual initially non-signalled event object
-        gs_heventShutdown = ::CreateEvent(NULL, TRUE, FALSE, NULL);
-        if ( !gs_heventShutdown )
-        {
-            wxLogDebug(_T("CreateEvent() in wxExecuteThread failed"));
-        }
+        wxLogDebug(_T("Waiting for the process termination failed!"));
     }
 
-    HANDLE handles[2] = { data->hProcess, gs_heventShutdown };
-    switch ( ::WaitForMultipleObjects(2, handles, FALSE, INFINITE) )
+    // get the exit code
+    if ( !::GetExitCodeProcess(data->hProcess, &data->dwExitCode) )
     {
-        case WAIT_OBJECT_0:
-            // process terminated, get its exit code
-            if ( !::GetExitCodeProcess(data->hProcess, &data->dwExitCode) )
-            {
-                wxLogLastError(wxT("GetExitCodeProcess"));
-            }
-
-            wxASSERT_MSG( data->dwExitCode != STILL_ACTIVE,
-                          wxT("process should have terminated") );
-
-            // send a message indicating process termination to the window
-            ::SendMessage(data->hWnd, wxWM_PROC_TERMINATED, 0, (LPARAM)data);
-            break;
-
-        case WAIT_OBJECT_0 + 1:
-            // we're shutting down but the process is still running -- leave it
-            // run but clean up the associated data
-            if ( !data->state )
-            {
-                delete data;
-            }
-            //else: exiting while synchronously executing process is still
-            //      running? this shouldn't happen...
-            break;
-
-        default:
-            wxLogDebug(_T("Waiting for the process termination failed!"));
+        wxLogLastError(wxT("GetExitCodeProcess"));
     }
+
+    wxASSERT_MSG( data->dwExitCode != STILL_ACTIVE,
+                  wxT("process should have terminated") );
+
+    // send a message indicating process termination to the window
+    ::SendMessage(data->hWnd, wxWM_PROC_TERMINATED, 0, (LPARAM)data);
 
     return 0;
 }
@@ -394,7 +321,7 @@ LRESULT APIENTRY _EXPORT wxExecuteWindowCbk(HWND hWnd, UINT message,
         {
             // we're executing synchronously, tell the waiting thread
             // that the process finished
-            data->state = false;
+            data->state = 0;
         }
         else
         {
@@ -805,13 +732,13 @@ long wxExecute(const wxString& cmd, int flags, wxProcess *handler)
                     // Win32 allows for null
 #ifdef __WXWINCE__
                  (wxChar *)
-                 moduleName.wx_str(),// application name
+                 moduleName.c_str(), // application name
                  (wxChar *)
-                 arguments.wx_str(), // arguments
+                 arguments.c_str(),  // arguments
 #else
                  NULL,               // application name (use only cmd line)
                  (wxChar *)
-                 command.wx_str(),   // full command line
+                 command.c_str(),    // full command line
 #endif
                  NULL,               // security attributes: defaults for both
                  NULL,               //   the process and its main thread
@@ -932,7 +859,7 @@ long wxExecute(const wxString& cmd, int flags, wxProcess *handler)
         return pi.dwProcessId;
     }
 
-    gs_asyncThreads.push_back(hThread);
+    ::CloseHandle(hThread);
 
 #if wxUSE_IPC && !defined(__WXWINCE__)
     // second part of DDE hack: now establish the DDE conversation with the
@@ -996,13 +923,13 @@ long wxExecute(const wxString& cmd, int flags, wxProcess *handler)
     while ( data->state )
     {
 #if wxUSE_STREAMS && !defined(__WXWINCE__)
-        if ( !bufOut.Update() && !bufErr.Update() )
+        bufOut.Update();
+        bufErr.Update();
 #endif // wxUSE_STREAMS
-        {
-            // don't eat 100% of the CPU -- ugly but anything else requires
-            // real async IO which we don't have for the moment
-            ::Sleep(50);
-        }
+
+        // don't eat 100% of the CPU -- ugly but anything else requires
+        // real async IO which we don't have for the moment
+        ::Sleep(50);
 
         // we must process messages or we'd never get wxWM_PROC_TERMINATED
         traits->AlwaysYield();
@@ -1021,16 +948,20 @@ long wxExecute(const wxString& cmd, int flags, wxProcess *handler)
     return dwExitCode;
 }
 
-template <typename CharType>
-long wxExecuteImpl(CharType **argv, int flags, wxProcess *handler)
+long wxExecute(wxChar **argv, int flags, wxProcess *handler)
 {
     wxString command;
-    command.reserve(1024);
 
     wxString arg;
     for ( ;; )
     {
         arg = *argv++;
+
+        // we didn't quote the arguments properly in the previous wx versions
+        // and while this is the right thing to do, there is a good chance that
+        // people worked around our bug in their code by quoting the arguments
+        // manually before, so, for compatibility sake, keep the argument
+        // unchanged if it's already quoted
 
         bool quote;
         if ( arg.empty() )
@@ -1041,39 +972,32 @@ long wxExecuteImpl(CharType **argv, int flags, wxProcess *handler)
         }
         else // non-empty
         {
-            // escape any quotes present in the string to avoid interfering
-            // with the command line parsing in the child process
-            arg.Replace("\"", "\\\"", true /* replace all */);
+            if ( *arg.begin() != _T('"') || *arg.rbegin() != _T('"') )
+            {
+                // escape any quotes present in the string to avoid interfering
+                // with the command line parsing in the child process
+                arg.Replace(_T("\""), _T("\\\""), true /* replace all */);
 
-            // and quote any arguments containing the spaces to prevent them from
-            // being broken down
-            quote = arg.find_first_of(" \t") != wxString::npos;
+                // and quote any arguments containing the spaces to prevent
+                // them from being broken down
+                quote = arg.find_first_of(_T(" \t")) != wxString::npos;
+            }
+            else // already quoted
+            {
+                quote = false;
+            }
         }
 
         if ( quote )
-            command += '\"' + arg + '\"';
+            command += _T('\"') + arg + _T('\"');
         else
             command += arg;
 
         if ( !*argv )
             break;
 
-        command += ' ';
+        command += _T(' ');
     }
 
     return wxExecute(command, flags, handler);
 }
-
-long wxExecute(char **argv, int flags, wxProcess *handler)
-{
-    return wxExecuteImpl(argv, flags, handler);
-}
-
-#if wxUSE_UNICODE
-
-long wxExecute(wchar_t **argv, int flags, wxProcess *handler)
-{
-    return wxExecuteImpl(argv, flags, handler);
-}
-
-#endif // wxUSE_UNICODE

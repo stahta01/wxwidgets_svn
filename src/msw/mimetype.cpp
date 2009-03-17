@@ -25,7 +25,6 @@
     #include "wx/string.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/crt.h"
     #if wxUSE_GUI
         #include "wx/icon.h"
         #include "wx/msgdlg.h"
@@ -212,7 +211,7 @@ static wxString wxFileTypeImplGetCurVer(const wxString& progId)
     return progId;
 }
 
-wxString wxFileTypeImpl::GetCommand(const wxString& verb) const
+wxString wxFileTypeImpl::GetCommand(const wxChar *verb) const
 {
     // suppress possible error messages
     wxLogNull nolog;
@@ -733,7 +732,7 @@ bool wxFileTypeImpl::SetMimeType(const wxString& mimeTypeOrig)
     {
         // make up a default value for it
         wxString cmd;
-        wxFileName::SplitPath(GetCommand(_T("open")), NULL, &cmd, NULL);
+        wxSplitPath(GetCommand(_T("open")), NULL, &cmd, NULL);
         mimeType << _T("application/x-") << cmd;
     }
     else

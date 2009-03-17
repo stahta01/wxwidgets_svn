@@ -63,6 +63,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "checklst"=.\checklst\checklst.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "collpane"=.\collpane\collpane.dsp - Package Owner=<4>
 
 Package=<5>
@@ -100,6 +112,18 @@ Package=<4>
 ###############################################################################
 
 Project: "dataview"=.\dataview\dataview.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "db"=.\db\db.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -159,6 +183,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "docvwmdi"=.\docvwmdi\docvwmdi.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "dragimag"=.\dragimag\dragimag.dsp - Package Owner=<4>
 
 Package=<5>
@@ -172,6 +208,18 @@ Package=<4>
 ###############################################################################
 
 Project: "drawing"=.\drawing\drawing.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "dynamic"=.\dynamic\dynamic.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -531,6 +579,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "minifram"=.\minifram\minifram.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "minimal"=.\minimal\minimal.dsp - Package Owner=<4>
 
 Package=<5>
@@ -591,6 +651,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "png"=.\png\png.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "popup"=.\popup\popup.dsp - Package Owner=<4>
 
 Package=<5>
@@ -615,7 +687,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "propgrid"=.\propgrid\propgrid.dsp - Package Owner=<4>
+Project: "propsize"=.\propsize\propsize.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -651,6 +723,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "rotate"=.\rotate\rotate.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "sashtest"=.\sashtest\sashtest.dsp - Package Owner=<4>
 
 Package=<5>
@@ -664,6 +748,18 @@ Package=<4>
 ###############################################################################
 
 Project: "scroll"=.\scroll\scroll.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "scrollsub"=.\scrollsub\scrollsub.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -712,18 +808,6 @@ Package=<4>
 ###############################################################################
 
 Project: "statbar"=.\statbar\statbar.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "stc"=.\stc\stctest.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

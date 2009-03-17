@@ -86,14 +86,12 @@ wxObject *wxListbookXmlHandler::DoCreateResource()
                 }
             }
             else
-            {
-                ReportError(n, "listbookpage child must be a window");
-            }
+                wxLogError(wxT("Error in resource."));
             return wnd;
         }
         else
         {
-            ReportError("listbookpage must have a window child");
+            wxLogError(wxT("Error in resource: no control within listbook's <page> tag."));
             return NULL;
         }
     }

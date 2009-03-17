@@ -20,95 +20,32 @@
     #include "wx/wx.h"
 #endif
 
-#include "wx/beforestd.h"
-#ifdef __VISUALC__
-    #pragma warning(disable:4100)
-#endif
-#include <cppunit/TestListener.h>
-#ifdef __VISUALC__
-    #pragma warning(default:4100)
-#endif
-#include <cppunit/Test.h>
-#include <cppunit/TestResult.h>
-#include "wx/afterstd.h"
-
 #include "wx/cmdline.h"
 #include <iostream>
 
 using CppUnit::Test;
 using CppUnit::TestSuite;
 using CppUnit::TestFactoryRegistry;
+using CppUnit::TextUi::TestRunner;
+using CppUnit::CompilerOutputter;
 
-
-// Displays the test name before starting to execute it: this helps with
-// diagnosing where exactly does a test crash or hang when/if it does.
-class DetailListener : public CppUnit::TestListener
-{
-public:
-    DetailListener(bool doTiming = false):
-        CppUnit::TestListener(),
-        m_timing(doTiming)
-    {
-    }
-
-    virtual void startTest(CppUnit::Test *test)
-    {
-        std::cout << test->getName () << " ";
-        m_watch.Start();
-    }
-
-    virtual void endTest(CppUnit::Test * WXUNUSED(test))
-    {
-        m_watch.Pause();
-        if ( m_timing )
-            std::cout << " (in "<< m_watch.Time() << " ms )";
-        std::cout << "\n";
-    }
-
-protected :
-    bool m_timing;
-    wxStopWatch m_watch;
-};
-
-using namespace std;
-
-#if wxUSE_GUI
-    typedef wxApp TestAppBase;
-#else
-    typedef wxAppConsole TestAppBase;
-#endif
+using std::string;
+using std::vector;
+using std::auto_ptr;
+using std::cout;
 
 // The application class
 //
-class TestApp : public TestAppBase
+class TestApp : public wxAppConsole
 {
 public:
     TestApp();
 
     // standard overrides
-    virtual void OnInitCmdLine(wxCmdLineParser& parser);
-    virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
-    virtual bool OnInit();
-    virtual int  OnRun();
-    virtual int  OnExit();
-
-    // used by events propagation test
-    virtual int FilterEvent(wxEvent& event);
-    virtual bool ProcessEvent(wxEvent& event);
-
-    void SetFilterEventFunc(FilterEventFunc f) { m_filterEventFunc = f; }
-    void SetProcessEventFunc(ProcessEventFunc f) { m_processEventFunc = f; }
-
-#ifdef __WXDEBUG__
-    virtual void OnAssertFailure(const wxChar *,
-                                 int,
-                                 const wxChar *,
-                                 const wxChar *,
-                                 const wxChar *)
-    {
-        throw TestAssertFailure();
-    }
-#endif // __WXDEBUG__
+    void OnInitCmdLine(wxCmdLineParser& parser);
+    bool OnCmdLineParsed(wxCmdLineParser& parser);
+    bool OnInit();
+    int  OnRun();
 
 private:
     void List(Test *test, const string& parent = "") const;
@@ -116,13 +53,7 @@ private:
     // command lines options/parameters
     bool m_list;
     bool m_longlist;
-    bool m_detail;
-    bool m_timing;
     vector<string> m_registries;
-
-    // event handling hooks
-    FilterEventFunc m_filterEventFunc;
-    ProcessEventFunc m_processEventFunc;
 };
 
 IMPLEMENT_APP_CONSOLE(TestApp)
@@ -131,50 +62,33 @@ TestApp::TestApp()
   : m_list(false),
     m_longlist(false)
 {
-    m_filterEventFunc = NULL;
-    m_processEventFunc = NULL;
 }
 
 // Init
 //
 bool TestApp::OnInit()
 {
-    if ( !TestAppBase::OnInit() )
-        return false;
-
     cout << "Test program for wxWidgets\n"
          << "build: " << WX_BUILD_OPTIONS_SIGNATURE << std::endl;
-
-#if wxUSE_GUI
-    // create a hidden parent window to be used as parent for the GUI controls
-    new wxFrame(NULL, wxID_ANY, "Hidden wx test frame");
-#endif // wxUSE_GUI
-
-    return true;
-}
+    return wxAppConsole::OnInit();
+};
 
 // The table of command line options
 //
 void TestApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
-    TestAppBase::OnInitCmdLine(parser);
+    wxAppConsole::OnInitCmdLine(parser);
 
     static const wxCmdLineEntryDesc cmdLineDesc[] = {
-        { wxCMD_LINE_SWITCH, "l", "list",
-            "list the test suites, do not run them",
+        { wxCMD_LINE_SWITCH, _T("l"), _T("list"),
+            _T("list the test suites, do not run them"),
             wxCMD_LINE_VAL_NONE, 0 },
-        { wxCMD_LINE_SWITCH, "L", "longlist",
-            "list the test cases, do not run them",
+        { wxCMD_LINE_SWITCH, _T("L"), _T("longlist"),
+            _T("list the test cases, do not run them"),
             wxCMD_LINE_VAL_NONE, 0 },
-        { wxCMD_LINE_SWITCH, "d", "detail",
-            "print the test case names, run them",
-            wxCMD_LINE_VAL_NONE, 0 },
-        { wxCMD_LINE_SWITCH, "t", "timing",
-            "print names and mesure running time of individual test, run them",
-            wxCMD_LINE_VAL_NONE, 0 },
-        { wxCMD_LINE_PARAM, NULL, NULL, "REGISTRY", wxCMD_LINE_VAL_STRING,
+        { wxCMD_LINE_PARAM, 0, 0, _T("REGISTRY"), wxCMD_LINE_VAL_STRING,
             wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE },
-        wxCMD_LINE_DESC_END
+        { wxCMD_LINE_NONE , 0, 0, 0, wxCMD_LINE_VAL_NONE, 0 }
     };
 
     parser.SetDesc(cmdLineDesc);
@@ -192,44 +106,15 @@ bool TestApp::OnCmdLineParsed(wxCmdLineParser& parser)
 
     m_longlist = parser.Found(_T("longlist"));
     m_list = m_longlist || parser.Found(_T("list"));
-    m_timing = parser.Found(_T("timing"));
-    m_detail = !m_timing && parser.Found(_T("detail"));
 
-    return TestAppBase::OnCmdLineParsed(parser);
-}
-
-// Event handling
-int TestApp::FilterEvent(wxEvent& event)
-{
-    if ( m_filterEventFunc )
-        return (*m_filterEventFunc)(event);
-
-    return TestAppBase::FilterEvent(event);
-}
-
-bool TestApp::ProcessEvent(wxEvent& event)
-{
-    if ( m_processEventFunc )
-        return (*m_processEventFunc)(event);
-
-    return TestAppBase::ProcessEvent(event);
-}
-
-extern void SetFilterEventFunc(FilterEventFunc func)
-{
-    wxGetApp().SetFilterEventFunc(func);
-}
-
-extern void SetProcessEventFunc(ProcessEventFunc func)
-{
-    wxGetApp().SetProcessEventFunc(func);
+    return wxAppConsole::OnCmdLineParsed(parser);
 }
 
 // Run
 //
 int TestApp::OnRun()
 {
-    CppUnit::TextTestRunner runner;
+    TestRunner runner;
 
     for (size_t i = 0; i < m_registries.size(); i++) {
         auto_ptr<Test> test(m_registries[i].empty() ?
@@ -247,10 +132,7 @@ int TestApp::OnRun()
             runner.addTest(test.release());
     }
 
-    if ( m_list )
-        return EXIT_SUCCESS;
-
-    runner.setOutputter(new CppUnit::CompilerOutputter(&runner.result(), cout));
+    runner.setOutputter(new CompilerOutputter(&runner.result(), cout));
 
 #if wxUSE_LOG
     // Switch off logging unless --verbose
@@ -260,28 +142,9 @@ int TestApp::OnRun()
     bool verbose = false;
 #endif
 
-    // there is a bug
-    // (http://sf.net/tracker/index.php?func=detail&aid=1649369&group_id=11795&atid=111795)
-    // in some versions of cppunit: they write progress dots to cout (and not
-    // cerr) and don't flush it so all the dots appear at once at the end which
-    // is not very useful so unbuffer cout to work around this
-    cout.setf(ios::unitbuf);
-
-    // add detail listener if needed
-    DetailListener detailListener(m_timing);
-    if ( m_detail || m_timing )
-        runner.eventManager().addListener(&detailListener);
-
-    return runner.run("", false, true, !verbose) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
-
-int TestApp::OnExit()
-{
-#if wxUSE_GUI
-    delete GetTopWindow();
-#endif // wxUSE_GUI
-
-    return 0;
+    return ( m_list || runner.run("", false, true, !verbose) )
+           ? EXIT_SUCCESS
+           : EXIT_FAILURE;
 }
 
 // List the tests

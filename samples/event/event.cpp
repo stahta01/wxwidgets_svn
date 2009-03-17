@@ -30,23 +30,30 @@
     #include "wx/wx.h"
 #endif
 
-#ifndef __WXMSW__
-    #include "../sample.xpm"
-#endif
-
 // ----------------------------------------------------------------------------
 // event constants
 // ----------------------------------------------------------------------------
 
-// define a custom event type (we don't need a separate declaration here but
-// usually you would use a matching wxDECLARE_EVENT in a header)
-wxDEFINE_EVENT(wxEVT_MY_CUSTOM_COMMAND, wxCommandEvent);
+// declare a custom event type
+//
+// note that in wxWin 2.3+ these macros expand simply into the following code:
+//
+//  extern const wxEventType wxEVT_MY_CUSTOM_COMMAND;
+//
+//  const wxEventType wxEVT_MY_CUSTOM_COMMAND = wxNewEventType();
+//
+// and you may use this code directly if you don't care about 2.2 compatibility
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_MY_CUSTOM_COMMAND, 7777)
+END_DECLARE_EVENT_TYPES()
+
+DEFINE_EVENT_TYPE(wxEVT_MY_CUSTOM_COMMAND)
 
 // it may also be convenient to define an event table macro for this event type
 #define EVT_MY_CUSTOM_COMMAND(id, fn) \
     DECLARE_EVENT_TABLE_ENTRY( \
         wxEVT_MY_CUSTOM_COMMAND, id, wxID_ANY, \
-        wxCommandEventHandler(fn), \
+        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
         (wxObject *) NULL \
     ),
 
@@ -193,9 +200,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("Event wxWidgets Sample"),
                                  wxPoint(50, 50), wxSize(600, 340));
@@ -218,8 +222,6 @@ bool MyApp::OnInit()
 MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
        : wxFrame((wxFrame *)NULL, wxID_ANY, title, pos, size)
 {
-    SetIcon(wxICON(sample));
-
     // init members
     m_nPush = 0;
 
@@ -308,18 +310,20 @@ void MyFrame::OnConnect(wxCommandEvent& event)
 {
     if ( event.IsChecked() )
     {
-        Connect(Event_Dynamic, wxEVT_COMMAND_MENU_SELECTED,
-                wxCommandEventHandler(MyFrame::OnDynamic));
+        // disconnect
+        Connect(Event_Dynamic, wxID_ANY, wxEVT_COMMAND_MENU_SELECTED,
+                (wxObjectEventFunction)
+                (wxEventFunction)
+                (wxCommandEventFunction)&MyFrame::OnDynamic);
 
 #if wxUSE_STATUSBAR
         SetStatusText(_T("You can now use \"Dynamic\" item in the menu"));
         SetStatusText(_T("Dynamic: on"), Status_Dynamic);
 #endif // wxUSE_STATUSBAR
     }
-    else // disconnect
+    else // connect
     {
-        Disconnect(Event_Dynamic, wxEVT_COMMAND_MENU_SELECTED,
-                   wxCommandEventHandler(MyFrame::OnDynamic));
+        Disconnect(Event_Dynamic, wxID_ANY, wxEVT_COMMAND_MENU_SELECTED);
 
 #if wxUSE_STATUSBAR
         SetStatusText(_T("You can no more use \"Dynamic\" item in the menu"));

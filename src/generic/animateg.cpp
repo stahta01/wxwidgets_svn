@@ -15,7 +15,7 @@
   #pragma hdrstop
 #endif  //__BORLANDC__
 
-#if wxUSE_ANIMATIONCTRL
+#if wxUSE_ANIMATIONCTRL && (!defined(__WXGTK20__) || defined(__WXUNIVERSAL__))
 
 #include "wx/animate.h"
 
@@ -42,7 +42,7 @@ wxAnimationDecoderList wxAnimation::sm_handlers;
 // ----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxAnimation, wxAnimationBase)
-#define M_ANIMDATA      static_cast<wxAnimationDecoder*>(m_refData)
+#define M_ANIMDATA      wx_static_cast(wxAnimationDecoder*, m_refData)
 
 wxSize wxAnimation::GetSize() const
 {
@@ -138,6 +138,7 @@ bool wxAnimation::Load(wxInputStream &stream, wxAnimationType type)
                 m_refData = handler->Clone();
                 return M_ANIMDATA->Load(stream);
             }
+
         }
 
         wxLogWarning( _("No handler found for animation type.") );
@@ -146,17 +147,16 @@ bool wxAnimation::Load(wxInputStream &stream, wxAnimationType type)
 
     handler = FindHandler(type);
 
+    // do a copy of the handler from the static list which we will own
+    // as our reference data
+    m_refData = handler->Clone();
+
     if (handler == NULL)
     {
         wxLogWarning( _("No animation handler for type %ld defined."), type );
 
         return false;
     }
-
-
-    // do a copy of the handler from the static list which we will own
-    // as our reference data
-    m_refData = handler->Clone();
 
     if (stream.IsSeekable() && !M_ANIMDATA->CanRead(stream))
     {
@@ -307,16 +307,9 @@ wxAnimationCtrl::~wxAnimationCtrl()
 
 bool wxAnimationCtrl::LoadFile(const wxString& filename, wxAnimationType type)
 {
-    wxFileInputStream fis(filename);
-    if (!fis.Ok())
-        return false;
-    return Load(fis, type);
-}
-
-bool wxAnimationCtrl::Load(wxInputStream& stream, wxAnimationType type)
-{
     wxAnimation anim;
-    if ( !anim.Load(stream, type) || !anim.IsOk() )
+    if (!anim.LoadFile(filename, type) ||
+        !anim.IsOk())
         return false;
 
     SetAnimation(anim);
@@ -693,5 +686,5 @@ void wxAnimationCtrl::OnSize(wxSizeEvent &WXUNUSED(event))
     }
 }
 
-#endif // wxUSE_ANIMATIONCTRL
+#endif      // wxUSE_ANIMATIONCTRL
 

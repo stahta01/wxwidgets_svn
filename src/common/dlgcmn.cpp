@@ -27,7 +27,6 @@
 #include "wx/dialog.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
     #include "wx/button.h"
     #include "wx/dcclient.h"
     #include "wx/intl.h"
@@ -39,14 +38,61 @@
 
 #include "wx/statline.h"
 #include "wx/sysopt.h"
-#include "wx/module.h"
-#include "wx/private/stattext.h"
-#include "wx/bookctrl.h"
-#include "wx/scrolwin.h"
 
-#if wxUSE_DISPLAY
-#include "wx/display.h"
-#endif
+#if wxUSE_STATTEXT
+
+// ----------------------------------------------------------------------------
+// wxTextWrapper
+// ----------------------------------------------------------------------------
+
+// this class is used to wrap the text on word boundary: wrapping is done by
+// calling OnStartLine() and OnOutputLine() functions
+class wxTextWrapper
+{
+public:
+    wxTextWrapper() { m_eol = false; }
+
+    // win is used for getting the font, text is the text to wrap, width is the
+    // max line width or -1 to disable wrapping
+    void Wrap(wxWindow *win, const wxString& text, int widthMax);
+
+    // we don't need it, but just to avoid compiler warnings
+    virtual ~wxTextWrapper() { }
+
+protected:
+    // line may be empty
+    virtual void OnOutputLine(const wxString& line) = 0;
+
+    // called at the start of every new line (except the very first one)
+    virtual void OnNewLine() { }
+
+private:
+    // call OnOutputLine() and set m_eol to true
+    void DoOutputLine(const wxString& line)
+    {
+        OnOutputLine(line);
+
+        m_eol = true;
+    }
+
+    // this function is a destructive inspector: when it returns true it also
+    // resets the flag to false so calling it again woulnd't return true any
+    // more
+    bool IsStartOfNewLine()
+    {
+        if ( !m_eol )
+            return false;
+
+        m_eol = false;
+
+        return true;
+    }
+
+
+    bool m_eol;
+};
+
+#endif // wxUSE_STATTEXT
 
 // ----------------------------------------------------------------------------
 // wxDialogBase
@@ -58,57 +104,79 @@ BEGIN_EVENT_TABLE(wxDialogBase, wxTopLevelWindow)
     EVT_CLOSE(wxDialogBase::OnCloseWindow)
 
     EVT_CHAR_HOOK(wxDialogBase::OnCharHook)
+
+    WX_EVENT_TABLE_CONTROL_CONTAINER(wxDialogBase)
 END_EVENT_TABLE()
 
-wxDialogLayoutAdapter* wxDialogBase::sm_layoutAdapter = NULL;
-bool wxDialogBase::sm_layoutAdaptation = false;
+WX_DELEGATE_TO_CONTROL_CONTAINER(wxDialogBase, wxTopLevelWindow)
 
 void wxDialogBase::Init()
 {
     m_returnCode = 0;
     m_affirmativeId = wxID_OK;
     m_escapeId = wxID_ANY;
-    m_layoutAdaptationLevel = 3;
-    m_layoutAdaptationDone = FALSE;
-    m_layoutAdaptationMode = wxDIALOG_ADAPTATION_MODE_DEFAULT;
 
     // the dialogs have this flag on by default to prevent the events from the
     // dialog controls from reaching the parent frame which is usually
     // undesirable and can lead to unexpected and hard to find bugs
     SetExtraStyle(GetExtraStyle() | wxWS_EX_BLOCK_EVENTS);
-}
 
-// helper of GetParentForModalDialog()
-static bool CanBeUsedAsParent(wxWindow *parent)
-{
-    extern WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
-
-    return !parent->HasExtraStyle(wxWS_EX_TRANSIENT) &&
-                parent->IsShownOnScreen() &&
-                    !wxPendingDelete.Member(parent) &&
-                        !parent->IsBeingDeleted();
-}
-
-wxWindow *wxDialogBase::GetParentForModalDialog(wxWindow *parent) const
-{
-    // creating a parent-less modal dialog will result (under e.g. wxGTK2)
-    // in an unfocused dialog, so try to find a valid parent for it:
-    if ( parent )
-        parent = wxGetTopLevelParent(parent);
-
-    if ( !parent || !CanBeUsedAsParent(parent) )
-        parent = wxTheApp->GetTopWindow();
-
-    if ( parent && !CanBeUsedAsParent(parent) )
-    {
-        // can't use this one, it's going to disappear
-        parent = NULL;
-    }
-
-    return parent;
+    m_container.SetContainerWindow(this);
 }
 
 #if wxUSE_STATTEXT
+
+void wxTextWrapper::Wrap(wxWindow *win, const wxString& text, int widthMax)
+{
+    const wxChar *lastSpace = NULL;
+    wxString line;
+
+    const wxChar *lineStart = text.c_str();
+    for ( const wxChar *p = lineStart; ; p++ )
+    {
+        if ( IsStartOfNewLine() )
+        {
+            OnNewLine();
+
+            lastSpace = NULL;
+            line.clear();
+            lineStart = p;
+        }
+
+        if ( *p == _T('\n') || *p == _T('\0') )
+        {
+            DoOutputLine(line);
+
+            if ( *p == _T('\0') )
+                break;
+        }
+        else // not EOL
+        {
+            if ( *p == _T(' ') )
+                lastSpace = p;
+
+            line += *p;
+
+            if ( widthMax >= 0 && lastSpace )
+            {
+                int width;
+                win->GetTextExtent(line, &width, NULL);
+
+                if ( width > widthMax )
+                {
+                    // remove the last word from this line
+                    line.erase(lastSpace - lineStart, p + 1 - lineStart);
+                    DoOutputLine(line);
+
+                    // go back to the last word of this line which we didn't
+                    // output yet
+                    p = lastSpace;
+                }
+            }
+            //else: no wrapping at all or impossible to wrap
+        }
+    }
+}
 
 class wxTextSizerWrapper : public wxTextWrapper
 {
@@ -170,10 +238,51 @@ wxSizer *wxDialogBase::CreateTextSizer(const wxString& message)
     return wrapper.CreateSizer(text, widthMax);
 }
 
+class wxLabelWrapper : public wxTextWrapper
+{
+public:
+    void WrapLabel(wxWindow *text, int widthMax)
+    {
+        m_text.clear();
+        Wrap(text, text->GetLabel(), widthMax);
+        text->SetLabel(m_text);
+    }
+
+protected:
+    virtual void OnOutputLine(const wxString& line)
+    {
+        m_text += line;
+    }
+
+    virtual void OnNewLine()
+    {
+        m_text += _T('\n');
+    }
+
+private:
+    wxString m_text;
+};
+
+// NB: don't "factor out" the scope operator, SGI MIPSpro 7.3 (but not 7.4)
+//     gets confused if it doesn't immediately follow the class name
+void
+#if defined(__WXGTK__) && !defined(__WXUNIVERSAL__)
+wxStaticText::
+#else
+wxStaticTextBase::
+#endif
+Wrap(int width)
+{
+    wxLabelWrapper wrapper;
+    wrapper.WrapLabel(this, width);
+}
+
 #endif // wxUSE_STATTEXT
 
 wxSizer *wxDialogBase::CreateButtonSizer(long flags)
 {
+    wxSizer *sizer = NULL;
+
 #ifdef __SMARTPHONE__
     wxDialog* dialog = (wxDialog*) this;
     if ( flags & wxOK )
@@ -187,8 +296,6 @@ wxSizer *wxDialogBase::CreateButtonSizer(long flags)
 
     if ( flags & wxNO )
         dialog->SetRightMenu(wxID_NO);
-
-    return NULL;
 #else // !__SMARTPHONE__
 
 #if wxUSE_BUTTON
@@ -202,19 +309,13 @@ wxSizer *wxDialogBase::CreateButtonSizer(long flags)
             wxSystemOptions::GetOptionInt(wxT("wince.dialog.real-ok-cancel")) )
 #endif // __POCKETPC__
     {
-        return CreateStdDialogButtonSizer(flags);
+        sizer = CreateStdDialogButtonSizer(flags);
     }
-#ifdef __POCKETPC__
-    return NULL;
-#endif // __POCKETPC__
-
-#else // !wxUSE_BUTTON
-    wxUnusedVar(flags);
-
-    return NULL;
-#endif // wxUSE_BUTTON/!wxUSE_BUTTON
+#endif // wxUSE_BUTTON
 
 #endif // __SMARTPHONE__/!__SMARTPHONE__
+
+    return sizer;
 }
 
 wxSizer *wxDialogBase::CreateSeparatedButtonSizer(long flags)
@@ -268,18 +369,6 @@ wxStdDialogButtonSizer *wxDialogBase::CreateStdDialogButtonSizer( long flags )
     {
         no = new wxButton(this, wxID_NO);
         sizer->AddButton(no);
-    }
-
-    if (flags & wxAPPLY)
-    {
-        wxButton *apply = new wxButton(this, wxID_APPLY);
-        sizer->AddButton(apply);
-    }
-
-    if (flags & wxCLOSE)
-    {
-        wxButton *close = new wxButton(this, wxID_CLOSE);
-        sizer->AddButton(close);
     }
 
     if (flags & wxHELP)
@@ -472,422 +561,5 @@ void wxDialogBase::OnSysColourChanged(wxSysColourChangedEvent& event)
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
     Refresh();
 #endif
-
     event.Skip();
 }
-
-/// Do the adaptation
-bool wxDialogBase::DoLayoutAdaptation()
-{
-    if (GetLayoutAdapter())
-    {
-        wxWindow* focusWindow = wxFindFocusDescendant(this); // from event.h
-        if (GetLayoutAdapter()->DoLayoutAdaptation((wxDialog*) this))
-        {
-            if (focusWindow)
-                focusWindow->SetFocus();
-            return true;
-        }
-        else
-            return false;
-    }
-    else
-        return false;
-}
-
-/// Can we do the adaptation?
-bool wxDialogBase::CanDoLayoutAdaptation()
-{
-    // Check if local setting overrides the global setting
-    bool layoutEnabled = (GetLayoutAdaptationMode() == wxDIALOG_ADAPTATION_MODE_ENABLED) || (IsLayoutAdaptationEnabled() && (GetLayoutAdaptationMode() != wxDIALOG_ADAPTATION_MODE_DISABLED));
-
-    return (layoutEnabled && !m_layoutAdaptationDone && GetLayoutAdaptationLevel() != 0 && GetLayoutAdapter() != NULL && GetLayoutAdapter()->CanDoLayoutAdaptation((wxDialog*) this));
-}
-
-/// Set scrolling adapter class, returning old adapter
-wxDialogLayoutAdapter* wxDialogBase::SetLayoutAdapter(wxDialogLayoutAdapter* adapter)
-{
-    wxDialogLayoutAdapter* oldLayoutAdapter = sm_layoutAdapter;
-    sm_layoutAdapter = adapter;
-    return oldLayoutAdapter;
-}
-
-/*!
- * Standard adapter
- */
-
-IMPLEMENT_CLASS(wxDialogLayoutAdapter, wxObject)
-
-IMPLEMENT_CLASS(wxStandardDialogLayoutAdapter, wxDialogLayoutAdapter)
-
-// Allow for caption size on wxWidgets < 2.9
-#if defined(__WXGTK__) && !wxCHECK_VERSION(2,9,0)
-#define wxEXTRA_DIALOG_HEIGHT 30
-#else
-#define wxEXTRA_DIALOG_HEIGHT 0
-#endif
-
-/// Indicate that adaptation should be done
-bool wxStandardDialogLayoutAdapter::CanDoLayoutAdaptation(wxDialog* dialog)
-{
-    if (dialog->GetSizer())
-    {
-        wxSize windowSize, displaySize;
-        return MustScroll(dialog, windowSize, displaySize) != 0;
-    }
-    else
-        return false;
-}
-
-bool wxStandardDialogLayoutAdapter::DoLayoutAdaptation(wxDialog* dialog)
-{
-    if (dialog->GetSizer())
-    {
-#if wxUSE_BOOKCTRL
-        wxBookCtrlBase* bookContentWindow = wxDynamicCast(dialog->GetContentWindow(), wxBookCtrlBase);
-
-        if (bookContentWindow)
-        {
-            // If we have a book control, make all the pages (that use sizers) scrollable
-            wxWindowList windows;
-            for (size_t i = 0; i < bookContentWindow->GetPageCount(); i++)
-            {
-                wxWindow* page = bookContentWindow->GetPage(i);
-
-                wxScrolledWindow* scrolledWindow = wxDynamicCast(page, wxScrolledWindow);
-                if (scrolledWindow)
-                    windows.Append(scrolledWindow);
-                else if (!scrolledWindow && page->GetSizer())
-                {
-                    // Create a scrolled window and reparent
-                    scrolledWindow = CreateScrolledWindow(page);
-                    wxSizer* oldSizer = page->GetSizer();
-
-                    wxSizer* newSizer = new wxBoxSizer(wxVERTICAL);
-                    newSizer->Add(scrolledWindow,1, wxEXPAND, 0);
-
-                    page->SetSizer(newSizer, false /* don't delete the old sizer */);
-
-                    scrolledWindow->SetSizer(oldSizer);
-
-                    ReparentControls(page, scrolledWindow);
-
-                    windows.Append(scrolledWindow);
-                }
-            }
-
-            FitWithScrolling(dialog, windows);
-        }
-        else
-#endif // wxUSE_BOOKCTRL
-        {
-            // If we have an arbitrary dialog, create a scrolling area for the main content, and a button sizer
-            // for the main buttons.
-            wxScrolledWindow* scrolledWindow = CreateScrolledWindow(dialog);
-
-            int buttonSizerBorder = 0;
-
-            // First try to find a wxStdDialogButtonSizer
-            wxSizer* buttonSizer = FindButtonSizer(true /* find std button sizer */, dialog, dialog->GetSizer(), buttonSizerBorder);
-
-            // Next try to find a wxBoxSizer containing the controls
-            if (!buttonSizer && dialog->GetLayoutAdaptationLevel() > wxDIALOG_ADAPTATION_STANDARD_SIZER)
-                buttonSizer = FindButtonSizer(false /* find ordinary sizer */, dialog, dialog->GetSizer(), buttonSizerBorder);
-
-            // If we still don't have a button sizer, collect any 'loose' buttons in the layout
-            if (!buttonSizer && dialog->GetLayoutAdaptationLevel() > wxDIALOG_ADAPTATION_ANY_SIZER)
-            {
-                int count = 0;
-                wxStdDialogButtonSizer* stdButtonSizer = new wxStdDialogButtonSizer;
-                buttonSizer = stdButtonSizer;
-
-                FindLooseButtons(dialog, stdButtonSizer, dialog->GetSizer(), count);
-                if (count > 0)
-                    stdButtonSizer->Realize();
-                else
-                {
-                    delete buttonSizer;
-                    buttonSizer = NULL;
-                }
-            }
-
-            if (buttonSizerBorder == 0)
-                buttonSizerBorder = 5;
-
-            ReparentControls(dialog, scrolledWindow, buttonSizer);
-
-            wxBoxSizer* newTopSizer = new wxBoxSizer(wxVERTICAL);
-            wxSizer* oldSizer = dialog->GetSizer();
-
-            dialog->SetSizer(newTopSizer, false /* don't delete old sizer */);
-
-            newTopSizer->Add(scrolledWindow, 1, wxEXPAND|wxALL, 0);
-            if (buttonSizer)
-                newTopSizer->Add(buttonSizer, 0, wxEXPAND|wxALL, buttonSizerBorder);
-
-            scrolledWindow->SetSizer(oldSizer);
-
-            FitWithScrolling(dialog, scrolledWindow);
-        }
-    }
-
-    dialog->SetLayoutAdaptationDone(true);
-    return true;
-}
-
-// Create the scrolled window
-wxScrolledWindow* wxStandardDialogLayoutAdapter::CreateScrolledWindow(wxWindow* parent)
-{
-    wxScrolledWindow* scrolledWindow = new wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL|wxVSCROLL|wxHSCROLL|wxBORDER_NONE);
-    return scrolledWindow;
-}
-
-/// Find and remove the button sizer, if any
-wxSizer* wxStandardDialogLayoutAdapter::FindButtonSizer(bool stdButtonSizer, wxDialog* dialog, wxSizer* sizer, int& retBorder, int accumlatedBorder)
-{
-    for ( wxSizerItemList::compatibility_iterator node = sizer->GetChildren().GetFirst();
-          node; node = node->GetNext() )
-    {
-        wxSizerItem *item = node->GetData();
-        wxSizer *childSizer = item->GetSizer();
-
-        if ( childSizer )
-        {
-            int newBorder = accumlatedBorder;
-            if (item->GetFlag() & wxALL)
-                newBorder += item->GetBorder();
-
-            if (stdButtonSizer) // find wxStdDialogButtonSizer
-            {
-                wxStdDialogButtonSizer* buttonSizer = wxDynamicCast(childSizer, wxStdDialogButtonSizer);
-                if (buttonSizer)
-                {
-                    sizer->Detach(childSizer);
-                    retBorder = newBorder;
-                    return buttonSizer;
-                }
-            }
-            else // find a horizontal box sizer containing standard buttons
-            {
-                wxBoxSizer* buttonSizer = wxDynamicCast(childSizer, wxBoxSizer);
-                if (buttonSizer && IsOrdinaryButtonSizer(dialog, buttonSizer))
-                {
-                    sizer->Detach(childSizer);
-                    retBorder = newBorder;
-                    return buttonSizer;
-                }
-            }
-
-            wxSizer* s = FindButtonSizer(stdButtonSizer, dialog, childSizer, retBorder, newBorder);
-            if (s)
-                return s;
-        }
-    }
-    return NULL;
-}
-
-/// Check if this sizer contains standard buttons, and so can be repositioned in the dialog
-bool wxStandardDialogLayoutAdapter::IsOrdinaryButtonSizer(wxDialog* dialog, wxBoxSizer* sizer)
-{
-    if (sizer->GetOrientation() != wxHORIZONTAL)
-        return false;
-
-    for ( wxSizerItemList::compatibility_iterator node = sizer->GetChildren().GetFirst();
-          node; node = node->GetNext() )
-    {
-        wxSizerItem *item = node->GetData();
-        wxButton *childButton = wxDynamicCast(item->GetWindow(), wxButton);
-
-        if (childButton && IsStandardButton(dialog, childButton))
-            return true;
-    }
-    return false;
-}
-
-/// Check if this is a standard button
-bool wxStandardDialogLayoutAdapter::IsStandardButton(wxDialog* dialog, wxButton* button)
-{
-    wxWindowID id = button->GetId();
-
-    return (id == wxID_OK || id == wxID_CANCEL || id == wxID_YES || id == wxID_NO || id == wxID_SAVE ||
-            id == wxID_APPLY || id == wxID_HELP || id == wxID_CONTEXT_HELP || dialog->IsMainButtonId(id));
-}
-
-/// Find 'loose' main buttons in the existing layout and add them to the standard dialog sizer
-bool wxStandardDialogLayoutAdapter::FindLooseButtons(wxDialog* dialog, wxStdDialogButtonSizer* buttonSizer, wxSizer* sizer, int& count)
-{
-    wxSizerItemList::compatibility_iterator node = sizer->GetChildren().GetFirst();
-    while (node)
-    {
-        wxSizerItemList::compatibility_iterator next = node->GetNext();
-        wxSizerItem *item = node->GetData();
-        wxSizer *childSizer = item->GetSizer();
-        wxButton *childButton = wxDynamicCast(item->GetWindow(), wxButton);
-
-        if (childButton && IsStandardButton(dialog, childButton))
-        {
-            sizer->Detach(childButton);
-            buttonSizer->AddButton(childButton);
-            count ++;
-        }
-
-        if (childSizer)
-            FindLooseButtons(dialog, buttonSizer, childSizer, count);
-
-        node = next;
-    }
-    return true;
-}
-
-/// Reparent the controls to the scrolled window
-void wxStandardDialogLayoutAdapter::ReparentControls(wxWindow* parent, wxWindow* reparentTo, wxSizer* buttonSizer)
-{
-    DoReparentControls(parent, reparentTo, buttonSizer);
-}
-
-void wxStandardDialogLayoutAdapter::DoReparentControls(wxWindow* parent, wxWindow* reparentTo, wxSizer* buttonSizer)
-{
-    wxWindowList::compatibility_iterator node = parent->GetChildren().GetFirst();
-    while (node)
-    {
-        wxWindowList::compatibility_iterator next = node->GetNext();
-
-        wxWindow *win = node->GetData();
-
-        // Don't reparent the scrolled window or buttons in the button sizer
-        if (win != reparentTo && (!buttonSizer || !buttonSizer->GetItem(win)))
-        {
-            win->Reparent(reparentTo);
-#ifdef __WXMSW__
-            // Restore correct tab order
-            ::SetWindowPos((HWND) win->GetHWND(), HWND_BOTTOM, -1, -1, -1, -1, SWP_NOMOVE|SWP_NOSIZE);
-#endif
-        }
-
-        node = next;
-    }
-}
-
-/// Find whether scrolling will be necessary for the dialog, returning wxVERTICAL, wxHORIZONTAL or both
-int wxStandardDialogLayoutAdapter::MustScroll(wxDialog* dialog, wxSize& windowSize, wxSize& displaySize)
-{
-    return DoMustScroll(dialog, windowSize, displaySize);
-}
-
-/// Find whether scrolling will be necessary for the dialog, returning wxVERTICAL, wxHORIZONTAL or both
-int wxStandardDialogLayoutAdapter::DoMustScroll(wxDialog* dialog, wxSize& windowSize, wxSize& displaySize)
-{
-    wxSize minWindowSize = dialog->GetSizer()->GetMinSize();
-    windowSize = dialog->GetSize();
-    windowSize = wxSize(wxMax(windowSize.x, minWindowSize.x), wxMax(windowSize.y, minWindowSize.y));
-#if wxUSE_DISPLAY
-    displaySize = wxDisplay(wxDisplay::GetFromWindow(dialog)).GetClientArea().GetSize();
-#else
-    displaySize = wxGetClientDisplayRect().GetSize();
-#endif
-
-    int flags = 0;
-
-    if (windowSize.y >= (displaySize.y - wxEXTRA_DIALOG_HEIGHT))
-        flags |= wxVERTICAL;
-    if (windowSize.x >= displaySize.x)
-        flags |= wxHORIZONTAL;
-
-    return flags;
-}
-
-// A function to fit the dialog around its contents, and then adjust for screen size.
-// If scrolled windows are passed, scrolling is enabled in the required orientation(s).
-bool wxStandardDialogLayoutAdapter::FitWithScrolling(wxDialog* dialog, wxWindowList& windows)
-{
-    return DoFitWithScrolling(dialog, windows);
-}
-
-// A function to fit the dialog around its contents, and then adjust for screen size.
-// If a scrolled window is passed, scrolling is enabled in the required orientation(s).
-bool wxStandardDialogLayoutAdapter::FitWithScrolling(wxDialog* dialog, wxScrolledWindow* scrolledWindow)
-{
-    return DoFitWithScrolling(dialog, scrolledWindow);
-}
-
-// A function to fit the dialog around its contents, and then adjust for screen size.
-// If a scrolled window is passed, scrolling is enabled in the required orientation(s).
-bool wxStandardDialogLayoutAdapter::DoFitWithScrolling(wxDialog* dialog, wxScrolledWindow* scrolledWindow)
-{
-    wxWindowList windows;
-    windows.Append(scrolledWindow);
-    return DoFitWithScrolling(dialog, windows);
-}
-
-bool wxStandardDialogLayoutAdapter::DoFitWithScrolling(wxDialog* dialog, wxWindowList& windows)
-{
-    wxSizer* sizer = dialog->GetSizer();
-    if (!sizer)
-        return false;
-
-    sizer->SetSizeHints(dialog);
-
-    wxSize windowSize, displaySize;
-    int scrollFlags = DoMustScroll(dialog, windowSize, displaySize);
-    int scrollBarSize = 20;
-
-    if (scrollFlags)
-    {
-        int scrollBarExtraX = 0, scrollBarExtraY = 0;
-        bool resizeHorizontally = (scrollFlags & wxHORIZONTAL) != 0;
-        bool resizeVertically = (scrollFlags & wxVERTICAL) != 0;
-
-        if (windows.GetCount() != 0)
-        {
-            // Allow extra for a scrollbar, assuming we resizing in one direction only.
-            if ((resizeVertically && !resizeHorizontally) && (windowSize.x < (displaySize.x - scrollBarSize)))
-                scrollBarExtraX = scrollBarSize;
-            if ((resizeHorizontally && !resizeVertically) && (windowSize.y < (displaySize.y - scrollBarSize)))
-                scrollBarExtraY = scrollBarSize;
-        }
-
-        wxWindowList::compatibility_iterator node = windows.GetFirst();
-        while (node)
-        {
-            wxWindow *win = node->GetData();
-            wxScrolledWindow* scrolledWindow = wxDynamicCast(win, wxScrolledWindow);
-            if (scrolledWindow)
-            {
-                scrolledWindow->SetScrollRate(resizeHorizontally ? 10 : 0, resizeVertically ? 10 : 0);
-
-                if (scrolledWindow->GetSizer())
-                    scrolledWindow->GetSizer()->Fit(scrolledWindow);
-            }
-
-            node = node->GetNext();
-        }
-
-        wxSize limitTo = windowSize + wxSize(scrollBarExtraX, scrollBarExtraY);
-        if (resizeVertically)
-            limitTo.y = displaySize.y - wxEXTRA_DIALOG_HEIGHT;
-        if (resizeHorizontally)
-            limitTo.x = displaySize.x;
-
-        dialog->SetMinSize(limitTo);
-        dialog->SetSize(limitTo);
-
-        dialog->SetSizeHints( limitTo.x, limitTo.y, dialog->GetMaxWidth(), dialog->GetMaxHeight() );
-    }
-
-    return true;
-}
-
-/*!
- * Module to initialise standard adapter
- */
-
-class wxDialogLayoutAdapterModule: public wxModule
-{
-    DECLARE_DYNAMIC_CLASS(wxDialogLayoutAdapterModule)
-public:
-    wxDialogLayoutAdapterModule() {}
-    virtual void OnExit() { delete wxDialogBase::SetLayoutAdapter(NULL); }
-    virtual bool OnInit() { wxDialogBase::SetLayoutAdapter(new wxStandardDialogLayoutAdapter); return true; }
-};
-
-IMPLEMENT_DYNAMIC_CLASS(wxDialogLayoutAdapterModule, wxModule)

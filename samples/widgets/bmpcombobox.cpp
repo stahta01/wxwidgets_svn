@@ -52,7 +52,6 @@
 #include "wx/imaglist.h"
 #include "wx/bmpcbox.h"
 
-#include "itemcontainer.h"
 #include "widgets.h"
 
 #include "icons/bmpcombobox.xpm"
@@ -83,29 +82,20 @@ enum
     BitmapComboBoxPage_Delete,
     BitmapComboBoxPage_DeleteText,
     BitmapComboBoxPage_DeleteSel,
-    BitmapComboBoxPage_Combo,
-    BitmapComboBoxPage_ContainerTests
+    BitmapComboBoxPage_Combo
 };
 
-// kinds of comboboxes
-enum
-{
-    ComboKind_Default,
-    ComboKind_Simple,
-    ComboKind_DropDown
-};
 
 // ----------------------------------------------------------------------------
 // BitmapComboBoxWidgetsPage
 // ----------------------------------------------------------------------------
 
-class BitmapComboBoxWidgetsPage : public ItemContainerWidgetsPage
+class BitmapComboBoxWidgetsPage : public WidgetsPage
 {
 public:
     BitmapComboBoxWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
 
     virtual wxControl *GetWidget() const { return m_combobox; }
-    virtual wxItemContainer* GetContainer() const { return m_combobox; }
     virtual void RecreateWidget() { CreateCombo(); }
 
     // lazy creation of the content
@@ -152,6 +142,7 @@ protected:
 
     // helpers for creating bitmaps
     wxBitmap CreateBitmap(const wxColour& colour);
+    wxBitmap CreateRandomBitmap(wxString* pStr);
     wxBitmap LoadBitmap(const wxString& filepath);
     wxBitmap QueryBitmap(wxString* pStr);
 
@@ -167,9 +158,6 @@ protected:
 
     // the controls
     // ------------
-
-    // the sel mode radiobox
-    wxRadioBox *m_radioKind;
 
     // the checkboxes for styles
     wxCheckBox *m_chkSort,
@@ -207,7 +195,6 @@ BEGIN_EVENT_TABLE(BitmapComboBoxWidgetsPage, WidgetsPage)
     EVT_BUTTON(BitmapComboBoxPage_AddMany, BitmapComboBoxWidgetsPage::OnButtonAddMany)
     EVT_BUTTON(BitmapComboBoxPage_LoadFromFile, BitmapComboBoxWidgetsPage::OnButtonLoadFromFile)
     EVT_BUTTON(BitmapComboBoxPage_SetFromFile, BitmapComboBoxWidgetsPage::OnButtonSetFromFile)
-    EVT_BUTTON(BitmapComboBoxPage_ContainerTests, ItemContainerWidgetsPage::OnButtonTestItemContainer)
 
     EVT_TEXT_ENTER(BitmapComboBoxPage_InsertText, BitmapComboBoxWidgetsPage::OnButtonInsert)
     EVT_TEXT(BitmapComboBoxPage_ChangeHeight, BitmapComboBoxWidgetsPage::OnTextChangeHeight)
@@ -237,32 +224,23 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
-#if defined(__WXMSW__) || defined(__WXGTK__)
-    #define NATIVE_OR_GENERIC_CTRLS     NATIVE_CTRLS
-#else
-    #define NATIVE_OR_GENERIC_CTRLS     GENERIC_CTRLS
-#endif
+
 
 IMPLEMENT_WIDGETS_PAGE(BitmapComboBoxWidgetsPage, _T("BitmapCombobox"),
-                       NATIVE_OR_GENERIC_CTRLS | WITH_ITEMS_CTRLS | COMBO_CTRLS
+                       GENERIC_CTRLS | WITH_ITEMS_CTRLS | COMBO_CTRLS
                        );
 
 
 BitmapComboBoxWidgetsPage::BitmapComboBoxWidgetsPage(WidgetsBookCtrl *book,
                                              wxImageList *imaglist)
-                  : ItemContainerWidgetsPage(book, imaglist, bmpcombobox_xpm)
+                  : WidgetsPage(book, imaglist, bmpcombobox_xpm)
 {
     // init everything
     m_chkSort =
-    m_chkReadonly = NULL;
+    m_chkReadonly = (wxCheckBox *)NULL;
 
-    m_combobox = NULL;
-    m_sizerCombo = NULL;
-
-    m_textInsert =
-    m_textChangeHeight =
-    m_textChange =
-    m_textDelete = NULL;
+    m_combobox = (wxBitmapComboBox *)NULL;
+    m_sizerCombo = (wxSizer *)NULL;
 }
 
 // create a sizer containing a label and a small text ctrl
@@ -292,6 +270,7 @@ void BitmapComboBoxWidgetsPage::CreateContent()
        miscellaneous combobox operations and the pane containing the combobox
        itself to the right
     */
+    //wxTextCtrl *text;
     wxSizer *sizerRow;
 
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
@@ -300,20 +279,6 @@ void BitmapComboBoxWidgetsPage::CreateContent()
 
     // left pane - style box
     wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
-
-
-    // should be in sync with ComboKind_XXX values
-    static const wxString kinds[] =
-    {
-        _T("default"),
-        _T("simple"),
-        _T("drop down"),
-    };
-
-    m_radioKind = new wxRadioBox(this, wxID_ANY, _T("Combobox &kind:"),
-                                 wxDefaultPosition, wxDefaultSize,
-                                 WXSIZEOF(kinds), kinds,
-                                 1, wxRA_SPECIFY_COLS);
 
     wxSizer *sizerStyle = new wxStaticBoxSizer(box, wxVERTICAL);
 
@@ -324,7 +289,6 @@ void BitmapComboBoxWidgetsPage::CreateContent()
     sizerStyle->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 3);
 
     sizerLeft->Add(sizerStyle, 0, wxGROW | wxALIGN_CENTRE_HORIZONTAL);
-    sizerLeft->Add(m_radioKind, 0, wxGROW | wxALL, 5);
 
     // left pane - other options box
     box = new wxStaticBox(this, wxID_ANY, _T("Demo options"));
@@ -343,9 +307,6 @@ void BitmapComboBoxWidgetsPage::CreateContent()
     wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY,
         _T("&Change wxBitmapComboBox contents"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
-
-    btn = new wxButton(this, BitmapComboBoxPage_ContainerTests, _T("Run &tests"));
-    sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
 #if wxUSE_IMAGE
     btn = new wxButton(this, BitmapComboBoxPage_AddWidgetIcons, _T("Add &widget icons"));
@@ -430,24 +391,6 @@ void BitmapComboBoxWidgetsPage::CreateCombo()
     if ( m_chkReadonly->GetValue() )
         flags |= wxCB_READONLY;
 
-    switch ( m_radioKind->GetSelection() )
-    {
-        default:
-            wxFAIL_MSG( _T("unknown combo kind") );
-            // fall through
-
-        case ComboKind_Default:
-            break;
-
-        case ComboKind_Simple:
-            flags |= wxCB_SIMPLE;
-            break;
-
-        case ComboKind_DropDown:
-            flags = wxCB_DROPDOWN;
-            break;
-    }
-
     wxArrayString items;
     wxArrayPtrVoid bitmaps;
     if ( m_combobox )
@@ -456,7 +399,8 @@ void BitmapComboBoxWidgetsPage::CreateCombo()
         for ( unsigned int n = 0; n < count; n++ )
         {
             items.Add(m_combobox->GetString(n));
-            bitmaps.Add(new wxBitmap(m_combobox->GetItemBitmap(n)));
+            wxBitmap bmp = m_combobox->GetItemBitmap(n);
+            bitmaps.Add(new wxBitmap(bmp));
         }
 
         m_sizerCombo->Detach( m_combobox );
@@ -564,8 +508,7 @@ void BitmapComboBoxWidgetsPage::OnButtonInsert(wxCommandEvent& WXUNUSED(event))
 void BitmapComboBoxWidgetsPage::OnTextChangeHeight(wxCommandEvent& WXUNUSED(event))
 {
     long h = 0;
-    if ( m_textChangeHeight )
-        m_textChangeHeight->GetValue().ToLong(&h);
+    m_textChangeHeight->GetValue().ToLong(&h);
     if ( h < 5 )
         return;
     m_combobox->SetSize(wxDefaultCoord, h);
@@ -578,16 +521,12 @@ void BitmapComboBoxWidgetsPage::OnButtonLoadFromFile(wxCommandEvent& WXUNUSED(ev
     if ( sel == wxNOT_FOUND )
         sel = m_combobox->GetCount();
 
-    wxBitmap bmp = QueryBitmap(&s);
-    if (bmp.IsOk())
-        m_combobox->Insert(s, bmp, sel);
+    m_combobox->Insert(s, QueryBitmap(&s), sel);
 }
 
 void BitmapComboBoxWidgetsPage::OnButtonSetFromFile(wxCommandEvent& WXUNUSED(event))
 {
-    wxBitmap bmp = QueryBitmap(NULL);
-    if (bmp.IsOk())
-        m_combobox->SetItemBitmap(m_combobox->GetSelection(), bmp);
+    m_combobox->SetItemBitmap(m_combobox->GetSelection(), QueryBitmap(NULL));
 }
 
 void BitmapComboBoxWidgetsPage::OnButtonAddMany(wxCommandEvent& WXUNUSED(event))
@@ -608,22 +547,13 @@ void BitmapComboBoxWidgetsPage::OnButtonAddSeveral(wxCommandEvent& WXUNUSED(even
 
 void BitmapComboBoxWidgetsPage::OnButtonAddSeveralWithImages(wxCommandEvent& WXUNUSED(event))
 {
-    static const struct TestEntry
-    {
-        const char *text;
-        unsigned long rgb;
-    } s_entries[] =
-    {
-        { "Red circle",     0x0000ff },
-        { "Blue circle",    0xff0000 },
-        { "Green circle",   0x00ff00 },
-        { "Black circle",   0x000000 },
-    };
+    int i;
 
-    for ( unsigned i = 0; i < WXSIZEOF(s_entries); i++ )
+    for ( i=0; i<4; i++ )
     {
-        const TestEntry& e = s_entries[i];
-        m_combobox->Append(e.text, CreateBitmap(wxColour(e.rgb)));
+        wxString s;
+        wxBitmap bmp = CreateRandomBitmap(&s);
+        m_combobox->Append(s, bmp);
     }
 }
 
@@ -665,7 +595,6 @@ void BitmapComboBoxWidgetsPage::LoadWidgetImages( wxArrayString* strings, wxImag
     if ( !wxDir::Exists(fn.GetFullPath()) ||
          !wxDir::GetAllFiles(fn.GetFullPath(),strings,wxT("*.xpm")) )
     {
-        // Try ../../samples/widgets/icons
         fn.RemoveLastDir();
         fn.RemoveLastDir();
         fn.AppendDir(wxT("icons"));
@@ -698,7 +627,7 @@ void BitmapComboBoxWidgetsPage::LoadWidgetImages( wxArrayString* strings, wxImag
     for ( i=0; i<strings->size(); i++ )
     {
         fn.SetFullName((*strings)[i]);
-        wxString name = fn.GetName();
+        wxString name =fn.GetName();
 
         // Handle few exceptions
         if ( name == wxT("bmpbtn") )
@@ -720,11 +649,6 @@ void BitmapComboBoxWidgetsPage::LoadWidgetImages( wxArrayString* strings, wxImag
 #endif
             images->Add(bmp);
             (*strings)[i] = name;
-
-            // if the combobox is empty, use as bitmap size of the image list
-            // the size of the first valid image loaded
-            if (foundSize == wxDefaultSize)
-                foundSize = bmp.GetSize();
         }
     }
 
@@ -904,8 +828,7 @@ wxBitmap BitmapComboBoxWidgetsPage::QueryBitmap(wxString* pStr)
         bitmap = LoadBitmap(filepath);
     }
 
-    if (bitmap.IsOk())
-        wxLogDebug(wxT("%i, %i"),bitmap.GetWidth(), bitmap.GetHeight());
+    wxLogDebug(wxT("%i, %i"),bitmap.GetWidth(), bitmap.GetHeight());
 
     ::wxSetCursor( *wxSTANDARD_CURSOR );
 
@@ -941,4 +864,47 @@ wxBitmap BitmapComboBoxWidgetsPage::CreateBitmap(const wxColour& colour)
     return bmp;
 }
 
-#endif // wxUSE_BITMAPCOMBOBOX
+wxBitmap BitmapComboBoxWidgetsPage::CreateRandomBitmap( wxString* pStr )
+{
+    int i = rand() % 6;
+    const wxChar* str = wxT("");
+    wxBitmap bmp;
+
+    if ( i == 0 )
+    {
+        str = wxT("Red Circle");
+        bmp = CreateBitmap( *wxRED );
+    }
+    else if ( i == 1 )
+    {
+        str = wxT("Green Circle");
+        bmp = CreateBitmap( *wxGREEN );
+    }
+    else if ( i == 2 )
+    {
+        str = wxT("Blue Circle");
+        bmp = CreateBitmap( *wxBLUE );
+    }
+    else if ( i == 3 )
+    {
+        str = wxT("Black Circle");
+        bmp = CreateBitmap( *wxBLACK );
+    }
+    else if ( i == 4 )
+    {
+        str = wxT("Cyan Circle");
+        bmp = CreateBitmap( *wxCYAN );
+    }
+    else if ( i == 5 )
+    {
+        str = wxT("Light Grey Circle");
+        bmp = CreateBitmap( *wxLIGHT_GREY );
+    }
+
+    if ( pStr )
+        *pStr = str;
+
+    return bmp;
+}
+
+#endif //wxUSE_BITMAPCOMBOBOX

@@ -37,7 +37,7 @@
 #include "wx/aui/framemanager.h"
 
 #ifdef __WXMAC__
-#include "wx/osx/private.h"
+#include "wx/mac/carbon/private.h"
 // for themeing support
 #include <Carbon/Carbon.h>
 #endif
@@ -46,11 +46,11 @@
 WX_DEFINE_OBJARRAY(wxAuiToolBarItemArray)
 
 
-wxDEFINE_EVENT( wxEVT_COMMAND_AUITOOLBAR_TOOL_DROPDOWN, wxAuiToolBarEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_AUITOOLBAR_OVERFLOW_CLICK, wxAuiToolBarEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_AUITOOLBAR_RIGHT_CLICK, wxAuiToolBarEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_AUITOOLBAR_MIDDLE_CLICK, wxAuiToolBarEvent );
-wxDEFINE_EVENT( wxEVT_COMMAND_AUITOOLBAR_BEGIN_DRAG, wxAuiToolBarEvent );
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUITOOLBAR_TOOL_DROPDOWN)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUITOOLBAR_OVERFLOW_CLICK)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUITOOLBAR_RIGHT_CLICK)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUITOOLBAR_MIDDLE_CLICK)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_AUITOOLBAR_BEGIN_DRAG)
 
 
 IMPLEMENT_CLASS(wxAuiToolBar, wxControl)
@@ -887,13 +887,13 @@ wxAuiToolBarArt* wxAuiToolBar::GetArtProvider() const
 
 
 
-wxAuiToolBarItem* wxAuiToolBar::AddTool(int tool_id,
+void wxAuiToolBar::AddTool(int tool_id,
                            const wxString& label,
                            const wxBitmap& bitmap,
                            const wxString& short_help_string,
                            wxItemKind kind)
 {
-    return AddTool(tool_id,
+    AddTool(tool_id,
             label,
             bitmap,
             wxNullBitmap,
@@ -904,7 +904,7 @@ wxAuiToolBarItem* wxAuiToolBar::AddTool(int tool_id,
 }
 
 
-wxAuiToolBarItem* wxAuiToolBar::AddTool(int tool_id,
+void wxAuiToolBar::AddTool(int tool_id,
                            const wxString& label,
                            const wxBitmap& bitmap,
                            const wxBitmap& disabled_bitmap,
@@ -943,11 +943,11 @@ wxAuiToolBarItem* wxAuiToolBar::AddTool(int tool_id,
             item.disabled_bitmap = MakeDisabledBitmap(item.bitmap);
         }
     }
+
     m_items.Add(item);
-    return &m_items.Last();
 }
 
-wxAuiToolBarItem* wxAuiToolBar::AddControl(wxControl* control,
+void wxAuiToolBar::AddControl(wxControl* control,
                               const wxString& label)
 {
     wxAuiToolBarItem item;
@@ -968,10 +968,9 @@ wxAuiToolBarItem* wxAuiToolBar::AddControl(wxControl* control,
     item.sticky = false;
 
     m_items.Add(item);
-    return &m_items.Last();
 }
 
-wxAuiToolBarItem* wxAuiToolBar::AddLabel(int tool_id,
+void wxAuiToolBar::AddLabel(int tool_id,
                             const wxString& label,
                             const int width)
 {
@@ -997,10 +996,9 @@ wxAuiToolBarItem* wxAuiToolBar::AddLabel(int tool_id,
     item.sticky = false;
 
     m_items.Add(item);
-    return &m_items.Last();
 }
 
-wxAuiToolBarItem* wxAuiToolBar::AddSeparator()
+void wxAuiToolBar::AddSeparator()
 {
     wxAuiToolBarItem item;
     item.window = NULL;
@@ -1019,10 +1017,9 @@ wxAuiToolBarItem* wxAuiToolBar::AddSeparator()
     item.sticky = false;
 
     m_items.Add(item);
-    return &m_items.Last();
 }
 
-wxAuiToolBarItem* wxAuiToolBar::AddSpacer(int pixels)
+void wxAuiToolBar::AddSpacer(int pixels)
 {
     wxAuiToolBarItem item;
     item.window = NULL;
@@ -1042,10 +1039,9 @@ wxAuiToolBarItem* wxAuiToolBar::AddSpacer(int pixels)
     item.sticky = false;
 
     m_items.Add(item);
-    return &m_items.Last();
 }
 
-wxAuiToolBarItem* wxAuiToolBar::AddStretchSpacer(int proportion)
+void wxAuiToolBar::AddStretchSpacer(int proportion)
 {
     wxAuiToolBarItem item;
     item.window = NULL;
@@ -1065,7 +1061,6 @@ wxAuiToolBarItem* wxAuiToolBar::AddStretchSpacer(int proportion)
     item.sticky = false;
 
     m_items.Add(item);
-    return &m_items.Last();
 }
 
 void wxAuiToolBar::Clear()
@@ -2260,7 +2255,7 @@ void wxAuiToolBar::OnLeftDown(wxMouseEvent& evt)
             e.SetEventObject(this);
             e.SetToolId(-1);
             e.SetClickPoint(wxPoint(evt.GetX(), evt.GetY()));
-            bool processed = GetEventHandler()->ProcessEvent(e);
+            bool processed = ProcessEvent(e);
 
             if (processed)
             {
@@ -2297,7 +2292,7 @@ void wxAuiToolBar::OnLeftDown(wxMouseEvent& evt)
                 {
                     wxCommandEvent e(wxEVT_COMMAND_MENU_SELECTED, res);
                     e.SetEventObject(this);
-                    GetParent()->GetEventHandler()->ProcessEvent(e);
+                    GetParent()->ProcessEvent(e);
                 }
             }
 
@@ -2338,7 +2333,7 @@ void wxAuiToolBar::OnLeftDown(wxMouseEvent& evt)
 
         e.SetClickPoint(evt.GetPosition());
         e.SetItemRect(rect);
-        GetEventHandler()->ProcessEvent(e);
+        ProcessEvent(e);
         DoIdleUpdate();
     }
 }
@@ -2384,14 +2379,14 @@ void wxAuiToolBar::OnLeftUp(wxMouseEvent& evt)
 
                 wxCommandEvent e(wxEVT_COMMAND_MENU_SELECTED, m_action_item->id);
                 e.SetEventObject(this);
-                GetEventHandler()->ProcessEvent(e);
+                ProcessEvent(e);
                 DoIdleUpdate();
             }
             else
             {
                 wxCommandEvent e(wxEVT_COMMAND_MENU_SELECTED, m_action_item->id);
                 e.SetEventObject(this);
-                GetEventHandler()->ProcessEvent(e);
+                ProcessEvent(e);
                 DoIdleUpdate();
             }
         }
@@ -2454,7 +2449,7 @@ void wxAuiToolBar::OnRightUp(wxMouseEvent& evt)
             e.SetEventObject(this);
             e.SetToolId(m_action_item->id);
             e.SetClickPoint(m_action_pos);
-            GetEventHandler()->ProcessEvent(e);
+            ProcessEvent(e);
             DoIdleUpdate();
         }
     }
@@ -2465,7 +2460,7 @@ void wxAuiToolBar::OnRightUp(wxMouseEvent& evt)
         e.SetEventObject(this);
         e.SetToolId(-1);
         e.SetClickPoint(m_action_pos);
-        GetEventHandler()->ProcessEvent(e);
+        ProcessEvent(e);
         DoIdleUpdate();
     }
 
@@ -2525,7 +2520,7 @@ void wxAuiToolBar::OnMiddleUp(wxMouseEvent& evt)
             e.SetEventObject(this);
             e.SetToolId(m_action_item->id);
             e.SetClickPoint(m_action_pos);
-            GetEventHandler()->ProcessEvent(e);
+            ProcessEvent(e);
             DoIdleUpdate();
         }
     }
@@ -2550,7 +2545,7 @@ void wxAuiToolBar::OnMotion(wxMouseEvent& evt)
         wxAuiToolBarEvent e(wxEVT_COMMAND_AUITOOLBAR_BEGIN_DRAG, GetId());
         e.SetEventObject(this);
         e.SetToolId(m_action_item->id);
-        GetEventHandler()->ProcessEvent(e);
+        ProcessEvent(e);
         DoIdleUpdate();
         return;
     }

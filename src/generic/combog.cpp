@@ -32,7 +32,6 @@
     #include "wx/combobox.h"
     #include "wx/dcclient.h"
     #include "wx/settings.h"
-    #include "wx/textctrl.h"
 #endif
 
 #include "wx/dcbuffer.h"
@@ -160,8 +159,7 @@ bool wxGenericComboCtrl::Create(wxWindow *parent,
     border = wxBORDER_NONE;
 
     Customize( wxCC_BUTTON_OUTSIDE_BORDER |
-               wxCC_NO_TEXT_AUTO_SELECT |
-               wxCC_BUTTON_STAYS_DOWN );
+               wxCC_NO_TEXT_AUTO_SELECT );
 
 #endif
 
@@ -237,7 +235,7 @@ void wxGenericComboCtrl::OnPaintEvent( wxPaintEvent& WXUNUSED(event) )
         // Set border colour
         wxPen pen1( wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT),
                     customBorder,
-                    wxPENSTYLE_SOLID);
+                    wxSOLID );
         dc.SetPen( pen1 );
 
         // area around both controls
@@ -430,8 +428,7 @@ bool wxGenericComboCtrl::IsKeyPopupToggle(const wxKeyEvent& event) const
     }
     else
     {
-        if ( (keycode == WXK_DOWN && event.AltDown()) ||
-             (keycode == WXK_F4) )
+        if ( keycode == WXK_DOWN && event.AltDown() )
             return true;
     }
 

@@ -1,7 +1,7 @@
 %define _prefix /usr
-%define ver  2.9.0
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.10
+%define ver2 2.8
+%define rel  0
 
 # Configurable settings (use --with(out) {unicode,gtk2} on rpmbuild cmd line):
 %define unicode 1
@@ -167,6 +167,7 @@ cd obj-shared
 			      --enable-unicode \
 %else
 			      --disable-unicode \
+			      --with-odbc \
 %endif
 			      --with-opengl
 $MAKE
@@ -188,6 +189,7 @@ cd obj-static
 			      --enable-unicode \
 %else
 			      --disable-unicode \
+			      --with-odbc \
 %endif
 			      --with-opengl
 $MAKE
@@ -211,23 +213,17 @@ wx/apptrait.h
 wx/archive.h
 wx/arrimpl.cpp
 wx/arrstr.h
-wx/atomic.h
-wx/base64.h
 wx/beforestd.h
 wx/buffer.h
 wx/build.h
-wx/chartype.h
-wx/checkeddelete.h
 wx/chkconf.h
 wx/clntdata.h
-wx/cmdargs.h
 wx/cmdline.h
 wx/confbase.h
 wx/config.h
 wx/convauto.h
 wx/containr.h
 wx/cpp.h
-wx/crt.h
 wx/datetime.h
 wx/datstrm.h
 wx/dde.h
@@ -235,7 +231,6 @@ wx/debug.h
 wx/defs.h
 wx/dir.h
 wx/dlimpexp.h
-wx/dlist.h
 wx/dynarray.h
 wx/dynlib.h
 wx/dynload.h
@@ -243,7 +238,6 @@ wx/encconv.h
 wx/event.h
 wx/except.h
 wx/features.h
-wx/flags.h
 wx/ffile.h
 wx/file.h
 wx/fileconf.h
@@ -267,7 +261,8 @@ wx/iosfwrap.h
 wx/ioswrap.h
 wx/ipc.h
 wx/ipcbase.h
-wx/kbdstate.h
+wx/isql.h
+wx/isqlext.h
 wx/link.h
 wx/list.h
 wx/listimpl.cpp
@@ -279,7 +274,6 @@ wx/memory.h
 wx/memtext.h
 wx/mimetype.h
 wx/module.h
-wx/mousestate.h
 wx/msgout.h
 wx/mstream.h
 wx/object.h
@@ -288,13 +282,9 @@ wx/platinfo.h
 wx/power.h
 wx/process.h
 wx/ptr_scpd.h
-wx/ptr_shrd.h
 wx/recguard.h
 wx/regex.h
-wx/scopedarray.h
-wx/scopedptr.h
 wx/scopeguard.h
-wx/sharedptr.h
 wx/snglinst.h
 wx/sstream.h
 wx/stack.h
@@ -305,9 +295,6 @@ wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/stringimpl.h
-wx/stringops.h
-wx/strvararg.h
 wx/sysopt.h
 wx/tarstrm.h
 wx/textbuf.h
@@ -315,60 +302,48 @@ wx/textfile.h
 wx/thread.h
 wx/thrimpl.cpp
 wx/timer.h
-wx/tls.h
 wx/tokenzr.h
-wx/tracker.h
 wx/txtstrm.h
 wx/types.h
-wx/unichar.h
 wx/uri.h
-wx/ustring.h
 wx/utils.h
 wx/variant.h
 wx/vector.h
 wx/version.h
 wx/volume.h
-wx/weakref.h
 wx/wfstream.h
 wx/wx.h
 wx/wxchar.h
-wx/wxcrt.h
-wx/wxcrtbase.h
-wx/wxcrtvararg.h
 wx/wxprec.h
-wx/xlocale.h
 wx/xti.h
 wx/xtistrm.h
 wx/zipstrm.h
 wx/zstream.h
-wx/meta/convertible.h
-wx/meta/if.h
-wx/meta/int2type.h
-wx/meta/movable.h
-wx/unix/app.h
 wx/unix/apptbase.h
 wx/unix/apptrait.h
-wx/unix/chkconf.h
-wx/unix/evtloop.h
-wx/unix/pipe.h
-wx/unix/stdpaths.h
-wx/unix/stackwalk.h
-wx/unix/tls.h
 wx/unix/execute.h
 wx/unix/mimetype.h
+wx/unix/pipe.h
+wx/unix/private.h
+wx/unix/stackwalk.h
+wx/unix/stdpaths.h
 wx/fs_inet.h
+wx/gsocket.h
 wx/protocol/file.h
 wx/protocol/ftp.h
 wx/protocol/http.h
-wx/protocol/log.h
 wx/protocol/protocol.h
 wx/sckaddr.h
 wx/sckipc.h
 wx/sckstrm.h
 wx/socket.h
 wx/url.h
+wx/unix/gsockunx.h
 wx/xml/xml.h
 wx/xtixml.h
+wx/db.h
+wx/dbkeyg.h
+wx/dbtable.h
 EOF
 # --- wxBase headers list ends here ---
 cat <<EOF >wxbase-headers.paths
@@ -492,6 +467,9 @@ cat <<EOF >wxbase-headers.paths
 %{_includedir}/wx-%{ver2}/wx/url.h
 %{_includedir}/wx-%{ver2}/wx/xml/xml.h
 %{_includedir}/wx-%{ver2}/wx/xtixml.h
+%{_includedir}/wx-%{ver2}/wx/db.h
+%{_includedir}/wx-%{ver2}/wx/dbkeyg.h
+%{_includedir}/wx-%{ver2}/wx/dbtable.h
 %{_includedir}/wx-%{ver2}/wx/unix/apptbase.h
 %{_includedir}/wx-%{ver2}/wx/unix/apptrait.h
 %{_includedir}/wx-%{ver2}/wx/unix/execute.h
@@ -594,6 +572,9 @@ rm -f %{_bindir}/%{wxbaseconfiglink}
 %{_libdir}/libwx_%{buildname}_adv-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_aui-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_core-%{ver2}.so.*
+%if !%{unicode}
+    %{_libdir}/libwx_%{buildname}_dbgrid-%{ver2}.so.*
+%endif
 %{_libdir}/libwx_%{buildname}_html-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_mmedia-%{ver2}.so.*
 %{_libdir}/libwx_%{buildname}_qa-%{ver2}.so.*
@@ -610,6 +591,9 @@ rm -f %{_bindir}/%{wxbaseconfiglink}
 %{_libdir}/libwx_%{buildname}_adv-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_aui-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_core-%{ver2}.so
+%if !%{unicode}
+    %{_libdir}/libwx_%{buildname}_dbgrid-%{ver2}.so
+%endif
 %{_libdir}/libwx_%{buildname}_gl-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_html-%{ver2}.so
 %{_libdir}/libwx_%{buildname}_mmedia-%{ver2}.so
@@ -620,6 +604,9 @@ rm -f %{_bindir}/%{wxbaseconfiglink}
 %{_libdir}/libwx_%{buildname}_adv-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_aui-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_core-%{ver2}.a
+%if !%{unicode}
+    %{_libdir}/libwx_%{buildname}_dbgrid-%{ver2}.a
+%endif
 %{_libdir}/libwx_%{buildname}_gl-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_html-%{ver2}.a
 %{_libdir}/libwx_%{buildname}_qa-%{ver2}.a

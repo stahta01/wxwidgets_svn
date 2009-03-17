@@ -31,13 +31,12 @@
 #include "wx/encconv.h"
 #include "wx/splitter.h"
 #include "wx/textfile.h"
-#include "wx/settings.h"
 
 #include "../sample.xpm"
 
 #ifdef __WXMAC__
     #undef wxFontDialog
-    #include "wx/osx/fontdlg.h"
+    #include "wx/mac/fontdlg.h"
 #endif
 
 // used as title for several dialog boxes
@@ -105,7 +104,6 @@ public:
     void OnUnderline(wxCommandEvent& event);
 
     void OnwxPointerFont(wxCommandEvent& event);
-    void OnwxSystemSettingsFont(wxCommandEvent& event);
 
     void OnTestTextValue(wxCommandEvent& event);
     void OnViewMsg(wxCommandEvent& event);
@@ -153,10 +151,9 @@ private:
 enum
 {
     // menu items
-    Font_Quit = wxID_EXIT,
-    Font_About = wxID_ABOUT,
-    
-    Font_ViewMsg = wxID_HIGHEST+1,
+    Font_Quit = 1,
+    Font_About,
+    Font_ViewMsg,
     Font_TestTextValue,
 
     Font_IncSize,
@@ -164,21 +161,11 @@ enum
     Font_Bold,
     Font_Italic,
     Font_Underlined,
-    
-    // standard global wxFont objects:
     Font_wxNORMAL_FONT,
     Font_wxSMALL_FONT,
     Font_wxITALIC_FONT,
     Font_wxSWISS_FONT,
     Font_Standard,
-
-    // wxSystemSettings::GetFont possible objects:
-    Font_wxSYS_OEM_FIXED_FONT,
-    Font_wxSYS_ANSI_FIXED_FONT,
-    Font_wxSYS_ANSI_VAR_FONT,
-    Font_wxSYS_SYSTEM_FONT,
-    Font_wxSYS_DEVICE_DEFAULT_FONT,
-    Font_wxSYS_DEFAULT_GUI_FONT,
 
     Font_Choose = 100,
     Font_EnumFamiliesForEncoding,
@@ -216,12 +203,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Font_wxITALIC_FONT, MyFrame::OnwxPointerFont)
     EVT_MENU(Font_wxSWISS_FONT, MyFrame::OnwxPointerFont)
 
-    EVT_MENU(Font_wxSYS_OEM_FIXED_FONT, MyFrame::OnwxSystemSettingsFont)
-    EVT_MENU(Font_wxSYS_ANSI_FIXED_FONT, MyFrame::OnwxSystemSettingsFont)
-    EVT_MENU(Font_wxSYS_ANSI_VAR_FONT, MyFrame::OnwxSystemSettingsFont)
-    EVT_MENU(Font_wxSYS_SYSTEM_FONT, MyFrame::OnwxSystemSettingsFont)
-    EVT_MENU(Font_wxSYS_DEVICE_DEFAULT_FONT, MyFrame::OnwxSystemSettingsFont)
-    EVT_MENU(Font_wxSYS_DEFAULT_GUI_FONT, MyFrame::OnwxSystemSettingsFont)
 
     EVT_MENU(Font_SetNativeDesc, MyFrame::OnSetNativeDesc)
     EVT_MENU(Font_SetNativeUserDesc, MyFrame::OnSetNativeUserDesc)
@@ -253,9 +234,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main application window
     MyFrame *frame = new MyFrame(wxT("Font wxWidgets demo"),
                                  wxPoint(50, 50), wxSize(600, 400));
@@ -320,21 +298,8 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     menuStdFonts->Append(Font_wxSMALL_FONT,  wxT("wxSMALL_FONT"),  wxT("Small font used by wxWidgets"));
     menuStdFonts->Append(Font_wxITALIC_FONT, wxT("wxITALIC_FONT"), wxT("Italic font used by wxWidgets"));
     menuStdFonts->Append(Font_wxSWISS_FONT,  wxT("wxSWISS_FONT"),  wxT("Swiss font used by wxWidgets"));
-    menuStdFonts->AppendSeparator();
-    menuStdFonts->Append(Font_wxSYS_OEM_FIXED_FONT, wxT("wxSYS_OEM_FIXED_FONT"), 
-                         wxT("Original equipment manufacturer dependent fixed-pitch font."));
-    menuStdFonts->Append(Font_wxSYS_ANSI_FIXED_FONT,  wxT("wxSYS_ANSI_FIXED_FONT"),  
-                         wxT("Windows fixed-pitch (monospaced) font. "));
-    menuStdFonts->Append(Font_wxSYS_ANSI_VAR_FONT, wxT("wxSYS_ANSI_VAR_FONT"), 
-                         wxT("Windows variable-pitch (proportional) font."));
-    menuStdFonts->Append(Font_wxSYS_SYSTEM_FONT,  wxT("wxSYS_SYSTEM_FONT"), 
-                         wxT("System font."));
-    menuStdFonts->Append(Font_wxSYS_DEVICE_DEFAULT_FONT,  wxT("wxSYS_DEVICE_DEFAULT_FONT"),
-                         wxT("Device-dependent font."));
-    menuStdFonts->Append(Font_wxSYS_DEFAULT_GUI_FONT,  wxT("wxSYS_DEFAULT_GUI_FONT"), 
-                         wxT("Default font for user interface objects such as menus and dialog boxes. "));
     menuSelect->Append(Font_Standard, wxT("Standar&d fonts"), menuStdFonts);
-    
+
     menuSelect->AppendSeparator();
     menuSelect->Append(Font_EnumFamilies, wxT("Enumerate font &families\tCtrl-F"));
     menuSelect->Append(Font_EnumFixedFamilies,
@@ -677,44 +642,6 @@ void MyFrame::OnwxPointerFont(wxCommandEvent& event)
     DoChangeFont(font);
 }
 
-void MyFrame::OnwxSystemSettingsFont(wxCommandEvent& event)
-{
-    wxFont font;
-
-    switch ( event.GetId() )
-    {
-        case Font_wxSYS_OEM_FIXED_FONT:
-            font = wxSystemSettings::GetFont(wxSYS_OEM_FIXED_FONT);
-            break;
-
-        case Font_wxSYS_ANSI_FIXED_FONT:
-            font = wxSystemSettings::GetFont(wxSYS_ANSI_FIXED_FONT);
-            break;
-
-        case Font_wxSYS_ANSI_VAR_FONT:
-            font = wxSystemSettings::GetFont(wxSYS_ANSI_VAR_FONT);
-            break;
-
-        case Font_wxSYS_SYSTEM_FONT:
-            font = wxSystemSettings::GetFont(wxSYS_SYSTEM_FONT);
-            break;
-
-        case Font_wxSYS_DEVICE_DEFAULT_FONT:
-            font = wxSystemSettings::GetFont(wxSYS_DEVICE_DEFAULT_FONT);
-            break;
-
-        case Font_wxSYS_DEFAULT_GUI_FONT:
-            font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
-            break;
-
-        default:
-            wxFAIL_MSG( wxT("unknown standard font") );
-            return;
-    }
-
-    DoChangeFont(font);
-}
-
 void MyFrame::DoChangeFont(const wxFont& font, const wxColour& col)
 {
     m_canvas->SetTextFont(font);
@@ -964,7 +891,7 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
     dc.SetTextForeground(m_colour);
 
     // the size of one cell (Normally biggest char + small margin)
-    wxCoord maxCharWidth, maxCharHeight;
+    long maxCharWidth, maxCharHeight;
     dc.GetTextExtent(wxT("W"), &maxCharWidth, &maxCharHeight);
     int w = maxCharWidth + 5,
         h = maxCharHeight + 4;
@@ -977,7 +904,7 @@ void MyCanvas::OnPaint( wxPaintEvent &WXUNUSED(event) )
         {
             wxChar c = (wxChar)(32 * (i + 1) + j);
 
-            wxCoord charWidth, charHeight;
+            long charWidth, charHeight;
             dc.GetTextExtent(c, &charWidth, &charHeight);
             dc.DrawText
             (

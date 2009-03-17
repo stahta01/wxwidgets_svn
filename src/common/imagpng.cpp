@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/imagpng.cpp
+// Name:        src/common/imagepng.cpp
 // Purpose:     wxImage PNG handler
 // Author:      Robert Roebling
 // RCS-ID:      $Id$
@@ -28,15 +28,25 @@
 
 #ifndef WX_PRECOMP
     #include "wx/log.h"
-    #include "wx/intl.h"
-    #include "wx/palette.h"
-    #include "wx/stream.h"
+    #include "wx/app.h"
+    #include "wx/bitmap.h"
+    #include "wx/module.h"
 #endif
 
 #include "png.h"
+#include "wx/filefn.h"
+#include "wx/wfstream.h"
+#include "wx/intl.h"
+#include "wx/palette.h"
 
 // For memcpy
 #include <string.h>
+
+#ifdef __SALFORDC__
+#ifdef FAR
+#undef FAR
+#endif
+#endif
 
 // ----------------------------------------------------------------------------
 // constants
@@ -148,19 +158,19 @@ struct wxPNGInfoStruct
 extern "C"
 {
 
-static void PNGLINKAGEMODE wx_PNG_stream_reader( png_structp png_ptr, png_bytep data,
-                                                 png_size_t length )
+void PNGLINKAGEMODE wx_PNG_stream_reader( png_structp png_ptr, png_bytep data,
+                                          png_size_t length )
 {
     WX_PNG_INFO(png_ptr)->stream.in->Read(data, length);
 }
 
-static void PNGLINKAGEMODE wx_PNG_stream_writer( png_structp png_ptr, png_bytep data,
-                                                 png_size_t length )
+void PNGLINKAGEMODE wx_PNG_stream_writer( png_structp png_ptr, png_bytep data,
+                                          png_size_t length )
 {
     WX_PNG_INFO(png_ptr)->stream.out->Write(data, length);
 }
 
-static void
+void
 PNGLINKAGEMODE wx_png_warning(png_structp png_ptr, png_const_charp message)
 {
     wxPNGInfoStruct *info = png_ptr ? WX_PNG_INFO(png_ptr) : NULL;
@@ -170,7 +180,7 @@ PNGLINKAGEMODE wx_png_warning(png_structp png_ptr, png_const_charp message)
 
 // from pngerror.c
 // so that the libpng doesn't send anything on stderr
-static void
+void
 PNGLINKAGEMODE wx_png_error(png_structp png_ptr, png_const_charp message)
 {
     wx_png_warning(NULL, message);
@@ -538,7 +548,7 @@ wxPNGHandler::LoadFile(wxImage *image,
         goto error;
 
     png_read_info( png_ptr, info_ptr );
-    png_get_IHDR( png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, NULL, NULL );
+    png_get_IHDR( png_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_type, (int*) NULL, (int*) NULL );
 
     if (color_type == PNG_COLOR_TYPE_PALETTE)
         png_set_expand( png_ptr );
@@ -710,21 +720,6 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
                                   : PNG_COLOR_TYPE_GRAY;
     }
 
-    if (image->HasOption(wxIMAGE_OPTION_PNG_FILTER))
-        png_set_filter( png_ptr, PNG_FILTER_TYPE_BASE, image->GetOptionInt(wxIMAGE_OPTION_PNG_FILTER) );
-
-    if (image->HasOption(wxIMAGE_OPTION_PNG_COMPRESSION_LEVEL))
-        png_set_compression_level( png_ptr, image->GetOptionInt(wxIMAGE_OPTION_PNG_COMPRESSION_LEVEL) );
-
-    if (image->HasOption(wxIMAGE_OPTION_PNG_COMPRESSION_MEM_LEVEL))
-        png_set_compression_mem_level( png_ptr, image->GetOptionInt(wxIMAGE_OPTION_PNG_COMPRESSION_MEM_LEVEL) );
-
-    if (image->HasOption(wxIMAGE_OPTION_PNG_COMPRESSION_STRATEGY))
-        png_set_compression_strategy( png_ptr, image->GetOptionInt(wxIMAGE_OPTION_PNG_COMPRESSION_STRATEGY) );
-
-    if (image->HasOption(wxIMAGE_OPTION_PNG_COMPRESSION_BUFFER_SIZE))
-        png_set_compression_buffer_size( png_ptr, image->GetOptionInt(wxIMAGE_OPTION_PNG_COMPRESSION_BUFFER_SIZE) );
-
     png_set_IHDR( png_ptr, info_ptr, image->GetWidth(), image->GetHeight(),
                   iBitDepth, iPngColorType,
                   PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
@@ -754,33 +749,6 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
 
     if ( iBitDepth == 16 )
         iElements *= 2;
-
-    // save the image resolution if we have it
-    int resX, resY;
-    switch ( GetResolutionFromOptions(*image, &resX, &resY) )
-    {
-        case wxIMAGE_RESOLUTION_INCHES:
-            {
-                const double INCHES_IN_METER = 10000.0 / 254;
-                resX = int(resX * INCHES_IN_METER);
-                resY = int(resY * INCHES_IN_METER);
-            }
-            break;
-
-        case wxIMAGE_RESOLUTION_CM:
-            resX *= 100;
-            resY *= 100;
-            break;
-
-        case wxIMAGE_RESOLUTION_NONE:
-            break;
-
-        default:
-            wxFAIL_MSG( _T("unsupported image resolution units") );
-    }
-
-    if ( resX && resY )
-        png_set_pHYs( png_ptr, info_ptr, resX, resY, PNG_RESOLUTION_METER );
 
     png_set_sBIT( png_ptr, info_ptr, &sig_bit );
     png_write_info( png_ptr, info_ptr );

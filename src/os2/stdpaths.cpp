@@ -54,7 +54,7 @@ wxString wxStandardPaths::GetInstallPrefix() const
 {
     if ( m_prefix.empty() )
     {
-        wxStandardPaths *self = const_cast<wxStandardPaths *>(this);
+        wxStandardPaths *self = wx_const_cast(wxStandardPaths *, this);
 
         self->m_prefix = _T("/usr/local");
     }
@@ -82,7 +82,7 @@ wxString wxStandardPaths::GetDataDir() const
 
 wxString wxStandardPaths::GetUserDataDir() const
 {
-    return AppendAppInfo(wxFileName::GetHomeDir() + _T("\\."));
+    return AppendAppName(wxFileName::GetHomeDir() + _T("\\."));
 }
 
 wxString wxStandardPaths::GetPluginsDir() const

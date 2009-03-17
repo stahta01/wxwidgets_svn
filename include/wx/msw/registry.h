@@ -12,10 +12,6 @@
 #ifndef _WX_MSW_REGISTRY_H_
 #define _WX_MSW_REGISTRY_H_
 
-#include "wx/defs.h"
-
-#if wxUSE_REGKEY
-
 class WXDLLIMPEXP_FWD_BASE wxOutputStream;
 
 // ----------------------------------------------------------------------------
@@ -124,16 +120,15 @@ public:
     // create the key: will fail if the key already exists and !bOkIfExists
   bool  Create(bool bOkIfExists = true);
     // rename a value from old name to new one
-  bool  RenameValue(const wxString& szValueOld, const wxString& szValueNew);
+  bool  RenameValue(const wxChar *szValueOld, const wxChar *szValueNew);
     // rename the key
-  bool  Rename(const wxString& szNewName);
+  bool  Rename(const wxChar *szNewName);
     // copy value to another key possibly changing its name (by default it will
     // remain the same)
-  bool  CopyValue(const wxString& szValue, wxRegKey& keyDst,
-                  const wxString& szNewName = wxEmptyString);
-
+  bool  CopyValue(const wxChar *szValue, wxRegKey& keyDst,
+                  const wxChar *szNewName = NULL);
     // copy the entire contents of the key recursively to another location
-  bool  Copy(const wxString& szNewName);
+  bool  Copy(const wxChar *szNewName);
     // same as Copy() but using a key and not the name
   bool  Copy(wxRegKey& keyDst);
     // close the key (will be automatically done in dtor)
@@ -143,19 +138,21 @@ public:
     // deletes this key and all of it's subkeys/values
   bool  DeleteSelf();
     // deletes the subkey with all of it's subkeys/values recursively
-  bool  DeleteKey(const wxString& szKey);
-    // deletes the named value (may be empty string to remove the default value)
-  bool DeleteValue(const wxString& szValue);
+  bool  DeleteKey(const wxChar *szKey);
+    // deletes the named value (may be NULL to remove the default value)
+  bool  DeleteValue(const wxChar *szValue);
 
   // access to values and subkeys
     // get value type
-  ValueType GetValueType(const wxString& szValue) const;
+  ValueType GetValueType(const wxChar *szValue) const;
     // returns true if the value contains a number (else it's some string)
-  bool IsNumericValue(const wxString& szValue) const;
+  bool IsNumericValue(const wxChar *szValue) const;
 
     // assignment operators set the default value of the key
   wxRegKey& operator=(const wxString& strValue)
-    { SetValue(wxEmptyString, strValue); return *this; }
+    { SetValue(NULL, strValue); return *this; }
+  wxRegKey& operator=(long lValue)
+    { SetValue(NULL, lValue); return *this; }
 
     // query the default value of the key: implicitly or explicitly
   wxString QueryDefaultValue() const;
@@ -164,30 +161,30 @@ public:
     // named values
 
     // set the string value
-  bool  SetValue(const wxString& szValue, const wxString& strValue);
+  bool  SetValue(const wxChar *szValue, const wxString& strValue);
     // retrieve the string value
-  bool  QueryValue(const wxString& szValue, wxString& strValue) const
+  bool  QueryValue(const wxChar *szValue, wxString& strValue) const
     { return QueryValue(szValue, strValue, false); }
     // retrieve raw string value
-  bool  QueryRawValue(const wxString& szValue, wxString& strValue) const
+  bool  QueryRawValue(const wxChar *szValue, wxString& strValue) const
     { return QueryValue(szValue, strValue, true); }
     // retrieve either raw or expanded string value
-  bool  QueryValue(const wxString& szValue, wxString& strValue, bool raw) const;
+  bool  QueryValue(const wxChar *szValue, wxString& strValue, bool raw) const;
 
     // set the numeric value
-  bool  SetValue(const wxString& szValue, long lValue);
+  bool  SetValue(const wxChar *szValue, long lValue);
     // return the numeric value
-  bool  QueryValue(const wxString& szValue, long *plValue) const;
+  bool  QueryValue(const wxChar *szValue, long *plValue) const;
     // set the binary value
-  bool  SetValue(const wxString& szValue, const wxMemoryBuffer& buf);
+  bool  SetValue(const wxChar *szValue, const wxMemoryBuffer& buf);
     // return the binary value
-  bool  QueryValue(const wxString& szValue, wxMemoryBuffer& buf) const;
+  bool  QueryValue(const wxChar *szValue, wxMemoryBuffer& buf) const;
 
   // query existence of a key/value
     // return true if value exists
-  bool HasValue(const wxString& szKey) const;
+  bool HasValue(const wxChar *szKey) const;
     // return true if given subkey exists
-  bool HasSubKey(const wxString& szKey) const;
+  bool HasSubKey(const wxChar *szKey) const;
     // return true if any subkeys exist
   bool HasSubkeys() const;
     // return true if any values exist
@@ -243,10 +240,8 @@ private:
   long        m_dwLastError;    // last error (0 if none)
 
 
-  wxDECLARE_NO_COPY_CLASS(wxRegKey);
+  DECLARE_NO_COPY_CLASS(wxRegKey)
 };
-
-#endif // wxUSE_REGKEY
 
 #endif // _WX_MSW_REGISTRY_H_
 

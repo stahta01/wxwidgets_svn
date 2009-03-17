@@ -29,7 +29,6 @@
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/encinfo.h"
-    #include "wx/wxcrtvararg.h"
 #endif //WX_PRECOMP
 
 #include "wx/msw/private.h"
@@ -162,7 +161,7 @@ bool wxTestFontEncoding(const wxNativeEncodingInfo& info)
     wxZeroMemory(lf);       // all default values
 
     lf.lfCharSet = (BYTE)info.charset;
-    wxStrlcpy(lf.lfFaceName, info.facename.c_str(), WXSIZEOF(lf.lfFaceName));
+    wxStrncpy(lf.lfFaceName, info.facename, WXSIZEOF(lf.lfFaceName));
 
     HFONT hfont = ::CreateFontIndirect(&lf);
     if ( !hfont )

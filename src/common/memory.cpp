@@ -39,7 +39,7 @@
 #include "wx/ioswrap.h"
 
 #if !defined(__WATCOMC__) && !(defined(__VMS__) && ( __VMS_VER < 70000000 ) )\
-     && !defined( __MWERKS__ )
+     && !defined( __MWERKS__ ) && !defined(__SALFORDC__)
 #include <memory.h>
 #endif
 
@@ -370,7 +370,7 @@ void wxMemStruct::Dump ()
     msg2.Printf(wxT(" at 0x%lX, size %d"), (long)GetActualData(), (int)RequestSize());
     msg += msg2;
 
-    wxDebugContext::OutputDumpLine(msg.c_str());
+    wxDebugContext::OutputDumpLine(msg);
   }
   else
   {
@@ -381,7 +381,7 @@ void wxMemStruct::Dump ()
     wxString msg2;
     msg2.Printf(wxT("non-object data at 0x%lX, size %d"), (long)GetActualData(), (int)RequestSize() );
     msg += msg2;
-    wxDebugContext::OutputDumpLine(msg.c_str());
+    wxDebugContext::OutputDumpLine(msg);
   }
 }
 
@@ -451,9 +451,6 @@ wxMemStruct *wxDebugContext::checkPoint = NULL;
 static wxMarkerType markerCalc[2];
 int wxDebugContext::m_balign = (int)((char *)&markerCalc[1] - (char*)&markerCalc[0]);
 int wxDebugContext::m_balignmask = (int)((char *)&markerCalc[1] - (char*)&markerCalc[0]) - 1;
-
-// Pointer to global function to call at shutdown
-wxShutdownNotifyFunction wxDebugContext::sm_shutdownFn;
 
 wxDebugContext::wxDebugContext(void)
 {
@@ -576,7 +573,7 @@ void wxDebugContext::TraverseList (PmSFV func, wxMemStruct *from)
 bool wxDebugContext::PrintList (void)
 {
 #ifdef __WXDEBUG__
-  TraverseList ((PmSFV)&wxMemStruct::PrintNode, (checkPoint ? checkPoint->m_next : NULL));
+  TraverseList ((PmSFV)&wxMemStruct::PrintNode, (checkPoint ? checkPoint->m_next : (wxMemStruct*)NULL));
 
   return true;
 #else
@@ -588,13 +585,13 @@ bool wxDebugContext::Dump(void)
 {
 #ifdef __WXDEBUG__
   {
-    const wxChar* appName = wxT("application");
+    wxChar* appName = (wxChar*) wxT("application");
     wxString appNameStr;
     if (wxTheApp)
     {
         appNameStr = wxTheApp->GetAppName();
-        appName = appNameStr.c_str();
-        OutputDumpLine(wxT("----- Memory dump of %s at %s -----"), appName, static_cast<const wxChar *>(wxNow().c_str()));
+        appName = WXSTRINGCAST appNameStr;
+        OutputDumpLine(wxT("----- Memory dump of %s at %s -----"), appName, WXSTRINGCAST wxNow() );
     }
     else
     {
@@ -602,7 +599,7 @@ bool wxDebugContext::Dump(void)
     }
   }
 
-  TraverseList ((PmSFV)&wxMemStruct::Dump, (checkPoint ? checkPoint->m_next : NULL));
+  TraverseList ((PmSFV)&wxMemStruct::Dump, (checkPoint ? checkPoint->m_next : (wxMemStruct*)NULL));
 
   OutputDumpLine(wxEmptyString);
   OutputDumpLine(wxEmptyString);
@@ -644,13 +641,13 @@ bool wxDebugContext::PrintStatistics(bool detailed)
 {
 #ifdef __WXDEBUG__
   {
-    const wxChar* appName = wxT("application");
+    wxChar* appName = (wxChar*) wxT("application");
     wxString appNameStr;
     if (wxTheApp)
     {
         appNameStr = wxTheApp->GetAppName();
-        appName = appNameStr.c_str();
-        OutputDumpLine(wxT("----- Memory statistics of %s at %s -----"), appName, static_cast<const wxChar *>(wxNow().c_str()));
+        appName = WXSTRINGCAST appNameStr;
+        OutputDumpLine(wxT("----- Memory statistics of %s at %s -----"), appName, WXSTRINGCAST wxNow() );
     }
     else
     {
@@ -667,7 +664,7 @@ bool wxDebugContext::PrintStatistics(bool detailed)
 
   wxDebugStatsStruct *list = NULL;
 
-  wxMemStruct *from = (checkPoint ? checkPoint->m_next : NULL );
+  wxMemStruct *from = (checkPoint ? checkPoint->m_next : (wxMemStruct*)NULL );
   if (!from)
     from = wxDebugContext::GetHead ();
 
@@ -738,24 +735,25 @@ bool wxDebugContext::PrintStatistics(bool detailed)
 bool wxDebugContext::PrintClasses(void)
 {
   {
-    const wxChar* appName = wxT("application");
+    wxChar* appName = (wxChar*) wxT("application");
     wxString appNameStr;
     if (wxTheApp)
     {
         appNameStr = wxTheApp->GetAppName();
-        appName = appNameStr.c_str();
+        appName = WXSTRINGCAST appNameStr;
         wxLogMessage(wxT("----- Classes in %s -----"), appName);
     }
   }
 
   int n = 0;
-  const wxClassInfo *info;
+  wxHashTable::compatibility_iterator node;
+  wxClassInfo *info;
 
-  for (wxClassInfo::const_iterator node = wxClassInfo::begin_classinfo(),
-                                    end = wxClassInfo::end_classinfo();
-       node != end; ++node)
+  wxClassInfo::sm_classTable->BeginFind();
+  node = wxClassInfo::sm_classTable->Next();
+  while (node)
   {
-    info = *node;
+    info = (wxClassInfo *)node->GetData();
     if (info->GetClassName())
     {
         wxString msg(info->GetClassName());
@@ -778,6 +776,7 @@ bool wxDebugContext::PrintClasses(void)
 
         wxLogMessage(msg);
     }
+    node = wxClassInfo::sm_classTable->Next();
     n ++;
   }
   wxLogMessage(wxEmptyString);
@@ -800,7 +799,7 @@ int wxDebugContext::Check(bool checkAll)
 {
   int nFailures = 0;
 
-  wxMemStruct *from = (checkPoint ? checkPoint->m_next : NULL );
+  wxMemStruct *from = (checkPoint ? checkPoint->m_next : (wxMemStruct*)NULL );
   if (!from || checkAll)
     from = wxDebugContext::GetHead ();
 
@@ -859,11 +858,6 @@ void wxDebugContext::OutputDumpLine(const wxChar *szFormat, ...)
 
     wxMessageOutputDebug dbgout;
     dbgout.Printf(buf);
-}
-
-void wxDebugContext::SetShutdownNotifyFunction(wxShutdownNotifyFunction shutdownFn)
-{
-    sm_shutdownFn = shutdownFn;
 }
 
 
@@ -1136,22 +1130,6 @@ void wxTraceLevel(int, const wxChar * ...)
 // Some compilers will really do the assignment later
 // All global variables are initialized to 0 at the very beginning, and this is just fine.
 int wxDebugContextDumpDelayCounter::sm_count;
-
-wxDebugContextDumpDelayCounter::wxDebugContextDumpDelayCounter()
-{
-    sm_count++;
-}
-
-wxDebugContextDumpDelayCounter::~wxDebugContextDumpDelayCounter()
-{
-    if ( !--sm_count )
-    {
-        // Notify app if we've been asked to do that
-        if( wxDebugContext::sm_shutdownFn )
-            wxDebugContext::sm_shutdownFn();
-        DoDump();
-    }
-}
 
 void wxDebugContextDumpDelayCounter::DoDump()
 {

@@ -176,12 +176,12 @@ protected:
 // wxRegionRefData
 // ========================================================================
 
-class wxRegionRefData : public wxGDIRefData,
+class wxRegionRefData : public wxObjectRefData,
                         public REGION
 {
 public:
     wxRegionRefData()
-        : wxGDIRefData(),
+        : wxObjectRefData(),
           REGION()
     {
         size = 1;
@@ -194,7 +194,7 @@ public:
     }
 
     wxRegionRefData(const wxPoint& topLeft, const wxPoint& bottomRight)
-        : wxGDIRefData(),
+        : wxObjectRefData(),
           REGION()
     {
         rects = (BOX*)malloc(sizeof(BOX));
@@ -208,7 +208,7 @@ public:
     }
 
     wxRegionRefData(const wxRect& rect)
-        : wxGDIRefData(),
+        : wxObjectRefData(),
           REGION(rect)
     {
         rects = (BOX*)malloc(sizeof(BOX));
@@ -216,7 +216,7 @@ public:
     }
 
     wxRegionRefData(const wxRegionRefData& refData)
-        : wxGDIRefData(),
+        : wxObjectRefData(),
           REGION()
     {
         size = refData.size;
@@ -271,34 +271,17 @@ wxRegionGeneric::wxRegionGeneric(const wxPoint& topLeft, const wxPoint& bottomRi
     m_refData = new wxRegionRefData(topLeft, bottomRight);
 }
 
-wxRegionGeneric::wxRegionGeneric(const wxBitmap& bmp) 
-{
-    wxFAIL_MSG("NOT IMPLEMENTED: wxRegionGeneric::wxRegionGeneric(const wxBitmap& bmp)");
-}
-
-wxRegionGeneric::wxRegionGeneric(size_t n, const wxPoint *points, wxPolygonFillMode fillStyle)
-{
-    wxFAIL_MSG("NOT IMPLEMENTED: wxRegionGeneric::wxRegionGeneric(size_t n, const wxPoint *points, wxPolygonFillMode fillStyle)");
-}
-
-wxRegionGeneric::wxRegionGeneric(const wxBitmap& bmp, const wxColour& transp, int tolerance)
-{
-    wxFAIL_MSG("NOT IMPLEMENTED: wxRegionGeneric::wxRegionGeneric(const wxBitmap& bmp, const wxColour& transp, int tolerance)");
-}
-
 void wxRegionGeneric::Clear()
 {
     UnRef();
-    if (!m_refData)
-        m_refData = new wxRegionRefData(wxRect(0,0,0,0));
 }
 
-wxGDIRefData *wxRegionGeneric::CreateGDIRefData() const
+wxObjectRefData *wxRegionGeneric::CreateRefData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegionGeneric::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegionGeneric::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }

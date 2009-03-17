@@ -40,7 +40,7 @@
 
 #include "wx/msw/private.h"
 #include "wx/evtloop.h"
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 
 #if defined(__SMARTPHONE__) && defined(__WXWINCE__)
     #include "wx/msw/wince/resources.h"
@@ -145,12 +145,13 @@ wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData)
 
 void wxDialog::Init()
 {
+    m_oldFocus = (wxWindow *)NULL;
     m_isShown = false;
     m_modalData = NULL;
+    m_endModalCalled = false;
 #if wxUSE_TOOLBAR && defined(__POCKETPC__)
     m_dialogToolBar = NULL;
 #endif
-    m_hGripper = 0;
 }
 
 bool wxDialog::Create(wxWindow *parent,
@@ -162,6 +163,9 @@ bool wxDialog::Create(wxWindow *parent,
                       const wxString& name)
 {
     SetExtraStyle(GetExtraStyle() | wxTOPLEVEL_EX_DIALOG);
+
+    // save focus before doing anything which can potentially change it
+    m_oldFocus = FindFocus();
 
     // All dialogs should really have this style
     style |= wxTAB_TRAVERSAL;
@@ -179,28 +183,54 @@ bool wxDialog::Create(wxWindow *parent,
     CreateToolBar();
 #endif
 
-    if ( HasFlag(wxRESIZE_BORDER) )
-    {
-        CreateGripper();
-
-        Connect(wxEVT_CREATE,
-                wxWindowCreateEventHandler(wxDialog::OnWindowCreate));
-    }
-
     return true;
 }
 
+#if WXWIN_COMPATIBILITY_2_6
+
+// deprecated ctor
+wxDialog::wxDialog(wxWindow *parent,
+                   const wxString& title,
+                   bool WXUNUSED(modal),
+                   int x,
+                   int y,
+                   int w,
+                   int h,
+                   long style,
+                   const wxString& name)
+{
+    Init();
+
+    Create(parent, wxID_ANY, title, wxPoint(x, y), wxSize(w, h), style, name);
+}
+
+void wxDialog::SetModal(bool WXUNUSED(flag))
+{
+    // nothing to do, obsolete method
+}
+
+#endif // WXWIN_COMPATIBILITY_2_6
+
 wxDialog::~wxDialog()
 {
+    m_isBeingDeleted = true;
+
     // this will also reenable all the other windows for a modal dialog
     Show(false);
-
-    DestroyGripper();
 }
 
 // ----------------------------------------------------------------------------
 // showing the dialogs
 // ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_6
+
+bool wxDialog::IsModalShowing() const
+{
+    return IsModal();
+}
+
+#endif // WXWIN_COMPATIBILITY_2_6
 
 wxWindow *wxDialog::FindSuitableParent() const
 {
@@ -241,9 +271,6 @@ bool wxDialog::Show(bool show)
 
     if ( show )
     {
-        if (CanDoLayoutAdaptation())
-            DoLayoutAdaptation();
-
         // this usually will result in TransferDataToWindow() being called
         // which will change the controls values so do it before showing as
         // otherwise we could have some flicker
@@ -254,15 +281,13 @@ bool wxDialog::Show(bool show)
 
     if ( show )
     {
-        // dialogs don't get WM_SIZE message from ::ShowWindow() for some
-        // reason so generate it ourselves for consistency with frames and
-        // dialogs in other ports
+        // dialogs don't get WM_SIZE message after creation unlike most (all?)
+        // other windows and so could start their life non laid out correctly
+        // if we didn't call Layout() from here
         //
         // NB: normally we should call it just the first time but doing it
         //     every time is simpler than keeping a flag
-        const wxSize size = GetClientSize();
-        ::SendMessage(GetHwnd(), WM_SIZE,
-                      SIZE_RESTORED, MAKELPARAM(size.x, size.y));
+        Layout();
     }
 
     return true;
@@ -276,18 +301,56 @@ void wxDialog::Raise()
 // show dialog modally
 int wxDialog::ShowModal()
 {
-    wxASSERT_MSG( !IsModal(), _T("ShowModal() can't be called twice") );
+    wxASSERT_MSG( !IsModal(), _T("wxDialog::ShowModal() reentered?") );
+
+    m_endModalCalled = false;
 
     Show();
 
     // EndModal may have been called from InitDialog handler (called from
-    // inside Show()) and hidden the dialog back again
-    if ( IsShown() )
+    // inside Show()), which would cause an infinite loop if we didn't take it
+    // into account
+    if ( !m_endModalCalled )
     {
+        // modal dialog needs a parent window, so try to find one
+        wxWindow *parent = GetParent();
+        if ( !parent )
+        {
+            parent = FindSuitableParent();
+        }
+
+        // remember where the focus was
+        wxWindow *oldFocus = m_oldFocus;
+        if ( !oldFocus )
+        {
+            // VZ: do we really want to do this?
+            oldFocus = parent;
+        }
+
+        // We have to remember the HWND because we need to check
+        // the HWND still exists (oldFocus can be garbage when the dialog
+        // exits, if it has been destroyed)
+        HWND hwndOldFocus = oldFocus ? GetHwndOf(oldFocus) : NULL;
+
+
         // enter and run the modal loop
-        wxDialogModalDataTiedPtr modalData(&m_modalData,
-                                           new wxDialogModalData(this));
-        modalData->RunLoop();
+        {
+            wxDialogModalDataTiedPtr modalData(&m_modalData,
+                                               new wxDialogModalData(this));
+            modalData->RunLoop();
+        }
+
+
+        // and restore focus
+        // Note that this code MUST NOT access the dialog object's data
+        // in case the object has been deleted (which will be the case
+        // for a modal dialog that has been destroyed before calling EndModal).
+        if ( oldFocus && (oldFocus != this) && ::IsWindow(hwndOldFocus))
+        {
+            // This is likely to prove that the object still exists
+            if (wxFindWinFromHandle((WXHWND) hwndOldFocus) == oldFocus)
+                oldFocus->SetFocus();
+        }
     }
 
     return GetReturnCode();
@@ -297,101 +360,10 @@ void wxDialog::EndModal(int retCode)
 {
     wxASSERT_MSG( IsModal(), _T("EndModal() called for non modal dialog") );
 
+    m_endModalCalled = true;
     SetReturnCode(retCode);
 
     Hide();
-}
-
-// ----------------------------------------------------------------------------
-// wxDialog gripper handling
-// ----------------------------------------------------------------------------
-
-void wxDialog::SetWindowStyleFlag(long style)
-{
-    wxDialogBase::SetWindowStyleFlag(style);
-
-    if ( HasFlag(wxRESIZE_BORDER) )
-        CreateGripper();
-    else
-        DestroyGripper();
-}
-
-void wxDialog::CreateGripper()
-{
-    if ( !m_hGripper )
-    {
-        // just create it here, it will be positioned and shown later
-        m_hGripper = (WXHWND)::CreateWindow
-                               (
-                                    wxT("SCROLLBAR"),
-                                    wxT(""),
-                                    WS_CHILD |
-                                    WS_CLIPSIBLINGS |
-                                    SBS_SIZEGRIP |
-                                    SBS_SIZEBOX |
-                                    SBS_SIZEBOXBOTTOMRIGHTALIGN,
-                                    0, 0, 0, 0,
-                                    GetHwnd(),
-                                    0,
-                                    wxGetInstance(),
-                                    NULL
-                               );
-    }
-}
-
-void wxDialog::DestroyGripper()
-{
-    if ( m_hGripper )
-    {
-        // we used to have trouble with gripper appearing on top (and hence
-        // overdrawing) the other, real, dialog children -- check that this
-        // isn't the case automatically (but notice that this could be false if
-        // we're not shown at all as in this case ResizeGripper() might not
-        // have been called yet)
-        wxASSERT_MSG( !IsShown() ||
-                      ::GetWindow((HWND)m_hGripper, GW_HWNDNEXT) == 0,
-            _T("Bug in wxWidgets: gripper should be at the bottom of Z-order") );
-        ::DestroyWindow((HWND) m_hGripper);
-        m_hGripper = 0;
-    }
-}
-
-void wxDialog::ShowGripper(bool show)
-{
-    wxASSERT_MSG( m_hGripper, _T("shouldn't be called if we have no gripper") );
-
-    if ( show )
-        ResizeGripper();
-
-    ::ShowWindow((HWND)m_hGripper, show ? SW_SHOW : SW_HIDE);
-}
-
-void wxDialog::ResizeGripper()
-{
-    wxASSERT_MSG( m_hGripper, _T("shouldn't be called if we have no gripper") );
-
-    HWND hwndGripper = (HWND)m_hGripper;
-
-    const wxRect rectGripper = wxRectFromRECT(wxGetWindowRect(hwndGripper));
-    const wxSize size = GetClientSize() - rectGripper.GetSize();
-
-    ::SetWindowPos(hwndGripper, HWND_BOTTOM,
-                   size.x, size.y,
-                   rectGripper.width, rectGripper.height,
-                   SWP_NOACTIVATE);
-}
-
-void wxDialog::OnWindowCreate(wxWindowCreateEvent& event)
-{
-    if ( m_hGripper && IsShown() &&
-            event.GetWindow() && event.GetWindow()->GetParent() == this )
-    {
-        // Put gripper below the newly created child window
-        ::SetWindowPos((HWND)m_hGripper, HWND_BOTTOM, 0, 0, 0, 0,
-                       SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
-    }
-
-    event.Skip();
 }
 
 // ----------------------------------------------------------------------------
@@ -411,7 +383,7 @@ bool wxDialog::DoOK()
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, GetAffirmativeId());
     event.SetEventObject(this);
 
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 #endif // __POCKETPC__
 
@@ -475,19 +447,6 @@ WXLRESULT wxDialog::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPar
             break;
 
         case WM_SIZE:
-            if ( m_hGripper )
-            {
-                switch ( wParam )
-                {
-                    case SIZE_MAXIMIZED:
-                        ShowGripper(false);
-                        break;
-
-                    case SIZE_RESTORED:
-                        ShowGripper(true);
-                }
-            }
-
             // the Windows dialogs unfortunately are not meant to be resizeable
             // at all and their standard class doesn't include CS_[VH]REDRAW
             // styles which means that the window is not refreshed properly

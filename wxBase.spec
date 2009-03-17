@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver  2.9.0
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.10
+%define ver2 2.8
+%define rel  0
 
 # Configurable settings (use --with(out) unicode on rpmbuild command line):
 %define unicode 0
@@ -73,7 +73,7 @@ cd obj-shared
 %if %{unicode}
                               --enable-unicode
 %else
-                              --disable-unicode \
+                              --with-odbc
 %endif
 $MAKE
 cd ..
@@ -84,7 +84,7 @@ cd obj-static
 %if %{unicode}
                               --enable-unicode
 %else
-                              --disable-unicode \
+                              --with-odbc
 %endif
 $MAKE
 cd ..

@@ -46,8 +46,8 @@ FORCE_WXHTML_MODULES()
 // small border always added to the cells:
 static const wxCoord CELL_BORDER = 2;
 
-const char wxHtmlListBoxNameStr[] = "htmlListBox";
-const char wxSimpleHtmlListBoxNameStr[] = "simpleHtmlListBox";
+const wxChar wxHtmlListBoxNameStr[] = wxT("htmlListBox");
+const wxChar wxSimpleHtmlListBoxNameStr[] = wxT("simpleHtmlListBox");
 
 // ============================================================================
 // private classes
@@ -165,33 +165,18 @@ public:
 
     virtual wxColour GetSelectedTextColour(const wxColour& colFg)
     {
-        // by default wxHtmlListBox doesn't implement GetSelectedTextColour()
-        // and returns wxNullColour from it, so use the default HTML colour for
-        // selection
-        wxColour col = m_hlbox.GetSelectedTextColour(colFg);
-        if ( !col.IsOk() )
-        {
-            col = wxDefaultHtmlRenderingStyle::GetSelectedTextColour(colFg);
-        }
-
-        return col;
+        return m_hlbox.GetSelectedTextColour(colFg);
     }
 
     virtual wxColour GetSelectedTextBgColour(const wxColour& colBg)
     {
-        wxColour col = m_hlbox.GetSelectedTextBgColour(colBg);
-        if ( !col.IsOk() )
-        {
-            col = wxDefaultHtmlRenderingStyle::GetSelectedTextBgColour(colBg);
-        }
-
-        return col;
+        return m_hlbox.GetSelectedTextBgColour(colBg);
     }
 
 private:
     const wxHtmlListBox& m_hlbox;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlListBoxStyle);
+    DECLARE_NO_COPY_CLASS(wxHtmlListBoxStyle)
 };
 
 // ----------------------------------------------------------------------------
@@ -269,10 +254,10 @@ wxHtmlListBox::~wxHtmlListBox()
 // wxHtmlListBox appearance
 // ----------------------------------------------------------------------------
 
-wxColour
-wxHtmlListBox::GetSelectedTextColour(const wxColour& WXUNUSED(colFg)) const
+wxColour wxHtmlListBox::GetSelectedTextColour(const wxColour& colFg) const
 {
-    return wxNullColour;
+    return m_htmlRendStyle->
+                wxDefaultHtmlRenderingStyle::GetSelectedTextColour(colFg);
 }
 
 wxColour
@@ -338,18 +323,18 @@ void wxHtmlListBox::OnSize(wxSizeEvent& event)
     event.Skip();
 }
 
-void wxHtmlListBox::RefreshRow(size_t line)
+void wxHtmlListBox::RefreshLine(size_t line)
 {
     m_cache->InvalidateRange(line, line);
 
-    wxVListBox::RefreshRow(line);
+    wxVListBox::RefreshLine(line);
 }
 
-void wxHtmlListBox::RefreshRows(size_t from, size_t to)
+void wxHtmlListBox::RefreshLines(size_t from, size_t to)
 {
     m_cache->InvalidateRange(from, to);
 
-    wxVListBox::RefreshRows(from, to);
+    wxVListBox::RefreshLines(from, to);
 }
 
 void wxHtmlListBox::RefreshAll()
@@ -371,27 +356,6 @@ void wxHtmlListBox::SetItemCount(size_t count)
 // wxHtmlListBox implementation of wxVListBox pure virtuals
 // ----------------------------------------------------------------------------
 
-void
-wxHtmlListBox::OnDrawBackground(wxDC& dc, const wxRect& rect, size_t n) const
-{
-    if ( IsSelected(n) )
-    {
-        if ( DoDrawSolidBackground
-             (
-                GetSelectedTextBgColour(GetBackgroundColour()),
-                dc,
-                rect,
-                n
-             ) )
-        {
-            return;
-        }
-        //else: no custom selection background colour, use base class version
-    }
-
-    wxVListBox::OnDrawBackground(dc, rect, n);
-}
-
 void wxHtmlListBox::OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const
 {
     CacheItem(n);
@@ -401,21 +365,16 @@ void wxHtmlListBox::OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const
 
     wxHtmlRenderingInfo htmlRendInfo;
 
-    // draw the selected cell in selected state ourselves if we're using custom
-    // colours (to test for this, check the callbacks by passing them any dummy
-    // (but valid, to avoid asserts) colour):
-    if ( IsSelected(n) &&
-            (GetSelectedTextColour(*wxBLACK).IsOk() ||
-             GetSelectedTextBgColour(*wxWHITE).IsOk()) )
+    // draw the selected cell in selected state
+    if ( IsSelected(n) )
     {
         wxHtmlSelection htmlSel;
         htmlSel.Set(wxPoint(0,0), cell, wxPoint(INT_MAX, INT_MAX), cell);
         htmlRendInfo.SetSelection(&htmlSel);
-        htmlRendInfo.SetStyle(m_htmlRendStyle);
+        if ( m_htmlRendStyle )
+            htmlRendInfo.SetStyle(m_htmlRendStyle);
         htmlRendInfo.GetState().SetSelectionState(wxHTML_SEL_IN);
     }
-    //else: normal item or selected item with default colours, its background
-    //      was already taken care of in the base class
 
     // note that we can't stop drawing exactly at the window boundary as then
     // even the visible cells part could be not drawn, so always draw the
@@ -510,13 +469,13 @@ wxPoint wxHtmlListBox::GetRootCellCoords(size_t n) const
 {
     wxPoint pos(CELL_BORDER, CELL_BORDER);
     pos += GetMargins();
-    pos.y += GetRowsHeight(GetVisibleBegin(), n);
+    pos.y += GetLinesHeight(GetFirstVisibleLine(), n);
     return pos;
 }
 
 bool wxHtmlListBox::PhysicalCoordsToCell(wxPoint& pos, wxHtmlCell*& cell) const
 {
-    int n = VirtualHitTest(pos.y);
+    int n = HitTest(pos);
     if ( n == wxNOT_FOUND )
         return false;
 
@@ -614,19 +573,19 @@ bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
 #if wxUSE_VALIDATORS
     SetValidator(validator);
 #endif
-
-    Append(n, choices);
+    for (int i=0; i<n; i++)
+        Append(choices[i]);
 
     return true;
 }
 
 bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
-                                 const wxPoint& pos,
-                                 const wxSize& size,
-                                 const wxArrayString& choices,
-                                 long style,
-                                 const wxValidator& validator,
-                                 const wxString& name)
+                                    const wxPoint& pos,
+                                    const wxSize& size,
+                                    const wxArrayString& choices,
+                                    long style,
+                                    const wxValidator& validator,
+                                    const wxString& name)
 {
     if (!wxHtmlListBox::Create(parent, id, pos, size, style, name))
         return false;
@@ -634,7 +593,6 @@ bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
 #if wxUSE_VALIDATORS
     SetValidator(validator);
 #endif
-
     Append(choices);
 
     return true;
@@ -642,51 +600,53 @@ bool wxSimpleHtmlListBox::Create(wxWindow *parent, wxWindowID id,
 
 wxSimpleHtmlListBox::~wxSimpleHtmlListBox()
 {
-    wxItemContainer::Clear();
-}
-
-void wxSimpleHtmlListBox::DoClear()
-{
     wxASSERT(m_items.GetCount() == m_HTMLclientData.GetCount());
+    if (HasClientObjectData())
+    {
+        // clear the array of client data objects
+        for (size_t i=0; i<m_items.GetCount(); i++)
+            delete DoGetItemClientObject(i);
+    }
 
     m_items.Clear();
     m_HTMLclientData.Clear();
-
-    UpdateCount();
 }
 
 void wxSimpleHtmlListBox::Clear()
 {
-    DoClear();
+    m_items.Clear();
+    m_HTMLclientData.Clear();
+    UpdateCount();
 }
 
-void wxSimpleHtmlListBox::DoDeleteOneItem(unsigned int n)
+void wxSimpleHtmlListBox::Delete(unsigned int n)
 {
     m_items.RemoveAt(n);
-
     m_HTMLclientData.RemoveAt(n);
-
     UpdateCount();
 }
 
-int wxSimpleHtmlListBox::DoInsertItems(const wxArrayStringsAdapter& items,
-                                       unsigned int pos,
-                                       void **clientData,
-                                       wxClientDataType type)
+void wxSimpleHtmlListBox::Append(const wxArrayString& strings)
 {
-    const unsigned int count = items.GetCount();
-
-    m_items.Insert(wxEmptyString, pos, count);
-    m_HTMLclientData.Insert(NULL, pos, count);
-
-    for ( unsigned int i = 0; i < count; ++i, ++pos )
-    {
-        m_items[pos] = items[i];
-        AssignNewItemClientData(pos, clientData, i, type);
-    }
-
+    // append all given items at once
+    WX_APPEND_ARRAY(m_items, strings);
+    m_HTMLclientData.Add(NULL, strings.GetCount());
     UpdateCount();
+}
 
+int wxSimpleHtmlListBox::DoAppend(const wxString& item)
+{
+    m_items.Add(item);
+    m_HTMLclientData.Add(NULL);
+    UpdateCount();
+    return GetCount()-1;
+}
+
+int wxSimpleHtmlListBox::DoInsert(const wxString& item, unsigned int pos)
+{
+    m_items.Insert(item, pos);
+    m_HTMLclientData.Insert(NULL, pos);
+    UpdateCount();
     return pos;
 }
 
@@ -695,8 +655,8 @@ void wxSimpleHtmlListBox::SetString(unsigned int n, const wxString& s)
     wxCHECK_RET( IsValid(n),
                  wxT("invalid index in wxSimpleHtmlListBox::SetString") );
 
-    m_items[n]=s;
-    RefreshRow(n);
+    m_items[n]=s; 
+    RefreshLine(n);
 }
 
 wxString wxSimpleHtmlListBox::GetString(unsigned int n) const

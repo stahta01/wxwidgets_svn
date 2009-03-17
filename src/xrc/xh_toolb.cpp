@@ -21,8 +21,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/frame.h"
-    #include "wx/log.h"
-    #include "wx/menu.h"
     #include "wx/toolbar.h"
 #endif
 
@@ -55,102 +53,48 @@ wxObject *wxToolBarXmlHandler::DoCreateResource()
 {
     if (m_class == wxT("tool"))
     {
-        if ( !m_toolbar )
+        wxCHECK_MSG(m_toolbar, NULL, wxT("Incorrect syntax of XRC resource: tool not within a toolbar!"));
+
+        if (GetPosition() != wxDefaultPosition)
         {
-            ReportError("tool only allowed inside a wxToolBar");
-            return NULL;
+            m_toolbar->AddTool(GetID(),
+                               GetBitmap(wxT("bitmap"), wxART_TOOLBAR),
+                               GetBitmap(wxT("bitmap2"), wxART_TOOLBAR),
+                               GetBool(wxT("toggle")),
+                               GetPosition().x,
+                               GetPosition().y,
+                               NULL,
+                               GetText(wxT("tooltip")),
+                               GetText(wxT("longhelp")));
         }
-
-        wxItemKind kind = wxITEM_NORMAL;
-        if (GetBool(wxT("radio")))
-            kind = wxITEM_RADIO;
-
-        if (GetBool(wxT("toggle")))
+        else
         {
-            if ( kind != wxITEM_NORMAL )
+            wxItemKind kind = wxITEM_NORMAL;
+            if (GetBool(wxT("radio")))
+                kind = wxITEM_RADIO;
+            if (GetBool(wxT("toggle")))
             {
-                ReportParamError
-                (
-                    "toggle",
-                    "tool can't have both <radio> and <toggle> properties"
-                );
+                wxASSERT_MSG( kind == wxITEM_NORMAL,
+                              _T("can't have both toggleable and radion button at once") );
+                kind = wxITEM_CHECK;
             }
+            m_toolbar->AddTool(GetID(),
+                               GetText(wxT("label")),
+                               GetBitmap(wxT("bitmap"), wxART_TOOLBAR),
+                               GetBitmap(wxT("bitmap2"), wxART_TOOLBAR),
+                               kind,
+                               GetText(wxT("tooltip")),
+                               GetText(wxT("longhelp")));
 
-            kind = wxITEM_CHECK;
+            if ( GetBool(wxT("disabled")) )
+                m_toolbar->EnableTool(GetID(), false);
         }
-
-        // check whether we have dropdown tag inside
-        wxMenu *menu = NULL; // menu for drop down items
-        wxXmlNode * const nodeDropdown = GetParamNode("dropdown");
-        if ( nodeDropdown )
-        {
-            if ( kind != wxITEM_NORMAL )
-            {
-                ReportParamError
-                (
-                    "dropdown",
-                    "drop-down tool can't have neither <radio> nor <toggle> properties"
-                );
-            }
-
-            kind = wxITEM_DROPDOWN;
-
-            // also check for the menu specified inside dropdown (it is
-            // optional and may be absent for e.g. dynamically-created
-            // menus)
-            wxXmlNode * const nodeMenu = nodeDropdown->GetChildren();
-            if ( nodeMenu )
-            {
-                wxObject *res = CreateResFromNode(nodeMenu, NULL);
-                menu = wxDynamicCast(res, wxMenu);
-                if ( !menu )
-                {
-                    ReportError
-                    (
-                        nodeMenu,
-                        "drop-down tool contents can only be a wxMenu"
-                    );
-                }
-
-                if ( nodeMenu->GetNext() )
-                {
-                    ReportError
-                    (
-                        nodeMenu->GetNext(),
-                        "unexpected extra contents under drop-down tool"
-                    );
-                }
-            }
-        }
-
-        wxToolBarToolBase * const
-            tool = m_toolbar->AddTool
-                             (
-                                GetID(),
-                                GetText(wxT("label")),
-                                GetBitmap(wxT("bitmap"), wxART_TOOLBAR),
-                                GetBitmap(wxT("bitmap2"), wxART_TOOLBAR),
-                                kind,
-                                GetText(wxT("tooltip")),
-                                GetText(wxT("longhelp"))
-                             );
-
-        if ( GetBool(wxT("disabled")) )
-            m_toolbar->EnableTool(GetID(), false);
-
-        if ( menu )
-            tool->SetDropdownMenu(menu);
-
         return m_toolbar; // must return non-NULL
     }
 
     else if (m_class == wxT("separator"))
     {
-        if ( !m_toolbar )
-        {
-            ReportError("separator only allowed inside wxToolBar");
-            return NULL;
-        }
+        wxCHECK_MSG(m_toolbar, NULL, wxT("Incorrect syntax of XRC resource: separator not within a toolbar!"));
         m_toolbar->AddSeparator();
         return m_toolbar; // must return non-NULL
     }

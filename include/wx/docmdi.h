@@ -23,17 +23,20 @@
  * Use this instead of wxMDIParentFrame
  */
 
-class WXDLLIMPEXP_CORE wxDocMDIParentFrame: public wxMDIParentFrame
+class WXDLLEXPORT wxDocMDIParentFrame: public wxMDIParentFrame
 {
 public:
     wxDocMDIParentFrame();
     wxDocMDIParentFrame(wxDocManager *manager, wxFrame *parent, wxWindowID id,
         const wxString& title, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr);
+        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
 
     bool Create(wxDocManager *manager, wxFrame *parent, wxWindowID id,
         const wxString& title, const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxFrameNameStr);
+        const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
+
+    // Extend event processing to search the document manager's event table
+    virtual bool ProcessEvent(wxEvent& event);
 
     wxDocManager *GetDocumentManager(void) const { return m_docManager; }
 
@@ -43,59 +46,62 @@ public:
 
 protected:
     void Init();
-
-    virtual bool TryBefore(wxEvent& event);
-
     wxDocManager *m_docManager;
 
 private:
     DECLARE_CLASS(wxDocMDIParentFrame)
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxDocMDIParentFrame);
+    DECLARE_NO_COPY_CLASS(wxDocMDIParentFrame)
 };
 
-// ----------------------------------------------------------------------------
-// An MDI document child frame: we need to define it as a class just for wxRTTI,
-// otherwise we could simply typedef it
-// ----------------------------------------------------------------------------
+/*
+ * Use this instead of wxMDIChildFrame
+ */
 
-#ifdef __VISUALC6__
-    // "non dll-interface class 'wxDocChildFrameAny<>' used as base interface
-    // for dll-interface class 'wxDocMDIChildFrame'" -- this is bogus as the
-    // template will be DLL-exported but only once it is used as base class
-    // here!
-    #pragma warning (disable:4275)
-#endif
-
-typedef
-  wxDocChildFrameAny<wxMDIChildFrame, wxMDIParentFrame> wxDocMDIChildFrameBase;
-
-class WXDLLIMPEXP_CORE wxDocMDIChildFrame : public wxDocMDIChildFrameBase
+class WXDLLEXPORT wxDocMDIChildFrame: public wxMDIChildFrame
 {
 public:
-    wxDocMDIChildFrame(wxDocument *doc,
-                       wxView *view,
-                       wxMDIParentFrame *parent,
-                       wxWindowID id,
-                       const wxString& title,
-                       const wxPoint& pos = wxDefaultPosition,
-                       const wxSize& size = wxDefaultSize,
-                       long style = wxDEFAULT_FRAME_STYLE,
-                       const wxString& name = wxFrameNameStr)
-        : wxDocMDIChildFrameBase(doc, view,
-                                 parent, id, title, pos, size, style, name)
-    {
-    }
+    wxDocMDIChildFrame();
+    wxDocMDIChildFrame(wxDocument *doc, wxView *view, wxMDIParentFrame *frame, wxWindowID id,
+        const wxString& title, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize,
+        long type = wxDEFAULT_FRAME_STYLE, const wxString& name = wxT("frame"));
+    virtual ~wxDocMDIChildFrame();
+
+    bool Create(wxDocument *doc,
+                wxView *view,
+                wxMDIParentFrame *frame,
+                wxWindowID id,
+                const wxString& title,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long type = wxDEFAULT_FRAME_STYLE,
+                const wxString& name = wxFrameNameStr);
+
+    // Extend event processing to search the view's event table
+    virtual bool ProcessEvent(wxEvent& event);
+
+    void OnActivate(wxActivateEvent& event);
+    void OnCloseWindow(wxCloseEvent& event);
+
+    inline wxDocument *GetDocument() const { return m_childDocument; }
+    inline wxView *GetView(void) const { return m_childView; }
+    inline void SetDocument(wxDocument *doc) { m_childDocument = doc; }
+    inline void SetView(wxView *view) { m_childView = view; }
+    bool Destroy() { m_childView = (wxView *)NULL; return wxMDIChildFrame::Destroy(); }
+
+protected:
+    void Init();
+    wxDocument*       m_childDocument;
+    wxView*           m_childView;
 
 private:
+    DECLARE_EVENT_TABLE()
     DECLARE_CLASS(wxDocMDIChildFrame)
-    wxDECLARE_NO_COPY_CLASS(wxDocMDIChildFrame);
+    DECLARE_NO_COPY_CLASS(wxDocMDIChildFrame)
 };
 
-#ifdef __VISUALC6__
-    #pragma warning (default:4275)
 #endif
+    // wxUSE_MDI_ARCHITECTURE
 
-#endif // wxUSE_MDI_ARCHITECTURE
-
-#endif // _WX_DOCMDI_H_
+#endif
+    // _WX_DOCMDI_H_

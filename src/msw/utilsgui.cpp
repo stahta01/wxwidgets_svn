@@ -33,13 +33,117 @@
 #include "wx/dynlib.h"
 
 #include "wx/msw/private.h"     // includes <windows.h>
-#include "wx/msw/registry.h"
-#include <shellapi.h> // needed for SHELLEXECUTEINFO
-
 
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// functions to work with .INI files
+// ----------------------------------------------------------------------------
+
+// Reading and writing resources (eg WIN.INI, .Xdefaults)
+#if wxUSE_RESOURCES
+bool wxWriteResource(const wxString& section, const wxString& entry, const wxString& value, const wxString& file)
+{
+  if (file != wxEmptyString)
+// Don't know what the correct cast should be, but it doesn't
+// compile in BC++/16-bit without this cast.
+#if !defined(__WIN32__)
+    return (WritePrivateProfileString((const char*) section, (const char*) entry, (const char*) value, (const char*) file) != 0);
+#else
+    return (WritePrivateProfileString((LPCTSTR)WXSTRINGCAST section, (LPCTSTR)WXSTRINGCAST entry, (LPCTSTR)value, (LPCTSTR)WXSTRINGCAST file) != 0);
+#endif
+  else
+    return (WriteProfileString((LPCTSTR)WXSTRINGCAST section, (LPCTSTR)WXSTRINGCAST entry, (LPCTSTR)WXSTRINGCAST value) != 0);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, float value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%.4f"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, long value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%ld"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxWriteResource(const wxString& section, const wxString& entry, int value, const wxString& file)
+{
+    wxString buf;
+    buf.Printf(wxT("%d"), value);
+
+    return wxWriteResource(section, entry, buf, file);
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, wxChar **value, const wxString& file)
+{
+    static const wxChar defunkt[] = wxT("$$default");
+
+    wxChar buf[1024];
+    if (file != wxEmptyString)
+    {
+        int n = GetPrivateProfileString(section, entry, defunkt,
+                                        buf, WXSIZEOF(buf), file);
+        if (n == 0 || wxStrcmp(buf, defunkt) == 0)
+            return false;
+    }
+    else
+    {
+        int n = GetProfileString(section, entry, defunkt, buf, WXSIZEOF(buf));
+        if (n == 0 || wxStrcmp(buf, defunkt) == 0)
+            return false;
+    }
+    if (*value) delete[] (*value);
+    *value = wxStrcpy(new wxChar[wxStrlen(buf) + 1], buf);
+    return true;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, float *value, const wxString& file)
+{
+    wxChar *s = NULL;
+    bool succ = wxGetResource(section, entry, (wxChar **)&s, file);
+    if (succ)
+    {
+        *value = (float)wxStrtod(s, NULL);
+        delete[] s;
+        return true;
+    }
+    else return false;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, long *value, const wxString& file)
+{
+    wxChar *s = NULL;
+    bool succ = wxGetResource(section, entry, (wxChar **)&s, file);
+    if (succ)
+    {
+        *value = wxStrtol(s, NULL, 10);
+        delete[] s;
+        return true;
+    }
+    else return false;
+}
+
+bool wxGetResource(const wxString& section, const wxString& entry, int *value, const wxString& file)
+{
+    wxChar *s = NULL;
+    bool succ = wxGetResource(section, entry, (wxChar **)&s, file);
+    if (succ)
+    {
+        *value = (int)wxStrtol(s, NULL, 10);
+        delete[] s;
+        return true;
+    }
+    else return false;
+}
+#endif // wxUSE_RESOURCES
 
 // ---------------------------------------------------------------------------
 // helper functions for showing a "busy" cursor
@@ -110,9 +214,7 @@ bool wxCheckForInterrupt(wxWindow *wnd)
 #ifndef __WXMICROWIN__
 wxChar *wxLoadUserResource(const wxString& resourceName, const wxString& resourceType)
 {
-    HRSRC hResource = ::FindResource(wxGetInstance(),
-                                     resourceName.wx_str(),
-                                     resourceType.wx_str());
+    HRSRC hResource = ::FindResource(wxGetInstance(), resourceName, resourceType);
     if ( hResource == 0 )
         return NULL;
 
@@ -126,9 +228,12 @@ wxChar *wxLoadUserResource(const wxString& resourceName, const wxString& resourc
 
     // Not all compilers put a zero at the end of the resource (e.g. BC++ doesn't).
     // so we need to find the length of the resource.
-    int len = ::SizeofResource(wxGetInstance(), hResource) + 1;
-    wxChar *s = new wxChar[len];
-    wxStrlcpy(s, theText, len);
+    int len = ::SizeofResource(wxGetInstance(), hResource);
+    wxChar  *s = new wxChar[len+1];
+    wxStrncpy(s,theText,len);
+    s[len]=0;
+
+    // wxChar *s = copystring(theText);
 
     // Obsolete in WIN32
 #ifndef __WIN32__
@@ -295,9 +400,9 @@ wxString WXDLLEXPORT wxGetWindowClass(WXHWND hWnd)
     return str;
 }
 
-int WXDLLEXPORT wxGetWindowId(WXHWND hWnd)
+WXWORD WXDLLEXPORT wxGetWindowId(WXHWND hWnd)
 {
-    return ::GetWindowLong((HWND)hWnd, GWL_ID);
+    return (WXWORD)GetWindowLong((HWND)hWnd, GWL_ID);
 }
 
 // ----------------------------------------------------------------------------
@@ -396,117 +501,3 @@ extern bool wxEnableFileNameAutoComplete(HWND hwnd)
 #endif // wxUSE_DYNLIB_CLASS/!wxUSE_DYNLIB_CLASS
 }
 
-// ----------------------------------------------------------------------------
-// Launch document with default app
-// ----------------------------------------------------------------------------
-
-bool wxLaunchDefaultApplication(const wxString& document, int flags)
-{
-    wxUnusedVar(flags);
-
-    WinStruct<SHELLEXECUTEINFO> sei;
-    sei.lpFile = document.wx_str();
-    sei.lpVerb = _T("open");
-#ifdef __WXWINCE__
-    sei.nShow = SW_SHOWNORMAL; // SW_SHOWDEFAULT not defined under CE (#10216)
-#else
-    sei.nShow = SW_SHOWDEFAULT;
-#endif
-
-    // avoid Windows message box in case of error for consistency with
-    // wxLaunchDefaultBrowser() even if don't show the error ourselves in this
-    // function
-    sei.fMask = SEE_MASK_FLAG_NO_UI;
-
-    if ( ::ShellExecuteEx(&sei) )
-        return true;
-
-    return false;
-}
-
-// ----------------------------------------------------------------------------
-// Launch default browser
-// ----------------------------------------------------------------------------
-
-bool wxDoLaunchDefaultBrowser(const wxString& url, const wxString& scheme, int flags)
-{
-    wxUnusedVar(flags);
-    
-#if wxUSE_IPC
-    if ( flags & wxBROWSER_NEW_WINDOW )
-    {
-        // ShellExecuteEx() opens the URL in an existing window by default so
-        // we can't use it if we need a new window
-        wxRegKey key(wxRegKey::HKCR, scheme + _T("\\shell\\open"));
-        if ( !key.Exists() )
-        {
-            // try the default browser, it must be registered at least for http URLs
-            key.SetName(wxRegKey::HKCR, _T("http\\shell\\open"));
-        }
-
-        if ( key.Exists() )
-        {
-            wxRegKey keyDDE(key, wxT("DDEExec"));
-            if ( keyDDE.Exists() )
-            {
-                // we only know the syntax of WWW_OpenURL DDE request for IE,
-                // optimistically assume that all other browsers are compatible
-                // with it
-                static const wxChar *TOPIC_OPEN_URL = wxT("WWW_OpenURL");
-                wxString ddeCmd;
-                wxRegKey keyTopic(keyDDE, wxT("topic"));
-                bool ok = keyTopic.Exists() &&
-                            keyTopic.QueryDefaultValue() == TOPIC_OPEN_URL;
-                if ( ok )
-                {
-                    ddeCmd = keyDDE.QueryDefaultValue();
-                    ok = !ddeCmd.empty();
-                }
-
-                if ( ok )
-                {
-                    // for WWW_OpenURL, the index of the window to open the URL
-                    // in is -1 (meaning "current") by default, replace it with
-                    // 0 which means "new" (see KB article 160957)
-                    ok = ddeCmd.Replace(wxT("-1"), wxT("0"),
-                                        false /* only first occurrence */) == 1;
-                }
-
-                if ( ok )
-                {
-                    // and also replace the parameters: the topic should
-                    // contain a placeholder for the URL
-                    ok = ddeCmd.Replace(wxT("%1"), url, false) == 1;
-                }
-
-                if ( ok )
-                {
-                    // try to send it the DDE request now but ignore the errors
-                    wxLogNull noLog;
-
-                    const wxString ddeServer = wxRegKey(keyDDE, wxT("application"));
-                    if ( wxExecuteDDE(ddeServer, TOPIC_OPEN_URL, ddeCmd) )
-                        return true;
-
-                    // this is not necessarily an error: maybe browser is
-                    // simply not running, but no matter, in any case we're
-                    // going to launch it using ShellExecuteEx() below now and
-                    // we shouldn't try to open a new window if we open a new
-                    // browser anyhow
-                }
-            }
-        }
-    }
-#endif // wxUSE_IPC
-
-    WinStruct<SHELLEXECUTEINFO> sei;
-    sei.lpFile = url.c_str();
-    sei.lpVerb = _T("open");
-    sei.nShow = SW_SHOWNORMAL;
-    sei.fMask = SEE_MASK_FLAG_NO_UI; // we give error message ourselves
-
-    if ( ::ShellExecuteEx(&sei) )
-        return true;
-
-    return false;
-}

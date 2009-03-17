@@ -45,13 +45,13 @@
     #define wxSL_NOTIFY_DRAG     0x0000
 #endif // WXWIN_COMPATIBILITY_2_6
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxSliderNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxSliderNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxSliderBase: define wxSlider interface
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSliderBase : public wxControl
+class WXDLLEXPORT wxSliderBase : public wxControl
 {
 public:
     /* the ctor of the derived class should have the following form:
@@ -105,9 +105,6 @@ public:
 
 protected:
 
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // adjust value according to wxSL_INVERSE style
     virtual int ValueInvertOrNot(int value) const
     {
@@ -118,7 +115,7 @@ protected:
     }
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxSliderBase);
+    DECLARE_NO_COPY_CLASS(wxSliderBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -128,7 +125,10 @@ private:
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/slider.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/slider.h"
+    #include "wx/msw/slider95.h"
+    #if WXWIN_COMPATIBILITY_2_4
+         #define wxSlider95 wxSlider
+    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/slider.h"
 #elif defined(__WXGTK20__)
@@ -136,7 +136,7 @@ private:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/slider.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/slider.h"
+    #include "wx/mac/slider.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/slider.h"
 #elif defined(__WXPM__)

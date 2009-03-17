@@ -130,9 +130,7 @@ void wxCrashReportImpl::Output(const wxChar *format, ...)
     DWORD cbWritten;
 
     wxString s = wxString::FormatV(format, argptr);
-
-    wxCharBuffer buf(s.mb_str(wxConvUTF8));
-    ::WriteFile(m_hFile, buf.data(), strlen(buf.data()), &cbWritten, 0);
+    ::WriteFile(m_hFile, s, s.length() * sizeof(wxChar), &cbWritten, 0);
 
     va_end(argptr);
 }
@@ -203,7 +201,7 @@ bool wxCrashReportImpl::Generate(int flags, EXCEPTION_POINTERS *ep)
             dumpFlags = (MINIDUMP_TYPE)(MiniDumpScanMemory
 #if _MSC_VER > 1300
                                         |MiniDumpWithIndirectlyReferencedMemory
-#endif
+#endif                                        
                                         );
         }
 
@@ -227,7 +225,7 @@ bool wxCrashReportImpl::Generate(int flags, EXCEPTION_POINTERS *ep)
     }
     else // dbghelp.dll couldn't be loaded
     {
-        Output(_T("%s"), wxDbgHelpDLL::GetErrorMessage().c_str());
+        Output(wxDbgHelpDLL::GetErrorMessage());
     }
 #else // !wxUSE_DBGHELP
     wxUnusedVar(flags);
@@ -245,13 +243,14 @@ bool wxCrashReportImpl::Generate(int flags, EXCEPTION_POINTERS *ep)
 // ----------------------------------------------------------------------------
 
 /* static */
-void wxCrashReport::SetFileName(const wxString& filename)
+void wxCrashReport::SetFileName(const wxChar *filename)
 {
-    wxStrlcpy(gs_reportFilename, filename.wx_str(), WXSIZEOF(gs_reportFilename));
+    wxStrncpy(gs_reportFilename, filename, WXSIZEOF(gs_reportFilename) - 1);
+    gs_reportFilename[WXSIZEOF(gs_reportFilename) - 1] = _T('\0');
 }
 
 /* static */
-wxString wxCrashReport::GetFileName()
+const wxChar *wxCrashReport::GetFileName()
 {
     return gs_reportFilename;
 }

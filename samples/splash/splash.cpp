@@ -123,9 +123,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxImage::AddHandler(new wxPNGHandler);
 
     // create the main application window
@@ -147,11 +144,7 @@ bool MyApp::OnInit()
             6000, frame, wxID_ANY, wxDefaultPosition, wxDefaultSize,
             wxSIMPLE_BORDER|wxSTAY_ON_TOP);
     }
-
-#if !defined(__WXGTK20__)
-    // we don't need it at least on wxGTK with GTK+ 2.12.9
     wxYield();
-#endif
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -224,17 +217,14 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
     if (ok)
     {
         wxImage image = bitmap.ConvertToImage();
-
         // do not scale on already small screens
         if (!m_isPda)
             image.Rescale( bitmap.GetWidth()/2, bitmap.GetHeight()/2 );
-
         bitmap = wxBitmap(image);
         wxSplashScreen *splash = new wxSplashScreen(bitmap,
             wxSPLASH_CENTRE_ON_PARENT | wxSPLASH_NO_TIMEOUT,
             0, this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
             wxSIMPLE_BORDER|wxSTAY_ON_TOP);
-
         wxWindow *win = splash->GetSplashWindow();
 #if wxUSE_MEDIACTRL
         wxMediaCtrl *media = new wxMediaCtrl( win, wxID_EXIT, _T("press.mpg"), wxPoint(2,2));
@@ -242,7 +232,7 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 #else
         wxStaticText *text = new wxStaticText( win,
                                                wxID_EXIT,
-                                               _T("click somewhere\non this image"),
+                                               _T("click somewhere\non image"),
                                                wxPoint(m_isPda ? 0 : 13,
                                                        m_isPda ? 0 : 11)
                                              );

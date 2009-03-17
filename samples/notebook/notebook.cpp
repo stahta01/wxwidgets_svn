@@ -30,24 +30,16 @@
     #include "../sample.xpm"
 #endif
 
-//-----------------------------------------------------------------------------
-// MyApp
-//-----------------------------------------------------------------------------
-
 IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_HELP
     wxHelpProvider::Set( new wxSimpleHelpProvider );
 #endif
 
     // Create the main window
     MyFrame *frame = new MyFrame();
-    SetTopWindow(frame);
 
     // Problem with generic wxNotebook implementation whereby it doesn't size
     // properly unless you set the size again
@@ -62,11 +54,6 @@ bool MyApp::OnInit()
     return true;
 }
 
-
-//-----------------------------------------------------------------------------
-// Creation functions
-//-----------------------------------------------------------------------------
-
 wxPanel *CreateUserCreatedPage(wxBookCtrlBase *parent)
 {
     wxPanel *panel = new wxPanel(parent);
@@ -76,7 +63,7 @@ wxPanel *CreateUserCreatedPage(wxBookCtrlBase *parent)
 #endif
 
     (void) new wxButton( panel, wxID_ANY, wxT("Button"),
-                         wxPoint(10, 10), wxDefaultSize );
+        wxPoint(10, 10), wxDefaultSize );
 
     return panel;
 }
@@ -89,15 +76,13 @@ wxPanel *CreateRadioButtonsPage(wxBookCtrlBase *parent)
     panel->SetHelpText( wxT( "Panel with some Radio Buttons" ) );
 #endif
 
-    wxString animals[] = 
-      { wxT("Fox"), wxT("Hare"), wxT("Rabbit"),
+    wxString animals[] = { wxT("Fox"), wxT("Hare"), wxT("Rabbit"),
         wxT("Sabre-toothed tiger"), wxT("T Rex") };
 
     wxRadioBox *radiobox1 = new wxRadioBox(panel, wxID_ANY, wxT("Choose one"),
         wxDefaultPosition, wxDefaultSize, 5, animals, 2, wxRA_SPECIFY_ROWS);
 
-    wxString computers[] = 
-      { wxT("Amiga"), wxT("Commodore 64"), wxT("PET"),
+    wxString computers[] = { wxT("Amiga"), wxT("Commodore 64"), wxT("PET"),
         wxT("Another") };
 
     wxRadioBox *radiobox2 = new wxRadioBox(panel, wxID_ANY,
@@ -121,8 +106,7 @@ wxPanel *CreateVetoPage(wxBookCtrlBase *parent)
 #endif
 
     (void) new wxStaticText( panel, wxID_ANY,
-                             wxT("This page intentionally left blank"), 
-                             wxPoint(10, 10) );
+        wxT("This page intentionally left blank"), wxPoint(10, 10) );
 
     return panel;
 }
@@ -144,6 +128,7 @@ wxPanel *CreateBigButtonPage(wxBookCtrlBase *parent)
     return panel;
 }
 
+
 wxPanel *CreateInsertPage(wxBookCtrlBase *parent)
 {
     wxPanel *panel = new wxPanel(parent);
@@ -154,8 +139,7 @@ wxPanel *CreateInsertPage(wxBookCtrlBase *parent)
 
     panel->SetBackgroundColour( wxColour( wxT("MAROON") ) );
     (void) new wxStaticText( panel, wxID_ANY,
-                             wxT("This page has been inserted, not added."), 
-                             wxPoint(10, 10) );
+        wxT("This page has been inserted, not added."), wxPoint(10, 10) );
 
     return panel;
 }
@@ -217,64 +201,6 @@ wxPanel *CreatePage(wxBookCtrlBase *parent, const wxString&pageName)
 
     return NULL;
 }
-
-
-//-----------------------------------------------------------------------------
-// MyFrame
-//-----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    // File menu
-    EVT_MENU_RANGE(ID_BOOK_NOTEBOOK, ID_BOOK_MAX, MyFrame::OnType)
-    EVT_MENU_RANGE(ID_ORIENT_DEFAULT, ID_ORIENT_MAX, MyFrame::OnOrient)
-    EVT_MENU(ID_SHOW_IMAGES, MyFrame::OnShowImages)
-    EVT_MENU(ID_MULTI, MyFrame::OnMulti)
-    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
-
-    // Operations menu
-    EVT_MENU(ID_ADD_PAGE, MyFrame::OnAddPage)
-    EVT_MENU(ID_ADD_PAGE_NO_SELECT, MyFrame::OnAddPageNoSelect)
-    EVT_MENU(ID_INSERT_PAGE, MyFrame::OnInsertPage)
-    EVT_MENU(ID_DELETE_CUR_PAGE, MyFrame::OnDeleteCurPage)
-    EVT_MENU(ID_DELETE_LAST_PAGE, MyFrame::OnDeleteLastPage)
-    EVT_MENU(ID_NEXT_PAGE, MyFrame::OnNextPage)
-    EVT_MENU(ID_GO_HOME, MyFrame::OnGoHome)
-
-#if wxUSE_HELP
-    EVT_MENU(ID_CONTEXT_HELP, MyFrame::OnContextHelp)
-#endif // wxUSE_HELP
-    EVT_MENU(ID_HITTEST, MyFrame::OnHitTest)
-
-    // Book controls
-#if wxUSE_NOTEBOOK
-    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnNotebook)
-    EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnNotebook)
-#endif
-#if wxUSE_LISTBOOK
-    EVT_LISTBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnListbook)
-    EVT_LISTBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnListbook)
-#endif
-#if wxUSE_CHOICEBOOK
-    EVT_CHOICEBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnChoicebook)
-    EVT_CHOICEBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnChoicebook)
-#endif
-#if wxUSE_TREEBOOK
-    EVT_TREEBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnTreebook)
-    EVT_TREEBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnTreebook)
-
-    EVT_MENU(ID_ADD_SUB_PAGE, MyFrame::OnAddSubPage)
-    EVT_MENU(ID_ADD_PAGE_BEFORE, MyFrame::OnAddPageBefore)
-    EVT_UPDATE_UI_RANGE(ID_ADD_PAGE_BEFORE, ID_ADD_SUB_PAGE,
-                            MyFrame::OnUpdateTreeMenu)
-#endif
-#if wxUSE_TOOLBOOK
-    EVT_TOOLBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnToolbook)
-    EVT_TOOLBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnToolbook)
-#endif
-
-    // Update title in idle time
-    EVT_IDLE(MyFrame::OnIdle)
-END_EVENT_TABLE()
 
 MyFrame::MyFrame()
     : wxFrame(NULL, wxID_ANY, wxString(wxT("wxWidgets book controls sample")))
@@ -403,6 +329,7 @@ MyFrame::MyFrame()
 
     m_panel->SetSizer(m_sizerFrame);
 
+    m_sizerFrame->Fit(this);
     m_sizerFrame->SetSizeHints(this);
 
     Centre(wxBOTH);
@@ -451,14 +378,14 @@ MyFrame::~MyFrame()
     #define CASE_TOOLBOOK(x)
 #endif
 
-#define DISPATCH_ON_TYPE(before, nb, lb, cb, tb, toolb, after)                \
+#define DISPATCH_ON_TYPE(before, nb, lb, cb, tb, toolb, after)                       \
     switch ( m_type )                                                         \
     {                                                                         \
         CASE_NOTEBOOK(before nb after)                                        \
         CASE_LISTBOOK(before lb after)                                        \
         CASE_CHOICEBOOK(before cb after)                                      \
         CASE_TREEBOOK(before tb after)                                        \
-        CASE_TOOLBOOK(before toolb after)                                     \
+        CASE_TOOLBOOK(before toolb after)                                        \
                                                                               \
         default:                                                              \
             wxFAIL_MSG( _T("unknown book control type") );                    \
@@ -578,35 +505,58 @@ void MyFrame::RecreateBook()
     m_sizerFrame->Layout();
 }
 
-void MyFrame::AddFlagStrIfFlagPresent(wxString & flagStr, long flags, long flag, 
-                                      const wxChar * flagName) const
-{
-    if( (flags & flag) == flag )
-    {
-        if( !flagStr.empty() )
-            flagStr += _T(" | ");
-        flagStr += flagName;
-    }
-}
+BEGIN_EVENT_TABLE(MyFrame, wxFrame)
+    // File menu
+    EVT_MENU_RANGE(ID_BOOK_NOTEBOOK, ID_BOOK_MAX, MyFrame::OnType)
+    EVT_MENU_RANGE(ID_ORIENT_DEFAULT, ID_ORIENT_MAX, MyFrame::OnOrient)
+    EVT_MENU(ID_SHOW_IMAGES, MyFrame::OnShowImages)
+    EVT_MENU(ID_MULTI, MyFrame::OnMulti)
+    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
 
-wxPanel *MyFrame::CreateNewPage() const
-{
-    wxPanel *panel = new wxPanel(m_bookCtrl, wxID_ANY );
+    // Operations menu
+    EVT_MENU(ID_ADD_PAGE, MyFrame::OnAddPage)
+    EVT_MENU(ID_ADD_PAGE_NO_SELECT, MyFrame::OnAddPageNoSelect)
+    EVT_MENU(ID_INSERT_PAGE, MyFrame::OnInsertPage)
+    EVT_MENU(ID_DELETE_CUR_PAGE, MyFrame::OnDeleteCurPage)
+    EVT_MENU(ID_DELETE_LAST_PAGE, MyFrame::OnDeleteLastPage)
+    EVT_MENU(ID_NEXT_PAGE, MyFrame::OnNextPage)
+    EVT_MENU(ID_GO_HOME, MyFrame::OnGoHome)
 
 #if wxUSE_HELP
-    panel->SetHelpText( wxT( "Panel with \"First\" and \"Second\" buttons" ) );
+    EVT_MENU(ID_CONTEXT_HELP, MyFrame::OnContextHelp)
+#endif // wxUSE_HELP
+    EVT_MENU(ID_HITTEST, MyFrame::OnHitTest)
+
+    // Book controls
+#if wxUSE_NOTEBOOK
+    EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnNotebook)
+    EVT_NOTEBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnNotebook)
+#endif
+#if wxUSE_LISTBOOK
+    EVT_LISTBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnListbook)
+    EVT_LISTBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnListbook)
+#endif
+#if wxUSE_CHOICEBOOK
+    EVT_CHOICEBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnChoicebook)
+    EVT_CHOICEBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnChoicebook)
+#endif
+#if wxUSE_TREEBOOK
+    EVT_TREEBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnTreebook)
+    EVT_TREEBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnTreebook)
+
+    EVT_MENU(ID_ADD_SUB_PAGE, MyFrame::OnAddSubPage)
+    EVT_MENU(ID_ADD_PAGE_BEFORE, MyFrame::OnAddPageBefore)
+    EVT_UPDATE_UI_RANGE(ID_ADD_PAGE_BEFORE, ID_ADD_SUB_PAGE,
+                            MyFrame::OnUpdateTreeMenu)
+#endif
+#if wxUSE_TOOLBOOK
+    EVT_TOOLBOOK_PAGE_CHANGED(wxID_ANY, MyFrame::OnToolbook)
+    EVT_TOOLBOOK_PAGE_CHANGING(wxID_ANY, MyFrame::OnToolbook)
 #endif
 
-    (void) new wxButton(panel, wxID_ANY, wxT("First button"), wxPoint(10, 30));
-    (void) new wxButton(panel, wxID_ANY, wxT("Second button"), wxPoint(150, 30));
-
-    return panel;
-}
-
-
-//-----------------------------------------------------------------------------
-// MyFrame - event handlers
-//-----------------------------------------------------------------------------
+    // Update title in idle time
+    EVT_IDLE(MyFrame::OnIdle)
+END_EVENT_TABLE()
 
 #if wxUSE_HELP
 
@@ -617,6 +567,16 @@ void MyFrame::OnContextHelp(wxCommandEvent& WXUNUSED(event))
 }
 
 #endif // wxUSE_HELP
+
+void MyFrame::AddFlagStrIfFlagPresent(wxString & flagStr, long flags, long flag, const wxChar * flagName) const
+{
+    if( (flags & flag) == flag )
+    {
+        if( !flagStr.empty() )
+            flagStr += _T(" | ");
+        flagStr += flagName;
+    }
+}
 
 void MyFrame::OnHitTest(wxCommandEvent& WXUNUSED(event))
 {
@@ -642,7 +602,7 @@ void MyFrame::OnHitTest(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnType(wxCommandEvent& event)
 {
-    m_type = static_cast<BookType>(event.GetId() - ID_BOOK_NOTEBOOK);
+    m_type = wx_static_cast(BookType, event.GetId() - ID_BOOK_NOTEBOOK);
 
     if ( m_bookCtrl )
         m_sizerFrame->Hide(m_bookCtrl);
@@ -658,6 +618,7 @@ void MyFrame::OnUpdateTreeMenu(wxUpdateUIEvent& event)
 }
 
 #endif // wxUSE_TREEBOOK
+
 
 void MyFrame::OnOrient(wxCommandEvent& event)
 {
@@ -684,6 +645,20 @@ void MyFrame::OnMulti(wxCommandEvent& event)
 void MyFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 {
     Close();
+}
+
+wxPanel *MyFrame::CreateNewPage() const
+{
+    wxPanel *panel = new wxPanel(m_bookCtrl, wxID_ANY );
+
+#if wxUSE_HELP
+    panel->SetHelpText( wxT( "Panel with \"First\" and \"Second\" buttons" ) );
+#endif
+
+    (void) new wxButton(panel, wxID_ANY, wxT("First button"), wxPoint(10, 10));
+    (void) new wxButton(panel, wxID_ANY, wxT("Second button"), wxPoint(50, 100));
+
+    return panel;
 }
 
 void MyFrame::OnAddPage(wxCommandEvent& WXUNUSED(event))
@@ -942,7 +917,7 @@ void MyFrame::OnBookCtrl(wxBookCtrlBaseEvent& event)
             // NB: can't use wxStaticCast here as wxBookCtrlBase is not in
             //     wxRTTI
             const wxBookCtrlBase * const
-                book = static_cast<wxBookCtrlBase *>(event.GetEventObject());
+                book = wx_static_cast(wxBookCtrlBase *, event.GetEventObject());
             if ( idx != wxNOT_FOUND &&
                     book && book->GetPageText(idx) == VETO_PAGE_NAME )
             {

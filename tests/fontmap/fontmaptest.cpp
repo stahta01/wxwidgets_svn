@@ -108,12 +108,11 @@ void FontMapperTestCase::NamesAndDesc()
         _T("Unknown encoding (-1)"             ),
     };
 
-    wxFontMapperBase& fmap = *wxFontMapperBase::Get();
     for ( size_t n = 0; n < WXSIZEOF(charsets); n++ )
     {
-        wxFontEncoding enc = fmap.CharsetToEncoding(charsets[n]);
-        CPPUNIT_ASSERT_EQUAL( names[n], fmap.GetEncodingName(enc).Lower() );
-        CPPUNIT_ASSERT_EQUAL( descriptions[n], fmap.GetEncodingDescription(enc) );
+        wxFontEncoding enc = wxFontMapperBase::Get()->CharsetToEncoding(charsets[n]);
+        CPPUNIT_ASSERT( wxFontMapperBase::Get()->GetEncodingName(enc).CmpNoCase(names[n]) == 0 );
+        CPPUNIT_ASSERT( wxFontMapperBase::Get()->GetEncodingDescription(enc) == descriptions[n] );
     }
 }
 

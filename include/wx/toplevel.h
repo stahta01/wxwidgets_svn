@@ -18,13 +18,11 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include "wx/nonownedwnd.h"
+#include "wx/window.h"
 #include "wx/iconbndl.h"
-#include "wx/containr.h"
-#include "wx/weakref.h"
 
 // the default names for various classes
-extern WXDLLIMPEXP_DATA_CORE(const char) wxFrameNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxFrameNameStr[];
 
 class WXDLLIMPEXP_FWD_CORE wxTopLevelWindowBase;
 
@@ -117,7 +115,7 @@ enum
 // wxTopLevelWindow: a top level (as opposed to child) window
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTopLevelWindowBase : public wxNonOwnedWindow
+class WXDLLEXPORT wxTopLevelWindowBase : public wxWindow
 {
 public:
     // construction
@@ -147,16 +145,16 @@ public:
     virtual bool IsIconized() const = 0;
 
     // get the frame icon
-    wxIcon GetIcon() const;
+    const wxIcon& GetIcon() const { return m_icons.GetIcon( -1 ); }
 
     // get the frame icons
     const wxIconBundle& GetIcons() const { return m_icons; }
 
-    // set the frame icon: implemented in terms of SetIcons()
-    void SetIcon(const wxIcon& icon);
+    // set the frame icon
+    virtual void SetIcon(const wxIcon& icon) { m_icons = wxIconBundle( icon ); }
 
     // set the frame icons
-    virtual void SetIcons(const wxIconBundle& icons) { m_icons = icons; }
+    virtual void SetIcons(const wxIconBundle& icons ) { m_icons = icons; }
 
     // maximize the window to cover entire screen
     virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL) = 0;
@@ -208,6 +206,9 @@ public:
     // reverts to the "permanent" default as soon as this temporary default
     // item loses focus
 
+    // used to reset default if pointing to removed child
+    virtual void RemoveChild(wxWindowBase *child);
+
     // get the default item, temporary or permanent
     wxWindow *GetDefaultItem() const
         { return m_winTmpDefault ? m_winTmpDefault : m_winDefault; }
@@ -251,6 +252,11 @@ public:
     virtual void SetMinSize(const wxSize& minSize);
     virtual void SetMaxSize(const wxSize& maxSize);
 
+    // set size hints for "window manager"
+    virtual void DoSetSizeHints( int minW, int minH,
+                                 int maxW = wxDefaultCoord, int maxH = wxDefaultCoord,
+                                 int incW = wxDefaultCoord, int incH = wxDefaultCoord );
+
 protected:
     // the frame client to screen translation should take account of the
     // toolbar which may shift the origin of the client area
@@ -289,19 +295,17 @@ protected:
     static int WidthDefault(int w) { return w == wxDefaultCoord ? GetDefaultSize().x : w; }
     static int HeightDefault(int h) { return h == wxDefaultCoord ? GetDefaultSize().y : h; }
 
-
     // the frame icon
     wxIconBundle m_icons;
 
     // a default window (usually a button) or NULL
-    wxWindowRef m_winDefault;
+    wxWindow *m_winDefault;
 
     // a temporary override of m_winDefault, use the latter if NULL
-    wxWindowRef m_winTmpDefault;
+    wxWindow *m_winTmpDefault;
 
-    wxDECLARE_NO_COPY_CLASS(wxTopLevelWindowBase);
+    DECLARE_NO_COPY_CLASS(wxTopLevelWindowBase)
     DECLARE_EVENT_TABLE()
-    WX_DECLARE_CONTROL_CONTAINER();
 };
 
 
@@ -328,7 +332,7 @@ protected:
     #include "wx/dfb/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowDFB
 #elif defined(__WXMAC__)
-    #include "wx/osx/toplevel.h"
+    #include "wx/mac/toplevel.h"
     #define wxTopLevelWindowNative wxTopLevelWindowMac
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/toplevel.h"
@@ -345,7 +349,7 @@ protected:
     #include "wx/univ/toplevel.h"
 #else // !__WXUNIVERSAL__
     #ifdef wxTopLevelWindowNative
-        class WXDLLIMPEXP_CORE wxTopLevelWindow : public wxTopLevelWindowNative
+        class WXDLLEXPORT wxTopLevelWindow : public wxTopLevelWindowNative
         {
         public:
             // construction

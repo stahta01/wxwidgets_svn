@@ -70,7 +70,16 @@ bool IsIidFromList(REFIID riid, const IID *aIids[], size_t nCount)
 
 WXDLLEXPORT BSTR wxConvertStringToOle(const wxString& str)
 {
-    return wxBasicString(str).Get();
+/*
+    unsigned int len = strlen((const char*) str);
+    unsigned short* s = new unsigned short[len*2+2];
+    unsigned int i;
+    memset(s, 0, len*2+2);
+    for (i=0; i < len; i++)
+        s[i*2] = str[i];
+*/
+    wxBasicString bstr(str.mb_str());
+    return bstr.Get();
 }
 
 WXDLLEXPORT wxString wxConvertStringFromOle(BSTR bStr)
@@ -103,25 +112,50 @@ WXDLLEXPORT wxString wxConvertStringFromOle(BSTR bStr)
 // wxBasicString
 // ----------------------------------------------------------------------------
 
+// ctor takes an ANSI string and transforms it to Unicode
+wxBasicString::wxBasicString(const char *sz)
+{
+    Init(sz);
+}
+
+// ctor takes an ANSI or Unicode string and transforms it to Unicode
 wxBasicString::wxBasicString(const wxString& str)
 {
-    m_bstrBuf = SysAllocString(str.wc_str(*wxConvCurrent));
+#if wxUSE_UNICODE
+    m_wzBuf = new OLECHAR[str.length() + 1];
+    memcpy(m_wzBuf, str.c_str(), str.length()*2);
+    m_wzBuf[str.length()] = L'\0';
+#else
+    Init(str.c_str());
+#endif
 }
 
-wxBasicString::wxBasicString(const wxBasicString& src)
+// Takes an ANSI string and transforms it to Unicode
+void wxBasicString::Init(const char *sz)
 {
-    m_bstrBuf = src.Get();
+    // get the size of required buffer: MetroWerks and Cygwin crash if NULL is
+    // passed to mbstowcs()
+    UINT lenAnsi = strlen(sz);
+#if defined(__MWERKS__) || defined(__CYGWIN__)
+    UINT lenWide = lenAnsi * 2 ;
+#else
+    UINT lenWide = mbstowcs(NULL, sz, lenAnsi);
+#endif
+
+    if ( lenWide > 0 ) {
+        m_wzBuf = new OLECHAR[lenWide + 1];
+        mbstowcs(m_wzBuf, sz, lenAnsi);
+        m_wzBuf[lenWide] = L'\0';
+    }
+    else {
+        m_wzBuf = NULL;
+    }
 }
 
-wxBasicString& wxBasicString::operator=(const wxBasicString& src)
-{
-    SysReAllocString(&m_bstrBuf, src);
-    return *this;
-}
-
+// dtor frees memory
 wxBasicString::~wxBasicString()
 {
-    SysFreeString(m_bstrBuf);
+  delete [] m_wzBuf;
 }
 
 #if wxUSE_DATAOBJ

@@ -55,7 +55,7 @@ public:
     typedef <integral type> NativeFormat;
 
     wxDataFormat(NativeFormat format = wxDF_INVALID);
-    wxDataFormat(const wxString& format);
+    wxDataFormat(const wxChar *format);
 
     wxDataFormat& operator=(NativeFormat format);
     wxDataFormat& operator=(const wxDataFormat& format);
@@ -67,7 +67,7 @@ public:
     NativeFormat GetType() const;
 
     wxString GetId() const;
-    void SetId(const wxString& format);
+    void SetId(const wxChar *format);
 };
 
 */
@@ -83,7 +83,7 @@ public:
 #elif defined(__WXX11__)
     #include "wx/x11/dataform.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/dataform.h"
+    #include "wx/mac/dataform.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/dataform.h"
 #elif defined(__WXPM__)
@@ -92,7 +92,7 @@ public:
 
 // the value for default argument to some functions (corresponds to
 // wxDF_INVALID)
-extern WXDLLIMPEXP_CORE const wxDataFormat& wxFormatInvalid;
+extern WXDLLEXPORT const wxDataFormat& wxFormatInvalid;
 
 // ----------------------------------------------------------------------------
 // wxDataObject represents a piece of data which knows which formats it
@@ -114,7 +114,7 @@ extern WXDLLIMPEXP_CORE const wxDataFormat& wxFormatInvalid;
 // to be supported by SetData() or GetDataHere().
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDataObjectBase
+class WXDLLEXPORT wxDataObjectBase
 {
 public:
     enum Direction
@@ -171,7 +171,7 @@ public:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/dataobj.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/dataobj.h"
+    #include "wx/mac/dataobj.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/dataobj.h"
 #elif defined(__WXPM__)
@@ -194,7 +194,7 @@ public:
 // Otherwise, you should use wxDataObjectComposite or wxDataObject directly.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDataObjectSimple : public wxDataObject
+class WXDLLEXPORT wxDataObjectSimple : public wxDataObject
 {
 public:
     // ctor takes the format we support, but it can also be set later with
@@ -246,7 +246,7 @@ private:
     // the one and only format we support
     wxDataFormat m_format;
 
-    wxDECLARE_NO_COPY_CLASS(wxDataObjectSimple);
+    DECLARE_NO_COPY_CLASS(wxDataObjectSimple)
 };
 
 // ----------------------------------------------------------------------------
@@ -261,7 +261,7 @@ private:
 
 WX_DECLARE_EXPORTED_LIST(wxDataObjectSimple, wxSimpleDataObjectList);
 
-class WXDLLIMPEXP_CORE wxDataObjectComposite : public wxDataObject
+class WXDLLEXPORT wxDataObjectComposite : public wxDataObject
 {
 public:
     // ctor
@@ -297,7 +297,7 @@ public:
 
 protected:
     // returns the pointer to the object which supports this format or NULL
-    wxDataObjectSimple *GetObject(const wxDataFormat& format, wxDataObjectBase::Direction dir=Get) const;
+    wxDataObjectSimple *GetObject(const wxDataFormat& format) const;
 
 private:
     // the list of all (simple) data objects whose formats we support
@@ -309,7 +309,7 @@ private:
 
     wxDataFormat m_receivedFormat;
 
-    wxDECLARE_NO_COPY_CLASS(wxDataObjectComposite);
+    DECLARE_NO_COPY_CLASS(wxDataObjectComposite)
 };
 
 // ============================================================================
@@ -324,15 +324,7 @@ private:
 // wxTextDataObject contains text data
 // ----------------------------------------------------------------------------
 
-#if wxUSE_UNICODE
-    #if defined(__WXGTK20__)
-        #define wxNEEDS_UTF8_FOR_TEXT_DATAOBJ
-    #elif defined(__WXMAC__)
-        #define wxNEEDS_UTF8_FOR_TEXT_DATAOBJ
-    #endif
-#endif // wxUSE_UNICODE
-
-class WXDLLIMPEXP_CORE wxTextDataObject : public wxDataObjectSimple
+class WXDLLEXPORT wxTextDataObject : public wxDataObjectSimple
 {
 public:
     // ctor: you can specify the text here or in SetText(), or override
@@ -359,7 +351,7 @@ public:
     // ----------------------------------
 
     // some platforms have 2 and not 1 format for text data
-#if defined(wxNEEDS_UTF8_FOR_TEXT_DATAOBJ) || defined(wxNEEDS_UTF16_FOR_TEXT_DATAOBJ)
+#if wxUSE_UNICODE && (defined(__WXGTK20__) || defined(__WXMAC__))
     virtual size_t GetFormatCount(Direction WXUNUSED(dir) = Get) const { return 2; }
     virtual void GetAllFormats(wxDataFormat *formats,
                                wxDataObjectBase::Direction WXUNUSED(dir) = Get) const;
@@ -371,7 +363,7 @@ public:
     size_t GetDataSize(const wxDataFormat& format) const;
     bool GetDataHere(const wxDataFormat& format, void *pBuf) const;
     bool SetData(const wxDataFormat& format, size_t nLen, const void* pBuf);
-#else // !wxNEEDS_UTF{8,16}_FOR_TEXT_DATAOBJ
+#else
     virtual size_t GetDataSize() const;
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
@@ -388,19 +380,19 @@ public:
     {
         return SetData(len, buf);
     }
-#endif // different wxTextDataObject implementations
+#endif
 
 private:
     wxString m_text;
 
-    wxDECLARE_NO_COPY_CLASS(wxTextDataObject);
+    DECLARE_NO_COPY_CLASS(wxTextDataObject)
 };
 
 // ----------------------------------------------------------------------------
 // wxBitmapDataObject contains a bitmap
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxBitmapDataObjectBase : public wxDataObjectSimple
+class WXDLLEXPORT wxBitmapDataObjectBase : public wxDataObjectSimple
 {
 public:
     // ctor: you can specify the bitmap here or in SetBitmap(), or override
@@ -418,7 +410,7 @@ public:
 protected:
     wxBitmap m_bitmap;
 
-    wxDECLARE_NO_COPY_CLASS(wxBitmapDataObjectBase);
+    DECLARE_NO_COPY_CLASS(wxBitmapDataObjectBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -428,7 +420,7 @@ protected:
 //     data from drag and drop operation.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileDataObjectBase : public wxDataObjectSimple
+class WXDLLEXPORT wxFileDataObjectBase : public wxDataObjectSimple
 {
 public:
     // ctor: use AddFile() later to fill the array
@@ -440,7 +432,7 @@ public:
 protected:
     wxArrayString m_filenames;
 
-    wxDECLARE_NO_COPY_CLASS(wxFileDataObjectBase);
+    DECLARE_NO_COPY_CLASS(wxFileDataObjectBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -449,7 +441,7 @@ protected:
 // It is understood that this data can be copied bitwise.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCustomDataObject : public wxDataObjectSimple
+class WXDLLEXPORT wxCustomDataObject : public wxDataObjectSimple
 {
 public:
     // if you don't specify the format in the ctor, you can still use
@@ -501,7 +493,7 @@ private:
     size_t m_size;
     void  *m_data;
 
-    wxDECLARE_NO_COPY_CLASS(wxCustomDataObject);
+    DECLARE_NO_COPY_CLASS(wxCustomDataObject)
 };
 
 // ----------------------------------------------------------------------------
@@ -510,20 +502,19 @@ private:
 
 #if defined(__WXMSW__)
     #include "wx/msw/ole/dataobj2.h"
-    // wxURLDataObject defined in msw/ole/dataobj2.h
-#elif defined(__WXGTK20__)
-    #include "wx/gtk/dataobj2.h"
-    // wxURLDataObject defined in msw/ole/dataobj2.h
 
-#else 
-    #if defined(__WXGTK__)
+    // wxURLDataObject defined in msw/ole/dataobj2.h
+#else // !__WXMSW__
+    #if defined(__WXGTK20__)
+        #include "wx/gtk/dataobj2.h"
+    #elif defined(__WXGTK__)
         #include "wx/gtk1/dataobj2.h"
     #elif defined(__WXX11__)
         #include "wx/x11/dataobj2.h"
     #elif defined(__WXMOTIF__)
         #include "wx/motif/dataobj2.h"
     #elif defined(__WXMAC__)
-        #include "wx/osx/dataobj2.h"
+        #include "wx/mac/dataobj2.h"
     #elif defined(__WXCOCOA__)
         #include "wx/cocoa/dataobj2.h"
     #elif defined(__WXPM__)
@@ -531,7 +522,7 @@ private:
     #endif
 
     // wxURLDataObject is simply wxTextDataObject with a different name
-    class WXDLLIMPEXP_CORE wxURLDataObject : public wxTextDataObject
+    class WXDLLEXPORT wxURLDataObject : public wxTextDataObject
     {
     public:
         wxURLDataObject(const wxString& url = wxEmptyString)
@@ -542,7 +533,7 @@ private:
         wxString GetURL() const { return GetText(); }
         void SetURL(const wxString& url) { SetText(url); }
     };
-#endif
+#endif // __WXMSW__/!__WXMSW__
 
 #endif // wxUSE_DATAOBJ
 

@@ -233,7 +233,7 @@ BombsCanvas::BombsCanvas(wxFrame *parent, BombsGame *game)
     wxFont font= BOMBS_FONT;
     dc.SetFont(font);
 
-    wxCoord chw, chh;
+    long chw, chh;
     wxString buf = wxT("M");
 
     dc.GetTextExtent(buf, &chw, &chh);

@@ -59,10 +59,6 @@
 #include "copy.xpm"
 #endif
 
-#ifndef __WXMSW__
-    #include "../sample.xpm"
-#endif
-
 // ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
@@ -260,8 +256,6 @@ enum
     Menu_Popup_ToBeChecked,
     Menu_Popup_Submenu,
 
-    Menu_PopupChoice,
-
     Menu_Max
 };
 
@@ -350,9 +344,6 @@ IMPLEMENT_APP(MyApp)
 // main frame
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame* frame = new MyFrame;
 
@@ -375,8 +366,6 @@ bool MyApp::OnInit()
 MyFrame::MyFrame()
        : wxFrame((wxFrame *)NULL, wxID_ANY, _T("wxWidgets menu sample"))
 {
-    SetIcon(wxICON(sample));
-
 #if USE_LOG_WINDOW
     m_textctrl = NULL;
 #endif
@@ -394,67 +383,49 @@ MyFrame::MyFrame()
     wxMenu *stockSubMenu = new wxMenu;
     stockSubMenu->Append(wxID_ADD);
     stockSubMenu->Append(wxID_APPLY);
-    stockSubMenu->Append(wxID_BACKWARD);
     stockSubMenu->Append(wxID_BOLD);
-    stockSubMenu->Append(wxID_BOTTOM);
     stockSubMenu->Append(wxID_CANCEL);
-    stockSubMenu->Append(wxID_CDROM);
     stockSubMenu->Append(wxID_CLEAR);
     stockSubMenu->Append(wxID_CLOSE);
-    stockSubMenu->Append(wxID_CONVERT);
     stockSubMenu->Append(wxID_COPY);
     stockSubMenu->Append(wxID_CUT);
     stockSubMenu->Append(wxID_DELETE);
-    stockSubMenu->Append(wxID_DOWN);
-    stockSubMenu->Append(wxID_EXECUTE);
-    stockSubMenu->Append(wxID_EXIT);
     stockSubMenu->Append(wxID_FIND);
-    stockSubMenu->Append(wxID_FIRST);
-    stockSubMenu->Append(wxID_FLOPPY);
+    stockSubMenu->Append(wxID_REPLACE);
+    stockSubMenu->Append(wxID_BACKWARD);
+    stockSubMenu->Append(wxID_DOWN);
     stockSubMenu->Append(wxID_FORWARD);
-    stockSubMenu->Append(wxID_HARDDISK);
+    stockSubMenu->Append(wxID_UP);
     stockSubMenu->Append(wxID_HELP);
     stockSubMenu->Append(wxID_HOME);
     stockSubMenu->Append(wxID_INDENT);
     stockSubMenu->Append(wxID_INDEX);
-    stockSubMenu->Append(wxID_INFO);
     stockSubMenu->Append(wxID_ITALIC);
-    stockSubMenu->Append(wxID_JUMP_TO);
     stockSubMenu->Append(wxID_JUSTIFY_CENTER);
     stockSubMenu->Append(wxID_JUSTIFY_FILL);
     stockSubMenu->Append(wxID_JUSTIFY_LEFT);
     stockSubMenu->Append(wxID_JUSTIFY_RIGHT);
-    stockSubMenu->Append(wxID_LAST);
-    stockSubMenu->Append(wxID_NETWORK);
     stockSubMenu->Append(wxID_NEW);
     stockSubMenu->Append(wxID_NO);
     stockSubMenu->Append(wxID_OK);
     stockSubMenu->Append(wxID_OPEN);
     stockSubMenu->Append(wxID_PASTE);
     stockSubMenu->Append(wxID_PREFERENCES);
-    stockSubMenu->Append(wxID_PREVIEW);
     stockSubMenu->Append(wxID_PRINT);
+    stockSubMenu->Append(wxID_PREVIEW);
     stockSubMenu->Append(wxID_PROPERTIES);
+    stockSubMenu->Append(wxID_EXIT);
     stockSubMenu->Append(wxID_REDO);
     stockSubMenu->Append(wxID_REFRESH);
     stockSubMenu->Append(wxID_REMOVE);
-    stockSubMenu->Append(wxID_REPLACE);
     stockSubMenu->Append(wxID_REVERT_TO_SAVED);
     stockSubMenu->Append(wxID_SAVE);
     stockSubMenu->Append(wxID_SAVEAS);
-    stockSubMenu->Append(wxID_SELECT_COLOR);
-    stockSubMenu->Append(wxID_SELECT_FONT);
-    stockSubMenu->Append(wxID_SORT_ASCENDING);
-    stockSubMenu->Append(wxID_SORT_DESCENDING);
-    stockSubMenu->Append(wxID_SPELL_CHECK);
     stockSubMenu->Append(wxID_STOP);
-    stockSubMenu->Append(wxID_STRIKETHROUGH);
-    stockSubMenu->Append(wxID_TOP);
     stockSubMenu->Append(wxID_UNDELETE);
     stockSubMenu->Append(wxID_UNDERLINE);
     stockSubMenu->Append(wxID_UNDO);
     stockSubMenu->Append(wxID_UNINDENT);
-    stockSubMenu->Append(wxID_UP);
     stockSubMenu->Append(wxID_YES);
     stockSubMenu->Append(wxID_ZOOM_100);
     stockSubMenu->Append(wxID_ZOOM_FIT);
@@ -572,7 +543,7 @@ MyFrame::MyFrame()
                                 wxTE_MULTILINE);
     m_textctrl->SetEditable(false);
 
-    wxLog::DisableTimestamp();
+    wxLog::SetTimestamp(NULL);
     m_logOld = wxLog::SetActiveTarget(new wxLogTextCtrl(m_textctrl));
 
     wxLogMessage(_T("Brief explanations: the commands or the \"Menu\" menu ")
@@ -745,7 +716,7 @@ void MyFrame::OnGetLabelMenu(wxCommandEvent& WXUNUSED(event))
     wxCHECK_RET( count, _T("no last menu?") );
 
     wxLogMessage(_T("The label of the last menu item is '%s'"),
-                 mbar->GetMenuLabel(count - 1).c_str());
+                 mbar->GetLabelTop(count - 1).c_str());
 }
 
 #if wxUSE_TEXTDLG
@@ -760,13 +731,13 @@ void MyFrame::OnSetLabelMenu(wxCommandEvent& WXUNUSED(event))
                      (
                         _T("Enter new label: "),
                         _T("Change last menu text"),
-                        mbar->GetMenuLabel(count - 1),
+                        mbar->GetLabelTop(count - 1),
                         this
                      );
 
     if ( !label.empty() )
     {
-        mbar->SetMenuLabel(count - 1, label);
+        mbar->SetLabelTop(count - 1, label);
     }
 }
 
@@ -884,7 +855,7 @@ void MyFrame::OnGetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
 
     if ( item )
     {
-        wxString label = item->GetItemLabel();
+        wxString label(item->GetItemLabelText());
         wxLogMessage(_T("The label of the last menu item is '%s'"),
                      label.c_str());
     }
@@ -901,7 +872,7 @@ void MyFrame::OnSetLabelMenuItem(wxCommandEvent& WXUNUSED(event))
                          (
                             _T("Enter new label: "),
                             _T("Change last menu item text"),
-                            item->GetItemLabel(),
+                            item->GetItemLabelText(),
                             this
                          );
         label.Replace( _T("\\t"), _T("\t") );
@@ -1031,50 +1002,27 @@ void MyFrame::ShowContextMenu(const wxPoint& pos)
 {
     wxMenu menu;
 
-    if ( wxGetKeyState(WXK_SHIFT) )
-    {
-        // when Shift is pressed, demonstrate the use of a simple function
-        // returning the id of the item selected in the popup menu
-        menu.SetTitle("Choose one of:");
-        static const char *choices[] = { "Apple", "Banana", "Cherry" };
-        for ( size_t n = 0; n < WXSIZEOF(choices); n++ )
-            menu.Append(Menu_PopupChoice + n, choices[n]);
+    menu.Append(Menu_Help_About, _T("&About"));
+    menu.Append(Menu_Popup_Submenu, _T("&Submenu"), CreateDummyMenu(NULL));
+    menu.Append(Menu_Popup_ToBeDeleted, _T("To be &deleted"));
+    menu.AppendCheckItem(Menu_Popup_ToBeChecked, _T("To be &checked"));
+    menu.Append(Menu_Popup_ToBeGreyed, _T("To be &greyed"),
+                _T("This menu item should be initially greyed out"));
+    menu.AppendSeparator();
+    menu.Append(Menu_File_Quit, _T("E&xit"));
 
-        const int rc = GetPopupMenuSelectionFromUser(menu, pos);
-        if ( rc == wxID_NONE )
-        {
-            wxLogMessage("No selection");
-        }
-        else
-        {
-            wxLogMessage("You have selected \"%s\"",
-                         choices[rc - Menu_PopupChoice]);
-        }
-    }
-    else // normal case, shift not pressed
-    {
-        menu.Append(Menu_Help_About, _T("&About"));
-        menu.Append(Menu_Popup_Submenu, _T("&Submenu"), CreateDummyMenu(NULL));
-        menu.Append(Menu_Popup_ToBeDeleted, _T("To be &deleted"));
-        menu.AppendCheckItem(Menu_Popup_ToBeChecked, _T("To be &checked"));
-        menu.Append(Menu_Popup_ToBeGreyed, _T("To be &greyed"),
-                    _T("This menu item should be initially greyed out"));
-        menu.AppendSeparator();
-        menu.Append(Menu_File_Quit, _T("E&xit"));
+    menu.Delete(Menu_Popup_ToBeDeleted);
+    menu.Check(Menu_Popup_ToBeChecked, true);
+    menu.Enable(Menu_Popup_ToBeGreyed, false);
 
-        menu.Delete(Menu_Popup_ToBeDeleted);
-        menu.Check(Menu_Popup_ToBeChecked, true);
-        menu.Enable(Menu_Popup_ToBeGreyed, false);
+    PopupMenu(&menu, pos.x, pos.y);
 
-        PopupMenu(&menu, pos);
-
-        // test for destroying items in popup menus
+    // test for destroying items in popup menus
 #if 0 // doesn't work in wxGTK!
-        menu.Destroy(Menu_Popup_Submenu);
+    menu.Destroy(Menu_Popup_Submenu);
 
-        PopupMenu( &menu, event.GetX(), event.GetY() );
+    PopupMenu( &menu, event.GetX(), event.GetY() );
 #endif // 0
-    }
 }
 
 void MyFrame::OnTestNormal(wxCommandEvent& WXUNUSED(event))

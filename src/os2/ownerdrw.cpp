@@ -27,7 +27,6 @@
 #endif
 
 #include "wx/ownerdrw.h"
-#include "wx/os2/dcclient.h"
 
 // ============================================================================
 // implementation of wxOwnerDrawn class
@@ -79,8 +78,8 @@ bool wxOwnerDrawn::OnMeasureItem( size_t* pWidth,
     }
     vDC.SetFont(GetFont());
     vDC.GetTextExtent( sStr
-                      ,(wxCoord *)pWidth
-                      ,(wxCoord *)pHeight
+                      ,(long *)pWidth
+                      ,(long *)pHeight
                      );
     if (!m_strAccel.empty())
     {
@@ -156,9 +155,8 @@ bool wxOwnerDrawn::OnMeasureItem( size_t* pWidth,
     // Make sure that this item is at least as
     // tall as the user's system settings specify
     //
-    const size_t heightStd = 6;		 // FIXME: get value from the system
-    if ( *pHeight < heightStd )
-      *pHeight = heightStd;
+    if (*pHeight < m_nMinHeight)
+        *pHeight = m_nMinHeight;
     m_nHeight = *pHeight;                // remember height for use in OnDrawItem
     return true;
 } // end of wxOwnerDrawn::OnMeasureItem
@@ -181,8 +179,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     //
 
     CHARBUNDLE                      vCbnd;
-    wxPMDCImpl                      *impl = (wxPMDCImpl*) rDC.GetImpl();
-    HPS                             hPS= impl->GetHPS();
+    HPS                             hPS= rDC.GetHPS();
     wxColour                        vColBack;
     wxColour                        vColText;
     COLORREF                        vRef;
@@ -316,7 +313,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     //
     // Deal with the tab, extracting the Accel text
     //
-    nIndex = sFullString.Find(sTgt);
+    nIndex = sFullString.Find(sTgt.c_str());
     if (nIndex != -1)
     {
         bFoundAccel = true;
@@ -328,7 +325,7 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     // Deal with the mnemonic character
     //
     sTgt = wxT("~");
-    nIndex = sFullString.Find(sTgt);
+    nIndex = sFullString.Find(sTgt.c_str());
     if (nIndex != -1)
     {
         wxString sTmp = sFullString;
@@ -336,13 +333,13 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
         bFoundMnemonic = true;
         sTmp.Remove(nIndex);
         rDC.GetTextExtent( sTmp
-                          ,(wxCoord *)&nWidth
-                          ,(wxCoord *)&nHeight
+                          ,(long *)&nWidth
+                          ,(long *)&nHeight
                          );
         sTmp = sFullString[(size_t)(nIndex + 1)];
         rDC.GetTextExtent( sTmp
-                          ,(wxCoord *)&nCharWidth
-                          ,(wxCoord *)&nHeight
+                          ,(long *)&nCharWidth
+                          ,(long *)&nHeight
                          );
         sFullString.Replace(sTgt.c_str(), wxEmptyString, true);
     }
@@ -351,10 +348,10 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
     // Draw the main item text sans the accel text
     //
     POINTL                      vPntStart = {nX, rRect.y + 4};
-    ::GpiCharStringAt( impl->GetHPS()
+    ::GpiCharStringAt( rDC.GetHPS()
                       ,&vPntStart
                       ,sFullString.length()
-                      ,sFullString.char_str()
+                      ,(PCH)sFullString.c_str()
                      );
     if (bFoundMnemonic)
     {
@@ -381,18 +378,18 @@ bool wxOwnerDrawn::OnDrawItem( wxDC& rDC,
         size_t                      nHeight;
 
         rDC.GetTextExtent( sAccel
-                          ,(wxCoord *)&nWidth
-                          ,(wxCoord *)&nHeight
+                          ,(long *)&nWidth
+                          ,(long *)&nHeight
                          );
         //
         // Back off the starting position from the right edge
         //
         vPntStart.x = rRect.width - (nWidth + 7);
         vPntStart.y = rRect.y + 4;
-        ::GpiCharStringAt( impl->GetHPS()
+        ::GpiCharStringAt( rDC.GetHPS()
                           ,&vPntStart
                           ,sAccel.length()
-                          ,sAccel.char_str()
+                          ,(PCH)sAccel.c_str()
                          );
     }
 

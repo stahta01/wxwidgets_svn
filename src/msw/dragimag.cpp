@@ -92,7 +92,7 @@ void wxDragImage::Init()
 #if !wxUSE_SIMPLER_DRAGIMAGE
     m_hCursorImageList = 0;
 #endif
-    m_window = NULL;
+    m_window = (wxWindow*) NULL;
     m_fullScreen = false;
 }
 
@@ -205,7 +205,7 @@ bool wxDragImage::Create(const wxString& str, const wxCursor& cursor)
 {
     wxFont font(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
-    wxCoord w = 0, h = 0;
+    long w = 0, h = 0;
     wxScreenDC dc;
     dc.SetFont(font);
     dc.GetTextExtent(str, & w, & h);
@@ -218,7 +218,7 @@ bool wxDragImage::Create(const wxString& str, const wxCursor& cursor)
 
     dc2.SetBackground(* wxWHITE_BRUSH);
     dc2.Clear();
-    dc2.SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
+    dc2.SetBackgroundMode(wxTRANSPARENT);
     dc2.SetTextForeground(* wxLIGHT_GREY);
     dc2.DrawText(str, 0, 0);
     dc2.DrawText(str, 1, 0);
@@ -388,7 +388,7 @@ bool wxDragImage::EndDrag()
     ::ShowCursor(TRUE);
 #endif
 
-    m_window = NULL;
+    m_window = (wxWindow*) NULL;
 
     return true;
 }

@@ -31,7 +31,7 @@ class wxHtmlProcessorList;
 class WXDLLIMPEXP_FWD_HTML wxHtmlWinAutoScrollTimer;
 class WXDLLIMPEXP_FWD_HTML wxHtmlCellEvent;
 class WXDLLIMPEXP_FWD_HTML wxHtmlLinkEvent;
-class WXDLLIMPEXP_FWD_CORE wxStatusBar;
+
 
 // wxHtmlWindow flags:
 #define wxHW_SCROLLBAR_NEVER    0x0002
@@ -297,8 +297,7 @@ public:
 #if wxUSE_STATUSBAR
     // After(!) calling SetRelatedFrame, this sets statusbar slot where messages
     // will be displayed. Default is -1 = no messages.
-    void SetRelatedStatusBar(int index);
-    void SetRelatedStatusBar(wxStatusBar*, int index = 0);
+    void SetRelatedStatusBar(int bar);
 #endif // wxUSE_STATUSBAR
 
     // Sets fonts to be used when displaying HTML page.
@@ -480,14 +479,13 @@ protected:
     // class for opening files (file system)
     wxFileSystem* m_FS;
 
+    wxFrame *m_RelatedFrame;
+    wxString m_TitleFormat;
+#if wxUSE_STATUSBAR
     // frame in which page title should be displayed & number of it's statusbar
     // reserved for usage with this html window
-    wxFrame *m_RelatedFrame;
-#if wxUSE_STATUSBAR
-    int m_RelatedStatusBarIndex;
-    wxStatusBar* m_RelatedStatusBar;
+    int m_RelatedStatusBar;
 #endif // wxUSE_STATUSBAR
-    wxString m_TitleFormat;
 
     // borders (free space between text and window borders)
     // defaults to 10 pixels.
@@ -548,14 +546,20 @@ private:
     static wxCursor *ms_cursorText;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxHtmlWindow);
+    DECLARE_NO_COPY_CLASS(wxHtmlWindow)
 };
 
-class WXDLLIMPEXP_FWD_HTML wxHtmlCellEvent;
 
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_HTML, wxEVT_COMMAND_HTML_CELL_CLICKED, wxHtmlCellEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_HTML, wxEVT_COMMAND_HTML_CELL_HOVER, wxHtmlCellEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_HTML, wxEVT_COMMAND_HTML_LINK_CLICKED, wxHtmlLinkEvent );
+
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_HTML,
+                                wxEVT_COMMAND_HTML_CELL_CLICKED, 1000)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_HTML,
+                                wxEVT_COMMAND_HTML_CELL_HOVER, 1001)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_HTML,
+                                wxEVT_COMMAND_HTML_LINK_CLICKED, 1002)
+END_DECLARE_EVENT_TYPES()
 
 
 /*!
@@ -629,9 +633,9 @@ typedef void (wxEvtHandler::*wxHtmlCellEventFunction)(wxHtmlCellEvent&);
 typedef void (wxEvtHandler::*wxHtmlLinkEventFunction)(wxHtmlLinkEvent&);
 
 #define wxHtmlCellEventHandler(func) \
-    wxEVENT_HANDLER_CAST(wxHtmlCellEventFunction, func)
+    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxHtmlCellEventFunction, &func)
 #define wxHtmlLinkEventHandler(func) \
-    wxEVENT_HANDLER_CAST(wxHtmlLinkEventFunction, func)
+    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxHtmlLinkEventFunction, &func)
 
 #define EVT_HTML_CELL_CLICKED(id, fn) \
     wx__DECLARE_EVT1(wxEVT_COMMAND_HTML_CELL_CLICKED, id, wxHtmlCellEventHandler(fn))

@@ -102,8 +102,8 @@ wxString wxAboutDialogInfo::GetCopyrightToDisplay() const
 
 #if wxUSE_UNICODE
     const wxString copyrightSign = wxString::FromUTF8("\xc2\xa9");
-    ret.Replace("(c)", copyrightSign);
-    ret.Replace("(C)", copyrightSign);
+    ret.Replace(_T("(c)"), copyrightSign);
+    ret.Replace(_T("(C)"), copyrightSign);
 #endif // wxUSE_UNICODE
 
     return ret;
@@ -115,8 +115,8 @@ wxString wxAboutDialogInfo::GetCopyrightToDisplay() const
 
 bool wxGenericAboutDialog::Create(const wxAboutDialogInfo& info)
 {
-    // this is a modal dialog thus we'll use GetParentForModalDialog:
-    if ( !wxDialog::Create(GetParentForModalDialog(), wxID_ANY, _("About ") + info.GetName(),
+    // TODO: should we use main frame as parent by default here?
+    if ( !wxDialog::Create(NULL, wxID_ANY, _("About ") + info.GetName(),
                            wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER|wxDEFAULT_DIALOG_STYLE) )
         return false;
 
@@ -185,14 +185,11 @@ bool wxGenericAboutDialog::Create(const wxAboutDialogInfo& info)
     wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
     sizerTop->Add(sizerIconAndText, wxSizerFlags(1).Expand().Border());
 
-// Mac typically doesn't use OK buttons just for dismissing dialogs.
-#if !defined(__WXMAC__)
     wxSizer *sizerBtns = CreateButtonSizer(wxOK);
     if ( sizerBtns )
     {
         sizerTop->Add(sizerBtns, wxSizerFlags().Expand().Border());
     }
-#endif
 
     SetSizerAndFit(sizerTop);
 
@@ -242,13 +239,8 @@ void wxGenericAboutDialog::AddCollapsiblePane(const wxString& title,
 
 void wxGenericAboutBox(const wxAboutDialogInfo& info)
 {
-#if !defined(__WXGTK__) && !defined(__WXMAC__)
     wxGenericAboutDialog dlg(info);
     dlg.ShowModal();
-#else
-    wxGenericAboutDialog* dlg = new wxGenericAboutDialog(info);
-    dlg->Show();
-#endif
 }
 
 // currently wxAboutBox is implemented natively only under these platforms, for

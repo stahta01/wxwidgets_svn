@@ -95,14 +95,12 @@ wxObject *wxTreebookXmlHandler::DoCreateResource()
         wnd = wxDynamicCast(item, wxWindow);
 
         if (wnd == NULL && item != NULL)
-        {
-            ReportError(n, "treebookpage child must be a window");
-        }
+            wxLogError(wxT("Error in resource: control within treebook's <page> tag is not a window."));
     }
 
     size_t depth = GetLong( wxT("depth") );
 
-    if( depth <= m_treeContext.GetCount() )
+    if( depth <= m_treeContext.Count() )
     {
         // first prepare the icon
         int imgIndex = wxNOT_FOUND;
@@ -119,8 +117,8 @@ wxObject *wxTreebookXmlHandler::DoCreateResource()
         }
 
         // then add the page to the corresponding parent
-        if( depth < m_treeContext.GetCount() )
-            m_treeContext.RemoveAt(depth, m_treeContext.GetCount() - depth );
+        if( depth < m_treeContext.Count() )
+            m_treeContext.RemoveAt(depth, m_treeContext.Count() - depth );
         if( depth == 0)
         {
             m_tbk->AddPage(wnd,
@@ -136,10 +134,7 @@ wxObject *wxTreebookXmlHandler::DoCreateResource()
 
     }
     else
-    {
-        ReportParamError("depth", "invalid depth");
-    }
-
+        wxLogError(wxT("Error in resource. wxTreebookPage has an invalid depth."));
     return wnd;
 }
 

@@ -188,7 +188,7 @@ void *wxGetSingleChoiceData( const wxString& message,
     return res;
 }
 
-int wxGetSelectedChoices(wxArrayInt& selections,
+size_t wxGetMultipleChoices(wxArrayInt& selections,
                             const wxString& message,
                             const wxString& caption,
                             int n, const wxString *choices,
@@ -203,19 +203,15 @@ int wxGetSelectedChoices(wxArrayInt& selections,
     // deselects the first item which is selected by default
     dialog.SetSelections(selections);
 
-    if ( dialog.ShowModal() != wxID_OK )
-    {
-        // NB: intentionally do not clear the selections array here, the caller
-        //     might want to preserve its original contents if the dialog was
-        //     cancelled
-        return -1;
-    }
+    if ( dialog.ShowModal() == wxID_OK )
+        selections = dialog.GetSelections();
+    else
+        selections.Empty();
 
-    selections = dialog.GetSelections();
     return selections.GetCount();
 }
 
-int wxGetSelectedChoices(wxArrayInt& selections,
+size_t wxGetMultipleChoices(wxArrayInt& selections,
                             const wxString& message,
                             const wxString& caption,
                             const wxArrayString& aChoices,
@@ -226,57 +222,13 @@ int wxGetSelectedChoices(wxArrayInt& selections,
 {
     wxString *choices;
     int n = ConvertWXArrayToC(aChoices, &choices);
-    int res = wxGetSelectedChoices(selections, message, caption,
+    size_t res = wxGetMultipleChoices(selections, message, caption,
                                       n, choices, parent,
                                       x, y, centre, width, height);
     delete [] choices;
 
     return res;
 }
-
-#if WXWIN_COMPATIBILITY_2_8
-size_t wxGetMultipleChoices(wxArrayInt& selections,
-                            const wxString& message,
-                            const wxString& caption,
-                            int n, const wxString *choices,
-                            wxWindow *parent,
-                            int x, int y,
-                            bool centre,
-                            int width, int height)
-{
-    int rc = wxGetSelectedChoices(selections, message, caption,
-                                  n, choices,
-                                  parent, x, y, centre, width, height);
-    if ( rc == -1 )
-    {
-        selections.clear();
-        return 0;
-    }
-
-    return rc;
-}
-
-size_t wxGetMultipleChoices(wxArrayInt& selections,
-                            const wxString& message,
-                            const wxString& caption,
-                            const wxArrayString& aChoices,
-                            wxWindow *parent,
-                            int x, int y,
-                            bool centre,
-                            int width, int height)
-{
-    int rc = wxGetSelectedChoices(selections, message, caption,
-                                  aChoices,
-                                  parent, x, y, centre, width, height);
-    if ( rc == -1 )
-    {
-        selections.clear();
-        return 0;
-    }
-
-    return rc;
-}
-#endif // WXWIN_COMPATIBILITY_2_8
 
 // ----------------------------------------------------------------------------
 // wxAnyChoiceDialog
@@ -350,8 +302,11 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
 
 wxListBoxBase *wxAnyChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
 {
+	wxSize size = wxDefaultSize;
+	if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
+		size = wxSize(300, 200);
     return new wxListBox( this, wxID_LISTBOX,
-                          wxDefaultPosition, wxDefaultSize,
+                          wxDefaultPosition, size,
                           n, choices,
                           styleLbox );
 }
@@ -586,8 +541,12 @@ bool wxMultiChoiceDialog::TransferDataFromWindow()
 
 wxListBoxBase *wxMultiChoiceDialog::CreateList(int n, const wxString *choices, long styleLbox)
 {
+	wxSize size = wxDefaultSize;
+	if (wxSystemSettings::GetScreenType() > wxSYS_SCREEN_PDA)
+		size = wxSize(300, 200);
+
     return new wxCheckListBox( this, wxID_LISTBOX,
-                               wxDefaultPosition, wxDefaultSize,
+                               wxDefaultPosition, size,
                                n, choices,
                                styleLbox );
 }

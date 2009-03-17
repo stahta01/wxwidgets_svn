@@ -12,9 +12,9 @@
 #ifndef _WX_SPINBUTT_H_
 #define _WX_SPINBUTT_H_
 
-class WXDLLIMPEXP_FWD_CORE wxArrowButton; // internal
+class WXDLLEXPORT wxArrowButton; // internal
 
-class WXDLLIMPEXP_CORE wxSpinButton : public wxSpinButtonBase
+class WXDLLEXPORT wxSpinButton : public wxSpinButtonBase
 {
     DECLARE_DYNAMIC_CLASS(wxSpinButton)
 

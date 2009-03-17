@@ -16,10 +16,10 @@
 #include "wx/arrstr.h"
 
 // ----------------------------------------------------------------------------
-// wxStatusBarUniv: a window near the bottom of the frame used for status info
+// wxStatusBar: a window near the bottom of the frame used for status info
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStatusBarUniv : public wxStatusBarBase,
+class WXDLLEXPORT wxStatusBarUniv : public wxStatusBarBase,
                                     public wxInputConsumer
 {
 public:
@@ -46,6 +46,7 @@ public:
 
     // get/set the text of the given field
     virtual void SetStatusText(const wxString& text, int number = 0);
+    virtual wxString GetStatusText(int number = 0) const;
 
     // Get the position and size of the field's internal bounding rectangle
     virtual bool GetFieldRect(int i, wxRect& rect) const;
@@ -59,7 +60,7 @@ public:
 
     // wxInputConsumer pure virtual
     virtual wxWindow *GetInputWindow() const
-        { return const_cast<wxStatusBar*>(this); }
+        { return wx_const_cast(wxStatusBar*, this); }
 
 protected:
     // recalculate the field widths
@@ -94,8 +95,8 @@ protected:
     void Init();
 
 private:
-    // the current status fields strings
-    //wxArrayString m_statusText;
+    // the status fields strings
+    wxArrayString m_statusText;
 
     // the absolute status fields widths
     wxArrayInt m_widthsAbs;

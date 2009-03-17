@@ -88,8 +88,8 @@ public:
         Init();
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         Init();
     }
@@ -125,7 +125,7 @@ public:
         if (bitmap.Ok())
         {
             GdkBitmap *mask = bitmap.GetMask() ? bitmap.GetMask()->GetBitmap()
-                                               : NULL;
+                                               : (GdkBitmap *)NULL;
             gtk_pixmap_set( GTK_PIXMAP(m_pixmap), bitmap.GetPixmap(), mask );
         }
     }
@@ -230,7 +230,7 @@ static void wxInsertChildInToolBar( wxToolBar* WXUNUSED(parent),
 void wxToolBarTool::Init()
 {
     m_item =
-    m_pixmap = NULL;
+    m_pixmap = (GtkWidget *)NULL;
 }
 
 wxToolBarToolBase *wxToolBar::CreateTool(int id,
@@ -246,10 +246,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int id,
                              clientData, shortHelpString, longHelpString);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 //-----------------------------------------------------------------------------
@@ -258,7 +257,7 @@ wxToolBar::CreateTool(wxControl *control, const wxString& label)
 
 void wxToolBar::Init()
 {
-    m_toolbar = NULL;
+    m_toolbar = (GtkToolbar *)NULL;
     m_blockEvent = false;
     m_defaultWidth = 32;
     m_defaultHeight = 32;
@@ -366,11 +365,11 @@ bool wxToolBar::DoInsertTool(size_t pos, wxToolBarToolBase *toolBase)
             wxCHECK_MSG( bitmap.GetPixmap() != NULL, false,
                          wxT("wxToolBar::Add needs a wxBitmap") );
 
-            GtkWidget *tool_pixmap = NULL;
+            GtkWidget *tool_pixmap = (GtkWidget *)NULL;
 
             GdkPixmap *pixmap = bitmap.GetPixmap();
 
-            GdkBitmap *mask = NULL;
+            GdkBitmap *mask = (GdkBitmap *)NULL;
             if ( bitmap.GetMask() )
                 mask = bitmap.GetMask()->GetBitmap();
 
@@ -482,26 +481,19 @@ bool wxToolBar::DoInsertTool(size_t pos, wxToolBarToolBase *toolBase)
     return true;
 }
 
-bool wxToolBar::DoDeleteTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
+bool wxToolBar::DoDeleteTool(size_t pos, wxToolBarToolBase *toolBase)
 {
     wxToolBarTool *tool = (wxToolBarTool *)toolBase;
 
     switch ( tool->GetStyle() )
     {
         case wxTOOL_STYLE_CONTROL:
-            // don't destroy the control here as we can be called from
-            // RemoveTool() and then we need to keep the control alive;
-            // while if we're called from DeleteTool() the control will
-            // be destroyed when wxToolBarToolBase itself is deleted
+            tool->GetControl()->Destroy();
             break;
 
         case wxTOOL_STYLE_BUTTON:
             gtk_widget_destroy( tool->m_item );
             break;
-
-        default:
-            wxFAIL_MSG( "unknown tool style" );
-            return false;
     }
 
     InvalidateBestSize();
@@ -556,7 +548,7 @@ wxToolBarToolBase *wxToolBar::FindToolForPosition(wxCoord WXUNUSED(x),
     // VZ: GTK+ doesn't seem to have such thing
     wxFAIL_MSG( _T("wxToolBar::FindToolForPosition() not implemented") );
 
-    return NULL;
+    return (wxToolBarToolBase *)NULL;
 }
 
 void wxToolBar::SetMargins( int x, int y )

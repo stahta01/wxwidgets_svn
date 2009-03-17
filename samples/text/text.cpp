@@ -45,10 +45,6 @@
 #include "wx/numdlg.h"
 #include "wx/tokenzr.h"
 
-#ifndef __WXMSW__
-    #include "../sample.xpm"
-#endif
-
 //----------------------------------------------------------------------
 // class definitions
 //----------------------------------------------------------------------
@@ -198,12 +194,6 @@ public:
     }
 #endif // wxUSE_CLIPBOARD
 
-    void OnAddTextLine(wxCommandEvent& WXUNUSED(event))
-    {
-        static int s_n = 0;
-        m_panel->m_textrich->AppendText(wxString::Format("Line %d\n", ++s_n));
-    }
-
     void OnAddTextFreeze( wxCommandEvent& WXUNUSED(event) )
         { DoAddText(true); }
     void OnAddText( wxCommandEvent& WXUNUSED(event) )
@@ -321,21 +311,20 @@ private:
     void DoAddText(bool freeze)
     {
         wxTextCtrl * const text = m_panel->m_textrich;
+        text->Clear();
 
         if ( freeze )
             text->Freeze();
-
-        text->Clear();
 
         for ( int i = 0; i < 100; i++ )
         {
             text->AppendText(wxString::Format(wxT("Line %i\n"), i));
         }
 
-        text->SetInsertionPoint(0);
-
         if ( freeze )
             text->Thaw();
+
+        text->SetInsertionPoint(0);
     }
 
     MyPanel *m_panel;
@@ -405,7 +394,6 @@ enum
     // text menu
     TEXT_ADD_SOME = 400,
     TEXT_ADD_FREEZE,
-    TEXT_ADD_LINE,
     TEXT_MOVE_ENDTEXT,
     TEXT_MOVE_ENDENTRY,
     TEXT_SET_EDITABLE,
@@ -437,9 +425,6 @@ enum
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame((wxFrame *) NULL,
             _T("Text wxWidgets sample"), 50, 50, 700, 550);
@@ -487,7 +472,6 @@ bool MyApp::OnInit()
     wxMenu *menuText = new wxMenu;
     menuText->Append(TEXT_ADD_SOME, _T("&Append some text\tCtrl-A"));
     menuText->Append(TEXT_ADD_FREEZE, _T("&Append text with freeze/thaw\tShift-Ctrl-A"));
-    menuText->Append(TEXT_ADD_LINE, _T("Append a new &line\tAlt-Shift-A"));
     menuText->Append(TEXT_REMOVE, _T("&Remove first 10 characters\tCtrl-Y"));
     menuText->Append(TEXT_REPLACE, _T("&Replace characters 4 to 8 with ABC\tCtrl-R"));
     menuText->Append(TEXT_SELECT, _T("&Select characters 4 to 8\tCtrl-I"));
@@ -934,10 +918,6 @@ void MyTextCtrl::OnKeyDown(wxKeyEvent& event)
                 wxLogMessage(_T("Selection = '%s' (len = %u)"),
                              sel.c_str(),
                              (unsigned int) sel.length());
-
-                const wxString text = GetLineText(line);
-                wxLogMessage(_T("Current line: \"%s\"; length = %lu"),
-                             text.c_str(), text.length());
             }
             break;
 
@@ -1053,7 +1033,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     // a little hack to use the command line argument for encoding testing
     if ( wxTheApp->argc == 2 )
     {
-        switch ( (wxChar)wxTheApp->argv[1][0] )
+        switch ( wxTheApp->argv[1][0] )
         {
             case '2':
                 m_horizontal->SetFont(wxFont(18, wxSWISS, wxNORMAL, wxNORMAL,
@@ -1085,9 +1065,8 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
         m_horizontal->AppendText(_T("Text in default encoding"));
     }
 
-    m_multitext = new MyTextCtrl( this, wxID_ANY,
-                                  _T("Multi line without vertical scrollbar."),
-      wxPoint(180,10), wxSize(200,70), wxTE_MULTILINE | wxTE_NO_VSCROLL );
+    m_multitext = new MyTextCtrl( this, wxID_ANY, _T("Multi line."),
+      wxPoint(180,10), wxSize(200,70), wxTE_MULTILINE );
     m_multitext->SetFont(*wxITALIC_FONT);
     (*m_multitext) << _T(" Appended.");
     m_multitext->SetInsertionPoint(0);
@@ -1157,6 +1136,7 @@ MyPanel::MyPanel( wxFrame *frame, int x, int y, int w, int h )
     topSizer->Add( m_log, 1, wxALL | wxEXPAND, 10 );
 #endif
 
+    SetAutoLayout( true );
     SetSizer(topSizer);
 }
 
@@ -1349,7 +1329,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(TEXT_SELECT,             MyFrame::OnSelectText)
     EVT_MENU(TEXT_ADD_SOME,           MyFrame::OnAddText)
     EVT_MENU(TEXT_ADD_FREEZE,         MyFrame::OnAddTextFreeze)
-    EVT_MENU(TEXT_ADD_LINE,           MyFrame::OnAddTextLine)
     EVT_MENU(TEXT_MOVE_ENDTEXT,       MyFrame::OnMoveToEndOfText)
     EVT_MENU(TEXT_MOVE_ENDENTRY,      MyFrame::OnMoveToEndOfEntry)
 
@@ -1373,8 +1352,6 @@ END_EVENT_TABLE()
 MyFrame::MyFrame(wxFrame *frame, const wxChar *title, int x, int y, int w, int h)
        : wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h) )
 {
-    SetIcon(wxICON(sample));
-
 #if wxUSE_STATUSBAR
     CreateStatusBar(2);
 #endif // wxUSE_STATUSBAR
@@ -1514,13 +1491,13 @@ void MyFrame::OnIdle( wxIdleEvent& event )
         wxString msg;
         msg.Printf(
 #ifdef __WXMSW__
-                _T("Focus: wxWindow = %p, HWND = %p"),
+                _T("Focus: wxWindow = %p, HWND = %08x"),
 #else
                 _T("Focus: wxWindow = %p"),
 #endif
                 s_windowFocus
 #ifdef __WXMSW__
-                , s_windowFocus->GetHWND()
+                , (unsigned int) s_windowFocus->GetHWND()
 #endif
                   );
 
@@ -1847,9 +1824,10 @@ void RichTextFrame::OnIdle(wxIdleEvent& WXUNUSED(event))
                 alignment = wxT("left-aligned");
             else if (attr.GetAlignment() == wxTEXT_ALIGNMENT_JUSTIFIED)
                 alignment = wxT("justified");
-            msg.Printf( "Facename: %s, wxColour(%d, %d, %d), %s", facename,
+            msg.Printf(wxT("Facename: %s, wxColour(%d, %d, %d), %s"),
+                (const wxChar*) facename,
                 attr.GetTextColour().Red(), attr.GetTextColour().Green(), attr.GetTextColour().Blue(),
-                alignment );
+                (const wxChar*) alignment);
 
             if (attr.HasFont())
             {

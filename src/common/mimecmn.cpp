@@ -35,7 +35,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/module.h"
-    #include "wx/crt.h"
 #endif //WX_PRECOMP
 
 #include "wx/file.h"
@@ -48,8 +47,8 @@
 // implementation classes:
 #if defined(__WXMSW__)
     #include "wx/msw/mimetype.h"
-#elif ( defined(__WXMAC__) && wxOSX_USE_CARBON )
-    #include "wx/osx/mimetype.h"
+#elif defined(__WXMAC__)
+    #include "wx/mac/mimetype.h"
 #elif defined(__WXPM__) || defined (__EMX__)
     #include "wx/os2/mimetype.h"
     #undef __UNIX__
@@ -112,16 +111,18 @@ wxString wxMimeTypeCommands::GetVerbCmd(size_t n) const
 // wxFileTypeInfo
 // ----------------------------------------------------------------------------
 
-void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
-                                  const wxString& openCmd,
-                                  const wxString& printCmd,
-                                  const wxString& desc,
-                                  va_list argptr)
+wxFileTypeInfo::wxFileTypeInfo(const wxChar *mimeType,
+                               const wxChar *openCmd,
+                               const wxChar *printCmd,
+                               const wxChar *desc,
+                               ...)
+              : m_mimeType(mimeType),
+                m_openCmd(openCmd),
+                m_printCmd(printCmd),
+                m_desc(desc)
 {
-    m_mimeType = mimeType;
-    m_openCmd = openCmd;
-    m_printCmd = printCmd;
-    m_desc = desc;
+    va_list argptr;
+    va_start(argptr, desc);
 
     for ( ;; )
     {
@@ -131,7 +132,7 @@ void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
     #pragma warning(disable: 1684)
 #endif
 
-        wxArgNormalizedString ext(WX_VA_ARG_STRING(argptr));
+        const wxChar *ext = va_arg(argptr, const wxChar *);
 
 #ifdef __INTELC__
     #pragma warning(pop)
@@ -142,20 +143,8 @@ void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
             break;
         }
 
-        m_exts.Add(ext.GetString());
+        m_exts.Add(ext);
     }
-}
-
-void wxFileTypeInfo::VarArgInit(const wxString *mimeType,
-                                const wxString *openCmd,
-                                const wxString *printCmd,
-                                const wxString *desc,
-                                ...)
-{
-    va_list argptr;
-    va_start(argptr, desc);
-
-    DoVarArgInit(*mimeType, *openCmd, *printCmd, *desc, argptr);
 
     va_end(argptr);
 }
@@ -665,6 +654,18 @@ wxMimeTypesManager::GetFileTypeFromMimeType(const wxString& mimeType)
     }
 
     return ft;
+}
+
+bool wxMimeTypesManager::ReadMailcap(const wxString& filename, bool fallback)
+{
+    EnsureImpl();
+    return m_impl->ReadMailcap(filename, fallback);
+}
+
+bool wxMimeTypesManager::ReadMimeTypes(const wxString& filename)
+{
+    EnsureImpl();
+    return m_impl->ReadMimeTypes(filename);
 }
 
 void wxMimeTypesManager::AddFallbacks(const wxFileTypeInfo *filetypes)

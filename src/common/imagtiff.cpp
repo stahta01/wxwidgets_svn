@@ -7,14 +7,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// ============================================================================
-// declarations
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// headers
-// ----------------------------------------------------------------------------
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -32,14 +24,10 @@
     #include "wx/intl.h"
     #include "wx/bitmap.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 extern "C"
 {
-#ifdef __DMC__
-    #include "tif_config.h"
-#endif
     #include "tiff.h"
     #include "tiffio.h"
 }
@@ -54,66 +42,11 @@ extern "C"
     #endif
 #endif
 
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// TIFF library error/warning handlers
-// ----------------------------------------------------------------------------
-
-static wxString
-FormatTiffMessage(const char *module, const char *fmt, va_list ap)
-{
-    char buf[512];
-    if ( wxCRT_VsnprintfA(buf, WXSIZEOF(buf), fmt, ap) <= 0 )
-    {
-        // this isn't supposed to happen, but if it does, it's better
-        // than nothing
-        strcpy(buf, "Incorrectly formatted TIFF message");
-    }
-    buf[WXSIZEOF(buf)-1] = 0; // make sure it is always NULL-terminated
-
-    wxString msg(buf);
-    if ( module )
-        msg += wxString::Format(_(" (in module \"%s\")"), module);
-
-    return msg;
-}
-
-extern "C"
-{
-
-static void
-TIFFwxWarningHandler(const char* module, const char *fmt, va_list ap)
-{
-    wxLogWarning("%s", FormatTiffMessage(module, fmt, ap));
-}
-
-static void
-TIFFwxErrorHandler(const char* module, const char *fmt, va_list ap)
-{
-    wxLogError("%s", FormatTiffMessage(module, fmt, ap));
-}
-
-} // extern "C"
-
 //-----------------------------------------------------------------------------
 // wxTIFFHandler
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxTIFFHandler,wxImageHandler)
-
-wxTIFFHandler::wxTIFFHandler()
-{
-    m_name = wxT("TIFF file");
-    m_extension = wxT("tif");
-    m_altExtensions.Add(wxT("tiff"));
-    m_type = wxBITMAP_TYPE_TIF;
-    m_mime = wxT("image/tiff");
-    TIFFSetWarningHandler((TIFFErrorHandler) TIFFwxWarningHandler);
-    TIFFSetErrorHandler((TIFFErrorHandler) TIFFwxErrorHandler);
-}
 
 #if wxUSE_STREAMS
 
@@ -232,6 +165,38 @@ wxTIFFUnmapProc(thandle_t WXUNUSED(handle),
 {
 }
 
+static void
+TIFFwxWarningHandler(const char* module,
+                     const char* WXUNUSED_IN_UNICODE(fmt),
+                     va_list WXUNUSED_IN_UNICODE(ap))
+{
+    if (module != NULL)
+        wxLogWarning(_("tiff module: %s"), wxString::FromAscii(module).c_str());
+
+    // FIXME: this is not terrible informative but better than crashing!
+#if wxUSE_UNICODE
+    wxLogWarning(_("TIFF library warning."));
+#else
+    wxVLogWarning(fmt, ap);
+#endif
+}
+
+static void
+TIFFwxErrorHandler(const char* module,
+                   const char* WXUNUSED_IN_UNICODE(fmt),
+                   va_list WXUNUSED_IN_UNICODE(ap))
+{
+    if (module != NULL)
+        wxLogError(_("tiff module: %s"), wxString::FromAscii(module).c_str());
+
+    // FIXME: as above
+#if wxUSE_UNICODE
+    wxLogError(_("TIFF library error."));
+#else
+    wxVLogError(fmt, ap);
+#endif
+}
+
 } // extern "C"
 
 TIFF*
@@ -256,6 +221,16 @@ TIFFwxOpen(wxOutputStream &stream, const char* name, const char* mode)
         wxTIFFMapProc, wxTIFFUnmapProc);
 
     return tif;
+}
+
+wxTIFFHandler::wxTIFFHandler()
+{
+    m_name = wxT("TIFF file");
+    m_extension = wxT("tif");
+    m_type = wxBITMAP_TYPE_TIF;
+    m_mime = wxT("image/tiff");
+    TIFFSetWarningHandler((TIFFErrorHandler) TIFFwxWarningHandler);
+    TIFFSetErrorHandler((TIFFErrorHandler) TIFFwxErrorHandler);
 }
 
 bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose, int index )
@@ -369,43 +344,6 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
             alpha -= 2*w;
     }
 
-    // set the image resolution if it's available
-    uint16 tiffRes;
-    if ( TIFFGetField(tif, TIFFTAG_RESOLUTIONUNIT, &tiffRes) )
-    {
-        wxImageResolution res;
-        switch ( tiffRes )
-        {
-            default:
-                wxLogWarning(_("Unknown TIFF resolution unit %d ignored"),
-                             tiffRes);
-                // fall through
-
-            case RESUNIT_NONE:
-                res = wxIMAGE_RESOLUTION_NONE;
-                break;
-
-            case RESUNIT_INCH:
-                res = wxIMAGE_RESOLUTION_INCHES;
-                break;
-
-            case RESUNIT_CENTIMETER:
-                res = wxIMAGE_RESOLUTION_CM;
-                break;
-        }
-
-        if ( res != wxIMAGE_RESOLUTION_NONE )
-        {
-            float xres, yres;
-            if ( TIFFGetField(tif, TIFFTAG_XRESOLUTION, &xres) )
-                image->SetOption(wxIMAGE_OPTION_RESOLUTIONX, wxRound(xres));
-
-            if ( TIFFGetField(tif, TIFFTAG_YRESOLUTION, &yres) )
-                image->SetOption(wxIMAGE_OPTION_RESOLUTIONY, wxRound(yres));
-        }
-    }
-
-
     _TIFFfree( raster );
 
     TIFFClose( tif );
@@ -448,36 +386,14 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
     TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
-    // save the image resolution if we have it
-    int xres, yres;
-    const wxImageResolution res = GetResolutionFromOptions(*image, &xres, &yres);
-    uint16 tiffRes;
-    switch ( res )
+    if ( image->HasOption(wxIMAGE_OPTION_RESOLUTIONX) &&
+            image->HasOption(wxIMAGE_OPTION_RESOLUTIONY) )
     {
-        default:
-            wxFAIL_MSG( _T("unknown image resolution units") );
-            // fall through
-
-        case wxIMAGE_RESOLUTION_NONE:
-            tiffRes = RESUNIT_NONE;
-            break;
-
-        case wxIMAGE_RESOLUTION_INCHES:
-            tiffRes = RESUNIT_INCH;
-            break;
-
-        case wxIMAGE_RESOLUTION_CM:
-            tiffRes = RESUNIT_CENTIMETER;
-            break;
+        TIFFSetField(tif, TIFFTAG_XRESOLUTION,
+                        (float)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONX));
+        TIFFSetField(tif, TIFFTAG_YRESOLUTION,
+                        (float)image->GetOptionInt(wxIMAGE_OPTION_RESOLUTIONY));
     }
-
-    if ( tiffRes != RESUNIT_NONE )
-    {
-        TIFFSetField(tif, TIFFTAG_RESOLUTIONUNIT, tiffRes);
-        TIFFSetField(tif, TIFFTAG_XRESOLUTION, (float)xres);
-        TIFFSetField(tif, TIFFTAG_YRESOLUTION, (float)yres);
-    }
-
 
     int spp = image->GetOptionInt(wxIMAGE_OPTION_SAMPLESPERPIXEL);
     if ( !spp )
@@ -485,7 +401,7 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
 
     int bpp = image->GetOptionInt(wxIMAGE_OPTION_BITSPERSAMPLE);
     if ( !bpp )
-        bpp = 8;
+        bpp=8;
 
     int compression = image->GetOptionInt(wxIMAGE_OPTION_COMPRESSION);
     if ( !compression )

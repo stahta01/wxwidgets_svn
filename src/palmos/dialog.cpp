@@ -36,7 +36,7 @@
 #endif
 
 #include "wx/evtloop.h"
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 
 // ----------------------------------------------------------------------------
 // wxWin macros
@@ -147,14 +147,11 @@ bool wxDialog::Create(wxWindow *parent,
                       long style,
                       const wxString& name)
 {
-    if ( !wxTopLevelWindow::Create(parent, id, title, pos, size, style, name) )
-        return false;
-    return true;
+    return false;
 }
 
 wxDialog::~wxDialog()
 {
-    Show (false);
 }
 
 // ----------------------------------------------------------------------------
@@ -168,10 +165,7 @@ wxWindow *wxDialog::FindSuitableParent() const
 
 bool wxDialog::Show(bool show)
 {
-    if (show && CanDoLayoutAdaptation())
-        DoLayoutAdaptation();
-
-    return wxTopLevelWindowPalm::Show (show);
+    return false;
 }
 
 void wxDialog::Raise()
@@ -181,11 +175,6 @@ void wxDialog::Raise()
 // show dialog modally
 int wxDialog::ShowModal()
 {
-    Show (true);
-
-    if (errNone == FrmDoDialog ((FormType *)wxTopLevelWindow::GetForm())) {
-        return 0;
-    }
     return -1;
 }
 

@@ -40,8 +40,8 @@
 #endif
 
 #include "wx/stockitem.h"
+#include "wx/tokenzr.h"
 #include "wx/msw/private.h"
-#include "wx/msw/private/button.h"
 
 #if wxUSE_UXTHEME
     #include "wx/msw/uxtheme.h"
@@ -70,10 +70,6 @@
 
 #ifndef ODS_NOFOCUSRECT
     #define ODS_NOFOCUSRECT     0x0200
-#endif
-
-#ifndef DT_HIDEPREFIX
-    #define DT_HIDEPREFIX       0x00100000
 #endif
 
 // ----------------------------------------------------------------------------
@@ -141,68 +137,13 @@ wxCONSTRUCTOR_6( wxButton , wxWindow* , Parent , wxWindowID , Id , wxString , La
 IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
 #endif
 
+// this macro tries to adjust the default button height to a reasonable value
+// using the char height as the base
+#define BUTTON_HEIGHT_FROM_CHAR_HEIGHT(cy) (11*EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)/10)
+
 // ============================================================================
 // implementation
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// helper functions from wx/msw/private/button.h
-// ----------------------------------------------------------------------------
-
-void wxMSWButton::UpdateMultilineStyle(HWND hwnd, const wxString& label)
-{
-    // update BS_MULTILINE style depending on the new label (resetting it
-    // doesn't seem to do anything very useful but it shouldn't hurt and we do
-    // have to set it whenever the label becomes multi line as otherwise it
-    // wouldn't be shown correctly as we don't use BS_MULTILINE when creating
-    // the control unless it already has new lines in its label)
-    long styleOld = ::GetWindowLong(hwnd, GWL_STYLE),
-         styleNew;
-    if ( label.find(_T('\n')) != wxString::npos )
-        styleNew = styleOld | BS_MULTILINE;
-    else
-        styleNew = styleOld & ~BS_MULTILINE;
-
-    if ( styleNew != styleOld )
-        ::SetWindowLong(hwnd, GWL_STYLE, styleNew);
-}
-
-wxSize wxMSWButton::GetFittingSize(wxWindow *win, const wxSize& sizeLabel)
-{
-    // FIXME: this is pure guesswork, need to retrieve the real button margins
-    wxSize sizeBtn = sizeLabel;
-
-    sizeBtn.x += 3*win->GetCharWidth();
-    sizeBtn.y = 11*EDIT_HEIGHT_FROM_CHAR_HEIGHT(sizeLabel.y)/10;
-
-    return sizeBtn;
-}
-
-wxSize wxMSWButton::ComputeBestSize(wxControl *btn)
-{
-    wxClientDC dc(btn);
-
-    wxSize sizeBtn;
-    dc.GetMultiLineTextExtent(btn->GetLabelText(), &sizeBtn.x, &sizeBtn.y);
-
-    sizeBtn = GetFittingSize(btn, sizeBtn);
-
-    // all buttons have at least the standard size unless the user explicitly
-    // wants them to be of smaller size and used wxBU_EXACTFIT style when
-    // creating the button
-    if ( !btn->HasFlag(wxBU_EXACTFIT) )
-    {
-        wxSize sizeDef = wxButton::GetDefaultSize();
-        if ( sizeBtn.x < sizeDef.x )
-            sizeBtn.x = sizeDef.x;
-        if ( sizeBtn.y < sizeDef.y )
-            sizeBtn.y = sizeDef.y;
-    }
-
-    btn->CacheBestSize(sizeBtn);
-
-    return sizeBtn;
-}
 
 // ----------------------------------------------------------------------------
 // creation/destruction
@@ -220,14 +161,16 @@ bool wxButton::Create(wxWindow *parent,
     wxString label(lbl);
     if (label.empty() && wxIsStockID(id))
     {
-        // On Windows, some buttons aren't supposed to have mnemonics
-        label = wxGetStockLabel
-                (
-                    id,
-                    id == wxID_OK || id == wxID_CANCEL || id == wxID_CLOSE
-                        ? wxSTOCK_NOFLAGS
-                        : wxSTOCK_WITH_MNEMONIC
-                );
+        // On Windows, some buttons aren't supposed to have
+        // mnemonics, so strip them out.
+
+        label = wxGetStockLabel(id
+#if defined(__WXMSW__) || defined(__WXWINCE__)
+                                        , ( id != wxID_OK &&
+                                            id != wxID_CANCEL &&
+                                            id != wxID_CLOSE )
+#endif
+                                );
     }
 
     if ( !CreateControl(parent, id, pos, size, style, validator, name) )
@@ -236,13 +179,19 @@ bool wxButton::Create(wxWindow *parent,
     WXDWORD exstyle;
     WXDWORD msStyle = MSWGetStyle(style, &exstyle);
 
+#ifdef __WIN32__
     // if the label contains several lines we must explicitly tell the button
     // about it or it wouldn't draw it correctly ("\n"s would just appear as
     // black boxes)
     //
     // NB: we do it here and not in MSWGetStyle() because we need the label
-    //     value and the label is not set yet when MSWGetStyle() is called
-    msStyle |= wxMSWButton::GetMultilineStyle(label);
+    //     value and m_label is not set yet when MSWGetStyle() is called;
+    //     besides changing BS_MULTILINE during run-time is pointless anyhow
+    if ( label.find(_T('\n')) != wxString::npos )
+    {
+        msStyle |= BS_MULTILINE;
+    }
+#endif // __WIN32__
 
     return MSWCreateControl(_T("BUTTON"), msStyle, pos, size, label, exstyle);
 }
@@ -273,6 +222,7 @@ WXDWORD wxButton::MSWGetStyle(long style, WXDWORD *exstyle) const
     // the bottom
     msStyle |= WS_CLIPSIBLINGS;
 
+#ifdef __WIN32__
     // don't use "else if" here: weird as it is, but you may combine wxBU_LEFT
     // and wxBU_RIGHT to get BS_CENTER!
     if ( style & wxBU_LEFT )
@@ -288,15 +238,9 @@ WXDWORD wxButton::MSWGetStyle(long style, WXDWORD *exstyle) const
     if ( style & wxNO_BORDER )
         msStyle |= BS_FLAT;
 #endif // __WXWINCE__
+#endif // __WIN32__
 
     return msStyle;
-}
-
-void wxButton::SetLabel(const wxString& label)
-{
-    wxMSWButton::UpdateMultilineStyle(GetHwnd(), label);
-
-    wxButtonBase::SetLabel(label);
 }
 
 // ----------------------------------------------------------------------------
@@ -305,7 +249,34 @@ void wxButton::SetLabel(const wxString& label)
 
 wxSize wxButton::DoGetBestSize() const
 {
-    return wxMSWButton::ComputeBestSize(const_cast<wxButton *>(this));
+    wxClientDC dc(wx_const_cast(wxButton *, this));
+    dc.SetFont(GetFont());
+
+    wxCoord wBtn,
+            hBtn;
+    dc.GetMultiLineTextExtent(GetLabelText(), &wBtn, &hBtn);
+
+    // add a margin -- the button is wider than just its label
+    wBtn += 3*GetCharWidth();
+    hBtn = BUTTON_HEIGHT_FROM_CHAR_HEIGHT(hBtn);
+
+    // all buttons have at least the standard size unless the user explicitly
+    // wants them to be of smaller size and used wxBU_EXACTFIT style when
+    // creating the button
+    if ( !HasFlag(wxBU_EXACTFIT) )
+    {
+        wxSize sz = GetDefaultSize();
+        if (wBtn > sz.x)
+            sz.x = wBtn;
+        if (hBtn > sz.y)
+            sz.y = hBtn;
+
+        return sz;
+    }
+
+    wxSize best(wBtn, hBtn);
+    CacheBestSize(best);
+    return best;
 }
 
 /* static */
@@ -372,16 +343,18 @@ wxSize wxButtonBase::GetDefaultSize()
  */
 
 // set this button as the (permanently) default one in its panel
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+
+    wxCHECK_RET( tlw, _T("button without top level window?") );
+
     // set this one as the default button both for wxWidgets ...
-    wxWindow *winOldDefault = wxButtonBase::SetDefault();
+    wxWindow *winOldDefault = tlw->SetDefaultItem(this);
 
     // ... and Windows
     SetDefaultStyle(wxDynamicCast(winOldDefault, wxButton), false);
     SetDefaultStyle(this, true);
-
-    return winOldDefault;
 }
 
 // return the top level parent window if it's not being deleted yet, otherwise
@@ -589,19 +562,17 @@ WXLRESULT wxButton::MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam)
 // owner-drawn buttons support
 // ----------------------------------------------------------------------------
 
+#ifdef __WIN32__
+
 // drawing helpers
 
 static void DrawButtonText(HDC hdc,
                            RECT *pRect,
                            const wxString& text,
-                           COLORREF col,
-                           int flags)
+                           COLORREF col)
 {
     COLORREF colOld = SetTextColor(hdc, col);
     int modeOld = SetBkMode(hdc, TRANSPARENT);
-
-    // center text horizontally in any case
-    flags |= DT_CENTER;
 
     if ( text.find(_T('\n')) != wxString::npos )
     {
@@ -610,8 +581,7 @@ static void DrawButtonText(HDC hdc,
         // first we need to compute its bounding rect
         RECT rc;
         ::CopyRect(&rc, pRect);
-        ::DrawText(hdc, text.wx_str(), text.length(), &rc,
-                   DT_CENTER | DT_CALCRECT);
+        ::DrawText(hdc, text, text.length(), &rc, DT_CENTER | DT_CALCRECT);
 
         // now center this rect inside the entire button area
         const LONG w = rc.right - rc.left;
@@ -621,14 +591,13 @@ static void DrawButtonText(HDC hdc,
         rc.top = (pRect->bottom - pRect->top)/2 - h/2;
         rc.bottom = rc.top+h;
 
-        ::DrawText(hdc, text.wx_str(), text.length(), &rc, flags);
+        ::DrawText(hdc, text, text.length(), &rc, DT_CENTER);
     }
     else // single line label
     {
-        // centre text vertically too (notice that we must have DT_SINGLELINE
-        // for DT_VCENTER to work)
-        ::DrawText(hdc, text.wx_str(), text.length(), pRect,
-                   flags | DT_SINGLELINE | DT_VCENTER);
+        // Note: we must have DT_SINGLELINE for DT_VCENTER to work.
+        ::DrawText(hdc, text, text.length(), pRect,
+                   DT_SINGLELINE | DT_CENTER | DT_VCENTER);
     }
 
     SetBkMode(hdc, modeOld);
@@ -907,18 +876,15 @@ bool wxButton::MSWOnDraw(WXDRAWITEMSTRUCT *wxdis)
         }
     }
 
-    COLORREF colFg = state & ODS_DISABLED
-                        ? ::GetSysColor(COLOR_GRAYTEXT)
-                        : wxColourToRGB(GetForegroundColour());
-
-    // notice that DT_HIDEPREFIX doesn't work on old (pre-Windows 2000) systems
-    // but by happy coincidence ODS_NOACCEL is not used under them neither so
-    // DT_HIDEPREFIX should never be used there
-    DrawButtonText(hdc, &rectBtn, GetLabel(), colFg,
-                   state & ODS_NOACCEL ? DT_HIDEPREFIX : 0);
+    COLORREF colFg = wxColourToRGB(GetForegroundColour());
+    if ( state & ODS_DISABLED ) colFg = GetSysColor(COLOR_GRAYTEXT) ;
+    wxString label = GetLabel();
+    if ( state & ODS_NOACCEL ) label = GetLabelText() ;
+    DrawButtonText(hdc, &rectBtn, label, colFg);
 
     return true;
 }
 
-#endif // wxUSE_BUTTON
+#endif // __WIN32__
 
+#endif // wxUSE_BUTTON

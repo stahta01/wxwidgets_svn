@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 16 January 2009                                                     *
+# Date : 19 September 2006                                                   *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -15,6 +15,7 @@
 
 all :
 	set default [.include.wx]
+	if f$search("DEPRECATED.DIR") .eqs. "" then set file/enter=[]deprecated.dir [--.contrib.include.wx]deprecated.dir
 	set default [--]
 	make gtk
 	purge [...]
@@ -32,28 +33,23 @@ all :
 gtk : [.include.wx]setup.h
 	set default [.src.generic]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
 	set default [-.common]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
 	set default [-.html]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
 	set default [-.xml]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
 	set default [-.aui]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.xrc]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
 	set default [-.unix]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
 	set default [-.gtk1]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	library [--.lib]libwx_gtk.olb [.CXX_REPOSITORY]*.obj
-	set default [--.demos.bombs]
+	set default [--.contrib.src.deprecated]
+	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
+	set default [---.demos.bombs]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [--.samples.calendar]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
@@ -61,11 +57,13 @@ gtk : [.include.wx]setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.caret]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.combo]
+	set default [-.checklst]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.config]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.controls]
+	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
+	set default [-.db]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.dialogs]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
@@ -89,8 +87,6 @@ gtk : [.include.wx]setup.h
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.richedit]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
-	set default [-.sockets]
-	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [-.xrc]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK__=1)
 	set default [--]
@@ -99,36 +95,35 @@ gtk2 : [.include.wx]setup.h
 	@gnome$root:[000000]glib2
 	set default [.src.generic]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
 	set default [-.common]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
 	set default [-.html]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
 	set default [-.aui]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
 	set default [-.xml]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
 	set default [-.xrc]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
 	set default [-.unix]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
 	set default [-.gtk]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
-	library [--.lib]libwx_gtk2.olb [.CXX_REPOSITORY]*.obj
-	set default [--.demos.bombs]
+	set default [--.contrib.src.deprecated]
+	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
+	set default [---.demos.bombs]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
 	set default [--.samples.calendar]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
 	set default [-.caret]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
+	set default [-.checklst]
+#	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
 	set default [-.config]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
 	set default [-.controls]
+#	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
+	set default [-.db]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
 	set default [-.dialogs]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXGTK2__=1)
@@ -158,39 +153,37 @@ gtk2 : [.include.wx]setup.h
 x11 : [.include.wx]setup.h
 	set default [.src.generic]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
 	set default [-.common]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
 	set default [-.html]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
 	set default [-.xml]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
 	set default [-.xrc]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
 	set default [-.aui]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
 	set default [-.unix]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
 	set default [-.x11]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
 	set default [-.univ]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
-	library [--.lib]libwx_x11_univ.olb [.CXX_REPOSITORY]*.obj
-	set default [--.demos.bombs]
+	set default [--.contrib.src.deprecated]
+#	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
+	set default [---.demos.bombs]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
 	set default [--.samples.calendar]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
 	set default [-.caret]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
+	set default [-.checklst]
+#	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
 	set default [-.config]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
 	set default [-.controls]
+#	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
+	set default [-.db]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
 	set default [-.dialogs]
 #	$(MMS)$(MMSQUALIFIERS)/macro=(__WXX11__=1,__WXUNIVERSAL__=1)
@@ -219,28 +212,25 @@ x11 : [.include.wx]setup.h
 motif : [.include.wx]setup.h
 	set default [.src.generic]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	library [--.lib]libwx_motif.olb [.CXX_REPOSITORY]*.obj
 	set default [-.common]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	library [--.lib]libwx_motif.olb [.CXX_REPOSITORY]*.obj
 	set default [-.unix]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	library [--.lib]libwx_motif.olb [.CXX_REPOSITORY]*.obj
 	set default [-.aui]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.motif]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	library [--.lib]libwx_motif.olb [.CXX_REPOSITORY]*.obj
 	set default [-.x11]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	library [--.lib]libwx_motif.olb [.CXX_REPOSITORY]*.obj
-	set default [--.demos.bombs]
+	set default [--.contrib.src.deprecated]
+	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
+	set default [---.demos.bombs]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [--.samples.calendar]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.caret]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
-	set default [-.combo]
+	set default [-.checklst]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)
 	set default [-.config]
 	$(MMS)$(MMSQUALIFIERS)/macro=(__WXMOTIF__=1)

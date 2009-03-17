@@ -85,7 +85,7 @@ public:
 #endif // wxUSE_DISPLAY
 
 
-    wxDECLARE_NO_COPY_CLASS(wxDisplayImplSingle);
+    DECLARE_NO_COPY_CLASS(wxDisplayImplSingle)
 };
 
 // ----------------------------------------------------------------------------
@@ -145,7 +145,7 @@ wxDisplay::~wxDisplay()
     return Factory().GetFromPoint(pt);
 }
 
-/* static */ int wxDisplay::GetFromWindow(const wxWindow *window)
+/* static */ int wxDisplay::GetFromWindow(wxWindow *window)
 {
     wxCHECK_MSG( window, wxNOT_FOUND, _T("invalid window") );
 
@@ -205,7 +205,7 @@ bool wxDisplay::ChangeMode(const wxVideoMode& mode)
     return m_impl->ChangeMode(mode);
 }
 
-#endif // wxUSE_DISPLAY
+#endif // wxUSE_DIRECTDRAW
 
 // ----------------------------------------------------------------------------
 // static functions implementation
@@ -235,7 +235,7 @@ bool wxDisplay::ChangeMode(const wxVideoMode& mode)
 // wxDisplayFactory implementation
 // ============================================================================
 
-int wxDisplayFactory::GetFromWindow(const wxWindow *window)
+int wxDisplayFactory::GetFromWindow(wxWindow *window)
 {
     // consider that the window belongs to the display containing its centre
     const wxRect r(window->GetRect());

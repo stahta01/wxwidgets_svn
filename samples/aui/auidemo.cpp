@@ -413,11 +413,11 @@ public:
         cont_sizer->Add(grid_sizer, 1, wxEXPAND | wxALL, 5);
         SetSizer(cont_sizer);
         GetSizer()->SetSizeHints(this);
-
+#if 0
         m_border_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE));
         m_sash_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_SASH_SIZE));
         m_caption_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_CAPTION_SIZE));
-
+#endif
         UpdateColors();
     }
 
@@ -559,9 +559,6 @@ END_EVENT_TABLE()
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame* frame = new MyFrame(NULL,
                                  wxID_ANY,
                                  wxT("wxAUI Sample Application"),
@@ -674,7 +671,7 @@ MyFrame::MyFrame(wxWindow* parent,
     wxMenuBar* mb = new wxMenuBar;
 
     wxMenu* file_menu = new wxMenu;
-    file_menu->Append(wxID_EXIT);
+    file_menu->Append(wxID_EXIT, _("Exit"));
 
     wxMenu* view_menu = new wxMenu;
     view_menu->Append(ID_CreateText, _("Create Text Control"));
@@ -737,14 +734,14 @@ MyFrame::MyFrame(wxWindow* parent,
     m_perspectives_menu->Append(ID_FirstPerspective+1, _("All Panes"));
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT);
+    help_menu->Append(wxID_ABOUT, _("About..."));
 
-    mb->Append(file_menu, _("&File"));
-    mb->Append(view_menu, _("&View"));
-    mb->Append(m_perspectives_menu, _("&Perspectives"));
-    mb->Append(options_menu, _("&Options"));
-    mb->Append(notebook_menu, _("&Notebook"));
-    mb->Append(help_menu, _("&Help"));
+    mb->Append(file_menu, _("File"));
+    mb->Append(view_menu, _("View"));
+    mb->Append(m_perspectives_menu, _("Perspectives"));
+    mb->Append(options_menu, _("Options"));
+    mb->Append(notebook_menu, _("Notebook"));
+    mb->Append(help_menu, _("Help"));
 
     SetMenuBar(mb);
 
@@ -1413,19 +1410,19 @@ void MyFrame::OnDropDownToolbarItem(wxAuiToolBarEvent& evt)
 
         wxBitmap bmp = wxArtProvider::GetBitmap(wxART_QUESTION, wxART_OTHER, wxSize(16,16));
 
-        wxMenuItem* m1 =  new wxMenuItem(&menuPopup, 10001, _("Drop Down Item 1"));
+        wxMenuItem* m1 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 1"));
         m1->SetBitmap(bmp);
         menuPopup.Append(m1);
 
-        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, 10002, _("Drop Down Item 2"));
+        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 2"));
         m2->SetBitmap(bmp);
         menuPopup.Append(m2);
 
-        wxMenuItem* m3 =  new wxMenuItem(&menuPopup, 10003, _("Drop Down Item 3"));
+        wxMenuItem* m3 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 3"));
         m3->SetBitmap(bmp);
         menuPopup.Append(m3);
 
-        wxMenuItem* m4 =  new wxMenuItem(&menuPopup, 10004, _("Drop Down Item 4"));
+        wxMenuItem* m4 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 4"));
         m4->SetBitmap(bmp);
         menuPopup.Append(m4);
 

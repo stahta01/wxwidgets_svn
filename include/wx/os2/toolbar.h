@@ -19,7 +19,7 @@
 #define ID_TOOLTIMER                100
 #define ID_TOOLEXPTIMER             101
 
-class WXDLLIMPEXP_CORE wxToolBar: public wxToolBarBase
+class WXDLLEXPORT wxToolBar: public wxToolBarBase
 {
 public:
     /*
@@ -165,8 +165,7 @@ protected:
                                           ,const wxString& rsShortHelp
                                           ,const wxString& rsLongHelp
                                          );
-    virtual wxToolBarToolBase* CreateTool(wxControl* pControl,
-                                          const wxString& label);
+    virtual wxToolBarToolBase* CreateTool(wxControl* pControl);
 
     //
     // Helpers

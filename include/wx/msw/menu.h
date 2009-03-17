@@ -45,7 +45,7 @@ class WXDLLIMPEXP_FWD_CORE wxToolBar;
 // Menu
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMenu : public wxMenuBase
+class WXDLLEXPORT wxMenu : public wxMenuBase
 {
 public:
     // ctors & dtor
@@ -75,8 +75,8 @@ public:
 
 #if wxUSE_ACCEL
     // called by wxMenuBar to build its accel table from the accels of all menus
-    bool HasAccels() const { return !m_accels.empty(); }
-    size_t GetAccelCount() const { return m_accels.size(); }
+    bool HasAccels() const { return !m_accels.IsEmpty(); }
+    size_t GetAccelCount() const { return m_accels.GetCount(); }
     size_t CopyAccels(wxAcceleratorEntry *accels) const;
 
     // called by wxMenuItem when its accels changes
@@ -84,11 +84,6 @@ public:
 
     // helper used by wxMenu itself (returns the index in m_accels)
     int FindAccel(int id) const;
-
-    // used only by wxMDIParentFrame currently but could be useful elsewhere:
-    // returns a new accelerator table with accelerators for just this menu
-    // (shouldn't be called if we don't have any accelerators)
-    wxAcceleratorTable *CreateAccelTable() const;
 #endif // wxUSE_ACCEL
 
 protected:
@@ -127,7 +122,7 @@ private:
 // Menu Bar (a la Windows)
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMenuInfo : public wxObject
+class WXDLLEXPORT wxMenuInfo : public wxObject
 {
 public :
     wxMenuInfo() { m_menu = NULL; }
@@ -146,7 +141,7 @@ private :
 
 WX_DECLARE_EXPORTED_LIST(wxMenuInfo, wxMenuInfoList );
 
-class WXDLLIMPEXP_CORE wxMenuBar : public wxMenuBarBase
+class WXDLLEXPORT wxMenuBar : public wxMenuBarBase
 {
 public:
     // ctors & dtor
@@ -168,8 +163,8 @@ public:
     virtual wxMenu *Remove(size_t pos);
 
     virtual void EnableTop( size_t pos, bool flag );
-    virtual void SetMenuLabel( size_t pos, const wxString& label );
-    virtual wxString GetMenuLabel( size_t pos ) const;
+    virtual void SetLabelTop( size_t pos, const wxString& label );
+    virtual wxString GetLabelTop( size_t pos ) const;
 
     // implementation from now on
     WXHMENU Create();
@@ -188,6 +183,9 @@ public:
 #endif
 
 #if wxUSE_ACCEL
+    // get the accel table for all the menus
+    const wxAcceleratorTable& GetAccelTable() const { return m_accelTable; }
+
     // update the accel table (must be called after adding/deleting a menu)
     void RebuildAccelTable();
 #endif // wxUSE_ACCEL
@@ -215,6 +213,10 @@ protected:
     // Return the MSW position for a wxMenu which is sometimes different from
     // the wxWidgets position.
     int MSWPositionForWxMenu(wxMenu *menu, int wxpos);
+#if wxUSE_ACCEL
+    // the accelerator table for all accelerators in all our menus
+    wxAcceleratorTable m_accelTable;
+#endif // wxUSE_ACCEL
 
 #if defined(__WXWINCE__) && wxUSE_TOOLBAR
     wxToolBar*  m_toolBar;
@@ -227,6 +229,13 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxMenuBar)
+
+public:
+
+#if wxABI_VERSION >= 20805
+    // Gets the original label at the top-level of the menubar
+    wxString GetMenuLabel(size_t pos) const;
+#endif
 };
 
 #endif // _WX_MENU_H_

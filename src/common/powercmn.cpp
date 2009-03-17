@@ -34,14 +34,14 @@
 // ============================================================================
 
 #ifdef wxHAS_POWER_EVENTS
-    wxDEFINE_EVENT( wxEVT_POWER_SUSPENDING, wxPowerEvent );
-    wxDEFINE_EVENT( wxEVT_POWER_SUSPENDED, wxPowerEvent );
-    wxDEFINE_EVENT( wxEVT_POWER_SUSPEND_CANCEL, wxPowerEvent );
-    wxDEFINE_EVENT( wxEVT_POWER_RESUME, wxPowerEvent );
+    DEFINE_EVENT_TYPE(wxEVT_POWER_SUSPENDING)
+    DEFINE_EVENT_TYPE(wxEVT_POWER_SUSPENDED)
+    DEFINE_EVENT_TYPE(wxEVT_POWER_SUSPEND_CANCEL)
+    DEFINE_EVENT_TYPE(wxEVT_POWER_RESUME)
 
-    IMPLEMENT_DYNAMIC_CLASS(wxPowerEvent, wxEvent)
+    IMPLEMENT_ABSTRACT_CLASS(wxPowerEvent, wxEvent)
 #endif
-
+    
 // provide stubs for the systems not implementing these functions
 #if !defined(__WXPALMOS__) && !defined(__WXMSW__)
 

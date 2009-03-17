@@ -27,6 +27,7 @@
 #include "wx/cursor.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/msw/missing.h" // IDC_HAND
     #include "wx/utils.h"
     #include "wx/app.h"
     #include "wx/bitmap.h"
@@ -38,7 +39,6 @@
 #endif
 
 #include "wx/msw/private.h"
-#include "wx/msw/missing.h" // IDC_HAND
 
 // define functions missing in MicroWin
 #ifdef __WXMICROWIN__
@@ -106,7 +106,7 @@ public:
     virtual void OnExit()
     {
         delete gs_globalCursor;
-        gs_globalCursor = NULL;
+        gs_globalCursor = (wxCursor *)NULL;
     }
 };
 
@@ -208,7 +208,6 @@ wxCursor::wxCursor(const wxImage& image)
 
     HCURSOR hcursor = wxBitmapToHCURSOR( wxBitmap(imageSized),
                                          hotSpotX, hotSpotY );
-
     if ( !hcursor )
     {
         wxLogWarning(_("Failed to create cursor."));
@@ -219,17 +218,32 @@ wxCursor::wxCursor(const wxImage& image)
 }
 #endif // wxUSE_IMAGE
 
+wxCursor::wxCursor(const char WXUNUSED(bits)[],
+                   int WXUNUSED(width),
+                   int WXUNUSED(height),
+                   int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY),
+                   const char WXUNUSED(maskBits)[])
+{
+}
+
 // MicroWin doesn't have support needed for the other ctors
 #ifdef __WXMICROWIN__
 
-wxCursor::InitFromStock(wxStockCursor WXUNUSED(cursor_type))
+wxCursor::wxCursor(const wxString& WXUNUSED(filename),
+                   long WXUNUSED(kind),
+                   int WXUNUSED(hotSpotX),
+                   int WXUNUSED(hotSpotY))
+{
+}
+
+wxCursor::wxCursor(int WXUNUSED(cursor_type))
 {
 }
 
 #else // !__WXMICROWIN__
 
 wxCursor::wxCursor(const wxString& filename,
-                   wxBitmapType kind,
+                   long kind,
                    int hotSpotX,
                    int hotSpotY)
 {
@@ -237,12 +251,12 @@ wxCursor::wxCursor(const wxString& filename,
     switch ( kind )
     {
         case wxBITMAP_TYPE_CUR_RESOURCE:
-            hcursor = ::LoadCursor(wxGetInstance(), filename.fn_str());
+            hcursor = ::LoadCursor(wxGetInstance(), filename);
             break;
 
 #ifndef __WXWINCE__
         case wxBITMAP_TYPE_CUR:
-            hcursor = ::LoadCursorFromFile(filename.fn_str());
+            hcursor = ::LoadCursorFromFile(filename);
             break;
 #endif
 
@@ -265,7 +279,7 @@ wxCursor::wxCursor(const wxString& filename,
             break;
 
         default:
-            wxLogError( _T("unknown cursor resource type '%d'"), kind );
+            wxFAIL_MSG( _T("unknown cursor resource type") );
 
             hcursor = NULL;
     }
@@ -277,7 +291,7 @@ wxCursor::wxCursor(const wxString& filename,
 }
 
 // Cursors by stock number
-void wxCursor::InitFromStock(wxStockCursor idCursor)
+wxCursor::wxCursor(int idCursor)
 {
     // all wxWidgets standard cursors
     static const struct StdCursor

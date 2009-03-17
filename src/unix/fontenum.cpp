@@ -20,8 +20,6 @@
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_FONTENUM
-
 #include "wx/fontenum.h"
 
 #ifndef WX_PRECOMP
@@ -49,16 +47,13 @@
 extern GtkWidget *wxGetRootWindow();
 #endif // __WXGTK20__
 
-extern "C"
-{
-static int wxCMPFUNC_CONV
+extern "C" int wxCMPFUNC_CONV
 wxCompareFamilies (const void *a, const void *b)
 {
   const char *a_name = pango_font_family_get_name (*(PangoFontFamily **)a);
   const char *b_name = pango_font_family_get_name (*(PangoFontFamily **)b);
 
   return g_utf8_collate (a_name, b_name);
-}
 }
 
 bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
@@ -71,29 +66,46 @@ bool wxFontEnumerator::EnumerateFacenames(wxFontEncoding encoding,
         return false;
     }
 
-    PangoFontFamily **families = NULL;
-    gint n_families = 0;
-    pango_context_list_families (
-#ifdef __WXGTK20__
-        gtk_widget_get_pango_context( wxGetRootWindow() ),
-#else
-        wxTheApp->GetPangoContext(),
+#if defined(__WXGTK20__) || !defined(HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE)
+    if ( fixedWidthOnly
+#if defined(__WXGTK24__)
+        && (gtk_check_version(2,4,0) != NULL)
 #endif
-        &families, &n_families );
-    qsort (families, n_families, sizeof (PangoFontFamily *), wxCompareFamilies);
-
-    for ( int i = 0; i < n_families; i++ )
+       )
     {
-#if defined(__WXGTK20__) || defined(HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE)
-        if ( !fixedWidthOnly ||
-            pango_font_family_is_monospace(families[i]) )
-#endif
-        {
-            const gchar *name = pango_font_family_get_name(families[i]);
-            OnFacename(wxString(name, wxConvUTF8));
-        }
+        OnFacename( wxT("monospace") );
     }
-    g_free(families);
+    else // !fixedWidthOnly
+#endif // __WXGTK20__ || !HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE
+    {
+        PangoFontFamily **families = NULL;
+        gint n_families = 0;
+        pango_context_list_families (
+#ifdef __WXGTK20__
+            gtk_widget_get_pango_context( wxGetRootWindow() ),
+#else
+            wxTheApp->GetPangoContext(),
+#endif
+            &families, &n_families );
+        qsort (families, n_families, sizeof (PangoFontFamily *), wxCompareFamilies);
+
+        for (int i=0; i<n_families; i++)
+        {
+#if defined(__WXGTK24__) || defined(HAVE_PANGO_FONT_FAMILY_IS_MONOSPACE)
+            if (!fixedWidthOnly || (
+#ifdef __WXGTK24__
+                !gtk_check_version(2,4,0) &&
+#endif
+                pango_font_family_is_monospace(families[i])
+                                   ) )
+#endif
+            {
+                const gchar *name = pango_font_family_get_name(families[i]);
+                OnFacename(wxString(name, wxConvUTF8));
+            }
+        }
+        g_free(families);
+    }
 
     return true;
 }
@@ -348,5 +360,3 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 }
 
 #endif // !wxUSE_PANGO
-
-#endif // wxUSE_FONTENUM

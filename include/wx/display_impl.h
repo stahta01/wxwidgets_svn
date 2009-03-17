@@ -17,7 +17,7 @@
 // wxDisplayFactory: allows to create wxDisplay objects
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDisplayFactory
+class WXDLLEXPORT wxDisplayFactory
 {
 public:
     wxDisplayFactory() { }
@@ -37,14 +37,14 @@ public:
     // return the display for the given window or wxNOT_FOUND
     //
     // the window pointer must not be NULL (i.e. caller should check it)
-    virtual int GetFromWindow(const wxWindow *window);
+    virtual int GetFromWindow(wxWindow *window);
 };
 
 // ----------------------------------------------------------------------------
 // wxDisplayImpl: base class for all wxDisplay implementations
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDisplayImpl
+class WXDLLEXPORT wxDisplayImpl
 {
 public:
     // virtual dtor for this base class
@@ -89,7 +89,7 @@ protected:
 
     friend class wxDisplayFactory;
 
-    wxDECLARE_NO_COPY_CLASS(wxDisplayImpl);
+    DECLARE_NO_COPY_CLASS(wxDisplayImpl)
 };
 
 // ----------------------------------------------------------------------------
@@ -98,7 +98,7 @@ protected:
 
 // this is a stub implementation using single/main display only, it is
 // available even if wxUSE_DISPLAY == 0
-class WXDLLIMPEXP_CORE wxDisplayFactorySingle : public wxDisplayFactory
+class WXDLLEXPORT wxDisplayFactorySingle : public wxDisplayFactory
 {
 public:
     virtual wxDisplayImpl *CreateDisplay(unsigned n);

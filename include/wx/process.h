@@ -55,7 +55,7 @@ public:
 
 
     // ctors
-    wxProcess(wxEvtHandler *parent = NULL, int nId = wxID_ANY)
+    wxProcess(wxEvtHandler *parent = (wxEvtHandler *) NULL, int nId = wxID_ANY)
         { Init(parent, nId, wxPROCESS_DEFAULT); }
 
     wxProcess(int flags) { Init(NULL, wxID_ANY, flags); }
@@ -123,16 +123,16 @@ protected:
     bool m_redirect;
 
     DECLARE_DYNAMIC_CLASS(wxProcess)
-    wxDECLARE_NO_COPY_CLASS(wxProcess);
+    DECLARE_NO_COPY_CLASS(wxProcess)
 };
 
 // ----------------------------------------------------------------------------
 // wxProcess events
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_BASE wxProcessEvent;
-
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_BASE, wxEVT_END_PROCESS, wxProcessEvent );
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_END_PROCESS, 440)
+END_DECLARE_EVENT_TYPES()
 
 class WXDLLIMPEXP_BASE wxProcessEvent : public wxEvent
 {
@@ -164,7 +164,7 @@ public:
 typedef void (wxEvtHandler::*wxProcessEventFunction)(wxProcessEvent&);
 
 #define wxProcessEventHandler(func) \
-    wxEVENT_HANDLER_CAST(wxProcessEventFunction, func)
+    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxProcessEventFunction, &func)
 
 #define EVT_END_PROCESS(id, func) \
    wx__DECLARE_EVT1(wxEVT_END_PROCESS, id, wxProcessEventHandler(func))

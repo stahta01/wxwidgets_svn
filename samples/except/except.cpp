@@ -123,8 +123,6 @@ public:
     void OnHandleCrash(wxCommandEvent& event);
 #endif
 
-protected:
-
     // 1st-level exception handling: we overload ProcessEvent() to be able to
     // catch exceptions which occur in MyFrame methods here
     virtual bool ProcessEvent(wxEvent& event);
@@ -240,9 +238,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame();
 
@@ -477,7 +472,8 @@ MyDialog::MyDialog(wxFrame *parent)
     sizerTop->Add(new wxButton(this, wxID_CANCEL, _T("&Cancel")),
                   0, wxCENTRE | wxALL, 5);
 
-    SetSizerAndFit(sizerTop);
+    SetSizer(sizerTop);
+    sizerTop->Fit(this);
 }
 
 void MyDialog::OnThrowInt(wxCommandEvent& WXUNUSED(event))

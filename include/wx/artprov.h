@@ -15,7 +15,6 @@
 #include "wx/string.h"
 #include "wx/bitmap.h"
 #include "wx/icon.h"
-#include "wx/iconbndl.h"
 
 class WXDLLIMPEXP_FWD_CORE wxArtProvidersList;
 class WXDLLIMPEXP_FWD_CORE wxArtProviderCache;
@@ -45,7 +44,6 @@ typedef wxString wxArtID;
 #define wxART_HELP_BROWSER         wxART_MAKE_CLIENT_ID(wxART_HELP_BROWSER)
 #define wxART_MESSAGE_BOX          wxART_MAKE_CLIENT_ID(wxART_MESSAGE_BOX)
 #define wxART_BUTTON               wxART_MAKE_CLIENT_ID(wxART_BUTTON)
-#define wxART_LIST                 wxART_MAKE_CLIENT_ID(wxART_LIST)
 
 #define wxART_OTHER                wxART_MAKE_CLIENT_ID(wxART_OTHER)
 
@@ -111,14 +109,12 @@ typedef wxString wxArtID;
 // wxArtProvider class
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxArtProvider : public wxObject
+class WXDLLEXPORT wxArtProvider : public wxObject
 {
 public:
     // Dtor removes the provider from providers stack if it's still on it
     virtual ~wxArtProvider();
 
-    // Does this platform implement native icons theme?
-    static bool HasNativeProvider();
 
     // Add new provider to the top of providers stack (i.e. the provider will
     // be queried first of all).
@@ -126,12 +122,11 @@ public:
 
     // Add new provider to the bottom of providers stack (i.e. the provider
     // will be queried as the last one).
+#if wxABI_VERSION >= 20810
     static void PushBack(wxArtProvider *provider);
-
-#if WXWIN_COMPATIBILITY_2_8
-    // use PushBack(), it's the same thing
-    wxDEPRECATED( static void Insert(wxArtProvider *provider) );
 #endif
+    // same as PushBack()
+    static void Insert(wxArtProvider *provider);
 
     // Remove latest added provider and delete it.
     static bool Pop();
@@ -154,20 +149,6 @@ public:
     static wxIcon GetIcon(const wxArtID& id,
                           const wxArtClient& client = wxART_OTHER,
                           const wxSize& size = wxDefaultSize);
-
-    // Helper used by several generic classes: return the icon corresponding to
-    // the standard wxICON_INFORMATION/WARNING/ERROR/QUESTION flags (only one
-    // can be set)
-    static wxIcon GetMessageBoxIcon(int flags);
-
-    // Query the providers for iconbundle with given ID and return it. Return
-    // wxNullIconBundle if no provider provides it.
-    static wxIconBundle GetIconBundle(const wxArtID& id,
-                                      const wxArtClient& client = wxART_OTHER);
-
-    // Gets native size for given 'client' or wxDefaultSize if it doesn't
-    // have native equivalent
-    static wxSize GetNativeSizeHint(const wxArtClient& client);
 
     // Get the size hint of an icon from a specific wxArtClient, queries
     // the topmost provider if platform_dependent = false
@@ -200,18 +181,12 @@ protected:
         return GetSizeHint(client, true);
     }
 
-    // Derived classes must override CreateBitmap or CreateIconBundle
-    // (or both) to create requested art resource. This method is called
-    // only once per instance's lifetime for each requested wxArtID.
+    // Derived classes must override this method to create requested
+    // art resource. This method is called only once per instance's
+    // lifetime for each requested wxArtID.
     virtual wxBitmap CreateBitmap(const wxArtID& WXUNUSED(id),
                                   const wxArtClient& WXUNUSED(client),
-                                  const wxSize& WXUNUSED(size)) { return wxNullBitmap; }
-
-    virtual wxIconBundle CreateIconBundle(const wxArtID& WXUNUSED(id),
-                                          const wxArtClient& WXUNUSED(client))
-    {
-        return wxNullIconBundle;
-    }
+                                  const wxSize& WXUNUSED(size)) = 0;
 
 private:
     static void CommonAddingProvider();
@@ -225,13 +200,5 @@ private:
     DECLARE_ABSTRACT_CLASS(wxArtProvider)
 };
 
-
-#if !defined(__WXUNIVERSAL__) && \
-    ((defined(__WXGTK__) && defined(__WXGTK20__)) || defined(__WXMSW__) || \
-     (defined(__WXMAC__) && wxOSX_USE_COCOA_OR_CARBON))
-  // *some* (partial) native implementation of wxArtProvider exists; this is
-  // not the same as wxArtProvider::HasNativeProvider()!
-  #define wxHAS_NATIVE_ART_PROVIDER_IMPL
-#endif
 
 #endif // _WX_ARTPROV_H_

@@ -50,7 +50,7 @@ wxBrush::wxBrush()
 {
 }
 
-wxBrush::wxBrush(const wxColour& col, wxBrushStyle style)
+wxBrush::wxBrush(const wxColour& col, int style)
 {
 }
 
@@ -71,12 +71,12 @@ bool wxBrush::operator==(const wxBrush& brush) const
     return false;
 }
 
-wxGDIRefData *wxBrush::CreateGDIRefData() const
+wxObjectRefData *wxBrush::CreateRefData() const
 {
     return NULL;
 }
 
-wxGDIRefData *wxBrush::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBrush::CloneRefData(const wxObjectRefData *data) const
 {
     return NULL;
 }
@@ -90,7 +90,7 @@ wxColour wxBrush::GetColour() const
     return wxNullColour;
 }
 
-wxBrushStyle wxBrush::GetStyle() const
+int wxBrush::GetStyle() const
 {
     return -1;
 }
@@ -117,7 +117,7 @@ void wxBrush::SetColour(unsigned char WXUNUSED(r), unsigned char WXUNUSED(g), un
 {
 }
 
-void wxBrush::SetStyle(wxBrushStyle WXUNUSED(style))
+void wxBrush::SetStyle(int WXUNUSED(style))
 {
 }
 

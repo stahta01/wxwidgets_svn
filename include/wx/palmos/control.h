@@ -15,7 +15,7 @@
 #include "wx/dynarray.h"
 
 // General item class
-class WXDLLIMPEXP_CORE wxControl : public wxControlBase
+class WXDLLEXPORT wxControl : public wxControlBase
 {
 public:
     wxControl() { Init(); }
@@ -48,7 +48,7 @@ public:
     virtual bool IsShown() const;
 
     virtual void SetLabel(const wxString& label);
-    //virtual wxString GetLabel();
+    virtual wxString GetLabel();
 
     // implementation from now on
     // --------------------------

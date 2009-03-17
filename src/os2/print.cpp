@@ -62,6 +62,9 @@ bool wxOS2Printer::Setup(wxWindow *WXUNUSED(parent))
 // TODO:
 /*
     wxPrintDialog dialog(parent, & m_printData);
+#if WXWIN_COMPATIBILITY_2_4
+    dialog.GetPrintData().SetSetupDialog(true);
+#endif
     return (dialog.ShowModal() == wxID_OK);
 */
     return false;

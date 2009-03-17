@@ -43,7 +43,7 @@ class wxSymbolListCtrl;
  */
 
 #define SYMBOL_WXSYMBOLPICKERDIALOG_STYLE (wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|wxCLOSE_BOX)
-#define SYMBOL_WXSYMBOLPICKERDIALOG_TITLE wxGetTranslation("Symbols")
+#define SYMBOL_WXSYMBOLPICKERDIALOG_TITLE wxGetTranslation(wxT("Symbols"))
 #define SYMBOL_WXSYMBOLPICKERDIALOG_IDNAME ID_SYMBOLPICKERDIALOG
 #define SYMBOL_WXSYMBOLPICKERDIALOG_SIZE wxSize(400, 300)
 #define SYMBOL_WXSYMBOLPICKERDIALOG_POSITION wxDefaultPosition
@@ -118,9 +118,16 @@ public:
     void OnFromUnicodeSelected( wxCommandEvent& event );
 
 #endif
+#if defined(__WXMSW__) || defined(__WXGTK__) || defined(__WXPM__) || defined(__WXMGL__) || defined(__WXMOTIF__) || defined(__WXCOCOA__) || defined(__WXX11__) || defined(__WXPALMOS__)
     /// wxEVT_UPDATE_UI event handler for wxID_OK
     void OnOkUpdate( wxUpdateUIEvent& event );
 
+#endif
+#if defined(__WXMAC__)
+    /// wxEVT_UPDATE_UI event handler for wxID_OK
+    void OnOkUpdate( wxUpdateUIEvent& event );
+
+#endif
 ////@end wxSymbolPickerDialog event handler declarations
 
 ////@begin wxSymbolPickerDialog member function declarations
@@ -285,7 +292,7 @@ protected:
     virtual void OnDrawItem(wxDC& dc, const wxRect& rect, size_t n) const;
 
     // gets the line height
-    virtual wxCoord OnGetRowHeight(size_t line) const;
+    virtual wxCoord OnGetLineHeight(size_t line) const;
 
     // event handlers
     void OnPaint(wxPaintEvent& event);
@@ -355,7 +362,7 @@ private:
     bool        m_unicodeMode;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxSymbolListCtrl);
+    DECLARE_NO_COPY_CLASS(wxSymbolListCtrl)
     DECLARE_ABSTRACT_CLASS(wxSymbolListCtrl)
 };
 

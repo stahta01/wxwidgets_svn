@@ -54,7 +54,7 @@ protected:
     HACCEL      m_hAccel;
     bool        m_ok;
 
-    wxDECLARE_NO_COPY_CLASS(wxAcceleratorRefData);
+    DECLARE_NO_COPY_CLASS(wxAcceleratorRefData)
 };
 
 // ============================================================================
@@ -90,7 +90,7 @@ wxAcceleratorTable::wxAcceleratorTable(const wxString& resource)
 {
     m_refData = new wxAcceleratorRefData;
 
-    HACCEL hAccel = ::LoadAccelerators(wxGetInstance(), resource.wx_str());
+    HACCEL hAccel = ::LoadAccelerators(wxGetInstance(), resource);
     M_ACCELDATA->m_hAccel = hAccel;
     M_ACCELDATA->m_ok = hAccel != 0;
 }

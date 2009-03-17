@@ -26,7 +26,6 @@
 #endif
 
 #include "wx/tooltip.h"
-#include "wx/os2/dcclient.h"
 
 bool wxToolBar::m_bInitialized = false;
 
@@ -61,10 +60,8 @@ public:
 
     inline wxToolBarTool( wxToolBar* pTbar
                          ,wxControl* pControl
-                         ,const wxString& label
                         ) : wxToolBarToolBase( pTbar
                                               ,pControl
-                                              ,label
                                              )
     {
     }
@@ -131,12 +128,10 @@ wxToolBarToolBase* wxToolBar::CreateTool(
 
 wxToolBarToolBase *wxToolBar::CreateTool(
   wxControl*                        pControl
-, const wxString&                   label
 )
 {
     return new wxToolBarTool( this
                              ,pControl
-                             ,label
                             );
 } // end of wxToolBarSimple::CreateTool
 
@@ -602,8 +597,7 @@ void wxToolBar::OnPaint (
         return;
     nCount++;
 
-    wxPMDCImpl *impl = (wxPMDCImpl*) vDc.GetImpl();
-    ::WinFillRect(impl->GetHPS(), &impl->m_vRclPaint, GetBackgroundColour().GetPixel());
+    ::WinFillRect(vDc.GetHPS(), &vDc.m_vRclPaint, GetBackgroundColour().GetPixel());
     for ( wxToolBarToolsList::compatibility_iterator node = m_tools.GetFirst();
           node;
           node = node->GetNext() )
@@ -979,7 +973,7 @@ wxToolBarToolBase* wxToolBar::FindToolForPosition(
         }
         node = node->GetNext();
     }
-    return NULL;
+    return (wxToolBarToolBase *)NULL;
 } // end of wxToolBar::FindToolForPosition
 
 // ----------------------------------------------------------------------------
@@ -1171,7 +1165,7 @@ void wxToolBar::RaiseTool ( wxToolBarToolBase* pToolBase,
 
 void wxToolBar::OnTimer ( wxTimerEvent& rEvent )
 {
-    if (rEvent.GetId() == m_vToolTimer.GetId())
+    if (rEvent.GetId() == m_vToolTimer.GetTimerId())
     {
         wxPoint vPos( m_vXMouse, m_vYMouse );
 
@@ -1179,7 +1173,7 @@ void wxToolBar::OnTimer ( wxTimerEvent& rEvent )
         m_vToolTimer.Stop();
         m_vToolExpTimer.Start(4000L, TRUE);
     }
-    else if (rEvent.GetId() == m_vToolExpTimer.GetId())
+    else if (rEvent.GetId() == m_vToolExpTimer.GetTimerId())
     {
         m_pToolTip->HideToolTipWindow();
         GetParent()->Refresh();

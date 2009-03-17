@@ -10,7 +10,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_RADIOBTN
+#if wxUSE_RADIOBOX
 
 #include "wx/radiobut.h"
 
@@ -30,16 +30,20 @@ extern "C" {
 static
 void gtk_radiobutton_clicked_callback( GtkToggleButton *button, wxRadioButton *rb )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!rb->m_hasVMT) return;
 
     if (g_blockEventsOnDrag) return;
 
     if (!button->active) return;
 
+    if (rb->m_blockEvent) return;
+
     wxCommandEvent event( wxEVT_COMMAND_RADIOBUTTON_SELECTED, rb->GetId());
     event.SetInt( rb->GetValue() );
     event.SetEventObject( rb );
-    rb->HandleWindowEvent( event );
+    rb->GetEventHandler()->ProcessEvent( event );
 }
 }
 
@@ -58,43 +62,54 @@ bool wxRadioButton::Create( wxWindow *parent,
                             const wxValidator& validator,
                             const wxString& name )
 {
+    m_acceptsFocus = TRUE;
+    m_needParent = TRUE;
+
+    m_blockEvent = FALSE;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxRadioButton creation failed") );
-        return false;
+        return FALSE;
     }
 
     GSList* radioButtonGroup = NULL;
-    if (!HasFlag(wxRB_GROUP) && !HasFlag(wxRB_SINGLE))
+    if (!HasFlag(wxRB_GROUP))
     {
         // search backward for last group start
+        wxRadioButton *chief = (wxRadioButton*) NULL;
         wxWindowList::compatibility_iterator node = parent->GetChildren().GetLast();
-        for (; node; node = node->GetPrevious())
+        while (node)
         {
             wxWindow *child = node->GetData();
-            if (child->HasFlag(wxRB_GROUP) && wxIsKindOf(child, wxRadioButton))
+            if (child->IsRadioButton())
             {
-                radioButtonGroup = gtk_radio_button_get_group(
-                    GTK_RADIO_BUTTON(child->m_widget));
-                break;
+                chief = (wxRadioButton*) child;
+                if (child->HasFlag(wxRB_GROUP))
+                    break;
             }
+            node = node->GetPrevious();
+        }
+        if (chief)
+        {
+            // we are part of the group started by chief
+            radioButtonGroup = gtk_radio_button_get_group( GTK_RADIO_BUTTON(chief->m_widget) );
         }
     }
 
     m_widget = gtk_radio_button_new_with_label( radioButtonGroup, wxGTK_CONV( label ) );
-    g_object_ref(m_widget);
 
     SetLabel(label);
 
-    g_signal_connect_after (m_widget, "clicked",
-                            G_CALLBACK (gtk_radiobutton_clicked_callback), this);
+    g_signal_connect (m_widget, "clicked",
+                      G_CALLBACK (gtk_radiobutton_clicked_callback), this);
 
     m_parent->DoAddChild( this );
 
     PostCreation(size);
 
-    return true;
+    return TRUE;
 }
 
 void wxRadioButton::SetLabel( const wxString& label )
@@ -111,8 +126,7 @@ void wxRadioButton::SetValue( bool val )
     if (val == GetValue())
         return;
 
-    g_signal_handlers_block_by_func(
-        m_widget, (void*)gtk_radiobutton_clicked_callback, this);
+    m_blockEvent = TRUE;
 
     if (val)
     {
@@ -125,13 +139,12 @@ void wxRadioButton::SetValue( bool val )
         //      as FALSE.  Failing silently is probably TRTTD here.
     }
 
-    g_signal_handlers_unblock_by_func(
-        m_widget, (void*)gtk_radiobutton_clicked_callback, this);
+    m_blockEvent = FALSE;
 }
 
 bool wxRadioButton::GetValue() const
 {
-    wxCHECK_MSG( m_widget != NULL, false, wxT("invalid radiobutton") );
+    wxCHECK_MSG( m_widget != NULL, FALSE, wxT("invalid radiobutton") );
 
     return GTK_TOGGLE_BUTTON(m_widget)->active;
 }
@@ -141,16 +154,14 @@ bool wxRadioButton::Enable( bool enable )
     bool isEnabled = IsEnabled();
 
     if ( !wxControl::Enable( enable ) )
-        return false;
+        return FALSE;
 
     gtk_widget_set_sensitive(GTK_BIN(m_widget)->child, enable);
 
     if (!isEnabled && enable)
-    {
-        GTKFixSensitivity();
-    }
+        wxGtkFixSensitivity(this);
 
-    return true;
+    return TRUE;
 }
 
 void wxRadioButton::DoApplyWidgetStyle(GtkRcStyle *style)
@@ -163,6 +174,11 @@ GdkWindow *
 wxRadioButton::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
 {
     return GTK_BUTTON(m_widget)->event_window;
+}
+
+wxSize wxRadioButton::DoGetBestSize() const
+{
+    return wxControl::DoGetBestSize();
 }
 
 // static

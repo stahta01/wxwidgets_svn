@@ -159,9 +159,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
     MyFrame *frame = new MyFrame(_T("wxWidgets Sound Sample"));
 
@@ -194,9 +191,8 @@ MyFrame::MyFrame(const wxString& title)
     menuFile->Append(Sound_SelectFile, _T("Select WAV &file...\tCtrl-O"), _T("Select a new wav file to play"));
 #ifdef __WXMSW__
     menuFile->Append(Sound_SelectResource, _T("Select WAV &resource...\tCtrl-R"), _T("Select a new resource to play"));
-    menuFile->Append(Sound_SelectMemory, _T("Select WAV &data\tCtrl-M"), _T("Choose to play from memory buffer"));
 #endif // __WXMSW__
-
+    menuFile->Append(Sound_SelectMemory, _T("Select WAV &data\tCtrl-M"), _T("Choose to play from memory buffer"));
     menuFile->Append(Sound_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     wxMenu *playMenu = new wxMenu;
@@ -228,7 +224,6 @@ MyFrame::MyFrame(const wxString& title)
 
 bool MyFrame::CreateSound(wxSound& snd) const
 {
-#ifdef __WXMSW__
     if ( m_useMemory )
     {
         // this is the dump of cuckoo.wav
@@ -962,6 +957,7 @@ bool MyFrame::CreateSound(wxSound& snd) const
         return snd.Create(sizeof(data), data);
     }
 
+#ifdef __WXMSW__
     if ( !m_soundRes.empty() )
     {
         return snd.Create(m_soundRes, true);

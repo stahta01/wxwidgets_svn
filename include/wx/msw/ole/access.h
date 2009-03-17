@@ -19,7 +19,7 @@
 // ----------------------------------------------------------------------------
 
 class wxIAccessible;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLEXPORT wxWindow;
 
 // ----------------------------------------------------------------------------
 // macros
@@ -29,7 +29,7 @@ class WXDLLIMPEXP_FWD_CORE wxWindow;
 // wxAccessible implements accessibility behaviour.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxAccessible : public wxAccessibleBase
+class WXDLLEXPORT wxAccessible : public wxAccessibleBase
 {
 public:
     wxAccessible(wxWindow *win = NULL);
@@ -59,7 +59,7 @@ private:
     void*           m_pIAccessibleStd;  // the pointer to the standard COM interface,
                                         // for default processing
 
-    wxDECLARE_NO_COPY_CLASS(wxAccessible);
+    DECLARE_NO_COPY_CLASS(wxAccessible)
 };
 
 #endif  //wxUSE_ACCESSIBILITY

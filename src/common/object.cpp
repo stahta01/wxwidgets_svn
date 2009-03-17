@@ -21,7 +21,6 @@
     #include "wx/object.h"
     #include "wx/hash.h"
     #include "wx/memory.h"
-    #include "wx/crt.h"
 #endif
 
 #include <string.h>
@@ -53,7 +52,7 @@ const wxClassInfo* wxObject::ms_classParents[] = { NULL } ;
  wxClassInfo wxObject::ms_classInfo(ms_classParents , wxEmptyString , wxT("wxObject"),
             (int) sizeof(wxObject),                              \
             (wxObjectConstructorFn) 0   ,
-            NULL,NULL,0 , 0 ,
+            (wxPropertyInfo*) NULL,(wxHandlerInfo*) NULL,0 , 0 ,
             0 , wxVariantOfPtrToObjectConverterwxObject , wxVariantToObjectConverterwxObject , wxObjectToVariantConverterwxObject);
  template<> void wxStringReadValue(const wxString & , wxObject * & ){assert(0) ;}
  template<> void wxStringWriteValue(wxString & , wxObject* const & ){assert(0) ;}
@@ -97,9 +96,9 @@ const bool wxFalse = false;
 // E.g. is wxWindow a kind of wxObject?
 // Go from this class to superclass, taking into account
 // two possible base classes.
-bool wxObject::IsKindOf(const wxClassInfo *info) const
+bool wxObject::IsKindOf(wxClassInfo *info) const
 {
-    const wxClassInfo *thisInfo = GetClassInfo();
+    wxClassInfo *thisInfo = GetClassInfo();
     return (thisInfo) ? thisInfo->IsKindOf(info) : false ;
 }
 
@@ -188,7 +187,7 @@ wxClassInfo::~wxClassInfo()
     Unregister();
 }
 
-wxClassInfo *wxClassInfo::FindClass(const wxString& className)
+wxClassInfo *wxClassInfo::FindClass(const wxChar *className)
 {
     if ( sm_classTable )
     {
@@ -198,7 +197,7 @@ wxClassInfo *wxClassInfo::FindClass(const wxString& className)
     {
         for ( wxClassInfo *info = sm_first; info ; info = info->m_next )
         {
-            if ( className == info->GetClassName() )
+            if ( wxStrcmp(info->GetClassName(), className) == 0 )
                 return info;
         }
 
@@ -206,37 +205,45 @@ wxClassInfo *wxClassInfo::FindClass(const wxString& className)
     }
 }
 
-// This function wasn't written to be reentrant but there is a possiblity of
-// reentrance if something it does causes a shared lib to load and register
-// classes. On Solaris this happens when the wxHashTable is newed, so the first
-// part of the function has been modified to handle it, and a wxASSERT checks
-// against reentrance in the remainder of the function.
+// Reentrance can occur on some platforms (Solaris for one), as the use of hash
+// and string objects can cause other modules to load and register classes
+// before the original call returns. This is handled by keeping the hash table
+// local when it is first created and only assigning it to the global variable
+// when the function is ready to return.
+//
+// That does make the assumption that after the function has completed the
+// first time the problem will no longer happen; all the modules it depends on
+// will have been loaded. The assumption is checked using the 'entry' variable
+// as a reentrance guard, it checks that once the hash table is global it is
+// not accessed multiple times simulateously.
 
 void wxClassInfo::Register()
 {
-    if ( !sm_classTable )
-    {
-        wxHashTable *classTable = new wxHashTable(wxKEY_STRING);
-
-        // check for reentrance
-        if ( sm_classTable )
-            delete classTable;
-        else
-            sm_classTable = classTable;
-    }
-
 #ifdef __WXDEBUG__
     // reentrance guard - see note above
     static int entry = 0;
-    wxASSERT_MSG(++entry == 1, _T("wxClassInfo::Register() reentrance"));
 #endif
+
+    wxHashTable *classTable;
+
+    if ( !sm_classTable )
+    {
+        // keep the hash local initially, reentrance is possible
+        classTable = new wxHashTable(wxKEY_STRING);
+    }
+    else
+    {
+        // guard againt reentrance once the global has been created
+        wxASSERT_MSG(++entry == 1, _T("wxClassInfo::Register() reentrance"));
+        classTable = sm_classTable;
+    }
 
     // Using IMPLEMENT_DYNAMIC_CLASS() macro twice (which may happen if you
     // link any object module twice mistakenly, or link twice against wx shared
     // library) will break this function because it will enter an infinite loop
     // and eventually die with "out of memory" - as this is quite hard to
     // detect if you're unaware of this, try to do some checks here.
-    wxASSERT_MSG( sm_classTable->Get(m_className) == NULL,
+    wxASSERT_MSG( classTable->Get(m_className) == NULL,
         wxString::Format
         (
             _T("Class \"%s\" already in RTTI table - have you used IMPLEMENT_DYNAMIC_CLASS() multiple times or linked some object file twice)?"),
@@ -244,10 +251,27 @@ void wxClassInfo::Register()
         )
     );
 
-    sm_classTable->Put(m_className, (wxObject *)this);
+    classTable->Put(m_className, (wxObject *)this);
+
+    // if we're using a local hash we need to try to make it global
+    if ( sm_classTable != classTable )
+    {
+        if ( !sm_classTable )
+        {
+            // make the hash global
+            sm_classTable = classTable;
+        }
+        else
+        {
+            // the gobal hash has already been created by a reentrant call,
+            // so delete the local hash and try again
+            delete classTable;
+            Register();
+        }
+    }
 
 #ifdef __WXDEBUG__
-    --entry;
+    entry = 0;
 #endif
 }
 
@@ -264,7 +288,7 @@ void wxClassInfo::Unregister()
     }
 }
 
-wxObject *wxCreateDynamicObject(const wxString& name)
+wxObject *wxCreateDynamicObject(const wxChar *name)
 {
 #if defined(__WXDEBUG__) || wxUSE_DEBUG_CONTEXT
     DEBUG_PRINTF(wxObject *wxCreateDynamicObject)
@@ -289,48 +313,6 @@ wxObject *wxCreateDynamicObject(const wxString& name)
     }
 }
 
-// iterator interface
-wxClassInfo::const_iterator::value_type
-wxClassInfo::const_iterator::operator*() const
-{
-    return (wxClassInfo*)m_node->GetData();
-}
-
-wxClassInfo::const_iterator& wxClassInfo::const_iterator::operator++()
-{
-    m_node = m_table->Next();
-    return *this;
-}
-
-const wxClassInfo::const_iterator wxClassInfo::const_iterator::operator++(int)
-{
-    wxClassInfo::const_iterator tmp = *this;
-    m_node = m_table->Next();
-    return tmp;
-}
-
-wxClassInfo::const_iterator wxClassInfo::begin_classinfo()
-{
-    sm_classTable->BeginFind();
-
-    return const_iterator(sm_classTable->Next(), sm_classTable);
-}
-
-wxClassInfo::const_iterator wxClassInfo::end_classinfo()
-{
-    return const_iterator(NULL, NULL);
-}
-
-// ----------------------------------------------------------------------------
-// wxObjectRefData
-// ----------------------------------------------------------------------------
-
-void wxObjectRefData::DecRef()
-{
-    if ( --m_count == 0 )
-        delete this;
-}
-
 
 // ----------------------------------------------------------------------------
 // wxObject
@@ -353,7 +335,7 @@ void wxObject::Ref(const wxObject& clone)
     if ( clone.m_refData )
     {
         m_refData = clone.m_refData;
-        m_refData->IncRef();
+        ++(m_refData->m_count);
     }
 }
 
@@ -363,7 +345,8 @@ void wxObject::UnRef()
     {
         wxASSERT_MSG( m_refData->m_count > 0, _T("invalid ref data count") );
 
-        m_refData->DecRef();
+        if ( --m_refData->m_count == 0 )
+            delete m_refData;
         m_refData = NULL;
     }
 }

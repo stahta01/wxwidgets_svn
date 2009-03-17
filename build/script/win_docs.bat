@@ -1,6 +1,8 @@
 rem Uncomment the next line to set the version; used also in wxWidgets.iss
-rem SET WXW_VER=2.9.0
-if (%WXW_VER%)==() SET WXW_VER=SVN
+SET WXW_VER=2.8.10
+
+
+if (%WXW_VER%)==() SET WXW_VER=CVS
 
 echo docs building for %WXW_VER%
 
@@ -12,49 +14,45 @@ rem  writes a log file in c:\
 
 echo Building wxWidgets-%WXW_VER% docs... > c:\temp.log
 
-set WXWIN=c:\wx\wxWidgets
-set DAILY=c:\daily
-
-rem svn already in my path...
-set PATH=%PATH%;C:\wx\WXWIDG~1.0\utils\tex2rtf\src\vc_based;c:\wx\Gnu\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1
+set WXWIN=c:\wx\wxw28b
+set DAILY=c:\daily28b
+set PATH=%PATH%;C:\wx\WXWIDG~1.0\utils\tex2rtf\src\vc_based;C:\wx\Gnu\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1
 set PATH=%PATH%;C:\Program Files\gs\gs8.51\lib;C:\Program Files\gs\gs8.51\bin
-rem add nmake to the path to build the docs
-call  \vc6
-echo %PATH% >>  c:\temp.log
-rem add bakefile build...
-set PATH=%PATH%;C:\wx\Bakefile\src
+echo %PATH% >> c:\temp.log
 
-SET >>  c:\temp.log
-
-
-rem update wxwidgets (holds docs) and inno (cvs wxMSW setup.exe only)
+rem update wxw28b (holds docs) and inno (cvs wxMSW setup.exe only)
 c:
 cd %WXWIN%
-svn cleanup >>  c:\temp.log
-svn up >>  c:\temp.log
+svn up 
 
 rem now inno
-cd \wx\inno\wxWidgets >>  c:\temp.log
-svn cleanup >>  c:\temp.log
-svn up >>  c:\temp.log
+cd \wx\inno\wxw28b
 del c*.*
 if exist include\wx\msw\setup.h del include\wx\msw\setup.h
 if exist include\wx\univ\setup.h del include\wx\univ\setup.h
-
+svn up 
 dos2unix configure
 dos2unix config.guess
 dos2unix config.sub
 copy include\wx\msw\setup0.h include\wx\msw\setup.h
 copy include\wx\univ\setup0.h include\wx\univ\setup.h
-echo SVN update  >>  c:\temp.log
+echo CVS update  >>  c:\temp.log
 
-rem just build the formats not in the SVN to keep down the .#makefile...
-cd \wx\inno\wxWidgets\build\bakefiles
+rem add bakefile build...
+rem just build the formats not in the CVS to keep down the .#makefile...
+set PATH=%PATH%;C:\wx\Bakefile
+cd \wx\inno\wxw28b\build\bakefiles
 del .bakefile_gen.state
-bakefile_gen -f dmars,dmars_smake,msevc4prj >> c:\temp.log
+if not exist Bakefiles.local.bkgen echo "Bakefiles.local.bkgen missing" >> c:\temp.log
+bakefile_gen -f dmars,msevc4prj,dmars_smake >> c:\temp.log
 
 
+rem add nmake to the path and build the docs
+call  \vc6
+echo %PATH% >>  c:\temp.log
+SET >>  c:\temp.log
 cd %WXWIN%\build\script
+mkdir %DAILY%\in
 nmake -f makedocs.vc cleandocs
 nmake -f makedocs.vc alldocs
 
@@ -63,26 +61,31 @@ mkdir %WXWIN%\docs\pdf
 mkdir %WXWIN%\docs\htmlhelp
 mkdir %WXWIN%\docs\htb
 echo starting word >>  c:\temp.log
-start /WAIT winword /mwx_ps
+start /WAIT winword /mwx28_ps
 
 
 echo cvs doc up part 2 >>  c:\temp.log
 
+rem use ghostscript ps2pdf - add extra path first
+rem set PATH=%PATH%;C:\Program Files\gs\gs8.51\lib;C:\Program Files\gs\gs8.51\bin
+rem set PATH=%PATH%;C:\wx\GnuWin32\bin;C:\PROGRA~1\INNOSE~1
+
 cd %DAILY%\in
 call ps2pdf wx.ps >>  c:\temp.log
-call ps2pdf tex2rtf.ps >> c:\temp.log
+call ps2pdf fl.ps >> c:\temp.log
+call ps2pdf gizmos.ps >> c:\temp.log
+call ps2pdf mmedia.ps >> c:\temp.log
+call ps2pdf ogl.ps >> c:\temp.log
+call ps2pdf svg.ps >> c:\temp.log
+call ps2pdf tex2rtf_rtf.ps >> c:\temp.log
 
 echo Zipping
 cd %WXWIN%
 del %DAILY%\*.zip
-zip %DAILY%\wxWidgets-%WXW_VER%-CHM.zip docs\htmlhelp\wx.chm utils/tex2rtf/docs/*.chm 
+zip %DAILY%\wxWidgets-%WXW_VER%-CHM.zip docs\htmlhelp\wx.chm utils/tex2rtf/docs/*.chm docs/htmlhelp/*.chm
+zip %DAILY%\wxWidgets-%WXW_VER%-HLP.zip docs\winhelp\wx.hlp docs\winhelp\wx.cnt utils/tex2rtf/docs/*.HLP utils/tex2rtf/docs/*.cnt docs/winhelp/*.hlp docs/winhelp/*.cnt
 zip %DAILY%\wxWidgets-%WXW_VER%-HTB.zip docs\htb\*.htb utils/tex2rtf/docs/*.htb 
-zip %DAILY%\wxWidgets-%WXW_VER%-HLP.zip docs\winhelp\wx.hlp docs\winhelp\wx.cnt utils/tex2rtf/docs/*.HLP utils/tex2rtf/docs/*.cnt 
-zip -r %DAILY%\wxWidgets-%WXW_VER%-HTML.zip docs\html\* utils\tex2rtf\docs\html\* -x CVS -x *.con -x *.hh* -x *.ref -x *.htx -x *.cn1 -x docs\html\CVS\*
-
-del %DAILY%\*.tar.gz
-bsdtar zcvf %DAILY%\wxWidgets-%WXW_VER%-HTB.tar.gz docs/htb/*.htb utils/tex2rtf/docs/*.htb 
-bsdtar zcvf %DAILY%\wxWidgets-%WXW_VER%-HTML.tar.gz  --exclude CVS --exclude *.con --exclude *.hh* --exclude *.ref --exclude *.htx --exclude *.cn1 --exclude docs/html/CVS/* docs/html/* utils/tex2rtf/docs/html/*
+zip %DAILY%\wxWidgets-%WXW_VER%-HTML.zip docs\mshtml\wx\*.* utils/tex2rtf/docs/*.html utils/tex2rtf/docs/*.gif 
 
 cd %DAILY%\
 mkdir docs
@@ -93,10 +96,12 @@ zip wxWidgets-%WXW_VER%-PDF.zip docs\pdf\*.pdf
 
 rem copy chm to inno
 cd %WXWIN%
-mkdir c:\wx\inno\wxWidgets\docs\htmlhelp
-copy docs\htmlhelp\wx.chm \wx\inno\wxWidgets\docs\htmlhelp\wx.chm
+mkdir c:\wx\inno\wxw28b\docs\htmlhelp
+del \wx\inno\wxw28b\docs\htmlhelp\wx.chm
+copy docs\htmlhelp\wx.chm \wx\inno\wxw28b\docs\htmlhelp\wx.chm
 cd %WXWIN%\build\script
 iscc wxwidgets.iss >> c:\temp.log
+
 
 echo docs built for %WXW_VER%
 echo docs built for %WXW_VER% >> c:\temp.log

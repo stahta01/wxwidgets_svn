@@ -58,7 +58,7 @@ public:
 //// Data
     wxContextHelp* m_contextHelp;
 
-    wxDECLARE_NO_COPY_CLASS(wxContextHelpEvtHandler);
+    DECLARE_NO_COPY_CLASS(wxContextHelpEvtHandler)
 };
 
 // ============================================================================
@@ -303,7 +303,7 @@ void wxContextHelpButton::OnContextHelp(wxCommandEvent& WXUNUSED(event))
 // wxHelpProvider
 // ----------------------------------------------------------------------------
 
-wxHelpProvider *wxHelpProvider::ms_helpProvider = NULL;
+wxHelpProvider *wxHelpProvider::ms_helpProvider = (wxHelpProvider *)NULL;
 
 // trivial implementation of some methods which we don't want to make pure
 // virtual for convenience

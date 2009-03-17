@@ -98,6 +98,18 @@ static void msgboxCallBackClose(Widget w,
 // wxMessageDialog
 // ----------------------------------------------------------------------------
 
+wxMessageDialog::wxMessageDialog(wxWindow *parent,
+                                 const wxString& message,
+                                 const wxString& caption,
+                                 long style,
+                                 const wxPoint& WXUNUSED(pos))
+{
+    m_caption = caption;
+    m_message = message;
+    m_parent = parent;
+    SetMessageDialogStyle(style);
+}
+
 extern "C"
 {
     typedef Widget (*DialogCreateFunction)(Widget, String, ArgList, Cardinal);
@@ -147,22 +159,19 @@ int wxMessageDialog::ShowModal()
     Arg args[10];
     int ac = 0;
 
-    wxXmString text(GetFullMessage());
+    wxXmString text(m_message);
     wxXmString title(m_caption);
     XtSetArg(args[ac], XmNmessageString, text()); ac++;
     XtSetArg(args[ac], XmNdialogTitle, title()); ac++;
 
     Display* dpy = XtDisplay(wParent);
 
-    if (m_backgroundColour.Ok())
-    {
-        wxComputeColours (dpy, & m_backgroundColour, NULL);
+    wxComputeColours (dpy, & m_backgroundColour, (wxColour*) NULL);
 
-        XtSetArg(args[ac], XmNbackground, g_itemColors[wxBACK_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNtopShadowColor, g_itemColors[wxTOPS_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNbottomShadowColor, g_itemColors[wxBOTS_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNforeground, g_itemColors[wxFORE_INDEX].pixel); ac++;
-    }
+    XtSetArg(args[ac], XmNbackground, g_itemColors[wxBACK_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNtopShadowColor, g_itemColors[wxTOPS_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNbottomShadowColor, g_itemColors[wxBOTS_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNforeground, g_itemColors[wxFORE_INDEX].pixel); ac++;
 
     wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 

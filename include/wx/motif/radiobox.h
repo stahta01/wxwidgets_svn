@@ -21,7 +21,7 @@
 
 #include "wx/arrstr.h"
 
-class WXDLLIMPEXP_CORE wxRadioBox : public wxControl, public wxRadioBoxBase
+class WXDLLEXPORT wxRadioBox : public wxControl, public wxRadioBoxBase
 {
 public:
     wxRadioBox() { Init(); }
@@ -113,7 +113,6 @@ public:
     virtual WXWidget GetLabelWidget() const { return m_labelWidget; }
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
     virtual void DoSetSize(int x, int y,
                            int width, int height,
                            int sizeFlags = wxSIZE_AUTO);

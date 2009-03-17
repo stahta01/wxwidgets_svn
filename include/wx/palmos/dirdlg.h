@@ -12,7 +12,7 @@
 #ifndef _WX_DIRDLG_H_
 #define _WX_DIRDLG_H_
 
-class WXDLLIMPEXP_CORE wxDirDialog : public wxDirDialogBase
+class WXDLLEXPORT wxDirDialog : public wxDirDialogBase
 {
 public:
     wxDirDialog(wxWindow *parent,

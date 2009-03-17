@@ -257,7 +257,7 @@ wxString wxStandardPaths::GetAppDir()
     {
         lastdir = fn.GetDirs().Last();
         lastdir.MakeLower();
-        if ( lastdir.Matches(_T("debug*")) || lastdir.Matches(_T("vc*msw*")) )
+        if ( lastdir.Matches(_T("debug*")) || lastdir.Matches(_T("vc_msw*")) )
             fn.RemoveLastDir();
     }
 #endif // __WXDEBUG__
@@ -281,7 +281,7 @@ wxString wxStandardPaths::GetExecutablePath() const
 
 wxString wxStandardPaths::GetConfigDir() const
 {
-    return AppendAppInfo(DoGetDirectory(CSIDL_COMMON_APPDATA));
+    return AppendAppName(DoGetDirectory(CSIDL_COMMON_APPDATA));
 }
 
 wxString wxStandardPaths::GetUserConfigDir() const
@@ -298,12 +298,12 @@ wxString wxStandardPaths::GetDataDir() const
 
 wxString wxStandardPaths::GetUserDataDir() const
 {
-    return AppendAppInfo(GetUserConfigDir());
+    return AppendAppName(GetUserConfigDir());
 }
 
 wxString wxStandardPaths::GetUserLocalDataDir() const
 {
-    return AppendAppInfo(DoGetDirectory(CSIDL_LOCAL_APPDATA));
+    return AppendAppName(DoGetDirectory(CSIDL_LOCAL_APPDATA));
 }
 
 wxString wxStandardPaths::GetPluginsDir() const

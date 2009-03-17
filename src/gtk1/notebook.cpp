@@ -31,6 +31,13 @@
 
 #include <gdk/gdkkeysyms.h>
 
+// ----------------------------------------------------------------------------
+// events
+// ----------------------------------------------------------------------------
+
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
+
 //-----------------------------------------------------------------------------
 // idle system
 //-----------------------------------------------------------------------------
@@ -61,8 +68,8 @@ public:
     wxGtkNotebookPage()
     {
         m_image = -1;
-        m_page = NULL;
-        m_box = NULL;
+        m_page = (GtkNotebookPage *) NULL;
+        m_box = (GtkWidget *) NULL;
     }
 
     wxString           m_text;
@@ -105,7 +112,7 @@ static void gtk_notebook_page_change_callback(GtkNotebook *WXUNUSED(widget),
         notebook->m_skipNextPageChangeEvent = false;
 
         // make wxNotebook::GetSelection() return the correct (i.e. consistent
-        // with wxBookCtrlEvent::GetSelection()) value even though the page is
+        // with wxNotebookEvent::GetSelection()) value even though the page is
         // not really changed in GTK+
         notebook->m_selection = page;
     }
@@ -119,7 +126,7 @@ static void gtk_notebook_page_change_callback(GtkNotebook *WXUNUSED(widget),
         else // change allowed
         {
             // make wxNotebook::GetSelection() return the correct (i.e. consistent
-            // with wxBookCtrlEvent::GetSelection()) value even though the page is
+            // with wxNotebookEvent::GetSelection()) value even though the page is
             // not really changed in GTK+
             notebook->m_selection = page;
 
@@ -242,7 +249,7 @@ static gint gtk_notebook_key_press_callback( GtkWidget *widget, GdkEventKey *gdk
         event.SetCurrentFocus( notebook );
 
         wxNotebookPage *client = notebook->GetPage(sel);
-        if ( !client->HandleWindowEvent( event ) )
+        if ( !client->GetEventHandler()->ProcessEvent( event ) )
         {
              client->SetFocus();
         }
@@ -291,7 +298,7 @@ void wxNotebook::Init()
     m_padding = 0;
     m_inSwitchPage = false;
 
-    m_imageList = NULL;
+    m_imageList = (wxImageList *) NULL;
     m_selection = -1;
     m_themeEnabled = true;
 }
@@ -408,9 +415,9 @@ int wxNotebook::GetPageImage( size_t page ) const
 
 wxGtkNotebookPage* wxNotebook::GetNotebookPage( int page ) const
 {
-    wxCHECK_MSG( m_widget != NULL, NULL, wxT("invalid notebook") );
+    wxCHECK_MSG( m_widget != NULL, (wxGtkNotebookPage*) NULL, wxT("invalid notebook") );
 
-    wxCHECK_MSG( page < (int)m_pagesData.GetCount(), NULL, wxT("invalid notebook index") );
+    wxCHECK_MSG( page < (int)m_pagesData.GetCount(), (wxGtkNotebookPage*) NULL, wxT("invalid notebook index") );
 
     return m_pagesData.Item(page)->GetData();
 }
@@ -485,7 +492,7 @@ bool wxNotebook::SetPageImage( size_t page, int image )
     if (image == -1 && nb_page->m_image == -1)
         return true; /* Case 1): Nothing to do. */
 
-    GtkWidget *pixmapwid = NULL;
+    GtkWidget *pixmapwid = (GtkWidget*) NULL;
 
     if (nb_page->m_image != -1)
     {
@@ -521,7 +528,7 @@ bool wxNotebook::SetPageImage( size_t page, int image )
     /* Construct the new pixmap */
     const wxBitmap *bmp = m_imageList->GetBitmapPtr(image);
     GdkPixmap *pixmap = bmp->GetPixmap();
-    GdkBitmap *mask = NULL;
+    GdkBitmap *mask = (GdkBitmap*) NULL;
     if ( bmp->GetMask() )
     {
         mask = bmp->GetMask()->GetBitmap();
@@ -689,7 +696,7 @@ bool wxNotebook::InsertPage( size_t position,
 
         const wxBitmap *bmp = m_imageList->GetBitmapPtr(imageId);
         GdkPixmap *pixmap = bmp->GetPixmap();
-        GdkBitmap *mask = NULL;
+        GdkBitmap *mask = (GdkBitmap*) NULL;
         if ( bmp->GetMask() )
         {
             mask = bmp->GetMask()->GetBitmap();
@@ -857,5 +864,11 @@ wxNotebook::GetClassDefaultAttributes(wxWindowVariant WXUNUSED(variant))
 {
     return GetDefaultAttributesFromGTKWidget(gtk_notebook_new);
 }
+
+//-----------------------------------------------------------------------------
+// wxNotebookEvent
+//-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
 
 #endif

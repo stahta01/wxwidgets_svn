@@ -110,11 +110,9 @@ bool wxAuiMDIParentFrame::Create(wxWindow *parent,
     }
 #endif // wxUSE_MENUS
 
-    if ( !wxFrame::Create(parent, id, title, pos, size, style, name) )
-        return false;
-
-    m_pClientWindow = OnCreateClient();
-    return m_pClientWindow != NULL;
+    wxFrame::Create(parent, id, title, pos, size, style, name);
+    OnCreateClient();
+    return true;
 }
 
 
@@ -136,7 +134,7 @@ wxAuiTabArt* wxAuiMDIParentFrame::GetArtProvider()
 
 wxAuiNotebook* wxAuiMDIParentFrame::GetNotebook() const
 {
-    return static_cast<wxAuiNotebook*>(m_pClientWindow);
+    return wx_static_cast(wxAuiNotebook*, m_pClientWindow);
 }
 
 
@@ -181,13 +179,13 @@ void wxAuiMDIParentFrame::SetChildMenuBar(wxAuiMDIChildFrame* pChild)
         // No Child, set Our menu bar back.
         if (m_pMyMenuBar)
             SetMenuBar(m_pMyMenuBar);
-        else
+             else
             SetMenuBar(GetMenuBar());
 
         // Make sure we know our menu bar is in use
         m_pMyMenuBar = NULL;
     }
-    else
+     else
     {
         if (pChild->GetMenuBar() == NULL)
             return;
@@ -254,7 +252,8 @@ wxAuiMDIClientWindow *wxAuiMDIParentFrame::GetClientWindow() const
 
 wxAuiMDIClientWindow *wxAuiMDIParentFrame::OnCreateClient()
 {
-    return new wxAuiMDIClientWindow( this );
+    m_pClientWindow = new wxAuiMDIClientWindow( this );
+    return m_pClientWindow;
 }
 
 void wxAuiMDIParentFrame::ActivateNext()
@@ -315,7 +314,7 @@ void wxAuiMDIParentFrame::AddWindowMenu(wxMenuBar *pMenuBar)
         int pos = pMenuBar->FindMenu(wxGetStockLabel(wxID_HELP,wxSTOCK_NOFLAGS));
         if (pos == wxNOT_FOUND)
             pMenuBar->Append(m_pWindowMenu, _("&Window"));
-        else
+             else
             pMenuBar->Insert(pos, m_pWindowMenu, _("&Window"));
     }
 }
@@ -367,7 +366,7 @@ void wxAuiMDIParentFrame::Tile(wxOrientation orient)
     {
         client_window->Split(cur_idx, wxLEFT);
     }
-    else if (orient == wxHORIZONTAL)
+     else if (orient == wxHORIZONTAL)
     {
         client_window->Split(cur_idx, wxTOP);
     }
@@ -447,7 +446,7 @@ bool wxAuiMDIChildFrame::Create(wxAuiMDIParentFrame* parent,
                                 const wxString& name)
 {
     wxAuiMDIClientWindow* pClientWindow = parent->GetClientWindow();
-    wxASSERT_MSG((pClientWindow != NULL), wxT("Missing MDI client window."));
+    wxASSERT_MSG((pClientWindow != (wxWindow*) NULL), wxT("Missing MDI client window."));
 
     // see comment in constructor
     if (style & wxMINIMIZE)
@@ -457,10 +456,10 @@ bool wxAuiMDIChildFrame::Create(wxAuiMDIParentFrame* parent,
 
     // create the window off-screen to prevent flicker
     wxPanel::Create(pClientWindow,
-                    id,
-                    wxPoint(cli_size.x+1, cli_size.y+1),
-                    size,
-                    wxNO_BORDER, name);
+		    id,
+		    wxPoint(cli_size.x+1, cli_size.y+1),
+		    size,
+		    wxNO_BORDER, name);
 
     DoShow(false);
 
@@ -727,7 +726,6 @@ wxAuiMDIClientWindow::wxAuiMDIClientWindow(wxAuiMDIParentFrame* parent, long sty
 
 wxAuiMDIClientWindow::~wxAuiMDIClientWindow()
 {
-    DestroyChildren();
 }
 
 bool wxAuiMDIClientWindow::CreateClient(wxAuiMDIParentFrame* parent, long style)
@@ -810,8 +808,8 @@ void wxAuiMDIClientWindow::PageChanged(int old_selection, int new_selection)
 
 void wxAuiMDIClientWindow::OnPageClose(wxAuiNotebookEvent& evt)
 {
-    wxAuiMDIChildFrame* wnd;
-    wnd = static_cast<wxAuiMDIChildFrame*>(GetPage(evt.GetSelection()));
+    wxAuiMDIChildFrame*
+        wnd = wx_static_cast(wxAuiMDIChildFrame*, GetPage(evt.GetSelection()));
 
     wnd->Close();
 
@@ -834,5 +832,6 @@ void wxAuiMDIClientWindow::OnSize(wxSizeEvent& evt)
         ((wxAuiMDIChildFrame *)GetPage(pos))->ApplyMDIChildFrameRect();
 }
 
-#endif //wxUSE_AUI
 #endif // wxUSE_MDI
+
+#endif // wxUSE_AUI

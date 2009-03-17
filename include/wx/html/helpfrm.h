@@ -88,7 +88,7 @@ public:
     wxHtmlHelpController* GetController() const { return m_helpController; }
 
     /// Sets the help controller associated with the window.
-    void SetController(wxHtmlHelpController* controller);
+    void SetController(wxHtmlHelpController* controller) { m_helpController = controller; }
 
     /// Returns the help window.
     wxHtmlHelpWindow* GetHelpWindow() const { return m_HtmlHelpWin; }
@@ -139,7 +139,7 @@ protected:
 private:
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpFrame);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrame)
 };
 
 #endif // wxUSE_WXHTML_HELP

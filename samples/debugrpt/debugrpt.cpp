@@ -115,7 +115,7 @@ public:
 // ----------------------------------------------------------------------------
 
 // just some functions to get a slightly deeper stack trace
-static void bar(const char *p)
+static void bar(const wxChar *p)
 {
     char *pc = 0;
     *pc = *p;
@@ -125,15 +125,15 @@ static void bar(const char *p)
 
 void baz(const wxString& s)
 {
-    printf("baz: %s\n", (const char*)s.c_str());
+    printf("baz: %s\n", s.c_str());
 }
 
 void foo(int n)
 {
     if ( n % 2 )
-        baz("odd");
+        baz(wxT("odd"));
     else
-        bar("even");
+        bar(wxT("even"));
 }
 
 // ----------------------------------------------------------------------------
@@ -169,7 +169,7 @@ private:
     // number of lines drawn in OnPaint()
     int m_numLines;
 
-    wxDECLARE_NO_COPY_CLASS(MyFrame);
+    DECLARE_NO_COPY_CLASS(MyFrame)
     DECLARE_EVENT_TABLE()
 };
 
@@ -204,7 +204,7 @@ public:
 private:
     bool m_uploadReport;
 
-    wxDECLARE_NO_COPY_CLASS(MyApp);
+    DECLARE_NO_COPY_CLASS(MyApp)
 };
 
 IMPLEMENT_APP(MyApp)
@@ -229,8 +229,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 END_EVENT_TABLE()
 
 MyFrame::MyFrame()
-       : wxFrame(NULL, wxID_ANY, _T("wxWidgets Debug Report Sample"),
-                 wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxDEFAULT_FRAME_STYLE)
+       : wxFrame(NULL, wxID_ANY, _T("wxWidgets Debug Report Sample"))
 {
     m_numLines = 10;
 

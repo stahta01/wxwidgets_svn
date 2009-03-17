@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 27 January 2009                                                     *
+# Date : 1 December 2006                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -50,20 +50,14 @@ LEX=flex
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
-		accelcmn.obj,\
 		anidecod.obj,\
 		animatecmn.obj,\
 		appbase.obj,\
 		appcmn.obj,\
-		arrstr.obj,\
 		artprov.obj,\
 		artstd.obj,\
-		base64.obj,\
 		bmpbase.obj,\
-		btncmn.obj,\
-		bmpcboxcmn.obj,\
 		bookctrl.obj,\
-		calctrlcmn.obj,\
 		choiccmn.obj,\
 		clipcmn.obj,\
 		clntdata.obj,\
@@ -80,6 +74,9 @@ OBJECTS = \
 		datacmn.obj,\
 		datetime.obj,\
 		datstrm.obj,\
+		db.obj,\
+		dbgrid.obj,\
+		dbtable.obj,\
 		dcbase.obj,\
 		dcbufcmn.obj,\
 		dircmn.obj,\
@@ -102,7 +99,6 @@ OBJECTS = \
 		filename.obj,\
 		filefn.obj,\
 		filesys.obj,\
-		filectrlcmn.obj,\
 		fldlgcmn.obj,\
 		fmapbase.obj,\
 		fontcmn.obj,\
@@ -120,7 +116,6 @@ OBJECTS1=fs_inet.obj,\
 		hashmap.obj,\
 		helpbase.obj,\
 		http.obj,\
-		hyperlnkcmn.obj,\
 		iconbndl.obj,\
 		init.obj,\
 		imagall.obj,\
@@ -168,24 +163,19 @@ OBJECTS1=fs_inet.obj,\
 		socket.obj,\
 		settcmn.obj,\
 		statbar.obj,\
-		stattextcmn.obj,\
 		stdpbase.obj,\
 		stockitem.obj,\
 		stopwatch.obj,\
 		strconv.obj,\
 		stream.obj,\
 		string.obj,\
-		stringimpl.obj,\
-		strvararg.obj,\
 		sysopt.obj
 
-OBJECTS2=tbarbase.obj,srchcmn.obj,\
+OBJECTS2=tbarbase.obj,\
 		textbuf.obj,\
 		textcmn.obj,\
 		textfile.obj,\
-		textentrycmn.obj,\
 		timercmn.obj,\
-		timerimpl.obj,\
 		tokenzr.obj,\
 		toplvcmn.obj,\
 		treebase.obj,\
@@ -193,15 +183,14 @@ OBJECTS2=tbarbase.obj,srchcmn.obj,\
 		url.obj,\
 		utilscmn.obj,\
 		rgncmn.obj,\
-		unichar.obj,\
 		uri.obj,\
 		valgen.obj,\
 		validate.obj,\
 		valtext.obj,\
 		variant.obj,\
 		wfstream.obj,\
+		wxchar.obj,\
 		wincmn.obj,\
-		wxcrt.obj,\
 		xpmdecod.obj,\
 		zipstrm.obj,\
 		zstream.obj,\
@@ -209,10 +198,7 @@ OBJECTS2=tbarbase.obj,srchcmn.obj,\
 		filepickercmn.obj,\
 		fontpickercmn.obj,\
 		pickerbase.obj,\
-		listctrlcmn.obj,socketiohandler.obj,fdiodispatcher.obj,\
-		selectdispatcher.obj,overlaycmn.obj,windowid.obj,sstream.obj,\
-		wrapsizer.obj,headerctrlcmn.obj,headercolcmn.obj,\
-		rearrangectrl.obj,spinctrlcmn.obj
+		listctrlcmn.obj
 
 OBJECTS_MOTIF=radiocmn.obj,combocmn.obj
 
@@ -222,25 +208,17 @@ OBJECTS_X11=accesscmn.obj,dndcmn.obj,dpycmn.obj,dseldlg.obj,\
 	regex.obj,taskbarcmn.obj,xti.obj,xtistrm.obj,xtixml.obj,\
 	combocmn.obj
 
-
-OBJECTS_GTK2=fontutilcmn.obj,cairo.obj
+OBJECTS_X11_2=socketevtdispatch.obj
 
 SOURCES = \
-		accelcmn.cpp,\
 		anidecod.cpp,\
 		animatecmn.cpp,\
 		appbase.cpp,\
 		appcmn.cpp,\
-		arrstr.cpp,\
 		artprov.cpp,\
 		artstd.cpp,\
-		base64.cpp,\
 		bmpbase.cpp,\
-		btncmn.cpp,\
-		bmpcboxcmn.cpp,\
 		bookctrl.cpp,\
-		calctrlcmn.cpp,\
-		cairo.cpp,\
 		choiccmn.cpp,\
 		clipcmn.cpp,\
 		clntdata.cpp,\
@@ -257,6 +235,9 @@ SOURCES = \
 		datacmn.cpp,\
 		datetime.cpp,\
 		datstrm.cpp,\
+		db.cpp,\
+		dbgrid.cpp,\
+		dbtable.cpp,\
 		dcbase.cpp,\
 		dcbufcmn.cpp,\
 		dircmn.cpp,\
@@ -273,20 +254,17 @@ SOURCES = \
 		extended.c,\
 		ffile.cpp,\
 		fddlgcmn.cpp,\
-		fdiodispatcher.cpp,\
 		file.cpp,\
 		fileback.cpp,\
 		fileconf.cpp,\
 		filename.cpp,\
 		filefn.cpp,\
 		filesys.cpp,\
-		filectrlcmn.cpp,\
 		fldlgcmn.cpp,\
 		fmapbase.cpp,\
 		fontcmn.cpp,\
 		fontenumcmn.cpp,\
 		fontmap.cpp,\
-		fontutilcmn.cpp,\
 		framecmn.cpp,\
 		fs_inet.cpp,\
 		ftp.cpp,\
@@ -294,12 +272,10 @@ SOURCES = \
 		gbsizer.cpp,\
 		gdicmn.cpp,\
 		gifdecod.cpp,\
-		socketiohandler.cpp,\
 		hash.cpp,\
 		hashmap.cpp,\
 		helpbase.cpp,\
 		http.cpp,\
-		hyperlnkcmn.cpp,\
 		iconbndl.cpp,\
 		init.cpp,\
 		imagall.cpp,\
@@ -331,7 +307,6 @@ SOURCES = \
 		mstream.cpp,\
 		nbkbase.cpp,\
 		object.cpp,\
-		overlaycmn.cpp,\
 		paper.cpp,\
 		platinfo.cpp,\
 		popupcmn.cpp,\
@@ -348,33 +323,25 @@ SOURCES = \
 		sckstrm.cpp,\
 		sizer.cpp,\
 		socket.cpp,\
-		selectdispatcher.cpp,\
+		socketevtdispatch.cpp,\
 		settcmn.cpp,\
-		sstream.cpp,\
 		statbar.cpp,\
-		stattextcmn.cpp,\
 		stdpbase.cpp,\
 		stockitem.cpp,\
 		stopwatch.cpp,\
-		srchcmn.cpp,\
 		strconv.cpp,\
 		stream.cpp,\
-		strvararg.cpp,\
 		sysopt.cpp,\
 		string.cpp,\
-		stringimpl.cpp,\
 		tbarbase.cpp,\
 		textbuf.cpp,\
 		textcmn.cpp,\
 		textfile.cpp,\
-		textentrycmn.cpp,\
 		timercmn.cpp,\
-		timerimpl.cpp,\
 		tokenzr.cpp,\
 		toplvcmn.cpp,\
 		treebase.cpp,\
 		txtstrm.cpp,\
-		unichar.cpp,\
 		url.cpp,\
 		utilscmn.cpp,\
 		valgen.cpp,\
@@ -383,7 +350,7 @@ SOURCES = \
 		variant.cpp,\
 		wfstream.cpp,\
 		wincmn.cpp,\
-		wxcrt.cpp,\
+		wxchar.cpp,\
 		xpmdecod.cpp,\
 		zipstrm.cpp,\
 		zstream.cpp,\
@@ -408,8 +375,7 @@ SOURCES = \
 		uri.cpp,\
 		xti.cpp,\
 		xtistrm.cpp,\
-		xtixml.cpp,\
-		wrapsizer.cpp
+		xtixml.cpp
 
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -431,43 +397,31 @@ all : $(SOURCES)
 .else
 .ifdef __WXGTK2__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_GTK2)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS1)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS2)
 	library [--.lib]libwx_gtk2.olb $(OBJECTS_X11)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS_GTK2)
 .else
 .ifdef __WXX11__
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11)
+	$(MMS)$(MMSQUALIFIERS) $(OBJECTS_X11_2)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS1)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS2)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS_X11)
+	library [--.lib]libwx_x11_univ.olb $(OBJECTS_X11_2)
 .endif
 .endif
 .endif
 .endif
 
-$(OBJECTS) : [--.include.wx]setup.h
-$(OBJECTS1) : [--.include.wx]setup.h
-$(OBJECTS2) : [--.include.wx]setup.h
-$(OBJECTS_X11) : [--.include.wx]setup.h
-$(OBJECTS_GTK2) : [--.include.wx]setup.h
-$(OBJECTS_MOTIF) : [--.include.wx]setup.h
-
-accelcmn.obj : accelcmn.cpp
 anidecod.obj : anidecod.cpp
 animatecmn.obj : animatecmn.cpp
 appbase.obj : appbase.cpp
 appcmn.obj : appcmn.cpp
-arrstr.obj : arrstr.cpp
 artprov.obj : artprov.cpp
 artstd.obj : artstd.cpp
-base64.obj : base64.cpp
 bmpbase.obj : bmpbase.cpp
-btncmn.obj : btncmn.cpp
-bmpcboxcmn.obj : bmpcboxcmn.cpp
 bookctrl.obj : bookctrl.cpp
 choiccmn.obj : choiccmn.cpp
 clipcmn.obj : clipcmn.cpp
@@ -485,6 +439,9 @@ ctrlsub.obj : ctrlsub.cpp
 datacmn.obj : datacmn.cpp
 datetime.obj : datetime.cpp
 datstrm.obj : datstrm.cpp
+db.obj : db.cpp
+dbgrid.obj : dbgrid.cpp
+dbtable.obj : dbtable.cpp
 dcbase.obj : dcbase.cpp
 dcbufcmn.obj : dcbufcmn.cpp
 dircmn.obj : dircmn.cpp
@@ -500,7 +457,6 @@ evtloopcmn.obj : evtloopcmn.cpp
 extended.obj : extended.c
 ffile.obj : ffile.cpp
 fddlgcmn.obj : fddlgcmn.cpp
-fdiodispatcher.obj : fdiodispatcher.cpp
 file.obj : file.cpp
 fileback.obj : fileback.cpp
 fileconf.obj : fileconf.cpp
@@ -512,7 +468,6 @@ fmapbase.obj : fmapbase.cpp
 fontcmn.obj : fontcmn.cpp
 fontenumcmn.obj : fontenumcmn.cpp
 fontmap.obj : fontmap.cpp
-fontutilcmn.obj : fontutilcmn.cpp
 framecmn.obj : framecmn.cpp
 fs_inet.obj : fs_inet.cpp
 ftp.obj : ftp.cpp
@@ -520,12 +475,10 @@ gaugecmn.obj : gaugecmn.cpp
 gbsizer.obj : gbsizer.cpp
 gdicmn.obj : gdicmn.cpp
 gifdecod.obj : gifdecod.cpp
-socketiohandler.obj : socketiohandler.cpp
 hash.obj : hash.cpp
 hashmap.obj : hashmap.cpp
 helpbase.obj : helpbase.cpp
 http.obj : http.cpp
-hyperlnkcmn.obj : hyperlnkcmn.cpp
 iconbndl.obj : iconbndl.cpp
 init.obj : init.cpp
 imagall.obj : imagall.cpp
@@ -570,32 +523,27 @@ sckaddr.obj : sckaddr.cpp
 sckfile.obj : sckfile.cpp
 sckipc.obj : sckipc.cpp
 sckstrm.obj : sckstrm.cpp
-selectdispatcher.obj : selectdispatcher.cpp
 sizer.obj : sizer.cpp
 socket.obj : socket.cpp
+socketevtdispatch.obj : socketevtdispatch.cpp
 settcmn.obj : settcmn.cpp
 statbar.obj : statbar.cpp
-stattextcmn.obj : stattextcmn.cpp
 stdpbase.obj : stdpbase.cpp
 stockitem.obj : stockitem.cpp
 stopwatch.obj : stopwatch.cpp
 strconv.obj : strconv.cpp
 stream.obj : stream.cpp
-strvararg.obj : strvararg.cpp
 sysopt.obj : sysopt.cpp
 string.obj : string.cpp
-stringimpl.obj : stringimpl.cpp
 tbarbase.obj : tbarbase.cpp
 textbuf.obj : textbuf.cpp
 textcmn.obj : textcmn.cpp
 textfile.obj : textfile.cpp
 timercmn.obj : timercmn.cpp
-timerimpl.obj : timerimpl.cpp
 tokenzr.obj : tokenzr.cpp
 toplvcmn.obj : toplvcmn.cpp
 treebase.obj : treebase.cpp
 txtstrm.obj : txtstrm.cpp
-unichar.obj : unichar.cpp
 url.obj : url.cpp
 utilscmn.obj : utilscmn.cpp
 valgen.obj : valgen.cpp
@@ -604,7 +552,7 @@ valtext.obj : valtext.cpp
 variant.obj : variant.cpp
 wfstream.obj : wfstream.cpp
 wincmn.obj : wincmn.cpp
-wxcrt.obj : wxcrt.cpp
+wxchar.obj : wxchar.cpp
 xpmdecod.obj : xpmdecod.cpp
 zipstrm.obj : zipstrm.cpp
 zstream.obj : zstream.cpp
@@ -633,17 +581,3 @@ filepickercmn.obj : filepickercmn.cpp
 fontpickercmn.obj : fontpickercmn.cpp
 pickerbase.obj : pickerbase.cpp
 listctrlcmn.obj : listctrlcmn.cpp
-srchcmn.obj : srchcmn.cpp
-textentrycmn.obj : textentrycmn.cpp
-filectrlcmn.obj : filectrlcmn.cpp
-cairo.obj : cairo.cpp
-	cxx$(CXXFLAGS)$(CXX_DEFINE)/obj=cairo.obj cairo.cpp
-overlaycmn.obj : overlaycmn.cpp
-windowid.obj : windowid.cpp
-calctrlcmn.obj : calctrlcmn.cpp
-sstream.obj : sstream.cpp
-wrapsizer.obj : wrapsizer.cpp
-headerctrlcmn.obj : headerctrlcmn.cpp
-headercolcmn.obj : headercolcmn.cpp
-rearrangectrl.obj : rearrangectrl.cpp
-spinctrlcmn.obj : spinctrlcmn.cpp

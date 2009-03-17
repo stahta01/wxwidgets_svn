@@ -39,10 +39,9 @@
 // TGA error codes.
 enum
 {
-    wxTGA_OK,
-    wxTGA_INVFORMAT,
-    wxTGA_MEMERR,
-    wxTGA_IOERR
+    wxTGA_OK = 0,
+    wxTGA_INVFORMAT = 1,
+    wxTGA_MEMERR = 2
 };
 
 // TGA header bytes.
@@ -101,9 +100,8 @@ void FlipTGA(unsigned char* imageData, int width, int height, short pixelSize)
     }
 }
 
-// return wxTGA_OK or wxTGA_IOERR
 static
-int DecodeRLE(unsigned char* imageData, unsigned long imageSize,
+void DecodeRLE(unsigned char* imageData, unsigned long imageSize,
                short pixelSize, wxInputStream& stream)
 {
     unsigned long index = 0;
@@ -113,11 +111,7 @@ int DecodeRLE(unsigned char* imageData, unsigned long imageSize,
 
     while (index < imageSize)
     {
-        int ch = stream.GetC();
-        if ( ch == wxEOF )
-            return wxTGA_IOERR;
-
-        current = ch;
+        current = stream.GetC();
 
         // RLE packet.
         if ( current & 0x80 )
@@ -132,8 +126,7 @@ int DecodeRLE(unsigned char* imageData, unsigned long imageSize,
             index += current * pixelSize;
 
             // Repeat the pixel length times.
-            if ( !stream.Read(buf, pixelSize) )
-                return wxTGA_IOERR;
+            stream.Read(buf, pixelSize);
 
             for (unsigned int i = 0; i < length; i++)
             {
@@ -152,14 +145,11 @@ int DecodeRLE(unsigned char* imageData, unsigned long imageSize,
             index += length;
 
             // Write the next length pixels directly to the image data.
-            if ( !stream.Read(imageData, length) )
-                return wxTGA_IOERR;
+            stream.Read(imageData, length);
 
             imageData += length;
         }
     }
-
-    return wxTGA_OK;
 }
 
 static
@@ -211,8 +201,7 @@ int ReadTGA(wxImage* image, wxInputStream& stream)
     }
 
     // Seek from the offset we got from the TGA header.
-    if (stream.SeekI(offset, wxFromStart) == wxInvalidOffset)
-        return wxTGA_INVFORMAT;
+    stream.SeekI(offset, wxFromStart);
 
     // Load a palette if we have one.
     if (colorType == wxTGA_MAPPED)
@@ -453,9 +442,7 @@ int ReadTGA(wxImage* image, wxInputStream& stream)
 
             // Decode the RLE data.
 
-            int rc =  DecodeRLE(imageData, imageSize, pixelSize, stream);
-            if ( rc != wxTGA_OK )
-                return rc;
+            DecodeRLE(imageData, imageSize, pixelSize, stream);
 
             // If orientation == 0, then the image is stored upside down.
             // We need to store it right side up.
@@ -513,9 +500,7 @@ int ReadTGA(wxImage* image, wxInputStream& stream)
         {
             // Decode the RLE data.
 
-            int rc = DecodeRLE(imageData, imageSize, pixelSize, stream);
-            if ( rc != wxTGA_OK )
-                return rc;
+            DecodeRLE(imageData, imageSize, pixelSize, stream);
 
             // If orientation == 0, then the image is stored upside down.
             // We need to store it right side up.
@@ -593,9 +578,7 @@ int ReadTGA(wxImage* image, wxInputStream& stream)
         {
             // Decode the RLE data.
 
-            int rc = DecodeRLE(imageData, imageSize, pixelSize, stream);
-            if ( rc != wxTGA_OK )
-                return rc;
+            DecodeRLE(imageData, imageSize, pixelSize, stream);
 
             // If orientation == 0, then the image is stored upside down.
             // We need to store it right side up.
@@ -689,10 +672,6 @@ bool wxTGAHandler::LoadFile(wxImage* image,
 
                 case wxTGA_MEMERR:
                     wxLogError(wxT("TGA: couldn't allocate memory."));
-                    break;
-
-                case wxTGA_IOERR:
-                    wxLogError(wxT("TGA: couldn't read image data."));
                     break;
 
                 default:

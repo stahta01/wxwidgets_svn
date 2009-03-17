@@ -30,24 +30,9 @@
 
 #include "wx/convauto.h"
 
-// we use latin1 by default as it seems the least bad choice: the files we need
-// to detect input of don't always come from the user system (they are often
-// received from other machines) and so using wxFONTENCODING_SYSTEM doesn't
-// seem to be a good idea and there is no other reasonable alternative
-wxFontEncoding wxConvAuto::ms_defaultMBEncoding = wxFONTENCODING_ISO8859_1;
-
 // ============================================================================
 // implementation
 // ============================================================================
-
-/* static */
-void wxConvAuto::SetFallbackEncoding(wxFontEncoding enc)
-{
-    wxASSERT_MSG( enc != wxFONTENCODING_DEFAULT,
-                  _T("wxFONTENCODING_DEFAULT doesn't make sense here") );
-
-    ms_defaultMBEncoding = enc;
-}
 
 /* static */
 wxConvAuto::BOMType wxConvAuto::DetectBOM(const char *src, size_t srcLen)
@@ -133,7 +118,8 @@ void wxConvAuto::InitFromBOM(BOMType bomType)
             break;
 
         case BOM_UTF8:
-            InitWithUTF8();
+            m_conv = &wxConvUTF8;
+            m_ownsConv = false;
             break;
 
         default:
@@ -141,7 +127,7 @@ void wxConvAuto::InitFromBOM(BOMType bomType)
             // fall through: still need to create something
 
         case BOM_None:
-            InitWithUTF8();
+            InitWithDefault();
             m_consumedBOM = true; // as there is nothing to consume
     }
 }
@@ -194,7 +180,7 @@ wxConvAuto::ToWChar(wchar_t *dst, size_t dstLen,
     // during this initial call but also during the first call with non-NULL
     // dst as typically we're first called with NULL dst to calculate the
     // needed buffer size
-    wxConvAuto *self = const_cast<wxConvAuto *>(this);
+    wxConvAuto *self = wx_const_cast(wxConvAuto *, this);
     if ( !m_conv )
     {
         self->InitFromInput(&src, &srcLen);
@@ -208,27 +194,7 @@ wxConvAuto::ToWChar(wchar_t *dst, size_t dstLen,
         SkipBOM(&src, &srcLen);
     }
 
-    // try to convert using the auto-detected encoding
-    size_t rc = m_conv->ToWChar(dst, dstLen, src, srcLen);
-    if ( rc == wxCONV_FAILED && m_bomType == BOM_None )
-    {
-        // if the conversion failed but we didn't really detect anything and
-        // simply tried UTF-8 by default, retry it using the fall-back
-        if ( m_encDefault != wxFONTENCODING_MAX )
-        {
-            if ( m_ownsConv )
-                delete m_conv;
-
-            self->m_conv = new wxCSConv(m_encDefault == wxFONTENCODING_DEFAULT
-                                            ? GetFallbackEncoding()
-                                            : m_encDefault);
-            self->m_ownsConv = true;
-
-            rc = m_conv->ToWChar(dst, dstLen, src, srcLen);
-        }
-    }
-
-    return rc;
+    return m_conv->ToWChar(dst, dstLen, src, srcLen);
 }
 
 size_t
@@ -238,7 +204,7 @@ wxConvAuto::FromWChar(char *dst, size_t dstLen,
     if ( !m_conv )
     {
         // default to UTF-8 for the multibyte output
-        const_cast<wxConvAuto *>(this)->InitWithUTF8();
+        wx_const_cast(wxConvAuto *, this)->InitWithDefault();
     }
 
     return m_conv->FromWChar(dst, dstLen, src, srcLen);

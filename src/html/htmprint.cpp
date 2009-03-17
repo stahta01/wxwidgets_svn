@@ -74,9 +74,6 @@ void wxHtmlDCRenderer::SetDC(wxDC *dc, double pixel_scale)
 
 void wxHtmlDCRenderer::SetSize(int width, int height)
 {
-    wxCHECK_RET( width, "width must be non-zero" );
-    wxCHECK_RET( height, "height must be non-zero" );
-
     m_Width = width;
     m_Height = height;
 }
@@ -84,10 +81,9 @@ void wxHtmlDCRenderer::SetSize(int width, int height)
 
 void wxHtmlDCRenderer::SetHtmlText(const wxString& html, const wxString& basepath, bool isdir)
 {
-    wxCHECK_RET( m_DC, "SetDC() must be called before SetHtmlText()" );
-    wxCHECK_RET( m_Width, "SetSize() must be called before SetHtmlText()" );
+    if (m_DC == NULL) return;
 
-    wxDELETE(m_Cells);
+    if (m_Cells != NULL) delete m_Cells;
 
     m_FS->ChangePathTo(basepath, isdir);
     m_Cells = (wxHtmlContainerCell*) m_Parser->Parse(html);
@@ -100,10 +96,8 @@ void wxHtmlDCRenderer::SetFonts(const wxString& normal_face, const wxString& fix
                                 const int *sizes)
 {
     m_Parser->SetFonts(normal_face, fixed_face, sizes);
-
-    if ( m_Cells )
+    if (m_DC == NULL && m_Cells != NULL)
         m_Cells->Layout(m_Width);
-    // else: SetHtmlText() not yet called, no need for relayout
 }
 
 void wxHtmlDCRenderer::SetStandardFonts(int size,
@@ -111,20 +105,17 @@ void wxHtmlDCRenderer::SetStandardFonts(int size,
                                         const wxString& fixed_face)
 {
     m_Parser->SetStandardFonts(size, normal_face, fixed_face);
-
-    if ( m_Cells )
+    if (m_DC == NULL && m_Cells != NULL)
         m_Cells->Layout(m_Width);
-    // else: SetHtmlText() not yet called, no need for relayout
 }
 
 int wxHtmlDCRenderer::Render(int x, int y,
                              wxArrayInt& known_pagebreaks,
                              int from, int dont_render, int to)
 {
-    wxCHECK_MSG( m_Cells, 0, "SetHtmlText() must be called before Render()" );
-    wxCHECK_MSG( m_DC, 0, "SetDC() must be called before Render()" );
-
     int pbreak, hght;
+
+    if (m_Cells == NULL || m_DC == NULL) return 0;
 
     pbreak = (int)(from + m_Height);
     while (m_Cells->AdjustPagebreak(&pbreak, known_pagebreaks)) {}
@@ -209,10 +200,8 @@ void wxHtmlPrintout::OnPreparePrinting()
 
     int ppiPrinterX, ppiPrinterY;
     GetPPIPrinter(&ppiPrinterX, &ppiPrinterY);
-    wxUnusedVar(ppiPrinterX);
     int ppiScreenX, ppiScreenY;
     GetPPIScreen(&ppiScreenX, &ppiScreenY);
-    wxUnusedVar(ppiScreenX);
 
     wxDisplaySize(&scr_w, &scr_h);
     GetDC()->GetSize(&dc_w, &dc_h);
@@ -269,7 +258,7 @@ bool wxHtmlPrintout::OnBeginDocument(int startPage, int endPage)
 bool wxHtmlPrintout::OnPrintPage(int page)
 {
     wxDC *dc = GetDC();
-    if (dc && dc->IsOk())
+    if (dc && dc->Ok())
     {
         if (HasPage(page))
             RenderPage(dc, page);
@@ -282,19 +271,19 @@ bool wxHtmlPrintout::OnPrintPage(int page)
 void wxHtmlPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo)
 {
     *minPage = 1;
-    if ( m_NumPages >= (signed)m_PageBreaks.GetCount()-1)
+    if ( m_NumPages >= (signed)m_PageBreaks.Count()-1)
         *maxPage = m_NumPages;
     else
-        *maxPage = (signed)m_PageBreaks.GetCount()-1;
+        *maxPage = (signed)m_PageBreaks.Count()-1;
     *selPageFrom = 1;
-    *selPageTo = (signed)m_PageBreaks.GetCount()-1;
+    *selPageTo = (signed)m_PageBreaks.Count()-1;
 }
 
 
 
 bool wxHtmlPrintout::HasPage(int pageNum)
 {
-    return pageNum > 0 && (unsigned)pageNum < m_PageBreaks.GetCount();
+    return pageNum > 0 && (unsigned)pageNum < m_PageBreaks.Count();
 }
 
 
@@ -392,7 +381,7 @@ void wxHtmlPrintout::CountPages()
                                  m_PageBreaks,
                                  pos, true, INT_MAX);
         m_PageBreaks.Add( pos);
-        if( m_PageBreaks.GetCount() > wxHTML_PRINT_MAX_PAGES)
+        if( m_PageBreaks.Count() > wxHTML_PRINT_MAX_PAGES)
         {
             wxMessageBox( _("HTML pagination algorithm generated more than the allowed maximum number of pages and it can't continue any longer!"),
             _("Warning"), wxCANCEL | wxICON_ERROR );
@@ -429,7 +418,7 @@ void wxHtmlPrintout::RenderPage(wxDC *dc, int page)
 
     m_Renderer->SetDC(dc, (double)ppiPrinterY / (double)ppiScreenY);
 
-    dc->SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
+    dc->SetBackgroundMode(wxTRANSPARENT);
 
     m_Renderer->Render((int) (ppmm_h * m_MarginLeft),
                          (int) (ppmm_v * (m_MarginTop + (m_HeaderHeight == 0 ? 0 : m_MarginSpace)) + m_HeaderHeight), m_PageBreaks,
@@ -459,7 +448,7 @@ wxString wxHtmlPrintout::TranslateHeader(const wxString& instr, int page)
     num.Printf(wxT("%i"), page);
     r.Replace(wxT("@PAGENUM@"), num);
 
-    num.Printf(wxT("%lu"), (unsigned long)(m_PageBreaks.GetCount() - 1));
+    num.Printf(wxT("%lu"), (unsigned long)(m_PageBreaks.Count() - 1));
     r.Replace(wxT("@PAGESCNT@"), num);
 
     const wxDateTime now = wxDateTime::Now();

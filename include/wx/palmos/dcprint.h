@@ -17,7 +17,7 @@
 #include "wx/dc.h"
 #include "wx/cmndata.h"
 
-class WXDLLIMPEXP_CORE wxPrinterDC : public wxDC
+class WXDLLEXPORT wxPrinterDC : public wxDC
 {
 public:
     // Create a printer DC (obsolete function: use wxPrintData version now)
@@ -34,7 +34,7 @@ public:
     virtual void StartPage();
     virtual void EndPage();
 
-    wxRect GetPaperRect() const;
+    wxRect GetPaperRect();
 
 protected:
     virtual void DoDrawBitmap(const wxBitmap &bmp, wxCoord x, wxCoord y,
@@ -42,8 +42,7 @@ protected:
     virtual bool DoBlit(wxCoord xdest, wxCoord ydest,
                         wxCoord width, wxCoord height,
                         wxDC *source, wxCoord xsrc, wxCoord ysrc,
-                        wxRasterOperationMode rop = wxCOPY, bool useMask = FALSE,
-                        wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
+                        int rop = wxCOPY, bool useMask = FALSE, wxCoord xsrcMask = -1, wxCoord ysrcMask = -1);
 
     // init the dc
     void Init();
@@ -55,10 +54,10 @@ private:
 };
 
 // Gets an HDC for the default printer configuration
-// WXHDC WXDLLIMPEXP_CORE wxGetPrinterDC(int orientation);
+// WXHDC WXDLLEXPORT wxGetPrinterDC(int orientation);
 
 // Gets an HDC for the specified printer configuration
-WXHDC WXDLLIMPEXP_CORE wxGetPrinterDC(const wxPrintData& data);
+WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& data);
 
 #endif // wxUSE_PRINTING_ARCHITECTURE
 

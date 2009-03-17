@@ -62,7 +62,7 @@ static gint gtk_popup_button_press (GtkWidget *widget, GdkEvent *gdk_event, wxPo
     wxFocusEvent event( wxEVT_KILL_FOCUS, win->GetId() );
     event.SetEventObject( win );
 
-    (void)win->HandleWindowEvent( event );
+    (void)win->GetEventHandler()->ProcessEvent( event );
 
     return TRUE;
 }
@@ -328,7 +328,7 @@ void wxPopupWindow::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y), int width, int 
     geom.max_width = m_width;
     geom.max_height = m_height;
     gtk_window_set_geometry_hints( GTK_WINDOW(m_widget),
-                                   NULL,
+                                   (GtkWidget*) NULL,
                                    &geom,
                                    (GdkWindowHints) flag );
 
@@ -337,7 +337,7 @@ void wxPopupWindow::GtkOnSize( int WXUNUSED(x), int WXUNUSED(y), int width, int 
 
     wxSizeEvent event( wxSize(m_width,m_height), GetId() );
     event.SetEventObject( this );
-    HandleWindowEvent( event );
+    GetEventHandler()->ProcessEvent( event );
 }
 
 void wxPopupWindow::OnInternalIdle()

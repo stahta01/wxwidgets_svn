@@ -75,9 +75,6 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_COMBOBOX
     AddHandler(new wxComboBoxXmlHandler);
 #endif
-#if wxUSE_COMBOCTRL
-    AddHandler(new wxComboCtrlXmlHandler);
-#endif
 #if wxUSE_DATEPICKCTRL
     AddHandler(new wxDateCtrlXmlHandler);
 #endif
@@ -139,9 +136,6 @@ void wxXmlResource::InitAllHandlers()
 #endif
 #if wxUSE_SCROLLBAR
     AddHandler(new wxScrollBarXmlHandler);
-#endif
-#if wxUSE_SEARCHCTRL
-    AddHandler(new wxSearchCtrlXmlHandler);
 #endif
 #if wxUSE_SLIDER
     AddHandler(new wxSliderXmlHandler);

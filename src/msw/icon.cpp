@@ -72,12 +72,12 @@ wxIcon::wxIcon(const char bits[], int width, int height)
 }
 
 wxIcon::wxIcon(const wxString& iconfile,
-               wxBitmapType type,
+               long flags,
                int desiredWidth,
                int desiredHeight)
 
 {
-    LoadFile(iconfile, type, desiredWidth, desiredHeight);
+    LoadFile(iconfile, flags, desiredWidth, desiredHeight);
 }
 
 wxIcon::wxIcon(const wxIconLocation& loc)
@@ -100,7 +100,7 @@ wxIcon::~wxIcon()
 wxObjectRefData *wxIcon::CloneRefData(const wxObjectRefData *dataOrig) const
 {
     const wxIconRefData *
-        data = static_cast<const wxIconRefData *>(dataOrig);
+        data = wx_static_cast(const wxIconRefData *, dataOrig);
     if ( !data )
         return NULL;
 
@@ -128,14 +128,14 @@ void wxIcon::CopyFromBitmap(const wxBitmap& bmp)
 #endif // __WXMICROWIN__
 }
 
-void wxIcon::CreateIconFromXpm(const char* const* data)
+void wxIcon::CreateIconFromXpm(const char **data)
 {
     wxBitmap bmp(data);
     CopyFromBitmap(bmp);
 }
 
 bool wxIcon::LoadFile(const wxString& filename,
-                      wxBitmapType type,
+                      long type,
                       int desiredWidth, int desiredHeight)
 {
     UnRef();

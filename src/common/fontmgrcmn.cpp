@@ -113,8 +113,7 @@ wxFontFace *wxFontBundleBase::GetFace(FaceType type) const
 wxFontFace *
 wxFontBundleBase::GetFaceForFont(const wxFontMgrFontRefData& font) const
 {
-    wxASSERT_MSG( font.GetFaceName().empty() ||
-                  GetName().CmpNoCase(font.GetFaceName()) == 0,
+    wxASSERT_MSG( font.GetFaceName().empty() || font.GetFaceName() == GetName(),
                   _T("calling GetFaceForFont for incompatible font") );
 
     int type = FaceType_Regular;
@@ -133,8 +132,6 @@ wxFontBundleBase::GetFaceForFont(const wxFontMgrFontRefData& font) const
 
     if ( !HasFace((FaceType)type) )
     {
-        // if we can't get the exact font requested, substitute it with
-        // some other variant:
         for (int i = 0; i < FaceType_Max; i++)
         {
             if ( HasFace((FaceType)i) )
@@ -225,15 +222,19 @@ void wxFontsManagerBase::AddBundle(wxFontBundle *bundle)
 // ----------------------------------------------------------------------------
 
 wxFontMgrFontRefData::wxFontMgrFontRefData(int size,
-                                           wxFontFamily family,
-                                           wxFontStyle style,
-                                           wxFontWeight weight,
+                                           int family,
+                                           int style,
+                                           int weight,
                                            bool underlined,
                                            const wxString& faceName,
                                            wxFontEncoding encoding)
 {
-    if ( family == wxFONTFAMILY_DEFAULT )
-        family = wxFONTFAMILY_SWISS;
+    if ( family == wxDEFAULT )
+        family = wxSWISS;
+    if ( style == wxDEFAULT )
+        style = wxNORMAL;
+    if ( weight == wxDEFAULT )
+        weight = wxNORMAL;
     if ( size == wxDEFAULT )
         size = 12;
 
@@ -290,21 +291,21 @@ void wxFontMgrFontRefData::SetPointSize(int pointSize)
     m_fontValid = false;
 }
 
-void wxFontMgrFontRefData::SetFamily(wxFontFamily family)
+void wxFontMgrFontRefData::SetFamily(int family)
 {
-    m_info.family = family;
+    m_info.family = (wxFontFamily)family;
     m_fontValid = false;
 }
 
-void wxFontMgrFontRefData::SetStyle(wxFontStyle style)
+void wxFontMgrFontRefData::SetStyle(int style)
 {
-    m_info.style = style;
+    m_info.style = (wxFontStyle)style;
     m_fontValid = false;
 }
 
-void wxFontMgrFontRefData::SetWeight(wxFontWeight weight)
+void wxFontMgrFontRefData::SetWeight(int weight)
 {
-    m_info.weight = weight;
+    m_info.weight = (wxFontWeight)weight;
     m_fontValid = false;
 }
 

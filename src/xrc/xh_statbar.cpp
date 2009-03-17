@@ -79,17 +79,7 @@ wxObject *wxStatusBarXmlHandler::DoCreateResource()
             else if (first == wxT("wxSB_RAISED"))
                 style[i] = wxSB_RAISED;
             else if (!first.empty())
-            {
-                ReportParamError
-                (
-                    "styles",
-                    wxString::Format
-                    (
-                        "unknown status bar field style \"%s\"",
-                        first
-                    )
-                );
-            }
+                wxLogError(wxT("Error in resource, unknown statusbar field style: ") + first);
 
             if(styles.Find(wxT(',')))
                 styles.Remove(0, styles.Find(wxT(',')) + 1);

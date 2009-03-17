@@ -44,7 +44,6 @@ public:
     // implement base class pure virtuals
     // ----------------------------------
 
-    virtual void WriteText(const wxString& text);
     virtual wxString GetValue() const;
     virtual bool IsEmpty() const;
 
@@ -55,13 +54,30 @@ public:
     virtual bool IsModified() const;
     virtual bool IsEditable() const;
 
+    // If the return values from and to are the same, there is no selection.
     virtual void GetSelection(long* from, long* to) const;
 
+    // operations
+    // ----------
+
+    // editing
+    virtual void Clear();
+    virtual void Replace(long from, long to, const wxString& value);
     virtual void Remove(long from, long to);
 
+    // sets/clears the dirty flag
     virtual void MarkDirty();
     virtual void DiscardEdits();
 
+    virtual void SetMaxLength(unsigned long len);
+
+    // writing text inserts it at the current position, appending always
+    // inserts it at the end
+    virtual void WriteText(const wxString& text);
+    virtual void AppendText(const wxString& text);
+
+    // apply text attribute to the range of text (only works with richedit
+    // controls)
     virtual bool SetStyle(long start, long end, const wxTextAttr& style);
 
     // translate between the position (which is just an index in the text ctrl
@@ -85,8 +101,16 @@ public:
     virtual void Cut();
     virtual void Paste();
 
+    // Undo/redo
+    virtual void Undo();
+    virtual void Redo();
+
+    virtual bool CanUndo() const;
+    virtual bool CanRedo() const;
+
     // Insertion point
     virtual void SetInsertionPoint(long pos);
+    virtual void SetInsertionPointEnd();
     virtual long GetInsertionPoint() const;
     virtual wxTextPos GetLastPosition() const;
 
@@ -121,7 +145,17 @@ public:
 
     void SetUpdateFont(bool WXUNUSED(update)) { }
 
+    // GTK+ textctrl is so dumb that you need to freeze/thaw it manually to
+    // avoid horrible flicker/scrolling back and forth
+    virtual void Freeze();
+    virtual void Thaw();
+
     // implementation only from now on
+
+    // wxGTK-specific: called recursively by Enable,
+    // to give widgets an oppprtunity to correct their colours after they
+    // have been changed by Enable
+    virtual void OnParentEnable( bool enable ) ;
 
     // tell the control to ignore next text changed signal
     void IgnoreNextTextUpdate(int n = 1) { m_countUpdatesToIgnore = n; }
@@ -143,19 +177,13 @@ public:
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
 
-protected:
-    // wxGTK-specific: called recursively by Enable,
-    // to give widgets an oppprtunity to correct their colours after they
-    // have been changed by Enable
-    virtual void OnEnabled(bool enable);
+    // has the control been frozen by Freeze()?
+    bool IsFrozen() const { return m_freezeCount > 0; }
 
-    // overridden wxWindow virtual methods
+protected:
     virtual wxSize DoGetBestSize() const;
     virtual void DoApplyWidgetStyle(GtkRcStyle *style);
     virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
-
-    virtual void DoFreeze();
-    virtual void DoThaw();
 
     // common part of all ctors
     void Init();
@@ -171,15 +199,10 @@ protected:
     // set the given characteristic)
     void GTKSetEditable();
     void GTKSetVisibility();
-    void GTKSetActivatesDefault();
     void GTKSetWrapMode();
     void GTKSetJustification();
 
 private:
-    // overridden wxTextEntry virtual methods
-    virtual GtkEditable *GetEditable() const;
-    virtual void EnableTextChangedEvents(bool enable);
-
     // change the font for everything in this control
     void ChangeFontGlobally();
 
@@ -189,17 +212,7 @@ private:
     // encoding
     wxFontEncoding GetTextEncoding() const;
 
-    // returns either m_text or m_buffer depending on whether the control is
-    // single- or multi-line; convenient for the GTK+ functions which work with
-    // both
-    void *GetTextObject() const
-    {
-        return IsMultiLine() ? static_cast<void *>(m_buffer)
-                             : static_cast<void *>(m_text);
-    }
 
-
-    // the widget used for single line controls
     GtkWidget  *m_text;
 
     bool        m_modified:1;
@@ -211,6 +224,8 @@ private:
     // a dummy one when frozen
     GtkTextBuffer *m_buffer;
 
+    // number of calls to Freeze() minus number of calls to Thaw()
+    unsigned m_freezeCount;
     GtkTextMark* m_showPositionOnThaw;
 
     // For wxTE_AUTO_URL

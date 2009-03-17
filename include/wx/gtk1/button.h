@@ -13,6 +13,19 @@
 #include "wx/defs.h"
 #include "wx/object.h"
 #include "wx/list.h"
+#include "wx/control.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxButton;
+
+//-----------------------------------------------------------------------------
+// global data
+//-----------------------------------------------------------------------------
+
+extern WXDLLIMPEXP_CORE const wxChar wxButtonNameStr[];
 
 //-----------------------------------------------------------------------------
 // wxButton
@@ -41,7 +54,7 @@ public:
            const wxValidator& validator = wxDefaultValidator,
            const wxString& name = wxButtonNameStr);
 
-    virtual wxWindow *SetDefault();
+    virtual void SetDefault();
     virtual void SetLabel( const wxString &label );
     virtual bool Enable( bool enable = TRUE );
 

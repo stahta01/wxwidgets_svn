@@ -26,8 +26,6 @@
 #endif //WX_PRECOMP
 
 #include "wx/evtloop.h"
-
-#include "wx/generic/private/timer.h"
 #include "wx/mgl/private.h"
 
 // ----------------------------------------------------------------------------
@@ -81,10 +79,9 @@ void wxEventLoopImpl::Dispatch()
     for (;;)
     {
 #if wxUSE_TIMER
-        wxGenericTimerImpl::NotifyTimers();
-#endif
+        wxTimer::NotifyTimers();
         MGL_wmUpdateDC(g_winMng);
-
+#endif
         EVT_pollJoystick();
         if ( EVT_getNext(&evt, EVT_EVERYEVT) ) break;
         PM_sleep(10);
@@ -100,19 +97,19 @@ bool wxEventLoopImpl::SendIdleEvent()
 }
 
 // ============================================================================
-// wxGUIEventLoop implementation
+// wxEventLoop implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// wxGUIEventLoop running and exiting
+// wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
     wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
     wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
@@ -149,7 +146,7 @@ int wxGUIEventLoop::Run()
     return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
     wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
@@ -165,7 +162,7 @@ void wxGUIEventLoop::Exit(int rc)
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     // update the display here, so that wxYield refreshes display and
     // changes take effect immediately, not after emptying events queue:
@@ -176,47 +173,10 @@ bool wxGUIEventLoop::Pending() const
     return (bool)(EVT_peekNext(&evt, EVT_EVERYEVT));
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
     wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
 
     m_impl->Dispatch();
     return m_impl->GetKeepLooping();
-}
-
-
-//-----------------------------------------------------------------------------
-// wxYield
-//-----------------------------------------------------------------------------
-
-bool wxGUIEventLoop::YieldFor(long eventsToProcess)
-{
-#if wxUSE_THREADS
-    if ( !wxThread::IsMain() )
-    {
-        // can't process events from other threads, MGL is thread-unsafe
-        return true;
-    }
-#endif // wxUSE_THREADS
-
-    m_isInsideYield = true;
-    m_eventsToProcessInsideYield = eventsToProcess;
-
-    wxLog::Suspend();
-
-    // TODO: implement event filtering using the eventsToProcess mask
-
-    while (Pending())
-        Dispatch();
-
-    /* it's necessary to call ProcessIdle() to update the frames sizes which
-       might have been changed (it also will update other things set from
-       OnUpdateUI() which is a nice (and desired) side effect) */
-    while (wxTheApp->ProcessIdle()) { }
-
-    wxLog::Resume();
-
-    m_isInsideYield = false;
-
-    return true;
 }

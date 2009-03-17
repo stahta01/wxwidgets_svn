@@ -19,12 +19,7 @@
 #include "wx/pen.h"
 #include "wx/arrstr.h"
 
-
-// ----------------------------------------------------------------------------
-// wxStatusBarGeneric
-// ----------------------------------------------------------------------------
-
-class WXDLLIMPEXP_CORE wxStatusBarGeneric : public wxStatusBarBase
+class WXDLLEXPORT wxStatusBarGeneric : public wxStatusBarBase
 {
 public:
     wxStatusBarGeneric() { Init(); }
@@ -50,6 +45,7 @@ public:
 
     // Set status line text
     virtual void SetStatusText(const wxString& text, int number = 0);
+    virtual wxString GetStatusText(int number = 0) const;
 
     // Set status line widths
     virtual void SetStatusWidths(int n, const int widths_field[]);
@@ -63,43 +59,34 @@ public:
     virtual int GetBorderX() const { return m_borderX; }
     virtual int GetBorderY() const { return m_borderY; }
 
+    ////////////////////////////////////////////////////////////////////////
+    // Implementation
 
-protected:      // event handlers
+    virtual void DrawFieldText(wxDC& dc, int i);
+    virtual void DrawField(wxDC& dc, int i);
+
+    void SetBorderX(int x);
+    void SetBorderY(int y);
 
     void OnPaint(wxPaintEvent& event);
-    void OnSize(wxSizeEvent& event);
 
     void OnLeftDown(wxMouseEvent& event);
     void OnRightDown(wxMouseEvent& event);
+
+    virtual void InitColours();
 
     // Responds to colour changes
     void OnSysColourChanged(wxSysColourChangedEvent& event);
 
 protected:
-
-    virtual void DrawFieldText(wxDC& dc, const wxRect& rc, int i, int textHeight);
-    virtual void DrawField(wxDC& dc, int i, int textHeight);
-
-    void SetBorderX(int x);
-    void SetBorderY(int y);
-
-    virtual void InitColours();
-
-    // true if the status bar shows the size grip: for this it must have
-    // wxST_SIZEGRIP style and the window it is attached to must be resizeable
-    // and not maximized
-    bool ShowsSizeGrip() const;
-
-    // returns the position and the size of the size grip
-    wxRect GetSizeGripRect() const;
-
     // common part of all ctors
     void Init();
 
-    // the last known height of the client rect
-    int               m_lastClientHeight;
+    wxArrayString     m_statusStrings;
 
-    // the absolute widths of the status bar panes in pixels
+    // the last known width of the client rect (used to rebuild cache)
+    int               m_lastClientWidth;
+    // the widths of the status bar panes in pixels
     wxArrayInt        m_widthsAbs;
 
     int               m_borderX;

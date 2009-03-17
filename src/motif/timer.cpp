@@ -12,7 +12,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/motif/private/timer.h"
+#include "wx/timer.h"
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
@@ -29,66 +29,66 @@
 
 #include "wx/motif/private.h"
 
-WX_DECLARE_VOIDPTR_HASH_MAP(wxMotifTimerImpl*, wxTimerHashMap);
+IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
 
-static wxTimerHashMap gs_timers;
+WX_DECLARE_VOIDPTR_HASH_MAP(wxTimer*, wxTimerHashMap);
 
-void wxTimerCallback (wxMotifTimerImpl *timer)
+static wxTimerHashMap s_timers;
+
+void wxTimerCallback (wxTimer * timer)
 {
-    // Check to see if it's still on
-    if ( gs_timers.find(timer) == gs_timers.end() )
-        return;
+  // Check to see if it's still on
+  if (s_timers.find(timer) == s_timers.end())
+    return;
 
-    if ( !timer->IsRunning() )
-        return;            // Avoid to process spurious timer events
+  if (timer->m_id == 0)
+    return;            // Avoid to process spurious timer events
 
-    timer->Notify();
+  if (!timer->m_oneShot)
+    timer->m_id = XtAppAddTimeOut((XtAppContext) wxTheApp->GetAppContext(),
+                                  timer->m_milli,
+                                  (XtTimerCallbackProc) wxTimerCallback,
+                                  (XtPointer) timer);
+  else
+    timer->m_id = 0;
+
+  timer->Notify();
 }
 
-wxMotifTimerImpl::~wxMotifTimerImpl()
+void wxTimer::Init()
 {
-    gs_timers.erase(this);
+    m_id = 0;
+    m_milli = 1000;
 }
 
-void wxMotifTimerImpl::DoStart()
+wxTimer::~wxTimer()
 {
+    Stop();
+    s_timers.erase(this);
+}
+
+bool wxTimer::Start(int milliseconds, bool mode)
+{
+    Stop();
+
+    (void)wxTimerBase::Start(milliseconds, mode);
+
+    if (s_timers.find(this) == s_timers.end())
+        s_timers[this] = this;
+
     m_id = XtAppAddTimeOut((XtAppContext) wxTheApp->GetAppContext(),
                             m_milli,
                             (XtTimerCallbackProc) wxTimerCallback,
                             (XtPointer) this);
-}
-
-bool wxMotifTimerImpl::Start(int milliseconds, bool mode)
-{
-    if ( !wxTimerImpl::Start(milliseconds, mode) )
-        return false;
-
-    if ( gs_timers.find(this) == gs_timers.end() )
-        gs_timers[this] = this;
-
-    DoStart();
-
     return true;
 }
 
-void wxMotifTimerImpl::Stop()
+void wxTimer::Stop()
 {
-    XtRemoveTimeOut (m_id);
-    m_id = 0;
-}
-
-void wxMotifTimerImpl::Notify()
-{
-    if ( IsOneShot() )
+    if (m_id > 0)
     {
-        // nothing to do, timeout is removed automatically by X
+        XtRemoveTimeOut (m_id);
         m_id = 0;
     }
-    else // rearm the timer
-    {
-        DoStart();
-    }
-
-    wxTimerImpl::Notify();
+    m_milli = 0 ;
 }
-

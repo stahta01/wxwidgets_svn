@@ -21,7 +21,6 @@
 #include "wx/wxprec.h"
 
 #include "wx/dcclient.h"
-#include "wx/os2/dcclient.h"
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
@@ -39,7 +38,7 @@
 struct WXDLLEXPORT wxPaintDCInfo
 {
     wxPaintDCInfo( wxWindow* pWin
-                  ,wxPaintDCImpl*     pDC
+                  ,wxDC*     pDC
                  )
     {
         m_hWnd = pWin->GetHWND();
@@ -55,6 +54,14 @@ struct WXDLLEXPORT wxPaintDCInfo
 #include "wx/arrimpl.cpp"
 
 WX_DEFINE_OBJARRAY(wxArrayDCInfo);
+
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+    IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
+    IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
+    IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
 
 // ----------------------------------------------------------------------------
 // global variables
@@ -75,19 +82,19 @@ static RECT        g_paintStruct;
 // ===========================================================================
 
 // ----------------------------------------------------------------------------
-// wxWindowDCImpl
+// wxWindowDC
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxWindowDCImpl, wxPMDCImpl)
-
-wxWindowDCImpl::wxWindowDCImpl( wxDC *owner ) :
-   wxPMDCImpl( owner )
+wxWindowDC::wxWindowDC()
 {
+    m_pCanvas = NULL;
     m_PageSize.cx = m_PageSize.cy = 0;
+
 }
 
-wxWindowDCImpl::wxWindowDCImpl( wxDC *owner, wxWindow* pTheCanvas) :
-   wxPMDCImpl( owner )
+wxWindowDC::wxWindowDC(
+  wxWindow*                         pTheCanvas
+)
 {
     ERRORID                         vError;
     wxString                        sError;
@@ -145,9 +152,9 @@ wxWindowDCImpl::wxWindowDCImpl( wxDC *owner, wxWindow* pTheCanvas) :
                          ,&m_vRclPaint
                         );
     InitDC();
-} // end of wxWindowDCImpl::wxWindowDCImpl
+} // end of wxWindowDC::wxWindowDC
 
-void wxWindowDCImpl::InitDC()
+void wxWindowDC::InitDC()
 {
 
     //
@@ -163,10 +170,7 @@ void wxWindowDCImpl::InitDC()
 
     m_pen.SetColour(*wxBLACK);
     m_brush.SetColour(*wxWHITE);
-    // since we are a window dc we need to grab the palette from the window
-#if wxUSE_PALETTE
     InitializePalette();
-#endif
     wxFont* pFont = new wxFont( 10, wxMODERN, wxNORMAL, wxBOLD );
     SetFont(*pFont);
     delete pFont;
@@ -175,9 +179,9 @@ void wxWindowDCImpl::InitDC()
     //
     ::GpiSetTextAlignment((HPS)GetHPS(), TA_NORMAL_HORIZ, TA_BOTTOM);
 
-} // end of wxWindowDCImpl::InitDC
+} // end of wxWindowDC::InitDC
 
-void wxWindowDCImpl::DoGetSize(
+void wxWindowDC::DoGetSize(
   int*                              pnWidth
 , int*                              pnHeight
 ) const
@@ -186,22 +190,20 @@ void wxWindowDCImpl::DoGetSize(
     m_pCanvas->GetSize( pnWidth
                        ,pnHeight
                       );
-} // end of wxWindowDCImpl::DoGetSize
+} // end of wxWindowDC::DoGetSize
 
 // ----------------------------------------------------------------------------
 // wxClientDC
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxClientDCImpl, wxWindowDCImpl)
-
-wxClientDCImpl::wxClientDCImpl( wxDC *owner ) :
-   wxWindowDCImpl( owner )
+wxClientDC::wxClientDC()
 {
     m_pCanvas = NULL;
 }
 
-wxClientDCImpl::wxClientDCImpl( wxDC *owner, wxWindow *pTheCanvas) :
-   wxWindowDCImpl( owner )
+wxClientDC::wxClientDC(
+  wxWindow*                         pTheCanvas
+)
 {
     SIZEL                           vSizl = { 0,0};
     ERRORID                         vError;
@@ -212,19 +214,13 @@ wxClientDCImpl::wxClientDCImpl( wxDC *owner, wxWindow *pTheCanvas) :
     //
     // default under PM is that Window and Client DC's are the same
     //
-
     m_hDC = (WXHDC) ::WinOpenWindowDC(GetWinHwnd(pTheCanvas));
-    printf("Got WindowDC %X for window handle %X\n", m_hDC, pTheCanvas);
-
     m_hPS = ::GpiCreatePS( wxGetInstance()
                           ,m_hDC
                           ,&vSizl
                           ,PU_PELS | GPIF_LONG | GPIA_ASSOC
                          );
-    ::GpiAssociate(m_hPS, NULLHANDLE);
-    ::GpiAssociate(m_hPS, m_hDC);
 
-    printf("Got m_hPS %X\n", m_hPS);
     // Set the wxWidgets color table
     if (!::GpiCreateLogColorTable( m_hPS
                                   ,0L
@@ -252,11 +248,11 @@ wxClientDCImpl::wxClientDCImpl( wxDC *owner, wxWindow *pTheCanvas) :
                          ,&m_vRclPaint
                         );
     InitDC();
-} // end of wxClientDCImpl::wxClientDCImpl
+} // end of wxClientDC::wxClientDC
 
-void wxClientDCImpl::InitDC()
+void wxClientDC::InitDC()
 {
-    wxWindowDCImpl::InitDC();
+    wxWindowDC::InitDC();
 
     // in wxUniv build we must manually do some DC adjustments usually
     // performed by Windows for us
@@ -271,13 +267,13 @@ void wxClientDCImpl::InitDC()
     // clip the DC to avoid overwriting the non client area
     SetClippingRegion(wxPoint(0, 0), m_pCanvas->GetClientSize());
 #endif // __WXUNIVERSAL__
-} // end of wxClientDCImpl::InitDC
+} // end of wxClientDC::InitDC
 
-wxClientDCImpl::~wxClientDCImpl()
+wxClientDC::~wxClientDC()
 {
-} // end of wxClientDCImpl::~wxClientDCImpl
+} // end of wxClientDC::~wxClientDC
 
-void wxClientDCImpl::DoGetSize(
+void wxClientDC::DoGetSize(
   int*                              pnWidth
 , int*                              pnHeight
 ) const
@@ -286,25 +282,23 @@ void wxClientDCImpl::DoGetSize(
     m_pCanvas->GetClientSize( pnWidth
                              ,pnHeight
                             );
-} // end of wxClientDCImpl::DoGetSize
+} // end of wxClientDC::DoGetSize
 
 // ----------------------------------------------------------------------------
 // wxPaintDC
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxPaintDCImpl, wxWindowDCImpl)
+wxArrayDCInfo wxPaintDC::ms_cache;
 
-wxArrayDCInfo wxPaintDCImpl::ms_cache;
-
-wxPaintDCImpl::wxPaintDCImpl( wxDC *owner ) :
-   wxClientDCImpl( owner )
+wxPaintDC::wxPaintDC()
 {
     m_pCanvas = NULL;
     m_hDC = 0;
 }
 
-wxPaintDCImpl::wxPaintDCImpl( wxDC *owner, wxWindow *pCanvas) :
-   wxClientDCImpl( owner )
+wxPaintDC::wxPaintDC(
+  wxWindow*                         pCanvas
+)
 {
     wxCHECK_RET(pCanvas, wxT("NULL canvas in wxPaintDC ctor"));
 
@@ -367,9 +361,9 @@ wxPaintDCImpl::wxPaintDCImpl( wxDC *owner, wxWindow *pCanvas) :
         ms_cache.Add(new wxPaintDCInfo(m_pCanvas, this));
     }
     InitDC();
-} // end of wxPaintDCImpl::wxPaintDCImpl
+} // end of wxPaintDC::wxPaintDC
 
-wxPaintDCImpl::~wxPaintDCImpl()
+wxPaintDC::~wxPaintDC()
 {
     if ( m_hDC )
     {
@@ -394,7 +388,7 @@ wxPaintDCImpl::~wxPaintDCImpl()
     }
 }
 
-wxPaintDCInfo* wxPaintDCImpl::FindInCache(
+wxPaintDCInfo* wxPaintDC::FindInCache(
   size_t*                           pIndex
 ) const
 {
@@ -412,10 +406,10 @@ wxPaintDCInfo* wxPaintDCImpl::FindInCache(
         }
     }
     return pInfo;
-} // end of wxPaintDCImpl::FindInCache
+} // end of wxPaintDC::FindInCache
 
 // find the entry for this DC in the cache (keyed by the window)
-WXHDC wxPaintDCImpl::FindDCInCache(
+WXHDC wxPaintDC::FindDCInCache(
   wxWindow*                         pWin
 )
 {
@@ -431,4 +425,4 @@ WXHDC wxPaintDCImpl::FindDCInCache(
         }
     }
     return 0;
-} // end of wxPaintDCImpl::FindInCache
+} // end of wxPaintDC::FindInCache

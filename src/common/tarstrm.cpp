@@ -26,7 +26,7 @@
 
 #include "wx/buffer.h"
 #include "wx/datetime.h"
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 #include "wx/filename.h"
 #include "wx/thread.h"
 
@@ -291,10 +291,7 @@ bool wxTarHeaderBlock::SetPath(const wxString& name, wxMBConv& conv)
         size_t len = name.length();
         wxCharBuffer approx(len);
         for (size_t i = 0; i < len; i++)
-        {
-            wxChar c = name[i];
-            approx.data()[i] = c & ~0x7F ? '_' : c;
-        }
+            approx.data()[i] = name[i] & ~0x7F ? '_' : name[i];
         nameBuf = approx;
     }
 
@@ -900,8 +897,8 @@ wxTarNumber wxTarInputStream::GetHeaderNumber(int id) const
 
     if ((value = GetExtendedHeader(m_hdr->Name(id))) != wxEmptyString) {
         wxTarNumber n = 0;
-        wxString::const_iterator p = value.begin();
-        while (*p == ' ' && p != value.end())
+        const wxChar *p = value;
+        while (*p == ' ')
             p++;
         while (isdigit(*p))
             n = n * 10 + (*p++ - '0');
@@ -945,7 +942,7 @@ bool wxTarInputStream::ReadExtendedHeader(wxTarHeaderRecords*& recs)
     size_t recPos, recSize;
     bool ok = true;
 
-    for (recPos = 0; recPos < len && ok; recPos += recSize) {
+    for (recPos = 0; recPos < len; recPos += recSize) {
         char *pRec = buf.data() + recPos;
         char *p = pRec;
 
@@ -1085,12 +1082,12 @@ void wxTarOutputStream::Init(wxTarFormat format)
     m_extendedHdr = NULL;
     m_extendedSize = 0;
     m_lasterror = m_parent_o_stream->GetLastError();
-    m_endrecWritten = false;
 }
 
 wxTarOutputStream::~wxTarOutputStream()
 {
-    Close();
+    if (m_tarsize)
+        Close();
     delete m_hdr;
     delete m_hdr2;
     delete [] m_extendedHdr;
@@ -1209,7 +1206,7 @@ bool wxTarOutputStream::CloseEntry()
 
 bool wxTarOutputStream::Close()
 {
-    if (!CloseEntry() || (m_tarsize == 0 && m_endrecWritten))
+    if (!CloseEntry())
         return false;
 
     memset(m_hdr, 0, sizeof(*m_hdr));
@@ -1221,7 +1218,6 @@ bool wxTarOutputStream::Close()
     m_tarsize = 0;
     m_tarstart = wxInvalidOffset;
     m_lasterror = m_parent_o_stream->GetLastError();
-    m_endrecWritten = true;
     return IsOk();
 }
 
@@ -1340,7 +1336,7 @@ wxString wxTarOutputStream::PaxHeaderPath(const wxString& format,
         if (end == wxString::npos || end + 1 >= format.length())
             break;
         ret << format.substr(begin, end - begin);
-        switch ( format[end + 1].GetValue() ) {
+        switch (format[end + 1]) {
             case 'd': ret << d; break;
             case 'f': ret << f; break;
             case 'p': ret << wxGetProcessId(); break;
@@ -1434,16 +1430,11 @@ void wxTarOutputStream::SetExtendedHeader(const wxString& key,
                                           const wxString& value)
 {
     if (m_pax) {
-#if wxUSE_UNICODE
-        const wxCharBuffer utf_key = key.utf8_str();
-        const wxCharBuffer utf_value = value.utf8_str();
-#else
         const wxWX2WCbuf wide_key = key.wc_str(GetConv());
         const wxCharBuffer utf_key = wxConvUTF8.cWC2MB(wide_key);
 
         const wxWX2WCbuf wide_value = value.wc_str(GetConv());
         const wxCharBuffer utf_value = wxConvUTF8.cWC2MB(wide_value);
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
 
         // a small buffer to format the length field in
         char buf[32];

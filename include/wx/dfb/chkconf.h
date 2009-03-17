@@ -21,13 +21,4 @@
 #   error "wxFileConfig is required by wxDFB port"
 #endif
 
-#if wxUSE_SOCKETS && !wxUSE_CONSOLE_EVENTLOOP
-#   ifdef wxABORT_ON_CONFIG_ERROR
-#       error "wxSocket requires wxSelectDispatcher in wxDFB"
-#   else
-#       undef wxUSE_CONSOLE_EVENTLOOP
-#       define wxUSE_CONSOLE_EVENTLOOP 1
-#   endif
-#endif
-
 #endif /* _WX_DFB_CHKCONF_H_ */

@@ -41,7 +41,6 @@
 #include "wx/datetime.h"
 #include "wx/msgout.h"
 #include "wx/filename.h"
-#include "wx/apptrait.h"
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -49,15 +48,11 @@
 
 static wxString GetTypeName(wxCmdLineParamType type);
 
-static wxString GetOptionName(wxString::const_iterator p,
-                              wxString::const_iterator end,
-                              const wxChar *allowedChars);
+static wxString GetOptionName(const wxChar *p, const wxChar *allowedChars);
 
-static wxString GetShortOptionName(wxString::const_iterator p,
-                                   wxString::const_iterator end);
+static wxString GetShortOptionName(const wxChar *p);
 
-static wxString GetLongOptionName(wxString::const_iterator p,
-                                  wxString::const_iterator end);
+static wxString GetLongOptionName(const wxChar *p);
 
 // ----------------------------------------------------------------------------
 // private structs
@@ -73,29 +68,20 @@ struct wxCmdLineOption
                     wxCmdLineParamType typ,
                     int fl)
     {
-        // wxCMD_LINE_USAGE_TEXT uses only description, shortName and longName is empty
-    #ifdef __WXDEBUG__
-        if ( k != wxCMD_LINE_USAGE_TEXT )
-        {
-            wxASSERT_MSG
-            (
-                !shrt.empty() || !lng.empty(),
-                 wxT("option should have at least one name")
-            );
+        wxASSERT_MSG( !shrt.empty() || !lng.empty(),
+                      _T("option should have at least one name") );
 
-            wxASSERT_MSG
+        wxASSERT_MSG
             (
-                GetShortOptionName(shrt.begin(), shrt.end()).Len() == shrt.Len(),
+                GetShortOptionName(shrt).Len() == shrt.Len(),
                 wxT("Short option contains invalid characters")
             );
 
-            wxASSERT_MSG
+        wxASSERT_MSG
             (
-                GetLongOptionName(lng.begin(), lng.end()).Len() == lng.Len(),
+                GetLongOptionName(lng).Len() == lng.Len(),
                 wxT("Long option contains invalid characters")
             );
-        }
-    #endif // __WXDEBUG__
 
 
         kind = k;
@@ -120,8 +106,6 @@ struct wxCmdLineOption
         wxASSERT_MSG( type == typ, _T("type mismatch in wxCmdLineOption") );
     }
 
-    double GetDoubleVal() const
-        { Check(wxCMD_LINE_VAL_DOUBLE); return m_doubleVal; }
     long GetLongVal() const
         { Check(wxCMD_LINE_VAL_NUMBER); return m_longVal; }
     const wxString& GetStrVal() const
@@ -131,8 +115,6 @@ struct wxCmdLineOption
         { Check(wxCMD_LINE_VAL_DATE);   return m_dateVal; }
 #endif // wxUSE_DATETIME
 
-    void SetDoubleVal(double val)
-        { Check(wxCMD_LINE_VAL_DOUBLE); m_doubleVal = val; m_hasVal = true; }
     void SetLongVal(long val)
         { Check(wxCMD_LINE_VAL_NUMBER); m_longVal = val; m_hasVal = true; }
     void SetStrVal(const wxString& val)
@@ -156,7 +138,6 @@ public:
 private:
     bool m_hasVal;
 
-    double m_doubleVal;
     long m_longVal;
     wxString m_strVal;
 #if wxUSE_DATETIME
@@ -198,7 +179,7 @@ struct wxCmdLineParserData
 
     // cmd line data
     wxArrayString m_arguments;  // == argv, argc == m_arguments.GetCount()
-    wxArrayOptions m_options;   // all possible options and switches
+    wxArrayOptions m_options;   // all possible options and switchrs
     wxArrayParams m_paramDesc;  // description of all possible params
     wxArrayString m_parameters; // all params found
 
@@ -207,7 +188,6 @@ struct wxCmdLineParserData
     void SetArguments(int argc, char **argv);
 #if wxUSE_UNICODE
     void SetArguments(int argc, wxChar **argv);
-    void SetArguments(int argc, const wxCmdLineArgsArray& argv);
 #endif // wxUSE_UNICODE
     void SetArguments(const wxString& cmdline);
 
@@ -253,12 +233,6 @@ void wxCmdLineParserData::SetArguments(int argc, wxChar **argv)
     {
         m_arguments.push_back(argv[n]);
     }
-}
-
-void wxCmdLineParserData::SetArguments(int WXUNUSED(argc),
-                                       const wxCmdLineArgsArray& argv)
-{
-    m_arguments = argv.GetArguments();
 }
 
 #endif // wxUSE_UNICODE
@@ -331,11 +305,6 @@ void wxCmdLineParser::SetCmdLine(int argc, wxChar **argv)
     m_data->SetArguments(argc, argv);
 }
 
-void wxCmdLineParser::SetCmdLine(int argc, const wxCmdLineArgsArray& argv)
-{
-    m_data->SetArguments(argc, argv);
-}
-
 #endif // wxUSE_UNICODE
 
 void wxCmdLineParser::SetCmdLine(const wxString& cmdline)
@@ -362,7 +331,7 @@ void wxCmdLineParser::EnableLongOptions(bool enable)
     m_data->m_enableLongOptions = enable;
 }
 
-bool wxCmdLineParser::AreLongOptionsEnabled() const
+bool wxCmdLineParser::AreLongOptionsEnabled()
 {
     return m_data->m_enableLongOptions;
 }
@@ -383,24 +352,17 @@ void wxCmdLineParser::SetDesc(const wxCmdLineEntryDesc *desc)
         switch ( desc->kind )
         {
             case wxCMD_LINE_SWITCH:
-                AddSwitch(desc->shortName, desc->longName,
-                          wxGetTranslation(desc->description),
+                AddSwitch(desc->shortName, desc->longName, desc->description,
                           desc->flags);
                 break;
 
             case wxCMD_LINE_OPTION:
-                AddOption(desc->shortName, desc->longName,
-                          wxGetTranslation(desc->description),
+                AddOption(desc->shortName, desc->longName, desc->description,
                           desc->type, desc->flags);
                 break;
 
             case wxCMD_LINE_PARAM:
-                AddParam(wxGetTranslation(desc->description),
-                         desc->type, desc->flags);
-                break;
-
-            case wxCMD_LINE_USAGE_TEXT:
-                AddUsageText(wxGetTranslation(desc->description));
+                AddParam(desc->description, desc->type, desc->flags);
                 break;
 
             default:
@@ -471,17 +433,6 @@ void wxCmdLineParser::AddParam(const wxString& desc,
     m_data->m_paramDesc.Add(param);
 }
 
-void wxCmdLineParser::AddUsageText(const wxString& text)
-{
-    wxASSERT_MSG( !text.empty(), wxT("text can't be empty") );
-
-    wxCmdLineOption *option = new wxCmdLineOption(wxCMD_LINE_USAGE_TEXT,
-                                                  wxEmptyString, wxEmptyString,
-                                                  text, wxCMD_LINE_VAL_NONE, 0);
-
-    m_data->m_options.Add(option);
-}
-
 // ----------------------------------------------------------------------------
 // access to parse command line
 // ----------------------------------------------------------------------------
@@ -539,25 +490,6 @@ bool wxCmdLineParser::Found(const wxString& name, long *value) const
     return true;
 }
 
-bool wxCmdLineParser::Found(const wxString& name, double *value) const
-{
-    int i = m_data->FindOption(name);
-    if ( i == wxNOT_FOUND )
-        i = m_data->FindOptionByLongName(name);
-
-    wxCHECK_MSG( i != wxNOT_FOUND, false, _T("unknown option") );
-
-    wxCmdLineOption& opt = m_data->m_options[(size_t)i];
-    if ( !opt.HasValue() )
-        return false;
-
-    wxCHECK_MSG( value, false, _T("NULL pointer in wxCmdLineOption::Found") );
-
-    *value = opt.GetDoubleVal();
-
-    return true;
-}
-
 #if wxUSE_DATETIME
 bool wxCmdLineParser::Found(const wxString& name, wxDateTime *value) const
 {
@@ -594,7 +526,7 @@ wxString wxCmdLineParser::GetParam(size_t n) const
 // Resets switches and options
 void wxCmdLineParser::Reset()
 {
-    for ( size_t i = 0; i < m_data->m_options.GetCount(); i++ )
+    for ( size_t i = 0; i < m_data->m_options.Count(); i++ )
     {
         wxCmdLineOption& opt = m_data->m_options[i];
         opt.SetHasValue(false);
@@ -639,25 +571,24 @@ int wxCmdLineParser::Parse(bool showUsage)
 
         // empty argument or just '-' is not an option but a parameter
         if ( maybeOption && arg.length() > 1 &&
-                // FIXME-UTF8: use wc_str() after removing ANSI build
-                wxStrchr(m_data->m_switchChars.c_str(), arg[0u]) )
+                wxStrchr(m_data->m_switchChars, arg[0u]) )
         {
             bool isLong;
             wxString name;
             int optInd = wxNOT_FOUND;   // init to suppress warnings
 
             // an option or a switch: find whether it's a long or a short one
-            if ( arg.length() >= 3 && arg[0u] == _T('-') && arg[1u] == _T('-') )
+            if ( arg[0u] == _T('-') && arg[1u] == _T('-') )
             {
                 // a long one
                 isLong = true;
 
                 // Skip leading "--"
-                wxString::const_iterator p = arg.begin() + 2;
+                const wxChar *p = arg.c_str() + 2;
 
                 bool longOptionsEnabled = AreLongOptionsEnabled();
 
-                name = GetLongOptionName(p, arg.end());
+                name = GetLongOptionName(p);
 
                 if (longOptionsEnabled)
                 {
@@ -685,9 +616,9 @@ int wxCmdLineParser::Parse(bool showUsage)
 
                 // a short one: as they can be cumulated, we try to find the
                 // longest substring which is a valid option
-                wxString::const_iterator p = arg.begin() + 1;
+                const wxChar *p = arg.c_str() + 1;
 
-                name = GetShortOptionName(p, arg.end());
+                name = GetShortOptionName(p);
 
                 size_t len = name.length();
                 do
@@ -747,17 +678,15 @@ int wxCmdLineParser::Parse(bool showUsage)
             // look at what follows:
 
             // +1 for leading '-'
-            wxString::const_iterator p = arg.begin() + 1 + name.length();
-            wxString::const_iterator end = arg.end();
-
+            const wxChar *p = arg.c_str() + 1 + name.length();
             if ( isLong )
-                ++p;    // for another leading '-'
+                p++;    // for another leading '-'
 
             wxCmdLineOption& opt = m_data->m_options[(size_t)optInd];
             if ( opt.kind == wxCMD_LINE_SWITCH )
             {
                 // we must check that there is no value following the switch
-                if ( p != arg.end() )
+                if ( *p != _T('\0') )
                 {
                     errorMsg << wxString::Format(_("Unexpected characters following option '%s'."), name.c_str())
                              << _T('\n');
@@ -779,49 +708,62 @@ int wxCmdLineParser::Parse(bool showUsage)
             }
             else // it's an option. not a switch
             {
-                switch ( p == end ? '\0' : (*p).GetValue() )
+                // get the value
+                if ( isLong )
                 {
-                    case '=':
-                    case ':':
-                        // the value follows
-                        ++p;
-                        break;
+                    if ( *p++ != _T('=') )
+                    {
+                        errorMsg << wxString::Format(_("Option '%s' requires a value, '=' expected."), name.c_str())
+                                 << _T('\n');
 
-                    case '\0':
-                        // the value is in the next argument
-                        if ( ++n == count )
-                        {
-                            // ... but there is none
-                            errorMsg << wxString::Format(_("Option '%s' requires a value."),
-                                                         name.c_str())
-                                     << _T('\n');
+                        ok = false;
+                    }
+                }
+                else // short option
+                {
+                    switch ( *p )
+                    {
+                        case _T('='):
+                        case _T(':'):
+                            // the value follows
+                            p++;
+                            break;
 
-                            ok = false;
-                        }
-                        else
-                        {
-                            // ... take it from there
-                            p = m_data->m_arguments[n].begin();
-                            end = m_data->m_arguments[n].end();
-                        }
-                        break;
+                        case 0:
+                            // the value is in the next argument
+                            if ( ++n == count )
+                            {
+                                // ... but there is none
+                                errorMsg << wxString::Format(_("Option '%s' requires a value."),
+                                                             name.c_str())
+                                         << _T('\n');
 
-                    default:
-                        // the value is right here: this may be legal or
-                        // not depending on the option style
-                        if ( opt.flags & wxCMD_LINE_NEEDS_SEPARATOR )
-                        {
-                            errorMsg << wxString::Format(_("Separator expected after the option '%s'."),
-                                                         name.c_str())
-                                    << _T('\n');
+                                ok = false;
+                            }
+                            else
+                            {
+                                // ... take it from there
+                                p = m_data->m_arguments[n].c_str();
+                            }
+                            break;
 
-                            ok = false;
-                        }
+                        default:
+                            // the value is right here: this may be legal or
+                            // not depending on the option style
+                            if ( opt.flags & wxCMD_LINE_NEEDS_SEPARATOR )
+                            {
+                                errorMsg << wxString::Format(_("Separator expected after the option '%s'."),
+                                                             name.c_str())
+                                        << _T('\n');
+
+                                ok = false;
+                            }
+                    }
                 }
 
                 if ( ok )
                 {
-                    wxString value(p, end);
+                    wxString value = p;
                     switch ( opt.type )
                     {
                         default:
@@ -850,29 +792,11 @@ int wxCmdLineParser::Parse(bool showUsage)
                             }
                             break;
 
-                        case wxCMD_LINE_VAL_DOUBLE:
-                            {
-                                double val;
-                                if ( value.ToDouble(&val) )
-                                {
-                                    opt.SetDoubleVal(val);
-                                }
-                                else
-                                {
-                                    errorMsg << wxString::Format(_("'%s' is not a correct numeric value for option '%s'."),
-                                                                 value.c_str(), name.c_str())
-                                             << _T('\n');
-
-                                    ok = false;
-                                }
-                            }
-                            break;
-
 #if wxUSE_DATETIME
                         case wxCMD_LINE_VAL_DATE:
                             {
                                 wxDateTime dt;
-                                const char *res = dt.ParseDate(value);
+                                const wxChar *res = dt.ParseDate(value);
                                 if ( !res || *res )
                                 {
                                     errorMsg << wxString::Format(_("Option '%s': '%s' cannot be converted to a date."),
@@ -1011,7 +935,7 @@ int wxCmdLineParser::Parse(bool showUsage)
 // give the usage message
 // ----------------------------------------------------------------------------
 
-void wxCmdLineParser::Usage() const
+void wxCmdLineParser::Usage()
 {
     wxMessageOutput* msgOut = wxMessageOutput::Get();
     if ( msgOut )
@@ -1024,7 +948,7 @@ void wxCmdLineParser::Usage() const
     }
 }
 
-wxString wxCmdLineParser::GetUsageString() const
+wxString wxCmdLineParser::GetUsageString()
 {
     wxString appname;
     if ( m_data->m_arguments.empty() )
@@ -1060,60 +984,58 @@ wxString wxCmdLineParser::GetUsageString() const
     for ( n = 0; n < count; n++ )
     {
         wxCmdLineOption& opt = m_data->m_options[n];
-        wxString option;
 
-        if ( opt.kind != wxCMD_LINE_USAGE_TEXT )
+        usage << _T(' ');
+        if ( !(opt.flags & wxCMD_LINE_OPTION_MANDATORY) )
         {
-            usage << _T(' ');
-            if ( !(opt.flags & wxCMD_LINE_OPTION_MANDATORY) )
-            {
-                usage << _T('[');
-            }
+            usage << _T('[');
+        }
 
-            if ( !opt.shortName.empty() )
+        if ( !opt.shortName.empty() )
+        {
+            usage << chSwitch << opt.shortName;
+        }
+        else if ( areLongOptionsEnabled && !opt.longName.empty() )
+        {
+            usage << _T("--") << opt.longName;
+        }
+        else
+        {
+            if (!opt.longName.empty())
             {
-                usage << chSwitch << opt.shortName;
-            }
-            else if ( areLongOptionsEnabled && !opt.longName.empty() )
-            {
-                usage << _T("--") << opt.longName;
+                wxFAIL_MSG( wxT("option with only a long name while long ")
+                            wxT("options are disabled") );
             }
             else
             {
-                if (!opt.longName.empty())
-                {
-                    wxFAIL_MSG( wxT("option with only a long name while long ")
-                                wxT("options are disabled") );
-                }
-                else
-                {
-                    wxFAIL_MSG( _T("option without neither short nor long name") );
-                }
+                wxFAIL_MSG( _T("option without neither short nor long name") );
             }
+        }
 
-            if ( !opt.shortName.empty() )
-            {
-                option << _T("  ") << chSwitch << opt.shortName;
-            }
+        wxString option;
 
-            if ( areLongOptionsEnabled && !opt.longName.empty() )
-            {
-                option << (option.empty() ? _T("  ") : _T(", "))
-                       << _T("--") << opt.longName;
-            }
+        if ( !opt.shortName.empty() )
+        {
+            option << _T("  ") << chSwitch << opt.shortName;
+        }
 
-            if ( opt.kind != wxCMD_LINE_SWITCH )
-            {
-                wxString val;
-                val << _T('<') << GetTypeName(opt.type) << _T('>');
-                usage << _T(' ') << val;
-                option << (!opt.longName ? _T(':') : _T('=')) << val;
-            }
+        if ( areLongOptionsEnabled && !opt.longName.empty() )
+        {
+            option << (option.empty() ? _T("  ") : _T(", "))
+                   << _T("--") << opt.longName;
+        }
 
-            if ( !(opt.flags & wxCMD_LINE_OPTION_MANDATORY) )
-            {
-                usage << _T(']');
-            }
+        if ( opt.kind != wxCMD_LINE_SWITCH )
+        {
+            wxString val;
+            val << _T('<') << GetTypeName(opt.type) << _T('>');
+            usage << _T(' ') << val;
+            option << (!opt.longName ? _T(':') : _T('=')) << val;
+        }
+
+        if ( !(opt.flags & wxCMD_LINE_OPTION_MANDATORY) )
+        {
+            usage << _T(']');
         }
 
         namesOptions.push_back(option);
@@ -1146,42 +1068,23 @@ wxString wxCmdLineParser::GetUsageString() const
 
     usage << _T('\n');
 
-    // set to number of our own options, not counting the standard ones
-    count = namesOptions.size();
-
-    // get option names & descriptions for standard options, if any:
-    wxAppTraits *traits = wxTheApp ? wxTheApp->GetTraits() : NULL;
-    wxString stdDesc;
-    if ( traits )
-        stdDesc = traits->GetStandardCmdLineOptions(namesOptions, descOptions);
-
     // now construct the detailed help message
     size_t len, lenMax = 0;
-    for ( n = 0; n < namesOptions.size(); n++ )
+    count = namesOptions.size();
+    for ( n = 0; n < count; n++ )
     {
         len = namesOptions[n].length();
         if ( len > lenMax )
             lenMax = len;
     }
 
-    for ( n = 0; n < namesOptions.size(); n++ )
+    for ( n = 0; n < count; n++ )
     {
-        if ( n == count )
-            usage << _T('\n') << stdDesc;
-
         len = namesOptions[n].length();
-        // desc contains text if name is empty
-        if (len == 0)
-        {
-            usage << descOptions[n] << _T('\n');
-        }
-        else
-        {
-            usage << namesOptions[n]
-                  << wxString(_T(' '), lenMax - len) << _T('\t')
-                  << descOptions[n]
-                  << _T('\n');
-        }
+        usage << namesOptions[n]
+              << wxString(_T(' '), lenMax - len) << _T('\t')
+              << descOptions[n]
+              << _T('\n');
     }
 
     return usage;
@@ -1208,10 +1111,6 @@ static wxString GetTypeName(wxCmdLineParamType type)
             s = _("num");
             break;
 
-        case wxCMD_LINE_VAL_DOUBLE:
-            s = _("double");
-            break;
-
         case wxCMD_LINE_VAL_DATE:
             s = _("date");
             break;
@@ -1229,13 +1128,12 @@ the parameter allowedChars.
 For example, if p points to "abcde-@-_", and allowedChars is "-_",
 this function returns "abcde-".
 */
-static wxString GetOptionName(wxString::const_iterator p,
-                              wxString::const_iterator end,
-                              const wxChar *allowedChars)
+static wxString GetOptionName(const wxChar *p,
+    const wxChar *allowedChars)
 {
     wxString argName;
 
-    while ( p != end && (wxIsalnum(*p) || wxStrchr(allowedChars, *p)) )
+    while ( *p && (wxIsalnum(*p) || wxStrchr(allowedChars, *p)) )
     {
         argName += *p++;
     }
@@ -1253,16 +1151,14 @@ static wxString GetOptionName(wxString::const_iterator p,
 #define wxCMD_LINE_CHARS_ALLOWED_BY_LONG_OPTION \
     wxCMD_LINE_CHARS_ALLOWED_BY_SHORT_OPTION wxT("-")
 
-static wxString GetShortOptionName(wxString::const_iterator p,
-                                  wxString::const_iterator end)
+static wxString GetShortOptionName(const wxChar *p)
 {
-    return GetOptionName(p, end, wxCMD_LINE_CHARS_ALLOWED_BY_SHORT_OPTION);
+    return GetOptionName(p, wxCMD_LINE_CHARS_ALLOWED_BY_SHORT_OPTION);
 }
 
-static wxString GetLongOptionName(wxString::const_iterator p,
-                                  wxString::const_iterator end)
+static wxString GetLongOptionName(const wxChar *p)
 {
-    return GetOptionName(p, end, wxCMD_LINE_CHARS_ALLOWED_BY_LONG_OPTION);
+    return GetOptionName(p, wxCMD_LINE_CHARS_ALLOWED_BY_LONG_OPTION);
 }
 
 #endif // wxUSE_CMDLINE_PARSER
@@ -1280,40 +1176,32 @@ static wxString GetLongOptionName(wxString::const_iterator p,
  */
 
 /* static */
-wxArrayString
-wxCmdLineParser::ConvertStringToArgs(const wxString& cmdline,
-                                     wxCmdLineSplitType type)
+wxArrayString wxCmdLineParser::ConvertStringToArgs(const wxChar *p)
 {
     wxArrayString args;
 
     wxString arg;
     arg.reserve(1024);
 
-    const wxString::const_iterator end = cmdline.end();
-    wxString::const_iterator p = cmdline.begin();
-
+    bool isInsideQuotes = false;
     for ( ;; )
     {
         // skip white space
-        while ( p != end && (*p == ' ' || *p == '\t') )
-            ++p;
+        while ( *p == _T(' ') || *p == _T('\t') )
+            p++;
 
         // anything left?
-        if ( p == end )
+        if ( *p == _T('\0') )
             break;
 
         // parse this parameter
-        bool lastBS = false,
-             isInsideQuotes = false;
-        wxChar chDelim = '\0';
-        for ( arg.clear(); p != end; ++p )
+        bool endParam = false;
+        bool lastBS = false;
+        for ( arg.clear(); !endParam; p++ )
         {
-            const wxChar ch = *p;
-
-            if ( type == wxCMD_LINE_SPLIT_DOS )
+            switch ( *p )
             {
-                if ( ch == '"' )
-                {
+                case _T('"'):
                     if ( !lastBS )
                     {
                         isInsideQuotes = !isInsideQuotes;
@@ -1324,57 +1212,32 @@ wxCmdLineParser::ConvertStringToArgs(const wxString& cmdline,
                     //else: quote has no special meaning but the backslash
                     //      still remains -- makes no sense but this is what
                     //      Windows does
-                }
-                // note that backslash does *not* quote the space, only quotes do
-                else if ( !isInsideQuotes && (ch == ' ' || ch == '\t') )
-                {
-                    ++p;    // skip this space anyhow
                     break;
-                }
 
-                lastBS = !lastBS && ch == '\\';
-            }
-            else // type == wxCMD_LINE_SPLIT_UNIX
-            {
-                if ( !lastBS )
-                {
+                case _T(' '):
+                case _T('\t'):
+                    // backslash does *not* quote the space, only quotes do
                     if ( isInsideQuotes )
                     {
-                        if ( ch == chDelim )
-                        {
-                            isInsideQuotes = false;
-
-                            continue;   // don't use the quote itself
-                        }
+                        // skip assignment below
+                        break;
                     }
-                    else // not in quotes and not escaped
-                    {
-                        if ( ch == '\'' || ch == '"' )
-                        {
-                            isInsideQuotes = true;
-                            chDelim = ch;
+                    // fall through
 
-                            continue;   // don't use the quote itself
-                        }
+                case _T('\0'):
+                    endParam = true;
 
-                        if ( ch == ' ' || ch == '\t' )
-                        {
-                            ++p;    // skip this space anyhow
-                            break;
-                        }
-                    }
-
-                    lastBS = ch == '\\';
-                    if ( lastBS )
-                        continue;
-                }
-                else // escaped by backslash, just use as is
-                {
-                    lastBS = false;
-                }
+                    break;
             }
 
-            arg += ch;
+            if ( endParam )
+            {
+                break;
+            }
+
+            lastBS = !lastBS && *p == _T('\\');
+
+            arg += *p;
         }
 
         args.push_back(arg);

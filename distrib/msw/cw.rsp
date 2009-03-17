@@ -57,6 +57,7 @@ samples/menu/*W7.xml
 samples/mfc/*W7.xml
 samples/minifram/*W7.xml
 samples/minimal/*W7.xml
+samples/mobile/*W7.xml
 samples/multimon/*W7.xml
 samples/nativdlg/*W7.xml
 samples/notebook/*W7.xml
@@ -70,6 +71,7 @@ samples/regtest/*W7.xml
 samples/rotate/*W7.xml
 samples/sashtest/*W7.xml
 samples/scroll/*W7.xml
+samples/scrollsub/*W7.xml
 samples/shaped/*W7.xml
 samples/sockets/*W7.xml
 samples/splitter/*W7.xml

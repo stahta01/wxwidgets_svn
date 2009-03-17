@@ -15,8 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
-    #include "wx/wxcrtvararg.h"
+#ifndef WXPRECOMP
 #endif
 
 #include "wx/html/forcelnk.h"
@@ -119,7 +118,7 @@ private:
     // only once, before first Layout().
     void ComputeMinMaxWidths();
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlTableCell);
+    DECLARE_NO_COPY_CLASS(wxHtmlTableCell)
 };
 
 
@@ -747,45 +746,27 @@ TAG_HANDLER_BEGIN(TABLE, "TABLE,TR,TD,TH")
 
                 m_WParser->OpenContainer();
 
-                const bool isHeader = tag.GetName() == wxT("TH");
+                if (tag.GetName() == wxT("TH")) /*header style*/
+                    m_WParser->SetAlign(wxHTML_ALIGN_CENTER);
+                else
+                    m_WParser->SetAlign(wxHTML_ALIGN_LEFT);
 
                 wxString als;
+
+                als = m_rAlign;
                 if (tag.HasParam(wxT("ALIGN")))
                     als = tag.GetParam(wxT("ALIGN"));
-                else
-                    als = m_rAlign;
                 als.MakeUpper();
-
                 if (als == wxT("RIGHT"))
                     m_WParser->SetAlign(wxHTML_ALIGN_RIGHT);
                 else if (als == wxT("LEFT"))
                     m_WParser->SetAlign(wxHTML_ALIGN_LEFT);
                 else if (als == wxT("CENTER"))
                     m_WParser->SetAlign(wxHTML_ALIGN_CENTER);
-                else // use default alignment
-                    m_WParser->SetAlign(isHeader ? wxHTML_ALIGN_CENTER
-                                                 : wxHTML_ALIGN_LEFT);
 
                 m_WParser->OpenContainer();
 
-                // the header should be rendered in bold by default
-                int boldOld = 0;
-                if ( isHeader )
-                {
-                    boldOld = m_WParser->GetFontBold();
-                    m_WParser->SetFontBold(true);
-                    m_WParser->GetContainer()->InsertCell(
-                        new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-                }
-
                 ParseInner(tag);
-
-                if ( isHeader )
-                {
-                    m_WParser->SetFontBold(boldOld);
-                    m_WParser->GetContainer()->InsertCell(
-                        new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
-                }
 
                 // set the current container back to the enclosing one so that
                 // text outside of <th> and <td> isn't included in any cell

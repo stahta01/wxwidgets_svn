@@ -14,11 +14,11 @@
 
 #include "wx/gdiobj.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPalette;
+class WXDLLEXPORT wxPalette;
 
-class WXDLLIMPEXP_CORE wxPaletteRefData: public wxGDIRefData
+class WXDLLEXPORT wxPaletteRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxPalette;
+    friend class WXDLLEXPORT wxPalette;
 public:
     wxPaletteRefData(void);
     virtual ~wxPaletteRefData(void);
@@ -28,7 +28,7 @@ protected:
 
 #define M_PALETTEDATA ((wxPaletteRefData *)m_refData)
 
-class WXDLLIMPEXP_CORE wxPalette: public wxPaletteBase
+class WXDLLEXPORT wxPalette: public wxPaletteBase
 {
   DECLARE_DYNAMIC_CLASS(wxPalette)
 
@@ -40,6 +40,9 @@ public:
   bool Create(int n, const unsigned char *red, const unsigned char *green, const unsigned char *blue);
   int GetPixel(unsigned char red, unsigned char green, unsigned char blue) const;
   bool GetRGB(int pixel, unsigned char *red, unsigned char *green, unsigned char *blue) const;
+
+  virtual bool Ok() const { return IsOk(); }
+  virtual bool IsOk(void) const { return (m_refData != NULL) ; }
 
   virtual bool FreeResource(bool force = false);
 

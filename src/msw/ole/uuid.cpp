@@ -89,6 +89,11 @@ bool Uuid::operator==(const Uuid& uuid) const
     return IsEqualGUID(m_uuid, uuid.m_uuid) == TRUE;
 }
 
+bool Uuid::operator!=(const Uuid& uuid) const
+{
+    return !(*this == uuid);
+}
+
 // dtor
 Uuid::~Uuid()
 {

@@ -18,8 +18,8 @@
 // forward declarations
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxToolTip;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxToolTip;
+class WXDLLIMPEXP_CORE wxWindow;
 
 //-----------------------------------------------------------------------------
 // wxToolTip
@@ -31,10 +31,6 @@ public:
     // globally change the tooltip parameters
     static void Enable( bool flag );
     static void SetDelay( long msecs );
-        // set the delay after which the tooltip disappears or how long the tooltip remains visible
-    static void SetAutoPop(long msecs);
-        // set the delay between subsequent tooltips to appear
-    static void SetReshow(long msecs);
 
     wxToolTip( const wxString &tip );
 

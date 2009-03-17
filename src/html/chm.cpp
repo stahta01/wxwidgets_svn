@@ -17,7 +17,7 @@
 
 #include <mspack.h>
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/module.h"
@@ -414,7 +414,7 @@ private:
  *                 be local file accesible via fopen, fread functions!
  * @param filename The Name of the file to be extracted from archive
  * @param simulate if true than class should simulate .HHP-File based on #SYSTEM
- *                 if false than class does nothing if it doesn't find .hhp
+ *                 if false than class does nothing if it doesnt find .hhp
  */
 wxChmInputStream::wxChmInputStream(const wxString& archive,
                                    const wxString& filename, bool simulate)
@@ -487,29 +487,15 @@ size_t wxChmInputStream::OnSysRead(void *buffer, size_t bufsize)
     m_lasterror = wxSTREAM_NO_ERROR;
 
     // If the rest to read from the stream is less
-    // than the buffer size, then only read the rest
+    // than the buffer size, than only read the rest
     if ( m_pos + bufsize > m_size )
         bufsize = m_size - m_pos;
 
-    if (m_contentStream->SeekI(m_pos) == wxInvalidOffset)
-    {
-        m_lasterror = wxSTREAM_EOF;
-        return 0;
-    }
-
-    size_t read = m_contentStream->Read(buffer, bufsize).LastRead();
-    m_pos += read;
-
-    if (m_contentStream->SeekI(m_pos) == wxInvalidOffset)
-    {
-        m_lasterror = wxSTREAM_READ_ERROR;
-        return 0;
-    }
-
-    if (read != bufsize)
-        m_lasterror = m_contentStream->GetLastError();
-
-    return read;
+    m_contentStream->SeekI(m_pos);
+    m_contentStream->Read(buffer, bufsize);
+    m_pos +=bufsize;
+    m_contentStream->SeekI(m_pos);
+    return bufsize;
 }
 
 
@@ -555,7 +541,7 @@ wxFileOffset wxChmInputStream::OnSysSeek(wxFileOffset seek, wxSeekMode mode)
 /**
  * Help Browser tries to read the contents of the
  * file by interpreting a .hhp file in the Archiv.
- * For .chm doesn't include such a file, we need
+ * For .chm doesnt include such a file, we need
  * to rebuild the information based on stored
  * system-files.
  */
@@ -575,7 +561,7 @@ wxChmInputStream::CreateHHPStream()
     if ( ! m_chm->Contains(_T("/#SYSTEM")) )
     {
 #ifdef DEBUG
-        wxLogDebug("Archive doesn't contain #SYSTEM file");
+        wxLogDebug(_("Archive doesnt contain #SYSTEM file"));
 #endif
         return;
     }
@@ -731,9 +717,6 @@ bool wxChmInputStream::CreateFileStream(const wxString& pattern)
     {
         // Open a filestream to extracted file
         fin = new wxFileInputStream(tmpfile);
-        if (!fin->IsOk())
-            return false;
-
         m_size = fin->GetSize();
         m_content = (char *) malloc(m_size+1);
         fin->Read(m_content, m_size);
@@ -842,11 +825,13 @@ wxFSFile* wxChmFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
     // Open a stream to read the content of the chm-file
     s = new wxChmInputStream(leftFilename.GetFullPath(), right, true);
 
+    wxString mime = GetMimeTypeFromExt(location);
+
     if ( s )
     {
         return new wxFSFile(s,
                             left + _T("#chm:") + right,
-                            wxEmptyString,
+                            mime,
                             GetAnchor(location),
                             wxDateTime(wxFileModificationTime(left)));
     }

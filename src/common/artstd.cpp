@@ -38,6 +38,37 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
+// helper macros
+// ----------------------------------------------------------------------------
+
+// Standard macro for getting a resource from XPM file:
+#define ART(artId, xpmRc) \
+    if ( id == artId ) return wxBitmap(xpmRc##_xpm);
+
+// There are two ways of getting the standard icon: either via XPMs or via
+// wxIcon ctor. This depends on the platform:
+#if defined(__WXUNIVERSAL__)
+    #define CREATE_STD_ICON(iconId, xpmRc) return wxNullBitmap;
+#elif defined(__WXGTK__) || defined(__WXMOTIF__)
+    #define CREATE_STD_ICON(iconId, xpmRc) return wxBitmap(xpmRc##_xpm);
+#else
+    #define CREATE_STD_ICON(iconId, xpmRc) \
+        { \
+            wxIcon icon(_T(iconId)); \
+            wxBitmap bmp; \
+            bmp.CopyFromIcon(icon); \
+            return bmp; \
+        }
+#endif
+
+// Macro used in CreateBitmap to get wxICON_FOO icons:
+#define ART_MSGBOX(artId, iconId, xpmRc) \
+    if ( id == artId ) \
+    { \
+        CREATE_STD_ICON(#iconId, xpmRc) \
+    }
+
+// ----------------------------------------------------------------------------
 // wxArtProvider::InitStdProvider
 // ----------------------------------------------------------------------------
 
@@ -46,31 +77,29 @@ protected:
     wxArtProvider::Push(new wxDefaultArtProvider);
 }
 
-// ----------------------------------------------------------------------------
-// helper macros
-// ----------------------------------------------------------------------------
+#if !defined(__WXGTK20__) || defined(__WXUNIVERSAL__)
+/*static*/ void wxArtProvider::InitNativeProvider()
+{
+}
+#endif
 
-// Standard macro for getting a resource from XPM file:
-#define ART(artId, xpmRc) \
-    if ( id == artId ) return wxBitmap(xpmRc##_xpm);
 
 // ----------------------------------------------------------------------------
 // XPMs with the art
 // ----------------------------------------------------------------------------
 
-#ifndef __WXUNIVERSAL__
-    #if defined(__WXGTK__)
-        #include "../../art/gtk/info.xpm"
-        #include "../../art/gtk/error.xpm"
-        #include "../../art/gtk/warning.xpm"
-        #include "../../art/gtk/question.xpm"
-    #elif defined(__WXMOTIF__)
-        #include "../../art/motif/info.xpm"
-        #include "../../art/motif/error.xpm"
-        #include "../../art/motif/warning.xpm"
-        #include "../../art/motif/question.xpm"
-    #endif
-#endif // !__WXUNIVERSAL__
+
+#if defined(__WXGTK__)
+    #include "../../art/gtk/info.xpm"
+    #include "../../art/gtk/error.xpm"
+    #include "../../art/gtk/warning.xpm"
+    #include "../../art/gtk/question.xpm"
+#elif defined(__WXMOTIF__)
+    #include "../../art/motif/info.xpm"
+    #include "../../art/motif/error.xpm"
+    #include "../../art/motif/warning.xpm"
+    #include "../../art/motif/question.xpm"
+#endif
 
 #if wxUSE_HTML
     #include "../../art/htmsidep.xpm"
@@ -121,15 +150,15 @@ protected:
 #include "../../art/find.xpm"
 #include "../../art/findrepl.xpm"
 
+
+
 wxBitmap wxDefaultArtProvider_CreateBitmap(const wxArtID& id)
 {
-#if !defined(__WXUNIVERSAL__) && (defined(__WXGTK__) || defined(__WXMOTIF__))
     // wxMessageBox icons:
-    ART(wxART_ERROR,                               error)
-    ART(wxART_INFORMATION,                         info)
-    ART(wxART_WARNING,                             warning)
-    ART(wxART_QUESTION,                            question)
-#endif
+    ART_MSGBOX(wxART_ERROR,       wxICON_ERROR,       error)
+    ART_MSGBOX(wxART_INFORMATION, wxICON_INFORMATION, info)
+    ART_MSGBOX(wxART_WARNING,     wxICON_WARNING,     warning)
+    ART_MSGBOX(wxART_QUESTION,    wxICON_QUESTION,    question)
 
     // standard icons:
 #if wxUSE_HTML

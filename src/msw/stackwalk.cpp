@@ -161,7 +161,7 @@ void wxStackFrame::OnParam(PSYMBOL_INFO pSymInfo)
 BOOL CALLBACK
 EnumSymbolsProc(PSYMBOL_INFO pSymInfo, ULONG WXUNUSED(SymSize), PVOID data)
 {
-    wxStackFrame *frame = static_cast<wxStackFrame *>(data);
+    wxStackFrame *frame = wx_static_cast(wxStackFrame *, data);
 
     // we're only interested in parameters
     if ( pSymInfo->Flags & IMAGEHLP_SYMBOL_INFO_PARAMETER )
@@ -214,7 +214,7 @@ void wxStackFrame::OnGetParam()
 // wxStackWalker
 // ----------------------------------------------------------------------------
 
-void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
+void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip)
 {
     if ( !wxDbgHelpDLL::Init() )
     {
@@ -266,8 +266,9 @@ void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
     #error "Need to initialize STACKFRAME on non x86"
 #endif // _M_IX86
 
-    // iterate over all stack frames
-    for ( size_t nLevel = 0; nLevel < maxDepth; nLevel++ )
+    // iterate over all stack frames (but stop after 200 to avoid entering
+    // infinite loop if the stack is corrupted)
+    for ( size_t nLevel = 0; nLevel < 200; nLevel++ )
     {
         // get the next stack frame
         if ( !wxDbgHelpDLL::StackWalk
@@ -293,7 +294,7 @@ void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
         if ( nLevel >= skip )
         {
             wxStackFrame frame(nLevel - skip,
-                               wxUIntToPtr(sf.AddrPC.Offset),
+                               (void *)sf.AddrPC.Offset,
                                sf.AddrFrame.Offset);
 
             OnStackFrame(frame);
@@ -310,14 +311,12 @@ void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
 #endif
 }
 
-void wxStackWalker::WalkFrom(const _EXCEPTION_POINTERS *ep, size_t skip, size_t maxDepth)
+void wxStackWalker::WalkFrom(const _EXCEPTION_POINTERS *ep, size_t skip)
 {
-    WalkFrom(ep->ContextRecord, skip, maxDepth);
+    WalkFrom(ep->ContextRecord, skip);
 }
 
-#if wxUSE_ON_FATAL_EXCEPTION
-
-void wxStackWalker::WalkFromException(size_t maxDepth)
+void wxStackWalker::WalkFromException()
 {
     extern EXCEPTION_POINTERS *wxGlobalSEInformation;
 
@@ -325,10 +324,8 @@ void wxStackWalker::WalkFromException(size_t maxDepth)
                  _T("wxStackWalker::WalkFromException() can only be called from wxApp::OnFatalException()") );
 
     // don't skip any frames, the first one is where we crashed
-    WalkFrom(wxGlobalSEInformation, 0, maxDepth);
+    WalkFrom(wxGlobalSEInformation, 0);
 }
-
-#endif // wxUSE_ON_FATAL_EXCEPTION
 
 void wxStackWalker::Walk(size_t skip, size_t WXUNUSED(maxDepth))
 {
@@ -336,7 +333,7 @@ void wxStackWalker::Walk(size_t skip, size_t WXUNUSED(maxDepth))
     // get EXCEPTION_POINTERS from it
     //
     // note:
-    //  1. we additionally skip RaiseException() and WalkFrom() frames
+    //  1. we additionally skip RaiseException() and WalkFromException() frames
     //  2. explicit cast to EXCEPTION_POINTERS is needed with VC7.1 even if it
     //     shouldn't have been according to the docs
     __try
@@ -346,8 +343,7 @@ void wxStackWalker::Walk(size_t skip, size_t WXUNUSED(maxDepth))
     __except( WalkFrom((EXCEPTION_POINTERS *)GetExceptionInformation(),
                        skip + 2), EXCEPTION_CONTINUE_EXECUTION )
     {
-        // never executed because the above expression always evaluates to
-        // EXCEPTION_CONTINUE_EXECUTION
+        // never executed because of WalkFromException() return value
     }
 }
 
@@ -391,24 +387,19 @@ void wxStackFrame::OnGetParam()
 // ----------------------------------------------------------------------------
 
 void
-wxStackWalker::WalkFrom(const CONTEXT * WXUNUSED(pCtx),
-                        size_t WXUNUSED(skip),
-                        size_t WXUNUSED(maxDepth))
+wxStackWalker::WalkFrom(const CONTEXT * WXUNUSED(pCtx), size_t WXUNUSED(skip))
 {
 }
 
 void
 wxStackWalker::WalkFrom(const _EXCEPTION_POINTERS * WXUNUSED(ep),
-                        size_t WXUNUSED(skip),
-                        size_t WXUNUSED(maxDepth))
+                        size_t WXUNUSED(skip))
 {
 }
 
-#if wxUSE_ON_FATAL_EXCEPTION
-void wxStackWalker::WalkFromException(size_t WXUNUSED(maxDepth))
+void wxStackWalker::WalkFromException()
 {
 }
-#endif // wxUSE_ON_FATAL_EXCEPTION
 
 void wxStackWalker::Walk(size_t WXUNUSED(skip), size_t WXUNUSED(maxDepth))
 {

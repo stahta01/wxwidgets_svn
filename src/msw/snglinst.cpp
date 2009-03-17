@@ -40,7 +40,7 @@
 // wxSingleInstanceCheckerImpl: the real implementation class
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxSingleInstanceCheckerImpl
+class WXDLLEXPORT wxSingleInstanceCheckerImpl
 {
 public:
     wxSingleInstanceCheckerImpl()
@@ -52,7 +52,7 @@ public:
 
     bool Create(const wxString& name)
     {
-        m_hMutex = ::CreateMutex(NULL, FALSE, name.t_str());
+        m_hMutex = ::CreateMutex(NULL, FALSE, name);
         if ( !m_hMutex )
         {
             wxLogLastError(_T("CreateMutex"));
@@ -92,7 +92,7 @@ private:
     // the mutex handle, may be NULL
     HANDLE m_hMutex;
 
-    wxDECLARE_NO_COPY_CLASS(wxSingleInstanceCheckerImpl);
+    DECLARE_NO_COPY_CLASS(wxSingleInstanceCheckerImpl)
 };
 
 // ============================================================================

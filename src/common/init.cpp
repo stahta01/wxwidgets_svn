@@ -27,14 +27,14 @@
     #include "wx/app.h"
     #include "wx/filefn.h"
     #include "wx/log.h"
+    #include "wx/thread.h"
     #include "wx/intl.h"
     #include "wx/module.h"
 #endif
 
 #include "wx/init.h"
-#include "wx/thread.h"
 
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 #include "wx/except.h"
 
 #if defined(__WXMSW__) && defined(__WXDEBUG__)
@@ -63,9 +63,8 @@ public:
     wxDummyConsoleApp() { }
 
     virtual int OnRun() { wxFAIL_MSG( _T("unreachable code") ); return 0; }
-    virtual bool DoYield(bool, long) { return true; }
 
-    wxDECLARE_NO_COPY_CLASS(wxDummyConsoleApp);
+    DECLARE_NO_COPY_CLASS(wxDummyConsoleApp)
 };
 
 // we need a special kind of auto pointer to wxApp which not only deletes the
@@ -94,7 +93,7 @@ public:
         wxApp::SetInstance(ptr);
     }
 
-    wxDECLARE_NO_COPY_CLASS(wxAppPtr);
+    DECLARE_NO_COPY_CLASS(wxAppPtr)
 };
 
 // class to ensure that wxAppBase::CleanUp() is called if our Initialize()
@@ -161,7 +160,7 @@ static struct InitData
     wchar_t **argv;
 #endif // wxUSE_UNICODE
 
-    wxDECLARE_NO_COPY_CLASS(InitData);
+    DECLARE_NO_COPY_CLASS(InitData)
 } gs_initData;
 
 // ============================================================================
@@ -250,44 +249,6 @@ static bool DoCommonPostInit()
         return false;
     }
 
-#if defined(__WXDEBUG__)
-    // check if event classes implement Clone() correctly
-    // NOTE: the check is done against _all_ event classes which are linked to
-    //       the executable currently running, which are not necessarily all
-    //       wxWidgets event classes.
-    const wxClassInfo *ci = wxClassInfo::GetFirst();
-    for (; ci; ci = ci->GetNext())
-    {
-        // is this class derived from wxEvent?
-        if (!ci->IsKindOf(CLASSINFO(wxEvent)) || wxString(ci->GetClassName()) == "wxEvent")
-            continue;
-
-        if (!ci->IsDynamic())
-        {
-            wxLogWarning("The event class '%s' should have a DECLARE_DYNAMIC_CLASS macro!",
-                         ci->GetClassName());
-            continue;
-        }
-
-        // yes; test if it implements Clone() correctly
-        wxEvent* test = wxDynamicCast(ci->CreateObject(),wxEvent);
-        if (test == NULL)
-        {
-            wxLogWarning("The event class '%s' should have a DECLARE_DYNAMIC_CLASS macro!",
-                         ci->GetClassName());
-            continue;
-        }
-
-        wxEvent* cloned = test->Clone();
-        if (!cloned || cloned->GetClassInfo() != ci)
-            wxLogWarning("The event class '%s' does not correctly implement Clone()!",
-                         ci->GetClassName());
-
-        delete cloned;
-        delete test;
-    }
-#endif
-
     return true;
 }
 
@@ -298,7 +259,9 @@ bool wxEntryStart(int& argc, wxChar **argv)
 
     // initialize wxRTTI
     if ( !DoCommonPreInit() )
+    {
         return false;
+    }
 
 
     // first of all, we need an application object
@@ -331,14 +294,15 @@ bool wxEntryStart(int& argc, wxChar **argv)
     // --------------------------------------------
 
     if ( !app->Initialize(argc, argv) )
+    {
         return false;
-
-    // remember, possibly modified (e.g. due to removal of toolkit-specific
-    // parameters), command line arguments in member variables
-    app->argc = argc;
-    app->argv = argv;
+    }
 
     wxCallAppCleanup callAppCleanup(app.get());
+
+    // for compatibility call the old initialization function too
+    if ( !app->OnInitGui() )
+        return false;
 
 
     // common initialization after wxTheApp creation
@@ -475,6 +439,7 @@ int wxEntryReal(int& argc, wxChar **argv)
 
     wxTRY
     {
+
         // app initialization
         if ( !wxTheApp->CallOnInit() )
         {

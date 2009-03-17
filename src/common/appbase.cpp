@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name:        src/common/appbase.cpp
-// Purpose:     implements wxAppConsoleBase class
+// Purpose:     implements wxAppConsole class
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     19.06.2003 (extracted from common/appcmn.cpp)
@@ -33,35 +33,35 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
-    #include "wx/wxcrtvararg.h"
 #endif //WX_PRECOMP
 
 #include "wx/apptrait.h"
 #include "wx/cmdline.h"
 #include "wx/confbase.h"
-#include "wx/evtloop.h"
 #include "wx/filename.h"
 #include "wx/msgout.h"
-#include "wx/scopedptr.h"
 #include "wx/tokenzr.h"
-#include "wx/thread.h"
 
-#if wxUSE_EXCEPTIONS && wxUSE_STL
-    #include <exception>
-    #include <typeinfo>
-#endif
-
-#ifndef __WXPALMOS5__
 #if !defined(__WXMSW__) || defined(__WXMICROWIN__)
   #include  <signal.h>      // for SIGTRAP used by wxTrap()
 #endif  //Win/Unix
 
-#include <locale.h>
-#endif // ! __WXPALMOS5__
-
 #if wxUSE_FONTMAP
     #include "wx/fontmap.h"
 #endif // wxUSE_FONTMAP
+
+#if defined(__DARWIN__) && defined(_MSL_USING_MW_C_HEADERS) && _MSL_USING_MW_C_HEADERS
+    // For MacTypes.h for Debugger function
+    #include <CoreFoundation/CFBase.h>
+#endif
+
+#if defined(__WXMAC__)
+    #ifdef __DARWIN__
+        #include  <CoreServices/CoreServices.h>
+    #else
+        #include  "wx/mac/private.h"  // includes mac headers
+    #endif
+#endif // __WXMAC__
 
 #ifdef __WXDEBUG__
     #if wxUSE_STACKWALKER
@@ -92,11 +92,11 @@
     // prepare for showing the assert dialog, use the given traits or
     // DoShowAssertDialog() as last fallback to really show it
     static
-    void ShowAssertDialog(const wxString& szFile,
+    void ShowAssertDialog(const wxChar *szFile,
                           int nLine,
-                          const wxString& szFunc,
-                          const wxString& szCond,
-                          const wxString& szMsg,
+                          const wxChar *szFunc,
+                          const wxChar *szCond,
+                          const wxChar *szMsg,
                           wxAppTraits *traits = NULL);
 
     // turn on the trace masks specified in the env variable WXTRACE
@@ -107,34 +107,23 @@
 // global vars
 // ----------------------------------------------------------------------------
 
-wxAppConsole *wxAppConsoleBase::ms_appInstance = NULL;
+wxAppConsole *wxAppConsole::ms_appInstance = NULL;
 
-wxAppInitializerFunction wxAppConsoleBase::ms_appInitFn = NULL;
-
-wxSocketManager *wxAppTraitsBase::ms_manager = NULL;
-
-// ----------------------------------------------------------------------------
-// wxEventLoopPtr
-// ----------------------------------------------------------------------------
-
-// this defines wxEventLoopPtr
-wxDEFINE_TIED_SCOPED_PTR_TYPE(wxEventLoopBase)
+wxAppInitializerFunction wxAppConsole::ms_appInitFn = NULL;
 
 // ============================================================================
-// wxAppConsoleBase implementation
+// wxAppConsole implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
 // ctor/dtor
 // ----------------------------------------------------------------------------
 
-wxAppConsoleBase::wxAppConsoleBase()
+wxAppConsole::wxAppConsole()
 {
     m_traits = NULL;
-    m_mainLoop = NULL;
-    m_bDoPendingEventProcessing = true;
 
-    ms_appInstance = static_cast<wxAppConsole *>(this);
+    ms_appInstance = this;
 
 #ifdef __WXDEBUG__
     SetTraceMasks();
@@ -148,51 +137,41 @@ wxAppConsoleBase::wxAppConsoleBase()
 #endif
 }
 
-wxAppConsoleBase::~wxAppConsoleBase()
+wxAppConsole::~wxAppConsole()
 {
     delete m_traits;
 }
 
 // ----------------------------------------------------------------------------
-// initialization/cleanup
+// initilization/cleanup
 // ----------------------------------------------------------------------------
 
-bool wxAppConsoleBase::Initialize(int& WXUNUSED(argc), wxChar **argv)
+bool wxAppConsole::Initialize(int& argcOrig, wxChar **argvOrig)
 {
-#if wxUSE_INTL
-    GetTraits()->SetLocale();
-#endif // wxUSE_INTL
+    // remember the command line arguments
+    argc = argcOrig;
+    argv = argvOrig;
 
 #ifndef __WXPALMOS__
-    if ( m_appName.empty() && argv && argv[0] )
+    if ( m_appName.empty() && argv )
     {
         // the application name is, by default, the name of its executable file
         wxFileName::SplitPath(argv[0], NULL, &m_appName, NULL);
     }
-#endif // !__WXPALMOS__
+#endif
 
     return true;
 }
 
-wxEventLoopBase *wxAppConsoleBase::CreateMainLoop()
+void wxAppConsole::CleanUp()
 {
-    return GetTraits()->CreateEventLoop();
-}
-
-void wxAppConsoleBase::CleanUp()
-{
-    if ( m_mainLoop )
-    {
-        delete m_mainLoop;
-        m_mainLoop = NULL;
-    }
 }
 
 // ----------------------------------------------------------------------------
 // OnXXX() callbacks
 // ----------------------------------------------------------------------------
 
-bool wxAppConsoleBase::OnInit()
+bool wxAppConsole::OnInit()
 {
 #if wxUSE_CMDLINE_PARSER
     wxCmdLineParser parser(argc, argv);
@@ -222,40 +201,32 @@ bool wxAppConsoleBase::OnInit()
     return true;
 }
 
-int wxAppConsoleBase::OnRun()
-{
-    return MainLoop();
-}
-
-int wxAppConsoleBase::OnExit()
+int wxAppConsole::OnExit()
 {
 #if wxUSE_CONFIG
     // delete the config object if any (don't use Get() here, but Set()
     // because Get() could create a new config object)
-    delete wxConfigBase::Set(NULL);
+    delete wxConfigBase::Set((wxConfigBase *) NULL);
 #endif // wxUSE_CONFIG
 
     return 0;
 }
 
-void wxAppConsoleBase::Exit()
+void wxAppConsole::Exit()
 {
-    if (m_mainLoop != NULL)
-        ExitMainLoop();
-    else
-        exit(-1);
+    exit(-1);
 }
 
 // ----------------------------------------------------------------------------
 // traits stuff
 // ----------------------------------------------------------------------------
 
-wxAppTraits *wxAppConsoleBase::CreateTraits()
+wxAppTraits *wxAppConsole::CreateTraits()
 {
     return new wxConsoleAppTraits;
 }
 
-wxAppTraits *wxAppConsoleBase::GetTraits()
+wxAppTraits *wxAppConsole::GetTraits()
 {
     // FIXME-MT: protect this with a CS?
     if ( !m_traits )
@@ -268,216 +239,72 @@ wxAppTraits *wxAppConsoleBase::GetTraits()
     return m_traits;
 }
 
-/* static */
-wxAppTraits *wxAppConsoleBase::GetTraitsIfExists()
+// we must implement CreateXXX() in wxApp itself for backwards compatibility
+#if WXWIN_COMPATIBILITY_2_4
+
+#if wxUSE_LOG
+
+wxLog *wxAppConsole::CreateLogTarget()
 {
-    wxAppConsole * const app = GetInstance();
-    return app ? app->GetTraits() : NULL;
+    wxAppTraits *traits = GetTraits();
+    return traits ? traits->CreateLogTarget() : NULL;
 }
 
-// ----------------------------------------------------------------------------
-// wxEventLoop redirection
-// ----------------------------------------------------------------------------
+#endif // wxUSE_LOG
 
-int wxAppConsoleBase::MainLoop()
+wxMessageOutput *wxAppConsole::CreateMessageOutput()
 {
-    wxEventLoopBaseTiedPtr mainLoop(&m_mainLoop, CreateMainLoop());
-
-    return m_mainLoop ? m_mainLoop->Run() : -1;
+    wxAppTraits *traits = GetTraits();
+    return traits ? traits->CreateMessageOutput() : NULL;
 }
 
-void wxAppConsoleBase::ExitMainLoop()
+#endif // WXWIN_COMPATIBILITY_2_4
+
+// ----------------------------------------------------------------------------
+// event processing
+// ----------------------------------------------------------------------------
+
+void wxAppConsole::ProcessPendingEvents()
 {
-    // we should exit from the main event loop, not just any currently active
-    // (e.g. modal dialog) event loop
-    if ( m_mainLoop && m_mainLoop->IsRunning() )
+#if wxUSE_THREADS
+    if ( !wxPendingEventsLocker )
+        return;
+#endif
+
+    // ensure that we're the only thread to modify the pending events list
+    wxENTER_CRIT_SECT( *wxPendingEventsLocker );
+
+    if ( !wxPendingEvents )
     {
-        m_mainLoop->Exit(0);
+        wxLEAVE_CRIT_SECT( *wxPendingEventsLocker );
+        return;
     }
+
+    // iterate until the list becomes empty
+    wxList::compatibility_iterator node = wxPendingEvents->GetFirst();
+    while (node)
+    {
+        wxEvtHandler *handler = (wxEvtHandler *)node->GetData();
+        wxPendingEvents->Erase(node);
+
+        // In ProcessPendingEvents(), new handlers might be add
+        // and we can safely leave the critical section here.
+        wxLEAVE_CRIT_SECT( *wxPendingEventsLocker );
+
+        handler->ProcessPendingEvents();
+
+        wxENTER_CRIT_SECT( *wxPendingEventsLocker );
+
+        node = wxPendingEvents->GetFirst();
+    }
+
+    wxLEAVE_CRIT_SECT( *wxPendingEventsLocker );
 }
 
-bool wxAppConsoleBase::Pending()
-{
-    // use the currently active message loop here, not m_mainLoop, because if
-    // we're showing a modal dialog (with its own event loop) currently the
-    // main event loop is not running anyhow
-    wxEventLoopBase * const loop = wxEventLoopBase::GetActive();
-
-    return loop && loop->Pending();
-}
-
-bool wxAppConsoleBase::Dispatch()
-{
-    // see comment in Pending()
-    wxEventLoopBase * const loop = wxEventLoopBase::GetActive();
-
-    return loop && loop->Dispatch();
-}
-
-bool wxAppConsoleBase::Yield(bool onlyIfNeeded)
-{
-    wxEventLoopBase * const loop = wxEventLoopBase::GetActive();
-
-    return loop && loop->Yield(onlyIfNeeded);
-}
-
-void wxAppConsoleBase::WakeUpIdle()
-{
-    if ( m_mainLoop )
-        m_mainLoop->WakeUp();
-}
-
-bool wxAppConsoleBase::ProcessIdle()
-{
-    wxEventLoopBase * const loop = wxEventLoopBase::GetActive();
-
-    return loop && loop->ProcessIdle();
-}
-
-// ----------------------------------------------------------------------------
-// events
-// ----------------------------------------------------------------------------
-
-/* static */
-bool wxAppConsoleBase::IsMainLoopRunning()
-{
-    const wxAppConsole * const app = GetInstance();
-
-    return app && app->m_mainLoop != NULL;
-}
-
-int wxAppConsoleBase::FilterEvent(wxEvent& WXUNUSED(event))
+int wxAppConsole::FilterEvent(wxEvent& WXUNUSED(event))
 {
     // process the events normally by default
     return -1;
-}
-
-void wxAppConsoleBase::DelayPendingEventHandler(wxEvtHandler* toDelay)
-{
-    wxENTER_CRIT_SECT(m_handlersWithPendingEventsLocker);
-
-    // move the handler from the list of handlers with processable pending events
-    // to the list of handlers with pending events which needs to be processed later
-    m_handlersWithPendingEvents.Remove(toDelay);
-
-    if (m_handlersWithPendingDelayedEvents.Index(toDelay) == wxNOT_FOUND)
-        m_handlersWithPendingDelayedEvents.Add(toDelay);
-
-    wxLEAVE_CRIT_SECT(m_handlersWithPendingEventsLocker);
-}
-
-void wxAppConsoleBase::RemovePendingEventHandler(wxEvtHandler* toRemove)
-{
-    wxENTER_CRIT_SECT(m_handlersWithPendingEventsLocker);
-
-    if (m_handlersWithPendingEvents.Index(toRemove) != wxNOT_FOUND)
-    {
-        m_handlersWithPendingEvents.Remove(toRemove);
-
-        // check that the handler was present only once in the list
-        wxASSERT_MSG( m_handlersWithPendingEvents.Index(toRemove) == wxNOT_FOUND,
-                        "Handler occurs twice in the m_handlersWithPendingEvents list!" );
-    }
-    //else: it wasn't in this list at all, it's ok
-
-    if (m_handlersWithPendingDelayedEvents.Index(toRemove) != wxNOT_FOUND)
-    {
-        m_handlersWithPendingDelayedEvents.Remove(toRemove);
-
-        // check that the handler was present only once in the list
-        wxASSERT_MSG( m_handlersWithPendingDelayedEvents.Index(toRemove) == wxNOT_FOUND,
-                        "Handler occurs twice in m_handlersWithPendingDelayedEvents list!" );
-    }
-    //else: it wasn't in this list at all, it's ok
-
-    wxLEAVE_CRIT_SECT(m_handlersWithPendingEventsLocker);
-}
-
-void wxAppConsoleBase::AppendPendingEventHandler(wxEvtHandler* toAppend)
-{
-    wxENTER_CRIT_SECT(m_handlersWithPendingEventsLocker);
-
-    if ( m_handlersWithPendingEvents.Index(toAppend) == wxNOT_FOUND )
-        m_handlersWithPendingEvents.Add(toAppend);
-
-    wxLEAVE_CRIT_SECT(m_handlersWithPendingEventsLocker);
-}
-
-bool wxAppConsoleBase::HasPendingEvents() const
-{
-    wxENTER_CRIT_SECT(const_cast<wxAppConsoleBase*>(this)->m_handlersWithPendingEventsLocker);
-
-    bool has = !m_handlersWithPendingEvents.IsEmpty();
-
-    wxLEAVE_CRIT_SECT(const_cast<wxAppConsoleBase*>(this)->m_handlersWithPendingEventsLocker);
-
-    return has;
-}
-
-void wxAppConsoleBase::SuspendProcessingOfPendingEvents()
-{
-    m_bDoPendingEventProcessing = false;
-}
-
-void wxAppConsoleBase::ResumeProcessingOfPendingEvents()
-{
-    m_bDoPendingEventProcessing = true;
-}
-
-void wxAppConsoleBase::ProcessPendingEvents()
-{
-    if (!m_bDoPendingEventProcessing)
-        return;
-
-    wxENTER_CRIT_SECT(m_handlersWithPendingEventsLocker);
-
-    wxCHECK_RET( m_handlersWithPendingDelayedEvents.IsEmpty(),
-                 "this helper list should be empty" );
-
-    // iterate until the list becomes empty: the handlers remove themselves
-    // from it when they don't have any more pending events
-    while (!m_handlersWithPendingEvents.IsEmpty())
-    {
-        // In ProcessPendingEvents(), new handlers might be added
-        // and we can safely leave the critical section here.
-        wxLEAVE_CRIT_SECT(m_handlersWithPendingEventsLocker);
-
-        // NOTE: we always call ProcessPendingEvents() on the first event handler
-        //       with pending events because handlers auto-remove themselves
-        //       from this list (see RemovePendingEventHandler) if they have no
-        //       more pending events.
-        m_handlersWithPendingEvents[0]->ProcessPendingEvents();
-
-        wxENTER_CRIT_SECT(m_handlersWithPendingEventsLocker);
-    }
-
-    // now the wxHandlersWithPendingEvents is surely empty; however some event
-    // handlers may have moved themselves into wxHandlersWithPendingDelayedEvents
-    // because of a selective wxYield call in progress.
-    // Now we need to move them back to wxHandlersWithPendingEvents so the next
-    // call to this function has the chance of processing them:
-    if (!m_handlersWithPendingDelayedEvents.IsEmpty())
-    {
-        WX_APPEND_ARRAY(m_handlersWithPendingEvents, m_handlersWithPendingDelayedEvents);
-        m_handlersWithPendingDelayedEvents.Clear();
-    }
-
-    wxLEAVE_CRIT_SECT(m_handlersWithPendingEventsLocker);
-}
-
-void wxAppConsoleBase::DeletePendingEvents()
-{
-    wxENTER_CRIT_SECT(m_handlersWithPendingEventsLocker);
-
-    wxCHECK_RET( m_handlersWithPendingDelayedEvents.IsEmpty(),
-                 "this helper list should be empty" );
-
-    for (unsigned int i=0; i<m_handlersWithPendingEvents.GetCount(); i++)
-        m_handlersWithPendingEvents[i]->DeletePendingEvents();
-
-    m_handlersWithPendingEvents.Clear();
-
-    wxLEAVE_CRIT_SECT(m_handlersWithPendingEventsLocker);
 }
 
 // ----------------------------------------------------------------------------
@@ -487,68 +314,12 @@ void wxAppConsoleBase::DeletePendingEvents()
 #if wxUSE_EXCEPTIONS
 
 void
-wxAppConsoleBase::HandleEvent(wxEvtHandler *handler,
-                              wxEventFunction func,
-                              wxEvent& event) const
+wxAppConsole::HandleEvent(wxEvtHandler *handler,
+                          wxEventFunction func,
+                          wxEvent& event) const
 {
     // by default, simply call the handler
     (handler->*func)(event);
-}
-
-void wxAppConsoleBase::CallEventHandler(wxEvtHandler *handler,
-                                        wxEventFunctor& functor,
-                                        wxEvent& event) const
-{
-    // If the functor holds a method then, for backward compatibility, call
-    // HandleEvent():
-    wxEventFunction eventFunction = functor.GetMethod();
-
-    if ( eventFunction )
-        HandleEvent(handler, eventFunction, event);
-    else
-        functor(handler, event);
-}
-
-void wxAppConsoleBase::OnUnhandledException()
-{
-#ifdef __WXDEBUG__
-    // we're called from an exception handler so we can re-throw the exception
-    // to recover its type
-    wxString what;
-    try
-    {
-        throw;
-    }
-#if wxUSE_STL
-    catch ( std::exception& e )
-    {
-        what.Printf("std::exception of type \"%s\", what() = \"%s\"",
-                    typeid(e).name(), e.what());
-    }
-#endif // wxUSE_STL
-    catch ( ... )
-    {
-        what = "unknown exception";
-    }
-
-    wxMessageOutputBest().Printf(
-        "*** Caught unhandled %s; terminating\n", what
-    );
-#endif // __WXDEBUG__
-}
-
-// ----------------------------------------------------------------------------
-// exceptions support
-// ----------------------------------------------------------------------------
-
-bool wxAppConsoleBase::OnExceptionInMainLoop()
-{
-    throw;
-
-    // some compilers are too stupid to know that we never return after throw
-#if defined(__DMC__) || (defined(_MSC_VER) && _MSC_VER < 1200)
-    return false;
-#endif
 }
 
 #endif // wxUSE_EXCEPTIONS
@@ -559,17 +330,17 @@ bool wxAppConsoleBase::OnExceptionInMainLoop()
 
 #if wxUSE_CMDLINE_PARSER
 
-#define OPTION_VERBOSE "verbose"
+#define OPTION_VERBOSE _T("verbose")
 
-void wxAppConsoleBase::OnInitCmdLine(wxCmdLineParser& parser)
+void wxAppConsole::OnInitCmdLine(wxCmdLineParser& parser)
 {
     // the standard command line options
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
         {
             wxCMD_LINE_SWITCH,
-            "h",
-            "help",
+            _T("h"),
+            _T("help"),
             gettext_noop("show this help message"),
             wxCMD_LINE_VAL_NONE,
             wxCMD_LINE_OPTION_HELP
@@ -578,7 +349,7 @@ void wxAppConsoleBase::OnInitCmdLine(wxCmdLineParser& parser)
 #if wxUSE_LOG
         {
             wxCMD_LINE_SWITCH,
-            NULL,
+            wxEmptyString,
             OPTION_VERBOSE,
             gettext_noop("generate verbose log messages"),
             wxCMD_LINE_VAL_NONE,
@@ -587,13 +358,20 @@ void wxAppConsoleBase::OnInitCmdLine(wxCmdLineParser& parser)
 #endif // wxUSE_LOG
 
         // terminator
-        wxCMD_LINE_DESC_END
+        {
+            wxCMD_LINE_NONE,
+            wxEmptyString,
+            wxEmptyString,
+            wxEmptyString,
+            wxCMD_LINE_VAL_NONE,
+            0x0
+        }
     };
 
     parser.SetDesc(cmdLineDesc);
 }
 
-bool wxAppConsoleBase::OnCmdLineParsed(wxCmdLineParser& parser)
+bool wxAppConsole::OnCmdLineParsed(wxCmdLineParser& parser)
 {
 #if wxUSE_LOG
     if ( parser.Found(OPTION_VERBOSE) )
@@ -607,14 +385,14 @@ bool wxAppConsoleBase::OnCmdLineParsed(wxCmdLineParser& parser)
     return true;
 }
 
-bool wxAppConsoleBase::OnCmdLineHelp(wxCmdLineParser& parser)
+bool wxAppConsole::OnCmdLineHelp(wxCmdLineParser& parser)
 {
     parser.Usage();
 
     return false;
 }
 
-bool wxAppConsoleBase::OnCmdLineError(wxCmdLineParser& parser)
+bool wxAppConsole::OnCmdLineError(wxCmdLineParser& parser)
 {
     parser.Usage();
 
@@ -628,8 +406,8 @@ bool wxAppConsoleBase::OnCmdLineError(wxCmdLineParser& parser)
 // ----------------------------------------------------------------------------
 
 /* static */
-bool wxAppConsoleBase::CheckBuildOptions(const char *optionsSignature,
-                                         const char *componentName)
+bool wxAppConsole::CheckBuildOptions(const char *optionsSignature,
+                                     const char *componentName)
 {
 #if 0 // can't use wxLogTrace, not up and running yet
     printf("checking build options object '%s' (ptr %p) in '%s'\n",
@@ -651,30 +429,40 @@ bool wxAppConsoleBase::CheckBuildOptions(const char *optionsSignature,
         // normally wxLogFatalError doesn't return
         return false;
     }
+#undef wxCMP
 
     return true;
 }
 
 #ifdef __WXDEBUG__
 
-void wxAppConsoleBase::OnAssertFailure(const wxChar *file,
-                                       int line,
-                                       const wxChar *func,
-                                       const wxChar *cond,
-                                       const wxChar *msg)
+void wxAppConsole::OnAssertFailure(const wxChar *file,
+                                   int line,
+                                   const wxChar *func,
+                                   const wxChar *cond,
+                                   const wxChar *msg)
 {
     ShowAssertDialog(file, line, func, cond, msg, GetTraits());
 }
 
-void wxAppConsoleBase::OnAssert(const wxChar *file,
-                                int line,
-                                const wxChar *cond,
-                                const wxChar *msg)
+void wxAppConsole::OnAssert(const wxChar *file,
+                            int line,
+                            const wxChar *cond,
+                            const wxChar *msg)
 {
     OnAssertFailure(file, line, NULL, cond, msg);
 }
 
 #endif // __WXDEBUG__
+
+#if WXWIN_COMPATIBILITY_2_4
+
+bool wxAppConsole::CheckBuildOptions(const wxBuildOptions& buildOptions)
+{
+    return CheckBuildOptions(buildOptions.m_signature, "your program");
+}
+
+#endif
 
 // ============================================================================
 // other classes implementations
@@ -736,46 +524,16 @@ void wxConsoleAppTraitsBase::RemoveFromPendingDelete(wxObject * WXUNUSED(object)
     // nothing to do
 }
 
-// ----------------------------------------------------------------------------
-// wxAppTraits
-// ----------------------------------------------------------------------------
-
-#if wxUSE_INTL
-void wxAppTraitsBase::SetLocale()
+#if wxUSE_SOCKETS
+GSocketGUIFunctionsTable* wxConsoleAppTraitsBase::GetSocketGUIFunctionsTable()
 {
-    wxSetlocale(LC_ALL, "");
-    wxUpdateLocaleIsUtf8();
+    return NULL;
 }
 #endif
 
-#if wxUSE_THREADS
-void wxMutexGuiEnterImpl();
-void wxMutexGuiLeaveImpl();
-
-void wxAppTraitsBase::MutexGuiEnter()
-{
-    wxMutexGuiEnterImpl();
-}
-
-void wxAppTraitsBase::MutexGuiLeave()
-{
-    wxMutexGuiLeaveImpl();
-}
-
-void WXDLLIMPEXP_BASE wxMutexGuiEnter()
-{
-    wxAppTraits * const traits = wxAppConsoleBase::GetTraitsIfExists();
-    if ( traits )
-        traits->MutexGuiEnter();
-}
-
-void WXDLLIMPEXP_BASE wxMutexGuiLeave()
-{
-    wxAppTraits * const traits = wxAppConsoleBase::GetTraitsIfExists();
-    if ( traits )
-        traits->MutexGuiLeave();
-}
-#endif // wxUSE_THREADS
+// ----------------------------------------------------------------------------
+// wxAppTraits
+// ----------------------------------------------------------------------------
 
 #ifdef __WXDEBUG__
 
@@ -904,6 +662,12 @@ void wxTrap()
 {
 #if defined(__WXMSW__) && !defined(__WXMICROWIN__)
     DebugBreak();
+#elif defined(__WXMAC__) && !defined(__DARWIN__)
+    #if __powerc
+        Debugger();
+    #else
+        SysBreak();
+    #endif
 #elif defined(_MSL_USING_MW_C_HEADERS) && _MSL_USING_MW_C_HEADERS
     Debugger();
 #elif defined(__UNIX__)
@@ -914,11 +678,11 @@ void wxTrap()
 }
 
 // this function is called when an assert fails
-static void wxDoOnAssert(const wxString& szFile,
-                         int nLine,
-                         const wxString& szFunc,
-                         const wxString& szCond,
-                         const wxString& szMsg = wxEmptyString)
+void wxOnAssert(const wxChar *szFile,
+                int nLine,
+                const char *szFunc,
+                const wxChar *szCond,
+                const wxChar *szMsg)
 {
     // FIXME MT-unsafe
     static int s_bInAssert = 0;
@@ -932,92 +696,21 @@ static void wxDoOnAssert(const wxString& szFile,
         return;
     }
 
+    // __FUNCTION__ is always in ASCII, convert it to wide char if needed
+    const wxString strFunc = wxString::FromAscii(szFunc);
+
     if ( !wxTheApp )
     {
         // by default, show the assert dialog box -- we can't customize this
         // behaviour
-        ShowAssertDialog(szFile, nLine, szFunc, szCond, szMsg);
+        ShowAssertDialog(szFile, nLine, strFunc, szCond, szMsg);
     }
     else
     {
         // let the app process it as it wants
-        // FIXME-UTF8: use wc_str(), not c_str(), when ANSI build is removed
-        wxTheApp->OnAssertFailure(szFile.c_str(), nLine, szFunc.c_str(),
-                                  szCond.c_str(), szMsg.c_str());
+        wxTheApp->OnAssertFailure(szFile, nLine, strFunc, szCond, szMsg);
     }
 }
-
-void wxOnAssert(const wxString& szFile,
-                int nLine,
-                const wxString& szFunc,
-                const wxString& szCond,
-                const wxString& szMsg)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond, szMsg);
-}
-
-void wxOnAssert(const wxString& szFile,
-                int nLine,
-                const wxString& szFunc,
-                const wxString& szCond)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond);
-}
-
-void wxOnAssert(const wxChar *szFile,
-                int nLine,
-                const char *szFunc,
-                const wxChar *szCond,
-                const wxChar *szMsg)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond, szMsg);
-}
-
-void wxOnAssert(const char *szFile,
-                int nLine,
-                const char *szFunc,
-                const char *szCond,
-                const wxString& szMsg)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond, szMsg);
-}
-
-void wxOnAssert(const char *szFile,
-                int nLine,
-                const char *szFunc,
-                const char *szCond,
-                const wxCStrData& msg)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond, msg);
-}
-
-#if wxUSE_UNICODE
-void wxOnAssert(const char *szFile,
-                int nLine,
-                const char *szFunc,
-                const char *szCond)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond);
-}
-
-void wxOnAssert(const char *szFile,
-                int nLine,
-                const char *szFunc,
-                const char *szCond,
-                const char *szMsg)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond, szMsg);
-}
-
-void wxOnAssert(const char *szFile,
-                int nLine,
-                const char *szFunc,
-                const char *szCond,
-                const wxChar *szMsg)
-{
-    wxDoOnAssert(szFile, nLine, szFunc, szCond, szMsg);
-}
-#endif // wxUSE_UNICODE
 
 #endif // __WXDEBUG__
 
@@ -1040,7 +733,6 @@ static void LINKAGEMODE SetTraceMasks()
 #endif // wxUSE_LOG
 }
 
-static
 bool DoShowAssertDialog(const wxString& msg)
 {
     // under MSW we can show the dialog even in the console mode
@@ -1053,7 +745,7 @@ bool DoShowAssertDialog(const wxString& msg)
               wxT("You can also choose [Cancel] to suppress ")
               wxT("further warnings.");
 
-    switch ( ::MessageBox(NULL, msgDlg.wx_str(), _T("wxWidgets Debug Alert"),
+    switch ( ::MessageBox(NULL, msgDlg, _T("wxWidgets Debug Alert"),
                           MB_YESNOCANCEL | MB_ICONSTOP ) )
     {
         case IDYES:
@@ -1080,11 +772,11 @@ bool DoShowAssertDialog(const wxString& msg)
 
 // show the assert modal dialog
 static
-void ShowAssertDialog(const wxString& szFile,
+void ShowAssertDialog(const wxChar *szFile,
                       int nLine,
-                      const wxString& szFunc,
-                      const wxString& szCond,
-                      const wxString& szMsg,
+                      const wxChar *szFunc,
+                      const wxChar *szCond,
+                      const wxChar *szMsg,
                       wxAppTraits *traits)
 {
     // this variable can be set to true to suppress "assert failure" messages
@@ -1099,11 +791,11 @@ void ShowAssertDialog(const wxString& szFile,
     msg.Printf(wxT("%s(%d): assert \"%s\" failed"), szFile, nLine, szCond);
 
     // add the function name, if any
-    if ( !szFunc.empty() )
+    if ( szFunc && *szFunc )
         msg << _T(" in ") << szFunc << _T("()");
 
     // and the message itself
-    if ( !szMsg.empty() )
+    if ( szMsg )
     {
         msg << _T(": ") << szMsg;
     }
@@ -1121,7 +813,7 @@ void ShowAssertDialog(const wxString& szFile,
 
 #if defined(__WXMSW__) && !defined(__WXMICROWIN__)
         msg << wxT("\r\n");
-        OutputDebugString(msg.wx_str());
+        OutputDebugString(msg );
 #else
         // send to stderr
         wxFprintf(stderr, wxT("%s\n"), msg.c_str());

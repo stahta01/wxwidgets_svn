@@ -17,7 +17,7 @@
 //
 #include "wx/os2/wxrsc.h"
 
-class WXDLLIMPEXP_CORE wxFrame : public wxFrameBase
+class WXDLLEXPORT wxFrame : public wxFrameBase
 {
 public:
     // construction
@@ -124,6 +124,8 @@ public:
     WXHWND GetToolTipCtrl(void) const { return m_hWndToolTip; }
     void   SetToolTipCtrl(WXHWND hHwndTT) { m_hWndToolTip = hHwndTT; }
 #endif // tooltips
+
+    virtual void SendSizeEvent(void);
 
     void      SetClient(WXHWND    c_Hwnd);
     void      SetClient(wxWindow* c_Window);

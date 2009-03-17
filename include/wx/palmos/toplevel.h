@@ -16,7 +16,7 @@
 // wxTopLevelWindowPalm
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTopLevelWindowPalm : public wxTopLevelWindowBase
+class WXDLLEXPORT wxTopLevelWindowPalm : public wxTopLevelWindowBase
 {
 public:
     // constructors and such
@@ -54,7 +54,8 @@ public:
     virtual bool IsMaximized() const;
     virtual void Iconize(bool iconize = true);
     virtual bool IsIconized() const;
-    virtual void SetIcons(const wxIconBundle& icons);
+    virtual void SetIcon(const wxIcon& icon);
+    virtual void SetIcons(const wxIconBundle& icons );
     virtual void Restore();
 
 #ifndef __WXWINCE__
@@ -121,7 +122,7 @@ protected:
     wxWindow             *m_winLastFocused;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxTopLevelWindowPalm);
+    DECLARE_NO_COPY_CLASS(wxTopLevelWindowPalm)
 };
 
 #endif // _WX_PALMOS_TOPLEVEL_H_

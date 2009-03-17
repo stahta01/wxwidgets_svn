@@ -39,16 +39,16 @@
 // implementation
 // ============================================================================
 
-wxThemeInfo *wxTheme::ms_allThemes = NULL;
-wxTheme *wxTheme::ms_theme = NULL;
+wxThemeInfo *wxTheme::ms_allThemes = (wxThemeInfo *)NULL;
+wxTheme *wxTheme::ms_theme = (wxTheme *)NULL;
 
 // ----------------------------------------------------------------------------
 // "dynamic" theme creation
 // ----------------------------------------------------------------------------
 
 wxThemeInfo::wxThemeInfo(Constructor c,
-                         const wxString& n,
-                         const wxString& d)
+                         const wxChar *n,
+                         const wxChar *d)
            : name(n), desc(d), ctor(c)
 {
     // insert us (in the head of) the linked list
@@ -70,7 +70,7 @@ wxThemeInfo::wxThemeInfo(Constructor c,
         info = info->next;
     }
 
-    return NULL;
+    return (wxTheme *)NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -152,7 +152,7 @@ wxTheme::~wxTheme()
 // wxDelegateTheme
 // ----------------------------------------------------------------------------
 
-wxDelegateTheme::wxDelegateTheme(const wxString& theme)
+wxDelegateTheme::wxDelegateTheme(const wxChar *theme)
 {
     m_themeName = theme;
     m_theme = NULL;

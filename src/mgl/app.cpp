@@ -44,6 +44,53 @@ void wxApp::Exit()
     exit(0);
 }
 
+//-----------------------------------------------------------------------------
+// wxYield
+//-----------------------------------------------------------------------------
+
+static bool gs_inYield = false;
+
+bool wxApp::Yield(bool onlyIfNeeded)
+{
+    if ( gs_inYield )
+    {
+        if ( !onlyIfNeeded )
+        {
+            wxFAIL_MSG( wxT("wxYield called recursively" ) );
+        }
+
+        return false;
+    }
+
+#if wxUSE_THREADS
+    if ( !wxThread::IsMain() )
+    {
+        // can't process events from other threads, MGL is thread-unsafe
+        return true;
+    }
+#endif // wxUSE_THREADS
+
+    gs_inYield = true;
+
+    wxLog::Suspend();
+
+    // A guarentee that there will be an active event loop:
+    wxEventLoopGuarantor dummyLoopIfNeeded;
+    while (wxEventLoop::GetActive()->Pending())
+        wxEventLoop::GetActive()->Dispatch();
+
+    /* it's necessary to call ProcessIdle() to update the frames sizes which
+       might have been changed (it also will update other things set from
+       OnUpdateUI() which is a nice (and desired) side effect) */
+    while (wxTheApp->ProcessIdle()) { }
+
+    wxLog::Resume();
+
+    gs_inYield = false;
+
+    return true;
+}
+
 
 //-----------------------------------------------------------------------------
 // wxWakeUpIdle
@@ -151,6 +198,11 @@ static void wxDestroyMGL_WM()
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxApp,wxEvtHandler)
+
+BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxAppBase::OnIdle)
+END_EVENT_TABLE()
+
 
 wxApp::wxApp()
 {

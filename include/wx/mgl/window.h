@@ -23,7 +23,7 @@ class MGLDevCtx;
 // wxWindow declaration for MGL
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowMGL : public wxWindowBase
+class WXDLLEXPORT wxWindowMGL : public wxWindowBase
 {
 public:
     wxWindowMGL() { Init(); }
@@ -68,6 +68,9 @@ public:
     virtual void Refresh(bool eraseBackground = true,
                          const wxRect *rect = (const wxRect *) NULL);
     virtual void Update();
+    virtual void Clear();
+    virtual void Freeze();
+    virtual void Thaw();
 
     virtual bool SetCursor(const wxCursor &cursor);
     virtual bool SetFont(const wxFont &font) { m_font = font; return true; }
@@ -76,8 +79,8 @@ public:
     virtual int GetCharWidth() const;
     virtual void GetTextExtent(const wxString& string,
                                int *x, int *y,
-                               int *descent = NULL,
-                               int *externalLeading = NULL,
+                               int *descent = (int *) NULL,
+                               int *externalLeading = (int *) NULL,
                                const wxFont *theFont = (const wxFont *) NULL)
                                const;
 
@@ -98,14 +101,11 @@ public:
     void OnInternalIdle();
 
 protected:
-    virtual void DoFreeze();
-    virtual void DoThaw();
-
-
     // the window handle
     struct window_t      *m_wnd;
     // whether there should be wxEraseEvent before wxPaintEvent or not
     // (see wxWindow::Refresh)
+    bool                  m_frozen:1;
     bool                  m_refreshAfterThaw:1;
     int                   m_eraseBackground;
 
@@ -139,7 +139,7 @@ private:
     friend class wxPaintDC;
 
     DECLARE_DYNAMIC_CLASS(wxWindowMGL)
-    wxDECLARE_NO_COPY_CLASS(wxWindowMGL);
+    DECLARE_NO_COPY_CLASS(wxWindowMGL)
     DECLARE_EVENT_TABLE()
 
 public:

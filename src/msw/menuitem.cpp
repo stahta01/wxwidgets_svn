@@ -137,7 +137,6 @@ wxMenuItem::wxMenuItem(wxMenu *pParentMenu,
     Init();
 }
 
-#if WXWIN_COMPATIBILITY_2_8
 wxMenuItem::wxMenuItem(wxMenu *parentMenu,
                        int id,
                        const wxString& text,
@@ -152,7 +151,6 @@ wxMenuItem::wxMenuItem(wxMenu *parentMenu,
 {
     Init();
 }
-#endif
 
 void wxMenuItem::Init()
 {
@@ -172,7 +170,7 @@ void wxMenuItem::Init()
     ResetOwnerDrawn();
 
     //  switch ownerdraw back on if using a non default margin
-    if ( !IsSeparator() )
+    if ( GetId() != wxID_SEPARATOR )
         SetMarginWidth(GetMarginWidth());
 
     // tell the owner drawing code to show the accel string as well
@@ -188,14 +186,9 @@ wxMenuItem::~wxMenuItem()
 // ----
 
 // return the id for calling Win32 API functions
-WXWPARAM wxMenuItem::GetMSWId() const
+int wxMenuItem::GetRealId() const
 {
-    // we must use ids in unsigned short range with Windows functions, if we
-    // pass ids > USHRT_MAX to them they get very confused (e.g. start
-    // generating WM_COMMAND messages with negative high word of wParam), so
-    // use the cast to ensure the id is in range
-    return m_subMenu ? wxPtrToUInt(m_subMenu->GetHMenu())
-                     : static_cast<unsigned short>(GetId());
+    return m_subMenu ? (int)m_subMenu->GetHMenu() : GetId();
 }
 
 // get item state
@@ -203,22 +196,20 @@ WXWPARAM wxMenuItem::GetMSWId() const
 
 bool wxMenuItem::IsChecked() const
 {
-    // fix that RTTI is always getting the correct state (separators cannot be
-    // checked, but the Windows call below returns true
-    if ( IsSeparator() )
-        return false;
+    // fix that RTTI is always getting the correct state (separators cannot be checked, but the call below
+    // returns true
+    if ( GetId() == wxID_SEPARATOR )
+        return false ;
 
-    // the item might not be attached to a menu yet
-    //
-    // TODO: shouldn't we just always call the base class version? It seems
-    //       like it ought to always be in sync
-    if ( !m_parentMenu )
-        return wxMenuItemBase::IsChecked();
-
-    HMENU hmenu = GetHMenuOf(m_parentMenu);
-    int flag = ::GetMenuState(hmenu, GetMSWId(), MF_BYCOMMAND);
+    int flag = ::GetMenuState(GetHMenuOf(m_parentMenu), GetId(), MF_BYCOMMAND);
 
     return (flag & MF_CHECKED) != 0;
+}
+
+/* static */
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
+{
+    return wxStripMenuCodes(text);
 }
 
 // radio group stuff
@@ -253,17 +244,13 @@ void wxMenuItem::Enable(bool enable)
     if ( m_isEnabled == enable )
         return;
 
-    if ( m_parentMenu )
-    {
-        long rc = EnableMenuItem(GetHMenuOf(m_parentMenu),
-                                 GetMSWId(),
-                                 MF_BYCOMMAND |
-                                 (enable ? MF_ENABLED : MF_GRAYED));
+    long rc = EnableMenuItem(GetHMenuOf(m_parentMenu),
+                             GetRealId(),
+                             MF_BYCOMMAND |
+                             (enable ? MF_ENABLED : MF_GRAYED));
 
-        if ( rc == -1 )
-        {
-            wxLogLastError(wxT("EnableMenuItem"));
-        }
+    if ( rc == -1 ) {
+        wxLogLastError(wxT("EnableMenuItem"));
     }
 
     wxMenuItemBase::Enable(enable);
@@ -276,85 +263,81 @@ void wxMenuItem::Check(bool check)
     if ( m_isChecked == check )
         return;
 
-    if ( m_parentMenu )
+    int flags = check ? MF_CHECKED : MF_UNCHECKED;
+    HMENU hmenu = GetHMenuOf(m_parentMenu);
+
+    if ( GetKind() == wxITEM_RADIO )
     {
-        int flags = check ? MF_CHECKED : MF_UNCHECKED;
-        HMENU hmenu = GetHMenuOf(m_parentMenu);
+        // it doesn't make sense to uncheck a radio item - what would this do?
+        if ( !check )
+            return;
 
-        if ( GetKind() == wxITEM_RADIO )
+        // get the index of this item in the menu
+        const wxMenuItemList& items = m_parentMenu->GetMenuItems();
+        int pos = items.IndexOf(this);
+        wxCHECK_RET( pos != wxNOT_FOUND,
+                     _T("menuitem not found in the menu items list?") );
+
+        // get the radio group range
+        int start,
+            end;
+
+        if ( m_isRadioGroupStart )
         {
-            // it doesn't make sense to uncheck a radio item -- what would this
-            // do?
-            if ( !check )
-                return;
-
-            // get the index of this item in the menu
-            const wxMenuItemList& items = m_parentMenu->GetMenuItems();
-            int pos = items.IndexOf(this);
-            wxCHECK_RET( pos != wxNOT_FOUND,
-                         _T("menuitem not found in the menu items list?") );
-
-            // get the radio group range
-            int start,
-                end;
-
-            if ( m_isRadioGroupStart )
-            {
-                // we already have all information we need
-                start = pos;
-                end = m_radioGroup.end;
-            }
-            else // next radio group item
-            {
-                // get the radio group end from the start item
-                start = m_radioGroup.start;
-                end = items.Item(start)->GetData()->m_radioGroup.end;
-            }
+            // we already have all information we need
+            start = pos;
+            end = m_radioGroup.end;
+        }
+        else // next radio group item
+        {
+            // get the radio group end from the start item
+            start = m_radioGroup.start;
+            end = items.Item(start)->GetData()->m_radioGroup.end;
+        }
 
 #ifdef __WIN32__
-            // calling CheckMenuRadioItem() with such parameters hangs my system
-            // (NT4 SP6) and I suspect this could happen to the others as well,
-            // so don't do it!
-            wxCHECK_RET( start != -1 && end != -1,
-                         _T("invalid ::CheckMenuRadioItem() parameter(s)") );
+        // calling CheckMenuRadioItem() with such parameters hangs my system
+        // (NT4 SP6) and I suspect this could happen to the others as well - so
+        // don't do it!
+        wxCHECK_RET( start != -1 && end != -1,
+                     _T("invalid ::CheckMenuRadioItem() parameter(s)") );
 
-            if ( !::CheckMenuRadioItem(hmenu,
-                                       start,   // the first radio group item
-                                       end,     // the last one
-                                       pos,     // the one to check
-                                       MF_BYPOSITION) )
-            {
-                wxLogLastError(_T("CheckMenuRadioItem"));
-            }
+        if ( !::CheckMenuRadioItem(hmenu,
+                                   start,   // the first radio group item
+                                   end,     // the last one
+                                   pos,     // the one to check
+                                   MF_BYPOSITION) )
+        {
+            wxLogLastError(_T("CheckMenuRadioItem"));
+        }
 #endif // __WIN32__
 
-            // also uncheck all the other items in this radio group
-            wxMenuItemList::compatibility_iterator node = items.Item(start);
-            for ( int n = start; n <= end && node; n++ )
-            {
-                if ( n != pos )
-                {
-                    node->GetData()->m_isChecked = false;
-                }
-
-                node = node->GetNext();
-            }
-        }
-        else // check item
+        // also uncheck all the other items in this radio group
+        wxMenuItemList::compatibility_iterator node = items.Item(start);
+        for ( int n = start; n <= end && node; n++ )
         {
-            if ( ::CheckMenuItem(hmenu,
-                                 GetMSWId(),
-                                 MF_BYCOMMAND | flags) == (DWORD)-1 )
+            if ( n != pos )
             {
-                wxFAIL_MSG(_T("CheckMenuItem() failed, item not in the menu?"));
+                node->GetData()->m_isChecked = false;
             }
+
+            node = node->GetNext();
+        }
+    }
+    else // check item
+    {
+        if ( ::CheckMenuItem(hmenu,
+                             GetRealId(),
+                             MF_BYCOMMAND | flags) == (DWORD)-1 )
+        {
+            wxFAIL_MSG( _T("CheckMenuItem() failed, item not in the menu?") );
         }
     }
 
     wxMenuItemBase::Check(check);
 }
 
-void wxMenuItem::SetItemLabel(const wxString& txt)
+void wxMenuItem::SetText(const wxString& txt)
 {
     wxString text = txt;
 
@@ -363,7 +346,7 @@ void wxMenuItem::SetItemLabel(const wxString& txt)
         return;
 
     // wxMenuItemBase will do stock ID checks
-    wxMenuItemBase::SetItemLabel(text);
+    wxMenuItemBase::SetText(text);
 
     // m_text could now be different from 'text' if we are a stock menu item,
     // so use only m_text below
@@ -374,59 +357,69 @@ void wxMenuItem::SetItemLabel(const wxString& txt)
     SetAccelString(m_text.AfterFirst(_T('\t')));
 #endif
 
-    // the item can be not attached to any menu yet and SetItemLabel() is still
-    // valid to call in this case and should do nothing else
-    if ( !m_parentMenu )
-        return;
+    HMENU hMenu = GetHMenuOf(m_parentMenu);
+    wxCHECK_RET( hMenu, wxT("menuitem without menu") );
 
 #if wxUSE_ACCEL
     m_parentMenu->UpdateAccel(this);
 #endif // wxUSE_ACCEL
 
-    const UINT id = GetMSWId();
-    HMENU hMenu = GetHMenuOf(m_parentMenu);
-    if ( !hMenu || ::GetMenuState(hMenu, id, MF_BYCOMMAND) == (UINT)-1 )
-        return;
+    UINT id = GetRealId();
+    UINT flagsOld = ::GetMenuState(hMenu, id, MF_BYCOMMAND);
+    if ( flagsOld == 0xFFFFFFFF )
+    {
+        // It's not an error, it means that the menu item doesn't exist
+        //wxLogLastError(wxT("GetMenuState"));
+    }
+    else
+    {
+        if ( IsSubMenu() )
+        {
+            // high byte contains the number of items in a submenu for submenus
+            flagsOld &= 0xFF;
+            flagsOld |= MF_POPUP;
+        }
+
+        LPCTSTR data;
 
 #if wxUSE_OWNER_DRAWN
-    if ( IsOwnerDrawn() )
-    {
-        // we don't need to do anything for owner drawn items, they will redraw
-        // themselves using the new text the next time they're displayed
-        return;
-    }
-#endif // owner drawn
+        if ( IsOwnerDrawn() )
+        {
+            flagsOld |= MF_OWNERDRAW;
+            data = (LPCTSTR)this;
+        }
+        else
+#endif  //owner drawn
+        {
+            flagsOld |= MF_STRING;
+            data = (wxChar*) m_text.c_str();
+        }
 
-    // update the text of the native menu item
-    WinStruct<MENUITEMINFO> info;
-
-    // surprisingly, calling SetMenuItemInfo() with just MIIM_STRING doesn't
-    // work as it resets the menu bitmap, so we need to first get the old item
-    // state and then modify it
-    const bool isLaterThanWin95 = wxGetWinVersion() > wxWinVersion_95;
-    info.fMask = MIIM_STATE |
-                 MIIM_ID |
-                 MIIM_SUBMENU |
-                 MIIM_CHECKMARKS |
-                 MIIM_DATA;
-    if ( isLaterThanWin95 )
-        info.fMask |= MIIM_BITMAP | MIIM_FTYPE;
-    else
-        info.fMask |= MIIM_TYPE;
-    if ( !::GetMenuItemInfo(hMenu, id, FALSE, &info) )
-    {
-        wxLogLastError(wxT("GetMenuItemInfo"));
-        return;
-    }
-
-    if ( isLaterThanWin95 )
-        info.fMask |= MIIM_STRING;
-    //else: MIIM_TYPE already specified
-    info.dwTypeData = (LPTSTR)m_text.wx_str();
-    info.cch = m_text.length();
-    if ( !::SetMenuItemInfo(hMenu, id, FALSE, &info) )
-    {
-        wxLogLastError(wxT("SetMenuItemInfo"));
+#ifdef __WXWINCE__
+        // FIXME: complete this, applying the old
+        // flags.
+        // However, the WinCE doc for SetMenuItemInfo
+        // says that you can't use it to set the menu
+        // item state; only data, id and type.
+        MENUITEMINFO info;
+        wxZeroMemory(info);
+        info.cbSize = sizeof(info);
+        info.fMask = MIIM_TYPE;
+        info.fType = MFT_STRING;
+        info.cch = m_text.length();
+        info.dwTypeData = (LPTSTR) data ;
+        if ( !::SetMenuItemInfo(hMenu, id, FALSE, & info) )
+        {
+            wxLogLastError(wxT("SetMenuItemInfo"));
+        }
+#else
+        if ( ::ModifyMenu(hMenu, id,
+                          MF_BYCOMMAND | flagsOld,
+                          id, data) == (int)0xFFFFFFFF )
+        {
+            wxLogLastError(wxT("ModifyMenu"));
+        }
+#endif
     }
 }
 

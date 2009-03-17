@@ -47,16 +47,16 @@ IMPLEMENT_VARIANT_OBJECT_EXPORTED_SHALLOWCMP(wxIcon,WXDLLEXPORT)
 
 
 IMPLEMENT_ABSTRACT_CLASS(wxBitmapBase, wxGDIObject)
-IMPLEMENT_ABSTRACT_CLASS(wxBitmapHandler, wxObject)
+IMPLEMENT_ABSTRACT_CLASS(wxBitmapHandlerBase,wxObject)
 
 wxList wxBitmapBase::sm_handlers;
 
-void wxBitmapBase::AddHandler(wxBitmapHandler *handler)
+void wxBitmapBase::AddHandler(wxBitmapHandlerBase *handler)
 {
     sm_handlers.Append(handler);
 }
 
-void wxBitmapBase::InsertHandler(wxBitmapHandler *handler)
+void wxBitmapBase::InsertHandler(wxBitmapHandlerBase *handler)
 {
     sm_handlers.Insert(handler);
 }
@@ -124,6 +124,21 @@ void wxBitmapBase::CleanUpHandlers()
         sm_handlers.Erase(node);
         node = next;
     }
+}
+
+bool wxBitmapHandlerBase::Create(wxBitmap*, const void*, long, int, int, int)
+{
+    return false;
+}
+
+bool wxBitmapHandlerBase::LoadFile(wxBitmap*, const wxString&, long, int, int)
+{
+    return false;
+}
+
+bool wxBitmapHandlerBase::SaveFile(const wxBitmap*, const wxString&, int, const wxPalette*)
+{
+    return false;
 }
 
 class wxBitmapBaseModule: public wxModule

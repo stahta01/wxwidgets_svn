@@ -47,13 +47,13 @@
 
 class WXDLLIMPEXP_FWD_CORE wxBitmap;
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxButtonNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxButtonNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxButton: a push button
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxButtonBase : public wxControl
+class WXDLLEXPORT wxButtonBase : public wxControl
 {
 public:
     wxButtonBase() { }
@@ -64,10 +64,9 @@ public:
     // set the margins around the image
     virtual void SetImageMargins(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y)) { }
 
-    // make this button the default button in its top level window
-    //
-    // returns the old default item (possibly NULL)
-    virtual wxWindow *SetDefault();
+    // this wxButton method is called when the button becomes the default one
+    // on its panel
+    virtual void SetDefault() { }
 
     // Buttons on MSW can look bad if they are not native colours, because
     // then they become owner-drawn and not theme-drawn.  Disable it here
@@ -78,10 +77,7 @@ public:
     static wxSize GetDefaultSize();
 
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
-    wxDECLARE_NO_COPY_CLASS(wxButtonBase);
+    DECLARE_NO_COPY_CLASS(wxButtonBase)
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -95,7 +91,7 @@ protected:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/button.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/button.h"
+    #include "wx/mac/button.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/button.h"
 #elif defined(__WXPM__)

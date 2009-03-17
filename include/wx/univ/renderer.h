@@ -30,27 +30,27 @@
 
 #include "wx/renderer.h"
 
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxDC;
-class WXDLLIMPEXP_FWD_CORE wxCheckListBox;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxDC;
+class WXDLLEXPORT wxCheckListBox;
 
 #if wxUSE_LISTBOX
-    class WXDLLIMPEXP_FWD_CORE wxListBox;
+    class WXDLLEXPORT wxListBox;
 #endif // wxUSE_LISTBOX
 
 #if wxUSE_MENUS
-   class WXDLLIMPEXP_FWD_CORE wxMenu;
-   class WXDLLIMPEXP_FWD_CORE wxMenuGeometryInfo;
+   class WXDLLEXPORT wxMenu;
+   class WXDLLEXPORT wxMenuGeometryInfo;
 #endif // wxUSE_MENUS
 
-class WXDLLIMPEXP_FWD_CORE wxScrollBar;
+class WXDLLEXPORT wxScrollBar;
 
 #if wxUSE_TEXTCTRL
-    class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+    class WXDLLEXPORT wxTextCtrl;
 #endif
 
 #if wxUSE_GAUGE
-    class WXDLLIMPEXP_FWD_CORE wxGauge;
+    class WXDLLEXPORT wxGauge;
 #endif // wxUSE_GAUGE
 
 #include "wx/string.h"
@@ -58,7 +58,7 @@ class WXDLLIMPEXP_FWD_CORE wxScrollBar;
 #include "wx/icon.h"
 
 // helper class used by wxMenu-related functions
-class WXDLLIMPEXP_CORE wxMenuGeometryInfo
+class WXDLLEXPORT wxMenuGeometryInfo
 {
 public:
     // get the total size of the menu
@@ -71,7 +71,7 @@ public:
 // wxRenderer: abstract renderers interface
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRenderer : public wxDelegateRendererNative
+class WXDLLEXPORT wxRenderer : public wxDelegateRendererNative
 {
 public:
     // drawing functions
@@ -89,6 +89,12 @@ public:
                                    const wxColour& col,
                                    const wxRect& rect,
                                    int flags) = 0;
+
+
+    // draw the focus rectangle around the label contained in the given rect
+    //
+    // only wxCONTROL_SELECTED makes sense in flags here
+    virtual void DrawFocusRect(wxDC& dc, const wxRect& rect, int flags = 0) = 0;
 
     // draw the label inside the given rectangle with the specified alignment
     // and optionally emphasize the character with the given index
@@ -117,7 +123,7 @@ public:
                             wxBorder border,
                             const wxRect& rect,
                             int flags = 0,
-                            wxRect *rectIn = NULL) = 0;
+                            wxRect *rectIn = (wxRect *)NULL) = 0;
 
     // draw text control border (I hate to have a separate method for this but
     // it is needed to accommodate GTK+)
@@ -125,13 +131,13 @@ public:
                                 wxBorder border,
                                 const wxRect& rect,
                                 int flags = 0,
-                                wxRect *rectIn = NULL) = 0;
+                                wxRect *rectIn = (wxRect *)NULL) = 0;
 
     // draw push button border and return the rectangle left for the label
     virtual void DrawButtonBorder(wxDC& dc,
                                   const wxRect& rect,
                                   int flags = 0,
-                                  wxRect *rectIn = NULL) = 0;
+                                  wxRect *rectIn = (wxRect *)NULL) = 0;
 
     // draw a horizontal line
     virtual void DrawHorizontalLine(wxDC& dc,
@@ -207,13 +213,6 @@ public:
                                  int flags = 0,
                                  wxAlignment align = wxALIGN_LEFT,
                                  int indexAccel = -1) = 0;
-
-   // draw a radio button sans label or bitmap, for wxRenderer API compat.
-    virtual void DrawRadioButton(wxDC& dc,
-                                 const wxRect& rect,
-                                 int flags = 0,
-                                 wxAlignment align = wxALIGN_LEFT)
-     { DrawRadioButton(dc, wxEmptyString, wxNullBitmap, rect, flags, align); } 
 
 #if wxUSE_TOOLBAR
     // draw a toolbar button (label may be empty, bitmap may be invalid, if
@@ -500,7 +499,7 @@ public:
 // will be left to the original renderer
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDelegateRenderer : public wxRenderer
+class WXDLLEXPORT wxDelegateRenderer : public wxRenderer
 {
 public:
     wxDelegateRenderer(wxRenderer *renderer) : m_renderer(renderer) { }
@@ -516,8 +515,8 @@ public:
                                    const wxRect& rect,
                                    int flags)
         { m_renderer->DrawButtonSurface(dc, col, rect, flags); }
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0)
-        { m_renderer->DrawFocusRect(win, dc, rect, flags); }
+    virtual void DrawFocusRect(wxDC& dc, const wxRect& rect, int flags = 0)
+        { m_renderer->DrawFocusRect(dc, rect, flags); }
     virtual void DrawLabel(wxDC& dc,
                            const wxString& label,
                            const wxRect& rect,
@@ -541,18 +540,18 @@ public:
                             wxBorder border,
                             const wxRect& rect,
                             int flags = 0,
-                            wxRect *rectIn = NULL)
+                            wxRect *rectIn = (wxRect *)NULL)
         { m_renderer->DrawBorder(dc, border, rect, flags, rectIn); }
     virtual void DrawTextBorder(wxDC& dc,
                                 wxBorder border,
                                 const wxRect& rect,
                                 int flags = 0,
-                                wxRect *rectIn = NULL)
+                                wxRect *rectIn = (wxRect *)NULL)
         { m_renderer->DrawTextBorder(dc, border, rect, flags, rectIn); }
     virtual void DrawButtonBorder(wxDC& dc,
                                   const wxRect& rect,
                                   int flags = 0,
-                                  wxRect *rectIn = NULL)
+                                  wxRect *rectIn = (wxRect *)NULL)
         { m_renderer->DrawButtonBorder(dc, rect, flags, rectIn); }
     virtual void DrawFrame(wxDC& dc,
                            const wxString& label,
@@ -870,7 +869,7 @@ protected:
 // OnPaint()
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxControlRenderer
+class WXDLLEXPORT wxControlRenderer
 {
 public:
     // create a renderer for this dc with this "fundamental" renderer

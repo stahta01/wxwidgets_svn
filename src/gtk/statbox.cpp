@@ -13,33 +13,53 @@
 #if wxUSE_STATBOX
 
 #include "wx/statbox.h"
+#include "wx/gtk/private.h"
 
-#include <gtk/gtk.h>
+#include "gdk/gdk.h"
+#include "gtk/gtk.h"
+
+
+// ============================================================================
+// implementation
+// ============================================================================
 
 // constants taken from GTK sources
 #define LABEL_PAD 1
 #define LABEL_SIDE_PAD 2
 
 //-----------------------------------------------------------------------------
-// "size_allocate" from m_widget
+// "gtk_frame_size_allocate" signal
 //-----------------------------------------------------------------------------
 
 extern "C" {
-static void size_allocate(GtkWidget* widget, GtkAllocation* alloc, void*)
+
+static void
+gtk_frame_size_allocate (GtkWidget     *widget,
+                         GtkAllocation *allocation,
+                         wxStaticBox *p)
 {
-    // clip label as GTK >= 2.12 does
-    GtkWidget* label_widget = gtk_frame_get_label_widget(GTK_FRAME(widget));
-    int w = alloc->width -
-        2 * widget->style->xthickness - 2 * LABEL_PAD - 2 * LABEL_SIDE_PAD;
-    if (w < 0) w = 0;
-    if (label_widget->allocation.width > w)
+    GtkFrame *frame = GTK_FRAME (widget);
+
+    // this handler gets called _after_ the GTK+'s own signal handler; thus we
+    // need to fix only the width of the GtkLabel
+    // (everything else has already been handled by the GTK+ signal handler).
+
+    if (frame->label_widget && GTK_WIDGET_VISIBLE (frame->label_widget))
     {
-        GtkAllocation alloc2 = label_widget->allocation;
-        alloc2.width = w;
-        gtk_widget_size_allocate(label_widget, &alloc2);
+        GtkAllocation ca = frame->label_widget->allocation;
+
+        // we want the GtkLabel to not exceed maxWidth:
+        int maxWidth = allocation->width - 2*LABEL_SIDE_PAD - 2*LABEL_PAD;
+        maxWidth = wxMax(2, maxWidth);      // maxWidth must always be positive!
+
+        // truncate the label to the GtkFrame width...
+        ca.width = wxMin(ca.width, maxWidth);
+        gtk_widget_size_allocate(frame->label_widget, &ca);
     }
 }
+
 }
+
 
 //-----------------------------------------------------------------------------
 // wxStaticBox
@@ -70,16 +90,16 @@ bool wxStaticBox::Create( wxWindow *parent,
                           long style,
                           const wxString& name )
 {
+    m_needParent = TRUE;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, wxDefaultValidator, name ))
     {
         wxFAIL_MSG( wxT("wxStaticBox creation failed") );
-        return false;
+        return FALSE;
     }
 
     m_widget = GTKCreateFrame(label);
-    g_object_ref(m_widget);
-    // only base SetLabel needs to be called after GTKCreateFrame
     wxControl::SetLabel(label);
 
     m_parent->DoAddChild( this );
@@ -87,22 +107,23 @@ bool wxStaticBox::Create( wxWindow *parent,
     PostCreation(size);
 
     // need to set non default alignment?
-    gfloat xalign = 0;
+    gfloat xalign;
     if ( style & wxALIGN_CENTER )
         xalign = 0.5;
     else if ( style & wxALIGN_RIGHT )
         xalign = 1.0;
+    else // wxALIGN_LEFT
+        xalign = 0.0;
 
-    gtk_frame_set_label_align(GTK_FRAME(m_widget), xalign, 0.5);
+    if ( style & (wxALIGN_RIGHT | wxALIGN_CENTER) ) // left alignment is default
+        gtk_frame_set_label_align(GTK_FRAME( m_widget ), xalign, 0.5);
 
-    if (gtk_check_version(2, 12, 0))
-    {
-        // for clipping label as GTK >= 2.12 does
-        g_signal_connect(m_widget, "size_allocate",
-            G_CALLBACK(size_allocate), NULL);
-    }
+    // in order to clip the label widget, we must connect to the size allocate
+    // signal of this GtkFrame after the default GTK+'s allocate size function
+    g_signal_connect_after (m_widget, "size_allocate",
+                            G_CALLBACK (gtk_frame_size_allocate), this);
 
-    return true;
+    return TRUE;
 }
 
 void wxStaticBox::SetLabel( const wxString& label )
