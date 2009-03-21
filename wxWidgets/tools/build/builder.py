@@ -167,7 +167,8 @@ class AutoconfBuilder(GNUMakeBuilder):
                 break
                 
         if not configure_cmd:
-            raise BuildError, "Could not find configure script at %r. Have you run autoconf?" % dir
+            sys.stderr.write("Could not find configure script at %r. Have you run autoconf?\n" % dir)
+            return 1
         
         optionsStr = string.join(options, " ") if options else ""
         result = os.system("%s %s" % (configure_cmd, optionsStr))
