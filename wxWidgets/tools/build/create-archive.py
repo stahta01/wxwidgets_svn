@@ -28,7 +28,7 @@ option_dict = {
             "docs"          : ("html", "Doc formats to build. Comma separated. Values are: none, html (default: html)"), 
             "name"          : ("wxWidgets", "Name given to the tarball created (default: wxWidgets)"),
             "postfix"       : ("", "String appended to the version to indicate a special release (default: none)"),
-            
+            "wxpython"      : (False, "Produce wxPython source tarball (name defaults to wxPython-src)")
             }
 
 mswProjectFiles = [ ".vcproj", ".sln", ".dsp", ".dsw", ".vc", ".bat"]
@@ -77,9 +77,14 @@ def makeDOSLineEndings(dir, extensions):
             if os.path.splitext(file)[1] in extensions:
                 os.system("unix2dos %s" % os.path.join(root, file))
 
-def getVersion():
+def getVersion(includeSubrelease=False):
     """Returns wxWidgets version as a tuple: (major,minor,release)."""
-    global wxVersion
+
+    wxVersion = None
+    major = None
+    minor = None
+    release = None
+    subrelease = None
     if wxVersion == None:
         f = open(VERSION_FILE, 'rt')
         lines = f.readlines()
@@ -96,9 +101,15 @@ def getVersion():
             if name == 'wxMAJOR_VERSION': major = int(value)
             if name == 'wxMINOR_VERSION': minor = int(value)
             if name == 'wxRELEASE_NUMBER': release = int(value)
+            if name == 'wxSUBRELEASE_NUMBER': subrelease = int(value)
             if major != None and minor != None and release != None:
-                break
-        wxVersion = (major, minor, release)
+                if not includeSubrelease or subrelease != None:
+                    break
+        
+        if includeSubrelease:
+            wxVersion = (major, minor, release, subrelease)
+        else:
+            wxVersion = (major, minor, release)
     return wxVersion
 
 def allFilesRecursive(dir):
@@ -121,10 +132,18 @@ def allFilesRecursive(dir):
 ## MAKE THE RELEASE!
 
 str_version = "%d.%d.%d" % getVersion()
+archive_name = options.name
+
+if options.wxpython:
+    dirsToCopy.append("wxPython")
+    archive_name = "wxPython-src"
+    str_version = "%d.%d.%d.%d" % getVersion(includeSubrelease=True)
+    options.docs = "none"
+
 if options.postfix != "":
     str_version += "-" + options.postfix
-    
-full_name = options.name + "-" + str_version
+
+full_name = archive_name + "-" + str_version
 
 copyDir = tempfile.mkdtemp()
 wxCopyDir = os.path.join(copyDir, full_name) 
