@@ -173,7 +173,7 @@ for afile in fileList:
 mswSetup0 = os.path.join(wxCopyDir, "include","wx","msw","setup0.h") 
 shutil.copy(mswSetup0, mswSetup0.replace("setup0.h", "setup.h")), 
     
-all = True if options.compression == "all" else False
+all = options.compression == "all"
     
 # make sure they have the DOS line endings everywhere
 print "Setting MSW Project files to use DOS line endings..."
