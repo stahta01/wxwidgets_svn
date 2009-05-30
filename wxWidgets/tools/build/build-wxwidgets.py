@@ -164,13 +164,16 @@ def main(scriptName, args):
         else:
             wxpy_configure_opts.append("--with-sdl")
             wxpy_configure_opts.append("--with-gnomeprint")
-            
-                            
+                                        
         if not options.mac_framework and options.installdir != option_dict["installdir"][0]:
             configure_opts.append("--prefix=" + installDir)
     
         if options.wxpython:
             configure_opts.extend(wxpy_configure_opts)
+            if options.debug:
+                # wxPython likes adding these debug options too
+                configure_opts.append("--enable-debug_gdb")
+                configure_opts.append("--disable-optimise")
     
         if options.rebake:
             retval = os.system("make -f autogen.mk")
