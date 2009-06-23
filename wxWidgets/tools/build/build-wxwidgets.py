@@ -111,6 +111,7 @@ def main(scriptName, args):
         "shared"     : (False, "Build wx as a dynamic library"),
         "cairo"      : (False, "Build support for wxCairoContext (always true on GTK+)"),
         "extra_make" : ("", "Extra args to pass on [n]make's command line."),
+        "features"   : ("", "A comma-separated list of wxUSE_XYZ defines on Win, or a list of configure flags on unix."),
     }
         
     parser = optparse.OptionParser(usage="usage: %prog [options]", version="%prog 1.0")
@@ -132,6 +133,8 @@ def main(scriptName, args):
     
     if toolkit == "autoconf":
         configure_opts = []
+        if options.features != "":
+            configure_opts.extend(options.features.split(" "))
         
         if options.unicode:
             configure_opts.append("--enable-unicode")
@@ -159,6 +162,7 @@ def main(scriptName, args):
                             "--enable-optimise",
                             "--disable-debugreport",                            
                             ]
+
         if sys.platform.startswith("darwin"):
             wxpy_configure_opts.append("--enable-monolithic")
         else:
