@@ -1597,7 +1597,12 @@ void wxGnomePrinterDCImpl::DoDrawRotatedText(const wxString& text, wxCoord x, wx
 
     bool underlined = m_font.Ok() && m_font.GetUnderlined();
 
-    const wxScopedCharBuffer data(text.utf8_str());
+    // FIXME-UTF8: wouldn't be needed if utf8_str() always returned a buffer
+#if wxUSE_UNICODE_UTF8
+    const char *data = text.utf8_str();
+#else
+    const wxCharBuffer data = text.utf8_str();
+#endif
 
     size_t datalen = strlen(data);
     pango_layout_set_text( m_layout, data, datalen);
@@ -1908,7 +1913,12 @@ void wxGnomePrinterDCImpl::DoGetTextExtent(const wxString& string, wxCoord *widt
 
     // Set layout's text
 
-    const wxScopedCharBuffer dataUTF8(string.utf8_str());
+    // FIXME-UTF8: wouldn't be needed if utf8_str() always returned a buffer
+#if wxUSE_UNICODE_UTF8
+    const char *dataUTF8 = string.utf8_str();
+#else
+    const wxCharBuffer dataUTF8 = string.utf8_str();
+#endif
 
     gint oldSize = 0;
     if ( theFont )

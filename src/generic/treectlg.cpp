@@ -541,7 +541,7 @@ void wxTreeTextCtrl::OnKeyUp( wxKeyEvent &event )
         wxPoint myPos = GetPosition();
         wxSize mySize = GetSize();
         int sx, sy;
-        GetTextExtent(GetValue() + wxT("M"), &sx, &sy);
+        GetTextExtent(GetValue() + _T("M"), &sx, &sy);
         if (myPos.x + sx > parentSize.x)
             sx = parentSize.x - myPos.x;
         if (mySize.x > sx)
@@ -1000,7 +1000,7 @@ bool wxGenericTreeCtrl::Create(wxWindow *parent,
 
     if (major < 10)
         style |= wxTR_ROW_LINES;
-
+        
     if (style & wxTR_HAS_BUTTONS)
         style |= wxTR_NO_LINES;
 #endif // __WXMAC__
@@ -1779,7 +1779,7 @@ void wxGenericTreeCtrl::Delete(const wxTreeItemId& itemId)
     }
 
     wxGenericTreeItem *parent = item->GetParent();
-
+    
     // if the selected item will be deleted, select the parent ...
     wxGenericTreeItem *to_be_selected = parent;
     if (parent)
@@ -1854,9 +1854,9 @@ void wxGenericTreeCtrl::Expand(const wxTreeItemId& itemId)
 {
     wxGenericTreeItem *item = (wxGenericTreeItem*) itemId.m_pItem;
 
-    wxCHECK_RET( item, wxT("invalid item in wxGenericTreeCtrl::Expand") );
+    wxCHECK_RET( item, _T("invalid item in wxGenericTreeCtrl::Expand") );
     wxCHECK_RET( !HasFlag(wxTR_HIDE_ROOT) || itemId != GetRootItem(),
-                 wxT("can't expand hidden root") );
+                 _T("can't expand hidden root") );
 
     if ( !item->HasPlus() )
         return;
@@ -1891,7 +1891,7 @@ void wxGenericTreeCtrl::Expand(const wxTreeItemId& itemId)
 void wxGenericTreeCtrl::Collapse(const wxTreeItemId& itemId)
 {
     wxCHECK_RET( !HasFlag(wxTR_HIDE_ROOT) || itemId != GetRootItem(),
-                 wxT("can't collapse hidden root") );
+                 _T("can't collapse hidden root") );
 
     wxGenericTreeItem *item = (wxGenericTreeItem*) itemId.m_pItem;
 
@@ -2146,16 +2146,15 @@ void wxGenericTreeCtrl::DoSelectItem(const wxTreeItemId& itemId,
 
 void wxGenericTreeCtrl::SelectItem(const wxTreeItemId& itemId, bool select)
 {
-    wxGenericTreeItem * const item = (wxGenericTreeItem*) itemId.m_pItem;
-    wxCHECK_RET( item, wxT("SelectItem(): invalid tree item") );
-
     if ( select )
     {
-        if ( !item->IsSelected() )
-            DoSelectItem(itemId, !HasFlag(wxTR_MULTIPLE));
+        DoSelectItem(itemId, !HasFlag(wxTR_MULTIPLE));
     }
     else // deselect
     {
+        wxGenericTreeItem *item = (wxGenericTreeItem*) itemId.m_pItem;
+        wxCHECK_RET( item, wxT("SelectItem(): invalid tree item") );
+
         wxTreeEvent event(wxEVT_COMMAND_TREE_SEL_CHANGING, this, item);
         if ( GetEventHandler()->ProcessEvent( event ) && !event.IsAllowed() )
             return;
@@ -2231,42 +2230,61 @@ void wxGenericTreeCtrl::EnsureVisible(const wxTreeItemId& item)
 
 void wxGenericTreeCtrl::ScrollTo(const wxTreeItemId &item)
 {
-    if (!item.IsOk())
-        return;
+    if (!item.IsOk()) return;
 
-    // update the control before scrolling it
+    // We have to call this here because the label in
+    // question might just have been added and no screen
+    // update taken place.
     if (m_dirty)
 #if defined( __WXMSW__ ) || defined(__WXMAC__)
         Update();
 #else
         DoDirtyProcessing();
 #endif
-
     wxGenericTreeItem *gitem = (wxGenericTreeItem*) item.m_pItem;
 
-    int itemY = gitem->GetY();
+    // now scroll to the item
+    int item_y = gitem->GetY();
 
     int start_x = 0;
     int start_y = 0;
     GetViewStart( &start_x, &start_y );
+    start_y *= PIXELS_PER_UNIT;
 
-    const int clientHeight = GetClientSize().y;
+    int client_h = 0;
+    int client_w = 0;
+    GetClientSize( &client_w, &client_h );
 
-    const int itemHeight = GetLineHeight(gitem) + 2;
-
-    if ( itemY + itemHeight > start_y*PIXELS_PER_UNIT + clientHeight )
+    if (item_y < start_y+3)
     {
-        // need to scroll up by enough to show this item fully
-        itemY += itemHeight - clientHeight;
+        // going down
+        int x = 0;
+        int y = 0;
+        m_anchor->GetSize( x, y, this );
+        y += PIXELS_PER_UNIT+2; // one more scrollbar unit + 2 pixels
+        x += PIXELS_PER_UNIT+2; // one more scrollbar unit + 2 pixels
+        int x_pos = GetScrollPos( wxHORIZONTAL );
+        // Item should appear at top
+        SetScrollbars( PIXELS_PER_UNIT, PIXELS_PER_UNIT,
+                       x/PIXELS_PER_UNIT, y/PIXELS_PER_UNIT,
+                       x_pos, item_y/PIXELS_PER_UNIT );
     }
-    else if ( itemY > start_y*PIXELS_PER_UNIT )
+    else if (item_y+GetLineHeight(gitem) > start_y+client_h)
     {
-        // item is already fully visible, don't do anything
-        return;
+        // going up
+        int x = 0;
+        int y = 0;
+        m_anchor->GetSize( x, y, this );
+        y += PIXELS_PER_UNIT+2; // one more scrollbar unit + 2 pixels
+        x += PIXELS_PER_UNIT+2; // one more scrollbar unit + 2 pixels
+        item_y += PIXELS_PER_UNIT+2;
+        int x_pos = GetScrollPos( wxHORIZONTAL );
+        // Item should appear at bottom
+        SetScrollbars( PIXELS_PER_UNIT, PIXELS_PER_UNIT,
+                       x/PIXELS_PER_UNIT, y/PIXELS_PER_UNIT,
+                       x_pos,
+                       (item_y+GetLineHeight(gitem)-client_h)/PIXELS_PER_UNIT );
     }
-    //else: scroll down to make this item the top one displayed
-
-    Scroll(-1, itemY/PIXELS_PER_UNIT);
 }
 
 // FIXME: tree sorting functions are not reentrant and not MT-safe!
@@ -3356,7 +3374,7 @@ bool wxGenericTreeCtrl::GetBoundingRect(const wxTreeItemId& item,
 wxTextCtrl *wxGenericTreeCtrl::EditLabel(const wxTreeItemId& item,
                                   wxClassInfo * WXUNUSED(textCtrlClass))
 {
-    wxCHECK_MSG( item.IsOk(), NULL, wxT("can't edit an invalid item") );
+    wxCHECK_MSG( item.IsOk(), NULL, _T("can't edit an invalid item") );
 
     wxGenericTreeItem *itemEdit = (wxGenericTreeItem *)item.m_pItem;
 
@@ -3396,7 +3414,7 @@ wxTextCtrl* wxGenericTreeCtrl::GetEditControl() const
 void wxGenericTreeCtrl::EndEditLabel(const wxTreeItemId& WXUNUSED(item),
                                      bool discardChanges)
 {
-    wxCHECK_RET( m_textCtrl, wxT("not editing label") );
+    wxCHECK_RET( m_textCtrl, _T("not editing label") );
 
     m_textCtrl->EndEdit(discardChanges);
 }

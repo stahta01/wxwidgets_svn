@@ -439,9 +439,7 @@ bool wxPCXHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbose
     if (!CanRead(stream))
     {
         if (verbose)
-        {
             wxLogError(_("PCX: this is not a PCX file."));
-        }
 
         return false;
     }
@@ -489,7 +487,7 @@ bool wxPCXHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
 
 bool wxPCXHandler::DoCanRead( wxInputStream& stream )
 {
-    unsigned char c = stream.GetC();     // it's ok to modify the stream position here
+    unsigned char c = stream.GetC();
     if ( !stream )
         return false;
 

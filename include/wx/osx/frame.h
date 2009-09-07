@@ -23,7 +23,7 @@ class WXDLLIMPEXP_FWD_CORE wxMenuBar;
 class WXDLLIMPEXP_FWD_CORE wxStatusBar;
 class WXDLLIMPEXP_FWD_CORE wxMacToolTip ;
 
-class WXDLLIMPEXP_CORE wxFrame: public wxFrameBase
+class WXDLLIMPEXP_CORE wxFrame: public wxFrameBase 
 {
 public:
     // construction
@@ -77,7 +77,7 @@ public:
     // Status bar
 #if wxUSE_STATUSBAR
     virtual wxStatusBar* OnCreateStatusBar(int number = 1,
-                                           long style = wxSTB_DEFAULT_STYLE,
+                                           long style = wxST_SIZEGRIP,
                                            wxWindowID id = 0,
                                            const wxString& name = wxStatusLineNameStr);
 #endif // wxUSE_STATUSBAR

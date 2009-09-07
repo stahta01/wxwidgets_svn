@@ -50,7 +50,7 @@ HTMLHELP GetHtmlHelpFunction()
 
     if ( !s_htmlHelp )
     {
-        static wxDynamicLibrary s_dllHtmlHelp(wxT("HHCTRL.OCX"), wxDL_VERBATIM);
+        static wxDynamicLibrary s_dllHtmlHelp(_T("HHCTRL.OCX"), wxDL_VERBATIM);
 
         if ( !s_dllHtmlHelp.IsLoaded() )
         {
@@ -156,8 +156,8 @@ wxCHMHelpController::DoDisplayTextPopup(const wxChar *text,
     popup.pszText = text;
     popup.pt.x = pos.x;
     popup.pt.y = pos.y;
-    popup.clrForeground = ::GetSysColor(COLOR_INFOTEXT);
-    popup.clrBackground = ::GetSysColor(COLOR_INFOBK);
+    popup.clrForeground =
+    popup.clrBackground = (COLORREF)-1;
     popup.rcMargins.top =
     popup.rcMargins.left =
     popup.rcMargins.right =

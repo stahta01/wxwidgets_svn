@@ -756,7 +756,13 @@ Boolean wxMacDataItemBrowserControl::CompareItems(DataBrowserItemID itemOneID,
 {
     wxMacDataItem* itemOne = (wxMacDataItem*) itemOneID;
     wxMacDataItem* itemTwo = (wxMacDataItem*) itemTwoID;
+    return CompareItems( itemOne , itemTwo , sortProperty );
+}
 
+Boolean wxMacDataItemBrowserControl::CompareItems(const wxMacDataItem*  itemOne,
+    const wxMacDataItem*  itemTwo,
+    DataBrowserPropertyID sortProperty)
+{
     Boolean retval = false;
     if ( itemOne != NULL )
         retval = itemOne->IsLessThan( this , itemTwo , sortProperty);
@@ -770,6 +776,15 @@ OSStatus wxMacDataItemBrowserControl::GetSetItemData(
     Boolean changeValue )
 {
     wxMacDataItem* item = (wxMacDataItem*) itemID;
+    return GetSetItemData(item, property, itemData , changeValue );
+}
+
+OSStatus wxMacDataItemBrowserControl::GetSetItemData(
+    wxMacDataItem* item,
+    DataBrowserPropertyID property,
+    DataBrowserItemDataRef itemData,
+    Boolean changeValue )
+{
     OSStatus err = errDataBrowserPropertyNotSupported;
     switch( property )
     {
@@ -795,6 +810,14 @@ void wxMacDataItemBrowserControl::ItemNotification(
     DataBrowserItemDataRef itemData)
 {
     wxMacDataItem* item = (wxMacDataItem*) itemID;
+    ItemNotification( item , message, itemData);
+}
+
+void wxMacDataItemBrowserControl::ItemNotification(
+    const wxMacDataItem* item,
+    DataBrowserItemNotification message,
+    DataBrowserItemDataRef itemData)
+{
     if (item != NULL)
         item->Notification( this, message, itemData);
 }
@@ -971,7 +994,6 @@ void wxMacDataItemBrowserControl::RemoveItems(wxMacDataItem *container, wxArrayM
 
 void wxMacDataItemBrowserControl::RemoveAllItems(wxMacDataItem *container)
 {
-    SetScrollPosition(0, 0);
     OSStatus err = wxMacDataBrowserControl::RemoveItems( (DataBrowserItemID)container, 0 , NULL , kDataBrowserItemNoProperty );
     verify_noerr( err );
 }
@@ -1031,7 +1053,7 @@ void wxMacDataItemBrowserControl::MacInsert( unsigned int n, wxMacDataItem* item
 {
     if ( m_sortOrder == SortOrder_None )
     {
-
+        
         // increase the order of the lines to be shifted
         unsigned int lines = MacGetCount();
         for ( unsigned int i = n; i < lines; ++i)
@@ -1039,7 +1061,7 @@ void wxMacDataItemBrowserControl::MacInsert( unsigned int n, wxMacDataItem* item
             wxMacDataItem* iter = (wxMacDataItem*) GetItemFromLine(i);
             iter->SetOrder( iter->GetOrder() + 1 );
         }
-
+     
 #if 0
         // I don't understand what this code is supposed to do, RR.
         SInt32 frontLineOrder = 0;
@@ -1048,7 +1070,7 @@ void wxMacDataItemBrowserControl::MacInsert( unsigned int n, wxMacDataItem* item
             wxMacDataItem* iter = (wxMacDataItem*) GetItemFromLine(n-1);
             frontLineOrder = iter->GetOrder()+1;
         }
-#else
+#else   
         item->SetOrder( n );
 #endif
     }

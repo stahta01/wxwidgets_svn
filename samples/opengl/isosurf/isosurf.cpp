@@ -51,6 +51,7 @@ GLboolean g_lighting = GL_TRUE;
 
 IMPLEMENT_APP(MyApp)
 
+// `Main program' equivalent, creating windows and returning main app frame
 bool MyApp::OnInit()
 {
     if ( !wxApp::OnInit() )
@@ -92,8 +93,9 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(wxID_EXIT, MyFrame::OnExit)
 END_EVENT_TABLE()
 
+// My frame constructor
 MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
-                 const wxSize& size, long style)
+    const wxSize& size, long style)
     : wxFrame(frame, wxID_ANY, title, pos, size, style),
       m_canvas(NULL)
 {
@@ -103,9 +105,9 @@ MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
     // Make a menubar
     wxMenu *fileMenu = new wxMenu;
 
-    fileMenu->Append(wxID_EXIT, wxT("E&xit"));
+    fileMenu->Append(wxID_EXIT, _T("E&xit"));
     wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(fileMenu, wxT("&File"));
+    menuBar->Append(fileMenu, _T("&File"));
     SetMenuBar(menuBar);
 
 
@@ -230,12 +232,8 @@ void TestGLCanvas::LoadSurface(const wxString& filename)
 
     delete stream;
 
-    wxLogMessage(wxT("Loaded %d vertices, %d triangles from '%s'"),
+    wxLogMessage(_T("Loaded %d vertices, %d triangles from '%s'"),
                  m_numverts, m_numverts-2, filename.c_str());
-                 
-    // NOTE: for some reason under wxGTK the following is required to avoid that
-    //       the surface gets rendered in a small rectangle in the top-left corner of the frame
-    PostSizeEventToParent();
 }
 
 void TestGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
@@ -347,9 +345,9 @@ void TestGLCanvas::OnMouseEvent(wxMouseEvent& event)
     // (for key events).
     event.Skip();
 
-    if (event.LeftIsDown())
+    if(event.LeftIsDown())
     {
-        if (!dragging)
+        if(!dragging)
         {
             dragging = 1;
         }

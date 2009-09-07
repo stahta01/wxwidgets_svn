@@ -107,7 +107,7 @@ public:
         // we can't know in advance whether we can sort by this column or not
         // with wxGrid API so suppose we can by default
         int flags = wxCOL_SORTABLE;
-        if ( m_grid->CanDragColSize(m_col) )
+        if ( m_grid->CanDragColSize() )
             flags |= wxCOL_RESIZABLE;
         if ( m_grid->CanDragColMove() )
             flags |= wxCOL_REORDERABLE;
@@ -195,12 +195,7 @@ private:
 
         // as this is done by the user we should notify the main program about
         // it
-
-        // make up a dummy event for the grid event to use -- unfortunately we
-        // can't do anything else here
-        wxMouseEvent e;
-        e.SetState(wxGetMouseState());
-        GetOwner()->SendGridSizeEvent(wxEVT_GRID_COL_SIZE, -1, idx, e);
+        GetOwner()->SendEvent(wxEVT_GRID_COL_SIZE, -1, idx);
     }
 
     // overridden to react to the columns order changes in the customization
@@ -231,12 +226,7 @@ private:
 
     void OnEndResize(wxHeaderCtrlEvent& event)
     {
-        // we again need to pass a mouse event to be used for the grid event
-        // generation but we don't have it here so use a dummy one as in
-        // UpdateColumnVisibility()
-        wxMouseEvent e;
-        e.SetState(wxGetMouseState());
-        GetOwner()->DoEndDragResizeCol(e);
+        GetOwner()->DoEndDragResizeCol();
 
         event.Skip();
     }
@@ -510,6 +500,9 @@ public:
     // Set the row default height or column default width
     virtual void SetDefaultLineSize(wxGrid *grid, int size, bool resizeExisting) const = 0;
 
+    // True if rows/columns can be resized by user
+    virtual bool CanResizeLines(const wxGrid *grid) const = 0;
+
 
     // Return the index of the line at the given position
     //
@@ -579,8 +572,10 @@ public:
         { return grid->GetRowMinimalHeight(line); }
     virtual void SetLineSize(wxGrid *grid, int line, int size) const
         { grid->SetRowSize(line, size); }
+    virtual bool CanResizeLines(const wxGrid *grid) const
+        { return grid->CanDragRowSize(); }
     virtual void SetDefaultLineSize(wxGrid *grid, int size, bool resizeExisting) const
-        {  grid->SetDefaultRowSize(size, resizeExisting); }
+        {  grid->SetDefaultRowSize(size, resizeExisting); } 
 
     virtual int GetLineAt(const wxGrid * WXUNUSED(grid), int line) const
         { return line; } // TODO: implement row reordering
@@ -640,8 +635,10 @@ public:
         { return grid->GetColMinimalWidth(line); }
     virtual void SetLineSize(wxGrid *grid, int line, int size) const
         { grid->SetColSize(line, size); }
+    virtual bool CanResizeLines(const wxGrid *grid) const
+        { return grid->CanDragColSize(); }
     virtual void SetDefaultLineSize(wxGrid *grid, int size, bool resizeExisting) const
-        {  grid->SetDefaultColSize(size, resizeExisting); }
+        {  grid->SetDefaultColSize(size, resizeExisting); } 
 
     virtual int GetLineAt(const wxGrid *grid, int line) const
         { return grid->GetColAt(line); }

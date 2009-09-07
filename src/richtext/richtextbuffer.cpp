@@ -683,7 +683,7 @@ bool wxRichTextParagraphLayoutBox::Layout(wxDC& dc, const wxRect& rect, int styl
         // Assume this box only contains paragraphs
 
         wxRichTextParagraph* child = wxDynamicCast(node->GetData(), wxRichTextParagraph);
-        wxCHECK_MSG( child, false, wxT("Unknown object in layout") );
+        wxCHECK_MSG( child, false, _T("Unknown object in layout") );
 
         // TODO: what if the child hasn't been laid out (e.g. involved in Undo) but still has 'old' lines
         if ( !forceQuickLayout &&
@@ -4671,9 +4671,7 @@ bool wxRichTextPlainText::Draw(wxDC& dc, const wxRichTextRange& range, const wxR
             int s1 = selectionRange.GetStart()-1;
             int fragmentLen = s1 - r1 + 1;
             if (fragmentLen < 0)
-            {
                 wxLogDebug(wxT("Mid(%d, %d"), (int)(r1 - offset), (int)fragmentLen);
-            }
             wxString stringFragment = str.Mid(r1 - offset, fragmentLen);
 
             DrawTabbedString(dc, textAttr, rect, stringFragment, x, y, false);
@@ -4704,9 +4702,7 @@ bool wxRichTextPlainText::Draw(wxDC& dc, const wxRichTextRange& range, const wxR
 
             int fragmentLen = s2 - s1 + 1;
             if (fragmentLen < 0)
-            {
                 wxLogDebug(wxT("Mid(%d, %d"), (int)(s1 - offset), (int)fragmentLen);
-            }
             wxString stringFragment = str.Mid(s1 - offset, fragmentLen);
 
             DrawTabbedString(dc, textAttr, rect, stringFragment, x, y, true);
@@ -4737,9 +4733,7 @@ bool wxRichTextPlainText::Draw(wxDC& dc, const wxRichTextRange& range, const wxR
 
             int fragmentLen = r2 - s2 + 1;
             if (fragmentLen < 0)
-            {
                 wxLogDebug(wxT("Mid(%d, %d"), (int)(s2 - offset), (int)fragmentLen);
-            }
             wxString stringFragment = str.Mid(s2 - offset, fragmentLen);
 
             DrawTabbedString(dc, textAttr, rect, stringFragment, x, y, false);
@@ -4800,7 +4794,6 @@ bool wxRichTextPlainText::DrawTabbedString(wxDC& dc, const wxTextAttr& attr, con
             dc.SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
     }
 
-    wxCoord x_orig = x;
     while (hasTabs)
     {
         // the string has a tab
@@ -4812,7 +4805,7 @@ bool wxRichTextPlainText::DrawTabbedString(wxDC& dc, const wxTextAttr& attr, con
         bool not_found = true;
         for (int i = 0; i < tabCount && not_found; ++i)
         {
-            nextTabPos = tabArray.Item(i) + x_orig;
+            nextTabPos = tabArray.Item(i);
 
             // Find the next tab position.
             // Even if we're at the end of the tab array, we must still draw the chunk.
@@ -6495,10 +6488,10 @@ bool wxRichTextStdRenderer::DrawBitmapBullet(wxRichTextParagraph* WXUNUSED(parag
 /// Enumerate the standard bullet names currently supported
 bool wxRichTextStdRenderer::EnumerateStandardBulletNames(wxArrayString& bulletNames)
 {
-    bulletNames.Add(wxTRANSLATE("standard/circle"));
-    bulletNames.Add(wxTRANSLATE("standard/square"));
-    bulletNames.Add(wxTRANSLATE("standard/diamond"));
-    bulletNames.Add(wxTRANSLATE("standard/triangle"));
+    bulletNames.Add(wxT("standard/circle"));
+    bulletNames.Add(wxT("standard/square"));
+    bulletNames.Add(wxT("standard/diamond"));
+    bulletNames.Add(wxT("standard/triangle"));
 
     return true;
 }

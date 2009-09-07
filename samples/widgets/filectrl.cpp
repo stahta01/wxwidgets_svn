@@ -177,21 +177,21 @@ void FileCtrlWidgetsPage::CreateContent()
                     0, wxALL | wxEXPAND , 5 );
 
     wxSizer *sizerUseFlags =
-        new wxStaticBoxSizer( wxVERTICAL, this, wxT( "&Flags" ) );
+        new wxStaticBoxSizer( wxVERTICAL, this, _T( "&Flags" ) );
 
-    m_chkMultiple   = CreateCheckBoxAndAddToSizer( sizerUseFlags, wxT( "wxFC_MULTIPLE" ) );
-    m_chkNoShowHidden   = CreateCheckBoxAndAddToSizer( sizerUseFlags, wxT( "wxFC_NOSHOWHIDDEN" ) );
+    m_chkMultiple   = CreateCheckBoxAndAddToSizer( sizerUseFlags, _T( "wxFC_MULTIPLE" ) );
+    m_chkNoShowHidden   = CreateCheckBoxAndAddToSizer( sizerUseFlags, _T( "wxFC_NOSHOWHIDDEN" ) );
     sizerLeft->Add( sizerUseFlags, wxSizerFlags().Expand().Border() );
 
     wxSizer *sizerFilters =
-        new wxStaticBoxSizer( wxVERTICAL, this, wxT( "&Filters" ) );
+        new wxStaticBoxSizer( wxVERTICAL, this, _T( "&Filters" ) );
     m_fltr[0] = CreateCheckBoxAndAddToSizer( sizerFilters, wxString::Format( wxT( "all files (%s)|%s" ),
                 wxFileSelectorDefaultWildcardStr, wxFileSelectorDefaultWildcardStr ) );
     m_fltr[1] = CreateCheckBoxAndAddToSizer( sizerFilters, wxT( "C++ files (*.cpp; *.h)|*.cpp;*.h" ) );
     m_fltr[2] = CreateCheckBoxAndAddToSizer( sizerFilters, wxT( "PNG images (*.png)|*.png" ) );
     sizerLeft->Add( sizerFilters, wxSizerFlags().Expand().Border() );
 
-    wxButton *btn = new wxButton( this, FileCtrlPage_Reset, wxT( "&Reset" ) );
+    wxButton *btn = new wxButton( this, FileCtrlPage_Reset, _T( "&Reset" ) );
     sizerLeft->Add( btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15 );
 
     // right pane
@@ -306,17 +306,11 @@ void FileCtrlWidgetsPage::OnRadioBox( wxCommandEvent& WXUNUSED( event ) )
 void FileCtrlWidgetsPage::OnFileCtrl( wxFileCtrlEvent& event )
 {
     if ( event.GetEventType() == wxEVT_FILECTRL_FOLDERCHANGED )
-    {
         wxLogMessage("Folder changed event, new folder: %s", event.GetDirectory());
-    }
     else if ( event.GetEventType() == wxEVT_FILECTRL_FILEACTIVATED )
-    {
         wxLogMessage("File activated event: %s", wxJoin(event.GetFiles(), ' '));
-    }
     else if ( event.GetEventType() == wxEVT_FILECTRL_SELECTIONCHANGED )
-    {
         wxLogMessage("Selection changed event: %s", wxJoin(event.GetFiles(), ' '));
-    }
 }
 
 #endif // wxUSE_FILECTRL

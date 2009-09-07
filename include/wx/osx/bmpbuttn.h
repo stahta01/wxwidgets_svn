@@ -9,21 +9,25 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_OSX_BMPBUTTN_H_
-#define _WX_OSX_BMPBUTTN_H_
+#ifndef _WX_BMPBUTTN_H_
+#define _WX_BMPBUTTN_H_
 
 #include "wx/button.h"
 
+WXDLLIMPEXP_DATA_CORE(extern const char) wxButtonNameStr[];
+
 #define wxDEFAULT_BUTTON_MARGIN 4
 
-class WXDLLIMPEXP_CORE wxBitmapButton : public wxBitmapButtonBase
+class WXDLLIMPEXP_CORE wxBitmapButton: public wxBitmapButtonBase
 {
+    DECLARE_DYNAMIC_CLASS(wxBitmapButton)
+
 public:
     wxBitmapButton()
         {
             SetMargins(wxDEFAULT_BUTTON_MARGIN, wxDEFAULT_BUTTON_MARGIN);
         }
-
+    
     wxBitmapButton(wxWindow *parent, wxWindowID id, const wxBitmap& bitmap,
                    const wxPoint& pos = wxDefaultPosition,
                    const wxSize& size = wxDefaultSize, long style = wxBU_AUTODRAW,
@@ -39,12 +43,11 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxButtonNameStr);
 
+    virtual void SetBitmapLabel(const wxBitmap& bitmap);
+
 protected:
-    virtual wxSize DoGetBestSize() const;
-
-    virtual void DoSetBitmap(const wxBitmap& bitmap, State which);
-
-    DECLARE_DYNAMIC_CLASS(wxBitmapButton)
+    virtual wxSize DoGetBestSize() const;    
 };
 
-#endif // _WX_OSX_BMPBUTTN_H_
+#endif
+    // _WX_BMPBUTTN_H_

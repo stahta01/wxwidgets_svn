@@ -70,6 +70,9 @@ public:
     // implementation from now on
     // --------------------------
 
+        // calls layout for layout constraints and sizers
+    void OnSize(wxSizeEvent& event);
+
     virtual void InitDialog();
 
 #ifdef __WXUNIVERSAL__

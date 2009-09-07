@@ -68,9 +68,8 @@ public:
         // stock items id support
         wxString GetAsString() const
         {
-            return m_stockId == wxID_NONE
-                    ? m_label
-                    : wxGetStockLabel(m_stockId, wxSTOCK_FOR_BUTTON);
+            return m_stockId == wxID_NONE ? m_label
+                                          : wxGetStockLabel(m_stockId);
         }
 
         // return the stock id or wxID_NONE if this is not a stock label
@@ -159,7 +158,7 @@ public:
         wxASSERT_MSG( !(style & wxCANCEL_DEFAULT) || (style & wxCANCEL),
                       "wxCANCEL_DEFAULT is invalid without wxCANCEL" );
 
-        wxASSERT_MSG( !(style & wxCANCEL_DEFAULT) || !(style & wxNO_DEFAULT),
+        wxASSERT_MSG( !(style & wxCANCEL_DEFAULT) || !(style & wxNO),
                       "only one default button can be specified" );
 
         m_dialogStyle = style;

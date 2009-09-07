@@ -82,6 +82,12 @@ public:
 
     virtual int GetCharHeight() const;
     virtual int GetCharWidth() const;
+    virtual void GetTextExtent(const wxString& string,
+                               int *x, int *y,
+                               int *descent = NULL,
+                               int *externalLeading = NULL,
+                               const wxFont *theFont = (const wxFont *) NULL)
+                               const;
 
     virtual void SetScrollbar( int orient, int pos, int thumbVisible,
                                int range, bool refresh = true );
@@ -153,12 +159,6 @@ public:
     // same value should be immediately returned by the handler without doing
     // anything else. If it returns -1, the handler should continue as usual
     int GTKCallbackCommonPrologue(struct _GdkEventAny *event) const;
-
-    // Simplified form of GTKCallbackCommonPrologue() which can be used from
-    // GTK callbacks without return value to check if the event should be
-    // ignored: if this returns true, the event shouldn't be handled
-    bool GTKShouldIgnoreEvent() const;
-
 
     // override this if some events should never be consumed by wxWidgets but
     // but have to be left for the native control
@@ -282,7 +282,7 @@ public:
     // extra (wxGTK-specific) flags
     bool                 m_noExpose:1;          // wxGLCanvas has its own redrawing
     bool                 m_nativeSizeEvent:1;   // wxGLCanvas sends wxSizeEvent upon "alloc_size"
-    bool                 m_hasVMT:1;            // set after PostCreation() is called
+    bool                 m_hasVMT:1;
     bool                 m_isScrolling:1;       // dragging scrollbar thumb?
     bool                 m_clipPaintRegion:1;   // true after ScrollWindow()
     wxRegion             m_nativeUpdateRegion;  // not transformed for RTL
@@ -296,11 +296,6 @@ public:
 
 protected:
     // implement the base class pure virtuals
-    virtual void DoGetTextExtent(const wxString& string,
-                                 int *x, int *y,
-                                 int *descent = NULL,
-                                 int *externalLeading = NULL,
-                                 const wxFont *font = NULL) const;
     virtual void DoClientToScreen( int *x, int *y ) const;
     virtual void DoScreenToClient( int *x, int *y ) const;
     virtual void DoGetPosition( int *x, int *y ) const;

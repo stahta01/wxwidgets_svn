@@ -24,29 +24,6 @@ enum wxImageResolution
 };
 
 /**
-    Image resize algorithm.
-
-    This is used with wxImage::Scale() and wxImage::Rescale().
- */
-enum wxImageResizeQuality
-{
-    /// Simplest and fastest algorithm.
-    wxIMAGE_QUALITY_NEAREST,
-
-    /// Compromise between wxIMAGE_QUALITY_NEAREST and wxIMAGE_QUALITY_BICUBIC.
-    wxIMAGE_QUALITY_BILINEAR,
-
-    /// Highest quality but slowest execution time.
-    wxIMAGE_QUALITY_BICUBIC,
-
-    /// Default image resizing algorithm used by wxImage::Scale().
-    wxIMAGE_QUALITY_NORMAL,
-
-    /// Best image resizing algorithm, currently same as wxIMAGE_QUALITY_BICUBIC.
-    wxIMAGE_QUALITY_HIGH
-};
-
-/**
     Possible values for PNG image type option.
 
     @see wxImage::GetOptionInt().
@@ -107,26 +84,6 @@ public:
     virtual ~wxImageHandler();
 
     /**
-        Returns @true if this handler supports the image format contained in the
-        given stream.
-        
-        This function doesn't modify the current stream position (because it
-        restores the original position before returning; this however requires the
-        stream to be seekable; see wxStreamBase::IsSeekable).
-    */
-    bool CanRead( wxInputStream& stream );    
-
-    /**
-        Returns @true if this handler supports the image format contained in the
-        file with the given name.
-        
-        This function doesn't modify the current stream position (because it
-        restores the original position before returning; this however requires the
-        stream to be seekable; see wxStreamBase::IsSeekable).
-    */
-    bool CanRead( const wxString& filename );
-    
-    /**
         Gets the preferred file extension associated with this handler.
 
         @see GetAltExtensions()
@@ -149,9 +106,7 @@ public:
 
         @param stream
             Opened input stream for reading image data.
-            This function doesn't modify the current stream position (because it
-            restores the original position before returning; this however requires the
-            stream to be seekable; see wxStreamBase::IsSeekable).
+            Currently, the stream must support seeking.
 
         @return Number of available images. For most image handlers, this is 1
                 (exceptions are TIFF and ICO formats as well as animated GIFs
@@ -299,10 +254,10 @@ const unsigned char wxIMAGE_ALPHA_OPAQUE = 0xff;
     The constants ::wxIMAGE_ALPHA_TRANSPARENT and ::wxIMAGE_ALPHA_OPAQUE can be
     used to indicate those values in a more readable form.
 
-    While all images have RGB data, not all images have an alpha channel. Before
-    using wxImage::GetAlpha you should check if this image contains an alpha
-    channel with wxImage::HasAlpha. Note that currently only the PNG format has
-    full alpha channel support so only the images loaded from PNG files can have
+    Unlike RGB data, not all images have an alpha channel and before using
+    wxImage::GetAlpha you should check if this image contains an alpha channel
+    with wxImage::HasAlpha. Note that currently only the PNG format has full
+    alpha channel support so only the images loaded from PNG files can have
     alpha and, if you initialize the image alpha channel yourself using
     wxImage::SetAlpha, you should save it in PNG format to avoid losing it.
 
@@ -684,7 +639,7 @@ public:
         @see Scale()
     */
     wxImage& Rescale(int width, int height,
-                     wxImageResizeQuality quality = wxIMAGE_QUALITY_NORMAL);
+                    int quality = wxIMAGE_QUALITY_NORMAL);
 
     /**
         Changes the size of the image in-place without scaling it by adding either a
@@ -737,8 +692,12 @@ public:
         This is also useful for scaling bitmaps in general as the only other way
         to scale bitmaps is to blit a wxMemoryDC into another wxMemoryDC.
 
-        The parameter @a quality determines what method to use for resampling
-        the image, see wxImageResizeQuality documentation.
+        The parameter @a quality determines what method to use for resampling the image.
+        Can be one of the following:
+        - wxIMAGE_QUALITY_NORMAL: Uses the normal default scaling method of pixel
+                                  replication
+        - wxIMAGE_QUALITY_HIGH: Uses bicubic and box averaging resampling methods
+                                for upsampling and downsampling respectively
 
         It should be noted that although using @c wxIMAGE_QUALITY_HIGH produces much nicer
         looking results it is a slower method. Downsampling will use the box averaging
@@ -772,7 +731,7 @@ public:
         @see Rescale()
     */
     wxImage Scale(int width, int height,
-                   wxImageResizeQuality quality = wxIMAGE_QUALITY_NORMAL) const;
+                  int quality = wxIMAGE_QUALITY_NORMAL) const;
     
     /**
         Returns a resized version of this image without scaling it by adding either a
@@ -1615,20 +1574,9 @@ public:
     
     
     /**
-        Returns @true if at least one of the available image handlers can read 
-        the file with the given name.
-        
-        See wxImageHandler::CanRead for more info.
+        Returns @true if the current image handlers can read this file
     */
     static bool CanRead(const wxString& filename);
-    
-    /**
-        Returns @true if at least one of the available image handlers can read 
-        the data in the given stream.
-        
-        See wxImageHandler::CanRead for more info.
-    */
-    static bool CanRead(wxInputStream& stream);
 
     //@{
     /**
@@ -1638,10 +1586,8 @@ public:
 
         For the overload taking the parameter @a filename, that's the name
         of the file to query.
-        For the overload taking the parameter @a stream, that's the opened input
-        stream with image data.
-        
-        See wxImageHandler::GetImageCount() for more info.
+        For the overload taking the parameter @a stream, that's the ppened input
+        stream with image data. Currently, the stream must support seeking.
 
         The parameter @a type may be one of the following values:
         @li wxBITMAP_TYPE_BMP: Load a Windows bitmap file.

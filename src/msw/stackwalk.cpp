@@ -68,7 +68,7 @@ void wxStackFrame::OnGetName()
                             pSymbol
                         ) )
     {
-        wxDbgHelpDLL::LogError(wxT("SymFromAddr"));
+        wxDbgHelpDLL::LogError(_T("SymFromAddr"));
         return;
     }
 
@@ -96,7 +96,7 @@ void wxStackFrame::OnGetLocation()
     {
         // it is normal that we don't have source info for some symbols,
         // notably all the ones from the system DLLs...
-        //wxDbgHelpDLL::LogError(wxT("SymGetLineFromAddr"));
+        //wxDbgHelpDLL::LogError(_T("SymGetLineFromAddr"));
         return;
     }
 
@@ -190,7 +190,7 @@ void wxStackFrame::OnGetParam()
         // address, this is not a real error
         if ( ::GetLastError() != ERROR_INVALID_ADDRESS )
         {
-            wxDbgHelpDLL::LogError(wxT("SymSetContext"));
+            wxDbgHelpDLL::LogError(_T("SymSetContext"));
         }
 
         return;
@@ -205,7 +205,7 @@ void wxStackFrame::OnGetParam()
                             this                // data to pass to it
                         ) )
     {
-        wxDbgHelpDLL::LogError(wxT("SymEnumSymbols"));
+        wxDbgHelpDLL::LogError(_T("SymEnumSymbols"));
     }
 }
 
@@ -221,7 +221,7 @@ void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
         // don't log a user-visible error message here because the stack trace
         // is only needed for debugging/diagnostics anyhow and we shouldn't
         // confuse the user by complaining that we couldn't generate it
-        wxLogDebug(wxT("Failed to get stack backtrace: %s"),
+        wxLogDebug(_T("Failed to get stack backtrace: %s"),
                    wxDbgHelpDLL::GetErrorMessage().c_str());
         return;
     }
@@ -240,7 +240,7 @@ void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
                             TRUE    // load symbols for all loaded modules
                         ) )
     {
-        wxDbgHelpDLL::LogError(wxT("SymInitialize"));
+        wxDbgHelpDLL::LogError(_T("SymInitialize"));
 
         return;
     }
@@ -284,7 +284,7 @@ void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
                             ) )
         {
             if ( ::GetLastError() )
-                wxDbgHelpDLL::LogError(wxT("StackWalk"));
+                wxDbgHelpDLL::LogError(_T("StackWalk"));
 
             break;
         }
@@ -305,7 +305,7 @@ void wxStackWalker::WalkFrom(const CONTEXT *pCtx, size_t skip, size_t maxDepth)
 #if 0
     if ( !wxDbgHelpDLL::SymCleanup(hProcess) )
     {
-        wxDbgHelpDLL::LogError(wxT("SymCleanup"));
+        wxDbgHelpDLL::LogError(_T("SymCleanup"));
     }
 #endif
 }
@@ -322,7 +322,7 @@ void wxStackWalker::WalkFromException(size_t maxDepth)
     extern EXCEPTION_POINTERS *wxGlobalSEInformation;
 
     wxCHECK_RET( wxGlobalSEInformation,
-                 wxT("wxStackWalker::WalkFromException() can only be called from wxApp::OnFatalException()") );
+                 _T("wxStackWalker::WalkFromException() can only be called from wxApp::OnFatalException()") );
 
     // don't skip any frames, the first one is where we crashed
     WalkFrom(wxGlobalSEInformation, 0, maxDepth);

@@ -51,23 +51,13 @@
 */
 #define wxPG_ATTR_AUTOCOMPLETE              wxS("AutoComplete")
 
-/** wxBoolProperty and wxFlagsProperty specific. Value type is bool.
-    Default value is False.
-
-    When set to True, bool property will use check box instead of a
-    combo box as its editor control. If you set this attribute
-    for a wxFlagsProperty, it is automatically applied to child
-    bool properties.
+/** wxBoolProperty specific, int, default 0. When 1 sets bool property to
+    use checkbox instead of choice.
 */
 #define wxPG_BOOL_USE_CHECKBOX              wxS("UseCheckbox")
 
-/** wxBoolProperty and wxFlagsProperty specific. Value type is bool.
-    Default value is False.
-
-    Set to True for the bool property to cycle value on double click
-    (instead of showing the popup listbox). If you set this attribute
-    for a wxFlagsProperty, it is automatically applied to child
-    bool properties.
+/** wxBoolProperty specific, int, default 0. When 1 sets bool property value
+    to cycle on double click (instead of showing the popup listbox).
 */
 #define wxPG_BOOL_USE_DOUBLE_CLICK_CYCLING  wxS("UseDClickCycling")
 
@@ -310,16 +300,13 @@
 
     @subsection wxFlagsProperty
 
-    Represents a bit set that fits in a long integer. wxBoolProperty sub-
-    properties are created for editing individual bits. Textctrl is created to
-    manually edit the flags as a text; a continous sequence of spaces, commas
-    and semicolons are considered as a flag id separator.
-
-    <b>Note:</b> When changing "choices" (ie. flag labels) of wxFlagsProperty,
-    you will need to use wxPGProperty::SetChoices() - otherwise they will not
-    get updated properly.
-
-    wxFlagsProperty supports the same attributes as wxBoolProperty.
+    Represents a bit set that fits in a long integer. wxBoolProperty sub-properties
+    are created for editing individual bits. Textctrl is created to manually edit
+    the flags as a text; a continous sequence of spaces, commas and semicolons
+    is considered as a flag id separator.
+    <b>Note: </b> When changing "choices" (ie. flag labels) of wxFlagsProperty, you
+    will need to use wxPGProperty::SetChoices() - otherwise they will not get updated
+    properly.
 
     @subsection wxArrayStringProperty
 
@@ -428,15 +415,11 @@
         class MyProperty : public wxPGProperty
         {
         public:
-            // Default constructor
-            MyProperty() { }
-
-            // All arguments of this ctor must have a default value -
+            // All arguments of ctor must have a default value -
             // use wxPG_LABEL for label and name
             MyProperty( const wxString& label = wxPG_LABEL,
                         const wxString& name = wxPG_LABEL,
                         const wxString& value = wxEmptyString )
-                : wxPGProperty(label, name)
             {
                 // m_value is wxVariant
                 m_value = value;
@@ -513,7 +496,7 @@ public:
         @code
 
         MyProperty( const wxString& label, const wxString& name, const T& value )
-            : wxPGProperty(label, name)
+            : wxPGProperty()
         {
             // Generally recommended way to set the initial value
             // (as it should work in pretty much 100% of cases).
@@ -702,25 +685,18 @@ public:
     virtual bool OnEvent( wxPropertyGrid* propgrid, wxWindow* wnd_primary, wxEvent& event );
 
     /**
-        Called after value of a child property has been altered. Must return
-        new value of the whole property (after any alterations warrented by
-        child's new value).
-
-        Note that this function is usually called at the time that value of
-        this property, or given child property, is still pending for change,
-        and as such, result of GetValue() or m_value should not be relied
-        on.
+        Called after value of a child property has been altered. Note that this function is
+        usually called at the time that value of this property, or given child property, is
+        still pending for change.
 
         Sample pseudo-code implementation:
 
         @code
-        wxVariant MyProperty::ChildChanged( wxVariant& thisValue,
-                                            int childIndex,
-                                            wxVariant& childValue ) const
+        void MyProperty::ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const
         {
             // Acquire reference to actual type of data stored in variant
-            // (TFromVariant only exists if wxPropertyGrid's wxVariant-macros
-            // were used to create the variant class).
+            // (TFromVariant only exists if wxPropertyGrid's wxVariant-macros were used to create
+            // the variant class).
             T& data = TFromVariant(thisValue);
 
             // Copy childValue into data.
@@ -734,28 +710,17 @@ public:
                     break;
                 ...
             }
-
-            // Return altered data
-            return data;
         }
         @endcode
 
         @param thisValue
-            Value of this property. Changed value should be returned (in
-            previous versions of wxPropertyGrid it was only necessary to
-            write value back to this argument).
+            Value of this property, that should be altered.
         @param childIndex
-            Index of child changed (you can use Item(childIndex) to get
-            child property).
+            Index of child changed (you can use Item(childIndex) to get).
         @param childValue
-            (Pending) value of the child property.
-
-        @return
-            Modified value of the whole property.
+            Value of the child property.
     */
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const;
 
     /**
         Returns pointer to an instance of used editor.
@@ -1028,22 +993,8 @@ public:
 
     /**
         Returns wxPGCell of given column.
-
-        @remarks const version of this member function returns 'default'
-                 wxPGCell object if the property itself didn't hold
-                 cell data.
     */
     const wxPGCell& GetCell( unsigned int column ) const;
-
-    /**
-        Returns wxPGCell of given column, creating one if necessary.
-    */
-    wxPGCell& GetCell( unsigned int column );
-
-    /**
-        Returns wxPGCell of given column, creating one if necessary.
-    */
-    wxPGCell& GetOrCreateCell( unsigned int column );
 
     /**
         Returns number of child properties.
@@ -1377,14 +1328,6 @@ public:
     */
     void SetChoiceSelection( int newValue );
 
-    /** Set default value of a property. Synonymous to
-
-        @code
-            SetAttribute("DefaultValue", value);
-        @endcode
-    */
-    void SetDefaultValue( wxVariant& value );
-
     /**
         Sets property's help string, which is shown, for example, in
         wxPropertyGridManager's description text box.
@@ -1511,7 +1454,7 @@ public:
     Helper class for managing choices of wxPropertyGrid properties.
     Each entry can have label, value, bitmap, text colour, and background
     colour.
-
+ 
     wxPGChoices uses reference counting, similar to other wxWidgets classes.
     This means that assignment operator and copy constructor only copy the
     reference and not the actual data. Use Copy() member function to create a
@@ -1623,10 +1566,6 @@ public:
     */
     wxArrayInt GetIndicesForStrings( const wxArrayString& strings,
                                      wxArrayString* unmatched = NULL ) const;
-
-    /** Returns property at given virtual y coordinate.
-    */
-    wxPGProperty* GetItemAtY( unsigned int y ) const;
 
     /**
         Returns @true if item at given index has a valid value;

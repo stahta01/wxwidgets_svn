@@ -99,13 +99,12 @@ public:
     // idle handling
     // -------------
 
-        // make sure that idle events are sent again
+    // make sure that idle events are sent again
     virtual void WakeUpIdle();
 
         // this virtual function is called  when the application
-        // becomes idle and by default it forwards to wxApp::ProcessIdle() and
-        // while it can be overridden in a custom event loop, you must call the
-        // base class version to ensure that idle events are still generated
+        // becomes idle and normally just sends wxIdleEvent to all interested
+        // parties
         //
         // it should return true if more idle events are needed, false if not
     virtual bool ProcessIdle();
@@ -195,15 +194,6 @@ protected:
 
     // should we exit the loop?
     bool m_shouldExit;
-
-private:
-    // process all already pending events and dispatch a new one (blocking
-    // until it appears in the event queue if necessary)
-    //
-    // returns the return value of Dispatch()
-    bool ProcessEvents();
-
-    wxDECLARE_NO_COPY_CLASS(wxEventLoopManual);
 };
 
 #endif // platforms using "manual" loop

@@ -82,15 +82,6 @@ int wxApp::OnRun()
     return 1;
 }
 
-bool wxApp::DoInitGui()
-{
-    return true;
-}
-
-void wxApp::DoCleanUp()
-{
-}
-
 void wxMacWakeUp()
 {
     // TODO
@@ -145,7 +136,7 @@ void wxClientDisplayRect(int *x, int *y, int *width, int *height)
         *width = r.size.width;
     if ( height )
         *height = r.size.height;
-
+    
 }
 
 void wxGetMousePosition( int* x, int* y )
@@ -163,7 +154,7 @@ int wxDisplayDepth()
 void wxDisplaySize(int *width, int *height)
 {
     CGRect bounds = [[UIScreen mainScreen] bounds];
-
+    
     if ( width )
         *width = (int)bounds.size.width ;
     if ( height )
@@ -224,21 +215,21 @@ wxBitmap wxWindowDCImpl::DoGetAsBitmap(const wxRect *subrect) const
     // call this method when a Blit is performed with it as a source.
     if (!m_window)
         return wxNullBitmap;
-
+        
     wxSize sz = m_window->GetSize();
-
+    
     int left = subrect != NULL ? subrect->x : 0 ;
     int top = subrect != NULL ? subrect->y : 0 ;
     int width = subrect != NULL ? subrect->width : sz.x;
     int height = subrect !=  NULL ? subrect->height : sz.y ;
-
+    
     wxBitmap bmp = wxBitmap(width, height, 32);
-
+    
     CGContextRef context = (CGContextRef)bmp.GetHBITMAP();
-
+    
     CGContextSaveGState(context);
-
-
+    
+    
     CGContextTranslateCTM( context, 0,  height );
     CGContextScaleCTM( context, 1, -1 );
 
@@ -260,11 +251,10 @@ wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
     // get OS version
     int major, minor;
 
-    wxString release = wxCFStringRef( wxCFRetain( [ [UIDevice currentDevice] systemVersion] ) ).AsString() ;
+    wxString release = wxCFStringRef( [ [UIDevice currentDevice] systemVersion] ).AsString() ;
 
     if ( release.empty() ||
-        // TODO use wx method
-         scanf(release.c_str(), wxT("%d.%d"), &major, &minor) != 2 )
+         wxSscanf(release.c_str(), wxT("%d.%d"), &major, &minor) != 2 )
     {
         // failed to get version string or unrecognized format
         major =
@@ -281,7 +271,7 @@ wxOperatingSystemId wxGetOsVersion(int *verMaj, int *verMin)
 
 wxString wxGetOsDescription()
 {
-    wxString release = wxCFStringRef( wxCFRetain([ [UIDevice currentDevice] systemName] )).AsString() ;
+    wxString release = wxCFStringRef( [ [UIDevice currentDevice] systemName] ).AsString() ;
 
     return release;
 }

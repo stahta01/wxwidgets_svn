@@ -70,7 +70,7 @@ enum wxPathFormat
 enum wxPathNormalize
 {
     wxPATH_NORM_ENV_VARS = 0x0001,  // replace env vars with their values
-    wxPATH_NORM_DOTS     = 0x0002,  // squeeze all .. and .
+    wxPATH_NORM_DOTS     = 0x0002,  // squeeze all .. and . and prepend cwd
     wxPATH_NORM_TILDE    = 0x0004,  // Unix only: replace ~ and ~user
     wxPATH_NORM_CASE     = 0x0008,  // if case insensitive => tolower
     wxPATH_NORM_ABSOLUTE = 0x0010,  // make the path absolute
@@ -243,10 +243,10 @@ public:
         // (any of the pointers may be NULL)
     bool SetTimes(const wxDateTime *dtAccess,
                   const wxDateTime *dtMod,
-                  const wxDateTime *dtCreate) const;
+                  const wxDateTime *dtCreate);
 
         // set the access and modification times to the current moment
-    bool Touch() const;
+    bool Touch();
 
         // return the last access, last modification and create times
         // (any of the pointers may be NULL)
@@ -265,7 +265,7 @@ public:
 
 #if defined( __WXOSX_MAC__ ) && wxOSX_USE_CARBON
     bool MacSetTypeAndCreator( wxUint32 type , wxUint32 creator ) ;
-    bool MacGetTypeAndCreator( wxUint32 *type , wxUint32 *creator ) const;
+    bool MacGetTypeAndCreator( wxUint32 *type , wxUint32 *creator ) ;
     // gets the 'common' type and creator for a certain extension
     static bool MacFindDefaultTypeAndCreator( const wxString& ext , wxUint32 *type , wxUint32 *creator ) ;
     // registers application defined extensions and their default type and creator
@@ -281,7 +281,7 @@ public:
     static wxString GetCwd(const wxString& volume = wxEmptyString);
 
         // change the current working directory
-    bool SetCwd() const;
+    bool SetCwd();
     static bool SetCwd( const wxString &cwd );
 
         // get the value of user home (Unix only mainly)
@@ -316,11 +316,11 @@ public:
 #endif // wxUSE_FFILE
 
     // directory creation and removal.
-    bool Mkdir(int perm = wxS_DIR_DEFAULT, int flags = 0) const;
+    bool Mkdir(int perm = wxS_DIR_DEFAULT, int flags = 0);
     static bool Mkdir(const wxString &dir, int perm = wxS_DIR_DEFAULT,
                       int flags = 0);
 
-    bool Rmdir(int flags = 0) const;
+    bool Rmdir(int flags = 0);
     static bool Rmdir(const wxString &dir, int flags = 0);
 
     // operations on the path
@@ -358,7 +358,7 @@ public:
         // the arguments
     bool GetShortcutTarget(const wxString& shortcutPath,
                            wxString& targetFilename,
-                           wxString* arguments = NULL) const;
+                           wxString* arguments = NULL);
 #endif
 
 #ifndef __WXWINCE__
@@ -535,10 +535,10 @@ public:
     static wxULongLong GetSize(const wxString &file);
 
         // returns the size in a human readable form
-    wxString GetHumanReadableSize(const wxString &nullsize = wxGetTranslation(wxT("Not available")),
+    wxString GetHumanReadableSize(const wxString &nullsize = wxGetTranslation(_T("Not available")),
                                   int precision = 1) const;
     static wxString GetHumanReadableSize(const wxULongLong &sz,
-                                         const wxString &nullsize = wxGetTranslation(wxT("Not available")),
+                                         const wxString &nullsize = wxGetTranslation(_T("Not available")),
                                          int precision = 1);
 #endif // wxUSE_LONGLONG
 

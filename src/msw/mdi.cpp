@@ -186,7 +186,7 @@ bool wxMDIParentFrame::Create(wxWindow *parent,
   msflags &= ~WS_VSCROLL;
   msflags &= ~WS_HSCROLL;
 
-  if ( !wxWindow::MSWCreate(wxApp::GetRegisteredClassName(wxT("wxMDIFrame")),
+  if ( !wxWindow::MSWCreate(wxApp::GetRegisteredClassName(_T("wxMDIFrame")),
                             title.wx_str(),
                             pos, size,
                             msflags,
@@ -495,7 +495,7 @@ void wxMDIParentFrame::Cascade()
 void wxMDIParentFrame::Tile(wxOrientation orient)
 {
     wxASSERT_MSG( orient == wxHORIZONTAL || orient == wxVERTICAL,
-                  wxT("invalid orientation value") );
+                  _T("invalid orientation value") );
 
     ::SendMessage(GetWinHwnd(GetClientWindow()), WM_MDITILE,
                   orient == wxHORIZONTAL ? MDITILE_HORIZONTAL
@@ -792,7 +792,7 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
   MDICREATESTRUCT mcs;
 
   wxString className =
-      wxApp::GetRegisteredClassName(wxT("wxMDIChildFrame"), COLOR_WINDOW);
+      wxApp::GetRegisteredClassName(_T("wxMDIChildFrame"), COLOR_WINDOW);
   if ( !(style & wxFULL_REPAINT_ON_RESIZE) )
       className += wxApp::GetNoRedrawClassSuffix();
 
@@ -846,7 +846,7 @@ bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
 
   if ( !m_hWnd )
   {
-      wxLogLastError(wxT("WM_MDICREATE"));
+      wxLogLastError(_T("WM_MDICREATE"));
       return false;
   }
 
@@ -900,14 +900,6 @@ bool wxMDIChildFrame::Show(bool show)
     MDISetMenu(parent->GetClientWindow(), NULL, NULL);
 
     return true;
-}
-
-void
-wxMDIChildFrame::DoSetSize(int x, int y, int width, int height, int sizeFlags)
-{
-    // we need to disable client area origin adjustments used for the child
-    // windows for the frame itself
-    wxMDIChildFrameBase::DoSetSize(x, y, width, height, sizeFlags);
 }
 
 // Set the client size (i.e. leave the calculation of borders etc.
@@ -1434,9 +1426,7 @@ void MDISetMenu(wxWindow *win, HMENU hmenuFrame, HMENU hmenuWindow)
         {
             DWORD err = ::GetLastError();
             if ( err )
-            {
-                wxLogApiError(wxT("SendMessage(WM_MDISETMENU)"), err);
-            }
+                wxLogApiError(_T("SendMessage(WM_MDISETMENU)"), err);
         }
     }
 
@@ -1474,7 +1464,7 @@ void MDIInsertWindowMenu(wxWindow *win, WXHMENU hMenu, HMENU menuWin)
                 inserted = true;
                 ::InsertMenu(hmenu, i, MF_BYPOSITION | MF_POPUP | MF_STRING,
                              (UINT_PTR)menuWin,
-                             wxString(wxGetTranslation(WINDOW_MENU_LABEL)).wx_str());
+                             wxGetTranslation(WINDOW_MENU_LABEL).wx_str());
                 break;
             }
         }
@@ -1483,7 +1473,7 @@ void MDIInsertWindowMenu(wxWindow *win, WXHMENU hMenu, HMENU menuWin)
         {
             ::AppendMenu(hmenu, MF_POPUP,
                          (UINT_PTR)menuWin,
-                         wxString(wxGetTranslation(WINDOW_MENU_LABEL)).wx_str());
+                         wxGetTranslation(WINDOW_MENU_LABEL).wx_str());
         }
     }
 

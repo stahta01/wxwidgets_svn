@@ -144,7 +144,7 @@ bool wxVarScrollHelperEvtHandler::ProcessEvent(wxEvent& event)
 
 wxVarScrollHelperBase::wxVarScrollHelperBase(wxWindow *win)
 {
-    wxASSERT_MSG( win, wxT("associated window can't be NULL in wxVarScrollHelperBase") );
+    wxASSERT_MSG( win, _T("associated window can't be NULL in wxVarScrollHelperBase") );
 
 #if wxUSE_MOUSEWHEEL
     m_sumWheelRotation = 0;
@@ -332,7 +332,7 @@ size_t wxVarScrollHelperBase::GetNewScrollPosition(wxScrollWinEvent& event) cons
     }
 
     // unknown scroll event?
-    wxFAIL_MSG( wxT("unknown scroll event type?") );
+    wxFAIL_MSG( _T("unknown scroll event type?") );
     return 0;
 }
 
@@ -476,7 +476,7 @@ void wxVarScrollHelperBase::RefreshUnit(size_t unit)
 
 void wxVarScrollHelperBase::RefreshUnits(size_t from, size_t to)
 {
-    wxASSERT_MSG( from <= to, wxT("RefreshUnits(): empty range") );
+    wxASSERT_MSG( from <= to, _T("RefreshUnits(): empty range") );
 
     // clump the range to just the visible units -- it is useless to refresh
     // the other ones
@@ -817,7 +817,7 @@ void wxVarHVScrollHelper::RefreshRowsColumns(size_t fromRow, size_t toRow,
                                              size_t fromColumn, size_t toColumn)
 {
     wxASSERT_MSG( fromRow <= toRow || fromColumn <= toColumn,
-        wxT("RefreshRowsColumns(): empty range") );
+        _T("RefreshRowsColumns(): empty range") );
 
     // clump the range to just the visible units -- it is useless to refresh
     // the other ones
@@ -936,7 +936,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxHVScrolledWindow, wxPanel)
 // wxVarVScrollLegacyAdaptor
 // ===========================================================================
 
-size_t wxVarVScrollLegacyAdaptor::GetFirstVisibleLine() const
+size_t wxVarVScrollLegacyAdaptor::GetFirstVisibleLine() const 
 { return GetVisibleRowsBegin(); }
 
 size_t wxVarVScrollLegacyAdaptor::GetLastVisibleLine() const
@@ -953,19 +953,19 @@ void wxVarVScrollLegacyAdaptor::RefreshLine(size_t line)
 
 void wxVarVScrollLegacyAdaptor::RefreshLines(size_t from, size_t to)
 { RefreshRows(from, to); }
-
+        
 bool wxVarVScrollLegacyAdaptor::ScrollToLine(size_t line)
 { return ScrollToRow(line); }
 
 bool wxVarVScrollLegacyAdaptor::ScrollLines(int lines)
 { return ScrollRows(lines); }
-
+        
 bool wxVarVScrollLegacyAdaptor::ScrollPages(int pages)
 { return ScrollRowPages(pages); }
 
 wxCoord wxVarVScrollLegacyAdaptor::OnGetLineHeight(size_t WXUNUSED(n)) const
 {
-    wxFAIL_MSG( wxT("OnGetLineHeight() must be overridden if OnGetRowHeight() isn't!") );
+    wxFAIL_MSG( _T("OnGetLineHeight() must be overridden if OnGetRowHeight() isn't!") );
     return -1;
 }
 

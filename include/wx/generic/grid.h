@@ -16,8 +16,6 @@
 
 #if wxUSE_GRID
 
-#include "wx/hashmap.h"
-
 #include "wx/scrolwin.h"
 
 // ----------------------------------------------------------------------------
@@ -44,11 +42,11 @@ extern WXDLLIMPEXP_DATA_ADV(const char) wxGridNameStr[];
 #define WXGRID_DEFAULT_SCROLLBAR_WIDTH        16
 
 // type names for grid table values
-#define wxGRID_VALUE_STRING     wxT("string")
-#define wxGRID_VALUE_BOOL       wxT("bool")
-#define wxGRID_VALUE_NUMBER     wxT("long")
-#define wxGRID_VALUE_FLOAT      wxT("double")
-#define wxGRID_VALUE_CHOICE     wxT("choice")
+#define wxGRID_VALUE_STRING     _T("string")
+#define wxGRID_VALUE_BOOL       _T("bool")
+#define wxGRID_VALUE_NUMBER     _T("long")
+#define wxGRID_VALUE_FLOAT      _T("double")
+#define wxGRID_VALUE_CHOICE     _T("choice")
 
 #define wxGRID_VALUE_TEXT wxGRID_VALUE_STRING
 #define wxGRID_VALUE_LONG wxGRID_VALUE_NUMBER
@@ -87,8 +85,6 @@ class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
 class WXDLLIMPEXP_FWD_CORE wxSpinCtrl;
 #endif
 
-class wxGridFixedIndicesSet;
-
 class wxGridOperations;
 class wxGridRowOperations;
 class wxGridColumnOperations;
@@ -110,10 +106,16 @@ class wxGridDirectionOperations;
 //     class is not documented and is not public at all
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxGridCellWorker : public wxClientDataContainer, public wxRefCounter
+class WXDLLIMPEXP_ADV wxGridCellWorker : public wxClientDataContainer
 {
 public:
-    wxGridCellWorker() { }
+    wxGridCellWorker() { m_nRef = 1; }
+
+    // this class is ref counted: it is created with ref count of 1, so
+    // calling DecRef() once will delete it. Calling IncRef() allows to lock
+    // it until the matching DecRef() is called
+    void IncRef() { m_nRef++; }
+    void DecRef() { if ( --m_nRef == 0 ) delete this; }
 
     // interpret renderer parameters: arbitrary string whose interpretatin is
     // left to the derived classes
@@ -125,6 +127,8 @@ protected:
     virtual ~wxGridCellWorker();
 
 private:
+    size_t m_nRef;
+
     // suppress the stupid gcc warning about the class having private dtor and
     // no friends
     friend class wxGridCellWorkerDummyFriend;
@@ -289,7 +293,7 @@ protected:
 // class may be returned by wxGridTable::GetAttr().
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxGridCellAttr : public wxClientDataContainer, public wxRefCounter
+class WXDLLIMPEXP_ADV wxGridCellAttr : public wxClientDataContainer
 {
 public:
     enum wxAttrKind
@@ -327,6 +331,12 @@ public:
     // creates a new copy of this object
     wxGridCellAttr *Clone() const;
     void MergeWith(wxGridCellAttr *mergefrom);
+
+    // this class is ref counted: it is created with ref count of 1, so
+    // calling DecRef() once will delete it. Calling IncRef() allows to lock
+    // it until the matching DecRef() is called
+    void IncRef() { m_nRef++; }
+    void DecRef() { if ( --m_nRef == 0 ) delete this; }
 
     // setters
     void SetTextColour(const wxColour& colText) { m_colText = colText; }
@@ -404,6 +414,9 @@ private:
     // the common part of all ctors
     void Init(wxGridCellAttr *attrDefault = NULL);
 
+
+    // the ref count - when it goes to 0, we die
+    size_t   m_nRef;
 
     wxColour m_colText,
              m_colBack;
@@ -708,13 +721,14 @@ class WXDLLIMPEXP_ADV wxGridStringTable : public wxGridTableBase
 public:
     wxGridStringTable();
     wxGridStringTable( int numRows, int numCols );
+    virtual ~wxGridStringTable();
 
     // these are pure virtual in wxGridTableBase
     //
-    virtual int GetNumberRows() { return m_data.size(); }
-    virtual int GetNumberCols() { return m_numCols; }
-    virtual wxString GetValue( int row, int col );
-    virtual void SetValue( int row, int col, const wxString& s );
+    int GetNumberRows();
+    int GetNumberCols();
+    wxString GetValue( int row, int col );
+    void SetValue( int row, int col, const wxString& s );
 
     // overridden functions from wxGridTableBase
     //
@@ -733,12 +747,6 @@ public:
 
 private:
     wxGridStringArray m_data;
-
-    // notice that while we don't need to store the number of our rows as it's
-    // always equal to the size of m_data array, we do need to store the number
-    // of our columns as we can't retrieve it from m_data when the number of
-    // rows is 0 (see #10818)
-    int m_numCols;
 
     // These only get used if you set your own labels, otherwise the
     // GetRow/ColLabelValue functions return wxGridTableBase defaults
@@ -763,7 +771,7 @@ private:
 // their non default size for those which don't have the default size.
 // ----------------------------------------------------------------------------
 
-// hash map to store positions as the keys and sizes as the values
+// Hashmap to store postions as the keys and sizes as the values
 WX_DECLARE_HASH_MAP_WITH_DECL( unsigned, int, wxIntegerHash, wxIntegerEqual,
                                wxUnsignedToIntHashMap, class WXDLLIMPEXP_ADV );
 
@@ -1093,42 +1101,19 @@ public:
     void     SetCellHighlightPenWidth(int width);
     void     SetCellHighlightROPenWidth(int width);
 
-
-    // interactive grid mouse operations control
-    // -----------------------------------------
-
-    // functions globally enabling row/column interactive resizing (enabled by
-    // default)
     void     EnableDragRowSize( bool enable = true );
     void     DisableDragRowSize() { EnableDragRowSize( false ); }
-
+    bool     CanDragRowSize() const { return m_canDragRowSize; }
     void     EnableDragColSize( bool enable = true );
     void     DisableDragColSize() { EnableDragColSize( false ); }
-
-        // if interactive resizing is enabled, some rows/columns can still have
-        // fixed size
-    void DisableRowResize(int row) { DoDisableLineResize(row, m_setFixedRows); }
-    void DisableColResize(int col) { DoDisableLineResize(col, m_setFixedCols); }
-
-        // these functions return whether the given row/column can be
-        // effectively resized: for this interactive resizing must be enabled
-        // and this index must not have been passed to DisableRow/ColResize()
-    bool CanDragRowSize(int row) const
-        { return m_canDragRowSize && DoCanResizeLine(row, m_setFixedRows); }
-    bool CanDragColSize(int col) const
-        { return m_canDragColSize && DoCanResizeLine(col, m_setFixedCols); }
-
-    // interactive column reordering (disabled by default)
+    bool     CanDragColSize() const { return m_canDragColSize; }
     void     EnableDragColMove( bool enable = true );
     void     DisableDragColMove() { EnableDragColMove( false ); }
     bool     CanDragColMove() const { return m_canDragColMove; }
-
-    // interactive resizing of grid cells (enabled by default)
     void     EnableDragGridSize(bool enable = true);
     void     DisableDragGridSize() { EnableDragGridSize(false); }
     bool     CanDragGridSize() const { return m_canDragGridSize; }
 
-    // interactive dragging of cells (disabled by default)
     void     EnableDragCell( bool enable = true );
     void     DisableDragCell() { EnableDragCell( false ); }
     bool     CanDragCell() const { return m_canDragCell; }
@@ -1674,9 +1659,6 @@ public:
            wxGRID_CHECKBOX,
            wxGRID_CHOICE,
            wxGRID_COMBOBOX };
-
-    wxDEPRECATED_INLINE(bool CanDragRowSize() const, return m_canDragRowSize; )
-    wxDEPRECATED_INLINE(bool CanDragColSize() const, return m_canDragColSize; )
 #endif // WXWIN_COMPATIBILITY_2_8
 
 
@@ -1944,10 +1926,10 @@ protected:
     // it was processed (but not vetoed) and 0 if it wasn't processed
     int SendEvent(const wxEventType evtType,
                   int row, int col,
-                  const wxMouseEvent& e);
+                  wxMouseEvent& e);
     int SendEvent(const wxEventType evtType,
                   const wxGridCellCoords& coords,
-                  const wxMouseEvent& e)
+                  wxMouseEvent& e)
         { return SendEvent(evtType, coords.GetRow(), coords.GetCol(), e); }
     int SendEvent(const wxEventType evtType,
                   int row, int col,
@@ -1958,11 +1940,6 @@ protected:
         { return SendEvent(evtType, coords.GetRow(), coords.GetCol(), s); }
     int SendEvent(const wxEventType evtType, const wxString& s = wxString())
         { return SendEvent(evtType, m_currentCellCoords, s); }
-
-    // send wxEVT_GRID_{ROW,COL}_SIZE
-    void SendGridSizeEvent(wxEventType type,
-                           int row, int col,
-                           const wxMouseEvent& mouseEv);
 
     void OnPaint( wxPaintEvent& );
     void OnSize( wxSizeEvent& );
@@ -2077,14 +2054,14 @@ private:
     void DoUpdateResizeColWidth(int w);
     void DoStartMoveCol(int col);
 
-    void DoEndDragResizeRow(const wxMouseEvent& event);
-    void DoEndDragResizeCol(const wxMouseEvent& event);
+    void DoEndDragResizeRow();
+    void DoEndDragResizeCol(wxMouseEvent *event = NULL);
     void DoEndMoveCol(int pos);
 
 
     // common implementations of methods defined for both rows and columns
     void DeselectLine(int line, const wxGridOperations& oper);
-    bool DoEndDragResizeLine(const wxGridOperations& oper);
+    void DoEndDragResizeLine(const wxGridOperations& oper);
     int PosToLinePos(int pos, bool clipToMinMax,
                      const wxGridOperations& oper) const;
     int PosToLine(int pos, bool clipToMinMax,
@@ -2106,21 +2083,9 @@ private:
     bool DoAppendLines(bool (wxGridTableBase::*funcAppend)(size_t),
                        int num, bool updateLabels);
 
-    // common part of Set{Col,Row}Sizes
+    // Common part of Set{Col,Row}Sizes
     void DoSetSizes(const wxGridSizesInfo& sizeInfo,
                     const wxGridOperations& oper);
-
-    // common part of Disable{Row,Col}Resize and CanDrag{Row,Col}Size
-    void DoDisableLineResize(int line, wxGridFixedIndicesSet *& setFixed);
-    bool DoCanResizeLine(int line, const wxGridFixedIndicesSet *setFixed) const;
-
-
-
-    // these sets contain the indices of fixed, i.e. non-resizable
-    // interactively, grid rows or columns and are NULL if there are no fixed
-    // elements (which is the default)
-    wxGridFixedIndicesSet *m_setFixedRows,
-                          *m_setFixedCols;
 
     DECLARE_DYNAMIC_CLASS( wxGrid )
     DECLARE_EVENT_TABLE()
@@ -2144,7 +2109,7 @@ public:
     // more than once
     void Create(wxGrid *grid)
     {
-        wxASSERT_MSG( !m_grid, wxT("shouldn't be called more than once") );
+        wxASSERT_MSG( !m_grid, _T("shouldn't be called more than once") );
 
         Init(grid);
     }

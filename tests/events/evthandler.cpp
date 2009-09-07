@@ -37,7 +37,7 @@ public:
 };
 
 typedef void (wxEvtHandler::*MyEventFunction)(MyEvent&);
-#ifndef wxHAS_EVENT_BIND
+#if wxEVENTS_COMPATIBILITY_2_8
     #define MyEventHandler(func) wxEVENT_HANDLER_CAST(MyEventFunction, func)
 #else
     #define MyEventHandler(func) &func
@@ -71,11 +71,6 @@ struct Called
 } g_called;
 
 void GlobalOnMyEvent(MyEvent&)
-{
-    g_called.function = true;
-}
-
-void GlobalOnEvent(wxEvent&)
 {
     g_called.function = true;
 }
@@ -135,7 +130,7 @@ BEGIN_EVENT_TABLE(MyClassWithEventTable, wxEvtHandler)
     EVT_IDLE(MyClassWithEventTable::OnIdle)
 
     EVT_MYEVENT(MyClassWithEventTable::OnMyEvent)
-#ifdef wxHAS_EVENT_BIND
+#if !wxEVENTS_COMPATIBILITY_2_8
     EVT_MYEVENT(MyClassWithEventTable::OnEvent)
 #endif
 
@@ -160,30 +155,28 @@ private:
     CPPUNIT_TEST_SUITE( EvtHandlerTestCase );
         CPPUNIT_TEST( BuiltinConnect );
         CPPUNIT_TEST( LegacyConnect );
-#ifdef wxHAS_EVENT_BIND
+#if !wxEVENTS_COMPATIBILITY_2_8
         CPPUNIT_TEST( BindFunction );
         CPPUNIT_TEST( BindStaticMethod );
         CPPUNIT_TEST( BindFunctor );
         CPPUNIT_TEST( BindMethod );
         CPPUNIT_TEST( BindMethodUsingBaseEvent );
-        CPPUNIT_TEST( BindFunctionUsingBaseEvent );
         CPPUNIT_TEST( BindNonHandler );
         CPPUNIT_TEST( InvalidBind );
-#endif // wxHAS_EVENT_BIND
+#endif // !wxEVENTS_COMPATIBILITY_2_8
     CPPUNIT_TEST_SUITE_END();
 
     void BuiltinConnect();
     void LegacyConnect();
-#ifdef wxHAS_EVENT_BIND
+#if !wxEVENTS_COMPATIBILITY_2_8
     void BindFunction();
     void BindStaticMethod();
     void BindFunctor();
     void BindMethod();
     void BindMethodUsingBaseEvent();
-    void BindFunctionUsingBaseEvent();
     void BindNonHandler();
     void InvalidBind();
-#endif // wxHAS_EVENT_BIND
+#endif // !wxEVENTS_COMPATIBILITY_2_8
 
 
     // these member variables exceptionally don't use "m_" prefix because
@@ -213,7 +206,7 @@ void EvtHandlerTestCase::BuiltinConnect()
     handler.Connect(wxEVT_IDLE, (wxObjectEventFunction)(wxEventFunction)&MyHandler::OnIdle);
     handler.Disconnect(wxEVT_IDLE, (wxObjectEventFunction)(wxEventFunction)&MyHandler::OnIdle);
 
-#ifdef wxHAS_EVENT_BIND
+#if !wxEVENTS_COMPATIBILITY_2_8
     handler.Bind(wxEVT_IDLE, GlobalOnIdle);
     handler.Unbind(wxEVT_IDLE, GlobalOnIdle);
 
@@ -226,7 +219,7 @@ void EvtHandlerTestCase::BuiltinConnect()
 
     handler.Bind(wxEVT_IDLE, &MyHandler::StaticOnIdle);
     handler.Unbind(wxEVT_IDLE, &MyHandler::StaticOnIdle);
-#endif // wxHAS_EVENT_BIND
+#endif // !wxEVENTS_COMPATIBILITY_2_8
 }
 
 void EvtHandlerTestCase::LegacyConnect()
@@ -249,7 +242,7 @@ void EvtHandlerTestCase::LegacyConnect()
     handler.Disconnect( 0, 0, LegacyEventType, (wxObjectEventFunction)&MyHandler::OnEvent, NULL, &handler );
 }
 
-#ifdef wxHAS_EVENT_BIND
+#if !wxEVENTS_COMPATIBILITY_2_8
 
 void EvtHandlerTestCase::BindFunction()
 {
@@ -309,19 +302,6 @@ void EvtHandlerTestCase::BindFunctor()
 
     handler.Bind( MyEventType, functor, 0, 0 );
     handler.Unbind( MyEventType, functor, 0, 0 );
-
-    // test that a temporary functor is working as well and also test that
-    // unbinding a different (though equal) instance of the same functor does
-    // not work
-    MyFunctor func;
-    handler.Bind( MyEventType, MyFunctor() );
-    CPPUNIT_ASSERT( !handler.Unbind( MyEventType, func ));
-
-    handler.Bind( MyEventType, MyFunctor(), 0 );
-    CPPUNIT_ASSERT( !handler.Unbind( MyEventType, func, 0 ));
-
-    handler.Bind( MyEventType, MyFunctor(), 0, 0 );
-    CPPUNIT_ASSERT( !handler.Unbind( MyEventType, func, 0, 0 ));
 }
 
 void EvtHandlerTestCase::BindMethod()
@@ -365,29 +345,6 @@ void EvtHandlerTestCase::BindMethodUsingBaseEvent()
 }
 
 
-void EvtHandlerTestCase::BindFunctionUsingBaseEvent()
-{
-    // test connecting a function taking just wxEvent and not MyEvent: this
-    // should work too if we don't need any MyEvent-specific information in the
-    // handler
-    handler.Bind( MyEventType, GlobalOnEvent );
-    g_called.Reset();
-    handler.ProcessEvent(e);
-    CPPUNIT_ASSERT( g_called.function );
-    handler.Unbind( MyEventType, GlobalOnEvent );
-    g_called.Reset();
-    handler.ProcessEvent(e);
-    CPPUNIT_ASSERT( !g_called.function );
-
-    handler.Bind( MyEventType, GlobalOnEvent, 0 );
-    handler.Unbind( MyEventType, GlobalOnEvent, 0 );
-
-    handler.Bind( MyEventType, GlobalOnEvent, 0, 0 );
-    handler.Unbind( MyEventType, GlobalOnEvent, 0, 0 );
-}
-
-
-
 void EvtHandlerTestCase::BindNonHandler()
 {
     // class method tests for class not derived from wxEvtHandler
@@ -409,40 +366,20 @@ void EvtHandlerTestCase::InvalidBind()
     // automatically, you need to uncomment them manually and test that
     // compilation does indeed fail
 
-    // connecting a handler with incompatible signature shouldn't work
-#ifdef TEST_INVALID_BIND_GLOBAL
-    handler.Bind(MyEventType, GlobalOnAnotherEvent);
-#endif
-#ifdef TEST_INVALID_BIND_STATIC
-    handler.Bind(MyEventType, &MyHandler::StaticOnAnotherEvent);
-#endif
-#ifdef TEST_INVALID_BIND_METHOD
-    handler.Bind(MyEventType, &MyHandler::OnAnotherEvent, &handler);
-#endif
-#ifdef TEST_INVALID_BIND_FUNCTOR
-    IdleFunctor f;
-    handler.Bind(MyEventType, f);
-#endif
+    //handler.Bind(MyEventType, GlobalOnAnotherEvent);
+    //IdleFunctor f; handler.Bind(MyEventType, f);
+    //handler.Bind(MyEventType, &MyHandler::StaticOnAnotherEvent);
+    //handler.Bind(MyEventType, &MyHandler::OnAnotherEvent, &handler);
 
-    // the handler can't be omitted when calling Bind()
-#ifdef TEST_INVALID_BIND_NO_HANDLER
-    handler.Bind(MyEventType, &MyHandler::OnMyEvent);
-#endif
+    // Test that this sample (discussed on the mailing list) doesn't compile:
+    // >struct C1 : wxEvtHandler { };
+    // >struct C2 : wxEvtHandler { void OnWhatever(wxEvent&) };
+    // >C1 c1;
+    // >c1.Connect(&C2::OnWhatever); // BOOM
 
-    // calling a derived class method with a base class pointer must not work
-#ifdef TEST_INVALID_BIND_DERIVED
-    struct C1 : wxEvtHandler { };
-    struct C2 : wxEvtHandler { void OnWhatever(wxEvent&); };
-    C1 c1;
-    c1.Bind(&C2::OnWhatever);
-#endif
-
-    // using object pointer incompatible with the method must not work
-#ifdef TEST_INVALID_BIND_WRONG_CLASS
-    MySink mySink;
-    MyHandler myHandler;
-    myHandler.Bind(MyEventType, &MyHandler::OnMyEvent, &mySink);
-#endif
+    //MySink mySink;
+    //MyHandler myHandler;
+    //myHandler.Bind( MyEventType, &MyHandler::OnMyEvent, &mySink ); 
 }
 
-#endif // wxHAS_EVENT_BIND
+#endif // !wxEVENTS_COMPATIBILITY_2_8

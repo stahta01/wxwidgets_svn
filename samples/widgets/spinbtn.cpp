@@ -196,7 +196,7 @@ END_EVENT_TABLE()
     #define FAMILY_CTRLS NATIVE_CTRLS
 #endif
 
-IMPLEMENT_WIDGETS_PAGE(SpinBtnWidgetsPage, wxT("Spin"),
+IMPLEMENT_WIDGETS_PAGE(SpinBtnWidgetsPage, _T("Spin"),
                        FAMILY_CTRLS | EDITABLE_CTRLS
                        );
 
@@ -227,25 +227,25 @@ void SpinBtnWidgetsPage::CreateContent()
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
-    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, wxT("&Set style"));
+    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
     wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
-    m_chkVert = CreateCheckBoxAndAddToSizer(sizerLeft, wxT("&Vertical"));
-    m_chkArrowKeys = CreateCheckBoxAndAddToSizer(sizerLeft, wxT("&Arrow Keys"));
-    m_chkWrap = CreateCheckBoxAndAddToSizer(sizerLeft, wxT("&Wrap"));
+    m_chkVert = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Vertical"));
+    m_chkArrowKeys = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Arrow Keys"));
+    m_chkWrap = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Wrap"));
     m_chkProcessEnter = CreateCheckBoxAndAddToSizer(sizerLeft,
-                                                    wxT("Process &Enter"));
+                                                    _T("Process &Enter"));
 
     sizerLeft->Add(5, 5, 0, wxGROW | wxALL, 5); // spacer
 
     static const wxString halign[] =
     {
-        wxT("left"),
-        wxT("centre"),
-        wxT("right"),
+        _T("left"),
+        _T("centre"),
+        _T("right"),
     };
 
-    m_radioAlign = new wxRadioBox(this, wxID_ANY, wxT("&Text alignment"),
+    m_radioAlign = new wxRadioBox(this, wxID_ANY, _T("&Text alignment"),
                                    wxDefaultPosition, wxDefaultSize,
                                    WXSIZEOF(halign), halign, 1);
 
@@ -253,17 +253,17 @@ void SpinBtnWidgetsPage::CreateContent()
 
     sizerLeft->Add(5, 5, 0, wxGROW | wxALL, 5); // spacer
 
-    wxButton *btn = new wxButton(this, SpinBtnPage_Reset, wxT("&Reset"));
+    wxButton *btn = new wxButton(this, SpinBtnPage_Reset, _T("&Reset"));
     sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
     wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY,
-        wxT("&Change spinbtn value"));
+        _T("&Change spinbtn value"));
 
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxTextCtrl *text;
-    wxSizer *sizerRow = CreateSizerWithTextAndLabel(wxT("Current value"),
+    wxSizer *sizerRow = CreateSizerWithTextAndLabel(_T("Current value"),
                                                     SpinBtnPage_CurValueText,
                                                     &text);
     text->SetEditable(false);
@@ -271,21 +271,21 @@ void SpinBtnWidgetsPage::CreateContent()
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndButton(SpinBtnPage_SetValue,
-                                            wxT("Set &value"),
+                                            _T("Set &value"),
                                             SpinBtnPage_ValueText,
                                             &m_textValue);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndButton(SpinBtnPage_SetMinAndMax,
-                                            wxT("&Min and max"),
+                                            _T("&Min and max"),
                                             SpinBtnPage_MinText,
                                             &m_textMin);
 
     m_textMax = new wxTextCtrl(this, SpinBtnPage_MaxText, wxEmptyString);
     sizerRow->Add(m_textMax, 1, wxLEFT | wxALIGN_CENTRE_VERTICAL, 5);
 
-    m_textMin->SetValue( wxString::Format(wxT("%d"), m_min) );
-    m_textMax->SetValue( wxString::Format(wxT("%d"), m_max) );
+    m_textMin->SetValue( wxString::Format(_T("%d"), m_min) );
+    m_textMax->SetValue( wxString::Format(_T("%d"), m_max) );
 
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
@@ -342,7 +342,7 @@ void SpinBtnWidgetsPage::CreateSpin()
     switch ( m_radioAlign->GetSelection() )
     {
         default:
-            wxFAIL_MSG(wxT("unexpected radiobox selection"));
+            wxFAIL_MSG(_T("unexpected radiobox selection"));
             // fall through
 
         case Align_Left:
@@ -378,13 +378,13 @@ void SpinBtnWidgetsPage::CreateSpin()
     m_spinbtn->SetRange(m_min, m_max);
 
     m_spinctrl = new wxSpinCtrl(this, SpinBtnPage_SpinCtrl,
-                                wxString::Format(wxT("%d"), val),
+                                wxString::Format(_T("%d"), val),
                                 wxDefaultPosition, wxDefaultSize,
                                 flags | textFlags,
                                 m_min, m_max, val);
 
     m_spinctrldbl = new wxSpinCtrlDouble(this, SpinBtnPage_SpinCtrlDouble,
-                                         wxString::Format(wxT("%d"), val),
+                                         wxString::Format(_T("%d"), val),
                                          wxDefaultPosition, wxDefaultSize,
                                          flags | textFlags,
                                          m_min, m_max, val, 0.1);
@@ -426,7 +426,7 @@ void SpinBtnWidgetsPage::OnButtonSetMinAndMax(wxCommandEvent& WXUNUSED(event))
          !m_textMax->GetValue().ToLong(&maxNew) ||
          minNew > maxNew )
     {
-        wxLogWarning(wxT("Invalid min/max values for the spinbtn."));
+        wxLogWarning(_T("Invalid min/max values for the spinbtn."));
 
         return;
     }
@@ -444,7 +444,7 @@ void SpinBtnWidgetsPage::OnButtonSetValue(wxCommandEvent& WXUNUSED(event))
     long val;
     if ( !m_textValue->GetValue().ToLong(&val) || !IsValidValue(val) )
     {
-        wxLogWarning(wxT("Invalid spinbtn value."));
+        wxLogWarning(_T("Invalid spinbtn value."));
 
         return;
     }
@@ -482,7 +482,7 @@ void SpinBtnWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
 
 void SpinBtnWidgetsPage::OnUpdateUICurValueText(wxUpdateUIEvent& event)
 {
-    event.SetText( wxString::Format(wxT("%d"), m_spinbtn->GetValue()));
+    event.SetText( wxString::Format(_T("%d"), m_spinbtn->GetValue()));
 }
 
 void SpinBtnWidgetsPage::OnSpinBtn(wxSpinEvent& event)
@@ -490,20 +490,20 @@ void SpinBtnWidgetsPage::OnSpinBtn(wxSpinEvent& event)
     int value = event.GetInt();
 
     wxASSERT_MSG( value == m_spinbtn->GetValue(),
-                  wxT("spinbtn value should be the same") );
+                  _T("spinbtn value should be the same") );
 
-    wxLogMessage(wxT("Spin button value changed, now %d"), value);
+    wxLogMessage(_T("Spin button value changed, now %d"), value);
 }
 
 void SpinBtnWidgetsPage::OnSpinBtnUp(wxSpinEvent& event)
 {
-    wxLogMessage( wxT("Spin button value incremented, will be %d (was %d)"),
+    wxLogMessage( _T("Spin button value incremented, will be %d (was %d)"),
                   event.GetInt(), m_spinbtn->GetValue() );
 }
 
 void SpinBtnWidgetsPage::OnSpinBtnDown(wxSpinEvent& event)
 {
-    wxLogMessage( wxT("Spin button value decremented, will be %d (was %d)"),
+    wxLogMessage( _T("Spin button value decremented, will be %d (was %d)"),
                   event.GetInt(), m_spinbtn->GetValue() );
 }
 
@@ -512,21 +512,21 @@ void SpinBtnWidgetsPage::OnSpinCtrl(wxSpinEvent& event)
     int value = event.GetInt();
 
     wxASSERT_MSG( value == m_spinctrl->GetValue(),
-                  wxT("spinctrl value should be the same") );
+                  _T("spinctrl value should be the same") );
 
-    wxLogMessage(wxT("Spin control value changed, now %d"), value);
+    wxLogMessage(_T("Spin control value changed, now %d"), value);
 }
 
 void SpinBtnWidgetsPage::OnSpinCtrlDouble(wxSpinDoubleEvent& event)
 {
     double value = event.GetValue();
 
-    wxLogMessage(wxT("Spin control value changed, now %g"), value);
+    wxLogMessage(_T("Spin control value changed, now %g"), value);
 }
 
 void SpinBtnWidgetsPage::OnSpinText(wxCommandEvent& event)
 {
-    wxLogMessage(wxT("Text changed in spin control, now \"%s\""),
+    wxLogMessage(_T("Text changed in spin control, now \"%s\""),
                  event.GetString().c_str());
 }
 

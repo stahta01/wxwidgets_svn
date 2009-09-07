@@ -101,7 +101,7 @@ wxRegion::wxRegion(size_t n, const wxPoint *points, wxPolygonFillMode WXUNUSED(f
     wxUnusedVar(n);
     wxUnusedVar(points);
 
-#if 0
+#if 0 
     // no non-QD APIs available
     // TODO : remove ?
     // OS X somehow does not collect the region invisibly as before, so sometimes things
@@ -139,7 +139,7 @@ wxRegion::wxRegion(size_t n, const wxPoint *points, wxPolygonFillMode WXUNUSED(f
 
         RgnHandle tempRgn = NewRgn();
         CloseRgn( tempRgn ) ;
-
+ 
         ::SetGWorld( oldWorld, oldGDHandle );
         wxCFRef<HIShapeRef> tempShape( HIShapeCreateWithQDRgn(tempRgn ) );
         m_refData = new wxRegionRefData(tempShape);
@@ -183,7 +183,7 @@ void wxRegion::Clear()
 // Move the region
 bool wxRegion::DoOffset(wxCoord x, wxCoord y)
 {
-    wxCHECK_MSG( M_REGION, false, wxT("invalid wxRegion") );
+    wxCHECK_MSG( M_REGION, false, _T("invalid wxRegion") );
 
     if ( !x && !y )
         // nothing to do
@@ -198,7 +198,7 @@ bool wxRegion::DoOffset(wxCoord x, wxCoord y)
 //! Union /e region with this.
 bool wxRegion::DoCombine(const wxRegion& region, wxRegionOp op)
 {
-    wxCHECK_MSG( region.Ok(), false, wxT("invalid wxRegion") );
+    wxCHECK_MSG( region.Ok(), false, _T("invalid wxRegion") );
 
     // Don't change shared data
     if (!m_refData)
@@ -250,7 +250,7 @@ bool wxRegion::DoCombine(const wxRegion& region, wxRegionOp op)
 
 bool wxRegion::DoIsEqual(const wxRegion& WXUNUSED(region)) const
 {
-    wxFAIL_MSG( wxT("not implemented") );
+    wxFAIL_MSG( _T("not implemented") );
 
     return false;
 }
@@ -301,7 +301,7 @@ wxRegionContain wxRegion::DoContainsPoint(wxCoord x, wxCoord y) const
     if (!m_refData)
         return wxOutRegion;
 
-    CGPoint p = { x, y } ;
+    CGPoint p = { y , x } ;
     if (HIShapeContainsPoint( M_REGION , &p ) )
         return wxInRegion;
 
@@ -504,7 +504,7 @@ void wxRegionIterator::Reset(const wxRegion& region)
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
         if ( HIShapeEnumerate != NULL )
         {
-            OSStatus err = HIShapeEnumerate (OTHER_M_REGION(region), kHIShapeParseFromTopLeft, wxOSXRegionToRectsCounterCallback,
+            OSStatus err = HIShapeEnumerate (OTHER_M_REGION(region), kHIShapeParseFromTopLeft, wxOSXRegionToRectsCounterCallback, 
                 (void*)&m_numRects);
             if (err == noErr)
             {
@@ -512,7 +512,7 @@ void wxRegionIterator::Reset(const wxRegion& region)
                 RegionToRectsCallbackData data ;
                 data.m_rects = m_rects ;
                 data.m_current = 0 ;
-                HIShapeEnumerate( OTHER_M_REGION(region), kHIShapeParseFromTopLeft, wxOSXRegionToRectsSetterCallback,
+                HIShapeEnumerate( OTHER_M_REGION(region), kHIShapeParseFromTopLeft, wxOSXRegionToRectsSetterCallback, 
                     (void*)&data );
             }
             else
@@ -536,7 +536,7 @@ void wxRegionIterator::Reset(const wxRegion& region)
                 RegionToRectsCallbackData data ;
                 data.m_rects = m_rects ;
                 data.m_current = 0 ;
-                QDRegionToRects( rgn , kQDParseRegionFromTopLeft, wxMacRegionToRectsSetterCallback,
+                QDRegionToRects( rgn , kQDParseRegionFromTopLeft, wxMacRegionToRectsSetterCallback, 
                     (void*)&data );
             }
             else

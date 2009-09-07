@@ -165,9 +165,7 @@ PNGLINKAGEMODE wx_png_warning(png_structp png_ptr, png_const_charp message)
 {
     wxPNGInfoStruct *info = png_ptr ? WX_PNG_INFO(png_ptr) : NULL;
     if ( !info || info->verbose )
-    {
         wxLogWarning( wxString::FromAscii(message) );
-    }
 }
 
 // from pngerror.c
@@ -304,7 +302,7 @@ bool wxPNGHandler::DoCanRead( wxInputStream& stream )
 {
     unsigned char hdr[4];
 
-    if ( !stream.Read(hdr, WXSIZEOF(hdr)) )     // it's ok to modify the stream position here
+    if ( !stream.Read(hdr, WXSIZEOF(hdr)) )
         return false;
 
     return memcmp(hdr, "\211PNG", WXSIZEOF(hdr)) == 0;
@@ -387,7 +385,7 @@ void CopyDataFromPNG(wxImage *image,
 
                         // must be opaque then as otherwise we shouldn't be
                         // using the mask at all
-                        wxASSERT_MSG( IsOpaque(a), wxT("logic error") );
+                        wxASSERT_MSG( IsOpaque(a), _T("logic error") );
 
                         // fall through
 
@@ -455,7 +453,7 @@ void CopyDataFromPNG(wxImage *image,
                         {
                             // must be opaque then as otherwise we shouldn't be
                             // using the mask at all
-                            wxASSERT_MSG( IsOpaque(a), wxT("logic error") );
+                            wxASSERT_MSG( IsOpaque(a), _T("logic error") );
 
                             // if we couldn't find a unique colour for the
                             // mask, we can have real pixels with the same
@@ -610,9 +608,7 @@ wxPNGHandler::LoadFile(wxImage *image,
 
 error:
     if (verbose)
-    {
        wxLogError(_("Couldn't load a PNG image - file is corrupted or not enough memory."));
-    }
 
     if ( image->Ok() )
     {
@@ -661,9 +657,7 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
     if (!png_ptr)
     {
         if (verbose)
-        {
            wxLogError(_("Couldn't save PNG image."));
-        }
         return false;
     }
 
@@ -672,9 +666,7 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
     {
         png_destroy_write_struct( &png_ptr, (png_infopp)NULL );
         if (verbose)
-        {
            wxLogError(_("Couldn't save PNG image."));
-        }
         return false;
     }
 
@@ -682,9 +674,7 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
     {
         png_destroy_write_struct( &png_ptr, (png_infopp)NULL );
         if (verbose)
-        {
            wxLogError(_("Couldn't save PNG image."));
-        }
         return false;
     }
 
@@ -698,6 +688,9 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
     const int iBitDepth = image->HasOption(wxIMAGE_OPTION_PNG_BITDEPTH)
                             ? image->GetOptionInt(wxIMAGE_OPTION_PNG_BITDEPTH)
                             : 8;
+
+    wxASSERT_MSG( iBitDepth == 8 || iBitDepth == 16,
+                    _T("PNG bit depth must be 8 or 16") );
 
     bool bHasAlpha = image->HasAlpha();
     bool bHasMask = image->HasMask();
@@ -781,7 +774,7 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
             break;
 
         default:
-            wxFAIL_MSG( wxT("unsupported image resolution units") );
+            wxFAIL_MSG( _T("unsupported image resolution units") );
     }
 
     if ( resX && resY )
@@ -828,7 +821,7 @@ bool wxPNGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbos
             switch ( iColorType )
             {
                 default:
-                    wxFAIL_MSG( wxT("unknown wxPNG_TYPE_XXX") );
+                    wxFAIL_MSG( _T("unknown wxPNG_TYPE_XXX") );
                     // fall through
 
                 case wxPNG_TYPE_COLOUR:

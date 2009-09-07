@@ -82,6 +82,20 @@ public:
 
     virtual int GetCharHeight() const;
     virtual int GetCharWidth() const;
+    virtual void GetTextExtent( const wxString& string,
+                               int *x, int *y,
+                               int *descent = NULL,
+                               int *externalLeading = NULL,
+                               const wxFont *theFont = NULL )
+                               const;
+protected:
+    virtual void DoEnable( bool enable );
+#if wxUSE_MENUS
+    virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
+#endif
+
+    virtual void DoFreeze();
+    virtual void DoThaw();
 
 public:
     virtual void SetScrollbar( int orient, int pos, int thumbVisible,
@@ -131,6 +145,8 @@ public:
     // event handlers
     // --------------
 
+    void OnNcPaint( wxNcPaintEvent& event );
+    void OnEraseBackground(wxEraseEvent& event );
     void OnMouseEvent( wxMouseEvent &event );
 
     void MacOnScroll( wxScrollEvent&event );
@@ -156,7 +172,7 @@ public:
     // this should not be overriden in classes above wxWindowMac
     // because it is called from its destructor via DeleteChildren
     virtual void        RemoveChild( wxWindowBase *child );
-
+    
     virtual bool        MacDoRedraw( long time ) ;
     virtual void        MacPaintChildrenBorders();
     virtual void        MacPaintBorders( int left , int top ) ;
@@ -235,12 +251,12 @@ public:
 
     // the 'true' OS level control for this wxWindow
     wxOSXWidgetImpl*       GetPeer() const { return m_peer ; }
-
+ 
     void *              MacGetCGContextRef() { return m_cgContextRef ; }
     void                MacSetCGContextRef(void * cg) { m_cgContextRef = cg ; }
 
     // osx specific event handling common for all osx-ports
-
+    
     virtual bool        OSXHandleClicked( double timestampsec );
     virtual bool        OSXHandleKeyEvent( wxKeyEvent& event );
 protected:
@@ -290,20 +306,6 @@ protected:
     void                MacUpdateControlFont() ;
 
     // implement the base class pure virtuals
-    virtual void DoGetTextExtent(const wxString& string,
-                                 int *x, int *y,
-                                 int *descent = NULL,
-                                 int *externalLeading = NULL,
-                                 const wxFont *theFont = NULL ) const;
-
-    virtual void DoEnable( bool enable );
-#if wxUSE_MENUS
-    virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
-#endif
-
-    virtual void DoFreeze();
-    virtual void DoThaw();
-
     virtual wxSize DoGetBestSize() const;
     virtual wxSize DoGetSizeFromClientSize( const wxSize & size ) const;
     virtual void DoClientToScreen( int *x, int *y ) const;

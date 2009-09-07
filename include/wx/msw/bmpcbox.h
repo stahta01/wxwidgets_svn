@@ -120,7 +120,6 @@ protected:
     virtual void DoDeleteOneItem(unsigned int n);
 
     virtual bool OnAddBitmap(const wxBitmap& bitmap);
-    virtual wxSize DoGetBestSize() const;
     void RecreateControl();
 
 private:

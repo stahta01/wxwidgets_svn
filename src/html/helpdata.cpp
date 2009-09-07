@@ -51,11 +51,11 @@ static const wxChar* ReadLine(const wxChar *line, wxChar *buf, size_t bufsize)
     wxChar *endptr = buf + bufsize - 1;
     const wxChar *readptr = line;
 
-    while (*readptr != 0 && *readptr != wxT('\r') && *readptr != wxT('\n') &&
+    while (*readptr != 0 && *readptr != _T('\r') && *readptr != _T('\n') &&
            writeptr != endptr)
         *(writeptr++) = *(readptr++);
     *writeptr = 0;
-    while (*readptr == wxT('\r') || *readptr == wxT('\n'))
+    while (*readptr == _T('\r') || *readptr == _T('\n'))
         readptr++;
     if (*readptr == 0)
         return NULL;
@@ -255,7 +255,7 @@ wxString wxHtmlHelpDataItem::GetIndentedName() const
 {
     wxString s;
     for (int i = 1; i < level; i++)
-        s << wxT("   ");
+        s << _T("   ");
     s << name;
     return s;
 }
@@ -476,10 +476,10 @@ void wxHtmlHelpData::SetTempDir(const wxString& path)
     else
     {
         if (wxIsAbsolutePath(path)) m_tempPath = path;
-        else m_tempPath = wxGetCwd() + wxT("/") + path;
+        else m_tempPath = wxGetCwd() + _T("/") + path;
 
-        if (m_tempPath[m_tempPath.length() - 1] != wxT('/'))
-            m_tempPath << wxT('/');
+        if (m_tempPath[m_tempPath.length() - 1] != _T('/'))
+            m_tempPath << _T('/');
     }
 }
 
@@ -674,16 +674,16 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
         for (wxChar *ch = linebuf; *ch != wxT('\0') && *ch != wxT('='); ch++)
            *ch = (wxChar)wxTolower(*ch);
 
-        if (wxStrstr(linebuf, wxT("title=")) == linebuf)
-            title = linebuf + wxStrlen(wxT("title="));
-        if (wxStrstr(linebuf, wxT("default topic=")) == linebuf)
-            start = linebuf + wxStrlen(wxT("default topic="));
-        if (wxStrstr(linebuf, wxT("index file=")) == linebuf)
-            index = linebuf + wxStrlen(wxT("index file="));
-        if (wxStrstr(linebuf, wxT("contents file=")) == linebuf)
-            contents = linebuf + wxStrlen(wxT("contents file="));
-        if (wxStrstr(linebuf, wxT("charset=")) == linebuf)
-            charset = linebuf + wxStrlen(wxT("charset="));
+        if (wxStrstr(linebuf, _T("title=")) == linebuf)
+            title = linebuf + wxStrlen(_T("title="));
+        if (wxStrstr(linebuf, _T("default topic=")) == linebuf)
+            start = linebuf + wxStrlen(_T("default topic="));
+        if (wxStrstr(linebuf, _T("index file=")) == linebuf)
+            index = linebuf + wxStrlen(_T("index file="));
+        if (wxStrstr(linebuf, _T("contents file=")) == linebuf)
+            contents = linebuf + wxStrlen(_T("contents file="));
+        if (wxStrstr(linebuf, _T("charset=")) == linebuf)
+            charset = linebuf + wxStrlen(_T("charset="));
     } while (lineptr != NULL);
 
     wxFontEncoding enc = wxFONTENCODING_SYSTEM;
@@ -714,9 +714,9 @@ wxString wxHtmlHelpData::FindPageByName(const wxString& x)
             break;
         }
     }
-
+    
     int cnt = m_bookRecords.GetCount();
-
+    
     if (!has_non_ascii)
     {
       wxFileSystem fsys;
@@ -844,11 +844,11 @@ bool wxHtmlSearchStatus::Search()
     {
         const wxChar *p1, *p2;
         for (p1 = thepage.c_str(), p2 = m_LastPage.c_str();
-             *p1 != 0 && *p1 != wxT('#') && *p1 == *p2; p1++, p2++) {}
+             *p1 != 0 && *p1 != _T('#') && *p1 == *p2; p1++, p2++) {}
 
         m_LastPage = thepage;
 
-        if (*p1 == 0 || *p1 == wxT('#'))
+        if (*p1 == 0 || *p1 == _T('#'))
             return false;
     }
     else m_LastPage = thepage;
@@ -892,7 +892,7 @@ void wxHtmlSearchEngine::LookFor(const wxString& keyword, bool case_sensitive, b
 
 static inline bool WHITESPACE(wxChar c)
 {
-    return c == wxT(' ') || c == wxT('\n') || c == wxT('\r') || c == wxT('\t');
+    return c == _T(' ') || c == _T('\n') || c == _T('\r') || c == _T('\t');
 }
 
 // replace continuous spaces by one single space
@@ -911,7 +911,7 @@ static inline wxString CompressSpaces(const wxString & str)
             {
                 continue;
             }
-            ch = wxT(' ');
+            ch = _T(' ');
             space_counted = true;
         }
         else
@@ -943,19 +943,19 @@ bool wxHtmlSearchEngine::Scan(const wxFSFile& file)
             wxChar c = *pBufStr;
             if (insideTag)
             {
-                if (c == wxT('>'))
+                if (c == _T('>'))
                 {
                     insideTag = false;
                     // replace the tag by an empty space
-                    c = wxT(' ');
+                    c = _T(' ');
                 }
                 else
                     continue;
             }
-            else if (c == wxT('<'))
+            else if (c == _T('<'))
             {
                 wxChar nextCh = *(pBufStr + 1);
-                if (nextCh == wxT('/') || !WHITESPACE(nextCh))
+                if (nextCh == _T('/') || !WHITESPACE(nextCh))
                 {
                     insideTag = true;
                     continue;
@@ -971,10 +971,10 @@ bool wxHtmlSearchEngine::Scan(const wxFSFile& file)
     if (m_WholeWords)
     {
         // insert ' ' at the beginning and at the end
-        keyword.insert( 0, wxT(" ") );
-        keyword.append( wxT(" ") );
-        bufStr.insert( 0, wxT(" ") );
-        bufStr.append( wxT(" ") );
+        keyword.insert( 0, _T(" ") );
+        keyword.append( _T(" ") );
+        bufStr.insert( 0, _T(" ") );
+        bufStr.append( _T(" ") );
     }
 
     // remove continuous spaces

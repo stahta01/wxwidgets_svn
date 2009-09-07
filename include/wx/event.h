@@ -27,7 +27,7 @@
 #include "wx/thread.h"
 #include "wx/tracker.h"
 
-#ifdef wxHAS_EVENT_BIND
+#if !wxEVENTS_COMPATIBILITY_2_8
     #include "wx/meta/convertible.h"
 #endif
 
@@ -99,59 +99,68 @@ typedef int wxEventType;
 // generate a new unique event type
 extern WXDLLIMPEXP_BASE wxEventType wxNewEventType();
 
-// define macros to create new event types:
-#ifdef wxHAS_EVENT_BIND
-    // events are represented by an instance of wxEventTypeTag and the
-    // corresponding type must be specified for type-safety checks
+// New macros to create templatized event types:
 
-    // define a new custom event type, can be used alone or after event
-    // declaration in the header using one of the macros below
-    #define wxDEFINE_EVENT( name, type ) \
-        const wxEventTypeTag< type > name( wxNewEventType() )
+#if wxEVENTS_COMPATIBILITY_2_8
 
-    // the general version allowing exporting the event type from DLL, used by
-    // wxWidgets itself
-    #define wxDECLARE_EXPORTED_EVENT( expdecl, name, type ) \
-        extern const expdecl wxEventTypeTag< type > name
-
-    // this is the version which will normally be used in the user code
-    #define wxDECLARE_EVENT( name, type ) \
-        wxDECLARE_EXPORTED_EVENT( wxEMPTY_PARAMETER_VALUE, name, type )
-
-
-    // these macros are only used internally for backwards compatibility and
-    // allow to define an alias for an existing event type (this is used by
-    // wxEVT_SPIN_XXX)
-    #define wxDEFINE_EVENT_ALIAS( name, type, value ) \
-        const wxEventTypeTag< type > name( value )
-
-    #define wxDECLARE_EXPORTED_EVENT_ALIAS( expdecl, name, type ) \
-        extern const expdecl wxEventTypeTag< type > name
-#else // !wxHAS_EVENT_BIND
-    // the macros are the same ones as above but defined differently as we only
-    // use the integer event type values to identify events in this case
+    // Define/Declare a wxEventType-based event type:
 
     #define wxDEFINE_EVENT( name, type ) \
         const wxEventType name( wxNewEventType() )
 
     #define wxDECLARE_EXPORTED_EVENT( expdecl, name, type ) \
         extern const expdecl wxEventType name
-    #define wxDECLARE_EVENT( name, type ) \
-        wxDECLARE_EXPORTED_EVENT( wxEMPTY_PARAMETER_VALUE, name, type )
+
+    // Define/Declare a wxEventType-based event type and initialize it with a
+    // predefined event type. (Only used for wxEVT_SPIN_XXX for backward
+    // compatibility)
 
     #define wxDEFINE_EVENT_ALIAS( name, type, value ) \
         const wxEventType name = value
+
     #define wxDECLARE_EXPORTED_EVENT_ALIAS( expdecl, name, type ) \
         extern const expdecl wxEventType name
-#endif // wxHAS_EVENT_BIND/!wxHAS_EVENT_BIND
+
+    // Declare a local (not exported) wxEventType-based event type:
+
+    #define wxDECLARE_EVENT( name, type ) \
+        wxDECLARE_EXPORTED_EVENT( wxEMPTY_PARAMETER_VALUE, name, type );
+
+#else
+    // Define/Declare a templatized event type with the corresponding event as
+    // a nested typedef:
+
+    #define wxDEFINE_EVENT( name, type ) \
+        const wxEventTypeTag< type > name( wxNewEventType() )
+
+    #define wxDECLARE_EXPORTED_EVENT( expdecl, name, type ) \
+        extern const expdecl wxEventTypeTag< type > name
+
+    // Define/Declare a templatized event type and initialize it with a
+    // predefined event type. (Only used for wxEVT_SPIN_XXX for backward
+    // compatibility)
+
+    #define wxDEFINE_EVENT_ALIAS( name, type, value ) \
+        const wxEventTypeTag< type > name( value )
+
+    #define wxDECLARE_EXPORTED_EVENT_ALIAS( expdecl, name, type ) \
+        extern const expdecl wxEventTypeTag< type > name
+
+    // Declare a local (not exported) templatized event type:
+
+    #define wxDECLARE_EVENT( name, type ) \
+        wxDECLARE_EXPORTED_EVENT( wxEMPTY_PARAMETER_VALUE, name, type );
+
+#endif
 
 // Try to cast the given event handler to the correct handler type:
 
 #define wxEVENT_HANDLER_CAST( functype, func ) \
     ( wxObjectEventFunction )( wxEventFunction )wxStaticCastEvent( functype, &func )
 
+// Template which associates the correct event object with the event type
 
-#ifdef wxHAS_EVENT_BIND
+#if !wxEVENTS_COMPATIBILITY_2_8
 
 // The tag is a type associated to the event type (which is an integer itself,
 // in spite of its name) value. It exists in order to be used as a template
@@ -175,7 +184,7 @@ private:
     wxEventType m_type;
 };
 
-#endif // wxHAS_EVENT_BIND
+#endif // !wxEVENTS_COMPATIBILITY_2_8
 
 // These are needed for the functor definitions
 typedef void (wxEvtHandler::*wxEventFunction)(wxEvent&);
@@ -190,15 +199,6 @@ typedef void (wxEvtHandler::*wxEventFunction)(wxEvent&);
 typedef wxEventFunction wxObjectEventFunction;
 
 
-// wxEventFunctorClassInfo is used as a unique identifier for wxEventFunctor-
-// derived classes; it is more light weight than wxClassInfo and can be used in
-// template classes
-typedef void (*wxEventFunctorClassInfo)();
-
-// this macro must be used in wxEventFunctor-derived classes
-#define wxDEFINE_EVENT_FUNCTOR_CLASS_INFO( classInfoName ) \
-    static void classInfoName() {}
-
 // The event functor which is stored in the static and dynamic event tables:
 class WXDLLIMPEXP_BASE wxEventFunctor
 {
@@ -209,74 +209,54 @@ public:
     virtual void operator()(wxEvtHandler *, wxEvent&) = 0;
 
     // this function tests whether this functor is matched, for the purpose of
-    // finding it in an event table in Unbind(), by the given functor:
-    virtual bool IsMatching(const wxEventFunctor& functor) const = 0;
+    // finding it in an event table in Disconnect(), by the given func
+    virtual bool Matches(const wxEventFunctor& func) const = 0;
 
-    // Test whether the given class info is the same as from this functor. This
-    // allows us in IsMatching to safely downcast the given wxEventFunctor without
-    // the usage of dynamic_cast<>().
-    virtual bool IsSameClass(wxEventFunctorClassInfo classInfo) const = 0;
+    // these functions are used for functors comparison in Matches()
+    virtual void *GetHandler() const { return GetEvtHandler(); }
+    virtual wxEventFunction GetMethod() const { return NULL; }
 
-    // If the functor holds an wxEvtHandler, then get access to it and track
-    // its lifetime with wxEventConnectionRef:
-    virtual wxEvtHandler *GetEvtHandler() const
-        { return NULL; }
-
-    // This is only used to maintain backward compatibility in
-    // wxAppConsoleBase::CallEventHandler and ensures that an overwritten
-    // wxAppConsoleBase::HandleEvent is still called for functors which hold an
-    // wxEventFunction:
-    virtual wxEventFunction GetEvtMethod() const
-        { return NULL; }
+    // this one is also used elsewhere in the code and should be overridden to
+    // return non-NULL if we are indeed associated with an wxEvtHandler
+    virtual wxEvtHandler *GetEvtHandler() const { return NULL; }
 };
 
-// A plain method functor for the untyped legacy event types:
+// A plain method functor: notice that it is used even with the new events as
+// it is reused as a specialization of wxEventFunctorMethod for legacy untyped
+// event types
 class WXDLLIMPEXP_BASE wxObjectEventFunctor : public wxEventFunctor
 {
 public:
     wxObjectEventFunctor(wxObjectEventFunction method, wxEvtHandler *handler)
-        : m_handler( handler ), m_method( method )
-        { }
-
-    virtual void operator()(wxEvtHandler *handler, wxEvent& event)
     {
-        wxEvtHandler * const realHandler = m_handler ? m_handler : handler;
-
-        (realHandler->*m_method)(event);
+        m_handler = handler;
+        m_method = method;
     }
 
-    virtual bool IsMatching(const wxEventFunctor& functor) const
+    virtual void operator()(wxEvtHandler *handler, wxEvent& event);
+
+    virtual bool Matches(const wxEventFunctor& func) const
     {
-        if ( functor.IsSameClass( sm_classInfo ))
-        {
-            const wxObjectEventFunctor &other =
-                static_cast< const wxObjectEventFunctor & >( functor );
-
-            // FIXME-VC6: amazing but true: replacing "method == NULL" here
-            // with "!method" makes VC6 crash with an ICE in DLL build (only!)
-
-            return ( m_method == other.m_method || other.m_method == NULL ) &&
-                   ( m_handler == other.m_handler || other.m_handler == NULL );
-        }
-        else
+        void * const handler = func.GetHandler();
+        if ( handler && GetHandler() != handler )
             return false;
+
+        const wxEventFunction method = GetMethod();
+
+        // FIXME-VC6: amazing but true: replacing "method == NULL" here with
+        //            "!method" makes VC6 crash with an ICE in DLL build (only!)
+        return method == NULL || GetMethod() == method;
     }
 
-    virtual bool IsSameClass( wxEventFunctorClassInfo otherClassInfo ) const
-        { return sm_classInfo == otherClassInfo; }
-
-    virtual wxEvtHandler *GetEvtHandler() const
-        { return m_handler; }
-
-    virtual wxEventFunction GetEvtMethod() const
-        { return m_method; }
+    virtual wxEvtHandler *GetEvtHandler() const { return m_handler; }
+    virtual wxEventFunction GetMethod() const { return m_method; }
 
 private:
     wxEvtHandler *m_handler;
     wxEventFunction m_method;
-
-    wxDEFINE_EVENT_FUNCTOR_CLASS_INFO( sm_classInfo );
 };
+
+#if wxEVENTS_COMPATIBILITY_2_8
 
 // Create a functor for the legacy events: used by Connect()
 inline wxObjectEventFunctor *
@@ -303,7 +283,40 @@ wxMakeEventFunctor(const wxEventType& WXUNUSED(evtType),
     return wxObjectEventFunctor(method, handler);
 }
 
-#ifdef wxHAS_EVENT_BIND
+#else // !wxEVENTS_COMPATIBILITY_2_8
+
+// functor forwarding the event to anything callable (function, static method,
+// generalized functor...)
+template <typename EventTag, typename Functor>
+class wxEventFunctorFunction : public wxEventFunctor
+{
+public:
+    typedef typename EventTag::EventClass EventArg;
+
+    wxEventFunctorFunction(Functor handler)
+    {
+        m_handler = handler;
+    }
+
+    virtual void operator()(wxEvtHandler *WXUNUSED(handler), wxEvent& event)
+    {
+        m_handler(static_cast<EventArg&>(event));
+    }
+
+    virtual bool Matches(const wxEventFunctor& WXUNUSED(func)) const
+    {
+        // we have no way to compare arbitrary functors so just consider them
+        // to be equal: this means that disconnecting a functor will always
+        // find the last functor connected which in turn implies that it's
+        // probably a bad idea to connect more than one functor if you plan to
+        // disconnect them but this limitation doesn't seem very important in
+        // practice
+        return true;
+    }
+
+private:
+    Functor m_handler;
+};
 
 namespace wxPrivate
 {
@@ -343,7 +356,7 @@ struct HandlerImpl<T, A, true>
         { return static_cast<T *>(p); }
     static wxEvtHandler *ConvertToEvtHandler(T *p)
         { return p; }
-    static wxEventFunction ConvertToEvtMethod(void (T::*f)(A&))
+    static wxEventFunction ConvertToEvtFunction(void (T::*f)(A&))
         { return static_cast<wxEventFunction>(
                     reinterpret_cast<void (T::*)(wxEvent&)>(f)); }
 };
@@ -358,7 +371,7 @@ struct HandlerImpl<T, A, false>
         { return NULL; }
     static wxEvtHandler *ConvertToEvtHandler(T *)
         { return NULL; }
-    static wxEventFunction ConvertToEvtMethod(void (T::*)(A&))
+    static wxEventFunction ConvertToEvtFunction(void (T::*)(A&))
         { return NULL; }
 };
 
@@ -393,7 +406,6 @@ public:
 
 
     wxEventFunctorMethod(void (Class::*method)(EventArg&), EventHandler *handler)
-        : m_handler( handler ), m_method( method )
     {
         wxASSERT_MSG( handler || this->IsEvtHandler(),
                       "handlers defined in non-wxEvtHandler-derived classes "
@@ -403,6 +415,9 @@ public:
         // you're trying to use is not compatible with (i.e. is not the same as
         // or a base class of) the real event class used for this event type
         CheckHandlerArgument(static_cast<EventClass *>(NULL));
+
+        m_handler = handler;
+        m_method =  method;
     }
 
     virtual void operator()(wxEvtHandler *handler, wxEvent& event)
@@ -422,141 +437,36 @@ public:
         (realHandler->*m_method)(static_cast<EventArg&>(event));
     }
 
-    virtual bool IsMatching(const wxEventFunctor& functor) const
+    virtual bool Matches(const wxEventFunctor& func) const
     {
-        if ( !functor.IsSameClass(sm_classInfo) )
+        void * const handler = func.GetHandler();
+        if ( handler && GetHandler() != handler )
             return false;
 
-        typedef wxEventFunctorMethod<EventTag, Class, EventArg, EventHandler>
-            ThisFunctor;
-
-        // the cast is valid because IsSameClass() returned true above
-        const ThisFunctor& other = static_cast<const ThisFunctor &>(functor);
-
-        return (m_method == other.m_method || other.m_method == NULL) &&
-               (m_handler == other.m_handler || other.m_handler == NULL);
+        const wxEventFunction method = GetMethod();
+        return !method || GetMethod() == method;
     }
 
-    virtual bool IsSameClass( wxEventFunctorClassInfo otherClassInfo ) const
-        { return sm_classInfo == otherClassInfo; }
+    virtual void *GetHandler() const
+    {
+        return m_handler;
+    }
+
+    virtual wxEventFunction GetMethod() const
+    {
+        return this->ConvertToEvtFunction(m_method);
+    }
 
     virtual wxEvtHandler *GetEvtHandler() const
-        { return this->ConvertToEvtHandler(m_handler); }
-
-    virtual wxEventFunction GetEvtMethod() const
-        { return this->ConvertToEvtMethod(m_method); }
+    {
+        return this->ConvertToEvtHandler(m_handler);
+    }
 
 private:
     EventHandler *m_handler;
     void (Class::*m_method)(EventArg&);
-
-    wxDEFINE_EVENT_FUNCTOR_CLASS_INFO( sm_classInfo );
 };
 
-
-// functor forwarding the event to function (function, static method)
-template <typename EventTag, typename EventArg>
-class wxEventFunctorFunction : public wxEventFunctor
-{
-private:
-    static void CheckHandlerArgument(EventArg *) { }
-
-public:
-    // the event class associated with the given event tag
-    typedef typename wxPrivate::EventClassOf<EventTag>::type EventClass;
-
-    wxEventFunctorFunction( void ( *handler )( EventArg & ))
-        : m_handler( handler )
-    {
-        // if you get an error here it means that the signature of the handler
-        // you're trying to use is not compatible with (i.e. is not the same as
-        // or a base class of) the real event class used for this event type
-        CheckHandlerArgument(static_cast<EventClass *>(NULL));
-    }
-
-    virtual void operator()(wxEvtHandler *WXUNUSED(handler), wxEvent& event)
-    {
-        // If you get an error here like "must use .* or ->* to call
-        // pointer-to-member function" then you probably tried to call
-        // Bind/Unbind with a method pointer but without a handler pointer or
-        // NULL as a handler e.g.:
-        // Unbind( wxEVT_XXX, &EventHandler::method );
-        // or
-        // Unbind( wxEVT_XXX, &EventHandler::method, NULL )
-        m_handler(static_cast<EventArg&>(event));
-    }
-
-    virtual bool IsMatching(const wxEventFunctor &functor) const
-    {
-        if ( !functor.IsSameClass(sm_classInfo) )
-            return false;
-
-        typedef wxEventFunctorFunction<EventTag, EventArg> ThisFunctor;
-
-        const ThisFunctor& other = static_cast<const ThisFunctor&>( functor );
-
-        return m_handler == other.m_handler;
-    }
-
-    virtual bool IsSameClass( wxEventFunctorClassInfo otherClassInfo ) const
-        { return sm_classInfo == otherClassInfo; }
-
-private:
-    void (*m_handler)(EventArg&);
-
-    wxDEFINE_EVENT_FUNCTOR_CLASS_INFO( sm_classInfo );
-};
-
-
-template <typename EventTag, typename Functor>
-class wxEventFunctorFunctor : public wxEventFunctor
-{
-public:
-    typedef typename EventTag::EventClass EventArg;
-
-    wxEventFunctorFunctor(const Functor& handler)
-        : m_handler(handler), m_handlerAddr(&handler)
-        { }
-
-    virtual void operator()(wxEvtHandler *WXUNUSED(handler), wxEvent& event)
-    {
-        // If you get an error here like "must use '.*' or '->*' to call
-        // pointer-to-member function" then you probably tried to call
-        // Bind/Unbind with a method pointer but without a handler pointer or
-        // NULL as a handler e.g.:
-        // Unbind( wxEVT_XXX, &EventHandler::method );
-        // or
-        // Unbind( wxEVT_XXX, &EventHandler::method, NULL )
-        m_handler(static_cast<EventArg&>(event));
-    }
-
-    virtual bool IsMatching(const wxEventFunctor &functor) const
-    {
-        if ( !functor.IsSameClass(sm_classInfo) )
-            return false;
-
-        typedef wxEventFunctorFunctor<EventTag, Functor> FunctorThis;
-
-        const FunctorThis& other = static_cast<const FunctorThis&>(functor);
-
-        // The only reliable/portable way to compare two functors is by
-        // identity:
-        return m_handlerAddr == other.m_handlerAddr;
-    }
-
-    virtual bool IsSameClass( wxEventFunctorClassInfo otherClassInfo ) const
-        { return sm_classInfo == otherClassInfo; }
-
-private:
-    // Store a copy of the functor to prevent using/calling an already
-    // destroyed instance:
-    Functor m_handler;
-
-    // Use the address of the original functor for comparison in IsMatching:
-    const void *m_handlerAddr;
-
-    wxDEFINE_EVENT_FUNCTOR_CLASS_INFO( sm_classInfo );
-};
 
 // Create functors for the templatized events, either allocated on the heap for
 // wxNewXXX() variants (this is needed in wxEvtHandler::Bind<>() to store them
@@ -564,37 +474,23 @@ private:
 // is enough for Unbind<>() and we avoid unnecessary heap allocation like this).
 
 
-// Create functors wrapping functions:
-template <typename EventTag, typename EventArg>
-inline wxEventFunctorFunction<EventTag, EventArg> *
-wxNewEventFunctor(const EventTag&, void (*func)(EventArg &))
-{
-    return new wxEventFunctorFunction<EventTag, EventArg>(func);
-}
-
-template <typename EventTag, typename EventArg>
-inline wxEventFunctorFunction<EventTag, EventArg>
-wxMakeEventFunctor(const EventTag&, void (*func)(EventArg &))
-{
-    return wxEventFunctorFunction<EventTag, EventArg>(func);
-}
-
-// Create functors wrapping other functors:
+// Create functors wrapping other functors (including functions):
 template <typename EventTag, typename Functor>
-inline wxEventFunctorFunctor<EventTag, Functor> *
-wxNewEventFunctor(const EventTag&, const Functor &func)
+inline wxEventFunctorFunction<EventTag, Functor> *
+wxNewEventFunctor(const EventTag&, Functor func)
 {
-    return new wxEventFunctorFunctor<EventTag, Functor>(func);
+    return new wxEventFunctorFunction<EventTag, Functor>(func);
 }
 
 template <typename EventTag, typename Functor>
-inline wxEventFunctorFunctor<EventTag, Functor>
-wxMakeEventFunctor(const EventTag&, const Functor &func)
+inline wxEventFunctorFunction<EventTag, Functor>
+wxMakeEventFunctor(const EventTag&, Functor func)
 {
-    return wxEventFunctorFunctor<EventTag, Functor>(func);
+    return wxEventFunctorFunction<EventTag, Functor>(func);
 }
 
-// Create functors wrapping methods:
+
+// Create functors for methods:
 template
   <typename EventTag, typename Class, typename EventArg, typename EventHandler>
 inline wxEventFunctorMethod<EventTag, Class, EventArg, EventHandler> *
@@ -628,7 +524,7 @@ wxNewEventTableFunctor(const EventTag&, void (Class::*method)(EventArg&))
                     method, NULL);
 }
 
-#endif // wxHAS_EVENT_BIND
+#endif // !wxEVENTS_COMPATIBILITY_2_8
 
 
 // many, but not all, standard event types
@@ -1069,7 +965,7 @@ public:
     wxPropagateOnce(wxEvent& event) : m_event(event)
     {
         wxASSERT_MSG( m_event.m_propagationLevel > 0,
-                        wxT("shouldn't be used unless ShouldPropagate()!") );
+                        _T("shouldn't be used unless ShouldPropagate()!") );
 
         m_event.m_propagationLevel--;
     }
@@ -1332,6 +1228,19 @@ private:
  wxEVT_NC_RIGHT_DCLICK,
 */
 
+// the symbolic names for the mouse buttons
+enum
+{
+    wxMOUSE_BTN_ANY     = -1,
+    wxMOUSE_BTN_NONE    = 0,
+    wxMOUSE_BTN_LEFT    = 1,
+    wxMOUSE_BTN_MIDDLE  = 2,
+    wxMOUSE_BTN_RIGHT   = 3,
+    wxMOUSE_BTN_AUX1    = 4,
+    wxMOUSE_BTN_AUX2    = 5,
+    wxMOUSE_BTN_MAX
+};
+
 class WXDLLIMPEXP_CORE wxMouseEvent : public wxEvent,
                                       public wxMouseState
 {
@@ -1356,8 +1265,11 @@ public:
     // Was it a up event from this (or any) button?
     bool ButtonUp(int but = wxMOUSE_BTN_ANY) const;
 
-    // Was this event generated by the given button?
+    // Was the given button?
     bool Button(int but) const;
+
+    // Was the given button in Down state?
+    bool ButtonIsDown(int but) const;
 
     // Get the button which is changing state (wxMOUSE_BTN_NONE if none)
     int GetButton() const;
@@ -1381,6 +1293,14 @@ public:
     bool Aux1DClick() const { return (m_eventType == wxEVT_AUX1_UP); }
     bool Aux2DClick() const { return (m_eventType == wxEVT_AUX2_UP); }
 
+    // Find the current state of the mouse buttons (regardless
+    // of current event type)
+    bool LeftIsDown() const { return m_leftDown; }
+    bool MiddleIsDown() const { return m_middleDown; }
+    bool RightIsDown() const { return m_rightDown; }
+    bool Aux1IsDown() const { return m_aux1Down; }
+    bool Aux2IsDown() const { return m_aux2Down; }
+
     // True if a button is down and the mouse is moving
     bool Dragging() const
     {
@@ -1402,8 +1322,35 @@ public:
     // Returns the number of mouse clicks associated with this event.
     int GetClickCount() const { return m_clickCount; }
 
+
+    // Find the position of the event
+    void GetPosition(wxCoord *xpos, wxCoord *ypos) const
+    {
+        if (xpos)
+            *xpos = m_x;
+        if (ypos)
+            *ypos = m_y;
+    }
+
+    void GetPosition(long *xpos, long *ypos) const
+    {
+        if (xpos)
+            *xpos = (long)m_x;
+        if (ypos)
+            *ypos = (long)m_y;
+    }
+
+    // Find the position of the event
+    wxPoint GetPosition() const { return wxPoint(m_x, m_y); }
+
     // Find the logical position of the event given the DC
     wxPoint GetLogicalPosition(const wxDC& dc) const;
+
+    // Get X position
+    wxCoord GetX() const { return m_x; }
+
+    // Get Y position
+    wxCoord GetY() const { return m_y; }
 
     // Get wheel rotation, positive or negative indicates direction of
     // rotation.  Current devices all send an event when rotation is equal to
@@ -1442,6 +1389,14 @@ public:
     }
 
 public:
+    wxCoord m_x, m_y;
+
+    bool          m_leftDown;
+    bool          m_middleDown;
+    bool          m_rightDown;
+    bool          m_aux1Down;
+    bool          m_aux2Down;
+
     int           m_clickCount;
 
     int           m_wheelAxis;
@@ -1504,33 +1459,6 @@ private:
  wxEVT_HOTKEY
  */
 
-// key categories: the bit flags for IsKeyInCategory() function
-//
-// the enum values used may change in future version of wx
-// use the named constants only, or bitwise combinations thereof
-enum wxKeyCategoryFlags
-{
-    // arrow keys, on and off numeric keypads
-    WXK_CATEGORY_ARROW  = 1,
-
-    // page up and page down keys, on and off numeric keypads
-    WXK_CATEGORY_PAGING = 2,
-
-    // home and end keys, on and off numeric keypads
-    WXK_CATEGORY_JUMP   = 4,
-
-    // tab key, on and off numeric keypads
-    WXK_CATEGORY_TAB    = 8,
-
-    // backspace and delete keys, on and off numeric keypads
-    WXK_CATEGORY_CUT    = 16,
-
-    // all keys usually used for navigation
-    WXK_CATEGORY_NAVIGATION = WXK_CATEGORY_ARROW |
-                              WXK_CATEGORY_PAGING |
-                              WXK_CATEGORY_JUMP
-};
-
 class WXDLLIMPEXP_CORE wxKeyEvent : public wxEvent,
                                     public wxKeyboardState
 {
@@ -1540,9 +1468,6 @@ public:
 
     // get the key code: an ASCII7 char or an element of wxKeyCode enum
     int GetKeyCode() const { return (int)m_keyCode; }
-
-    // returns true iff this event's key code is of a certain type
-    bool IsKeyInCategory(int category) const;
 
 #if wxUSE_UNICODE
     // get the Unicode character corresponding to this key
@@ -1947,7 +1872,7 @@ public:
         // m_loggingOff flag is only used by wxEVT_[QUERY_]END_SESSION, it
         // doesn't make sense for wxEVT_CLOSE_WINDOW
         wxASSERT_MSG( m_eventType != wxEVT_CLOSE_WINDOW,
-                      wxT("this flag is for end session events only") );
+                      _T("this flag is for end session events only") );
 
         return m_loggingOff;
     }
@@ -3005,7 +2930,7 @@ public:
                  wxObject *userData = NULL,
                  wxEvtHandler *eventSink = NULL)
     {
-        DoBind(winid, lastId, eventType,
+        DoConnect(winid, lastId, eventType,
                   wxNewEventFunctor(eventType, func, eventSink),
                   userData);
     }
@@ -3032,7 +2957,7 @@ public:
                     wxObject *userData = NULL,
                     wxEvtHandler *eventSink = NULL)
     {
-        return DoUnbind(winid, lastId, eventType,
+        return DoDisconnect(winid, lastId, eventType,
                             wxMakeEventFunctor(eventType, func, eventSink),
                             userData );
     }
@@ -3050,42 +2975,16 @@ public:
                     wxEvtHandler *eventSink = NULL)
         { return Disconnect(wxID_ANY, eventType, func, userData, eventSink); }
 
-#ifdef wxHAS_EVENT_BIND
-    // Bind functions to an event:
-    template <typename EventTag, typename EventArg>
-    void Bind(const EventTag& eventType,
-              void (*function)(EventArg &),
-              int winid = wxID_ANY,
-              int lastId = wxID_ANY,
-              wxObject *userData = NULL)
-    {
-        DoBind(winid, lastId, eventType,
-                  wxNewEventFunctor(eventType, function),
-                  userData);
-    }
-
-
-    template <typename EventTag, typename EventArg>
-    bool Unbind(const EventTag& eventType,
-                void (*function)(EventArg &),
-                int winid = wxID_ANY,
-                int lastId = wxID_ANY,
-                wxObject *userData = NULL)
-    {
-        return DoUnbind(winid, lastId, eventType,
-                            wxMakeEventFunctor(eventType, function),
-                            userData);
-    }
-
-    // Bind functors to an event:
+#if !wxEVENTS_COMPATIBILITY_2_8
+    // Bind arbitrary functor (including just a function) to an event:
     template <typename EventTag, typename Functor>
     void Bind(const EventTag& eventType,
-              const Functor &functor,
+              Functor functor,
               int winid = wxID_ANY,
               int lastId = wxID_ANY,
               wxObject *userData = NULL)
     {
-        DoBind(winid, lastId, eventType,
+        DoConnect(winid, lastId, eventType,
                   wxNewEventFunctor(eventType, functor),
                   userData);
     }
@@ -3093,12 +2992,12 @@ public:
 
     template <typename EventTag, typename Functor>
     bool Unbind(const EventTag& eventType,
-                const Functor &functor,
+                Functor functor,
                 int winid = wxID_ANY,
                 int lastId = wxID_ANY,
                 wxObject *userData = NULL)
     {
-        return DoUnbind(winid, lastId, eventType,
+        return DoDisconnect(winid, lastId, eventType,
                             wxMakeEventFunctor(eventType, functor),
                             userData);
     }
@@ -3115,7 +3014,7 @@ public:
               int lastId = wxID_ANY,
               wxObject *userData = NULL)
     {
-        DoBind(winid, lastId, eventType,
+        DoConnect(winid, lastId, eventType,
                   wxNewEventFunctor(eventType, method, handler),
                   userData);
     }
@@ -3128,11 +3027,11 @@ public:
                 int lastId = wxID_ANY,
                 wxObject *userData = NULL )
     {
-        return DoUnbind(winid, lastId, eventType,
+        return DoDisconnect(winid, lastId, eventType,
                             wxMakeEventFunctor(eventType, method, handler),
                             userData);
     }
-#endif // wxHAS_EVENT_BIND
+#endif // !wxEVENTS_COMPATIBILITY_2_8
 
     wxList* GetDynamicEventTable() const { return m_dynamicEvents ; }
 
@@ -3174,13 +3073,13 @@ public:
 
 
 private:
-    void DoBind(int winid,
+    void DoConnect(int winid,
                    int lastId,
                    wxEventType eventType,
                    wxEventFunctor *func,
                    wxObject* userData = NULL);
 
-    bool DoUnbind(int winid,
+    bool DoDisconnect(int winid,
                       int lastId,
                       wxEventType eventType,
                       const wxEventFunctor& func,
@@ -3314,6 +3213,13 @@ private:
 
     wxDECLARE_NO_ASSIGN_CLASS(wxEventConnectionRef);
 };
+
+inline void wxObjectEventFunctor::operator()(wxEvtHandler *handler, wxEvent& event)
+{
+    wxEvtHandler * const realHandler = m_handler ? m_handler : handler;
+
+    (realHandler->*m_method)(event);
+}
 
 // Post a message to the given event handler which will be processed during the
 // next event loop iteration.
@@ -3924,17 +3830,17 @@ typedef void (wxEvtHandler::*wxClipboardTextEventFunction)(wxClipboardTextEvent&
 // (and not in a private header) because the base class must be visible from
 // other public headers, please do NOT use this in your code, it will be
 // removed from future wx versions without warning.
-#ifdef wxHAS_EVENT_BIND
-    #define wxBIND_OR_CONNECT_HACK_BASE_CLASS
-    #define wxBIND_OR_CONNECT_HACK_ONLY_BASE_CLASS
-    #define wxBIND_OR_CONNECT_HACK(w, evt, handler, func, obj) \
-        win->Bind(evt, &func, obj)
-#else // wxHAS_EVENT_BIND
+#if wxEVENTS_COMPATIBILITY_2_8
     #define wxBIND_OR_CONNECT_HACK_BASE_CLASS public wxEvtHandler,
     #define wxBIND_OR_CONNECT_HACK_ONLY_BASE_CLASS : public wxEvtHandler
     #define wxBIND_OR_CONNECT_HACK(w, evt, handler, func, obj) \
         win->Connect(evt, handler(func), NULL, obj)
-#endif // wxHAS_EVENT_BIND
+#else // wxEVENTS_COMPATIBILITY_2_8
+    #define wxBIND_OR_CONNECT_HACK_BASE_CLASS
+    #define wxBIND_OR_CONNECT_HACK_ONLY_BASE_CLASS
+    #define wxBIND_OR_CONNECT_HACK(w, evt, handler, func, obj) \
+        win->Bind(evt, &func, obj)
+#endif // wxEVENTS_COMPATIBILITY_2_8/!wxEVENTS_COMPATIBILITY_2_8
 
 #if wxUSE_GUI
 

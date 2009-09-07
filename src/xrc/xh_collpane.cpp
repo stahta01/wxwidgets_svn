@@ -26,7 +26,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxCollapsiblePaneXmlHandler, wxXmlResourceHandler)
 
-wxCollapsiblePaneXmlHandler::wxCollapsiblePaneXmlHandler()
+wxCollapsiblePaneXmlHandler::wxCollapsiblePaneXmlHandler() 
 : wxXmlResourceHandler(), m_isInside(false)
 {
     XRC_ADD_STYLE(wxCP_NO_TLW_RESIZE);
@@ -73,11 +73,11 @@ wxObject *wxCollapsiblePaneXmlHandler::DoCreateResource()
                     GetID(),
                     label,
                     GetPosition(), GetSize(),
-                    GetStyle(wxT("style"), wxCP_DEFAULT_STYLE),
+                    GetStyle(_T("style"), wxCP_DEFAULT_STYLE),
                     wxDefaultValidator,
                     GetName());
 
-        ctrl->Collapse(GetBool(wxT("collapsed")));
+        ctrl->Collapse(GetBool(_T("collapsed")));
         SetupWindow(ctrl);
 
         wxCollapsiblePane *old_par = m_collpane;

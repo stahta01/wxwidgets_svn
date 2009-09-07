@@ -302,12 +302,12 @@ public :
     virtual bool        IsVisible() const;
 
     virtual void        Raise();
-
+    
     virtual void        Lower();
 
     virtual void        ScrollRect( const wxRect *rect, int dx, int dy );
 
-    virtual void        GetContentArea( int &left , int &top , int &width , int &height ) const;
+    virtual void        GetContentArea( int &left , int &top , int &width , int &height ) const;    
     virtual void        Move(int x, int y, int width, int height);
     virtual void        GetPosition( int &x, int &y ) const;
     virtual void        GetSize( int &width, int &height ) const;
@@ -316,7 +316,7 @@ public :
     // where is in native window relative coordinates
     virtual void        SetNeedsDisplay( const wxRect* where = NULL );
     virtual bool        GetNeedsDisplay() const;
-
+ 
     virtual bool        CanFocus() const;
     // return true if successful
     virtual bool        SetFocus();
@@ -324,7 +324,7 @@ public :
 
     void                RemoveFromParent();
     void                Embed( wxWidgetImpl *parent );
-
+    
     void                SetDefaultButton( bool isDefault );
     void                PerformClick();
     void                SetLabel( const wxString& title, wxFontEncoding encoding );
@@ -335,9 +335,7 @@ public :
 
     wxInt32             GetValue() const;
     void                SetValue( wxInt32 v );
-    wxBitmap            GetBitmap() const;
     void                SetBitmap( const wxBitmap& bitmap );
-    void                SetBitmapPosition( wxDirection dir );
     void                SetupTabs( const wxNotebook &notebook );
 
     void                GetBestRect( wxRect *r ) const;
@@ -369,7 +367,7 @@ public :
 
     virtual wxInt32 GetMaximum() const;
     virtual wxInt32 GetMinimum() const;
-
+ 
     virtual void SetValueAndRange( SInt32 value , SInt32 minimum , SInt32 maximum );
     virtual void SetRange( SInt32 minimum , SInt32 maximum );
 
@@ -451,7 +449,7 @@ public :
 
 
     virtual void GetFeatures( UInt32 *features );
-
+   
     // to be moved into a tab control class
 
     virtual OSStatus SetTabEnabled( SInt16 tabNo , bool enable );
@@ -640,7 +638,7 @@ public :
 } ;
 */
 
-class WXDLLIMPEXP_CORE wxMacDataItem
+class WXDLLIMPEXP_CORE wxMacDataItem 
 {
 public :
     wxMacDataItem();
@@ -735,6 +733,22 @@ public :
 
 public :
 
+    // item aware methods, to be used in subclasses
+
+    virtual Boolean CompareItems(const wxMacDataItem* itemOneID,
+                        const wxMacDataItem* itemTwoID,
+                        DataBrowserPropertyID sortProperty);
+
+    virtual OSStatus GetSetItemData(wxMacDataItem* itemID,
+                        DataBrowserPropertyID property,
+                        DataBrowserItemDataRef itemData,
+                        Boolean changeValue );
+
+    virtual void    ItemNotification(
+                        const wxMacDataItem* itemID,
+                        DataBrowserItemNotification message,
+                        DataBrowserItemDataRef itemData);
+
     // as we are getting the same events for human and API selection we have to suppress
     // events in the latter case, since this will be used from many subclasses we keep it here
 
@@ -817,7 +831,7 @@ protected :
 class WXDLLIMPEXP_CORE wxMacDataBrowserColumn : public wxListWidgetColumn
 {
 public :
-    wxMacDataBrowserColumn( DataBrowserPropertyID propertyId, DataBrowserPropertyType colType, bool editable )
+    wxMacDataBrowserColumn( DataBrowserPropertyID propertyId, DataBrowserPropertyType colType, bool editable ) 
         : m_property(propertyId), m_editable(editable), m_type( colType )
     {
     }
@@ -825,9 +839,9 @@ public :
     {
     }
     DataBrowserPropertyID GetProperty() const { return m_property ; }
-
+    
     bool IsEditable() const { return m_editable; }
-
+    
     DataBrowserPropertyType GetType() const { return m_type; }
 
 protected :
@@ -844,12 +858,12 @@ class WXDLLIMPEXP_CORE wxMacDataBrowserCellValue : public wxListWidgetCellValue
 public :
     wxMacDataBrowserCellValue(DataBrowserItemDataRef data) : m_data(data) {}
     virtual ~wxMacDataBrowserCellValue() {}
-
+    
     virtual void Set( CFStringRef value );
     virtual void Set( const wxString& value );
     virtual void Set( int value ) ;
     virtual void Check( bool check );
-
+    
     virtual int GetIntValue() const ;
     virtual wxString GetStringValue() const ;
 protected :
@@ -868,10 +882,10 @@ public:
 
     wxListWidgetColumn*     InsertTextColumn( unsigned int pos, const wxString& title, bool editable = false,
                                 wxAlignment just = wxALIGN_LEFT , int defaultWidth = -1) ;
-    wxListWidgetColumn*     InsertCheckColumn( unsigned int pos , const wxString& title, bool editable = false,
+    wxListWidgetColumn*     InsertCheckColumn( unsigned int pos , const wxString& title, bool editable = false, 
                                 wxAlignment just = wxALIGN_LEFT , int defaultWidth = -1) ;
 
-    wxMacDataBrowserColumn* DoInsertColumn( unsigned int pos, DataBrowserPropertyID property,
+    wxMacDataBrowserColumn* DoInsertColumn( unsigned int pos, DataBrowserPropertyID property, 
                                 const wxString& title, bool editable,
                                 DataBrowserPropertyType colType, SInt16 just, int width );
     // add and remove
@@ -900,7 +914,7 @@ public:
     virtual void            UpdateLineToEnd( unsigned int n) ;
 
     virtual void            ItemNotification(
-                                DataBrowserItemID itemID,
+                                const wxMacDataItem* itemID,
                                 DataBrowserItemNotification message,
                                 DataBrowserItemDataRef itemData);
 
@@ -1000,51 +1014,51 @@ public :
     wxNonOwnedWindowCarbonImpl( wxNonOwnedWindow* nonownedwnd) ;
     wxNonOwnedWindowCarbonImpl();
     virtual ~wxNonOwnedWindowCarbonImpl();
-
+    
     virtual void Destroy() ;
     void Create( wxWindow* parent, const wxPoint& pos, const wxSize& size,
     long style, long extraStyle, const wxString& name ) ;
-
+    
     WXWindow GetWXWindow() const;
-    void Raise();
+    void Raise();    
     void Lower();
-    bool Show(bool show);
+    bool Show(bool show);    
     bool ShowWithEffect(bool show, wxShowEffect effect, unsigned timeout);
-
+        
 
     void Update();
     bool SetTransparent(wxByte alpha);
     bool SetBackgroundColour(const wxColour& col );
-    void SetExtraStyle( long exStyle );
-    bool SetBackgroundStyle(wxBackgroundStyle style);
+    void SetExtraStyle( long exStyle );    
+    bool SetBackgroundStyle(wxBackgroundStyle style);    
     bool CanSetTransparent();
     void MoveWindow(int x, int y, int width, int height);
     void GetPosition( int &x, int &y ) const;
     void GetSize( int &width, int &height ) const;
-    void GetContentArea( int &left , int &top , int &width , int &height ) const;
+    void GetContentArea( int &left , int &top , int &width , int &height ) const;    
 
     bool SetShape(const wxRegion& region);
 
     virtual void SetTitle( const wxString& title, wxFontEncoding encoding ) ;
-
+    
     virtual bool IsMaximized() const;
-
+    
     virtual bool IsIconized() const;
-
+    
     virtual void Iconize( bool iconize );
-
+    
     virtual void Maximize(bool maximize);
-
+    
     virtual bool IsFullScreen() const;
-
+    
     virtual bool ShowFullScreen(bool show, long style);
 
     virtual void RequestUserAttention(int flags);
-
+    
     virtual void ScreenToWindow( int *x, int *y );
-
+    
     virtual void WindowToScreen( int *x, int *y );
-
+    
 
     bool MacGetUnifiedAppearance() const ;
     void MacChangeWindowAttributes( wxUint32 attributesToSet , wxUint32 attributesToClear ) ;
@@ -1052,18 +1066,18 @@ public :
     void MacSetMetalAppearance( bool set ) ;
     bool MacGetMetalAppearance() const ;
     void MacSetUnifiedAppearance( bool set );
-
+    
     WXEVENTHANDLERREF    MacGetEventHandler() { return m_macEventHandler ; }
 
     wxNonOwnedWindow*   GetWXPeer() { return m_wxPeer; }
 protected :
     void                MacInstallTopLevelWindowEventHandler();
-
+    
     WXEVENTHANDLERREF   m_macEventHandler ;
     WindowRef           m_macWindow;
     void *              m_macFullScreenData ;
-    DECLARE_DYNAMIC_CLASS_NO_COPY(wxNonOwnedWindowCarbonImpl)
-};
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxNonOwnedWindowCarbonImpl)    
+};    
 
 #endif // wxUSE_GUI
 

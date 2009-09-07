@@ -923,10 +923,6 @@ without warnings or errors.
   - wxPropertyGridInterface::GetExpandedProperties() is removed. You should
     now use wxPropertyGridInterface::GetEditableState() instead.
 
-  - wxPG_EX_DISABLE_TLP_TRACKING is now enabled by default. To get the old
-    behavior (recommended if you don't use a system that reparents the grid
-    on its own), use the wxPG_EX_ENABLE_TLP_TRACKING extra style.
-
   - Extended window style wxPG_EX_LEGACY_VALIDATORS was removed.
 
   - wxPropertyGridManager now has same Get/SetSelection() semantics as
@@ -951,9 +947,6 @@ without warnings or errors.
   - Confusing custom property macros have been eliminated.
 
   - Implement wxPGProperty::ValueToString() instead of GetValueAsString().
-
-  - wxPGProperty::ChildChanged() must now return the modified value of
-    whole property instead of writing it back into 'thisValue' argument.
 
   - Removed wxPropertyGrid::PrepareValueForDialogEditing(). Use
     wxPropertyGrid::GetPendingEditedValue() instead.

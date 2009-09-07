@@ -513,23 +513,7 @@ public:
     virtual int GetScrollThumb(int orientation) const;
 
     /**
-        Returns @true if this window can have a scroll bar in this orientation.
-
-        @param orient
-            Orientation to check, either wxHORIZONTAL or wxVERTICAL.
-
-        @since 2.9.1
-    */
-    bool CanScroll(int orient) const;
-
-    /**
-        Returns @true if this window currently has a scroll bar for this
-        orientation.
-
-        This method may return @false even when CanScroll() for the same
-        orientation returns @true, but if CanScroll() returns @false, i.e.
-        scrolling in this direction is not enabled at all, HasScrollbar()
-        always returns @false as well.
+        Returns @true if this window has a scroll bar for this orientation.
 
         @param orient
             Orientation to check, either wxHORIZONTAL or wxVERTICAL.
@@ -1434,12 +1418,12 @@ public:
 
     /**
         Returns the background style of the window.
+        The background style can be one of the wxBackgroundStyle.
 
         @see SetBackgroundColour(), GetForegroundColour(),
              SetBackgroundStyle(), SetTransparent()
     */
     virtual wxBackgroundStyle GetBackgroundStyle() const;
-
     /**
         Returns the character height for this window.
     */
@@ -1505,11 +1489,10 @@ public:
         @param font
             Font to use instead of the current window font (optional).
     */
-    void GetTextExtent(const wxString& string,
-                        int* w, int* h,
-                       int* descent = NULL,
-                       int* externalLeading = NULL,
-                       const wxFont* font = NULL) const;
+    virtual void GetTextExtent(const wxString& string, int* w, int* h,
+                               int* descent = NULL,
+                               int* externalLeading = NULL,
+                               const wxFont* font = NULL) const;
 
     /**
         Gets the dimensions of the string as it would be drawn on the
@@ -1599,28 +1582,8 @@ public:
     virtual bool SetBackgroundColour(const wxColour& colour);
 
     /**
-        Sets the background style of the window.
-
-        The default background style is wxBG_STYLE_ERASE which indicates that
-        the window background may be erased in EVT_ERASE_BACKGROUND handler.
-        This is a safe compatibility default however you may want to change it
-        to wxBG_STYLE_SYSTEM if you don't define any erase background event
-        handlers at all to avoid unnecessary generation of erase background
-        events and always let system erase the background. And you should
-        change the background style to wxBG_STYLE_PAINT if you define an
-        EVT_PAINT handler which completely overwrites the window background as
-        in this case erasing it previously, either in EVT_ERASE_BACKGROUND
-        handler or in the system default handler, would result in flicker as
-        the background pixels will be repainted twice every time the window is
-        redrawn. Do ensure that the background is entirely erased by your
-        EVT_PAINT handler in this case however as otherwise garbage may be left
-        on screen.
-
-        Notice that in previous versions of wxWidgets a common way to work
-        around the above mentioned flickering problem was to define an empty
-        EVT_ERASE_BACKGROUND handler. Setting background style to
-        wxBG_STYLE_PAINT is a simpler and more efficient solution to the same
-        problem.
+        Sets the background style of the window. see GetBackgroundStyle() for
+        the description of the possible style values.
 
         @see SetBackgroundColour(), GetForegroundColour(),
              SetTransparent()
@@ -2233,11 +2196,6 @@ public:
     wxToolTip* GetToolTip() const;
 
     /**
-        Get the text of the associated tooltip or empty string if none.
-     */
-    wxString GetToolTipText() const;
-
-    /**
         Attach a tooltip to the window.
 
         wxToolTip pointer can be @NULL in the overload taking the pointer,
@@ -2642,23 +2600,19 @@ public:
 
     /**
         Sets the window to have the given layout sizer.
-
         The window will then own the object, and will take care of its deletion.
         If an existing layout constraints object is already owned by the
-        window, it will be deleted if the @a deleteOld parameter is @true.
+        window, it will be deleted if the deleteOld parameter is @true.
 
         Note that this function will also call SetAutoLayout() implicitly with @true
-        parameter if the @a sizer is non-@NULL and @false otherwise so that the
-        sizer will be effectively used to layout the window children whenever
-        it is resized.
+        parameter if the @a sizer is non-@NULL and @false otherwise.
 
         @param sizer
             The sizer to set. Pass @NULL to disassociate and conditionally delete
             the window's sizer. See below.
         @param deleteOld
             If @true (the default), this will delete any pre-existing sizer.
-            Pass @false if you wish to handle deleting the old sizer yourself
-            but remember to do it yourself in this case to avoid memory leaks.
+            Pass @false if you wish to handle deleting the old sizer yourself.
 
         @remarks SetSizer enables and disables Layout automatically.
     */
@@ -2711,17 +2665,20 @@ public:
 
     /**
         Determines whether the Layout() function will be called automatically
-        when the window is resized.
+        when the window is resized. Please note that this only happens for the
+        windows usually used to contain children, namely wxPanel and wxTopLevelWindow
+        (and the classes deriving from them).
 
         This method is called implicitly by SetSizer() but if you use SetConstraints()
         you should call it manually or otherwise the window layout won't be correctly
         updated when its size changes.
 
         @param autoLayout
-            Set this to @true if you wish the Layout() function to be called
-            automatically when the window is resized.
+            Set this to @true if you wish the Layout() function to be
+            called automatically when the window is resized
+            (really happens only if you derive from wxPanel or wxTopLevelWindow).
 
-        @see SetSizer(), SetConstraints()
+        @see SetConstraints()
     */
     void SetAutoLayout(bool autoLayout);
 

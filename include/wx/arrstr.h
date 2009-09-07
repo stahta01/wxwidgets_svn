@@ -87,17 +87,6 @@ public:
     }
 
     int Index(const wxString& str, bool bCase = true, bool bFromEnd = false) const;
-
-private:
-    void Insert()
-    {
-        wxFAIL_MSG( "wxSortedArrayString::Insert() is not to be used" );
-    }
-
-    void Sort()
-    {
-        wxFAIL_MSG( "wxSortedArrayString::Sort() is not to be used" );
-    }
 };
 
 #else // if !wxUSE_STL
@@ -176,7 +165,7 @@ public:
   wxString& Item(size_t nIndex) const
     {
         wxASSERT_MSG( nIndex < m_nCount,
-                      wxT("wxArrayString: index out of bounds") );
+                      _T("wxArrayString: index out of bounds") );
 
         return m_pItems[nIndex];
     }
@@ -187,7 +176,7 @@ public:
   wxString& Last() const
   {
       wxASSERT_MSG( !IsEmpty(),
-                    wxT("wxArrayString: index out of bounds") );
+                    _T("wxArrayString: index out of bounds") );
       return Item(GetCount() - 1);
   }
 

@@ -127,8 +127,6 @@ bool wxApp::DoIdle()
     gdk_threads_enter();
     bool needMore;
     do {
-        ProcessPendingEvents();
-
         needMore = ProcessIdle();
     } while (needMore && gtk_events_pending() == 0);
     gdk_threads_leave();
@@ -311,9 +309,9 @@ bool wxApp::Initialize(int& argc_, wxChar **argv_)
 
     // (1) this variable exists for the sole purpose of specifying the encoding
     //     of the filenames for GTK+ programs, so use it if it is set
-    wxString encName(wxGetenv(wxT("G_FILENAME_ENCODING")));
-    encName = encName.BeforeFirst(wxT(','));
-    if (encName.CmpNoCase(wxT("@locale")) == 0)
+    wxString encName(wxGetenv(_T("G_FILENAME_ENCODING")));
+    encName = encName.BeforeFirst(_T(','));
+    if (encName.CmpNoCase(_T("@locale")) == 0)
         encName.clear();
     encName.MakeUpper();
 #if wxUSE_INTL
@@ -323,13 +321,13 @@ bool wxApp::Initialize(int& argc_, wxChar **argv_)
         //     filenames in this locale too
         encName = wxLocale::GetSystemEncodingName().Upper();
         // (3) finally use UTF-8 by default
-        if (encName.empty() || encName == wxT("US-ASCII"))
-            encName = wxT("UTF-8");
-        wxSetEnv(wxT("G_FILENAME_ENCODING"), encName);
+        if (encName.empty() || encName == _T("US-ASCII"))
+            encName = _T("UTF-8");
+        wxSetEnv(_T("G_FILENAME_ENCODING"), encName);
     }
 #else
     if (encName.empty())
-        encName = wxT("UTF-8");
+        encName = _T("UTF-8");
 
     // if wxUSE_INTL==0 it probably indicates that only "C" locale is supported
     // by the program anyhow so prevent GTK+ from calling setlocale(LC_ALL, "")

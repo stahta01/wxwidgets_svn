@@ -87,7 +87,7 @@ wxColourData::~wxColourData()
 
 void wxColourData::SetCustomColour(int i, const wxColour& colour)
 {
-    wxCHECK_RET( i >= 0 && i < NUM_CUSTOM, wxT("custom colour index out of range") );
+    wxCHECK_RET( i >= 0 && i < NUM_CUSTOM, _T("custom colour index out of range") );
 
     m_custColours[i] = colour;
 }
@@ -95,7 +95,7 @@ void wxColourData::SetCustomColour(int i, const wxColour& colour)
 wxColour wxColourData::GetCustomColour(int i) const
 {
     wxCHECK_MSG( i >= 0 && i < NUM_CUSTOM, wxColour(0,0,0),
-                 wxT("custom colour index out of range") );
+                 _T("custom colour index out of range") );
 
     return m_custColours[i];
 }
@@ -524,12 +524,9 @@ void wxPageSetupDialogData::CalculatePaperSizeFromId()
 
     wxSize sz = wxThePrintPaperDatabase->GetSize(m_printData.GetPaperId());
 
-    if (sz != wxSize(0, 0))
-    {
-        // sz is in 10ths of a mm, while paper size is in mm
-        m_paperSize.x = sz.x / 10;
-        m_paperSize.y = sz.y / 10;
-    }
+    // sz is in 10ths of a mm, while paper size is in mm
+    m_paperSize.x = sz.x / 10;
+    m_paperSize.y = sz.y / 10;
 }
 
 #endif // wxUSE_PRINTING_ARCHITECTURE

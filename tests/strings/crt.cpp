@@ -69,24 +69,15 @@ CPPUNIT_TEST_SUITE_NAMED_REGISTRATION( CrtTestCase, "CrtTestCase" );
 
 void CrtTestCase::SetGetEnv()
 {
-#define TESTVAR_NAME wxT("WXTESTVAR")
-
     wxString val;
-    wxSetEnv(TESTVAR_NAME, wxT("value"));
-    CPPUNIT_ASSERT( wxGetEnv(TESTVAR_NAME, &val) );
-    CPPUNIT_ASSERT_EQUAL( "value", val );
-    CPPUNIT_ASSERT_EQUAL( "value", wxString(wxGetenv(TESTVAR_NAME)) );
-
-    wxSetEnv(TESTVAR_NAME, wxT("something else"));
-    CPPUNIT_ASSERT( wxGetEnv(TESTVAR_NAME, &val) );
-    CPPUNIT_ASSERT_EQUAL( "something else", val );
-    CPPUNIT_ASSERT_EQUAL( "something else", wxString(wxGetenv(TESTVAR_NAME)) );
-
-    CPPUNIT_ASSERT( wxUnsetEnv(TESTVAR_NAME) );
-    CPPUNIT_ASSERT( !wxGetEnv(TESTVAR_NAME, NULL) );
-    CPPUNIT_ASSERT( !wxGetenv(TESTVAR_NAME) );
-
-#undef TESTVAR_NAME
+    wxSetEnv(_T("TESTVAR"), _T("value"));
+    CPPUNIT_ASSERT( wxGetEnv(_T("TESTVAR"), &val) == true );
+    CPPUNIT_ASSERT( val == _T("value") );
+    wxSetEnv(_T("TESTVAR"), _T("something else"));
+    CPPUNIT_ASSERT( wxGetEnv(_T("TESTVAR"), &val) );
+    CPPUNIT_ASSERT( val == _T("something else") );
+    CPPUNIT_ASSERT( wxUnsetEnv(_T("TESTVAR")) );
+    CPPUNIT_ASSERT( wxGetEnv(_T("TESTVAR"), NULL) == false );
 }
 
 void CrtTestCase::Strcmp()

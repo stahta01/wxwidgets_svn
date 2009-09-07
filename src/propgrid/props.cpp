@@ -134,7 +134,7 @@ bool wxStringProperty::DoSetAttribute( const wxString& name, wxVariant& value )
     if ( name == wxPG_STRING_PASSWORD )
     {
         m_flags &= ~(wxPG_PROP_PASSWORD);
-        if ( value.GetLong() ) m_flags |= wxPG_PROP_PASSWORD;
+        if ( wxPGVariantToInt(value) ) m_flags |= wxPG_PROP_PASSWORD;
         RecreateEditor();
         return false;
     }
@@ -169,10 +169,11 @@ wxString wxIntProperty::ValueToString( wxVariant& value,
     {
         return wxString::Format(wxS("%li"),value.GetLong());
     }
-    else if ( value.GetType() == wxPG_VARIANT_TYPE_LONGLONG )
+    else if ( value.GetType() == wxLongLong_VariantType )
     {
-        wxLongLong ll = value.GetLongLong();
-        return ll.ToString();
+	    wxLongLong ll;
+        ll << value;
+	    return ll.ToString();
     }
 
     return wxEmptyString;
@@ -220,9 +221,10 @@ bool wxIntProperty::StringToValue( wxVariant& variant, const wxString& text, int
         {
             bool doChangeValue = isPrevLong;
 
-            if ( !isPrevLong && variantType == wxPG_VARIANT_TYPE_LONGLONG )
+            if ( !isPrevLong && variantType == wxLongLong_VariantType )
             {
-                wxLongLong oldValue = variant.GetLongLong();
+                wxLongLong oldValue;
+                oldValue << variant;
                 if ( oldValue.GetValue() != value64 )
                     doChangeValue = true;
             }
@@ -230,7 +232,7 @@ bool wxIntProperty::StringToValue( wxVariant& variant, const wxString& text, int
             if ( doChangeValue )
             {
                 wxLongLong ll(value64);
-                variant = ll;
+                variant << ll;
                 return true;
             }
         }
@@ -272,14 +274,14 @@ bool wxIntProperty::DoValidation( const wxPGProperty* property, wxLongLong_t& va
     variant = property->GetAttribute(wxPGGlobalVars->m_strMin);
     if ( !variant.IsNull() )
     {
-        min = variant.GetLongLong().GetValue();
+        wxPGVariantToLongLong(variant, &min);
         minOk = true;
     }
 
     variant = property->GetAttribute(wxPGGlobalVars->m_strMax);
     if ( !variant.IsNull() )
     {
-        max = variant.GetLongLong().GetValue();
+        wxPGVariantToLongLong(variant, &max);
         maxOk = true;
     }
 
@@ -317,12 +319,12 @@ bool wxIntProperty::DoValidation( const wxPGProperty* property, wxLongLong_t& va
     return true;
 }
 
-bool wxIntProperty::ValidateValue( wxVariant& value,
-                                   wxPGValidationInfo& validationInfo ) const
+bool wxIntProperty::ValidateValue( wxVariant& value, wxPGValidationInfo& validationInfo ) const
 {
-    wxLongLong_t ll = value.GetLongLong().GetValue();
-    return DoValidation(this, ll, &validationInfo,
-                        wxPG_PROPERTY_VALIDATION_ERROR_MESSAGE);
+    wxLongLong_t ll;
+    if ( wxPGVariantToLongLong(value, &ll) )
+        return DoValidation(this, ll, &validationInfo, wxPG_PROPERTY_VALIDATION_ERROR_MESSAGE);
+    return true;
 }
 
 wxValidator* wxIntProperty::GetClassValidator()
@@ -404,11 +406,11 @@ wxString wxUIntProperty::ValueToString( wxVariant& value,
 
     if ( value.GetType() == wxPG_VARIANT_TYPE_LONG )
     {
-        return wxString::Format(gs_uintTemplates32[index],
-                                (unsigned long)value.GetLong());
+        return wxString::Format(gs_uintTemplates32[index], (unsigned long)value.GetLong());
     }
 
-    wxULongLong ull = value.GetULongLong();
+    wxULongLong ull;
+    ull << value;
 
     return wxString::Format(gs_uintTemplates64[index], ull.GetValue());
 }
@@ -437,16 +439,18 @@ bool wxUIntProperty::StringToValue( wxVariant& variant, const wxString& text, in
         {
             bool doChangeValue = isPrevLong;
 
-            if ( !isPrevLong && variantType == wxPG_VARIANT_TYPE_ULONGLONG )
+            if ( !isPrevLong && variantType == wxULongLong_VariantType )
             {
-                wxULongLong oldValue = variant.GetULongLong();
+                wxULongLong oldValue;
+                oldValue << variant;
                 if ( oldValue.GetValue() != value64 )
                     doChangeValue = true;
             }
 
             if ( doChangeValue )
             {
-                variant = wxULongLong(value64);
+                wxULongLong ull(value64);
+                variant << ull;
                 return true;
             }
         }
@@ -474,40 +478,49 @@ bool wxUIntProperty::IntToValue( wxVariant& variant, int number, int WXUNUSED(ar
     return false;
 }
 
+#ifdef ULLONG_MAX
+  #define wxUINT64_MAX ULLONG_MAX
+  #define wxUINT64_MIN wxULL(0)
+#else
+  #define wxUINT64_MAX wxULL(0xFFFFFFFFFFFFFFFF)
+  #define wxUINT64_MIN wxULL(0)
+#endif
+
 bool wxUIntProperty::ValidateValue( wxVariant& value, wxPGValidationInfo& validationInfo ) const
 {
     // Check for min/max
-    wxULongLong_t ll = value.GetULongLong().GetValue();
-
-    wxULongLong_t min = 0;
-    wxULongLong_t max = wxUINT64_MAX;
-    wxVariant variant;
-
-    variant = GetAttribute(wxPGGlobalVars->m_strMin);
-    if ( !variant.IsNull() )
+    wxULongLong_t ll;
+    if ( wxPGVariantToULongLong(value, &ll) )
     {
-        min = variant.GetULongLong().GetValue();
-        if ( ll < min )
+        wxULongLong_t min = wxUINT64_MIN;
+        wxULongLong_t max = wxUINT64_MAX;
+        wxVariant variant;
+
+        variant = GetAttribute(wxPGGlobalVars->m_strMin);
+        if ( !variant.IsNull() )
         {
-            validationInfo.SetFailureMessage(
-                wxString::Format(_("Value must be %llu or higher"),min)
-                );
-            return false;
+            wxPGVariantToULongLong(variant, &min);
+            if ( ll < min )
+            {
+                validationInfo.SetFailureMessage(
+                    wxString::Format(_("Value must be %llu or higher"),min)
+                    );
+                return false;
+            }
+        }
+        variant = GetAttribute(wxPGGlobalVars->m_strMax);
+        if ( !variant.IsNull() )
+        {
+            wxPGVariantToULongLong(variant, &max);
+            if ( ll > max )
+            {
+                validationInfo.SetFailureMessage(
+                    wxString::Format(_("Value must be %llu or less"),max)
+                    );
+                return false;
+            }
         }
     }
-    variant = GetAttribute(wxPGGlobalVars->m_strMax);
-    if ( !variant.IsNull() )
-    {
-        max = variant.GetULongLong().GetValue();
-        if ( ll > max )
-        {
-            validationInfo.SetFailureMessage(
-                wxString::Format(_("Value must be %llu or less"),max)
-                );
-            return false;
-        }
-    }
-
     return true;
 }
 
@@ -650,10 +663,7 @@ bool wxFloatProperty::StringToValue( wxVariant& variant, const wxString& text, i
     return false;
 }
 
-bool wxFloatProperty::DoValidation( const wxPGProperty* property,
-                                    double& value,
-                                    wxPGValidationInfo* pValidationInfo,
-                                    int mode )
+bool wxFloatProperty::DoValidation( const wxPGProperty* property, double& value, wxPGValidationInfo* pValidationInfo, int mode )
 {
     // Check for min/max
     double min = (double)wxINT64_MIN;
@@ -665,14 +675,14 @@ bool wxFloatProperty::DoValidation( const wxPGProperty* property,
     variant = property->GetAttribute(wxPGGlobalVars->m_strMin);
     if ( !variant.IsNull() )
     {
-        min = variant.GetDouble();
+        wxPGVariantToDouble(variant, &min);
         minOk = true;
     }
 
     variant = property->GetAttribute(wxPGGlobalVars->m_strMax);
     if ( !variant.IsNull() )
     {
-        max = variant.GetDouble();
+        wxPGVariantToDouble(variant, &max);
         maxOk = true;
     }
 
@@ -694,7 +704,7 @@ bool wxFloatProperty::DoValidation( const wxPGProperty* property,
 
     if ( maxOk )
     {
-        max = variant.GetDouble();
+        wxPGVariantToDouble(variant, &max);
         if ( value > max )
         {
             if ( mode == wxPG_PROPERTY_VALIDATION_ERROR_MESSAGE )
@@ -711,13 +721,12 @@ bool wxFloatProperty::DoValidation( const wxPGProperty* property,
     return true;
 }
 
-bool
-wxFloatProperty::ValidateValue( wxVariant& value,
-                                wxPGValidationInfo& validationInfo ) const
+bool wxFloatProperty::ValidateValue( wxVariant& value, wxPGValidationInfo& validationInfo ) const
 {
-    double fpv = value.GetDouble();
-    return DoValidation(this, fpv, &validationInfo,
-                        wxPG_PROPERTY_VALIDATION_ERROR_MESSAGE);
+    double fpv;
+    if ( wxPGVariantToDouble(value, &fpv) )
+        return DoValidation(this, fpv, &validationInfo, wxPG_PROPERTY_VALIDATION_ERROR_MESSAGE);
+    return true;
 }
 
 bool wxFloatProperty::DoSetAttribute( const wxString& name, wxVariant& value )
@@ -848,7 +857,8 @@ bool wxBoolProperty::DoSetAttribute( const wxString& name, wxVariant& value )
 #if wxPG_INCLUDE_CHECKBOX
     if ( name == wxPG_BOOL_USE_CHECKBOX )
     {
-        if ( value.GetLong() )
+        int ival = wxPGVariantToInt(value);
+        if ( ival )
             m_flags |= wxPG_PROP_USE_CHECKBOX;
         else
             m_flags &= ~(wxPG_PROP_USE_CHECKBOX);
@@ -857,7 +867,8 @@ bool wxBoolProperty::DoSetAttribute( const wxString& name, wxVariant& value )
 #endif
     if ( name == wxPG_BOOL_USE_DOUBLE_CLICK_CYCLING )
     {
-        if ( value.GetLong() )
+        int ival = wxPGVariantToInt(value);
+        if ( ival )
             m_flags |= wxPG_PROP_USE_DCC;
         else
             m_flags &= ~(wxPG_PROP_USE_DCC);
@@ -1213,12 +1224,6 @@ void wxFlagsProperty::Init()
 
     m_children.clear();
 
-    // Relay wxPG_BOOL_USE_CHECKBOX and wxPG_BOOL_USE_DOUBLE_CLICK_CYCLING
-    // to child bool property controls.
-    long attrUseCheckBox = GetAttributeAsLong(wxPG_BOOL_USE_CHECKBOX, 0);
-    long attrUseDCC = GetAttributeAsLong(wxPG_BOOL_USE_DOUBLE_CLICK_CYCLING,
-                                         0);
-
     if ( m_choices.IsOk() )
     {
         const wxPGChoices& choices = m_choices;
@@ -1241,12 +1246,6 @@ void wxFlagsProperty::Init()
             {
                 boolProp = new wxBoolProperty( label, label, child_val );
             }
-            if ( attrUseCheckBox )
-                boolProp->SetAttribute(wxPG_BOOL_USE_CHECKBOX,
-                                       true);
-            if ( attrUseDCC )
-                boolProp->SetAttribute(wxPG_BOOL_USE_DOUBLE_CLICK_CYCLING,
-                                       true);
             AddPrivateChild(boolProp);
         }
 
@@ -1484,34 +1483,15 @@ void wxFlagsProperty::RefreshChildren()
     m_oldValue = flags;
 }
 
-wxVariant wxFlagsProperty::ChildChanged( wxVariant& thisValue,
-                                         int childIndex,
-                                         wxVariant& childValue ) const
+void wxFlagsProperty::ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const
 {
     long oldValue = thisValue.GetLong();
     long val = childValue.GetLong();
     unsigned long vi = m_choices.GetValue(childIndex);
-
     if ( val )
-        return (long) (oldValue | vi);
-
-    return (long) (oldValue & ~(vi));
-}
-
-bool wxFlagsProperty::DoSetAttribute( const wxString& name, wxVariant& value )
-{
-    if ( name == wxPG_BOOL_USE_CHECKBOX ||
-         name == wxPG_BOOL_USE_DOUBLE_CLICK_CYCLING )
-    {
-        for ( size_t i=0; i<GetChildCount(); i++ )
-        {
-            Item(i)->SetAttribute(name, value);
-        }
-        // Must return false so that the attribute is stored in
-        // flag property's actual property storage
-        return false;
-    }
-    return false;
+        thisValue = (long)(oldValue | vi);
+    else
+        thisValue = (long)(oldValue & ~(vi));
 }
 
 // -----------------------------------------------------------------------
@@ -1796,7 +1776,7 @@ bool wxFileProperty::DoSetAttribute( const wxString& name, wxVariant& value )
     // stored in m_attributes.
     if ( name == wxPG_FILE_SHOW_FULL_PATH )
     {
-        if ( value.GetLong() )
+        if ( wxPGVariantToInt(value) )
             m_flags |= wxPG_PROP_SHOW_FULL_FILENAME;
         else
             m_flags &= ~(wxPG_PROP_SHOW_FULL_FILENAME);
@@ -1941,14 +1921,14 @@ bool wxLongStringProperty::DisplayEditorDialog( wxPGProperty* prop, wxPropertyGr
 
     rowsizer->Add( ed, 1, wxEXPAND|wxALL, spacing );
     topsizer->Add( rowsizer, 1, wxEXPAND, 0 );
-
-    wxStdDialogButtonSizer* buttonSizer = new wxStdDialogButtonSizer();
-    buttonSizer->AddButton(new wxButton(dlg, wxID_OK));
-    buttonSizer->AddButton(new wxButton(dlg, wxID_CANCEL));
-    buttonSizer->Realize();
-    topsizer->Add( buttonSizer, 0,
-                   wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL|wxBOTTOM|wxRIGHT,
-                   spacing );
+    rowsizer = new wxBoxSizer( wxHORIZONTAL );
+    const int but_sz_flags =
+        wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL|wxBOTTOM|wxLEFT|wxRIGHT;
+    rowsizer->Add( new wxButton(dlg,wxID_OK,_("Ok")),
+        0, but_sz_flags, spacing );
+    rowsizer->Add( new wxButton(dlg,wxID_CANCEL,_("Cancel")),
+        0, but_sz_flags, spacing );
+    topsizer->Add( rowsizer, 0, wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL, 0 );
 
     dlg->SetSizer( topsizer );
     topsizer->SetSizeHints( dlg );
@@ -2103,6 +2083,9 @@ bool wxArrayEditorDialog::Create( wxWindow *parent,
 
     m_curFocus = 1;
 
+    const int but_sz_flags =
+        wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL|wxALL; //wxBOTTOM|wxLEFT|wxRIGHT;
+
     wxBoxSizer* topsizer = new wxBoxSizer( wxVERTICAL );
 
     // Message
@@ -2172,14 +2155,17 @@ bool wxArrayEditorDialog::Create( wxWindow *parent,
     topsizer->Add( new wxStaticLine(this,-1),
         0, wxEXPAND|wxTOP|wxLEFT|wxRIGHT, spacing );
 
-    // Standard dialog buttons
-    wxStdDialogButtonSizer* buttonSizer = new wxStdDialogButtonSizer();
-    buttonSizer->AddButton(new wxButton(this, wxID_OK));
-    buttonSizer->AddButton(new wxButton(this, wxID_CANCEL));
-    buttonSizer->Realize();
-    topsizer->Add( buttonSizer, 0,
-                   wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL|wxALL,
-                   spacing );
+    // buttons
+    rowsizer = new wxBoxSizer( wxHORIZONTAL );
+    /*
+    const int but_sz_flags =
+        wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL|wxBOTTOM|wxLEFT|wxRIGHT;
+    */
+    rowsizer->Add( new wxButton(this,wxID_OK,_("Ok")),
+        0, but_sz_flags, spacing );
+    rowsizer->Add( new wxButton(this,wxID_CANCEL,_("Cancel")),
+        0, but_sz_flags, spacing );
+    topsizer->Add( rowsizer, 0, wxALIGN_RIGHT|wxALIGN_CENTRE_VERTICAL, 0 );
 
     m_edValue->SetFocus();
 

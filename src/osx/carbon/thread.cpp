@@ -49,7 +49,7 @@ enum wxThreadState
 // ----------------------------------------------------------------------------
 
 // the task ID of the main thread
-wxThreadIdType wxThread::ms_idMainThread = kInvalidID;
+static wxThreadIdType gs_idMainThread = kInvalidID;
 
 // this is the Per-Task Storage for the pointer to the appropriate wxThread
 TaskStorageIndex gs_tlsForWXThread = 0;
@@ -796,6 +796,11 @@ wxThread *wxThread::This()
     return thr;
 }
 
+bool wxThread::IsMain()
+{
+    return GetCurrentId() == gs_idMainThread || gs_idMainThread == kInvalidID ;
+}
+
 #ifdef Yield
 #undef Yield
 #endif
@@ -893,7 +898,7 @@ wxThreadError wxThread::Run()
 wxThreadError wxThread::Pause()
 {
     wxCHECK_MSG( This() != this, wxTHREAD_MISC_ERROR,
-                 wxT("a thread can't pause itself") );
+                 _T("a thread can't pause itself") );
 
     wxCriticalSectionLocker lock(m_critsect);
 
@@ -1191,8 +1196,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxThreadModule, wxModule)
 
 bool wxThreadModule::OnInit()
 {
-    bool hasThreadManager =
-#ifdef __LP64__
+    bool hasThreadManager = 
+#ifdef __LP64__ 
         true ; // TODO VERIFY IN NEXT BUILD
 #else
         MPLibraryIsLoaded();
@@ -1209,7 +1214,7 @@ bool wxThreadModule::OnInit()
     verify_noerr( MPAllocateTaskStorageIndex( &gs_tlsForWXThread ) ) ;
     verify_noerr( MPSetTaskStorageValue( gs_tlsForWXThread, 0 ) ) ;
 
-    wxThread::ms_idMainThread = wxThread::GetCurrentId();
+    gs_idMainThread = wxThread::GetCurrentId();
     gs_critsectWaitingForGui = new wxCriticalSection();
 
     gs_critsectGui = new wxCriticalSection();

@@ -32,7 +32,7 @@ class WXDLLIMPEXP_FWD_BASE wxArrayInt;
 // wxLongLong
 #include "wx/longlong.h"
 
-// needed for wxOperatingSystemId, wxLinuxDistributionInfo
+// need for wxOperatingSystemId
 #include "wx/platinfo.h"
 
 #ifdef __WATCOMC__
@@ -115,11 +115,6 @@ WXDLLIMPEXP_BASE bool wxIsPlatformLittleEndian();
 
 // Get platform architecture
 WXDLLIMPEXP_BASE bool wxIsPlatform64Bit();
-
-#ifdef __LINUX__
-// Get linux-distro informations
-WXDLLIMPEXP_BASE wxLinuxDistributionInfo wxGetLinuxDistributionInfo();
-#endif
 
 // Return a string with the current date/time
 WXDLLIMPEXP_BASE wxString wxNow();

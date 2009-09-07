@@ -1,5 +1,5 @@
 %define _prefix /usr
-%define ver  2.9.1
+%define ver  2.9.0
 %define ver2 2.9
 %define rel  1
 
@@ -301,7 +301,6 @@ wx/sstream.h
 wx/stack.h
 wx/stackwalk.h
 wx/stdpaths.h
-wx/stdstream.h
 wx/stockitem.h
 wx/stopwatch.h
 wx/strconv.h

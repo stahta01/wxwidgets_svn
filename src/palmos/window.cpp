@@ -610,11 +610,10 @@ int wxWindowPalm::GetCharWidth() const
     return 0;
 }
 
-void wxWindowPalm::DoGetTextExtent(const wxString& string,
-                                   int *x, int *y,
-                                   int *descent,
-                                   int *externalLeading,
-                                   const wxFont *theFont) const
+void wxWindowPalm::GetTextExtent(const wxString& string,
+                             int *x, int *y,
+                             int *descent, int *externalLeading,
+                             const wxFont *theFont) const
 {
 }
 

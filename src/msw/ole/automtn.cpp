@@ -606,10 +606,11 @@ WXDLLEXPORT bool wxConvertVariantToOle(const wxVariant& variant, VARIANTARG& ole
         wxDateTime date( variant.GetDateTime() );
         oleVariant.vt = VT_DATE;
 
-        SYSTEMTIME st;
-        date.GetAsMSWSysTime(&st);
+        long dosDateTime = date.GetAsDOS();
+        short dosDate = short((dosDateTime & 0xFFFF0000) >> 16);
+        short dosTime = short(dosDateTime & 0xFFFF);
 
-        SystemTimeToVariantTime(&st, &oleVariant.date);
+        DosDateTimeToVariantTime(dosDate, dosTime, & oleVariant.date);
     }
 #endif
     else if (type == wxT("void*"))
@@ -730,7 +731,7 @@ wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
                 break;
 
             default:
-                wxLogDebug(wxT("unhandled VT_ARRAY type %x in wxConvertOleToVariant"),
+                wxLogDebug(_T("unhandled VT_ARRAY type %x in wxConvertOleToVariant"),
                            oleVariant.vt & VT_TYPEMASK);
                 variant = wxVariant();
                 ok = false;
@@ -771,11 +772,13 @@ wxConvertOleToVariant(const VARIANTARG& oleVariant, wxVariant& variant)
             case VT_DATE:
 #if wxUSE_DATETIME
                 {
-                    SYSTEMTIME st;
-                    VariantTimeToSystemTime(oleVariant.date, &st);
+                    unsigned short dosDate = 0;
+                    unsigned short dosTime = 0;
+                    VariantTimeToDosDateTime(oleVariant.date, & dosDate, & dosTime);
 
+                    long dosDateTime = (dosDate << 16) | dosTime;
                     wxDateTime date;
-                    date.SetFromMSWSysTime(st);
+                    date.SetFromDOS(dosDateTime);
                     variant = date;
                 }
 #endif // wxUSE_DATETIME

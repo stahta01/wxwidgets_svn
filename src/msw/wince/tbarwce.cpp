@@ -202,7 +202,7 @@ bool wxToolMenuBar::MSWCreateToolbar(const wxPoint& WXUNUSED(pos),
         m_menuBar->SetToolBar(this);
 
     HWND hwndParent = GetHwndOf(GetParent());
-    wxCHECK_MSG( hwndParent, false, wxT("should have valid parent HWND") );
+    wxCHECK_MSG( hwndParent, false, _T("should have valid parent HWND") );
 
 #if defined(WINCE_WITHOUT_COMMANDBAR)
     // create the menubar.
@@ -214,7 +214,7 @@ bool wxToolMenuBar::MSWCreateToolbar(const wxPoint& WXUNUSED(pos),
 
     if ( !SHCreateMenuBar(&mbi) )
     {
-        wxFAIL_MSG( wxT("SHCreateMenuBar failed") );
+        wxFAIL_MSG( _T("SHCreateMenuBar failed") );
         return false;
     }
 
@@ -272,10 +272,6 @@ bool wxToolMenuBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *tool)
 
 bool wxToolMenuBar::DoDeleteTool(size_t pos, wxToolBarToolBase *tool)
 {
-    // Skip over the menus
-    if (GetMenuBar())
-        pos += GetMenuBar()->GetMenuCount();
-
     // the main difficulty we have here is with the controls in the toolbars:
     // as we (sometimes) use several separators to cover up the space used by
     // them, the indices are not the same for us and the toolbar
@@ -308,7 +304,7 @@ bool wxToolMenuBar::DoDeleteTool(size_t pos, wxToolBarToolBase *tool)
     RECT r;
     if ( !::SendMessage(GetHwnd(), TB_GETITEMRECT, pos, (LPARAM)&r) )
     {
-        wxLogLastError(wxT("TB_GETITEMRECT"));
+        wxLogLastError(_T("TB_GETITEMRECT"));
     }
 
     int width = r.right - r.left;
@@ -466,7 +462,7 @@ bool wxToolMenuBar::Realize()
                         break;
 
                     default:
-                        wxFAIL_MSG( wxT("unexpected toolbar button kind") );
+                        wxFAIL_MSG( _T("unexpected toolbar button kind") );
                         // fall through
 
                     case wxITEM_NORMAL:
@@ -644,7 +640,7 @@ void wxToolBar::DoToggleTool(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(to
 
 void wxToolBar::DoSetToggle(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(toggle))
 {
-    wxFAIL_MSG( wxT("not implemented") );
+    wxFAIL_MSG( _T("not implemented") );
 }
 
 #endif

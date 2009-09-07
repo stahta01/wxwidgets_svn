@@ -38,7 +38,7 @@
 
 // define a hash containing all the timers: it is indexed by timer id and
 // contains the corresponding timer
-WX_DECLARE_HASH_MAP(WPARAM, wxMSWTimerImpl *, wxIntegerHash, wxIntegerEqual,
+WX_DECLARE_HASH_MAP(unsigned long, wxMSWTimerImpl *, wxIntegerHash, wxIntegerEqual,
                     wxTimerMap);
 
 // instead of using a global here, wrap it in a static function as otherwise it
@@ -122,11 +122,6 @@ bool wxMSWTimerImpl::Start(int milliseconds, bool oneShot)
     // check that SetTimer() didn't reuse an existing id: according to the MSDN
     // this can happen and this would be catastrophic to us as we rely on ids
     // uniquely identifying the timers because we use them as keys in the hash
-    //
-    // notice that this also happens if the same id is reused for multiple
-    // timers: this used to work in previous versions but was never supported
-    // and absolutely shouldn't be done, use wxID_ANY to assign an id to the
-    // timer automatically or ensure that all your timers have unique ids
     if ( TimerMap().find(m_id) != TimerMap().end() )
     {
         wxLogError(_("Timer creation failed."));
@@ -144,7 +139,7 @@ bool wxMSWTimerImpl::Start(int milliseconds, bool oneShot)
 
 void wxMSWTimerImpl::Stop()
 {
-    wxASSERT_MSG( m_id, wxT("should be running") );
+    wxASSERT_MSG( m_id, _T("should be running") );
 
     ::KillTimer(wxTimerHiddenWindowModule::GetHWND(), m_id);
 
@@ -159,7 +154,7 @@ void wxMSWTimerImpl::Stop()
 
 void wxProcessTimer(wxMSWTimerImpl& timer)
 {
-    wxASSERT_MSG( timer.IsRunning(), wxT("bogus timer id") );
+    wxASSERT_MSG( timer.IsRunning(), _T("bogus timer id") );
 
     if ( timer.IsOneShot() )
         timer.Stop();
@@ -173,7 +168,7 @@ LRESULT APIENTRY _EXPORT wxTimerWndProc(HWND hWnd, UINT message,
 {
     if ( message == WM_TIMER )
     {
-        wxTimerMap::iterator node = TimerMap().find(wParam);
+        wxTimerMap::iterator node = TimerMap().find((unsigned long)wParam);
 
         wxCHECK_MSG( node != TimerMap().end(), 0, wxT("bogus timer id in wxTimerProc") );
 
@@ -211,7 +206,7 @@ void wxTimerHiddenWindowModule::OnExit()
     {
         if ( !::DestroyWindow(ms_hwnd) )
         {
-            wxLogLastError(wxT("DestroyWindow(wxTimerHiddenWindow)"));
+            wxLogLastError(_T("DestroyWindow(wxTimerHiddenWindow)"));
         }
 
         ms_hwnd = NULL;
@@ -221,7 +216,7 @@ void wxTimerHiddenWindowModule::OnExit()
     {
         if ( !::UnregisterClass(ms_className, wxGetInstance()) )
         {
-            wxLogLastError(wxT("UnregisterClass(\"wxTimerHiddenWindow\")"));
+            wxLogLastError(_T("UnregisterClass(\"wxTimerHiddenWindow\")"));
         }
 
         ms_className = NULL;
@@ -231,7 +226,7 @@ void wxTimerHiddenWindowModule::OnExit()
 /* static */
 HWND wxTimerHiddenWindowModule::GetHWND()
 {
-    static const wxChar *HIDDEN_WINDOW_CLASS = wxT("wxTimerHiddenWindow");
+    static const wxChar *HIDDEN_WINDOW_CLASS = _T("wxTimerHiddenWindow");
     if ( !ms_hwnd )
     {
         ms_hwnd = wxCreateHiddenWindow(&ms_className, HIDDEN_WINDOW_CLASS,

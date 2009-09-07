@@ -415,31 +415,16 @@ void wxFrameBase::DoGiveHelp(const wxString& help, bool show)
             if ( m_oldStatusText.empty() )
             {
                 // use special value to prevent us from doing this the next time
-                m_oldStatusText += wxT('\0');
+                m_oldStatusText += _T('\0');
             }
         }
 
-        m_lastHelpShown =
         text = help;
     }
     else // hide help, restore the original text
     {
-        // clear the last shown help string but remember its value
-        wxString lastHelpShown;
-        lastHelpShown.swap(m_lastHelpShown);
-
-        // also clear the old status text but remember it too to restore it
-        // below
-        text.swap(m_oldStatusText);
-
-        if ( statbar->GetStatusText(m_statusBarPane) != lastHelpShown )
-        {
-            // if the text was changed with an explicit SetStatusText() call
-            // from the user code in the meanwhile, do not overwrite it with
-            // the old status bar contents -- this is almost certainly not what
-            // the user expects and would be very hard to avoid from user code
-            return;
-        }
+        text = m_oldStatusText;
+        m_oldStatusText.clear();
     }
 
     statbar->SetStatusText(text, m_statusBarPane);

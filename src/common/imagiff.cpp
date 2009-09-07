@@ -98,10 +98,7 @@ public:
     // constructor, destructor, etc.
     wxIFFDecoder(wxInputStream *s);
     ~wxIFFDecoder() { Destroy(); }
-
-    // NOTE: this function modifies the current stream position
     bool CanRead();
-
     int ReadIFF();
     bool ConvertToImage(wxImage *image) const;
 };
@@ -235,6 +232,9 @@ bool wxIFFDecoder::CanRead()
     unsigned char buf[12];
 
     if ( !m_f->Read(buf, WXSIZEOF(buf)) )
+        return false;
+
+    if ( m_f->SeekI(-(wxFileOffset)WXSIZEOF(buf), wxFromCurrent) == wxInvalidOffset )
         return false;
 
     return (memcmp(buf, "FORM", 4) == 0) && (memcmp(buf+8, "ILBM", 4) == 0);
@@ -379,7 +379,7 @@ int wxIFFDecoder::ReadIFF()
         return wxIFF_INVFORMAT;
     }
 
-    wxLogTrace(wxT("iff"), wxT("IFF ILBM file recognized"));
+    wxLogTrace(_T("iff"), _T("IFF ILBM file recognized"));
 
     dataptr = dataptr + 4;                                // skip ID
 
@@ -438,7 +438,7 @@ int wxIFFDecoder::ReadIFF()
         }
         }
 
-        wxLogTrace(wxT("iff"), wxT("Read %d colors from IFF file."),
+        wxLogTrace(_T("iff"), _T("Read %d colors from IFF file."),
             colors);
 
         dataptr += 8 + chunkLen;                    // to next chunk
@@ -501,8 +501,8 @@ int wxIFFDecoder::ReadIFF()
         }
         }
 
-        wxLogTrace(wxT("iff"),
-            wxT("LoadIFF: %s %dx%d, planes=%d (%d cols), comp=%d"),
+        wxLogTrace(_T("iff"),
+            _T("LoadIFF: %s %dx%d, planes=%d (%d cols), comp=%d"),
             (fmt==ILBM_NORMAL) ? "Normal ILBM" :
             (fmt==ILBM_HAM)    ? "HAM ILBM" :
             (fmt==ILBM_HAM8)   ? "HAM8 ILBM" :
@@ -512,8 +512,8 @@ int wxIFFDecoder::ReadIFF()
             1<<bmhd_bitplanes, bmhd_compression);
 
         if ((fmt==ILBM_NORMAL) || (fmt==ILBM_EHB) || (fmt==ILBM_HAM)) {
-        wxLogTrace(wxT("iff"),
-            wxT("Converting CMAP from normal ILBM CMAP"));
+        wxLogTrace(_T("iff"),
+            _T("Converting CMAP from normal ILBM CMAP"));
 
         switch(fmt) {
             case ILBM_NORMAL: colors = 1 << bmhd_bitplanes; break;
@@ -647,7 +647,7 @@ int wxIFFDecoder::ReadIFF()
         }
         }  else if ((fmt == ILBM_NORMAL) || (fmt == ILBM_EHB)) {
         if (fmt == ILBM_EHB) {
-            wxLogTrace(wxT("iff"), wxT("Doubling CMAP for EHB mode"));
+            wxLogTrace(_T("iff"), _T("Doubling CMAP for EHB mode"));
 
             for (int i=0; i<32; i++) {
             pal[3*(i + 32) + 0] = pal[3*i + 0] >> 1;
@@ -704,12 +704,12 @@ int wxIFFDecoder::ReadIFF()
         m_image->h = height;
         m_image->transparent = bmhd_transcol;
 
-        wxLogTrace(wxT("iff"), wxT("Loaded IFF picture %s"),
+        wxLogTrace(_T("iff"), _T("Loaded IFF picture %s"),
             truncated? "truncated" : "completely");
 
         return (truncated? wxIFF_TRUNCATED : wxIFF_OK);
     } else {
-        wxLogTrace(wxT("iff"), wxT("Skipping unknown chunk '%c%c%c%c'"),
+        wxLogTrace(_T("iff"), _T("Skipping unknown chunk '%c%c%c%c'"),
                 *dataptr, *(dataptr+1), *(dataptr+2), *(dataptr+3));
 
         dataptr = dataptr + 8 + chunkLen;      // skip unknown chunk
@@ -777,9 +777,7 @@ bool wxIFFHandler::SaveFile(wxImage * WXUNUSED(image),
                             wxOutputStream& WXUNUSED(stream), bool verbose)
 {
     if (verbose)
-    {
         wxLogDebug(wxT("IFF: the handler is read-only!!"));
-    }
 
     return false;
 }
@@ -789,7 +787,6 @@ bool wxIFFHandler::DoCanRead(wxInputStream& stream)
     wxIFFDecoder decod(&stream);
 
     return decod.CanRead();
-         // it's ok to modify the stream position here
 }
 
 #endif // wxUSE_STREAMS

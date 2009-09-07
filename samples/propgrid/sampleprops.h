@@ -34,9 +34,8 @@ public:
     // in base class to function properly.
     virtual wxVariant DoGetValue() const;
 
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue,
+                               int childIndex, wxVariant& childValue ) const;
     virtual void RefreshChildren();
     virtual bool OnEvent( wxPropertyGrid* propgrid, wxWindow* primary, wxEvent& event );
 
@@ -57,9 +56,8 @@ public:
                     const wxSize& value = wxSize() );
     virtual ~wxSizeProperty();
 
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue,
+                               int childIndex, wxVariant& childValue ) const;
     virtual void RefreshChildren();
 
 protected:
@@ -82,9 +80,8 @@ public:
                      const wxPoint& value = wxPoint() );
     virtual ~wxPointProperty();
 
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue,
+                               int childIndex, wxVariant& childValue ) const;
     virtual void RefreshChildren();
 
 protected:

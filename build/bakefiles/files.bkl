@@ -58,17 +58,17 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <set var="BASE_UNIX_AND_DARWIN_SRC" hints="files">
     src/common/fdiodispatcher.cpp
     src/common/selectdispatcher.cpp
+    src/unix/epolldispatcher.cpp
     src/unix/appunix.cpp
+    src/unix/evtloopunix.cpp
     src/unix/dir.cpp
     src/unix/dlunix.cpp
-    src/unix/epolldispatcher.cpp
-    src/unix/evtloopunix.cpp
     src/unix/fdiounix.cpp
     src/unix/snglinst.cpp
-    src/unix/stackwalk.cpp
     src/unix/stdpaths.cpp
     src/unix/timerunx.cpp
     src/unix/threadpsx.cpp
+    src/unix/stackwalk.cpp
     src/unix/utilsunx.cpp
 </set>
 
@@ -355,7 +355,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/regex.cpp
     src/common/stdpbase.cpp
     src/common/sstream.cpp
-    src/common/stdstream.cpp
     src/common/stopwatch.cpp
     src/common/strconv.cpp
     src/common/stream.cpp
@@ -487,7 +486,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/stack.h
     wx/stackwalk.h
     wx/stdpaths.h
-    wx/stdstream.h
     wx/stockitem.h
     wx/stopwatch.h
     wx/strconv.h
@@ -684,7 +682,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/common/listctrlcmn.cpp
     src/common/matrix.cpp
     src/common/menucmn.cpp
-    src/common/mousemanager.cpp
     src/common/nbkbase.cpp
     src/common/overlaycmn.cpp
     src/common/paper.cpp
@@ -815,7 +812,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/listbox.h
     wx/mdi.h
     wx/menu.h
-    wx/mousemanager.h
     wx/msgdlg.h
     wx/nativewin.h
     wx/numdlg.h
@@ -842,7 +838,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/textctrl.h
     wx/textdlg.h
     wx/textentry.h
-    wx/textwrapper.h
     wx/toolbar.h
     wx/validate.h
     wx/valtext.h
@@ -1573,7 +1568,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <!-- ====================================================================== -->
 
 <set var="MSW_LOWLEVEL_SRC" hints="files">
-    src/msw/ole/activex.cpp
     src/msw/app.cpp
     src/msw/bitmap.cpp
     src/msw/brush.cpp
@@ -1620,7 +1614,6 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/msw/window.cpp
 </set>
 <set var="MSW_LOWLEVEL_HDR" hints="files">
-    wx/msw/ole/activex.h
     wx/msw/popupwin.h
     wx/msw/uxtheme.h
     wx/msw/uxthemep.h
@@ -1675,6 +1668,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     src/msw/nativewin.cpp
     src/msw/notebook.cpp
     src/msw/ole/access.cpp
+    src/msw/ole/activex.cpp
     src/msw/ownerdrw.cpp
     src/msw/radiobox.cpp
     src/msw/radiobut.cpp
@@ -1747,6 +1741,7 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
     wx/msw/msvcrt.h
     wx/msw/notebook.h
     wx/msw/ole/access.h
+    wx/msw/ole/activex.h
     wx/msw/ole/dataform.h
     wx/msw/ole/dataobj.h
     wx/msw/ole/dataobj2.h
@@ -2169,15 +2164,40 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 <set var="OSX_LOWLEVEL_SRC" hints="files">
     <!-- Shared wxMac and wxCocoa files -->
     <if cond="PLATFORM_MACOSX=='1'">
+    src/osx/accel.cpp
     src/osx/artmac.cpp
+    src/osx/bmpbuttn_osx.cpp
     src/osx/brush.cpp
+    src/osx/button_osx.cpp
+    src/osx/checkbox_osx.cpp
+    src/osx/checklst_osx.cpp
+    src/osx/choice_osx.cpp
     src/osx/dialog_osx.cpp
     src/osx/fontutil.cpp
+    src/osx/gauge_osx.cpp
     src/osx/imaglist.cpp
+    src/osx/listbox_osx.cpp
+    src/osx/menu_osx.cpp
+    src/osx/menuitem_osx.cpp
     src/osx/minifram.cpp
     src/osx/nonownedwnd_osx.cpp
+    src/osx/notebook_osx.cpp
     src/osx/palette.cpp
     src/osx/pen.cpp
+    src/osx/printdlg_osx.cpp
+    src/osx/radiobox_osx.cpp
+    src/osx/radiobut_osx.cpp
+    src/osx/scrolbar_osx.cpp
+    src/osx/slider_osx.cpp
+    src/osx/spinbutt_osx.cpp
+    src/osx/spinctrl_osx.cpp
+    src/osx/srchctrl_osx.cpp
+    src/osx/statbox_osx.cpp
+    src/osx/statline_osx.cpp
+    src/osx/stattext_osx.cpp
+    src/osx/textctrl_osx.cpp
+    src/osx/tglbtn_osx.cpp
+    src/osx/toolbar_osx.cpp
     src/osx/toplevel_osx.cpp
     src/osx/utils_osx.cpp
     <!-- src/osx/treectrl.cpp -->
@@ -2209,38 +2229,12 @@ IMPORTANT: please read docs/tech/tn0016.txt before modifying this file!
 
 <set var="OSX_CARBON_COCOA_SRC" hints="files">
 <if cond="PLATFORM_MACOSX=='1'">
-    <!-- Common controls implementation -->
-    src/osx/bmpbuttn_osx.cpp
-    src/osx/button_osx.cpp
-    src/osx/checkbox_osx.cpp
-    src/osx/checklst_osx.cpp
-    src/osx/choice_osx.cpp
-    src/osx/gauge_osx.cpp
-    src/osx/listbox_osx.cpp
-    src/osx/menu_osx.cpp
-    src/osx/menuitem_osx.cpp
-    src/osx/notebook_osx.cpp
-    src/osx/printdlg_osx.cpp
-    src/osx/radiobox_osx.cpp
-    src/osx/radiobut_osx.cpp
-    src/osx/scrolbar_osx.cpp
-    src/osx/slider_osx.cpp
-    src/osx/spinbutt_osx.cpp
-    src/osx/spinctrl_osx.cpp
-    src/osx/srchctrl_osx.cpp
-    src/osx/statbox_osx.cpp
-    src/osx/statline_osx.cpp
-    src/osx/stattext_osx.cpp
-    src/osx/textctrl_osx.cpp
-    src/osx/tglbtn_osx.cpp
-    src/osx/toolbar_osx.cpp
     <!-- wxWebKit files -->
     src/html/htmlctrl/webkit/webkit.mm
     <!-- Native color/font dialogs -->
     src/osx/carbon/colordlgosx.mm
     src/osx/carbon/fontdlgosx.mm
     <!-- other shared files -->
-    src/osx/accel.cpp
     src/osx/carbon/clipbrd.cpp
     src/osx/carbon/cursor.cpp
     src/osx/carbon/fontdlg.cpp
@@ -2920,8 +2914,8 @@ src/osx/iphone/window.mm
     src/generic/animateg.cpp
     src/osx/carbon/aboutdlg.cpp
     src/osx/carbon/drawer.cpp
-    src/osx/dataview_osx.cpp
     src/osx/carbon/dataview.cpp
+    src/osx/carbon/databrow.cpp
     src/osx/carbon/sound.cpp
     src/osx/carbon/taskbar.cpp
     src/osx/core/hidjoystick.cpp
@@ -2935,6 +2929,7 @@ src/osx/iphone/window.mm
     wx/osx/taskbarosx.h
     wx/osx/carbon/drawer.h
     wx/osx/carbon/dataview.h
+    wx/osx/carbon/databrow.h
     wx/osx/core/joystick.h
 </set>
 
@@ -2943,8 +2938,6 @@ src/osx/iphone/window.mm
     src/generic/animateg.cpp
     src/osx/carbon/sound.cpp
     src/osx/cocoa/aboutdlg.mm
-    src/osx/dataview_osx.cpp
-    src/osx/cocoa/dataview.mm
     src/osx/cocoa/taskbar.mm
     src/osx/core/hidjoystick.cpp
 </set>
@@ -2956,7 +2949,6 @@ src/osx/iphone/window.mm
     wx/osx/sound.h
     wx/osx/taskbarosx.h
     wx/osx/core/joystick.h
-    wx/osx/cocoa/dataview.h
 </set>
 
 <set var="ADVANCED_COCOA_SRC" hints="files">
@@ -3196,11 +3188,10 @@ src/osx/iphone/window.mm
     src/xrc/xh_datectrl.cpp
     src/xrc/xh_dirpicker.cpp
     src/xrc/xh_dlg.cpp
-    src/xrc/xh_editlbox.cpp
-    src/xrc/xh_filectrl.cpp
+    src/xrc/xh_frame.cpp
+    src/xrc/xh_mdi.cpp
     src/xrc/xh_filepicker.cpp
     src/xrc/xh_fontpicker.cpp
-    src/xrc/xh_frame.cpp
     src/xrc/xh_gauge.cpp
     src/xrc/xh_gdctl.cpp
     src/xrc/xh_grid.cpp
@@ -3209,7 +3200,6 @@ src/osx/iphone/window.mm
     src/xrc/xh_listb.cpp
     src/xrc/xh_listbk.cpp
     src/xrc/xh_listc.cpp
-    src/xrc/xh_mdi.cpp
     src/xrc/xh_menu.cpp
     src/xrc/xh_notbk.cpp
     src/xrc/xh_odcombo.cpp
@@ -3262,8 +3252,6 @@ src/osx/iphone/window.mm
     wx/xrc/xh_datectrl.h
     wx/xrc/xh_dirpicker.h
     wx/xrc/xh_dlg.h
-    wx/xrc/xh_editlbox.h
-    wx/xrc/xh_filectrl.h
     wx/xrc/xh_filepicker.h
     wx/xrc/xh_fontpicker.h
     wx/xrc/xh_frame.h

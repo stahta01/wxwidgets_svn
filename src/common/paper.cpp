@@ -212,12 +212,6 @@ void wxPrintPaperDatabase::CreateDatabase()
     WXADDPAPER(wxPAPER_PENV_8_ROTATED,      116,                        wxTRANSLATE("PRC Envelope #8 Rotated 309 x 120 mm"), 3090, 1200);
     WXADDPAPER(wxPAPER_PENV_9_ROTATED,      117,                        wxTRANSLATE("PRC Envelope #9 Rotated 324 x 229 mm"), 3240, 2290);
     WXADDPAPER(wxPAPER_PENV_10_ROTATED,     118,                        wxTRANSLATE("PRC Envelope #10 Rotated 458 x 324 mm"), 4580, 3240);
-
-    // notice that the values 135 and 136 for Windows paper size ids of A0 and
-    // A1 formats are not documented anywhere but seem to work for at least
-    // some printers so we use them until we find a better way (see #11083)
-    WXADDPAPER(wxPAPER_A0,                  136,                        wxTRANSLATE("A0 sheet, 841 x 1189 mm"), 8410, 11888);
-    WXADDPAPER(wxPAPER_A1,                  135,                        wxTRANSLATE("A1 sheet, 594 x 841 mm"), 5940, 8410);
 }
 
 void wxPrintPaperDatabase::ClearDatabase()
@@ -280,15 +274,13 @@ wxPrintPaperType *wxPrintPaperDatabase::FindPaperTypeByPlatformId(int id)
 
 wxPrintPaperType *wxPrintPaperDatabase::FindPaperType(const wxSize& sz)
 {
-    // Take the item ordering into account so that the more common types
-    // are likely to be taken into account first. This fixes problems with,
-    // for example, Letter reverting to A4 in the page setup dialog because
-    // it was wrongly translated to Note.
-    for ( size_t i = 0; i < GetCount(); i++ )
+    typedef wxStringToPrintPaperTypeHashMap::iterator iterator;
+
+    for (iterator it = m_map->begin(), en = m_map->end(); it != en; ++it)
     {
-        wxPrintPaperType* const paperType = Item(i);
-        const wxSize paperSize = paperType->GetSize() ;
-        if ( abs(paperSize.x - sz.x) < 10 && abs(paperSize.y - sz.y) < 10 )
+        wxPrintPaperType* paperType = it->second;
+        wxSize paperSize = paperType->GetSize() ;
+        if ( abs( paperSize.x - sz.x ) < 10 && abs( paperSize.y - sz.y ) < 10 )
             return paperType;
     }
 

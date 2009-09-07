@@ -267,7 +267,7 @@ wxBitmapRefData::wxBitmapRefData(const wxBitmapRefData& data)
 
 #if wxUSE_PALETTE
     wxASSERT_MSG( !data.m_palette,
-                  wxT("copying bitmaps palette not implemented") );
+                  _T("copying bitmaps palette not implemented") );
 #endif // wxUSE_PALETTE
 
 

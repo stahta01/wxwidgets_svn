@@ -47,7 +47,7 @@ public:
     {
         Create(size, family, style, weight, underlined, face, encoding);
     }
-
+    
     wxFont(const wxSize& pixelSize,
            wxFontFamily family,
            wxFontStyle style,
@@ -59,7 +59,7 @@ public:
         Create(10, family, style, weight, underlined, face, encoding);
         SetPixelSize(pixelSize);
     }
-
+    
     bool Create(int size,
                 wxFontFamily family,
                 wxFontStyle style,
@@ -88,7 +88,7 @@ public:
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
 
-    wxDECLARE_COMMON_FONT_METHODS();
+    WXDECLARE_COMPAT_SETTERS
 
     // Unofficial API, don't use
     virtual void SetNoAntiAliasing(bool no = true);

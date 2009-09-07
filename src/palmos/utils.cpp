@@ -251,7 +251,7 @@ bool wxIsPlatform64Bit()
 
 wxString wxGetOsDescription()
 {
-    wxString strOS = wxT("PalmOS");
+    wxString strOS = _T("PalmOS");
 
     //err = FtrGet(sysFtrCreator, sysFtrNumROMVersion, &romVersion);
     //if (romVersion >= 0x02000000) v20 = true;

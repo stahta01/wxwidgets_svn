@@ -154,7 +154,7 @@ wxString wxStandardPathsCF::GetExecutablePath() const
 #else
     FSSpec fsSpec;
 #endif
-
+    
     procno.highLongOfPSN = 0 ;
     procno.lowLongOfPSN = kCurrentProcess ;
     processinfo.processInfoLength = sizeof(ProcessInfoRec);
@@ -164,7 +164,7 @@ wxString wxStandardPathsCF::GetExecutablePath() const
 #else
     processinfo.processAppSpec = &fsSpec;
 #endif
-
+    
     GetProcessInformation( &procno , &processinfo ) ;
 #ifdef __LP64__
     return wxMacFSRefToPath(&fsRef);
@@ -172,7 +172,7 @@ wxString wxStandardPathsCF::GetExecutablePath() const
     return wxMacFSSpec2MacFilename(&fsSpec);
 #endif
 #endif
-
+    
 #else
     return wxStandardPathsBase::GetExecutablePath();
 #endif
@@ -192,7 +192,7 @@ wxString wxStandardPathsCF::GetUserDataDir() const
 #if defined( __WXMAC__ ) && wxOSX_USE_CARBON
     return AppendAppInfo(wxMacFindFolder((short)kUserDomain, kApplicationSupportFolderType, kCreateFolder));
 #else
-    return AppendAppInfo(wxFileName::GetHomeDir() + wxT("/Library/Application Support"));
+    return AppendAppInfo(wxFileName::GetHomeDir() + _T("/Library/Application Support"));
 #endif
 }
 
@@ -211,7 +211,7 @@ wxStandardPathsCF::GetLocalizedResourcesDir(const wxString& lang,
                                             ResourceCat category) const
 {
     return wxStandardPathsBase::
-            GetLocalizedResourcesDir(lang, category) + wxT(".lproj");
+            GetLocalizedResourcesDir(lang, category) + _T(".lproj");
 }
 
 #endif // wxUSE_STDPATHS

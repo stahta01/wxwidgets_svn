@@ -20,14 +20,14 @@
 // ----------------------------------------------------------------------------
 
 class WXDLLIMPEXP_CORE wxStatusBarUniv : public wxStatusBarBase,
-                                         public wxInputConsumer
+                                    public wxInputConsumer
 {
 public:
     wxStatusBarUniv() { Init(); }
 
     wxStatusBarUniv(wxWindow *parent,
                     wxWindowID id = wxID_ANY,
-                    long style = wxSTB_DEFAULT_STYLE,
+                    long style = 0,
                     const wxString& name = wxPanelNameStr)
     {
         Init();
@@ -37,16 +37,23 @@ public:
 
     bool Create(wxWindow *parent,
                 wxWindowID id = wxID_ANY,
-                long style = wxSTB_DEFAULT_STYLE,
+                long style = 0,
                 const wxString& name = wxPanelNameStr);
 
-    // implement base class methods
+    // set field count/widths
     virtual void SetFieldsCount(int number = 1, const int *widths = NULL);
     virtual void SetStatusWidths(int n, const int widths[]);
 
+    // get/set the text of the given field
+    virtual void SetStatusText(const wxString& text, int number = 0);
+
+    // Get the position and size of the field's internal bounding rectangle
     virtual bool GetFieldRect(int i, wxRect& rect) const;
+
+    // sets the minimal vertical size of the status bar
     virtual void SetMinHeight(int height);
 
+    // get the dimensions of the horizontal and vertical borders
     virtual int GetBorderX() const;
     virtual int GetBorderY() const;
 
@@ -55,8 +62,6 @@ public:
         { return const_cast<wxStatusBar*>(this); }
 
 protected:
-    virtual void DoUpdateStatusText(int i);
-
     // recalculate the field widths
     void OnSize(wxSizeEvent& event);
 
@@ -81,6 +86,9 @@ protected:
 
     // get the rect for this field without ani side effects (see code)
     wxRect DoGetFieldRect(int n) const;
+
+    // refresh the given field
+    void RefreshField(int i);
 
     // common part of all ctors
     void Init();

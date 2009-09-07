@@ -30,7 +30,7 @@ public:
     wxStatusBarGeneric() { Init(); }
     wxStatusBarGeneric(wxWindow *parent,
                        wxWindowID winid = wxID_ANY,
-                       long style = wxSTB_DEFAULT_STYLE,
+                       long style = wxST_SIZEGRIP,
                        const wxString& name = wxStatusBarNameStr)
     {
         Init();
@@ -41,26 +41,31 @@ public:
     virtual ~wxStatusBarGeneric();
 
     bool Create(wxWindow *parent, wxWindowID winid = wxID_ANY,
-                long style = wxSTB_DEFAULT_STYLE,
+                long style = wxST_SIZEGRIP,
                 const wxString& name = wxStatusBarNameStr);
 
-    // implement base class methods
+    // Create status line
+    virtual void SetFieldsCount(int number = 1,
+                                const int *widths = (const int *) NULL);
+
+    // Set status line text
+    virtual void SetStatusText(const wxString& text, int number = 0);
+
+    // Set status line widths
     virtual void SetStatusWidths(int n, const int widths_field[]);
+
+    // Get the position and size of the field's internal bounding rectangle
     virtual bool GetFieldRect(int i, wxRect& rect) const;
+
+    // sets the minimal vertical size of the status bar
     virtual void SetMinHeight(int height);
 
     virtual int GetBorderX() const { return m_borderX; }
     virtual int GetBorderY() const { return m_borderY; }
 
 
-    // implementation only (not part of wxStatusBar public API):
+protected:      // event handlers
 
-    int GetFieldFromPoint(const wxPoint& point) const;
-
-protected:
-    virtual void DoUpdateStatusText(int number);
-
-    // event handlers
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
 
@@ -81,7 +86,7 @@ protected:
     virtual void InitColours();
 
     // true if the status bar shows the size grip: for this it must have
-    // wxSTB_SIZEGRIP style and the window it is attached to must be resizeable
+    // wxST_SIZEGRIP style and the window it is attached to must be resizeable
     // and not maximized
     bool ShowsSizeGrip() const;
 
@@ -99,7 +104,6 @@ protected:
 
     int               m_borderX;
     int               m_borderY;
-
     wxPen             m_mediumShadowPen;
     wxPen             m_hilightPen;
 

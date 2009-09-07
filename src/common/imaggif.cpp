@@ -89,9 +89,7 @@ bool wxGIFHandler::SaveFile( wxImage * WXUNUSED(image),
                              wxOutputStream& WXUNUSED(stream), bool verbose )
 {
     if (verbose)
-    {
         wxLogDebug(wxT("GIF: the handler is read-only!!"));
-    }
 
     return false;
 }
@@ -100,18 +98,14 @@ bool wxGIFHandler::DoCanRead( wxInputStream& stream )
 {
     wxGIFDecoder decod;
     return decod.CanRead(stream);
-         // it's ok to modify the stream position here
 }
 
-int wxGIFHandler::DoGetImageCount( wxInputStream& stream )
+int wxGIFHandler::GetImageCount( wxInputStream& stream )
 {
     wxGIFDecoder decod;
     wxGIFErrorCode error = decod.LoadGIF(stream);
     if ( (error != wxGIF_OK) && (error != wxGIF_TRUNCATED) )
         return -1;
-
-    // NOTE: this function modifies the current stream position but it's ok
-    //       (see wxImageHandler::GetImageCount)
 
     return decod.GetFrameCount();
 }

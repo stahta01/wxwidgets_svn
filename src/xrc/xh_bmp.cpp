@@ -32,7 +32,9 @@ wxBitmapXmlHandler::wxBitmapXmlHandler()
 
 wxObject *wxBitmapXmlHandler::DoCreateResource()
 {
-    return new wxBitmap(GetBitmap(m_node));
+    // NB: empty parameter name means "take directly from this node's next
+    //     instead of from subnode with given name"
+    return new wxBitmap(GetBitmap(wxEmptyString));
 }
 
 bool wxBitmapXmlHandler::CanHandle(wxXmlNode *node)
@@ -49,7 +51,9 @@ wxIconXmlHandler::wxIconXmlHandler()
 
 wxObject *wxIconXmlHandler::DoCreateResource()
 {
-    return new wxIcon(GetIcon(m_node));
+    // NB: empty parameter name means "take directly from this node's next
+    //     instead of from subnode with given name"
+    return new wxIcon(GetIcon(wxEmptyString));
 }
 
 bool wxIconXmlHandler::CanHandle(wxXmlNode *node)

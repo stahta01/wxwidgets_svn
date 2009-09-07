@@ -86,9 +86,7 @@ void wxMessageDialog::GTKCreateMsgDialog()
 
 #if wxUSE_LIBHILDON
     const char *stockIcon;
-    if ( m_dialogStyle & wxICON_NONE )
-        stockIcon = "";
-    else if ( m_dialogStyle & wxICON_ERROR )
+    if ( m_dialogStyle & wxICON_ERROR )
         stockIcon = "qgn_note_gene_syserror";
     else if ( m_dialogStyle & wxICON_EXCLAMATION )
         stockIcon = "qgn_note_gene_syswarning";
@@ -129,11 +127,6 @@ void wxMessageDialog::GTKCreateMsgDialog()
         }
     }
 
-#ifdef __WXGTK210__
-    if ( gtk_check_version(2, 10, 0) == NULL && (m_dialogStyle & wxICON_NONE))
-        type = GTK_MESSAGE_OTHER;
-    else
-#endif // __WXGTK210__
     if (m_dialogStyle & wxICON_EXCLAMATION)
         type = GTK_MESSAGE_WARNING;
     else if (m_dialogStyle & wxICON_ERROR)
@@ -144,8 +137,7 @@ void wxMessageDialog::GTKCreateMsgDialog()
         type = GTK_MESSAGE_QUESTION;
     else
     {
-        // if no style is explicitly specified, detect the suitable icon
-        // ourselves (this can be disabled by using wxICON_NONE)
+        // GTK+ doesn't have a "typeless" msg box, so try to auto detect...
         type = m_dialogStyle & wxYES ? GTK_MESSAGE_QUESTION : GTK_MESSAGE_INFO;
     }
 
@@ -189,11 +181,6 @@ void wxMessageDialog::GTKCreateMsgDialog()
         gtk_window_set_title(GTK_WINDOW(m_widget), wxGTK_CONV(m_caption));
 
     GtkDialog * const dlg = GTK_DIALOG(m_widget);
-
-    if ( m_dialogStyle & wxSTAY_ON_TOP )
-    {
-        gtk_window_set_keep_above(GTK_WINDOW(m_widget), TRUE);
-    }
 
     // we need to add buttons manually if we use custom labels or always for
     // Yes/No/Cancel dialog as GTK+ doesn't support it natively and when using
@@ -260,7 +247,7 @@ int wxMessageDialog::ShowModal()
     {
         GTKCreateMsgDialog();
         wxCHECK_MSG( m_widget, wxID_CANCEL,
-                     wxT("failed to create GtkMessageDialog") );
+                     _T("failed to create GtkMessageDialog") );
     }
 
     // This should be necessary, but otherwise the
@@ -276,7 +263,7 @@ int wxMessageDialog::ShowModal()
     switch (result)
     {
         default:
-            wxFAIL_MSG(wxT("unexpected GtkMessageDialog return code"));
+            wxFAIL_MSG(_T("unexpected GtkMessageDialog return code"));
             // fall through
 
         case GTK_RESPONSE_CANCEL:

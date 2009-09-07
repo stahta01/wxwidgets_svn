@@ -534,11 +534,10 @@ public:
     virtual bool StringToValue( wxVariant& variant,
                                 const wxString& text,
                                 int flags ) const;
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue,
+                               int childIndex,
+                               wxVariant& childValue ) const;
     virtual void RefreshChildren();
-    virtual bool DoSetAttribute( const wxString& name, wxVariant& value );
 
     // GetChoiceSelection needs to overridden since m_choices is
     // used and value is integer, but it is not index.

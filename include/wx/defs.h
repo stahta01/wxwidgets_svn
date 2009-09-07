@@ -141,9 +141,6 @@
         #ifndef _CRT_NON_CONFORMING_SWPRINTFS
             #define _CRT_NON_CONFORMING_SWPRINTFS 1
         #endif
-        #ifndef _SCL_SECURE_NO_WARNINGS
-            #define _SCL_SECURE_NO_WARNINGS 1
-        #endif
     #endif /* VC++ 8 */
 #endif /*  __VISUALC__ */
 
@@ -306,7 +303,8 @@ typedef short int WXTYPE;
     #if defined(__VISUALC__) && (__VISUALC__ >= 1100)
         /*  VC++ 6.0 and 5.0 have std::wstring (what about earlier versions?) */
         #define HAVE_STD_WSTRING
-    #elif defined(__MINGW32__) && wxCHECK_GCC_VERSION(3, 3)
+    #elif ( defined(__MINGW32__) || defined(__CYGWIN32__) ) \
+          && wxCHECK_GCC_VERSION(3, 3)
         /*  GCC 3.1 has std::wstring; 3.0 never was in MinGW, 2.95 hasn't it */
         #define HAVE_STD_WSTRING
     #endif
@@ -376,11 +374,10 @@ typedef short int WXTYPE;
 
 
 #ifndef HAVE_WOSTREAM
-    // Mingw <= 3.4 and all versions of Cygwin as well as any gcc version (so
-    // far) targeting PalmOS don't have std::wostream
+    // Mingw <= 3.4 and any version (so far) when targetting PalmOS don't have
+    // std::wostream
     #if defined(__PALMOS__) || \
-        (defined(__MINGW32__) && !wxCHECK_GCC_VERSION(4, 0)) || \
-        defined(__CYGWIN__)
+        (defined(__MINGW32__) && !wxCHECK_GCC_VERSION(4, 0))
         #define wxNO_WOSTREAM
     #endif
 
@@ -521,11 +518,6 @@ typedef short int WXTYPE;
    explains why do we have it.
  */
 #define wxDEPRECATED_INLINE(func, body) wxDEPRECATED(func) { body }
-
-/*
-    A macro to define a simple deprecated accessor.
- */
-#define wxDEPRECATED_ACCESSOR(func, what) wxDEPRECATED_INLINE(func, return what;)
 
 /*
    Special variant of the macro above which should be used for the functions
@@ -924,20 +916,16 @@ typedef wxUint16 wxWord;
 /* also define C99-like sized MIN/MAX constants */
 #define wxINT8_MIN CHAR_MIN
 #define wxINT8_MAX CHAR_MAX
-#define wxUINT8_MAX UCHAR_MAX
 
 #define wxINT16_MIN SHRT_MIN
 #define wxINT16_MAX SHRT_MAX
-#define wxUINT16_MAX USHRT_MAX
 
 #if SIZEOF_INT == 4
     #define wxINT32_MIN INT_MIN
     #define wxINT32_MAX INT_MAX
-    #define wxUINT32_MAX UINT_MAX
 #elif SIZEOF_LONG == 4
     #define wxINT32_MIN LONG_MIN
     #define wxINT32_MAX LONG_MAX
-    #define wxUINT32_MAX ULONG_MAX
 #else
     #error "Unknown 32 bit type"
 #endif
@@ -945,13 +933,11 @@ typedef wxUint16 wxWord;
 typedef wxUint32 wxDword;
 
 #ifdef LLONG_MAX
-    #define wxINT64_MIN LLONG_MIN
     #define wxINT64_MAX LLONG_MAX
-    #define wxUINT64_MAX ULLONG_MAX
+    #define wxINT64_MIN LLONG_MIN
 #else
-    #define wxINT64_MIN (wxLL(-9223372036854775807)-1)
     #define wxINT64_MAX wxLL(9223372036854775807)
-    #define wxUINT64_MAX wxULL(0xFFFFFFFFFFFFFFFF)
+    #define wxINT64_MIN (wxLL(-9223372036854775807)-1)
 #endif
 
 /*  64 bit */
@@ -978,28 +964,28 @@ typedef wxUint32 wxDword;
 #if (defined(__VISUALC__) && defined(__WIN32__))
     #define wxLongLong_t __int64
     #define wxLongLongSuffix i64
-    #define wxLongLongFmtSpec wxT("I64")
+    #define wxLongLongFmtSpec _T("I64")
 #elif defined(__BORLANDC__) && defined(__WIN32__) && (__BORLANDC__ >= 0x520)
     #define wxLongLong_t __int64
     #define wxLongLongSuffix i64
-    #define wxLongLongFmtSpec wxT("L")
+    #define wxLongLongFmtSpec _T("L")
 #elif (defined(__WATCOMC__) && (defined(__WIN32__) || defined(__DOS__) || defined(__OS2__)))
       #define wxLongLong_t __int64
       #define wxLongLongSuffix i64
-      #define wxLongLongFmtSpec wxT("L")
+      #define wxLongLongFmtSpec _T("L")
 #elif defined(__DIGITALMARS__)
       #define wxLongLong_t __int64
       #define wxLongLongSuffix LL
-      #define wxLongLongFmtSpec wxT("ll")
+      #define wxLongLongFmtSpec _T("ll")
 #elif defined(__MINGW32__)
     #define wxLongLong_t long long
     #define wxLongLongSuffix ll
-    #define wxLongLongFmtSpec wxT("I64")
+    #define wxLongLongFmtSpec _T("I64")
 #elif defined(__MWERKS__)
     #if __option(longlong)
         #define wxLongLong_t long long
         #define wxLongLongSuffix ll
-        #define wxLongLongFmtSpec wxT("ll")
+        #define wxLongLongFmtSpec _T("ll")
     #else
         #error "The 64 bit integer support in CodeWarrior has been disabled."
         #error "See the documentation on the 'longlong' pragma."
@@ -1011,7 +997,7 @@ typedef wxUint32 wxDword;
         #define wxLongLong_t long long
     #endif /* __WXPALMOS6__ */
     #define wxLongLongSuffix ll
-    #define wxLongLongFmtSpec wxT("ll")
+    #define wxLongLongFmtSpec _T("ll")
 #elif defined(__VISAGECPP__) && __IBMCPP__ >= 400
     #define wxLongLong_t long long
 #elif (defined(SIZEOF_LONG_LONG) && SIZEOF_LONG_LONG >= 8)  || \
@@ -1021,11 +1007,11 @@ typedef wxUint32 wxDword;
         (defined(__DJGPP__) && __DJGPP__ >= 2)
     #define wxLongLong_t long long
     #define wxLongLongSuffix ll
-    #define wxLongLongFmtSpec wxT("ll")
+    #define wxLongLongFmtSpec _T("ll")
 #elif defined(SIZEOF_LONG) && (SIZEOF_LONG == 8)
     #define wxLongLong_t long
     #define wxLongLongSuffix l
-    #define wxLongLongFmtSpec wxT("l")
+    #define wxLongLongFmtSpec _T("l")
     #define wxLongLongIsLong
 #endif
 
@@ -1076,8 +1062,6 @@ typedef wxUint32 wxDword;
         #define HAVE_SSIZE_T
     #endif
 #elif defined(__PALMOS__)
-    #define HAVE_SSIZE_T
-#elif wxCHECK_WATCOM_VERSION(1,4)
     #define HAVE_SSIZE_T
 #endif
 #endif /* !HAVE_SSIZE_T */
@@ -1709,10 +1693,9 @@ enum wxBorder
 #define wxLB_MULTIPLE       0x0040
 #define wxLB_EXTENDED       0x0080
 /*  wxLB_OWNERDRAW is Windows-only */
-#define wxLB_NEEDED_SB      0x0000
 #define wxLB_OWNERDRAW      0x0100
-#define wxLB_ALWAYS_SB      0x0200
-#define wxLB_NO_SB          0x0400
+#define wxLB_NEEDED_SB      0x0200
+#define wxLB_ALWAYS_SB      0x0400
 #define wxLB_HSCROLL        wxHSCROLL
 /*  always show an entire number of rows */
 #define wxLB_INT_HEIGHT     0x0800
@@ -1785,6 +1768,11 @@ enum wxBorder
 #define wxTC_OWNERDRAW        0x0400
 
 /*
+ * wxStatusBar95 flags
+ */
+#define wxST_SIZEGRIP         0x0010
+
+/*
  * wxStaticBitmap flags
  */
 #define wxBI_EXPAND           wxEXPAND
@@ -1825,7 +1813,7 @@ enum wxBorder
 #define wxICON_INFORMATION      0x00000800
 #define wxICON_STOP             wxICON_HAND
 #define wxICON_ASTERISK         wxICON_INFORMATION
-#define wxICON_MASK             (wxICON_EXCLAMATION|wxICON_HAND|wxICON_QUESTION|wxICON_INFORMATION)
+#define wxICON_MASK             (0x00000100|0x00000200|0x00000400|0x00000800)
 
 #define  wxFORWARD              0x00001000
 #define  wxBACKWARD             0x00002000
@@ -1833,37 +1821,17 @@ enum wxBorder
 #define  wxHELP                 0x00008000
 #define  wxMORE                 0x00010000
 #define  wxSETUP                0x00020000
-#define wxICON_NONE             0x00040000
 
 /*
  * Background styles. See wxWindow::SetBackgroundStyle
  */
+
 enum wxBackgroundStyle
 {
-    // background is erased in the EVT_ERASE_BACKGROUND handler or using the
-    // system default background if no such handler is defined (this is the
-    // default style)
-    wxBG_STYLE_ERASE,
-
-    // background is erased by the system, no EVT_ERASE_BACKGROUND event is
-    // generated at all
-    wxBG_STYLE_SYSTEM,
-
-    // background is erased in EVT_PAINT handler and not erased at all before
-    // it, this should be used if the paint handler paints over the entire
-    // window to avoid flicker
-    wxBG_STYLE_PAINT,
-
-
-    // this is a Mac-only style, don't use in portable code
-    wxBG_STYLE_TRANSPARENT,
-
-    // this style is deprecated and doesn't do anything, don't use
-    wxBG_STYLE_COLOUR,
-
-    // this style is deprecated and is synonymous with wxBG_STYLE_PAINT, use
-    // the new name
-    wxBG_STYLE_CUSTOM = wxBG_STYLE_PAINT
+  wxBG_STYLE_SYSTEM,
+  wxBG_STYLE_COLOUR,
+  wxBG_STYLE_CUSTOM,
+  wxBG_STYLE_TRANSPARENT
 };
 
 /*
@@ -2251,12 +2219,12 @@ enum wxKeyCode
     WXK_DELETE  =    127,
 
     /* values from 128 to 255 are reserved for ASCII extended characters
-       (note that there isn't a single fixed standard for the meaning
+       (note that there isn't a real widely used standard for the meaning
        of these values; avoid them in portable apps!) */
 
-    /* These are not compatible with unicode characters.
+    /* These are, by design, not compatible with unicode characters.
        If you want to get a unicode character from a key event, use
-       wxKeyEvent::GetUnicodeKey                                    */
+       wxKeyEvent::GetUnicodeKey instead.                           */
     WXK_START   = 300,
     WXK_LBUTTON,
     WXK_RBUTTON,
@@ -2530,9 +2498,7 @@ typedef enum
     wxPAPER_PENV_7_ROTATED,     /* PRC Envelope #7 Rotated 230 x 160 mm */
     wxPAPER_PENV_8_ROTATED,     /* PRC Envelope #8 Rotated 309 x 120 mm */
     wxPAPER_PENV_9_ROTATED,     /* PRC Envelope #9 Rotated 324 x 229 mm */
-    wxPAPER_PENV_10_ROTATED,    /* PRC Envelope #10 Rotated 458 x 324 m */
-    wxPAPER_A0,                 /* A0 Sheet 841 x 1189 mm */
-    wxPAPER_A1                  /* A1 Sheet 594 x 841 mm */
+    wxPAPER_PENV_10_ROTATED    /* PRC Envelope #10 Rotated 458 x 324 m */
 } wxPaperSize;
 
 /* Printing orientation */
@@ -2837,9 +2803,6 @@ typedef WX_NSOpenGLContext WXGLContext;
 DECLARE_WXCOCOA_OBJC_CLASS(UIWindow);
 DECLARE_WXCOCOA_OBJC_CLASS(UIView);
 DECLARE_WXCOCOA_OBJC_CLASS(UIFont);
-DECLARE_WXCOCOA_OBJC_CLASS(UIImage);
-DECLARE_WXCOCOA_OBJC_CLASS(UIEvent);
-DECLARE_WXCOCOA_OBJC_CLASS(NSSet);
 
 typedef WX_UIWindow WXWindow;
 typedef WX_UIView WXWidget;
@@ -3169,11 +3132,9 @@ typedef const void* WXWidget;
 /*  This is required because of clashing macros in windows.h, which may be */
 /*  included before or after wxWidgets classes, and therefore must be */
 /*  disabled here before any significant wxWidgets headers are included. */
-#ifdef __cplusplus
 #ifdef __WXMSW__
 #include "wx/msw/winundef.h"
 #endif /* __WXMSW__ */
-#endif /* __cplusplus */
 
 
 /*  include the feature test macros */

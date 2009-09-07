@@ -87,17 +87,6 @@ WXGLContext WXGLGetCurrentContext()
     return aglGetCurrentContext();
 }
 
-bool WXGLSetCurrentContext(WXGLContext context)
-{
-    if ( !aglSetCurrentContext(context) )
-    {
-        wxLogAGLError("aglSetCurrentContext");
-        return false;
-    }
-
-    return true;
-}
-
 void WXGLDestroyPixelFormat( WXGLPixelFormat pixelFormat )
 {
     if ( pixelFormat )
@@ -268,7 +257,7 @@ bool wxGLContext::SetCurrent(const wxGLCanvas& win) const
     GLint bufnummer = win.GetAglBufferName();
     aglSetInteger(m_glContext, AGL_BUFFER_NAME, &bufnummer);
     //win.SetLastContext(m_glContext);
-
+    
     const_cast<wxGLCanvas&>(win).SetViewport();
 
     if ( !aglSetDrawable(m_glContext, drawable) )
@@ -277,7 +266,12 @@ bool wxGLContext::SetCurrent(const wxGLCanvas& win) const
         return false;
     }
 
-    return WXGLSetCurrentContext(m_glContext);
+    if ( !aglSetCurrentContext(m_glContext) )
+    {
+        wxLogAGLError("aglSetCurrentContext");
+        return false;
+    }
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -286,19 +280,19 @@ bool wxGLContext::SetCurrent(const wxGLCanvas& win) const
 
 /*
 
-sharing contexts under AGL is not straightforward, to quote from
+sharing contexts under AGL is not straightforward, to quote from 
 
 http://lists.apple.com/archives/mac-opengl/2003/Jan/msg00402.html :
 
-In Carbon OpenGL (AGL) you would use call aglSetInteger to setup a
-buffer name and attached each context to that same name. From AGL
+In Carbon OpenGL (AGL) you would use call aglSetInteger to setup a 
+buffer name and attached each context to that same name. From AGL 
 you can do:
 
 GLint id = 1;
 
 ctx1 = aglCreateContext...
 aglSetInteger(ctx1, AGL_BUFFER_NAME, &id); // create name
-aglAttachDrawable (ctx1,...); // create surface with associated with
+aglAttachDrawable (ctx1,...); // create surface with associated with 
 name (first time)
 ctx2 = aglCreateContext...
 aglSetInteger(ctx2, AGL_BUFFER_NAME, &id); // uses previously created name
@@ -320,7 +314,7 @@ context behavior.
 */
 
 /*
-so what I'm doing is to have a dummy aglContext attached to a wxGLCanvas,
+so what I'm doing is to have a dummy aglContext attached to a wxGLCanvas, 
 assign it a buffer number
 */
 
@@ -348,8 +342,8 @@ bool wxGLCanvas::Create(wxWindow *parent,
 
     static GLint gCurrentBufferName = 1;
     m_bufferName = gCurrentBufferName++;
-    aglSetInteger (m_dummyContext, AGL_BUFFER_NAME, &m_bufferName);
-
+    aglSetInteger (m_dummyContext, AGL_BUFFER_NAME, &m_bufferName); 
+    
     AGLDrawable drawable = (AGLDrawable)GetWindowPort(MAC_WXHWND(MacGetTopLevelWindowRef()));
     aglSetDrawable(m_dummyContext, drawable);
 
@@ -362,7 +356,7 @@ wxGLCanvas::~wxGLCanvas()
 {
     if ( m_glFormat )
         WXGLDestroyPixelFormat(m_glFormat);
-
+        
     if ( m_dummyContext )
         WXGLDestroyContext(m_dummyContext);
 }

@@ -91,7 +91,7 @@ public:
     void SetSplitMode(int mode)
     {
         wxASSERT_MSG( mode == wxSPLIT_VERTICAL || mode == wxSPLIT_HORIZONTAL,
-                      wxT("invalid split mode") );
+                      _T("invalid split mode") );
 
         m_splitMode = (wxSplitMode)mode;
     }
@@ -193,9 +193,6 @@ public:
     // Handles mouse events
     void OnMouseEvent(wxMouseEvent& ev);
 
-    // Aborts dragging mode
-    void OnMouseCaptureLost(wxMouseCaptureLostEvent& event);
-
     // Adjusts the panes
     void OnSize(wxSizeEvent& event);
 
@@ -278,16 +275,16 @@ protected:
     wxWindow*   m_windowOne;
     wxWindow*   m_windowTwo;
     int         m_dragMode;
-    int         m_oldX;         // current tracker position if not live mode
-    int         m_oldY;         // current tracker position if not live mode
+    int         m_oldX;
+    int         m_oldY;
     int         m_sashPosition; // Number of pixels from left or top
     double      m_sashGravity;
     int         m_sashSize;
     wxSize      m_lastSize;
     int         m_requestedSashPosition;
     int         m_sashPositionCurrent; // while dragging
-    wxPoint     m_ptStart;      // mouse position when dragging started
-    int         m_sashStart;    // sash position when dragging started
+    int         m_firstX;
+    int         m_firstY;
     int         m_minimumPaneSize;
     wxCursor    m_sashCursorWE;
     wxCursor    m_sashCursorNS;

@@ -104,9 +104,9 @@ public:
         @param height
             Cursor height.
         @param hotSpotX
-            Hotspot x coordinate (relative to the top left of the image).
+            Hotspot x coordinate.
         @param hotSpotY
-            Hotspot y coordinate (relative to the top left of the image).
+            Hotspot y coordinate.
         @param maskBits
             Bits for a mask bitmap.
 
@@ -119,32 +119,39 @@ public:
     /**
         Constructs a cursor by passing a string resource name or filename.
 
-        The arguments @a hotSpotX and @a hotSpotY are only used when there's no
-        hotspot info in the resource/image-file to load (e.g. when using
-        @c wxBITMAP_TYPE_ICO under wxMSW or @c wxBITMAP_TYPE_XPM under wxGTK).
+        @note
+        On MacOS when specifying a string resource name, first the color
+        cursors 'crsr' and then the black/white cursors 'CURS' in the resource
+        chain are scanned through.
+
+        @a hotSpotX and @a hotSpotY are currently only used under Windows when
+        loading from an icon file, to specify the cursor hotspot relative to
+        the top left of the image.
 
         @param cursorName
             The name of the resource or the image file to load.
         @param type
-            Icon type to load. It defaults to @c wxCURSOR_DEFAULT_TYPE,
+            Icon type to load. It defaults to wxCURSOR_DEFAULT_TYPE,
             which is a @#define associated to different values on different
             platforms:
-            - under Windows, it defaults to @c wxBITMAP_TYPE_CUR_RESOURCE.
-              Other permitted types under Windows are @c wxBITMAP_TYPE_CUR
-              (to load a cursor from a .cur cursor file) and @c wxBITMAP_TYPE_ICO
-              (to load a cursor from a .ico icon file).
-            - under MacOS, it defaults to @c wxBITMAP_TYPE_MACCURSOR_RESOURCE;
-              when specifying a string resource name, first the color cursors 'crsr' 
-              and then the black/white cursors 'CURS' in the resource chain are scanned 
-              through.
-            - under GTK, it defaults to @c wxBITMAP_TYPE_XPM. 
-              See the wxCursor(const wxImage& image) ctor for more info.
-            - under X11, it defaults to @c wxBITMAP_TYPE_XPM.
-            - under Motif, it defaults to @c wxBITMAP_TYPE_XBM.
+            - under Windows, it defaults to wxBITMAP_TYPE_CUR_RESOURCE.
+            - under MacOS, it defaults to wxBITMAP_TYPE_MACCURSOR_RESOURCE.
+            - under GTK, it defaults to wxBITMAP_TYPE_XPM.
+            - under X11, it defaults to wxBITMAP_TYPE_XPM.
+            - under Motif, type defaults to wxBITMAP_TYPE_XBM.
+            Under Windows, the permitted types are:
+            - wxBITMAP_TYPE_CUR - Load a cursor from a .cur cursor file (only
+                                  if USE_RESOURCE_LOADING_IN_MSW is enabled in
+                                  setup.h).
+            - wxBITMAP_TYPE_CUR_RESOURCE - Load a Windows resource
+                                           (as specified in the .rc file).
+            - wxBITMAP_TYPE_ICO - Load a cursor from a .ico icon file (only if
+                                  USE_RESOURCE_LOADING_IN_MSW is enabled in
+                                  setup.h). Specify @a hotSpotX and @a hotSpotY.
         @param hotSpotX
-            Hotspot x coordinate (relative to the top left of the image).
+            Hotspot x coordinate.
         @param hotSpotY
-            Hotspot y coordinate (relative to the top left of the image).
+            Hotspot y coordinate.
     */
     wxCursor(const wxString& cursorName,
              wxBitmapType type = wxCURSOR_DEFAULT_TYPE,

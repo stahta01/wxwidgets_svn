@@ -12,9 +12,11 @@
 #ifndef _WX_CONFIG_H_BASE_
 #define _WX_CONFIG_H_BASE_
 
-#include "wx/confbase.h"
+#include "wx/defs.h"
 
 #if wxUSE_CONFIG
+
+#include "wx/confbase.h"
 
 // ----------------------------------------------------------------------------
 // define the native wxConfigBase implementation

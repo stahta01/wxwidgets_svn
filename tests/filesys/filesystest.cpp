@@ -84,20 +84,20 @@ void FileSystemTestCase::UrlParsing()
     } data[] =
     {
         // simple case:
-        { wxT("http://www.root.cz/index.html"),
-                wxT("http"), wxT(""), wxT("//www.root.cz/index.html"), wxT("")},
+        { _T("http://www.root.cz/index.html"),
+                _T("http"), _T(""), _T("//www.root.cz/index.html"), _T("")},
         // anchors:
-        { wxT("http://www.root.cz/index.html#lbl"),
-                wxT("http"), wxT(""), wxT("//www.root.cz/index.html"), wxT("lbl")},
+        { _T("http://www.root.cz/index.html#lbl"),
+                _T("http"), _T(""), _T("//www.root.cz/index.html"), _T("lbl")},
         // file is default protocol:
-        { wxT("testfile.html"),
-                wxT("file"), wxT(""), wxT("testfile.html"), wxT("")},
+        { _T("testfile.html"),
+                _T("file"), _T(""), _T("testfile.html"), _T("")},
         // stacked protocols:
-        { wxT("file:myzipfile.zip#zip:index.htm"),
-                wxT("zip"), wxT("file:myzipfile.zip"), wxT("index.htm"), wxT("")},
+        { _T("file:myzipfile.zip#zip:index.htm"),
+                _T("zip"), _T("file:myzipfile.zip"), _T("index.htm"), _T("")},
         // changes to ':' parsing often break things:
-        { wxT("file:a#b:foo"),
-                wxT("b"), wxT("file:a"), wxT("foo"), wxT("")}
+        { _T("file:a#b:foo"),
+                _T("b"), _T("file:a"), _T("foo"), _T("")}
     };
 
     UrlTester tst;
@@ -114,7 +114,7 @@ void FileSystemTestCase::UrlParsing()
 void FileSystemTestCase::FileNameToUrlConversion()
 {
 #ifdef __WINDOWS__
-    wxFileName fn1(wxT("\\\\server\\share\\path\\to\\file"));
+    wxFileName fn1(_T("\\\\server\\share\\path\\to\\file"));
     wxString url1 = wxFileSystem::FileNameToURL(fn1);
    
     CPPUNIT_ASSERT( fn1.SameAs(wxFileSystem::URLToFileName(url1)) );

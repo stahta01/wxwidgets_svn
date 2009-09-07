@@ -180,15 +180,11 @@ public:
         if ( m_hFile == INVALID_HANDLE_VALUE )
         {
             if ( mode == Read )
-            {
                 wxLogSysError(_("Failed to open '%s' for reading"),
                               filename.c_str());
-            }
             else
-            {
                 wxLogSysError(_("Failed to open '%s' for writing"),
                               filename.c_str());
-            }
         }
     }
 
@@ -230,13 +226,13 @@ static void ConvertFileTimeToWx(wxDateTime *dt, const FILETIME &ft)
     FILETIME ftLocal;
     if ( !::FileTimeToLocalFileTime(&ftcopy, &ftLocal) )
     {
-        wxLogLastError(wxT("FileTimeToLocalFileTime"));
+        wxLogLastError(_T("FileTimeToLocalFileTime"));
     }
 
     SYSTEMTIME st;
     if ( !::FileTimeToSystemTime(&ftLocal, &st) )
     {
-        wxLogLastError(wxT("FileTimeToSystemTime"));
+        wxLogLastError(_T("FileTimeToSystemTime"));
     }
 
     dt->Set(st.wDay, wxDateTime::Month(st.wMonth - 1), st.wYear,
@@ -257,12 +253,12 @@ static void ConvertWxToFileTime(FILETIME *ft, const wxDateTime& dt)
     FILETIME ftLocal;
     if ( !::SystemTimeToFileTime(&st, &ftLocal) )
     {
-        wxLogLastError(wxT("SystemTimeToFileTime"));
+        wxLogLastError(_T("SystemTimeToFileTime"));
     }
 
     if ( !::LocalFileTimeToFileTime(&ftLocal, ft) )
     {
-        wxLogLastError(wxT("LocalFileTimeToFileTime"));
+        wxLogLastError(_T("LocalFileTimeToFileTime"));
     }
 }
 
@@ -412,11 +408,12 @@ void wxFileName::SetPath( const wxString& pathOrig, wxPathFormat format )
             break;
 
         default:
-            wxFAIL_MSG( wxT("Unknown path format") );
+            wxFAIL_MSG( _T("Unknown path format") );
             // !! Fall through !!
 
         case wxPATH_UNIX:
-            m_relative = leadingChar != wxT('/');
+            // the paths of the form "~" or "~username" are absolute
+            m_relative = leadingChar != wxT('/') && leadingChar != _T('~');
             break;
 
         case wxPATH_DOS:
@@ -482,12 +479,12 @@ void wxFileName::Assign(const wxString& fullpathOrig,
     SplitPath(fullname, &volDummy, &pathDummy, &name, &ext, &hasExt, format);
 
     wxASSERT_MSG( volDummy.empty() && pathDummy.empty(),
-                  wxT("the file name shouldn't contain the path") );
+                  _T("the file name shouldn't contain the path") );
 
     SplitPath(fullpath, &volume, &path, &nameDummy, &extDummy, format);
 
     wxASSERT_MSG( nameDummy.empty() && extDummy.empty(),
-                  wxT("the path shouldn't contain file name nor extension") );
+                  _T("the path shouldn't contain file name nor extension") );
 
     Assign(volume, path, name, ext, hasExt, format);
 }
@@ -595,7 +592,7 @@ wxString wxFileName::GetCwd(const wxString& volume)
     return cwd;
 }
 
-bool wxFileName::SetCwd() const
+bool wxFileName::SetCwd()
 {
     return wxFileName::SetCwd( GetPath() );
 }
@@ -679,7 +676,7 @@ static bool wxTempOpen(wxFFile *file, const wxString& path, bool *deleteOnClose)
 {
 #ifndef wx_fdopen
     *deleteOnClose = false;
-    return file->Open(path, wxT("w+b"));
+    return file->Open(path, _T("w+b"));
 #else // wx_fdopen
     int fd = wxTempOpen(path, deleteOnClose);
     if (fd == -1)
@@ -747,7 +744,7 @@ static wxString wxCreateTempImpl(
     if ( !::GetTempFileName(dir.fn_str(), name.fn_str(), 0,
                             wxStringBuffer(path, MAX_PATH + 1)) )
     {
-        wxLogLastError(wxT("GetTempFileName"));
+        wxLogLastError(_T("GetTempFileName"));
 
         path.clear();
     }
@@ -765,7 +762,7 @@ static wxString wxCreateTempImpl(
 
 #if defined(HAVE_MKSTEMP)
     // scratch space for mkstemp()
-    path += wxT("XXXXXX");
+    path += _T("XXXXXX");
 
     // we need to copy the path to the buffer in which mkstemp() can modify it
     wxCharBuffer buf(path.fn_str());
@@ -797,7 +794,7 @@ static wxString wxCreateTempImpl(
         #ifdef wx_fdopen
             ffileTemp->Attach(wx_fdopen(fdTemp, "r+b"));
         #else
-            ffileTemp->Open(path, wxT("r+b"));
+            ffileTemp->Open(path, _T("r+b"));
             close(fdTemp);
         #endif
         }
@@ -812,7 +809,7 @@ static wxString wxCreateTempImpl(
 
 #ifdef HAVE_MKTEMP
     // same as above
-    path += wxT("XXXXXX");
+    path += _T("XXXXXX");
 
     wxCharBuffer buf = wxConvFile.cWX2MB( path );
     if ( !mktemp( (char*)(const char*) buf ) )
@@ -835,7 +832,7 @@ static wxString wxCreateTempImpl(
     for ( size_t n = 0; n < numTries; n++ )
     {
         // 3 hex digits is enough for numTries == 1000 < 4096
-        pathTry = path + wxString::Format(wxT("%.03x"), (unsigned int) n);
+        pathTry = path + wxString::Format(_T("%.03x"), (unsigned int) n);
         if ( !wxFileName::FileExists(pathTry) )
         {
             break;
@@ -1056,7 +1053,7 @@ wxString wxFileName::GetTempDir()
 #elif defined(__WINDOWS__) && !defined(__WXMICROWIN__)
         if ( !::GetTempPath(MAX_PATH, wxStringBuffer(dir, MAX_PATH + 1)) )
         {
-            wxLogLastError(wxT("GetTempPath"));
+            wxLogLastError(_T("GetTempPath"));
         }
 #elif defined(__WXMAC__) && wxOSX_USE_CARBON
         dir = wxMacFindFolder(short(kOnSystemDisk), kTemporaryFolderType, kCreateFolder);
@@ -1076,7 +1073,7 @@ wxString wxFileName::GetTempDir()
     return dir;
 }
 
-bool wxFileName::Mkdir( int perm, int flags ) const
+bool wxFileName::Mkdir( int perm, int flags )
 {
     return wxFileName::Mkdir(GetPath(), perm, flags);
 }
@@ -1120,7 +1117,7 @@ bool wxFileName::Mkdir( const wxString& dir, int perm, int flags )
     return ::wxMkdir( dir, perm );
 }
 
-bool wxFileName::Rmdir(int flags) const
+bool wxFileName::Rmdir(int flags)
 {
     return wxFileName::Rmdir( GetPath(), flags );
 }
@@ -1135,7 +1132,7 @@ bool wxFileName::Rmdir(const wxString& dir, int flags)
         wxString path(dir);
         if ( path.Last() == wxFILE_SEP_PATH )
             path.RemoveLast();
-        path += wxT('\0');
+        path += _T('\0');
 
         SHFILEOPSTRUCT fileop;
         wxZeroMemory(fileop);
@@ -1152,7 +1149,7 @@ bool wxFileName::Rmdir(const wxString& dir, int flags)
         {
             // SHFileOperation may return non-Win32 error codes, so the error
             // message can be incorrect
-            wxLogApiError(wxT("SHFileOperation"), ret);
+            wxLogApiError(_T("SHFileOperation"), ret);
             return false;
         }
 
@@ -1240,15 +1237,25 @@ bool wxFileName::Normalize(int flags,
     }
 
     // handle ~ stuff under Unix only
-    if ( (format == wxPATH_UNIX) && (flags & wxPATH_NORM_TILDE) && m_relative )
+    if ( (format == wxPATH_UNIX) && (flags & wxPATH_NORM_TILDE) )
     {
         if ( !dirs.IsEmpty() )
         {
             wxString dir = dirs[0u];
-            if ( !dir.empty() && dir[0u] == wxT('~') )
+            if ( !dir.empty() && dir[0u] == _T('~') )
             {
                 // to make the path absolute use the home directory
                 curDir.AssignDir(wxGetUserHome(dir.c_str() + 1));
+
+                // if we are expanding the tilde, then this path
+                // *should* be already relative (since we checked for
+                // the tilde only in the first char of the first dir);
+                // if m_relative==false, it's because it was initialized
+                // from a string which started with /~; in that case
+                // we reach this point but then need m_relative=true
+                // for relative->absolute expansion later
+                m_relative = true;
+
                 dirs.RemoveAt(0u);
             }
         }
@@ -1277,7 +1284,7 @@ bool wxFileName::Normalize(int flags,
 
         // if we used e.g. tilde expansion previously and wxGetUserHome didn't
         // return for some reason an absolute path, then curDir maybe not be absolute!
-        if ( !curDir.m_relative )
+        if ( curDir.IsAbsolute(format) )
         {
             // we have prepended an absolute path and thus we are now an absolute
             // file name too
@@ -1426,7 +1433,7 @@ bool wxFileName::ReplaceHomeDir(wxPathFormat format)
 
 bool wxFileName::GetShortcutTarget(const wxString& shortcutPath,
                                    wxString& targetFilename,
-                                   wxString* arguments) const
+                                   wxString* arguments)
 {
     wxString path, file, ext;
     wxFileName::SplitPath(shortcutPath, & path, & file, & ext);
@@ -1492,18 +1499,6 @@ bool wxFileName::GetShortcutTarget(const wxString& shortcutPath,
 
 bool wxFileName::IsAbsolute(wxPathFormat format) const
 {
-    // unix paths beginning with ~ are reported as being absolute
-    if ( format == wxPATH_UNIX )
-    {
-        if ( !m_dirs.IsEmpty() )
-        {
-            wxString dir = m_dirs[0u];
-
-            if (!dir.empty() && dir[0u] == wxT('~'))
-                return true;
-        }
-    }
-
     // if our path doesn't start with a path separator, it's not an absolute
     // path
     if ( m_relative )
@@ -1512,7 +1507,7 @@ bool wxFileName::IsAbsolute(wxPathFormat format) const
     if ( !GetVolumeSeparator(format).empty() )
     {
         // this format has volumes and an absolute path must have one, it's not
-        // enough to have the full path to be an absolute file under Windows
+        // enough to have the full path to bean absolute file under Windows
         if ( GetVolume().empty() )
             return false;
     }
@@ -1563,7 +1558,7 @@ bool wxFileName::MakeRelativeTo(const wxString& pathBase, wxPathFormat format)
         // files)
         if ( m_dirs.IsEmpty() && IsDir() )
         {
-            m_dirs.Add(wxT('.'));
+            m_dirs.Add(_T('.'));
         }
     }
 
@@ -1670,7 +1665,7 @@ wxString wxFileName::GetPathSeparators(wxPathFormat format)
             break;
 
         default:
-            wxFAIL_MSG( wxT("Unknown wxPATH_XXX style") );
+            wxFAIL_MSG( _T("Unknown wxPATH_XXX style") );
             // fall through
 
         case wxPATH_UNIX:
@@ -1696,7 +1691,7 @@ wxString wxFileName::GetPathTerminators(wxPathFormat format)
 
     // under VMS the end of the path is ']', not the path separator used to
     // separate the components
-    return format == wxPATH_VMS ? wxString(wxT(']')) : GetPathSeparators(format);
+    return format == wxPATH_VMS ? wxString(_T(']')) : GetPathSeparators(format);
 }
 
 /* static */
@@ -1704,7 +1699,7 @@ bool wxFileName::IsPathSeparator(wxChar ch, wxPathFormat format)
 {
     // wxString::Find() doesn't work as expected with NUL - it will always find
     // it, so test for it separately
-    return ch != wxT('\0') && GetPathSeparators(format).Find(ch) != wxNOT_FOUND;
+    return ch != _T('\0') && GetPathSeparators(format).Find(ch) != wxNOT_FOUND;
 }
 
 // ----------------------------------------------------------------------------
@@ -1715,7 +1710,7 @@ bool wxFileName::IsPathSeparator(wxChar ch, wxPathFormat format)
 {
     if ( dir.empty() )
     {
-        wxFAIL_MSG( wxT("empty directory passed to wxFileName::InsertDir()") );
+        wxFAIL_MSG( _T("empty directory passed to wxFileName::InsertDir()") );
 
         return false;
     }
@@ -1725,7 +1720,7 @@ bool wxFileName::IsPathSeparator(wxChar ch, wxPathFormat format)
     {
         if ( dir[n] == GetVolumeSeparator() || IsPathSeparator(dir[n]) )
         {
-            wxFAIL_MSG( wxT("invalid directory component in wxFileName") );
+            wxFAIL_MSG( _T("invalid directory component in wxFileName") );
 
             return false;
         }
@@ -1809,7 +1804,13 @@ wxString wxFileName::GetPath( int flags, wxPathFormat format ) const
         case wxPATH_UNIX:
             if ( !m_relative )
             {
-                fullpath += wxFILE_SEP_PATH_UNIX;
+                // normally the absolute file names start with a slash
+                // with one exception: the ones like "~/foo.bar" don't
+                // have it
+                if ( m_dirs.IsEmpty() || m_dirs[0u] != _T('~') )
+                {
+                    fullpath += wxFILE_SEP_PATH_UNIX;
+                }
             }
             break;
 
@@ -1940,13 +1941,13 @@ wxString wxFileName::GetLongPath() const
         {
             s_triedToLoad = true;
 
-            wxDynamicLibrary dllKernel(wxT("kernel32"));
+            wxDynamicLibrary dllKernel(_T("kernel32"));
 
-            const wxChar* GetLongPathName = wxT("GetLongPathName")
+            const wxChar* GetLongPathName = _T("GetLongPathName")
 #if wxUSE_UNICODE
-                              wxT("W");
+                              _T("W");
 #else // ANSI
-                              wxT("A");
+                              _T("A");
 #endif // Unicode/ANSI
 
             if ( dllKernel.HasSymbol(GetLongPathName) )
@@ -2151,7 +2152,7 @@ void wxFileName::SplitPath(const wxString& fullpathWithVolume,
     if ( (posLastDot != wxString::npos) &&
          (posLastDot == 0 ||
             IsPathSeparator(fullpath[posLastDot - 1]) ||
-            (format == wxPATH_VMS && fullpath[posLastDot - 1] == wxT(']'))) )
+            (format == wxPATH_VMS && fullpath[posLastDot - 1] == _T(']'))) )
     {
         // dot may be (and commonly -- at least under Unix -- is) the first
         // character of the filename, don't treat the entire filename as
@@ -2193,7 +2194,7 @@ void wxFileName::SplitPath(const wxString& fullpathWithVolume,
             // special VMS hack: remove the initial bracket
             if ( format == wxPATH_VMS )
             {
-                if ( (*pstrPath)[0u] == wxT('[') )
+                if ( (*pstrPath)[0u] == _T('[') )
                     pstrPath->erase(0, 1);
             }
         }
@@ -2276,7 +2277,7 @@ wxString wxFileName::StripExtension(const wxString& fullpath)
 
 bool wxFileName::SetTimes(const wxDateTime *dtAccess,
                           const wxDateTime *dtMod,
-                          const wxDateTime *dtCreate) const
+                          const wxDateTime *dtCreate)
 {
 #if defined(__WIN32__)
     FILETIME ftAccess, ftCreate, ftWrite;
@@ -2349,7 +2350,7 @@ bool wxFileName::SetTimes(const wxDateTime *dtAccess,
     return false;
 }
 
-bool wxFileName::Touch() const
+bool wxFileName::Touch()
 {
 #if defined(__UNIX_LIKE__)
     // under Unix touching file is simple: just pass NULL to utime()
@@ -2607,7 +2608,7 @@ bool wxFileName::MacSetTypeAndCreator( wxUint32 type , wxUint32 creator )
     return false ;
 }
 
-bool wxFileName::MacGetTypeAndCreator( wxUint32 *type , wxUint32 *creator ) const
+bool wxFileName::MacGetTypeAndCreator( wxUint32 *type , wxUint32 *creator )
 {
     FSRef fsRef ;
     FSCatalogInfo catInfo;

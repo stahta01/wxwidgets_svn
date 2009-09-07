@@ -18,7 +18,6 @@
 #include "wx/string.h"
 #include "wx/gdicmn.h"
 #include "wx/hashmap.h"
-#include "wx/arrstr.h"
 
 #if wxUSE_STREAMS
 #  include "wx/stream.h"
@@ -28,17 +27,17 @@
 // which breaks the compilation below
 #undef index
 
-#define wxIMAGE_OPTION_QUALITY  wxString(wxT("quality"))
-#define wxIMAGE_OPTION_FILENAME wxString(wxT("FileName"))
+#define wxIMAGE_OPTION_QUALITY  wxString(_T("quality"))
+#define wxIMAGE_OPTION_FILENAME wxString(_T("FileName"))
 
-#define wxIMAGE_OPTION_RESOLUTION            wxString(wxT("Resolution"))
-#define wxIMAGE_OPTION_RESOLUTIONX           wxString(wxT("ResolutionX"))
-#define wxIMAGE_OPTION_RESOLUTIONY           wxString(wxT("ResolutionY"))
+#define wxIMAGE_OPTION_RESOLUTION            wxString(_T("Resolution"))
+#define wxIMAGE_OPTION_RESOLUTIONX           wxString(_T("ResolutionX"))
+#define wxIMAGE_OPTION_RESOLUTIONY           wxString(_T("ResolutionY"))
 
-#define wxIMAGE_OPTION_RESOLUTIONUNIT        wxString(wxT("ResolutionUnit"))
+#define wxIMAGE_OPTION_RESOLUTIONUNIT        wxString(_T("ResolutionUnit"))
 
-#define wxIMAGE_OPTION_MAX_WIDTH             wxString(wxT("MaxWidth"))
-#define wxIMAGE_OPTION_MAX_HEIGHT            wxString(wxT("MaxHeight"))
+#define wxIMAGE_OPTION_MAX_WIDTH             wxString(_T("MaxWidth"))
+#define wxIMAGE_OPTION_MAX_HEIGHT            wxString(_T("MaxHeight"))
 
 // constants used with wxIMAGE_OPTION_RESOLUTIONUNIT
 //
@@ -56,18 +55,10 @@ enum wxImageResolution
 };
 
 // Constants for wxImage::Scale() for determining the level of quality
-enum wxImageResizeQuality
+enum
 {
-    // different image resizing algorithms used by Scale() and Rescale()
-    wxIMAGE_QUALITY_NEAREST = 0,
-    wxIMAGE_QUALITY_BILINEAR = 1,
-    wxIMAGE_QUALITY_BICUBIC = 2,
-
-    // default quality is low (but fast)
-    wxIMAGE_QUALITY_NORMAL = wxIMAGE_QUALITY_NEAREST,
-
-    // highest (but best) quality
-    wxIMAGE_QUALITY_HIGH = wxIMAGE_QUALITY_BICUBIC
+    wxIMAGE_QUALITY_NORMAL = 0,
+    wxIMAGE_QUALITY_HIGH = 1
 };
 
 // alpha channel values: fully transparent, default threshold separating
@@ -106,17 +97,10 @@ public:
         { }
 
 #if wxUSE_STREAMS
-    // NOTE: LoadFile and SaveFile are not pure virtuals to allow derived classes
-    //       to implement only one of the two
-    virtual bool LoadFile( wxImage *WXUNUSED(image), wxInputStream& WXUNUSED(stream),
-                           bool WXUNUSED(verbose)=true, int WXUNUSED(index)=-1 )
-        { return false; }
-    virtual bool SaveFile( wxImage *WXUNUSED(image), wxOutputStream& WXUNUSED(stream),
-                           bool WXUNUSED(verbose)=true )
-        { return false; }
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
 
-    int GetImageCount( wxInputStream& stream );
-        // save the stream position, call DoGetImageCount() and restore the position
+    virtual int GetImageCount( wxInputStream& stream );
 
     bool CanRead( wxInputStream& stream ) { return CallDoCanRead(stream); }
     bool CanRead( const wxString& name );
@@ -141,13 +125,6 @@ public:
 
 protected:
 #if wxUSE_STREAMS
-    // NOTE: this function is allowed to change the current stream position
-    //       since GetImageCount() will take care of restoring it later
-    virtual int DoGetImageCount( wxInputStream& WXUNUSED(stream) )
-        { return 1; }       // default return value is 1 image
-
-    // NOTE: this function is allowed to change the current stream position
-    //       since CallDoCanRead() will take care of restoring it later
     virtual bool DoCanRead( wxInputStream& stream ) = 0;
 
     // save the stream position, call DoCanRead() and restore the position
@@ -283,7 +260,7 @@ public:
     bool Create( int width, int height, bool clear = true );
     bool Create( int width, int height, unsigned char* data, bool static_data = false );
     bool Create( int width, int height, unsigned char* data, unsigned char* alpha, bool static_data = false );
-
+    
     // Create() variants using wxSize:
     bool Create( const wxSize& sz, bool clear = true )
         { return Create(sz.GetWidth(), sz.GetHeight(), clear); }
@@ -293,7 +270,7 @@ public:
         { return Create(sz.GetWidth(), sz.GetHeight(), data, alpha, static_data); }
 
     void Destroy();
-
+   
     // initialize the image data with zeroes
     void Clear(unsigned char value = 0);
 
@@ -316,13 +293,10 @@ public:
     void Paste( const wxImage &image, int x, int y );
 
     // return the new image with size width*height
-    wxImage Scale( int width, int height,
-                   wxImageResizeQuality quality = wxIMAGE_QUALITY_NORMAL ) const;
+    wxImage Scale( int width, int height, int quality = wxIMAGE_QUALITY_NORMAL ) const;
 
     // box averager and bicubic filters for up/down sampling
-    wxImage ResampleNearest(int width, int height) const;
     wxImage ResampleBox(int width, int height) const;
-    wxImage ResampleBilinear(int width, int height) const;
     wxImage ResampleBicubic(int width, int height) const;
 
     // blur the image according to the specified pixel radius
@@ -333,9 +307,7 @@ public:
     wxImage ShrinkBy( int xFactor , int yFactor ) const ;
 
     // rescales the image in place
-    wxImage& Rescale( int width, int height,
-                      wxImageResizeQuality quality = wxIMAGE_QUALITY_NORMAL )
-        { return *this = Scale(width, height, quality); }
+    wxImage& Rescale( int width, int height, int quality = wxIMAGE_QUALITY_NORMAL ) { return *this = Scale(width, height, quality); }
 
     // resizes the image in place
     wxImage& Resize( const wxSize& size, const wxPoint& pos,

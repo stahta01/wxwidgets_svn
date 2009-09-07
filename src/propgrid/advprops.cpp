@@ -62,8 +62,6 @@
     #include "wx/msw/dc.h"
 #endif
 
-#include "wx/odcombo.h"
-
 // -----------------------------------------------------------------------
 
 #if defined(__WXMSW__)
@@ -662,7 +660,8 @@ void wxFontProperty::OnSetValue()
 
     if ( !font.Ok() )
     {
-        m_value << *wxNORMAL_FONT;
+        font = wxFont(10,wxSWISS,wxNORMAL,wxNORMAL);
+        m_value << font;
     }
 }
 
@@ -713,16 +712,14 @@ void wxFontProperty::RefreshChildren()
     Item(5)->SetValue( font.GetUnderlined() );
 }
 
-wxVariant wxFontProperty::ChildChanged( wxVariant& thisValue,
-                                        int ind,
-                                        wxVariant& childValue ) const
+void wxFontProperty::ChildChanged( wxVariant& thisValue, int ind, wxVariant& childValue ) const
 {
     wxFont font;
     font << thisValue;
 
     if ( ind == 0 )
     {
-        font.SetPointSize( childValue.GetLong() );
+        font.SetPointSize( wxPGVariantToInt(childValue) );
     }
     else if ( ind == 1 )
     {
@@ -765,9 +762,7 @@ wxVariant wxFontProperty::ChildChanged( wxVariant& thisValue,
         font.SetUnderlined( childValue.GetBool() );
     }
 
-    wxVariant newVariant;
-    newVariant << font;
-    return newVariant;
+    thisValue << font;
 }
 
 /*
@@ -1032,10 +1027,7 @@ wxVariant wxSystemColourProperty::DoTranslateVal( wxColourPropertyValue& v ) con
 int wxSystemColourProperty::ColToInd( const wxColour& colour ) const
 {
     size_t i;
-    size_t i_max = m_choices.GetCount();
-
-    if ( !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
-        i_max -= 1;
+    size_t i_max = m_choices.GetCount() - 1;
 
     for ( i=0; i<i_max; i++ )
     {
@@ -1093,8 +1085,7 @@ void wxSystemColourProperty::OnSetValue()
             return;
         }
 
-        if ( cpv.m_type < wxPG_COLOUR_WEB_BASE ||
-             (m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
+        if ( cpv.m_type < wxPG_COLOUR_WEB_BASE )
         {
             ind = GetIndexForValue(cpv.m_type);
         }
@@ -1118,8 +1109,7 @@ void wxSystemColourProperty::OnSetValue()
 
         ind = ColToInd(col);
 
-        if ( ind == wxNOT_FOUND &&
-             !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
+        if ( ind == wxNOT_FOUND )
             ind = GetCustomColourIndex();
     }
 
@@ -1158,8 +1148,7 @@ wxString wxSystemColourProperty::ValueToString( wxVariant& value,
 
         // If custom colour was selected, use invalid index, so that
         // ColourToString() will return properly formatted colour text.
-        if ( index == GetCustomColourIndex() &&
-             !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
+        if ( index == GetCustomColourIndex() )
             index = wxNOT_FOUND;
     }
     else
@@ -1244,37 +1233,12 @@ bool wxSystemColourProperty::IntToValue( wxVariant& variant, int number, int WXU
 }
 
 // Need to do some extra event handling.
-bool wxSystemColourProperty::OnEvent( wxPropertyGrid* propgrid,
-                                      wxWindow* WXUNUSED(primary),
-                                      wxEvent& event )
+bool wxSystemColourProperty::OnEvent( wxPropertyGrid* propgrid, wxWindow* WXUNUSED(primary), wxEvent& event )
 {
-    bool askColour = false;
-
     if ( propgrid->IsMainButtonEvent(event) )
     {
         // We need to handle button click in case editor has been
         // switched to one that has wxButton as well.
-        askColour = true;
-    }
-    else if ( event.GetEventType() == wxEVT_COMMAND_COMBOBOX_SELECTED )
-    {
-        // Must override index detection since at this point GetIndex()
-        // will return old value.
-        wxOwnerDrawnComboBox* cb =
-            static_cast<wxOwnerDrawnComboBox*>(propgrid->GetEditorControl());
-
-        if ( cb )
-        {
-            int index = cb->GetSelection();
-
-            if ( index == GetCustomColourIndex() &&
-                    !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
-                askColour = true;
-        }
-    }
-
-    if ( askColour && !propgrid->WasValueChangedInEvent() )
-    {
         wxVariant variant;
         if ( QueryColourFromUser(variant) )
             return true;
@@ -1339,10 +1303,8 @@ void wxSystemColourProperty::OnCustomPaint( wxDC& dc, const wxRect& rect,
 {
     wxColour col;
 
-    if ( paintdata.m_choiceItem >= 0 &&
-         paintdata.m_choiceItem < (int)m_choices.GetCount() &&
-         (paintdata.m_choiceItem != GetCustomColourIndex() ||
-          m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
+    if ( paintdata.m_choiceItem >= 0 && paintdata.m_choiceItem < (int)m_choices.GetCount() &&
+         paintdata.m_choiceItem != GetCustomColourIndex() )
     {
         int colInd = m_choices[paintdata.m_choiceItem].GetValue();
         col = GetColour( colInd );
@@ -1391,7 +1353,6 @@ bool wxSystemColourProperty::StringToValue( wxVariant& value, const wxString& te
         colourRGB.clear();
 
     if ( colourRGB.length() == 0 && m_choices.GetCount() &&
-         !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) &&
          colourName == m_choices.GetLabel(GetCustomColourIndex()) )
     {
         if ( !(argFlags & wxPG_EDITABLE_VALUE ))
@@ -1461,7 +1422,7 @@ bool wxSystemColourProperty::DoSetAttribute( const wxString& name, wxVariant& va
 {
     if ( name == wxPG_COLOUR_ALLOW_CUSTOM )
     {
-        int ival = value.GetLong();
+        int ival = wxPGVariantToInt(value);
 
         if ( ival && (m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
         {

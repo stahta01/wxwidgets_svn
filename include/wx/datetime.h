@@ -139,12 +139,11 @@ extern WXDLLIMPEXP_DATA_BASE(const wxDateTime) wxDefaultDateTime;
 // conditional compilation
 // ----------------------------------------------------------------------------
 
-// if configure detected strftime(), we have it too
-#ifdef HAVE_STRFTIME
-    #define wxHAS_STRFTIME
-// suppose everyone else has strftime except Win CE unless VC8 is used
-#elif !defined(__WXWINCE__) || defined(__VISUALC8__)
-    #define wxHAS_STRFTIME
+// everyone has strftime except Win CE unless VC8 is used
+#if !defined(__WXWINCE__) || defined(__VISUALC8__)
+    #ifndef HAVE_STRFTIME
+        #define HAVE_STRFTIME
+    #endif
 #endif
 
 // ----------------------------------------------------------------------------
@@ -985,37 +984,37 @@ public:
 
     inline bool operator<(const wxDateTime& dt) const
     {
-        wxASSERT_MSG( IsValid() && dt.IsValid(), wxT("invalid wxDateTime") );
+        wxASSERT_MSG( IsValid() && dt.IsValid(), _T("invalid wxDateTime") );
         return GetValue() < dt.GetValue();
     }
 
     inline bool operator<=(const wxDateTime& dt) const
     {
-        wxASSERT_MSG( IsValid() && dt.IsValid(), wxT("invalid wxDateTime") );
+        wxASSERT_MSG( IsValid() && dt.IsValid(), _T("invalid wxDateTime") );
         return GetValue() <= dt.GetValue();
     }
 
     inline bool operator>(const wxDateTime& dt) const
     {
-        wxASSERT_MSG( IsValid() && dt.IsValid(), wxT("invalid wxDateTime") );
+        wxASSERT_MSG( IsValid() && dt.IsValid(), _T("invalid wxDateTime") );
         return GetValue() > dt.GetValue();
     }
 
     inline bool operator>=(const wxDateTime& dt) const
     {
-        wxASSERT_MSG( IsValid() && dt.IsValid(), wxT("invalid wxDateTime") );
+        wxASSERT_MSG( IsValid() && dt.IsValid(), _T("invalid wxDateTime") );
         return GetValue() >= dt.GetValue();
     }
 
     inline bool operator==(const wxDateTime& dt) const
     {
-        wxASSERT_MSG( IsValid() && dt.IsValid(), wxT("invalid wxDateTime") );
+        wxASSERT_MSG( IsValid() && dt.IsValid(), _T("invalid wxDateTime") );
         return GetValue() == dt.GetValue();
     }
 
     inline bool operator!=(const wxDateTime& dt) const
     {
-        wxASSERT_MSG( IsValid() && dt.IsValid(), wxT("invalid wxDateTime") );
+        wxASSERT_MSG( IsValid() && dt.IsValid(), _T("invalid wxDateTime") );
         return GetValue() != dt.GetValue();
     }
 
@@ -1722,9 +1721,7 @@ protected:
 
 inline bool wxDateTime::IsInStdRange() const
 {
-    // currently we don't know what is the real type of time_t so prefer to err
-    // on the safe side and limit it to 32 bit values which is safe everywhere
-    return m_time >= 0l && (m_time / TIME_T_FACTOR) < wxINT32_MAX;
+    return m_time >= 0l && (m_time / TIME_T_FACTOR) < LONG_MAX;
 }
 
 /* static */
@@ -1784,7 +1781,7 @@ inline wxDateTime::wxDateTime(double jdn)
 
 inline wxDateTime& wxDateTime::Set(const Tm& tm)
 {
-    wxASSERT_MSG( tm.IsValid(), wxT("invalid broken down date/time") );
+    wxASSERT_MSG( tm.IsValid(), _T("invalid broken down date/time") );
 
     return Set(tm.mday, (Month)tm.mon, tm.year,
                tm.hour, tm.min, tm.sec, tm.msec);
@@ -1815,14 +1812,14 @@ inline wxDateTime::wxDateTime(wxDateTime_t day,
 
 inline wxLongLong wxDateTime::GetValue() const
 {
-    wxASSERT_MSG( IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     return m_time;
 }
 
 inline time_t wxDateTime::GetTicks() const
 {
-    wxASSERT_MSG( IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
     if ( !IsInStdRange() )
     {
         return (time_t)-1;
@@ -1890,21 +1887,21 @@ inline wxDateTime wxDateTime::GetYearDay(wxDateTime_t yday) const
 
 inline bool wxDateTime::IsEqualTo(const wxDateTime& datetime) const
 {
-    wxASSERT_MSG( IsValid() && datetime.IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return m_time == datetime.m_time;
 }
 
 inline bool wxDateTime::IsEarlierThan(const wxDateTime& datetime) const
 {
-    wxASSERT_MSG( IsValid() && datetime.IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return m_time < datetime.m_time;
 }
 
 inline bool wxDateTime::IsLaterThan(const wxDateTime& datetime) const
 {
-    wxASSERT_MSG( IsValid() && datetime.IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return m_time > datetime.m_time;
 }
@@ -1961,14 +1958,14 @@ inline bool wxDateTime::IsEqualUpTo(const wxDateTime& dt,
 
 inline wxDateTime wxDateTime::Add(const wxTimeSpan& diff) const
 {
-    wxASSERT_MSG( IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     return wxDateTime(m_time + diff.GetValue());
 }
 
 inline wxDateTime& wxDateTime::Add(const wxTimeSpan& diff)
 {
-    wxASSERT_MSG( IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     m_time += diff.GetValue();
 
@@ -1982,14 +1979,14 @@ inline wxDateTime& wxDateTime::operator+=(const wxTimeSpan& diff)
 
 inline wxDateTime wxDateTime::Subtract(const wxTimeSpan& diff) const
 {
-    wxASSERT_MSG( IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     return wxDateTime(m_time - diff.GetValue());
 }
 
 inline wxDateTime& wxDateTime::Subtract(const wxTimeSpan& diff)
 {
-    wxASSERT_MSG( IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid(), _T("invalid wxDateTime"));
 
     m_time -= diff.GetValue();
 
@@ -2003,7 +2000,7 @@ inline wxDateTime& wxDateTime::operator-=(const wxTimeSpan& diff)
 
 inline wxTimeSpan wxDateTime::Subtract(const wxDateTime& datetime) const
 {
-    wxASSERT_MSG( IsValid() && datetime.IsValid(), wxT("invalid wxDateTime"));
+    wxASSERT_MSG( IsValid() && datetime.IsValid(), _T("invalid wxDateTime"));
 
     return wxTimeSpan(GetValue() - datetime.GetValue());
 }

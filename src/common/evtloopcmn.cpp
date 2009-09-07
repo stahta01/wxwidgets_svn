@@ -63,7 +63,18 @@ void wxEventLoopBase::WakeUpIdle()
 
 bool wxEventLoopBase::ProcessIdle()
 {
-    return wxTheApp && wxTheApp->ProcessIdle();
+    if (!wxTheApp)
+        return false;
+
+    // process pending wx events before sending idle events
+    wxTheApp->ProcessPendingEvents();
+
+    // synthetize an idle event and send it to wxApp
+    wxIdleEvent event;
+    event.SetEventObject(wxTheApp);
+    wxTheApp->ProcessEvent(event);
+
+    return event.MoreRequested();
 }
 
 bool wxEventLoopBase::Yield(bool onlyIfNeeded)
@@ -94,33 +105,18 @@ wxEventLoopManual::wxEventLoopManual()
     m_shouldExit = false;
 }
 
-bool wxEventLoopManual::ProcessEvents()
-{
-    // process pending wx events first as they correspond to low-level events
-    // which happened before, i.e. typically pending events were queued by a
-    // previous call to Dispatch() and if we didn't process them now the next
-    // call to it might enqueue them again (as happens with e.g. socket events
-    // which would be generated as long as there is input available on socket
-    // and this input is only removed from it when pending event handlers are
-    // executed)
-    if ( wxTheApp )
-        wxTheApp->ProcessPendingEvents();
-
-    return Dispatch();
-}
-
 int wxEventLoopManual::Run()
 {
     // event loops are not recursive, you need to create another loop!
-    wxCHECK_MSG( !IsRunning(), -1, wxT("can't reenter a message loop") );
+    wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
-    // ProcessIdle() and ProcessEvents() below may throw so the code here should
+    // ProcessIdle() and Dispatch() below may throw so the code here should
     // be exception-safe, hence we must use local objects for all actions we
     // should undo
     wxEventLoopActivator activate(this);
 
     // we must ensure that OnExit() is called even if an exception is thrown
-    // from inside ProcessEvents() but we must call it from Exit() in normal
+    // from inside Dispatch() but we must call it from Exit() in normal
     // situations because it is supposed to be called synchronously,
     // wxModalEventLoop depends on this (so we can't just use ON_BLOCK_EXIT or
     // something similar here)
@@ -139,7 +135,7 @@ int wxEventLoopManual::Run()
 
                 // generate and process idle events for as long as we don't
                 // have anything else to do
-                while ( !Pending() && ProcessIdle() )
+                while ( !Pending() && (wxTheApp && wxTheApp->ProcessIdle()) )
                     ;
 
                 // if the "should exit" flag is set, the loop should terminate
@@ -148,15 +144,14 @@ int wxEventLoopManual::Run()
                 if ( m_shouldExit )
                 {
                     while ( Pending() )
-                        ProcessEvents();
+                        Dispatch();
 
                     break;
                 }
 
-                // a message came or no more idle processing to do, dispatch
-                // all the pending events and call Dispatch() to wait for the
-                // next message
-                if ( !ProcessEvents() )
+                // a message came or no more idle processing to do, sit in
+                // Dispatch() waiting for the next message
+                if ( !Dispatch() )
                 {
                     // we got WM_QUIT
                     break;
@@ -195,7 +190,7 @@ int wxEventLoopManual::Run()
 
 void wxEventLoopManual::Exit(int rc)
 {
-    wxCHECK_RET( IsRunning(), wxT("can't call Exit() if not running") );
+    wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
     m_exitcode = rc;
     m_shouldExit = true;

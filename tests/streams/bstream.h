@@ -28,6 +28,12 @@
     CPPUNIT_TEST_SUITE_NAMED_REGISTRATION( Name, COMPOSE_TEST_NAME(Name) ); \
     STREAM_IMPLEMENT_SUB_REGISTRATION_ROUTINE( Name )
 
+// under 64 bit platforms wxFileOffset is the same as long and we already have
+// WX_CPPUNIT_ALLOW_EQUALS_TO_INT(long) in wx/cppunit.h
+#if SIZEOF_LONG != 8
+WX_CPPUNIT_ALLOW_EQUALS_TO_INT(wxFileOffset)
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Template class that implements a test for all base stream functions.
 //
@@ -400,7 +406,7 @@ protected:
     {
         if (m_pCurrentIn)
         {
-            wxFAIL_MSG(wxT("Error in test case, the previouse input stream needs to be delete first!"));
+            wxFAIL_MSG(_T("Error in test case, the previouse input stream needs to be delete first!"));
         }
 
         m_pCurrentIn = DoCreateInStream();
@@ -411,7 +417,7 @@ protected:
     {
         if (m_pCurrentOut)
         {
-            wxFAIL_MSG(wxT("Error in test case, the previouse output stream needs to be delete first!"));
+            wxFAIL_MSG(_T("Error in test case, the previouse output stream needs to be delete first!"));
         }
 
         m_pCurrentOut = DoCreateOutStream();

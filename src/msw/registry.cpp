@@ -294,18 +294,6 @@ void wxRegKey::SetHkey(WXHKEY hKey)
   Close();
 
   m_hKey = hKey;
-
-  // we don't know the parent of this key, assume HKLM by default
-  m_hRootKey = HKEY_LOCAL_MACHINE;
-
-  // we don't know in which mode was this key opened but we can't reopen it
-  // anyhow because we don't know its name, so the only thing we can is to hope
-  // that it allows all the operations which we're going to perform on it
-  m_mode = Write;
-
-  // reset old data
-  m_strKey.empty();
-  m_dwLastError = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -326,7 +314,7 @@ wxString wxRegKey::GetName(bool bShortPrefix) const
   wxString str = bShortPrefix ? aStdKeys[key].szShortName
                               : aStdKeys[key].szName;
   if ( !m_strKey.empty() )
-    str << wxT("\\") << m_strKey;
+    str << _T("\\") << m_strKey;
 
   return str;
 }
@@ -344,7 +332,7 @@ bool wxRegKey::GetKeyInfo(size_t *pnSubKeys,
 #endif
 
   // it might be unexpected to some that this function doesn't open the key
-  wxASSERT_MSG( IsOpened(), wxT("key should be opened in GetKeyInfo") );
+  wxASSERT_MSG( IsOpened(), _T("key should be opened in GetKeyInfo") );
 
   m_dwLastError = ::RegQueryInfoKey
                   (
@@ -546,7 +534,7 @@ bool wxRegKey::CopyValue(const wxString& szValue,
 
 bool wxRegKey::Rename(const wxString& szNewName)
 {
-    wxCHECK_MSG( !m_strKey.empty(), false, wxT("registry hives can't be renamed") );
+    wxCHECK_MSG( !m_strKey.empty(), false, _T("registry hives can't be renamed") );
 
     if ( !Exists() ) {
         wxLogError(_("Registry key '%s' does not exist, cannot rename it."),
@@ -968,7 +956,7 @@ bool wxRegKey::QueryValue(const wxString& szValue,
 
                     if ( !ok )
                     {
-                        wxLogLastError(wxT("ExpandEnvironmentStrings"));
+                        wxLogLastError(_T("ExpandEnvironmentStrings"));
                     }
                 }
 #endif
@@ -1173,7 +1161,7 @@ bool wxRegKey::Export(const wxString& filename) const
         return false;
     }
 
-    wxFFileOutputStream ostr(filename, wxT("w"));
+    wxFFileOutputStream ostr(filename, _T("w"));
 
     return ostr.Ok() && Export(ostr);
 #else
@@ -1199,13 +1187,13 @@ FormatAsHex(const void *data,
             size_t size,
             wxRegKey::ValueType type = wxRegKey::Type_Binary)
 {
-    wxString value(wxT("hex"));
+    wxString value(_T("hex"));
 
     // binary values use just "hex:" prefix while the other ones must indicate
     // the real type
     if ( type != wxRegKey::Type_Binary )
-        value << wxT('(') << type << wxT(')');
-    value << wxT(':');
+        value << _T('(') << type << _T(')');
+    value << _T(':');
 
     // write all the rest as comma-separated bytes
     value.reserve(3*size + 10);
@@ -1216,9 +1204,9 @@ FormatAsHex(const void *data,
         //       the generated files easier to read and compare with the files
         //       produced by regedit
         if ( n )
-            value << wxT(',');
+            value << _T(',');
 
-        value << wxString::Format(wxT("%02x"), (unsigned char)p[n]);
+        value << wxString::Format(_T("%02x"), (unsigned char)p[n]);
     }
 
     return value;
@@ -1245,7 +1233,7 @@ wxString wxRegKey::FormatValue(const wxString& name) const
                 // quotes and backslashes must be quoted, linefeeds are not
                 // allowed in string values
                 rhs.reserve(value.length() + 2);
-                rhs = wxT('"');
+                rhs = _T('"');
 
                 // there can be no NULs here
                 bool useHex = false;
@@ -1254,15 +1242,15 @@ wxString wxRegKey::FormatValue(const wxString& name) const
                 {
                     switch ( (*p).GetValue() )
                     {
-                        case wxT('\n'):
+                        case _T('\n'):
                             // we can only represent this string in hex
                             useHex = true;
                             break;
 
-                        case wxT('"'):
-                        case wxT('\\'):
+                        case _T('"'):
+                        case _T('\\'):
                             // escape special symbol
-                            rhs += wxT('\\');
+                            rhs += _T('\\');
                             // fall through
 
                         default:
@@ -1273,7 +1261,7 @@ wxString wxRegKey::FormatValue(const wxString& name) const
                 if ( useHex )
                     rhs = FormatAsHex(value, Type_String);
                 else
-                    rhs += wxT('"');
+                    rhs += _T('"');
             }
             break;
 
@@ -1284,7 +1272,7 @@ wxString wxRegKey::FormatValue(const wxString& name) const
                 if ( !QueryValue(name, &value) )
                     break;
 
-                rhs.Printf(wxT("dword:%08x"), (unsigned int)value);
+                rhs.Printf(_T("dword:%08x"), (unsigned int)value);
             }
             break;
 

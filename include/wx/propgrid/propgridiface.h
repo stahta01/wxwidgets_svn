@@ -210,12 +210,8 @@ public:
         @return Returns @true if successful or if there was no selection. May
                 fail if validation was enabled and active editor had invalid
                 value.
-
-        @remarks In wxPropertyGrid 1.4, this member function used to send
-                 wxPG_EVT_SELECTED. In wxWidgets 2.9 and later, it no longer
-                 does that.
     */
-    bool ClearSelection( bool validation = false );
+    bool ClearSelection( bool validation = false);
 
     /** Resets modified status of all properties.
     */
@@ -541,17 +537,23 @@ public:
         return value.GetArrayString();
     }
 
-#ifdef wxLongLong_t
+#if wxUSE_LONGLONG_NATIVE
     wxLongLong_t GetPropertyValueAsLongLong( wxPGPropArg id ) const
     {
-        wxPG_PROP_ARG_CALL_PROLOG_RETVAL(0)
-        return p->GetValue().GetLongLong().GetValue();
+        wxPG_PROP_ID_GETPROPVAL_CALL_PROLOG_RETVAL_WFALLBACK("wxLongLong",
+                                             (long) GetPropertyValueAsLong(id))
+        wxLongLong ll;
+        ll << value;
+        return ll.GetValue();
     }
 
     wxULongLong_t GetPropertyValueAsULongLong( wxPGPropArg id ) const
     {
-        wxPG_PROP_ARG_CALL_PROLOG_RETVAL(0)
-        return p->GetValue().GetULongLong().GetValue();
+        wxPG_PROP_ID_GETPROPVAL_CALL_PROLOG_RETVAL_WFALLBACK("wxULongLong",
+                                    (unsigned long) GetPropertyValueAsULong(id))
+        wxULongLong ull;
+        ull << value;
+        return ull.GetValue();
     }
 #endif
 
@@ -591,23 +593,10 @@ public:
     }
 #endif
 
-    /**
-        Returns currently selected property. NULL if none.
-
-        @remarks When wxPG_EX_MULTIPLE_SELECTION extra style is used, this
-                 member function returns the focused property, that is the
-                 one which can have active editor.
-    */
-    wxPGProperty* GetSelection() const;
-
-    /**
-        Returns list of currently selected properties.
-
-        @remarks wxArrayPGProperty should be compatible with std::vector API.
-    */
-    const wxArrayPGProperty& GetSelectedProperties() const
+    /** Returns currently selected property. */
+    wxPGProperty* GetSelection() const
     {
-        return m_pState->m_selection;
+        return m_pState->GetSelection();
     }
 
 #ifndef SWIG
@@ -738,18 +727,9 @@ public:
     }
 
     /**
-        Returns true if property is selected.
-    */
-    bool IsPropertySelected( wxPGPropArg id ) const
-    {
-        wxPG_PROP_ARG_CALL_PROLOG_RETVAL(false)
-        return m_pState->DoIsPropertySelected(p);
-    }
-
-    /**
         Returns true if property is shown (ie hideproperty with true not
         called for it).
-    */
+     */
     bool IsPropertyShown( wxPGPropArg id ) const
     {
         wxPG_PROP_ARG_CALL_PROLOG_RETVAL(false)
@@ -1041,7 +1021,7 @@ public:
         if ( flags & wxPG_RECURSE )
             p->SetFlagRecursively(wxPG_PROP_READONLY, set);
         else
-            p->ChangeFlag(wxPG_PROP_READONLY, set);
+            p->SetFlag(wxPG_PROP_READONLY);
     }
 
     /** Sets property's value to unspecified.
@@ -1056,8 +1036,9 @@ public:
     }
 
 #ifndef SWIG
-    /**
-        Sets property values from a list of wxVariants.
+    /** Sets various property values from a list of wxVariants. If property with
+        name is missing from the grid, new property is created under given
+        default category (or root if omitted).
     */
     void SetPropertyValues( const wxVariantList& list,
                             wxPGPropArg defaultCategory = wxNullProperty )
@@ -1068,9 +1049,6 @@ public:
         m_pState->DoSetPropertyValues(list, p);
     }
 
-    /**
-        Sets property values from a list of wxVariants.
-    */
     void SetPropertyValues( const wxVariant& list,
                             wxPGPropArg defaultCategory = wxNullProperty )
     {
@@ -1192,7 +1170,7 @@ public:
         SetPropVal( id, v );
     }
 
-#ifdef wxLongLong_t
+#if wxUSE_LONGLONG_NATIVE
     /** Sets value (wxLongLong&) of a property.
     */
     void SetPropertyValue( wxPGPropArg id, wxLongLong_t value )
@@ -1287,16 +1265,9 @@ public:
 
     static wxPGEditor* GetEditorByName( const wxString& editorName );
 
-    // NOTE: This function reselects the property and may cause
-    //       excess flicker, so to just call Refresh() on a rect
-    //       of single property, call DrawItem() instead.
     virtual void RefreshProperty( wxPGProperty* p ) = 0;
 
 protected:
-
-    bool DoClearSelection( bool validation = false,
-                           int selFlags = 0 );
-
     /**
         In derived class, implement to set editable state component with
         given name to given value.
@@ -1349,17 +1320,13 @@ private:
     // Cannot be GetGrid() due to ambiguity issues.
     wxPropertyGrid* GetPropertyGrid()
     {
-        if ( !m_pState )
-            return NULL;
         return m_pState->GetGrid();
     }
 
     // Cannot be GetGrid() due to ambiguity issues.
     const wxPropertyGrid* GetPropertyGrid() const
     {
-        if ( !m_pState )
-            return NULL;
-        return static_cast<const wxPropertyGrid*>(m_pState->GetGrid());
+        return (const wxPropertyGrid*) m_pState->GetGrid();
     }
 #endif // #ifndef SWIG
 

@@ -30,6 +30,7 @@
 #include <string.h>
 #include <ctype.h>
 
+IMPLEMENT_CLASS(wxProtoInfo, wxObject)
 IMPLEMENT_CLASS(wxURL, wxURI)
 
 // Protocols list
@@ -266,11 +267,7 @@ wxInputStream *wxURL::GetInputStream()
     wxIPV4address addr;
 
     // m_protoinfo is NULL when we use a proxy
-    if (
-#if wxUSE_PROTOCOL_HTTP
-         !m_useProxy &&
-#endif // wxUSE_PROTOCOL_HTTP
-         m_protoinfo->m_needhost )
+    if (!m_useProxy && m_protoinfo->m_needhost)
     {
         if (!addr.Hostname(m_server))
         {
@@ -286,15 +283,13 @@ wxInputStream *wxURL::GetInputStream()
             return NULL;
         }
     }
-#endif // wxUSE_SOCKETS
+#endif
 
     wxString fullPath;
 
-#if wxUSE_PROTOCOL_HTTP
     // When we use a proxy, we have to pass the whole URL to it.
     if (m_useProxy)
         fullPath += m_url;
-#endif // wxUSE_PROTOCOL_HTTP
 
     if(m_path.empty())
         fullPath += wxT("/");
@@ -426,7 +421,7 @@ wxURLModule::wxURLModule()
 {
     // we must be cleaned up before wxSocketModule as otherwise deleting
     // ms_proxyDefault from our OnExit() won't work (and can actually crash)
-    AddDependency(wxClassInfo::FindClass(wxT("wxSocketModule")));
+    AddDependency(wxClassInfo::FindClass(_T("wxSocketModule")));
 }
 
 bool wxURLModule::OnInit()
@@ -437,7 +432,7 @@ bool wxURLModule::OnInit()
     // down the program startup (especially if there is no DNS server
     // available, in which case it may take up to 1 minute)
 
-    if ( wxGetenv(wxT("HTTP_PROXY")) )
+    if ( wxGetenv(_T("HTTP_PROXY")) )
     {
         wxURL::ms_useDefaultProxy = true;
     }

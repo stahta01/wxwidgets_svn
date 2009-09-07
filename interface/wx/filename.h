@@ -42,7 +42,7 @@ enum wxPathNormalize
     //! and in addition under Windows @c "%var%" is also.
     wxPATH_NORM_ENV_VARS = 0x0001,
 
-    wxPATH_NORM_DOTS     = 0x0002,  //!< Squeeze all @c ".." and @c ".".
+    wxPATH_NORM_DOTS     = 0x0002,  //!< Squeeze all @c ".." and @c "." and prepend the current working directory.
     wxPATH_NORM_TILDE    = 0x0004,  //!< Replace @c "~" and @c "~user" (Unix only).
     wxPATH_NORM_CASE     = 0x0008,  //!< If the platform is case insensitive, make lowercase the path.
     wxPATH_NORM_ABSOLUTE = 0x0010,  //!< Make the path absolute.
@@ -892,7 +892,7 @@ public:
         @return Returns @true if the directory was successfully created, @false
                 otherwise.
     */
-    bool Mkdir(int perm = wxS_DIR_DEFAULT, int flags = 0) const;
+    bool Mkdir(int perm = wxS_DIR_DEFAULT, int flags = 0);
 
     /**
         Creates a directory.
@@ -1009,7 +1009,7 @@ public:
         @return Returns @true if the directory was successfully deleted, @false
                 otherwise.
     */
-    bool Rmdir(int flags = 0) const;
+    bool Rmdir(int flags = 0);
 
     /**
         Deletes the specified directory from the file system.
@@ -1035,7 +1035,7 @@ public:
     /**
         Changes the current working directory.
     */
-    bool SetCwd() const;
+    bool SetCwd();
 
     /**
         Changes the current working directory.
@@ -1075,22 +1075,12 @@ public:
     void SetName(const wxString& name);
 
     /**
-        Sets the full path.
-
-        The @a path argument includes both the path (and the volume, if
-        supported by @a format) and the name and extension.
-
-        @see GetPath()
-     */
-    void SetPath(const wxString& path, wxPathFormat format = wxPATH_NATIVE);
-
-    /**
         Sets the file creation and last access/modification times (any of the pointers
         may be @NULL).
     */
     bool SetTimes(const wxDateTime* dtAccess,
                   const wxDateTime* dtMod,
-                  const wxDateTime* dtCreate) const;
+                  const wxDateTime* dtCreate);
 
     /**
         Sets the volume specifier.
@@ -1172,7 +1162,7 @@ public:
     /**
         Sets the access and modification times to the current moment.
     */
-    bool Touch() const;
+    bool Touch();
 
     /**
         Returns @true if the filenames are different. The string @e filenames

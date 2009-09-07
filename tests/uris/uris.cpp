@@ -27,6 +27,11 @@
 // Test wxURL & wxURI compat?
 #define TEST_URL wxUSE_URL
 
+// Define this as 1 to test network connections, this is disabled by default as
+// some machines running automatic builds don't allow outgoing connections and
+// so the tests fail
+#define TEST_NETWORK 0
+
 // ----------------------------------------------------------------------------
 // test class
 // ----------------------------------------------------------------------------
@@ -368,7 +373,14 @@ void URITestCase::URLCompat()
 {
     wxURL url("http://user:password@wxwidgets.org");
 
-    CPPUNIT_ASSERT( url.GetError() == wxURL_NOERR );
+    CPPUNIT_ASSERT(url.GetError() == wxURL_NOERR);
+
+#if TEST_NETWORK
+    wxInputStream* pInput = url.GetInputStream();
+
+    CPPUNIT_ASSERT( pInput != NULL );
+#endif
+
     CPPUNIT_ASSERT( url == wxURL("http://user:password@wxwidgets.org") );
 
     wxURI uri("http://user:password@wxwidgets.org");
@@ -409,7 +421,7 @@ void URITestCase::URLCompat()
         wxInputStream* is = urlProblem.GetInputStream();
         CPPUNIT_ASSERT(is != NULL);
 
-        wxFile fOut(wxT("test.html"), wxFile::write);
+        wxFile fOut(_T("test.html"), wxFile::write);
         wxASSERT(fOut.IsOpened());
 
         char buf[1001];

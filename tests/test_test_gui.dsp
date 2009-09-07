@@ -277,15 +277,7 @@ SOURCE=.\html\htmlwindow.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\image\image.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\controls\listctrltest.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\graphics\measuring.cpp
 # End Source File
 # Begin Source File
 

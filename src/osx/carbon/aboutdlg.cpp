@@ -56,7 +56,7 @@ public:
 // implementation
 // ============================================================================
 
-void wxAboutBox(const wxAboutDialogInfo& info, wxWindow *parent)
+void wxAboutBox(const wxAboutDialogInfo& info)
 {
     // Mac native about box currently can show only name, version, copyright
     // and description fields and we also shoehorn the credits text into the
@@ -69,7 +69,10 @@ void wxAboutBox(const wxAboutDialogInfo& info, wxWindow *parent)
         opts.Set(kHIAboutBoxNameKey, info.GetName());
 
         if ( info.HasVersion() )
-            opts.Set(kHIAboutBoxVersionKey,info.GetLongVersion());
+        {
+            opts.Set(kHIAboutBoxVersionKey,
+                     wxString::Format(_("Version %s"), info.GetVersion()));
+        }
 
         if ( info.HasCopyright() )
             opts.Set(kHIAboutBoxCopyrightKey, info.GetCopyrightToDisplay());
@@ -81,7 +84,7 @@ void wxAboutBox(const wxAboutDialogInfo& info, wxWindow *parent)
     else // simple "native" version is not enough
     {
         // we need to use the full-blown generic version
-        wxGenericAboutBox(info, parent);
+        wxGenericAboutBox(info);
     }
 }
 

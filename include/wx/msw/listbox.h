@@ -133,8 +133,6 @@ public:
     virtual bool CanApplyThemeBorder() const { return false; }
 
 protected:
-    virtual wxSize DoGetBestClientSize() const;
-
     virtual void DoClear();
     virtual void DoDeleteOneItem(unsigned int n);
 
@@ -156,6 +154,8 @@ protected:
     void Free();
 
     unsigned int m_noItems;
+
+    virtual wxSize DoGetBestSize() const;
 
 #if wxUSE_OWNER_DRAWN
     // control items

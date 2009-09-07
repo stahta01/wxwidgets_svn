@@ -340,9 +340,7 @@ WXHDC WXDLLEXPORT wxGetPrinterDC(const wxPrintData& printDataConst)
                     static_cast<DEVMODE *>(lockDevMode.Get())
                 );
     if ( !hDC )
-    {
-        wxLogLastError(wxT("CreateDC(printer)"));
-    }
+        wxLogLastError(_T("CreateDC(printer)"));
 
     return (WXHDC) hDC;
 #endif // PostScript/Windows printing
@@ -367,7 +365,7 @@ bool DrawBitmapUsingStretchDIBits(HDC hdc,
     DIBSECTION ds;
     if ( !::GetObject(dib.GetHandle(), sizeof(ds), &ds) )
     {
-        wxLogLastError(wxT("GetObject(DIBSECTION)"));
+        wxLogLastError(_T("GetObject(DIBSECTION)"));
 
         return false;
     }
@@ -401,7 +399,7 @@ void wxPrinterDCImpl::DoDrawBitmap(const wxBitmap& bmp,
                                wxCoord x, wxCoord y,
                                bool useMask)
 {
-    wxCHECK_RET( bmp.Ok(), wxT("invalid bitmap in wxPrinterDC::DrawBitmap") );
+    wxCHECK_RET( bmp.Ok(), _T("invalid bitmap in wxPrinterDC::DrawBitmap") );
 
     int width = bmp.GetWidth(),
         height = bmp.GetHeight();

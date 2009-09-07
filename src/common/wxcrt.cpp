@@ -65,9 +65,9 @@ using namespace std ;
 #endif
 
 #if defined(__DARWIN__)
-    #include "wx/osx/core/cfref.h"
-    #include <CoreFoundation/CFLocale.h>
-    #include "wx/osx/core/cfstring.h"
+	#include "wx/osx/core/cfref.h"
+	#include <CoreFoundation/CFLocale.h>
+	#include "wx/osx/core/cfstring.h"
     #include <xlocale.h>
 #endif
 
@@ -255,14 +255,14 @@ int /* not wint_t */ wxCRT_FputcW(wchar_t wc, FILE *stream)
 // TODO: implement the scanf() functions
 static int vwscanf(const wchar_t *format, va_list argptr)
 {
-    wxFAIL_MSG( wxT("TODO") );
+    wxFAIL_MSG( _T("TODO") );
 
     return -1;
 }
 
 static int vfwscanf(FILE *stream, const wchar_t *format, va_list argptr)
 {
-    wxFAIL_MSG( wxT("TODO") );
+    wxFAIL_MSG( _T("TODO") );
 
     return -1;
 }
@@ -299,10 +299,10 @@ static int vswscanf(const wchar_t *ws, const wchar_t *format, va_list argptr)
     // of the function. This doesn't work with %c and %s because of difference
     // in size of char and wchar_t, though.
 
-    wxCHECK_MSG( wxStrstr(format, wxT("%s")) == NULL, -1,
-                 wxT("incomplete vswscanf implementation doesn't allow %s") );
-    wxCHECK_MSG( wxStrstr(format, wxT("%c")) == NULL, -1,
-                 wxT("incomplete vswscanf implementation doesn't allow %c") );
+    wxCHECK_MSG( wxStrstr(format, _T("%s")) == NULL, -1,
+                 _T("incomplete vswscanf implementation doesn't allow %s") );
+    wxCHECK_MSG( wxStrstr(format, _T("%c")) == NULL, -1,
+                 _T("incomplete vswscanf implementation doesn't allow %c") );
 
     return vsscanf(static_cast<const char*>(wxConvLibc.cWX2MB(ws)),
         wxConvLibc.cWX2MB(format), argptr);
@@ -643,13 +643,13 @@ int wxVsprintf(wchar_t *str, const wxString& format, va_list argptr)
 #if wxUSE_UNICODE_WCHAR
 #ifdef __DMC__
 /*
-This fails with a bug similar to
+This fails with a bug similar to 
 http://www.digitalmars.com/pnews/read.php?server=news.digitalmars.com&group=c++.beta&artnum=680
 in DMC 8.49 and 8.50
 I don't see it being used in the wxWidgets sources at present (oct 2007) CE
 */
 #pragma message ( "warning ::::: wxVsprintf(wchar_t *str, const wxString& format, va_list argptr) not yet implemented" )
-    wxFAIL_MSG( wxT("TODO") );
+    wxFAIL_MSG( _T("TODO") );
 
     return -1;
 #else
@@ -797,17 +797,17 @@ WXDLLIMPEXP_BASE wchar_t * wxCRT_StrdupW(const wchar_t *pwz)
 #endif // wxCRT_StrdupW
 
 #ifndef wxWCHAR_T_IS_WXCHAR16
-size_t wxStrlen(const wxChar16 *s )
-{
-    if (!s) return 0;
-    size_t i=0;
-    while (*s!=0) { ++i; ++s; };
+size_t wxStrlen(const wxChar16 *s ) 
+{ 
+    if (!s) return 0; 
+    size_t i=0; 
+    while (*s!=0) { ++i; ++s; }; 
     return i;
 }
 
 wxChar16* wxStrdup(const wxChar16* s)
-{
-  size_t size = (wxStrlen(s) + 1) * sizeof(wxChar16);
+{ 
+  size_t size = (wxStrlen(s) + 1) * sizeof(wxChar16); 
   wxChar16 *ret = (wxChar16*) malloc(size);
   memcpy(ret, s, size);
   return ret;
@@ -815,17 +815,17 @@ wxChar16* wxStrdup(const wxChar16* s)
 #endif
 
 #ifndef wxWCHAR_T_IS_WXCHAR32
-size_t wxStrlen(const wxChar32 *s )
-{
-    if (!s) return 0;
-    size_t i=0;
-    while (*s!=0) { ++i; ++s; };
+size_t wxStrlen(const wxChar32 *s ) 
+{ 
+    if (!s) return 0; 
+    size_t i=0; 
+    while (*s!=0) { ++i; ++s; }; 
     return i;
 }
 
 wxChar32* wxStrdup(const wxChar32* s)
-{
-  size_t size = (wxStrlen(s) + 1) * sizeof(wxChar32);
+{ 
+  size_t size = (wxStrlen(s) + 1) * sizeof(wxChar32); 
   wxChar32 *ret = (wxChar32*) malloc(size);
   memcpy(ret, s, size);
   return ret;
@@ -1222,7 +1222,7 @@ void wxUpdateLocaleIsUtf8()
 #if wxUSE_UTF8_LOCALE_ONLY
     if ( !wxIsLocaleUtf8() )
     {
-        wxLogFatalError(wxT("This program requires UTF-8 locale to run."));
+        wxLogFatalError(_T("This program requires UTF-8 locale to run."));
     }
 #else // !wxUSE_UTF8_LOCALE_ONLY
     wxLocaleIsUtf8 = wxIsLocaleUtf8();

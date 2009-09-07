@@ -161,9 +161,7 @@ void wxFontDataProperty::RefreshChildren()
     Item(6)->SetValue( variant );
 }
 
-wxVariant wxFontDataProperty::ChildChanged( wxVariant& thisValue,
-                                            int childIndex,
-                                            wxVariant& childValue ) const
+void wxFontDataProperty::ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const
 {
     wxFontData fontData;
     fontData << thisValue;
@@ -185,9 +183,7 @@ wxVariant wxFontDataProperty::ChildChanged( wxVariant& thisValue,
             fontData.SetChosenFont(font);
     }
 
-    wxVariant newVariant;
-    newVariant << fontData;
-    return newVariant;
+    thisValue << fontData;
 }
 
 // -----------------------------------------------------------------------
@@ -215,20 +211,15 @@ void wxSizeProperty::RefreshChildren()
     Item(1)->SetValue( (long)size.y );
 }
 
-wxVariant wxSizeProperty::ChildChanged( wxVariant& thisValue,
-                                        int childIndex,
-                                        wxVariant& childValue ) const
+void wxSizeProperty::ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const
 {
     wxSize& size = wxSizeRefFromVariant(thisValue);
-    int val = childValue.GetLong();
+    int val = wxPGVariantToInt(childValue);
     switch ( childIndex )
     {
         case 0: size.x = val; break;
         case 1: size.y = val; break;
     }
-    wxVariant newVariant;
-    newVariant << size;
-    return newVariant;
 }
 
 // -----------------------------------------------------------------------
@@ -256,20 +247,15 @@ void wxPointProperty::RefreshChildren()
     Item(1)->SetValue( (long)point.y );
 }
 
-wxVariant wxPointProperty::ChildChanged( wxVariant& thisValue,
-                                         int childIndex,
-                                         wxVariant& childValue ) const
+void wxPointProperty::ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const
 {
     wxPoint& point = wxPointRefFromVariant(thisValue);
-    int val = childValue.GetLong();
+    int val = wxPGVariantToInt(childValue);
     switch ( childIndex )
     {
         case 0: point.x = val; break;
         case 1: point.y = val; break;
     }
-    wxVariant newVariant;
-    newVariant << point;
-    return newVariant;
 }
 
 

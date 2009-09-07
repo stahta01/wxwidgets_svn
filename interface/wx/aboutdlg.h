@@ -148,19 +148,10 @@ public:
     void SetTranslators(const wxArrayString& translators);
 
     /**
-        Set the version of the program. The word "version" shouldn't be included
-        in @a version. Example @a version values: "1.2" and "RC2". In about dialogs
-        with more space set aside for version information, @a longVersion is used.
-        Example @a longVersion values: "Version 1.2" and "Release Candidate 2".
-        If @a version is non-empty but @a longVersion is empty, a long version
-        is constructed automatically, using @a version (by simply prepending
-        "Version " to @a version).
-
-        The generic about dialog and native GTK+ dialog use @a version only,
-        as a suffix to the program name. The native MSW and OS X about dialogs
-        use the long version.
+        Set the version of the program. The version is in free format, i.e. not
+        necessarily in the @c x.y.z form but it shouldn't contain the "version" word.
     */
-    void SetVersion(const wxString& version, const wxString& longVersion = wxString());
+    void SetVersion(const wxString& version);
 
     /**
         Set the web site for the program and its description (which defaults to @a url
@@ -198,7 +189,7 @@ public:
         info.SetName(_("My Program"));
         info.SetVersion(_("1.2.3 Beta"));
         info.SetDescription(_("This program does something great."));
-        info.SetCopyright(wxT("(C) 2007 Me <my@email.addre.ss>"));
+        info.SetCopyright(_T("(C) 2007 Me <my@email.addre.ss>"));
 
         wxAboutBox(info);
     }
@@ -210,7 +201,7 @@ public:
 
     @header{wx/aboutdlg.h}
 */
-void wxAboutBox(const wxAboutDialogInfo& info, wxWindow* parent = NULL);
+void wxAboutBox(const wxAboutDialogInfo& info);
 
 /**
     This function does the same thing as wxAboutBox() except that it always uses
@@ -227,6 +218,6 @@ void wxAboutBox(const wxAboutDialogInfo& info, wxWindow* parent = NULL);
 
     @header{wx/aboutdlg.h}
 */
-void wxGenericAboutBox(const wxAboutDialogInfo& info, wxWindow* parent = NULL);
+void wxGenericAboutBox(const wxAboutDialogInfo& info);
 
 //@}

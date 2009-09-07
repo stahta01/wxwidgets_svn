@@ -13,7 +13,6 @@
 #define _WX_MSW_TOOLTIP_H_
 
 #include "wx/object.h"
-#include "wx/gdicmn.h"
 
 class WXDLLIMPEXP_FWD_CORE wxWindow;
 
@@ -23,11 +22,6 @@ public:
     // ctor & dtor
     wxToolTip(const wxString &tip);
     virtual ~wxToolTip();
-
-    // ctor used by wxStatusBar to associate a tooltip to a portion of
-    // the status bar window:
-    wxToolTip(wxWindow* win, unsigned int id,
-              const wxString &tip, const wxRect& rc);
 
     // accessors
         // tip text
@@ -55,18 +49,14 @@ public:
     // implementation only from now on
     // -------------------------------
 
-    // should be called in response to WM_MOUSEMOVE
+    // should be called in responde to WM_MOUSEMOVE
     static void RelayEvent(WXMSG *msg);
 
     // add a window to the tooltip control
     void Add(WXHWND hwnd);
 
     // remove any tooltip from the window
-    static void Remove(WXHWND hwnd, unsigned int id, const wxRect& rc);
-
-    // the rect we're associated with
-    void SetRect(const wxRect& rc);
-    const wxRect& GetRect() const { return m_rect; }
+    static void Remove(WXHWND hwnd);
 
 private:
     // the one and only one tooltip control we use - never access it directly
@@ -83,10 +73,7 @@ private:
     void Remove();
 
     wxString  m_text;           // tooltip text
-    wxWindow* m_window;         // window we're associated with
-    wxRect    m_rect;           // the rect of the window for which this tooltip is shown
-                                // (or a rect with width/height == 0 to show it for the entire window)
-    unsigned int m_id;          // the id of this tooltip (ignored when m_rect width/height is 0)
+    wxWindow *m_window;         // window we're associated with
 
     DECLARE_ABSTRACT_CLASS(wxToolTip)
     wxDECLARE_NO_COPY_CLASS(wxToolTip);

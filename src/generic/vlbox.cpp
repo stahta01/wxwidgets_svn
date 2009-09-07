@@ -138,10 +138,10 @@ bool wxVListBox::IsSelected(size_t line) const
 bool wxVListBox::Select(size_t item, bool select)
 {
     wxCHECK_MSG( m_selStore, false,
-                 wxT("Select() may only be used with multiselection listbox") );
+                 _T("Select() may only be used with multiselection listbox") );
 
     wxCHECK_MSG( item < GetItemCount(), false,
-                 wxT("Select(): invalid item index") );
+                 _T("Select(): invalid item index") );
 
     bool changed = m_selStore->SelectItem(item, select);
     if ( changed )
@@ -158,7 +158,7 @@ bool wxVListBox::Select(size_t item, bool select)
 bool wxVListBox::SelectRange(size_t from, size_t to)
 {
     wxCHECK_MSG( m_selStore, false,
-                 wxT("SelectRange() may only be used with multiselection listbox") );
+                 _T("SelectRange() may only be used with multiselection listbox") );
 
     // make sure items are in correct order
     if ( from > to )
@@ -169,7 +169,7 @@ bool wxVListBox::SelectRange(size_t from, size_t to)
     }
 
     wxCHECK_MSG( to < GetItemCount(), false,
-                    wxT("SelectRange(): invalid item index") );
+                    _T("SelectRange(): invalid item index") );
 
     wxArrayInt changed;
     if ( !m_selStore->SelectRange(from, to, true, &changed) )
@@ -201,7 +201,7 @@ bool wxVListBox::SelectRange(size_t from, size_t to)
 bool wxVListBox::DoSelectAll(bool select)
 {
     wxCHECK_MSG( m_selStore, false,
-                 wxT("SelectAll may only be used with multiselection listbox") );
+                 _T("SelectAll may only be used with multiselection listbox") );
 
     size_t count = GetItemCount();
     if ( count )
@@ -224,7 +224,7 @@ bool wxVListBox::DoSetCurrent(int current)
 {
     wxASSERT_MSG( current == wxNOT_FOUND ||
                     (current >= 0 && (size_t)current < GetItemCount()),
-                  wxT("wxVListBox::DoSetCurrent(): invalid item index") );
+                  _T("wxVListBox::DoSetCurrent(): invalid item index") );
 
     if ( current == m_current )
     {
@@ -270,7 +270,7 @@ void wxVListBox::InitEvent(wxCommandEvent& event, int n)
 void wxVListBox::SendSelectedEvent()
 {
     wxASSERT_MSG( m_current != wxNOT_FOUND,
-                    wxT("SendSelectedEvent() shouldn't be called") );
+                    _T("SendSelectedEvent() shouldn't be called") );
 
     wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, GetId());
     InitEvent(event, m_current);
@@ -281,7 +281,7 @@ void wxVListBox::SetSelection(int selection)
 {
     wxCHECK_RET( selection == wxNOT_FOUND ||
                   (selection >= 0 && (size_t)selection < GetItemCount()),
-                  wxT("wxVListBox::SetSelection(): invalid item index") );
+                  _T("wxVListBox::SetSelection(): invalid item index") );
 
     if ( HasMultipleSelection() )
     {
@@ -311,7 +311,7 @@ int wxVListBox::GetFirstSelected(unsigned long& cookie) const
 int wxVListBox::GetNextSelected(unsigned long& cookie) const
 {
     wxCHECK_MSG( m_selStore, wxNOT_FOUND,
-                  wxT("GetFirst/NextSelected() may only be used with multiselection listboxes") );
+                  _T("GetFirst/NextSelected() may only be used with multiselection listboxes") );
 
     while ( cookie < GetItemCount() )
     {

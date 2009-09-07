@@ -25,7 +25,7 @@
 // Not needed, included in defs.h
 // #include "wx/windowid.h"
 
-#define wxTRACE_WINDOWID wxT("windowid")
+#define wxTRACE_WINDOWID _T("windowid")
 
 namespace
 {
@@ -212,7 +212,7 @@ wxWindowID wxIdManager::ReserveId(int count)
         }
     }
 
-    wxLogError(_("Out of window IDs.  Recommend shutting down application."));
+    ::wxLogError(_("Out of window IDs.  Recommend shutting down application."));
     return wxID_NONE;
 #else // !wxUSE_AUTOID_MANAGEMENT
     // Make sure enough in the range

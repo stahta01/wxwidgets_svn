@@ -127,7 +127,7 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
             // have the corresponding style and even then only if we really can
             // resize this frame
             if ( n == (int)m_panes.GetCount() - 1 &&
-                 HasFlag(wxSTB_SIZEGRIP) &&
+                 HasFlag(wxST_SIZEGRIP) &&
                  GetParent()->HasFlag(wxRESIZE_BORDER) &&
                  parentTLW && !parentTLW->IsMaximized() )
             {
@@ -141,7 +141,7 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
     }
 }
 
-void wxStatusBarUniv::DoUpdateStatusText(int i)
+void wxStatusBarUniv::RefreshField(int i)
 {
     wxRect rect;
     if ( GetFieldRect(i, rect) )
@@ -149,6 +149,27 @@ void wxStatusBarUniv::DoUpdateStatusText(int i)
         RefreshRect(rect);
     }
 }
+
+// ----------------------------------------------------------------------------
+// fields text
+// ----------------------------------------------------------------------------
+
+void wxStatusBarUniv::SetStatusText(const wxString& text, int number)
+{
+    wxCHECK_RET( number >= 0 && (size_t)number < m_panes.GetCount(),
+                 _T("invalid status bar field index in SetStatusText()") );
+
+    if ( text == GetStatusText(number) )
+    {
+        // nothing changed
+        return;
+    }
+
+    wxStatusBarBase::SetStatusText(text, number);
+
+    RefreshField(number);
+}
+
 
 // ----------------------------------------------------------------------------
 // fields count/widths
@@ -216,7 +237,7 @@ void wxStatusBarUniv::OnSize(wxSizeEvent& event)
 bool wxStatusBarUniv::GetFieldRect(int n, wxRect& rect) const
 {
     wxCHECK_MSG( n >= 0 && (size_t)n < m_panes.GetCount(), false,
-                 wxT("invalid field index in GetFieldRect()") );
+                 _T("invalid field index in GetFieldRect()") );
 
     // this is a fix for a bug exhibited by the statbar sample: if
     // GetFieldRect() is called from the derived class OnSize() handler, then
@@ -239,7 +260,7 @@ wxRect wxStatusBarUniv::DoGetFieldRect(int n) const
     // it's the caller responsability to check this, if unsure - call
     // GetFieldRect() instead
     wxCHECK_MSG( !m_widthsAbs.IsEmpty(), rect,
-                 wxT("can't be called if we don't have the widths") );
+                 _T("can't be called if we don't have the widths") );
 
     for ( int i = 0; i <= n; i++ )
     {

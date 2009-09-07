@@ -79,6 +79,12 @@ public:
 
     virtual int GetCharHeight() const;
     virtual int GetCharWidth() const;
+    virtual void GetTextExtent(const wxString& string,
+                               int *x, int *y,
+                               int *descent = NULL,
+                               int *externalLeading = NULL,
+                               const wxFont *theFont = (const wxFont *) NULL)
+                               const;
 
 #if wxUSE_MENUS_NATIVE
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
@@ -225,11 +231,6 @@ protected:
     WXHMENU               m_hMenu; // Menu, if any
 
     // implement the base class pure virtuals
-    virtual void DoGetTextExtent(const wxString& string,
-                                 int *x, int *y,
-                                 int *descent = NULL,
-                                 int *externalLeading = NULL,
-                                 const wxFont *font = NULL) const;
     virtual void DoClientToScreen( int *x, int *y ) const;
     virtual void DoScreenToClient( int *x, int *y ) const;
     virtual void DoGetPosition( int *x, int *y ) const;

@@ -153,11 +153,11 @@ int wxFileDialog::ShowModal()
 
     m_path = wxEmptyString;
     m_fileNames.Clear();
-
+    
     wxNonOwnedWindow* parentWindow = NULL;
     int returnCode = -1;
-
-    if (GetParent())
+    
+    if (GetParent()) 
     {
         parentWindow = dynamic_cast<wxNonOwnedWindow*>(wxGetTopLevelParent(GetParent()));
     }
@@ -181,10 +181,10 @@ int wxFileDialog::ShowModal()
         if (parentWindow)
         {
             NSWindow* nativeParent = parentWindow->GetWXWindow();
-            ModalDialogDelegate* sheetDelegate = [[ModalDialogDelegate alloc] init];
-            [sPanel beginSheetForDirectory:dir.AsNSString() file:file.AsNSString()
-                modalForWindow: nativeParent modalDelegate: sheetDelegate
-                didEndSelector: @selector(sheetDidEnd:returnCode:contextInfo:)
+            ModalDialogDelegate* sheetDelegate = [[ModalDialogDelegate alloc] init]; 
+            [sPanel beginSheetForDirectory:dir.AsNSString() file:file.AsNSString() 
+                modalForWindow: nativeParent modalDelegate: sheetDelegate 
+                didEndSelector: @selector(sheetDidEnd:returnCode:contextInfo:) 
                 contextInfo: nil];
             [sheetDelegate waitForSheetToFinish];
             returnCode = [sheetDelegate code];
@@ -195,13 +195,15 @@ int wxFileDialog::ShowModal()
         {
             returnCode = [sPanel runModalForDirectory:dir.AsNSString() file:file.AsNSString() ];
         }
-
+        
         if (returnCode == NSOKButton )
         {
             panel = sPanel;
             result = wxID_OK;
 
-            m_path = wxCFStringRef::AsString([sPanel filename]);
+            wxCFStringRef filename( [[sPanel filename] retain] );
+
+            m_path = filename.AsString();
             m_fileName = wxFileNameFromPath(m_path);
             m_dir = wxPathOnly( m_path );
         }
@@ -220,11 +222,11 @@ int wxFileDialog::ShowModal()
         if (parentWindow)
         {
             NSWindow* nativeParent = parentWindow->GetWXWindow();
-            ModalDialogDelegate* sheetDelegate = [[ModalDialogDelegate alloc] init];
-            [oPanel beginSheetForDirectory:dir.AsNSString() file:file.AsNSString()
-                types: types modalForWindow: nativeParent
-                modalDelegate: sheetDelegate
-                didEndSelector: @selector(sheetDidEnd:returnCode:contextInfo:)
+            ModalDialogDelegate* sheetDelegate = [[ModalDialogDelegate alloc] init]; 
+            [oPanel beginSheetForDirectory:dir.AsNSString() file:file.AsNSString() 
+                types: types modalForWindow: nativeParent 
+                modalDelegate: sheetDelegate 
+                didEndSelector: @selector(sheetDidEnd:returnCode:contextInfo:) 
                 contextInfo: nil];
             [sheetDelegate waitForSheetToFinish];
             returnCode = [sheetDelegate code];
@@ -233,7 +235,7 @@ int wxFileDialog::ShowModal()
         else
 */
         {
-            returnCode = [oPanel runModalForDirectory:dir.AsNSString()
+            returnCode = [oPanel runModalForDirectory:dir.AsNSString() 
                         file:file.AsNSString() types:types];
         }
         if (returnCode == NSOKButton )
@@ -243,7 +245,8 @@ int wxFileDialog::ShowModal()
             NSArray* filenames = [oPanel filenames];
             for ( size_t i = 0 ; i < [filenames count] ; ++ i )
             {
-                wxString fnstr = wxCFStringRef::AsString([filenames objectAtIndex:i]);
+                wxCFStringRef filename( [(NSString*) [filenames objectAtIndex:i] retain] );
+                wxString fnstr = filename.AsString();
                 m_paths.Add( fnstr );
                 m_fileNames.Add( wxFileNameFromPath(fnstr) );
                 if ( i == 0 )

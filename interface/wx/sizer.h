@@ -568,7 +568,7 @@ public:
 
     /**
         Inserts non-stretchable space to the sizer.
-        More readable way of calling wxSizer::Insert(index, size, size).
+        More readable way of calling wxSizer::Insert(size, size, 0).
     */
     wxSizerItem* InsertSpacer(size_t index, int size);
 
@@ -783,28 +783,35 @@ public:
     /**
         Set an item's minimum size by window, sizer, or position.
 
+        The item will be found recursively in the sizer's descendants.
         This function enables an application to set the size of an item after
         initial creation.
 
-        The @a window or @a sizer will be found recursively in the sizer's
-        descendants.
+        @see wxSizerItem::SetMinSize()
+    */
+    bool SetItemMinSize(wxWindow* window, int width, int height);
+
+    /**
+        Set an item's minimum size by window, sizer, or position.
+
+        The item will be found recursively in the sizer's descendants.
+        This function enables an application to set the size of an item after
+        initial creation.
 
         @see wxSizerItem::SetMinSize()
-
-        @return
-            @true if the minimal size was successfully set or @false if the
-            item was not found.
     */
-    //@{
-    bool SetItemMinSize(wxWindow* window, int width, int height);
-    bool SetItemMinSize(wxWindow* window, const wxSize& size);
-
     bool SetItemMinSize(wxSizer* sizer, int width, int height);
-    bool SetItemMinSize(wxSizer* sizer, const wxSize& size);
 
+    /**
+        Set an item's minimum size by window, sizer, or position.
+
+        The item will be found recursively in the sizer's descendants.
+        This function enables an application to set the size of an item after
+        initial creation.
+
+        @see wxSizerItem::SetMinSize()
+    */
     bool SetItemMinSize(size_t index, int width, int height);
-    bool SetItemMinSize(size_t index, const wxSize& size);
-    //@}
 
     /**
         Call this to give the sizer a minimal size.
@@ -1428,27 +1435,17 @@ class wxFlexGridSizer : public wxGridSizer
 public:
     //@{
     /**
-        wxFlexGridSizer constructors.
+        Constructor for a wxFlexGridSizer.
 
-        Usually only the number of columns in the flex grid sizer needs to be
-        specified using @a cols argument. The number of rows will be deduced
-        automatically depending on the number of the elements added to the
-        sizer. If the number of @a rows is explicitly specified (and not zero),
-        the sizer will check that it no more than @code cols*rows @endcode
-        elements are added to it.
+        @a rows and @a cols determine the number of columns and rows in the sizer -
+        if either of the parameters is zero, it will be calculated to form the
+        total number of children in the sizer, thus making the sizer grow
+        dynamically.
 
-        The @a gap (or @a vgap and @a hgap, which correspond to the height and
-        width of the wxSize object) argument defines the size of the padding
-        between the rows (its vertical component, or @a vgap) and columns
-        (its horizontal component, or @a hgap), in pixels.
-
-        @since 2.9.1 (except for the four argument overload)
+        @a vgap and @a hgap define extra space between all children.
     */
-    wxFlexGridSizer( int cols, int vgap, int hgap );
-    wxFlexGridSizer( int cols, const wxSize& gap = wxSize(0, 0) );
-
-    wxFlexGridSizer( int rows, int cols, int vgap, int hgap );
-    wxFlexGridSizer( int rows, int cols, const wxSize& gap );
+    wxFlexGridSizer(int rows, int cols, int vgap, int hgap);
+    wxFlexGridSizer(int cols, int vgap = 0, int hgap = 0);
     //@}
 
     /**
@@ -1581,60 +1578,32 @@ class wxGridSizer : public wxSizer
 public:
     //@{
     /**
-        wxGridSizer constructors.
+        Constructor for a wxGridSizer.
 
-        Usually only the number of columns in the grid sizer needs to be
-        specified using @a cols argument. The number of rows will be deduced
-        automatically depending on the number of the elements added to the
-        sizer. If the number of @a rows is explicitly specified (and not zero),
-        the sizer will check that it no more than @code cols*rows @endcode
-        elements are added to it.
+        @a rows and @a cols determine the number of columns and rows in the sizer -
+        if either of the parameters is zero, it will be calculated to form the
+        total number of children in the sizer, thus making the sizer grow dynamically.
 
-        The @a gap (or @a vgap and @a hgap, which correspond to @c y and @c x
-        fields of the wxSize object) argument defines the size of the padding
-        between the grid rows (its vertical component, or @a vgap) and columns
-        (its horizontal component, or @a hgap), in pixels.
-
-        @since 2.9.1 (except for the four argument overload)
+        @a vgap and @a hgap define extra space between all children.
     */
-    wxGridSizer( int cols, int vgap, int hgap );
-    wxGridSizer( int cols, const wxSize& gap = wxSize(0, 0) );
-
-    wxGridSizer( int rows, int cols, int vgap, int hgap );
-    wxGridSizer( int rows, int cols, const wxSize& gap );
+    wxGridSizer(int rows, int cols, int vgap, int hgap);
+    wxGridSizer(int cols, int vgap = 0, int hgap = 0);
     //@}
 
-    //@{
     /**
-        Returns the number of columns or rows that has been specified for the
-        sizer.
-
-        Returns zero if the sizer is automatically adjusting the number of
-        columns/rows depending on number of its children. To get the effective
-        number of columns or rows being currently used, see
-        GetEffectiveColsCount() and GetEffectiveRowsCount().
+        Returns the number of columns in the sizer.
     */
     int GetCols() const;
-    int GetRows() const;
-    //@}
-
-    //@{
-    /**
-        Returns the number of columns or rows currently used by the sizer.
-
-        This will depend on the number of children the sizer has if
-        the sizer is automatically adjusting the number of columns/rows.
-
-        @since 2.9.1
-    */
-    int GetEffectiveColsCount() const;
-    int GetEffectiveRowsCount() const;
-    //@}
 
     /**
         Returns the horizontal gap (in pixels) between cells in the sizer.
     */
     int GetHGap() const;
+
+    /**
+        Returns the number of rows in the sizer.
+    */
+    int GetRows() const;
 
     /**
         Returns the vertical gap (in pixels) between the cells in the sizer.
@@ -1667,29 +1636,11 @@ public:
 /**
     @class wxStaticBoxSizer
 
-    wxStaticBoxSizer is a sizer derived from wxBoxSizer but adds a static box around
-    the sizer.
-
-    The static box may be either created independently or the sizer may create it
-    itself as a convenience. In any case, the sizer owns the wxStaticBox control
-    and will delete it in the wxStaticBoxSizer destructor.
-
-    Note that since wxWidgets 2.9.1 you are encouraged to create the windows
-    which are added to wxStaticBoxSizer as children of wxStaticBox itself, see
-    this class documentation for more details.
-
-    Example of use of this class:
-    @code
-        void MyFrame::CreateControls()
-        {
-            wxPanel *panel = new wxPanel(this);
-            ...
-            wxStaticBoxSizer *sz = new wxStaticBoxSizer(wxVERTICAL, panel, "Box");
-            sz->Add(new wxStaticText(sz->GetStaticBox(), wxID_ANY,
-                                     "This window is a child of the staticbox"));
-            ...
-        }
-    @endcode
+    wxStaticBoxSizer is a sizer derived from wxBoxSizer but adds a static
+    box around the sizer.
+    This static box may be either created independently or the sizer may create
+    it itself as a convenience. In any case, the sizer owns the wxStaticBox control
+    and will delete it, if it is deleted.
 
     @library{wxcore}
     @category{winlayout}
@@ -1702,11 +1653,8 @@ public:
     /**
         This constructor uses an already existing static box.
 
-        @param box
-            The static box to associate with the sizer (which will take its
-            ownership).
-        @param orient
-            Can be either @c wxVERTICAL or @c wxHORIZONTAL.
+        It takes the associated static box and the orientation @a orient, which
+        can be either @c wxVERTICAL or @c wxHORIZONTAL as parameters.
     */
     wxStaticBoxSizer(wxStaticBox* box, int orient);
 

@@ -170,7 +170,7 @@ public:
     virtual wxString GetTitle() const = 0;
 
     // enable/disable close button [x]
-    virtual bool EnableCloseButton(bool WXUNUSED(enable) ) { return false; }
+    virtual bool EnableCloseButton(bool WXUNUSED(enable) ) { return false; } 
 
     // Set the shape of the window to the given region.
     // Returns true if the platform supports this feature (and the
@@ -344,25 +344,28 @@ protected:
 #ifdef __WXUNIVERSAL__
     #include "wx/univ/toplevel.h"
 #else // !__WXUNIVERSAL__
-    class WXDLLIMPEXP_CORE wxTopLevelWindow : public wxTopLevelWindowNative
-    {
-    public:
-        // construction
-        wxTopLevelWindow() { }
-        wxTopLevelWindow(wxWindow *parent,
-                   wxWindowID winid,
-                   const wxString& title,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = wxDEFAULT_FRAME_STYLE,
-                   const wxString& name = wxFrameNameStr)
-            : wxTopLevelWindowNative(parent, winid, title,
-                                     pos, size, style, name)
+    #ifdef wxTopLevelWindowNative
+        class WXDLLIMPEXP_CORE wxTopLevelWindow : public wxTopLevelWindowNative
         {
-        }
+        public:
+            // construction
+            wxTopLevelWindow() { Init(); }
+            wxTopLevelWindow(wxWindow *parent,
+                       wxWindowID winid,
+                       const wxString& title,
+                       const wxPoint& pos = wxDefaultPosition,
+                       const wxSize& size = wxDefaultSize,
+                       long style = wxDEFAULT_FRAME_STYLE,
+                       const wxString& name = wxFrameNameStr)
+            {
+                Init();
+                Create(parent, winid, title, pos, size, style, name);
+            }
 
-        DECLARE_DYNAMIC_CLASS_NO_COPY(wxTopLevelWindow)
-    };
+            DECLARE_DYNAMIC_CLASS_NO_COPY(wxTopLevelWindow)
+        };
+    #endif // wxTopLevelWindowNative
 #endif // __WXUNIVERSAL__/!__WXUNIVERSAL__
+
 
 #endif // _WX_TOPLEVEL_BASE_H_

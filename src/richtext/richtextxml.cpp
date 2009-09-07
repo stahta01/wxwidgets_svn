@@ -181,13 +181,9 @@ bool wxRichTextXMLHandler::ImportXML(wxRichTextBuffer* buffer, wxXmlNode* node)
 
                     // note: 0 == wxBITMAP_TYPE_INVALID
                     if (type <= 0 || type >= wxBITMAP_TYPE_MAX)
-                    {
                         wxLogWarning("Invalid bitmap type specified for <image> tag: %d", type);
-                    }
                     else
-                    {
                         imageType = (wxBitmapType)type;
-                    }
                 }
 
                 wxString data;

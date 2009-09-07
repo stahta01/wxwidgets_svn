@@ -36,7 +36,7 @@
 // DLL options compatibility check:
 WX_CHECK_BUILD_OPTIONS("wxHTML")
 
-const wxChar *wxTRACE_HTML_DEBUG = wxT("htmldebug");
+const wxChar *wxTRACE_HTML_DEBUG = _T("htmldebug");
 
 //-----------------------------------------------------------------------------
 // wx28HtmlParser helpers
@@ -918,18 +918,18 @@ private:
 
 bool wxMetaTagHandler::HandleTag(const wx28HtmlTag& tag)
 {
-    if (tag.GetName() == wxT("BODY"))
+    if (tag.GetName() == _T("BODY"))
     {
         m_Parser->StopParsing();
         return false;
     }
 
-    if (tag.HasParam(wxT("HTTP-EQUIV")) &&
-        tag.GetParam(wxT("HTTP-EQUIV")).IsSameAs(wxT("Content-Type"), false) &&
-        tag.HasParam(wxT("CONTENT")))
+    if (tag.HasParam(_T("HTTP-EQUIV")) &&
+        tag.GetParam(_T("HTTP-EQUIV")).IsSameAs(_T("Content-Type"), false) &&
+        tag.HasParam(_T("CONTENT")))
     {
-        wxString content = tag.GetParam(wxT("CONTENT")).Lower();
-        if (content.Left(19) == wxT("text/html; charset="))
+        wxString content = tag.GetParam(_T("CONTENT")).Lower();
+        if (content.Left(19) == _T("text/html; charset="))
         {
             *m_retval = content.Mid(19);
             m_Parser->StopParsing();

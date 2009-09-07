@@ -397,7 +397,7 @@ void wxWindowX11::SetFocus()
 
     if (wxWindowIsVisible(xwindow))
     {
-        wxLogTrace( wxT("focus"), wxT("wxWindowX11::SetFocus: %s"), GetClassInfo()->GetClassName());
+        wxLogTrace( _T("focus"), _T("wxWindowX11::SetFocus: %s"), GetClassInfo()->GetClassName());
         //        XSetInputFocus( wxGlobalDisplay(), xwindow, RevertToParent, CurrentTime );
         XSetInputFocus( wxGlobalDisplay(), xwindow, RevertToNone, CurrentTime );
         m_needsInputFocus = false;
@@ -522,9 +522,7 @@ void wxWindowX11::DoCaptureMouse()
             msg.Printf(wxT("Failed to grab pointer for window %s"), this->GetClassInfo()->GetClassName());
             wxLogDebug(msg);
             if (res == GrabNotViewable)
-            {
                 wxLogDebug( wxT("This is not a viewable window - perhaps not shown yet?") );
-            }
 
             g_captureWindow = NULL;
             return;
@@ -1078,11 +1076,10 @@ int wxWindowX11::GetCharWidth() const
 #endif
 }
 
-void wxWindowX11::DoGetTextExtent(const wxString& string,
-                                  int *x, int *y,
-                                  int *descent,
-                                  int *externalLeading,
-                                  const wxFont *theFont) const
+void wxWindowX11::GetTextExtent(const wxString& string,
+                                int *x, int *y,
+                                int *descent, int *externalLeading,
+                                const wxFont *theFont) const
 {
     wxFont fontToUse = GetFont();
     if (theFont) fontToUse = *theFont;
@@ -1732,7 +1729,7 @@ public:
     wxWinModule()
     {
         // we must be cleaned up before the display is closed
-        AddDependency(wxClassInfo::FindClass(wxT("wxX11DisplayModule")));
+        AddDependency(wxClassInfo::FindClass(_T("wxX11DisplayModule")));
     }
 
     virtual bool OnInit();

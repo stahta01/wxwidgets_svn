@@ -569,7 +569,7 @@ void wxDCImpl::GetMultiLineTextExtent(const wxString& text,
     wxString curLine;
     for ( wxString::const_iterator pc = text.begin(); ; ++pc )
     {
-        if ( pc == text.end() || *pc == wxT('\n') )
+        if ( pc == text.end() || *pc == _T('\n') )
         {
             if ( curLine.empty() )
             {
@@ -585,7 +585,7 @@ void wxDCImpl::GetMultiLineTextExtent(const wxString& text,
                 if ( !heightLineDefault )
                 {
                     // but we don't know it yet - choose something reasonable
-                    DoGetTextExtent(wxT("W"), NULL, &heightLineDefault,
+                    DoGetTextExtent(_T("W"), NULL, &heightLineDefault,
                                   NULL, NULL, font);
                 }
 
@@ -656,7 +656,7 @@ wxDCImpl::DoStretchBlit(wxCoord xdest, wxCoord ydest,
                         wxCoord ysrcMask)
 {
     wxCHECK_MSG( srcWidth && srcHeight && dstWidth && dstHeight, false,
-                 wxT("invalid blit size") );
+                 _T("invalid blit size") );
 
     // emulate the stretching by modifying the DC scale
     double xscale = (double)srcWidth/dstWidth,
@@ -1115,8 +1115,7 @@ void wxDCImpl::InheritAttributes(wxWindow *win)
     SetFont(win->GetFont());
     SetTextForeground(win->GetForegroundColour());
     SetTextBackground(win->GetBackgroundColour());
-    SetBackground(win->GetBackgroundColour());
-    SetLayoutDirection(win->GetLayoutDirection());
+    SetBackground(wxBrush(win->GetBackgroundColour()));
 }
 
 //-----------------------------------------------------------------------------
@@ -1124,15 +1123,6 @@ void wxDCImpl::InheritAttributes(wxWindow *win)
 //-----------------------------------------------------------------------------
 
 IMPLEMENT_ABSTRACT_CLASS(wxDC, wxObject)
-
-void wxDC::CopyAttributes(const wxDC& dc)
-{
-    SetFont(dc.GetFont());
-    SetTextForeground(dc.GetTextForeground());
-    SetTextBackground(dc.GetTextBackground());
-    SetBackground(dc.GetBackground());
-    SetLayoutDirection(dc.GetLayoutDirection());
-}
 
 void wxDC::DrawLabel(const wxString& text,
                          const wxBitmap& bitmap,

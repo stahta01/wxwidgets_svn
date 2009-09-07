@@ -148,9 +148,7 @@ WX_DECLARE_LIST_3(wxWindow, wxWindowBase, wxWindowList, wxWindowListNode, class 
 // ----------------------------------------------------------------------------
 
 extern WXDLLIMPEXP_DATA_CORE(wxWindowList) wxTopLevelWindows;
-
-// declared here for compatibility only, main declaration is in wx/app.h
-extern WXDLLIMPEXP_DATA_BASE(wxList) wxPendingDelete;
+extern WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
 
 // ----------------------------------------------------------------------------
 // wxWindowBase is the base class for all GUI controls/widgets, this is the public
@@ -377,7 +375,7 @@ public:
         // acceptable size using which it will still look "nice" in
         // most situations)
     wxSize GetBestSize() const;
-
+    
     void GetBestSize(int *w, int *h) const
     {
         wxSize s = GetBestSize();
@@ -822,10 +820,6 @@ public:
     virtual void SetNextHandler(wxEvtHandler *handler);
     virtual void SetPreviousHandler(wxEvtHandler *handler);
 
-
-    // Watcom doesn't allow reducing access with using access declaration, see
-    // #10749
-#ifndef __WATCOMC__
 protected:
 
     // NOTE: we change the access specifier of the following wxEvtHandler functions
@@ -845,7 +839,6 @@ protected:
     using wxEvtHandler::ProcessPendingEvents;
     using wxEvtHandler::AddPendingEvent;
     using wxEvtHandler::QueueEvent;
-#endif // __WATCOMC__
 
 public:
 
@@ -1034,10 +1027,9 @@ public:
     wxColour GetForegroundColour() const;
 
         // Set/get the background style.
-    virtual bool SetBackgroundStyle(wxBackgroundStyle style)
-        { m_backgroundStyle = style; return true; }
-    wxBackgroundStyle GetBackgroundStyle() const
-        { return m_backgroundStyle; }
+        // Pass one of wxBG_STYLE_SYSTEM, wxBG_STYLE_COLOUR, wxBG_STYLE_CUSTOM
+    virtual bool SetBackgroundStyle(wxBackgroundStyle style) { m_backgroundStyle = style; return true; }
+    virtual wxBackgroundStyle GetBackgroundStyle() const { return m_backgroundStyle; }
 
         // returns true if the control has "transparent" areas such as a
         // wxStaticText and wxCheckBox and the background should be adapted
@@ -1072,14 +1064,12 @@ public:
 
         // get the width/height/... of the text using current or specified
         // font
-    void GetTextExtent(const wxString& string,
-                       int *x, int *y,
-                       int *descent = NULL,
-                       int *externalLeading = NULL,
-                       const wxFont *font = NULL) const
-    {
-        DoGetTextExtent(string, x, y, descent, externalLeading, font);
-    }
+    virtual void GetTextExtent(const wxString& string,
+                               int *x, int *y,
+                               int *descent = NULL,
+                               int *externalLeading = NULL,
+                               const wxFont *theFont = (const wxFont *) NULL)
+                               const = 0;
 
     wxSize GetTextExtent(const wxString& string) const
     {
@@ -1160,15 +1150,12 @@ public:
     // scrollbars
     // ----------
 
-        // can the window have the scrollbar in this orientation?
-    bool CanScroll(int orient) const
+        // does the window have the scrollbar for this orientation?
+    bool HasScrollbar(int orient) const
     {
         return (m_windowStyle &
                 (orient == wxHORIZONTAL ? wxHSCROLL : wxVSCROLL)) != 0;
     }
-
-        // does the window have the scrollbar in this orientation?
-    bool HasScrollbar(int orient) const;
 
         // configure the window scrollbars
     virtual void SetScrollbar( int orient,
@@ -1610,13 +1597,6 @@ protected:
     //     overloaded Something()s in terms of DoSomething() which will be the
     //     only one to be virtual.
 
-    // text extent
-    virtual void DoGetTextExtent(const wxString& string,
-                                 int *x, int *y,
-                                 int *descent = NULL,
-                                 int *externalLeading = NULL,
-                                 const wxFont *font = NULL) const = 0;
-
     // coordinates translation
     virtual void DoClientToScreen( int *x, int *y ) const = 0;
     virtual void DoScreenToClient( int *x, int *y ) const = 0;
@@ -1638,11 +1618,6 @@ protected:
     // same size as it would have after a call to Fit()
     virtual wxSize DoGetBestSize() const;
 
-    // this method can be overridden instead of DoGetBestSize() if it computes
-    // the best size of the client area of the window only, excluding borders
-    // (GetBorderSize() will be used to add them)
-    virtual wxSize DoGetBestClientSize() const { return wxDefaultSize; }
-
     // this is the virtual function to be overriden in any derived class which
     // wants to change how SetSize() or Move() works - it is called by all
     // versions of these functions in the base class
@@ -1656,19 +1631,6 @@ protected:
     virtual void DoSetSizeHints( int minW, int minH,
                                  int maxW, int maxH,
                                  int incW, int incH );
-
-    // return the total size of the window borders, i.e. the sum of the widths
-    // of the left and the right border in the x component of the returned size
-    // and the sum of the heights of the top and bottom borders in the y one
-    //
-    // NB: this is new/temporary API only implemented by wxMSW so far and
-    //     subject to change, don't use
-    virtual wxSize DoGetBorderSize() const
-    {
-        wxFAIL_MSG( "must be overridden if called" );
-
-        return wxDefaultSize;
-    }
 
     // move the window to the specified location and resize it: this is called
     // from both DoSetSize() and DoSetClientSize() and would usually just
@@ -1726,11 +1688,6 @@ private:
     // implementation of the public GetPopupMenuSelectionFromUser() method
     int DoGetPopupMenuSelectionFromUser(wxMenu& menu, int x, int y);
 #endif // wxUSE_MENUS
-
-    // layout the window children when its size changes unless this was
-    // explicitly disabled with SetAutoLayout(false)
-    void InternalOnSize(wxSizeEvent& event);
-
 
     // the stack of windows which have captured the mouse
     static struct WXDLLIMPEXP_FWD_CORE wxWindowNext *ms_winCaptureNext;

@@ -224,7 +224,7 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                             if ( !thisWindow->MacDoRedraw( cEvent.GetTicks() ) )
                             {
                                // for native controls: call their native paint method
-                                if ( !thisWindow->MacIsUserPane() ||
+                                if ( !thisWindow->MacIsUserPane() || 
                                     ( thisWindow->IsTopLevel() && thisWindow->GetBackgroundStyle() == wxBG_STYLE_SYSTEM ) )
                                 {
                                     if ( thisWindow->GetBackgroundStyle() != wxBG_STYLE_TRANSPARENT )
@@ -234,7 +234,7 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                                     }
                                 }
                             }
-                            else
+                            else 
                             {
                                 result = noErr ;
                             }
@@ -309,8 +309,8 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                         thisWindow->GetCaret()->OnKillFocus();
 #endif
 
-                    wxLogTrace(wxT("Focus"), wxT("focus lost(%p)"), static_cast<void*>(thisWindow));
-
+                    wxLogTrace(_T("Focus"), _T("focus lost(%p)"), static_cast<void*>(thisWindow));
+                    
                     // remove this as soon as posting the synthesized event works properly
                     static bool inKillFocusEvent = false ;
 
@@ -329,7 +329,7 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                 {
                     // set focus
                     // panel wants to track the window which was the last to have focus in it
-                    wxLogTrace(wxT("Focus"), wxT("focus set(%p)"), static_cast<void*>(thisWindow));
+                    wxLogTrace(_T("Focus"), _T("focus set(%p)"), static_cast<void*>(thisWindow));
                     wxChildFocusEvent eventFocus((wxWindow*)thisWindow);
                     thisWindow->HandleWindowEvent(eventFocus);
 
@@ -357,14 +357,14 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                 if ( controlPart != kControlFocusNoPart )
                 {
                     targetFocusWindow = thisWindow;
-                    wxLogTrace(wxT("Focus"), wxT("focus to be set(%p)"), static_cast<void*>(thisWindow));
+                    wxLogTrace(_T("Focus"), _T("focus to be set(%p)"), static_cast<void*>(thisWindow));
                 }
                 else
                 {
                     formerFocusWindow = thisWindow;
-                    wxLogTrace(wxT("Focus"), wxT("focus to be lost(%p)"), static_cast<void*>(thisWindow));
+                    wxLogTrace(_T("Focus"), _T("focus to be lost(%p)"), static_cast<void*>(thisWindow));
                 }
-
+                
                 ControlPartCode previousControlPart = 0;
                 verify_noerr( HIViewGetFocusPart(controlRef, &previousControlPart));
 
@@ -397,7 +397,7 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                         iEvent.SetParameter<EventTargetRef>( kEventParamPostTarget, typeEventTargetRef, GetControlEventTarget( controlRef ) );
                         iEvent.SetParameter<ControlPartCode>( kEventParamControlPreviousPart, typeControlPartCode, previousControlPart );
                         iEvent.SetParameter<ControlPartCode>( kEventParamControlCurrentPart, typeControlPartCode, currentControlPart );
-
+        
 #if 1
                         // TODO test this first, avoid double posts etc...
                         PostEventToQueue( GetMainEventQueue(), evRef , kEventPriorityHigh );
@@ -415,7 +415,7 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                             thisWindow->GetCaret()->OnKillFocus();
 #endif
 
-                        wxLogTrace(wxT("Focus"), wxT("focus lost(%p)"), static_cast<void*>(thisWindow));
+                        wxLogTrace(_T("Focus"), _T("focus lost(%p)"), static_cast<void*>(thisWindow));
 
                         static bool inKillFocusEvent = false ;
 
@@ -431,7 +431,7 @@ static pascal OSStatus wxMacWindowControlEventHandler( EventHandlerCallRef handl
                     else
                     {
                         // panel wants to track the window which was the last to have focus in it
-                        wxLogTrace(wxT("Focus"), wxT("focus set(%p)"), static_cast<void*>(thisWindow));
+                        wxLogTrace(_T("Focus"), _T("focus set(%p)"), static_cast<void*>(thisWindow));
                         wxChildFocusEvent eventFocus((wxWindow*)thisWindow);
                         thisWindow->HandleWindowEvent(eventFocus);
 
@@ -792,7 +792,7 @@ pascal void wxMacLiveScrollbarActionProc( ControlRef control , ControlPartCode p
     {
         wxWindow*  wx = wxFindWindowFromWXWidget(  (WXWidget) control ) ;
         if ( wx )
-        {
+        {   
             wxEventType scrollEvent = wxEVT_NULL;
             switch ( partCode )
             {
@@ -825,12 +825,12 @@ pascal void wxMacLiveScrollbarActionProc( ControlRef control , ControlPartCode p
 }
 wxMAC_DEFINE_PROC_GETTER( ControlActionUPP , wxMacLiveScrollbarActionProc ) ;
 
-wxWidgetImplType* wxWidgetImpl::CreateUserPane( wxWindowMac* wxpeer,
-                            wxWindowMac* WXUNUSED(parent),
-                            wxWindowID WXUNUSED(id),
-                            const wxPoint& pos,
+wxWidgetImplType* wxWidgetImpl::CreateUserPane( wxWindowMac* wxpeer, 
+                            wxWindowMac* WXUNUSED(parent), 
+                            wxWindowID WXUNUSED(id), 
+                            const wxPoint& pos, 
                             const wxSize& size,
-                            long WXUNUSED(style),
+                            long WXUNUSED(style), 
                             long WXUNUSED(extraStyle))
 {
     OSStatus err = noErr;
@@ -925,7 +925,7 @@ void wxMacControl::Raise()
 {
     verify_noerr( HIViewSetZOrder( m_controlRef, kHIViewZOrderAbove, NULL ) );
 }
-
+    
 void wxMacControl::Lower()
 {
     verify_noerr( HIViewSetZOrder( m_controlRef, kHIViewZOrderBelow, NULL ) );
@@ -934,16 +934,13 @@ void wxMacControl::Lower()
 void wxMacControl::GetContentArea(int &left , int &top , int &width , int &height) const
 {
     HIShapeRef rgn = NULL;
-    Rect content ;
+    Rect content ;  
 
     if ( HIViewCopyShape(m_controlRef, kHIViewContentMetaPart, &rgn) == noErr)
     {
         CGRect cgrect;
         HIShapeGetBounds(rgn, &cgrect);
-        content = (Rect){ (short)cgrect.origin.y,
-                          (short)cgrect.origin.x,
-                          (short)(cgrect.origin.y+cgrect.size.height),
-                          (short)(cgrect.origin.x+cgrect.size.width) };
+        content = (Rect){ cgrect.origin.y, cgrect.origin.x, cgrect.origin.y+cgrect.size.height, cgrect.origin.x+cgrect.size.width };
         CFRelease(rgn);
     }
     else
@@ -984,7 +981,7 @@ void wxMacControl::GetSize( int &width, int &height ) const
     height = r.bottom - r.top;
 }
 
-void wxMacControl::SetControlSize( wxWindowVariant variant )
+void wxMacControl::SetControlSize( wxWindowVariant variant ) 
 {
     ControlSize size ;
     switch ( variant )
@@ -1007,7 +1004,7 @@ void wxMacControl::SetControlSize( wxWindowVariant variant )
             break ;
 
         default:
-            wxFAIL_MSG(wxT("unexpected window variant"));
+            wxFAIL_MSG(_T("unexpected window variant"));
             break ;
     }
 
@@ -1090,7 +1087,7 @@ bool wxMacControl::SetFocus()
     if ( err == errCouldntSetFocus )
         return false ;
     SetUserFocusWindow(GetControlOwner( m_controlRef ) );
-
+    
     return true;
 }
 
@@ -1467,19 +1464,9 @@ wxMacControl* wxMacControl::GetReferenceFromNativeControl(ControlRef control)
     return NULL;
 }
 
-wxBitmap wxMacControl::GetBitmap() const
-{
-    return wxNullBitmap;
-}
-
 void wxMacControl::SetBitmap( const wxBitmap& WXUNUSED(bmp) )
 {
     // implemented in the respective subclasses
-}
-
-void wxMacControl::SetBitmapPosition( wxDirection WXUNUSED(dir) )
-{
-    // implemented in the same subclasses that implement SetBitmap()
 }
 
 void wxMacControl::SetScrollThumb( wxInt32 WXUNUSED(pos), wxInt32 WXUNUSED(viewsize) )
@@ -1500,11 +1487,11 @@ OSStatus wxMacControl::SetTabEnabled( SInt16 tabNo , bool enable )
 
 // Control Factory
 
-wxWidgetImplType* wxWidgetImpl::CreateContentView( wxNonOwnedWindow* now )
+wxWidgetImplType* wxWidgetImpl::CreateContentView( wxNonOwnedWindow* now ) 
 {
     // There is a bug in 10.2.X for ::GetRootControl returning the window view instead of
     // the content view, so we have to retrieve it explicitly
-
+    
     wxMacControl* contentview = new wxMacControl(now , true /*isRootControl*/);
     HIViewFindByID( HIViewGetRoot( (WindowRef) now->GetWXWindow() ) , kHIViewWindowContentID ,
         contentview->GetControlRefAddr() ) ;

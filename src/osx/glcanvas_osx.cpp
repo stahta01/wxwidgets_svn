@@ -35,8 +35,6 @@
 
 #include "wx/osx/private.h"
 
-#include <AGL/agl.h>
-
 // ----------------------------------------------------------------------------
 // wxGLCanvas
 // ----------------------------------------------------------------------------
@@ -150,7 +148,7 @@ bool wxGLCanvasBase::IsDisplaySupported(const int *attribList)
 bool wxGLCanvas::SwapBuffers()
 {
     WXGLContext context = WXGLGetCurrentContext();
-    wxCHECK_MSG(context, false, wxT("should have current context"));
+    wxCHECK_MSG(context, false, _T("should have current context"));
 
     WXGLSwapBuffers(context);
     return true;
@@ -164,12 +162,8 @@ bool wxGLCanvasBase::IsExtensionSupported(const char *extension)
     if ( !ctx )
         return false;
 
-    WXGLContext ctxOld = WXGLGetCurrentContext();
-    WXGLSetCurrentContext(ctx);
-
     wxString extensions = wxString::FromAscii(glGetString(GL_EXTENSIONS));
 
-    WXGLSetCurrentContext(ctxOld);
     WXGLDestroyPixelFormat(fmt);
     WXGLDestroyContext(ctx);
 

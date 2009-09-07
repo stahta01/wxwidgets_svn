@@ -13,7 +13,8 @@
 #define _WX_ICONBNDL_H_
 
 #include "wx/gdiobj.h"
-#include "wx/gdicmn.h"      // for wxSize
+// for wxSize
+#include "wx/gdicmn.h"
 #include "wx/icon.h"
 
 #include "wx/dynarray.h"
@@ -32,10 +33,10 @@ public:
     wxIconBundle();
 
     // initializes the bundle with the icon(s) found in the file
-#if wxUSE_STREAMS
     wxIconBundle(const wxString& file, wxBitmapType type = wxBITMAP_TYPE_ANY);
+#if wxUSE_STREAMS
     wxIconBundle(wxInputStream& stream, wxBitmapType type = wxBITMAP_TYPE_ANY);
-#endif // wxUSE_STREAMS
+#endif
 
     // initializes the bundle with a single icon
     wxIconBundle(const wxIcon& icon);
@@ -45,10 +46,10 @@ public:
     // adds all the icons contained in the file to the collection,
     // if the collection already contains icons with the same
     // width and height, they are replaced
-#if wxUSE_STREAMS
     void AddIcon(const wxString& file, wxBitmapType type = wxBITMAP_TYPE_ANY);
+#if wxUSE_STREAMS
     void AddIcon(wxInputStream& stream, wxBitmapType type = wxBITMAP_TYPE_ANY);
-#endif // wxUSE_STREAMS
+#endif
 
     // adds the icon to the collection, if the collection already
     // contains an icon with the same width and height, it is

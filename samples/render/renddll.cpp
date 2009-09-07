@@ -27,19 +27,15 @@ class MyDllRenderer : public wxDelegateRendererNative
 {
 public:
     // draw the header control button (used by wxListCtrl)
-    virtual int DrawHeaderButton(wxWindow * WXUNUSED(win),
-                                 wxDC& dc,
-                                 const wxRect& rect,
-                                 int WXUNUSED(flags) = 0,
-                                 wxHeaderSortIconType WXUNUSED(sortArrow) = wxHDR_SORT_ICON_NONE,
-                                 wxHeaderButtonParams* WXUNUSED(params) = NULL)
+    virtual void DrawHeaderButton(wxWindow *win,
+                                  wxDC& dc,
+                                  const wxRect& rect,
+                                  int flags = 0)
     {
         dc.SetBrush(*wxCYAN_BRUSH);
         dc.SetTextForeground(*wxRED);
         dc.DrawRoundedRectangle(rect, 10);
-        dc.DrawLabel("MyDllRenderer", wxNullBitmap, rect, wxALIGN_CENTER);
-
-        return dc.GetTextExtent("MyDllRenderer").x;
+        dc.DrawLabel(_T("MyDllRenderer"), wxNullBitmap, rect, wxALIGN_CENTER);
     }
 
     virtual wxRendererVersion GetVersion() const
@@ -51,12 +47,12 @@ public:
 #if 0 // just for debugging
     MyDllRenderer()
     {
-        wxMessageBox(wxT("Creating MyDllRenderer"), wxT("Renderer Sample"));
+        wxMessageBox(_T("Creating MyDllRenderer"), _T("Renderer Sample"));
     }
 
     virtual ~MyDllRenderer()
     {
-        wxMessageBox(wxT("Deleting MyDllRenderer"), wxT("Renderer Sample"));
+        wxMessageBox(_T("Deleting MyDllRenderer"), _T("Renderer Sample"));
     }
 #endif // 0
 };

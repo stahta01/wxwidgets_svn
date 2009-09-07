@@ -36,27 +36,6 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxCalendarCtrl, wxControl)
 
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-namespace
-{
-
-// values of week days used by the native control
-enum
-{
-    MonthCal_Monday,
-    MonthCal_Tuesday,
-    MonthCal_Wednesday,
-    MonthCal_Thursday,
-    MonthCal_Friday,
-    MonthCal_Saturday,
-    MonthCal_Sunday
-};
-
-} // anonymous namespace
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -106,7 +85,7 @@ wxCalendarCtrl::Create(wxWindow *parent,
         }
         else
         {
-            wxLogLastError(wxT("GetClassInfoEx(SysMonthCal32)"));
+            wxLogLastError(_T("GetClassInfoEx(SysMonthCal32)"));
         }
     }
 
@@ -117,7 +96,7 @@ wxCalendarCtrl::Create(wxWindow *parent,
     if ( !MSWCreateControl(clsname, wxEmptyString, pos, size) )
         return false;
 
-    // initialize the control
+    // initialize the control 
     UpdateFirstDayOfWeek();
 
     SetDate(dt.IsValid() ? dt : wxDateTime::Today());
@@ -187,15 +166,6 @@ wxCalendarCtrl::HitTest(const wxPoint& pos,
                         wxDateTime::WeekDay *wd)
 {
     WinStruct<MCHITTESTINFO> hti;
-
-    // Vista and later SDKs add a few extra fields to MCHITTESTINFO which are
-    // not supported by the previous versions, as we don't use them anyhow we
-    // should pretend that we always use the old struct format to make the call
-    // below work on pre-Vista systems (see #11057)
-#ifdef MCHITTESTINFO_V1_SIZE
-    hti.cbSize = MCHITTESTINFO_V1_SIZE;
-#endif
-
     hti.pt.x = pos.x;
     hti.pt.y = pos.y;
     switch ( MonthCal_HitTest(GetHwnd(), &hti) )
@@ -220,26 +190,7 @@ wxCalendarCtrl::HitTest(const wxPoint& pos,
         case MCHT_CALENDARDAY:
             if ( wd )
             {
-                int day = hti.st.wDayOfWeek;
-
-                // the native control returns incorrect day of the week when
-                // the first day isn't Monday, i.e. the first column is always
-                // "Monday" even if its label is "Sunday", compensate for it
-                const int first = LOWORD(MonthCal_GetFirstDayOfWeek(GetHwnd()));
-                if ( first == MonthCal_Monday )
-                {
-                    // as MonthCal_Monday is 0 while wxDateTime::Mon is 1,
-                    // normally we need to do this to transform from MSW
-                    // convention to wx one
-                    day++;
-                    day %= 7;
-                }
-                //else: but when the first day is MonthCal_Sunday, the native
-                //      control still returns 0 (i.e. MonthCal_Monday) for the
-                //      first column which looks like a bug in it but to work
-                //      around it it's enough to not apply the correction above
-
-                *wd = static_cast<wxDateTime::WeekDay>(day);
+                *wd = static_cast<wxDateTime::WeekDay>(hti.st.wDayOfWeek);
             }
             return wxCAL_HITTEST_HEADER;
 
@@ -267,7 +218,7 @@ bool wxCalendarCtrl::SetDate(const wxDateTime& dt)
     dt.GetAsMSWSysTime(&st);
     if ( !MonthCal_SetCurSel(GetHwnd(), &st) )
     {
-        wxLogDebug(wxT("DateTime_SetSystemtime() failed"));
+        wxLogDebug(_T("DateTime_SetSystemtime() failed"));
 
         return false;
     }
@@ -315,7 +266,7 @@ bool wxCalendarCtrl::SetDateRange(const wxDateTime& dt1, const wxDateTime& dt2)
 
     if ( !MonthCal_SetRange(GetHwnd(), flags, st) )
     {
-        wxLogDebug(wxT("MonthCal_SetRange() failed"));
+        wxLogDebug(_T("MonthCal_SetRange() failed"));
     }
 
     return flags != 0;
@@ -410,15 +361,13 @@ void wxCalendarCtrl::UpdateMarks()
 
     if ( !MonthCal_SetDayState(GetHwnd(), nMonths, states) )
     {
-        wxLogLastError(wxT("MonthCal_SetDayState"));
+        wxLogLastError(_T("MonthCal_SetDayState"));
     }
 }
 
 void wxCalendarCtrl::UpdateFirstDayOfWeek()
 {
-    MonthCal_SetFirstDayOfWeek(GetHwnd(),
-                               HasFlag(wxCAL_MONDAY_FIRST) ? MonthCal_Monday
-                                                           : MonthCal_Sunday);
+    MonthCal_SetFirstDayOfWeek(GetHwnd(), HasFlag(wxCAL_MONDAY_FIRST) ? 0 : 6);
 }
 
 // ----------------------------------------------------------------------------

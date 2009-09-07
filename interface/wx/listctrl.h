@@ -151,10 +151,9 @@ public:
             Window identifier. The value wxID_ANY indicates a default value.
         @param pos
             Window position.
-            If ::wxDefaultPosition is specified then a default position is chosen.
         @param size
             Window size.
-            If ::wxDefaultSize is specified then the window is sized appropriately.
+            If wxDefaultSize is specified then the window is sized appropriately.
         @param style
             Window style. See wxListCtrl.
         @param validator
@@ -843,7 +842,7 @@ public:
         using the specified @a fnSortCallBack function. This function must have the
         following prototype:
         @code
-        int wxCALLBACK wxListCompareFunction(long item1, long item2, wxIntPtr sortData)
+        int wxCALLBACK wxListCompareFunction(long item1, long item2, long sortData)
         @endcode
 
         It is called each time when the two items must be compared and should return 0
@@ -861,7 +860,7 @@ public:
 
         Please see the @ref page_samples_listctrl for an example of using this function.
     */
-    bool SortItems(wxListCtrlCompare fnSortCallBack, wxIntPtr data);
+    bool SortItems(wxListCtrlCompare fnSortCallBack, long data);
 
 protected:
 

@@ -108,7 +108,7 @@ void wxPGCellRenderer::DrawEditorValue( wxDC& dc, const wxRect& rect,
 
     if ( editor )
     {
-        wxRect rect2(rect);
+        wxRect rect2(rect); 
         rect2.x += xOffset;
         rect2.y += yOffset;
         rect2.height -= yOffset;
@@ -613,15 +613,6 @@ bool wxPGProperty::IsSomeParent( wxPGProperty* candidate ) const
     return false;
 }
 
-void wxPGProperty::SetName( const wxString& newName )
-{
-    wxPropertyGrid* pg = GetGrid();
-
-    if ( pg )
-        pg->SetPropertyName(this, newName);
-    else
-        DoSetName(newName);
-}
 
 wxString wxPGProperty::GetName() const
 {
@@ -721,7 +712,7 @@ void wxPGProperty::GetDisplayInfo( unsigned int column,
 /*
 wxString wxPGProperty::GetColumnText( unsigned int col, int choiceIndex ) const
 {
-
+    
     if ( col != 1 || choiceIndex == wxNOT_FOUND )
     {
         const wxPGCell& cell = GetCell(col);
@@ -827,7 +818,7 @@ void wxPGProperty::DoGenerateComposedValue( wxString& text,
                                             argFlags|wxPG_COMPOSITE_FRAGMENT);
             }
         }
-
+ 
         if ( childResults && curChild->GetChildCount() )
             (*childResults)[curChild->GetName()] = s;
 
@@ -1362,7 +1353,10 @@ void wxPGProperty::SetValueInEvent( wxVariant value ) const
 
 void wxPGProperty::SetFlagRecursively( FlagType flag, bool set )
 {
-    ChangeFlag(flag, set);
+    if ( set )
+        SetFlag(flag);
+    else
+        ClearFlag(flag);
 
     unsigned int i;
     for ( i = 0; i < GetChildCount(); i++ )
@@ -1381,7 +1375,7 @@ void wxPGProperty::RefreshEditor()
 
 wxVariant wxPGProperty::GetDefaultValue() const
 {
-    wxVariant defVal = GetAttribute(wxPG_ATTR_DEFAULT_VALUE);
+    wxVariant defVal = GetAttribute(wxS("DefaultValue"));
     if ( !defVal.IsNull() )
         return defVal;
 
@@ -1511,7 +1505,7 @@ const wxPGCell& wxPGProperty::GetCell( unsigned int column ) const
     return pg->GetPropertyDefaultCell();
 }
 
-wxPGCell& wxPGProperty::GetOrCreateCell( unsigned int column )
+wxPGCell& wxPGProperty::GetCell( unsigned int column )
 {
     EnsureCells(column);
     return m_cells[column];
@@ -1643,20 +1637,18 @@ long wxPGProperty::GetAttributeAsLong( const wxString& name, long defVal ) const
 {
     wxVariant variant = m_attributes.FindValue(name);
 
-    if ( variant.IsNull() )
-        return defVal;
-
-    return variant.GetLong();
+    return wxPGVariantToInt(variant, defVal);
 }
 
 double wxPGProperty::GetAttributeAsDouble( const wxString& name, double defVal ) const
 {
+    double retVal;
     wxVariant variant = m_attributes.FindValue(name);
 
-    if ( variant.IsNull() )
-        return defVal;
+    if ( wxPGVariantToDouble(variant, &retVal) )
+        return retVal;
 
-    return variant.GetDouble();
+    return defVal;
 }
 
 wxVariant wxPGProperty::GetAttributesAsList() const
@@ -2174,10 +2166,7 @@ void wxPGProperty::AdaptListToValue( wxVariant& list, wxVariant* value ) const
             }
 
             if ( allChildrenSpecified )
-            {
-                *value = ChildChanged(*value, i, childValue);
-            }
-
+                ChildChanged(*value, i, childValue);
             n++;
             if ( n == (unsigned int)list.GetCount() )
                 break;
@@ -2288,9 +2277,7 @@ int wxPGProperty::GetChildrenHeight( int lh, int iMax_ ) const
     return h;
 }
 
-wxPGProperty* wxPGProperty::GetItemAtY( unsigned int y,
-                                        unsigned int lh,
-                                        unsigned int* nextItemY ) const
+wxPGProperty* wxPGProperty::GetItemAtY( unsigned int y, unsigned int lh, unsigned int* nextItemY ) const
 {
     wxASSERT( nextItemY );
 
@@ -2340,16 +2327,18 @@ wxPGProperty* wxPGProperty::GetItemAtY( unsigned int y,
 
     /*
     if ( current )
-    {
         wxLogDebug(wxT("%s::GetItemAtY(%i) -> %s"),this->GetLabel().c_str(),y,current->GetLabel().c_str());
-    }
     else
-    {
         wxLogDebug(wxT("%s::GetItemAtY(%i) -> NULL"),this->GetLabel().c_str(),y);
-    }
     */
 
     return (wxPGProperty*) result;
+}
+
+wxPGProperty* wxPGProperty::GetItemAtY( unsigned int y ) const
+{
+    unsigned int nextItemY;
+    return GetItemAtY(y, GetGrid()->GetRowHeight(), &nextItemY);
 }
 
 void wxPGProperty::Empty()
@@ -2366,12 +2355,6 @@ void wxPGProperty::Empty()
     m_children.clear();
 }
 
-wxPGProperty* wxPGProperty::GetItemAtY( unsigned int y ) const
-{
-    unsigned int nextItem;
-    return GetItemAtY( y, GetGrid()->GetRowHeight(), &nextItem);
-}
-
 void wxPGProperty::DeleteChildren()
 {
     wxPropertyGridPageState* state = m_parentState;
@@ -2383,11 +2366,10 @@ void wxPGProperty::DeleteChildren()
     }
 }
 
-wxVariant wxPGProperty::ChildChanged( wxVariant& WXUNUSED(thisValue),
-                                      int WXUNUSED(childIndex),
-                                      wxVariant& WXUNUSED(childValue) ) const
+void wxPGProperty::ChildChanged( wxVariant& WXUNUSED(thisValue),
+                                 int WXUNUSED(childIndex),
+                                 wxVariant& WXUNUSED(childValue) ) const
 {
-    return wxNullVariant;
 }
 
 bool wxPGProperty::AreAllChildrenSpecified( wxVariant* pendingList ) const
@@ -2578,14 +2560,14 @@ int wxPropertyCategory::GetTextExtent( const wxWindow* wnd, const wxFont& font )
     if ( m_textExtent > 0 )
         return m_textExtent;
     int x = 0, y = 0;
-    ((wxWindow*)wnd)->GetTextExtent( m_label, &x, &y, 0, 0, &font );
+	((wxWindow*)wnd)->GetTextExtent( m_label, &x, &y, 0, 0, &font );
     return x;
 }
 
 void wxPropertyCategory::CalculateTextExtent( wxWindow* wnd, const wxFont& font )
 {
     int x = 0, y = 0;
-    wnd->GetTextExtent( m_label, &x, &y, 0, 0, &font );
+	wnd->GetTextExtent( m_label, &x, &y, 0, 0, &font );
     m_textExtent = x;
 }
 
@@ -2697,7 +2679,7 @@ void wxPGChoices::RemoveAt(size_t nIndex, size_t count)
 {
     AllocExclusive();
 
-    wxASSERT( m_data->GetRefCount() != -1 );
+    wxASSERT( m_data->m_refCount != 0xFFFFFFF );
     m_data->m_items.erase(m_data->m_items.begin()+nIndex,
                           m_data->m_items.begin()+nIndex+count);
 }
@@ -2813,7 +2795,7 @@ void wxPGChoices::AllocExclusive()
 {
     EnsureData();
 
-    if ( m_data->GetRefCount() != 1 )
+    if ( m_data->m_refCount != 1 )
     {
         wxPGChoicesData* data = new wxPGChoicesData();
         data->CopyDataFrom(m_data);
@@ -2831,7 +2813,7 @@ void wxPGChoices::AssignData( wxPGChoicesData* data )
     if ( data != wxPGChoicesEmptyData )
     {
         m_data = data;
-        data->IncRef();
+        data->m_refCount++;
     }
 }
 

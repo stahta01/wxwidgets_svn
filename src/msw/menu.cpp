@@ -118,9 +118,7 @@ UINT GetMenuState(HMENU hMenu, UINT id, UINT flags)
     info.fMask = MIIM_STATE;
     // MF_BYCOMMAND is zero so test MF_BYPOSITION
     if ( !::GetMenuItemInfo(hMenu, id, flags & MF_BYPOSITION ? TRUE : FALSE , & info) )
-    {
         wxLogLastError(wxT("GetMenuItemInfo"));
-    }
     return info.fState;
 }
 #endif // __WXWINCE__
@@ -564,16 +562,14 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
                 // the app from starting up under Windows 95/NT 4
                 typedef BOOL (WINAPI *SetMenuInfo_t)(HMENU, MENUINFO *);
 
-                wxDynamicLibrary dllUser(wxT("user32"));
+                wxDynamicLibrary dllUser(_T("user32"));
                 wxDYNLIB_FUNCTION(SetMenuInfo_t, SetMenuInfo, dllUser);
                 if ( pfnSetMenuInfo )
                 {
                     mi.fMask = MIM_STYLE;
                     mi.dwStyle = MNS_CHECKORBMP;
                     if ( !(*pfnSetMenuInfo)(GetHmenu(), &mi) )
-                    {
-                        wxLogLastError(wxT("SetMenuInfo(MNS_NOCHECK)"));
-                    }
+                        wxLogLastError(_T("SetMenuInfo(MNS_NOCHECK)"));
                 }
 
                 // tell the item that it's not really owner-drawn but only
@@ -639,7 +635,7 @@ void wxMenu::EndRadioGroup()
 
 wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
 {
-    wxCHECK_MSG( item, NULL, wxT("NULL item in wxMenu::DoAppend") );
+    wxCHECK_MSG( item, NULL, _T("NULL item in wxMenu::DoAppend") );
 
     bool check = false;
 
@@ -671,7 +667,7 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
             }
             else
             {
-                wxFAIL_MSG( wxT("where is the radio group start item?") );
+                wxFAIL_MSG( _T("where is the radio group start item?") );
             }
         }
     }
@@ -1450,13 +1446,9 @@ bool wxMenuBar::AddAdornments(long style)
     if (style & wxCLOSE_BOX)
     {
         if (!CommandBar_AddAdornments((HWND) m_commandBar, 0, 0))
-        {
             wxLogLastError(wxT("CommandBar_AddAdornments"));
-        }
         else
-        {
             return true;
-        }
     }
     return false;
 }

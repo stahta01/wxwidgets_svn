@@ -100,7 +100,7 @@ bool wxHtmlHelpFrame::Create(wxWindow* parent, wxWindowID id,
     m_HtmlHelpWin->SetController(m_helpController);
     if ( config)
         m_HtmlHelpWin->UseConfig(config, rootpath);
-
+    
     wxFrame::Create(parent, id, _("Help"),
                     wxPoint(m_HtmlHelpWin->GetCfgData().x, m_HtmlHelpWin->GetCfgData().y),
                     wxSize(m_HtmlHelpWin->GetCfgData().w, m_HtmlHelpWin->GetCfgData().h),
@@ -113,7 +113,7 @@ bool wxHtmlHelpFrame::Create(wxWindow* parent, wxWindowID id,
 
     GetPosition(& (m_HtmlHelpWin->GetCfgData().x), & (m_HtmlHelpWin->GetCfgData()).y);
 
-    SetIcons(wxArtProvider::GetIconBundle(wxART_HELP, wxART_FRAME_ICON));
+    SetIcon(wxArtProvider::GetIcon(wxART_HELP, wxART_FRAME_ICON));
 
     // On the Mac, each modeless frame must have a menubar.
     // TODO: add more menu items, and perhaps add a style to show

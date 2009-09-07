@@ -26,7 +26,7 @@ class WXDLLIMPEXP_CORE wxDirDialog: public wxDirDialogBase
 public:
     wxDirDialog(wxWindow *parent,
                 const wxString& message = wxDirSelectorPromptStr,
-                const wxString& defaultPath = wxT(""),
+                const wxString& defaultPath = _T(""),
                 long style = wxDD_DEFAULT_STYLE,
                 const wxPoint& pos = wxDefaultPosition,
                 const wxSize& size = wxDefaultSize,
@@ -34,7 +34,7 @@ public:
     virtual ~wxDirDialog();
 
     virtual int ShowModal();
-
+    
     inline WX_NSSavePanel GetNSSavePanel()
     {   return (WX_NSSavePanel)m_cocoaNSWindow; }
 

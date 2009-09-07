@@ -37,7 +37,7 @@
 #include "wx/unix/private/epolldispatcher.h"
 #include "wx/private/selectdispatcher.h"
 
-#define TRACE_EVENTS wxT("events")
+#define TRACE_EVENTS _T("events")
 
 // ===========================================================================
 // wxEventLoop::PipeIOHandler implementation
@@ -200,8 +200,7 @@ bool wxConsoleEventLoop::Pending() const
 
 bool wxConsoleEventLoop::Dispatch()
 {
-    DispatchTimeout(static_cast<unsigned long>(
-        wxFDIODispatcher::TIMEOUT_INFINITE));
+    DispatchTimeout(wxFDIODispatcher::TIMEOUT_INFINITE);
 
     return true;
 }

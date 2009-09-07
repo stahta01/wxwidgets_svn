@@ -98,7 +98,7 @@ bool wxGUIEventLoop::Pending() const
 
 bool wxGUIEventLoop::Dispatch()
 {
-    wxCHECK_MSG( IsRunning(), false, wxT("can't call Dispatch() if not running") );
+    wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
 
     // gtk_main_iteration() returns TRUE only if gtk_main_quit() was called
     return !gtk_main_iteration();
@@ -138,11 +138,11 @@ static void wxgtk_main_do_event(GdkEvent *event, wxGUIEventLoop* evtloop)
     // categorize the GDK event according to wxEventCategory.
     // See http://library.gnome.org/devel/gdk/unstable/gdk-Events.html#GdkEventType
     // for more info.
-
+    
     // NOTE: GDK_* constants which were not present in the GDK2.0 can be tested for
     //       only at compile-time; when running the program (compiled with a recent GDK)
-    //       on a system with an older GDK lib we can be sure there won't be problems
-    //       because event->type will never assume those values corresponding to
+    //       on a system with an older GDK lib we can be sure there won't be problems 
+    //       because event->type will never assume those values corresponding to 
     //       new event types (since new event types are always added in GDK with non
     //       conflicting values for ABI compatibility).
 

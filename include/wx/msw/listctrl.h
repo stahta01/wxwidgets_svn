@@ -14,10 +14,8 @@
 
 #include "wx/textctrl.h"
 #include "wx/dynarray.h"
-#include "wx/vector.h"
 
 class WXDLLIMPEXP_FWD_CORE wxImageList;
-class wxMSWListItemData;
 
 // define this symbol to indicate the availability of SetColumnsOrder() and
 // related functions
@@ -355,7 +353,7 @@ public:
     // or zero if the two items are equivalent.
 
     // data is arbitrary data to be passed to the sort function.
-    bool SortItems(wxListCtrlCompare fn, wxIntPtr data);
+    bool SortItems(wxListCtrlCompare fn, long data);
 
     // IMPLEMENTATION
     virtual bool MSWCommand(WXUINT param, WXWORD id);
@@ -402,9 +400,6 @@ protected:
     // free memory taken by all internal data
     void FreeAllInternalData();
 
-    // get the internal data object for this item (may return NULL)
-    wxMSWListItemData *MSWGetItemData(long item) const;
-
     // get the item attribute, either by quering it for virtual control, or by
     // returning the one previously set using setter methods for a normal one
     wxListItemAttr *DoGetItemColumnAttr(long item, long column) const;
@@ -422,9 +417,10 @@ protected:
                                     // keep track of inserted/deleted columns
     long              m_count;      // Keep track of item count to save calls to
                                     // ListView_GetItemCount
+    bool              m_ignoreChangeMessages;
 
-    // all wxMSWListItemData objects we use
-    wxVector<wxMSWListItemData *> m_internalData;
+    // true if we have any internal data (user data & attributes)
+    bool m_AnyInternalData;
 
     // true if we have any items with custom attributes
     bool m_hasAnyAttr;

@@ -43,11 +43,11 @@ public:
         @param id
             Window identifier. The value wxID_ANY indicates a default value.
         @param pos
-            Window position. 
-            If ::wxDefaultPosition is specified then a default position is chosen.
+            Window position. If wxDefaultPosition is specified then a default
+        position is chosen.
         @param size
-            Window size. 
-            If ::wxDefaultSize is specified then a default size is chosen.
+            Window size. If wxDefaultSize is specified then a default size
+        is chosen.
         @param style
             Window style. See wxSpinButton.
         @param min
@@ -70,7 +70,7 @@ public:
                long style = wxSP_ARROW_KEYS,
                double min = 0, double max = 100,
                double initial = 0, double inc = 1,
-               const wxString& name = wxT("wxSpinCtrlDouble"));
+               const wxString& name = _T("wxSpinCtrlDouble"));
 
     /**
         Creation function called by the spin control constructor.

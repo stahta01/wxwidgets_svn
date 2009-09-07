@@ -35,6 +35,10 @@
 // wxConsoleAppTraits implementation
 // ============================================================================
 
+void wxConsoleAppTraits::AlwaysYield()
+{
+}
+
 void *wxConsoleAppTraits::BeforeChildWaitLoop()
 {
     return NULL;

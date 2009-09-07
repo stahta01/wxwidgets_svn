@@ -21,7 +21,6 @@
 #include "wx/arrstr.h"
 #include "wx/list.h"
 #include "wx/cpp.h"
-#include "wx/longlong.h"
 
 #if wxUSE_DATETIME
     #include "wx/datetime.h"
@@ -33,6 +32,10 @@
  * wxVariantData stores the actual data in a wxVariant object,
  * to allow it to store any type of data.
  * Derive from this to provide custom data handling.
+ *
+ * NB: To prevent addition of extra vtbl pointer to wxVariantData,
+ *     we don't multiple-inherit from wxObjectRefData. Instead,
+ *     we simply replicate the wxObject ref-counting scheme.
  *
  * NB: When you construct a wxVariantData, it will have refcount
  *     of one. Refcount will not be further increased when
@@ -52,11 +55,11 @@
  * overloading wxVariant with unnecessary functionality.
  */
 
-class WXDLLIMPEXP_BASE wxVariantData : public wxObjectRefData
+class WXDLLIMPEXP_BASE wxVariantData
 {
     friend class wxVariant;
 public:
-    wxVariantData() { }
+    wxVariantData() : m_count(1) { }
 
     // Override these to provide common functionality
     virtual bool Eq(wxVariantData& data) const = 0;
@@ -74,15 +77,27 @@ public:
     // If it based on wxObject return the ClassInfo.
     virtual wxClassInfo* GetValueClassInfo() { return NULL; }
 
-    // Implement this to make wxVariant::UnShare work. Returns
+    // Implement this to make wxVariant::AllocExcusive work. Returns
     // a copy of the data.
     virtual wxVariantData* Clone() const { return NULL; }
+
+    void IncRef() { m_count++; }
+    void DecRef()
+    {
+        if ( --m_count == 0 )
+            delete this;
+    }
+
+    int GetRefCount() const { return m_count; }
 
 protected:
     // Protected dtor should make some incompatible code
     // break more louder. That is, they should do data->DecRef()
     // instead of delete data.
     virtual ~wxVariantData() { }
+
+private:
+    int     m_count;
 };
 
 /*
@@ -122,14 +137,14 @@ public:
 
     // For compatibility with wxWidgets <= 2.6, this doesn't increase
     // reference count.
-    wxVariantData* GetData() const
-    {
-        return (wxVariantData*) m_refData;
-    }
+    wxVariantData* GetData() const { return m_data; }
     void SetData(wxVariantData* data) ;
 
     // make a 'clone' of the object
-    void Ref(const wxVariant& clone) { wxObject::Ref(clone); }
+    void Ref(const wxVariant& clone);
+
+    // destroy a reference
+    void UnRef();
 
     // ensure that the data is exclusive to this variant, and not shared
     bool Unshare();
@@ -261,23 +276,6 @@ public:
     void operator= (wxObject* value);
     wxObject* GetWxObjectPtr() const;
 
-#if wxUSE_LONGLONG
-    // wxLongLong
-    wxVariant(wxLongLong, const wxString& name = wxEmptyString);
-    bool operator==(wxLongLong value) const;
-    bool operator!=(wxLongLong value) const;
-    void operator=(wxLongLong value);
-    operator wxLongLong() const { return GetLongLong(); }
-    wxLongLong GetLongLong() const;
-
-    // wxULongLong
-    wxVariant(wxULongLong, const wxString& name = wxEmptyString);
-    bool operator==(wxULongLong value) const;
-    bool operator!=(wxULongLong value) const;
-    void operator=(wxULongLong value);
-    operator wxULongLong() const { return GetULongLong(); }
-    wxULongLong GetULongLong() const;
-#endif
 
     // ------------------------------
     // list operations
@@ -325,16 +323,10 @@ public:
 #if wxUSE_DATETIME
     bool Convert(wxDateTime* value) const;
 #endif // wxUSE_DATETIME
-#if wxUSE_LONGLONG
-    bool Convert(wxLongLong* value) const;
-    bool Convert(wxULongLong* value) const;
-#endif // wxUSE_LONGLONG
 
 // Attributes
 protected:
-    virtual wxObjectRefData *CreateRefData() const;
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
-
+    wxVariantData*  m_data;
     wxString        m_name;
 
 private:

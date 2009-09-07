@@ -23,14 +23,14 @@
 
 static void wxSocket_PM_Input(void *data)
 {
-    wxFDIOHandler *handler = static_cast<wxSocketImplUnix *>(data);
+    wxFDIOHandler *handler = static_cast<wxFDIOHandler *>(data);
 
     handler->OnReadWaiting();
 }
 
 static void wxSocket_PM_Output(void *data)
 {
-    wxFDIOHandler *handler = static_cast<wxSocketImplUnix *>(data);
+    wxFDIOHandler *handler = static_cast<wxFDIOHandler *>(data);
 
     handler->OnWriteWaiting();
 }

@@ -288,7 +288,7 @@ public:
     wxCStrData operator-(ptrdiff_t n) const
     {
         wxASSERT_MSG( n <= (ptrdiff_t)m_offset,
-                      wxT("attempt to construct address before the beginning of the string") );
+                      _T("attempt to construct address before the beginning of the string") );
         return wxCStrData(m_str, m_offset - n, m_owned);
     }
 
@@ -408,7 +408,6 @@ protected:
 #ifdef wxNEEDS_WXSTRING_PRINTF_MIXIN
     // "non dll-interface class 'wxStringPrintfMixin' used as base interface
     // for dll-interface class 'wxString'" -- this is OK in our case
-    #pragma warning (push)
     #pragma warning (disable:4275)
 #endif
 
@@ -1005,8 +1004,8 @@ public:
         { return iterator(str(), wxStringOperations::AddToIter(m_cur, -n)); }
 
   private:
-      iterator(wxString *wxstr, underlying_iterator ptr)
-          : m_cur(ptr), m_node(wxstr, &m_cur) {}
+      iterator(wxString *str, underlying_iterator ptr)
+          : m_cur(ptr), m_node(str, &m_cur) {}
 
       wxString* str() const { return const_cast<wxString*>(m_node.m_str); }
 
@@ -1050,8 +1049,8 @@ public:
 
   private:
       // for internal wxString use only:
-      const_iterator(const wxString *wxstr, underlying_iterator ptr)
-          : m_cur(ptr), m_node(wxstr, &m_cur) {}
+      const_iterator(const wxString *str, underlying_iterator ptr)
+          : m_cur(ptr), m_node(str, &m_cur) {}
 
       const wxString* str() const { return m_node.m_str; }
 
@@ -1513,14 +1512,14 @@ public:
     // get last character
     wxUniChar Last() const
     {
-      wxASSERT_MSG( !empty(), wxT("wxString: index out of bounds") );
+      wxASSERT_MSG( !empty(), _T("wxString: index out of bounds") );
       return *rbegin();
     }
 
     // get writable last character
     wxUniCharRef Last()
     {
-      wxASSERT_MSG( !empty(), wxT("wxString: index out of bounds") );
+      wxASSERT_MSG( !empty(), _T("wxString: index out of bounds") );
       return *rbegin();
     }
 
@@ -1963,7 +1962,7 @@ public:
   {
 #if WXWIN_COMPATIBILITY_2_8 && !wxUSE_STL_BASED_WXSTRING && !wxUSE_UNICODE_UTF8
     wxASSERT_MSG( s.IsValid(),
-                  wxT("did you forget to call UngetWriteBuf()?") );
+                  _T("did you forget to call UngetWriteBuf()?") );
 #endif
 
     append(s);
@@ -2057,36 +2056,36 @@ public:
   // stream-like functions
       // insert an int into string
   wxString& operator<<(int i)
-    { return (*this) << Format(wxT("%d"), i); }
+    { return (*this) << Format(_T("%d"), i); }
       // insert an unsigned int into string
   wxString& operator<<(unsigned int ui)
-    { return (*this) << Format(wxT("%u"), ui); }
+    { return (*this) << Format(_T("%u"), ui); }
       // insert a long into string
   wxString& operator<<(long l)
-    { return (*this) << Format(wxT("%ld"), l); }
+    { return (*this) << Format(_T("%ld"), l); }
       // insert an unsigned long into string
   wxString& operator<<(unsigned long ul)
-    { return (*this) << Format(wxT("%lu"), ul); }
+    { return (*this) << Format(_T("%lu"), ul); }
 #if defined wxLongLong_t && !defined wxLongLongIsLong
       // insert a long long if they exist and aren't longs
   wxString& operator<<(wxLongLong_t ll)
     {
-      const wxChar *fmt = wxT("%") wxLongLongFmtSpec wxT("d");
+      const wxChar *fmt = _T("%") wxLongLongFmtSpec _T("d");
       return (*this) << Format(fmt, ll);
     }
       // insert an unsigned long long
   wxString& operator<<(wxULongLong_t ull)
     {
-      const wxChar *fmt = wxT("%") wxLongLongFmtSpec wxT("u");
+      const wxChar *fmt = _T("%") wxLongLongFmtSpec _T("u");
       return (*this) << Format(fmt , ull);
     }
 #endif // wxLongLong_t && !wxLongLongIsLong
       // insert a float into string
   wxString& operator<<(float f)
-    { return (*this) << Format(wxT("%f"), f); }
+    { return (*this) << Format(_T("%f"), f); }
       // insert a double into string
   wxString& operator<<(double d)
-    { return (*this) << Format(wxT("%g"), d); }
+    { return (*this) << Format(_T("%g"), d); }
 
   // string comparison
     // case-sensitive comparison (returns a value < 0, = 0 or > 0)
@@ -2273,7 +2272,7 @@ public:
       // convert to a double
   bool ToCDouble(double *val) const;
 #endif
-
+  
 #ifndef wxNEEDS_WXSTRING_PRINTF_MIXIN
   // formatted input/output
     // as sprintf(), returns the number of characters written or < 0 on error
@@ -2428,7 +2427,7 @@ public:
                CreateConstIterator(last).impl())
   {
       wxASSERT_MSG( first.m_str == last.m_str,
-                    wxT("pointers must be into the same string") );
+                    _T("pointers must be into the same string") );
   }
 #endif // WXWIN_COMPATIBILITY_STRING_PTR_AS_ITER
 
@@ -3577,7 +3576,7 @@ private:
 };
 
 #ifdef wxNEEDS_WXSTRING_PRINTF_MIXIN
-    #pragma warning (pop)
+    #pragma warning (default:4275)
 #endif
 
 // string iterator operators that satisfy STL Random Access Iterator
@@ -4165,7 +4164,7 @@ inline const wxStringCharType *wxCStrData::AsInternal() const
 inline wxUniChar wxCStrData::operator*() const
 {
     if ( m_str->empty() )
-        return wxUniChar(wxT('\0'));
+        return wxUniChar(_T('\0'));
     else
         return (*m_str)[m_offset];
 }

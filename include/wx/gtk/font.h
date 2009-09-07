@@ -20,9 +20,9 @@ public:
     wxFont() { }
 
     // wxGTK-specific
-    wxFont(const wxString& nativeFontInfoString)
+    wxFont(const wxString& fontname)
     {
-        Create(nativeFontInfoString);
+        Create(fontname);
     }
 
     wxFont(const wxNativeFontInfo& info);
@@ -62,7 +62,7 @@ public:
         Create(10, family, style, weight, underlined, face, encoding);
         SetPixelSize(pixelSize);
     }
-
+    
     bool Create(int size,
                 wxFontFamily family,
                 wxFontStyle style,
@@ -95,7 +95,7 @@ public:
     virtual void SetUnderlined( bool underlined );
     virtual void SetEncoding(wxFontEncoding encoding);
 
-    wxDECLARE_COMMON_FONT_METHODS();
+    WXDECLARE_COMPAT_SETTERS
 
     virtual void SetNoAntiAliasing( bool no = true );
     virtual bool GetNoAntiAliasing() const ;

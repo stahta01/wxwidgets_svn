@@ -53,7 +53,7 @@ extern GdkAtom g_altTextAtom;
 // the trace mask we use with wxLogTrace() - call
 // wxLog::AddTraceMask(TRACE_CLIPBOARD) to enable the trace messages from here
 // (there will be a *lot* of them!)
-#define TRACE_CLIPBOARD wxT("clipboard")
+#define TRACE_CLIPBOARD _T("clipboard")
 
 // ----------------------------------------------------------------------------
 // wxClipboardSync: used to perform clipboard operations synchronously
@@ -69,7 +69,7 @@ class wxClipboardSync
 public:
     wxClipboardSync(wxClipboard& clipboard)
     {
-        wxASSERT_MSG( !ms_clipboard, wxT("reentrancy in clipboard code") );
+        wxASSERT_MSG( !ms_clipboard, _T("reentrancy in clipboard code") );
         ms_clipboard = &clipboard;
     }
 
@@ -84,7 +84,7 @@ public:
     static void OnDone(wxClipboard * WXUNUSED_UNLESS_DEBUG(clipboard))
     {
         wxASSERT_MSG( clipboard == ms_clipboard,
-                        wxT("got notification for alien clipboard") );
+                        _T("got notification for alien clipboard") );
 
         ms_clipboard = NULL;
     }
@@ -138,7 +138,7 @@ targets_selection_received( GtkWidget *WXUNUSED(widget),
         if ( strcmp(wxGtkString(gdk_atom_name(type)), "TARGETS") != 0 )
         {
             wxLogTrace( TRACE_CLIPBOARD,
-                        wxT("got unsupported clipboard target") );
+                        _T("got unsupported clipboard target") );
 
             return;
         }
@@ -274,7 +274,7 @@ selection_handler( GtkWidget *WXUNUSED(widget),
                                (guchar*)&(timestamp),
                                sizeof(timestamp));
         wxLogTrace(TRACE_CLIPBOARD,
-                   wxT("Clipboard TIMESTAMP requested, returning timestamp=%u"),
+                   _T("Clipboard TIMESTAMP requested, returning timestamp=%u"),
                    timestamp);
         return;
     }
@@ -282,7 +282,7 @@ selection_handler( GtkWidget *WXUNUSED(widget),
     wxDataFormat format( selection_data->target );
 
     wxLogTrace(TRACE_CLIPBOARD,
-               wxT("clipboard data in format %s, GtkSelectionData is target=%s type=%s selection=%s timestamp=%u"),
+               _T("clipboard data in format %s, GtkSelectionData is target=%s type=%s selection=%s timestamp=%u"),
                format.GetId().c_str(),
                wxString::FromAscii(wxGtkString(gdk_atom_name(selection_data->target))).c_str(),
                wxString::FromAscii(wxGtkString(gdk_atom_name(selection_data->type))).c_str(),
@@ -328,10 +328,10 @@ selection_handler( GtkWidget *WXUNUSED(widget),
 
 void wxClipboard::GTKOnSelectionReceived(const GtkSelectionData& sel)
 {
-    wxCHECK_RET( m_receivedData, wxT("should be inside GetData()") );
+    wxCHECK_RET( m_receivedData, _T("should be inside GetData()") );
 
     const wxDataFormat format(sel.target);
-    wxLogTrace(TRACE_CLIPBOARD, wxT("Received selection %s"),
+    wxLogTrace(TRACE_CLIPBOARD, _T("Received selection %s"),
                format.GetId().c_str());
 
     if ( !m_receivedData->IsSupportedFormat(format) )
@@ -375,7 +375,7 @@ async_targets_selection_received( GtkWidget *WXUNUSED(widget),
         if ( strcmp(wxGtkString(gdk_atom_name(type)), "TARGETS") != 0 )
         {
             wxLogTrace( TRACE_CLIPBOARD,
-                        wxT("got unsupported clipboard target") );
+                        _T("got unsupported clipboard target") );
 
             clipboard->m_sink->QueueEvent( event );
             clipboard->m_sink.Release();
@@ -499,8 +499,8 @@ bool wxClipboard::SetSelectionOwner(bool set)
 
     if ( !rc )
     {
-        wxLogTrace(TRACE_CLIPBOARD, wxT("Failed to %sset selection owner"),
-                   set ? wxT("") : wxT("un"));
+        wxLogTrace(TRACE_CLIPBOARD, _T("Failed to %sset selection owner"),
+                   set ? _T("") : _T("un"));
     }
 
     return rc;
@@ -564,8 +564,6 @@ bool wxClipboard::DoIsSupported(const wxDataFormat& format)
 
 void wxClipboard::Clear()
 {
-    gtk_selection_clear_targets( m_clipboardWidget, GTKGetClipboardAtom() );
-
     if ( gdk_selection_owner_get(GTKGetClipboardAtom()) ==
             m_clipboardWidget->window )
     {

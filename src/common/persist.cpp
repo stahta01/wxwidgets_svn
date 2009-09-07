@@ -23,8 +23,6 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_CONFIG
-
 #ifndef WX_PRECOMP
 #endif // WX_PRECOMP
 
@@ -152,6 +150,4 @@ wxPERSIST_DEFINE_SAVE_RESTORE_FOR(int)
 wxPERSIST_DEFINE_SAVE_RESTORE_FOR(long)
 wxPERSIST_DEFINE_SAVE_RESTORE_FOR(wxString)
 
-#undef wxPERSIST_DEFINE_SAVE_RESTORE_FOR
-
-#endif // wxUSE_CONFIG
+#undef wxPERSIST_DEFINE_SAVE_RESTORE_FOR  

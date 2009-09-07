@@ -376,9 +376,7 @@ bool BenchConnection::OnPoke(const wxString& topic,
     if ( m_advise )
     {
         if ( !Advise(item, m_item) )
-        {
             wxLogMessage("Failed to advise client about the change.");
-        }
     }
 
     return true;

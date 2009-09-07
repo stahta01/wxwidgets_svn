@@ -39,8 +39,6 @@
         Always show a vertical scrollbar.
     @style{wxLB_NEEDED_SB}
         Only create a vertical scrollbar if needed.
-    @style{wxLB_NO_SB}
-        Don't create vertical scrollbar (wxMSW only).
     @style{wxLB_SORT}
         The listbox contents are sorted in alphabetical order.
     @endStyleTable
@@ -81,10 +79,9 @@ public:
             The ID of this control. A value of @c wxID_ANY indicates a default value.
         @param pos
             The initial position.
-            If ::wxDefaultPosition is specified then a default position is chosen.
         @param size
             The initial size.
-            If ::wxDefaultSize is specified then the window is sized appropriately.
+            If wxDefaultSize is specified then the window is sized appropriately.
         @param n
             Number of strings with which to initialise the control.
         @param choices

@@ -80,7 +80,7 @@ bool wxHeaderCtrl::Create(wxWindow *parent,
     if ( !CreateControl(parent, id, pos, size, style, wxDefaultValidator, name) )
         return false;
 
-    if ( !MSWCreateControl(WC_HEADER, wxT(""), pos, size) )
+    if ( !MSWCreateControl(WC_HEADER, _T(""), pos, size) )
         return false;
 
     // special hack for margins when using comctl32.dll v6 or later: the
@@ -156,7 +156,7 @@ wxSize wxHeaderCtrl::DoGetBestSize() const
     HDLAYOUT layout = { &rc, &wpos };
     if ( !Header_Layout(GetHwnd(), &layout) )
     {
-        wxLogLastError(wxT("Header_Layout"));
+        wxLogLastError(_T("Header_Layout"));
         return wxControl::DoGetBestSize();
     }
 
@@ -196,7 +196,7 @@ void wxHeaderCtrl::DoSetCount(unsigned int count)
     {
         if ( !Header_DeleteItem(GetHwnd(), 0) )
         {
-            wxLogLastError(wxT("Header_DeleteItem"));
+            wxLogLastError(_T("Header_DeleteItem"));
         }
     }
 
@@ -348,7 +348,7 @@ void wxHeaderCtrl::DoInsertItem(const wxHeaderColumn& col, unsigned int idx)
     if ( ::SendMessage(GetHwnd(), HDM_INSERTITEM,
                        MSWToNativeIdx(idx), (LPARAM)&hdi) == -1 )
     {
-        wxLogLastError(wxT("Header_InsertItem()"));
+        wxLogLastError(_T("Header_InsertItem()"));
     }
 }
 
@@ -366,7 +366,7 @@ void wxHeaderCtrl::DoSetColumnsOrder(const wxArrayInt& order)
 
     if ( !Header_SetOrderArray(GetHwnd(), orderShown.size(), &orderShown[0]) )
     {
-        wxLogLastError(wxT("Header_GetOrderArray"));
+        wxLogLastError(_T("Header_GetOrderArray"));
     }
 
     m_colIndices = order;

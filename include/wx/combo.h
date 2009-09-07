@@ -86,8 +86,8 @@ enum
     wxCC_IFLAG_CREATED              = 0x0100,
     // Internal use: really put button outside
     wxCC_IFLAG_BUTTON_OUTSIDE       = 0x0200,
-    // Internal use: SetMargins has been succesfully called
-    wxCC_IFLAG_LEFT_MARGIN_SET      = 0x0400,
+    // Internal use: SetTextIndent has been called
+    wxCC_IFLAG_INDENT_SET           = 0x0400,
     // Internal use: Set wxTAB_TRAVERSAL to parent when popup is dismissed
     wxCC_IFLAG_PARENT_TAB_TRAVERSAL = 0x0800,
     // Internal use: Secondary popup window type should be used (if available).
@@ -118,8 +118,7 @@ struct wxComboCtrlFeatures
         BitmapButton        = 0x0002, // Button may be replaced with bitmap
         ButtonSpacing       = 0x0004, // Button can have spacing from the edge
                                       // of the control
-        TextIndent          = 0x0008, // SetMargins can be used to control
-                                      // left margin.
+        TextIndent          = 0x0008, // SetTextIndent can be used
         PaintControl        = 0x0010, // Combo control itself can be custom painted
         PaintWritable       = 0x0020, // A variable-width area in front of writable
                                       // combo control's textctrl can be custom
@@ -303,18 +302,19 @@ public:
                            const wxBitmap& bmpHover = wxNullBitmap,
                            const wxBitmap& bmpDisabled = wxNullBitmap );
 
-#if WXWIN_COMPATIBILITY_2_6
     //
     // This will set the space in pixels between left edge of the control and the
     // text, regardless whether control is read-only (ie. no wxTextCtrl) or not.
     // Platform-specific default can be set with value-1.
     // Remarks
     // * This method may do nothing on some native implementations.
-    wxDEPRECTED( void SetTextIndent( int indent ) );
+    void SetTextIndent( int indent );
 
     // Returns actual indentation in pixels.
-    wxDEPRECTED( wxCoord GetTextIndent() const );
-#endif
+    wxCoord GetTextIndent() const
+    {
+        return m_absIndent;
+    }
 
     // Returns area covered by the text field.
     const wxRect& GetTextRect() const
@@ -385,17 +385,6 @@ public:
     const wxBitmap& GetBitmapHover() const { return m_bmpHover; }
     const wxBitmap& GetBitmapDisabled() const { return m_bmpDisabled; }
 
-    // Margins functions mirrored from TextEntryBase
-    // (wxComboCtrl does not inherit from wxTextEntry, but may embed a
-    // wxTextCtrl, so we need these). Also note that these functions
-    // have replaced SetTextIndent() in wxWidgets 2.9.1 and later.
-    bool SetMargins(const wxPoint& pt)
-        { return DoSetMargins(pt); }
-    bool SetMargins(wxCoord left, wxCoord top = -1)
-        { return DoSetMargins(wxPoint(left, top)); }
-    wxPoint GetMargins() const
-        { return DoGetMargins(); }
-
     // Return internal flags
     wxUint32 GetInternalFlags() const { return m_iFlags; }
 
@@ -434,8 +423,7 @@ protected:
     // called from wxSizeEvent handler
     virtual void OnResize() = 0;
 
-    // Return native text identation
-    // (i.e. text margin, for pure text, not textctrl)
+    // Return native text identation (for pure text, not textctrl)
     virtual wxCoord GetNativeTextIndent() const;
 
     // Called in syscolourchanged handler and base create
@@ -533,10 +521,6 @@ protected:
     virtual void DoSetToolTip( wxToolTip *tip );
 #endif
 
-    // margins functions
-    virtual bool DoSetMargins(const wxPoint& pt);
-    virtual wxPoint DoGetMargins() const;
-
     // This is used when m_text is hidden (readonly).
     wxString                m_valueString;
 
@@ -588,8 +572,8 @@ protected:
     // selection indicator.
     wxCoord                 m_widthCustomPaint;
 
-    // left margin, in pixels
-    wxCoord                 m_marginLeft;
+    // absolute text indentation, in pixels
+    wxCoord                 m_absIndent;
 
     // side on which the popup is aligned
     int                     m_anchorSide;
@@ -633,7 +617,7 @@ protected:
 
     // should the focus be reset to the textctrl in idle time?
     bool                    m_resetFocus;
-
+    
 private:
     void Init();
 

@@ -113,7 +113,7 @@ class WXDLLIMPEXP_CORE wxFontBase : public wxGDIObject
 public:
     /*
         derived classes should provide the following ctors:
-
+    
     wxFont();
     wxFont(const wxString& nativeFontInfoString);
     wxFont(const wxNativeFontInfo& info);
@@ -132,7 +132,7 @@ public:
            const wxString& face = wxEmptyString,
            wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
     */
-
+    
     // creator function
     virtual ~wxFontBase();
 
@@ -276,7 +276,7 @@ WXDLLIMPEXP_CORE bool wxFromString(const wxString& str, wxFontBase* font);
 
 
 #if FUTURE_WXWIN_COMPATIBILITY_3_0
-#define wxDECLARE_FONT_COMPAT_SETTER   \
+#define WXDECLARE_COMPAT_SETTERS   \
     wxDEPRECATED_FUTURE( void SetFamily(int family) ) \
         { SetFamily((wxFontFamily)family); } \
     wxDEPRECATED_FUTURE( void SetStyle(int style) ) \
@@ -290,25 +290,8 @@ WXDLLIMPEXP_CORE bool wxFromString(const wxString& str, wxFontBase* font);
     wxDEPRECATED_FUTURE( void SetWeight(wxDeprecatedGUIConstants weight) ) \
         { SetWeight((wxFontWeight)weight); }
 #else
-#define wxDECLARE_FONT_COMPAT_SETTER  /*empty*/
+#define WXDECLARE_COMPAT_SETTERS  /*empty*/
 #endif
-
-// this macro must be used in all derived wxFont classes declarations
-#define wxDECLARE_COMMON_FONT_METHODS() \
-    wxDECLARE_FONT_COMPAT_SETTER \
- \
-    /* functions for modifying font in place */ \
-    wxFont& MakeBold(); \
-    wxFont& MakeItalic(); \
-    wxFont& MakeLarger() { return Scale(1.2f); } \
-    wxFont& MakeSmaller() { return Scale(1/1.2f); } \
-    wxFont& Scale(float x); \
-    /* functions for creating fonts based on this one */ \
-    wxFont Bold() const; \
-    wxFont Italic() const; \
-    wxFont Larger() const { return Scaled(1.2f); } \
-    wxFont Smaller() const { return Scaled(1/1.2f); } \
-    wxFont Scaled(float x) const
 
 // include the real class declaration
 #if defined(__WXPALMOS__)

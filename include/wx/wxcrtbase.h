@@ -26,7 +26,7 @@
 
     NB: don't include any wxWidgets headers here because almost all of them
         include this one!
-
+        
     NB2: User code should include wx/crt.h instead of including this
          header directly.
 
@@ -72,7 +72,7 @@
 
 #ifdef _WIN32_WCE
     #if _WIN32_WCE <= 211
-        #define isspace(c) ((c) == wxT(' ') || (c) == wxT('\t'))
+        #define isspace(c) ((c) == _T(' ') || (c) == _T('\t'))
     #endif
 #endif /* _WIN32_WCE */
 
@@ -183,9 +183,7 @@ WXDLLIMPEXP_BASE void *calloc( size_t num, size_t size );
 #elif !(defined(__MWERKS__) && defined(__WXMAC__)) && !defined(__WXWINCE__)
     #define wxCRT_StrdupA strdup
 #endif
-
-// all compilers except Cygwin provide _wcsdup() under Windows
-#if defined(__WINDOWS__) && !defined(__CYGWIN__)
+#if defined(__WINDOWS__)
     #define wxCRT_StrdupW _wcsdup
 #elif defined(HAVE_WCSDUP)
     #define wxCRT_StrdupW wcsdup
@@ -228,24 +226,12 @@ WXDLLIMPEXP_BASE void *calloc( size_t num, size_t size );
     #endif /* HAVE_WCSTOULL */
 #endif
 
-/*
-    Only VC8 and later provide strnlen() and wcsnlen() functions under Windows
-    and it's also only available starting from Windows CE 6.0 only in CE build.
- */
-#if wxCHECK_VISUALC_VERSION(8) && (!defined(_WIN32_WCE) || (_WIN32_WCE >= 0x600))
-    #ifndef HAVE_STRNLEN
-        #define HAVE_STRNLEN
-    #endif
-    #ifndef HAVE_WCSNLEN
-        #define HAVE_WCSNLEN
-    #endif
-#endif
-
-#ifdef HAVE_STRNLEN
+/* Not all compilers have strnlen(); e.g. MSVC 6.x and 7.x don't have it */
+#if wxCHECK_VISUALC_VERSION(8) || defined(HAVE_STRNLEN)
     #define wxCRT_StrnlenA  strnlen
 #endif
 
-#ifdef HAVE_WCSNLEN
+#if wxCHECK_VISUALC_VERSION(8) || defined(HAVE_WCSNLEN)
     #define wxCRT_StrnlenW  wcsnlen
 #endif
 

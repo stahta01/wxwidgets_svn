@@ -151,7 +151,7 @@ wxStdRenderer::ArrowDirection wxStdRenderer::GetArrowDirection(wxDirection dir)
             return Arrow_Down;
 
         default:
-            wxFAIL_MSG(wxT("unknown arrow direction"));
+            wxFAIL_MSG(_T("unknown arrow direction"));
     }
 
     return Arrow_Max;
@@ -438,7 +438,7 @@ void wxStdRenderer::DrawBorder(wxDC& dc,
             break;
 
         default:
-            wxFAIL_MSG(wxT("unknown border type"));
+            wxFAIL_MSG(_T("unknown border type"));
             // fall through
 
         case wxBORDER_DEFAULT:
@@ -471,7 +471,7 @@ wxRect wxStdRenderer::GetBorderDimensions(wxBorder border) const
             break;
 #endif
         default:
-            wxFAIL_MSG(wxT("unknown border type"));
+            wxFAIL_MSG(_T("unknown border type"));
             // fall through
 
         case wxBORDER_DEFAULT:
@@ -862,7 +862,7 @@ wxSize wxStdRenderer::GetStatusBarBorders() const
     wxRect flat = GetBorderDimensions(wxBORDER_STATIC);
     wxASSERT_MSG( raised.x == raised.width && raised.y == raised.height &&
                   flat.x == flat.width && flat.y == flat.height,
-                  wxT("this code expects uniform borders, you must override GetStatusBarBorders") );
+                  _T("this code expects uniform borders, you must override GetStatusBarBorders") );
 
     // take the larger of flat/raised values:
     wxSize border(wxMax(raised.x, flat.x), wxMax(raised.y, flat.y));
@@ -892,8 +892,6 @@ void wxStdRenderer::DrawStatusField(wxDC& dc,
         DrawBorder(dc, wxBORDER_RAISED, rect, flags, &rectIn);
     else if ( style != wxSB_FLAT )
         DrawBorder(dc, wxBORDER_STATIC, rect, flags, &rectIn);
-    else
-        rectIn = rect;
 
     rectIn.Deflate(GetStatusBarFieldMargins());
 

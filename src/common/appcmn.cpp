@@ -50,6 +50,8 @@
 #include "wx/build.h"
 WX_CHECK_BUILD_OPTIONS("wxCore")
 
+WXDLLIMPEXP_DATA_CORE(wxList) wxPendingDelete;
+
 // ============================================================================
 // wxAppBase implementation
 // ============================================================================
@@ -242,7 +244,7 @@ bool wxAppBase::OnCmdLineParsed(wxCmdLineParser& parser)
     if ( parser.Found(OPTION_MODE, &modeDesc) )
     {
         unsigned w, h, bpp;
-        if ( wxSscanf(modeDesc.c_str(), wxT("%ux%u-%u"), &w, &h, &bpp) != 3 )
+        if ( wxSscanf(modeDesc.c_str(), _T("%ux%u-%u"), &w, &h, &bpp) != 3 )
         {
             wxLogError(_("Invalid display mode specification '%s'."), modeDesc.c_str());
             return false;
@@ -339,11 +341,33 @@ bool wxAppBase::SafeYieldFor(wxWindow *win, long eventsToProcess)
 // idle handling
 // ----------------------------------------------------------------------------
 
+void wxAppBase::DeletePendingObjects()
+{
+    wxList::compatibility_iterator node = wxPendingDelete.GetFirst();
+    while (node)
+    {
+        wxObject *obj = node->GetData();
+
+        // remove it from the list first so that if we get back here somehow
+        // during the object deletion (e.g. wxYield called from its dtor) we
+        // wouldn't try to delete it the second time
+        if ( wxPendingDelete.Member(obj) )
+            wxPendingDelete.Erase(node);
+
+        delete obj;
+
+        // Deleting one object may have deleted other pending
+        // objects, so start from beginning of list again.
+        node = wxPendingDelete.GetFirst();
+    }
+}
+
 // Returns true if more time is needed.
 bool wxAppBase::ProcessIdle()
 {
-    // call the base class version first to send the idle event to wxTheApp
-    // itself
+    // call the base class version first, it will process the pending events
+    // (which should be done before the idle events generation) and send the
+    // idle event to wxTheApp itself
     bool needMore = wxAppConsoleBase::ProcessIdle();
     wxIdleEvent event;
     wxWindowList::compatibility_iterator node = wxTopLevelWindows.GetFirst();
@@ -354,6 +378,14 @@ bool wxAppBase::ProcessIdle()
             needMore = true;
         node = node->GetNext();
     }
+
+    // 'Garbage' collection of windows deleted with Close().
+    DeletePendingObjects();
+
+#if wxUSE_LOG
+    // flush the logged messages if any
+    wxLog::FlushActive();
+#endif
 
     wxUpdateUIEvent::ResetUpdateTime();
 
@@ -469,7 +501,7 @@ bool wxGUIAppTraitsBase::ShowAssertDialog(const wxString& msg)
 
     const wxString stackTrace = GetAssertStackTrace();
     if ( !stackTrace.empty() )
-        msgDlg << wxT("\n\nCall stack:\n") << stackTrace;
+        msgDlg << _T("\n\nCall stack:\n") << stackTrace;
 #endif // wxUSE_STACKWALKER
 
     // this message is intentionally not translated -- it is for
@@ -510,5 +542,16 @@ bool wxGUIAppTraitsBase::HasStderr()
 #else
     return false;
 #endif
+}
+
+void wxGUIAppTraitsBase::ScheduleForDestroy(wxObject *object)
+{
+    if ( !wxPendingDelete.Member(object) )
+        wxPendingDelete.Append(object);
+}
+
+void wxGUIAppTraitsBase::RemoveFromPendingDelete(wxObject *object)
+{
+    wxPendingDelete.DeleteObject(object);
 }
 

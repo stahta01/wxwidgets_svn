@@ -508,7 +508,7 @@ wxMenu* wxFindMenuFromMacCommand( const HICommand &command , wxMenuItem* &item )
         }
         else
         {
-            URefCon refCon = 0 ;
+            URefCon refCon = NULL ;
 
             GetMenuItemRefCon( command.menu.menuRef , command.menu.menuItemIndex , &refCon ) ;
             itemMenu = wxFindMenuFromMacMenu( command.menu.menuRef ) ;
@@ -799,7 +799,7 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
     // application (otherwise applications would need to handle it)
     if ( argc > 1 )
     {
-        static const wxChar *ARG_PSN = wxT("-psn_");
+        static const wxChar *ARG_PSN = _T("-psn_");
         if ( wxStrncmp(argv[1], ARG_PSN, wxStrlen(ARG_PSN)) == 0 )
         {
             // remove this argument
@@ -835,19 +835,17 @@ bool wxApp::Initialize(int& argc, wxChar **argv)
     event_posted_context.perform = macPostedEventCallback;
     m_macEventPosted = CFRunLoopSourceCreate(NULL,0,&event_posted_context);
     CFRunLoopAddSource(CFRunLoopGetCurrent(), m_macEventPosted, kCFRunLoopCommonModes);
-    // run loop takes ownership
-    CFRelease(m_macEventPosted);
+	// run loop takes ownership
+	CFRelease(m_macEventPosted);
         */
     return true;
 }
 
-#if wxOSX_USE_COCOA_OR_CARBON
 bool wxApp::CallOnInit()
 {
     wxMacAutoreleasePool autoreleasepool;
     return OnInit();
 }
-#endif
 
 bool wxApp::OnInitGui()
 {
@@ -944,10 +942,10 @@ void wxApp::CleanUp()
 #endif
 
     if (m_macEventPosted)
-    {
-        CFRunLoopRemoveSource(CFRunLoopGetCurrent(), m_macEventPosted, kCFRunLoopCommonModes);
-        m_macEventPosted = NULL;
-    }
+	{
+		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), m_macEventPosted, kCFRunLoopCommonModes);
+		m_macEventPosted = NULL;
+	}
 
     DoCleanUp();
 
@@ -1445,7 +1443,7 @@ void wxApp::MacCreateKeyEvent( wxKeyEvent& event, wxWindow* focus , long keymess
         // control interferes with some built-in keys like pgdown, return etc. therefore we remove the controlKey modifier
         // and look at the character after
 #ifdef __LP64__
-        // TODO new implementation using TextInputSources
+		// TODO new implementation using TextInputSources
 #else
         UInt32 state = 0;
         UInt32 keyInfo = KeyTranslate((Ptr)GetScriptManagerVariable(smKCHRCache), ( modifiers & (~(controlKey | shiftKey | optionKey))) | keycode, &state);

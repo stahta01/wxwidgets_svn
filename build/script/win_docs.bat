@@ -1,5 +1,5 @@
 rem Uncomment the next line to set the version; used also in wxWidgets.iss
-rem SET WXW_VER=2.9.1-rc1
+SET WXW_VER=2.9.0
 if (%WXW_VER%)==() SET WXW_VER=SVN
 
 echo docs building for %WXW_VER%
@@ -12,12 +12,12 @@ rem  writes a log file in c:\
 
 echo Building wxWidgets-%WXW_VER% docs... > c:\temp.log
 
-set WXWIN=c:\wx\wxWidgets
+set WXWIN=c:\wx\wx29b
 set DAILY=c:\daily
-set INNO=c:\wx\inno\wxWidgets
+set INNO=c:\wx\inno\wx29b
 
 rem svn already in my path...
-set PATH=%PATH%;c:\wx\Gnu\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1
+set PATH=%PATH%;c:\wx\Gnu\bin;c:\progra~1\htmlhe~1;C:\PROGRA~1\INNOSE~1;c:\wx\doxygen\bin
 
 echo %PATH% >>  c:\temp.log
 rem add bakefile build...
@@ -34,23 +34,21 @@ svn up >>  c:\temp.log
 
 rem now inno
 cd %INNO% >>  c:\temp.log
-svn cleanup >>  c:\temp.log
-svn up >>  c:\temp.log
+rem Don't update the svn automatically
+rem svn cleanup >>  c:\temp.log
+rem svn up >>  c:\temp.log
 
 if exist include\wx\msw\setup.h del include\wx\msw\setup.h
 if exist include\wx\univ\setup.h del include\wx\univ\setup.h
 
-rem for cygwin these need to be in unix format
-del configure
-del config.guess
-del config.sub
+del c*.*
 svn up configure
+svn up configure.in
 svn up config.guess
 svn up config.sub
 dos2unix configure
 dos2unix config.guess
 dos2unix config.sub
-
 copy include\wx\msw\setup0.h include\wx\msw\setup.h
 copy include\wx\univ\setup0.h include\wx\univ\setup.h
 echo SVN update  >>  c:\temp.log
@@ -67,6 +65,7 @@ rem Now create standalone copies of docs (chm and htb)
 cd %WXWIN%\docs\doxygen
 del out\html\*.html
 del out\html\*.htb
+del out\html\*.zip
 del out\*.chm
 call regen chm
 

@@ -121,7 +121,7 @@ bool wxFFile::ReadAll(wxString *str, const wxMBConv& conv)
     // realLen = fileLen - numOfLinesInTheFile)
     length = fread(buf.data(), sizeof(char), length, m_fp);
 
-    if ( Error() )
+    if ( Error() ) 
     {
         wxLogSysError(_("Read error on file '%s'"), m_name.c_str());
 
@@ -239,7 +239,7 @@ bool wxFFile::Seek(wxFileOffset ofs, wxSeekMode mode)
 wxFileOffset wxFFile::Tell() const
 {
     wxCHECK_MSG( IsOpened(), wxInvalidOffset,
-                 wxT("wxFFile::Tell(): file is closed!") );
+                 _T("wxFFile::Tell(): file is closed!") );
 
     wxFileOffset rc = wxFtell(m_fp);
     if ( rc == wxInvalidOffset )
@@ -254,7 +254,7 @@ wxFileOffset wxFFile::Tell() const
 wxFileOffset wxFFile::Length() const
 {
     wxCHECK_MSG( IsOpened(), wxInvalidOffset,
-                 wxT("wxFFile::Length(): file is closed!") );
+                 _T("wxFFile::Length(): file is closed!") );
 
     wxFFile& self = *(wxFFile *)this;   // const_cast
 

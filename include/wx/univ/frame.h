@@ -44,7 +44,7 @@ public:
 
 #if wxUSE_STATUSBAR
     virtual wxStatusBar* CreateStatusBar(int number = 1,
-                                         long style = wxSTB_DEFAULT_STYLE,
+                                         long style = wxST_SIZEGRIP,
                                          wxWindowID id = 0,
                                          const wxString& name = wxStatusLineNameStr);
 #endif // wxUSE_STATUSBAR

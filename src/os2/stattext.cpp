@@ -131,7 +131,7 @@ wxSize wxStaticText::DoGetBestSize() const
                 if (!nHeightLineDefault)
                     nHeightLineDefault = nHeightLine;
                 if (!nHeightLineDefault)
-                    GetTextExtent(wxT("W"), NULL, &nHeightLineDefault);
+                    GetTextExtent(_T("W"), NULL, &nHeightLineDefault);
                 nHeightTextTotal += nHeightLineDefault;
             }
             else
@@ -162,7 +162,7 @@ wxSize wxStaticText::DoGetBestSize() const
             // when it is preceded by another '~' in which case it stands for a
             // literal tilde
             //
-            if (*pc == wxT('~'))
+            if (*pc == _T('~'))
             {
                 if (!bLastWasTilde)
                 {

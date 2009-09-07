@@ -102,8 +102,19 @@ void wxStatusBarMac::DrawField(wxDC& dc, int i, int textHeight)
     DrawFieldText(dc, rect, i, textHeight);
 }
 
-void wxStatusBarMac::DoUpdateStatusText(int number)
+void wxStatusBarMac::SetStatusText(const wxString& text, int number)
 {
+    // NOTE: seems this function is identic to wxStatusBarGeneric::SetStatusText;
+    //       probably can be removed without problems (FM)
+
+    wxCHECK_RET( (number >= 0) && ((size_t)number < m_panes.GetCount()),
+        wxT("invalid status bar field index") );
+
+    if ( GetStatusText(number) == text )
+        return;
+
+    wxStatusBarGeneric::SetStatusText(text, number);
+
     wxRect rect;
     GetFieldRect(number, rect);
 

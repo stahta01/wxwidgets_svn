@@ -23,59 +23,25 @@
     A return value from wxPropertyGrid::HitTest(),
     contains all you need to know about an arbitrary location on the grid.
 */
-class WXDLLIMPEXP_PROPGRID wxPropertyGridHitTestResult
+struct WXDLLIMPEXP_PROPGRID wxPropertyGridHitTestResult
 {
     friend class wxPropertyGridPageState;
 public:
-    wxPropertyGridHitTestResult()
-    {
-        m_property = NULL;
-        m_column = -1;
-        m_splitter = -1;
-        m_splitterHitOffset = 0;
-    }
 
-    ~wxPropertyGridHitTestResult()
-    {
-    }
+    wxPGProperty* GetProperty() const { return property; }
 
-    /**
-        Returns column hit. -1 for margin.
-    */
-    int GetColumn() const { return m_column; }
+    /** Column. -1 for margin. */
+    int             column;
 
-    /**
-        Returns property hit. NULL if empty space below
-        properties was hit instead.
-    */
-    wxPGProperty* GetProperty() const
-    {
-        return m_property;
-    }
+    /** Index of splitter hit, -1 for none. */
+    int             splitter;
 
-    /**
-        Returns index of splitter hit, -1 for none.
-    */
-    int GetSplitter() const { return m_splitter; }
-
-    /**
-        If splitter hit, then this member function
-        returns offset to the exact splitter position.
-    */
-    int GetSplitterHitOffset() const { return m_splitterHitOffset; }
+    /** If splitter hit, offset to that */
+    int             splitterHitOffset;
 
 private:
     /** Property. NULL if empty space below properties was hit */
-    wxPGProperty*   m_property;
-
-    /** Column. -1 for margin. */
-    int             m_column;
-
-    /** Index of splitter hit, -1 for none. */
-    int             m_splitter;
-
-    /** If splitter hit, offset to that */
-    int             m_splitterHitOffset;
+    wxPGProperty*   property;
 };
 
 // -----------------------------------------------------------------------
@@ -348,16 +314,28 @@ protected:
 
 /** Base class to derive new viterators.
 */
-class WXDLLIMPEXP_PROPGRID wxPGVIteratorBase : public wxObjectRefData
+class WXDLLIMPEXP_PROPGRID wxPGVIteratorBase
 {
     friend class wxPGVIterator;
 public:
-    wxPGVIteratorBase() { }
+    wxPGVIteratorBase() { m_refCount = 1; }
     virtual void Next() = 0;
+    void IncRef()
+    {
+        m_refCount++;
+    }
+    void DecRef()
+    {
+        m_refCount--;
+        if ( m_refCount <= 0 )
+            delete this;
+    }
 protected:
     virtual ~wxPGVIteratorBase() { }
 
     wxPropertyGridIterator  m_it;
+private:
+    int     m_refCount;
 };
 
 /** @class wxPGVIterator
@@ -509,6 +487,11 @@ public:
         return (unsigned int) m_colWidths.size();
     }
 
+    wxPGProperty* GetSelection() const
+    {
+        return m_selected;
+    }
+
     int GetColumnMinWidth( int column ) const;
 
     int GetColumnWidth( unsigned int column ) const
@@ -528,30 +511,6 @@ public:
     {
         return ((wxPropertyGridPageState*)this)->GetLastItem(flags);
     }
-
-    /**
-        Returns currently selected property.
-    */
-    wxPGProperty* GetSelection() const
-    {
-        if ( m_selection.size() == 0 )
-            return NULL;
-        return m_selection[0];
-    }
-
-    void DoSetSelection( wxPGProperty* prop )
-    {
-        m_selection.clear();
-        if ( prop )
-            m_selection.push_back(prop);
-    }
-
-    bool DoClearSelection()
-    {
-        return DoSelectProperty(NULL);
-    }
-
-    void DoRemoveFromSelection( wxPGProperty* prop );
 
     wxPropertyCategory* GetPropertyCategory( const wxPGProperty* p ) const;
 
@@ -643,6 +602,8 @@ public:
 
     bool PrepareAfterItemsAdded();
 
+    void SetSelection( wxPGProperty* p ) { m_selected = p; }
+
     /** Called after virtual height needs to be recalculated.
     */
     void VirtualHeightChanged()
@@ -656,10 +617,13 @@ public:
     /** Returns property by its name. */
     wxPGProperty* BaseGetPropertyByName( const wxString& name ) const;
 
+    void DoClearSelection()
+    {
+        m_selected = NULL;
+    }
+
     /** Called in, for example, wxPropertyGrid::Clear. */
     void DoClear();
-
-    bool DoIsPropertySelected( wxPGProperty* prop ) const;
 
     bool DoCollapse( wxPGProperty* p );
 
@@ -668,11 +632,6 @@ public:
     void CalculateFontAndBitmapStuff( int vspacing );
 
 protected:
-
-    // Utility to check if two properties are visibly next to each other
-    bool ArePropertiesAdjacent( wxPGProperty* prop1,
-                                wxPGProperty* prop2,
-                                int iterFlags = wxPG_ITERATE_VISIBLE ) const;
 
     int DoGetSplitterPosition( int splitterIndex = 0 ) const;
 
@@ -707,16 +666,13 @@ protected:
     /** List of column widths (first column does not include margin). */
     wxArrayInt                  m_colWidths;
 
-    /** List of indices of columns the user can edit by clicking it. */
-    wxArrayInt                  m_editableColumns;
-
     double                      m_fSplitterX;
 
     /** Most recently added category. */
     wxPropertyCategory*         m_currentCategory;
 
-    /** Array of selected property. */
-    wxArrayPGProperty           m_selection;
+    /** Pointer to selected property. */
+    wxPGProperty*               m_selected;
 
     /** Virtual width. */
     int                         m_width;

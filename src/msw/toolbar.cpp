@@ -200,7 +200,7 @@ public:
     wxStaticText* GetStaticText()
     {
         wxASSERT_MSG( IsControl(),
-                      wxT("only makes sense for embedded control tools") );
+                      _T("only makes sense for embedded control tools") );
 
         return m_staticText;
     }
@@ -286,7 +286,7 @@ void wxToolBar::Init()
     // 32*32) size for their bitmaps, the native control itself still uses the
     // old 16*15 default size (see TB_SETBITMAPSIZE documentation in MSDN), so
     // default to it so that we don't call SetToolBitmapSize() unnecessarily in
-    // wxToolBarBase::AdjustToolBitmapSize()
+    // AdjustToolBitmapSize()
     m_defaultWidth = 16;
     m_defaultHeight = 15;
 
@@ -361,7 +361,7 @@ void wxToolBar::Recreate()
     if ( !MSWCreateToolbar(pos, size) )
     {
         // what can we do?
-        wxFAIL_MSG( wxT("recreating the toolbar failed") );
+        wxFAIL_MSG( _T("recreating the toolbar failed") );
 
         return;
     }
@@ -634,12 +634,34 @@ void wxToolBar::CreateDisabledImageList()
     }
 }
 
+void wxToolBar::AdjustToolBitmapSize()
+{
+    const wxSize sizeOrig(m_defaultWidth, m_defaultHeight);
+
+    wxSize sizeActual(sizeOrig);
+
+    for ( wxToolBarToolsList::const_iterator i = m_tools.begin();
+          i != m_tools.end();
+          ++i )
+    {
+        const wxBitmap& bmp = (*i)->GetNormalBitmap();
+        sizeActual.IncTo(bmp.GetSize());
+    }
+
+    if ( sizeActual != sizeOrig )
+        SetToolBitmapSize(sizeActual);
+}
+
 bool wxToolBar::Realize()
 {
-    if ( !wxToolBarBase::Realize() )
-        return false;
-
     const size_t nTools = GetToolsCount();
+    if ( nTools == 0 )
+        // nothing to do
+        return true;
+
+    // make sure tool size is larger enough for all all bitmaps to fit in
+    // (this is consistent with what other ports do):
+    AdjustToolBitmapSize();
 
 #ifdef wxREMAP_BUTTON_COLOURS
     // don't change the values of these constants, they can be set from the
@@ -752,7 +774,7 @@ bool wxToolBar::Realize()
                 }
                 else
                 {
-                    wxFAIL_MSG( wxT("invalid tool button bitmap") );
+                    wxFAIL_MSG( _T("invalid tool button bitmap") );
                 }
 
                 // also deal with disabled bitmap if we want to use them
@@ -997,7 +1019,7 @@ bool wxToolBar::Realize()
                         break;
 
                     default:
-                        wxFAIL_MSG( wxT("unexpected toolbar button kind") );
+                        wxFAIL_MSG( _T("unexpected toolbar button kind") );
                         button.fsStyle = TBSTYLE_BUTTON;
                         break;
                 }
@@ -1277,7 +1299,7 @@ bool wxToolBar::MSWOnNotify(int WXUNUSED(idCtrl),
         }
 
         const wxToolBarToolBase * const tool = FindById(tbhdr->iItem);
-        wxCHECK_MSG( tool, false, wxT("drop down message for unknown tool") );
+        wxCHECK_MSG( tool, false, _T("drop down message for unknown tool") );
 
         wxMenu * const menu = tool->GetDropdownMenu();
         if ( !menu )
@@ -1490,7 +1512,7 @@ void wxToolBar::DoSetToggle(wxToolBarToolBase *WXUNUSED(tool), bool WXUNUSED(tog
 {
     // VZ: AFAIK, the button has to be created either with TBSTYLE_CHECK or
     //     without, so we really need to delete the button and recreate it here
-    wxFAIL_MSG( wxT("not implemented") );
+    wxFAIL_MSG( _T("not implemented") );
 }
 
 void wxToolBar::SetToolNormalBitmap( int id, const wxBitmap& bitmap )
@@ -1600,9 +1622,7 @@ void wxToolBar::OnEraseBackground(wxEraseEvent& event)
             // it can also return S_FALSE which seems to simply say that it
             // didn't draw anything but no error really occurred
             if ( FAILED(hr) )
-            {
-                wxLogApiError(wxT("DrawThemeParentBackground(toolbar)"), hr);
-            }
+                wxLogApiError(_T("DrawThemeParentBackground(toolbar)"), hr);
         }
     }
 
@@ -1625,9 +1645,7 @@ void wxToolBar::OnEraseBackground(wxEraseEvent& event)
             // it can also return S_FALSE which seems to simply say that it
             // didn't draw anything but no error really occurred
             if ( FAILED(hr) )
-            {
-                wxLogApiError(wxT("DrawThemeParentBackground(toolbar)"), hr);
-            }
+                wxLogApiError(_T("DrawThemeParentBackground(toolbar)"), hr);
         }
     }
 
@@ -1773,7 +1791,7 @@ bool wxToolBar::HandlePaint(WXWPARAM wParam, WXLPARAM lParam)
                 if ( !::SendMessage(GetHwnd(), TB_GETBUTTON,
                                     n, (LPARAM)&tbb) )
                 {
-                    wxLogDebug(wxT("TB_GETBUTTON failed?"));
+                    wxLogDebug(_T("TB_GETBUTTON failed?"));
 
                     continue;
                 }
@@ -1905,7 +1923,7 @@ WXHBITMAP wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
 
     if ( !hdcMem )
     {
-        wxLogLastError(wxT("CreateCompatibleDC"));
+        wxLogLastError(_T("CreateCompatibleDC"));
 
         return bitmap;
     }
@@ -1914,7 +1932,7 @@ WXHBITMAP wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
 
     if ( !bmpInHDC )
     {
-        wxLogLastError(wxT("SelectObject"));
+        wxLogLastError(_T("SelectObject"));
 
         return bitmap;
     }

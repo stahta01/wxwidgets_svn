@@ -153,9 +153,9 @@ public:
     bool DoEnable( bool enable );
 
     void UpdateImages();
-
+    
     void UpdateToggleImage( bool toggle );
-
+    
     void UpdateLabel()
     {
 #if wxOSX_USE_NATIVE_TOOLBAR
@@ -167,7 +167,7 @@ public:
             wxCFStringRef l(labelStr, GetToolBarFontEncoding());
 
             [m_toolbarItem setLabel:l.AsNSString()];
-
+            
             wxCFStringRef sh( GetShortHelp(), GetToolBarFontEncoding() );
             [m_toolbarItem setToolTip:sh.AsNSString()];
         }
@@ -187,7 +187,7 @@ public:
 
         tbar->OnLeftClick( GetId(), IsToggled() );
     }
-
+    
 #if wxOSX_USE_NATIVE_TOOLBAR
     void SetToolbarItemRef( NSToolbarItem* ref )
     {
@@ -274,7 +274,7 @@ private:
 }
 
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar itemForItemIdentifier:(NSString *)itemIdentifier willBeInsertedIntoToolbar:(BOOL)flag;
-
+    
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar*)toolbar;
 
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar*)toolbar;
@@ -479,7 +479,7 @@ void wxToolBarTool::SetPosition( const wxPoint& position )
             frame.origin.y = mac_y;
             [m_controlHandle setFrame:frame];
         }
-    }
+    }    
 }
 
 void wxToolBarTool::UpdateImages()
@@ -499,7 +499,7 @@ void wxToolBarTool::UpdateImages()
         dc.DrawRectangle( 0, 0, w, h );
         dc.DrawBitmap( m_bmpNormal, 0, 0, true );
         dc.SelectObject( wxNullBitmap );
-
+        
         [(NSButton*) m_controlHandle setAlternateImage:m_alternateBitmap.GetNSImage()];
     }
     UpdateToggleImage( CanBeToggled() && IsToggled() );
@@ -598,19 +598,19 @@ bool wxToolBar::Create(
     if (parent->IsKindOf(CLASSINFO(wxFrame)) && wxSystemOptions::GetOptionInt(wxT("mac.toolbar.no-native")) != 1)
     {
         static wxNSToolbarDelegate* controller = nil;
-
+        
         if ( controller == nil )
             controller = [[wxNSToolbarDelegate alloc] init];
         wxString identifier = wxString::Format( wxT("%p"), this );
         wxCFStringRef cfidentifier(identifier);
         NSToolbar* tb =  [[NSToolbar alloc] initWithIdentifier:cfidentifier.AsNSString()];
-
+        
         m_macToolbar = tb ;
-
+        
         if (m_macToolbar != NULL)
         {
             [tb setDelegate:controller];
-
+            
             NSToolbarDisplayMode mode = NSToolbarDisplayModeDefault;
             NSToolbarSizeMode displaySize = NSToolbarSizeModeSmall;
 
@@ -706,7 +706,7 @@ void wxToolBar::DoGetSize( int *width, int *height ) const
         WXWindow tlw = MacGetTopLevelWindowRef();
         float toolbarHeight = 0.0;
         NSRect windowFrame = NSMakeRect(0, 0, 0, 0);
-
+ 
         if(m_macToolbar && [(NSToolbar*)m_macToolbar isVisible])
         {
             windowFrame = [NSWindow contentRectForFrameRect:[tlw frame]
@@ -714,11 +714,11 @@ void wxToolBar::DoGetSize( int *width, int *height ) const
             toolbarHeight = NSHeight(windowFrame)
                         - NSHeight([[tlw contentView] frame]);
         }
-
+ 
         if ( width != NULL )
-            *width = (int)windowFrame.size.width;
+            *width = windowFrame.size.width;
         if ( height != NULL )
-            *height = (int)toolbarHeight;
+            *height = toolbarHeight;
     }
     else
         wxToolBarBase::DoGetSize( width, height );
@@ -810,7 +810,7 @@ bool wxToolBar::MacInstallNativeToolbar(bool usesNative)
             bResult = true;
             [tlw setToolbar:(NSToolbar*) m_macToolbar];
             [(NSToolbar*) m_macToolbar setVisible:YES];
-
+            
             m_peer->Move(0,0,0,0 );
             SetSize( wxSIZE_AUTO_WIDTH, 0 );
             m_peer->SetVisibility( false );
@@ -839,7 +839,7 @@ bool wxToolBar::MacInstallNativeToolbar(bool usesNative)
 
 bool wxToolBar::Realize()
 {
-    if ( !wxToolBarBase::Realize() )
+    if (m_tools.GetCount() == 0)
         return false;
 
     int maxWidth = 0;
@@ -1236,9 +1236,9 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
                 [v setBordered:NO];
                 [v setButtonType: ( tool->CanBeToggled() ? NSOnOffButton : NSMomentaryPushInButton )];
                 [v setImplementation:tool];
-
+                
                 controlHandle = v;
-
+                
 #if wxOSX_USE_NATIVE_TOOLBAR
                 if (m_macToolbar != NULL)
                 {
@@ -1271,7 +1271,7 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
             if (m_macToolbar != NULL)
             {
                 WXWidget view = (WXWidget) tool->GetControl()->GetHandle() ;
-                wxCHECK_MSG( view, false, wxT("control must be non-NULL") );
+                wxCHECK_MSG( view, false, _T("control must be non-NULL") );
 
                 wxString identifier = wxString::Format(wxT("%ld"), (long) tool);
                 wxCFStringRef cfidentifier( identifier, wxFont::GetDefaultEncoding() );

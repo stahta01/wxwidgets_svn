@@ -57,7 +57,7 @@
 #endif //def __DARWIN__
 
 
-#define TRACE_STRCONV wxT("strconv")
+#define TRACE_STRCONV _T("strconv")
 
 // WC_UTF16 is defined only if sizeof(wchar_t) == 2, otherwise it's supposed to
 // be 4 bytes
@@ -512,8 +512,8 @@ size_t wxMBConvLibc::WC2MB(char *buf, const wchar_t *psz, size_t n) const
 
 wxConvBrokenFileNames::wxConvBrokenFileNames(const wxString& charset)
 {
-    if ( wxStricmp(charset, wxT("UTF-8")) == 0 ||
-         wxStricmp(charset, wxT("UTF8")) == 0  )
+    if ( wxStricmp(charset, _T("UTF-8")) == 0 ||
+         wxStricmp(charset, _T("UTF8")) == 0  )
         m_conv = new wxMBConvUTF8(wxMBConvUTF8::MAP_INVALID_UTF8_TO_PUA);
     else
         m_conv = new wxCSConv(charset);
@@ -1137,7 +1137,7 @@ wxMBConvStrictUTF8::FromWChar(char *dst, size_t dstLen,
         }
         else
         {
-            wxFAIL_MSG( wxT("trying to encode undefined Unicode character") );
+            wxFAIL_MSG( _T("trying to encode undefined Unicode character") );
             break;
         }
 
@@ -2106,7 +2106,7 @@ wxMBConv_iconv::wxMBConv_iconv(const char *name)
     // check for charset that represents wchar_t:
     if ( ms_wcCharsetName.empty() )
     {
-        wxLogTrace(TRACE_STRCONV, wxT("Looking for wide char codeset:"));
+        wxLogTrace(TRACE_STRCONV, _T("Looking for wide char codeset:"));
 
 #if wxUSE_FONTMAP
         const wxChar **names = wxFontMapperBase::GetAllEncodingNames(WC_ENC);
@@ -2114,9 +2114,9 @@ wxMBConv_iconv::wxMBConv_iconv(const char *name)
         static const wxChar *names_static[] =
         {
 #if SIZEOF_WCHAR_T == 4
-            wxT("UCS-4"),
+            _T("UCS-4"),
 #elif SIZEOF_WCHAR_T = 2
-            wxT("UCS-2"),
+            _T("UCS-2"),
 #endif
             NULL
         };
@@ -2131,19 +2131,19 @@ wxMBConv_iconv::wxMBConv_iconv(const char *name)
             wxString nameXE(nameCS);
 
 #ifdef WORDS_BIGENDIAN
-                nameXE += wxT("BE");
+                nameXE += _T("BE");
 #else // little endian
-                nameXE += wxT("LE");
+                nameXE += _T("LE");
 #endif
 
-            wxLogTrace(TRACE_STRCONV, wxT("  trying charset \"%s\""),
+            wxLogTrace(TRACE_STRCONV, _T("  trying charset \"%s\""),
                        nameXE.c_str());
 
             m2w = iconv_open(nameXE.ToAscii(), name);
             if ( m2w == ICONV_T_INVALID )
             {
                 // try charset w/o bytesex info (e.g. "UCS4")
-                wxLogTrace(TRACE_STRCONV, wxT("  trying charset \"%s\""),
+                wxLogTrace(TRACE_STRCONV, _T("  trying charset \"%s\""),
                            nameCS.c_str());
                 m2w = iconv_open(nameCS.ToAscii(), name);
 
@@ -2190,8 +2190,8 @@ wxMBConv_iconv::wxMBConv_iconv(const char *name)
                    wxT("iconv wchar_t charset is \"%s\"%s"),
                    ms_wcCharsetName.empty() ? wxString("<none>")
                                             : ms_wcCharsetName,
-                   ms_wcNeedsSwap ? wxT(" (needs swap)")
-                                  : wxT(""));
+                   ms_wcNeedsSwap ? _T(" (needs swap)")
+                                  : _T(""));
     }
     else // we already have ms_wcCharsetName
     {
@@ -2667,7 +2667,7 @@ public:
             switch ( len )
             {
                 default:
-                    wxLogDebug(wxT("Unexpected NUL length %d"), len);
+                    wxLogDebug(_T("Unexpected NUL length %d"), len);
                     self->m_minMBCharWidth = (size_t)-1;
                     break;
 
@@ -2714,7 +2714,7 @@ private:
                     break;
             }
 
-            wxASSERT_MSG( s_isWin98Or2k != -1, wxT("should be set above") );
+            wxASSERT_MSG( s_isWin98Or2k != -1, _T("should be set above") );
         }
 
         return s_isWin98Or2k == 1;
@@ -2908,7 +2908,7 @@ wxCSConv::wxCSConv(wxFontEncoding encoding)
 {
     if ( encoding == wxFONTENCODING_MAX || encoding == wxFONTENCODING_DEFAULT )
     {
-        wxFAIL_MSG( wxT("invalid encoding value in wxCSConv ctor") );
+        wxFAIL_MSG( _T("invalid encoding value in wxCSConv ctor") );
 
         encoding = wxFONTENCODING_SYSTEM;
     }
@@ -3056,7 +3056,7 @@ wxMBConv *wxCSConv::DoCreate() const
                     delete conv;
                 }
 
-                gs_nameCache[encoding] = wxT(""); // cache the failure
+                gs_nameCache[encoding] = _T(""); // cache the failure
             }
         }
 #endif // wxUSE_FONTMAP
@@ -3146,12 +3146,31 @@ wxMBConv *wxCSConv::DoCreate() const
 
         delete conv;
     }
-
-    wxLogTrace(TRACE_STRCONV,
-               wxT("encoding \"%s\" is not supported by this system"),
-               (m_name ? wxString(m_name)
-                       : wxFontMapperBase::GetEncodingName(m_encoding)));
 #endif // wxUSE_FONTMAP
+
+    // NB: This is a hack to prevent deadlock. What could otherwise happen
+    //     in Unicode build: wxConvLocal creation ends up being here
+    //     because of some failure and logs the error. But wxLog will try to
+    //     attach a timestamp, for which it will need wxConvLocal (to convert
+    //     time to char* and then wchar_t*), but that fails, tries to log the
+    //     error, but wxLog has an (already locked) critical section that
+    //     guards the static buffer.
+    static bool alreadyLoggingError = false;
+    if (!alreadyLoggingError)
+    {
+        alreadyLoggingError = true;
+        wxLogError(_("Cannot convert from the charset '%s'!"),
+                   m_name ? m_name
+                      :
+#if wxUSE_FONTMAP
+                         (const char*)wxFontMapperBase::GetEncodingDescription(m_encoding).ToAscii()
+#else // !wxUSE_FONTMAP
+                         (const char*)wxString::Format(_("encoding %i"), m_encoding).ToAscii()
+#endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
+              );
+
+        alreadyLoggingError = false;
+    }
 
     return NULL;
 }

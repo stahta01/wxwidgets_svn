@@ -89,26 +89,26 @@ wxString wxTextBuffer::Translate(const wxString& text, wxTextFileType type)
     {
         wxChar ch = *i;
         switch ( ch ) {
-            case wxT('\n'):
+            case _T('\n'):
                 // Dos/Unix line termination
                 result += eol;
                 chLast = 0;
                 break;
 
-            case wxT('\r'):
-                if ( chLast == wxT('\r') ) {
+            case _T('\r'):
+                if ( chLast == _T('\r') ) {
                     // Mac empty line
                     result += eol;
                 }
                 else {
                     // just remember it: we don't know whether it is just "\r"
                     // or "\r\n" yet
-                    chLast = wxT('\r');
+                    chLast = _T('\r');
                 }
                 break;
 
             default:
-                if ( chLast == wxT('\r') ) {
+                if ( chLast == _T('\r') ) {
                     // Mac line termination
                     result += eol;
 
@@ -226,7 +226,7 @@ wxTextFileType wxTextBuffer::GuessType() const
             case wxTextFileType_Unix: nUnix++; break;   \
             case wxTextFileType_Dos:  nDos++;  break;   \
             case wxTextFileType_Mac:  nMac++;  break;   \
-            default: wxFAIL_MSG(wxT("unknown line terminator")); \
+            default: wxFAIL_MSG(_T("unknown line terminator")); \
         }
 
     size_t n;

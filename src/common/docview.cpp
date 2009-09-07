@@ -105,6 +105,13 @@ IMPLEMENT_DYNAMIC_CLASS(wxFileHistory, wxObject)
 namespace
 {
 
+wxWindow *wxFindSuitableParent()
+{
+    wxWindow * const win = wxGetTopLevelParent(wxWindow::FindFocus());
+
+    return win ? win : wxTheApp->GetTopWindow();
+}
+
 wxString FindExtension(const wxString& path)
 {
     wxString ext;
@@ -482,7 +489,8 @@ bool wxDocument::OnSaveModified()
                      GetUserReadableName()
                     ),
                     wxTheApp->GetAppDisplayName(),
-                    wxYES_NO | wxCANCEL | wxICON_QUESTION | wxCENTRE
+                    wxYES_NO | wxCANCEL | wxICON_QUESTION | wxCENTRE,
+                    wxFindSuitableParent()
                  ) )
         {
             case wxNO:
@@ -1581,11 +1589,15 @@ wxDocTemplate *wxDocManager::SelectDocumentPath(wxDocTemplate **templates,
 
     int FilterIndex = -1;
 
+    wxWindow* parent = wxFindSuitableParent();
+
     wxString pathTmp = wxFileSelectorEx(_("Open File"),
                                         GetLastDirectory(),
                                         wxEmptyString,
                                         &FilterIndex,
-                                        descrBuf);
+                                        descrBuf,
+                                        0,
+                                        parent);
 
     wxDocTemplate *theTemplate = NULL;
     if (!pathTmp.empty())
@@ -1600,7 +1612,8 @@ wxDocTemplate *wxDocManager::SelectDocumentPath(wxDocTemplate **templates,
 
             wxMessageBox(_("Sorry, could not open this file."),
                          msgTitle,
-                         wxOK | wxICON_EXCLAMATION | wxCENTRE);
+                         wxOK | wxICON_EXCLAMATION | wxCENTRE,
+                         parent);
 
             path = wxEmptyString;
             return NULL;
@@ -1623,7 +1636,8 @@ wxDocTemplate *wxDocManager::SelectDocumentPath(wxDocTemplate **templates,
             // allowed templates in runtime.
             wxMessageBox(_("Sorry, the format for this file is unknown."),
                          _("Open File"),
-                         wxOK | wxICON_EXCLAMATION | wxCENTRE);
+                         wxOK | wxICON_EXCLAMATION | wxCENTRE,
+                         parent);
         }
     }
     else
@@ -1705,7 +1719,8 @@ wxDocTemplate *wxDocManager::SelectDocumentType(wxDocTemplate **templates,
                             _("Select a document template"),
                             _("Templates"),
                             strings,
-                            (void **)data.get()
+                            (void **)data.get(),
+                            wxFindSuitableParent()
                           );
     }
 
@@ -1779,7 +1794,8 @@ wxDocTemplate *wxDocManager::SelectViewType(wxDocTemplate **templates,
                             _("Select a document view"),
                             _("Views"),
                             strings,
-                            (void **)data.get()
+                            (void **)data.get(),
+                            wxFindSuitableParent()
                           );
 
     }
@@ -2236,11 +2252,7 @@ void wxFileHistory::AddFilesToMenu(wxMenu* menu)
 
 bool wxTransferFileToStream(const wxString& filename, wxSTD ostream& stream)
 {
-#if wxUSE_FFILE
-    wxFFile file(filename, wxT("rb"));
-#elif wxUSE_FILE
-    wxFile file(filename, wxFile::read);
-#endif
+    wxFFile file(filename, _T("rb"));
     if ( !file.IsOpened() )
         return false;
 
@@ -2264,11 +2276,7 @@ bool wxTransferFileToStream(const wxString& filename, wxSTD ostream& stream)
 
 bool wxTransferStreamToFile(wxSTD istream& stream, const wxString& filename)
 {
-#if wxUSE_FFILE
-    wxFFile file(filename, wxT("wb"));
-#elif wxUSE_FILE
-    wxFile file(filename, wxFile::write);
-#endif
+    wxFFile file(filename, _T("wb"));
     if ( !file.IsOpened() )
         return false;
 
@@ -2291,11 +2299,7 @@ bool wxTransferStreamToFile(wxSTD istream& stream, const wxString& filename)
 
 bool wxTransferFileToStream(const wxString& filename, wxOutputStream& stream)
 {
-#if wxUSE_FFILE
-    wxFFile file(filename, wxT("rb"));
-#elif wxUSE_FILE
-    wxFile file(filename, wxFile::read);
-#endif
+    wxFFile file(filename, _T("rb"));
     if ( !file.IsOpened() )
         return false;
 
@@ -2319,11 +2323,7 @@ bool wxTransferFileToStream(const wxString& filename, wxOutputStream& stream)
 
 bool wxTransferStreamToFile(wxInputStream& stream, const wxString& filename)
 {
-#if wxUSE_FFILE
-    wxFFile file(filename, wxT("wb"));
-#elif wxUSE_FILE
-    wxFile file(filename, wxFile::write);
-#endif
+    wxFFile file(filename, _T("wb"));
     if ( !file.IsOpened() )
         return false;
 

@@ -76,7 +76,7 @@ public:
     virtual bool IsOk() const;
 
     /**
-        Returns @true if the stream supports seeking to arbitrary offsets.
+        Returns @true if the streams supports seeking to arbitrary offsets.
     */
     virtual bool IsSeekable() const;
 
@@ -613,11 +613,6 @@ public:
     /**
         Changes the stream current position.
 
-        This operation in general is possible only for seekable streams 
-        (see wxStreamBase::IsSeekable()); non-seekable streams support only
-        seeking positive amounts in mode @c wxFromCurrent (this is implemented
-        by reading data and simply discarding it).
-
         @param pos
             Offset to seek to.
         @param mode
@@ -628,9 +623,7 @@ public:
     virtual wxFileOffset SeekI(wxFileOffset pos, wxSeekMode mode = wxFromStart);
 
     /**
-        Returns the current stream position or ::wxInvalidOffset if it's not
-        available (e.g. socket streams do not have a size nor a current stream
-        position).
+        Returns the current stream position.
     */
     virtual wxFileOffset TellI() const;
 
@@ -836,7 +829,7 @@ public:
         const wxFilterClassFactory *factory = wxFilterClassFactory::GetFirst();
 
         while (factory) {
-            list << factory->GetProtocol() << wxT("\n");
+            list << factory->GetProtocol() << _T("\n");
             factory = factory->GetNext();
         }
         @endcode
@@ -866,7 +859,7 @@ public:
         const wxChar *const *p;
 
         for (p = factory->GetProtocols(wxSTREAM_FILEEXT); *p; p++)
-            list << *p << wxT("\n");
+            list << *p << _T("\n");
         @endcode
     */
     virtual const wxChar * const* GetProtocols(wxStreamProtocolType type = wxSTREAM_PROTOCOL) const = 0;

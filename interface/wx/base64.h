@@ -14,17 +14,6 @@
 /** @addtogroup group_funcmacro_misc */
 //@{
 
-/** 
-    Elements of this enum specify the possible behaviours of wxBase64Decode
-    when an invalid character is encountered.
-*/
-enum wxBase64DecodeMode
-{
-    wxBase64DecodeMode_Strict,  ///< Normal behaviour: stop at any invalid characters.
-    wxBase64DecodeMode_SkipWS,  ///< Skip whitespace characters.
-    wxBase64DecodeMode_Relaxed  ///< The most lenient behaviour: simply ignore all invalid characters.
-};
-
 /**
     This function encodes the given data using base64.
 
@@ -106,8 +95,7 @@ size_t wxBase64EncodedSize(size_t len);
     This overload is a raw decoding function and decodes the data into the
     provided buffer @a dst of the given size @e dstLen. An error is returned if
     the buffer is not large enough -- that is not at least
-    wxBase64DecodedSize(srcLen) bytes. Notice that the buffer will @e not be
-    @NULL-terminated.
+    wxBase64DecodedSize(srcLen) bytes.
 
     This overload returns the number of bytes written to the buffer or the
     necessary buffer size if @a dst was @NULL or @c wxCONV_FAILED on error,
@@ -142,10 +130,10 @@ size_t wxBase64Decode(void* dst, size_t dstLen,
                       const char* src,
                       size_t srcLen = wxNO_LEN,
                       wxBase64DecodeMode mode = wxBase64DecodeMode_Strict,
-                      size_t *posErr = NULL);
+                      size_t posErr = NULL);
 
 /**
-    See the wxBase64Decode(void*,size_t,const char*,size_t,wxBase64DecodeMode,size_t*)
+    See the wxBase64Decode(void*,size_t,const char*,size_t,wxBase64DecodeMode,size_t)
     overload for more info about the parameters of this function.
 
     This overload allocates memory internally and returns it as wxMemoryBuffer
@@ -159,10 +147,10 @@ size_t wxBase64Decode(void* dst, size_t dstLen,
 wxMemoryBuffer wxBase64Decode(const char* src,
                               size_t srcLen = wxNO_LEN,
                               wxBase64DecodeMode mode = wxBase64DecodeMode_Strict,
-                              size_t *posErr = NULL);
+                              size_t posErr = NULL);
 
 /**
-    See the wxBase64Decode(void*,size_t,const char*,size_t,wxBase64DecodeMode,size_t*)
+    See the wxBase64Decode(void*,size_t,const char*,size_t,wxBase64DecodeMode,size_t)
     overload for more info about the parameters of this function.
 
     This overload takes as input a wxString and returns the internally-allocated
@@ -172,7 +160,7 @@ wxMemoryBuffer wxBase64Decode(const char* src,
 */
 wxMemoryBuffer wxBase64Decode(const wxString& src,
                               wxBase64DecodeMode mode = wxBase64DecodeMode_Strict,
-                              size_t *posErr = NULL);
+                              size_t posErr = NULL);
 
 //@}
 

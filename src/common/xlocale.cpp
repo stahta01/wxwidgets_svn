@@ -153,7 +153,7 @@ void wxXLocale::Init(const char *loc)
             m_locale = newlocale(LC_ALL_MASK, buf2.c_str(), NULL);
         }
     }
-
+    
     // TODO: wxLocale performs many more manipulations of the given locale
     //       string in the attempt to set a valid locale; reusing that code
     //       (changing it to take a generic wxTryLocale callback) would be nice
@@ -282,12 +282,13 @@ int wxToupper_l(const wxUniChar& c, const wxXLocale& loc)
 #define IMPLEMENT_STRTOX_L_START                                \
     wxCHECK(loc.IsOk(), 0);                                     \
                                                                 \
-    /* (Try to) temporary set the 'C' locale */                 \
-    const char *oldLocale = wxSetlocale(LC_NUMERIC, "C");       \
-    if ( !oldLocale )                                           \
+    /* (Try to) temporary set the locale to 'C' */              \
+    const char *oldLocale = wxSetlocale(LC_NUMERIC, NULL);      \
+    const char *tmp = wxSetlocale(LC_NUMERIC, "C");             \
+    if ( !tmp )                                                 \
     {                                                           \
-        /* the current locale was not changed; no need to */    \
-        /* restore the previous one... */                       \
+        /* restore the original locale */                       \
+        wxSetlocale(LC_NUMERIC, oldLocale);                     \
         errno = EINVAL;                                         \
             /* signal an error (better than nothing) */         \
         return 0;                                               \
@@ -313,7 +314,7 @@ double wxStrtod_l(const char* str, char **endptr, const wxXLocale& loc)
 }
 
 long wxStrtol_l(const wchar_t* str, wchar_t **endptr, int base, const wxXLocale& loc)
-{
+{ 
     IMPLEMENT_STRTOX_L_START
     long ret = wxStrtol(str, endptr, base);
     IMPLEMENT_STRTOX_L_END

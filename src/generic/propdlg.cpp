@@ -120,7 +120,7 @@ void wxPropertySheetDialog::CreateButtons(int flags)
     wxSystemOptions::SetOption(optionName,0);
 #endif
 
-    wxSizer *buttonSizer = CreateButtonSizer(flags);
+    wxSizer *buttonSizer = CreateButtonSizer( flags & ButtonSizerFlags );
     if( buttonSizer )
     {
         m_innerSizer->Add( buttonSizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT|wxRIGHT, 2);

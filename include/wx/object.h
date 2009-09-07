@@ -69,6 +69,7 @@ class WXDLLIMPEXP_FWD_BASE wxClassInfo;
 class WXDLLIMPEXP_FWD_BASE wxHashTable;
 class WXDLLIMPEXP_FWD_BASE wxObject;
 class WXDLLIMPEXP_FWD_BASE wxPluginLibrary;
+class WXDLLIMPEXP_FWD_BASE wxObjectRefData;
 class WXDLLIMPEXP_FWD_BASE wxHashTable_Node;
 
 // ----------------------------------------------------------------------------
@@ -398,13 +399,15 @@ inline T *wxCheckCast(const void *ptr, T * = NULL)
 #endif // wxUSE_MEMORY_TRACING
 
 // ----------------------------------------------------------------------------
-// wxRefCounter: ref counted data "manager"
+// wxObjectRefData: ref counted data meant to be stored in wxObject
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_BASE wxRefCounter
+class WXDLLIMPEXP_BASE wxObjectRefData
 {
+    friend class WXDLLIMPEXP_FWD_BASE wxObject;
+
 public:
-    wxRefCounter() { m_count = 1; }
+    wxObjectRefData() : m_count(1) { }
 
     int GetRefCount() const { return m_count; }
 
@@ -414,19 +417,12 @@ public:
 protected:
     // this object should never be destroyed directly but only as a
     // result of a DecRef() call:
-    virtual ~wxRefCounter() { }
+    virtual ~wxObjectRefData() { }
 
 private:
     // our refcount:
     int m_count;
 };
-
-// ----------------------------------------------------------------------------
-// wxObjectRefData: ref counted data meant to be stored in wxObject
-// ----------------------------------------------------------------------------
-
-typedef wxRefCounter wxObjectRefData;
-
 
 // ----------------------------------------------------------------------------
 // wxObjectDataPtr: helper class to avoid memleaks because of missing calls
@@ -522,7 +518,7 @@ public:
     {
          m_refData = other.m_refData;
          if (m_refData)
-             m_refData->IncRef();
+             m_refData->m_count++;
     }
 
     wxObject& operator=(const wxObject& other)

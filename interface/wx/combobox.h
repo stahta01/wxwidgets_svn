@@ -96,10 +96,9 @@ public:
             string must be one of the valid choices if it is not empty.
         @param pos
             Window position.
-            If ::wxDefaultPosition is specified then a default position is chosen.
         @param size
-            Window size. 
-            If ::wxDefaultSize is specified then the window is sized appropriately.
+            Window size. If wxDefaultSize is specified then the window is sized
+            appropriately.
         @param n
             Number of strings with which to initialise the control.
         @param choices
@@ -224,9 +223,6 @@ public:
 
     /**
         Sets the text for the combobox text field.
-
-        Notice that this method will generate a wxEVT_COMMAND_TEXT_UPDATED
-        event, use wxTextEntry::ChangeValue() if this is undesirable.
 
         @note For a combobox with @c wxCB_READONLY style the string must be in
               the combobox choices list, otherwise the call to SetValue() is

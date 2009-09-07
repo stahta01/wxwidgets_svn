@@ -9,44 +9,24 @@
 /**
     @class wxStaticBox
 
-    A static box is a rectangle drawn around other windows to denote
+    A static box is a rectangle drawn around other panel items to denote
     a logical grouping of items.
 
-    Note that while the previous versions required that windows appearing
-    inside a static box be created as its siblings (i.e. use the same parent as
-    the static box itself), since wxWidgets 2.9.1 it is also possible to create
-    them as children of wxStaticBox itself and you are actually encouraged to
-    do it like this if compatibility with the previous versions is not
-    important.
+    Please note that a static box should @b not be used as the parent for the
+    controls it contains, instead they should be siblings of each other. Although
+    using a static box as a parent might work in some versions of wxWidgets, it
+    results in a crash under, for example, wxGTK.
 
-    So the new recommended way to create static box is:
-    @code
-        void MyFrame::CreateControls()
-        {
-            wxPanel *panel = new wxPanel(this);
-            wxStaticBox *box = new wxStaticBox(panel, wxID_ANY, "StaticBox");
-
-            new wxStaticText(box, wxID_ANY "This window is a child of the staticbox");
-            ...
-        }
-    @endcode
-
-    While the compatible -- and now deprecated -- way is
-    @code
-            wxStaticBox *box = new wxStaticBox(panel, wxID_ANY, "StaticBox");
-
-            new wxStaticText(panel, wxID_ANY "This window is a child of the panel");
-            ...
-    @endcode
-
-    Also note that there is a specialized wxSizer class (wxStaticBoxSizer) which can
-    be used as an easier way to pack items into a static box.
+    Also, please note that because of this, the order in which you create new
+    controls is important. Create your wxStaticBox control @b before any
+    siblings that are to appear inside the wxStaticBox in order to preserve the
+    correct Z-Order of controls.
 
     @library{wxcore}
     @category{ctrl}
     @appearance{staticbox.png}
 
-    @see wxStaticText, wxStaticBoxSizer
+    @see wxStaticText
 */
 class wxStaticBox : public wxControl
 {
@@ -67,10 +47,10 @@ public:
             Text to be displayed in the static box, the empty string for no label.
         @param pos
             Window position.
-            If ::wxDefaultPosition is specified then a default position is chosen.
+            If wxDefaultPosition is specified then a default position is chosen.
         @param size
             Checkbox size.
-            If ::wxDefaultSize is specified then a default size is chosen.
+            If wxDefaultSize is specified then a default size is chosen.
         @param style
             Window style. See wxStaticBox.
         @param name

@@ -131,7 +131,7 @@ const int wxInvalidOffset = -1;
 // regardless of the mode parameter. This hack works around the problem by
 // setting the mode with _wchmod.
 //
-int wxCRT_OpenW(const wchar_t *pathname, int flags, mode_t mode)
+int wxCRT_Open(const wchar_t *pathname, int flags, mode_t mode)
 {
     int moreflags = 0;
 
@@ -955,8 +955,8 @@ static void wxDoDos2UnixFilename(T *s)
   if (s)
     while (*s)
       {
-        if (*s == wxT('\\'))
-          *s = wxT('/');
+        if (*s == _T('\\'))
+          *s = _T('/');
 #ifdef __WXMSW__
         else
           *s = wxTolower(*s);        // Case INDEPENDENT
@@ -1279,7 +1279,7 @@ bool wxMkdir(const wxString& dir, int perm)
 #else  // !MSW, !DOS and !OS/2 VAC++
     wxUnusedVar(perm);
   #ifdef __WXWINCE__
-    if ( CreateDirectory(dir.fn_str(), NULL) == 0 )
+    if ( CreateDirectory(dir, NULL) == 0 )
   #else
     if ( wxMkDir(dir.fn_str()) != 0 )
   #endif
@@ -1304,7 +1304,7 @@ bool wxRmdir(const wxString& dir, int WXUNUSED(flags))
   #if defined(__OS2__)
     if ( ::DosDeleteDir(dir.c_str()) != 0 )
   #elif defined(__WXWINCE__)
-    if ( RemoveDirectory(dir.fn_str()) == 0 )
+    if ( RemoveDirectory(dir) == 0 )
   #else
     if ( wxRmDir(dir.fn_str()) != 0 )
   #endif
@@ -1329,7 +1329,7 @@ bool wxDirExists(const wxString& pathName)
     while ( wxEndsWithPathSeparator(strPath) )
     {
         size_t len = strPath.length();
-        if ( len == 1 || (len == 3 && strPath[len - 2] == wxT(':')) )
+        if ( len == 1 || (len == 3 && strPath[len - 2] == _T(':')) )
             break;
 
         strPath.Truncate(len - 1);
@@ -1338,8 +1338,8 @@ bool wxDirExists(const wxString& pathName)
 
 #ifdef __OS2__
     // OS/2 can't handle "d:", it wants either "d:\" or "d:."
-    if (strPath.length() == 2 && strPath[1u] == wxT(':'))
-        strPath << wxT('.');
+    if (strPath.length() == 2 && strPath[1u] == _T(':'))
+        strPath << _T('.');
 #endif
 
 #if defined(__WXPALMOS__)
@@ -1477,11 +1477,11 @@ wxChar *wxDoGetCwd(wxChar *buf, int sz)
 {
 #if defined(__WXPALMOS__)
     // TODO
-    if(buf && sz>0) buf[0] = wxT('\0');
+    if(buf && sz>0) buf[0] = _T('\0');
     return buf;
 #elif defined(__WXWINCE__)
     // TODO
-    if(buf && sz>0) buf[0] = wxT('\0');
+    if(buf && sz>0) buf[0] = _T('\0');
     return buf;
 #else
     if ( !buf )
@@ -1555,7 +1555,7 @@ wxChar *wxDoGetCwd(wxChar *buf, int sz)
         //     sense at all to me - empty string is a better error indicator
         //     (NULL might be even better but I'm afraid this could lead to
         //     problems with the old code assuming the return is never NULL)
-        buf[0] = wxT('\0');
+        buf[0] = _T('\0');
     }
     else // ok, but we might need to massage the path into the right format
     {
@@ -1613,7 +1613,7 @@ bool wxSetWorkingDirectory(const wxString& d)
 #if defined(__OS2__)
     if (d[1] == ':')
     {
-        ::DosSetDefaultDisk(wxToupper(d[0]) - wxT('A') + 1);
+        ::DosSetDefaultDisk(wxToupper(d[0]) - _T('A') + 1);
     // do not call DosSetCurrentDir when just changing drive,
     // since it requires e.g. "d:." instead of "d:"!
     if (d.length() == 2)
@@ -1686,7 +1686,7 @@ bool wxFindFileInPath(wxString *pStr, const wxString& szPath, const wxString& sz
 {
     // we assume that it's not empty
     wxCHECK_MSG( !szFile.empty(), false,
-                 wxT("empty file name in wxFindFileInPath"));
+                 _T("empty file name in wxFindFileInPath"));
 
     // skip path separator in the beginning of the file name if present
     wxString szFile2;
@@ -1767,7 +1767,7 @@ int WXDLLIMPEXP_BASE wxParseCommonDialogsFilter(const wxString& filterStr,
             }
             else
             {
-                wxFAIL_MSG( wxT("missing '|' in the wildcard string!") );
+                wxFAIL_MSG( _T("missing '|' in the wildcard string!") );
             }
 
             break;
@@ -1818,13 +1818,13 @@ int WXDLLIMPEXP_BASE wxParseCommonDialogsFilter(const wxString& filterStr,
                 {
                     wxString before = descriptions[k].Left(pos);
                     wxString after = descriptions[k].Mid(pos+filters[k].Len());
-                    pos = before.Find(wxT('('),true);
-                    if (pos>before.Find(wxT(')'),true))
+                    pos = before.Find(_T('('),true);
+                    if (pos>before.Find(_T(')'),true))
                     {
                         before = before.Left(pos+1);
                         before << filters[k];
-                        pos = after.Find(wxT(')'));
-                        int pos1 = after.Find(wxT('('));
+                        pos = after.Find(_T(')'));
+                        int pos1 = after.Find(_T('('));
                         if (pos != wxNOT_FOUND && (pos<pos1 || pos1==wxNOT_FOUND))
                         {
                             before << after.Mid(pos);

@@ -54,19 +54,11 @@ public:
 
         for ( size_t n = 0; n < m_count; n++ )
         {
-#if wxUSE_UNICODE
-            // notice that there is no need to copy the string pointer here
-            // because this class is used only as a temporary and during its
-            // existence the pointer persists in wxString which uses it either
-            // for internal representation (in wxUSE_UNICODE_UTF8 case) or as
-            // cached m_convertedToChar (in wxUSE_UNICODE_WCHAR case)
-            m_strings[n] = wxGTK_CONV_SYS(a[n]);
-#else // !wxUSE_UNICODE
-            // and in ANSI build we can simply borrow the pointer from
-            // wxCharBuffer (which owns it in this case) instead of copying it
-            // but we then become responsible for freeing it
+#if wxUSE_UNICODE_UTF8
+            m_strings[n] = a[n].utf8_str();
+#else
             m_strings[n] = wxGTK_CONV_SYS(a[n]).release();
-#endif // wxUSE_UNICODE/!wxUSE_UNICODE
+#endif
         }
 
         // array must be NULL-terminated
@@ -77,7 +69,7 @@ public:
 
     ~GtkArray()
     {
-#if !wxUSE_UNICODE
+#if !wxUSE_UNICODE_UTF8
         for ( size_t n = 0; n < m_count; n++ )
             free(const_cast<gchar *>(m_strings[n]));
 #endif
@@ -117,7 +109,7 @@ wxGtkAboutDialogOnLink(GtkAboutDialog * WXUNUSED(about),
     wxLaunchDefaultBrowser(wxGTK_CONV_BACK_SYS(link));
 }
 
-void wxAboutBox(const wxAboutDialogInfo& info, wxWindow* WXUNUSED(parent))
+void wxAboutBox(const wxAboutDialogInfo& info)
 {
     if ( !gtk_check_version(2,6,0) )
     {
@@ -189,7 +181,7 @@ void wxAboutBox(const wxAboutDialogInfo& info, wxWindow* WXUNUSED(parent))
             const size_t count = translators.size();
             for ( size_t n = 0; n < count; n++ )
             {
-                transCredits << translators[n] << wxT('\n');
+                transCredits << translators[n] << _T('\n');
             }
         }
         else // no translators explicitely specified

@@ -81,7 +81,7 @@ public:
     // Status bar
 #if wxUSE_STATUSBAR
     virtual wxStatusBar* OnCreateStatusBar( int             nNumber = 1
-                                           ,long            lStyle = wxSTB_DEFAULT_STYLE
+                                           ,long            lStyle = wxST_SIZEGRIP
                                            ,wxWindowID      vId = 0
                                            ,const wxString& rsName = wxStatusLineNameStr
                                           );

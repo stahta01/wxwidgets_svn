@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 17 June 2009                                                        *
+# Date : 12 January 2009                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -10,20 +10,19 @@
 
 .ifdef __WXMOTIF__
 CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
-	   /assume=(nostdnew,noglobal_array_new)/warn=disable=(INTSIGNCHANGE)
+	   /assume=(nostdnew,noglobal_array_new)
 .else
 .ifdef __WXGTK__
 CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)/warn=disable=(INTSIGNCHANGE)
+	   /assume=(nostdnew,noglobal_array_new)
 .else
 .ifdef __WXGTK2__
 CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)/warn=disable=(INTSIGNCHANGE)
+	   /assume=(nostdnew,noglobal_array_new)
 .else
 .ifdef __WXX11__
 CXX_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
-	/name=(as_is,short)/assume=(nostdnew,noglobal_array_new)\
-	/warn=disable=(INTSIGNCHANGE)
+	/name=(as_is,short)/assume=(nostdnew,noglobal_array_new)
 .else
 CXX_DEFINE =
 .endif

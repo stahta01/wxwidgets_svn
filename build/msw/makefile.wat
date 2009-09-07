@@ -151,11 +151,10 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_xh_datectrl.obj &
 	$(OBJS)\monodll_xh_dirpicker.obj &
 	$(OBJS)\monodll_xh_dlg.obj &
-	$(OBJS)\monodll_xh_editlbox.obj &
-	$(OBJS)\monodll_xh_filectrl.obj &
+	$(OBJS)\monodll_xh_frame.obj &
+	$(OBJS)\monodll_xh_mdi.obj &
 	$(OBJS)\monodll_xh_filepicker.obj &
 	$(OBJS)\monodll_xh_fontpicker.obj &
-	$(OBJS)\monodll_xh_frame.obj &
 	$(OBJS)\monodll_xh_gauge.obj &
 	$(OBJS)\monodll_xh_gdctl.obj &
 	$(OBJS)\monodll_xh_grid.obj &
@@ -164,7 +163,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_xh_listb.obj &
 	$(OBJS)\monodll_xh_listbk.obj &
 	$(OBJS)\monodll_xh_listc.obj &
-	$(OBJS)\monodll_xh_mdi.obj &
 	$(OBJS)\monodll_xh_menu.obj &
 	$(OBJS)\monodll_xh_notbk.obj &
 	$(OBJS)\monodll_xh_odcombo.obj &
@@ -226,7 +224,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =
 !ifeq USE_GUI 1
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_OBJECTS =  &
-	$(OBJS)\monodll_activex.obj &
 	$(OBJS)\monodll_app.obj &
 	$(OBJS)\monodll_bitmap.obj &
 	$(OBJS)\monodll_brush.obj &
@@ -310,6 +307,7 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_nativewin.obj &
 	$(OBJS)\monodll_notebook.obj &
 	$(OBJS)\monodll_access.obj &
+	$(OBJS)\monodll_activex.obj &
 	$(OBJS)\monodll_ownerdrw.obj &
 	$(OBJS)\monodll_radiobox.obj &
 	$(OBJS)\monodll_radiobut.obj &
@@ -402,7 +400,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_listctrlcmn.obj &
 	$(OBJS)\monodll_matrix.obj &
 	$(OBJS)\monodll_menucmn.obj &
-	$(OBJS)\monodll_mousemanager.obj &
 	$(OBJS)\monodll_nbkbase.obj &
 	$(OBJS)\monodll_overlaycmn.obj &
 	$(OBJS)\monodll_paper.obj &
@@ -470,7 +467,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 !ifeq USE_GUI 1
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_OBJECTS =  &
-	$(OBJS)\monodll_activex.obj &
 	$(OBJS)\monodll_app.obj &
 	$(OBJS)\monodll_bitmap.obj &
 	$(OBJS)\monodll_brush.obj &
@@ -645,7 +641,6 @@ ____CORE_SRC_FILENAMES_OBJECTS =  &
 	$(OBJS)\monodll_listctrlcmn.obj &
 	$(OBJS)\monodll_matrix.obj &
 	$(OBJS)\monodll_menucmn.obj &
-	$(OBJS)\monodll_mousemanager.obj &
 	$(OBJS)\monodll_nbkbase.obj &
 	$(OBJS)\monodll_overlaycmn.obj &
 	$(OBJS)\monodll_paper.obj &
@@ -848,11 +843,10 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_xh_datectrl.obj &
 	$(OBJS)\monolib_xh_dirpicker.obj &
 	$(OBJS)\monolib_xh_dlg.obj &
-	$(OBJS)\monolib_xh_editlbox.obj &
-	$(OBJS)\monolib_xh_filectrl.obj &
+	$(OBJS)\monolib_xh_frame.obj &
+	$(OBJS)\monolib_xh_mdi.obj &
 	$(OBJS)\monolib_xh_filepicker.obj &
 	$(OBJS)\monolib_xh_fontpicker.obj &
-	$(OBJS)\monolib_xh_frame.obj &
 	$(OBJS)\monolib_xh_gauge.obj &
 	$(OBJS)\monolib_xh_gdctl.obj &
 	$(OBJS)\monolib_xh_grid.obj &
@@ -861,7 +855,6 @@ ____MONOLIB_GUI_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_xh_listb.obj &
 	$(OBJS)\monolib_xh_listbk.obj &
 	$(OBJS)\monolib_xh_listc.obj &
-	$(OBJS)\monolib_xh_mdi.obj &
 	$(OBJS)\monolib_xh_menu.obj &
 	$(OBJS)\monolib_xh_notbk.obj &
 	$(OBJS)\monolib_xh_odcombo.obj &
@@ -923,7 +916,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =
 !ifeq USE_GUI 1
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_1_OBJECTS =  &
-	$(OBJS)\monolib_activex.obj &
 	$(OBJS)\monolib_app.obj &
 	$(OBJS)\monolib_bitmap.obj &
 	$(OBJS)\monolib_brush.obj &
@@ -1007,6 +999,7 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_nativewin.obj &
 	$(OBJS)\monolib_notebook.obj &
 	$(OBJS)\monolib_access.obj &
+	$(OBJS)\monolib_activex.obj &
 	$(OBJS)\monolib_ownerdrw.obj &
 	$(OBJS)\monolib_radiobox.obj &
 	$(OBJS)\monolib_radiobut.obj &
@@ -1099,7 +1092,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_listctrlcmn.obj &
 	$(OBJS)\monolib_matrix.obj &
 	$(OBJS)\monolib_menucmn.obj &
-	$(OBJS)\monolib_mousemanager.obj &
 	$(OBJS)\monolib_nbkbase.obj &
 	$(OBJS)\monolib_overlaycmn.obj &
 	$(OBJS)\monolib_paper.obj &
@@ -1167,7 +1159,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 !ifeq USE_GUI 1
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_1_OBJECTS =  &
-	$(OBJS)\monolib_activex.obj &
 	$(OBJS)\monolib_app.obj &
 	$(OBJS)\monolib_bitmap.obj &
 	$(OBJS)\monolib_brush.obj &
@@ -1342,7 +1333,6 @@ ____CORE_SRC_FILENAMES_1_OBJECTS =  &
 	$(OBJS)\monolib_listctrlcmn.obj &
 	$(OBJS)\monolib_matrix.obj &
 	$(OBJS)\monolib_menucmn.obj &
-	$(OBJS)\monolib_mousemanager.obj &
 	$(OBJS)\monolib_nbkbase.obj &
 	$(OBJS)\monolib_overlaycmn.obj &
 	$(OBJS)\monolib_paper.obj &
@@ -1539,7 +1529,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =
 !ifeq USE_GUI 1
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_2_OBJECTS =  &
-	$(OBJS)\coredll_activex.obj &
 	$(OBJS)\coredll_app.obj &
 	$(OBJS)\coredll_bitmap.obj &
 	$(OBJS)\coredll_brush.obj &
@@ -1623,6 +1612,7 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_nativewin.obj &
 	$(OBJS)\coredll_notebook.obj &
 	$(OBJS)\coredll_access.obj &
+	$(OBJS)\coredll_activex.obj &
 	$(OBJS)\coredll_ownerdrw.obj &
 	$(OBJS)\coredll_radiobox.obj &
 	$(OBJS)\coredll_radiobut.obj &
@@ -1715,7 +1705,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_listctrlcmn.obj &
 	$(OBJS)\coredll_matrix.obj &
 	$(OBJS)\coredll_menucmn.obj &
-	$(OBJS)\coredll_mousemanager.obj &
 	$(OBJS)\coredll_nbkbase.obj &
 	$(OBJS)\coredll_overlaycmn.obj &
 	$(OBJS)\coredll_paper.obj &
@@ -1783,7 +1772,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 !ifeq USE_GUI 1
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_2_OBJECTS =  &
-	$(OBJS)\coredll_activex.obj &
 	$(OBJS)\coredll_app.obj &
 	$(OBJS)\coredll_bitmap.obj &
 	$(OBJS)\coredll_brush.obj &
@@ -1958,7 +1946,6 @@ ____CORE_SRC_FILENAMES_2_OBJECTS =  &
 	$(OBJS)\coredll_listctrlcmn.obj &
 	$(OBJS)\coredll_matrix.obj &
 	$(OBJS)\coredll_menucmn.obj &
-	$(OBJS)\coredll_mousemanager.obj &
 	$(OBJS)\coredll_nbkbase.obj &
 	$(OBJS)\coredll_overlaycmn.obj &
 	$(OBJS)\coredll_paper.obj &
@@ -2036,7 +2023,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =
 !ifeq USE_GUI 1
 !ifeq WXUNIV 0
 ____CORE_SRC_FILENAMES_3_OBJECTS =  &
-	$(OBJS)\corelib_activex.obj &
 	$(OBJS)\corelib_app.obj &
 	$(OBJS)\corelib_bitmap.obj &
 	$(OBJS)\corelib_brush.obj &
@@ -2120,6 +2106,7 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_nativewin.obj &
 	$(OBJS)\corelib_notebook.obj &
 	$(OBJS)\corelib_access.obj &
+	$(OBJS)\corelib_activex.obj &
 	$(OBJS)\corelib_ownerdrw.obj &
 	$(OBJS)\corelib_radiobox.obj &
 	$(OBJS)\corelib_radiobut.obj &
@@ -2212,7 +2199,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_listctrlcmn.obj &
 	$(OBJS)\corelib_matrix.obj &
 	$(OBJS)\corelib_menucmn.obj &
-	$(OBJS)\corelib_mousemanager.obj &
 	$(OBJS)\corelib_nbkbase.obj &
 	$(OBJS)\corelib_overlaycmn.obj &
 	$(OBJS)\corelib_paper.obj &
@@ -2280,7 +2266,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 !ifeq USE_GUI 1
 !ifeq WXUNIV 1
 ____CORE_SRC_FILENAMES_3_OBJECTS =  &
-	$(OBJS)\corelib_activex.obj &
 	$(OBJS)\corelib_app.obj &
 	$(OBJS)\corelib_bitmap.obj &
 	$(OBJS)\corelib_brush.obj &
@@ -2455,7 +2440,6 @@ ____CORE_SRC_FILENAMES_3_OBJECTS =  &
 	$(OBJS)\corelib_listctrlcmn.obj &
 	$(OBJS)\corelib_matrix.obj &
 	$(OBJS)\corelib_menucmn.obj &
-	$(OBJS)\corelib_mousemanager.obj &
 	$(OBJS)\corelib_nbkbase.obj &
 	$(OBJS)\corelib_overlaycmn.obj &
 	$(OBJS)\corelib_paper.obj &
@@ -3158,7 +3142,7 @@ MAKEARGS = CC="$(CC)" CXX="$(CXX)" CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" &
 	CPPUNIT_CFLAGS="$(CPPUNIT_CFLAGS)" CPPUNIT_LIBS="$(CPPUNIT_LIBS)" &
 	RUNTIME_LIBS="$(RUNTIME_LIBS)"
 WX_RELEASE_NODOT = 29
-WX_VERSION_NODOT = $(WX_RELEASE_NODOT)1
+WX_VERSION_NODOT = $(WX_RELEASE_NODOT)0
 COMPILER_PREFIX = wat
 OBJS = &
 	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
@@ -3472,7 +3456,6 @@ MONODLL_OBJECTS =  &
 	$(OBJS)\monodll_regex.obj &
 	$(OBJS)\monodll_stdpbase.obj &
 	$(OBJS)\monodll_sstream.obj &
-	$(OBJS)\monodll_stdstream.obj &
 	$(OBJS)\monodll_stopwatch.obj &
 	$(OBJS)\monodll_strconv.obj &
 	$(OBJS)\monodll_stream.obj &
@@ -3612,7 +3595,6 @@ MONOLIB_OBJECTS =  &
 	$(OBJS)\monolib_regex.obj &
 	$(OBJS)\monolib_stdpbase.obj &
 	$(OBJS)\monolib_sstream.obj &
-	$(OBJS)\monolib_stdstream.obj &
 	$(OBJS)\monolib_stopwatch.obj &
 	$(OBJS)\monolib_strconv.obj &
 	$(OBJS)\monolib_stream.obj &
@@ -3750,7 +3732,6 @@ BASEDLL_OBJECTS =  &
 	$(OBJS)\basedll_regex.obj &
 	$(OBJS)\basedll_stdpbase.obj &
 	$(OBJS)\basedll_sstream.obj &
-	$(OBJS)\basedll_stdstream.obj &
 	$(OBJS)\basedll_stopwatch.obj &
 	$(OBJS)\basedll_strconv.obj &
 	$(OBJS)\basedll_stream.obj &
@@ -3872,7 +3853,6 @@ BASELIB_OBJECTS =  &
 	$(OBJS)\baselib_regex.obj &
 	$(OBJS)\baselib_stdpbase.obj &
 	$(OBJS)\baselib_sstream.obj &
-	$(OBJS)\baselib_stdstream.obj &
 	$(OBJS)\baselib_stopwatch.obj &
 	$(OBJS)\baselib_strconv.obj &
 	$(OBJS)\baselib_stream.obj &
@@ -4208,11 +4188,10 @@ XRCDLL_OBJECTS =  &
 	$(OBJS)\xrcdll_xh_datectrl.obj &
 	$(OBJS)\xrcdll_xh_dirpicker.obj &
 	$(OBJS)\xrcdll_xh_dlg.obj &
-	$(OBJS)\xrcdll_xh_editlbox.obj &
-	$(OBJS)\xrcdll_xh_filectrl.obj &
+	$(OBJS)\xrcdll_xh_frame.obj &
+	$(OBJS)\xrcdll_xh_mdi.obj &
 	$(OBJS)\xrcdll_xh_filepicker.obj &
 	$(OBJS)\xrcdll_xh_fontpicker.obj &
-	$(OBJS)\xrcdll_xh_frame.obj &
 	$(OBJS)\xrcdll_xh_gauge.obj &
 	$(OBJS)\xrcdll_xh_gdctl.obj &
 	$(OBJS)\xrcdll_xh_grid.obj &
@@ -4221,7 +4200,6 @@ XRCDLL_OBJECTS =  &
 	$(OBJS)\xrcdll_xh_listb.obj &
 	$(OBJS)\xrcdll_xh_listbk.obj &
 	$(OBJS)\xrcdll_xh_listc.obj &
-	$(OBJS)\xrcdll_xh_mdi.obj &
 	$(OBJS)\xrcdll_xh_menu.obj &
 	$(OBJS)\xrcdll_xh_notbk.obj &
 	$(OBJS)\xrcdll_xh_odcombo.obj &
@@ -4279,11 +4257,10 @@ XRCLIB_OBJECTS =  &
 	$(OBJS)\xrclib_xh_datectrl.obj &
 	$(OBJS)\xrclib_xh_dirpicker.obj &
 	$(OBJS)\xrclib_xh_dlg.obj &
-	$(OBJS)\xrclib_xh_editlbox.obj &
-	$(OBJS)\xrclib_xh_filectrl.obj &
+	$(OBJS)\xrclib_xh_frame.obj &
+	$(OBJS)\xrclib_xh_mdi.obj &
 	$(OBJS)\xrclib_xh_filepicker.obj &
 	$(OBJS)\xrclib_xh_fontpicker.obj &
-	$(OBJS)\xrclib_xh_frame.obj &
 	$(OBJS)\xrclib_xh_gauge.obj &
 	$(OBJS)\xrclib_xh_gdctl.obj &
 	$(OBJS)\xrclib_xh_grid.obj &
@@ -4292,7 +4269,6 @@ XRCLIB_OBJECTS =  &
 	$(OBJS)\xrclib_xh_listb.obj &
 	$(OBJS)\xrclib_xh_listbk.obj &
 	$(OBJS)\xrclib_xh_listc.obj &
-	$(OBJS)\xrclib_xh_mdi.obj &
 	$(OBJS)\xrclib_xh_menu.obj &
 	$(OBJS)\xrclib_xh_notbk.obj &
 	$(OBJS)\xrclib_xh_odcombo.obj &
@@ -5160,7 +5136,7 @@ $(SETUPHDIR)\wx\msw\rcdefs.h :  $(SETUPHDIR)\wx\msw ..\..\include\wx\msw\genrcde
 build_cfg_file : .SYMBOLIC $(SETUPHDIR)
 	@echo WXVER_MAJOR=2 >$(BUILD_CFG_FILE)
 	@echo WXVER_MINOR=9 >>$(BUILD_CFG_FILE)
-	@echo WXVER_RELEASE=1 >>$(BUILD_CFG_FILE)
+	@echo WXVER_RELEASE=0 >>$(BUILD_CFG_FILE)
 	@echo BUILD=$(BUILD) >>$(BUILD_CFG_FILE)
 	@echo MONOLITHIC=$(MONOLITHIC) >>$(BUILD_CFG_FILE)
 	@echo SHARED=$(SHARED) >>$(BUILD_CFG_FILE)
@@ -5975,9 +5951,6 @@ $(OBJS)\monodll_stdpbase.obj :  .AUTODEPEND ..\..\src\common\stdpbase.cpp
 $(OBJS)\monodll_sstream.obj :  .AUTODEPEND ..\..\src\common\sstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_stdstream.obj :  .AUTODEPEND ..\..\src\common\stdstream.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
 $(OBJS)\monodll_stopwatch.obj :  .AUTODEPEND ..\..\src\common\stopwatch.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
@@ -6218,6 +6191,9 @@ $(OBJS)\monodll_nativewin.obj :  .AUTODEPEND ..\..\src\msw\nativewin.cpp
 $(OBJS)\monodll_access.obj :  .AUTODEPEND ..\..\src\msw\ole\access.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
+$(OBJS)\monodll_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
+
 $(OBJS)\monodll_ownerdrw.obj :  .AUTODEPEND ..\..\src\msw\ownerdrw.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
@@ -6452,19 +6428,16 @@ $(OBJS)\monodll_xh_dirpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_dirpicker.cpp
 $(OBJS)\monodll_xh_dlg.obj :  .AUTODEPEND ..\..\src\xrc\xh_dlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_xh_editlbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_editlbox.cpp
+$(OBJS)\monodll_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
-$(OBJS)\monodll_xh_filectrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_filectrl.cpp
+$(OBJS)\monodll_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xh_filepicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_filepicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xh_fontpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_fontpicker.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xh_gauge.obj :  .AUTODEPEND ..\..\src\xrc\xh_gauge.cpp
@@ -6489,9 +6462,6 @@ $(OBJS)\monodll_xh_listbk.obj :  .AUTODEPEND ..\..\src\xrc\xh_listbk.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xh_listc.obj :  .AUTODEPEND ..\..\src\xrc\xh_listc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-$(OBJS)\monodll_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 
 $(OBJS)\monodll_xh_menu.obj :  .AUTODEPEND ..\..\src\xrc\xh_menu.cpp
@@ -6667,11 +6637,6 @@ $(OBJS)\monodll_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
 
 $(OBJS)\monodll_xtixml.obj :  .AUTODEPEND ..\..\src\common\xtixml.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-
-!ifeq USE_GUI 1
-$(OBJS)\monodll_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
 
 !ifeq USE_GUI 1
 $(OBJS)\monodll_app.obj :  .AUTODEPEND ..\..\src\msw\app.cpp
@@ -7691,11 +7656,6 @@ $(OBJS)\monodll_menucmn.obj :  .AUTODEPEND ..\..\src\common\menucmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monodll_mousemanager.obj :  .AUTODEPEND ..\..\src\common\mousemanager.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monodll_nbkbase.obj :  .AUTODEPEND ..\..\src\common\nbkbase.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONODLL_CXXFLAGS) $<
 !endif
@@ -8324,9 +8284,6 @@ $(OBJS)\monolib_stdpbase.obj :  .AUTODEPEND ..\..\src\common\stdpbase.cpp
 $(OBJS)\monolib_sstream.obj :  .AUTODEPEND ..\..\src\common\sstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_stdstream.obj :  .AUTODEPEND ..\..\src\common\stdstream.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
 $(OBJS)\monolib_stopwatch.obj :  .AUTODEPEND ..\..\src\common\stopwatch.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -8567,6 +8524,9 @@ $(OBJS)\monolib_nativewin.obj :  .AUTODEPEND ..\..\src\msw\nativewin.cpp
 $(OBJS)\monolib_access.obj :  .AUTODEPEND ..\..\src\msw\ole\access.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
+$(OBJS)\monolib_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
+
 $(OBJS)\monolib_ownerdrw.obj :  .AUTODEPEND ..\..\src\msw\ownerdrw.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
@@ -8801,19 +8761,16 @@ $(OBJS)\monolib_xh_dirpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_dirpicker.cpp
 $(OBJS)\monolib_xh_dlg.obj :  .AUTODEPEND ..\..\src\xrc\xh_dlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_xh_editlbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_editlbox.cpp
+$(OBJS)\monolib_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
-$(OBJS)\monolib_xh_filectrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_filectrl.cpp
+$(OBJS)\monolib_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xh_filepicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_filepicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xh_fontpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_fontpicker.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xh_gauge.obj :  .AUTODEPEND ..\..\src\xrc\xh_gauge.cpp
@@ -8838,9 +8795,6 @@ $(OBJS)\monolib_xh_listbk.obj :  .AUTODEPEND ..\..\src\xrc\xh_listbk.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xh_listc.obj :  .AUTODEPEND ..\..\src\xrc\xh_listc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-$(OBJS)\monolib_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 
 $(OBJS)\monolib_xh_menu.obj :  .AUTODEPEND ..\..\src\xrc\xh_menu.cpp
@@ -9016,11 +8970,6 @@ $(OBJS)\monolib_xml.obj :  .AUTODEPEND ..\..\src\xml\xml.cpp
 
 $(OBJS)\monolib_xtixml.obj :  .AUTODEPEND ..\..\src\common\xtixml.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-
-!ifeq USE_GUI 1
-$(OBJS)\monolib_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
 
 !ifeq USE_GUI 1
 $(OBJS)\monolib_app.obj :  .AUTODEPEND ..\..\src\msw\app.cpp
@@ -10040,11 +9989,6 @@ $(OBJS)\monolib_menucmn.obj :  .AUTODEPEND ..\..\src\common\menucmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\monolib_mousemanager.obj :  .AUTODEPEND ..\..\src\common\mousemanager.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\monolib_nbkbase.obj :  .AUTODEPEND ..\..\src\common\nbkbase.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(MONOLIB_CXXFLAGS) $<
 !endif
@@ -10673,9 +10617,6 @@ $(OBJS)\basedll_stdpbase.obj :  .AUTODEPEND ..\..\src\common\stdpbase.cpp
 $(OBJS)\basedll_sstream.obj :  .AUTODEPEND ..\..\src\common\sstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
-$(OBJS)\basedll_stdstream.obj :  .AUTODEPEND ..\..\src\common\stdstream.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
-
 $(OBJS)\basedll_stopwatch.obj :  .AUTODEPEND ..\..\src\common\stopwatch.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASEDLL_CXXFLAGS) $<
 
@@ -10986,9 +10927,6 @@ $(OBJS)\baselib_stdpbase.obj :  .AUTODEPEND ..\..\src\common\stdpbase.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_sstream.obj :  .AUTODEPEND ..\..\src\common\sstream.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
-
-$(OBJS)\baselib_stdstream.obj :  .AUTODEPEND ..\..\src\common\stdstream.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(BASELIB_CXXFLAGS) $<
 
 $(OBJS)\baselib_stopwatch.obj :  .AUTODEPEND ..\..\src\common\stopwatch.cpp
@@ -11306,6 +11244,9 @@ $(OBJS)\coredll_nativewin.obj :  .AUTODEPEND ..\..\src\msw\nativewin.cpp
 $(OBJS)\coredll_access.obj :  .AUTODEPEND ..\..\src\msw\ole\access.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 
+$(OBJS)\coredll_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
+
 $(OBJS)\coredll_ownerdrw.obj :  .AUTODEPEND ..\..\src\msw\ownerdrw.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 
@@ -11386,11 +11327,6 @@ $(OBJS)\coredll_mono.obj :  .AUTODEPEND ..\..\src\univ\themes\mono.cpp
 
 $(OBJS)\coredll_win32.obj :  .AUTODEPEND ..\..\src\univ\themes\win32.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-
-!ifeq USE_GUI 1
-$(OBJS)\coredll_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
 
 !ifeq USE_GUI 1
 $(OBJS)\coredll_app.obj :  .AUTODEPEND ..\..\src\msw\app.cpp
@@ -12410,11 +12346,6 @@ $(OBJS)\coredll_menucmn.obj :  .AUTODEPEND ..\..\src\common\menucmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\coredll_mousemanager.obj :  .AUTODEPEND ..\..\src\common\mousemanager.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\coredll_nbkbase.obj :  .AUTODEPEND ..\..\src\common\nbkbase.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(COREDLL_CXXFLAGS) $<
 !endif
@@ -12799,6 +12730,9 @@ $(OBJS)\corelib_nativewin.obj :  .AUTODEPEND ..\..\src\msw\nativewin.cpp
 $(OBJS)\corelib_access.obj :  .AUTODEPEND ..\..\src\msw\ole\access.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 
+$(OBJS)\corelib_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
+	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
+
 $(OBJS)\corelib_ownerdrw.obj :  .AUTODEPEND ..\..\src\msw\ownerdrw.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 
@@ -12879,11 +12813,6 @@ $(OBJS)\corelib_mono.obj :  .AUTODEPEND ..\..\src\univ\themes\mono.cpp
 
 $(OBJS)\corelib_win32.obj :  .AUTODEPEND ..\..\src\univ\themes\win32.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-
-!ifeq USE_GUI 1
-$(OBJS)\corelib_activex.obj :  .AUTODEPEND ..\..\src\msw\ole\activex.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
 
 !ifeq USE_GUI 1
 $(OBJS)\corelib_app.obj :  .AUTODEPEND ..\..\src\msw\app.cpp
@@ -13903,11 +13832,6 @@ $(OBJS)\corelib_menucmn.obj :  .AUTODEPEND ..\..\src\common\menucmn.cpp
 !endif
 
 !ifeq USE_GUI 1
-$(OBJS)\corelib_mousemanager.obj :  .AUTODEPEND ..\..\src\common\mousemanager.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
-!endif
-
-!ifeq USE_GUI 1
 $(OBJS)\corelib_nbkbase.obj :  .AUTODEPEND ..\..\src\common\nbkbase.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(CORELIB_CXXFLAGS) $<
 !endif
@@ -14727,19 +14651,16 @@ $(OBJS)\xrcdll_xh_dirpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_dirpicker.cpp
 $(OBJS)\xrcdll_xh_dlg.obj :  .AUTODEPEND ..\..\src\xrc\xh_dlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
-$(OBJS)\xrcdll_xh_editlbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_editlbox.cpp
+$(OBJS)\xrcdll_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
-$(OBJS)\xrcdll_xh_filectrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_filectrl.cpp
+$(OBJS)\xrcdll_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_xh_filepicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_filepicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_xh_fontpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_fontpicker.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
-
-$(OBJS)\xrcdll_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_xh_gauge.obj :  .AUTODEPEND ..\..\src\xrc\xh_gauge.cpp
@@ -14764,9 +14685,6 @@ $(OBJS)\xrcdll_xh_listbk.obj :  .AUTODEPEND ..\..\src\xrc\xh_listbk.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_xh_listc.obj :  .AUTODEPEND ..\..\src\xrc\xh_listc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
-
-$(OBJS)\xrcdll_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCDLL_CXXFLAGS) $<
 
 $(OBJS)\xrcdll_xh_menu.obj :  .AUTODEPEND ..\..\src\xrc\xh_menu.cpp
@@ -14913,19 +14831,16 @@ $(OBJS)\xrclib_xh_dirpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_dirpicker.cpp
 $(OBJS)\xrclib_xh_dlg.obj :  .AUTODEPEND ..\..\src\xrc\xh_dlg.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
-$(OBJS)\xrclib_xh_editlbox.obj :  .AUTODEPEND ..\..\src\xrc\xh_editlbox.cpp
+$(OBJS)\xrclib_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
-$(OBJS)\xrclib_xh_filectrl.obj :  .AUTODEPEND ..\..\src\xrc\xh_filectrl.cpp
+$(OBJS)\xrclib_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_filepicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_filepicker.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_fontpicker.obj :  .AUTODEPEND ..\..\src\xrc\xh_fontpicker.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
-
-$(OBJS)\xrclib_xh_frame.obj :  .AUTODEPEND ..\..\src\xrc\xh_frame.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_gauge.obj :  .AUTODEPEND ..\..\src\xrc\xh_gauge.cpp
@@ -14950,9 +14865,6 @@ $(OBJS)\xrclib_xh_listbk.obj :  .AUTODEPEND ..\..\src\xrc\xh_listbk.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_listc.obj :  .AUTODEPEND ..\..\src\xrc\xh_listc.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
-
-$(OBJS)\xrclib_xh_mdi.obj :  .AUTODEPEND ..\..\src\xrc\xh_mdi.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(XRCLIB_CXXFLAGS) $<
 
 $(OBJS)\xrclib_xh_menu.obj :  .AUTODEPEND ..\..\src\xrc\xh_menu.cpp

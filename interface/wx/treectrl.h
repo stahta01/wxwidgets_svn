@@ -150,10 +150,9 @@ public:
             Window identifier. The value @c wxID_ANY indicates a default value.
         @param pos
             Window position.
-            If ::wxDefaultPosition is specified then a default position is chosen.
         @param size
-            Window size. 
-            If ::wxDefaultSize is specified then the window is sized appropriately.
+            Window size. If wxDefaultSize is specified then the window is sized
+            appropriately.
         @param style
             Window style. See wxTreeCtrl.
         @param validator
@@ -419,15 +418,6 @@ public:
     virtual wxTreeItemId GetFirstVisibleItem() const;
 
     /**
-        Returns the item last clicked or otherwise selected.
-        Unlike GetSelection(), it can be used whether or not
-        the control has the @c wxTR_MULTIPLE style.
-        
-        @since 2.9.1
-    */
-    virtual wxTreeItemId GetFocusedItem() const;
-
-    /**
         Returns the normal image list.
     */
     wxImageList* GetImageList() const;
@@ -575,8 +565,7 @@ public:
     /**
         Returns the selection, or an invalid item if there is no selection. This
         function only works with the controls without @c wxTR_MULTIPLE style,
-        use GetSelections() for the controls which do have this style 
-        or, if a single item is wanted, use GetFocusedItem().
+        use GetSelections() for the controls which do have this style.
     */
     virtual wxTreeItemId GetSelection() const;
 
@@ -931,15 +920,13 @@ public:
 
     @beginEventTable{wxTreeEvent}
     @event{EVT_TREE_BEGIN_DRAG(id, func)}
-        Begin dragging with the left mouse button. If you want to enable
-        left-dragging you need to intercept this event and explicitely call
-        wxTreeEvent::Allow(), as it's vetoed by default. Also notice that the
-        control must have an associated image list (see SetImageList()) to
-        drag its items under MSW.
+        Begin dragging with the left mouse button.
+          If you want to enable left-dragging you need to intercept this event
+          and explicitely call wxTreeEvent::Allow(), as it's vetoed by default.
     @event{EVT_TREE_BEGIN_RDRAG(id, func)}
-        Begin dragging with the right mouse button. If you want to enable
-        right-dragging you need to intercept this event and explicitely call
-        wxTreeEvent::Allow(), as it's vetoed by default.
+          Begin dragging with the right mouse button.
+          If you want to enable right-dragging you need to intercept this event
+          and explicitely call wxTreeEvent::Allow(), as it's vetoed by default.
     @event{EVT_TREE_END_DRAG(id, func)}
         End dragging with the left or right mouse button.
     @event{EVT_TREE_BEGIN_LABEL_EDIT(id, func)}

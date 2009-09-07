@@ -91,12 +91,6 @@ public:
         @return Returns @true if successful or if there was no selection. May
                fail if validation was enabled and active editor had invalid
                value.
-
-        @remarks In wxPropertyGrid 1.4, this member function used to send
-                 wxPG_EVT_SELECTED. In wxWidgets 2.9 and later, it no longer
-                 does that.
-
-        @see wxPropertyGrid::SelectProperty()
     */
     bool ClearSelection( bool validation = false);
 
@@ -418,20 +412,7 @@ public:
     wxVariant GetPropertyValues( const wxString& listname = wxEmptyString,
                                  wxPGProperty* baseparent = NULL, long flags = 0 ) const;
 
-    /**
-        Returns list of currently selected properties.
-
-        @remarks wxArrayPGProperty should be compatible with std::vector API.
-    */
-    const wxArrayPGProperty& GetSelectedProperties() const;
-
-    /**
-        Returns currently selected property. NULL if none.
-
-        @remarks When wxPG_EX_MULTIPLE_SELECTION extra style is used, this
-                 member function returns the focused property, that is the
-                 one which can have active editor.
-    */
+    /** Returns currently selected property. */
     wxPGProperty* GetSelection() const;
 
     /**
@@ -550,11 +531,6 @@ public:
         flag clear by software.
     */
     bool IsPropertyModified( wxPGPropArg id ) const;
-
-    /**
-        Returns true if property is selected.
-    */
-    virtual bool IsPropertySelected( wxPGPropArg id ) const;
 
     /**
         Returns @true if property is shown (ie. HideProperty() with @true not
@@ -816,14 +792,13 @@ public:
     void SetPropertyValueUnspecified( wxPGPropArg id );
 
     /**
-        Sets property values from a list of wxVariants.
+        Sets various property values from a list of wxVariants. If property with
+        name is missing from the grid, new property is created under given
+        default category (or root if omitted).
     */
     void SetPropertyValues( const wxVariantList& list,
                             wxPGPropArg defaultCategory = wxNullProperty );
 
-    /**
-        Sets property values from a list of wxVariants.
-    */
     void SetPropertyValues( const wxVariant& list,
                             wxPGPropArg defaultCategory = wxNullProperty );
 

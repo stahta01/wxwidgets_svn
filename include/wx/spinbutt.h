@@ -23,7 +23,7 @@
 #include "wx/control.h"
 #include "wx/event.h"
 
-#define wxSPIN_BUTTON_NAME wxT("wxSpinButton")
+#define wxSPIN_BUTTON_NAME _T("wxSpinButton")
 
 // ----------------------------------------------------------------------------
 //  The wxSpinButton is like a small scrollbar than is often placed next

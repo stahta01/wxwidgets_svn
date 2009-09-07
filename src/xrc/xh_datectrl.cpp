@@ -40,7 +40,7 @@ wxObject *wxDateCtrlXmlHandler::DoCreateResource()
                   GetID(),
                   wxDefaultDateTime,
                   GetPosition(), GetSize(),
-                  GetStyle(wxT("style"), wxDP_DEFAULT | wxDP_SHOWCENTURY),
+                  GetStyle(_T("style"), wxDP_DEFAULT | wxDP_SHOWCENTURY),
                   wxDefaultValidator,
                   GetName());
 

@@ -249,9 +249,7 @@ void wxMDIParentFrame::MacActivate(long timestamp, bool activating)
         else // schedule ourselves for deactivation
         {
             if (s_macDeactivateWindow)
-            {
                 wxLogTrace(TRACE_MDI, wxT("window=%p SHOULD have been deactivated, oh well!"), s_macDeactivateWindow);
-            }
             wxLogTrace(TRACE_MDI, wxT("Scheduling delayed MDI Parent deactivation"));
 
             s_macDeactivateWindow = this;
@@ -404,9 +402,7 @@ void wxMDIChildFrame::MacActivate(long timestamp, bool activating)
         else // schedule ourselves for deactivation
         {
             if (s_macDeactivateWindow)
-            {
                 wxLogTrace(TRACE_MDI, wxT("window=%p SHOULD have been deactivated, oh well!"), s_macDeactivateWindow);
-            }
             wxLogTrace(TRACE_MDI, wxT("Scheduling delayed deactivation"));
 
             s_macDeactivateWindow = this;

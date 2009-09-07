@@ -342,15 +342,15 @@ bool wxFile::Flush()
 // seek
 wxFileOffset wxFile::Seek(wxFileOffset ofs, wxSeekMode mode)
 {
-    wxASSERT_MSG( IsOpened(), wxT("can't seek on closed file") );
+    wxASSERT_MSG( IsOpened(), _T("can't seek on closed file") );
     wxCHECK_MSG( ofs != wxInvalidOffset || mode != wxFromStart,
                  wxInvalidOffset,
-                 wxT("invalid absolute file offset") );
+                 _T("invalid absolute file offset") );
 
     int origin;
     switch ( mode ) {
         default:
-            wxFAIL_MSG(wxT("unknown seek origin"));
+            wxFAIL_MSG(_T("unknown seek origin"));
 
         case wxFromStart:
             origin = SEEK_SET;
@@ -450,17 +450,14 @@ bool wxFile::Eof() const
     iRc = wxEof(m_fd);
 #endif // Windows/Unix
 
-    if ( iRc == 0 )
+    if ( iRc == 1)
+        {}
+    else if ( iRc == 0 )
         return false;
-
-    if ( iRc == wxInvalidOffset )
-    {
+    else if ( iRc == wxInvalidOffset )
         wxLogSysError(_("can't determine if the end of file is reached on descriptor %d"), m_fd);
-    }
-    else if ( iRc != 1 )
-    {
-        wxFAIL_MSG(wxT("invalid eof() return value."));
-    }
+    else
+        wxFAIL_MSG(_T("invalid eof() return value."));
 
     return true;
 }
@@ -563,9 +560,7 @@ void wxTempFile::Discard()
 {
     m_file.Close();
     if ( wxRemove(m_strTemp) != 0 )
-    {
         wxLogSysError(_("can't remove temporary file '%s'"), m_strTemp.c_str());
-    }
 }
 
 #endif // wxUSE_FILE

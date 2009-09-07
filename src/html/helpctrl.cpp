@@ -115,7 +115,12 @@ void wxHtmlHelpController::SetTitleFormat(const wxString& title)
 // Find the top-most parent window
 wxWindow* wxHtmlHelpController::FindTopLevelWindow()
 {
-    return wxGetTopLevelParent(m_helpWindow);
+    wxWindow* parent = m_helpWindow;
+    while (parent && !parent->IsTopLevel())
+    {
+        parent = parent->GetParent();
+    }
+    return parent;
 }
 
 bool wxHtmlHelpController::AddBook(const wxFileName& book_file, bool show_wait_msg)
@@ -184,7 +189,7 @@ wxWindow* wxHtmlHelpController::CreateHelpWindow()
     {
         m_Config = wxConfigBase::Get(false);
         if (m_Config != NULL)
-            m_ConfigRoot = wxT("wxWindows/wxHtmlHelpController");
+            m_ConfigRoot = _T("wxWindows/wxHtmlHelpController");
     }
 
     if (m_FrameStyle & wxHF_DIALOG)

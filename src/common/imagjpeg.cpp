@@ -28,7 +28,7 @@
 
 // A hack based on one from tif_jpeg.c to overcome the problem on Windows
 // of rpcndr.h defining boolean with a different type to the jpeg headers.
-//
+// 
 // This hack is only necessary for an external jpeg library, the builtin one
 // usually used on Windows doesn't use the type boolean, so always works.
 //
@@ -251,9 +251,7 @@ bool wxJPEGHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
        * We need to clean up the JPEG object, close the input file, and return.
        */
       if (verbose)
-      {
         wxLogError(_("JPEG: Couldn't load - file is probably corrupted."));
-      }
       (cinfo.src->term_source)(&cinfo);
       jpeg_destroy_decompress(&cinfo);
       if (image->Ok()) image->Destroy();
@@ -423,9 +421,7 @@ bool wxJPEGHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
          * We need to clean up the JPEG object, close the input file, and return.
          */
          if (verbose)
-         {
             wxLogError(_("JPEG: Couldn't save image."));
-         }
          jpeg_destroy_compress(&cinfo);
          return false;
     }
@@ -483,7 +479,7 @@ bool wxJPEGHandler::DoCanRead( wxInputStream& stream )
 {
     unsigned char hdr[2];
 
-    if ( !stream.Read(hdr, WXSIZEOF(hdr)) )     // it's ok to modify the stream position here
+    if ( !stream.Read(hdr, WXSIZEOF(hdr)) )
         return false;
 
     return hdr[0] == 0xFF && hdr[1] == 0xD8;

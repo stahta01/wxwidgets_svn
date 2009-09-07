@@ -724,32 +724,16 @@ private:
 class WXDLLIMPEXP_CORE wxGridSizer: public wxSizer
 {
 public:
-    // ctors specifying the number of columns only: number of rows will be
-    // deduced automatically depending on the number of sizer elements
-    wxGridSizer( int cols, int vgap, int hgap );
-    wxGridSizer( int cols, const wxSize& gap = wxSize(0, 0) );
-
-    // ctors specifying the number of rows and columns
     wxGridSizer( int rows, int cols, int vgap, int hgap );
-    wxGridSizer( int rows, int cols, const wxSize& gap );
+    wxGridSizer( int cols, int vgap = 0, int hgap = 0 );
 
     virtual wxSizerItem *Insert(size_t index, wxSizerItem *item);
 
     virtual void RecalcSizes();
     virtual wxSize CalcMin();
 
-    void SetCols( int cols )
-    {
-        wxASSERT_MSG( cols >= 0, "Number of columns must be non-negative");
-        m_cols = cols;
-    }
-
-    void SetRows( int rows )
-    {
-        wxASSERT_MSG( rows >= 0, "Number of rows must be non-negative");
-        m_rows = rows;
-    }
-
+    void SetCols( int cols )    { m_cols = cols; }
+    void SetRows( int rows )    { m_rows = rows; }
     void SetVGap( int gap )     { m_vgap = gap; }
     void SetHGap( int gap )     { m_hgap = gap; }
     int GetCols() const         { return m_cols; }
@@ -757,48 +741,17 @@ public:
     int GetVGap() const         { return m_vgap; }
     int GetHGap() const         { return m_hgap; }
 
-    int GetEffectiveColsCount() const   { return m_cols ? m_cols : CalcCols(); }
-    int GetEffectiveRowsCount() const   { return m_rows ? m_rows : CalcRows(); }
-
     // return the number of total items and the number of columns and rows
     // (for internal use only)
     int CalcRowsCols(int& rows, int& cols) const;
 
 protected:
-    // the number of rows/columns in the sizer, if 0 then it is determined
-    // dynamically depending on the total number of items
     int    m_rows;
     int    m_cols;
-
-    // gaps between rows and columns
     int    m_vgap;
     int    m_hgap;
 
     void SetItemBounds( wxSizerItem *item, int x, int y, int w, int h );
-
-    // returns the number of columns/rows needed for the current total number
-    // of children (and the fixed number of rows/columns)
-    int CalcCols() const
-    {
-        wxCHECK_MSG
-        (
-            m_rows, 0,
-            "Can't calculate number of cols if number of rows is not specified"
-        );
-
-        return (m_children.GetCount() + m_rows - 1) / m_rows;
-    }
-
-    int CalcRows() const
-    {
-        wxCHECK_MSG
-        (
-            m_cols, 0,
-            "Can't calculate number of cols if number of rows is not specified"
-        );
-
-        return (m_children.GetCount() + m_cols - 1) / m_cols;
-    }
 
 private:
     DECLARE_CLASS(wxGridSizer)
@@ -825,17 +778,11 @@ enum wxFlexSizerGrowMode
 class WXDLLIMPEXP_CORE wxFlexGridSizer: public wxGridSizer
 {
 public:
-    // ctors specifying the number of columns only: number of rows will be
-    // deduced automatically depending on the number of sizer elements
-    wxFlexGridSizer( int cols, int vgap, int hgap );
-    wxFlexGridSizer( int cols, const wxSize& gap = wxSize(0, 0) );
-
-    // ctors specifying the number of rows and columns
+    // ctors/dtor
     wxFlexGridSizer( int rows, int cols, int vgap, int hgap );
-    wxFlexGridSizer( int rows, int cols, const wxSize& gap );
-
-    // dtor
+    wxFlexGridSizer( int cols, int vgap = 0, int hgap = 0 );
     virtual ~wxFlexGridSizer();
+
 
     // set the rows/columns which will grow (the others will remain of the
     // constant initial size)
@@ -910,7 +857,7 @@ public:
         m_totalProportion = 0;
 
         wxASSERT_MSG( m_orient == wxHORIZONTAL || m_orient == wxVERTICAL,
-                      wxT("invalid value for wxBoxSizer orientation") );
+                      _T("invalid value for wxBoxSizer orientation") );
     }
 
     int GetOrientation() const { return m_orient; }
@@ -1021,10 +968,6 @@ private:
 };
 
 #endif // wxUSE_STATBOX
-
-//---------------------------------------------------------------------------
-// wxStdDialogButtonSizer
-//---------------------------------------------------------------------------
 
 #if wxUSE_BUTTON
 

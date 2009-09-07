@@ -34,8 +34,8 @@ void wxDialog::DoShowModal()
     SetFocus() ;
 
     WindowRef windowRef = (WindowRef) GetWXWindow();
-    WindowGroupRef windowGroup = NULL;
-    WindowGroupRef formerParentGroup = NULL;
+    WindowGroupRef windowGroup;
+    WindowGroupRef formerParentGroup;
     bool resetGroupParent = false;
 
     if ( GetParent() == NULL )

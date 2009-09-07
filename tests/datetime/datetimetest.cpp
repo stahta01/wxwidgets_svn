@@ -175,23 +175,23 @@ struct Date
     wxString Format() const
     {
         wxString s;
-        s.Printf(wxT("%02d:%02d:%02d %10s %02d, %4d%s"),
+        s.Printf(_T("%02d:%02d:%02d %10s %02d, %4d%s"),
                  hour, min, sec,
                  wxDateTime::GetMonthName(month).c_str(),
                  day,
                  abs(wxDateTime::ConvertYearToBC(year)),
-                 year > 0 ? wxT("AD") : wxT("BC"));
+                 year > 0 ? _T("AD") : _T("BC"));
         return s;
     }
 
     wxString FormatDate() const
     {
         wxString s;
-        s.Printf(wxT("%02d-%s-%4d%s"),
+        s.Printf(_T("%02d-%s-%4d%s"),
                  day,
                  wxDateTime::GetMonthName(month, wxDateTime::Name_Abbr).c_str(),
                  abs(wxDateTime::ConvertYearToBC(year)),
-                 year > 0 ? wxT("AD") : wxT("BC"));
+                 year > 0 ? _T("AD") : _T("BC"));
         return s;
     }
 };
@@ -306,7 +306,7 @@ void DateTimeTestCase::TestLeapYears()
     {
         const LeapYearTestData& y = years[n];
 
-        CPPUNIT_ASSERT_EQUAL( y.isLeap, wxDateTime::IsLeapYear(y.year) );
+        CPPUNIT_ASSERT( wxDateTime::IsLeapYear(y.year) == y.isLeap );
     }
 }
 
@@ -324,7 +324,7 @@ void DateTimeTestCase::TestTimeSet()
         wxString s1 = d1.Format(),
                  s2 = d2.Format();
 
-        CPPUNIT_ASSERT_EQUAL( s1, s2 );
+        CPPUNIT_ASSERT( s1 == s2 );
     }
 }
 
@@ -357,7 +357,7 @@ void DateTimeTestCase::TestTimeWDays()
         wxDateTime dt(d.day, d.month, d.year, d.hour, d.min, d.sec);
 
         wxDateTime::WeekDay wday = dt.GetWeekDay();
-        CPPUNIT_ASSERT_EQUAL( d.wday, wday );
+        CPPUNIT_ASSERT( wday == d.wday );
     }
 
     // test SetToWeekDay()
@@ -374,21 +374,21 @@ void DateTimeTestCase::TestTimeWDays()
             wxString s, which;
             switch ( nWeek < -1 ? -nWeek : nWeek )
             {
-                case 1: which = wxT("first"); break;
-                case 2: which = wxT("second"); break;
-                case 3: which = wxT("third"); break;
-                case 4: which = wxT("fourth"); break;
-                case 5: which = wxT("fifth"); break;
+                case 1: which = _T("first"); break;
+                case 2: which = _T("second"); break;
+                case 3: which = _T("third"); break;
+                case 4: which = _T("fourth"); break;
+                case 5: which = _T("fifth"); break;
 
-                case -1: which = wxT("last"); break;
+                case -1: which = _T("last"); break;
             }
 
             if ( nWeek < -1 )
             {
-                which += wxT(" from end");
+                which += _T(" from end");
             }
 
-            s.Printf(wxT("The %s %s of %s in %d"),
+            s.Printf(_T("The %s %s of %s in %d"),
                      which.c_str(),
                      wxDateTime::GetWeekDayName(wday).c_str(),
                      wxDateTime::GetMonthName(month).c_str(),
@@ -570,10 +570,10 @@ for n in range(20):
             wmon2 = dt.GetWeekOfMonth(wxDateTime::Sunday_First),
             dnum = dt.GetDayOfYear();
 
-        CPPUNIT_ASSERT_EQUAL( wn.dnum, dnum );
-        CPPUNIT_ASSERT_EQUAL( wn.wmon, wmon );
-        CPPUNIT_ASSERT_EQUAL( wn.wmon2, wmon2 );
-        CPPUNIT_ASSERT_EQUAL( wn.week, week );
+        CPPUNIT_ASSERT( dnum == wn.dnum );
+        CPPUNIT_ASSERT( wmon == wn.wmon );
+        CPPUNIT_ASSERT( wmon2 == wn.wmon2 );
+        CPPUNIT_ASSERT( week == wn.week );
 
         int year = d.year;
         if ( week == 1 && d.month != wxDateTime::Jan )
@@ -584,7 +584,7 @@ for n in range(20):
 
         wxDateTime
             dt2 = wxDateTime::SetToWeekOfYear(year, week, dt.GetWeekDay());
-        CPPUNIT_ASSERT_EQUAL( dt, dt2 );
+        CPPUNIT_ASSERT( dt2 == dt );
     }
 }
 
@@ -771,7 +771,7 @@ void DateTimeTestCase::TestTimeFormat()
                         break;
 
                     case CompareNone:
-                        wxFAIL_MSG( wxT("unexpected") );
+                        wxFAIL_MSG( _T("unexpected") );
                         break;
                 }
             }
@@ -785,14 +785,6 @@ void DateTimeTestCase::TestTimeFormat()
     CPPUNIT_ASSERT( dt.ParseFormat("02/06/1856", "%x") );
     CPPUNIT_ASSERT_EQUAL( 1856, dt.GetYear() );
 #endif
-
-    // also test %l separately
-    CPPUNIT_ASSERT( dt.ParseFormat("12:23:45.678", "%H:%M:%S.%l") );
-    CPPUNIT_ASSERT_EQUAL( 678, dt.GetMillisecond() );
-
-    // test special case of %l matching 0 milliseconds
-    CPPUNIT_ASSERT( dt.ParseFormat("12:23:45.000", "%H:%M:%S.%l") );
-    CPPUNIT_ASSERT_EQUAL( 0, dt.GetMillisecond() );
 
     // test partially specified dates too
     wxDateTime dtDef(26, wxDateTime::Sep, 2008);
@@ -983,7 +975,7 @@ void DateTimeTestCase::TestDateParse()
 
     // special cases
     wxDateTime dt;
-    CPPUNIT_ASSERT( dt.ParseDate(wxT("today")) );
+    CPPUNIT_ASSERT( dt.ParseDate(_T("today")) );
     CPPUNIT_ASSERT_EQUAL( wxDateTime::Today(), dt );
 
     for ( size_t n = 0; n < WXSIZEOF(parseTestDates); n++ )
@@ -1149,9 +1141,9 @@ void DateTimeTestCase::TestTimeArithmetics()
         dt1 = dt + span;
         dt2 = dt - span;
 
-        CPPUNIT_ASSERT_EQUAL( dt, dt1 - span );
-        CPPUNIT_ASSERT_EQUAL( dt, dt2 + span );
-        CPPUNIT_ASSERT_EQUAL( dt1, dt2 + 2*span );
+        CPPUNIT_ASSERT( dt1 - span == dt );
+        CPPUNIT_ASSERT( dt2 + span == dt );
+        CPPUNIT_ASSERT( dt2 + 2*span == dt1 );
     }
 }
 

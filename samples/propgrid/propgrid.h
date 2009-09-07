@@ -76,9 +76,8 @@ public:
                     const wxVector3f& value = wxVector3f() );
     virtual ~wxVectorProperty();
 
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue,
+                            int childIndex, wxVariant& childValue ) const;
     virtual void RefreshChildren();
 
 protected:
@@ -109,9 +108,8 @@ public:
                         const wxTriangle& value = wxTriangle() );
     virtual ~wxTriangleProperty();
 
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue,
+                            int childIndex, wxVariant& childValue ) const;
     virtual void RefreshChildren();
 
 protected:
@@ -184,7 +182,6 @@ public:
     void OnSetBackgroundColour( wxCommandEvent& event );
     void OnClearModifyStatusClick( wxCommandEvent& event );
     void OnFreezeClick( wxCommandEvent& event );
-    void OnEnableLabelEditing( wxCommandEvent& event );
     void OnDumpList( wxCommandEvent& event );
     void OnCatColours( wxCommandEvent& event );
     void OnSetColumns( wxCommandEvent& event );
@@ -231,8 +228,6 @@ public:
     void OnPropertyGridKeyEvent( wxKeyEvent& event );
     void OnPropertyGridItemCollapse( wxPropertyGridEvent& event );
     void OnPropertyGridItemExpand( wxPropertyGridEvent& event );
-    void OnPropertyGridLabelEditBegin( wxPropertyGridEvent& event );
-    void OnPropertyGridLabelEditEnding( wxPropertyGridEvent& event );
 
     void OnAbout( wxCommandEvent& event );
 

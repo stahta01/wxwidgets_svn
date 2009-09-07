@@ -309,7 +309,7 @@ wxDataViewIndexListModel::wxDataViewIndexListModel( unsigned int initial_size )
     unsigned int i;
     for (i = 1; i < initial_size+1; i++)
             m_hash.Add( wxUIntToPtr(i) );
-    m_nextFreeID = initial_size + 1;
+    m_lastIndex = initial_size + 1;
 }
 
 wxDataViewIndexListModel::~wxDataViewIndexListModel()
@@ -327,8 +327,7 @@ void wxDataViewIndexListModel::Reset( unsigned int new_size )
     unsigned int i;
     for (i = 1; i < new_size+1; i++)
             m_hash.Add( wxUIntToPtr(i) );
-
-    m_nextFreeID = new_size + 1;
+    m_lastIndex = new_size + 1;
 
     wxDataViewModel::Cleared();
 }
@@ -337,22 +336,17 @@ void wxDataViewIndexListModel::RowPrepended()
 {
     m_ordered = false;
 
-    unsigned int id = m_nextFreeID;
-    m_nextFreeID++;
-
+    unsigned int id = m_lastIndex++;
     m_hash.Insert( wxUIntToPtr(id), 0 );
     wxDataViewItem item( wxUIntToPtr(id) );
     ItemAdded( wxDataViewItem(0), item );
-
 }
 
 void wxDataViewIndexListModel::RowInserted( unsigned int before )
 {
     m_ordered = false;
 
-    unsigned int id = m_nextFreeID;
-    m_nextFreeID++;
-
+    unsigned int id = m_lastIndex++;
     m_hash.Insert( wxUIntToPtr(id), before );
     wxDataViewItem item( wxUIntToPtr(id) );
     ItemAdded( wxDataViewItem(0), item );
@@ -360,9 +354,7 @@ void wxDataViewIndexListModel::RowInserted( unsigned int before )
 
 void wxDataViewIndexListModel::RowAppended()
 {
-    unsigned int id = m_nextFreeID;
-    m_nextFreeID++;
-
+    unsigned int id = m_lastIndex++;
     m_hash.Add( wxUIntToPtr(id) );
     wxDataViewItem item( wxUIntToPtr(id) );
     ItemAdded( wxDataViewItem(0), item );
@@ -410,7 +402,10 @@ void wxDataViewIndexListModel::RowValueChanged( unsigned int row, unsigned int c
 unsigned int wxDataViewIndexListModel::GetRow( const wxDataViewItem &item ) const
 {
     if (m_ordered)
-        return wxPtrToUInt(item.GetID())-1;
+    {
+            unsigned int pos = wxPtrToUInt( item.GetID() );
+            return pos-1;
+    }
 
     // assert for not found
     return (unsigned int) m_hash.Index( item.GetID() );
@@ -434,8 +429,8 @@ int wxDataViewIndexListModel::Compare(const wxDataViewItem& item1,
 {
     if (m_ordered)
     {
-        unsigned int pos1 = wxPtrToUInt(item1.GetID());  // -1 not needed here
-        unsigned int pos2 = wxPtrToUInt(item2.GetID());  // -1 not needed here
+        unsigned int pos1 = wxPtrToUInt(item1.GetID());
+        unsigned int pos2 = wxPtrToUInt(item2.GetID());
 
         if (ascending)
             return pos1 - pos2;
@@ -498,7 +493,7 @@ unsigned int wxDataViewIndexListModel::GetChildren( const wxDataViewItem &item, 
 
 wxDataViewVirtualListModel::wxDataViewVirtualListModel( unsigned int initial_size )
 {
-    m_size = initial_size;
+    m_lastIndex = initial_size-1;
 }
 
 wxDataViewVirtualListModel::~wxDataViewVirtualListModel()
@@ -507,43 +502,41 @@ wxDataViewVirtualListModel::~wxDataViewVirtualListModel()
 
 void wxDataViewVirtualListModel::Reset( unsigned int new_size )
 {
-    m_size = new_size;
+    m_lastIndex = new_size-1;
 
     wxDataViewModel::Cleared();
 }
 
 void wxDataViewVirtualListModel::RowPrepended()
 {
-    m_size++;
-    wxDataViewItem item( wxUIntToPtr(1) );
+    m_lastIndex++;
+    wxDataViewItem item( NULL );
     ItemAdded( wxDataViewItem(0), item );
 }
 
 void wxDataViewVirtualListModel::RowInserted( unsigned int before )
 {
-    m_size++;
-    wxDataViewItem item( wxUIntToPtr(before+1) );
+    m_lastIndex++;
+    wxDataViewItem item( wxUIntToPtr(before) );
     ItemAdded( wxDataViewItem(0), item );
 }
 
 void wxDataViewVirtualListModel::RowAppended()
 {
-    m_size++;
-    wxDataViewItem item( wxUIntToPtr(m_size) );
+    m_lastIndex++;
+    wxDataViewItem item( wxUIntToPtr(m_lastIndex) );
     ItemAdded( wxDataViewItem(0), item );
 }
 
 void wxDataViewVirtualListModel::RowDeleted( unsigned int row )
 {
-    m_size--;
-    wxDataViewItem item( wxUIntToPtr(row+1) );
+    wxDataViewItem item( wxUIntToPtr(row) );
     wxDataViewModel::ItemDeleted( wxDataViewItem(0), item );
+    m_lastIndex++;
 }
 
 void wxDataViewVirtualListModel::RowsDeleted( const wxArrayInt &rows )
 {
-    m_size -= rows.GetCount();
-
     wxArrayInt sorted = rows;
     sorted.Sort( my_sort );
 
@@ -551,10 +544,12 @@ void wxDataViewVirtualListModel::RowsDeleted( const wxArrayInt &rows )
     unsigned int i;
     for (i = 0; i < sorted.GetCount(); i++)
     {
-            wxDataViewItem item( wxUIntToPtr(sorted[i]+1) );
+            wxDataViewItem item( wxUIntToPtr(sorted[i]) );
             array.Add( item );
     }
     wxDataViewModel::ItemsDeleted( wxDataViewItem(0), array );
+
+    m_lastIndex -= rows.GetCount();
 }
 
 void wxDataViewVirtualListModel::RowChanged( unsigned int row )
@@ -569,12 +564,12 @@ void wxDataViewVirtualListModel::RowValueChanged( unsigned int row, unsigned int
 
 unsigned int wxDataViewVirtualListModel::GetRow( const wxDataViewItem &item ) const
 {
-    return wxPtrToUInt( item.GetID() ) -1;
+    return wxPtrToUInt( item.GetID() );
 }
 
 wxDataViewItem wxDataViewVirtualListModel::GetItem( unsigned int row ) const
 {
-    return wxDataViewItem( wxUIntToPtr(row+1) );
+    return wxDataViewItem( wxUIntToPtr(row)  );
 }
 
 bool wxDataViewVirtualListModel::HasDefaultCompare() const
@@ -587,8 +582,8 @@ int wxDataViewVirtualListModel::Compare(const wxDataViewItem& item1,
                                       unsigned int WXUNUSED(column),
                                       bool ascending) const
 {
-    unsigned int pos1 = wxPtrToUInt(item1.GetID());  // -1 not needed here
-    unsigned int pos2 = wxPtrToUInt(item2.GetID());  // -1 not needed here
+    unsigned int pos1 = wxPtrToUInt(item1.GetID());
+    unsigned int pos2 = wxPtrToUInt(item2.GetID());
 
     if (ascending)
        return pos1 - pos2;
@@ -686,30 +681,13 @@ public:
 
 bool wxDataViewRendererBase::StartEditing( const wxDataViewItem &item, wxRect labelRect )
 {
-    wxDataViewCtrl* dv_ctrl = GetOwner()->GetOwner();
-
-    // Before doing anything we send an event asking if editing of this item is really wanted.
-    wxDataViewEvent start_event( wxEVT_COMMAND_DATAVIEW_ITEM_START_EDITING, dv_ctrl->GetId() );
-    start_event.SetDataViewColumn( GetOwner() );
-    start_event.SetModel( dv_ctrl->GetModel() );
-    start_event.SetItem( item );
-    start_event.SetEventObject( dv_ctrl );
-    dv_ctrl->GetEventHandler()->ProcessEvent( start_event );
-    if( !start_event.IsAllowed() )
-        return false;
-
     m_item = item; // remember for later
 
     unsigned int col = GetOwner()->GetModelColumn();
     wxVariant value;
-    dv_ctrl->GetModel()->GetValue( value, item, col );
+    GetOwner()->GetOwner()->GetModel()->GetValue( value, item, col );
 
-    m_editorCtrl = CreateEditorCtrl( dv_ctrl->GetMainWindow(), labelRect, value );
-
-    // there might be no editor control for the given item
-    if(!m_editorCtrl)
-        return false;
-
+    m_editorCtrl = CreateEditorCtrl( GetOwner()->GetOwner()->GetMainWindow(), labelRect, value );
     (void) new wxKillRef( m_editorCtrl.get() );
 
     wxDataViewEditorCtrlEvtHandler *handler =
@@ -717,6 +695,10 @@ bool wxDataViewRendererBase::StartEditing( const wxDataViewItem &item, wxRect la
 
     m_editorCtrl->PushEventHandler( handler );
 
+    // there might be no editor control for the given item
+    if (!m_editorCtrl)
+        return false;
+        
 #if defined(__WXGTK20__) && !defined(wxUSE_GENERICDATAVIEWCTRL)
     handler->SetFocusOnIdle();
 #else
@@ -724,20 +706,18 @@ bool wxDataViewRendererBase::StartEditing( const wxDataViewItem &item, wxRect la
 #endif
 
     // Now we should send Editing Started event
-    wxDataViewEvent event( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_STARTED, dv_ctrl->GetId() );
+    wxDataViewEvent event( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_STARTED, GetOwner()->GetOwner()->GetId() );
     event.SetDataViewColumn( GetOwner() );
-    event.SetModel( dv_ctrl->GetModel() );
+    event.SetModel( GetOwner()->GetOwner()->GetModel() );
     event.SetItem( item );
-    event.SetEventObject( dv_ctrl );
-    dv_ctrl->GetEventHandler()->ProcessEvent( event );
+    GetOwner()->GetOwner()->GetEventHandler()->ProcessEvent( event );
 
     return true;
 }
 
 void wxDataViewRendererBase::CancelEditing()
 {
-    if (!m_editorCtrl)
-        return;
+    if (!m_editorCtrl) return;
 
     GetOwner()->GetOwner()->GetMainWindow()->SetFocus();
 
@@ -747,15 +727,12 @@ void wxDataViewRendererBase::CancelEditing()
 
 bool wxDataViewRendererBase::FinishEditing()
 {
-    if (!m_editorCtrl)
-        return true;
+    if (!m_editorCtrl) return true;
 
     wxVariant value;
     GetValueFromEditorCtrl( m_editorCtrl, value );
 
-    wxDataViewCtrl* dv_ctrl = GetOwner()->GetOwner();
-
-    dv_ctrl->GetMainWindow()->SetFocus();
+    GetOwner()->GetOwner()->GetMainWindow()->SetFocus();
 
     m_editorCtrl->Hide();
     wxPendingDelete.Append( m_editorCtrl );
@@ -764,16 +741,15 @@ bool wxDataViewRendererBase::FinishEditing()
         return false;
 
     unsigned int col = GetOwner()->GetModelColumn();
-    dv_ctrl->GetModel()->SetValue( value, m_item, col );
-    dv_ctrl->GetModel()->ValueChanged( m_item, col );
+    GetOwner()->GetOwner()->GetModel()->SetValue( value, m_item, col );
+    GetOwner()->GetOwner()->GetModel()->ValueChanged( m_item, col );
 
     // Now we should send Editing Done event
-    wxDataViewEvent event( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, dv_ctrl->GetId() );
+    wxDataViewEvent event( wxEVT_COMMAND_DATAVIEW_ITEM_EDITING_DONE, GetOwner()->GetOwner()->GetId() );
     event.SetDataViewColumn( GetOwner() );
-    event.SetModel( dv_ctrl->GetModel() );
+    event.SetModel( GetOwner()->GetOwner()->GetModel() );
     event.SetItem( m_item );
-    event.SetEventObject( dv_ctrl );
-    dv_ctrl->GetEventHandler()->ProcessEvent( event );
+    GetOwner()->GetOwner()->GetEventHandler()->ProcessEvent( event );
 
     return true;
 }
@@ -1250,13 +1226,9 @@ wxDEFINE_EVENT( wxEVT_COMMAND_DATAVIEW_COLUMN_HEADER_RIGHT_CLICK, wxDataViewEven
 wxDEFINE_EVENT( wxEVT_COMMAND_DATAVIEW_COLUMN_SORTED, wxDataViewEvent );
 wxDEFINE_EVENT( wxEVT_COMMAND_DATAVIEW_COLUMN_REORDERED, wxDataViewEvent );
 
-wxDEFINE_EVENT( wxEVT_COMMAND_DATAVIEW_CACHE_HINT, wxDataViewEvent );
-
 wxDEFINE_EVENT( wxEVT_COMMAND_DATAVIEW_ITEM_BEGIN_DRAG, wxDataViewEvent );
 wxDEFINE_EVENT( wxEVT_COMMAND_DATAVIEW_ITEM_DROP_POSSIBLE, wxDataViewEvent );
 wxDEFINE_EVENT( wxEVT_COMMAND_DATAVIEW_ITEM_DROP, wxDataViewEvent );
-
-
 
 // -------------------------------------
 // wxDataViewSpinRenderer
@@ -1326,7 +1298,7 @@ bool wxDataViewSpinRenderer::GetValue( wxVariant &value ) const
 // wxDataViewChoiceRenderer
 // -------------------------------------
 
-#if defined(wxHAS_GENERIC_DATAVIEWCTRL) || defined(__WXOSX_CARBON__)
+#if defined(wxHAS_GENERIC_DATAVIEWCTRL) || defined(__WXMAC__)
 
 wxDataViewChoiceRenderer::wxDataViewChoiceRenderer( const wxArrayString& choices, wxDataViewCellMode mode, int alignment ) :
    wxDataViewCustomRenderer(wxT("string"), mode, alignment )
@@ -1441,7 +1413,7 @@ void wxDataViewListStore::PrependItem( const wxVector<wxVariant> &values, wxClie
     RowPrepended();
 }
 
-void wxDataViewListStore::InsertItem(  unsigned int row, const wxVector<wxVariant> &values,
+void wxDataViewListStore::InsertItem(  unsigned int row, const wxVector<wxVariant> &values, 
                                        wxClientData *data )
 {
     wxDataViewListStoreLine *line = new wxDataViewListStoreLine( data );
@@ -1557,7 +1529,7 @@ bool wxDataViewListCtrl::AppendColumn( wxDataViewColumn *col )
     return AppendColumn( col, "string" );
 }
 
-wxDataViewColumn *wxDataViewListCtrl::AppendTextColumn( const wxString &label,
+wxDataViewColumn *wxDataViewListCtrl::AppendTextColumn( const wxString &label, 
           wxDataViewCellMode mode, int width, wxAlignment align, int flags )
 {
     GetStore()->AppendColumn( wxT("string") );
@@ -1571,7 +1543,7 @@ wxDataViewColumn *wxDataViewListCtrl::AppendTextColumn( const wxString &label,
     return ret;
 }
 
-wxDataViewColumn *wxDataViewListCtrl::AppendToggleColumn( const wxString &label,
+wxDataViewColumn *wxDataViewListCtrl::AppendToggleColumn( const wxString &label, 
           wxDataViewCellMode mode, int width, wxAlignment align, int flags )
 {
     GetStore()->AppendColumn( wxT("bool") );
@@ -1585,7 +1557,7 @@ wxDataViewColumn *wxDataViewListCtrl::AppendToggleColumn( const wxString &label,
     return ret;
 }
 
-wxDataViewColumn *wxDataViewListCtrl::AppendProgressColumn( const wxString &label,
+wxDataViewColumn *wxDataViewListCtrl::AppendProgressColumn( const wxString &label, 
           wxDataViewCellMode mode, int width, wxAlignment align, int flags )
 {
     GetStore()->AppendColumn( wxT("long") );
@@ -1599,7 +1571,7 @@ wxDataViewColumn *wxDataViewListCtrl::AppendProgressColumn( const wxString &labe
     return ret;
 }
 
-wxDataViewColumn *wxDataViewListCtrl::AppendIconTextColumn( const wxString &label,
+wxDataViewColumn *wxDataViewListCtrl::AppendIconTextColumn( const wxString &label, 
           wxDataViewCellMode mode, int width, wxAlignment align, int flags )
 {
     GetStore()->AppendColumn( wxT("wxDataViewIconText") );
@@ -1880,7 +1852,7 @@ void wxDataViewTreeStore::DeleteChildren( const wxDataViewItem& item )
 
 void wxDataViewTreeStore::DeleteAllItems()
 {
-    DeleteChildren(m_root);
+    // TODO
 }
 
 void
@@ -2160,7 +2132,7 @@ wxDataViewItem wxDataViewTreeCtrl::InsertContainer( const wxDataViewItem& parent
 }
 
 void wxDataViewTreeCtrl::SetItemText( const wxDataViewItem& item, const wxString &text )
-{
+{ 
     GetStore()->SetItemText(item,text);
 
     // notify control
@@ -2168,7 +2140,7 @@ void wxDataViewTreeCtrl::SetItemText( const wxDataViewItem& item, const wxString
 }
 
 void wxDataViewTreeCtrl::SetItemIcon( const wxDataViewItem& item, const wxIcon &icon )
-{
+{ 
     GetStore()->SetItemIcon(item,icon);
 
     // notify control
@@ -2176,7 +2148,7 @@ void wxDataViewTreeCtrl::SetItemIcon( const wxDataViewItem& item, const wxIcon &
 }
 
 void wxDataViewTreeCtrl::SetItemExpandedIcon( const wxDataViewItem& item, const wxIcon &icon )
-{
+{ 
     GetStore()->SetItemExpandedIcon(item,icon);
 
     // notify control
@@ -2184,7 +2156,7 @@ void wxDataViewTreeCtrl::SetItemExpandedIcon( const wxDataViewItem& item, const 
 }
 
 void wxDataViewTreeCtrl::DeleteItem( const wxDataViewItem& item )
-{
+{ 
     wxDataViewItem parent_item = GetStore()->GetParent( item );
 
     GetStore()->DeleteItem(item);
@@ -2194,7 +2166,7 @@ void wxDataViewTreeCtrl::DeleteItem( const wxDataViewItem& item )
 }
 
 void wxDataViewTreeCtrl::DeleteChildren( const wxDataViewItem& item )
-{
+{ 
     wxDataViewTreeStoreContainerNode *node = GetStore()->FindContainerNode( item );
     if (!node) return;
 
@@ -2213,7 +2185,7 @@ void wxDataViewTreeCtrl::DeleteChildren( const wxDataViewItem& item )
 }
 
 void  wxDataViewTreeCtrl::DeleteAllItems()
-{
+{ 
     GetStore()->DeleteAllItems();
 
     GetStore()->Cleared();

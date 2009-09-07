@@ -83,7 +83,7 @@ targets_selection_received( GtkWidget *WXUNUSED(widget),
             if ( strcmp(atom_name, "TARGETS") )
             {
                 wxLogTrace( TRACE_CLIPBOARD,
-                            wxT("got unsupported clipboard target") );
+                            _T("got unsupported clipboard target") );
 
                 clipboard->m_waiting = false;
                 g_free(atom_name);
@@ -257,7 +257,7 @@ selection_handler( GtkWidget *WXUNUSED(widget),
                                (guchar*)&(timestamp),
                                sizeof(timestamp));
         wxLogTrace(TRACE_CLIPBOARD,
-                   wxT("Clipboard TIMESTAMP requested, returning timestamp=%u"),
+                   _T("Clipboard TIMESTAMP requested, returning timestamp=%u"),
                    timestamp);
         return;
     }
@@ -265,7 +265,7 @@ selection_handler( GtkWidget *WXUNUSED(widget),
     wxDataFormat format( selection_data->target );
 
     wxLogTrace(TRACE_CLIPBOARD,
-               wxT("clipboard data in format %s, GtkSelectionData is target=%s type=%s selection=%s timestamp=%u"),
+               _T("clipboard data in format %s, GtkSelectionData is target=%s type=%s selection=%s timestamp=%u"),
                format.GetId().c_str(),
                wxString::FromAscii(gdk_atom_name(selection_data->target)).c_str(),
                wxString::FromAscii(gdk_atom_name(selection_data->type)).c_str(),

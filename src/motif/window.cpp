@@ -1478,11 +1478,10 @@ int wxWindow::GetCharWidth() const
     return width;
 }
 
-void wxWindow::DoGetTextExtent(const wxString& string,
-                               int *x, int *y,
-                               int *descent,
-                               int *externalLeading,
-                               const wxFont *theFont) const
+void wxWindow::GetTextExtent(const wxString& string,
+                             int *x, int *y,
+                             int *descent, int *externalLeading,
+                             const wxFont *theFont) const
 {
     const wxFont *fontToUse = theFont ? theFont : &m_font;
 
@@ -2098,7 +2097,7 @@ static void wxScrollBarCallback(Widget scrollbar,
                                 XmScrollBarCallbackStruct *cbs)
 {
     wxWindow *win = wxGetWindowFromTable(scrollbar);
-    wxCHECK_RET( win, wxT("invalid widget in scrollbar callback") );
+    wxCHECK_RET( win, _T("invalid widget in scrollbar callback") );
 
     wxOrientation orientation = (wxOrientation)wxPtrToUInt(clientData);
 

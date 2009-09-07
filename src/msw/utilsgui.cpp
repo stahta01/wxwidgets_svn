@@ -304,8 +304,10 @@ int WXDLLEXPORT wxGetWindowId(WXHWND hWnd)
 // Metafile helpers
 // ----------------------------------------------------------------------------
 
-void PixelToHIMETRIC(LONG *x, LONG *y, HDC hdcRef)
+extern void PixelToHIMETRIC(LONG *x, LONG *y)
 {
+    ScreenHDC hdcRef;
+
     int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE),
         iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE),
         iWidthPels = GetDeviceCaps(hdcRef, HORZRES),
@@ -317,8 +319,10 @@ void PixelToHIMETRIC(LONG *x, LONG *y, HDC hdcRef)
     *y /= iHeightPels;
 }
 
-void HIMETRICToPixel(LONG *x, LONG *y, HDC hdcRef)
+extern void HIMETRICToPixel(LONG *x, LONG *y)
 {
+    ScreenHDC hdcRef;
+
     int iWidthMM = GetDeviceCaps(hdcRef, HORZSIZE),
         iHeightMM = GetDeviceCaps(hdcRef, VERTSIZE),
         iWidthPels = GetDeviceCaps(hdcRef, HORZRES),
@@ -328,16 +332,6 @@ void HIMETRICToPixel(LONG *x, LONG *y, HDC hdcRef)
     *x /= (iWidthMM * 100);
     *y *= iHeightPels;
     *y /= (iHeightMM * 100);
-}
-
-void HIMETRICToPixel(LONG *x, LONG *y)
-{
-    HIMETRICToPixel(x, y, ScreenHDC());
-}
-
-void PixelToHIMETRIC(LONG *x, LONG *y)
-{
-    PixelToHIMETRIC(x, y, ScreenHDC());
 }
 
 void wxDrawLine(HDC hdc, int x1, int y1, int x2, int y2)
@@ -372,11 +366,11 @@ extern bool wxEnableFileNameAutoComplete(HWND hwnd)
         s_initialized = true;
 
         wxLogNull nolog;
-        wxDynamicLibrary dll(wxT("shlwapi.dll"));
+        wxDynamicLibrary dll(_T("shlwapi.dll"));
         if ( dll.IsLoaded() )
         {
             s_pfnSHAutoComplete =
-                (SHAutoComplete_t)dll.GetSymbol(wxT("SHAutoComplete"));
+                (SHAutoComplete_t)dll.GetSymbol(_T("SHAutoComplete"));
             if ( s_pfnSHAutoComplete )
             {
                 // won't be unloaded until the process termination, no big deal
@@ -391,7 +385,7 @@ extern bool wxEnableFileNameAutoComplete(HWND hwnd)
     HRESULT hr = s_pfnSHAutoComplete(hwnd, 0x10 /* SHACF_FILESYS_ONLY */);
     if ( FAILED(hr) )
     {
-        wxLogApiError(wxT("SHAutoComplete"), hr);
+        wxLogApiError(_T("SHAutoComplete"), hr);
         return false;
     }
 
@@ -412,7 +406,7 @@ bool wxLaunchDefaultApplication(const wxString& document, int flags)
 
     WinStruct<SHELLEXECUTEINFO> sei;
     sei.lpFile = document.wx_str();
-    sei.lpVerb = wxT("open");
+    sei.lpVerb = _T("open");
 #ifdef __WXWINCE__
     sei.nShow = SW_SHOWNORMAL; // SW_SHOWDEFAULT not defined under CE (#10216)
 #else
@@ -437,17 +431,17 @@ bool wxLaunchDefaultApplication(const wxString& document, int flags)
 bool wxDoLaunchDefaultBrowser(const wxString& url, const wxString& scheme, int flags)
 {
     wxUnusedVar(flags);
-
+    
 #if wxUSE_IPC
     if ( flags & wxBROWSER_NEW_WINDOW )
     {
         // ShellExecuteEx() opens the URL in an existing window by default so
         // we can't use it if we need a new window
-        wxRegKey key(wxRegKey::HKCR, scheme + wxT("\\shell\\open"));
+        wxRegKey key(wxRegKey::HKCR, scheme + _T("\\shell\\open"));
         if ( !key.Exists() )
         {
             // try the default browser, it must be registered at least for http URLs
-            key.SetName(wxRegKey::HKCR, wxT("http\\shell\\open"));
+            key.SetName(wxRegKey::HKCR, _T("http\\shell\\open"));
         }
 
         if ( key.Exists() )
@@ -507,7 +501,7 @@ bool wxDoLaunchDefaultBrowser(const wxString& url, const wxString& scheme, int f
 
     WinStruct<SHELLEXECUTEINFO> sei;
     sei.lpFile = url.c_str();
-    sei.lpVerb = wxT("open");
+    sei.lpVerb = _T("open");
     sei.nShow = SW_SHOWNORMAL;
     sei.fMask = SEE_MASK_FLAG_NO_UI; // we give error message ourselves
 

@@ -89,54 +89,54 @@ wxString wxFileSystemHandler::GetMimeTypeFromExt(const wxString& location)
         {
             static const wxFileTypeInfo fallbacks[] =
             {
-                wxFileTypeInfo(wxT("image/jpeg"),
+                wxFileTypeInfo(_T("image/jpeg"),
                     wxEmptyString,
                     wxEmptyString,
-                    wxT("JPEG image (from fallback)"),
-                    wxT("jpg"), wxT("jpeg"), wxT("JPG"), wxT("JPEG"), wxNullPtr),
-                wxFileTypeInfo(wxT("image/gif"),
+                    _T("JPEG image (from fallback)"),
+                    _T("jpg"), _T("jpeg"), _T("JPG"), _T("JPEG"), wxNullPtr),
+                wxFileTypeInfo(_T("image/gif"),
                     wxEmptyString,
                     wxEmptyString,
-                    wxT("GIF image (from fallback)"),
-                    wxT("gif"), wxT("GIF"), wxNullPtr),
-                wxFileTypeInfo(wxT("image/png"),
+                    _T("GIF image (from fallback)"),
+                    _T("gif"), _T("GIF"), wxNullPtr),
+                wxFileTypeInfo(_T("image/png"),
                     wxEmptyString,
                     wxEmptyString,
-                    wxT("PNG image (from fallback)"),
-                    wxT("png"), wxT("PNG"), wxNullPtr),
-                wxFileTypeInfo(wxT("image/bmp"),
+                    _T("PNG image (from fallback)"),
+                    _T("png"), _T("PNG"), wxNullPtr),
+                wxFileTypeInfo(_T("image/bmp"),
                     wxEmptyString,
                     wxEmptyString,
-                    wxT("windows bitmap image (from fallback)"),
-                    wxT("bmp"), wxT("BMP"), wxNullPtr),
-                wxFileTypeInfo(wxT("text/html"),
+                    _T("windows bitmap image (from fallback)"),
+                    _T("bmp"), _T("BMP"), wxNullPtr),
+                wxFileTypeInfo(_T("text/html"),
                     wxEmptyString,
                     wxEmptyString,
-                    wxT("HTML document (from fallback)"),
-                    wxT("htm"), wxT("html"), wxT("HTM"), wxT("HTML"), wxNullPtr),
+                    _T("HTML document (from fallback)"),
+                    _T("htm"), _T("html"), _T("HTM"), _T("HTML"), wxNullPtr),
                 // must terminate the table with this!
                 wxFileTypeInfo()
             };
             wxTheMimeTypesManager->AddFallbacks(fallbacks);
             s_MinimalMimeEnsured = true;
         }
-
+        
         wxFileType *ft = wxTheMimeTypesManager->GetFileTypeFromExtension(ext);
         if ( !ft || !ft -> GetMimeType(&mime) )
         {
             mime = wxEmptyString;
         }
-
+        
         delete ft;
-
+        
         return mime;
     }
     else
 #endif
     {
-        if ( ext.IsSameAs(wxT("htm"), false) || ext.IsSameAs(wxT("html"), false) )
+        if ( ext.IsSameAs(wxT("htm"), false) || ext.IsSameAs(_T("html"), false) )
             return wxT("text/html");
-        if ( ext.IsSameAs(wxT("jpg"), false) || ext.IsSameAs(wxT("jpeg"), false) )
+        if ( ext.IsSameAs(wxT("jpg"), false) || ext.IsSameAs(_T("jpeg"), false) )
             return wxT("image/jpeg");
         if ( ext.IsSameAs(wxT("gif"), false) )
             return wxT("image/gif");
@@ -543,7 +543,7 @@ bool wxFileSystem::FindFileInPath(wxString *pStr,
 {
     // we assume that it's not empty
     wxCHECK_MSG( !basename.empty(), false,
-                wxT("empty file name in wxFileSystem::FindFileInPath"));
+                _T("empty file name in wxFileSystem::FindFileInPath"));
 
     wxString name;
     // skip path separator in the beginning of the file name if present

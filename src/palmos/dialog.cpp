@@ -161,6 +161,11 @@ wxDialog::~wxDialog()
 // showing the dialogs
 // ----------------------------------------------------------------------------
 
+wxWindow *wxDialog::FindSuitableParent() const
+{
+    return NULL;
+}
+
 bool wxDialog::Show(bool show)
 {
     if (show && CanDoLayoutAdaptation())

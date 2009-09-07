@@ -778,7 +778,7 @@ bool wxTextAreaBase::SaveFile(const wxString& filename, int fileType)
 bool wxTextCtrlBase::DoSaveFile(const wxString& filename, int WXUNUSED(fileType))
 {
 #if wxUSE_FFILE
-    wxFFile file(filename, wxT("w"));
+    wxFFile file(filename, _T("w"));
     if ( file.IsOpened() && file.Write(GetValue()) )
     {
         // if it worked, save for future calls
@@ -859,32 +859,32 @@ bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
         case WXK_NUMPAD7:
         case WXK_NUMPAD8:
         case WXK_NUMPAD9:
-            ch = (wxChar)(wxT('0') + keycode - WXK_NUMPAD0);
+            ch = (wxChar)(_T('0') + keycode - WXK_NUMPAD0);
             break;
 
         case WXK_MULTIPLY:
         case WXK_NUMPAD_MULTIPLY:
-            ch = wxT('*');
+            ch = _T('*');
             break;
 
         case WXK_ADD:
         case WXK_NUMPAD_ADD:
-            ch = wxT('+');
+            ch = _T('+');
             break;
 
         case WXK_SUBTRACT:
         case WXK_NUMPAD_SUBTRACT:
-            ch = wxT('-');
+            ch = _T('-');
             break;
 
         case WXK_DECIMAL:
         case WXK_NUMPAD_DECIMAL:
-            ch = wxT('.');
+            ch = _T('.');
             break;
 
         case WXK_DIVIDE:
         case WXK_NUMPAD_DIVIDE:
-            ch = wxT('/');
+            ch = _T('/');
             break;
 
         case WXK_DELETE:
@@ -926,7 +926,7 @@ bool wxTextCtrlBase::EmulateKeyPress(const wxKeyEvent& event)
             }
             else
             {
-                ch = wxT('\0');
+                ch = _T('\0');
             }
     }
 

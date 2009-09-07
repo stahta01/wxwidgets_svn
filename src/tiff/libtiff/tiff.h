@@ -27,11 +27,7 @@
 #ifndef _TIFF_
 #define	_TIFF_
 
-#ifdef __APPLE__
-#include <tif_config.h>
-#else
 #include <tiffconf.h>
-#endif
 
 /*
  * Tag Image File Format (TIFF)

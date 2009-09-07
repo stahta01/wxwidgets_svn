@@ -118,7 +118,7 @@ public:
 
     virtual void DrawTextCtrl(wxWindow* win, wxDC& dc, const wxRect& rect, int flags=0);
 
-    virtual void DrawRadioBitmap(wxWindow* win, wxDC& dc, const wxRect& rect, int flags=0);
+    virtual void DrawRadioButton(wxWindow* win, wxDC& dc, const wxRect& rect, int flags=0);
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 
@@ -647,10 +647,17 @@ wxRendererGeneric::DrawPushButton(wxWindow *win,
 }
 
 void
+#ifdef __WXMAC__
 wxRendererGeneric::DrawItemSelectionRect(wxWindow * win,
                                          wxDC& dc,
                                          const wxRect& rect,
                                          int flags)
+#else
+wxRendererGeneric::DrawItemSelectionRect(wxWindow * WXUNUSED(win),
+                                         wxDC& dc,
+                                         const wxRect& rect,
+                                         int flags)
+#endif
 {
     wxBrush brush;
     if ( flags & wxCONTROL_SELECTED )
@@ -680,9 +687,6 @@ wxRendererGeneric::DrawItemSelectionRect(wxWindow * win,
         dc.SetPen( *wxTRANSPARENT_PEN );
 
     dc.DrawRectangle( rect );
-
-    // it's unused everywhere except in wxOSX/Carbon
-    wxUnusedVar(win);
 }
 
 void
@@ -739,10 +743,10 @@ void wxRendererGeneric::DrawComboBox(wxWindow* WXUNUSED(win), wxDC& WXUNUSED(dc)
     wxFAIL_MSG("UNIMPLEMENTED: wxRendererGeneric::DrawComboBox");
 }
 
-void wxRendererGeneric::DrawRadioBitmap(wxWindow* WXUNUSED(win), wxDC& WXUNUSED(dc),
+void wxRendererGeneric::DrawRadioButton(wxWindow* WXUNUSED(win), wxDC& WXUNUSED(dc),
                            const wxRect& WXUNUSED(rect), int WXUNUSED(flags))
 {
-    wxFAIL_MSG("UNIMPLEMENTED: wxRendererGeneric::DrawRadioBitmap");
+    wxFAIL_MSG("UNIMPLEMENTED: wxRendererGeneric::DrawRadioButton");
 }
 
 void wxRendererGeneric::DrawTextCtrl(wxWindow* WXUNUSED(win), wxDC& WXUNUSED(dc),

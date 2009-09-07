@@ -227,7 +227,7 @@ MyFrame::MyFrame() : wxFrame((wxFrame *)NULL, wxID_ANY,
   m_menuSocket->Append(CLIENT_CLOSE, _("&Close session\tCtrl-Q"), _("Close connection"));
 
   m_menuDatagramSocket = new wxMenu();
-  m_menuDatagramSocket->Append(CLIENT_DGRAM, _("&Datagram test\tCtrl-D"), _("Test UDP sockets"));
+  m_menuDatagramSocket->Append(CLIENT_DGRAM, _("Send Datagram"), _("Test UDP sockets"));
 
 #if wxUSE_URL
   m_menuProtocols = new wxMenu();
@@ -238,8 +238,8 @@ MyFrame::MyFrame() : wxFrame((wxFrame *)NULL, wxID_ANY,
   // Append menus to the menubar
   m_menuBar = new wxMenuBar();
   m_menuBar->Append(m_menuFile, _("&File"));
-  m_menuBar->Append(m_menuSocket, _("&TCP"));
-  m_menuBar->Append(m_menuDatagramSocket, _("&UDP"));
+  m_menuBar->Append(m_menuSocket, _("&SocketClient"));
+  m_menuBar->Append(m_menuDatagramSocket, _("&DatagramSocket"));
 #if wxUSE_URL
   m_menuBar->Append(m_menuProtocols, _("&Protocols"));
 #endif
@@ -328,20 +328,73 @@ void MyFrame::OpenConnection(wxSockAddress::Family family)
     _("Enter the address of the wxSocket demo server:"),
     _("Connect ..."),
     _("localhost"));
-  if ( hostname.empty() )
-    return;
 
   addr->Hostname(hostname);
   addr->Service(3000);
 
-  // we connect asynchronously and will get a wxSOCKET_CONNECTION event when
-  // the connection is really established
+  // Mini-tutorial for Connect() :-)
+  // ---------------------------
   //
-  // if you want to make sure that connection is established right here you
-  // could call WaitOnConnect(timeout) instead
-  wxLogMessage("Trying to connect to %s:%d", hostname, addr->Service());
+  // There are two ways to use Connect(): blocking and non-blocking,
+  // depending on the value passed as the 'wait' (2nd) parameter.
+  //
+  // Connect(addr, true) will wait until the connection completes,
+  // returning true on success and false on failure. This call blocks
+  // the GUI (this might be changed in future releases to honour the
+  // wxSOCKET_BLOCK flag).
+  //
+  // Connect(addr, false) will issue a nonblocking connection request
+  // and return immediately. If the return value is true, then the
+  // connection has been already successfully established. If it is
+  // false, you must wait for the request to complete, either with
+  // WaitOnConnect() or by watching wxSOCKET_CONNECTION / LOST
+  // events (please read the documentation).
+  //
+  // WaitOnConnect() itself never blocks the GUI (this might change
+  // in the future to honour the wxSOCKET_BLOCK flag). This call will
+  // return false on timeout, or true if the connection request
+  // completes, which in turn might mean:
+  //
+  //   a) That the connection was successfully established
+  //   b) That the connection request failed (for example, because
+  //      it was refused by the peer.
+  //
+  // Use IsConnected() to distinguish between these two.
+  //
+  // So, in a brief, you should do one of the following things:
+  //
+  // For blocking Connect:
+  //
+  //   bool success = client->Connect(addr, true);
+  //
+  // For nonblocking Connect:
+  //
+  //   client->Connect(addr, false);
+  //
+  //   bool waitmore = true;
+  //   while (! client->WaitOnConnect(seconds, millis) && waitmore )
+  //   {
+  //     // possibly give some feedback to the user,
+  //     // update waitmore if needed.
+  //   }
+  //   bool success = client->IsConnected();
+  //
+  // And that's all :-)
 
+  m_text->AppendText(_("\nTrying to connect (timeout = 10 sec) ...\n"));
   m_sock->Connect(*addr, false);
+  m_sock->WaitOnConnect(10);
+
+  if (m_sock->IsConnected())
+    m_text->AppendText(_("Succeeded ! Connection established\n"));
+  else
+  {
+    m_sock->Close();
+    m_text->AppendText(_("Failed ! Unable to connect\n"));
+    wxMessageBox(_("Can't connect to the specified host"), _("Alert !"));
+  }
+
+  UpdateStatusBar();
 }
 
 void MyFrame::OnTest1(wxCommandEvent& WXUNUSED(event))
@@ -525,52 +578,9 @@ void MyFrame::OnCloseConnection(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnDatagram(wxCommandEvent& WXUNUSED(event))
 {
-    wxString hostname = wxGetTextFromUser
-                        (
-                         "Enter the address of the wxSocket demo server:",
-                         "UDP peer",
-                         "localhost"
-                        );
-    if ( hostname.empty() )
-        return;
-
-    TestLogger logtest("UDP");
-
-    wxIPV4address addrLocal;
-    addrLocal.Hostname();
-    wxDatagramSocket sock(addrLocal);
-    if ( !sock.IsOk() )
-    {
-        wxLogMessage("ERROR: failed to create UDP socket");
-        return;
-    }
-
-    wxLogMessage("Created UDP socket at %s:%u",
-                 addrLocal.IPAddress(), addrLocal.Service());
-
-    wxIPV4address addrPeer;
-    addrPeer.Hostname(hostname);
-    addrPeer.Service(3000);
-
-    wxLogMessage("Testing UDP with peer at %s:%u",
-                 addrPeer.IPAddress(), addrPeer.Service());
-
-    char buf[] = "Uryyb sebz pyvrag!";
-    if ( sock.SendTo(addrPeer, buf, sizeof(buf)).LastCount() != sizeof(buf) )
-    {
-        wxLogMessage("ERROR: failed to send data");
-        return;
-    }
-
-    if ( sock.RecvFrom(addrPeer, buf, sizeof(buf)).LastCount() != sizeof(buf) )
-    {
-        wxLogMessage("ERROR: failed to receive data");
-        return;
-    }
-
-    wxLogMessage("Received \"%s\" from %s:%u.",
-                 wxString::From8BitData(buf, sock.LastCount()),
-                 addrPeer.IPAddress(), addrPeer.Service());
+  m_text->AppendText(_("\n=== Datagram test begins ===\n"));
+  m_text->AppendText(_("Sorry, not implemented\n"));
+  m_text->AppendText(_("=== Datagram test ends ===\n"));
 }
 
 #if wxUSE_URL
@@ -618,9 +628,7 @@ void MyFrame::OnTestURL(wxCommandEvent& WXUNUSED(event))
     // Get the data
     wxStringOutputStream sout;
     if ( data->Read(sout).GetLastError() != wxSTREAM_EOF )
-    {
         wxLogError("Error reading the input stream.");
-    }
 
     wxLogMessage("Text retrieved from URL \"%s\" follows:\n%s",
                  urlname, sout.GetString());
@@ -630,38 +638,29 @@ void MyFrame::OnTestURL(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnSocketEvent(wxSocketEvent& event)
 {
-    switch ( event.GetSocketEvent() )
-    {
-        case wxSOCKET_INPUT:
-            wxLogMessage("Input available on the socket");
-            break;
+  wxString s = _("OnSocketEvent: ");
 
-        case wxSOCKET_LOST:
-            wxLogMessage("Socket connection was unexpectedly lost.");
-            UpdateStatusBar();
-            break;
+  switch(event.GetSocketEvent())
+  {
+    case wxSOCKET_INPUT      : s.Append(_("wxSOCKET_INPUT\n")); break;
+    case wxSOCKET_LOST       : s.Append(_("wxSOCKET_LOST\n")); break;
+    case wxSOCKET_CONNECTION : s.Append(_("wxSOCKET_CONNECTION\n")); break;
+    default                  : s.Append(_("Unexpected event !\n")); break;
+  }
 
-        case wxSOCKET_CONNECTION:
-            wxLogMessage("... socket is now connected.");
-            UpdateStatusBar();
-            break;
-
-        default:
-            wxLogMessage("Unknown socket event!!!");
-            break;
-    }
+  m_text->AppendText(s);
+  UpdateStatusBar();
 }
 
 // convenience functions
 
 void MyFrame::UpdateStatusBar()
 {
-#if wxUSE_STATUSBAR
   wxString s;
 
   if (!m_sock->IsConnected())
   {
-    s = "Not connected";
+    s.Printf(_("Not connected"));
   }
   else
   {
@@ -672,9 +671,10 @@ void MyFrame::UpdateStatusBar()
 #endif
 
     m_sock->GetPeer(addr);
-    s.Printf("%s : %d", addr.Hostname(), addr.Service());
+    s.Printf(_("%s : %d"), (addr.Hostname()).c_str(), addr.Service());
   }
 
+#if wxUSE_STATUSBAR
   SetStatusText(s, 1);
 #endif // wxUSE_STATUSBAR
 

@@ -166,6 +166,28 @@ bool wxDialog::IsModalShowing() const
 
 #endif // WXWIN_COMPATIBILITY_2_6
 
+wxWindow *wxDialog::FindSuitableParent() const
+{
+    // first try to use the currently active window
+    HWND hwndFg = ::WinQueryActiveWindow(HWND_DESKTOP);
+    wxWindow *parent = hwndFg ? wxFindWinFromHandle((WXHWND)hwndFg)
+                              : NULL;
+    if ( !parent )
+    {
+        // next try the main app window
+        parent = wxTheApp->GetTopWindow();
+    }
+
+    // finally, check if the parent we found is really suitable
+    if ( !parent || parent == (wxWindow *)this || !parent->IsShown() )
+    {
+        // don't use this one
+        parent = NULL;
+    }
+
+    return parent;
+}
+
 bool wxDialog::Show( bool bShow )
 {
     if ( bShow == IsShown() )
@@ -224,7 +246,7 @@ bool wxDialog::Show( bool bShow )
 //
 int wxDialog::ShowModal()
 {
-    wxASSERT_MSG( !IsModal(), wxT("wxDialog::ShowModal() reentered?") );
+    wxASSERT_MSG( !IsModal(), _T("wxDialog::ShowModal() reentered?") );
 
     m_endModalCalled = false;
 
@@ -236,7 +258,11 @@ int wxDialog::ShowModal()
     if ( !m_endModalCalled )
     {
         // modal dialog needs a parent window, so try to find one
-        wxWindow * const parent = GetParentForModalDialog();
+        wxWindow *parent = GetParent();
+        if ( !parent )
+        {
+            parent = FindSuitableParent();
+        }
 
         // remember where the focus was
         wxWindow *oldFocus = m_pOldFocus;
@@ -288,7 +314,7 @@ void wxDialog::EndModal(
   int                               nRetCode
 )
 {
-    wxASSERT_MSG( IsModal(), wxT("EndModal() called for non modal dialog") );
+    wxASSERT_MSG( IsModal(), _T("EndModal() called for non modal dialog") );
 
     m_endModalCalled = true;
     SetReturnCode(nRetCode);

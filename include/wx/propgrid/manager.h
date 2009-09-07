@@ -65,7 +65,9 @@ class WXDLLIMPEXP_PROPGRID wxPropertyGridPage : public wxEvtHandler,
                                                 public wxPropertyGridPageState
 {
     friend class wxPropertyGridManager;
+#ifndef SWIG
     DECLARE_CLASS(wxPropertyGridPage)
+#endif
 public:
 
     wxPropertyGridPage();
@@ -219,7 +221,7 @@ public:
         Two step constructor.
         Call Create when this constructor is called to build up the
         wxPropertyGridManager.
-      */
+    */
     wxPropertyGridManager();
 #endif
 
@@ -491,12 +493,6 @@ public:
      */
     bool IsPageModified( size_t index ) const;
 
-    /**
-        Returns true if property is selected. Since selection is page
-        based, this function checks every page in the manager.
-    */
-    virtual bool IsPropertySelected( wxPGPropArg id ) const;
-
     virtual void Refresh( bool eraseBackground = true,
                           const wxRect* rect = (const wxRect*) NULL );
 
@@ -598,7 +594,6 @@ public:
     virtual void SetExtraStyle ( long exStyle );
     virtual bool SetFont ( const wxFont& font );
     virtual void SetWindowStyleFlag ( long style );
-    virtual bool Reparent( wxWindowBase *newParent );
 
 protected:
     virtual wxSize DoGetBestSize() const;

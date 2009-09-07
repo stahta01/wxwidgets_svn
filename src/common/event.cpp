@@ -703,6 +703,34 @@ bool wxMouseEvent::Button(int but) const
     }
 }
 
+bool wxMouseEvent::ButtonIsDown(int but) const
+{
+    switch (but)
+    {
+        default:
+            wxFAIL_MSG(wxT("invalid parameter in wxMouseEvent::ButtonIsDown"));
+            // fall through
+
+        case wxMOUSE_BTN_ANY:
+            return LeftIsDown() || MiddleIsDown() || RightIsDown() || Aux1Down() || Aux2Down();
+
+        case wxMOUSE_BTN_LEFT:
+            return LeftIsDown();
+
+        case wxMOUSE_BTN_MIDDLE:
+            return MiddleIsDown();
+
+        case wxMOUSE_BTN_RIGHT:
+            return RightIsDown();
+
+        case wxMOUSE_BTN_AUX1:
+            return Aux1IsDown();
+
+        case wxMOUSE_BTN_AUX2:
+            return Aux2IsDown();
+    }
+}
+
 int wxMouseEvent::GetButton() const
 {
     for ( int i = 1; i < wxMOUSE_BTN_MAX; i++ )
@@ -750,46 +778,6 @@ wxKeyEvent::wxKeyEvent(const wxKeyEvent& evt)
 #if wxUSE_UNICODE
     m_uniChar = evt.m_uniChar;
 #endif
-}
-
-bool wxKeyEvent::IsKeyInCategory(int category) const
-{
-    switch ( GetKeyCode() )
-    {
-        case WXK_LEFT:
-        case WXK_RIGHT:
-        case WXK_UP:
-        case WXK_DOWN:
-        case WXK_NUMPAD_LEFT:
-        case WXK_NUMPAD_RIGHT:
-        case WXK_NUMPAD_UP:
-        case WXK_NUMPAD_DOWN:
-            return (category & WXK_CATEGORY_ARROW) != 0;
-
-        case WXK_PAGEDOWN:
-        case WXK_END:
-        case WXK_NUMPAD_PAGEUP:
-        case WXK_NUMPAD_PAGEDOWN:
-            return (category & WXK_CATEGORY_PAGING) != 0;
-
-        case WXK_HOME:
-        case WXK_PAGEUP:
-        case WXK_NUMPAD_HOME:
-        case WXK_NUMPAD_END:
-            return (category & WXK_CATEGORY_JUMP) != 0;
-
-        case WXK_TAB:
-        case WXK_NUMPAD_TAB:
-            return (category & WXK_CATEGORY_TAB) != 0;
-
-        case WXK_BACK:
-        case WXK_DELETE:
-        case WXK_NUMPAD_DELETE:
-            return (category & WXK_CATEGORY_CUT) != 0;
-
-        default:
-            return false;
-    }
 }
 
 // ----------------------------------------------------------------------------
@@ -1455,11 +1443,11 @@ bool wxEvtHandler::SearchEventTable(wxEventTable& table, wxEvent& event)
     return false;
 }
 
-void wxEvtHandler::DoBind(int id,
-                          int lastId,
-                          wxEventType eventType,
-                          wxEventFunctor *func,
-                          wxObject *userData)
+void wxEvtHandler::DoConnect(int id,
+                             int lastId,
+                             wxEventType eventType,
+                             wxEventFunctor *func,
+                             wxObject *userData)
 {
     wxDynamicEventTableEntry *entry =
         new wxDynamicEventTableEntry(eventType, id, lastId, func, userData);
@@ -1483,11 +1471,11 @@ void wxEvtHandler::DoBind(int id,
 }
 
 bool
-wxEvtHandler::DoUnbind(int id,
-                       int lastId,
-                       wxEventType eventType,
-                       const wxEventFunctor& func,
-                       wxObject *userData)
+wxEvtHandler::DoDisconnect(int id,
+                           int lastId,
+                           wxEventType eventType,
+                           const wxEventFunctor& func,
+                           wxObject *userData)
 {
     if (!m_dynamicEvents)
         return false;
@@ -1509,7 +1497,7 @@ wxEvtHandler::DoUnbind(int id,
         if ((entry->m_id == id) &&
             ((entry->m_lastId == lastId) || (lastId == wxID_ANY)) &&
             ((entry->m_eventType == eventType) || (eventType == wxEVT_NULL)) &&
-            entry->m_fn->IsMatching(func) &&
+            entry->m_fn->Matches(func) &&
             ((entry->m_callbackUserData == userData) || !userData))
         {
             delete entry->m_callbackUserData;

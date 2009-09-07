@@ -5,7 +5,7 @@
 // Modified by:
 // Created:     06/16/98
 // RCS-ID:      $Id$
-// Copyright:   (c) 1998-2009 wxWidgets team
+// Copyright:   (c) 1998-2002 wxWidgets team
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
@@ -89,21 +89,27 @@ public:
 // the main application frame
 // ----------------------------------------------------------------------------
 
-class MyFrame : public wxFrame,
-                private wxLog
+class MyFrame: public wxFrame
 {
 public:
     // ctor
-    MyFrame(const wxString& title);
+    MyFrame(wxFrame *frame, const wxString& title, int x, int y, int w, int h);
     virtual ~MyFrame();
+
+    // this function is MT-safe, i.e. it can be called from worker threads
+    // safely without any additional locking
+    void LogThreadMessage(const wxString& text)
+    {
+        wxCriticalSectionLocker lock(m_csMessages);
+        m_messages.push_back(text);
+
+        // as we effectively log the messages from the idle event handler,
+        // ensure it's going to be called now that we have some messages to log
+        wxWakeUpIdle();
+    }
 
     // accessors for MyWorkerThread (called in its context!)
     bool Cancelled();
-
-protected:
-    virtual void DoLogRecord(wxLogLevel level,
-                             const wxString& msg,
-                             const wxLogRecordInfo& info);
 
 private:
     // event handlers
@@ -130,13 +136,6 @@ private:
     void OnUpdateWorker(wxUpdateUIEvent& event);
 
 
-    // logging helper
-    void DoLogLine(wxTextCtrl *text,
-                   const wxString& timestr,
-                   const wxString& threadstr,
-                   const wxString& msg);
-
-
     // thread helper functions
     // -----------------------
 
@@ -146,16 +145,15 @@ private:
     // update display in our status bar: called during idle handling
     void UpdateThreadStatus();
 
+    // log the messages queued by LogThreadMessage()
+    void DoLogThreadMessages();
+
 
     // internal variables
     // ------------------
 
     // just some place to put our messages in
     wxTextCtrl *m_txtctrl;
-
-    // old log target, we replace it with one using m_txtctrl during this
-    // frame life time
-    wxLog *m_oldLogger;
 
     // the array of pending messages to be displayed and the critical section
     // protecting it
@@ -210,14 +208,21 @@ enum
 class MyThread : public wxThread
 {
 public:
-    MyThread();
+    MyThread(MyFrame *frame);
     virtual ~MyThread();
 
     // thread execution starts here
     virtual void *Entry();
 
+    // write something to the text control in the main frame
+    void WriteText(const wxString& text)
+    {
+        m_frame->LogThreadMessage(text);
+    }
+
 public:
     unsigned m_count;
+    MyFrame *m_frame;
 };
 
 // ----------------------------------------------------------------------------
@@ -315,7 +320,12 @@ bool MyApp::OnInit()
     wxLog::AddTraceMask("thread");
 
     // Create the main frame window
-    new MyFrame("wxWidgets threads sample");
+    MyFrame *frame = new MyFrame((wxFrame *)NULL, _T("wxWidgets threads sample"),
+                                 50, 50, 450, 340);
+    SetTopWindow(frame);
+
+    // Show the frame
+    frame->Show(true);
 
     return true;
 }
@@ -346,84 +356,56 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 END_EVENT_TABLE()
 
 // My frame constructor
-MyFrame::MyFrame(const wxString& title)
-       : wxFrame(NULL, wxID_ANY, title)
+MyFrame::MyFrame(wxFrame *frame, const wxString& title,
+                 int x, int y, int w, int h)
+       : wxFrame(frame, wxID_ANY, title, wxPoint(x, y), wxSize(w, h))
 {
-    m_oldLogger = wxLog::GetActiveTarget();
-
     SetIcon(wxIcon(sample_xpm));
 
     // Make a menubar
     wxMenuBar *menuBar = new wxMenuBar;
 
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(THREAD_CLEAR, wxT("&Clear log\tCtrl-L"));
+    menuFile->Append(THREAD_CLEAR, _T("&Clear log\tCtrl-L"));
     menuFile->AppendSeparator();
-    menuFile->Append(THREAD_QUIT, wxT("E&xit\tAlt-X"));
-    menuBar->Append(menuFile, wxT("&File"));
+    menuFile->Append(THREAD_QUIT, _T("E&xit\tAlt-X"));
+    menuBar->Append(menuFile, _T("&File"));
 
     wxMenu *menuThread = new wxMenu;
-    menuThread->Append(THREAD_START_THREAD, wxT("&Start a new thread\tCtrl-N"));
-    menuThread->Append(THREAD_START_THREADS, wxT("Start &many threads at once"));
-    menuThread->Append(THREAD_STOP_THREAD, wxT("S&top the last spawned thread\tCtrl-S"));
+    menuThread->Append(THREAD_START_THREAD, _T("&Start a new thread\tCtrl-N"));
+    menuThread->Append(THREAD_START_THREADS, _T("Start &many threads at once"));
+    menuThread->Append(THREAD_STOP_THREAD, _T("S&top the last spawned thread\tCtrl-S"));
     menuThread->AppendSeparator();
-    menuThread->Append(THREAD_PAUSE_THREAD, wxT("&Pause the last spawned running thread\tCtrl-P"));
-    menuThread->Append(THREAD_RESUME_THREAD, wxT("&Resume the first suspended thread\tCtrl-R"));
+    menuThread->Append(THREAD_PAUSE_THREAD, _T("&Pause the last spawned running thread\tCtrl-P"));
+    menuThread->Append(THREAD_RESUME_THREAD, _T("&Resume the first suspended thread\tCtrl-R"));
     menuThread->AppendSeparator();
-    menuThread->Append(THREAD_START_WORKER, wxT("Start a &worker thread\tCtrl-W"));
-    menuThread->Append(THREAD_EXEC_MAIN, wxT("&Launch a program from main thread\tF5"));
-    menuThread->Append(THREAD_START_GUI_THREAD, wxT("Launch a &GUI thread\tF6"));
-    menuBar->Append(menuThread, wxT("&Thread"));
+    menuThread->Append(THREAD_START_WORKER, _T("Start a &worker thread\tCtrl-W"));
+    menuThread->Append(THREAD_EXEC_MAIN, _T("&Launch a program from main thread\tF5"));
+    menuThread->Append(THREAD_START_GUI_THREAD, _T("Launch a &GUI thread\tF6"));
+    menuBar->Append(menuThread, _T("&Thread"));
 
     wxMenu *menuHelp = new wxMenu;
-    menuHelp->Append(THREAD_SHOWCPUS, wxT("&Show CPU count"));
+    menuHelp->Append(THREAD_SHOWCPUS, _T("&Show CPU count"));
     menuHelp->AppendSeparator();
-    menuHelp->Append(THREAD_ABOUT, wxT("&About..."));
-    menuBar->Append(menuHelp, wxT("&Help"));
+    menuHelp->Append(THREAD_ABOUT, _T("&About..."));
+    menuBar->Append(menuHelp, _T("&Help"));
 
     SetMenuBar(menuBar);
 
     m_nRunning = m_nCount = 0;
 
-    m_dlgProgress = NULL;
+    m_dlgProgress = (wxProgressDialog *)NULL;
 
 #if wxUSE_STATUSBAR
     CreateStatusBar(2);
 #endif // wxUSE_STATUSBAR
 
-    // create the logging text control and a header showing the meaning of the
-    // different columns
-    wxTextCtrl *header = new wxTextCtrl(this, wxID_ANY, "",
-                                        wxDefaultPosition, wxDefaultSize,
-                                        wxTE_READONLY);
-    DoLogLine(header, "  Time", " Thread", "Message");
-    m_txtctrl = new wxTextCtrl(this, wxID_ANY, "",
-                               wxDefaultPosition, wxDefaultSize,
+    m_txtctrl = new wxTextCtrl(this, wxID_ANY, _T(""), wxPoint(0, 0), wxSize(0, 0),
                                wxTE_MULTILINE | wxTE_READONLY);
-    wxLog::SetActiveTarget(this);
-
-    // use fixed width font to align output in nice columns
-    wxFont font(wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE,
-                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-    header->SetFont(font);
-    m_txtctrl->SetFont(font);
-
-    m_txtctrl->SetFocus();
-
-    // layout and show the frame
-    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(header, wxSizerFlags().Expand());
-    sizer->Add(m_txtctrl, wxSizerFlags(1).Expand());
-    SetSizer(sizer);
-
-    SetSize(600, 350);
-    Show();
 }
 
 MyFrame::~MyFrame()
 {
-    wxLog::SetActiveTarget(m_oldLogger);
-
     // NB: although the OS will terminate all the threads anyhow when the main
     //     one exits, it's good practice to do it ourselves -- even if it's not
     //     completely trivial in this example
@@ -450,43 +432,9 @@ MyFrame::~MyFrame()
     wxGetApp().m_semAllDone.Wait();
 }
 
-void
-MyFrame::DoLogLine(wxTextCtrl *text,
-                   const wxString& timestr,
-                   const wxString& threadstr,
-                   const wxString& msg)
-{
-    text->AppendText(wxString::Format("%9s %10s %s", timestr, threadstr, msg));
-}
-
-void
-MyFrame::DoLogRecord(wxLogLevel level,
-                     const wxString& msg,
-                     const wxLogRecordInfo& info)
-{
-    // let the default GUI logger treat warnings and errors as they should be
-    // more noticeable than just another line in the log window and also trace
-    // messages as there may be too many of them
-    if ( level <= wxLOG_Warning || level == wxLOG_Trace )
-    {
-        m_oldLogger->LogRecord(level, msg, info);
-        return;
-    }
-
-    DoLogLine
-    (
-        m_txtctrl,
-        wxDateTime(info.timestamp).FormatISOTime(),
-        info.threadId == wxThread::GetMainId()
-            ? wxString("main")
-            : wxString::Format("%x", info.threadId),
-        msg + "\n"
-    );
-}
-
 MyThread *MyFrame::CreateThread()
 {
-    MyThread *thread = new MyThread;
+    MyThread *thread = new MyThread(this);
 
     if ( thread->Create() != wxTHREAD_NO_ERROR )
     {
@@ -497,6 +445,19 @@ MyThread *MyFrame::CreateThread()
     wxGetApp().m_threads.Add(thread);
 
     return thread;
+}
+
+void MyFrame::DoLogThreadMessages()
+{
+    wxCriticalSectionLocker lock(m_csMessages);
+
+    const size_t count = m_messages.size();
+    for ( size_t n = 0; n < count; n++ )
+    {
+        m_txtctrl->AppendText(m_messages[n]);
+    }
+
+    m_messages.clear();
 }
 
 void MyFrame::UpdateThreadStatus()
@@ -537,8 +498,8 @@ void MyFrame::OnStartThreads(wxCommandEvent& WXUNUSED(event) )
 {
     static long s_num;
 
-    s_num = wxGetNumberFromUser(wxT("How many threads to start: "), wxT(""),
-                                wxT("wxThread sample"), s_num, 1, 10000, this);
+    s_num = wxGetNumberFromUser(_T("How many threads to start: "), _T(""),
+                                _T("wxThread sample"), s_num, 1, 10000, this);
     if ( s_num == -1 )
     {
         s_num = 10;
@@ -591,7 +552,7 @@ void MyFrame::OnStartThread(wxCommandEvent& WXUNUSED(event) )
     }
 
 #if wxUSE_STATUSBAR
-    SetStatusText(wxT("New thread started."), 1);
+    SetStatusText(_T("New thread started."), 1);
 #endif // wxUSE_STATUSBAR
 }
 
@@ -609,7 +570,7 @@ void MyFrame::OnStopThread(wxCommandEvent& WXUNUSED(event) )
         wxGetApp().m_threads.Last()->Delete();
 
 #if wxUSE_STATUSBAR
-        SetStatusText(wxT("Last thread stopped."), 1);
+        SetStatusText(_T("Last thread stopped."), 1);
 #endif // wxUSE_STATUSBAR
     }
 }
@@ -632,7 +593,7 @@ void MyFrame::OnResumeThread(wxCommandEvent& WXUNUSED(event) )
         wxGetApp().m_threads[n]->Resume();
 
 #if wxUSE_STATUSBAR
-        SetStatusText(wxT("Thread resumed."), 1);
+        SetStatusText(_T("Thread resumed."), 1);
 #endif // wxUSE_STATUSBAR
     }
 }
@@ -655,13 +616,15 @@ void MyFrame::OnPauseThread(wxCommandEvent& WXUNUSED(event) )
         wxGetApp().m_threads[n]->Pause();
 
 #if wxUSE_STATUSBAR
-        SetStatusText(wxT("Thread paused."), 1);
+        SetStatusText(_T("Thread paused."), 1);
 #endif // wxUSE_STATUSBAR
     }
 }
 
 void MyFrame::OnIdle(wxIdleEvent& event)
 {
+    DoLogThreadMessages();
+
     UpdateThreadStatus();
 
     event.Skip();
@@ -697,15 +660,15 @@ void MyFrame::OnShowCPUs(wxCommandEvent& WXUNUSED(event))
     switch ( nCPUs )
     {
         case -1:
-            msg = wxT("Unknown number of CPUs");
+            msg = _T("Unknown number of CPUs");
             break;
 
         case 0:
-            msg = wxT("WARNING: you're running without any CPUs!");
+            msg = _T("WARNING: you're running without any CPUs!");
             break;
 
         case 1:
-            msg = wxT("This system only has one CPU.");
+            msg = _T("This system only has one CPU.");
             break;
 
         default:
@@ -718,11 +681,11 @@ void MyFrame::OnShowCPUs(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event) )
 {
     wxMessageDialog dialog(this,
-                           wxT("wxWidgets multithreaded application sample\n")
-                           wxT("(c) 1998 Julian Smart, Guilhem Lavaux\n")
-                           wxT("(c) 2000 Robert Roebling\n")
-                           wxT("(c) 1999,2009 Vadim Zeitlin"),
-                           wxT("About wxThread sample"),
+                           _T("wxWidgets multithreaded application sample\n")
+                           _T("(c) 1998 Julian Smart, Guilhem Lavaux\n")
+                           _T("(c) 1999 Vadim Zeitlin\n")
+                           _T("(c) 2000 Robert Roebling"),
+                           _T("About wxThread sample"),
                            wxOK | wxICON_INFORMATION);
 
     dialog.ShowModal();
@@ -750,8 +713,8 @@ void MyFrame::OnStartWorker(wxCommandEvent& WXUNUSED(event))
 
     m_dlgProgress = new wxProgressDialog
                         (
-                         wxT("Progress dialog"),
-                         wxT("Wait until the thread terminates or press [Cancel]"),
+                         _T("Progress dialog"),
+                         _T("Wait until the thread terminates or press [Cancel]"),
                          100,
                          this,
                          wxPD_CAN_ABORT |
@@ -793,11 +756,6 @@ void MyFrame::OnWorkerEvent(wxThreadEvent& event)
 
 void MyFrame::OnStartGUIThread(wxCommandEvent& WXUNUSED(event))
 {
-    // we use this to check that disabling logging only affects the main thread
-    // but the messages from the worker thread will still be logged
-    wxLogNull noLog;
-    wxLogMessage("You shouldn't see this message because of wxLogNull");
-
     MyImageDialog dlg(this);
 
     dlg.ShowModal();
@@ -886,10 +844,11 @@ void MyImageDialog::OnPaint(wxPaintEvent& WXUNUSED(evt))
 // MyThread
 // ----------------------------------------------------------------------------
 
-MyThread::MyThread()
+MyThread::MyThread(MyFrame *frame)
         : wxThread()
 {
     m_count = 0;
+    m_frame = frame;
 }
 
 MyThread::~MyThread()
@@ -914,7 +873,12 @@ MyThread::~MyThread()
 
 wxThread::ExitCode MyThread::Entry()
 {
-    wxLogMessage("Thread started (priority = %u).", GetPriority());
+    wxString text;
+
+    text.Printf(wxT("Thread %p started (priority = %u).\n"),
+                GetId(), GetPriority());
+    WriteText(text);
+    // wxLogMessage(text); -- test wxLog thread safeness
 
     for ( m_count = 0; m_count < 10; m_count++ )
     {
@@ -930,13 +894,16 @@ wxThread::ExitCode MyThread::Entry()
         if ( TestDestroy() )
             break;
 
-        wxLogMessage("Thread progress: %u", m_count);
+        text.Printf(wxT("[%u] Thread %p here.\n"), m_count, GetId());
+        WriteText(text);
 
         // wxSleep() can't be called from non-GUI thread!
         wxThread::Sleep(1000);
     }
 
-    wxLogMessage("Thread finished.");
+    text.Printf(wxT("Thread %p finished.\n"), GetId());
+    WriteText(text);
+    // wxLogMessage(text); -- test wxLog thread safeness
 
     return NULL;
 }
@@ -1008,19 +975,6 @@ wxThread::ExitCode MyWorkerThread::Entry()
 
 wxThread::ExitCode MyGUIThread::Entry()
 {
-    // uncomment this to check that disabling logging here does disable it for
-    // this thread -- but not the main one if you also comment out wxLogNull
-    // line in MyFrame::OnStartGUIThread()
-    //wxLogNull noLog;
-
-    // this goes to the main window
-    wxLogMessage("GUI thread starting");
-
-    // use a thread-specific log target for this thread to show that its
-    // messages don't appear in the main window while it runs
-    wxLogBuffer logBuf;
-    wxLog::SetThreadActiveTarget(&logBuf);
-
     for (int i=0; i<GUITHREAD_NUM_UPDATES && !TestDestroy(); i++)
     {
         // inform the GUI toolkit that we're going to use GUI functions
@@ -1047,22 +1001,10 @@ wxThread::ExitCode MyGUIThread::Entry()
         event.SetInt(i+1);
         wxQueueEvent( m_dlg, event.Clone() );
 
-        if ( !((i + 1) % 10) )
-        {
-            // this message will go to the buffer
-            wxLogMessage("Step #%d.", i + 1);
-        }
-
         // give the main thread the time to refresh before we lock the GUI mutex again
         // FIXME: find a better way to do this!
         wxMilliSleep(100);
     }
-
-    // now remove the thread-specific thread target
-    wxLog::SetThreadActiveTarget(NULL);
-
-    // so that this goes to the main window again
-    wxLogMessage("GUI thread finished.");
 
     return (ExitCode)0;
 }

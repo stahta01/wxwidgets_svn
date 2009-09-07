@@ -289,9 +289,7 @@ inline void wxCopyRectToRECT(const wxRect& rect, RECT& rc)
 // translations between HIMETRIC units (which OLE likes) and pixels (which are
 // liked by all the others) - implemented in msw/utilsexc.cpp
 extern void HIMETRICToPixel(LONG *x, LONG *y);
-extern void HIMETRICToPixel(LONG *x, LONG *y, HDC hdcRef);
 extern void PixelToHIMETRIC(LONG *x, LONG *y);
-extern void PixelToHIMETRIC(LONG *x, LONG *y, HDC hdcRef);
 
 // Windows convention of the mask is opposed to the wxWidgets one, so we need
 // to invert the mask each time we pass one/get one to/from Windows
@@ -368,9 +366,7 @@ inline RECT wxGetWindowRect(HWND hwnd)
     RECT rect;
 
     if ( !::GetWindowRect(hwnd, &rect) )
-    {
-        wxLogLastError(wxT("GetWindowRect"));
-    }
+        wxLogLastError(_T("GetWindowRect"));
 
     return rect;
 }
@@ -380,9 +376,7 @@ inline RECT wxGetClientRect(HWND hwnd)
     RECT rect;
 
     if ( !::GetClientRect(hwnd, &rect) )
-    {
-        wxLogLastError(wxT("GetClientRect"));
-    }
+        wxLogLastError(_T("GetClientRect"));
 
     return rect;
 }
@@ -452,7 +446,7 @@ public:
 
     void Init(HDC hdc, HGDIOBJ hgdiobj)
     {
-        wxASSERT_MSG( !m_hdc, wxT("initializing twice?") );
+        wxASSERT_MSG( !m_hdc, _T("initializing twice?") );
 
         m_hdc = hdc;
 
@@ -481,7 +475,7 @@ protected:
 
     void InitGdiobj(HGDIOBJ gdiobj)
     {
-        wxASSERT_MSG( !m_gdiobj, wxT("initializing twice?") );
+        wxASSERT_MSG( !m_gdiobj, _T("initializing twice?") );
 
         m_gdiobj = gdiobj;
     }
@@ -574,9 +568,7 @@ public:
         : m_hdc(hdc)
     {
         if ( !::SelectClipRgn(hdc, hrgn) )
-        {
-            wxLogLastError(wxT("SelectClipRgn"));
-        }
+            wxLogLastError(_T("SelectClipRgn"));
     }
 
     ~HDCClipper()
@@ -605,9 +597,7 @@ private:
         {
             m_modeOld = ::SetMapMode(hdc, mm);
             if ( !m_modeOld )
-            {
-                wxLogLastError(wxT("SelectClipRgn"));
-            }
+                wxLogLastError(_T("SelectClipRgn"));
         }
 
         ~HDCMapModeChanger()
@@ -642,9 +632,7 @@ public:
     {
         m_hGlobal = ::GlobalAlloc(flags, size);
         if ( !m_hGlobal )
-        {
-            wxLogLastError(wxT("GlobalAlloc"));
-        }
+            wxLogLastError(_T("GlobalAlloc"));
     }
 
     GlobalPtr(size_t size, unsigned flags = GMEM_MOVEABLE)
@@ -655,9 +643,7 @@ public:
     ~GlobalPtr()
     {
         if ( m_hGlobal && ::GlobalFree(m_hGlobal) )
-        {
-            wxLogLastError(wxT("GlobalFree"));
-        }
+            wxLogLastError(_T("GlobalFree"));
     }
 
     // implicit conversion
@@ -693,9 +679,7 @@ public:
         //     global scope operator with it (and neither with GlobalUnlock())
         m_ptr = GlobalLock(hGlobal);
         if ( !m_ptr )
-        {
-            wxLogLastError(wxT("GlobalLock"));
-        }
+            wxLogLastError(_T("GlobalLock"));
     }
 
     // initialize the object, HGLOBAL must not be NULL
@@ -712,7 +696,7 @@ public:
             DWORD dwLastError = ::GetLastError();
             if ( dwLastError != NO_ERROR )
             {
-                wxLogApiError(wxT("GlobalUnlock"), dwLastError);
+                wxLogApiError(_T("GlobalUnlock"), dwLastError);
             }
         }
     }
@@ -745,12 +729,12 @@ public:
     {
         // we should only be called if we hadn't been initialized yet
         wxASSERT_MSG( m_registered == -1,
-                        wxT("calling ClassRegistrar::Register() twice?") );
+                        _T("calling ClassRegistrar::Register() twice?") );
 
         m_registered = ::RegisterClass(&wc) ? 1 : 0;
         if ( !IsRegistered() )
         {
-            wxLogLastError(wxT("RegisterClassEx()"));
+            wxLogLastError(_T("RegisterClassEx()"));
         }
         else
         {
@@ -771,7 +755,7 @@ public:
         {
             if ( !::UnregisterClass(m_clsname.wx_str(), wxhInstance) )
             {
-                wxLogLastError(wxT("UnregisterClass"));
+                wxLogLastError(_T("UnregisterClass"));
             }
         }
     }
@@ -813,7 +797,7 @@ private:
 #define GetHbrushOf(brush)      ((HBRUSH)(brush).GetResourceHandle())
 
 #define GetHmenu()              ((HMENU)GetHMenu())
-#define GetHmenuOf(menu)        ((HMENU)(menu)->GetHMenu())
+#define GetHmenuOf(menu)        ((HMENU)menu->GetHMenu())
 
 #define GetHcursor()            ((HCURSOR)GetHCURSOR())
 #define GetHcursorOf(cursor)    ((HCURSOR)(cursor).GetHCURSOR())
@@ -822,7 +806,7 @@ private:
 #define GetHfontOf(font)        ((HFONT)(font).GetHFONT())
 
 #define GetHimagelist()         ((HIMAGELIST)GetHIMAGELIST())
-#define GetHimagelistOf(imgl)   ((HIMAGELIST)(imgl)->GetHIMAGELIST())
+#define GetHimagelistOf(imgl)   ((HIMAGELIST)imgl->GetHIMAGELIST())
 
 #define GetHpalette()           ((HPALETTE)GetHPALETTE())
 #define GetHpaletteOf(pal)      ((HPALETTE)(pal).GetHPALETTE())
@@ -857,7 +841,7 @@ inline wxString wxGetFullModuleName(HMODULE hmod)
                 MAX_PATH
             ) )
     {
-        wxLogLastError(wxT("GetModuleFileName"));
+        wxLogLastError(_T("GetModuleFileName"));
     }
 
     return fullname;

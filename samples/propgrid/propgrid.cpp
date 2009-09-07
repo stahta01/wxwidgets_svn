@@ -493,9 +493,7 @@ void wxVectorProperty::RefreshChildren()
     Item(2)->SetValue( vector.z );
 }
 
-wxVariant wxVectorProperty::ChildChanged( wxVariant& thisValue,
-                                          int childIndex,
-                                          wxVariant& childValue ) const
+void wxVectorProperty::ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const
 {
     wxVector3f vector;
     vector << thisValue;
@@ -505,9 +503,7 @@ wxVariant wxVectorProperty::ChildChanged( wxVariant& thisValue,
         case 1: vector.y = childValue.GetDouble(); break;
         case 2: vector.z = childValue.GetDouble(); break;
     }
-    wxVariant newVariant;
-    newVariant << vector;
-    return newVariant;
+    thisValue << vector;
 }
 
 
@@ -545,9 +541,7 @@ void wxTriangleProperty::RefreshChildren()
     Item(2)->SetValue( WXVARIANT(triangle.c) );
 }
 
-wxVariant wxTriangleProperty::ChildChanged( wxVariant& thisValue,
-                                            int childIndex,
-                                            wxVariant& childValue ) const
+void wxTriangleProperty::ChildChanged( wxVariant& thisValue, int childIndex, wxVariant& childValue ) const
 {
     wxTriangle triangle;
     triangle << thisValue;
@@ -558,9 +552,7 @@ wxVariant wxTriangleProperty::ChildChanged( wxVariant& thisValue,
         case 1: triangle.b = vector; break;
         case 2: triangle.c = vector; break;
     }
-    wxVariant newVariant;
-    newVariant << triangle;
-    return newVariant;
+    thisValue << triangle;
 }
 
 
@@ -687,8 +679,7 @@ enum
     ID_SELECTSTYLE,
     ID_SAVESTATE,
     ID_RESTORESTATE,
-    ID_RUNMINIMAL,
-    ID_ENABLELABELEDITING
+    ID_RUNMINIMAL
 };
 
 // -----------------------------------------------------------------------
@@ -714,12 +705,6 @@ BEGIN_EVENT_TABLE(FormMain, wxFrame)
     EVT_PG_DOUBLE_CLICK( PGID, FormMain::OnPropertyGridItemDoubleClick )
     // This occurs when propgridmanager's page changes.
     EVT_PG_PAGE_CHANGED( PGID, FormMain::OnPropertyGridPageChange )
-    // This occurs when user starts editing a property label
-    EVT_PG_LABEL_EDIT_BEGIN( PGID,
-        FormMain::OnPropertyGridLabelEditBegin )
-    // This occurs when user stops editing a property label
-    EVT_PG_LABEL_EDIT_ENDING( PGID,
-        FormMain::OnPropertyGridLabelEditEnding )
     // This occurs when property's editor button (if any) is clicked.
     EVT_BUTTON( PGID, FormMain::OnPropertyGridButtonClick )
 
@@ -752,7 +737,6 @@ BEGIN_EVENT_TABLE(FormMain, wxFrame)
     EVT_MENU( ID_SETBGCOLOURRECUR, FormMain::OnSetBackgroundColour )
     EVT_MENU( ID_CLEARMODIF, FormMain::OnClearModifyStatusClick )
     EVT_MENU( ID_FREEZE, FormMain::OnFreezeClick )
-    EVT_MENU( ID_ENABLELABELEDITING, FormMain::OnEnableLabelEditing )
     EVT_MENU( ID_DUMPLIST, FormMain::OnDumpList )
 
     EVT_MENU( ID_COLOURSCHEME1, FormMain::OnColourScheme )
@@ -928,11 +912,11 @@ void FormMain::OnPropertyGridChange( wxPropertyGridEvent& event )
         SetSize ( m_pPropGridManager->GetPropertyValueAsInt(property), -1, -1, -1, wxSIZE_USE_EXISTING );
     else if ( name == wxT("Y") )
     // wxPGVariantToInt is safe long int value getter
-        SetSize ( -1, value.GetLong(), -1, -1, wxSIZE_USE_EXISTING );
+        SetSize ( -1, wxPGVariantToInt(value), -1, -1, wxSIZE_USE_EXISTING );
     else if ( name == wxT("Width") )
         SetSize ( -1, -1, m_pPropGridManager->GetPropertyValueAsInt(property), -1, wxSIZE_USE_EXISTING );
     else if ( name == wxT("Height") )
-        SetSize ( -1, -1, -1, value.GetLong(), wxSIZE_USE_EXISTING );
+        SetSize ( -1, -1, -1, wxPGVariantToInt(value), wxSIZE_USE_EXISTING );
     else if ( name == wxT("Label") )
     {
         SetTitle ( m_pPropGridManager->GetPropertyValueAsString(property) );
@@ -1022,22 +1006,6 @@ void FormMain::OnPropertyGridPageChange( wxPropertyGridEvent& WXUNUSED(event) )
     text += m_pPropGridManager->GetPageName(m_pPropGridManager->GetSelectedPage());
     sb->SetStatusText( text );
 #endif
-}
-
-// -----------------------------------------------------------------------
-
-void FormMain::OnPropertyGridLabelEditBegin( wxPropertyGridEvent& event )
-{
-    wxLogDebug("wxPG_EVT_LABEL_EDIT_BEGIN(%s)",
-               event.GetProperty()->GetLabel().c_str());
-}
-
-// -----------------------------------------------------------------------
-
-void FormMain::OnPropertyGridLabelEditEnding( wxPropertyGridEvent& event )
-{
-    wxLogDebug("wxPG_EVT_LABEL_EDIT_ENDING(%s)",
-               event.GetProperty()->GetLabel().c_str());
 }
 
 // -----------------------------------------------------------------------
@@ -1953,7 +1921,7 @@ void wxMyPropertyGridPage::OnPropertySelect( wxPropertyGridEvent& WXUNUSED(event
 void wxMyPropertyGridPage::OnPropertyChange( wxPropertyGridEvent& event )
 {
     wxPGProperty* p = event.GetProperty();
-    wxLogVerbose(wxT("wxMyPropertyGridPage::OnPropertyChange('%s', to value '%s')"),
+    wxLogDebug(wxT("wxMyPropertyGridPage::OnPropertyChange('%s', to value '%s')"),
                p->GetName().c_str(),
                p->GetDisplayedString().c_str());
 }
@@ -1961,7 +1929,7 @@ void wxMyPropertyGridPage::OnPropertyChange( wxPropertyGridEvent& event )
 void wxMyPropertyGridPage::OnPropertyChanging( wxPropertyGridEvent& event )
 {
     wxPGProperty* p = event.GetProperty();
-    wxLogVerbose(wxT("wxMyPropertyGridPage::OnPropertyChanging('%s', to value '%s')"),
+    wxLogDebug(wxT("wxMyPropertyGridPage::OnPropertyChanging('%s', to value '%s')"),
                p->GetName().c_str(),
                event.GetValue().GetString().c_str());
 }
@@ -2069,8 +2037,7 @@ void FormMain::CreateGrid( int style, int extraStyle )
 
     if ( extraStyle == -1 )
         // default extra style
-        extraStyle = wxPG_EX_MODE_BUTTONS |
-                     wxPG_EX_MULTIPLE_SELECTION;
+        extraStyle = wxPG_EX_MODE_BUTTONS;
                 //| wxPG_EX_AUTO_UNSPECIFIED_VALUES
                 //| wxPG_EX_GREY_LABEL_WHEN_DISABLED
                 //| wxPG_EX_NATIVE_DOUBLE_BUFFERING
@@ -2165,8 +2132,7 @@ FormMain::FormMain(const wxString& title, const wxPoint& pos, const wxSize& size
                 wxPG_TOOLBAR |
                 wxPG_DESCRIPTION,
                 // extra style
-                wxPG_EX_MODE_BUTTONS |
-                wxPG_EX_MULTIPLE_SELECTION
+                wxPG_EX_MODE_BUTTONS
                 //| wxPG_EX_AUTO_UNSPECIFIED_VALUES
                 //| wxPG_EX_GREY_LABEL_WHEN_DISABLED
                 //| wxPG_EX_NATIVE_DOUBLE_BUFFERING
@@ -2243,8 +2209,6 @@ FormMain::FormMain(const wxString& title, const wxPoint& pos, const wxSize& size
 
     menuTry->Append(ID_SELECTSTYLE, wxT("Set Window Style"),
         wxT("Select window style flags used by the grid."));
-    menuTry->Append(ID_ENABLELABELEDITING, "Enable label editing",
-        "This calls wxPropertyGrid::MakeColumnEditable(0)");
     menuTry->AppendSeparator();
     menuTry->AppendRadioItem( ID_COLOURSCHEME1, wxT("Standard Colour Scheme") );
     menuTry->AppendRadioItem( ID_COLOURSCHEME2, wxT("White Colour Scheme") );
@@ -2465,8 +2429,6 @@ void FormMain::OnContextMenu( wxContextMenuEvent& event )
 {
     wxLogDebug(wxT("FormMain::OnContextMenu(%i,%i)"),
         event.GetPosition().x,event.GetPosition().y);
-
-    wxUnusedVar(event);
 
     //event.Skip();
 }
@@ -2788,13 +2750,6 @@ void FormMain::OnFreezeClick( wxCommandEvent& event )
 
 // -----------------------------------------------------------------------
 
-void FormMain::OnEnableLabelEditing( wxCommandEvent& WXUNUSED(event) )
-{
-    m_propGrid->MakeColumnEditable(0);
-}
-
-// -----------------------------------------------------------------------
-
 void FormMain::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxString msg;
@@ -2819,7 +2774,7 @@ void FormMain::OnAbout(wxCommandEvent& WXUNUSED(event))
             wxT("Jaakko Salli"), wxVERSION_STRING
             );
 
-    wxMessageBox(msg, wxT("About"), wxOK | wxICON_INFORMATION, this);
+    wxMessageBox(msg, _T("About"), wxOK | wxICON_INFORMATION, this);
 }
 
 // -----------------------------------------------------------------------
@@ -2963,9 +2918,6 @@ void FormMain::OnSelectStyle( wxCommandEvent& WXUNUSED(event) )
         ADD_FLAG(wxPG_EX_NATIVE_DOUBLE_BUFFERING)
         ADD_FLAG(wxPG_EX_AUTO_UNSPECIFIED_VALUES)
         ADD_FLAG(wxPG_EX_WRITEONLY_BUILTIN_ATTRIBUTES)
-        ADD_FLAG(wxPG_EX_HIDE_PAGE_BUTTONS)
-        ADD_FLAG(wxPG_EX_MULTIPLE_SELECTION)
-        ADD_FLAG(wxPG_EX_ENABLE_TLP_TRACKING)
         wxMultiChoiceDialog dlg( this, wxT("Select extra window styles to use"),
                                  wxT("wxPropertyGrid Extra Style"), chs );
         dlg.SetSelections(sel);
@@ -3176,8 +3128,8 @@ bool cxApplication::OnInit()
     //wxLocale Locale;
     //Locale.Init(wxLANGUAGE_FINNISH);
 
-    FormMain* frame = Form1 = new FormMain( wxT("wxPropertyGrid Sample"), wxPoint(0,0), wxSize(300,500) );
-    frame->Show(true);
+	FormMain* frame = Form1 = new FormMain( wxT("wxPropertyGrid Sample"), wxPoint(0,0), wxSize(300,500) );
+	frame->Show(true);
 
     //
     // Parse command-line
@@ -3196,7 +3148,7 @@ bool cxApplication::OnInit()
         }
     }
 
-    return true;
+	return true;
 }
 
 // -----------------------------------------------------------------------

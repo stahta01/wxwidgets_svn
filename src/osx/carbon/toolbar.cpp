@@ -167,14 +167,14 @@ public:
     {
         if ( wxToolBarToolBase::Toggle( toggle ) == false )
             return false;
-
+            
         UpdateToggleImage(toggle);
         return true;
     }
-
+    
     void UpdateHelpStrings()
     {
-#if wxOSX_USE_NATIVE_TOOLBAR
+#if wxOSX_USE_NATIVE_TOOLBAR            
         if ( m_toolbarItemRef )
         {
             wxFontEncoding enc = GetToolBarFontEncoding();
@@ -186,16 +186,16 @@ public:
         }
 #endif
     }
-
+    
     virtual bool SetShortHelp(const wxString& help)
     {
         if ( wxToolBarToolBase::SetShortHelp( help ) == false )
             return false;
-
-        UpdateHelpStrings();
+            
+        UpdateHelpStrings();        
         return true;
     }
-
+    
     virtual bool SetLongHelp(const wxString& help)
     {
         if ( wxToolBarToolBase::SetLongHelp( help ) == false )
@@ -205,12 +205,12 @@ public:
         return true;
     }
 
-    virtual void SetNormalBitmap(const wxBitmap& bmp)
+    virtual void SetNormalBitmap(const wxBitmap& bmp) 
     {
         wxToolBarToolBase::SetNormalBitmap(bmp);
         UpdateToggleImage(CanBeToggled() && IsToggled());
     }
-
+        
     virtual void SetLabel(const wxString& label)
     {
         wxToolBarToolBase::SetLabel(label);
@@ -429,7 +429,7 @@ bool wxToolBarTool::Enable( bool enable )
 {
     if ( wxToolBarToolBase::Enable( enable ) == false )
         return false;
-
+    
     if ( IsControl() )
     {
         GetControl()->Enable( enable );
@@ -1108,18 +1108,18 @@ bool wxToolBar::MacInstallNativeToolbar(bool usesNative)
             bResult = true;
 
             SetWindowToolbar( tlw, (HIToolbarRef) m_macToolbar );
-
+            
             // ShowHideWindowToolbar will make the wxFrame grow
             // which we don't want in this case
             wxSize sz = GetParent()->GetSize();
             ShowHideWindowToolbar( tlw, true, false );
             // Restore the orginal size
             GetParent()->SetSize( sz );
-
+            
             ChangeWindowAttributes( tlw, kWindowToolbarButtonAttribute, 0 );
-
+            
             SetAutomaticControlDragTrackingEnabledForWindow( tlw, true );
-
+    
             m_peer->Move(0,0,0,0 );
             SetSize( wxSIZE_AUTO_WIDTH, 0 );
             m_peer->SetVisibility( false );
@@ -1151,9 +1151,9 @@ bool wxToolBar::MacInstallNativeToolbar(bool usesNative)
 
 bool wxToolBar::Realize()
 {
-    if ( !wxToolBarBase::Realize() )
+    if (m_tools.GetCount() == 0)
         return false;
-
+    
     wxSize tlw_sz = GetParent()->GetSize();
 
     int maxWidth = 0;
@@ -1365,7 +1365,7 @@ bool wxToolBar::Realize()
 
     if (m_macUsesNativeToolbar)
         GetParent()->SetSize( tlw_sz );
-
+    
     if ( GetWindowStyleFlag() &  (wxTB_TOP|wxTB_BOTTOM) )
     {
         // if not set yet, only one row
@@ -1653,7 +1653,7 @@ bool wxToolBar::DoInsertTool(size_t WXUNUSED(pos), wxToolBarToolBase *toolBase)
 #if wxOSX_USE_NATIVE_TOOLBAR
             if (m_macToolbar != NULL)
             {
-                wxCHECK_MSG( tool->GetControl(), false, wxT("control must be non-NULL") );
+                wxCHECK_MSG( tool->GetControl(), false, _T("control must be non-NULL") );
                 HIToolbarItemRef    item;
                 HIViewRef viewRef = (HIViewRef) tool->GetControl()->GetHandle() ;
                 CFDataRef data = CFDataCreate( kCFAllocatorDefault , (UInt8*) &viewRef , sizeof(viewRef) ) ;

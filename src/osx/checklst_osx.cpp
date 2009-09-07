@@ -28,7 +28,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox, wxListBox)
 
 BEGIN_EVENT_TABLE(wxCheckListBox, wxListBox)
 END_EVENT_TABLE()
-
+ 
 void wxCheckListBox::Init()
 {
 }
@@ -85,7 +85,7 @@ bool wxCheckListBox::Create(
 bool wxCheckListBox::IsChecked(unsigned int n) const
 {
     wxCHECK_MSG( IsValid(n), false,
-                 wxT("invalid index in wxCheckListBox::IsChecked") );
+                 _T("invalid index in wxCheckListBox::IsChecked") );
 
     return m_checks[n] != 0;
 }
@@ -93,7 +93,7 @@ bool wxCheckListBox::IsChecked(unsigned int n) const
 void wxCheckListBox::Check(unsigned int n, bool check)
 {
     wxCHECK_RET( IsValid(n),
-                 wxT("invalid index in wxCheckListBox::Check") );
+                 _T("invalid index in wxCheckListBox::Check") );
 
     // intermediate var is needed to avoid compiler warning with VC++
     bool isChecked = m_checks[n] != 0;
@@ -118,7 +118,7 @@ void wxCheckListBox::SetValueCallback( unsigned int n, wxListWidgetColumn* col ,
     if ( col == m_checkColumn )
     {
         Check( n, value.IsChecked() );
-
+        
         wxCommandEvent event( wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, GetId() );
         event.SetInt( n );
         event.SetString( GetString( n ) );

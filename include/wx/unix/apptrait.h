@@ -63,7 +63,7 @@ public:
 #endif
 
 #if (defined(__WXMAC__) || defined(__WXCOCOA__)) && wxUSE_STDPATHS
-    virtual wxStandardPaths& GetStandardPaths();
+    virtual wxStandardPathsBase& GetStandardPaths();
 #endif
     virtual wxPortId GetToolkitVersion(int *majVer = NULL, int *minVer = NULL) const;
 

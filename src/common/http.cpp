@@ -219,10 +219,7 @@ bool wxHTTP::Connect(const wxString& host, unsigned short port)
     else if (!addr->Service(wxT("http")))
         addr->Service(80);
 
-    wxString hostHdr = host;
-    if ( port && port != 80 )
-        hostHdr << wxT(":") << port;
-    SetHeader(wxT("Host"), hostHdr);
+    SetHeader(wxT("Host"), host);
 
     m_lastError = wxPROTO_NOERR;
     return true;
@@ -238,14 +235,8 @@ bool wxHTTP::Connect(const wxSockAddress& addr, bool WXUNUSED(wait))
     m_addr = addr.Clone();
 
     wxIPV4address *ipv4addr = wxDynamicCast(&addr, wxIPV4address);
-    if ( ipv4addr )
-    {
-        wxString hostHdr = ipv4addr->OrigHostname();
-        unsigned short port = ipv4addr->Service();
-        if ( port && port != 80 )
-            hostHdr << wxT(":") << port;
-        SetHeader(wxT("Host"), hostHdr);
-    }
+    if (ipv4addr)
+        SetHeader(wxT("Host"), ipv4addr->OrigHostname());
 
     m_lastError = wxPROTO_NOERR;
     return true;

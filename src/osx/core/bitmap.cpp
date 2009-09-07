@@ -496,13 +496,8 @@ IconRef wxBitmapRefData::GetIconRef()
                      }
                 }
                 HUnlock( data );
-
                 OSStatus err = SetIconFamilyData( iconFamily, dataType , data );
-                if ( err != noErr )
-                {
-                    wxFAIL_MSG("Error when adding bitmap");
-                }
-
+                wxASSERT_MSG( err == noErr , wxT("Error when adding bitmap") );
                 DisposeHandle( data );
             }
             else
@@ -1019,7 +1014,7 @@ IconRef wxBitmap::CreateIconRef() const
 }
 #endif
 
-#if wxOSX_USE_COCOA
+#if wxOSX_USE_COCOA_OR_IPHONE
 
 WX_NSImage wxBitmap::GetNSImage() const
 {
@@ -1029,15 +1024,6 @@ WX_NSImage wxBitmap::GetNSImage() const
 
 #endif
 
-#if wxOSX_USE_IPHONE
-
-WX_UIImage wxBitmap::GetUIImage() const
-{
-    wxCFRef< CGImageRef > cgimage(CreateCGImage());
-    return wxOSXCreateUIImageFromCGImage( cgimage );
-}
-
-#endif
 wxBitmap wxBitmap::GetSubBitmap(const wxRect &rect) const
 {
     wxCHECK_MSG( Ok() &&
@@ -1171,7 +1157,7 @@ wxBitmap::wxBitmap(const wxImage& image, int depth)
     int height = image.GetHeight();
 
     wxBitmapRefData* bitmapRefData;
-
+    
     m_refData = bitmapRefData = new wxBitmapRefData( width , height , depth ) ;
 
     if ( bitmapRefData->IsOk())
@@ -1654,7 +1640,7 @@ WXHBITMAP wxMask::GetHBITMAP() const
 // Standard Handlers
 // ----------------------------------------------------------------------------
 
-#if !defined( __LP64__ ) && !defined(__WXOSX_IPHONE__)
+#if !defined( __LP64__ ) && !defined(__WXOSX_IPHONE__) 
 
 class WXDLLEXPORT wxPICTResourceHandler: public wxBitmapHandler
 {
@@ -1668,11 +1654,8 @@ public:
         SetType(wxBITMAP_TYPE_PICT_RESOURCE);
     };
 
-    virtual bool LoadFile(wxBitmap *bitmap,
-                          const wxString& name,
-                          wxBitmapType type,
-                          int desiredWidth,
-                          int desiredHeight);
+    virtual bool LoadFile(wxBitmap *bitmap, const wxString& name, long flags,
+          int desiredWidth, int desiredHeight);
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxPICTResourceHandler, wxBitmapHandler)
@@ -1680,7 +1663,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxPICTResourceHandler, wxBitmapHandler)
 
 bool wxPICTResourceHandler::LoadFile(wxBitmap *bitmap,
                                      const wxString& name,
-                                     wxBitmapType WXUNUSED(type),
+                                     long WXUNUSED(flags),
                                      int WXUNUSED(desiredWidth),
                                      int WXUNUSED(desiredHeight))
 {

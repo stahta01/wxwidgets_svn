@@ -11,8 +11,6 @@
 
 #include "wx/wxprec.h"
 
-#if wxUSE_MENUS
-
 #include "wx/menuitem.h"
 #include "wx/stockitem.h"
 
@@ -48,14 +46,14 @@ wxMenuItem::wxMenuItem(wxMenu *pParentMenu,
 
     m_radioGroup.start = -1;
     m_isRadioGroupStart = false;
-
+    
     wxString text = wxStripMenuCodes(m_text);
     if (text.IsEmpty() && !IsSeparator())
     {
         wxASSERT_MSG(wxIsStockID(GetId()), wxT("A non-stock menu item with an empty label?"));
         text = wxGetStockLabel(GetId(), wxSTOCK_WITH_ACCELERATOR|wxSTOCK_WITH_MNEMONIC);
     }
-
+    
     wxAcceleratorEntry *entry = wxAcceleratorEntry::Create( m_text ) ;
     // use accessors for ID and Kind because they might have been changed in the base constructor
     m_peer = wxMenuItemImpl::Create( this, pParentMenu, GetId(), text, entry, strHelp, GetKind(), pSubMenu );
@@ -83,7 +81,7 @@ void wxMenuItem::Enable(bool bDoEnable)
       // eg. BeginAppModalStateForWindow() will disable menus and ignore this change
       // which in turn causes m_isEnabled to become out of sync with real menuitem state
 #if wxOSX_USE_CARBON
-         && !(m_parentMenu && !IsMenuItemEnabled(MAC_WXHMENU(m_parentMenu->GetHMenu()), 0))
+         && !(m_parentMenu && !IsMenuItemEnabled(MAC_WXHMENU(m_parentMenu->GetHMenu()), 0)) 
 #endif
          )
       // always update builtin menuitems
@@ -123,7 +121,7 @@ void wxMenuItem::Check(bool bDoCheck)
                 const wxMenuItemList& items = m_parentMenu->GetMenuItems();
                 int pos = items.IndexOf(this);
                 wxCHECK_RET( pos != wxNOT_FOUND,
-                             wxT("menuitem not found in the menu items list?") );
+                             _T("menuitem not found in the menu items list?") );
 
                 // get the radio group range
                 int start, end;
@@ -176,7 +174,7 @@ void wxMenuItem::UpdateItemBitmap()
 {
     if ( !m_parentMenu )
         return;
-
+    
     if ( m_bitmap.Ok() )
     {
         m_peer->SetBitmap( m_bitmap );
@@ -190,12 +188,12 @@ void wxMenuItem::UpdateItemStatus()
 
     if ( IsSeparator() )
         return ;
-
+        
     if ( IsCheckable() && IsChecked() )
         m_peer->Check( true );
     else
         m_peer->Check( false );
-
+        
     m_peer->Enable( IsEnabled() );
 }
 
@@ -210,7 +208,7 @@ void wxMenuItem::UpdateItemText()
         wxASSERT_MSG(wxIsStockID(GetId()), wxT("A non-stock menu item with an empty label?"));
         text = wxGetStockLabel(GetId(), wxSTOCK_WITH_ACCELERATOR|wxSTOCK_WITH_MNEMONIC);
     }
-
+    
     wxAcceleratorEntry *entry = wxAcceleratorEntry::Create( m_text ) ;
     m_peer->SetLabel( text, entry );
     delete entry ;
@@ -253,5 +251,3 @@ wxMenuItem *wxMenuItemBase::New(wxMenu *parentMenu,
 {
     return new wxMenuItem(parentMenu, id, name, help, kind, subMenu);
 }
-
-#endif

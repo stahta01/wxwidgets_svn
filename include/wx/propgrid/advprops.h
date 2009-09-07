@@ -19,17 +19,19 @@
 // -----------------------------------------------------------------------
 
 
-#ifndef SWIG
-
 //
 // Additional Value Type Handlers
 //
+#ifndef SWIG
 bool WXDLLIMPEXP_PROPGRID
 operator==(const wxArrayInt& array1, const wxArrayInt& array2);
+#endif
+
 
 //
 // Additional Property Editors
 //
+#ifndef SWIG
 #if wxUSE_SPINBTN
 WX_PG_DECLARE_EDITOR_WITH_DECL(SpinCtrl,WXDLLIMPEXP_PROPGRID)
 #endif
@@ -37,8 +39,7 @@ WX_PG_DECLARE_EDITOR_WITH_DECL(SpinCtrl,WXDLLIMPEXP_PROPGRID)
 #if wxUSE_DATEPICKCTRL
 WX_PG_DECLARE_EDITOR_WITH_DECL(DatePickerCtrl,WXDLLIMPEXP_PROPGRID)
 #endif
-
-#endif  // !SWIG
+#endif
 
 // -----------------------------------------------------------------------
 
@@ -183,9 +184,8 @@ public:
     virtual wxString ValueToString( wxVariant& value, int argFlags = 0 ) const;
     virtual bool OnEvent( wxPropertyGrid* propgrid,
                           wxWindow* primary, wxEvent& event );
-    virtual wxVariant ChildChanged( wxVariant& thisValue,
-                                    int childIndex,
-                                    wxVariant& childValue ) const;
+    virtual void ChildChanged( wxVariant& thisValue,
+                               int childIndex, wxVariant& childValue ) const;
     virtual void RefreshChildren();
 
 protected:
@@ -432,7 +432,7 @@ protected:
     <b>Supported special attributes:</b>
     - "DateFormat": Determines displayed date format.
     - "PickerStyle": Determines window style used with wxDatePickerCtrl.
-       Default is wxDP_DEFAULT | wxDP_SHOWCENTURY. Using wxDP_ALLOWNONE
+       Default is wxDP_DEFAULT | wxDP_SHOWCENTURY. Using wxDP_ALLOWNONE 
        enables additional support for unspecified property value.
 */
 class WXDLLIMPEXP_PROPGRID wxDateProperty : public wxPGProperty

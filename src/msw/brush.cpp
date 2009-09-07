@@ -192,7 +192,7 @@ HBRUSH wxBrushRefData::GetHBRUSH()
                     break;
 
                 default:
-                    wxFAIL_MSG( wxT("unknown brush style") );
+                    wxFAIL_MSG( _T("unknown brush style") );
                     // fall through
 
                 case wxBRUSHSTYLE_SOLID:
@@ -209,7 +209,7 @@ HBRUSH wxBrushRefData::GetHBRUSH()
 
         if ( !m_hBrush )
         {
-            wxLogLastError(wxT("CreateXXXBrush()"));
+            wxLogLastError(_T("CreateXXXBrush()"));
         }
     }
 
@@ -277,28 +277,28 @@ wxGDIRefData *wxBrush::CloneGDIRefData(const wxGDIRefData *data) const
 
 wxColour wxBrush::GetColour() const
 {
-    wxCHECK_MSG( Ok(), wxNullColour, wxT("invalid brush") );
+    wxCHECK_MSG( Ok(), wxNullColour, _T("invalid brush") );
 
     return M_BRUSHDATA->GetColour();
 }
 
 wxBrushStyle wxBrush::GetStyle() const
 {
-    wxCHECK_MSG( Ok(), wxBRUSHSTYLE_INVALID, wxT("invalid brush") );
+    wxCHECK_MSG( Ok(), wxBRUSHSTYLE_INVALID, _T("invalid brush") );
 
     return M_BRUSHDATA->GetStyle();
 }
 
 wxBitmap *wxBrush::GetStipple() const
 {
-    wxCHECK_MSG( Ok(), NULL, wxT("invalid brush") );
+    wxCHECK_MSG( Ok(), NULL, _T("invalid brush") );
 
     return M_BRUSHDATA->GetStipple();
 }
 
 WXHANDLE wxBrush::GetResourceHandle() const
 {
-    wxCHECK_MSG( Ok(), FALSE, wxT("invalid brush") );
+    wxCHECK_MSG( Ok(), FALSE, _T("invalid brush") );
 
     return (WXHANDLE)M_BRUSHDATA->GetHBRUSH();
 }

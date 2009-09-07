@@ -131,7 +131,7 @@ bool wxScrollBar::MSWOnScroll(int WXUNUSED(orientation), WXWORD wParam,
 
         if ( !::GetScrollInfo(GetHwnd(), SB_CTL, &scrollInfo) )
         {
-            wxLogLastError(wxT("GetScrollInfo"));
+            wxLogLastError(_T("GetScrollInfo"));
         }
 
         trackPos = scrollInfo.nTrackPos;
@@ -255,7 +255,7 @@ int wxScrollBar::GetThumbPosition(void) const
 
     if ( !::GetScrollInfo(GetHwnd(), SB_CTL, &scrollInfo) )
     {
-        wxLogLastError(wxT("GetScrollInfo"));
+        wxLogLastError(_T("GetScrollInfo"));
     }
     return scrollInfo.nPos;
 //    return ::GetScrollPos((HWND)m_hWnd, SB_CTL);

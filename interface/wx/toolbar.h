@@ -224,9 +224,8 @@ public:
     /**
         Adds a separator for spacing groups of tools.
 
-        Notice that the separator uses the look appropriate for the current
-        platform so it can be a vertical line (MSW, some versions of GTK) or
-        just an empty space or something else.
+        Note that the meaning of a "separator" is a vertical line under wxMSW and
+        a simple space under wxGTK.
 
         @see AddTool(), SetToolSeparation()
     */

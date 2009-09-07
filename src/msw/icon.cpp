@@ -86,7 +86,7 @@ wxIcon::wxIcon(const wxIconLocation& loc)
     wxString fullname = loc.GetFileName();
     if ( loc.GetIndex() )
     {
-        fullname << wxT(';') << loc.GetIndex();
+        fullname << _T(';') << loc.GetIndex();
     }
     //else: 0 is default
 

@@ -472,7 +472,6 @@ wxBEGIN_FLAGS( wxGenericDirCtrlStyle )
     wxFLAGS_MEMBER(wxDIRCTRL_DIR_ONLY)
     wxFLAGS_MEMBER(wxDIRCTRL_3D_INTERNAL)
     wxFLAGS_MEMBER(wxDIRCTRL_SELECT_FIRST)
-    wxFLAGS_MEMBER(wxDIRCTRL_MULTIPLE)
 
 wxEND_FLAGS( wxGenericDirCtrlStyle )
 
@@ -561,9 +560,6 @@ bool wxGenericDirCtrl::Create(wxWindow *parent,
     if (style & wxDIRCTRL_EDIT_LABELS)
         treeStyle |= wxTR_EDIT_LABELS;
 
-    if (style & wxDIRCTRL_MULTIPLE)
-        treeStyle |= wxTR_MULTIPLE;
-
     if ((style & wxDIRCTRL_3D_INTERNAL) == 0)
         treeStyle |= wxNO_BORDER;
 
@@ -633,22 +629,9 @@ void wxGenericDirCtrl::ShowHidden( bool show )
 
     m_showHidden = show;
 
-    if ( HasFlag(wxDIRCTRL_MULTIPLE) )
-    {
-        wxArrayString paths;
-        GetPaths(paths);
-        ReCreateTree();
-        for ( unsigned n = 0; n < paths.size(); n++ )
-        {
-            ExpandPath(paths[n]);
-        }
-    }
-    else
-    {
-        wxString path = GetPath();
-        ReCreateTree();
-        SetPath(path);
-    }
+    wxString path = GetPath();
+    ReCreateTree();
+    SetPath(path);
 }
 
 const wxTreeItemId
@@ -1112,20 +1095,6 @@ wxString wxGenericDirCtrl::GetPath() const
         return wxEmptyString;
 }
 
-void wxGenericDirCtrl::GetPaths(wxArrayString& paths) const
-{
-    paths.clear();
-
-    wxArrayTreeItemIds items;
-    m_treeCtrl->GetSelections(items);
-    for ( unsigned n = 0; n < items.size(); n++ )
-    {
-        wxTreeItemId id = items[n];
-        wxDirItemData* data = (wxDirItemData*) m_treeCtrl->GetItemData(id);
-        paths.Add(data->m_path);
-    }
-}
-
 wxString wxGenericDirCtrl::GetFilePath() const
 {
     wxTreeItemId id = m_treeCtrl->GetSelection();
@@ -1141,63 +1110,11 @@ wxString wxGenericDirCtrl::GetFilePath() const
         return wxEmptyString;
 }
 
-void wxGenericDirCtrl::GetFilePaths(wxArrayString& paths) const
-{
-    paths.clear();
-
-    wxArrayTreeItemIds items;
-    m_treeCtrl->GetSelections(items);
-    for ( unsigned n = 0; n < items.size(); n++ )
-    {
-        wxTreeItemId id = items[n];
-        wxDirItemData* data = (wxDirItemData*) m_treeCtrl->GetItemData(id);
-        if ( !data->m_isDir )
-            paths.Add(data->m_path);
-    }
-}
-
 void wxGenericDirCtrl::SetPath(const wxString& path)
 {
     m_defaultPath = path;
     if (m_rootId)
         ExpandPath(path);
-}
-
-void wxGenericDirCtrl::SelectPath(const wxString& path, bool select)
-{
-    bool done = false;
-    wxTreeItemId id = FindChild(m_rootId, path, done);
-    wxTreeItemId lastId = id; // The last non-zero id
-    while ( id.IsOk() && !done )
-    {
-        id = FindChild(id, path, done);
-        if ( id.IsOk() )
-            lastId = id;
-    }
-    if ( !lastId.IsOk() )
-        return;
-
-    if ( done )
-    {
-        m_treeCtrl->SelectItem(id, select);
-    }
-}
-
-void wxGenericDirCtrl::SelectPaths(const wxArrayString& paths)
-{
-    if ( HasFlag(wxDIRCTRL_MULTIPLE) )
-    {
-        UnselectAll();
-        for ( unsigned n = 0; n < paths.size(); n++ )
-        {
-            SelectPath(paths[n]);
-        }
-    }
-}
-
-void wxGenericDirCtrl::UnselectAll()
-{
-    m_treeCtrl->UnselectAll();
 }
 
 // Not used
@@ -1582,14 +1499,14 @@ void wxFileIconsTable::Create()
                                                    wxART_CMN_DIALOG,
                                                    wxSize(16, 16)));
     // executable
-    if (GetIconID(wxEmptyString, wxT("application/x-executable")) == file)
+    if (GetIconID(wxEmptyString, _T("application/x-executable")) == file)
     {
         m_smallImageList->Add(wxArtProvider::GetBitmap(wxART_EXECUTABLE_FILE,
                                                        wxART_CMN_DIALOG,
                                                        wxSize(16, 16)));
-        delete m_HashTable->Get(wxT("exe"));
-        m_HashTable->Delete(wxT("exe"));
-        m_HashTable->Put(wxT("exe"), new wxFileIconEntry(executable));
+        delete m_HashTable->Get(_T("exe"));
+        m_HashTable->Delete(_T("exe"));
+        m_HashTable->Put(_T("exe"), new wxFileIconEntry(executable));
     }
     /* else put into list by GetIconID
        (KDE defines application/x-executable for *.exe and has nice icon)

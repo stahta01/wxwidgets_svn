@@ -33,7 +33,7 @@ public:
     // backing file is never created and the backing is done with memory.
     wxBackingFile(wxInputStream *stream,
                   size_t bufsize = DefaultBufSize,
-                  const wxString& prefix = wxT("wxbf"));
+                  const wxString& prefix = _T("wxbf"));
 
     wxBackingFile() : m_impl(NULL) { }
     ~wxBackingFile();

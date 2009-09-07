@@ -199,31 +199,11 @@ wxString wxGetStockLabel(wxWindowID id, long flags)
         STOCKITEM(wxID_ZOOM_OUT,            _("Zoom &Out"))
 
         default:
-            wxFAIL_MSG( wxT("invalid stock item ID") );
+            wxFAIL_MSG( _T("invalid stock item ID") );
             break;
     };
 
     #undef STOCKITEM
-
-    // we assume that buttons use the same labels as menu items but unlike them
-    // they should never use ellipsis
-    if ( (flags & wxSTOCK_FOR_BUTTON) == wxSTOCK_FOR_BUTTON )
-    {
-        wxString baseLabel;
-        if ( stockLabel.EndsWith("...", &baseLabel) )
-            stockLabel = baseLabel;
-
-        wxASSERT_MSG( !(flags & wxSTOCK_WITH_ACCELERATOR),
-                        "button labels never use accelerators" );
-    }
-
-#ifdef __WXMSW__
-    // special case: the "Cancel" button shouldn't have a mnemonic under MSW
-    // for consistency with the native dialogs (which don't use any mnemonic
-    // for it because it is already bound to Esc implicitly)
-    if ( id == wxID_CANCEL )
-        flags &= ~wxSTOCK_WITH_MNEMONIC;
-#endif // __WXMSW__
 
     if ( !(flags & wxSTOCK_WITH_MNEMONIC) )
     {
@@ -235,7 +215,7 @@ wxString wxGetStockLabel(wxWindowID id, long flags)
     {
         wxAcceleratorEntry accel = wxGetStockAccelerator(id);
         if (accel.IsOk())
-            stockLabel << wxT('\t') << accel.ToString();
+            stockLabel << _T('\t') << accel.ToString();
     }
 #endif // wxUSE_ACCEL
 
@@ -328,7 +308,7 @@ bool wxIsStockLabel(wxWindowID id, const wxString& label)
     if (label == stock)
         return true;
 
-    stock.Replace(wxT("&"), wxEmptyString);
+    stock.Replace(_T("&"), wxEmptyString);
     if (label == stock)
         return true;
 

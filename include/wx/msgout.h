@@ -69,7 +69,6 @@ protected:
 #ifdef __VISUALC__
     // "non dll-interface class 'wxStringPrintfMixin' used as base interface
     // for dll-interface class 'wxString'" -- this is OK in our case
-    #pragma warning (push)
     #pragma warning (disable:4275)
 #endif
 
@@ -98,17 +97,17 @@ private:
 };
 
 #ifdef __VISUALC__
-    #pragma warning (pop)
+    #pragma warning (default:4275)
 #endif
 
 // ----------------------------------------------------------------------------
-// implementation which sends output to stderr or specified file
+// implementation which sends output to stderr
 // ----------------------------------------------------------------------------
 
 class WXDLLIMPEXP_BASE wxMessageOutputStderr : public wxMessageOutput
 {
 public:
-    wxMessageOutputStderr(FILE *fp = stderr) : m_fp(fp) { }
+    wxMessageOutputStderr() { }
 
     virtual void Output(const wxString& str);
 
@@ -116,8 +115,6 @@ protected:
     // return the string with "\n" appended if it doesn't already terminate
     // with it (in which case it's returned unchanged)
     wxString AppendLineFeedIfNeeded(const wxString& str);
-
-    FILE *m_fp;
 };
 
 // ----------------------------------------------------------------------------

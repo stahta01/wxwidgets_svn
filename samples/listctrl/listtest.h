@@ -120,9 +120,6 @@ protected:
     void OnVirtualView(wxCommandEvent& event);
     void OnSmallVirtualView(wxCommandEvent& event);
 
-    void OnSetItemsCount(wxCommandEvent& event);
-
-
     void OnGoTo(wxCommandEvent& event);
     void OnFocusLast(wxCommandEvent& event);
     void OnToggleFirstSel(wxCommandEvent& event);
@@ -146,10 +143,7 @@ protected:
     void OnFreeze(wxCommandEvent& event);
     void OnThaw(wxCommandEvent& event);
     void OnToggleLines(wxCommandEvent& event);
-#ifdef __WXOSX__
     void OnToggleMacUseGeneric(wxCommandEvent& event);
-#endif // __WXOSX__
-    void OnFind(wxCommandEvent& event);
 
     void OnUpdateShowColInfo(wxUpdateUIEvent& event);
     void OnUpdateToggleMultiSel(wxUpdateUIEvent& event);
@@ -180,10 +174,6 @@ private:
 
     bool m_smallVirtual;
 
-    // number of items to initialize list/report view with
-    int m_numListItems;
-
-
     wxDECLARE_NO_COPY_CLASS(MyFrame);
     DECLARE_EVENT_TABLE()
 };
@@ -203,7 +193,6 @@ enum
     LIST_REPORT_VIEW,
     LIST_VIRTUAL_VIEW,
     LIST_SMALL_VIRTUAL_VIEW,
-    LIST_SET_ITEMS_COUNT,
 
     LIST_DESELECT_ALL,
     LIST_SELECT_ALL,
@@ -212,7 +201,6 @@ enum
     LIST_ADD,
     LIST_EDIT,
     LIST_SORT,
-    LIST_FIND,
     LIST_SET_FG_COL,
     LIST_SET_BG_COL,
     LIST_TOGGLE_MULTI_SEL,
@@ -229,9 +217,7 @@ enum
     LIST_FREEZE,
     LIST_THAW,
     LIST_TOGGLE_LINES,
-#ifdef __WXOSX__
     LIST_MAC_USE_GENERIC,
-#endif
 
     LIST_CTRL                   = 1000
 };

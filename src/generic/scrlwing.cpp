@@ -152,7 +152,7 @@ void wxAutoScrollTimer::Notify()
         {
             // and then send a pseudo mouse-move event to refresh the selection
             wxMouseEvent event2(wxEVT_MOTION);
-            event2.SetPosition(wxGetMousePosition());
+            wxGetMousePosition(&event2.m_x, &event2.m_y);
 
             // the mouse event coordinates should be client, not screen as
             // returned by wxGetMousePosition
@@ -314,7 +314,7 @@ bool wxScrollHelperEvtHandler::ProcessEvent(wxEvent& event)
 
 wxScrollHelperBase::wxScrollHelperBase(wxWindow *win)
 {
-    wxASSERT_MSG( win, wxT("associated window can't be NULL in wxScrollHelper") );
+    wxASSERT_MSG( win, _T("associated window can't be NULL in wxScrollHelper") );
 
     m_xScrollPixelsPerLine =
     m_yScrollPixelsPerLine =
@@ -829,70 +829,93 @@ void wxScrollHelperBase::HandleOnPaint(wxPaintEvent& WXUNUSED(event))
 // this they always have the priority
 void wxScrollHelperBase::HandleOnChar(wxKeyEvent& event)
 {
-    // prepare the event this key press maps to
-    wxScrollWinEvent newEvent;
+    int stx = 0, sty = 0,       // view origin
+        szx = 0, szy = 0,       // view size (total)
+        clix = 0, cliy = 0;     // view size (on screen)
 
-    newEvent.SetPosition(0);
-    newEvent.SetEventObject(m_win);
+    GetViewStart(&stx, &sty);
+    GetTargetSize(&clix, &cliy);
+    m_targetWindow->GetVirtualSize(&szx, &szy);
 
-    // this is the default, it's changed to wxHORIZONTAL below if needed
-    newEvent.SetOrientation(wxVERTICAL);
+    if( m_xScrollPixelsPerLine )
+    {
+        clix /= m_xScrollPixelsPerLine;
+        szx /= m_xScrollPixelsPerLine;
+    }
+    else
+    {
+        clix = 0;
+        szx = -1;
+    }
+    if( m_yScrollPixelsPerLine )
+    {
+        cliy /= m_yScrollPixelsPerLine;
+        szy /= m_yScrollPixelsPerLine;
+    }
+    else
+    {
+        cliy = 0;
+        szy = -1;
+    }
 
-    // some key events result in scrolling in both horizontal and vertical
-    // direction, e.g. Ctrl-{Home,End}, if this flag is true we should generate
-    // a second event in horizontal direction in addition to the primary one
-    bool sendHorizontalToo = false;
+    int xScrollOld = m_xScrollPosition,
+        yScrollOld = m_yScrollPosition;
 
+    int dsty;
     switch ( event.GetKeyCode() )
     {
         case WXK_PAGEUP:
-            newEvent.SetEventType(wxEVT_SCROLLWIN_PAGEUP);
+            dsty = sty - (5 * cliy / 6);
+            Scroll(-1, (dsty == -1) ? 0 : dsty);
             break;
 
         case WXK_PAGEDOWN:
-            newEvent.SetEventType(wxEVT_SCROLLWIN_PAGEDOWN);
+            Scroll(-1, sty + (5 * cliy / 6));
             break;
 
         case WXK_HOME:
-            newEvent.SetEventType(wxEVT_SCROLLWIN_TOP);
-
-            sendHorizontalToo = event.ControlDown();
+            Scroll(0, event.ControlDown() ? 0 : -1);
             break;
 
         case WXK_END:
-            newEvent.SetEventType(wxEVT_SCROLLWIN_BOTTOM);
+            Scroll(szx - clix, event.ControlDown() ? szy - cliy : -1);
+            break;
 
-            sendHorizontalToo = event.ControlDown();
+        case WXK_UP:
+            Scroll(-1, sty - 1);
+            break;
+
+        case WXK_DOWN:
+            Scroll(-1, sty + 1);
             break;
 
         case WXK_LEFT:
-            newEvent.SetOrientation(wxHORIZONTAL);
-            // fall through
-
-        case WXK_UP:
-            newEvent.SetEventType(wxEVT_SCROLLWIN_LINEUP);
+            Scroll(stx - 1, -1);
             break;
 
         case WXK_RIGHT:
-            newEvent.SetOrientation(wxHORIZONTAL);
-            // fall through
-
-        case WXK_DOWN:
-            newEvent.SetEventType(wxEVT_SCROLLWIN_LINEDOWN);
+            Scroll(stx + 1, -1);
             break;
 
         default:
-            // not a scrolling key
+            // not for us
             event.Skip();
-            return;
     }
 
-    m_win->ProcessWindowEvent(newEvent);
-
-    if ( sendHorizontalToo )
+    if ( m_xScrollPosition != xScrollOld )
     {
-        newEvent.SetOrientation(wxHORIZONTAL);
-        m_win->ProcessWindowEvent(newEvent);
+        wxScrollWinEvent evt(wxEVT_SCROLLWIN_THUMBTRACK, m_xScrollPosition,
+                               wxHORIZONTAL);
+        evt.SetEventObject(m_win);
+        m_win->GetEventHandler()->ProcessEvent(evt);
+    }
+
+    if ( m_yScrollPosition != yScrollOld )
+    {
+        wxScrollWinEvent evt(wxEVT_SCROLLWIN_THUMBTRACK, m_yScrollPosition,
+                               wxVERTICAL);
+        evt.SetEventObject(m_win);
+        m_win->GetEventHandler()->ProcessEvent(evt);
     }
 }
 
@@ -967,7 +990,7 @@ void wxScrollHelperBase::HandleOnMouseLeave(wxMouseEvent& event)
                 // but seems to happen sometimes under wxMSW - maybe it's a bug
                 // there but for now just ignore it
 
-                //wxFAIL_MSG( wxT("can't understand where has mouse gone") );
+                //wxFAIL_MSG( _T("can't understand where has mouse gone") );
 
                 return;
             }
@@ -1050,7 +1073,7 @@ void wxScrollHelperBase::HandleOnChildFocus(wxChildFocusEvent& event)
     if ( win == m_targetWindow )
         return; // nothing to do
 
-#if defined( __WXOSX__ ) && wxUSE_SCROLLBAR
+#ifdef __WXMAC__
     if (wxDynamicCast(win, wxScrollBar))
         return;
 #endif

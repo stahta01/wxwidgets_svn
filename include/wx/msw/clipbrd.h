@@ -14,6 +14,10 @@
 
 #if wxUSE_CLIPBOARD
 
+#include "wx/list.h"
+#include "wx/module.h"
+#include "wx/dataobj.h"     // for wxDataFormat
+
 // These functions superceded by wxClipboard, but retained in order to
 // implement wxClipboard, and for compatibility.
 
@@ -43,8 +47,11 @@ WXDLLIMPEXP_CORE bool wxGetClipboardFormatName(wxDataFormat dataFormat,
 // wxClipboard
 //-----------------------------------------------------------------------------
 
+class WXDLLIMPEXP_FWD_CORE wxDataObject;
 class WXDLLIMPEXP_CORE wxClipboard : public wxClipboardBase
 {
+    DECLARE_DYNAMIC_CLASS(wxClipboard)
+
 public:
     wxClipboard();
     virtual ~wxClipboard();
@@ -81,8 +88,6 @@ public:
 private:
     IDataObject *m_lastDataObject;
     bool m_isOpened;
-
-    DECLARE_DYNAMIC_CLASS(wxClipboard)
 };
 
 #endif // wxUSE_CLIPBOARD

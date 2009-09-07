@@ -32,13 +32,13 @@ class WXDLLIMPEXP_FWD_BASE wxArrayString;
 
 /// separates group and entry names (probably shouldn't be changed)
 #ifndef wxCONFIG_PATH_SEPARATOR
-  #define   wxCONFIG_PATH_SEPARATOR     wxT('/')
+  #define   wxCONFIG_PATH_SEPARATOR     _T('/')
 #endif
 
 /// introduces immutable entries
 // (i.e. the ones which can't be changed from the local config file)
 #ifndef wxCONFIG_IMMUTABLE_PREFIX
-  #define   wxCONFIG_IMMUTABLE_PREFIX   wxT('!')
+  #define   wxCONFIG_IMMUTABLE_PREFIX   _T('!')
 #endif
 
 #if wxUSE_CONFIG
@@ -217,7 +217,7 @@ public:
   }
 #endif // wxHAS_CONFIG_TEMPLATE_RW
 
-  // convenience functions returning directly the value
+  // convenience functions returning directly the value 
   wxString Read(const wxString& key,
                 const wxString& defVal = wxEmptyString) const
     { wxString s; (void)Read(key, &s, defVal); return s; }

@@ -142,8 +142,8 @@ public:
         if ( m_data == GetNullData() )
             return NULL;
 
-        wxASSERT_MSG( m_data->m_owned, wxT("can't release non-owned buffer") );
-        wxASSERT_MSG( m_data->m_ref == 1, wxT("can't release shared buffer") );
+        wxASSERT_MSG( m_data->m_owned, _T("can't release non-owned buffer") );
+        wxASSERT_MSG( m_data->m_ref == 1, _T("can't release shared buffer") );
 
         CharType * const p = m_data->Get();
 
@@ -343,7 +343,6 @@ public:
     }
 };
 
-WXDLLIMPEXP_TEMPLATE_INSTANCE_BASE( wxScopedCharTypeBuffer<char> )
 WXDLLIMPEXP_TEMPLATE_INSTANCE_BASE( wxCharTypeBuffer<char> )
 
 class wxCharBuffer : public wxCharTypeBuffer<char>
@@ -364,7 +363,6 @@ public:
 };
 
 #if wxUSE_WCHAR_T
-WXDLLIMPEXP_TEMPLATE_INSTANCE_BASE( wxScopedCharTypeBuffer<wchar_t> )
 WXDLLIMPEXP_TEMPLATE_INSTANCE_BASE( wxCharTypeBuffer<wchar_t> )
 
 class wxWCharBuffer : public wxCharTypeBuffer<wchar_t>
@@ -561,7 +559,7 @@ public:
     // Other ways to append to the buffer
     void  AppendByte(char data)
     {
-        wxCHECK_RET( m_bufdata->m_data, wxT("invalid wxMemoryBuffer") );
+        wxCHECK_RET( m_bufdata->m_data, _T("invalid wxMemoryBuffer") );
 
         m_bufdata->ResizeIfNeeded(m_bufdata->m_len + 1);
         *(((char*)m_bufdata->m_data) + m_bufdata->m_len) = data;

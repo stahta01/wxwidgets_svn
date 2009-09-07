@@ -435,7 +435,7 @@ MyFrame::MyFrame(wxFrame *frame, const wxString &title, int x, int y, int w, int
 
     mainSizer->Add( m_notebook, 1, wxGROW );
     mainSizer->Add( m_log, 0, wxGROW );
-
+    
     SetSizerAndFit(mainSizer);
 }
 
@@ -692,7 +692,7 @@ void MyFrame::OnAbout( wxCommandEvent& WXUNUSED(event) )
     wxAboutDialogInfo info;
     info.SetName(_("DataView sample"));
     info.SetDescription(_("This sample demonstrates wxDataViewCtrl"));
-    info.SetCopyright(wxT("(C) 2007-2009 Robert Roebling"));
+    info.SetCopyright(_T("(C) 2007-2009 Robert Roebling"));
     info.AddDeveloper("Robert Roebling");
     info.AddDeveloper("Francesco Montorsi");
 
@@ -819,9 +819,7 @@ void MyFrame::OnActivated( wxDataViewEvent &event )
     wxLogMessage( "wxEVT_COMMAND_DATAVIEW_ITEM_ACTIVATED, Item: %s", title );
 
     if (m_ctrl[0]->IsExpanded( event.GetItem() ))
-    {
         wxLogMessage( "Item: %s is expanded", title );
-    }
 }
 
 void MyFrame::OnSelectionChanged( wxDataViewEvent &event )
@@ -852,15 +850,12 @@ void MyFrame::OnStartEditing( wxDataViewEvent &event )
     if (artist == "Ludwig van Beethoven")
     {
         event.Veto();
-
+        
         if (!m_log)
            return;
-
-        wxLogMessage( "wxEVT_COMMAND_DATAVIEW_ITEM_START_EDITING vetoed. Artist: %s", artist );
+           
+        wxLogMessage( "wxEVT_COMMAND_DATAVIEW_ITEM_START_EDITING vetoed, Item: %s", artist );
     }
-    else
-        wxLogMessage( "wxEVT_COMMAND_DATAVIEW_ITEM_START_EDITING not vetoed. Artist: %s", artist );
-
 }
 
 void MyFrame::OnEditingStarted( wxDataViewEvent &event )
@@ -936,7 +931,6 @@ void MyFrame::OnHeaderClick( wxDataViewEvent &event )
     int pos = m_ctrl[0]->GetColumnPosition( event.GetDataViewColumn() );
 
     wxLogMessage( "wxEVT_COMMAND_DATAVIEW_COLUMN_HEADER_CLICK, Column position: %d", pos );
-    wxLogMessage( "Column width: %d", event.GetDataViewColumn()->GetWidth() );
 }
 
 void MyFrame::OnHeaderRightClick( wxDataViewEvent &event )

@@ -50,7 +50,7 @@ public:
     // ------------------
 
 #if WXWIN_COMPATIBILITY_2_8
-    wxDEPRECATED_CONSTRUCTOR(
+    wxDEPRECATED(
     wxGLCanvas(wxWindow *parent,
                wxWindowID id = wxID_ANY,
                const wxPoint& pos = wxDefaultPosition,
@@ -61,7 +61,7 @@ public:
                const wxPalette& palette = wxNullPalette)
     );
 
-    wxDEPRECATED_CONSTRUCTOR(
+    wxDEPRECATED(
     wxGLCanvas(wxWindow *parent,
                const wxGLContext *shared,
                wxWindowID id = wxID_ANY,
@@ -73,7 +73,7 @@ public:
                const wxPalette& palette = wxNullPalette)
     );
 
-    wxDEPRECATED_CONSTRUCTOR(
+    wxDEPRECATED(
     wxGLCanvas(wxWindow *parent,
                const wxGLCanvas *shared,
                wxWindowID id = wxID_ANY,

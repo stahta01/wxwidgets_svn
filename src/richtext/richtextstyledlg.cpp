@@ -705,7 +705,6 @@ void wxRichTextStyleOrganiserDialog::OnEditClick( wxCommandEvent& WXUNUSED(event
             }
 
             m_stylesListBox->UpdateStyles();
-            m_stylesListBox->GetStyleListBox()->SetSelection(sel);
             ShowPreview();
         }
     }

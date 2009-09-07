@@ -284,9 +284,9 @@ bool wxGenericFontDialog::DoCreate(wxWindow *parent)
 {
     parent = GetParentForModalDialog(parent);
 
-    if ( !wxDialog::Create( parent , wxID_ANY , wxT("Choose Font") ,
+    if ( !wxDialog::Create( parent , wxID_ANY , _T("Choose Font") ,
                             wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE,
-        wxT("fontdialog") ) )
+        _T("fontdialog") ) )
     {
         wxFAIL_MSG( wxT("wxFontDialog creation failed") );
         return false;

@@ -53,12 +53,12 @@ class WXDLLIMPEXP_BASE wxMimeType : public wxString
 public:
     // all string ctors here
 
-    wxString GetType() const { return BeforeFirst(wxT('/')); }
-    wxString GetSubType() const { return AfterFirst(wxT('/')); }
+    wxString GetType() const { return BeforeFirst(_T('/')); }
+    wxString GetSubType() const { return AfterFirst(_T('/')); }
 
     void SetSubType(const wxString& subtype)
     {
-        *this = GetType() + wxT('/') + subtype;
+        *this = GetType() + _T('/') + subtype;
     }
 
     bool Matches(const wxMimeType& wildcard)
@@ -410,7 +410,7 @@ public:
 
     static void Set( wxMimeTypesManagerFactory *factory );
     static wxMimeTypesManagerFactory *Get();
-
+    
 private:
     static wxMimeTypesManagerFactory *m_factory;
 };

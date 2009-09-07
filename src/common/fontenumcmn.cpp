@@ -84,9 +84,9 @@ bool wxFontEnumerator::IsValidFacename(const wxString &facename)
 
 #ifdef __WXMSW__
     // Quoting the MSDN:
-    //     "MS Shell Dlg is a mapping mechanism that enables
-    //     U.S. English Microsoft Windows NT, and Microsoft Windows 2000 to
-    //     support locales that have characters that are not contained in code
+    //     "MS Shell Dlg is a mapping mechanism that enables 
+    //     U.S. English Microsoft Windows NT, and Microsoft Windows 2000 to 
+    //     support locales that have characters that are not contained in code 
     //     page 1252. It is not a font but a face name for a nonexistent font."
     // Thus we need to consider "Ms Shell Dlg" and "Ms Shell Dlg 2" as valid
     // font face names even if they are not enumerated by wxFontEnumerator
@@ -107,7 +107,7 @@ bool wxFontEnumerator::EnumerateEncodingsUTF8(const wxString& facename)
 {
     // name of UTF-8 encoding: no need to use wxFontMapper for it as it's
     // unlikely to change
-    const wxString utf8(wxT("UTF-8"));
+    const wxString utf8(_T("UTF-8"));
 
     // all fonts are in UTF-8 only if this code is used
     if ( !facename.empty() )

@@ -61,7 +61,7 @@ inline void FreeFindData(FIND_DATA fd)
 {
     if ( !::FindClose(fd) )
     {
-        wxLogLastError(wxT("FindClose"));
+        wxLogLastError(_T("FindClose"));
     }
 }
 
@@ -190,10 +190,10 @@ bool wxDirData::Read(wxString *filename)
         wxString filespec = m_dirname;
         if ( !wxEndsWithPathSeparator(filespec) )
         {
-            filespec += wxT('\\');
+            filespec += _T('\\');
         }
         if ( !m_filespec )
-            filespec += wxT("*.*");
+            filespec += _T("*.*");
         else
             filespec += m_filespec;
 
@@ -236,7 +236,7 @@ bool wxDirData::Read(wxString *filename)
 
                 if ( err != ERROR_NO_MORE_FILES )
                 {
-                    wxLogLastError(wxT("FindNext"));
+                    wxLogLastError(_T("FindNext"));
                 }
 #endif // __WIN32__
                 //else: not an error, just no more (such) files
@@ -249,9 +249,9 @@ bool wxDirData::Read(wxString *filename)
         attr = GetAttrFromFindData(PTR_TO_FINDDATA);
 
         // don't return "." and ".." unless asked for
-        if ( name[0] == wxT('.') &&
-             ((name[1] == wxT('.') && name[2] == wxT('\0')) ||
-              (name[1] == wxT('\0'))) )
+        if ( name[0] == _T('.') &&
+             ((name[1] == _T('.') && name[2] == _T('\0')) ||
+              (name[1] == _T('\0'))) )
         {
             if ( !(m_flags & wxDIR_DOTDOT) )
                 continue;
@@ -311,7 +311,7 @@ wxDir::wxDir(const wxString& dirname)
 bool wxDir::Open(const wxString& dirname)
 {
     delete M_DIR;
-
+    
     // The Unix code does a similar test
     if (wxDirExists(dirname))
     {
@@ -322,7 +322,7 @@ bool wxDir::Open(const wxString& dirname)
     else
     {
         m_data = NULL;
-
+    
         return false;
     }
 }
@@ -341,9 +341,9 @@ wxString wxDir::GetName() const
         if ( !name.empty() )
         {
             // bring to canonical Windows form
-            name.Replace(wxT("/"), wxT("\\"));
+            name.Replace(_T("/"), _T("\\"));
 
-            if ( name.Last() == wxT('\\') )
+            if ( name.Last() == _T('\\') )
             {
                 // chop off the last (back)slash
                 name.Truncate(name.length() - 1);
@@ -367,7 +367,7 @@ bool wxDir::GetFirst(wxString *filename,
                      const wxString& filespec,
                      int flags) const
 {
-    wxCHECK_MSG( IsOpened(), false, wxT("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
 
     M_DIR->Rewind();
 
@@ -379,9 +379,9 @@ bool wxDir::GetFirst(wxString *filename,
 
 bool wxDir::GetNext(wxString *filename) const
 {
-    wxCHECK_MSG( IsOpened(), false, wxT("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
 
-    wxCHECK_MSG( filename, false, wxT("bad pointer in wxDir::GetNext()") );
+    wxCHECK_MSG( filename, false, _T("bad pointer in wxDir::GetNext()") );
 
     return M_DIR->Read(filename);
 }
@@ -399,11 +399,11 @@ wxGetDirectoryTimes(const wxString& dirname,
 #ifdef __WXWINCE__
     // FindFirst() is going to fail
     wxASSERT_MSG( !dirname.empty(),
-                  wxT("incorrect directory name format in wxGetDirectoryTimes") );
+                  _T("incorrect directory name format in wxGetDirectoryTimes") );
 #else
     // FindFirst() is going to fail
-    wxASSERT_MSG( !dirname.empty() && dirname.Last() != wxT('\\'),
-                  wxT("incorrect directory name format in wxGetDirectoryTimes") );
+    wxASSERT_MSG( !dirname.empty() && dirname.Last() != _T('\\'),
+                  _T("incorrect directory name format in wxGetDirectoryTimes") );
 #endif
 
     FIND_STRUCT fs;

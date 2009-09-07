@@ -225,7 +225,7 @@ public:
                                 const wxRect& rect,
                                 int flags=0);
 
-    virtual void DrawRadioBitmap(wxWindow* win,
+    virtual void DrawRadioButton(wxWindow* win,
                                 wxDC& dc,
                                 const wxRect& rect,
                                 int flags=0);
@@ -527,7 +527,7 @@ void wxRendererMSW::DrawChoice(wxWindow* win, wxDC& dc,
 
 
 // Draw a themed radio button
-void wxRendererMSW::DrawRadioBitmap(wxWindow* win, wxDC& dc, const wxRect& rect, int flags)
+void wxRendererMSW::DrawRadioButton(wxWindow* win, wxDC& dc, const wxRect& rect, int flags)
 {
 #if wxUSE_UXTHEME
     wxUxThemeHandle hTheme(win, L"BUTTON");

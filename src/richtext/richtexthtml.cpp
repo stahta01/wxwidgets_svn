@@ -253,12 +253,7 @@ void wxRichTextHTMLHandler::BeginParagraphFormatting(const wxTextAttr& WXUNUSED(
             CloseLists(-1, str);
 
             wxString align = GetAlignment(thisStyle);
-            str << wxString::Format(wxT("<p align=\"%s\""), align.c_str());
-
-            if (thisStyle.HasParagraphSpacingAfter() && thisStyle.GetParagraphSpacingAfter() == 0)
-                str << wxT(" style=\"line-height: 0px\"");
-
-            str << wxT(">");
+            str << wxString::Format(wxT("<p align=\"%s\">"), align.c_str());
 
             // Use a table
             int indentTenthsMM = thisStyle.GetLeftIndent() + thisStyle.GetLeftSubIndent();
@@ -281,12 +276,7 @@ void wxRichTextHTMLHandler::BeginParagraphFormatting(const wxTextAttr& WXUNUSED(
         CloseLists(-1, str);
 
         wxString align = GetAlignment(thisStyle);
-        str << wxString::Format(wxT("<p align=\"%s\""), align.c_str());
-
-        if (thisStyle.HasParagraphSpacingAfter() && thisStyle.GetParagraphSpacingAfter() == 0)
-            str << wxT(" style=\"line-height: 0px\"");
-
-        str << wxT(">");
+        str << wxString::Format(wxT("<p align=\"%s\">"), align.c_str());
     }
 }
 

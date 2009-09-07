@@ -400,6 +400,7 @@ protected:
     // actual size of window. This method also setup scrollbars
     void CreateLayout();
 
+    void OnEraseBackground(wxEraseEvent& event);
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnMouseMove(wxMouseEvent& event);
@@ -509,13 +510,8 @@ protected:
 #endif // wxUSE_CLIPBOARD
 
 private:
-    // erase the window background using m_bmpBg or just solid colour if we
-    // don't have any background image
-    void DoEraseBackground(wxDC& dc);
-
-    // window content for double buffered rendering, may be invalid until it is
-    // really initialized in OnPaint()
-    wxBitmap m_backBuffer;
+    // window content for double buffered rendering:
+    wxBitmap *m_backBuffer;
 
     // background image, may be invalid
     wxBitmap m_bmpBg;
@@ -542,6 +538,10 @@ private:
     int m_HistoryPos;
     // if this FLAG is false, items are not added to history
     bool m_HistoryOn;
+
+    // a flag set if we need to erase background in OnPaint() (otherwise this
+    // is supposed to have been done in OnEraseBackground())
+    bool m_eraseBgInOnPaint;
 
     // standard mouse cursors
     static wxCursor *ms_cursorLink;

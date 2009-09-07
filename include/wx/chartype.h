@@ -222,7 +222,7 @@
 
 
 /* ------------------------------------------------------------------------- */
-/* define wxT() and related macros                                           */
+/* define _T() and related macros                                            */
 /* ------------------------------------------------------------------------- */
 
 /* BSD systems define _T() to be something different in ctype.h, override it */
@@ -231,19 +231,15 @@
     #undef _T
 #endif
 
-/*
-   wxT ("wx text") macro turns a literal string constant into a wide char
-   constant. It is mostly unnecessary with wx 2.9 but defined for
-   compatibility.
- */
-#ifndef wxT
+/* could already be defined by tchar.h (it's quasi standard) */
+#ifndef _T
     #if !wxUSE_UNICODE
-        #define wxT(x) x
+        #define _T(x) x
     #else /* Unicode */
         /* use wxCONCAT_HELPER so that x could be expanded if it's a macro */
-        #define wxT(x) wxCONCAT_HELPER(L, x)
+        #define _T(x) wxCONCAT_HELPER(L, x)
     #endif /* ASCII/Unicode */
-#endif /* !defined(wxT) */
+#endif /* !defined(_T) */
 
 /*
    wxS ("wx string") macro can be used to create literals using the same
@@ -257,25 +253,13 @@
     #define wxS(x) x
 #endif
 
-/*
-    _T() is a synonym for wxT() familiar to Windows programmers. As this macro
-    has even higher risk of conflicting with system headers, its use is
-    discouraged and you may predefine wxNO__T to disable it. Additionally, we
-    do it ourselves for Sun CC which is known to use it in its standard headers
-    (see #10660).
- */
-#if defined(__SUNPRO_C) || defined(__SUNPRO_CC)
-    #ifndef wxNO__T
-        #define wxNO__T
-    #endif
-#endif
-
-#if !defined(_T) && !defined(wxNO__T)
-    #define _T(x) wxT(x)
-#endif
+/* although global macros with such names are normally bad, we want to have  */
+/* another name for _T() which should be used to avoid confusion between     */
+/* _T() and _() in wxWidgets sources */
+#define wxT(x)       _T(x)
 
 /* a helper macro allowing to make another macro Unicode-friendly, see below */
-#define wxAPPLY_T(x) wxT(x)
+#define wxAPPLY_T(x) _T(x)
 
 /* Unicode-friendly __FILE__, __DATE__ and __TIME__ analogs */
 #ifndef __TFILE__

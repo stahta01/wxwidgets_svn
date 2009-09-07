@@ -86,7 +86,7 @@ public:
 
     // create the main status bar by calling OnCreateStatusBar()
     virtual wxStatusBar* CreateStatusBar(int number = 1,
-                                         long style = wxSTB_DEFAULT_STYLE,
+                                         long style = wxST_SIZEGRIP,
                                          wxWindowID winid = 0,
                                          const wxString& name =
                                             wxStatusLineNameStr);

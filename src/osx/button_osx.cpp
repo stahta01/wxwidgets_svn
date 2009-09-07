@@ -34,18 +34,6 @@ bool wxButton::Create(wxWindow *parent,
     const wxValidator& validator,
     const wxString& name)
 {
-    // FIXME: this hack is needed because we're called from
-    //        wxBitmapButton::Create() with this style and we currently use a
-    //        different wxWidgetImpl method (CreateBitmapButton() rather than
-    //        CreateButton()) for creating bitmap buttons, but we really ought
-    //        to unify the creation of buttons of all kinds and then remove
-    //        this check
-    if ( style & wxBU_NOTEXT )
-    {
-        return wxControl::Create(parent, id, pos, size, style,
-                                 validator, name);
-    }
-
     wxString label(lbl);
     if (label.empty() && wxIsStockID(id) && !(id == wxID_HELP))
         label = wxGetStockLabel(id);
@@ -55,51 +43,14 @@ bool wxButton::Create(wxWindow *parent,
     if ( !wxButtonBase::Create(parent, id, pos, size, style, validator, name) )
         return false;
 
-    m_labelOrig =
-    m_label = label ;
-
+    m_labelOrig = m_label = label ;
+    
     m_peer = wxWidgetImpl::CreateButton( this, parent, id, label, pos, size, style, GetExtraStyle() );
 
     MacPostControlCreate( pos, size );
 
     return true;
 }
-
-void wxButton::SetLabel(const wxString& label)
-{
-    if ( GetId() == wxID_HELP || HasFlag(wxBU_NOTEXT) )
-    {
-        // just store the label internally but don't really use it for the
-        // button
-        m_labelOrig =
-        m_label = label;
-        return;
-    }
-
-    wxButtonBase::SetLabel(label);
-}
-
-// there is no support for button bitmaps in wxOSX/Carbon so there is no need
-// for these methods there
-#if wxOSX_USE_COCOA
-
-wxBitmap wxButton::DoGetBitmap(State which) const
-{
-    return which == State_Normal ? m_peer->GetBitmap() : wxBitmap();
-}
-
-void wxButton::DoSetBitmap(const wxBitmap& bitmap, State which)
-{
-    if ( which == State_Normal )
-        m_peer->SetBitmap(bitmap);
-}
-
-void wxButton::DoSetBitmapPosition(wxDirection dir)
-{
-    m_peer->SetBitmapPosition(dir);
-}
-
-#endif // wxOSX_USE_COCOA
 
 wxWindow *wxButton::SetDefault()
 {
@@ -144,9 +95,9 @@ bool wxDisclosureTriangle::Create(wxWindow *parent, wxWindowID id, const wxStrin
     m_peer = wxWidgetImpl::CreateDisclosureTriangle(this, parent, id, label, pos, size, style, GetExtraStyle() );
 
     MacPostControlCreate( pos, size );
-    // passing the text in the param doesn't seem to work, so lets do it again
+    // passing the text in the param doesn't seem to work, so lets do if again
     SetLabel( label );
-
+    
     return true;
 }
 
@@ -172,14 +123,6 @@ bool wxDisclosureTriangle::OSXHandleClicked( double WXUNUSED(timestampsec) )
 
 wxSize wxDisclosureTriangle::DoGetBestSize() const
 {
-    wxSize size = wxWindow::DoGetBestSize();
-
-    // under Carbon the base class GetBestSize() implementation doesn't seem to
-    // take the label into account at all, correct for it here
-#if wxOSX_USE_CARBON
-    size.x += GetTextExtent(GetLabel()).x;
-#endif // wxOSX_USE_CARBON
-
-    return size;
+    return wxWindow::DoGetBestSize();
 }
 

@@ -64,7 +64,7 @@ class wxDummyConsoleApp : public wxAppConsole
 public:
     wxDummyConsoleApp() { }
 
-    virtual int OnRun() { wxFAIL_MSG( wxT("unreachable code") ); return 0; }
+    virtual int OnRun() { wxFAIL_MSG( _T("unreachable code") ); return 0; }
     virtual bool DoYield(bool, long) { return true; }
 
     wxDECLARE_NO_COPY_CLASS(wxDummyConsoleApp);
@@ -111,6 +111,14 @@ public:
 
 private:
     wxAppConsole *m_app;
+};
+
+// another tiny class which simply exists to ensure that wxEntryCleanup is
+// always called
+class wxCleanupOnExit
+{
+public:
+    ~wxCleanupOnExit() { wxEntryCleanup(); }
 };
 
 // ----------------------------------------------------------------------------
@@ -222,20 +230,12 @@ static bool DoCommonPreInit()
     // Reset logging in case we were cleaned up and are being reinitialized.
     wxLog::DoCreateOnDemand();
 
-    // force wxLog to create a log target now: we do it because wxTheApp
-    // doesn't exist yet so wxLog will create a special log target which is
-    // safe to use even when the GUI is not available while without this call
-    // we could create wxApp in wxEntryStart() below, then log an error about
-    // e.g. failure to establish connection to the X server and wxLog would
-    // send it to wxLogGui (because wxTheApp does exist already) which, of
-    // course, can't be used in this case
+    // install temporary log sink: we can't use wxLogGui before wxApp is
+    // constructed and if we use wxLogStderr, all messages during
+    // initialization simply disappear under Windows
     //
-    // notice also that this does nothing if the user had set up a custom log
-    // target before -- which is fine as we want to give him this possibility
-    // (as it's impossible to override logging by overriding wxAppTraits::
-    // CreateLogTarget() before wxApp is created) and we just assume he knows
-    // what he is doing
-    wxLog::GetActiveTarget();
+    // note that we will delete this log target below
+    delete wxLog::SetActiveTarget(new wxLogBuffer);
 #endif // wxUSE_LOG
 
     return true;
@@ -356,15 +356,14 @@ bool wxEntryStart(int& argc, char **argv)
 static void DoCommonPreCleanup()
 {
 #if wxUSE_LOG
-    // flush the logged messages if any and don't use the current probably
-    // unsafe log target any more: the default one (wxLogGui) can't be used
-    // after the resources are freed which happens when we return and the user
-    // supplied one might be even more unsafe (using any wxWidgets GUI function
-    // is unsafe starting from now)
-    //
-    // notice that wxLog will still recreate a default log target if any
-    // messages are logged but that one will be safe to use until the very end
-    delete wxLog::SetActiveTarget(NULL);
+    // flush the logged messages if any and install a 'safer' log target: the
+    // default one (wxLogGui) can't be used after the resources are freed just
+    // below and the user supplied one might be even more unsafe (using any
+    // wxWidgets GUI function is unsafe starting from now)
+    wxLog::DontCreateOnDemand();
+
+    // this will flush the old messages if any
+    delete wxLog::SetActiveTarget(new wxLogStderr);
 #endif // wxUSE_LOG
 }
 
@@ -385,12 +384,6 @@ static void DoCommonPostCleanup()
 
 #if wxUSE_LOG
     // and now delete the last logger as well
-    //
-    // we still don't disable log target auto-vivification even if any log
-    // objects created now will result in memory leaks because it seems better
-    // to leak memory which doesn't matter much considering the application is
-    // exiting anyhow than to not show messages which could still be logged
-    // from the user code (e.g. static dtors and such)
     delete wxLog::SetActiveTarget(NULL);
 #endif // wxUSE_LOG
 }
@@ -429,9 +422,7 @@ void wxEntryCleanup()
 int wxEntryReal(int& argc, wxChar **argv)
 {
     // library initialization
-    wxInitializer initializer(argc, argv);
-
-    if ( !initializer.IsOk() )
+    if ( !wxEntryStart(argc, argv) )
     {
 #if wxUSE_LOG
         // flush any log messages explaining why we failed
@@ -439,6 +430,12 @@ int wxEntryReal(int& argc, wxChar **argv)
 #endif
         return -1;
     }
+
+    // if wxEntryStart succeeded, we must call wxEntryCleanup even if the code
+    // below returns or throws
+    wxCleanupOnExit cleanupOnExit;
+
+    WX_SUPPRESS_UNUSED_WARN(cleanupOnExit);
 
     wxTRY
     {
@@ -480,11 +477,6 @@ int wxEntry(int& argc, char **argv)
 // wxInitialize/wxUninitialize
 // ----------------------------------------------------------------------------
 
-bool wxInitialize()
-{
-    return wxInitialize(0, (wxChar**)NULL);
-}
-
 bool wxInitialize(int argc, wxChar **argv)
 {
     wxCRIT_SECT_LOCKER(lockInit, gs_initData.csInit);
@@ -497,21 +489,6 @@ bool wxInitialize(int argc, wxChar **argv)
 
     return wxEntryStart(argc, argv);
 }
-
-#if wxUSE_UNICODE
-bool wxInitialize(int argc, char **argv)
-{
-    wxCRIT_SECT_LOCKER(lockInit, gs_initData.csInit);
-
-    if ( gs_initData.nInitCount++ )
-    {
-        // already initialized
-        return true;
-    }
-
-    return wxEntryStart(argc, argv);
-}
-#endif // wxUSE_UNICODE
 
 void wxUninitialize()
 {

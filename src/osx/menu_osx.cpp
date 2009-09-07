@@ -18,8 +18,6 @@
 
 #include "wx/wxprec.h"
 
-#if wxUSE_MENUS
-
 #include "wx/menu.h"
 
 #ifndef WX_PRECOMP
@@ -76,7 +74,7 @@ void wxMenu::Init()
     m_startRadioGroup = -1;
     m_allowRearrange = true;
     m_noEventsMode = false;
-
+    
     m_peer = wxMenuImpl::Create( this, wxStripMenuCodes(m_title) );
 
 
@@ -144,7 +142,7 @@ bool wxMenu::DoInsertOrAppend(wxMenuItem *pItem, size_t pos)
             pSubMenu->DoRearrange();
         }
         else
-        {
+        { 
             if ( pItem->GetId() == idMenuTitle )
                 pItem->GetMenu()->Enable( idMenuTitle, false );
         }
@@ -165,7 +163,7 @@ void wxMenu::EndRadioGroup()
 
 wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
 {
-    wxCHECK_MSG( item, NULL, wxT("NULL item in wxMenu::DoAppend") );
+    wxCHECK_MSG( item, NULL, _T("NULL item in wxMenu::DoAppend") );
 
     bool check = false;
 
@@ -197,7 +195,7 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
             }
             else
             {
-                wxFAIL_MSG( wxT("where is the radio group start item?") );
+                wxFAIL_MSG( _T("where is the radio group start item?") );
             }
         }
     }
@@ -293,7 +291,7 @@ void wxMenu::DoRearrange()
 {
     if ( !AllowRearrange() )
         return;
-
+        
     wxMenuItem* previousItem = NULL ;
     size_t pos ;
     wxMenuItemList::compatibility_iterator node;
@@ -331,7 +329,7 @@ void wxMenu::DoRearrange()
                 {
                     // next (i.e. second as we must be first) item is
                     // the separator to hide
-                    wxASSERT_MSG( pos == 0, wxT("should be the menu start") );
+                    wxASSERT_MSG( pos == 0, _T("should be the menu start") );
                     sepToHide = next;
                 }
                 else if ( GetMenuItems().GetCount() == pos + 1 &&
@@ -564,7 +562,7 @@ void wxMenuBar::MacInstallMenuBar()
 {
     if ( s_macInstalledMenuBar == this )
         return ;
-
+        
     m_rootMenu->GetPeer()->MakeRoot();
     // DisableMenuCommand( NULL , kHICommandPreferences ) ;
 #if 0
@@ -765,7 +763,7 @@ void wxMenuBar::MacInstallMenuBar()
 void wxMenuBar::EnableTop(size_t pos, bool enable)
 {
     wxCHECK_RET( IsAttached(), wxT("doesn't work with unattached menubars") );
-
+    
     m_rootMenu->FindItemByPosition( pos )->Enable(enable);
 
     Refresh();
@@ -847,7 +845,7 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
         return false;
 
     m_titles.Insert(title, pos);
-
+    
     m_rootMenu->Insert( pos+firstMenuPos, wxMenuItem::New( m_rootMenu, wxID_ANY, title, "", wxITEM_NORMAL, menu ) );
 
     if (m_invokingWindow)
@@ -942,7 +940,7 @@ void wxMenuBar::SetInvokingWindow(wxFrame *frame)
 {
     m_invokingWindow = frame;
     wxMenubarSetInvokingWindow(m_appleMenu, frame);
-
+    
     wxMenu *menu;
     wxMenuList::compatibility_iterator node = m_menus.GetFirst();
 
@@ -997,5 +995,3 @@ wxMenuItem *wxMenuBar::FindItem(int id, wxMenu **itemMenu) const
 
     return item;
 }
-
-#endif

@@ -60,14 +60,6 @@ wxDEFINE_EVENT( wxEVT_COMMAND_RICHTEXT_BUFFER_RESET, wxRichTextEvent );
 
 #if wxRICHTEXT_USE_OWN_CARET
 
-/*!
- * wxRichTextCaret
- *
- * This implements a non-flashing cursor in case there
- * are platform-specific problems with the generic caret.
- * wxRICHTEXT_USE_OWN_CARET is set in richtextbuffer.h.
- */
-
 class wxRichTextCaret;
 class wxRichTextCaretTimer: public wxTimer
 {
@@ -79,6 +71,14 @@ class wxRichTextCaretTimer: public wxTimer
     virtual void Notify();
     wxRichTextCaret* m_caret;
 };
+
+/*!
+ * wxRichTextCaret
+ *
+ * This implements a non-flashing cursor in case there
+ * are platform-specific problems with the generic caret.
+ * wxRICHTEXT_USE_OWN_CARET is set in richtextbuffer.h.
+ */
 
 class wxRichTextCaret: public wxCaret
 {
@@ -692,7 +692,23 @@ void wxRichTextCtrl::OnChar(wxKeyEvent& event)
 
     if (event.GetEventType() == wxEVT_KEY_DOWN)
     {
-        if (event.IsKeyInCategory(WXK_CATEGORY_NAVIGATION))
+        if (event.GetKeyCode() == WXK_LEFT ||
+            event.GetKeyCode() == WXK_RIGHT ||
+            event.GetKeyCode() == WXK_UP ||
+            event.GetKeyCode() == WXK_DOWN ||
+            event.GetKeyCode() == WXK_HOME ||
+            event.GetKeyCode() == WXK_PAGEUP ||
+            event.GetKeyCode() == WXK_PAGEDOWN ||
+            event.GetKeyCode() == WXK_END ||
+
+            event.GetKeyCode() == WXK_NUMPAD_LEFT ||
+            event.GetKeyCode() == WXK_NUMPAD_RIGHT ||
+            event.GetKeyCode() == WXK_NUMPAD_UP ||
+            event.GetKeyCode() == WXK_NUMPAD_DOWN ||
+            event.GetKeyCode() == WXK_NUMPAD_HOME ||
+            event.GetKeyCode() == WXK_NUMPAD_PAGEUP ||
+            event.GetKeyCode() == WXK_NUMPAD_PAGEDOWN ||
+            event.GetKeyCode() == WXK_NUMPAD_END)
         {
             KeyboardNavigate(event.GetKeyCode(), flags);
             return;
@@ -3479,6 +3495,7 @@ void wxRichTextCaret::Init()
     m_yOld = -1;
     m_richTextCtrl = NULL;
     m_needsUpdate = false;
+    m_needsUpdate = false;
     m_flashOn = true;
 }
 
@@ -3603,6 +3620,7 @@ void wxRichTextCaretTimer::Notify()
 {
     m_caret->Notify();
 }
+
 #endif
     // wxRICHTEXT_USE_OWN_CARET
 

@@ -144,11 +144,9 @@ void wxMessageOutputStderr::Output(const wxString& str)
     const wxWX2MBbuf buf = strWithLF.mb_str();
 
     if ( buf )
-        fprintf(m_fp, "%s", (const char*) buf);
+        fprintf(stderr, "%s", (const char*) buf);
     else // print at least something
-        fprintf(m_fp, "%s", (const char*) strWithLF.ToAscii());
-
-    fflush(m_fp);
+        fprintf(stderr, "%s", (const char*) strWithLF.ToAscii());
 }
 
 // ----------------------------------------------------------------------------
@@ -178,7 +176,7 @@ void wxMessageOutputLog::Output(const wxString& str)
 
     out.Replace(wxT("\t"), wxT("        "));
 
-    wxLogMessage(wxT("%s"), out.c_str());
+    ::wxLogMessage(wxT("%s"), out.c_str());
 }
 
 #endif // wxUSE_BASE

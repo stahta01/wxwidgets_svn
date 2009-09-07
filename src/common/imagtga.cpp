@@ -669,9 +669,7 @@ bool wxTGAHandler::LoadFile(wxImage* image,
     if ( !CanRead(stream) )
     {
         if ( verbose )
-        {
             wxLogError(wxT("TGA: this is not a TGA file."));
-        }
 
         return false;
     }
@@ -743,7 +741,7 @@ bool wxTGAHandler::DoCanRead(wxInputStream& stream)
 {
     // read the fixed-size TGA headers
     unsigned char hdr[HDR_SIZE];
-    stream.Read(hdr, HDR_SIZE);     // it's ok to modify the stream position here
+    stream.Read(hdr, HDR_SIZE);
 
     // Check wether we can read the file or not.
 

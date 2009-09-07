@@ -126,7 +126,7 @@ static toff_t wxFileOffsetToTIFF(wxFileOffset ofs)
 
     toff_t tofs = wx_truncate_cast(toff_t, ofs);
     wxCHECK_MSG( (wxFileOffset)tofs == ofs, (toff_t)-1,
-                    wxT("TIFF library doesn't support large files") );
+                    _T("TIFF library doesn't support large files") );
 
     return tofs;
 }
@@ -270,9 +270,7 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     if (!tif)
     {
         if (verbose)
-        {
             wxLogError( _("TIFF: Error loading image.") );
-        }
 
         return false;
     }
@@ -280,9 +278,7 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     if (!TIFFSetDirectory( tif, (tdir_t)index ))
     {
         if (verbose)
-        {
             wxLogError( _("Invalid TIFF image index.") );
-        }
 
         TIFFClose( tif );
 
@@ -306,26 +302,22 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     // guard against integer overflow during multiplication which could result
     // in allocating a too small buffer and then overflowing it
     const double bytesNeeded = (double)w * (double)h * sizeof(uint32);
-    if ( bytesNeeded >= wxUINT32_MAX )
+    if ( bytesNeeded >= 4294967295U /* UINT32_MAX */ )
     {
         if ( verbose )
-        {
             wxLogError( _("TIFF: Image size is abnormally big.") );
-        }
 
         TIFFClose(tif);
 
         return false;
     }
 
-    raster = (uint32*) _TIFFmalloc( (uint32)bytesNeeded );
+    raster = (uint32*) _TIFFmalloc( bytesNeeded );
 
     if (!raster)
     {
         if (verbose)
-        {
             wxLogError( _("TIFF: Couldn't allocate memory.") );
-        }
 
         TIFFClose( tif );
 
@@ -336,9 +328,7 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     if (!image->Ok())
     {
         if (verbose)
-        {
             wxLogError( _("TIFF: Couldn't allocate memory.") );
-        }
 
         _TIFFfree( raster );
         TIFFClose( tif );
@@ -352,9 +342,7 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     if (!TIFFReadRGBAImage( tif, w, h, raster, 0 ))
     {
         if (verbose)
-        {
             wxLogError( _("TIFF: Error reading image.") );
-        }
 
         _TIFFfree( raster );
         image->Destroy();
@@ -435,7 +423,7 @@ bool wxTIFFHandler::LoadFile( wxImage *image, wxInputStream& stream, bool verbos
     return true;
 }
 
-int wxTIFFHandler::DoGetImageCount( wxInputStream& stream )
+int wxTIFFHandler::GetImageCount( wxInputStream& stream )
 {
     TIFF *tif = TIFFwxOpen( stream, "image", "r" );
 
@@ -449,9 +437,6 @@ int wxTIFFHandler::DoGetImageCount( wxInputStream& stream )
 
     TIFFClose( tif );
 
-    // NOTE: this function modifies the current stream position but it's ok
-    //       (see wxImageHandler::GetImageCount)
-
     return dircount;
 }
 
@@ -462,9 +447,7 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     if (!tif)
     {
         if (verbose)
-        {
             wxLogError( _("TIFF: Error saving image.") );
-        }
 
         return false;
     }
@@ -482,7 +465,7 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
     switch ( res )
     {
         default:
-            wxFAIL_MSG( wxT("unknown image resolution units") );
+            wxFAIL_MSG( _T("unknown image resolution units") );
             // fall through
 
         case wxIMAGE_RESOLUTION_NONE:
@@ -544,9 +527,7 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
         if (!buf)
         {
             if (verbose)
-            {
                 wxLogError( _("TIFF: Couldn't allocate memory.") );
-            }
 
             TIFFClose( tif );
 
@@ -592,9 +573,7 @@ bool wxTIFFHandler::SaveFile( wxImage *image, wxOutputStream& stream, bool verbo
         if ( TIFFWriteScanline(tif, buf ? buf : ptr, (uint32)row, 0) < 0 )
         {
             if (verbose)
-            {
                 wxLogError( _("TIFF: Error writing image.") );
-            }
 
             TIFFClose( tif );
             if (buf)
@@ -618,7 +597,7 @@ bool wxTIFFHandler::DoCanRead( wxInputStream& stream )
 {
     unsigned char hdr[2];
 
-    if ( !stream.Read(&hdr[0], WXSIZEOF(hdr)) )     // it's ok to modify the stream position here
+    if ( !stream.Read(&hdr[0], WXSIZEOF(hdr)) )
         return false;
 
     return (hdr[0] == 'I' && hdr[1] == 'I') ||

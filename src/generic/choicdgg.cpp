@@ -290,12 +290,14 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
                                const wxPoint& pos,
                                long styleLbox)
 {
-    // extract the buttons styles from the dialog one and remove them from it
-    const long styleBtns = styleDlg & (wxOK | wxCANCEL);
-    styleDlg &= ~styleBtns;
-
+#ifdef __WXMAC__
+    // FIXME: why??
+    if ( !wxDialog::Create(parent, wxID_ANY, caption, pos, wxDefaultSize, styleDlg & (~wxCANCEL) ) )
+        return false;
+#else
     if ( !wxDialog::Create(parent, wxID_ANY, caption, pos, wxDefaultSize, styleDlg) )
         return false;
+#endif
 
     wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
@@ -314,7 +316,7 @@ bool wxAnyChoiceDialog::Create(wxWindow *parent,
 
     // 3) buttons if any
     wxSizer *
-        buttonSizer = CreateSeparatedButtonSizer(styleBtns);
+        buttonSizer = CreateSeparatedButtonSizer(styleDlg & ButtonSizerFlags);
     if ( buttonSizer )
     {
         topsizer->Add(buttonSizer, wxSizerFlags().Expand().DoubleBorder());

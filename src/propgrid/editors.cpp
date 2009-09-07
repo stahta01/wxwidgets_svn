@@ -71,11 +71,15 @@
     #define wxPG_TEXTCTRL_AND_BUTTON_SPACING        4
 #else
     #define wxPG_TEXTCTRL_AND_BUTTON_SPACING        2
-#endif
+#endif 
 
 #define wxPG_BUTTON_SIZEDEC                         0
 
 #include "wx/odcombo.h"
+
+#ifdef __WXMSW__
+    #include "wx/msw/private.h"
+#endif
 
 // -----------------------------------------------------------------------
 
@@ -140,14 +144,13 @@
 // for odcombo
 #ifdef __WXMAC__
 #define wxPG_CHOICEXADJUST           -3 // required because wxComboCtrl reserves 3pixels for wxTextCtrl's focus ring
-#define wxPG_CHOICEYADJUST           -3
+#define wxPG_CHOICEYADJUST           -3 
 #else
 #define wxPG_CHOICEXADJUST           0
 #define wxPG_CHOICEYADJUST           0
 #endif
 
-// Number added to image width for SetCustomPaintWidth
-#define ODCB_CUST_PAINT_MARGIN               9
+#define ODCB_CUST_PAINT_MARGIN               6  // Number added to image width for SetCustomPaintWidth
 
 // Milliseconds to wait for two mouse-ups after focus inorder
 // to trigger a double-click.
@@ -285,7 +288,12 @@ void wxPGTextCtrlEditor::UpdateControl( wxPGProperty* property, wxWindow* ctrl )
     //
     // Fix indentation, just in case (change in font boldness is one good
     // reason).
-    tc->SetMargins(0);
+#if defined(__WXMSW__) && !defined(__WXWINCE__)
+    ::SendMessage(GetHwndOf(tc),
+                  EM_SETMARGINS,
+                  EC_LEFTMARGIN | EC_RIGHTMARGIN,
+                  MAKELONG(0, 0));
+#endif
 }
 
 // Provided so that, for example, ComboBox editor can use the same code
@@ -574,16 +582,13 @@ public:
         return rect.width;
     }
 
-    virtual void PositionTextCtrl( int textCtrlXAdjust,
+    virtual void PositionTextCtrl( int WXUNUSED(textCtrlXAdjust),
                                    int WXUNUSED(textCtrlYAdjust) )
     {
         wxPropertyGrid* pg = GetGrid();
-    #ifdef wxPG_TEXTCTRLXADJUST
-        textCtrlXAdjust = wxPG_TEXTCTRLXADJUST -
-                          (wxPG_XBEFOREWIDGET+wxPG_CONTROL_MARGIN+1) - 1,
-    #endif
         wxOwnerDrawnComboBox::PositionTextCtrl(
-            textCtrlXAdjust,
+            wxPG_TEXTCTRLXADJUST -
+            (wxPG_XBEFOREWIDGET+wxPG_CONTROL_MARGIN+1) - 1,
             pg->GetSpacingY() + 2
         );
     }
@@ -603,7 +608,7 @@ void wxPropertyGrid::OnComboItemPaint( const wxPGComboBox* pCb,
     // Sanity check
     wxASSERT( IsKindOf(CLASSINFO(wxPropertyGrid)) );
 
-    wxPGProperty* p = GetSelection();
+    wxPGProperty* p = m_selected;
     wxString text;
 
     const wxPGChoices& choices = p->GetChoices();
@@ -836,10 +841,6 @@ wxWindow* wxPGChoiceEditor::CreateControlsBase( wxPropertyGrid* propGrid,
 
     int odcbFlags = extraStyle | wxBORDER_NONE | wxTE_PROCESS_ENTER;
 
-    if ( (property->GetFlags() & wxPG_PROP_USE_DCC) &&
-         (property->IsKindOf(CLASSINFO(wxBoolProperty)) ) )
-        odcbFlags |= wxODCB_DCLICK_CYCLES;
-
     //
     // If common value specified, use appropriate index
     unsigned int cmnVals = property->GetDisplayedCommonValueCount();
@@ -872,7 +873,7 @@ wxWindow* wxPGChoiceEditor::CreateControlsBase( wxPropertyGrid* propGrid,
                odcbFlags);
 
     cb->SetButtonPosition(si.y,0,wxRIGHT);
-    cb->SetMargins(wxPG_XBEFORETEXT-1);
+    cb->SetTextIndent(wxPG_XBEFORETEXT-1);
 
     wxPGChoiceEditor_SetCustomPaintWidth( propGrid, cb, property->GetCommonValue() );
 
@@ -961,7 +962,7 @@ bool wxPGChoiceEditor::OnEvent( wxPropertyGrid* propGrid, wxPGProperty* property
                 return false;
             }
         }
-        return wxPGChoiceEditor_SetCustomPaintWidth( propGrid, cb, cmnValIndex );
+        return wxPGChoiceEditor_SetCustomPaintWidth( propGrid, cb, cmnValIndex );        
     }
     return false;
 }
@@ -1408,7 +1409,7 @@ wxPGWindowList wxPGCheckBoxEditor::CreateControls( wxPropertyGrid* propGrid,
                     cb->m_state |= wxSCB_STATE_CHECKED;
 
                 // Makes sure wxPG_EVT_CHANGING etc. is sent for this initial
-                // click
+                // click 
                 propGrid->ChangePropertyValue(property,
                                               wxPGVariant_Bool(cb->m_state));
             }
@@ -1523,6 +1524,9 @@ wxWindow* wxPropertyGrid::GetEditorControl() const
 
 void wxPropertyGrid::CorrectEditorWidgetSizeX()
 {
+    if ( m_selColumn == -1 )
+        return;
+
     int secWid = 0;
     int newSplitterx = m_pState->DoGetSplitterPosition(m_selColumn-1);
     int newWidth = newSplitterx + m_pState->m_colWidths[m_selColumn];
@@ -1565,9 +1569,12 @@ void wxPropertyGrid::CorrectEditorWidgetSizeX()
 
 void wxPropertyGrid::CorrectEditorWidgetPosY()
 {
-    if ( GetSelection() && (m_wndEditor || m_wndEditor2) )
+    if ( m_selColumn == -1 )
+        return;
+
+    if ( m_selected && (m_wndEditor || m_wndEditor2) ) 
     {
-        wxRect r = GetEditorWidgetRect(GetSelection(), m_selColumn);
+        wxRect r = GetEditorWidgetRect(m_selected, m_selColumn);
 
         if ( m_wndEditor )
         {
@@ -1592,9 +1599,7 @@ void wxPropertyGrid::CorrectEditorWidgetPosY()
 
 // Fixes position of wxTextCtrl-like control (wxSpinCtrl usually
 // fits into that category as well).
-void wxPropertyGrid::FixPosForTextCtrl( wxWindow* ctrl,
-                                        unsigned int WXUNUSED(forColumn),
-                                        const wxPoint& offset )
+void wxPropertyGrid::FixPosForTextCtrl( wxWindow* ctrl, const wxPoint& offset )
 {
     // Center the control vertically
     wxRect finalPos = ctrl->GetRect();
@@ -1607,14 +1612,7 @@ void wxPropertyGrid::FixPosForTextCtrl( wxWindow* ctrl,
     finalPos.y += y_adj;
     finalPos.height -= (y_adj+sz_dec);
 
-#ifndef wxPG_TEXTCTRLXADJUST
-    int textCtrlXAdjust = wxPG_XBEFORETEXT - 1;
-
-    wxTextCtrl* tc = static_cast<wxTextCtrl*>(ctrl);
-    tc->SetMargins(0);
-#else
-    int textCtrlXAdjust = wxPG_TEXTCTRLXADJUST;
-#endif
+    const int textCtrlXAdjust = wxPG_TEXTCTRLXADJUST;
 
     finalPos.x += textCtrlXAdjust;
     finalPos.width -= textCtrlXAdjust;
@@ -1632,16 +1630,15 @@ wxWindow* wxPropertyGrid::GenerateEditorTextCtrl( const wxPoint& pos,
                                                   const wxString& value,
                                                   wxWindow* secondary,
                                                   int extraStyle,
-                                                  int maxLen,
-                                                  unsigned int forColumn )
+                                                  int maxLen )
 {
     wxWindowID id = wxPG_SUBID1;
-    wxPGProperty* prop = GetSelection();
+    wxPGProperty* prop = m_selected;
     wxASSERT(prop);
 
     int tcFlags = wxTE_PROCESS_ENTER | extraStyle;
 
-    if ( prop->HasFlag(wxPG_PROP_READONLY) && forColumn == 1 )
+    if ( prop->HasFlag(wxPG_PROP_READONLY) )
         tcFlags |= wxTE_READONLY;
 
     wxPoint p(pos.x,pos.y);
@@ -1652,11 +1649,7 @@ wxWindow* wxPropertyGrid::GenerateEditorTextCtrl( const wxPoint& pos,
     s.x -= 8;
 #endif
 
-    // For label editors, trim the size to allow better splitter grabbing
-    if ( forColumn != 1 )
-        s.x -= 2;
-
-    // Take button into acccount
+     // Take button into acccount
     if ( secondary )
     {
         s.x -= (secondary->GetSize().x + wxPG_TEXTCTRL_AND_BUTTON_SPACING);
@@ -1681,16 +1674,10 @@ wxWindow* wxPropertyGrid::GenerateEditorTextCtrl( const wxPoint& pos,
 #endif
     SetupTextCtrlValue(value);
     tc->Create(ctrlParent,id,value, p, s,tcFlags);
-
+    
     // Center the control vertically
     if ( !hasSpecialSize )
-        FixPosForTextCtrl(tc, forColumn);
-
-    if ( forColumn != 1 )
-    {
-        tc->SetBackgroundColour(m_colSelBack);
-        tc->SetForegroundColour(m_colSelFore);
-    }
+        FixPosForTextCtrl(tc);
 
 #ifdef __WXMSW__
     tc->Show();
@@ -1717,7 +1704,7 @@ wxWindow* wxPropertyGrid::GenerateEditorTextCtrl( const wxPoint& pos,
 wxWindow* wxPropertyGrid::GenerateEditorButton( const wxPoint& pos, const wxSize& sz )
 {
     wxWindowID id = wxPG_SUBID2;
-    wxPGProperty* selected = GetSelection();
+    wxPGProperty* selected = m_selected;
     wxASSERT(selected);
 
 #ifdef __WXMAC__
@@ -1735,7 +1722,7 @@ wxWindow* wxPropertyGrid::GenerateEditorButton( const wxPoint& pos, const wxSize
    p.x = pos.x + sz.x - but->GetSize().x - 2;
    but->Move(p);
 
-#else
+#else 
     wxSize s(sz.y-(wxPG_BUTTON_SIZEDEC*2)+(wxPG_NAT_BUTTON_BORDER_Y*2),
         sz.y-(wxPG_BUTTON_SIZEDEC*2)+(wxPG_NAT_BUTTON_BORDER_Y*2));
 

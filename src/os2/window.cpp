@@ -352,9 +352,7 @@ wxWindowOS2::~wxWindowOS2()
     if (m_hWnd)
     {
         if(!::WinDestroyWindow(GetHWND()))
-        {
             wxLogLastError(wxT("DestroyWindow"));
-        }
         //
         // remove hWnd <-> wxWindow association
         //
@@ -386,7 +384,7 @@ bool wxWindowOS2::Create( wxWindow*       pParent,
     // static box
     //
     wxASSERT_MSG( !wxDynamicCast(pParent, wxStaticBox),
-                  wxT("wxStaticBox can't be used as a window parent!") );
+                  _T("wxStaticBox can't be used as a window parent!") );
 #endif // wxUSE_STATBOX
 
      // Ensure groupbox backgrounds are painted
@@ -456,7 +454,7 @@ bool wxWindowOS2::Create( wxWindow*       pParent,
 void wxWindowOS2::SetFocus()
 {
     HWND                            hWnd = GetHwnd();
-    wxCHECK_RET( hWnd, wxT("can't set focus to invalid window") );
+    wxCHECK_RET( hWnd, _T("can't set focus to invalid window") );
 
     if (hWnd)
         ::WinSetFocus(HWND_DESKTOP, hWnd);
@@ -1663,12 +1661,12 @@ int wxWindowOS2::GetCharWidth() const
     return(vFontMetrics.lAveCharWidth);
 } // end of wxWindowOS2::GetCharWidth
 
-void wxWindowOS2::DoGetTextExtent( const wxString& rString,
-                                   int* pX,
-                                   int* pY,
-                                   int* pDescent,
-                                   int* pExternalLeading,
-                                   const wxFont* WXUNUSED(pTheFont) ) const
+void wxWindowOS2::GetTextExtent( const wxString& rString,
+                                 int* pX,
+                                 int* pY,
+                                 int* pDescent,
+                                 int* pExternalLeading,
+                                 const wxFont* WXUNUSED(pTheFont) ) const
 {
     POINTL      avPoint[TXTBOX_COUNT];
     POINTL      vPtMin;
@@ -1752,7 +1750,7 @@ void wxWindowOS2::DoGetTextExtent( const wxString& rString,
             *pExternalLeading = 0;
     }
     ::WinReleasePS(hPS);
-} // end of wxWindow::DoGetTextExtent
+} // end of wxWindow::GetTextExtent
 
 bool wxWindowOS2::IsMouseInWindow() const
 {
@@ -2855,7 +2853,7 @@ void wxAssociateWinWithHandle(
     {
         wxString  Newstr(pWin->GetClassInfo()->GetClassName());
         wxString Oldstr(pOldWin->GetClassInfo()->GetClassName());
-        wxLogError( wxT("Bug! New window of class %s has same HWND %X as old window of class %s"),
+        wxLogError( _T("Bug! New window of class %s has same HWND %X as old window of class %s"),
                     Newstr.c_str(),
                     (int)hWnd,
                     Oldstr.c_str()
@@ -3001,7 +2999,7 @@ bool wxWindowOS2::OS2Create( PSZ            zClass,
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(wxT("Error creating frame. Error: %s\n"), sError.c_str());
+        wxLogError(_T("Error creating frame. Error: %s\n"), sError.c_str());
         return false;
     }
     SetSize( nX
@@ -3224,7 +3222,7 @@ bool wxWindowOS2::OS2OnDrawItem( int vId,
                                           ,pMeasureStruct->rclItem.yTop - pMeasureStruct->rclItem.yBottom
                                          );
 
-        wxPMDCImpl *impl = (wxPMDCImpl*) vDc.GetImpl();
+	wxPMDCImpl *impl = (wxPMDCImpl*) vDc.GetImpl();
         impl->SetHDC( hDC, false );
         impl->SetHPS( pMeasureStruct->hps );
         //
@@ -3240,7 +3238,7 @@ bool wxWindowOS2::OS2OnDrawItem( int vId,
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(wxT("Unable to set current color table (1). Error: %s\n"), sError.c_str());
+            wxLogError(_T("Unable to set current color table (1). Error: %s\n"), sError.c_str());
         }
         //
         // Set the color table to RGB mode
@@ -3255,7 +3253,7 @@ bool wxWindowOS2::OS2OnDrawItem( int vId,
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(wxT("Unable to set current color table (2). Error: %s\n"), sError.c_str());
+            wxLogError(_T("Unable to set current color table (2). Error: %s\n"), sError.c_str());
         }
 
         wxCHECK( pMenuItem->IsKindOf(CLASSINFO(wxMenuItem)), FALSE );

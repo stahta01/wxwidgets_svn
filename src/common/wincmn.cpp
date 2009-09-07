@@ -102,7 +102,6 @@ BEGIN_EVENT_TABLE(wxWindowBase, wxEvtHandler)
     EVT_HELP(wxID_ANY, wxWindowBase::OnHelp)
 #endif // wxUSE_HELP
 
-    EVT_SIZE(wxWindowBase::InternalOnSize)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -154,7 +153,7 @@ wxWindowBase::wxWindowBase()
     m_exStyle =
     m_windowStyle = 0;
 
-    m_backgroundStyle = wxBG_STYLE_ERASE;
+    m_backgroundStyle = wxBG_STYLE_SYSTEM;
 
 #if wxUSE_CONSTRAINTS
     // no constraints whatsoever
@@ -218,12 +217,23 @@ bool wxWindowBase::CreateBase(wxWindowBase *parent,
                               const wxValidator& wxVALIDATOR_PARAM(validator),
                               const wxString& name)
 {
+#if wxUSE_STATBOX
+    // wxGTK doesn't allow to create controls with static box as the parent so
+    // this will result in a crash when the program is ported to wxGTK so warn
+    // the user about it
+
+    // if you get this assert, the correct solution is to create the controls
+    // as siblings of the static box
+    wxASSERT_MSG( !parent || !wxDynamicCast(parent, wxStaticBox),
+                  _T("wxStaticBox can't be used as a window parent!") );
+#endif // wxUSE_STATBOX
+
     // ids are limited to 16 bits under MSW so if you care about portability,
     // it's not a good idea to use ids out of this range (and negative ids are
     // reserved for wxWidgets own usage)
     wxASSERT_MSG( id == wxID_ANY || (id >= 0 && id < 32767) ||
                   (id >= wxID_AUTO_LOWEST && id <= wxID_AUTO_HIGHEST),
-                  wxT("invalid id value") );
+                  _T("invalid id value") );
 
     // generate a new id if the user doesn't care about it
     if ( id == wxID_ANY )
@@ -260,7 +270,7 @@ bool wxWindowBase::CreateBase(wxWindowBase *parent,
 
 bool wxWindowBase::ToggleWindowStyle(int flag)
 {
-    wxASSERT_MSG( flag, wxT("flags with 0 value can't be toggled") );
+    wxASSERT_MSG( flag, _T("flags with 0 value can't be toggled") );
 
     bool rc;
     long style = GetWindowStyleFlag();
@@ -439,7 +449,7 @@ bool wxWindowBase::DestroyChildren()
 void wxWindowBase::DoCentre(int dir)
 {
     wxCHECK_RET( !(dir & wxCENTRE_ON_SCREEN) && GetParent(),
-                 wxT("this method only implements centering child windows") );
+                 _T("this method only implements centering child windows") );
 
     SetSize(GetRect().CentreIn(GetParent()->GetClientSize(), dir));
 }
@@ -474,11 +484,7 @@ static bool wxHasRealChildren(const wxWindowBase* win)
           node = node->GetNext() )
     {
         wxWindow *win = node->GetData();
-        if ( !win->IsTopLevel() && win->IsShown()
-#if wxUSE_SCROLLBAR
-            && !win->IsKindOf(CLASSINFO(wxScrollBar))
-#endif
-            )
+        if ( !win->IsTopLevel() && win->IsShown() && !win->IsKindOf(CLASSINFO(wxScrollBar)))
             realChildCount ++;
     }
     return (realChildCount > 0);
@@ -644,7 +650,7 @@ static int wxGetMetricOrDefault(wxSystemMetric what, const wxWindowBase* win)
                 break;
 
             default:
-                wxFAIL_MSG( wxT("unexpected wxGetMetricOrDefault() argument") );
+                wxFAIL_MSG( _T("unexpected wxGetMetricOrDefault() argument") );
                 rc = 0;
         }
     }
@@ -684,7 +690,7 @@ wxSize wxWindowBase::GetWindowBorderSize() const
             break;
 
         default:
-            wxFAIL_MSG(wxT("Unknown border style."));
+            wxFAIL_MSG(_T("Unknown border style."));
             break;
     }
 
@@ -709,19 +715,8 @@ wxSize wxWindowBase::GetEffectiveMinSize() const
 
 wxSize wxWindowBase::GetBestSize() const
 {
-    if ( !m_windowSizer && m_bestSizeCache.IsFullySpecified() )
+    if ((!m_windowSizer) && (m_bestSizeCache.IsFullySpecified()))
         return m_bestSizeCache;
-
-    // call DoGetBestClientSize() first, if a derived class overrides it wants
-    // it to be used
-    wxSize size = DoGetBestClientSize();
-    if ( size != wxDefaultSize )
-    {
-        size += DoGetBorderSize();
-
-        CacheBestSize(size);
-        return size;
-    }
 
     return DoGetBestSize();
 }
@@ -812,7 +807,7 @@ void wxWindowBase::DoSetWindowVariant( wxWindowVariant variant )
             break;
 
         default:
-            wxFAIL_MSG(wxT("unexpected window variant"));
+            wxFAIL_MSG(_T("unexpected window variant"));
             break;
     }
 
@@ -826,7 +821,7 @@ void wxWindowBase::DoSetSizeHints( int minW, int minH,
 {
     wxCHECK_RET( (minW == wxDefaultCoord || maxW == wxDefaultCoord || minW <= maxW) &&
                     (minH == wxDefaultCoord || maxH == wxDefaultCoord || minH <= maxH),
-                 wxT("min width/height must be less than max width/height!") );
+                 _T("min width/height must be less than max width/height!") );
 
     m_minWidth = minW;
     m_maxWidth = maxW;
@@ -894,20 +889,6 @@ void wxWindowBase::SendSizeEventToParent(int flags)
     wxWindow * const parent = GetParent();
     if ( parent && !parent->IsBeingDeleted() )
         parent->SendSizeEvent(flags);
-}
-
-bool wxWindowBase::HasScrollbar(int orient) const
-{
-    // if scrolling in the given direction is disabled, we can't have the
-    // corresponding scrollbar no matter what
-    if ( !CanScroll(orient) )
-        return false;
-
-    const wxSize sizeVirt = GetVirtualSize();
-    const wxSize sizeClient = GetClientSize();
-
-    return orient == wxHORIZONTAL ? sizeVirt.x > sizeClient.x
-                                  : sizeVirt.y > sizeClient.y;
 }
 
 // ----------------------------------------------------------------------------
@@ -1054,7 +1035,7 @@ void wxWindowBase::AddChild(wxWindowBase *child)
     // this should never happen and it will lead to a crash later if it does
     // because RemoveChild() will remove only one node from the children list
     // and the other(s) one(s) will be left with dangling pointers in them
-    wxASSERT_MSG( !GetChildren().Find((wxWindow*)child), wxT("AddChild() called twice") );
+    wxASSERT_MSG( !GetChildren().Find((wxWindow*)child), _T("AddChild() called twice") );
 
     GetChildren().Append((wxWindow*)child);
     child->SetParent(this);
@@ -1248,7 +1229,7 @@ bool wxWindowBase::RemoveEventHandler(wxEvtHandler *handlerToRemove)
         handlerCur = handlerNext;
     }
 
-    wxFAIL_MSG( wxT("where has the event handler gone?") );
+    wxFAIL_MSG( _T("where has the event handler gone?") );
 
     return false;
 }
@@ -1321,7 +1302,7 @@ wxColour wxWindowBase::GetBackgroundColour() const
 {
     if ( !m_backgroundColour.IsOk() )
     {
-        wxASSERT_MSG( !m_hasBgCol, wxT("we have invalid explicit bg colour?") );
+        wxASSERT_MSG( !m_hasBgCol, _T("we have invalid explicit bg colour?") );
 
         // get our default background colour
         wxColour colBg = GetDefaultAttributes().colBg;
@@ -1362,6 +1343,8 @@ bool wxWindowBase::SetBackgroundColour( const wxColour &colour )
         return false;
 
     m_hasBgCol = colour.IsOk();
+    if ( m_backgroundStyle != wxBG_STYLE_CUSTOM )
+        m_backgroundStyle = m_hasBgCol ? wxBG_STYLE_COLOUR : wxBG_STYLE_SYSTEM;
 
     m_inheritBgCol = m_hasBgCol;
     m_backgroundColour = colour;
@@ -1401,7 +1384,7 @@ wxFont wxWindowBase::GetFont() const
     // logic is the same as in GetBackgroundColour()
     if ( !m_font.IsOk() )
     {
-        wxASSERT_MSG( !m_hasFont, wxT("we have invalid explicit font?") );
+        wxASSERT_MSG( !m_hasFont, _T("we have invalid explicit font?") );
 
         wxFont font = GetDefaultAttributes().font;
         if ( !font.IsOk() )
@@ -1892,11 +1875,6 @@ void wxWindowBase::OnHelp(wxHelpEvent& event)
 
 #if wxUSE_TOOLTIPS
 
-wxString wxWindowBase::GetToolTipText() const
-{
-    return m_tooltip ? m_tooltip->GetTip() : wxString();
-}
-
 void wxWindowBase::SetToolTip( const wxString &tip )
 {
     // don't create the new tooltip if we already have one
@@ -2076,7 +2054,7 @@ void wxWindowBase::SetContainingSizer(wxSizer* sizer)
     // associated wxSizerItem we're going to dereference a dangling
     // pointer; so try to detect this as early as possible
     wxASSERT_MSG( !sizer || m_containingSizer != sizer,
-                  wxT("Adding a window to the same sizer twice?") );
+                  _T("Adding a window to the same sizer twice?") );
 
     m_containingSizer = sizer;
 }
@@ -2126,14 +2104,6 @@ bool wxWindowBase::Layout()
 #endif
 
     return true;
-}
-
-void wxWindowBase::InternalOnSize(wxSizeEvent& event)
-{
-    if ( GetAutoLayout() )
-        Layout();
-
-    event.Skip();
 }
 
 #if wxUSE_CONSTRAINTS
@@ -2770,9 +2740,9 @@ bool wxWindowBase::ms_winCaptureChanging = false;
 
 void wxWindowBase::CaptureMouse()
 {
-    wxLogTrace(wxT("mousecapture"), wxT("CaptureMouse(%p)"), static_cast<void*>(this));
+    wxLogTrace(_T("mousecapture"), _T("CaptureMouse(%p)"), static_cast<void*>(this));
 
-    wxASSERT_MSG( !ms_winCaptureChanging, wxT("recursive CaptureMouse call?") );
+    wxASSERT_MSG( !ms_winCaptureChanging, _T("recursive CaptureMouse call?") );
 
     ms_winCaptureChanging = true;
 
@@ -2797,9 +2767,9 @@ void wxWindowBase::CaptureMouse()
 
 void wxWindowBase::ReleaseMouse()
 {
-    wxLogTrace(wxT("mousecapture"), wxT("ReleaseMouse(%p)"), static_cast<void*>(this));
+    wxLogTrace(_T("mousecapture"), _T("ReleaseMouse(%p)"), static_cast<void*>(this));
 
-    wxASSERT_MSG( !ms_winCaptureChanging, wxT("recursive ReleaseMouse call?") );
+    wxASSERT_MSG( !ms_winCaptureChanging, _T("recursive ReleaseMouse call?") );
 
     wxASSERT_MSG( GetCapture() == this,
                   "attempt to release mouse, but this window hasn't captured it" );
@@ -2824,8 +2794,8 @@ void wxWindowBase::ReleaseMouse()
 
     ms_winCaptureChanging = false;
 
-    wxLogTrace(wxT("mousecapture"),
-        (const wxChar *) wxT("After ReleaseMouse() mouse is captured by %p"),
+    wxLogTrace(_T("mousecapture"),
+        (const wxChar *) _T("After ReleaseMouse() mouse is captured by %p"),
         static_cast<void*>(GetCapture()));
 }
 
@@ -2839,7 +2809,7 @@ static void DoNotifyWindowAboutCaptureLost(wxWindow *win)
         // correctly if it loses capture unexpectedly; see the discussion here:
         // http://sourceforge.net/tracker/index.php?func=detail&aid=1153662&group_id=9863&atid=109863
         // http://article.gmane.org/gmane.comp.lib.wxwidgets.devel/82376
-        wxFAIL_MSG( wxT("window that captured the mouse didn't process wxEVT_MOUSE_CAPTURE_LOST") );
+        wxFAIL_MSG( _T("window that captured the mouse didn't process wxEVT_MOUSE_CAPTURE_LOST") );
     }
 }
 
@@ -2944,11 +2914,11 @@ bool wxWindowBase::TryAfter(wxEvent& event)
 wxWindow *wxWindowBase::DoGetSibling(WindowOrder order) const
 {
     wxCHECK_MSG( GetParent(), NULL,
-                    wxT("GetPrev/NextSibling() don't work for TLWs!") );
+                    _T("GetPrev/NextSibling() don't work for TLWs!") );
 
     wxWindowList& siblings = GetParent()->GetChildren();
     wxWindowList::compatibility_iterator i = siblings.Find((wxWindow *)this);
-    wxCHECK_MSG( i, NULL, wxT("window not a child of its parent?") );
+    wxCHECK_MSG( i, NULL, _T("window not a child of its parent?") );
 
     if ( order == OrderBefore )
         i = i->GetPrevious();
@@ -3002,7 +2972,7 @@ void wxWindowBase::DoMoveInTabOrder(wxWindow *win, WindowOrder move)
 {
     // check that we're not a top level window
     wxCHECK_RET( GetParent(),
-                    wxT("MoveBefore/AfterInTabOrder() don't work for TLWs!") );
+                    _T("MoveBefore/AfterInTabOrder() don't work for TLWs!") );
 
     // detect the special case when we have nothing to do anyhow and when the
     // code below wouldn't work
@@ -3012,7 +2982,7 @@ void wxWindowBase::DoMoveInTabOrder(wxWindow *win, WindowOrder move)
     // find the target window in the siblings list
     wxWindowList& siblings = GetParent()->GetChildren();
     wxWindowList::compatibility_iterator i = siblings.Find(win);
-    wxCHECK_RET( i, wxT("MoveBefore/AfterInTabOrder(): win is not a sibling") );
+    wxCHECK_RET( i, _T("MoveBefore/AfterInTabOrder(): win is not a sibling") );
 
     // unfortunately, when wxUSE_STL == 1 DetachNode() is not implemented so we
     // can't just move the node around

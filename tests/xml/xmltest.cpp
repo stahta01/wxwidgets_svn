@@ -75,13 +75,11 @@ private:
         CPPUNIT_TEST( InsertChild );
         CPPUNIT_TEST( InsertChildAfter );
         CPPUNIT_TEST( LoadSave );
-        CPPUNIT_TEST( CDATA );
     CPPUNIT_TEST_SUITE_END();
 
     void InsertChild();
     void InsertChildAfter();
     void LoadSave();
-    void CDATA();
 
     DECLARE_NO_COPY_CLASS(XmlTestCase)
 };
@@ -191,27 +189,3 @@ void XmlTestCase::LoadSave()
                           wxString(sos8.GetString().ToUTF8()) );
 }
 
-void XmlTestCase::CDATA()
-{
-    const char *xmlText =
-        "<?xml version=\"1.0\" encoding=\"windows-1252\"?>\n"
-        "<name>\n"
-        "  <![CDATA[Giovanni Mittone]]>\n"
-        "</name>\n"
-    ;
-
-    wxStringInputStream sis(xmlText);
-    wxXmlDocument doc;
-    CPPUNIT_ASSERT( doc.Load(sis) );
-
-    wxXmlNode *n = doc.GetRoot();
-    CPPUNIT_ASSERT( n );
-
-    n = n->GetChildren();
-    CPPUNIT_ASSERT( n );
-
-    // check that both leading ("  ") and trailing white space is not part of
-    // the node contents when CDATA is used and wxXMLDOC_KEEP_WHITESPACE_NODES
-    // is not
-    CPPUNIT_ASSERT_EQUAL( "Giovanni Mittone", n->GetContent() );
-}

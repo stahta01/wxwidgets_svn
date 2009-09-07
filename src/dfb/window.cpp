@@ -72,15 +72,6 @@ IMPLEMENT_ABSTRACT_CLASS(wxWindowDFB, wxWindowBase)
 BEGIN_EVENT_TABLE(wxWindowDFB, wxWindowBase)
 END_EVENT_TABLE()
 
-//-----------------------------------------------------------------------------
-// global functions
-//-----------------------------------------------------------------------------
-
-wxWindow *wxGetActiveWindow()
-{
-    return wxWindow::FindFocus();
-}
-
 // ----------------------------------------------------------------------------
 // constructors and such
 // ----------------------------------------------------------------------------
@@ -557,11 +548,10 @@ int wxWindowDFB::GetCharWidth() const
     return dc.GetCharWidth();
 }
 
-void wxWindowDFB::DoGetTextExtent(const wxString& string,
-                                  int *x, int *y,
-                                  int *descent,
-                                  int *externalLeading,
-                                  const wxFont *theFont) const
+void wxWindowDFB::GetTextExtent(const wxString& string,
+                             int *x, int *y,
+                             int *descent, int *externalLeading,
+                             const wxFont *theFont) const
 {
     wxWindowDC dc((wxWindow*)this);
     dc.GetTextExtent(string, x, y, descent, externalLeading, (wxFont*)theFont);
@@ -801,7 +791,7 @@ void wxWindowDFB::RemoveOverlay(wxOverlayImpl *overlay)
 #define KEY(dfb, wx)                                                \
     case dfb:                                                       \
           wxLogTrace(TRACE_EVENTS,                                  \
-                     wxT("key " #dfb " mapped to " #wx));            \
+                     _T("key " #dfb " mapped to " #wx));            \
           return wx
 
 // returns translated keycode, i.e. the one for KEYUP/KEYDOWN where 'a'..'z' is

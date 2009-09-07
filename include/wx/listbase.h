@@ -22,8 +22,7 @@
 // ----------------------------------------------------------------------------
 
 // type of compare function for wxListCtrl sort operation
-typedef
-int (wxCALLBACK *wxListCtrlCompare)(long item1, long item2, wxIntPtr sortData);
+typedef int (wxCALLBACK *wxListCtrlCompare)(long item1, long item2, long sortData);
 
 // ----------------------------------------------------------------------------
 // wxListCtrl constants
@@ -380,10 +379,10 @@ class WXDLLIMPEXP_CORE wxListEvent : public wxNotifyEvent
 public:
     wxListEvent(wxEventType commandType = wxEVT_NULL, int winid = 0)
         : wxNotifyEvent(commandType, winid)
-        , m_code(-1)
-        , m_oldItemIndex(-1)
-        , m_itemIndex(-1)
-        , m_col(-1)
+        , m_code(0)
+        , m_oldItemIndex(0)
+        , m_itemIndex(0)
+        , m_col(0)
         , m_pointDrag()
         , m_item()
         , m_editCancelled(false)

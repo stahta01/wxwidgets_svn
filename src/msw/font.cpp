@@ -134,66 +134,87 @@ public:
 
     wxFontRefData(const wxFontRefData& data) : wxGDIRefData()
     {
-        Init(data.m_nativeFontInfo);
+        if ( data.m_nativeFontInfoOk )
+        {
+            Init(data.m_nativeFontInfo);
+        }
+        else
+        {
+            Init(data.m_pointSize, data.m_pixelSize, data.m_sizeUsingPixels,
+                 data.m_family, data.m_style, data.m_weight,
+                 data.m_underlined, data.m_faceName, data.m_encoding);
+        }
     }
 
     virtual ~wxFontRefData();
 
     // operations
-    bool Alloc();
+    bool Alloc(const wxFont *font);
 
     void Free();
 
     // all wxFont accessors
     int GetPointSize() const
     {
-        return m_nativeFontInfo.GetPointSize();
+        return m_nativeFontInfoOk ? m_nativeFontInfo.GetPointSize()
+                                  : m_pointSize;
     }
 
     wxSize GetPixelSize() const
     {
-        return m_nativeFontInfo.GetPixelSize();
+        return m_nativeFontInfoOk ? m_nativeFontInfo.GetPixelSize()
+                                  : m_pixelSize;
     }
 
     bool IsUsingSizeInPixels() const
     {
-        return m_sizeUsingPixels;
+        return m_nativeFontInfoOk ? true : m_sizeUsingPixels;
     }
 
     wxFontFamily GetFamily() const
     {
-        return m_nativeFontInfo.GetFamily();
+        return m_family;
     }
 
     wxFontStyle GetStyle() const
     {
-        return m_nativeFontInfo.GetStyle();
+        return m_nativeFontInfoOk ? m_nativeFontInfo.GetStyle()
+                                  : m_style;
     }
 
     wxFontWeight GetWeight() const
     {
-        return m_nativeFontInfo.GetWeight();
+        return m_nativeFontInfoOk ? m_nativeFontInfo.GetWeight()
+                                  : m_weight;
     }
 
     bool GetUnderlined() const
     {
-        return m_nativeFontInfo.GetUnderlined();
+        return m_nativeFontInfoOk ? m_nativeFontInfo.GetUnderlined()
+                                  : m_underlined;
     }
 
     wxString GetFaceName() const
     {
-        return m_nativeFontInfo.GetFaceName();
+        wxString s;
+        if ( m_nativeFontInfoOk )
+            s = m_nativeFontInfo.GetFaceName();
+        else
+            s = m_faceName;
+
+        return s;
     }
 
     wxFontEncoding GetEncoding() const
     {
-        return m_nativeFontInfo.GetEncoding();
+        return m_nativeFontInfoOk ? m_nativeFontInfo.GetEncoding()
+                                  : m_encoding;
     }
 
-    WXHFONT GetHFONT() const
+    WXHFONT GetHFONT(const wxFont *font) const
     {
         if ( !m_hFont )
-            const_cast<wxFontRefData *>(this)->Alloc();
+            const_cast<wxFontRefData *>(this)->Alloc(font);
 
         return (WXHFONT)m_hFont;
     }
@@ -210,59 +231,92 @@ public:
     {
         Free();
 
-        m_nativeFontInfo.SetPointSize(pointSize);
-        m_sizeUsingPixels = false;
+        if ( m_nativeFontInfoOk )
+        {
+            m_nativeFontInfo.SetPointSize(pointSize);
+        }
+        else
+        {
+            m_pointSize = pointSize;
+            m_sizeUsingPixels = false;
+        }
     }
 
     void SetPixelSize(const wxSize& pixelSize)
     {
         Free();
 
-        m_nativeFontInfo.SetPixelSize(pixelSize);
-        m_sizeUsingPixels = true;
+        if ( m_nativeFontInfoOk )
+        {
+            m_nativeFontInfo.SetPixelSize(pixelSize);
+        }
+        else
+        {
+            m_pixelSize = pixelSize;
+            m_sizeUsingPixels = true;
+        }
     }
 
     void SetFamily(wxFontFamily family)
     {
         Free();
 
-        m_nativeFontInfo.SetFamily(family);
+        m_family = family;
     }
 
     void SetStyle(wxFontStyle style)
     {
         Free();
 
-        m_nativeFontInfo.SetStyle(style);
+        if ( m_nativeFontInfoOk )
+            m_nativeFontInfo.SetStyle((wxFontStyle)style);
+        else
+            m_style = style;
     }
 
     void SetWeight(wxFontWeight weight)
     {
         Free();
 
-        m_nativeFontInfo.SetWeight(weight);
+        if ( m_nativeFontInfoOk )
+            m_nativeFontInfo.SetWeight((wxFontWeight)weight);
+        else
+            m_weight = weight;
     }
 
     bool SetFaceName(const wxString& faceName)
     {
         Free();
 
-        return m_nativeFontInfo.SetFaceName(faceName);
+        if ( m_nativeFontInfoOk )
+            return m_nativeFontInfo.SetFaceName(faceName);
+
+        m_faceName = faceName;
+        return true;
     }
 
     void SetUnderlined(bool underlined)
     {
         Free();
 
-        m_nativeFontInfo.SetUnderlined(underlined);
+        if ( m_nativeFontInfoOk )
+            m_nativeFontInfo.SetUnderlined(underlined);
+        else
+            m_underlined = underlined;
     }
 
     void SetEncoding(wxFontEncoding encoding)
     {
         Free();
 
-        m_nativeFontInfo.SetEncoding(encoding);
+        if ( m_nativeFontInfoOk )
+            m_nativeFontInfo.SetEncoding(encoding);
+        else
+            m_encoding = encoding;
     }
+
+    // native font info
+    bool HasNativeFontInfo() const { return m_nativeFontInfoOk; }
 
     const wxNativeFontInfo& GetNativeFontInfo() const
         { return m_nativeFontInfo; }
@@ -272,6 +326,7 @@ public:
         Free();
 
         m_nativeFontInfo = nativeFontInfo;
+        m_nativeFontInfoOk = true;
     }
 
 protected:
@@ -288,14 +343,23 @@ protected:
 
     void Init(const wxNativeFontInfo& info, WXHFONT hFont = 0);
 
-    // are we using m_nativeFontInfo.lf.lfHeight for point size or pixel size?
-    bool             m_sizeUsingPixels;
+    // font characteristics
+    int           m_pointSize;
+    wxSize        m_pixelSize;
+    bool          m_sizeUsingPixels;
+    wxFontFamily  m_family;
+    wxFontStyle   m_style;
+    wxFontWeight  m_weight;
+    bool          m_underlined;
+    wxString      m_faceName;
+    wxFontEncoding m_encoding;
 
     // Windows font handle, created on demand in GetHFONT()
-    HFONT            m_hFont;
+    HFONT         m_hFont;
 
     // Native font info
     wxNativeFontInfo m_nativeFontInfo;
+    bool             m_nativeFontInfoOk;
 };
 
 #define M_FONTDATA ((wxFontRefData*)m_refData)
@@ -318,26 +382,20 @@ void wxFontRefData::Init(int pointSize,
                          const wxString& faceName,
                          wxFontEncoding encoding)
 {
-    m_hFont = NULL;
-
+    m_style = style;
+    m_pointSize = pointSize == -1 ? wxNORMAL_FONT->GetPointSize() : pointSize;
+    m_pixelSize = pixelSize;
     m_sizeUsingPixels = sizeUsingPixels;
-    if ( m_sizeUsingPixels )
-        SetPixelSize(pixelSize);
-    else
-        SetPointSize(pointSize);
+    m_family = family;
+    m_style = style;
+    m_weight = weight;
+    m_underlined = underlined;
+    m_faceName = faceName;
+    m_encoding = encoding;
 
-    SetStyle(style);
-    SetWeight(weight);
-    SetUnderlined(underlined);
+    m_hFont = 0;
 
-    // set the family/facename
-    SetFamily(family);
-    if ( !faceName.empty() )
-        SetFaceName(faceName);
-
-    // deal with encoding now (it may override the font family and facename
-    // so do it after setting them)
-    SetEncoding(encoding);
+    m_nativeFontInfoOk = false;
 }
 
 void wxFontRefData::Init(const wxNativeFontInfo& info, WXHFONT hFont)
@@ -347,9 +405,13 @@ void wxFontRefData::Init(const wxNativeFontInfo& info, WXHFONT hFont)
     // (for example where we can't guarantee conversion from HFONT
     // to LOGFONT back to HFONT)
     m_hFont = (HFONT)hFont;
+
+    m_nativeFontInfoOk = true;
     m_nativeFontInfo = info;
 
-    // TODO: m_sizeUsingPixels?
+    // This is the best we can do since we don't have the
+    // correct information at this point.
+    m_family = wxFONTFAMILY_SWISS;
 }
 
 wxFontRefData::~wxFontRefData()
@@ -357,8 +419,18 @@ wxFontRefData::~wxFontRefData()
     Free();
 }
 
-bool wxFontRefData::Alloc()
+bool wxFontRefData::Alloc(const wxFont *font)
 {
+    if ( !m_nativeFontInfoOk )
+    {
+        // NOTE: we use wxNativeInfo::InitFromFont to avoid code duplication:
+        //       it results in using our m_* variables (except for m_hFont and
+        //       for m_nativeFontInfo obviously) for the initialization
+        //       of the wxNativeInfo::lf member.
+        m_nativeFontInfo.InitFromFont(*font);
+        m_nativeFontInfoOk = true;
+    }
+
     m_hFont = ::CreateFontIndirect(&m_nativeFontInfo.lf);
     if ( !m_hFont )
     {
@@ -397,7 +469,7 @@ void wxNativeFontInfo::Init()
 #ifdef __WXWINCE__
     lf.lfQuality = CLEARTYPE_QUALITY;
 #else
-    lf.lfQuality = wxSystemOptions::GetOptionInt("msw.font.no-proof-quality")
+    lf.lfQuality = wxSystemOptions::GetOptionInt(_T("msw.font.no-proof-quality"))
                     ? DEFAULT_QUALITY
                     : PROOF_QUALITY;
 #endif
@@ -454,13 +526,13 @@ wxFontFamily wxNativeFontInfo::GetFamily() const
     // extract family from pitch-and-family
     switch ( lf.lfPitchAndFamily & ~PITCH_MASK )
     {
-        case 0:
-            family = wxFONTFAMILY_UNKNOWN;
-            break;
-
         case FF_ROMAN:
             family = wxFONTFAMILY_ROMAN;
             break;
+
+        default:
+            wxFAIL_MSG( _T("unknown LOGFONT::lfFamily value") );
+            // fall through
 
         case FF_SWISS:
             family = wxFONTFAMILY_SWISS;
@@ -477,11 +549,6 @@ wxFontFamily wxNativeFontInfo::GetFamily() const
         case FF_DECORATIVE:
             family = wxFONTFAMILY_DECORATIVE;
             break;
-
-        default:
-            wxFAIL_MSG( "unknown LOGFONT::lfFamily value" );
-            family = wxFONTFAMILY_UNKNOWN;
-                // just to avoid a warning
     }
 
     return family;
@@ -508,7 +575,7 @@ void wxNativeFontInfo::SetPixelSize(const wxSize& pixelSize)
     //       here if we get a negative height:
     wxCHECK_RET( pixelSize.GetWidth() >= 0 && pixelSize.GetHeight() > 0,
                  "Negative values for the pixel size or zero pixel height are not allowed" );
-
+    
     lf.lfHeight = pixelSize.GetHeight();
     lf.lfWidth = pixelSize.GetWidth();
 }
@@ -518,7 +585,7 @@ void wxNativeFontInfo::SetStyle(wxFontStyle style)
     switch ( style )
     {
         default:
-            wxFAIL_MSG( "unknown font style" );
+            wxFAIL_MSG( _T("unknown font style") );
             // fall through
 
         case wxFONTSTYLE_NORMAL:
@@ -537,7 +604,7 @@ void wxNativeFontInfo::SetWeight(wxFontWeight weight)
     switch ( weight )
     {
         default:
-            wxFAIL_MSG( "unknown font weight" );
+            wxFAIL_MSG( _T("unknown font weight") );
             // fall through
 
         case wxFONTWEIGHT_NORMAL:
@@ -575,51 +642,51 @@ void wxNativeFontInfo::SetFamily(wxFontFamily family)
 
     switch ( family )
     {
-        case wxFONTFAMILY_SCRIPT:
+        case wxSCRIPT:
             ff_family = FF_SCRIPT;
-            facename.Add(wxS("Script"));
-            facename.Add(wxS("Brush Script MT"));
-            facename.Add(wxS("Comic Sans MS"));
-            facename.Add(wxS("Lucida Handwriting"));
+            facename.Add(_T("Script"));
+            facename.Add(_T("Brush Script MT"));
+            facename.Add(_T("Comic Sans MS"));
+            facename.Add(_T("Lucida Handwriting"));
             break;
 
-        case wxFONTFAMILY_DECORATIVE:
+        case wxDECORATIVE:
             ff_family = FF_DECORATIVE;
-            facename.Add(wxS("Old English Text MT"));
-            facename.Add(wxS("Comic Sans MS"));
-            facename.Add(wxS("Lucida Handwriting"));
+            facename.Add(_T("Old English Text MT"));
+            facename.Add(_T("Comic Sans MS"));
+            facename.Add(_T("Lucida Handwriting"));
             break;
 
-        case wxFONTFAMILY_ROMAN:
+        case wxROMAN:
             ff_family = FF_ROMAN;
-            facename.Add(wxS("Times New Roman"));
-            facename.Add(wxS("Georgia"));
-            facename.Add(wxS("Garamond"));
-            facename.Add(wxS("Bookman Old Style"));
-            facename.Add(wxS("Book Antiqua"));
+            facename.Add(_T("Times New Roman"));
+            facename.Add(_T("Georgia"));
+            facename.Add(_T("Garamond"));
+            facename.Add(_T("Bookman Old Style"));
+            facename.Add(_T("Book Antiqua"));
             break;
 
-        case wxFONTFAMILY_TELETYPE:
-        case wxFONTFAMILY_MODERN:
+        case wxTELETYPE:
+        case wxMODERN:
             ff_family = FF_MODERN;
-            facename.Add(wxS("Courier New"));
-            facename.Add(wxS("Lucida Console"));
-            facename.Add(wxS("Andale Mono"));
-            facename.Add(wxS("OCR A Extended"));
-            facename.Add(wxS("Terminal"));
+            facename.Add(_T("Courier New"));
+            facename.Add(_T("Lucida Console"));
+            facename.Add(_T("Andale Mono"));
+            facename.Add(_T("OCR A Extended"));
+            facename.Add(_T("Terminal"));
             break;
 
-        case wxFONTFAMILY_SWISS:
+        case wxSWISS:
             ff_family = FF_SWISS;
-            facename.Add(wxS("Arial"));
-            facename.Add(wxS("Century Gothic"));
-            facename.Add(wxS("Lucida Sans Unicode"));
-            facename.Add(wxS("Tahoma"));
-            facename.Add(wxS("Trebuchet MS"));
-            facename.Add(wxS("Verdana"));
+            facename.Add(_T("Arial"));
+            facename.Add(_T("Century Gothic"));
+            facename.Add(_T("Lucida Sans Unicode"));
+            facename.Add(_T("Tahoma"));
+            facename.Add(_T("Trebuchet MS"));
+            facename.Add(_T("Verdana"));
             break;
 
-        case wxFONTFAMILY_DEFAULT:
+        case wxDEFAULT:
         default:
         {
             // We want Windows 2000 or later to have new fonts even MS Shell Dlg
@@ -627,9 +694,9 @@ void wxNativeFontInfo::SetFamily(wxFontFamily family)
             int verMaj;
             ff_family = FF_SWISS;
             if(wxGetOsVersion(&verMaj) == wxOS_WINDOWS_NT && verMaj >= 5)
-                facename.Add(wxS("MS Shell Dlg 2"));
+                facename.Add(_T("MS Shell Dlg 2"));
             else
-                facename.Add(wxS("MS Shell Dlg"));
+                facename.Add(_T("MS Shell Dlg"));
 
             // Quoting the MSDN:
             //     "MS Shell Dlg is a mapping mechanism that enables
@@ -641,9 +708,10 @@ void wxNativeFontInfo::SetFamily(wxFontFamily family)
 
     lf.lfPitchAndFamily = (BYTE)(DEFAULT_PITCH) | ff_family;
 
-    // reset the facename so that CreateFontIndirect() will automatically choose a
-    // face name based only on the font family.
-    lf.lfFaceName[0] = '\0';
+    if ( !wxStrlen(lf.lfFaceName) )
+    {
+        SetFaceName(facename);
+    }
 }
 
 void wxNativeFontInfo::SetEncoding(wxFontEncoding encoding)
@@ -677,11 +745,11 @@ bool wxNativeFontInfo::FromString(const wxString& s)
 {
     long l;
 
-    wxStringTokenizer tokenizer(s, wxS(";"), wxTOKEN_RET_EMPTY_ALL);
+    wxStringTokenizer tokenizer(s, _T(";"));
 
     // first the version
     wxString token = tokenizer.GetNextToken();
-    if ( token != wxS('0') )
+    if ( token != _T('0') )
         return false;
 
     token = tokenizer.GetNextToken();
@@ -749,11 +817,10 @@ bool wxNativeFontInfo::FromString(const wxString& s)
         return false;
     lf.lfPitchAndFamily = (BYTE)l;
 
-    if ( !tokenizer.HasMoreTokens() )
+    token = tokenizer.GetNextToken();
+    if(!token)
         return false;
-
-    // the face name may be empty
-    wxStrcpy(lf.lfFaceName, tokenizer.GetNextToken());
+    wxStrcpy(lf.lfFaceName, token.c_str());
 
     return true;
 }
@@ -762,7 +829,7 @@ wxString wxNativeFontInfo::ToString() const
 {
     wxString s;
 
-    s.Printf(wxS("%d;%ld;%ld;%ld;%ld;%ld;%d;%d;%d;%d;%d;%d;%d;%d;%s"),
+    s.Printf(_T("%d;%ld;%ld;%ld;%ld;%ld;%d;%d;%d;%d;%d;%d;%d;%d;%s"),
              0, // version, in case we want to change the format later
              lf.lfHeight,
              lf.lfWidth,
@@ -777,7 +844,7 @@ wxString wxNativeFontInfo::ToString() const
              lf.lfClipPrecision,
              lf.lfQuality,
              lf.lfPitchAndFamily,
-             lf.lfFaceName);
+             (const wxChar*)lf.lfFaceName);
 
     return s;
 }
@@ -849,7 +916,7 @@ wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
 bool wxFont::RealizeResource()
 {
     // NOTE: the GetHFONT() call automatically triggers a reallocation of
-    //       the HFONT if necessary (will do nothing if we already have the resource);
+    //       the HFONT if necessary (will do nothing if we already have the resource); 
     //       it returns NULL only if there is a failure in wxFontRefData::Alloc()...
     return GetHFONT() != NULL;
 }
@@ -873,7 +940,7 @@ WXHFONT wxFont::GetHFONT() const
 {
     // NOTE: wxFontRefData::GetHFONT() will automatically call
     //       wxFontRefData::Alloc() if necessary
-    return M_FONTDATA ? M_FONTDATA->GetHFONT() : 0;
+    return M_FONTDATA ? M_FONTDATA->GetHFONT(this) : 0;
 }
 
 bool wxFont::IsFree() const
@@ -1028,7 +1095,8 @@ wxFontEncoding wxFont::GetEncoding() const
 
 const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
 {
-    return IsOk() ? &(M_FONTDATA->GetNativeFontInfo()) : NULL;
+    return IsOk() && M_FONTDATA->HasNativeFontInfo() ? &(M_FONTDATA->GetNativeFontInfo())
+                                           : NULL;
 }
 
 wxString wxFont::GetNativeFontInfoDesc() const
@@ -1053,10 +1121,15 @@ bool wxFont::IsFixedWidth() const
 {
     wxCHECK_MSG( IsOk(), false, wxT("invalid font") );
 
-    // the two low-order bits specify the pitch of the font, the rest is
-    // family
-    BYTE pitch =
-        (BYTE)(M_FONTDATA->GetNativeFontInfo().lf.lfPitchAndFamily & PITCH_MASK);
+    if ( M_FONTDATA->HasNativeFontInfo() )
+    {
+        // the two low-order bits specify the pitch of the font, the rest is
+        // family
+        BYTE pitch =
+            (BYTE)(M_FONTDATA->GetNativeFontInfo().lf.lfPitchAndFamily & PITCH_MASK);
 
-    return pitch == FIXED_PITCH;
+        return pitch == FIXED_PITCH;
+    }
+
+    return wxFontBase::IsFixedWidth();
 }

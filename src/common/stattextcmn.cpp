@@ -24,7 +24,6 @@
     #pragma hdrstop
 #endif
 
-#include "wx/textwrapper.h"
 #include "wx/private/stattext.h"
 
 #ifndef WX_PRECOMP
@@ -69,7 +68,7 @@ void wxTextWrapper::Wrap(wxWindow *win, const wxString& text, int widthMax)
             lineStart = p;
         }
 
-        if ( p == text.end() || *p == wxT('\n') )
+        if ( p == text.end() || *p == _T('\n') )
         {
             DoOutputLine(line);
 
@@ -78,7 +77,7 @@ void wxTextWrapper::Wrap(wxWindow *win, const wxString& text, int widthMax)
         }
         else // not EOL
         {
-            if ( *p == wxT(' ') )
+            if ( *p == _T(' ') )
                 lastSpace = p;
 
             line += *p;
@@ -127,7 +126,7 @@ protected:
 
     virtual void OnNewLine()
     {
-        m_text += wxT('\n');
+        m_text += _T('\n');
     }
 
 private:

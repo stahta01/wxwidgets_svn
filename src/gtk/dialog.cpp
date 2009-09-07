@@ -111,11 +111,16 @@ int wxDialog::ShowModal()
     if ( win )
         win->GTKReleaseMouseAndNotify();
 
-    wxWindow * const parent = GetParentForModalDialog(GetParent());
-    if ( parent )
+    // use the apps top level window as parent if none given unless explicitly
+    // forbidden
+    if ( !GetParent() && !(GetWindowStyleFlag() & wxDIALOG_NO_PARENT) )
     {
-        gtk_window_set_transient_for( GTK_WINDOW(m_widget),
-                                      GTK_WINDOW(parent->m_widget) );
+        wxWindow * const parent = GetParentForModalDialog();
+        if ( parent && parent != this )
+        {
+            gtk_window_set_transient_for( GTK_WINDOW(m_widget),
+                                          GTK_WINDOW(parent->m_widget) );
+        }
     }
 
     wxBusyCursorSuspender cs; // temporarily suppress the busy cursor

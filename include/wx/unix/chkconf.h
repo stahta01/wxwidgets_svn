@@ -20,14 +20,3 @@
 #       endif
 #   endif
 #endif /* wxUSE_CONSOLE_EVENTLOOP */
-
-#if wxUSE_GSTREAMER
-#   if !wxUSE_THREADS
-#       ifdef wxABORT_ON_CONFIG_ERROR
-#           error "GStreamer requires threads"
-#       else
-#           undef wxUSE_GSTREAMER
-#           define wxUSE_GSTREAMER 0
-#       endif
-#   endif
-#endif /* wxUSE_GSTREAMER */

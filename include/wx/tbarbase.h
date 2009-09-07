@@ -121,7 +121,7 @@ public:
 
     wxControl *GetControl() const
     {
-        wxASSERT_MSG( IsControl(), wxT("this toolbar tool is not a control") );
+        wxASSERT_MSG( IsControl(), _T("this toolbar tool is not a control") );
 
         return m_control;
     }
@@ -135,7 +135,7 @@ public:
     int GetStyle() const { return m_toolStyle; }
     wxItemKind GetKind() const
     {
-        wxASSERT_MSG( IsButton(), wxT("only makes sense for buttons") );
+        wxASSERT_MSG( IsButton(), _T("only makes sense for buttons") );
 
         return m_kind;
     }
@@ -361,9 +361,6 @@ public:
 
     // must be called after all buttons have been created to finish toolbar
     // initialisation
-    //
-    // derived class versions should call the base one first, before doing
-    // platform-specific stuff
     virtual bool Realize();
 
     // tools state
@@ -604,10 +601,6 @@ protected:
 
     // un-toggle all buttons in the same radio group
     void UnToggleRadioGroup(wxToolBarToolBase *tool);
-
-    // make the size of the buttons big enough to fit the largest bitmap size
-    void AdjustToolBitmapSize();
-
 
     // the list of all our tools
     wxToolBarToolsList m_tools;

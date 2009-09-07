@@ -7,34 +7,6 @@
 // Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
-/// Symbolic names for the mouse buttons.
-enum wxMouseButton
-{
-    /// Any mouse button, means to check for any button being pressed for
-    /// example.
-    wxMOUSE_BTN_ANY     = -1,
-
-    /// None of the mouse buttons.
-    wxMOUSE_BTN_NONE    = 0,
-
-    /// Left mouse button.
-    wxMOUSE_BTN_LEFT    = 1,
-
-    /// Middle mouse button.
-    wxMOUSE_BTN_MIDDLE  = 2,
-
-    /// Right mouse button.
-    wxMOUSE_BTN_RIGHT   = 3,
-
-    /// First additional mouse button.
-    wxMOUSE_BTN_AUX1    = 4,
-
-    /// Second additional mouse button.
-    wxMOUSE_BTN_AUX2    = 5,
-
-    wxMOUSE_BTN_MAX
-};
-
 
 /**
     @class wxMouseState
@@ -50,7 +22,7 @@ enum wxMouseButton
     has no linking requirements.
 
     @nolibrary
-    @category{events}
+    @category{misc}
 
     @see wxGetMouseState(), wxMouseEvent
  */
@@ -75,35 +47,32 @@ public:
     /**
         Returns the physical mouse position.
     */
-    //@{
     wxPoint GetPosition() const;
-    void GetPosition(int *x, int *y) const;
-    //@}
 
     /**
-        Returns @true if the left mouse button is currently down.
+        Returns @true if the left mouse button changed to down.
     */
-    bool LeftIsDown() const;
+    bool LeftDown() const;
 
     /**
-        Returns @true if the middle mouse button is currently down.
+        Returns @true if the middle mouse button changed to down.
     */
-    bool MiddleIsDown() const;
+    bool MiddleDown() const;
 
     /**
-        Returns @true if the right mouse button is currently down.
+        Returns @true if the right mouse button changed to down.
     */
-    bool RightIsDown() const;
+    bool RightDown() const;
 
     /**
-        Returns @true if the first extra button mouse button is currently down.
+        Returns @true if the first extra button mouse button changed to down.
     */
-    bool Aux1IsDown() const;
+    bool Aux1Down() const;
 
     /**
-        Returns @true if the second extra button mouse button is currently down.
+        Returns @true if the second extra button mouse button changed to down.
     */
-    bool Aux2IsDown() const;
+    bool Aux2Down() const;
 };
 
 

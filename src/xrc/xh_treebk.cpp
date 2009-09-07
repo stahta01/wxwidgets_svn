@@ -61,10 +61,6 @@ wxObject *wxTreebookXmlHandler::DoCreateResource()
                     GetStyle(wxT("style")),
                     GetName());
 
-        wxImageList *imagelist = GetImageList();
-        if ( imagelist )
-            tbk->AssignImageList(imagelist);
-
         wxTreebook * old_par = m_tbk;
         m_tbk = tbk;
 
@@ -120,18 +116,6 @@ wxObject *wxTreebookXmlHandler::DoCreateResource()
                 m_tbk->AssignImageList( imgList );
             }
             imgIndex = imgList->Add(bmp);
-        }
-        else if ( HasParam(wxT("image")) )
-        {
-            if ( m_tbk->GetImageList() )
-            {
-                imgIndex = GetLong(wxT("image"));
-            }
-            else // image without image list?
-            {
-                ReportError(n, "image can only be used in conjunction "
-                               "with imagelist");
-            }
         }
 
         // then add the page to the corresponding parent

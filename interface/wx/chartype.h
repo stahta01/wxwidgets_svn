@@ -60,10 +60,7 @@
 
     Don't confuse this macro with _()!
 
-    Note that since wxWidgets 2.9.0 the use of _T() is discouraged just like
-    for wxT() and also that this macro may conflict with identifiers defined in
-    standard headers of some compilers (such as Sun CC) so its use should
-    really be avoided.
+    Note that since wxWidgets 2.9.0 the use of _T() is discouraged just like for wxT().
 
     @header{wx/chartype.h}
 */

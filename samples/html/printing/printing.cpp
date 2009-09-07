@@ -1,9 +1,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        printing.cpp
 // Purpose:     wxHtml sample: wxHtmlEasyPrinting test
-// Author:      Vaclav Slavik
+// Author:      ?
+// Modified by:
+// Created:     ?
 // RCS-ID:      $Id$
-// Copyright:   (c) 1998-2009 wxWidgets team
+// Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -179,23 +181,23 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     wxMenu *menuFile = new wxMenu;
     menuFile->Append(Minimal_Open, _("Open...\tCtrl-O"));
     menuFile->AppendSeparator();
-    menuFile->Append(Minimal_PageSetup, _("Page &Setup"));
-    menuFile->Append(Minimal_Preview, _("Print pre&view..."));
-    menuFile->Append(Minimal_Print, _("Print...\tCtrl-P"));
+    menuFile->Append(Minimal_PageSetup, _("Page Setup"));
+    menuFile->Append(Minimal_Print, _("Print..."));
+    menuFile->Append(Minimal_Preview, _("Preview..."));
     menuFile->AppendSeparator();
     menuFile->Append(wxID_ABOUT, _("&About"));
     menuFile->AppendSeparator();
     menuFile->Append(Minimal_Quit, _("&Exit"));
 
-    wxMenu *menuFonts = new wxMenu;
-    menuFonts->AppendRadioItem(Minimal_PrintSmall, _("&Small Printer Fonts"));
-    menuFonts->AppendRadioItem(Minimal_PrintNormal, _("&Normal Printer Fonts"));
-    menuFonts->AppendRadioItem(Minimal_PrintHuge, _("&Huge Printer Fonts"));
+    wxMenu *testFile = new wxMenu;
+    testFile->Append(Minimal_PrintSmall, _("Small Printer Fonts"));
+    testFile->Append(Minimal_PrintNormal, _("Normal Printer Fonts"));
+    testFile->Append(Minimal_PrintHuge, _("Huge Printer Fonts"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar;
     menuBar->Append(menuFile, _("&File"));
-    menuBar->Append(menuFonts, _("F&onts"));
+    menuBar->Append(testFile, _("&Test"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);

@@ -77,7 +77,6 @@ wxBEGIN_FLAGS( wxListBoxStyle )
     wxFLAGS_MEMBER(wxLB_HSCROLL)
     wxFLAGS_MEMBER(wxLB_ALWAYS_SB)
     wxFLAGS_MEMBER(wxLB_NEEDED_SB)
-    wxFLAGS_MEMBER(wxLB_NO_SB)
     wxFLAGS_MEMBER(wxLB_SORT)
 
 wxEND_FLAGS( wxListBoxStyle )
@@ -166,7 +165,7 @@ bool wxListBox::Create(wxWindow *parent,
         return false;
 
     // create the native control
-    if ( !MSWCreateControl(wxT("LISTBOX"), wxEmptyString, pos, size) )
+    if ( !MSWCreateControl(_T("LISTBOX"), wxEmptyString, pos, size) )
     {
         // control creation failed
         return false;
@@ -208,6 +207,10 @@ WXDWORD wxListBox::MSWGetStyle(long style, WXDWORD *exstyle) const
 {
     WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);
 
+    // always show the vertical scrollbar if necessary -- otherwise it is
+    // impossible to use the control with the mouse
+    msStyle |= WS_VSCROLL;
+
     // we always want to get the notifications
     msStyle |= LBS_NOTIFY;
 
@@ -216,23 +219,15 @@ WXDWORD wxListBox::MSWGetStyle(long style, WXDWORD *exstyle) const
     msStyle |= LBS_NOINTEGRALHEIGHT;
 
     wxASSERT_MSG( !(style & wxLB_MULTIPLE) || !(style & wxLB_EXTENDED),
-                  wxT("only one of listbox selection modes can be specified") );
+                  _T("only one of listbox selection modes can be specified") );
 
     if ( style & wxLB_MULTIPLE )
         msStyle |= LBS_MULTIPLESEL;
     else if ( style & wxLB_EXTENDED )
         msStyle |= LBS_EXTENDEDSEL;
 
-    wxASSERT_MSG( !(style & wxLB_ALWAYS_SB) || !(style & wxLB_NO_SB),
-                  wxT( "Conflicting styles wxLB_ALWAYS_SB and wxLB_NO_SB." ) );
-
-    if ( !(style & wxLB_NO_SB) )
-    {
-        msStyle |= WS_VSCROLL;
-        if ( style & wxLB_ALWAYS_SB )
-            msStyle |= LBS_DISABLENOSCROLL;
-    }
-
+    if ( m_windowStyle & wxLB_ALWAYS_SB )
+        msStyle |= LBS_DISABLENOSCROLL;
     if ( m_windowStyle & wxLB_HSCROLL )
         msStyle |= WS_HSCROLL;
     if ( m_windowStyle & wxLB_SORT )
@@ -254,7 +249,7 @@ WXDWORD wxListBox::MSWGetStyle(long style, WXDWORD *exstyle) const
 void wxListBox::OnInternalIdle()
 {
     wxWindow::OnInternalIdle();
-
+    
     if (m_updateHorizontalExtent)
     {
         SetHorizontalExtent(wxEmptyString);
@@ -362,9 +357,7 @@ void wxListBox::DoSetItemClientData(unsigned int n, void *clientData)
                  wxT("invalid index in wxListBox::SetClientData") );
 
     if ( ListBox_SetItemData(GetHwnd(), n, clientData) == LB_ERR )
-    {
         wxLogDebug(wxT("LB_SETITEMDATA failed"));
-    }
 }
 
 // Return number of selections and an array of selected integers
@@ -377,7 +370,7 @@ int wxListBox::GetSelections(wxArrayInt& aSelections) const
         int countSel = ListBox_GetSelCount(GetHwnd());
         if ( countSel == LB_ERR )
         {
-            wxLogDebug(wxT("ListBox_GetSelCount failed"));
+            wxLogDebug(_T("ListBox_GetSelCount failed"));
         }
         else if ( countSel != 0 )
         {
@@ -597,7 +590,7 @@ void wxListBox::SetHorizontalExtent(const wxString& s)
     //else: it shouldn't change
 }
 
-wxSize wxListBox::DoGetBestClientSize() const
+wxSize wxListBox::DoGetBestSize() const
 {
     // find the widest string
     int wLine;
@@ -616,17 +609,22 @@ wxSize wxListBox::DoGetBestClientSize() const
         wListbox = 100;
 
     // the listbox should be slightly larger than the widest string
-    wListbox += 3*GetCharWidth();
+    int cx, cy;
+    wxGetCharSize(GetHWND(), &cx, &cy, GetFont());
 
-    // add room for the scrollbar
+    wListbox += 3*cx;
+
+    // Add room for the scrollbar
     wListbox += wxSystemSettings::GetMetric(wxSYS_VSCROLL_X);
 
     // don't make the listbox too tall (limit height to 10 items) but don't
     // make it too small neither
-    int hListbox = SendMessage(GetHwnd(), LB_GETITEMHEIGHT, 0, 0)*
+    int hListbox = EDIT_HEIGHT_FROM_CHAR_HEIGHT(cy)*
                     wxMin(wxMax(m_noItems, 3), 10);
 
-    return wxSize(wListbox, hListbox);
+    wxSize best(wListbox, hListbox);
+    CacheBestSize(best);
+    return best;
 }
 
 // ----------------------------------------------------------------------------
@@ -742,8 +740,11 @@ bool wxListBox::MSWOnDraw(WXDRAWITEMSTRUCT *item)
     wxListBoxItem *pItem = (wxListBoxItem *)m_aItems[pStruct->itemID];
 
     wxDCTemp dc((WXHDC)pStruct->hDC);
+    wxPoint pt1(pStruct->rcItem.left, pStruct->rcItem.top);
+    wxPoint pt2(pStruct->rcItem.right, pStruct->rcItem.bottom);
+    wxRect rect(pt1, pt2);
 
-    return pItem->OnDrawItem(dc, wxRectFromRECT(pStruct->rcItem),
+    return pItem->OnDrawItem(dc, rect,
                              (wxOwnerDrawn::wxODAction)pStruct->itemAction,
                              (wxOwnerDrawn::wxODStatus)pStruct->itemState);
 }

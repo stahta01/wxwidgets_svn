@@ -135,8 +135,8 @@ protected:
     // custom list stores.
     virtual void GTKCreateComboBoxWidget();
 
-    virtual GtkEntry *GetEntry() const
-        { return m_entry; }
+    // return the GtkEntry part of the combobox
+    GtkEntry *GetEntry() const { return m_entry; }
 
     GtkEntry*   m_entry;
 

@@ -126,7 +126,7 @@ wxTextEntry *wxTextValidator::GetTextEntry()
 #endif
 
     wxFAIL_MSG(
-        wxT("wxTextValidator can only be used with wxTextCtrl or wxComboBox")
+        _T("wxTextValidator can only be used with wxTextCtrl or wxComboBox")
     );
 
     return NULL;

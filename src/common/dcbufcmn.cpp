@@ -115,17 +115,12 @@ void wxBufferedDC::UseBuffer(wxCoord w, wxCoord h)
     }
 
     SelectObject(*m_buffer);
-
-    // now that the DC is valid we can inherit the attributes (fonts, colours,
-    // layout direction, ...) from the original DC
-    if ( m_dc->IsOk() )
-        CopyAttributes(*m_dc);
 }
 
 void wxBufferedDC::UnMask()
 {
-    wxCHECK_RET( m_dc, wxT("no underlying wxDC?") );
-    wxASSERT_MSG( m_buffer && m_buffer->IsOk(), wxT("invalid backing store") );
+    wxCHECK_RET( m_dc, _T("no underlying wxDC?") );
+    wxASSERT_MSG( m_buffer && m_buffer->IsOk(), _T("invalid backing store") );
 
     wxCoord x = 0,
             y = 0;

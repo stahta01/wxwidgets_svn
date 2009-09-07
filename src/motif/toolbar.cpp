@@ -478,7 +478,7 @@ bool wxToolBar::Realize()
 wxToolBarToolBase *wxToolBar::FindToolForPosition(wxCoord WXUNUSED(x),
                                                   wxCoord WXUNUSED(y)) const
 {
-    wxFAIL_MSG( wxT("TODO") );
+    wxFAIL_MSG( _T("TODO") );
 
     return NULL;
 }

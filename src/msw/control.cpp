@@ -145,7 +145,7 @@ bool wxControl::MSWCreateControl(const wxChar *classname,
     {
         wxLogLastError(wxString::Format
                        (
-                        wxT("CreateWindowEx(\"%s\", flags=%08lx, ex=%08lx)"),
+                        _T("CreateWindowEx(\"%s\", flags=%08lx, ex=%08lx)"),
                         classname, style, exstyle
                        ));
 
@@ -245,7 +245,7 @@ wxSize wxControl::DoGetBestSize() const
 {
     if (m_windowSizer)
        return wxControlBase::DoGetBestSize();
-
+       
     return wxSize(DEFAULT_ITEM_WIDTH, DEFAULT_ITEM_HEIGHT);
 }
 

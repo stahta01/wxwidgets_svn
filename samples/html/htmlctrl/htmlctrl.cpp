@@ -133,7 +133,7 @@ bool MyApp::OnInit()
         return false;
 
     // create the main application window
-    MyFrame *frame = new MyFrame(wxT("wxWebKit Sample"));
+    MyFrame *frame = new MyFrame(_T("wxWebKit Sample"));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -184,7 +184,7 @@ MyFrame::MyFrame(const wxString& title)
     wxButton* btnReload = new wxButton(myToolbar, ID_RELOAD, _("Reload"));
     myToolbar->AddControl(btnReload);
     myToolbar->AddSeparator();
-    urlText = new wxTextCtrl(myToolbar, ID_URLLIST, wxT("http://www.wxwidgets.org"), wxDefaultPosition, wxSize(220, -1), wxTE_PROCESS_ENTER);
+    urlText = new wxTextCtrl(myToolbar, ID_URLLIST, _T("http://www.wxwidgets.org"), wxDefaultPosition, wxSize(220, -1), wxTE_PROCESS_ENTER);
     myToolbar->AddControl(urlText);
     myToolbar->AddSeparator();
     myToolbar->Realize();
@@ -196,7 +196,7 @@ MyFrame::MyFrame(const wxString& title)
     wxBoxSizer* boxSizer = new wxBoxSizer(wxVERTICAL);
     panel->SetSizer(boxSizer);
 
-    mySafari = new wxWebKitCtrl(panel, ID_WEBKIT, wxT("http://www.wxwidgets.org"), wxDefaultPosition, wxSize(200, 200));
+    mySafari = new wxWebKitCtrl(panel, ID_WEBKIT, _T("http://www.wxwidgets.org"), wxDefaultPosition, wxSize(200, 200));
 
     boxSizer->Add(mySafari, 1, wxEXPAND);
 
@@ -204,7 +204,7 @@ MyFrame::MyFrame(const wxString& title)
     SetSizer(frameSizer);
     frameSizer->Add(panel, 1, wxEXPAND);
 #else
-    mySafari = new wxWebKitCtrl(this, ID_WEBKIT, wxT("http://www.wxwidgets.org"), wxDefaultPosition, wxSize(200, 200));
+    mySafari = new wxWebKitCtrl(this, ID_WEBKIT, _T("http://www.wxwidgets.org"), wxDefaultPosition, wxSize(200, 200));
 #endif
 
 #if wxUSE_STATUSBAR
@@ -212,69 +212,55 @@ MyFrame::MyFrame(const wxString& title)
 #endif // wxUSE_STATUSBAR
 }
 
-void MyFrame::OnBackButton(wxCommandEvent& WXUNUSED(myEvent))
-{
+void MyFrame::OnBackButton(wxCommandEvent& myEvent){
     if (mySafari->CanGoBack())
         mySafari->GoBack();
 }
 
-void MyFrame::OnNextButton(wxCommandEvent& WXUNUSED(myEvent))
-{
+void MyFrame::OnNextButton(wxCommandEvent& myEvent){
     if (mySafari->CanGoForward())
         mySafari->GoForward();
 }
 
-void MyFrame::OnStopButton(wxCommandEvent& WXUNUSED(myEvent))
-{
+void MyFrame::OnStopButton(wxCommandEvent& myEvent){
         mySafari->Stop();
 }
 
-void MyFrame::OnReloadButton(wxCommandEvent& WXUNUSED(myEvent))
-{
+void MyFrame::OnReloadButton(wxCommandEvent& myEvent){
     mySafari->Reload();
 }
 
-void MyFrame::OnURLEnter(wxCommandEvent& WXUNUSED(myEvent))
-{
+void MyFrame::OnURLEnter(wxCommandEvent& myEvent){
     mySafari->LoadURL(urlText->GetValue());
 }
 
-void MyFrame::OnStateChanged(wxWebKitStateChangedEvent& myEvent)
-{
-    if (GetStatusBar() != NULL)
-    {
-        if (myEvent.GetState() == wxWEBKIT_STATE_NEGOTIATING)
-        {
+void MyFrame::OnStateChanged(wxWebKitStateChangedEvent& myEvent){
+    if (GetStatusBar() != NULL){
+        if (myEvent.GetState() == wxWEBKIT_STATE_NEGOTIATING){
             GetStatusBar()->SetStatusText(_("Contacting ") + myEvent.GetURL());
             urlText->SetValue(myEvent.GetURL());
         }
-        else if (myEvent.GetState() == wxWEBKIT_STATE_TRANSFERRING)
-        {
+        else if (myEvent.GetState() == wxWEBKIT_STATE_TRANSFERRING){
             GetStatusBar()->SetStatusText(_("Loading ") + myEvent.GetURL());
         }
-        else if (myEvent.GetState() == wxWEBKIT_STATE_STOP)
-        {
+        else if (myEvent.GetState() == wxWEBKIT_STATE_STOP){
             GetStatusBar()->SetStatusText(_("Load complete."));
             SetTitle(mySafari->GetTitle());
         }
-        else if (myEvent.GetState() == wxWEBKIT_STATE_FAILED)
-        {
+        else if (myEvent.GetState() == wxWEBKIT_STATE_FAILED){
             GetStatusBar()->SetStatusText(_("Failed to load ") + myEvent.GetURL());
         }
     }
 
 }
 
-void MyFrame::OnViewSource(wxCommandEvent& WXUNUSED(myEvent))
-{
+void MyFrame::OnViewSource(wxCommandEvent& myEvent){
     if (mySafari->CanGetPageSource())
         wxMessageBox(mySafari->GetPageSource());
 }
 
-void MyFrame::OnSetSource(wxCommandEvent& WXUNUSED(myEvent))
-{
-    if (mySafari)
-    {
+void MyFrame::OnSetSource(wxCommandEvent& myEvent){
+    if (mySafari){
         wxString myText = wxT("<HTML><HEAD></HEAD><BODY><P>Hello world!</P></BODY></HTML>");
         mySafari->SetPageSource(myText);
     }

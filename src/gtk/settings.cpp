@@ -228,7 +228,7 @@ wxColour wxSystemSettingsNative::GetColour( wxSystemColour index )
 
         case wxSYS_COLOUR_MAX:
         default:
-            wxFAIL_MSG( wxT("unknown system colour index") );
+            wxFAIL_MSG( _T("unknown system colour index") );
             color = *wxWHITE;
             break;
     }
@@ -257,13 +257,13 @@ wxFont wxSystemSettingsNative::GetFont( wxSystemFont index )
                 wxNativeFontInfo info;
                 info.description = ButtonStyle()->font_desc;
                 gs_fontSystem = wxFont(info);
-
+                
                 // (try to) heal the default font (on some common systems e.g. Ubuntu
                 // it's "Sans Serif" but the real font is called "Sans"):
                 if (!wxFontEnumerator::IsValidFacename(gs_fontSystem.GetFaceName()) &&
                     gs_fontSystem.GetFaceName() == "Sans Serif")
                     gs_fontSystem.SetFaceName("Sans");
-
+                
                 info.description = NULL;
             }
             font = gs_fontSystem;

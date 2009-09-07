@@ -16,54 +16,21 @@
 #include "wx/nonownedwnd.h"
 #include "wx/frame.h"
 
-CGRect wxToNSRect(UIView* parent, const wxRect& r )
-{
-    CGRect frame = parent ? [parent bounds] : [[UIScreen mainScreen] bounds];
-    int y = r.y;
-    int x = r.x ;
-    return CGRectMake(x, y, r.width , r.height);
-}
-
-wxRect wxFromNSRect( UIView* parent, const CGRect& rect )
-{
-    CGRect frame = parent ? [parent bounds] : [[UIScreen mainScreen] bounds];
-    int y = rect.origin.y;
-    int x = rect.origin.x;
-    return wxRect( x, y, rect.size.width, rect.size.height );
-}
-
-CGPoint wxToNSPoint( UIView* parent, const wxPoint& p )
-{
-    CGRect frame = parent ? [parent bounds] : [[UIScreen mainScreen] bounds];
-    int x = p.x ;
-    int y = p.y;
-    return CGPointMake(x, y);
-}
-
-wxPoint wxFromNSPoint( UIView* parent, const CGPoint& p )
-{
-    CGRect frame = parent ? [parent bounds] : [[UIScreen mainScreen] bounds];
-    int x = p.x;
-    int y = p.y;
-    return wxPoint( x, y);
-}
-
-
 IMPLEMENT_DYNAMIC_CLASS( wxNonOwnedWindowIPhoneImpl , wxNonOwnedWindowImpl )
 
-wxNonOwnedWindowIPhoneImpl::wxNonOwnedWindowIPhoneImpl( wxNonOwnedWindow* nonownedwnd) :
+wxNonOwnedWindowIPhoneImpl::wxNonOwnedWindowIPhoneImpl( wxNonOwnedWindow* nonownedwnd) : 
     wxNonOwnedWindowImpl(nonownedwnd)
 {
     m_macWindow = NULL;
     m_macFullScreenData = NULL;
 }
-
-wxNonOwnedWindowIPhoneImpl::wxNonOwnedWindowIPhoneImpl()
+    
+wxNonOwnedWindowIPhoneImpl::wxNonOwnedWindowIPhoneImpl() 
 {
     m_macWindow = NULL;
     m_macFullScreenData = NULL;
 }
-
+    
 wxNonOwnedWindowIPhoneImpl::~wxNonOwnedWindowIPhoneImpl()
 {
     [m_macWindow release];
@@ -78,11 +45,11 @@ void wxNonOwnedWindowIPhoneImpl::Create( wxWindow* parent, const wxPoint& pos, c
 long style, long extraStyle, const wxString& name )
 {
     m_macWindow = [UIWindow alloc];
-
+    
     UIWindowLevel level = UIWindowLevelNormal;
-
+    
     // most styles are not supported on the iphone
-
+    
     if ( style & wxFRAME_TOOL_WINDOW )
     {
         level = UIWindowLevelAlert; ;
@@ -102,11 +69,11 @@ long style, long extraStyle, const wxString& name )
     }
 
     if ( ( style & wxSTAY_ON_TOP ) )
-        level = UIWindowLevelAlert;
+        level = UIWindowLevelAlert;    
     CGRect r = CGRectMake( 0, 0, size.x, size.y) ;
-
+    
     [m_macWindow initWithFrame:r ];
-
+        
     [m_macWindow setWindowLevel:level];
     // [m_macWindow makeKeyAndOrderFront:nil];
 }
@@ -120,7 +87,7 @@ WXWindow wxNonOwnedWindowIPhoneImpl::GetWXWindow() const
 void wxNonOwnedWindowIPhoneImpl::Raise()
 {
 }
-
+    
 void wxNonOwnedWindowIPhoneImpl::Lower()
 {
 }
@@ -135,7 +102,7 @@ bool wxNonOwnedWindowIPhoneImpl::Show(bool show)
     }
     return true;
 }
-
+    
 bool wxNonOwnedWindowIPhoneImpl::ShowWithEffect(bool show, wxShowEffect effect, unsigned timeout)
 {
     return Show(show);
@@ -161,12 +128,12 @@ void wxNonOwnedWindowIPhoneImpl::SetExtraStyle( long exStyle )
 {
     // no special styles supported
 }
-
+    
 bool wxNonOwnedWindowIPhoneImpl::SetBackgroundStyle(wxBackgroundStyle style)
 {
     return true;
 }
-
+    
 bool wxNonOwnedWindowIPhoneImpl::CanSetTransparent()
 {
     return true;
@@ -174,7 +141,7 @@ bool wxNonOwnedWindowIPhoneImpl::CanSetTransparent()
 
 void wxNonOwnedWindowIPhoneImpl::MoveWindow(int x, int y, int width, int height)
 {
-    CGRect r = CGRectMake( x,y,width,height) ;
+    CGRect r = CGRectMake( 0,0,width,height) ;
     [m_macWindow setFrame:r];
 }
 
@@ -192,39 +159,39 @@ void wxNonOwnedWindowIPhoneImpl::GetSize( int &width, int &height ) const
     height = rect.size.height;
 }
 
-void wxNonOwnedWindowIPhoneImpl::GetContentArea( int& left, int &top, int &width, int &height ) const
+void wxNonOwnedWindowIPhoneImpl::GetContentArea( int& left, int &right, int &width, int &height ) const
 {
-    CGRect rect = [m_macWindow frame];
+    CGRect rect = [m_macWindow  frame];
     width = rect.size.width;
     height = rect.size.height;
-    left = rect.origin.x;
-    top = rect.origin.y;
+    left = 0;
+    right = 0;
 }
-
+    
 bool wxNonOwnedWindowIPhoneImpl::SetShape(const wxRegion& region)
 {
     return false;
 }
 
-void wxNonOwnedWindowIPhoneImpl::SetTitle( const wxString& title, wxFontEncoding encoding )
+void wxNonOwnedWindowIPhoneImpl::SetTitle( const wxString& title, wxFontEncoding encoding ) 
 {
 // TODO change title of app ?
 }
-
+    
 bool wxNonOwnedWindowIPhoneImpl::IsMaximized() const
 {
     return false;
 }
-
+    
 bool wxNonOwnedWindowIPhoneImpl::IsIconized() const
 {
     return false;
 }
-
+    
 void wxNonOwnedWindowIPhoneImpl::Iconize( bool iconize )
 {
 }
-
+    
 void wxNonOwnedWindowIPhoneImpl::Maximize(bool maximize)
 {
 }
@@ -233,9 +200,9 @@ bool wxNonOwnedWindowIPhoneImpl::IsFullScreen() const
 {
     return m_macFullScreenData != NULL ;
 }
-
+    
 bool wxNonOwnedWindowIPhoneImpl::ShowFullScreen(bool show, long style)
-{
+{    
     return true;
 }
 

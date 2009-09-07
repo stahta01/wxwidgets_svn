@@ -294,7 +294,7 @@ int wxListBox::DoInsertItems(const wxArrayStringsAdapter & items,
         n = (int)::WinSendMsg(GetHwnd(), LM_INSERTITEM, (MPARAM)lIndexType, (MPARAM)items[i].wx_str());
         if (n < 0)
         {
-            wxLogLastError(wxT("WinSendMsg(LM_INSERTITEM)"));
+            wxLogLastError(_T("WinSendMsg(LM_INSERTITEM)"));
             n = wxNOT_FOUND;
             break;
         }
@@ -305,7 +305,7 @@ int wxListBox::DoInsertItems(const wxArrayStringsAdapter & items,
         {
             wxOwnerDrawn*               pNewItem = CreateItem(n); // dummy argument
             wxScreenDC                  vDc; // FIXME: is it really needed here?
-
+    
             pNewItem->SetName(items[i]);
             m_aItems.Insert(pNewItem, n);
             pNewItem->SetFont(GetFont());

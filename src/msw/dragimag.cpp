@@ -281,7 +281,7 @@ bool wxDragImage::BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullS
 
     if (!ret)
     {
-        wxFAIL_MSG( wxT("BeginDrag failed.") );
+        wxFAIL_MSG( _T("BeginDrag failed.") );
 
         return false;
     }

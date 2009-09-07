@@ -127,7 +127,6 @@ public:
     virtual wxTreeItemId GetRootItem() const;
     virtual wxTreeItemId GetSelection() const;
     virtual size_t GetSelections(wxArrayTreeItemIds& selections) const;
-    virtual wxTreeItemId GetFocusedItem() const;
 
     virtual wxTreeItemId GetItemParent(const wxTreeItemId& item) const;
     virtual wxTreeItemId GetFirstChild(const wxTreeItemId& item,
@@ -317,9 +316,6 @@ private:
 
     // whether we need to trigger a state image click event
     bool m_triggerStateImageClick;
-
-    // whether we need to deselect other items on mouse up
-    bool m_mouseUpDeselect;
 
     friend class wxTreeItemIndirectData;
     friend class wxTreeSortHelper;

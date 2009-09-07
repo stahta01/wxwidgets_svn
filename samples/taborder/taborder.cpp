@@ -100,13 +100,9 @@ private:
     void DoNavigate(int flags)
     {
         if ( m_panel->NavigateIn(flags) )
-        {
-            wxLogStatus(this, wxT("Navigation event processed"));
-        }
+            wxLogStatus(this, _T("Navigation event processed"));
         else
-        {
-            wxLogStatus(this, wxT("Navigation event ignored"));
-        }
+            wxLogStatus(this, _T("Navigation event ignored"));
     }
 
     wxPanel *m_panel;
@@ -144,8 +140,8 @@ private:
         if ( event.GetKeyCode() == WXK_TAB &&
                 wxMessageBox
                 (
-                    wxT("Let the Tab be used for navigation?"),
-                    wxT("wxWidgets TabOrder sample: Tab key pressed"),
+                    _T("Let the Tab be used for navigation?"),
+                    _T("wxWidgets TabOrder sample: Tab key pressed"),
                     wxICON_QUESTION | wxYES_NO,
                     this
                 ) != wxYES )
@@ -195,7 +191,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 END_EVENT_TABLE()
 
 MyFrame::MyFrame()
-       : wxFrame(NULL, wxID_ANY, wxT("TabOrder wxWidgets Sample"),
+       : wxFrame(NULL, wxID_ANY, _T("TabOrder wxWidgets Sample"),
                  wxDefaultPosition, wxSize(700, 450))
 {
     SetIcon(wxICON(sample));
@@ -206,14 +202,14 @@ MyFrame::MyFrame()
     menuFile->Append(TabOrder_Quit);
 
     wxMenu *menuNav = new wxMenu;
-    menuNav->Append(TabOrder_TabForward, wxT("Tab &forward\tCtrl-F"),
-                    wxT("Emulate a <Tab> press"));
-    menuNav->Append(TabOrder_TabBackward, wxT("Tab &backward\tCtrl-B"),
-                    wxT("Emulate a <Shift-Tab> press"));
+    menuNav->Append(TabOrder_TabForward, _T("Tab &forward\tCtrl-F"),
+                    _T("Emulate a <Tab> press"));
+    menuNav->Append(TabOrder_TabBackward, _T("Tab &backward\tCtrl-B"),
+                    _T("Emulate a <Shift-Tab> press"));
 
     wxMenuBar *mbar = new wxMenuBar;
-    mbar->Append(menuFile, wxT("&File"));
-    mbar->Append(menuNav, wxT("&Navigate"));
+    mbar->Append(menuFile, _T("&File"));
+    mbar->Append(menuNav, _T("&Navigate"));
 
     SetMenuBar(mbar);
 
@@ -229,8 +225,8 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox(wxT("Tab navigation sample\n(c) 2007 Vadim Zeitlin"),
-                 wxT("About TabOrder wxWidgets Sample"), wxOK, this);
+    wxMessageBox(_T("Tab navigation sample\n(c) 2007 Vadim Zeitlin"),
+                 _T("About TabOrder wxWidgets Sample"), wxOK, this);
 }
 
 void MyFrame::OnTabForward(wxCommandEvent& WXUNUSED(event))
@@ -255,11 +251,11 @@ void MyFrame::OnIdle( wxIdleEvent& WXUNUSED(event) )
         wxString msg;
         if ( focus )
         {
-            msg.Printf(wxT("Focus is at %s"), s_windowFocus->GetName().c_str());
+            msg.Printf(_T("Focus is at %s"), s_windowFocus->GetName().c_str());
         }
         else
         {
-            msg = wxT("No focus");
+            msg = _T("No focus");
         }
 
         SetStatusText(msg, StatusPane_Focus);
@@ -274,16 +270,16 @@ MyPanel::MyPanel(wxWindow *parent)
        : wxPanel(parent, wxID_ANY)
 {
     wxNotebook *notebook = new wxNotebook(this, wxID_ANY);
-    notebook->AddPage(CreateButtonPage(notebook), wxT("Button"));
-    notebook->AddPage(CreateTextPage(notebook), wxT("Text"));
+    notebook->AddPage(CreateButtonPage(notebook), _T("Button"));
+    notebook->AddPage(CreateTextPage(notebook), _T("Text"));
 
     wxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
     sizerV->Add(notebook, wxSizerFlags(1).Expand());
 
     wxListBox *lbox = new wxListBox(this, wxID_ANY);
-    lbox->AppendString(wxT("Just a"));
-    lbox->AppendString(wxT("simple"));
-    lbox->AppendString(wxT("listbox"));
+    lbox->AppendString(_T("Just a"));
+    lbox->AppendString(_T("simple"));
+    lbox->AppendString(_T("listbox"));
     sizerV->Add(lbox, wxSizerFlags(1).Expand());
 
     SetSizerAndFit(sizerV);
@@ -295,10 +291,10 @@ wxWindow *MyPanel::CreateButtonPage(wxWindow *parent)
 
     wxPanel *page = new wxPanel(parent);
     wxSizer *sizerPage = new wxBoxSizer(wxHORIZONTAL);
-    sizerPage->Add(new wxButton(page, wxID_ANY, wxT("&First")), flagsBorder);
-    sizerPage->Add(new wxStaticText(page, wxID_ANY, wxT("[st&atic]")),
+    sizerPage->Add(new wxButton(page, wxID_ANY, _T("&First")), flagsBorder);
+    sizerPage->Add(new wxStaticText(page, wxID_ANY, _T("[st&atic]")),
                    flagsBorder);
-    sizerPage->Add(new wxButton(page, wxID_ANY, wxT("&Second")), flagsBorder);
+    sizerPage->Add(new wxButton(page, wxID_ANY, _T("&Second")), flagsBorder);
 
     page->SetSizer(sizerPage);
 
@@ -313,14 +309,14 @@ wxWindow *MyPanel::CreateTextPage(wxWindow *parent)
     wxPanel *page = new wxPanel(parent);
 
     wxSizer *sizerH = new wxBoxSizer(wxHORIZONTAL);
-    sizerH->Add(new wxStaticText(page, wxID_ANY, wxT("&Label:")), flagsBorder);
-    sizerH->Add(new MyTabTextCtrl(page, wxT("TAB ignored here")), flagsBorder);
+    sizerH->Add(new wxStaticText(page, wxID_ANY, _T("&Label:")), flagsBorder);
+    sizerH->Add(new MyTabTextCtrl(page, _T("TAB ignored here")), flagsBorder);
     sizerPage->Add(sizerH, wxSizerFlags(1).Expand());
 
     sizerH = new wxBoxSizer(wxHORIZONTAL);
-    sizerH->Add(new wxStaticText(page, wxID_ANY, wxT("&Another one:")),
+    sizerH->Add(new wxStaticText(page, wxID_ANY, _T("&Another one:")),
                 flagsBorder);
-    sizerH->Add(new MyTabTextCtrl(page, wxT("press Tab here"), wxTE_PROCESS_TAB),
+    sizerH->Add(new MyTabTextCtrl(page, _T("press Tab here"), wxTE_PROCESS_TAB),
                 flagsBorder);
     sizerPage->Add(sizerH, wxSizerFlags(1).Expand());
 

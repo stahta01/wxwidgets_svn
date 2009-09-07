@@ -189,7 +189,7 @@ const gchar *wx_pango_version_check (int major, int minor, int micro)
     // NOTE: you don't need to use this macro to check for Pango features
     //       added in pango-1.4 or earlier since GTK 2.4 (our minimum requirement
     //       for GTK lib) required pango 1.4...
-
+    
 #ifdef PANGO_VERSION_MAJOR
     if (!gtk_check_version (2,11,0))
     {
@@ -421,7 +421,7 @@ bool wxGUIAppTraits::ShowAssertDialog(const wxString& msg)
         break;
 
     default:
-        wxFAIL_MSG( wxT("unexpected return code from GtkAssertDialog") );
+        wxFAIL_MSG( _T("unexpected return code from GtkAssertDialog") );
     }
 
     gtk_widget_destroy(dialog);
@@ -435,7 +435,7 @@ bool wxGUIAppTraits::ShowAssertDialog(const wxString& msg)
 
 wxString wxGUIAppTraits::GetDesktopEnvironment() const
 {
-    wxString de = wxSystemOptions::GetOption(wxT("gtk.desktop"));
+    wxString de = wxSystemOptions::GetOption(_T("gtk.desktop"));
 #if wxUSE_DETECT_SM
     if ( de.empty() )
     {
@@ -484,18 +484,18 @@ wxString wxGetNameFromGtkOptionEntry(const GOptionEntry *opt)
     wxString ret;
 
     if (opt->short_name)
-        ret << wxT("-") << opt->short_name;
+        ret << _T("-") << opt->short_name;
     if (opt->long_name)
     {
         if (!ret.empty())
-            ret << wxT(", ");
-        ret << wxT("--") << opt->long_name;
+            ret << _T(", ");
+        ret << _T("--") << opt->long_name;
 
         if (opt->arg_description)
-            ret << wxT("=") << opt->arg_description;
+            ret << _T("=") << opt->arg_description;
     }
 
-    return wxT("  ") + ret;
+    return _T("  ") + ret;
 }
 
 #endif // __WXGTK26__

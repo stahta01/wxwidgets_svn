@@ -47,7 +47,7 @@ public:
     {
         Create(size, family, style, weight, underlined, face, encoding);
     }
-
+    
     bool Create(int size,
                 wxFontFamily family,
                 wxFontStyle style,
@@ -135,7 +135,7 @@ public:
     virtual void SetUnderlined(bool underlined);
     virtual void SetEncoding(wxFontEncoding encoding);
 
-    wxDECLARE_COMMON_FONT_METHODS();
+    WXDECLARE_COMPAT_SETTERS
 
     virtual bool IsFixedWidth() const;
 

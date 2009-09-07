@@ -151,8 +151,6 @@ int wxBitmapComboBox::DoInsertItems(const wxArrayStringsAdapter & items,
     const unsigned int numItems = items.GetCount();
     const unsigned int countNew = GetCount() + numItems;
 
-    wxASSERT( numItems == 1 || !HasFlag(wxCB_SORT) );  // Sanity check
-
     m_bitmaps.Alloc(countNew);
 
     for ( unsigned int i = 0; i < numItems; i++ )
@@ -167,14 +165,6 @@ int wxBitmapComboBox::DoInsertItems(const wxArrayStringsAdapter & items,
     {
         for ( int i = numItems-1; i >= 0; i-- )
             BCBDoDeleteOneItem(pos + i);
-    }
-    else if ( ((unsigned int)index) != pos )
-    {
-        // Move pre-inserted empty bitmap into correct position
-        // (usually happens when combo box has wxCB_SORT style)
-        wxBitmap* bmp = static_cast<wxBitmap*>(m_bitmaps[pos]);
-        m_bitmaps.RemoveAt(pos);
-        m_bitmaps.Insert(bmp, index);
     }
 
     return index;
@@ -337,7 +327,7 @@ void wxBitmapComboBox::OnDrawItem(wxDC& dc,
     {
         text = GetString(item);
     }
-
+    
     wxBitmapComboBoxBase::DrawItem(dc, rect, item, text, flags);
 }
 

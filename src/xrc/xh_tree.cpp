@@ -51,13 +51,9 @@ wxObject *wxTreeCtrlXmlHandler::DoCreateResource()
     tree->Create(m_parentAsWindow,
                 GetID(),
                 GetPosition(), GetSize(),
-                GetStyle(wxT("style"), wxTR_DEFAULT_STYLE),
+                GetStyle(_T("style"), wxTR_DEFAULT_STYLE),
                 wxDefaultValidator,
                 GetName());
-
-    wxImageList *imagelist = GetImageList();
-    if ( imagelist )
-        tree->AssignImageList(imagelist);
 
     SetupWindow(tree);
 

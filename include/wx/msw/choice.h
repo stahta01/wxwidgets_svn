@@ -92,11 +92,7 @@ protected:
     virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 
     // common part of all ctors
-    void Init()
-    {
-        m_lastAcceptedSelection = wxID_NONE;
-        m_heightOwn = wxDefaultCoord;
-    }
+    void Init() { m_lastAcceptedSelection = wxID_NONE; }
 
     virtual void DoDeleteOneItem(unsigned int n);
     virtual void DoClear();
@@ -118,10 +114,7 @@ protected:
 
     // update the height of the drop down list to fit the number of items we
     // have (without changing the visible height)
-    void MSWUpdateDropDownHeight();
-
-    // set the height of the visible part of the control to m_heightOwn
-    void MSWUpdateVisibleHeight();
+    void UpdateVisibleHeight();
 
     // create and initialize the control
     bool CreateAndInit(wxWindow *parent, wxWindowID id,
@@ -135,18 +128,12 @@ protected:
     // free all memory we have (used by Clear() and dtor)
     void Free();
 
-#if wxUSE_DEFERRED_SIZING
-    virtual void MSWEndDeferWindowPos();
-#endif // wxUSE_DEFERRED_SIZING
 
     // last "completed" selection, i.e. not the transient one while the user is
     // browsing the popup list: this is only used when != wxID_NONE which is
     // the case while the drop down is opened
     int m_lastAcceptedSelection;
 
-    // the height of the control itself if it was set explicitly or
-    // wxDefaultCoord if it hadn't
-    int m_heightOwn;
 
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxChoice)
 };

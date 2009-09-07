@@ -107,11 +107,7 @@ void wxGenericMessageDialog::DoCreateMsgdialog()
     int center_flag = wxEXPAND;
     if (m_dialogStyle & wxYES_NO)
         center_flag = wxALIGN_CENTRE;
-    wxSizer *sizerBtn = CreateSeparatedButtonSizer
-                        (
-                            m_dialogStyle & (wxOK | wxCANCEL | wxYES_NO |
-                                             wxNO_DEFAULT | wxCANCEL_DEFAULT)
-                        );
+    wxSizer *sizerBtn = CreateSeparatedButtonSizer(m_dialogStyle & ButtonSizerFlags);
     if ( sizerBtn )
         topsizer->Add(sizerBtn, 0, center_flag | wxALL, 10 );
 

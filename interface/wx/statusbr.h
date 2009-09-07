@@ -8,7 +8,7 @@
 
 /**
     @class wxStatusBarPane
-
+    
     A status bar pane data container used by wxStatusBar.
 
     @library{wxcore}
@@ -23,21 +23,27 @@ public:
         Constructs the pane with the given @a style and @a width.
     */
     wxStatusBarPane(int style = wxSB_NORMAL, size_t width = 0);
-
+        
     /**
         Returns the pane width; it maybe negative, indicating a variable-width field.
     */
     int GetWidth() const;
-
+    
     /**
         Returns the pane style.
     */
     int GetStyle() const;
-
+    
     /**
-        Returns the text currently shown in this pane.
-     */
-    wxString GetText() const;
+        Returns the stack of strings pushed on this pane.
+        
+        Note that this stack does include also the string currently displayed in this pane
+        as the version stored in the native status bar control is possibly ellipsized.
+        
+        Also note that GetStack().Last() is the top of the stack (i.e. the string shown 
+        in the status bar).
+    */
+    const wxArrayString& GetStack() const;
 };
 
 /**
@@ -47,31 +53,9 @@ public:
     to give small amounts of status information. It can contain one or more fields,
     one or more of which can be variable length according to the size of the window.
 
-    wxStatusBar also maintains an independent stack of status texts for each field
-    (see PushStatusText() and PopStatusText()).
-
-    Note that in wxStatusBar context, the terms @e pane and @e field are synonyms.
-
     @beginStyleTable
-    @style{wxSTB_SIZEGRIP}
-        Displays a gripper at the right-hand side of the status bar which can be used
-        to resize the parent window.
-    @style{wxSTB_SHOW_TIPS}
-        Displays tooltips for those panes whose status text has been ellipsized/truncated
-        because the status text doesn't fit the pane width.
-        Note that this style has effect only on wxGTK (with GTK+ >= 2.12) currently.
-    @style{wxSTB_ELLIPSIZE_START}
-        Replace the beginning of the status texts with an ellipsis when the status text
-        widths exceed the status bar pane's widths (uses wxControl::Ellipsize).
-    @style{wxSTB_ELLIPSIZE_MIDDLE}
-        Replace the middle of the status texts with an ellipsis when the status text
-        widths exceed the status bar pane's widths (uses wxControl::Ellipsize).
-    @style{wxSTB_ELLIPSIZE_END}
-        Replace the end of the status texts with an ellipsis when the status text
-        widths exceed the status bar pane's widths (uses wxControl::Ellipsize).
-    @style{wxSTB_DEFAULT_STYLE}
-        The default style: includes
-        @c wxSTB_SIZEGRIP|wxSTB_SHOW_TIPS|wxSTB_ELLIPSIZE_END|wxFULL_REPAINT_ON_RESIZE.
+    @style{wxST_SIZEGRIP}
+        Displays a gripper at the right-hand side of the status bar.
     @endStyleTable
 
     @remarks
@@ -109,7 +93,7 @@ public:
         @see Create()
     */
     wxStatusBar(wxWindow* parent, wxWindowID id = wxID_ANY,
-                long style = wxSTB_DEFAULT_STYLE,
+                long style = wxST_SIZEGRIP,
                 const wxString& name = wxStatusBarNameStr);
 
     /**
@@ -122,7 +106,7 @@ public:
         See wxStatusBar() for details.
     */
     bool Create(wxWindow* parent, wxWindowID id = wxID_ANY,
-                long style = wxSTB_DEFAULT_STYLE,
+                long style = wxST_SIZEGRIP,
                 const wxString& name = wxStatusBarNameStr);
 
     /**
@@ -138,26 +122,17 @@ public:
         @see wxRect
     */
     virtual bool GetFieldRect(int i, wxRect& rect) const;
-
+    
     /**
-        Returns the number of fields in the status bar.
+        Returns the number of fields in the status bar. 
     */
     int GetFieldsCount() const;
-
+    
     /**
         Returns the wxStatusBarPane representing the @a n-th field.
     */
     const wxStatusBarPane& GetField(int n) const;
-
-    /**
-        Returns the horizontal and vertical borders used when rendering the field
-        text inside the field area.
-
-        Note that the rect returned by GetFieldRect() already accounts for the
-        presence of horizontal and vertical border returned by this function.
-    */
-    wxSize GetBorders() const;
-
+    
     /**
         Returns the string associated with a status bar field.
 
@@ -172,35 +147,38 @@ public:
     virtual wxString GetStatusText(int i = 0) const;
 
     /**
-        Returns the width of the @a n-th field.
+        Returns the stack of strings pushed (see PushStatusText()) on the
+        @a n-th field.
+        
+        See wxStatusBarPane::GetStack() for more info.
+    */
+    const wxArrayString& GetStatusStack(int n) const;
 
+    /**
+        Returns the width of the @a n-th field.
+        
         See wxStatusBarPane::GetWidth() for more info.
     */
     int GetStatusWidth(int n) const;
 
     /**
         Returns the style of the @a n-th field.
-
+        
         See wxStatusBarPane::GetStyle() for more info.
     */
     int GetStatusStyle(int n) const;
-
+        
     /**
-        Restores the text to the value it had before the last call to
-        PushStatusText().
-
-        Notice that if SetStatusText() had been called in the meanwhile,
-        PopStatusText() will not change the text, i.e. it does not override
-        explicit changes to status text but only restores the saved text if it
-        hadn't been changed since.
+        Sets the field text to the top of the stack, and pops the stack of saved
+        strings.
 
         @see PushStatusText()
     */
     void PopStatusText(int field = 0);
 
     /**
-        Saves the current field text in a per-field stack, and sets the field
-        text to the string passed as argument.
+        Saves the current field text in a per field stack, and sets the field text
+        to the string passed as argument.
 
         @see PopStatusText()
     */
@@ -234,23 +212,16 @@ public:
             The number of fields in the status bar. Must be equal to the
             number passed to SetFieldsCount() the last time it was called.
         @param styles
-            Contains an array of @a n integers with the styles for each field.
-            There are three possible styles:
-            - @c wxSB_NORMAL (default): The field appears sunken with a standard 3D border.
-            - @c wxSB_FLAT: No border is painted around the field so that it appears flat.
-            - @c wxSB_RAISED: A raised 3D border is painted around the field.
+            Contains an array of n integers with the styles for each field. There
+            are three possible styles:
+            - wxSB_NORMAL (default): The field appears sunken with a standard 3D border.
+            - wxSB_FLAT: No border is painted around the field so that it appears flat.
+            - wxSB_RAISED: A raised 3D border is painted around the field.
     */
     virtual void SetStatusStyles(int n, const int* styles);
 
     /**
-        Sets the status text for the @a i-th field.
-
-        The given text will replace the current text.
-
-        Note that if PushStatusText() had been called before the new text will
-        also replace the last saved value to make sure that the next call to
-        PopStatusText() doesn't restore the old value, which was overwritten by
-        the call to this function.
+        Sets the text for one field.
 
         @param text
             The text to be set. Use an empty string ("") to clear the field.

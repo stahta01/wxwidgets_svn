@@ -44,14 +44,12 @@ public:
 
     virtual void GetBordersForSizer(int *borderTop, int *borderOther) const;
 
-    virtual void AddChild( wxWindowBase *child );
-
 protected:
     virtual bool GTKWidgetNeedsMnemonic() const;
     virtual void GTKWidgetDoSetMnemonic(GtkWidget* w);
 
     void DoApplyWidgetStyle(GtkRcStyle *style);
-
+    
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
 };

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/statbmpg.cpp
+// Name:        src/generic/statbmp.cpp
 // Purpose:     wxGenericStaticBitmap
 // Author:      Marcin Wojdyr, Stefan Csomor
 // Created:     2008-06-16

@@ -88,7 +88,7 @@ bool wxListBox::Create(
         m_strings.unsorted = new wxArrayString;
 
     m_peer = wxWidgetImpl::CreateListBox( this, parent, id, pos, size, style, GetExtraStyle() );
-
+    
     MacPostControlCreate( pos, size );
 
     m_textColumn = GetListPeer()->InsertTextColumn(0,wxEmptyString);
@@ -155,7 +155,7 @@ void wxListBox::DoDeleteOneItem(unsigned int n)
 
     GetListPeer()->ListDelete( n );
     m_blockEvents = false;
-
+    
     UpdateOldSelections();
 }
 
@@ -164,7 +164,7 @@ void wxListBox::DoClear()
     m_blockEvents = true;
     FreeData();
     m_blockEvents = false;
-
+    
     UpdateOldSelections();
 }
 
@@ -178,14 +178,14 @@ void wxListBox::DoSetSelection(int n, bool select)
         wxT("invalid index in wxListBox::SetSelection") );
 
     m_blockEvents = true;
-
+    
     if ( n == wxNOT_FOUND )
         GetListPeer()->ListDeselectAll();
     else
         GetListPeer()->ListSetSelection( n, select, HasMultipleSelection() );
-
+        
     m_blockEvents = false;
-
+    
     UpdateOldSelections();
 }
 
@@ -359,7 +359,7 @@ int wxListBox::DoInsertItems(const wxArrayStringsAdapter& items,
 
 void wxListBox::SetString(unsigned int n, const wxString& s)
 {
-    wxCHECK_RET( !IsSorted(), wxT("can't set string in sorted listbox") );
+    wxCHECK_RET( !IsSorted(), _T("can't set string in sorted listbox") );
 
     if ( IsSorted() )
         (*m_strings.sorted)[n] = s;
@@ -375,7 +375,7 @@ void wxListBox::SetString(unsigned int n, const wxString& s)
 
 void wxListBox::HandleLineEvent( unsigned int n, bool doubleClick )
 {
-    wxCommandEvent event( doubleClick ? wxEVT_COMMAND_LISTBOX_DOUBLECLICKED :
+    wxCommandEvent event( doubleClick ? wxEVT_COMMAND_LISTBOX_DOUBLECLICKED : 
         wxEVT_COMMAND_LISTBOX_SELECTED, GetId() );
     event.SetEventObject( this );
     if ( HasClientObjectData() )
@@ -390,7 +390,7 @@ void wxListBox::HandleLineEvent( unsigned int n, bool doubleClick )
 
 //
 // common list cell value operations
-//
+// 
 
 void wxListWidgetCellValue::Check( bool check )
 {
@@ -401,7 +401,7 @@ bool wxListWidgetCellValue::IsChecked() const
 {
     return GetIntValue() != 0;
 }
-
+    
 
 
 #endif // wxUSE_LISTBOX

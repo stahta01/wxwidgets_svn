@@ -179,17 +179,17 @@ void wxFontRefData::InitFromNative()
     m_weight = wxFONTWEIGHT_NORMAL;
 
     wxString w = m_nativeFontInfo.GetXFontComponent(wxXLFD_WEIGHT).Upper();
-    if ( !w.empty() && w != wxT('*') )
+    if ( !w.empty() && w != _T('*') )
     {
         // the test below catches all of BOLD, EXTRABOLD, DEMIBOLD, ULTRABOLD
         // and BLACK
-        if ( ((w[0u] == wxT('B') && (!wxStrcmp(w.c_str() + 1, wxT("OLD")) ||
+        if ( ((w[0u] == _T('B') && (!wxStrcmp(w.c_str() + 1, wxT("OLD")) ||
                                    !wxStrcmp(w.c_str() + 1, wxT("LACK"))))) ||
-             wxStrstr(w.c_str() + 1, wxT("BOLD")) )
+             wxStrstr(w.c_str() + 1, _T("BOLD")) )
         {
             m_weight = wxFONTWEIGHT_BOLD;
         }
-        else if ( w == wxT("LIGHT") || w == wxT("THIN") )
+        else if ( w == _T("LIGHT") || w == _T("THIN") )
         {
             m_weight = wxFONTWEIGHT_LIGHT;
         }
@@ -198,11 +198,11 @@ void wxFontRefData::InitFromNative()
     switch ( wxToupper(m_nativeFontInfo.
                            GetXFontComponent(wxXLFD_SLANT)[0u]).GetValue() )
     {
-        case wxT('I'):   // italique
+        case _T('I'):   // italique
             m_style = wxFONTSTYLE_ITALIC;
             break;
 
-        case wxT('O'):   // oblique
+        case _T('O'):   // oblique
             m_style = wxFONTSTYLE_SLANT;
             break;
 
@@ -224,7 +224,7 @@ void wxFontRefData::InitFromNative()
     // examine the spacing: if the font is monospaced, assume wxTELETYPE
     // family for compatibility with the old code which used it instead of
     // IsFixedWidth()
-    if ( m_nativeFontInfo.GetXFontComponent(wxXLFD_SPACING).Upper() == wxT('M') )
+    if ( m_nativeFontInfo.GetXFontComponent(wxXLFD_SPACING).Upper() == _T('M') )
     {
         m_family = wxFONTFAMILY_TELETYPE;
     }
@@ -243,7 +243,7 @@ void wxFontRefData::InitFromNative()
         registry = m_nativeFontInfo.GetXFontComponent(wxXLFD_REGISTRY).Upper(),
         encoding = m_nativeFontInfo.GetXFontComponent(wxXLFD_ENCODING).Upper();
 
-    if ( registry == wxT("ISO8859") )
+    if ( registry == _T("ISO8859") )
     {
         int cp;
         if ( wxSscanf(encoding, wxT("%d"), &cp) == 1 )
@@ -251,7 +251,7 @@ void wxFontRefData::InitFromNative()
             m_encoding = (wxFontEncoding)(wxFONTENCODING_ISO8859_1 + cp - 1);
         }
     }
-    else if ( registry == wxT("MICROSOFT") )
+    else if ( registry == _T("MICROSOFT") )
     {
         int cp;
         if ( wxSscanf(encoding, wxT("cp125%d"), &cp) == 1 )
@@ -259,7 +259,7 @@ void wxFontRefData::InitFromNative()
             m_encoding = (wxFontEncoding)(wxFONTENCODING_CP1250 + cp);
         }
     }
-    else if ( registry == wxT("KOI8") )
+    else if ( registry == _T("KOI8") )
     {
         m_encoding = wxFONTENCODING_KOI8;
     }
@@ -337,9 +337,9 @@ void wxFontRefData::SetPointSize(int pointSize)
     {
         wxString size;
         if ( pointSize == -1 )
-            size = wxT('*');
+            size = _T('*');
         else
-            size.Printf(wxT("%d"), 10*pointSize);
+            size.Printf(_T("%d"), 10*pointSize);
 
         m_nativeFontInfo.SetXFontComponent(wxXLFD_POINTSIZE, size);
     }
@@ -362,19 +362,19 @@ void wxFontRefData::SetStyle(wxFontStyle style)
         switch ( style )
         {
             case wxFONTSTYLE_ITALIC:
-                slant = wxT('i');
+                slant = _T('i');
                 break;
 
             case wxFONTSTYLE_SLANT:
-                slant = wxT('o');
+                slant = _T('o');
                 break;
 
             default:
-                wxFAIL_MSG( wxT("unknown font style") );
+                wxFAIL_MSG( _T("unknown font style") );
                 // fall through
 
             case wxFONTSTYLE_NORMAL:
-                slant = wxT('r');
+                slant = _T('r');
         }
 
         m_nativeFontInfo.SetXFontComponent(wxXLFD_SLANT, slant);
@@ -391,20 +391,20 @@ void wxFontRefData::SetWeight(wxFontWeight weight)
         switch ( weight )
         {
             case wxFONTWEIGHT_BOLD:
-                boldness = wxT("bold");
+                boldness = _T("bold");
                 break;
 
             case wxFONTWEIGHT_LIGHT:
-                boldness = wxT("light");
+                boldness = _T("light");
                 break;
 
             default:
-                wxFAIL_MSG( wxT("unknown font weight") );
+                wxFAIL_MSG( _T("unknown font weight") );
                 // fall through
 
             case wxFONTWEIGHT_NORMAL:
                 // unspecified
-                boldness = wxT("medium");
+                boldness = _T("medium");
         }
 
         m_nativeFontInfo.SetXFontComponent(wxXLFD_WEIGHT, boldness);
@@ -612,7 +612,7 @@ bool wxFont::IsFixedWidth() const
         wxString spacing = M_FONTDATA->
                             m_nativeFontInfo.GetXFontComponent(wxXLFD_SPACING);
 
-        return spacing.Upper() == wxT('M');
+        return spacing.Upper() == _T('M');
     }
 
     return wxFontBase::IsFixedWidth();

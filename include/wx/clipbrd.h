@@ -19,9 +19,10 @@
 
 #include "wx/event.h"
 #include "wx/chartype.h"
-#include "wx/dataobj.h"     // for wxDataFormat
 #include "wx/vector.h"
 
+class WXDLLIMPEXP_FWD_CORE wxDataFormat;
+class WXDLLIMPEXP_FWD_CORE wxDataObject;
 class WXDLLIMPEXP_FWD_CORE wxClipboard;
 
 // ----------------------------------------------------------------------------
@@ -104,25 +105,13 @@ public:
 class WXDLLIMPEXP_CORE wxClipboardEvent : public wxEvent
 {
 public:
-    wxClipboardEvent(wxEventType evtType = wxEVT_NULL)
-        : wxEvent(0, evtType)
-    {
-    }
-
-    wxClipboardEvent(const wxClipboardEvent& event)
-        : wxEvent(event),
-          m_formats(event.m_formats)
-    {
-    }
+    wxClipboardEvent(wxEventType evtType = wxEVT_NULL);
+    wxClipboardEvent(const wxClipboardEvent& event);
 
     bool SupportsFormat(const wxDataFormat& format) const;
     void AddFormat(const wxDataFormat& format);
 
-    virtual wxEvent *Clone() const
-    {
-        return new wxClipboardEvent(*this);
-    }
-
+    virtual wxEvent *Clone() const;
 
 protected:
     wxVector<wxDataFormat> m_formats;

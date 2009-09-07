@@ -288,7 +288,7 @@ WXHWND wxTopLevelWindowMSW::MSWGetParent() const
         if ( !parent )
         {
             // this flag doesn't make sense then and will be ignored
-            wxFAIL_MSG( wxT("wxFRAME_FLOAT_ON_PARENT but no parent?") );
+            wxFAIL_MSG( _T("wxFRAME_FLOAT_ON_PARENT but no parent?") );
         }
         else
         {
@@ -373,10 +373,29 @@ bool wxTopLevelWindowMSW::CreateDialog(const void *dlgTemplate,
     // no dialogs support under MicroWin yet
     return CreateFrame(title, pos, size);
 #else // !__WXMICROWIN__
-    // static cast is valid as we're only ever called for dialogs
-    wxWindow * const
-        parent = static_cast<wxDialog *>(this)->
-                    GetParentForModalDialog(GetParent());
+    wxWindow *parent = GetParent();
+
+    // for the dialogs without wxDIALOG_NO_PARENT style, use the top level
+    // app window as parent - this avoids creating modal dialogs without
+    // parent
+    if ( !parent && !(GetWindowStyleFlag() & wxDIALOG_NO_PARENT) )
+    {
+        parent = wxTheApp->GetTopWindow();
+
+        if ( parent )
+        {
+            // don't use transient windows as parents, this is dangerous as it
+            // can lead to a crash if the parent is destroyed before the child
+            //
+            // also don't use the window which is currently hidden as then the
+            // dialog would be hidden as well
+            if ( (parent->GetExtraStyle() & wxWS_EX_TRANSIENT) ||
+                    !parent->IsShown() )
+            {
+                parent = NULL;
+            }
+        }
+    }
 
     m_hWnd = (WXHWND)::CreateDialogIndirect
                        (
@@ -804,7 +823,7 @@ void wxTopLevelWindowMSW::DoGetPosition(int *x, int *y) const
             return;
         }
 
-        wxLogLastError(wxT("GetWindowPlacement"));
+        wxLogLastError(_T("GetWindowPlacement"));
     }
     //else: normal case
 
@@ -829,7 +848,7 @@ void wxTopLevelWindowMSW::DoGetSize(int *width, int *height) const
             return;
         }
 
-        wxLogLastError(wxT("GetWindowPlacement"));
+        wxLogLastError(_T("GetWindowPlacement"));
     }
     //else: normal case
 
@@ -1021,7 +1040,7 @@ bool wxTopLevelWindowMSW::EnableCloseButton(bool enable)
                           MF_BYCOMMAND |
                           (enable ? MF_ENABLED : MF_GRAYED)) == -1 )
     {
-        wxLogLastError(wxT("EnableMenuItem(SC_CLOSE)"));
+        wxLogLastError(_T("EnableMenuItem(SC_CLOSE)"));
 
         return false;
     }
@@ -1029,7 +1048,7 @@ bool wxTopLevelWindowMSW::EnableCloseButton(bool enable)
     // update appearance immediately
     if ( !::DrawMenuBar(GetHwnd()) )
     {
-        wxLogLastError(wxT("DrawMenuBar"));
+        wxLogLastError(_T("DrawMenuBar"));
     }
 #endif
 #endif // !__WXMICROWIN__
@@ -1042,7 +1061,7 @@ bool wxTopLevelWindowMSW::EnableCloseButton(bool enable)
 bool wxTopLevelWindowMSW::SetShape(const wxRegion& region)
 {
     wxCHECK_MSG( HasFlag(wxFRAME_SHAPED), false,
-                 wxT("Shaped windows must be created with the wxFRAME_SHAPED style."));
+                 _T("Shaped windows must be created with the wxFRAME_SHAPED style."));
 
     // The empty region signifies that the shape should be removed from the
     // window.
@@ -1050,7 +1069,7 @@ bool wxTopLevelWindowMSW::SetShape(const wxRegion& region)
     {
         if (::SetWindowRgn(GetHwnd(), NULL, TRUE) == 0)
         {
-            wxLogLastError(wxT("SetWindowRgn"));
+            wxLogLastError(_T("SetWindowRgn"));
             return false;
         }
         return true;
@@ -1077,7 +1096,7 @@ bool wxTopLevelWindowMSW::SetShape(const wxRegion& region)
     // Now call the shape API with the new region.
     if (::SetWindowRgn(GetHwnd(), hrgn, TRUE) == 0)
     {
-        wxLogLastError(wxT("SetWindowRgn"));
+        wxLogLastError(_T("SetWindowRgn"));
         return false;
     }
     return true;
@@ -1098,9 +1117,9 @@ void wxTopLevelWindowMSW::RequestUserAttention(int flags)
     static FlashWindowEx_t s_pfnFlashWindowEx = NULL;
     if ( !s_pfnFlashWindowEx )
     {
-        wxDynamicLibrary dllUser32(wxT("user32.dll"));
+        wxDynamicLibrary dllUser32(_T("user32.dll"));
         s_pfnFlashWindowEx = (FlashWindowEx_t)
-                                dllUser32.GetSymbol(wxT("FlashWindowEx"));
+                                dllUser32.GetSymbol(_T("FlashWindowEx"));
 
         // we can safely unload user32.dll here, it's going to remain loaded as
         // long as the program is running anyhow
@@ -1145,7 +1164,7 @@ bool wxTopLevelWindowMSW::SetTransparent(wxByte alpha)
 
     if ( pSetLayeredWindowAttributes == (PSETLAYEREDWINDOWATTR)-1 )
     {
-        wxDynamicLibrary dllUser32(wxT("user32.dll"));
+        wxDynamicLibrary dllUser32(_T("user32.dll"));
 
         // use RawGetSymbol() and not GetSymbol() to avoid error messages under
         // Windows 95: there is nothing the user can do about this anyhow
@@ -1221,7 +1240,7 @@ void wxTopLevelWindowMSW::OnActivate(wxActivateEvent& event)
     {
         // restore focus to the child which was last focused unless we already
         // have it
-        wxLogTrace(wxT("focus"), wxT("wxTLW %p activated."), m_hWnd);
+        wxLogTrace(_T("focus"), _T("wxTLW %p activated."), m_hWnd);
 
         wxWindow *winFocus = FindFocus();
         if ( !winFocus || wxGetTopLevelParent(winFocus) != this )
@@ -1255,8 +1274,8 @@ void wxTopLevelWindowMSW::OnActivate(wxActivateEvent& event)
             }
         }
 
-        wxLogTrace(wxT("focus"),
-                   wxT("wxTLW %p deactivated, last focused: %p."),
+        wxLogTrace(_T("focus"),
+                   _T("wxTLW %p deactivated, last focused: %p."),
                    m_hWnd,
                    m_winLastFocused ? GetHwndOf(m_winLastFocused) : NULL);
 
@@ -1330,7 +1349,7 @@ void wxTLWHiddenParentModule::OnExit()
     {
         if ( !::DestroyWindow(ms_hwnd) )
         {
-            wxLogLastError(wxT("DestroyWindow(hidden TLW parent)"));
+            wxLogLastError(_T("DestroyWindow(hidden TLW parent)"));
         }
 
         ms_hwnd = NULL;
@@ -1340,7 +1359,7 @@ void wxTLWHiddenParentModule::OnExit()
     {
         if ( !::UnregisterClass(ms_className, wxGetInstance()) )
         {
-            wxLogLastError(wxT("UnregisterClass(\"wxTLWHiddenParent\")"));
+            wxLogLastError(_T("UnregisterClass(\"wxTLWHiddenParent\")"));
         }
 
         ms_className = NULL;
@@ -1354,7 +1373,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
     {
         if ( !ms_className )
         {
-            static const wxChar *HIDDEN_PARENT_CLASS = wxT("wxTLWHiddenParent");
+            static const wxChar *HIDDEN_PARENT_CLASS = _T("wxTLWHiddenParent");
 
             WNDCLASS wndclass;
             wxZeroMemory(wndclass);
@@ -1365,7 +1384,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
 
             if ( !::RegisterClass(&wndclass) )
             {
-                wxLogLastError(wxT("RegisterClass(\"wxTLWHiddenParent\")"));
+                wxLogLastError(_T("RegisterClass(\"wxTLWHiddenParent\")"));
             }
             else
             {
@@ -1377,7 +1396,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
                                  (HMENU)NULL, wxGetInstance(), NULL);
         if ( !ms_hwnd )
         {
-            wxLogLastError(wxT("CreateWindow(hidden TLW parent)"));
+            wxLogLastError(_T("CreateWindow(hidden TLW parent)"));
         }
     }
 

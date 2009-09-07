@@ -475,18 +475,30 @@ void wxArrayString::Sort(bool reverseOrder)
     }
 }
 
-int wxSortedArrayString::Index(const wxString& str,
-                               bool WXUNUSED_UNLESS_DEBUG(bCase),
-                               bool WXUNUSED_UNLESS_DEBUG(bFromEnd)) const
+int wxSortedArrayString::Index(const wxString& str, bool bCase, bool WXUNUSED(bFromEnd)) const
 {
-    wxASSERT_MSG( bCase && !bFromEnd,
-                  "search parameters ignored for sorted array" );
+    wxSortedArrayString::const_iterator it;
 
-    wxSortedArrayString::const_iterator
-        it = std::lower_bound(begin(), end(), str, wxStringCompare(wxStringCmp()));
+    if (bCase)
+        it = std::lower_bound(begin(), end(), str,
+                              wxStringCompare(wxStringCmp()));
+    else
+        it = std::lower_bound(begin(), end(), str,
+                              wxStringCompare(wxStringCmpNoCase()));
 
-    if ( it == end() || str.Cmp(*it) != 0 )
+    if (it == end())
         return wxNOT_FOUND;
+
+    if (bCase)
+    {
+        if (str.Cmp(*it) != 0)
+            return wxNOT_FOUND;
+    }
+    else
+    {
+        if (str.CmpNoCase(*it) != 0)
+            return wxNOT_FOUND;
+    }
 
     return it - begin();
 }

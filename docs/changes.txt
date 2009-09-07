@@ -96,7 +96,7 @@ Changes in behaviour not resulting in compilation errors, please read this!
   proportions to return to the old behaviour.
 
 - wxWindow::Freeze/Thaw() are not virtual any more, if you overrode them in
-  your code you need to override DoFreeze/DoThaw() instead now.
+  your code you need to override DoFreeze/Thaw() instead now.
 
 - wxCalendarCtrl has native implementation in wxGTK, but it has less features
   than the generic one. The native implementation is used by default, but you
@@ -121,28 +121,6 @@ Changes in behaviour not resulting in compilation errors, please read this!
   Thus initialization code (e.g. showing a dialog) previously done in wxApp::OnRun()
   or equivalent function should now be done into wxApp::OnEventLoopEnter().
   See wxApp::OnEventLoopEnter() and wxApp::OnEventLoopExit() docs for more info.
-
-- wxLoadFileSelector() now allows the user to select existing files only.
-
-- Erase background events are now not generated at all when background style is
-  changed. See the updated wxWindow::SetBackgroundStyle() description in the
-  manual for more details.
-
-- wxTreeCtrl::GetSelection now asserts if the tree has the wxTR_MULTIPLE style.
-  Instead use GetSelections() for multiple items; or if you want only the
-  single item last touched, the new wxTreeCtrl::GetFocusedItem.
-
-- Custom log targets should be updated to override wxLog::DoLogRecord() method
-  instead of DoLog() or DoLogString() and must be updated if they call the base
-  class versions of these functions as this won't work any more; please see the
-  documentation of wxLog for more information.
-
-- Confusing wxGridSizer(int cols, int vgap = 0, int hgap = 0) ctor which was
-  easy to mistake for wxGridSizer(int rows, int cols) overload was removed, you
-  will need to specify both vertical and horizontal gap if you want to use this
-  overload or specify both rows and columns and the gap otherwise. Use of the
-  new constructors taking wxSize for the gap argument is preferred. The same
-  applies to wxFlexGridSizer as well.
 
 
 Changes in behaviour which may result in compilation errors
@@ -248,23 +226,14 @@ Changes in behaviour which may result in compilation errors
 - wxEVT_GRID_CELL_CHANGE event renamed to wxEVT_GRID_CELL_CHANGED and shouldn't
   be vetoed any more, use the new wxEVT_GRID_CELL_CHANGING event to do it.
 
-- wxListCtrlCompare function used with wxListCtrl::SortItems() must now declare
-  its third parameter as wxIntPtr and not long (this allows passing pointers
-  to it under 64 bit platforms too).
+- Now wxWidgets at startup in debug builds checks if all wxEvent-derived classes
+  correctly implement the Clone() function, logging a warning if they don't.
+  A correct implementation for MyCustomEventClass::Clone() is simply:
+    virtual wxEvent *Clone() const  { return new MyCustomEventClass(*this); }
 
 - Global wxPendingEvents and wxPendingEventsLocker objects were removed.
   You may use wxEventLoopBase::SuspendProcessingOfPendingEvents instead of
   locking wxPendingEventsLocker now.
-
-- wxBitmapButton::GetBitmapXXX() overloads returning non-const wxBitmap
-  references have been removed, modifying the returned bitmaps never worked and
-  now results in compile-time error.
-
-- wxLogXXX() are now macros, not functions. Because of this calling them with
-  an explicit scope resolution operator ("::wxLogError()") doesn't work any
-  longer, just remove it. Also notice that using them inside an "if" statement
-  without enclosing parentheses results in warnings from g++ with -Wparentheses,
-  add parentheses around the if statement body to work around it.
 
 
 Deprecated methods and their replacements
@@ -316,14 +285,6 @@ Deprecated methods and their replacements
   documented TryBefore/After() methods if you used to override these ones.
 - wxGetMultipleChoices() is deprecated, use wxGetSelectedChoices() which has
   the same signature but returns -1 and not 0 if the dialog was cancelled.
-- building the windows which are placed inside wxStaticBoxes as siblings of the
-  wxStaticBox is still allowed but it's deprecated as it gives some problems
-  on some ports (e.g. wxGTK).
-  You should now create windows placed inside a wxStaticBox as children of
-  the static box itself.
-- wxMouseState::{Left,Middle,Right}Down() were renamed to XXXIsDown() for
-  consistency with wxMouseEvent and the old names were deprecated.
-
 
 Major new features in this release
 ----------------------------------
@@ -353,72 +314,6 @@ Major new features in this release
 
 - Support for persistent objects automatically saving and restoring their state
   was added.
-
-
-2.9.1:
-------
-
-All:
-
-- Added wxStd{Input,Output}Stream classes (Jonathan Liu).
-- Include port number in host header in wxHTTP (Marcin 'Malcom' Malich).
-- Added wxTempFile::Flush().
-- Added support for wxLongLong and wxULongLong in wxVariant.
-- Added wxVector::swap().
-- Many wxLog improvements:
- * wxLogXXX() functions are now thread-safe.
- * Log levels can now be set independently for different log components.
- * wxLog::DoLogRecord() has access to the location of the log message
-   (file, line and function name) and id of the thread which generated it.
- * SetThreadActiveTarget() allows to set up thread-specific log targets.
-- Fix output buffer overflow in wxBase64Decode() (Eric W. Savage).
-- Added bilinear image resizing algorithm to wxImage (bishop).
-- Fix bug with position argument in wxImage::Size() (Byron Sorgdrager).
-
-All (GUI):
-
-- Added support for showing bitmaps in wxButton.
-- wxWindow::SetAutoLayout() now works for all windows, not just panels.
-- Support wxListCtrl columns, items and image lists in XRC (Kinaou Hervé).
-- Added support for wxFileCtrl to XRC (Kinaou Hervé).
-- Added ownfg, ownbg and ownfont tags to XRC.
-- Added wxEditableListBox XRC handler.
-- Added multiple selection support to wxDirCtrl (Steve Lamerton).
-- wxGrid: add possibility to prevent resizing of individual rows/columns.
-- wxHTML: add support for table borders width (Laurent Humbertclaude).
-- Added wxMouseEventsManager.
-- Building OpenGL library is now enabled by default.
-- Improve wxTreeCtrl::ScrollTo() in generic version (Raanan Barzel).
-- Added wxFont::[Make]{Bold,Italic,Smaller,Larger} and Scale[d]() methods.
-- Added wxDC::CopyAttributes() and use it in wxBufferedDC.
-- Added wxTextWrapper helper class useful for wrapping lines of text.
-- Added EVT_DATAVIEW_CACHE_HINT() event (Trigve).
-- Added wxLB_NO_SB style (implemented for MSW only; Dario Senic).
-- Added long version field to wxAboutDialogInfo (Jeff Tupper).
-- Added wxWindow::CanScroll() behaving like the old HasScrollbar() and made
-  HasScrollbar() really check for the scrollbar existence.
-- Added wxKeyEvent::IsKeyInCategory() (Jeff Tupper).
-- Add A0 and A1 paper formats support (Martin Perktold).
-
-GTK:
-
-- wxRadioBox constructor uses default consistent with other ports now.
-
-MSW:
-
-- Translate wxMessageDialog labels to the language of the current locale.
-- Allow changing the height of wxChoice and wxComboBox.
-- Update CRT environment block in wxSetEnv() too.
-- Fix wxMDIChildFrame::SetSize() (Lars Rosenboom).
-- Fix wxTreeCtrl::UnselectItem() in single selection controls.
-- Allow customizing wxStandardPaths logic for program directory determination.
-- Use time in wxDateTime <-> SYSTEMTIME conversion (troelsk).
-- Setting colours for wxSpinCtrl now works.
-
-i18n:
-
-- Korean translations added (Sungkee Jung).
-- Romanian translations added (Manuel Ciosici).
 
 
 2.9.0
@@ -540,6 +435,7 @@ All (GUI):
 - Added wxEventBlocker class (Francesco Montorsi).
 - Added wxFile/DirPickerCtrl::Get/SetFile/DirName() (Francesco Montorsi).
 - Added wxSizerFlags::Top() and Bottom().
+- Slovak translation added.
 - Fixed tab-related drawing and hit-testing bugs in wxRichTextCtrl.
 - Implemented background colour in wxRichTextCtrl.
 - Fixed crashes in helpview when opening a file.
@@ -688,11 +584,6 @@ wxX11:
 wxDFB:
 
 - Implement wxBitmap ctor from XBM data.
-
-i18n:
------
-
-- Slovak translations added (Ivan Masár).
 
 
 2.8.10:

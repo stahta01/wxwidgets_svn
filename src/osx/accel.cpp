@@ -11,13 +11,13 @@
 
 #include "wx/wxprec.h"
 
-#if wxUSE_ACCEL
-
 #include "wx/accel.h"
 
 #ifndef WX_PRECOMP
     #include "wx/string.h"
 #endif
+
+#ifndef __WXUNIVERSAL__
 
 IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
 
@@ -95,7 +95,7 @@ int wxAcceleratorTable::GetCommand( wxKeyEvent &event )
         if ((event.m_keyCode == entry->GetKeyCode()) &&
            (((entry->GetFlags() & wxACCEL_CTRL) != 0) == event.ControlDown()) &&
            (((entry->GetFlags() & wxACCEL_SHIFT) != 0) == event.ShiftDown()) &&
-           (((entry->GetFlags() & wxACCEL_ALT) != 0) == event.AltDown()) &&
+           (((entry->GetFlags() & wxACCEL_ALT) != 0) == event.AltDown()) && 
            (((entry->GetFlags() & wxACCEL_CMD) != 0) == event.CmdDown()))
         {
             return entry->GetCommand();
@@ -106,4 +106,4 @@ int wxAcceleratorTable::GetCommand( wxKeyEvent &event )
     return -1;
 }
 
-#endif // wxUSE_ACCEL
+#endif

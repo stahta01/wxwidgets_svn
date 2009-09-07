@@ -924,15 +924,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\image\image.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\controls\listctrltest.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\graphics\measuring.cpp"
 				>
 			</File>
 			<File

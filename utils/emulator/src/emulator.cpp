@@ -117,10 +117,10 @@ bool wxEmulatorApp::OnInit()
 
     // If the development version, go up a directory.
 #ifdef __WXMSW__
-    if ((m_appDir.Right(5).CmpNoCase(wxT("DEBUG")) == 0) ||
-        (m_appDir.Right(11).CmpNoCase(wxT("DEBUGSTABLE")) == 0) ||
-        (m_appDir.Right(7).CmpNoCase(wxT("RELEASE")) == 0) ||
-        (m_appDir.Right(13).CmpNoCase(wxT("RELEASESTABLE")) == 0)
+    if ((m_appDir.Right(5).CmpNoCase(_T("DEBUG")) == 0) ||
+        (m_appDir.Right(11).CmpNoCase(_T("DEBUGSTABLE")) == 0) ||
+        (m_appDir.Right(7).CmpNoCase(_T("RELEASE")) == 0) ||
+        (m_appDir.Right(13).CmpNoCase(_T("RELEASESTABLE")) == 0)
         )
         m_appDir = wxPathOnly(m_appDir);
 #endif
@@ -176,7 +176,7 @@ bool wxEmulatorApp::OnInit()
     }
 
     // create the main application window
-    wxEmulatorFrame *frame = new wxEmulatorFrame(wxT("wxEmulator"),
+    wxEmulatorFrame *frame = new wxEmulatorFrame(_T("wxEmulator"),
                                  wxPoint(50, 50), wxSize(450, 340));
 
 #if wxUSE_STATUSBAR
@@ -274,14 +274,14 @@ wxEmulatorFrame::wxEmulatorFrame(const wxString& title,
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(Emulator_About, wxT("&About...\tF1"), wxT("Show about dialog"));
+    helpMenu->Append(Emulator_About, _T("&About...\tF1"), _T("Show about dialog"));
 
-    menuFile->Append(Emulator_Quit, wxT("E&xit\tAlt-X"), wxT("Quit this program"));
+    menuFile->Append(Emulator_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(menuFile, wxT("&File"));
-    menuBar->Append(helpMenu, wxT("&Help"));
+    menuBar->Append(menuFile, _T("&File"));
+    menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
@@ -305,9 +305,9 @@ void wxEmulatorFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void wxEmulatorFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxString msg;
-    msg.Printf( wxT("wxEmulator is an environment for testing embedded X11 apps.\n"));
+    msg.Printf( _T("wxEmulator is an environment for testing embedded X11 apps.\n"));
 
-    wxMessageBox(msg, wxT("About wxEmulator"), wxOK | wxICON_INFORMATION, this);
+    wxMessageBox(msg, _T("About wxEmulator"), wxOK | wxICON_INFORMATION, this);
 }
 
 void wxEmulatorFrame::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
@@ -523,17 +523,17 @@ wxBitmapType wxDetermineImageType(const wxString& filename)
     wxFileName::SplitPath(filename, & path, & name, & ext);
 
     ext.MakeLower();
-    if (ext == wxT("jpg") || ext == wxT("jpeg"))
+    if (ext == _T("jpg") || ext == _T("jpeg"))
         return wxBITMAP_TYPE_JPEG;
-    if (ext == wxT("gif"))
+    if (ext == _T("gif"))
         return wxBITMAP_TYPE_GIF;
-    if (ext == wxT("bmp"))
+    if (ext == _T("bmp"))
         return wxBITMAP_TYPE_BMP;
-    if (ext == wxT("png"))
+    if (ext == _T("png"))
         return wxBITMAP_TYPE_PNG;
-    if (ext == wxT("pcx"))
+    if (ext == _T("pcx"))
         return wxBITMAP_TYPE_PCX;
-    if (ext == wxT("tif") || ext == wxT("tiff"))
+    if (ext == _T("tif") || ext == _T("tiff"))
         return wxBITMAP_TYPE_TIF;
 
     return wxBITMAP_TYPE_INVALID;

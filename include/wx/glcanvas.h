@@ -52,7 +52,7 @@ enum
     WX_GL_SAMPLES          // 4 for 2x2 antialising supersampling on most graphics cards
 };
 
-#define wxGLCanvasName wxT("GLCanvas")
+#define wxGLCanvasName _T("GLCanvas")
 
 // ----------------------------------------------------------------------------
 // wxGLContextBase: OpenGL rendering context
@@ -118,7 +118,7 @@ public:
     // miscellaneous helper functions
     // ------------------------------
 
-#ifndef wxHAS_OPENGL_ES
+#ifndef wxHAS_OPENGL_ES 
     // call glcolor() for the colour with the given name, return false if
     // colour not found
     bool SetColour(const wxString& colour);

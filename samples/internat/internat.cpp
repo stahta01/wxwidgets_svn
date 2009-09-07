@@ -76,7 +76,6 @@ public:
     void OnTest1(wxCommandEvent& event);
     void OnTest2(wxCommandEvent& event);
     void OnTest3(wxCommandEvent& event);
-    void OnTestMsgBox(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 
@@ -94,8 +93,7 @@ enum
     INTERNAT_PLAY,
     INTERNAT_TEST_1,
     INTERNAT_TEST_2,
-    INTERNAT_TEST_3,
-    INTERNAT_TEST_MSGBOX
+    INTERNAT_TEST_3
 };
 
 // language data
@@ -165,7 +163,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(INTERNAT_TEST_1, MyFrame::OnTest1)
     EVT_MENU(INTERNAT_TEST_2, MyFrame::OnTest2)
     EVT_MENU(INTERNAT_TEST_3, MyFrame::OnTest3)
-    EVT_MENU(INTERNAT_TEST_MSGBOX, MyFrame::OnTestMsgBox)
 END_EVENT_TABLE()
 
 IMPLEMENT_APP(MyApp)
@@ -245,10 +242,8 @@ bool MyApp::OnInit()
     // Initialize the catalogs we'll be using
     const wxLanguageInfo* pInfo = wxLocale::GetLanguageInfo(m_lang);
     if (!m_locale.AddCatalog("internat"))
-    {
         wxLogError(_("Couldn't find/load the 'internat' catalog for locale '%s'."),
                    pInfo ? pInfo->GetLocaleName() : _("unknown"));
-    }
 
     // Now try to add wxstd.mo so that loading "NOTEXIST.ING" file will produce
     // a localized error message:
@@ -307,8 +302,6 @@ MyFrame::MyFrame(wxLocale& locale)
     test_menu->Append(INTERNAT_TEST_1, _("&1 _() (gettext)"), _("Tests the _() macro"));
     test_menu->Append(INTERNAT_TEST_2, _("&2 _N() (ngettext)"), _("Tests the _N() macro"));
     test_menu->Append(INTERNAT_TEST_3, _("&3 wxTRANSLATE() (gettext_noop)"), _("Tests the wxTRANSLATE() macro"));
-    test_menu->Append(INTERNAT_TEST_MSGBOX, _("&Message box test"),
-                      _("Tests message box buttons labels translation"));
 
     wxMenuBar *menu_bar = new wxMenuBar;
     menu_bar->Append(file_menu, _("&File"));
@@ -376,9 +369,9 @@ void MyFrame::OnPlay(wxCommandEvent& WXUNUSED(event))
     }
     else if ( num == 9 )
     {
-        // this message is not translated (not in catalog) because we used wxT()
+        // this message is not translated (not in catalog) because we used _T()
         // and not _() around it
-        str = wxT("You've found a bug in this program!");
+        str = _T("You've found a bug in this program!");
     }
     else if ( num == 17 )
     {
@@ -429,13 +422,9 @@ void MyFrame::OnTestLocaleAvail(wxCommandEvent& WXUNUSED(event))
     }
 
     if ( wxLocale::IsAvailable(info->Language) )
-    {
         wxLogMessage(_("Locale \"%s\" is available."), s_locale.c_str());
-    }
     else
-    {
         wxLogWarning(_("Locale \"%s\" is not available."), s_locale.c_str());
-    }
 }
 
 void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
@@ -509,17 +498,4 @@ void MyFrame::OnTest3(wxCommandEvent& WXUNUSED(event))
     wxMessageBox(s);
 }
 
-void MyFrame::OnTestMsgBox(wxCommandEvent& WXUNUSED(event))
-{
-    if ( wxMessageBox
-         (
-            _("Are the labels of the buttons in this message box "
-              "translated into the current locale language?"),
-            _("wxWidgets i18n sample"),
-            wxYES_NO,
-            this
-         ) != wxYES )
-    {
-        wxMessageBox(_("Please report the details of your platform to us."));
-    }
-}
+

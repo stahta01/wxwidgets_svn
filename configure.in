@@ -17,7 +17,7 @@ dnl ---------------------------------------------------------------------------
 dnl initialization
 dnl ---------------------------------------------------------------------------
 
-AC_INIT([wxWidgets], [2.9.1], [wx-dev@lists.wxwidgets.org])
+AC_INIT([wxWidgets], [2.9.0], [wx-dev@lists.wxwidgets.org])
 
 dnl the file passed to AC_CONFIG_SRCDIR should be specific to our package
 AC_CONFIG_SRCDIR([wx-config.in])
@@ -43,7 +43,7 @@ dnl wx_release_number += 1
 
 wx_major_version_number=2
 wx_minor_version_number=9
-wx_release_number=1
+wx_release_number=0
 wx_subrelease_number=0
 
 WX_RELEASE=$wx_major_version_number.$wx_minor_version_number
@@ -324,6 +324,18 @@ case "${host}" in
     AC_DEFINE(__DARWIN__)
     AC_DEFINE(TARGET_CARBON)
     DEFAULT_DEFAULT_wxUSE_OSX_CARBON=1
+    DEFAULT_STD_FLAG=no
+  ;;
+  powerpc-apple-macos* )
+    dnl Classic Mac OS (< X)
+    USE_UNIX=0
+    dnl For some reason the test that should be cross-compiler capable fails
+    dnl However, there is no doubt that MacOS PowerPC is big endian.
+    ac_cv_c_bigendian=yes
+    dnl AC_DEFINE(TARGET_CARBON)
+    dnl platform.h needs TARGET_CARBON before setup.h, we'll add it to CPPFLAGS
+    DEFAULT_DEFAULT_wxUSE_OSX_CARBON=1
+    DEFAULT_STD_FLAG=no
   ;;
 
   *-*-beos* )
@@ -376,7 +388,6 @@ dnl automatic features
 DEFAULT_wxUSE_UNICODE_UTF8=auto
 DEFAULT_wxUSE_OPENGL=auto
 DEFAULT_wxUSE_MEDIACTRL=auto
-DEFAULT_wxUSE_COMPILER_TLS=auto
 
 DEFAULT_wxUSE_UNICODE_UTF8_LOCALE=no
 
@@ -671,12 +682,18 @@ WX_ARG_ENABLE_PARAM(universal_binary, [[  --enable-universal_binary  create Mac 
 WX_ARG_ENABLE(compat26,      [  --enable-compat26       enable wxWidgets 2.6 compatibility], WXWIN_COMPATIBILITY_2_6)
 WX_ARG_DISABLE(compat28,     [  --disable-compat28      disable wxWidgets 2.8 compatibility], WXWIN_COMPATIBILITY_2_8)
 
+dnl currently we don't provide a switch for disabling it as it shouldn't be
+dnl necessary to do it unless the compiler doesn't support the new events and
+dnl this should be tested for by configure itself (but also isn't done yet
+dnl because there are no known examples of such compilers among the currently
+dnl supported ones)
+AC_DEFINE(wxEVENTS_COMPATIBILITY_2_8, 0)
+
 WX_ARG_DISABLE(rpath,        [  --disable-rpath         disable use of rpath for uninstalled builds], wxUSE_RPATH)
 
 WX_ARG_ENABLE(objc_uniquifying,[  --enable-objc_uniquifying enable Objective-C class name uniquifying], wxUSE_OBJC_UNIQUIFYING)
 
 WX_ARG_DISABLE(visibility,   [  --disable-visibility    disable use of ELF symbols visibility even if supported], wxUSE_VISIBILITY)
-WX_ARG_DISABLE(tls,          [  --disable-tls           disable use of compiler TLS support], wxUSE_COMPILER_TLS)
 
 dnl ---------------------------------------------------------------------------
 dnl optional non GUI features
@@ -1042,15 +1059,10 @@ if test "x$SUNCXX" != xyes; then
     fi
 fi
 
-dnl ---------------------------------------------------------------------------
-dnl Mac-specific SDK/architectures checks
-dnl ---------------------------------------------------------------------------
-
-if test "$wxUSE_MAC" = 1; then
-
 retest_macosx_linking=no
 
 dnl Support the old --enable-universal_binary in case anyone was using it.
+#if test "$wxUSE_MAC" = 1; then
     if test "x$wxUSE_UNIVERSAL_BINARY" != xno ; then
         dnl --enable-universal_binary uses a default SDK (currently 10.4u)
         dnl --enable-universal_binary=SDK names a path to an SDK
@@ -1107,6 +1119,7 @@ dnl Support the old --enable-universal_binary in case anyone was using it.
         AC_MSG_WARN([Disabling precompiled headers due to universal binary build.])
         bk_use_pch=no
     fi
+#fi
 
 dnl Set up the Mac OS X SDK.  We do this early so configure tests will occur
 dnl with the SDK in place.
@@ -1167,42 +1180,9 @@ dnl We need to quote the next line where we don't need macros and do need [] in 
         wxUSE_MACOSX_VERSION_MIN=
     fi
 elif test "x$wxUSE_MACOSX_VERSION_MIN" = "x"; then
-    OSX_VERSION=`sw_vers -productVersion | grep 10.[[0-9]]`
-    if test "$wxUSE_OSX_CARBON" = 1 -o "x$OSX_VERSION" = "x10.4"; then
+    if test "$wxUSE_MAC" = 1; then
         # otherwise configure stops on leopard for universal_binary
         wxUSE_MACOSX_VERSION_MIN=10.4
-    else
-        # for OS X Cocoa, use 10.5 so we can get 64-bit compile on Snow Leopard
-        wxUSE_MACOSX_VERSION_MIN=10.5
-    fi
-fi
-
-NEEDS_GCC40="no"
-if test "x$wxUSE_MACOSX_VERSION_MIN" == "x10.4"; then
-    NEEDS_GCC40="yes"
-fi
-
-if test "$wxUSE_OSX_CARBON" = 1; then
-    NEEDS_GCC40="yes"
-fi
-
-if test "x$NEEDS_GCC40" == "xyes"; then
-    # gcc 4.2 cannot compile 10.4 compatible code, so if the user is using it
-    # and wants 10.4 compatible code, then 'downgrade' to 4.0
-    # This is also the simplest way to get 32-bit binaries on Snow Leopard.
-    if test "x$CC" = "xgcc"; then
-        CCVERSION=`$CC --version | grep 4.[[2-9]].`
-        if test "x$CCVERSION" != "x"; then
-            echo "$as_me:$LINENO: WARNING: gcc >= 4.2 cannot compile 10.4 compatible code. Using gcc 4.0 instead."
-            CC="/usr/bin/gcc-4.0"
-        fi
-    fi
-
-    if test "x$CXX" = "xg++"; then
-        CCVERSION=`$CXX --version | grep 4.[[2-9]].`
-        if test "x$CCVERSION" != "x"; then
-            CXX="/usr/bin/g++-4.0"
-        fi
     fi
 fi
 
@@ -1229,7 +1209,6 @@ if test "x$retest_macosx_linking" = "xyes"; then
     AC_LANG_POP()
 fi
 
-fi dnl wxUSE_MAC
 
 case "${host}" in
 
@@ -2038,9 +2017,7 @@ SEARCH_INCLUDE="\
     /usr/local/include        \
     /usr/local/X11/include    \
     /usr/local/include/X11    \
-    /usr/local/X11R7/include  \
     /usr/local/X11R6/include  \
-    /usr/local/include/X11R7  \
     /usr/local/include/X11R6  \
                               \
     /usr/Motif-2.1/include    \
@@ -2052,11 +2029,9 @@ SEARCH_INCLUDE="\
                               \
     /usr/include/Xm           \
                               \
-    /usr/X11R7/include        \
     /usr/X11R6/include        \
     /usr/X11R6.4/include      \
                               \
-    /usr/include/X11R7        \
     /usr/include/X11R6        \
                               \
     /usr/X11/include          \
@@ -3713,17 +3688,13 @@ if test "$wxUSE_OPENGL" = "yes" -o "$wxUSE_OPENGL" = "auto"; then
                 wxUSE_OPENGL=no
                 USE_OPENGL=0
             fi
+        else
+            dnl libraries are available... change 'auto' in 'yes'
+            wxUSE_OPENGL=yes
         fi
     else
         AC_MSG_WARN([wxGLCanvas not implemented for this port, library will be compiled without it.])
         wxUSE_OPENGL="no"
-    fi
-
-    if test "$wxUSE_OPENGL" = "auto"; then
-        dnl if the OpenGL libraries were unavailable, this would have been
-        dnl changed to "no" above, if it wasn't, change it to "yes" as we've
-        dnl verified that we can indeed use OpenGL
-        wxUSE_OPENGL=yes
     fi
 
     if test "$wxUSE_OPENGL" = "yes"; then
@@ -5021,59 +4992,48 @@ if test "$TOOLKIT" != "MSW" -a "$USE_OS2" != 1; then
         fi
       fi
 
-      if test "$wxUSE_COMPILER_TLS" = "auto"; then
-          if test "$USE_NETBSD" = 1; then
-              AC_MSG_WARN([Disabling TLS under NetBSD, please contact wx-dev if it works now])
-              wxUSE_COMPILER_TLS=no
-          else
-              wxUSE_COMPILER_TLS=yes
+      dnl test for compiler thread-specific variables support
+      AC_CACHE_CHECK([for __thread keyword],
+                     wx_cv_cc___thread,
+          [
+              AC_TRY_COMPILE([#include <pthread.h>],
+                  [
+                      static __thread int n = 0;
+                      static __thread int *p = 0;
+                  ],
+                  wx_cv_cc___thread=yes,
+                  wx_cv_cc___thread=no
+              )
+          ]
+      )
+
+      if test "$wx_cv_cc___thread" = "yes"; then
+          AX_GXX_VERSION
+          if test -n "$ax_cv_gxx_version"; then
+              dnl g++ supports __thread since at least version 3.3 but its support
+              dnl seems to be broken until 4.1, see
+              dnl   http://thread.gmane.org/gmane.comp.lib.wxwidgets.devel/108388
+              dnl
+              dnl NB: we still need to test __thread support with
+              dnl     AC_TRY_COMPILE above even for g++ 4 as it doesn't
+              dnl     support it for all architectures (e.g. it doesn't
+              dnl     work under OS X)
+              AC_MSG_CHECKING([whether __thread support in g++ is usable])
+              case "$ax_cv_gxx_version" in
+                1.* | 2.* | 3.* )
+                    AC_MSG_RESULT([no, it's broken])
+                    wx_cv_cc___thread=no
+                    ;;
+                *)
+                    AC_MSG_RESULT([yes, it works])
+                    ;;
+              esac
           fi
       fi
 
-      if test "$wxUSE_COMPILER_TLS" = "yes"; then
-          dnl test for compiler thread-specific variables support
-          AC_CACHE_CHECK([for __thread keyword],
-                         wx_cv_cc___thread,
-              [
-                  AC_TRY_COMPILE([#include <pthread.h>],
-                      [
-                          static __thread int n = 0;
-                          static __thread int *p = 0;
-                      ],
-                      wx_cv_cc___thread=yes,
-                      wx_cv_cc___thread=no
-                  )
-              ]
-          )
-
-          if test "$wx_cv_cc___thread" = "yes"; then
-              AX_GXX_VERSION
-              if test -n "$ax_cv_gxx_version"; then
-                  dnl g++ supports __thread since at least version 3.3 but its support
-                  dnl seems to be broken until 4.1, see
-                  dnl   http://thread.gmane.org/gmane.comp.lib.wxwidgets.devel/108388
-                  dnl
-                  dnl NB: we still need to test __thread support with
-                  dnl     AC_TRY_COMPILE above even for g++ 4 as it doesn't
-                  dnl     support it for all architectures (e.g. it doesn't
-                  dnl     work under OS X)
-                  AC_MSG_CHECKING([whether __thread support in g++ is usable])
-                  case "$ax_cv_gxx_version" in
-                    1.* | 2.* | 3.* )
-                        AC_MSG_RESULT([no, it's broken])
-                        wx_cv_cc___thread=no
-                        ;;
-                    *)
-                        AC_MSG_RESULT([yes, it works])
-                        ;;
-                  esac
-              fi
-          fi
-
-          if test "$wx_cv_cc___thread" = "yes"; then
-            AC_DEFINE(HAVE___THREAD_KEYWORD)
-          fi
-        fi
+      if test "$wx_cv_cc___thread" = "yes"; then
+        AC_DEFINE(HAVE___THREAD_KEYWORD)
+      fi
     fi
 
 dnl from if !MSW
@@ -7463,14 +7423,6 @@ if test "x$INTELCXX" = "xyes" ; then
 elif test "$GXX" = yes ; then
     CXXWARNINGS="-Wall -Wundef -Wunused-parameter -Wno-ctor-dtor-privacy"
     AX_CXXFLAGS_GCC_OPTION(-Woverloaded-virtual, CXXWARNINGS)
-
-    dnl when building under Mac we currently get hundreds of deprecation
-    dnl warnings for Carbon symbols from the standard headers -- disable them
-    dnl as we already know that they're deprecated and nothing else can be seen
-    dnl with these warnings on
-    if test "$wxUSE_MAC" = 1 ; then
-        CXXWARNINGS="$CXXWARNINGS -Wno-deprecated-declarations"
-    fi
 fi
 
 
@@ -8006,7 +7958,10 @@ AC_PROG_MAKE_SET
 AC_CONFIG_HEADERS([lib/wx/include/${TOOLCHAIN_FULLNAME}/wx/setup.h:setup.h.in])
 
 if test "$USE_WIN32" = 1; then
-    AC_CONFIG_COMMANDS([rcdefs.h],
+    AC_CONFIG_COMMANDS(
+        [
+            rcdefs.h
+        ],
         [
             mkdir -p $outdir &&
             $CPP $infile | sed 's/^# *[1-9].*//;s/^ *//;/./,/^$/!d' > $outdir/rcdefs.h

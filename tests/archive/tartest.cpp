@@ -44,8 +44,8 @@ protected:
 tartest::tartest()
   : ArchiveTestSuite("tar")
 {
-    AddArchiver(wxT("tar cf %s *"));
-    AddUnArchiver(wxT("tar xf %s"));
+    AddArchiver(_T("tar cf %s *"));
+    AddUnArchiver(_T("tar xf %s"));
 }
 
 CppUnit::Test *tartest::makeTest(
@@ -59,15 +59,13 @@ CppUnit::Test *tartest::makeTest(
         return NULL;
 
     if (genericInterface)
-    {
         return new ArchiveTestCase<wxArchiveClassFactory>(
                             descr, new wxTarClassFactory,
                             options, archiver, unarchiver);
-    }
-
-    return new ArchiveTestCase<wxTarClassFactory>(
-                        descr, new wxTarClassFactory,
-                        options, archiver, unarchiver);
+    else
+        return new ArchiveTestCase<wxTarClassFactory>(
+                            descr, new wxTarClassFactory,
+                            options, archiver, unarchiver);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(tartest);

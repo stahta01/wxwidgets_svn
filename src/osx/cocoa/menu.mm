@@ -55,10 +55,7 @@
 
 @end
 
-@interface wxNSMenuController : NSObject 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-    <NSMenuDelegate>
-#endif
+@interface wxNSMenuController : NSObject
 {
 }
 
@@ -120,11 +117,11 @@
 
 @end
 
-@interface NSApplication(MissingAppleMenuCall)
-- (void)setAppleMenu:(NSMenu *)menu;
-@end
+@interface NSApplication(MissingAppleMenuCall) 
+- (void)setAppleMenu:(NSMenu *)menu; 
+@end 
 
-class wxMenuCocoaImpl : public wxMenuImpl
+class wxMenuCocoaImpl : public wxMenuImpl 
 {
 public :
     wxMenuCocoaImpl( wxMenu* peer , wxNSMenu* menu) : wxMenuImpl(peer), m_osxMenu(menu)
@@ -136,27 +133,23 @@ public :
         }
         [menu setDelegate:controller];
         [m_osxMenu setImplementation:this];
-        // gc aware
-        if ( m_osxMenu )
-            CFRetain(m_osxMenu);
-        [m_osxMenu release];
     }
-
+    
     virtual ~wxMenuCocoaImpl();
-
-    virtual void InsertOrAppend(wxMenuItem *pItem, size_t pos)
+        
+    virtual void InsertOrAppend(wxMenuItem *pItem, size_t pos) 
     {
         if ( pos == (size_t) -1 )
             [m_osxMenu addItem:(NSMenuItem*) pItem->GetPeer()->GetHMenuItem() ];
         else
             [m_osxMenu insertItem:(NSMenuItem*) pItem->GetPeer()->GetHMenuItem() atIndex:pos];
     }
-
-    virtual void Remove( wxMenuItem *pItem )
+        
+    virtual void Remove( wxMenuItem *pItem ) 
     {
         [m_osxMenu removeItem:(NSMenuItem*) pItem->GetPeer()->GetHMenuItem()];
     }
-
+    
     virtual void MakeRoot()
     {
         [NSApp setMainMenu:m_osxMenu];
@@ -166,7 +159,7 @@ public :
     virtual void Enable( bool WXUNUSED(enable) )
     {
     }
-
+    
     virtual void SetTitle( const wxString& text )
     {
         wxCFStringRef cfText(text);
@@ -203,9 +196,7 @@ wxMenuCocoaImpl::~wxMenuCocoaImpl()
 {
     [m_osxMenu setDelegate:nil];
     [m_osxMenu setImplementation:nil];
-    // gc aware
-    if ( m_osxMenu )
-        CFRelease(m_osxMenu);
+    [m_osxMenu release];
 }
 
 wxMenuImpl* wxMenuImpl::Create( wxMenu* peer, const wxString& title )

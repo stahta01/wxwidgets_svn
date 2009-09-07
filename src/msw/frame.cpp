@@ -477,7 +477,7 @@ void wxFrame::AttachMenuBar(wxMenuBar *menubar)
 
             if ( !m_hMenu )
             {
-                wxFAIL_MSG( wxT("failed to create menu bar") );
+                wxFAIL_MSG( _T("failed to create menu bar") );
                 return;
             }
         }
@@ -893,12 +893,6 @@ bool wxFrame::HandleSize(int WXUNUSED(x), int WXUNUSED(y), WXUINT id)
 bool wxFrame::HandleCommand(WXWORD id, WXWORD cmd, WXHWND control)
 {
 #if wxUSE_MENUS
-
-#if defined(WINCE_WITHOUT_COMMANDBAR)
-    if (GetToolBar() && GetToolBar()->FindById(id))
-        return GetToolBar()->MSWCommand(cmd, id);
-#endif
-
     // we only need to handle the menu and accelerator commands from the items
     // of our menu bar, base wxWindow class already handles the rest
     if ( !control && (cmd == 0 /* menu */ || cmd == 1 /* accel */) )
@@ -919,28 +913,35 @@ bool wxFrame::HandleCommand(WXWORD id, WXWORD cmd, WXHWND control)
 
 #if wxUSE_MENUS
 
-bool
-wxFrame::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU WXUNUSED(hMenu))
+bool wxFrame::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU hMenu)
 {
-    // WM_MENUSELECT is generated for both normal items and menus, including
-    // the top level menus of the menu bar, which can't be represented using
-    // any valid identifier in wxMenuEvent so use -1 for them
-    // the menu highlight events for n
-    const int item = flags & (MF_POPUP | MF_SEPARATOR) ? -1 : nItem;
+    int item;
+    if ( flags == 0xFFFF && hMenu == 0 )
+    {
+        // menu was removed from screen
+        item = -1;
+    }
+#ifndef __WXMICROWIN__
+    else if ( !(flags & MF_POPUP) && !(flags & MF_SEPARATOR) )
+    {
+        item = nItem;
+    }
+#endif
+    else
+    {
+        // don't give hints for separators (doesn't make sense) nor for the
+        // items opening popup menus (they don't have them anyhow) but do clear
+        // the status line - otherwise, we would be left with the help message
+        // for the previous item which doesn't apply any more
+        DoGiveHelp(wxEmptyString, true);
+
+        return false;
+    }
 
     wxMenuEvent event(wxEVT_MENU_HIGHLIGHT, item);
     event.SetEventObject(this);
 
-    if ( HandleWindowEvent(event) )
-        return true;
-
-    // by default, i.e. if the event wasn't handled above, clear the status bar
-    // text when an item which can't have any associated help string in wx API
-    // is selected
-    if ( item == -1 )
-        DoGiveHelp(wxEmptyString, true);
-
-    return false;
+    return HandleWindowEvent(event);
 }
 
 bool wxFrame::HandleMenuLoop(const wxEventType& evtType, WXWORD isPopup)

@@ -74,7 +74,6 @@ public:
     wxPGCachedString    m_strbool;
     wxPGCachedString    m_strlist;
 
-    wxPGCachedString    m_strDefaultValue;
     wxPGCachedString    m_strMin;
     wxPGCachedString    m_strMax;
     wxPGCachedString    m_strUnits;
@@ -247,39 +246,9 @@ wxPG_EX_WRITEONLY_BUILTIN_ATTRIBUTES    = 0x00400000,
 
 /** Hides page selection buttons from toolbar.
 */
-wxPG_EX_HIDE_PAGE_BUTTONS               = 0x01000000,
-
-/** Allows multiple properties to be selected by user (by pressing SHIFT
-    when clicking on a property, or by dragging with left mouse button
-    down).
-
-    You can get array of selected properties with
-    wxPropertyGridInterface::GetSelectedProperties(). In multiple selection
-    mode wxPropertyGridInterface::GetSelection() returns
-    property which has editor active (usually the first one
-    selected). Other useful member functions are ClearSelection(),
-    AddToSelection() and RemoveFromSelection().
-*/
-wxPG_EX_MULTIPLE_SELECTION              = 0x02000000,
-
-/**
-    This enables top-level window tracking which allows wxPropertyGrid to
-    notify the application of last-minute property value changes by user.
-
-    This style is not enabled by default because it may cause crashes when
-    wxPropertyGrid is used in with wxAUI or similar system.
-
-    @remarks If you are not in fact using any system that may change
-             wxPropertyGrid's top-level parent window on its own, then you
-             are recommended to enable this style.
-*/
-wxPG_EX_ENABLE_TLP_TRACKING             = 0x04000000
+wxPG_EX_HIDE_PAGE_BUTTONS               = 0x01000000
 
 };
-
-#if wxPG_COMPATIBILITY_1_4
-    #define wxPG_EX_DISABLE_TLP_TRACKING    0x00000000
-#endif
 
 /** Combines various styles.
 */
@@ -465,23 +434,20 @@ enum wxPG_KEYBOARD_ACTIONS
 // wxPropertyGrid::DoSelectProperty flags (selFlags)
 
 // Focuses to created editor
-#define wxPG_SEL_FOCUS                  0x0001
+#define wxPG_SEL_FOCUS      0x01
 // Forces deletion and recreation of editor
-#define wxPG_SEL_FORCE                  0x0002
+#define wxPG_SEL_FORCE      0x02
 // For example, doesn't cause EnsureVisible
-#define wxPG_SEL_NONVISIBLE             0x0004
+#define wxPG_SEL_NONVISIBLE 0x04
 // Do not validate editor's value before selecting
-#define wxPG_SEL_NOVALIDATE             0x0008
+#define wxPG_SEL_NOVALIDATE 0x08
 // Property being deselected is about to be deleted
-#define wxPG_SEL_DELETING               0x0010
+#define wxPG_SEL_DELETING   0x10
 // Property's values was set to unspecified by the user
-#define wxPG_SEL_SETUNSPEC              0x0020
+#define wxPG_SEL_SETUNSPEC  0x20
 // Property's event handler changed the value
-#define wxPG_SEL_DIALOGVAL              0x0040
-// Set to disable sending of wxEVT_PG_SELECTED event
-#define wxPG_SEL_DONT_SEND_EVENT        0x0080
-// Don't make any graphics updates
-#define wxPG_SEL_NO_REFRESH             0x0100
+#define wxPG_SEL_DIALOGVAL  0x40
+
 
 // -----------------------------------------------------------------------
 
@@ -575,11 +541,8 @@ enum wxPG_KEYBOARD_ACTIONS
 
     @beginEventTable{wxPropertyGridEvent}
     @event{EVT_PG_SELECTED (id, func)}
-        Respond to wxEVT_PG_SELECTED event, generated when a property selection
-        has been changed, either by user action or by indirect program
-        function. For instance, collapsing a parent property programmatically
-        causes any selected child property to become unselected, and may
-        therefore cause this event to be generated.
+        Respond to wxEVT_PG_SELECTED event, generated when property value
+        has been changed by user.
     @event{EVT_PG_CHANGING(id, func)}
         Respond to wxEVT_PG_CHANGING event, generated when property value
         is about to be changed by user. Use wxPropertyGridEvent::GetValue()
@@ -601,14 +564,6 @@ enum wxPG_KEYBOARD_ACTIONS
     @event{EVT_PG_ITEM_EXPANDED(id, func)}
         Respond to wxEVT_PG_ITEM_EXPANDED event, generated when user expands
         a property or category..
-    @event{EVT_PG_LABEL_EDIT_BEGIN(id, func)}
-        Respond to wxEVT_PG_LABEL_EDIT_BEGIN event, generated when is about to
-        begin editing a property label. You can veto this event to prevent the
-        action.
-    @event{EVT_PG_LABEL_EDIT_ENDING(id, func)}
-        Respond to wxEVT_PG_LABEL_EDIT_ENDING event, generated when is about to
-        end editing of a property label. You can veto this event to prevent the
-        action.
     @endEventTable
 
     @remarks
@@ -878,6 +833,12 @@ public:
     /** Returns currently selected property. */
     wxPGProperty* GetSelectedProperty() const { return GetSelection(); }
 
+    /** Returns currently selected property. */
+    wxPGProperty* GetSelection() const
+    {
+        return m_selected;
+    }
+
     /** Returns current selection background colour. */
     wxColour GetSelectionBackgroundColour() const { return m_colSelBack; }
 
@@ -931,21 +892,6 @@ public:
      */
     bool IsFrozen() const { return (m_frozen>0)?true:false; }
 
-    /**
-        It is recommended that you call this function any time your code causes
-        wxPropertyGrid's top-level parent to change. wxPropertyGrid's OnIdle()
-        handler should be able to detect most changes, but it is not perfect.
-
-        @param newTLP
-            New top-level parent that is about to be set. Old top-level parent
-            window should still exist as the current one.
-
-        @remarks This function is automatically called from wxPropertyGrid::
-                 Reparent() and wxPropertyGridManager::Reparent(). You only
-                 need to use it if you reparent wxPropertyGrid indirectly.
-    */
-    void OnTLPChanging( wxWindow* newTLP );
-
     /** Redraws given property.
     */
     virtual void RefreshProperty( wxPGProperty* p );
@@ -973,105 +919,18 @@ public:
     /**
         Selects a property.
         Editor widget is automatically created, but not focused unless focus is
-        true.
-
+        true. This will generate wxEVT_PG_SELECT event.
         @param id
             Property to select.
-
         @return
             True if selection finished successfully. Usually only fails if
             current value in editor is not valid.
-
-        @remarks In wxPropertyGrid 1.4, this member function used to generate
-                 wxEVT_PG_SELECTED. In wxWidgets 2.9 and later, it no longer
-                 does that.
-
-        @remarks This clears any previous selection.
+        @see wxPropertyGrid::Unselect
     */
-    bool SelectProperty( wxPGPropArg id, bool focus = false );
-
-    /**
-        Set entire new selection from given list of properties.
-    */
-    void SetSelection( const wxArrayPGProperty& newSelection )
-    {
-        DoSetSelection( newSelection, wxPG_SEL_DONT_SEND_EVENT );
-    }
-
-    /**
-        Adds given property into selection. If wxPG_EX_MULTIPLE_SELECTION
-        extra style is not used, then this has same effect as
-        calling SelectProperty().
-
-        @remarks Multiple selection is not supported for categories. This
-                 means that if you have properties selected, you cannot
-                 add category to selection, and also if you have category
-                 selected, you cannot add other properties to selection.
-                 This member function will fail silently in these cases,
-                 even returning true.
-    */
-    bool AddToSelection( wxPGPropArg id )
+    bool SelectProperty( wxPGPropArg id, bool focus = false )
     {
         wxPG_PROP_ARG_CALL_PROLOG_RETVAL(false)
-        return DoAddToSelection(p, wxPG_SEL_DONT_SEND_EVENT);
-    }
-
-    /**
-        Removes given property from selection. If property is not selected,
-        an assertion failure will occur.
-    */
-    bool RemoveFromSelection( wxPGPropArg id )
-    {
-        wxPG_PROP_ARG_CALL_PROLOG_RETVAL(false)
-        return DoRemoveFromSelection(p, wxPG_SEL_DONT_SEND_EVENT);
-    }
-
-    /**
-        Makes given column editable by user.
-
-        @param editable
-            Using @false here will disable column from being editable.
-    */
-    void MakeColumnEditable( unsigned int column, bool editable = true );
-
-    /**
-        Creates label editor wxTextCtrl for given column, for property
-        that is currently selected. When multiple selection is
-        enabled, this applies to whatever property GetSelection()
-        returns.
-
-        @param colIndex
-            Which column's label to edit. Note that you should not
-            use value 1, which is reserved for property value
-            column.
-
-        @see EndLabelEdit(), MakeColumnEditable()
-    */
-    void BeginLabelEdit( unsigned int column = 0 )
-    {
-        DoBeginLabelEdit(column, wxPG_SEL_DONT_SEND_EVENT);
-    }
-
-    /**
-        Destroys label editor wxTextCtrl, if any.
-
-        @param commit
-            Use @true (default) to store edited label text in
-            property cell data.
-
-        @see BeginLabelEdit(), MakeColumnEditable()
-    */
-    void EndLabelEdit( bool commit = true )
-    {
-        DoEndLabelEdit(commit, wxPG_SEL_DONT_SEND_EVENT);
-    }
-
-    /**
-        Returns currently active label editor, NULL if none.
-    */
-    wxTextCtrl* GetLabelEditor() const
-    {
-        return m_labelEditor;
+        return DoSelectProperty(p,focus?wxPG_SEL_FOCUS:0);
     }
 
     /** Sets category caption background colour. */
@@ -1273,7 +1132,6 @@ public:
         shown).
     */
     void FixPosForTextCtrl( wxWindow* ctrl,
-                            unsigned int forColumn = 1,
                             const wxPoint& offset = wxPoint(0, 0) );
 
     /** Shortcut for creating text editor widget.
@@ -1297,8 +1155,7 @@ public:
                                       const wxString& value,
                                       wxWindow* secondary,
                                       int extraStyle = 0,
-                                      int maxLen = 0,
-                                      unsigned int forColumn = 1 );
+                                      int maxLen = 0 );
 
     /* Generates both textctrl and button.
     */
@@ -1409,21 +1266,6 @@ public:
     {
         m_changeInEventValue = variant;
         m_iFlags |= wxPG_FL_VALUE_CHANGE_IN_EVENT;
-    }
-
-    /**
-        You can use this member function, for instance, to detect in
-        wxPGProperty::OnEvent() if wxPGProperty::SetValueInEvent() was
-        already called in wxPGEditor::OnEvent(). It really only detects
-        if was value was changed using wxPGProperty::SetValueInEvent(), which
-        is usually used when a 'picker' dialog is displayed. If value was
-        written by "normal means" in wxPGProperty::StringToValue() or
-        IntToValue(), then this function will return false (on the other hand,
-        wxPGProperty::OnEvent() is not even called in those cases).
-    */
-    bool WasValueChangedInEvent() const
-    {
-        return (m_iFlags & wxPG_FL_VALUE_CHANGE_IN_EVENT) ? true : false;
     }
 
     /** Returns true if given event is from first of an array of buttons
@@ -1562,6 +1404,7 @@ public:
 
     //
     // Public methods for semi-public use
+    // (not protected for optimization)
     //
     bool DoSelectProperty( wxPGProperty* p, unsigned int flags = 0 );
 
@@ -1579,7 +1422,7 @@ public:
     virtual void Freeze();
     virtual void SetExtraStyle( long exStyle );
     virtual void Thaw();
-    virtual bool Reparent( wxWindowBase *newParent );
+
 
 protected:
     virtual wxSize DoGetBestSize() const;
@@ -1753,17 +1596,14 @@ protected:
     /** When drawing next time, clear this many item slots at the end. */
     int                 m_clearThisMany;
 
-    // Mouse is hovering over this column (index)
-    unsigned int        m_colHover;
+    /** Pointer to selected property. Note that this is duplicated in
+        m_state for better transiency between pages so that the selected
+        item can be retained.
+    */
+    wxPGProperty*       m_selected;
 
     // pointer to property that has mouse hovering
     wxPGProperty*       m_propHover;
-
-    // Active label editor
-    wxTextCtrl*         m_labelEditor;
-
-    // For which property the label editor is active
-    wxPGProperty*       m_labelEditorProperty;
 
     // EventObject for wxPropertyGridEvents
     wxWindow*           m_eventObject;
@@ -1772,23 +1612,19 @@ protected:
     // handling mess).
     wxWindow*           m_curFocused;
 
-    // Last known top-level parent
+    // wxPGTLWHandler
+    wxEvtHandler*       m_tlwHandler;
+
+    // Top level parent
     wxWindow*           m_tlp;
-
-    // Last closed top-level parent
-    wxWindow*           m_tlpClosed;
-
-    // Local time ms when tlp was closed.
-    wxLongLong          m_tlpClosedTime;
 
     // Sort function
     wxPGSortCallback    m_sortFunction;
 
     // y coordinate of property that mouse hovering
     int                 m_propHoverY;
-
     // Which column's editor is selected (usually 1)?
-    unsigned int        m_selColumn;
+    int                 m_selColumn;
 
     // x relative to splitter (needed for resize).
     int                 m_ctrlXAdjust;
@@ -1885,14 +1721,7 @@ protected:
 
     void OnSysColourChanged( wxSysColourChangedEvent &event );
 
-    void OnTLPClose( wxCloseEvent& event );
-
 protected:
-
-    bool AddToSelectionFromInputEvent( wxPGProperty* prop,
-                                       unsigned int colIndex,
-                                       wxMouseEvent* event = NULL,
-                                       int selFlags = 0 );
 
     /**
         Adjust the centering of the bitmap icons (collapse / expand) when the
@@ -1912,6 +1741,10 @@ protected:
         on virtual height changes.
     */
     void CorrectEditorWidgetPosY();
+
+    /** Deselect current selection, if any. Returns true if success
+        (ie. validator did not intercept). */
+    bool DoClearSelection();
 
     int DoDrawItems( wxDC& dc,
                      const wxRect* clipRect,
@@ -1945,27 +1778,6 @@ protected:
 
     bool DoEditorValidate();
 
-    // Similar to DoSelectProperty() but also works on columns
-    // other than 1. Does not active editor if column is not
-    // editable.
-    bool DoSelectAndEdit( wxPGProperty* prop,
-                          unsigned int colIndex,
-                          unsigned int selFlags );
-
-    void DoSetSelection( const wxArrayPGProperty& newSelection,
-                         int selFlags = 0 );
-
-    bool DoAddToSelection( wxPGProperty* prop,
-                           int selFlags = 0 );
-
-    bool DoRemoveFromSelection( wxPGProperty* prop,
-                                int selFlags = 0 );
-
-    void DoBeginLabelEdit( unsigned int colIndex, int selFlags = 0 );
-    void DoEndLabelEdit( bool commit, int selFlags = 0 );
-    void OnLabelEditorEnterPress( wxCommandEvent& event );
-    void OnLabelEditorKeyPress( wxKeyEvent& event );
-
     wxPGProperty* DoGetItemAtY( int y ) const;
 
     void DoSetSplitterPosition_( int newxpos,
@@ -1973,7 +1785,6 @@ protected:
                                  int splitterIndex = 0,
                                  bool allPages = false );
 
-    void DestroyEditorWnd( wxWindow* wnd );
     void FreeEditors();
 
     virtual bool DoExpand( wxPGProperty* p, bool sendEvent = false );
@@ -2000,11 +1811,10 @@ protected:
 
     void PrepareAfterItemsAdded();
 
-    // Omit the wxPG_SEL_NOVALIDATE flag to allow vetoing the event
-    bool SendEvent( int eventType, wxPGProperty* p,
+    bool SendEvent( int eventType,
+                    wxPGProperty* p,
                     wxVariant* pValue = NULL,
-                    unsigned int selFlags = wxPG_SEL_NOVALIDATE,
-                    unsigned int column = 1 );
+                    unsigned int selFlags = 0 );
 
     void SetFocusOnCanvas();
 
@@ -2046,14 +1856,14 @@ inline int wxPGProperty::GetDisplayedCommonValueCount() const
     return 0;
 }
 
-inline void wxPGProperty::SetDefaultValue( wxVariant& value )
-{
-    SetAttribute(wxPG_ATTR_DEFAULT_VALUE, value);
-}
-
 inline void wxPGProperty::SetEditor( const wxString& editorName )
 {
     m_customEditor = wxPropertyGridInterface::GetEditorByName(editorName);
+}
+
+inline void wxPGProperty::SetName( const wxString& newName )
+{
+    GetGrid()->SetPropertyName(this, newName);
 }
 
 inline bool wxPGProperty::Hide( bool hide, int flags )
@@ -2081,10 +1891,6 @@ wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_PROPGRID, wxEVT_PG_PAGE_CHANGED, wxPropert
 wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_PROPGRID, wxEVT_PG_ITEM_COLLAPSED, wxPropertyGridEvent );
 wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_PROPGRID, wxEVT_PG_ITEM_EXPANDED, wxPropertyGridEvent );
 wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_PROPGRID, wxEVT_PG_DOUBLE_CLICK, wxPropertyGridEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_PROPGRID,
-                          wxEVT_PG_LABEL_EDIT_BEGIN, wxPropertyGridEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_PROPGRID,
-                          wxEVT_PG_LABEL_EDIT_ENDING, wxPropertyGridEvent );
 
 #else
     enum {
@@ -2096,9 +1902,7 @@ wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_PROPGRID,
         wxEVT_PG_PAGE_CHANGED,
         wxEVT_PG_ITEM_COLLAPSED,
         wxEVT_PG_ITEM_EXPANDED,
-        wxEVT_PG_DOUBLE_CLICK,
-        wxEVT_PG_LABEL_EDIT_BEGIN,
-        wxEVT_PG_LABEL_EDIT_ENDING
+        wxEVT_PG_DOUBLE_CLICK
     };
 #endif
 
@@ -2119,8 +1923,6 @@ typedef void (wxEvtHandler::*wxPropertyGridEventFunction)(wxPropertyGridEvent&);
 #define EVT_PG_PAGE_CHANGED(id, fn)          DECLARE_EVENT_TABLE_ENTRY( wxEVT_PG_PAGE_CHANGED, id, -1, wxEVENT_HANDLER_CAST( wxPropertyGridEventFunction, fn ), NULL ),
 #define EVT_PG_ITEM_COLLAPSED(id, fn)        DECLARE_EVENT_TABLE_ENTRY( wxEVT_PG_ITEM_COLLAPSED, id, -1, wxEVENT_HANDLER_CAST( wxPropertyGridEventFunction, fn ), NULL ),
 #define EVT_PG_ITEM_EXPANDED(id, fn)         DECLARE_EVENT_TABLE_ENTRY( wxEVT_PG_ITEM_EXPANDED, id, -1, wxEVENT_HANDLER_CAST( wxPropertyGridEventFunction, fn ), NULL ),
-#define EVT_PG_LABEL_EDIT_BEGIN(id, fn)      DECLARE_EVENT_TABLE_ENTRY( wxEVT_PG_LABEL_EDIT_BEGIN, id, -1, wxEVENT_HANDLER_CAST( wxPropertyGridEventFunction, fn ), NULL ),
-#define EVT_PG_LABEL_EDIT_ENDING(id, fn)     DECLARE_EVENT_TABLE_ENTRY( wxEVT_PG_LABEL_EDIT_ENDING, id, -1, wxEVENT_HANDLER_CAST( wxPropertyGridEventFunction, fn ), NULL ),
 
 #define wxPropertyGridEventHandler(fn) \
     wxEVENT_HANDLER_CAST( wxPropertyGridEventFunction, fn )
@@ -2151,14 +1953,6 @@ public:
 
     /** Copyer. */
     virtual wxEvent* Clone() const;
-
-    /**
-        Returns the column index associated with this event.
-    */
-    unsigned int GetColumn() const
-    {
-        return m_column;
-    }
 
     wxPGProperty* GetMainParent() const
     {
@@ -2231,11 +2025,6 @@ public:
         return m_validationInfo->GetFailureBehavior();
     }
 
-    void SetColumn( unsigned int column )
-    {
-        m_column = column;
-    }
-
     void SetCanVeto( bool canVeto ) { m_canVeto = canVeto; }
     bool WasVetoed() const { return m_wasVetoed; }
 
@@ -2258,8 +2047,6 @@ private:
     wxPGProperty*       m_property;
     wxPropertyGrid*     m_pg;
     wxPGValidationInfo* m_validationInfo;
-
-    unsigned int        m_column;
 
     bool                m_canVeto;
     bool                m_wasVetoed;

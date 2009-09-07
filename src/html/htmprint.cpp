@@ -218,16 +218,16 @@ wxHtmlPrintout::CheckFit(const wxSize& pageArea, const wxSize& docArea) const
                  GetTitle()
                 ),
                 _("Printing"),
-                wxOK | wxCANCEL | wxCANCEL_DEFAULT | wxICON_QUESTION
+                wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION
             );
         dlg.SetExtendedMessage
             (
                 _("If possible, try changing the layout parameters to "
-                  "make the printout more narrow.")
+                  "make the printout more narrow")
             );
-        dlg.SetOKLabel(wxID_PRINT);
+        dlg.SetYesNoLabels(_("&Print"), _("&Cancel"));
 
-        if ( dlg.ShowModal() == wxID_CANCEL )
+        if ( dlg.ShowModal() != wxYES )
             return false;
     }
 

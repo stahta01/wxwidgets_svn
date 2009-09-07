@@ -26,7 +26,7 @@
 
 #include "wx/listimpl.cpp"
 
-#define TRACE_MODULE wxT("module")
+#define TRACE_MODULE _T("module")
 
 WX_DEFINE_LIST(wxModuleList)
 
@@ -192,7 +192,7 @@ void wxModule::DoCleanUpModules(const wxModuleList& modules)
         wxModule * module = node->GetData();
 
         wxASSERT_MSG( module->m_state == State_Initialized,
-                        wxT("not initialized module being cleaned up") );
+                        _T("not initialized module being cleaned up") );
 
         module->Exit();
         module->m_state = State_Registered;
