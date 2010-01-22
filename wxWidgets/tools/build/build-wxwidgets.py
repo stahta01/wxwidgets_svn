@@ -59,7 +59,7 @@ def doMacLipoBuild(arch, buildDir, installDir,
     os.environ["CXX"] = "%s -arch %s %s" % (cxxcompiler, arch, flags)
     os.environ["CC"] = "%s -arch %s %s" % (cccompiler, arch, flags)
     os.environ["MACOSX_DEPLOYMENT_TARGET"] = target
-    archArgs = ["prefix=" + archInstallDir]
+    archArgs = ["DESTDIR=" + archInstallDir]
     buildRoot = "bld-" + arch
     if buildDir:
         buildRoot = buildDir + "/" + buildRoot
@@ -73,17 +73,17 @@ def doMacLipoBuild(arch, buildDir, installDir,
     if not options.no_config:
         exitIfError(wxBuilder.configure(dir=wxRootDir, options=configure_opts), "Error running configure for "+arch)
     exitIfError(wxBuilder.build(options=archArgs), "Error building for "+arch)
-    exitIfError(wxBuilder.install(options=["prefix=" + archInstallDir]), "Error Installing for "+arch)
+    exitIfError(wxBuilder.install(options=["DESTDIR=" + archInstallDir]), "Error Installing for "+arch)
     
     if options.wxpython and os.path.exists(os.path.join(wxRootDir, contribDir)):
         exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "gizmos"), options=archArgs), 
                     "Error building gizmos for "+arch)
-        exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos"), options=["prefix=" + archInstallDir]), 
+        exitIfError(wxBuilder.install(os.path.join(contribDir, "gizmos"), options=["DESTDIR=" + archInstallDir]), 
                     "Error Installing gizmos for "+arch)
         
         exitIfError(wxBuilder.build(dir=os.path.join(contribDir, "stc"),options=archArgs), 
                     "Error building stc for "+arch)
-        exitIfError(wxBuilder.install(os.path.join(contribDir, "stc"),options=["prefix=" + archInstallDir]), 
+        exitIfError(wxBuilder.install(os.path.join(contribDir, "stc"),options=["DESTDIR=" + archInstallDir]), 
                     "Error installing stc for "+arch)
 
     os.chdir(olddir)
@@ -94,23 +94,26 @@ def doMacLipoBuild(arch, buildDir, installDir,
             del os.environ[key]
 
 
-def doMacFixupInstallName(arch, searchDir, installDir):
-    # fixup the install_names in the dynamic libs to remove the
-    # architecture-specific install dirs in the dependencies
-    for dl in glob.glob(os.path.join(searchDir, '*.dylib')):
-        if not os.path.islink(dl):
-            otool = os.popen('otool -L %s' % dl)
-            for line in otool:
-                deppath = line.split()[0]
-                archpath = os.path.join(installDir, arch)
-                if deppath.startswith(archpath):
-                    base = os.path.basename(deppath)
-                    cmd = ('install_name_tool -change %s %s %s' % 
-                           (deppath, os.path.join(installDir, 'lib', base), dl))
-                    print cmd
-                    os.system(cmd)
+def macFixupInstallNames(destdir, prefix):
+    # When an installdir is used then the install_names embedded in
+    # the dylibs are not correct.  Reset the IDs and the dependencies
+    # to use just the prefix.
+    pwd = os.getcwd()
+    os.chdir(destdir+prefix+'/lib')
+    dylibs = glob.glob('*.dylib')     # ('*[0-9].[0-9].[0-9].[0-9]*.dylib')
+    for lib in dylibs:
+        cmd = 'install_name_tool -id %s/lib/%s %s/lib/%s' % \
+              (prefix,lib,  destdir+prefix,lib)
+        print cmd
+        os.system(cmd)
+        for dep in dylibs:
+            cmd = 'install_name_tool -change %s/lib/%s %s/lib/%s %s/lib/%s' % \
+                  (destdir+prefix,dep,  prefix,dep,  destdir+prefix,lib)
+            print cmd
+            os.system(cmd)        
+    os.chdir(pwd)
 
-    
+
 
 def main(scriptName, args):
     global scriptDir
@@ -370,15 +373,8 @@ def main(scriptName, args):
                 doMacLipoBuild("ppc", buildDir, installDir)
     
             doMacLipoBuild("i386", buildDir, installDir)
-
-            # Change the install_names to not include the arch folder we built
-            # in. Do this before the lipo because on Tiger the linker looks at
-            # the install_names of the arch-specfic part of the fat dylib...
-            doMacFixupInstallName('ppc', installDir+'/ppc/lib', installDir)
-            doMacFixupInstallName('i386', installDir+'/i386/lib', installDir)
             
-            
-            # Use lipo to merge together all binaries in the install dirs, and
+            # Use lipo to merge together all binaries in the install dirs, and it
             # also copies all other files and links it finds to the new destination.
             result = os.system("python %s/distrib/scripts/mac/lipo-dir.py %s %s %s" %
                                (wxRootDir, installDir+"/ppc", installDir+"/i386", installDir))
@@ -407,7 +403,7 @@ def main(scriptName, args):
         if options.install:
             extra=None
             if installDir:
-                extra = ['prefix='+installDir]
+                extra = ['DESTDIR='+installDir]
             wxBuilder.install(options=extra) 
             
             if options.wxpython and os.path.exists(contribDir):
@@ -491,6 +487,17 @@ def main(scriptName, args):
         os.system("ln -s -f Versions/Current/wx wx")
         
 
+    # adjust the install_name if needed  TODO: skip this for framework builds?
+    if sys.platform.startswith("darwin") and \
+           options.install and \
+           options.installdir and \
+           not options.wxpython:  # wxPython's build will do this later if needed
+        prefix = options.prefix
+        if not prefix:
+            prefix = '/usr/local'
+        macFixupInstallNames(options.installdir, prefix)
+
+        
         
 if __name__ == '__main__':
     exitWithException = False  # use sys.exit instead
