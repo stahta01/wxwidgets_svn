@@ -176,7 +176,9 @@ class AutoconfBuilder(GNUMakeBuilder):
             return 1
 
         optionsStr = string.join(options, " ") if options else ""
-        result = os.system("%s %s" % (configure_cmd, optionsStr))
+        command = "%s %s" % (configure_cmd, optionsStr)
+        print command
+        result = os.system(command)
         #os.chdir(olddir)
         return result
 
