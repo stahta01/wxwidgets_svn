@@ -208,7 +208,8 @@ def main(scriptName, args):
                             "--enable-geometry",
                             "--enable-debug_flag",
                             "--enable-optimise",
-                            "--disable-debugreport",                            
+                            "--disable-debugreport",
+                            "--enable-uiactionsim",
                             ]
 
         if sys.platform.startswith("darwin"):
@@ -283,6 +284,9 @@ def main(scriptName, args):
             if VERSION < (2,9):
                 flags["wxUSE_DIB_FOR_BITMAP"] = "1"
 
+            if VERSION >= (2,9):
+                flags["wxUSE_UIACTIONSIMULATOR"] = "1"
+                
             # setup the wxPython 'hybrid' build
             if not options.debug:
                 flags["wxUSE_MEMORY_TRACING"] = "0"
