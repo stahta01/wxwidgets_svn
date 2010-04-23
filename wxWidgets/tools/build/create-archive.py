@@ -131,19 +131,19 @@ def allFilesRecursive(dir):
 
 ## MAKE THE RELEASE!
 
-str_version = "%d.%d.%d" % getVersion()
+str_version = "" ##"%d.%d.%d" % getVersion()
 archive_name = options.name
 
 if options.wxpython:
     dirsToCopy.append("wxPython")
     archive_name = "wxPython-src"
-    str_version = "%d.%d.%d.%d" % getVersion(includeSubrelease=True)
+##    str_version = "%d.%d.%d.%d" % getVersion(includeSubrelease=True)
     options.docs = "none"
 
 if options.postfix != "":
     str_version += "-" + options.postfix
 
-full_name = archive_name + "-" + str_version
+full_name = archive_name ## + "-" + str_version
 
 copyDir = tempfile.mkdtemp()
 wxCopyDir = os.path.join(copyDir, full_name) 
