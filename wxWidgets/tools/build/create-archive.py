@@ -3,13 +3,14 @@
 import glob
 import optparse
 import os
+import platform
 import re
 import shutil
 import string
 import sys
 import tempfile
 import types
-
+import pdb
 
 ## CONSTANTS
 
@@ -176,8 +177,8 @@ shutil.copy(mswSetup0, mswSetup0.replace("setup0.h", "setup.h")),
 all = options.compression == "all"
     
 # make sure they have the DOS line endings everywhere
-print "Setting MSW Project files to use DOS line endings..."
-makeDOSLineEndings(wxCopyDir, mswProjectFiles)
+##print "Setting MSW Project files to use DOS line endings..."
+##makeDOSLineEndings(wxCopyDir, mswProjectFiles)
 
 if all or options.compression == "gzip":
     print "Creating gzip archive..."
@@ -194,24 +195,44 @@ if all or options.compression == "bzip":
 if all or options.compression == "zip":
     os.chdir(copyDir)
     print "Setting DOS line endings on source and text files..."
-    makeDOSLineEndings(copyDir, nativeLineEndingFiles)
+  ##  makeDOSLineEndings(copyDir, nativeLineEndingFiles)
     print "Creating zip archive..."
     os.system("zip -9 -r %s/%s.zip %s" % (destDir, full_name, "*"))
     os.chdir(rootDir)
 
 shutil.rmtree(copyDir)
 
+
 # build any docs packages:
 doc_formats = string.split(options.docs, ",")
 doxy_dir = "docs/doxygen"
-output_dir = doxy_dir + "/out"
+output_dir = "out"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
 for format in doc_formats:
     if not format == "none":
-        os.system("%s/regen.sh %s" % (doxy_dir, format))
+        os.chdir(doxy_dir)
+        if platform.system() == "Windows":
+            print "Windows platform"
+            os.system("regen.bat %s" % format)
+        else:
+            os.system("regen.sh %s" % format)
+
         os.chdir(output_dir)
-        docs_full_name = "%s-%s" % (full_name, format.upper())
-        os.rename(format, docs_full_name)
-        os.system("zip -9 -r %s/%s.zip %s" % (destDir, docs_full_name, "*"))
+        
+        if format == "html":
+            src = format 
+            docs_full_name = "%s-%s" % (full_name, format.upper())
+            files_to_zip = "*"
+        else:
+            src = "wx.%s" % format
+            docs_full_name = "%s.%s" % (full_name, format.upper())
+            files_to_zip = docs_full_name 
+
+        os.rename(src, docs_full_name)
+        os.system("zip -9 -r %s/%s.zip %s" % (destDir, docs_full_name, files_to_zip))
+        os.chdir(rootDir)
 
 os.chdir(rootDir)
 if os.path.exists(output_dir):
