@@ -46,7 +46,7 @@ public:
     {
     }
 
-    wxDECLARE_NO_COPY_CLASS(wxMemoryConfig);
+    DECLARE_NO_COPY_CLASS(wxMemoryConfig)
 };
 
 #endif // wxUSE_CONFIG

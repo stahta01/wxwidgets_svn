@@ -33,8 +33,6 @@
     #include "wx/arrstr.h"
 #endif
 
-#include "wx/log.h"
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -42,6 +40,33 @@
 wxListBoxBase::~wxListBoxBase()
 {
     // this destructor is required for Darwin
+}
+
+// ----------------------------------------------------------------------------
+// adding items
+// ----------------------------------------------------------------------------
+
+void wxListBoxBase::InsertItems(unsigned int nItems, const wxString *items, unsigned int pos)
+{
+    wxArrayString aItems;
+    for ( unsigned int n = 0; n < nItems; n++ )
+    {
+        aItems.Add(items[n]);
+    }
+
+    DoInsertItems(aItems, pos);
+}
+
+
+void wxListBoxBase::Set(int nItems, const wxString* items, void **clientData)
+{
+    wxArrayString aItems;
+    for ( int n = 0; n < nItems; n++ )
+    {
+        aItems.Add(items[n]);
+    }
+
+    DoSetItems(aItems, clientData);
 }
 
 // ----------------------------------------------------------------------------
@@ -84,116 +109,6 @@ void wxListBoxBase::DeselectAll(int itemToLeaveSelected)
     }
 }
 
-void wxListBoxBase::UpdateOldSelections()
-{
-    if (HasFlag(wxLB_MULTIPLE) || HasFlag(wxLB_EXTENDED))
-        GetSelections( m_oldSelections );
-}
-
-static void LBSendEvent( wxCommandEvent &event, wxListBoxBase *listbox, int item )
-{
-    event.SetInt( item );
-    event.SetString( listbox->GetString( item ) );
-    if ( listbox->HasClientObjectData() )
-        event.SetClientObject( listbox->GetClientObject(item) );
-    else if ( listbox->HasClientUntypedData() )
-        event.SetClientData( listbox->GetClientData(item) );
-    listbox->HandleWindowEvent( event );
-}
-
-void wxListBoxBase::CalcAndSendEvent()
-{
-    wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, GetId());
-    event.SetEventObject( this );
-
-    wxArrayInt selections;
-    GetSelections(selections);
-
-    if ( selections.empty() && m_oldSelections.empty() )
-    {
-        // nothing changed, just leave
-        return;
-    }
-
-    const size_t countSel = selections.size(),
-                 countSelOld = m_oldSelections.size();
-    if ( countSel == countSelOld )
-    {
-        bool changed = false;
-        for ( size_t idx = 0; idx < countSel; idx++ )
-        {
-            if (selections[idx] != m_oldSelections[idx])
-            {
-                changed = true;
-                break;
-            }
-        }
-
-        // nothing changed, just leave
-        if ( !changed )
-           return;
-    }
-
-    int item = wxNOT_FOUND;
-    if ( selections.empty() )
-    {
-        // indicate that this is a deselection
-        event.SetExtraLong(0);
-        item = m_oldSelections[0];
-    }
-    else // we [still] have some selections
-    {
-        // Now test if any new item is selected
-        bool any_new_selected = false;
-        for ( size_t idx = 0; idx < countSel; idx++ )
-        {
-            item = selections[idx];
-            if ( m_oldSelections.Index(item) == wxNOT_FOUND )
-            {
-                any_new_selected = true;
-                break;
-            }
-        }
-
-        if ( any_new_selected )
-        {
-            // indicate that this is a selection
-            event.SetExtraLong(1);
-        }
-        else // no new items selected
-        {
-            // Now test if any new item is deselected
-            bool any_new_deselected = false;
-            for ( size_t idx = 0; idx < countSelOld; idx++ )
-            {
-                item = m_oldSelections[idx];
-                if ( selections.Index(item) == wxNOT_FOUND )
-                {
-                    any_new_deselected = true;
-                    break;
-                }
-            }
-
-            if ( any_new_deselected )
-            {
-                // indicate that this is a selection
-                event.SetExtraLong(0);
-            }
-            else
-            {
-                item = wxNOT_FOUND; // this should be impossible
-            }
-        }
-    }
-
-    wxASSERT_MSG( item != wxNOT_FOUND,
-                  "Logic error in wxListBox selection event generation code" );
-
-    m_oldSelections = selections;
-
-    LBSendEvent(event, this, item);
-}
-
 // ----------------------------------------------------------------------------
 // misc
 // ----------------------------------------------------------------------------
@@ -201,7 +116,7 @@ void wxListBoxBase::CalcAndSendEvent()
 void wxListBoxBase::Command(wxCommandEvent& event)
 {
     SetSelection(event.GetInt(), event.GetExtraLong() != 0);
-    (void)GetEventHandler()->ProcessEvent(event);
+    (void)ProcessEvent(event);
 }
 
 // ----------------------------------------------------------------------------

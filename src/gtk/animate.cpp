@@ -22,8 +22,6 @@
     #include "wx/stream.h"
 #endif
 
-#include "wx/wfstream.h"
-
 #include <gtk/gtk.h>
 
 
@@ -32,10 +30,10 @@
 // ============================================================================
 
 void gdk_pixbuf_area_updated(GdkPixbufLoader *loader,
-                             gint             WXUNUSED(x),
-                             gint             WXUNUSED(y),
-                             gint             WXUNUSED(width),
-                             gint             WXUNUSED(height),
+                             gint             x,
+                             gint             y,
+                             gint             width,
+                             gint             height,
                              wxAnimation      *anim)
 {
     if (anim && anim->GetPixbuf() == NULL)
@@ -84,7 +82,8 @@ wxAnimation& wxAnimation::operator=(const wxAnimation& that)
 bool wxAnimation::LoadFile(const wxString &name, wxAnimationType WXUNUSED(type))
 {
     UnRef();
-    m_pixbuf = gdk_pixbuf_animation_new_from_file(name.fn_str(), NULL);
+    m_pixbuf = gdk_pixbuf_animation_new_from_file(
+        wxConvFileName->cWX2MB(name), NULL);
     return IsOk();
 }
 
@@ -116,11 +115,9 @@ bool wxAnimation::Load(wxInputStream &stream, wxAnimationType type)
     else
         loader = gdk_pixbuf_loader_new();
 
-    if (!loader ||
-        error != NULL)  // even if the loader was allocated, an error could have happened
+    if (!loader)
     {
-        wxLogDebug(wxT("Could not create the loader for '%s' animation type: %s"),
-                   anim_type, error->message);
+        wxLogDebug(wxT("Could not create the loader for '%s' animation type"), anim_type);
         return false;
     }
 
@@ -128,48 +125,29 @@ bool wxAnimation::Load(wxInputStream &stream, wxAnimationType type)
     g_signal_connect(loader, "area-updated", G_CALLBACK(gdk_pixbuf_area_updated), this);
 
     guchar buf[2048];
-    bool data_written = false;
     while (stream.IsOk())
     {
         // read a chunk of data
-        if (!stream.Read(buf, sizeof(buf)) &&
-            stream.GetLastError() != wxSTREAM_EOF)   // EOF is OK for now
-        {
-            // gdk_pixbuf_loader_close wants the GError == NULL
-            gdk_pixbuf_loader_close(loader, NULL);
-            return false;
-        }
+        stream.Read(buf, sizeof(buf));
 
         // fetch all data into the loader
         if (!gdk_pixbuf_loader_write(loader, buf, stream.LastRead(), &error))
         {
-            wxLogDebug(wxT("Could not write to the loader: %s"), error->message);
-
-            // gdk_pixbuf_loader_close wants the GError == NULL
-            gdk_pixbuf_loader_close(loader, NULL);
+            gdk_pixbuf_loader_close(loader, &error);
+            wxLogDebug(wxT("Could not write to the loader"));
             return false;
         }
-
-        data_written = true;
     }
 
-    if (!data_written)
-    {
-        wxLogDebug("Could not read data from the stream...");
-        return false;
-    }
-
-    // load complete: gdk_pixbuf_loader_close will now check if the data we
-    // wrote inside the pixbuf loader does make sense and will give an error
-    // if it doesn't (because of a truncated file, corrupted data or whatelse)
+    // load complete
     if (!gdk_pixbuf_loader_close(loader, &error))
     {
-        wxLogDebug(wxT("Could not close the loader: %s"), error->message);
+        wxLogDebug(wxT("Could not close the loader"));
         return false;
     }
 
     // wait until we get the last area_updated signal
-    return data_written;
+    return true;
 }
 
 wxImage wxAnimation::GetFrame(unsigned int WXUNUSED(frame)) const
@@ -221,6 +199,9 @@ bool wxAnimationCtrl::Create( wxWindow *parent, wxWindowID id,
                               long style,
                               const wxString& name)
 {
+    m_needParent = true;
+    m_acceptsFocus = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !base_type::CreateBase(parent, id, pos, size, style & wxWINDOW_STYLE_MASK,
                                wxDefaultValidator, name))
@@ -232,8 +213,7 @@ bool wxAnimationCtrl::Create( wxWindow *parent, wxWindowID id,
     SetWindowStyle(style);
 
     m_widget = gtk_image_new();
-    g_object_ref(m_widget);
-    gtk_widget_show(m_widget);
+    gtk_widget_show( GTK_WIDGET(m_widget) );
 
     m_parent->DoAddChild( this );
 
@@ -257,16 +237,8 @@ wxAnimationCtrl::~wxAnimationCtrl()
 
 bool wxAnimationCtrl::LoadFile(const wxString &filename, wxAnimationType type)
 {
-    wxFileInputStream fis(filename);
-    if (!fis.IsOk())
-        return false;
-    return Load(fis, type);
-}
-
-bool wxAnimationCtrl::Load(wxInputStream& stream, wxAnimationType type)
-{
     wxAnimation anim;
-    if ( !anim.Load(stream, type) || !anim.IsOk() )
+    if (!anim.LoadFile(filename, type))
         return false;
 
     SetAnimation(anim);
@@ -363,7 +335,7 @@ void wxAnimationCtrl::DisplayStaticImage()
     if (m_bmpStaticReal.IsOk())
     {
         // show inactive bitmap
-        GdkBitmap *mask = NULL;
+        GdkBitmap *mask = (GdkBitmap *) NULL;
         if (m_bmpStaticReal.GetMask())
             mask = m_bmpStaticReal.GetMask()->GetBitmap();
 
@@ -452,7 +424,7 @@ bool wxAnimationCtrl::SetBackgroundColour( const wxColour &colour )
 // wxAnimationCtrl - event handlers
 //-----------------------------------------------------------------------------
 
-void wxAnimationCtrl::OnTimer(wxTimerEvent& WXUNUSED(ev))
+void wxAnimationCtrl::OnTimer(wxTimerEvent &ev)
 {
     wxASSERT(m_iter != NULL);
 

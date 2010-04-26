@@ -22,7 +22,6 @@
     #include "wx/log.h"
 #endif
 
-#include "wx/os2/dc.h"
 #include "wx/os2/private.h"
 
 IMPLEMENT_ABSTRACT_CLASS(wxControl, wxWindow)
@@ -59,6 +58,11 @@ bool wxControl::Create( wxWindow*           pParent,
     }
     return bRval;
 } // end of wxControl::Create
+
+wxControl::~wxControl()
+{
+    m_isBeingDeleted = true;
+}
 
 bool wxControl::OS2CreateControl( const wxChar* zClassname,
                                   const wxString& rsLabel,
@@ -106,15 +110,15 @@ bool wxControl::OS2CreateControl( const wxChar*   zClassname,
     if (!pParent)
         return false;
 
-    if ((wxStrcmp(zClassname, wxT("COMBOBOX"))) == 0)
+    if ((wxStrcmp(zClassname, _T("COMBOBOX"))) == 0)
         zClass = WC_COMBOBOX;
-    else if ((wxStrcmp(zClassname, wxT("STATIC"))) == 0)
+    else if ((wxStrcmp(zClassname, _T("STATIC"))) == 0)
         zClass = WC_STATIC;
-    else if ((wxStrcmp(zClassname, wxT("BUTTON"))) == 0)
+    else if ((wxStrcmp(zClassname, _T("BUTTON"))) == 0)
         zClass = WC_BUTTON;
-    else if ((wxStrcmp(zClassname, wxT("NOTEBOOK"))) == 0)
+    else if ((wxStrcmp(zClassname, _T("NOTEBOOK"))) == 0)
         zClass = WC_NOTEBOOK;
-    else if ((wxStrcmp(zClassname, wxT("CONTAINER"))) == 0)
+    else if ((wxStrcmp(zClassname, _T("CONTAINER"))) == 0)
         zClass = WC_CONTAINER;
     if ((zClass == WC_STATIC) || (zClass == WC_BUTTON))
         dwStyle |= DT_MNEMONIC;
@@ -131,8 +135,8 @@ bool wxControl::OS2CreateControl( const wxChar*   zClassname,
     dwStyle &= ~WS_CLIPSIBLINGS;
 
     m_hWnd = (WXHWND)::WinCreateWindow( (HWND)GetHwndOf(pParent) // Parent window handle
-                                       ,zClass              // Window class
-                                       ,label.c_str()       // Initial Text
+                                       ,(PSZ)zClass              // Window class
+                                       ,(PSZ)label.c_str()       // Initial Text
                                        ,(ULONG)dwStyle           // Style flags
                                        ,(LONG)0                  // X pos of origin
                                        ,(LONG)0                  // Y pos of origin
@@ -147,7 +151,9 @@ bool wxControl::OS2CreateControl( const wxChar*   zClassname,
 
     if ( !m_hWnd )
     {
+#ifdef __WXDEBUG__
         wxLogError(wxT("Failed to create a control of class '%s'"), zClassname);
+#endif // DEBUG
 
         return false;
     }
@@ -178,7 +184,7 @@ wxSize wxControl::DoGetBestSize() const
 
 bool wxControl::ProcessCommand(wxCommandEvent& event)
 {
-    return HandleWindowEvent(event);
+    return GetEventHandler()->ProcessEvent(event);
 }
 
 WXHBRUSH wxControl::OnCtlColor(WXHDC    hWxDC,
@@ -209,8 +215,7 @@ WXHBRUSH wxControl::OnCtlColor(WXHDC    hWxDC,
 void wxControl::OnEraseBackground( wxEraseEvent& rEvent )
 {
     RECTL                           vRect;
-    wxPMDCImpl                     *impl = (wxPMDCImpl*) rEvent.GetDC()->GetImpl();
-    HPS                             hPS = impl->GetHPS();
+    HPS                             hPS = rEvent.GetDC()->GetHPS();
     SIZEL                           vSize = {0,0};
 
     ::GpiSetPS(hPS, &vSize, PU_PELS | GPIF_DEFAULT);
@@ -222,7 +227,7 @@ WXDWORD wxControl::OS2GetStyle( long lStyle, WXDWORD* pdwExstyle ) const
 {
     long dwStyle = wxWindow::OS2GetStyle( lStyle, pdwExstyle );
 
-    if (AcceptsFocusFromKeyboard())
+    if (AcceptsFocus())
     {
         dwStyle |= WS_TABSTOP;
     }
@@ -239,7 +244,7 @@ void wxControl::SetLabel( const wxString& rsLabel )
             label = ::wxPMTextToLabel(m_label);
         else
             label = m_label;
-        ::WinSetWindowText(GetHwnd(), label.c_str());
+        ::WinSetWindowText(GetHwnd(), (PSZ)label.c_str());
     }
 } // end of wxControl::SetLabel
 

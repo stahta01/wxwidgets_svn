@@ -181,8 +181,6 @@ public:
     void OnPreview(wxCommandEvent& event);
     void OnPageSetup(wxCommandEvent& event);
 
-protected:
-
     // Forward command events to the current rich text control, if any
     bool ProcessEvent(wxEvent& event);
 
@@ -344,9 +342,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_HELP
     wxHelpProvider::Set(new wxSimpleHelpProvider);
 #endif
@@ -381,7 +376,7 @@ bool MyApp::OnInit()
 #endif
 
     // create the main application window
-    MyFrame *frame = new MyFrame(wxT("wxRichTextCtrl Sample"), wxID_ANY, wxDefaultPosition, wxSize(700, 600));
+    MyFrame *frame = new MyFrame(_T("wxRichTextCtrl Sample"), wxID_ANY, wxDefaultPosition, wxSize(700, 600));
 
     m_printing->SetParentWindow(frame);
 
@@ -437,7 +432,7 @@ void MyApp::CreateStyles()
     wxRichTextAttr indentedAttr2;
     indentedAttr2.SetFontFaceName(romanFont.GetFaceName());
     indentedAttr2.SetFontSize(12);
-    indentedAttr2.SetFontWeight(wxFONTWEIGHT_BOLD);
+    indentedAttr2.SetFontWeight(wxBOLD);
     indentedAttr2.SetTextColour(*wxRED);
     indentedAttr2.SetFontSize(12);
     indentedAttr2.SetLeftIndent(100, 0);
@@ -464,7 +459,7 @@ void MyApp::CreateStyles()
     wxRichTextAttr boldAttr;
     boldAttr.SetFontFaceName(romanFont.GetFaceName());
     boldAttr.SetFontSize(12);
-    boldAttr.SetFontWeight(wxFONTWEIGHT_BOLD);
+    boldAttr.SetFontWeight(wxBOLD);
     // We only want to affect boldness
     boldAttr.SetFlags(wxTEXT_ATTR_FONT_WEIGHT);
     boldDef->SetStyle(boldAttr);
@@ -475,7 +470,7 @@ void MyApp::CreateStyles()
     wxRichTextAttr italicAttr;
     italicAttr.SetFontFaceName(romanFont.GetFaceName());
     italicAttr.SetFontSize(12);
-    italicAttr.SetFontStyle(wxFONTSTYLE_ITALIC);
+    italicAttr.SetFontStyle(wxITALIC);
     // We only want to affect italics
     italicAttr.SetFlags(wxTEXT_ATTR_FONT_ITALIC);
     italicDef->SetStyle(italicAttr);
@@ -486,7 +481,7 @@ void MyApp::CreateStyles()
     wxRichTextAttr redAttr;
     redAttr.SetFontFaceName(romanFont.GetFaceName());
     redAttr.SetFontSize(12);
-    redAttr.SetFontWeight(wxFONTWEIGHT_BOLD);
+    redAttr.SetFontWeight(wxBOLD);
     redAttr.SetTextColour(*wxRED);
     // We only want to affect colour, weight and face
     redAttr.SetFlags(wxTEXT_ATTR_FONT_FACE|wxTEXT_ATTR_FONT_WEIGHT|wxTEXT_ATTR_TEXT_COLOUR);
@@ -569,21 +564,21 @@ MyFrame::MyFrame(const wxString& title, wxWindowID id, const wxPoint& pos,
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(ID_About, wxT("&About...\tF1"), wxT("Show about dialog"));
+    helpMenu->Append(ID_About, _T("&About...\tF1"), _T("Show about dialog"));
 
-    fileMenu->Append(wxID_OPEN, wxT("&Open\tCtrl+O"), wxT("Open a file"));
-    fileMenu->Append(wxID_SAVE, wxT("&Save\tCtrl+S"), wxT("Save a file"));
-    fileMenu->Append(wxID_SAVEAS, wxT("&Save As...\tF12"), wxT("Save to a new file"));
+    fileMenu->Append(wxID_OPEN, _T("&Open\tCtrl+O"), _T("Open a file"));
+    fileMenu->Append(wxID_SAVE, _T("&Save\tCtrl+S"), _T("Save a file"));
+    fileMenu->Append(wxID_SAVEAS, _T("&Save As...\tF12"), _T("Save to a new file"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(ID_RELOAD, wxT("&Reload Text\tF2"), wxT("Reload the initial text"));
+    fileMenu->Append(ID_RELOAD, _T("&Reload Text\tF2"), _T("Reload the initial text"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(ID_PAGE_SETUP, wxT("Page Set&up..."), wxT("Page setup"));
-    fileMenu->Append(ID_PRINT, wxT("&Print...\tCtrl+P"), wxT("Print"));
-    fileMenu->Append(ID_PREVIEW, wxT("Print Pre&view"), wxT("Print preview"));
+    fileMenu->Append(ID_PAGE_SETUP, _T("Page Set&up..."), _T("Page setup"));
+    fileMenu->Append(ID_PRINT, _T("&Print...\tCtrl+P"), _T("Print"));
+    fileMenu->Append(ID_PREVIEW, _T("Print Pre&view"), _T("Print preview"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(ID_VIEW_HTML, wxT("&View as HTML"), wxT("View HTML"));
+    fileMenu->Append(ID_VIEW_HTML, _T("&View as HTML"), _T("View HTML"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(ID_Quit, wxT("E&xit\tAlt+X"), wxT("Quit this program"));
+    fileMenu->Append(ID_Quit, _T("E&xit\tAlt+X"), _T("Quit this program"));
 
     wxMenu* editMenu = new wxMenu;
     editMenu->Append(wxID_UNDO, _("&Undo\tCtrl+Z"));
@@ -643,12 +638,12 @@ MyFrame::MyFrame(const wxString& title, wxWindowID id, const wxPoint& pos,
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(fileMenu, wxT("&File"));
-    menuBar->Append(editMenu, wxT("&Edit"));
-    menuBar->Append(formatMenu, wxT("F&ormat"));
-    menuBar->Append(listsMenu, wxT("&Lists"));
-    menuBar->Append(insertMenu, wxT("&Insert"));
-    menuBar->Append(helpMenu, wxT("&Help"));
+    menuBar->Append(fileMenu, _T("&File"));
+    menuBar->Append(editMenu, _T("&Edit"));
+    menuBar->Append(formatMenu, _T("F&ormat"));
+    menuBar->Append(listsMenu, _T("&Lists"));
+    menuBar->Append(insertMenu, _T("&Insert"));
+    menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
@@ -661,47 +656,47 @@ MyFrame::MyFrame(const wxString& title, wxWindowID id, const wxPoint& pos,
     if ( !is_pda )
     {
         CreateStatusBar(2);
-        SetStatusText(wxT("Welcome to wxRichTextCtrl!"));
+        SetStatusText(_T("Welcome to wxRichTextCtrl!"));
     }
 #endif
 
     wxToolBar* toolBar = CreateToolBar();
 
-    toolBar->AddTool(wxID_OPEN, wxEmptyString, wxBitmap(open_xpm), _("Open"));
-    toolBar->AddTool(wxID_SAVEAS, wxEmptyString, wxBitmap(save_xpm), _("Save"));
+    toolBar->AddTool(wxID_OPEN, wxBitmap(open_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Open"));
+    toolBar->AddTool(wxID_SAVEAS, wxBitmap(save_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Save"));
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_CUT, wxEmptyString, wxBitmap(cut_xpm), _("Cut"));
-    toolBar->AddTool(wxID_COPY, wxEmptyString, wxBitmap(copy_xpm), _("Copy"));
-    toolBar->AddTool(wxID_PASTE, wxEmptyString, wxBitmap(paste_xpm), _("Paste"));
+    toolBar->AddTool(wxID_CUT, wxBitmap(cut_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Cut"));
+    toolBar->AddTool(wxID_COPY, wxBitmap(copy_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Copy"));
+    toolBar->AddTool(wxID_PASTE, wxBitmap(paste_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Paste"));
     toolBar->AddSeparator();
-    toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), _("Undo"));
-    toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), _("Redo"));
+    toolBar->AddTool(wxID_UNDO, wxBitmap(undo_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Undo"));
+    toolBar->AddTool(wxID_REDO, wxBitmap(redo_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Redo"));
     toolBar->AddSeparator();
-    toolBar->AddCheckTool(ID_FORMAT_BOLD, wxEmptyString, wxBitmap(bold_xpm), wxNullBitmap, _("Bold"));
-    toolBar->AddCheckTool(ID_FORMAT_ITALIC, wxEmptyString, wxBitmap(italic_xpm), wxNullBitmap, _("Italic"));
-    toolBar->AddCheckTool(ID_FORMAT_UNDERLINE, wxEmptyString, wxBitmap(underline_xpm), wxNullBitmap, _("Underline"));
+    toolBar->AddTool(ID_FORMAT_BOLD, wxBitmap(bold_xpm), wxNullBitmap, true, -1, -1, (wxObject *) NULL, _("Bold"));
+    toolBar->AddTool(ID_FORMAT_ITALIC, wxBitmap(italic_xpm), wxNullBitmap, true, -1, -1, (wxObject *) NULL, _("Italic"));
+    toolBar->AddTool(ID_FORMAT_UNDERLINE, wxBitmap(underline_xpm), wxNullBitmap, true, -1, -1, (wxObject *) NULL, _("Underline"));
     toolBar->AddSeparator();
-    toolBar->AddCheckTool(ID_FORMAT_ALIGN_LEFT, wxEmptyString, wxBitmap(alignleft_xpm), wxNullBitmap, _("Align Left"));
-    toolBar->AddCheckTool(ID_FORMAT_ALIGN_CENTRE, wxEmptyString, wxBitmap(centre_xpm), wxNullBitmap, _("Centre"));
-    toolBar->AddCheckTool(ID_FORMAT_ALIGN_RIGHT, wxEmptyString, wxBitmap(alignright_xpm), wxNullBitmap, _("Align Right"));
+    toolBar->AddTool(ID_FORMAT_ALIGN_LEFT, wxBitmap(alignleft_xpm), wxNullBitmap, true, -1, -1, (wxObject *) NULL, _("Align Left"));
+    toolBar->AddTool(ID_FORMAT_ALIGN_CENTRE, wxBitmap(centre_xpm), wxNullBitmap, true, -1, -1, (wxObject *) NULL, _("Centre"));
+    toolBar->AddTool(ID_FORMAT_ALIGN_RIGHT, wxBitmap(alignright_xpm), wxNullBitmap, true, -1, -1, (wxObject *) NULL, _("Align Right"));
     toolBar->AddSeparator();
-    toolBar->AddTool(ID_FORMAT_INDENT_LESS, wxEmptyString, wxBitmap(indentless_xpm), _("Indent Less"));
-    toolBar->AddTool(ID_FORMAT_INDENT_MORE, wxEmptyString, wxBitmap(indentmore_xpm), _("Indent More"));
+    toolBar->AddTool(ID_FORMAT_INDENT_LESS, wxBitmap(indentless_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Indent Less"));
+    toolBar->AddTool(ID_FORMAT_INDENT_MORE, wxBitmap(indentmore_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Indent More"));
     toolBar->AddSeparator();
-    toolBar->AddTool(ID_FORMAT_FONT, wxEmptyString, wxBitmap(font_xpm), _("Font"));
+    toolBar->AddTool(ID_FORMAT_FONT, wxBitmap(font_xpm), wxNullBitmap, false, -1, -1, (wxObject *) NULL, _("Font"));
 
     wxRichTextStyleComboCtrl* combo = new wxRichTextStyleComboCtrl(toolBar, ID_RICHTEXT_STYLE_COMBO, wxDefaultPosition, wxSize(200, -1));
     toolBar->AddControl(combo);
 
     toolBar->Realize();
 
-    wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSP_LIVE_UPDATE);
+    wxSplitterWindow* splitter = new wxSplitterWindow(this, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSP_NO_XP_THEME|wxSP_3D|wxSP_LIVE_UPDATE);
 
     wxFont textFont = wxFont(12, wxROMAN, wxNORMAL, wxNORMAL);
     wxFont boldFont = wxFont(12, wxROMAN, wxNORMAL, wxBOLD);
     wxFont italicFont = wxFont(12, wxROMAN, wxITALIC, wxNORMAL);
 
-    m_richTextCtrl = new wxRichTextCtrl(splitter, ID_RICHTEXT_CTRL, wxEmptyString, wxDefaultPosition, wxSize(200, 200), wxVSCROLL|wxHSCROLL|wxWANTS_CHARS);
+    m_richTextCtrl = new wxRichTextCtrl(splitter, ID_RICHTEXT_CTRL, wxEmptyString, wxDefaultPosition, wxSize(200, 200), wxVSCROLL|wxHSCROLL|wxNO_BORDER|wxWANTS_CHARS);
     wxFont font(12, wxROMAN, wxNORMAL, wxNORMAL);
 
     m_richTextCtrl->SetFont(font);
@@ -753,6 +748,7 @@ void MyFrame::WriteInitialText()
 
     r.WriteText(wxString(wxT("Welcome to wxRichTextCtrl, a wxWidgets control")) + lineBreak + wxT("for editing and presenting styled text and images\n"));
     r.EndFontSize();
+    //r.Newline();
 
     r.BeginItalic();
     r.WriteText(wxT("by Julian Smart"));
@@ -826,11 +822,13 @@ void MyFrame::WriteInitialText()
     r.BeginNumberedBullet(1, 100, 60);
     r.WriteText(wxT("This is my first item. Note that wxRichTextCtrl can apply numbering and bullets automatically based on list styles, but this list is formatted explicitly by setting indents."));
     r.Newline();
+
     r.EndNumberedBullet();
 
     r.BeginNumberedBullet(2, 100, 60);
     r.WriteText(wxT("This is my second item."));
     r.Newline();
+
     r.EndNumberedBullet();
 
     r.WriteText(wxT("The following paragraph is right-indented:"));
@@ -919,12 +917,15 @@ void MyFrame::WriteInitialText()
 
     r.Newline();
 
-    r.WriteText(wxT("Note: this sample content was generated programmatically from within the MyFrame constructor in the demo. The images were loaded from inline XPMs. Enjoy wxRichTextCtrl!\n"));
+    r.WriteText(wxT("Note: this sample content was generated programmatically from within the MyFrame constructor in the demo. The images were loaded from inline XPMs. Enjoy wxRichTextCtrl!"));
+
+    r.Newline();
 
     r.EndParagraphSpacing();
 
     r.EndSuppressUndo();
 }
+
 
 // event handlers
 
@@ -937,8 +938,8 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxString msg;
-    msg.Printf( wxT("This is a demo for wxRichTextCtrl, a control for editing styled text.\n(c) Julian Smart, 2005"));
-    wxMessageBox(msg, wxT("About wxRichTextCtrl Sample"), wxOK | wxICON_INFORMATION, this);
+    msg.Printf( _T("This is a demo for wxRichTextCtrl, a control for editing styled text.\n(c) Julian Smart, 2005"));
+    wxMessageBox(msg, _T("About wxRichTextCtrl Sample"), wxOK | wxICON_INFORMATION, this);
 }
 
 // Forward command events to the current rich text control, if any
@@ -960,7 +961,7 @@ bool MyFrame::ProcessEvent(wxEvent& event)
             s_id = event.GetId();
 
             wxWindow* focusWin = wxFindFocusDescendant(this);
-            if (focusWin && focusWin->GetEventHandler()->ProcessEvent(event))
+            if (focusWin && focusWin->ProcessEvent(event))
             {
                 //s_command = NULL;
                 s_eventType = 0;
@@ -1199,7 +1200,7 @@ void MyFrame::OnUpdateFormat(wxUpdateUIEvent& event)
 
 void MyFrame::OnIndentMore(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LEFT_INDENT);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1217,7 +1218,7 @@ void MyFrame::OnIndentMore(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnIndentLess(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LEFT_INDENT);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1237,7 +1238,7 @@ void MyFrame::OnIndentLess(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingHalf(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1255,7 +1256,7 @@ void MyFrame::OnLineSpacingHalf(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingDouble(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1273,7 +1274,7 @@ void MyFrame::OnLineSpacingDouble(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnLineSpacingSingle(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_LINE_SPACING);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1291,7 +1292,7 @@ void MyFrame::OnLineSpacingSingle(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnParagraphSpacingMore(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_PARA_SPACING_AFTER);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1309,7 +1310,7 @@ void MyFrame::OnParagraphSpacingMore(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnParagraphSpacingLess(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_PARA_SPACING_AFTER);
 
     if (m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr))
@@ -1443,7 +1444,7 @@ void MyFrame::OnManageStyles(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnInsertSymbol(wxCommandEvent& WXUNUSED(event))
 {
-    wxRichTextAttr attr;
+    wxTextAttrEx attr;
     attr.SetFlags(wxTEXT_ATTR_FONT);
     m_richTextCtrl->GetStyle(m_richTextCtrl->GetInsertionPoint(), attr);
 

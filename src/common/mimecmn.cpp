@@ -35,7 +35,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/module.h"
-    #include "wx/crt.h"
 #endif //WX_PRECOMP
 
 #include "wx/file.h"
@@ -48,8 +47,8 @@
 // implementation classes:
 #if defined(__WXMSW__)
     #include "wx/msw/mimetype.h"
-#elif ( defined(__WXMAC__) && wxOSX_USE_CARBON )
-    #include "wx/osx/mimetype.h"
+#elif defined(__WXMAC__)
+    #include "wx/mac/mimetype.h"
 #elif defined(__WXPM__) || defined (__EMX__)
     #include "wx/os2/mimetype.h"
     #undef __UNIX__
@@ -112,16 +111,18 @@ wxString wxMimeTypeCommands::GetVerbCmd(size_t n) const
 // wxFileTypeInfo
 // ----------------------------------------------------------------------------
 
-void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
-                                  const wxString& openCmd,
-                                  const wxString& printCmd,
-                                  const wxString& desc,
-                                  va_list argptr)
+wxFileTypeInfo::wxFileTypeInfo(const wxChar *mimeType,
+                               const wxChar *openCmd,
+                               const wxChar *printCmd,
+                               const wxChar *desc,
+                               ...)
+              : m_mimeType(mimeType),
+                m_openCmd(openCmd),
+                m_printCmd(printCmd),
+                m_desc(desc)
 {
-    m_mimeType = mimeType;
-    m_openCmd = openCmd;
-    m_printCmd = printCmd;
-    m_desc = desc;
+    va_list argptr;
+    va_start(argptr, desc);
 
     for ( ;; )
     {
@@ -131,7 +132,7 @@ void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
     #pragma warning(disable: 1684)
 #endif
 
-        wxArgNormalizedString ext(WX_VA_ARG_STRING(argptr));
+        const wxChar *ext = va_arg(argptr, const wxChar *);
 
 #ifdef __INTELC__
     #pragma warning(pop)
@@ -142,20 +143,8 @@ void wxFileTypeInfo::DoVarArgInit(const wxString& mimeType,
             break;
         }
 
-        m_exts.Add(ext.GetString());
+        m_exts.Add(ext);
     }
-}
-
-void wxFileTypeInfo::VarArgInit(const wxString *mimeType,
-                                const wxString *openCmd,
-                                const wxString *printCmd,
-                                const wxString *desc,
-                                ...)
-{
-    va_list argptr;
-    va_start(argptr, desc);
-
-    DoVarArgInit(*mimeType, *openCmd, *printCmd, *desc, argptr);
 
     va_end(argptr);
 }
@@ -262,7 +251,7 @@ wxString wxFileType::ExpandCommand(const wxString& command,
     // test now carried out on reading file so test should never get here
     if ( !hasFilename && !str.empty()
 #ifdef __UNIX__
-                      && !str.StartsWith(wxT("test "))
+                      && !str.StartsWith(_T("test "))
 #endif // Unix
        ) {
         str << wxT(" < '") << params.GetFileName() << wxT('\'');
@@ -302,7 +291,7 @@ bool wxFileType::GetExtensions(wxArrayString& extensions)
 
 bool wxFileType::GetMimeType(wxString *mimeType) const
 {
-    wxCHECK_MSG( mimeType, false, wxT("invalid parameter in GetMimeType") );
+    wxCHECK_MSG( mimeType, false, _T("invalid parameter in GetMimeType") );
 
     if ( m_info )
     {
@@ -366,7 +355,7 @@ wxFileType::GetIcon(wxIconLocation *iconloc,
 
 bool wxFileType::GetDescription(wxString *desc) const
 {
-    wxCHECK_MSG( desc, false, wxT("invalid parameter in GetDescription") );
+    wxCHECK_MSG( desc, false, _T("invalid parameter in GetDescription") );
 
     if ( m_info )
     {
@@ -382,7 +371,7 @@ bool
 wxFileType::GetOpenCommand(wxString *openCmd,
                            const wxFileType::MessageParameters& params) const
 {
-    wxCHECK_MSG( openCmd, false, wxT("invalid parameter in GetOpenCommand") );
+    wxCHECK_MSG( openCmd, false, _T("invalid parameter in GetOpenCommand") );
 
     if ( m_info )
     {
@@ -410,7 +399,7 @@ bool
 wxFileType::GetPrintCommand(wxString *printCmd,
                             const wxFileType::MessageParameters& params) const
 {
-    wxCHECK_MSG( printCmd, false, wxT("invalid parameter in GetPrintCommand") );
+    wxCHECK_MSG( printCmd, false, _T("invalid parameter in GetPrintCommand") );
 
     if ( m_info )
     {
@@ -442,7 +431,7 @@ size_t wxFileType::GetAllCommands(wxArrayString *verbs,
     if ( GetOpenCommand(&cmd, params) )
     {
         if ( verbs )
-            verbs->Add(wxT("Open"));
+            verbs->Add(_T("Open"));
         if ( commands )
             commands->Add(cmd);
         count++;
@@ -451,7 +440,7 @@ size_t wxFileType::GetAllCommands(wxArrayString *verbs,
     if ( GetPrintCommand(&cmd, params) )
     {
         if ( verbs )
-            verbs->Add(wxT("Print"));
+            verbs->Add(_T("Print"));
         if ( commands )
             commands->Add(cmd);
 
@@ -469,7 +458,7 @@ bool wxFileType::Unassociate()
 #elif defined(__UNIX__)
     return m_impl->Unassociate(this);
 #else
-    wxFAIL_MSG( wxT("not implemented") ); // TODO
+    wxFAIL_MSG( _T("not implemented") ); // TODO
     return false;
 #endif
 }
@@ -484,7 +473,7 @@ bool wxFileType::SetCommand(const wxString& cmd,
     wxUnusedVar(cmd);
     wxUnusedVar(verb);
     wxUnusedVar(overwriteprompt);
-    wxFAIL_MSG(wxT("not implemented"));
+    wxFAIL_MSG(_T("not implemented"));
     return false;
 #endif
 }
@@ -498,13 +487,13 @@ bool wxFileType::SetDefaultIcon(const wxString& cmd, int index)
     if ( sTmp.empty() )
         GetOpenCommand(&sTmp, wxFileType::MessageParameters(wxEmptyString, wxEmptyString));
 #endif
-    wxCHECK_MSG( !sTmp.empty(), false, wxT("need the icon file") );
+    wxCHECK_MSG( !sTmp.empty(), false, _T("need the icon file") );
 
 #if defined (__WXMSW__) || defined(__UNIX__)
     return m_impl->SetDefaultIcon (cmd, index);
 #else
     wxUnusedVar(index);
-    wxFAIL_MSG(wxT("not implemented"));
+    wxFAIL_MSG(_T("not implemented"));
     return false;
 #endif
 }
@@ -602,7 +591,7 @@ wxMimeTypesManager::Associate(const wxFileTypeInfo& ftInfo)
     return m_impl->Associate(ftInfo);
 #else // other platforms
     wxUnusedVar(ftInfo);
-    wxFAIL_MSG( wxT("not implemented") ); // TODO
+    wxFAIL_MSG( _T("not implemented") ); // TODO
     return NULL;
 #endif // platforms
 }
@@ -620,7 +609,7 @@ wxMimeTypesManager::GetFileTypeFromExtension(const wxString& ext)
     else
         extWithoutDot = ext;
 
-    wxCHECK_MSG( !ext.empty(), NULL, wxT("extension can't be empty") );
+    wxCHECK_MSG( !ext.empty(), NULL, _T("extension can't be empty") );
 
     wxFileType *ft = m_impl->GetFileTypeFromExtension(extWithoutDot);
 
@@ -665,6 +654,18 @@ wxMimeTypesManager::GetFileTypeFromMimeType(const wxString& mimeType)
     }
 
     return ft;
+}
+
+bool wxMimeTypesManager::ReadMailcap(const wxString& filename, bool fallback)
+{
+    EnsureImpl();
+    return m_impl->ReadMailcap(filename, fallback);
+}
+
+bool wxMimeTypesManager::ReadMimeTypes(const wxString& filename)
+{
+    EnsureImpl();
+    return m_impl->ReadMimeTypes(filename);
 }
 
 void wxMimeTypesManager::AddFallbacks(const wxFileTypeInfo *filetypes)

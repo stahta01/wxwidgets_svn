@@ -17,10 +17,10 @@
 
 #include "wx/fs_filter.h"
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
 #endif
 
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 
 wxDEFINE_SCOPED_PTR_TYPE(wxFSFile)
 wxDEFINE_SCOPED_PTR_TYPE(wxInputStream)

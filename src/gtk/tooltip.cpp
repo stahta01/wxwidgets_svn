@@ -24,7 +24,7 @@
 // global data
 //-----------------------------------------------------------------------------
 
-static GtkTooltips *gs_tooltips = NULL;
+static GtkTooltips *gs_tooltips = (GtkTooltips*) NULL;
 
 //-----------------------------------------------------------------------------
 // wxToolTip
@@ -35,16 +35,16 @@ IMPLEMENT_ABSTRACT_CLASS(wxToolTip, wxObject)
 wxToolTip::wxToolTip( const wxString &tip )
 {
     m_text = tip;
-    m_window = NULL;
+    m_window = (wxWindow*) NULL;
 }
 
 void wxToolTip::SetTip( const wxString &tip )
 {
     m_text = tip;
-    GTKApply( m_window );
+    Apply( m_window );
 }
 
-void wxToolTip::GTKApply( wxWindow *win )
+void wxToolTip::Apply( wxWindow *win )
 {
     if (!win)
         return;
@@ -55,13 +55,13 @@ void wxToolTip::GTKApply( wxWindow *win )
     m_window = win;
 
     if (m_text.empty())
-        m_window->GTKApplyToolTip( gs_tooltips, NULL );
+        m_window->ApplyToolTip( gs_tooltips, (wxChar*) NULL );
     else
-        m_window->GTKApplyToolTip( gs_tooltips, wxGTK_CONV_SYS(m_text) );
+        m_window->ApplyToolTip( gs_tooltips, m_text );
 }
 
 /* static */
-void wxToolTip::GTKApply(GtkWidget *w, const gchar *tip)
+void wxToolTip::Apply(GtkWidget *w, const wxCharBuffer& tip)
 {
     if ( !gs_tooltips )
         gs_tooltips = gtk_tooltips_new();
@@ -93,14 +93,6 @@ void wxToolTip::SetDelay( long msecs )
     // FIXME: This is a deprecated function and might not even have an effect.
     // Try to not use it, after which remove the prototype above.
     gtk_tooltips_set_delay( gs_tooltips, (int)msecs );
-}
-
-void wxToolTip::SetAutoPop( long WXUNUSED(msecs) )
-{
-}
-
-void wxToolTip::SetReshow( long WXUNUSED(msecs) )
-{
 }
 
 #endif // wxUSE_TOOLTIPS

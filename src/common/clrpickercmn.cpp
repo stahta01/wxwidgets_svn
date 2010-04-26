@@ -32,14 +32,14 @@
     #include "wx/textctrl.h"
 #endif
 
-const char wxColourPickerCtrlNameStr[] = "colourpicker";
-const char wxColourPickerWidgetNameStr[] = "colourpickerwidget";
+const wxChar wxColourPickerCtrlNameStr[] = wxT("colourpicker");
+const wxChar wxColourPickerWidgetNameStr[] = wxT("colourpickerwidget");
 
 // ============================================================================
 // implementation
 // ============================================================================
 
-wxDEFINE_EVENT(wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEvent);
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_COLOURPICKER_CHANGED)
 IMPLEMENT_DYNAMIC_CLASS(wxColourPickerCtrl, wxPickerBase)
 IMPLEMENT_DYNAMIC_CLASS(wxColourPickerEvent, wxEvent)
 

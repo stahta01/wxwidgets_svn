@@ -43,7 +43,7 @@ class wxCursorRefData: public wxObjectRefData
 
 wxCursorRefData::wxCursorRefData()
 {
-    m_cursor = NULL;
+    m_cursor = (MGLCursor*) NULL;
 }
 
 wxCursorRefData::~wxCursorRefData()
@@ -65,14 +65,14 @@ wxCursor::wxCursor()
 {
 }
 
-void wxCursor::InitFromStock(wxStockCursor cursorId)
+wxCursor::wxCursor(int cursorId)
 {
     if ( !gs_cursorsHash )
         gs_cursorsHash = new wxCursorsHash;
 
     if ( gs_cursorsHash->find(cursorId) != gs_cursorsHash->end() )
     {
-        wxLogTrace(wxT("mglcursor"), wxT("cursor id %i fetched from cache"), cursorId);
+        wxLogTrace(_T("mglcursor"), _T("cursor id %i fetched from cache"), cursorId);
         *this = (*gs_cursorsHash)[cursorId];
         return;
     }
@@ -135,16 +135,26 @@ void wxCursor::InitFromStock(wxStockCursor cursorId)
     else
     {
         (*gs_cursorsHash)[cursorId] = *this;
-        wxLogTrace(wxT("mglcursor"), wxT("cursor id %i added to cache (%s)"),
+        wxLogTrace(_T("mglcursor"), _T("cursor id %i added to cache (%s)"),
                    cursorId, cursorname);
     }
 }
 
+wxCursor::wxCursor(const char WXUNUSED(bits)[],
+                   int WXUNUSED(width),
+                   int WXUNUSED(height),
+                   int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY),
+                   const char WXUNUSED(maskBits)[],
+                   wxColour * WXUNUSED(fg), wxColour * WXUNUSED(bg) )
+{
+    //FIXME_MGL
+}
+
 wxCursor::wxCursor(const wxString& cursor_file,
-                   wxBitmapType type,
+                   long flags,
                    int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY))
 {
-    if ( type == wxBITMAP_TYPE_CUR || type == wxBITMAP_TYPE_CUR_RESOURCE )
+    if ( flags == wxBITMAP_TYPE_CUR || flags == wxBITMAP_TYPE_CUR_RESOURCE )
     {
         m_refData = new wxCursorRefData();
         M_CURSORDATA->m_cursor = new MGLCursor(cursor_file.mb_str());
@@ -163,6 +173,11 @@ wxCursor::wxCursor(const wxString& cursor_file,
 wxCursor::~wxCursor()
 {
     // wxObject unrefs data
+}
+
+bool wxCursor::IsOk() const
+{
+    return (m_refData != NULL);
 }
 
 MGLCursor *wxCursor::GetMGLCursor() const

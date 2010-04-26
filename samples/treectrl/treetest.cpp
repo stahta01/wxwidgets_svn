@@ -24,12 +24,10 @@
 #include "wx/colordlg.h"
 #include "wx/numdlg.h"
 
-#include "wx/artprov.h"
 #include "wx/image.h"
 #include "wx/imaglist.h"
 #include "wx/treectrl.h"
 #include "wx/math.h"
-#include "wx/renderer.h"
 
 #ifdef __WIN32__
     // this is not supported by native control
@@ -44,21 +42,9 @@
 #include "icon4.xpm"
 #include "icon5.xpm"
 
-#include "state1.xpm"
-#include "state2.xpm"
-#include "state3.xpm"
-#include "state4.xpm"
-#include "state5.xpm"
-
-#include "unchecked.xpm"
-#include "checked.xpm"
-
 #ifndef __WXMSW__
     #include "../sample.xpm"
 #endif
-
-static const int NUM_CHILDREN_PER_LEVEL = 5;
-static const int NUM_LEVELS = 2;
 
 // verify that the item is ok and insult the user if it is not
 #define CHECK_ITEM( item ) if ( !item.IsOk() ) {                                 \
@@ -77,7 +63,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
     MENU_LINK(Quit)
     MENU_LINK(About)
-    MENU_LINK(ClearLog)
 
     MENU_LINK(TogButtons)
     MENU_LINK(TogTwist)
@@ -98,7 +83,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     MENU_LINK(Select)
     MENU_LINK(Unselect)
     MENU_LINK(ToggleSel)
-    MENU_LINK(SelectChildren)
 #endif // NO_MULTIPLE_SELECTION
     MENU_LINK(Rename)
     MENU_LINK(Count)
@@ -112,14 +96,10 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     MENU_LINK(DeleteAll)
     MENU_LINK(Recreate)
     MENU_LINK(ToggleImages)
-    MENU_LINK(ToggleStates)
-    MENU_LINK(ToggleAlternateImages)
-    MENU_LINK(ToggleAlternateStates)
     MENU_LINK(ToggleButtons)
     MENU_LINK(SetImageSize)
     MENU_LINK(CollapseAndReset)
     MENU_LINK(EnsureVisible)
-    MENU_LINK(SetFocus)
     MENU_LINK(AddItem)
     MENU_LINK(InsertItem)
     MENU_LINK(IncIndent)
@@ -127,19 +107,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     MENU_LINK(IncSpacing)
     MENU_LINK(DecSpacing)
     MENU_LINK(ToggleIcon)
-    MENU_LINK(ToggleState)
     MENU_LINK(SelectRoot)
-
-    MENU_LINK(ShowFirstVisible)
-#ifdef wxHAS_LAST_VISIBLE
-    MENU_LINK(ShowLastVisible)
-#endif // wxHAS_LAST_VISIBLE
-    MENU_LINK(ShowNextVisible)
-    MENU_LINK(ShowPrevVisible)
-    MENU_LINK(ShowParent)
-    MENU_LINK(ShowPrevSibling)
-    MENU_LINK(ShowNextSibling)
-    MENU_LINK(ScrollTo)
 #undef MENU_LINK
 
 END_EVENT_TABLE()
@@ -168,9 +136,8 @@ BEGIN_EVENT_TABLE(MyTreeCtrl, wxTreeCtrl)
     EVT_TREE_SEL_CHANGING(TreeTest_Ctrl, MyTreeCtrl::OnSelChanging)
     EVT_TREE_KEY_DOWN(TreeTest_Ctrl, MyTreeCtrl::OnTreeKeyDown)
     EVT_TREE_ITEM_ACTIVATED(TreeTest_Ctrl, MyTreeCtrl::OnItemActivated)
-    EVT_TREE_STATE_IMAGE_CLICK(TreeTest_Ctrl, MyTreeCtrl::OnItemStateClick)
 
-    // so many different ways to handle right mouse button clicks...
+    // so many differents ways to handle right mouse button clicks...
     EVT_CONTEXT_MENU(MyTreeCtrl::OnContextMenu)
     // EVT_TREE_ITEM_MENU is the preferred event for creating context menus
     // on a tree control, because it includes the point of the click or item,
@@ -187,9 +154,6 @@ IMPLEMENT_APP(MyApp)
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // Create the main frame window
     MyFrame *frame = new MyFrame(wxT("wxTreeCtrl Test"), 50, 50, 450, 600);
 
@@ -224,8 +188,6 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
            *tree_menu = new wxMenu,
            *item_menu = new wxMenu;
 
-    file_menu->Append(TreeTest_ClearLog, wxT("&Clear log\tCtrl-L"));
-    file_menu->AppendSeparator();
     file_menu->Append(TreeTest_About, wxT("&About..."));
     file_menu->AppendSeparator();
     file_menu->Append(TreeTest_Quit, wxT("E&xit\tAlt-X"));
@@ -241,12 +203,9 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     style_menu->AppendCheckItem(TreeTest_TogFullHighlight, wxT("Toggle &full row highlight"));
     style_menu->AppendCheckItem(TreeTest_TogEdit, wxT("Toggle &edit mode"));
 #ifndef NO_MULTIPLE_SELECTION
-    style_menu->AppendCheckItem(TreeTest_ToggleSel, wxT("Toggle &selection mode\tCtrl-S"));
+    style_menu->AppendCheckItem(TreeTest_ToggleSel, wxT("Toggle &selection mode"));
 #endif // NO_MULTIPLE_SELECTION
     style_menu->AppendCheckItem(TreeTest_ToggleImages, wxT("Toggle show ima&ges"));
-    style_menu->AppendCheckItem(TreeTest_ToggleStates, wxT("Toggle show st&ates"));
-    style_menu->AppendCheckItem(TreeTest_ToggleAlternateImages, wxT("Toggle alternate images"));
-    style_menu->AppendCheckItem(TreeTest_ToggleAlternateStates, wxT("Toggle alternate state images"));
     style_menu->Append(TreeTest_SetImageSize, wxT("Set image si&ze..."));
     style_menu->AppendSeparator();
     style_menu->Append(TreeTest_SetFgColour, wxT("Set &foreground colour..."));
@@ -263,7 +222,6 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     tree_menu->Append(TreeTest_DeleteChildren, wxT("Delete &children"));
     tree_menu->Append(TreeTest_DeleteAll, wxT("Delete &all items"));
     tree_menu->Append(TreeTest_SelectRoot, wxT("Select root item"));
-
     tree_menu->AppendSeparator();
     tree_menu->Append(TreeTest_Count, wxT("Count children of current item"));
     tree_menu->Append(TreeTest_CountRec, wxT("Recursively count children of current item"));
@@ -272,7 +230,6 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     tree_menu->Append(TreeTest_SortRev, wxT("Sort in reversed order"));
     tree_menu->AppendSeparator();
     tree_menu->Append(TreeTest_EnsureVisible, wxT("Make the last item &visible"));
-    tree_menu->Append(TreeTest_SetFocus, wxT("Set &focus to the tree"));
     tree_menu->AppendSeparator();
     tree_menu->Append(TreeTest_IncIndent, wxT("Add 5 points to indentation\tAlt-I"));
     tree_menu->Append(TreeTest_DecIndent, wxT("Reduce indentation by 5 points\tAlt-R"));
@@ -288,28 +245,12 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     item_menu->Append(TreeTest_ClearBold, wxT("Make item &not bold"));
     item_menu->AppendSeparator();
     item_menu->Append(TreeTest_ToggleIcon, wxT("Toggle the item's &icon"));
-    item_menu->Append(TreeTest_ToggleState, wxT("Toggle the item's &state"));
-    item_menu->AppendSeparator();
-    item_menu->Append(TreeTest_ShowFirstVisible, wxT("Show &first visible"));
-#ifdef wxHAS_LAST_VISIBLE
-    item_menu->Append(TreeTest_ShowLastVisible, wxT("Show &last visible"));
-#endif // wxHAS_LAST_VISIBLE
-    item_menu->Append(TreeTest_ShowNextVisible, wxT("Show &next visible"));
-    item_menu->Append(TreeTest_ShowPrevVisible, wxT("Show &previous visible"));
-    item_menu->AppendSeparator();
-    item_menu->Append(TreeTest_ShowParent, "Show pa&rent");
-    item_menu->Append(TreeTest_ShowPrevSibling, "Show &previous sibling");
-    item_menu->Append(TreeTest_ShowNextSibling, "Show &next sibling");
-    item_menu->AppendSeparator();
-    item_menu->Append(TreeTest_ScrollTo, "Scroll &to item",
-                      "Scroll to the last by one top level child");
 
 #ifndef NO_MULTIPLE_SELECTION
     item_menu->AppendSeparator();
     item_menu->Append(TreeTest_DumpSelected, wxT("Dump selected items\tAlt-D"));
     item_menu->Append(TreeTest_Select, wxT("Select current item\tAlt-S"));
     item_menu->Append(TreeTest_Unselect, wxT("Unselect everything\tAlt-U"));
-    item_menu->Append(TreeTest_SelectChildren, wxT("Select all children\tCtrl-A"));
 #endif // NO_MULTIPLE_SELECTION
 
     wxMenuBar *menu_bar = new wxMenuBar;
@@ -332,9 +273,6 @@ MyFrame::MyFrame(const wxString& title, int x, int y, int w, int h)
     CreateTreeWithDefStyle();
 
     menu_bar->Check(TreeTest_ToggleImages, true);
-    menu_bar->Check(TreeTest_ToggleStates, true);
-    menu_bar->Check(TreeTest_ToggleAlternateImages, false);
-    menu_bar->Check(TreeTest_ToggleAlternateStates, false);
 
 #if wxUSE_STATUSBAR
     // create a status bar
@@ -422,13 +360,13 @@ void MyFrame::OnIdle(wxIdleEvent& event)
         {
             wxTreeItemId idLast = m_treeCtrl->GetLastChild(idRoot);
             status = wxString::Format(
-                wxT("Root/last item is %svisible/%svisible"),
-                m_treeCtrl->IsVisible(idRoot) ? wxT("") : wxT("not "),
+                _T("Root/last item is %svisible/%svisible"),
+                m_treeCtrl->IsVisible(idRoot) ? _T("") : _T("not "),
                 idLast.IsOk() && m_treeCtrl->IsVisible(idLast)
-                    ? wxT("") : wxT("not "));
+                    ? _T("") : _T("not "));
         }
         else
-            status = wxT("No root item");
+            status = _T("No root item");
 
         SetStatusText(status, 1);
     }
@@ -455,11 +393,12 @@ void MyFrame::Resize()
 {
     wxSize size = GetClientSize();
     m_treeCtrl->SetSize(0, 0, size.x, size.y
-#if wxUSE_LOG
+#if !wxUSE_LOG
+                                            );
+#else
                                             *2/3);
-    m_textCtrl->SetSize(0, 2*size.y/3, size.x, size.y/3
+    m_textCtrl->SetSize(0, 2*size.y/3, size.x, size.y/3);
 #endif
-    );
 }
 
 void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -475,14 +414,9 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
                  wxOK | wxICON_INFORMATION, this);
 }
 
-void MyFrame::OnClearLog(wxCommandEvent& WXUNUSED(event))
-{
-    m_textCtrl->Clear();
-}
-
 void MyFrame::OnRename(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
@@ -503,7 +437,7 @@ void MyFrame::OnRename(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnCount(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
@@ -514,7 +448,7 @@ void MyFrame::OnCount(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnCountRec(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
@@ -525,7 +459,7 @@ void MyFrame::OnCountRec(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::DoSort(bool reverse)
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
@@ -534,14 +468,14 @@ void MyFrame::DoSort(bool reverse)
 
 void MyFrame::OnHighlight(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId id = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId id = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( id );
 
     wxRect r;
     if ( !m_treeCtrl->GetBoundingRect(id, r, true /* text, not full row */) )
     {
-        wxLogMessage(wxT("Failed to get bounding item rect"));
+        wxLogMessage(_T("Failed to get bounding item rect"));
         return;
     }
 
@@ -554,7 +488,7 @@ void MyFrame::OnHighlight(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnDump(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId root = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId root = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( root );
 
@@ -583,7 +517,7 @@ void MyFrame::OnDumpSelected(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnSelect(wxCommandEvent& WXUNUSED(event))
 {
-    m_treeCtrl->SelectItem(m_treeCtrl->GetFocusedItem());
+    m_treeCtrl->SelectItem(m_treeCtrl->GetSelection());
 }
 
 void MyFrame::OnSelectRoot(wxCommandEvent& WXUNUSED(event))
@@ -597,20 +531,11 @@ void MyFrame::OnUnselect(wxCommandEvent& WXUNUSED(event))
     m_treeCtrl->UnselectAll();
 }
 
-void MyFrame::OnSelectChildren(wxCommandEvent& WXUNUSED(event))
-{
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
-    if ( !item.IsOk() )
-        item = m_treeCtrl->GetRootItem();
-
-    m_treeCtrl->SelectChildren(item);
-}
-
 #endif // NO_MULTIPLE_SELECTION
 
 void MyFrame::DoSetBold(bool bold)
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
@@ -619,7 +544,7 @@ void MyFrame::DoSetBold(bool bold)
 
 void MyFrame::OnDelete(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
@@ -628,7 +553,7 @@ void MyFrame::OnDelete(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnDeleteChildren(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
@@ -643,7 +568,7 @@ void MyFrame::OnDeleteAll(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnRecreate(wxCommandEvent& event)
 {
     OnDeleteAll(event);
-    m_treeCtrl->AddTestItemsToTree(NUM_CHILDREN_PER_LEVEL, NUM_LEVELS);
+    m_treeCtrl->AddTestItemsToTree(5, 2);
 }
 
 void MyFrame::OnSetImageSize(wxCommandEvent& WXUNUSED(event))
@@ -673,41 +598,6 @@ void MyFrame::OnToggleImages(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void MyFrame::OnToggleStates(wxCommandEvent& WXUNUSED(event))
-{
-    if ( wxGetApp().ShowStates() )
-    {
-        m_treeCtrl->CreateStateImageList(true);
-        wxGetApp().SetShowStates(false);
-    }
-    else
-    {
-        m_treeCtrl->CreateStateImageList(false);
-        wxGetApp().SetShowStates(true);
-    }
-}
-
-void MyFrame::OnToggleAlternateImages(wxCommandEvent& WXUNUSED(event))
-{
-    bool alternateImages = m_treeCtrl->AlternateImages();
-
-    m_treeCtrl->SetAlternateImages(!alternateImages);
-    m_treeCtrl->CreateImageList(0);
-}
-
-void MyFrame::OnToggleAlternateStates(wxCommandEvent& WXUNUSED(event))
-{
-    bool alternateStates = m_treeCtrl->AlternateStates();
-
-    m_treeCtrl->SetAlternateStates(!alternateStates);
-    m_treeCtrl->CreateStateImageList();
-
-    // normal states < alternate states
-    // so we must reset broken states
-    if ( alternateStates )
-        m_treeCtrl->ResetBrokenStateImages();
-}
-
 void MyFrame::OnToggleButtons(wxCommandEvent& WXUNUSED(event))
 {
 #if USE_GENERIC_TREECTRL || !defined(__WXMSW__)
@@ -732,11 +622,6 @@ void MyFrame::OnCollapseAndReset(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnEnsureVisible(wxCommandEvent& WXUNUSED(event))
 {
     m_treeCtrl->DoEnsureVisible();
-}
-
-void MyFrame::OnSetFocus(wxCommandEvent& WXUNUSED(event))
-{
-    m_treeCtrl->SetFocus();
 }
 
 void MyFrame::OnInsertItem(wxCommandEvent& WXUNUSED(event))
@@ -775,91 +660,23 @@ void MyFrame::OnIncSpacing(wxCommandEvent& WXUNUSED(event))
 {
     unsigned int indent = m_treeCtrl->GetSpacing();
     if (indent < 100)
-    {
         m_treeCtrl->SetSpacing( indent+5 );
-        m_treeCtrl->Refresh();
-    }
 }
 
 void MyFrame::OnDecSpacing(wxCommandEvent& WXUNUSED(event))
 {
     unsigned int indent = m_treeCtrl->GetSpacing();
     if (indent > 10)
-    {
         m_treeCtrl->SetSpacing( indent-5 );
-        m_treeCtrl->Refresh();
-    } 
 }
 
 void MyFrame::OnToggleIcon(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
+    wxTreeItemId item = m_treeCtrl->GetSelection();
 
     CHECK_ITEM( item );
 
     m_treeCtrl->DoToggleIcon(item);
-}
-
-void MyFrame::OnToggleState(wxCommandEvent& WXUNUSED(event))
-{
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
-
-    CHECK_ITEM( item );
-
-    m_treeCtrl->DoToggleState(item);
-}
-
-void MyFrame::DoShowFirstOrLast(TreeFunc0_t pfn, const wxString& label)
-{
-    const wxTreeItemId item = (m_treeCtrl->*pfn)();
-
-    if ( !item.IsOk() )
-    {
-        wxLogMessage("There is no %s item", label);
-    }
-    else
-    {
-        wxLogMessage("The %s item is \"%s\"",
-                     label, m_treeCtrl->GetItemText(item));
-    }
-}
-
-void MyFrame::DoShowRelativeItem(TreeFunc1_t pfn, const wxString& label)
-{
-    wxTreeItemId item = m_treeCtrl->GetFocusedItem();
-
-    CHECK_ITEM( item );
-
-    if ((pfn == (TreeFunc1_t) &wxTreeCtrl::GetPrevVisible
-         || pfn == (TreeFunc1_t) &wxTreeCtrl::GetNextVisible)
-        && !m_treeCtrl->IsVisible(item))
-    {
-        wxLogMessage("The selected item must be visible.");
-        return;
-    }
-
-    wxTreeItemId new_item = (m_treeCtrl->*pfn)(item);
-
-    if ( !new_item.IsOk() )
-    {
-        wxLogMessage("There is no %s item", label);
-    }
-    else
-    {
-        wxLogMessage("The %s item is \"%s\"",
-                     label, m_treeCtrl->GetItemText(new_item));
-    }
-}
-
-void MyFrame::OnScrollTo(wxCommandEvent& WXUNUSED(event))
-{
-    // scroll to the last but one top level child
-    wxTreeItemId item = m_treeCtrl->GetPrevSibling(
-                            m_treeCtrl->GetLastChild(
-                                m_treeCtrl->GetRootItem()));
-    CHECK_ITEM( item );
-
-    m_treeCtrl->ScrollTo(item);
 }
 
 void MyFrame::OnSetFgColour(wxCommandEvent& WXUNUSED(event))
@@ -886,17 +703,14 @@ IMPLEMENT_DYNAMIC_CLASS(MyTreeCtrl, wxTreeCtrl)
 MyTreeCtrl::MyTreeCtrl(wxWindow *parent, const wxWindowID id,
                        const wxPoint& pos, const wxSize& size,
                        long style)
-          : wxTreeCtrl(parent, id, pos, size, style),
-            m_alternateImages(false),
-            m_alternateStates(false)
+          : wxTreeCtrl(parent, id, pos, size, style)
 {
     m_reverseSort = false;
 
     CreateImageList();
-    CreateStateImageList();
 
     // Add some items to the tree
-    AddTestItemsToTree(NUM_CHILDREN_PER_LEVEL, NUM_LEVELS);
+    AddTestItemsToTree(5, 2);
 }
 
 void MyTreeCtrl::CreateImageList(int size)
@@ -917,29 +731,15 @@ void MyTreeCtrl::CreateImageList(int size)
     // should correspond to TreeCtrlIcon_xxx enum
     wxBusyCursor wait;
     wxIcon icons[5];
+    icons[0] = wxIcon(icon1_xpm);
+    icons[1] = wxIcon(icon2_xpm);
+    icons[2] = wxIcon(icon3_xpm);
+    icons[3] = wxIcon(icon4_xpm);
+    icons[4] = wxIcon(icon5_xpm);
 
-    if (m_alternateImages)
-    {
-        icons[TreeCtrlIcon_File] = wxIcon(icon1_xpm);
-        icons[TreeCtrlIcon_FileSelected] = wxIcon(icon2_xpm);
-        icons[TreeCtrlIcon_Folder] = wxIcon(icon3_xpm);
-        icons[TreeCtrlIcon_FolderSelected] = wxIcon(icon4_xpm);
-        icons[TreeCtrlIcon_FolderOpened] = wxIcon(icon5_xpm);
-    }
-    else
-    {
-        wxSize iconSize(size, size);
-
-        icons[TreeCtrlIcon_File] =
-        icons[TreeCtrlIcon_FileSelected] = wxArtProvider::GetIcon(wxART_NORMAL_FILE, wxART_LIST, iconSize);
-        icons[TreeCtrlIcon_Folder] =
-        icons[TreeCtrlIcon_FolderSelected] =
-        icons[TreeCtrlIcon_FolderOpened] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);
-    }
-
+    int sizeOrig = icons[0].GetWidth();
     for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
     {
-        int sizeOrig = icons[0].GetWidth();
         if ( size == sizeOrig )
         {
             images->Add(icons[i]);
@@ -951,54 +751,6 @@ void MyTreeCtrl::CreateImageList(int size)
     }
 
     AssignImageList(images);
-}
-
-void MyTreeCtrl::CreateStateImageList(bool del)
-{
-    if ( del )
-    {
-        SetStateImageList(NULL);
-        return;
-    }
-
-    wxImageList *states;
-    wxBusyCursor wait;
-
-    if (m_alternateStates)
-    {
-        wxIcon icons[5];
-        icons[0] = wxIcon(state1_xpm);  // yellow
-        icons[1] = wxIcon(state2_xpm);  // green
-        icons[2] = wxIcon(state3_xpm);  // red
-        icons[3] = wxIcon(state4_xpm);  // blue
-        icons[4] = wxIcon(state5_xpm);  // black
-
-        int width  = icons[0].GetWidth(),
-            height = icons[0].GetHeight();
-
-        // Make an state image list containing small icons
-        states = new wxImageList(width, height, true);
-
-        for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
-            states->Add(icons[i]);
-    }
-    else
-    {
-        wxIcon icons[2];
-        icons[0] = wxIcon(unchecked_xpm);
-        icons[1] = wxIcon(checked_xpm);
-        
-        int width  = icons[0].GetWidth(),
-            height = icons[0].GetHeight();
-            
-        // Make an state image list containing small icons
-        states = new wxImageList(width, height, true);
-
-        for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
-            states->Add(icons[i]);
-    }
-
-    AssignStateImageList(states);
 }
 
 #if USE_GENERIC_TREECTRL || !defined(__WXMSW__)
@@ -1016,25 +768,12 @@ void MyTreeCtrl::CreateButtonsImageList(int size)
     // should correspond to TreeCtrlIcon_xxx enum
     wxBusyCursor wait;
     wxIcon icons[4];
+    icons[0] = wxIcon(icon3_xpm);   // closed
+    icons[1] = wxIcon(icon3_xpm);   // closed, selected
+    icons[2] = wxIcon(icon5_xpm);   // open
+    icons[3] = wxIcon(icon5_xpm);   // open, selected
 
-    if (m_alternateImages)
-    {
-        icons[0] = wxIcon(icon3_xpm);   // closed
-        icons[1] = wxIcon(icon3_xpm);   // closed, selected
-        icons[2] = wxIcon(icon5_xpm);   // open
-        icons[3] = wxIcon(icon5_xpm);   // open, selected
-    }
-    else
-    {
-        wxSize iconSize(size, size);
-
-        icons[0] =                                                                 // closed
-        icons[1] = wxArtProvider::GetIcon(wxART_FOLDER, wxART_LIST, iconSize);     // closed, selected
-        icons[2] =                                                                 // open
-        icons[3] = wxArtProvider::GetIcon(wxART_FOLDER_OPEN, wxART_LIST, iconSize);// open, selected
-    }
-
-   for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
+    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
     {
         int sizeOrig = icons[i].GetWidth();
         if ( size == sizeOrig )
@@ -1101,9 +840,6 @@ void MyTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent,
             wxTreeItemId id = AppendItem(idParent, str, image, imageSel,
                                          new MyTreeItemData(str));
 
-            if ( wxGetApp().ShowStates() )
-                SetItemState(id, 0);
-
             // and now we also set the expanded one (only for the folders)
             if ( hasChildren && wxGetApp().ShowImages() )
             {
@@ -1146,13 +882,9 @@ void MyTreeCtrl::AddTestItemsToTree(size_t numChildren,
     SetItemTextColour(id, *wxBLUE);
 
     id = GetNextChild(rootId, cookie);
-    if ( id )
-        id = GetNextChild(rootId, cookie);
-    if ( id )
-    {
-        SetItemTextColour(id, *wxRED);
-        SetItemBackgroundColour(id, *wxLIGHT_GREY);
-    }
+    id = GetNextChild(rootId, cookie);
+    SetItemTextColour(id, *wxRED);
+    SetItemBackgroundColour(id, *wxLIGHT_GREY);
 }
 
 void MyTreeCtrl::GetItemsRecursively(const wxTreeItemId& idParent,
@@ -1179,60 +911,15 @@ void MyTreeCtrl::GetItemsRecursively(const wxTreeItemId& idParent,
 
 void MyTreeCtrl::DoToggleIcon(const wxTreeItemId& item)
 {
-    int image = GetItemImage(item) == TreeCtrlIcon_Folder
+    int image = (GetItemImage(item) == TreeCtrlIcon_Folder)
                     ? TreeCtrlIcon_File
                     : TreeCtrlIcon_Folder;
     SetItemImage(item, image, wxTreeItemIcon_Normal);
 
-    image = GetItemImage(item, wxTreeItemIcon_Selected) == TreeCtrlIcon_FolderSelected
+    image = (GetItemImage(item) == TreeCtrlIcon_FolderSelected)
                     ? TreeCtrlIcon_FileSelected
                     : TreeCtrlIcon_FolderSelected;
     SetItemImage(item, image, wxTreeItemIcon_Selected);
-}
-
-void MyTreeCtrl::DoToggleState(const wxTreeItemId& item)
-{
-    if ( m_alternateStates )
-    {
-        // sets random state unlike current
-        int state = GetItemState(item);
-        int nState;
-
-        srand (time(NULL));
-        do {
-            nState = rand() % GetStateImageList()->GetImageCount();
-        } while (nState == state);
-
-        SetItemState(item, nState);
-    }
-    else
-    {
-        // we have only 2 checkbox states, so next state will be reversed
-        SetItemState(item, wxTREE_ITEMSTATE_NEXT);
-    }
-}
-
-void MyTreeCtrl::DoResetBrokenStateImages(const wxTreeItemId& idParent,
-                                          wxTreeItemIdValue cookie, int state)
-{
-    wxTreeItemId id;
-
-    if ( !cookie )
-        id = GetFirstChild(idParent, cookie);
-    else
-        id = GetNextChild(idParent, cookie);
-
-    if ( !id.IsOk() )
-        return;
-
-    int curState = GetItemState(id);
-    if ( curState != wxTREE_ITEMSTATE_NONE && curState > state )
-        SetItemState(id, state);
-
-    if (ItemHasChildren(id))
-        DoResetBrokenStateImages(id, 0, state);
-
-    DoResetBrokenStateImages(idParent, cookie, state);
 }
 
 void MyTreeCtrl::LogEvent(const wxChar *name, const wxTreeEvent& event)
@@ -1240,9 +927,9 @@ void MyTreeCtrl::LogEvent(const wxChar *name, const wxTreeEvent& event)
     wxTreeItemId item = event.GetItem();
     wxString text;
     if ( item.IsOk() )
-        text << wxT('"') << GetItemText(item).c_str() << wxT('"');
+        text << _T('"') << GetItemText(item).c_str() << _T('"');
     else
-        text = wxT("invalid item");
+        text = _T("invalid item");
     wxLogMessage(wxT("%s(%s)"), name, text.c_str());
 }
 
@@ -1250,7 +937,7 @@ void MyTreeCtrl::LogEvent(const wxChar *name, const wxTreeEvent& event)
 #define TREE_EVENT_HANDLER(name)                                 \
 void MyTreeCtrl::name(wxTreeEvent& event)                        \
 {                                                                \
-    LogEvent(wxT(#name), event);                                  \
+    LogEvent(_T(#name), event);                                  \
     SetLastItem(wxTreeItemId());                                 \
     event.Skip();                                                \
 }
@@ -1455,10 +1142,7 @@ void MyTreeCtrl::OnEndDrag(wxTreeEvent& event)
     // Finally, we only copy one item here but we might copy the entire tree if
     // we were dragging a folder.
     int image = wxGetApp().ShowImages() ? TreeCtrlIcon_File : -1;
-    wxTreeItemId id = AppendItem(itemDst, text, image);
-
-    if ( wxGetApp().ShowStates() )
-        SetItemState(id, GetItemState(itemSrc));
+    AppendItem(itemDst, text, image);
 }
 
 void MyTreeCtrl::OnBeginLabelEdit(wxTreeEvent& event)
@@ -1476,7 +1160,7 @@ void MyTreeCtrl::OnBeginLabelEdit(wxTreeEvent& event)
     else if ( itemId == GetRootItem() )
     {
         // test that it is possible to change the text of the item being edited
-        SetItemText(itemId, wxT("Editing root item"));
+        SetItemText(itemId, _T("Editing root item"));
     }
 }
 
@@ -1521,16 +1205,6 @@ void MyTreeCtrl::OnItemActivated(wxTreeEvent& event)
     wxLogMessage(wxT("OnItemActivated"));
 }
 
-void MyTreeCtrl::OnItemStateClick(wxTreeEvent& event)
-{
-    // toggle item state
-    wxTreeItemId itemId = event.GetItem();
-    DoToggleState(itemId);
-
-    wxLogMessage(wxT("Item \"%s\" state changed to %d"),
-                 GetItemText(itemId), GetItemState(itemId));
-}
-
 void MyTreeCtrl::OnItemMenu(wxTreeEvent& event)
 {
     wxTreeItemId itemId = event.GetItem();
@@ -1539,8 +1213,8 @@ void MyTreeCtrl::OnItemMenu(wxTreeEvent& event)
     wxPoint clientpt = event.GetPoint();
     wxPoint screenpt = ClientToScreen(clientpt);
 
-    wxLogMessage(wxT("OnItemMenu for item \"%s\" at screen coords (%i, %i)"),
-                 item ? item->GetDesc() : wxT(""), screenpt.x, screenpt.y);
+    wxLogMessage(wxT("OnItemMenu for item \"%s\" at screen coords (%i, %i)"), 
+                 item ? item->GetDesc() : _T(""), screenpt.x, screenpt.y);
 
     ShowMenu(itemId, clientpt);
     event.Skip();
@@ -1551,8 +1225,6 @@ void MyTreeCtrl::OnContextMenu(wxContextMenuEvent& event)
     wxPoint pt = event.GetPosition();
 
     wxLogMessage(wxT("OnContextMenu at screen coords (%i, %i)"), pt.x, pt.y);
-
-    event.Skip();
 }
 
 void MyTreeCtrl::ShowMenu(wxTreeItemId id, const wxPoint& pt)
@@ -1585,7 +1257,7 @@ void MyTreeCtrl::OnItemRClick(wxTreeEvent& event)
                                          : NULL;
 
     wxLogMessage(wxT("Item \"%s\" right clicked"), item ? item->GetDesc()
-                                                        : wxT(""));
+                                                        : _T(""));
 
     event.Skip();
 }
@@ -1608,16 +1280,12 @@ void MyTreeCtrl::OnRMouseDClick(wxMouseEvent& event)
 {
     wxTreeItemId id = HitTest(event.GetPosition());
     if ( !id )
-    {
         wxLogMessage(wxT("No item under mouse"));
-    }
     else
     {
         MyTreeItemData *item = (MyTreeItemData *)GetItemData(id);
         if ( item )
-        {
             wxLogMessage(wxT("Item '%s' under mouse"), item->GetDesc());
-        }
     }
 
     event.Skip();

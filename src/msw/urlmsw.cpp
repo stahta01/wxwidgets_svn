@@ -137,7 +137,7 @@ protected:
     HINTERNET m_hFile;
     size_t OnSysRead(void *buffer, size_t bufsize);
 
-    wxDECLARE_NO_COPY_CLASS(wxWinINetInputStream);
+    DECLARE_NO_COPY_CLASS(wxWinINetInputStream)
 };
 
 size_t wxWinINetInputStream::GetSize() const
@@ -174,7 +174,7 @@ size_t wxWinINetInputStream::OnSysRead(void *buffer, size_t bufsize)
             );
 
             wxLogError(wxT("Read failed with error %d: %s"),
-                       iError, errorString);
+                       iError, errorString.c_str());
         }
     }
 

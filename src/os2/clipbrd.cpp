@@ -60,9 +60,7 @@ bool wxOpenClipboard()
         gs_wxClipboardIsOpen = ::OpenClipboard((HWND)win->GetHWND()) != 0;
 
         if ( !gs_wxClipboardIsOpen )
-        {
             wxLogSysError(_("Failed to open the clipboard."));
-        }
 
         return gs_wxClipboardIsOpen;
     }

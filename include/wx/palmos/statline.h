@@ -16,7 +16,7 @@
 // wxStaticLine
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticLine : public wxStaticLineBase
+class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 {
 public:
     // constructors and pseudo-constructors

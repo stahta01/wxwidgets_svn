@@ -53,7 +53,6 @@ Test *StreamCase::suite()
     STREAM_REGISTER_SUB_SUITE(tempStream);
     STREAM_REGISTER_SUB_SUITE(zlibStream);
     STREAM_REGISTER_SUB_SUITE(backStream);
-    STREAM_REGISTER_SUB_SUITE(socketStream);
 
     extern CppUnit::Test* GetlargeFileSuite();
     Test *lfs = GetlargeFileSuite();

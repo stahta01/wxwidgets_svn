@@ -18,8 +18,8 @@
 // forward declarations
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxToolTip;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxToolTip;
+class WXDLLIMPEXP_CORE wxWindow;
 
 //-----------------------------------------------------------------------------
 // wxToolTip
@@ -33,10 +33,6 @@ public:
     // globally change the tooltip parameters
     static void Enable( bool flag );
     static void SetDelay( long msecs );
-        // set the delay after which the tooltip disappears or how long the tooltip remains visible
-    static void SetAutoPop(long msecs);
-        // set the delay between subsequent tooltips to appear
-    static void SetReshow(long msecs);
 
     // get/set the tooltip text
     void SetTip( const wxString &tip );
@@ -46,12 +42,15 @@ public:
     bool IsOk() const { return m_window != NULL; }
 
 
-    // this forwards back to wxWindow::GTKApplyToolTip()
-    void GTKApply( wxWindow *win );
+    // wxGTK-only from now on
+
+    // this forwards back to wxWindow::ApplyToolTip()
+    void Apply( wxWindow *win );
 
     // this just sets the given tooltip for the specified widget
-    // tip must be UTF-8 encoded
-    static void GTKApply(GtkWidget *w, const gchar *tip);
+    //
+    // tip must be already UTF-8 encoded
+    static void Apply(GtkWidget *w, const wxCharBuffer& tip);
 
 private:
     wxString     m_text;

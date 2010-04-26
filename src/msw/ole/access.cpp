@@ -87,7 +87,7 @@ private:
     wxVariant m_variant;  // List of further variants
     int       m_nCurrent; // Current enum position
 
-    wxDECLARE_NO_COPY_CLASS(wxIEnumVARIANT);
+    DECLARE_NO_COPY_CLASS(wxIEnumVARIANT)
 };
 
 // ----------------------------------------------------------------------------
@@ -339,7 +339,7 @@ private:
     wxAccessible *m_pAccessible;      // pointer to C++ class we belong to
     bool m_bQuiescing;                // Object is to be deleted
 
-    wxDECLARE_NO_COPY_CLASS(wxIAccessible);
+    DECLARE_NO_COPY_CLASS(wxIAccessible)
 };
 
 // ============================================================================

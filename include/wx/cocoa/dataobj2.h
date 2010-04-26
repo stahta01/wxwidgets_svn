@@ -15,7 +15,7 @@
 //=========================================================================
 // wxBitmapDataObject is a specialization of wxDataObject for bitmaps
 //=========================================================================
-class WXDLLIMPEXP_CORE wxBitmapDataObject : public wxBitmapDataObjectBase
+class wxBitmapDataObject : public wxBitmapDataObjectBase
 {
 public:
     // ctors
@@ -36,7 +36,7 @@ public:
     virtual bool SetData(size_t len, const void *buf);
 
 protected:
-    void Init() { m_pngData = NULL; m_pngSize = 0; }
+    void Init() { m_pngData = (void *)NULL; m_pngSize = 0; }
     void Clear() { free(m_pngData); }
     void ClearAll() { Clear(); Init(); }
 
@@ -59,7 +59,7 @@ private:
 // wxFileDataObject is a specialization of wxDataObject for file names
 //=========================================================================
 
-class WXDLLIMPEXP_CORE wxFileDataObject : public wxFileDataObjectBase
+class wxFileDataObject : public wxFileDataObjectBase
 {
 public:
     // implement base class pure virtuals

@@ -72,7 +72,6 @@ public:
     virtual ~SearchCtrlWidgetsPage(){};
 
     virtual wxControl *GetWidget() const { return m_srchCtrl; }
-    virtual wxTextEntryBase *GetTextEntry() const { return m_srchCtrl; }
     virtual void RecreateWidget() { CreateControl(); }
 
     // lazy creation of the content
@@ -123,7 +122,7 @@ END_EVENT_TABLE()
     #define FAMILY_CTRLS GENERIC_CTRLS
 #endif
 
-IMPLEMENT_WIDGETS_PAGE(SearchCtrlWidgetsPage, wxT("SearchCtrl"),
+IMPLEMENT_WIDGETS_PAGE(SearchCtrlWidgetsPage, _T("SearchCtrl"),
                        FAMILY_CTRLS | EDITABLE_CTRLS | ALL_CTRLS);
 
 SearchCtrlWidgetsPage::SearchCtrlWidgetsPage(WidgetsBookCtrl *book,
@@ -181,7 +180,7 @@ wxMenu* SearchCtrlWidgetsPage::CreateTestMenu()
 {
     wxMenu* menu = new wxMenu;
     const int SEARCH_MENU_SIZE = 5;
-    wxMenuItem* menuItem = menu->Append(wxID_ANY, wxT("Recent Searches"), wxT(""), wxITEM_NORMAL);
+    wxMenuItem* menuItem = menu->Append(wxID_ANY, _T("Recent Searches"), wxT(""), wxITEM_NORMAL);
     menuItem->Enable(false);
     for ( int i = 0; i < SEARCH_MENU_SIZE; i++ )
     {

@@ -12,8 +12,8 @@
 #ifndef _WX_UNIV_TEXTCTRL_H_
 #define _WX_UNIV_TEXTCTRL_H_
 
-class WXDLLIMPEXP_FWD_CORE wxCaret;
-class WXDLLIMPEXP_FWD_CORE wxTextCtrlCommandProcessor;
+class WXDLLEXPORT wxCaret;
+class WXDLLEXPORT wxTextCtrlCommandProcessor;
 
 #include "wx/scrolwin.h"    // for wxScrollHelper
 
@@ -66,7 +66,7 @@ class WXDLLIMPEXP_FWD_CORE wxTextCtrlCommandProcessor;
 // wxTextCtrl
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTextCtrl : public wxTextCtrlBase,
+class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase,
                                public wxScrollHelper
 {
 public:
@@ -83,7 +83,7 @@ public:
                long style = 0,
                const wxValidator& validator = wxDefaultValidator,
                const wxString& name = wxTextCtrlNameStr)
-        : wxScrollHelper(this)
+        : wxScrollHelper(this) 
     {
         Init();
 
@@ -103,6 +103,8 @@ public:
 
     // implement base class pure virtuals
     // ----------------------------------
+
+    virtual wxString GetValue() const;
 
     virtual int GetLineLength(wxTextCoord lineNo) const;
     virtual wxString GetLineText(wxTextCoord lineNo) const;
@@ -258,7 +260,6 @@ protected:
 
     // implements Set/ChangeValue()
     virtual void DoSetValue(const wxString& value, int flags = 0);
-    virtual wxString DoGetValue() const;
 
     // common part of all ctors
     void Init();

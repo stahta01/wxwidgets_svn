@@ -142,7 +142,7 @@ public:
 
 private:
 
-    wxDECLARE_NO_COPY_CLASS(wxCheckListBoxItem);
+    DECLARE_NO_COPY_CLASS(wxCheckListBoxItem)
   bool            m_bChecked;
   wxCheckListBox *m_pParent;
   size_t          m_nIndex;

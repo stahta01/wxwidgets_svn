@@ -33,7 +33,7 @@
 
 #include "wx/control.h"
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxRadioButtonNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxRadioButtonNameStr[];
 
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/radiobut.h"
@@ -46,7 +46,7 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxRadioButtonNameStr[];
 #elif defined(__WXGTK__)
     #include "wx/gtk1/radiobut.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/radiobut.h"
+    #include "wx/mac/radiobut.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/radiobut.h"
 #elif defined(__WXPM__)

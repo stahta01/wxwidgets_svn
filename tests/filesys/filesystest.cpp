@@ -61,12 +61,10 @@ private:
     CPPUNIT_TEST_SUITE( FileSystemTestCase );
         CPPUNIT_TEST( UrlParsing );
         CPPUNIT_TEST( FileNameToUrlConversion );
-        CPPUNIT_TEST( UnicodeFileNameToUrlConversion );
     CPPUNIT_TEST_SUITE_END();
 
     void UrlParsing();
     void FileNameToUrlConversion();
-    void UnicodeFileNameToUrlConversion();
 
     DECLARE_NO_COPY_CLASS(FileSystemTestCase)
 };
@@ -86,20 +84,20 @@ void FileSystemTestCase::UrlParsing()
     } data[] =
     {
         // simple case:
-        { wxT("http://www.root.cz/index.html"),
-                wxT("http"), wxT(""), wxT("//www.root.cz/index.html"), wxT("")},
+        { _T("http://www.root.cz/index.html"),
+                _T("http"), _T(""), _T("//www.root.cz/index.html"), _T("")},
         // anchors:
-        { wxT("http://www.root.cz/index.html#lbl"),
-                wxT("http"), wxT(""), wxT("//www.root.cz/index.html"), wxT("lbl")},
+        { _T("http://www.root.cz/index.html#lbl"),
+                _T("http"), _T(""), _T("//www.root.cz/index.html"), _T("lbl")},
         // file is default protocol:
-        { wxT("testfile.html"),
-                wxT("file"), wxT(""), wxT("testfile.html"), wxT("")},
+        { _T("testfile.html"),
+                _T("file"), _T(""), _T("testfile.html"), _T("")},
         // stacked protocols:
-        { wxT("file:myzipfile.zip#zip:index.htm"),
-                wxT("zip"), wxT("file:myzipfile.zip"), wxT("index.htm"), wxT("")},
+        { _T("file:myzipfile.zip#zip:index.htm"),
+                _T("zip"), _T("file:myzipfile.zip"), _T("index.htm"), _T("")},
         // changes to ':' parsing often break things:
-        { wxT("file:a#b:foo"),
-                wxT("b"), wxT("file:a"), wxT("foo"), wxT("")}
+        { _T("file:a#b:foo"),
+                _T("b"), _T("file:a"), _T("foo"), _T("")}
     };
 
     UrlTester tst;
@@ -112,30 +110,15 @@ void FileSystemTestCase::UrlParsing()
         CPPUNIT_ASSERT( tst.Anchor(d.url) == d.anchor );
     }
 }
-
+    
 void FileSystemTestCase::FileNameToUrlConversion()
 {
 #ifdef __WINDOWS__
-    wxFileName fn1(wxT("\\\\server\\share\\path\\to\\file"));
+    wxFileName fn1(_T("\\\\server\\share\\path\\to\\file"));
     wxString url1 = wxFileSystem::FileNameToURL(fn1);
-
+   
     CPPUNIT_ASSERT( fn1.SameAs(wxFileSystem::URLToFileName(url1)) );
 #endif
-}
-
-void FileSystemTestCase::UnicodeFileNameToUrlConversion()
-{
-    const unsigned char filename_utf8[] = {
-              0x4b, 0x72, 0xc3, 0xa1, 0x73, 0x79, 0x50, 0xc5,
-              0x99, 0xc3, 0xad, 0x72, 0x6f, 0x64, 0x79, 0x2e,
-              0x6a, 0x70, 0x67, 0x00
-              // KrásyPřírody.jpg
-        };
-    wxFileName filename(wxString::FromUTF8((const char*)filename_utf8));
-
-    wxString url = wxFileSystem::FileNameToURL(filename);
-
-    CPPUNIT_ASSERT( filename.SameAs(wxFileSystem::URLToFileName(url)) );
 }
 
 #endif // wxUSE_FILESYSTEM

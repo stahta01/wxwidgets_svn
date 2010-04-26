@@ -54,13 +54,6 @@ class wxMonoRenderer : public wxStdRenderer
 public:
     wxMonoRenderer(const wxColourScheme *scheme);
 
-    virtual void DrawLabel(wxDC& dc,
-                           const wxString& label,
-                           const wxRect& rect,
-                           int flags = 0,
-                           int alignment = wxALIGN_LEFT | wxALIGN_TOP,
-                           int indexAccel = -1,
-                           wxRect *rectBounds = NULL);
     virtual void DrawButtonLabel(wxDC& dc,
                                  const wxString& label,
                                  const wxBitmap& image,
@@ -70,7 +63,7 @@ public:
                                  int indexAccel = -1,
                                  wxRect *rectBounds = NULL);
 
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0);
+    virtual void DrawFocusRect(wxDC& dc, const wxRect& rect, int flags = 0);
 
     virtual void DrawButtonBorder(wxDC& dc,
                                   const wxRect& rect,
@@ -613,7 +606,7 @@ wxColour wxMonoColourScheme::Get(wxMonoColourScheme::StdColour col) const
 
         case MAX:
         default:
-            wxFAIL_MSG(wxT("invalid standard colour"));
+            wxFAIL_MSG(_T("invalid standard colour"));
             // fall through
 
         case SHADOW_DARK:
@@ -658,16 +651,15 @@ wxRect wxMonoRenderer::GetBorderDimensions(wxBorder border) const
         case wxBORDER_STATIC:
         case wxBORDER_RAISED:
         case wxBORDER_SUNKEN:
-        case wxBORDER_THEME:
             width = 1;
             break;
-  /*
+
         case wxBORDER_DOUBLE:
             width = 2;
             break;
-   */
+
         default:
-            wxFAIL_MSG(wxT("unknown border type"));
+            wxFAIL_MSG(_T("unknown border type"));
             // fall through
 
         case wxBORDER_DEFAULT:
@@ -711,7 +703,7 @@ wxMonoRenderer::DrawVerticalLine(wxDC& dc, wxCoord x, wxCoord y1, wxCoord y2)
     dc.DrawLine(x, y1, x, y2 + 1);
 }
 
-void wxMonoRenderer::DrawFocusRect(wxWindow* WXUNUSED(win), wxDC& dc, const wxRect& rect, int flags)
+void wxMonoRenderer::DrawFocusRect(wxDC& dc, const wxRect& rect, int flags)
 {
     // no need to draw the focus rect for selected items, it would be invisible
     // anyhow
@@ -726,17 +718,6 @@ void wxMonoRenderer::DrawFocusRect(wxWindow* WXUNUSED(win), wxDC& dc, const wxRe
 // ----------------------------------------------------------------------------
 // label
 // ----------------------------------------------------------------------------
-
-void wxMonoRenderer::DrawLabel(wxDC& dc,
-                               const wxString& label,
-                               const wxRect& rect,
-                               int WXUNUSED(flags),
-                               int alignment,
-                               int indexAccel,
-                               wxRect *rectBounds)
-{
-    dc.DrawLabel(label, wxNullBitmap, rect, alignment, indexAccel, rectBounds);
-}
 
 void wxMonoRenderer::DrawButtonLabel(wxDC& dc,
                                      const wxString& label,
@@ -829,19 +810,19 @@ void wxMonoRenderer::DrawToolBarButton(wxDC& WXUNUSED(dc),
                                        long WXUNUSED(style),
                                        int WXUNUSED(tbarStyle))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 wxSize wxMonoRenderer::GetToolBarButtonSize(wxCoord *WXUNUSED(separator)) const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxSize();
 }
 
 wxSize wxMonoRenderer::GetToolBarMargin() const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxSize();
 }
@@ -862,19 +843,19 @@ void wxMonoRenderer::DrawTab(wxDC& WXUNUSED(dc),
                              int WXUNUSED(flags),
                              int WXUNUSED(indexAccel))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 wxSize wxMonoRenderer::GetTabIndent() const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxSize();
 }
 
 wxSize wxMonoRenderer::GetTabPadding() const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxSize();
 }
@@ -892,7 +873,7 @@ void wxMonoRenderer::GetComboBitmaps(wxBitmap *WXUNUSED(bmpNormal),
                                      wxBitmap *WXUNUSED(bmpPressed),
                                      wxBitmap *WXUNUSED(bmpDisabled))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 #endif // wxUSE_COMBOBOX
@@ -909,7 +890,7 @@ void wxMonoRenderer::DrawMenuBarItem(wxDC& WXUNUSED(dc),
                                      int WXUNUSED(flags),
                                      int WXUNUSED(indexAccel))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 void wxMonoRenderer::DrawMenuItem(wxDC& WXUNUSED(dc),
@@ -921,19 +902,19 @@ void wxMonoRenderer::DrawMenuItem(wxDC& WXUNUSED(dc),
                                   int WXUNUSED(flags),
                                   int WXUNUSED(indexAccel))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 void wxMonoRenderer::DrawMenuSeparator(wxDC& WXUNUSED(dc),
                                        wxCoord WXUNUSED(y),
                                        const wxMenuGeometryInfo& WXUNUSED(geomInfo))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 wxSize wxMonoRenderer::GetMenuBarItemSize(const wxSize& WXUNUSED(sizeText)) const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxSize();
 }
@@ -941,7 +922,7 @@ wxSize wxMonoRenderer::GetMenuBarItemSize(const wxSize& WXUNUSED(sizeText)) cons
 wxMenuGeometryInfo *wxMonoRenderer::GetMenuGeometry(wxWindow *WXUNUSED(win),
                                                     const wxMenu& WXUNUSED(menu)) const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return NULL;
 }
@@ -962,7 +943,7 @@ void wxMonoRenderer::DrawSliderShaft(wxDC& WXUNUSED(dc),
                                      long WXUNUSED(style),
                                      wxRect *WXUNUSED(rectShaft))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 
@@ -972,7 +953,7 @@ void wxMonoRenderer::DrawSliderThumb(wxDC& WXUNUSED(dc),
                                      int WXUNUSED(flags),
                                      long WXUNUSED(style))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 void wxMonoRenderer::DrawSliderTicks(wxDC& WXUNUSED(dc),
@@ -985,19 +966,19 @@ void wxMonoRenderer::DrawSliderTicks(wxDC& WXUNUSED(dc),
                                      int WXUNUSED(flags),
                                      long WXUNUSED(style))
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 }
 
 wxCoord wxMonoRenderer::GetSliderDim() const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return 0;
 }
 
 wxCoord wxMonoRenderer::GetSliderTickLen() const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return 0;
 }
@@ -1008,7 +989,7 @@ wxRect wxMonoRenderer::GetSliderShaftRect(const wxRect& WXUNUSED(rect),
                                           wxOrientation WXUNUSED(orient),
                                           long WXUNUSED(style)) const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxRect();
 }
@@ -1017,7 +998,7 @@ wxSize wxMonoRenderer::GetSliderThumbSize(const wxRect& WXUNUSED(rect),
                                           int WXUNUSED(lenThumb),
                                           wxOrientation WXUNUSED(orient)) const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxSize();
 }
@@ -1026,7 +1007,7 @@ wxSize wxMonoRenderer::GetSliderThumbSize(const wxRect& WXUNUSED(rect),
 
 wxSize wxMonoRenderer::GetProgressBarStep() const
 {
-    wxFAIL_MSG(wxT("TODO"));
+    wxFAIL_MSG(_T("TODO"));
 
     return wxSize();
 }
@@ -1042,7 +1023,7 @@ void wxMonoRenderer::DrawArrow(wxDC& dc,
                                int WXUNUSED(flags))
 {
     ArrowDirection arrowDir = GetArrowDirection(dir);
-    wxCHECK_RET( arrowDir != Arrow_Max, wxT("invalid arrow direction") );
+    wxCHECK_RET( arrowDir != Arrow_Max, _T("invalid arrow direction") );
 
     wxBitmap& bmp = m_bmpArrows[arrowDir];
     if ( !bmp.Ok() )

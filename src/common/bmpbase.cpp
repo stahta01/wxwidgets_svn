@@ -47,16 +47,16 @@ IMPLEMENT_VARIANT_OBJECT_EXPORTED_SHALLOWCMP(wxIcon,WXDLLEXPORT)
 
 
 IMPLEMENT_ABSTRACT_CLASS(wxBitmapBase, wxGDIObject)
-IMPLEMENT_ABSTRACT_CLASS(wxBitmapHandler, wxObject)
+IMPLEMENT_ABSTRACT_CLASS(wxBitmapHandlerBase,wxObject)
 
 wxList wxBitmapBase::sm_handlers;
 
-void wxBitmapBase::AddHandler(wxBitmapHandler *handler)
+void wxBitmapBase::AddHandler(wxBitmapHandlerBase *handler)
 {
     sm_handlers.Append(handler);
 }
 
-void wxBitmapBase::InsertHandler(wxBitmapHandler *handler)
+void wxBitmapBase::InsertHandler(wxBitmapHandlerBase *handler)
 {
     sm_handlers.Insert(handler);
 }
@@ -126,6 +126,21 @@ void wxBitmapBase::CleanUpHandlers()
     }
 }
 
+bool wxBitmapHandlerBase::Create(wxBitmap*, const void*, long, int, int, int)
+{
+    return false;
+}
+
+bool wxBitmapHandlerBase::LoadFile(wxBitmap*, const wxString&, long, int, int)
+{
+    return false;
+}
+
+bool wxBitmapHandlerBase::SaveFile(const wxBitmap*, const wxString&, int, const wxPalette*)
+{
+    return false;
+}
+
 class wxBitmapBaseModule: public wxModule
 {
 DECLARE_DYNAMIC_CLASS(wxBitmapBaseModule)
@@ -134,16 +149,6 @@ public:
     bool OnInit() { wxBitmap::InitStandardHandlers(); return true; }
     void OnExit() { wxBitmap::CleanUpHandlers(); }
 };
-
-wxBitmap wxBitmapBase::ConvertToDisabled(unsigned char brightness) const
-{
-    wxBitmap bmp;
-#if wxUSE_IMAGE
-    wxImage image = ConvertToImage();
-    bmp = wxBitmap(image.ConvertToDisabled(brightness));
-#endif
-    return bmp;
-}
 
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapBaseModule, wxModule)
 
@@ -165,7 +170,7 @@ wxBitmap::wxBitmap(const char* const* bits)
 
     *this = wxBitmap(image);
 #else
-    wxFAIL_MSG(wxT("creating bitmaps from XPMs not supported"));
+    wxFAIL_MSG(_T("creating bitmaps from XPMs not supported"));
 #endif // wxUSE_IMAGE && wxUSE_XPM
 }
 #endif // !(defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXX11__))

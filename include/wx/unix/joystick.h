@@ -9,14 +9,15 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_UNIX_JOYSTICK_H_
-#define _WX_UNIX_JOYSTICK_H_
+#ifndef __JOYSTICKH__
+#define __JOYSTICKH__
 
 #include "wx/event.h"
+#include "wx/thread.h"
 
-class WXDLLIMPEXP_FWD_CORE wxJoystickThread;
+class WXDLLEXPORT wxJoystickThread;
 
-class WXDLLIMPEXP_ADV wxJoystick: public wxObject
+class WXDLLEXPORT wxJoystick: public wxObject
 {
     DECLARE_DYNAMIC_CLASS(wxJoystick)
         public:
@@ -31,8 +32,6 @@ class WXDLLIMPEXP_ADV wxJoystick: public wxObject
     ////////////////////////////////////////////////////////////////////////////
 
     wxPoint GetPosition() const;
-    int GetPosition(unsigned axis) const;
-    bool GetButtonState(unsigned button) const;
     int GetZPosition() const;
     int GetButtonState() const;
     int GetPOVPosition() const;
@@ -92,4 +91,5 @@ protected:
     wxJoystickThread*   m_thread;
 };
 
-#endif // _WX_UNIX_JOYSTICK_H_
+#endif
+    // __JOYSTICKH__

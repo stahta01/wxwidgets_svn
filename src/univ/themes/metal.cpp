@@ -146,7 +146,7 @@ private:
 class wxMetalTheme : public wxDelegateTheme
 {
 public:
-    wxMetalTheme() : wxDelegateTheme(wxT("win32")), m_renderer(NULL) {}
+    wxMetalTheme() : wxDelegateTheme(_T("win32")), m_renderer(NULL) {}
     ~wxMetalTheme() { delete m_renderer; }
 
 protected:
@@ -426,7 +426,7 @@ void wxMetalRenderer::DrawArrow(wxDC& dc,
         case wxDOWN:    arrowDir = Arrow_Down; break;
 
         default:
-            wxFAIL_MSG(wxT("unknown arrow direction"));
+            wxFAIL_MSG(_T("unknown arrow direction"));
             return;
     }
 

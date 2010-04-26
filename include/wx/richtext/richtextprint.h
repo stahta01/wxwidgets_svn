@@ -149,7 +149,7 @@ private:
 
     wxRichTextHeaderFooterData  m_headerFooterData;
 
-    wxDECLARE_NO_COPY_CLASS(wxRichTextPrintout);
+    DECLARE_NO_COPY_CLASS(wxRichTextPrintout)
 };
 
 /*
@@ -238,7 +238,7 @@ private:
     wxRichTextBuffer*           m_richTextBufferPrinting;
     wxRect                      m_previewRect;
 
-    wxDECLARE_NO_COPY_CLASS(wxRichTextPrinting);
+    DECLARE_NO_COPY_CLASS(wxRichTextPrinting)
 };
 
 #endif  // wxUSE_RICHTEXT & wxUSE_PRINTING_ARCHITECTURE

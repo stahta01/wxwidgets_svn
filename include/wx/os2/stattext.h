@@ -14,7 +14,7 @@
 
 #include "wx/control.h"
 
-class WXDLLIMPEXP_CORE wxStaticText : public wxStaticTextBase
+class WXDLLEXPORT wxStaticText : public wxStaticTextBase
 {
 public:
     inline wxStaticText() { }
@@ -66,9 +66,6 @@ protected:
                              ,int nSizeFlags = wxSIZE_AUTO
                             );
     virtual wxSize DoGetBestSize(void) const;
-
-    virtual void DoSetLabel(const wxString& str);
-    virtual wxString DoGetLabel() const;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticText)

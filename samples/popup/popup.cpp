@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        popup.cpp
+// Name:        minimal.cpp
 // Purpose:     Popup wxWidgets sample
 // Author:      Robert Roebling
 // Modified by:
@@ -116,7 +116,7 @@ SimpleTransientPopup::SimpleTransientPopup( wxWindow *parent )
     m_panel = new wxScrolledWindow( this, wxID_ANY );
     m_panel->SetBackgroundColour( *wxLIGHT_GREY );
 
-    // Keep this code to verify if mouse events work, they're required if
+    // Keep this code to verify if mouse events work, they're required if 
     // you're making a control like a combobox where the items are highlighted
     // under the cursor, the m_panel is set focus in the Popup() function
     m_panel->Connect(wxEVT_MOTION,
@@ -124,8 +124,8 @@ SimpleTransientPopup::SimpleTransientPopup( wxWindow *parent )
                      NULL, this);
 
     wxStaticText *text = new wxStaticText( m_panel, wxID_ANY,
-                          wxT("wxPopupTransientWindow is a\n")
-                          wxT("wxPopupWindow which disappears\n")
+                          wxT("wx.PopupTransientWindow is a\n")
+                          wxT("wx.PopupWindow which disappears\n")
                           wxT("automatically when the user\n")
                           wxT("clicks the mouse outside it or if it\n")
                           wxT("(or its first child) loses focus in \n")
@@ -133,7 +133,7 @@ SimpleTransientPopup::SimpleTransientPopup( wxWindow *parent )
 
     m_button = new wxButton(m_panel, Minimal_PopupButton, wxT("Press Me"));
     m_spinCtrl = new wxSpinCtrl(m_panel, Minimal_PopupSpinctrl, wxT("Hello"));
-    m_mouseText = new wxStaticText(m_panel, wxID_ANY,
+    m_mouseText = new wxStaticText(m_panel, wxID_ANY, 
                                    wxT("<- Test Mouse ->"));
 
     wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
@@ -142,6 +142,7 @@ SimpleTransientPopup::SimpleTransientPopup( wxWindow *parent )
     topSizer->Add( m_spinCtrl, 0, wxALL, 5 );
     topSizer->Add( m_mouseText, 0, wxCENTRE|wxALL, 5 );
 
+    m_panel->SetAutoLayout( true );
     m_panel->SetSizer( topSizer );
     topSizer->Fit(m_panel);
     topSizer->Fit(this);
@@ -151,10 +152,10 @@ SimpleTransientPopup::~SimpleTransientPopup()
 {
 }
 
-void SimpleTransientPopup::Popup(wxWindow* WXUNUSED(focus))
+void SimpleTransientPopup::Popup(wxWindow *focus)
 {
     wxLogMessage( wxT("0x%lx SimpleTransientPopup::Popup"), long(this) );
-    wxPopupTransientWindow::Popup();
+    wxPopupTransientWindow::Popup(focus ? focus : m_panel);
 }
 
 void SimpleTransientPopup::OnDismiss()
@@ -200,10 +201,9 @@ void SimpleTransientPopup::OnMouse(wxMouseEvent &event)
     wxColour colour(*wxLIGHT_GREY);
 
     if (rect.Contains(event.GetPosition()))
-    {
+    {       
         colour = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
-        wxLogMessage( wxT("0x%lx SimpleTransientPopup::OnMouse pos(%d, %d)"),
-                      long(event.GetEventObject()), event.GetX(), event.GetY());
+    wxLogMessage( wxT("0x%lx SimpleTransientPopup::OnMouse pos(%d, %d)"), long(event.GetEventObject()), event.GetX(), event.GetY());
     }
 
     if (colour != m_mouseText->GetBackgroundColour())
@@ -229,8 +229,7 @@ void SimpleTransientPopup::OnButton(wxCommandEvent& event)
 
 void SimpleTransientPopup::OnSpinCtrl(wxSpinEvent& event)
 {
-    wxLogMessage( wxT("0x%lx SimpleTransientPopup::OnSpinCtrl ID %d Value %d"),
-                  long(this), event.GetId(), event.GetInt());
+    wxLogMessage( wxT("0x%lx SimpleTransientPopup::OnSpinCtrl ID %d Value %d"), long(this), event.GetId(), event.GetInt());
     event.Skip();
 }
 
@@ -263,7 +262,6 @@ public:
     void OnTestDialog(wxCommandEvent& event);
     void OnStartSimplePopup(wxCommandEvent& event);
     void OnStartScrolledPopup(wxCommandEvent& event);
-    void OnActivate(wxActivateEvent& event);
 
 private:
     SimpleTransientPopup *m_simplePopup;
@@ -291,11 +289,8 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
-    m_frame = new MyFrame(wxT("Popup wxWidgets App"));
+    m_frame = new MyFrame(_T("Popup wxWidgets App"));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -315,13 +310,12 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Minimal_Quit,  MyFrame::OnQuit)
     EVT_MENU(Minimal_About, MyFrame::OnAbout)
     EVT_MENU(Minimal_TestDialog, MyFrame::OnTestDialog)
-    EVT_ACTIVATE(MyFrame::OnActivate)
     EVT_BUTTON(Minimal_StartSimplePopup, MyFrame::OnStartSimplePopup)
     EVT_BUTTON(Minimal_StartScrolledPopup, MyFrame::OnStartScrolledPopup)
 END_EVENT_TABLE()
 
 MyFrame::MyFrame(const wxString& title)
-: wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(500,300))
+       : wxFrame(NULL, wxID_ANY, title)
 {
     m_simplePopup = m_scrolledPopup = NULL;
 
@@ -332,15 +326,15 @@ MyFrame::MyFrame(const wxString& title)
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(Minimal_About, wxT("&About...\tF1"), wxT("Show about dialog"));
+    helpMenu->Append(Minimal_About, _T("&About...\tF1"), _T("Show about dialog"));
 
-    menuFile->Append(Minimal_TestDialog, wxT("&Test dialog\tAlt-T"), wxT("Test dialog"));
-    menuFile->Append(Minimal_Quit, wxT("E&xit\tAlt-X"), wxT("Quit this program"));
+    menuFile->Append(Minimal_TestDialog, _T("&Test dialog\tAlt-T"), _T("Test dialog"));
+    menuFile->Append(Minimal_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(menuFile, wxT("&File"));
-    menuBar->Append(helpMenu, wxT("&Help"));
+    menuBar->Append(menuFile, _T("&File"));
+    menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
@@ -349,7 +343,7 @@ MyFrame::MyFrame(const wxString& title)
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
-    SetStatusText(wxT("Welcome to wxWidgets!"));
+    SetStatusText(_T("Welcome to wxWidgets!"));
 #endif // wxUSE_STATUSBAR
 
     wxPanel *panel = new wxPanel(this, -1);
@@ -361,13 +355,14 @@ MyFrame::MyFrame(const wxString& title)
     m_logWin->SetEditable(false);
     wxLogTextCtrl* logger = new wxLogTextCtrl( m_logWin );
     m_logOld = logger->SetActiveTarget( logger );
-    logger->DisableTimestamp();
+    logger->SetTimestamp( NULL );
 
     wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
     topSizer->Add( button1, 0, wxALL, 5 );
     topSizer->Add( button2, 0, wxALL, 5 );
     topSizer->Add( m_logWin, 1, wxEXPAND|wxALL, 5 );
 
+    panel->SetAutoLayout( true );
     panel->SetSizer( topSizer );
 
 }
@@ -379,11 +374,6 @@ MyFrame::~MyFrame()
 
 
 // event handlers
-
-void MyFrame::OnActivate(wxActivateEvent& WXUNUSED(event))
-{
-    wxLogMessage( wxT("In activate...") );
-}
 
 void MyFrame::OnStartSimplePopup(wxCommandEvent& event)
 {
@@ -427,10 +417,10 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxString msg;
-    msg.Printf( wxT("This is the About dialog of the popup sample.\n")
-                wxT("Welcome to %s"), wxVERSION_STRING);
+    msg.Printf( _T("This is the About dialog of the popup sample.\n")
+                _T("Welcome to %s"), wxVERSION_STRING);
 
-    wxMessageBox(msg, wxT("About Popup"), wxOK | wxICON_INFORMATION, this);
+    wxMessageBox(msg, _T("About Popup"), wxOK | wxICON_INFORMATION, this);
 }
 
 // ----------------------------------------------------------------------------
@@ -459,7 +449,9 @@ MyDialog::MyDialog(const wxString& title)
     topSizer->AddSpacer(40);
     topSizer->Add( okButton, 0, wxALL, 5 );
 
-    panel->SetSizerAndFit( topSizer );
+    panel->SetAutoLayout( true );
+    panel->SetSizer( topSizer );
+    topSizer->Fit(this);
 }
 
 void MyDialog::OnStartSimplePopup(wxCommandEvent& event)

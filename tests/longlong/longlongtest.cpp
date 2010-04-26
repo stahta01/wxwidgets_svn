@@ -68,7 +68,6 @@ private:
         CPPUNIT_TEST( Division );
         CPPUNIT_TEST( BitOperations );
         CPPUNIT_TEST( ToString );
-        CPPUNIT_TEST( LoHi );
     CPPUNIT_TEST_SUITE_END();
 
     void Conversion();
@@ -78,7 +77,6 @@ private:
     void Division();
     void BitOperations();
     void ToString();
-    void LoHi();
 
     DECLARE_NO_COPY_CLASS(LongLongTestCase)
 };
@@ -237,7 +235,7 @@ void LongLongTestCase::Division()
 
 void LongLongTestCase::BitOperations()
 {
-    for ( size_t m = 0; m < ITEMS; m++ )
+    for ( size_t n = 0; n < ITEMS; n++ )
     {
         wxLongLong a = RAND_LL();
 
@@ -281,7 +279,7 @@ void LongLongTestCase::ToString()
     for ( size_t n = 0; n < WXSIZEOF(testLongs); n++ )
     {
         wxLongLong a = testLongs[n];
-        s1 = wxString::Format(wxT("%ld"), testLongs[n]);
+        s1 = wxString::Format(_T("%ld"), testLongs[n]);
         s2 = a.ToString();
         CPPUNIT_ASSERT( s1 == s2 );
 
@@ -303,38 +301,27 @@ void LongLongTestCase::ToString()
     }
 
     wxLongLong a(0x12345678, 0x87654321);
-    CPPUNIT_ASSERT( a.ToString() == wxT("1311768467139281697") );
+    CPPUNIT_ASSERT( a.ToString() == _T("1311768467139281697") );
     a.Negate();
-    CPPUNIT_ASSERT( a.ToString() == wxT("-1311768467139281697") );
+    CPPUNIT_ASSERT( a.ToString() == _T("-1311768467139281697") );
 
     wxLongLong llMin(-2147483647L - 1L, 0);
-    CPPUNIT_ASSERT( llMin.ToString() == wxT("-9223372036854775808") );
+    CPPUNIT_ASSERT( llMin.ToString() == _T("-9223372036854775808") );
 
 #if wxUSE_LONGLONG_WX
     wxLongLongWx a1(a.GetHi(), a.GetLo());
-    CPPUNIT_ASSERT( a1.ToString() == wxT("-1311768467139281697") );
+    CPPUNIT_ASSERT( a1.ToString() == _T("-1311768467139281697") );
     a1.Negate();
-    CPPUNIT_ASSERT( a1.ToString() == wxT("1311768467139281697") );
+    CPPUNIT_ASSERT( a1.ToString() == _T("1311768467139281697") );
 #endif
 
 #if wxUSE_LONGLONG_NATIVE
     wxLongLongNative a2(a.GetHi(), a.GetLo());
-    CPPUNIT_ASSERT( a2.ToString() == wxT("-1311768467139281697") );
+    CPPUNIT_ASSERT( a2.ToString() == _T("-1311768467139281697") );
     a2.Negate();
-    CPPUNIT_ASSERT( a2.ToString() == wxT("1311768467139281697") );
+    CPPUNIT_ASSERT( a2.ToString() == _T("1311768467139281697") );
 #endif
 
-}
-
-void LongLongTestCase::LoHi()
-{
-    wxLongLong ll(123, 456);
-    CPPUNIT_ASSERT_EQUAL( 456u, ll.GetLo() );
-    CPPUNIT_ASSERT_EQUAL( 123, ll.GetHi() );
-
-    wxULongLong ull(987, 654);
-    CPPUNIT_ASSERT_EQUAL( 654u, ull.GetLo() );
-    CPPUNIT_ASSERT_EQUAL( 987u, ull.GetHi() );
 }
 
 #endif // wxUSE_LONGLONG

@@ -94,48 +94,29 @@ wxDataObjectComposite::~wxDataObjectComposite()
 }
 
 wxDataObjectSimple *
-wxDataObjectComposite::GetObject(const wxDataFormat& format, wxDataObjectBase::Direction dir) const
+wxDataObjectComposite::GetObject(const wxDataFormat& format) const
 {
     wxSimpleDataObjectList::compatibility_iterator node = m_dataObjects.GetFirst();
-
     while ( node )
     {
         wxDataObjectSimple *dataObj = node->GetData();
 
-        if (dataObj->IsSupported(format,dir))
-          return dataObj;
+        if ( dataObj->GetFormat() == format )
+        {
+            return dataObj;
+        }
+
         node = node->GetNext();
     }
-    return NULL;
+
+    return (wxDataObjectSimple *)NULL;
 }
 
 void wxDataObjectComposite::Add(wxDataObjectSimple *dataObject, bool preferred)
 {
-   // check if the data format of the passed object already exists in the composite data object, if this is the case
-   // do not add the data object and display a message in debug mode (otherwise this method fails silently):
-   // start checking if the data format exists for the 'GET' direction:
-    size_t indexFormats;
-    size_t noOfFormats;
-    wxDataFormat* formats;
-
-    noOfFormats = dataObject->GetFormatCount(wxDataObjectBase::Get);
-    formats = new wxDataFormat[noOfFormats];
-    for (indexFormats=0; indexFormats<noOfFormats; ++indexFormats)
-      wxCHECK_RET(this->GetObject(formats[indexFormats],wxDataObjectBase::Get) == NULL,
-                  _("The data format for the GET-direction of the to be added data object already exists"));
-    delete[] formats;
-   // do the same with the 'SET' direction:
-    noOfFormats = dataObject->GetFormatCount(wxDataObjectBase::Set);
-
-    formats = new wxDataFormat[noOfFormats];
-    for (indexFormats=0; indexFormats<noOfFormats; ++indexFormats)
-      wxCHECK_RET(this->GetObject(formats[indexFormats],wxDataObjectBase::Set) == NULL,
-                  _("The data format for the SET-direction of the to be added data object already exists"));
-    delete[] formats;
-
-   // if we reach this location the data object can simply be appended:
     if ( preferred )
         m_preferred = m_dataObjects.GetCount();
+
     m_dataObjects.Append( dataObject );
 }
 
@@ -195,33 +176,21 @@ void* wxDataObjectComposite::SetSizeInBuffer( void* buffer, size_t size,
 
 #endif
 
-size_t wxDataObjectComposite::GetFormatCount(Direction dir) const
+size_t wxDataObjectComposite::GetFormatCount(Direction WXUNUSED(dir)) const
 {
-    size_t n = 0;
-
-    // NOTE: some wxDataObjectSimple objects may return a number greater than 1
-    //       from GetFormatCount(): this is the case of e.g. wxTextDataObject
-    //       under wxMac and wxGTK
-    wxSimpleDataObjectList::compatibility_iterator node;
-    for ( node = m_dataObjects.GetFirst(); node; node = node->GetNext() )
-        n += node->GetData()->GetFormatCount(dir);
-
-    return n;
+    // TODO what about the Get/Set only formats?
+    return m_dataObjects.GetCount();
 }
 
 void wxDataObjectComposite::GetAllFormats(wxDataFormat *formats,
-                                          Direction dir) const
+                                          Direction WXUNUSED(dir)) const
 {
-    size_t index(0);
+    size_t n = 0;
     wxSimpleDataObjectList::compatibility_iterator node;
-
     for ( node = m_dataObjects.GetFirst(); node; node = node->GetNext() )
     {
-        // NOTE: some wxDataObjectSimple objects may return more than 1 format
-        //       from GetAllFormats(): this is the case of e.g. wxTextDataObject
-        //       under wxMac and wxGTK
-        node->GetData()->GetAllFormats(formats+index, dir);
-        index += node->GetData()->GetFormatCount(dir);
+        // TODO if ( !outputOnlyToo ) && this one counts ...
+        formats[n++] = node->GetData()->GetFormat();
     }
 }
 
@@ -263,13 +232,7 @@ bool wxDataObjectComposite::SetData(const wxDataFormat& format,
 // wxTextDataObject
 // ----------------------------------------------------------------------------
 
-#ifdef wxNEEDS_UTF8_FOR_TEXT_DATAOBJ
-
-// FIXME-UTF8: we should be able to merge wchar_t and UTF-8 versions once we
-//             have a way to get UTF-8 string (and its length) in both builds
-//             without loss of efficiency (i.e. extra buffer copy/strlen call)
-
-#if wxUSE_UNICODE_WCHAR
+#if defined(__WXGTK20__) && wxUSE_UNICODE
 
 static inline wxMBConv& GetConv(const wxDataFormat& format)
 {
@@ -312,70 +275,7 @@ bool wxTextDataObject::SetData(const wxDataFormat& format,
     return true;
 }
 
-#else // wxUSE_UNICODE_UTF8
-
-size_t wxTextDataObject::GetDataSize(const wxDataFormat& format) const
-{
-    if ( format == wxDF_UNICODETEXT || wxLocaleIsUtf8 )
-    {
-        return m_text.utf8_length();
-    }
-    else // wxDF_TEXT
-    {
-        const wxCharBuffer buf(wxConvLocal.cWC2MB(m_text.wc_str()));
-        return buf ? strlen(buf) : 0;
-    }
-}
-
-bool wxTextDataObject::GetDataHere(const wxDataFormat& format, void *buf) const
-{
-    if ( !buf )
-        return false;
-
-    if ( format == wxDF_UNICODETEXT || wxLocaleIsUtf8 )
-    {
-        memcpy(buf, m_text.utf8_str(), m_text.utf8_length());
-    }
-    else // wxDF_TEXT
-    {
-        const wxCharBuffer bufLocal(wxConvLocal.cWC2MB(m_text.wc_str()));
-        if ( !bufLocal )
-            return false;
-
-        memcpy(buf, bufLocal, strlen(bufLocal));
-    }
-
-    return true;
-}
-
-bool wxTextDataObject::SetData(const wxDataFormat& format,
-                               size_t len, const void *buf_)
-{
-    const char * const buf = static_cast<const char *>(buf_);
-
-    if ( buf == NULL )
-        return false;
-
-    if ( format == wxDF_UNICODETEXT || wxLocaleIsUtf8 )
-    {
-        // normally the data is in UTF-8 so we could use FromUTF8Unchecked()
-        // but it's not absolutely clear what GTK+ does if the clipboard data
-        // is not in UTF-8 so do an extra check for tranquility, it shouldn't
-        // matter much if we lose a bit of performance when pasting from
-        // clipboard
-        m_text = wxString::FromUTF8(buf, len);
-    }
-    else // wxDF_TEXT, convert from current (non-UTF8) locale
-    {
-        m_text = wxConvLocal.cMB2WC(buf, len, NULL);
-    }
-
-    return true;
-}
-
-#endif // wxUSE_UNICODE_WCHAR/wxUSE_UNICODE_UTF8
-
-#elif defined(wxNEEDS_UTF16_FOR_TEXT_DATAOBJ)
+#elif wxUSE_UNICODE && defined(__WXMAC__)
 
 static wxMBConvUTF16 sUTF16Converter;
 
@@ -389,9 +289,11 @@ static inline wxMBConv& GetConv(const wxDataFormat& format)
 
 size_t wxTextDataObject::GetDataSize(const wxDataFormat& format) const
 {
-    size_t len = GetConv(format).WC2MB( NULL, GetText().c_str(), 0 );
-    len += (format == wxDF_UNICODETEXT ? 2 : 1);
+    wxCharBuffer buffer = GetConv(format).cWX2MB( GetText().c_str() );
+    if ( !buffer )
+        return 0;
 
+    size_t len = GetConv(format).WC2MB( NULL, GetText().c_str(), 0 );
     return len;
 }
 
@@ -401,11 +303,10 @@ bool wxTextDataObject::GetDataHere(const wxDataFormat& format, void *buf) const
         return false;
 
     wxCharBuffer buffer = GetConv(format).cWX2MB( GetText().c_str() );
+    if ( !buffer )
+        return false;
 
     size_t len = GetConv(format).WC2MB( NULL, GetText().c_str(), 0 );
-    len += (format == wxDF_UNICODETEXT ? 2 : 1);
-
-    // trailing (uni)char 0
     memcpy( (char*)buf, (const char*)buffer, len );
 
     return true;
@@ -424,7 +325,7 @@ bool wxTextDataObject::SetData(const wxDataFormat& format,
     return true;
 }
 
-#else // !wxNEEDS_UTF{8,16}_FOR_TEXT_DATAOBJ
+#else
 
 size_t wxTextDataObject::GetDataSize() const
 {
@@ -433,21 +334,66 @@ size_t wxTextDataObject::GetDataSize() const
 
 bool wxTextDataObject::GetDataHere(void *buf) const
 {
-    // NOTE: use wxTmemcpy() instead of wxStrncpy() to allow
-    //       retrieval of strings with embedded NULLs
-    wxTmemcpy( (wxChar*)buf, GetText().c_str(), GetTextLength() );
+    wxStrcpy( (wxChar*)buf, GetText().c_str() );
 
     return true;
 }
 
-bool wxTextDataObject::SetData(size_t len, const void *buf)
+bool wxTextDataObject::SetData(size_t WXUNUSED(len), const void *buf)
 {
-    SetText( wxString((const wxChar*)buf, len/sizeof(wxChar)) );
+    SetText( wxString((const wxChar*)buf) );
 
     return true;
 }
 
-#endif // different wxTextDataObject implementations
+#endif
+
+// ----------------------------------------------------------------------------
+// wxFileDataObjectBase
+// ----------------------------------------------------------------------------
+
+// VZ: I don't need this in MSW finally, so if it is needed in wxGTK, it should
+//     be moved to gtk/dataobj.cpp
+#if 0
+
+wxString wxFileDataObjectBase::GetFilenames() const
+{
+    wxString str;
+    size_t count = m_filenames.GetCount();
+    for ( size_t n = 0; n < count; n++ )
+    {
+        str << m_filenames[n] << wxT('\0');
+    }
+
+    return str;
+}
+
+void wxFileDataObjectBase::SetFilenames(const wxChar* filenames)
+{
+    m_filenames.Empty();
+
+    wxString current;
+    for ( const wxChar *pc = filenames; ; pc++ )
+    {
+        if ( *pc )
+        {
+            current += *pc;
+        }
+        else
+        {
+            if ( !current )
+            {
+                // 2 consecutive NULs - this is the end of the string
+                break;
+            }
+
+            m_filenames.Add(current);
+            current.Empty();
+        }
+    }
+}
+
+#endif
 
 // ----------------------------------------------------------------------------
 // wxCustomDataObject
@@ -482,7 +428,7 @@ void wxCustomDataObject::Free()
 {
     delete [] (char*)m_data;
     m_size = 0;
-    m_data = NULL;
+    m_data = (void*)NULL;
 }
 
 size_t wxCustomDataObject::GetDataSize() const

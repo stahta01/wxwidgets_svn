@@ -20,7 +20,7 @@
 // wxCheckListBox: a listbox whose items may be checked
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCheckListBoxBase : public
+class WXDLLEXPORT wxCheckListBoxBase : public
                                               #ifdef __WXWINCE__
                                                   // keep virtuals synchronised
                                                   wxListBoxBase
@@ -35,7 +35,7 @@ public:
     virtual bool IsChecked(unsigned int item) const = 0;
     virtual void Check(unsigned int item, bool check = true) = 0;
 
-    wxDECLARE_NO_COPY_CLASS(wxCheckListBoxBase);
+    DECLARE_NO_COPY_CLASS(wxCheckListBoxBase)
 };
 
 #if defined(__WXUNIVERSAL__)
@@ -51,7 +51,7 @@ public:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/checklst.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/checklst.h"
+    #include "wx/mac/checklst.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/checklst.h"
 #elif defined(__WXPM__)

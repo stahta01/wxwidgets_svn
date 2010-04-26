@@ -16,19 +16,17 @@
 // wxEventLoop
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGUIEventLoop : public wxEventLoopBase
+class WXDLLEXPORT wxEventLoop : public wxEventLoopBase
 {
 public:
-    wxGUIEventLoop();
+    wxEventLoop();
 
     // implement base class pure virtuals
     virtual int Run();
     virtual void Exit(int rc = 0);
     virtual bool Pending() const;
     virtual bool Dispatch();
-    virtual int DispatchTimeout(unsigned long timeout);
     virtual bool IsRunning() const;
-    virtual bool YieldFor(long eventsToProcess);
 
     // MSW-specific methods
     // --------------------
@@ -39,7 +37,6 @@ public:
 
     // process a single message
     virtual void ProcessMessage(WXMSG *msg);
-    virtual void WakeUp();
 
 protected:
     // should we exit the loop?

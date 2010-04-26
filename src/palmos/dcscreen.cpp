@@ -16,21 +16,20 @@
     #pragma hdrstop
 #endif
 
-#include "wx/palmos/dcscreen.h"
+#include "wx/dcscreen.h"
 
 #ifndef WX_PRECOMP
    #include "wx/string.h"
    #include "wx/window.h"
 #endif
 
-IMPLEMENT_ABSTRACT_CLASS(wxScreenDCImpl, wxPalmDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC, wxWindowDC)
 
 // Create a DC representing the whole screen
-wxScreenDCImpl::wxScreenDCImpl( wxScreenDC *owner ) :
-    wxPalmDCImpl( owner )
+wxScreenDC::wxScreenDC()
 {
 }
 
-void wxScreenDCImpl::DoGetSize (int *w, int *h) const
+void wxScreenDC::DoGetSize(int *width, int *height) const
 {
 }

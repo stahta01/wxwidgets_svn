@@ -154,11 +154,8 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     // create the main application window
-    MyFrame *frame = new MyFrame(wxT("wxComboCtrl and wxOwnerDrawnComboBox Sample"));
+    MyFrame *frame = new MyFrame(_T("wxComboCtrl and wxOwnerDrawnComboBox Sample"));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -383,7 +380,9 @@ public:
     {
         return wxTreeCtrl::Create(parent,1,
                                   wxPoint(0,0),wxDefaultSize,
-                                  wxTR_DEFAULT_STYLE | wxTR_HIDE_ROOT | wxSIMPLE_BORDER );
+                                  wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|
+                                  wxTR_SINGLE|wxTR_LINES_AT_ROOT|
+                                  wxSIMPLE_BORDER);
     }
 
     virtual void OnShow()
@@ -532,17 +531,11 @@ public:
         m_animTimer.SetOwner( this, wxID_ANY );
         m_animTimer.Start( 10, wxTIMER_CONTINUOUS );
 
-        DoOnTimer();
+        OnTimerEvent(*((wxTimerEvent*)NULL));  // Event is never used, so we can give NULL
         return false;
     }
 
-private:
     void OnTimerEvent( wxTimerEvent& WXUNUSED(event) )
-    {
-        DoOnTimer();
-    }
-
-    void DoOnTimer()
     {
         bool stopTimer = false;
 
@@ -598,6 +591,8 @@ private:
         }
     }
 
+protected:
+
     // Popup animation related
     wxLongLong  m_animStart;
     wxTimer     m_animTimer;
@@ -605,6 +600,7 @@ private:
     wxBitmap    m_animBackBitmap;
     int         m_animFlags;
 
+private:
     DECLARE_EVENT_TABLE()
 };
 
@@ -724,17 +720,17 @@ MyFrame::MyFrame(const wxString& title)
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(ComboControl_About, wxT("&About...\tF1"), wxT("Show about dialog"));
+    helpMenu->Append(ComboControl_About, _T("&About...\tF1"), _T("Show about dialog"));
 
-    fileMenu->Append(ComboControl_Compare, wxT("&Compare against wxComboBox..."),
-        wxT("Show some wxOwnerDrawnComboBoxes side-by-side with native wxComboBoxes."));
+    fileMenu->Append(ComboControl_Compare, _T("&Compare against wxComboBox..."),
+        _T("Show some wxOwnerDrawnComboBoxes side-by-side with native wxComboBoxes."));
     fileMenu->AppendSeparator();
-    fileMenu->Append(ComboControl_Quit, wxT("E&xit\tAlt-X"), wxT("Quit this program"));
+    fileMenu->Append(ComboControl_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(fileMenu, wxT("&File"));
-    menuBar->Append(helpMenu, wxT("&Help"));
+    menuBar->Append(fileMenu, _T("&File"));
+    menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
@@ -743,13 +739,12 @@ MyFrame::MyFrame(const wxString& title)
     wxPanel* panel = new wxPanel(this);
 
     // Prepare log window right away since it shows EVT_TEXTs
-    m_logWin = new wxTextCtrl(panel, 105, wxEmptyString,
-                              wxDefaultPosition,
-                              wxSize(-1, 125),
-                              wxTE_MULTILINE);
-    wxLogTextCtrl* logger = new wxLogTextCtrl(m_logWin);
-    m_logOld = logger->SetActiveTarget(logger);
-    logger->DisableTimestamp();
+    m_logWin = new wxTextCtrl( panel, 105, wxEmptyString, wxDefaultPosition,
+                               wxSize(-1,125), wxTE_MULTILINE|wxFULL_REPAINT_ON_RESIZE );
+    m_logWin->SetEditable(false);
+    wxLogTextCtrl* logger = new wxLogTextCtrl( m_logWin );
+    m_logOld = logger->SetActiveTarget( logger );
+    logger->SetTimestamp( NULL );
 
 
     topSizer = new wxBoxSizer( wxVERTICAL );
@@ -1043,13 +1038,9 @@ void MyFrame::OnComboBoxUpdate( wxCommandEvent& event )
         return;
 
     if ( event.GetEventType() == wxEVT_COMMAND_COMBOBOX_SELECTED )
-    {
         wxLogDebug(wxT("EVT_COMBOBOX(id=%i,selection=%i)"),event.GetId(),event.GetSelection());
-    }
     else if ( event.GetEventType() == wxEVT_COMMAND_TEXT_UPDATED )
-    {
         wxLogDebug(wxT("EVT_TEXT(id=%i,string=\"%s\")"),event.GetId(),event.GetString().c_str());
-    }
 }
 
 void MyFrame::OnShowComparison( wxCommandEvent& WXUNUSED(event) )
@@ -1207,14 +1198,14 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxMessageBox(wxString::Format(
-                    wxT("Welcome to %s!\n")
-                    wxT("\n")
-                    wxT("This is the wxWidgets wxComboCtrl and wxOwnerDrawnComboBox sample\n")
-                    wxT("running under %s."),
+                    _T("Welcome to %s!\n")
+                    _T("\n")
+                    _T("This is the wxWidgets wxComboCtrl and wxOwnerDrawnComboBox sample\n")
+                    _T("running under %s."),
                     wxVERSION_STRING,
                     wxGetOsDescription().c_str()
                  ),
-                 wxT("About wxComboCtrl sample"),
+                 _T("About wxComboCtrl sample"),
                  wxOK | wxICON_INFORMATION,
                  this);
 }

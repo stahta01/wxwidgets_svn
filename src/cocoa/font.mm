@@ -94,7 +94,7 @@
 static NSFont* GetNSFontForNativeFontInfo(const wxNativeFontInfo &info);
 static void UpdateNativeFontInfoWithNSFont(wxNativeFontInfo &info, NSFont *cocoaNSFont);
 static wxNativeFontInfo MakeNativeFontInfoForNSFont(NSFont *cocoaNSFont, bool underlined = false);
-static wxNativeFontInfo MakeNativeFontInfo(int size, wxFontFamily family, wxFontStyle style, wxFontWeight weight, bool underlined, const wxString& faceName, wxFontEncoding encoding);
+static wxNativeFontInfo MakeNativeFontInfo(int size, int family, int style, int weight, bool underlined, const wxString& faceName, wxFontEncoding encoding);
 
 /*! @discussion
     Due to 2.8 ABI compatibility concerns we probably don't want to change wxNativeFontInfo
@@ -113,7 +113,7 @@ static wxNativeFontInfo MakeNativeFontInfo(int size, wxFontFamily family, wxFont
  */
 class WXDLLEXPORT wxFontRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxFont;
+    friend class WXDLLEXPORT wxFont;
 public:
     wxFontRefData()
     :   m_cocoaNSFont(nil)
@@ -146,9 +146,9 @@ public:
     }
 
     wxFontRefData(int size,
-                  wxFontFamily family,
-                  wxFontStyle style,
-                  wxFontWeight weight,
+                  int family,
+                  int style,
+                  int weight,
                   bool underlined,
                   const wxString& faceName,
                   wxFontEncoding encoding)
@@ -166,9 +166,9 @@ protected:
         FIXME: Remove from trunk
      */
     void Init(int size,
-              wxFontFamily family,
-              wxFontStyle style,
-              wxFontWeight weight,
+              int family,
+              int style,
+              int weight,
               bool underlined,
               const wxString& faceName,
               wxFontEncoding encoding);
@@ -283,7 +283,7 @@ static wxNativeFontInfo MakeNativeFontInfoForNSFont(NSFont *cocoaNSFont, bool un
 
 IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
 
-static wxNativeFontInfo MakeNativeFontInfo(int size, wxFontFamily family, wxFontStyle style, wxFontWeight weight, bool underlined, const wxString& faceName, wxFontEncoding encoding)
+static wxNativeFontInfo MakeNativeFontInfo(int size, int family, int style, int weight, bool underlined, const wxString& faceName, wxFontEncoding encoding)
 {
     wxNativeFontInfo m_info; // NOTE: not an i-var despite name
     m_info.pointSize = size;
@@ -296,7 +296,7 @@ static wxNativeFontInfo MakeNativeFontInfo(int size, wxFontFamily family, wxFont
     return m_info;
 }
 
-void wxFontRefData::Init(int size, wxFontFamily family, wxFontStyle style, wxFontWeight weight, bool underlined, const wxString& faceName, wxFontEncoding encoding)
+void wxFontRefData::Init(int size, int family, int style, int weight, bool underlined, const wxString& faceName, wxFontEncoding encoding)
 {
     m_info = MakeNativeFontInfo(size, family, style, weight, underlined, faceName, encoding);
 }
@@ -319,7 +319,7 @@ bool wxFont::Create(wxFontRefData *refData)
 {
     UnRef();
     m_refData = refData;
-
+    
     return m_refData != NULL;
 }
 
@@ -327,18 +327,8 @@ bool wxFont::Create(const wxNativeFontInfo& nativeFontInfo)
 {
     UnRef();
     m_refData = new wxFontRefData(nativeFontInfo);
-
+    
     return true;
-}
-
-wxGDIRefData *wxFont::CreateGDIRefData() const
-{
-    return new wxFontRefData;
-}
-
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxFontRefData(*static_cast<const wxFontRefData *>(data));
 }
 
 void wxFont::SetEncoding(wxFontEncoding)
@@ -364,19 +354,19 @@ bool wxFont::GetUnderlined() const
         return false;
 }
 
-wxFontStyle wxFont::GetStyle() const
+int wxFont::GetStyle() const
 {
     wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
     return M_FONTDATA->m_info.style;
 }
 
-wxFontFamily wxFont::GetFamily() const
+int wxFont::GetFamily() const
 {
     wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
     return M_FONTDATA->m_info.family;
 }
 
-wxFontWeight wxFont::GetWeight() const
+int wxFont::GetWeight() const
 {
     wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
     return M_FONTDATA->m_info.weight;
@@ -388,7 +378,7 @@ const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
     return &M_FONTDATA->m_info;
 }
 
-bool wxFont::Create(int pointSize, wxFontFamily family, wxFontStyle style, wxFontWeight weight, bool underlined, const wxString& faceName, wxFontEncoding encoding)
+bool wxFont::Create(int pointSize, int family, int style, int weight, bool underlined, const wxString& faceName, wxFontEncoding encoding)
 {
     UnRef();
     m_refData = new wxFontRefData(pointSize, family, style, weight, underlined, faceName, encoding);
@@ -408,36 +398,51 @@ bool wxFont::RealizeResource()
     return false;
 }
 
+void wxFont::Unshare()
+{
+    // Don't change shared data
+    if (!m_refData)
+    {
+        m_refData = new wxFontRefData();
+    }
+    else
+    {
+        wxFontRefData* ref = new wxFontRefData(*(wxFontRefData*)m_refData);
+        UnRef();
+        m_refData = ref;
+    }
+}
+
 void wxFont::SetPointSize(int pointSize)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.pointSize = pointSize;
 
     RealizeResource();
 }
 
-void wxFont::SetFamily(wxFontFamily family)
+void wxFont::SetFamily(int family)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.family = static_cast<wxFontFamily>(family);
 
     RealizeResource();
 }
 
-void wxFont::SetStyle(wxFontStyle style)
+void wxFont::SetStyle(int style)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.style = static_cast<wxFontStyle>(style);
 
     RealizeResource();
 }
 
-void wxFont::SetWeight(wxFontWeight weight)
+void wxFont::SetWeight(int weight)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.weight = static_cast<wxFontWeight>(weight);
 
@@ -446,7 +451,7 @@ void wxFont::SetWeight(wxFontWeight weight)
 
 bool wxFont::SetFaceName(const wxString& faceName)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.faceName = faceName;
 
@@ -457,7 +462,7 @@ bool wxFont::SetFaceName(const wxString& faceName)
 
 void wxFont::SetUnderlined(bool underlined)
 {
-    AllocExclusive();
+    Unshare();
 
     M_FONTDATA->m_info.underlined = underlined;
 

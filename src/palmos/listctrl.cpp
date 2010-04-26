@@ -100,7 +100,7 @@ wxEND_HANDLERS_TABLE()
 wxCONSTRUCTOR_5( wxListCtrl , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size , long , WindowStyle )
 
 /*
- TODO : Expose more information of a list's layout etc. via appropriate objects (Ã  la NotebookPageInfo)
+ TODO : Expose more information of a list's layout etc. via appropriate objects (à la NotebookPageInfo)
 */
 #else
 IMPLEMENT_DYNAMIC_CLASS(wxListCtrl, wxControl)
@@ -283,7 +283,7 @@ long wxListCtrl::GetItemData(long item) const
 }
 
 // Sets the item data
-bool wxListCtrl::SetItemPtrData(long item, wxUIntPtr data)
+bool wxListCtrl::SetItemData(long item, long data)
 {
     return false;
 }

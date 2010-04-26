@@ -15,11 +15,11 @@
 #include "wx/gdiobj.h"
 #include "wx/os2/private.h"
 
-class WXDLLIMPEXP_FWD_CORE wxPalette;
+class WXDLLEXPORT wxPalette;
 
-class WXDLLIMPEXP_CORE wxPaletteRefData: public wxGDIRefData
+class WXDLLEXPORT wxPaletteRefData: public wxGDIRefData
 {
-    friend class WXDLLIMPEXP_FWD_CORE wxPalette;
+    friend class WXDLLEXPORT wxPalette;
 public:
     wxPaletteRefData();
     virtual ~wxPaletteRefData();
@@ -30,8 +30,10 @@ public:
 
 #define M_PALETTEDATA ((wxPaletteRefData *)m_refData)
 
-class WXDLLIMPEXP_CORE wxPalette: public wxPaletteBase
+class WXDLLEXPORT wxPalette: public wxPaletteBase
 {
+    DECLARE_DYNAMIC_CLASS(wxPalette)
+
 public:
     wxPalette();
 
@@ -57,18 +59,14 @@ public:
                 ,unsigned char* pBlue
                ) const;
 
+    virtual bool Ok() const { return IsOk(); }
+    virtual bool IsOk(void) const { return (m_refData != NULL) ; }
+
     virtual bool FreeResource(bool bForce = false);
 
     inline WXHPALETTE GetHPALETTE(void) const { return (M_PALETTEDATA ? M_PALETTEDATA->m_hPalette : 0); }
     void              SetHPALETTE(WXHPALETTE hPalette);
     void              SetPS(HPS hPS);
-
-protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
-
-private:
-    DECLARE_DYNAMIC_CLASS(wxPalette)
 }; // end of CLASS wxPalette
 
 #endif

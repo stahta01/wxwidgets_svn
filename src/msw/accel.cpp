@@ -34,6 +34,8 @@
 
 #include "wx/msw/private.h"
 
+extern WXWORD wxCharCodeWXToMSW(int id, bool *isVirtual);
+
 IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
 
 // ----------------------------------------------------------------------------
@@ -52,7 +54,7 @@ protected:
     HACCEL      m_hAccel;
     bool        m_ok;
 
-    wxDECLARE_NO_COPY_CLASS(wxAcceleratorRefData);
+    DECLARE_NO_COPY_CLASS(wxAcceleratorRefData)
 };
 
 // ============================================================================
@@ -88,7 +90,7 @@ wxAcceleratorTable::wxAcceleratorTable(const wxString& resource)
 {
     m_refData = new wxAcceleratorRefData;
 
-    HACCEL hAccel = ::LoadAccelerators(wxGetInstance(), resource.wx_str());
+    HACCEL hAccel = ::LoadAccelerators(wxGetInstance(), resource);
     M_ACCELDATA->m_hAccel = hAccel;
     M_ACCELDATA->m_ok = hAccel != 0;
 }
@@ -103,15 +105,19 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
     {
         int flags = entries[i].GetFlags();
 
-        BYTE fVirt = FVIRTKEY;
+        BYTE fVirt = 0;
         if ( flags & wxACCEL_ALT )
-            fVirt |= FALT;
+            fVirt |= FALT | FVIRTKEY;
         if ( flags & wxACCEL_SHIFT )
-            fVirt |= FSHIFT;
+            fVirt |= FSHIFT | FVIRTKEY;
         if ( flags & wxACCEL_CTRL )
-            fVirt |= FCONTROL;
+            fVirt |= FCONTROL | FVIRTKEY;
 
-        WORD key = wxCharCodeWXToMSW(entries[i].GetKeyCode());
+        bool isVirtual;
+
+        WORD key = wxCharCodeWXToMSW(entries[i].GetKeyCode(), &isVirtual);
+        if (isVirtual)
+            fVirt |= FVIRTKEY;
 
         arr[i].fVirt = fVirt;
         arr[i].key = key;

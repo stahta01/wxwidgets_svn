@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/imaggif.h
+// Name:        imaggif.h
 // Purpose:     wxImage GIF handler
 // Author:      Vaclav Slavik & Guillermo Rodriguez Garcia
 // RCS-ID:      $Id$
@@ -19,7 +19,7 @@
 
 #if wxUSE_GIF
 
-class WXDLLIMPEXP_CORE wxGIFHandler : public wxImageHandler
+class WXDLLEXPORT wxGIFHandler : public wxImageHandler
 {
 public:
     inline wxGIFHandler()
@@ -31,21 +31,18 @@ public:
     }
 
 #if wxUSE_STREAMS
-    virtual bool LoadFile(wxImage *image, wxInputStream& stream,
-                          bool verbose = true, int index = -1);
-    virtual bool SaveFile(wxImage *image, wxOutputStream& stream,
-                          bool verbose=true);
-
+    virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
+    virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
 protected:
-    virtual int DoGetImageCount(wxInputStream& stream);
-    virtual bool DoCanRead(wxInputStream& stream);
-#endif // wxUSE_STREAMS
+    virtual bool DoCanRead( wxInputStream& stream );
+#endif
 
 private:
     DECLARE_DYNAMIC_CLASS(wxGIFHandler)
 };
+#endif
 
-#endif // wxUSE_GIF
 
-#endif // _WX_IMAGGIF_H_
+#endif
+  // _WX_IMAGGIF_H_
 

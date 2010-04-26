@@ -18,7 +18,7 @@
 // Represents the printer: manages printing a wxPrintout object
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowsPrinter : public wxPrinterBase
+class WXDLLEXPORT wxWindowsPrinter : public wxPrinterBase
 {
     DECLARE_DYNAMIC_CLASS(wxWindowsPrinter)
 
@@ -36,7 +36,7 @@ public:
 private:
     WXFARPROC     m_lpAbortProc;
 
-    wxDECLARE_NO_COPY_CLASS(wxWindowsPrinter);
+    DECLARE_NO_COPY_CLASS(wxWindowsPrinter)
 };
 
 // ---------------------------------------------------------------------------
@@ -44,7 +44,7 @@ private:
 // wxPrintout.
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowsPrintPreview : public wxPrintPreviewBase
+class WXDLLEXPORT wxWindowsPrintPreview : public wxPrintPreviewBase
 {
 public:
     wxWindowsPrintPreview(wxPrintout *printout,
@@ -58,9 +58,7 @@ public:
     virtual bool Print(bool interactive);
     virtual void DetermineScaling();
 
-protected:
-    virtual bool RenderPageIntoBitmap(wxBitmap& bmp, int pageNum);
-
+private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxWindowsPrintPreview)
 };
 

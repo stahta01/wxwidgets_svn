@@ -22,9 +22,9 @@
 // ----------------------------------------------------------------------------
 
 // fwd declarations
-class WXDLLIMPEXP_FWD_CORE wxImageList;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxTabView;
+class WXDLLEXPORT wxImageList;
+class WXDLLEXPORT wxWindow;
+class WXDLLEXPORT wxTabView;
 
 // ----------------------------------------------------------------------------
 // wxNotebook
@@ -115,7 +115,7 @@ public:
   // ---------
   void OnSize(wxSizeEvent& event);
   void OnInternalIdle();
-  void OnSelChange(wxBookCtrlEvent& event);
+  void OnSelChange(wxNotebookEvent& event);
   void OnSetFocus(wxFocusEvent& event);
   void OnNavigationKey(wxNavigationKeyEvent& event);
 

@@ -152,7 +152,6 @@ private:
     void OnCustomizeToolbar(wxCommandEvent& evt);
     void OnAllowNotebookDnD(wxAuiNotebookEvent& evt);
     void OnNotebookPageClose(wxAuiNotebookEvent& evt);
-    void OnNotebookPageClosed(wxAuiNotebookEvent& evt);
     void OnExit(wxCommandEvent& evt);
     void OnAbout(wxCommandEvent& evt);
     void OnTabAlignment(wxCommandEvent &evt);
@@ -414,11 +413,11 @@ public:
         cont_sizer->Add(grid_sizer, 1, wxEXPAND | wxALL, 5);
         SetSizer(cont_sizer);
         GetSizer()->SetSizeHints(this);
-
+#if 0
         m_border_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE));
         m_sash_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_SASH_SIZE));
         m_caption_size->SetValue(frame->GetDockArt()->GetMetric(wxAUI_DOCKART_CAPTION_SIZE));
-
+#endif
         UpdateColors();
     }
 
@@ -560,9 +559,6 @@ END_EVENT_TABLE()
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxFrame* frame = new MyFrame(NULL,
                                  wxID_ANY,
                                  wxT("wxAUI Sample Application"),
@@ -650,7 +646,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_AUI_PANE_CLOSE(MyFrame::OnPaneClose)
     EVT_AUINOTEBOOK_ALLOW_DND(wxID_ANY, MyFrame::OnAllowNotebookDnD)
     EVT_AUINOTEBOOK_PAGE_CLOSE(wxID_ANY, MyFrame::OnNotebookPageClose)
-    EVT_AUINOTEBOOK_PAGE_CLOSED(wxID_ANY, MyFrame::OnNotebookPageClosed)
 END_EVENT_TABLE()
 
 
@@ -676,7 +671,7 @@ MyFrame::MyFrame(wxWindow* parent,
     wxMenuBar* mb = new wxMenuBar;
 
     wxMenu* file_menu = new wxMenu;
-    file_menu->Append(wxID_EXIT);
+    file_menu->Append(wxID_EXIT, _("Exit"));
 
     wxMenu* view_menu = new wxMenu;
     view_menu->Append(ID_CreateText, _("Create Text Control"));
@@ -739,14 +734,14 @@ MyFrame::MyFrame(wxWindow* parent,
     m_perspectives_menu->Append(ID_FirstPerspective+1, _("All Panes"));
 
     wxMenu* help_menu = new wxMenu;
-    help_menu->Append(wxID_ABOUT);
+    help_menu->Append(wxID_ABOUT, _("About..."));
 
-    mb->Append(file_menu, _("&File"));
-    mb->Append(view_menu, _("&View"));
-    mb->Append(m_perspectives_menu, _("&Perspectives"));
-    mb->Append(options_menu, _("&Options"));
-    mb->Append(notebook_menu, _("&Notebook"));
-    mb->Append(help_menu, _("&Help"));
+    mb->Append(file_menu, _("File"));
+    mb->Append(view_menu, _("View"));
+    mb->Append(m_perspectives_menu, _("Perspectives"));
+    mb->Append(options_menu, _("Options"));
+    mb->Append(notebook_menu, _("Notebook"));
+    mb->Append(help_menu, _("Help"));
 
     SetMenuBar(mb);
 
@@ -847,10 +842,6 @@ MyFrame::MyFrame(wxWindow* parent,
     tb4->AddTool(ID_SampleItem+29, wxT("Item 8"), tb4_bmp1);
     tb4->SetToolDropDown(ID_DropDownToolbarItem, true);
     tb4->SetCustomOverflowItems(prepend_items, append_items);
-    wxChoice* choice = new wxChoice(tb4, ID_SampleItem+35);
-    choice->AppendString(wxT("One choice"));
-    choice->AppendString(wxT("Another choice"));
-    tb4->AddControl(choice);
     tb4->Realize();
 
 
@@ -1331,19 +1322,6 @@ void MyFrame::OnNotebookPageClose(wxAuiNotebookEvent& evt)
     }
 }
 
-void MyFrame::OnNotebookPageClosed(wxAuiNotebookEvent& evt)
-{
-    wxAuiNotebook* ctrl = (wxAuiNotebook*)evt.GetEventObject();
-
-    // selection should always be a valid index
-    wxASSERT_MSG( ctrl->GetSelection() < (int)ctrl->GetPageCount(),
-                  wxString::Format("Invalid selection %d, only %d pages left",
-                                   ctrl->GetSelection(),
-                                   (int)ctrl->GetPageCount()) );
-
-    evt.Skip();
-}
-
 void MyFrame::OnAllowNotebookDnD(wxAuiNotebookEvent& evt)
 {
     // for the purpose of this test application, explicitly
@@ -1437,19 +1415,19 @@ void MyFrame::OnDropDownToolbarItem(wxAuiToolBarEvent& evt)
 
         wxBitmap bmp = wxArtProvider::GetBitmap(wxART_QUESTION, wxART_OTHER, wxSize(16,16));
 
-        wxMenuItem* m1 =  new wxMenuItem(&menuPopup, 10001, _("Drop Down Item 1"));
+        wxMenuItem* m1 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 1"));
         m1->SetBitmap(bmp);
         menuPopup.Append(m1);
 
-        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, 10002, _("Drop Down Item 2"));
+        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 2"));
         m2->SetBitmap(bmp);
         menuPopup.Append(m2);
 
-        wxMenuItem* m3 =  new wxMenuItem(&menuPopup, 10003, _("Drop Down Item 3"));
+        wxMenuItem* m3 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 3"));
         m3->SetBitmap(bmp);
         menuPopup.Append(m3);
 
-        wxMenuItem* m4 =  new wxMenuItem(&menuPopup, 10004, _("Drop Down Item 4"));
+        wxMenuItem* m4 =  new wxMenuItem(&menuPopup, 101, _("Drop Down Item 4"));
         m4->SetBitmap(bmp);
         menuPopup.Append(m4);
 
@@ -1470,7 +1448,7 @@ void MyFrame::OnDropDownToolbarItem(wxAuiToolBarEvent& evt)
 
 void MyFrame::OnTabAlignment(wxCommandEvent &evt)
 {
-    size_t i, count;
+   size_t i, count;
     wxAuiPaneInfoArray& all_panes = m_mgr.GetAllPanes();
     for (i = 0, count = all_panes.GetCount(); i < count; ++i)
     {
@@ -1479,14 +1457,10 @@ void MyFrame::OnTabAlignment(wxCommandEvent &evt)
         {
             wxAuiNotebook* nb = (wxAuiNotebook*)pane.window;
 
-            long style = nb->GetWindowStyleFlag();
-            style &= ~(wxAUI_NB_TOP | wxAUI_NB_BOTTOM);
             if (evt.GetId() == ID_NotebookAlignTop)
-                style |= wxAUI_NB_TOP;
-            else if (evt.GetId() == ID_NotebookAlignBottom)
-                style |= wxAUI_NB_BOTTOM;
-            nb->SetWindowStyleFlag(style);
-
+                nb->SetWindowStyleFlag(nb->GetWindowStyleFlag()^wxAUI_NB_BOTTOM|wxAUI_NB_TOP);
+           else if (evt.GetId() == ID_NotebookAlignBottom)
+               nb->SetWindowStyleFlag(nb->GetWindowStyleFlag()^wxAUI_NB_TOP|wxAUI_NB_BOTTOM);
             nb->Refresh();
         }
     }
@@ -1597,14 +1571,13 @@ wxAuiNotebook* MyFrame::CreateNotebook()
                                     wxPoint(client_size.x, client_size.y),
                                     wxSize(430,200),
                                     m_notebook_style);
-   ctrl->Freeze();
 
    wxBitmap page_bmp = wxArtProvider::GetBitmap(wxART_NORMAL_FILE, wxART_OTHER, wxSize(16,16));
 
    ctrl->AddPage(CreateHTMLCtrl(ctrl), wxT("Welcome to wxAUI") , false, page_bmp);
 
    wxPanel *panel = new wxPanel( ctrl, wxID_ANY );
-   wxFlexGridSizer *flex = new wxFlexGridSizer( 4, 2, 0, 0 );
+   wxFlexGridSizer *flex = new wxFlexGridSizer( 2 );
    flex->AddGrowableRow( 0 );
    flex->AddGrowableRow( 3 );
    flex->AddGrowableCol( 1 );
@@ -1644,7 +1617,6 @@ wxAuiNotebook* MyFrame::CreateNotebook()
    ctrl->AddPage( new wxTextCtrl( ctrl, wxID_ANY, wxT("Some more text"),
                 wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxNO_BORDER) , wxT("wxTextCtrl 8") );
 
-   ctrl->Thaw();
    return ctrl;
 }
 

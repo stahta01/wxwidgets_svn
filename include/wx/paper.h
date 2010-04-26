@@ -30,7 +30,7 @@
 #define WXADDPAPER(paperId, platformId, name, w, h) AddPaperType(paperId, 0, name, w, h)
 #endif
 
-class WXDLLIMPEXP_CORE wxPrintPaperType: public wxObject
+class WXDLLEXPORT wxPrintPaperType: public wxObject
 {
 public:
     wxPrintPaperType();
@@ -70,7 +70,7 @@ WX_DECLARE_STRING_HASH_MAP(wxPrintPaperType*, wxStringToPrintPaperTypeHashMap);
 
 class WXDLLIMPEXP_FWD_CORE wxPrintPaperTypeList;
 
-class WXDLLIMPEXP_CORE wxPrintPaperDatabase
+class WXDLLEXPORT wxPrintPaperDatabase
 {
 public:
     wxPrintPaperDatabase();
@@ -115,7 +115,7 @@ private:
     // DECLARE_DYNAMIC_CLASS(wxPrintPaperDatabase)
 };
 
-extern WXDLLIMPEXP_DATA_CORE(wxPrintPaperDatabase*) wxThePrintPaperDatabase;
+extern WXDLLEXPORT_DATA(wxPrintPaperDatabase*) wxThePrintPaperDatabase;
 
 
 #endif

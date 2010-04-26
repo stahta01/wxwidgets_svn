@@ -32,7 +32,6 @@
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/dcmemory.h"
-    #include "wx/dcclient.h"
     #include "wx/window.h"
 
     #include "wx/menu.h"
@@ -66,7 +65,7 @@
 #include "wx/univ/inphand.h"
 #include "wx/univ/colschem.h"
 
-class wxGTKMenuGeometryInfo;
+class WXDLLEXPORT wxGTKMenuGeometryInfo;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -85,7 +84,7 @@ public:
     wxGTKRenderer(const wxColourScheme *scheme);
 
     // wxRenderer methods
-    virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect, int flags = 0);
+    virtual void DrawFocusRect(wxDC& dc, const wxRect& rect, int flags = 0);
     virtual void DrawTextBorder(wxDC& dc,
                                 wxBorder border,
                                 const wxRect& rect,
@@ -328,7 +327,7 @@ protected:
                      wxCoord y1, wxCoord y2);
 
     // draw the radio button bitmap for the given state
-    void DrawRadioButtonBitmap(wxDC& dc, const wxRect& rect, int flags);
+    void DrawRadioBitmap(wxDC& dc, const wxRect& rect, int flags);
 
     // common part of DrawMenuItem() and DrawMenuBarItem()
     void DoDrawMenuItem(wxDC& dc,
@@ -716,7 +715,7 @@ wxColour wxGTKColourScheme::Get(wxGTKColourScheme::StdColour col) const
 
         case MAX:
         default:
-            wxFAIL_MSG(wxT("invalid standard colour"));
+            wxFAIL_MSG(_T("invalid standard colour"));
             return *wxBLACK;
     }
 }
@@ -772,7 +771,7 @@ void wxGTKRenderer::DrawAntiShadedRectSide(wxDC& dc,
             break;
 
         default:
-            wxFAIL_MSG(wxT("unknown rectangle side"));
+            wxFAIL_MSG(_T("unknown rectangle side"));
     }
 }
 
@@ -814,7 +813,7 @@ void wxGTKRenderer::DrawSunkenBorder(wxDC& dc, wxRect *rect)
 }
 
 void
-wxGTKRenderer::DrawFocusRect(wxWindow* WXUNUSED(win), wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
+wxGTKRenderer::DrawFocusRect(wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
 {
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
     wxRect rectFocus = rect;
@@ -925,7 +924,7 @@ void wxGTKRenderer::DrawFrameWithLabel(wxDC& dc,
 }
 
 // ----------------------------------------------------------------------------
-// check/radio buttons
+// check/radion buttons
 // ----------------------------------------------------------------------------
 
 void wxGTKRenderer::DrawCheckItemBitmap(wxDC& dc,
@@ -997,9 +996,9 @@ void wxGTKRenderer::DrawCheckBitmap(wxDC& dc, const wxRect& rectTotal)
     dc.DrawRectangle(rect);
 }
 
-void wxGTKRenderer::DrawRadioButtonBitmap(wxDC& dc,
-                                          const wxRect& rect,
-                                          int flags)
+void wxGTKRenderer::DrawRadioBitmap(wxDC& dc,
+                                    const wxRect& rect,
+                                    int flags)
 {
     wxCoord x = rect.x,
             y = rect.y,
@@ -1134,7 +1133,7 @@ wxBitmap wxGTKRenderer::GetRadioBitmap(int flags)
         bmp.Create(size.x, size.y);
         dc.SelectObject(bmp);
 
-        DrawRadioButtonBitmap(dc, size, flags);
+        DrawRadioBitmap(dc, size, flags);
     }
 
     return bmp;
@@ -1155,7 +1154,7 @@ wxBitmap wxGTKRenderer::GetLineWrapBitmap() const
         wxBitmap bmpLineWrap(line_wrap_bits, line_wrap_width, line_wrap_height);
         if ( !bmpLineWrap.Ok() )
         {
-            wxFAIL_MSG( wxT("Failed to create line wrap XBM") );
+            wxFAIL_MSG( _T("Failed to create line wrap XBM") );
         }
         else
         {
@@ -1303,7 +1302,7 @@ void wxGTKRenderer::DrawTab(wxDC& dc,
         switch ( dir )
         {
             default:
-                wxFAIL_MSG(wxT("invaild notebook tab orientation"));
+                wxFAIL_MSG(_T("invaild notebook tab orientation"));
                 // fall through
 
             case wxTOP:
@@ -1573,7 +1572,7 @@ void wxGTKRenderer::DrawSliderThumb(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 // wxGTKMenuGeometryInfo: the wxMenuGeometryInfo used by wxGTKRenderer
-class wxGTKMenuGeometryInfo : public wxMenuGeometryInfo
+class WXDLLEXPORT wxGTKMenuGeometryInfo : public wxMenuGeometryInfo
 {
 public:
     virtual wxSize GetSize() const { return m_size; }
@@ -1703,7 +1702,7 @@ void wxGTKRenderer::DoDrawMenuItem(wxDC& dc,
     if ( !accel.empty() )
     {
         // menubar items shouldn't have them
-        wxCHECK_RET( geometryInfo, wxT("accel strings only valid for menus") );
+        wxCHECK_RET( geometryInfo, _T("accel strings only valid for menus") );
 
         rect.x = geometryInfo->GetAccelOffset();
         rect.SetRight(geometryInfo->GetSize().x);
@@ -1715,7 +1714,7 @@ void wxGTKRenderer::DoDrawMenuItem(wxDC& dc,
     // draw the submenu indicator
     if ( flags & wxCONTROL_ISSUBMENU )
     {
-        wxCHECK_RET( geometryInfo, wxT("wxCONTROL_ISSUBMENU only valid for menus") );
+        wxCHECK_RET( geometryInfo, _T("wxCONTROL_ISSUBMENU only valid for menus") );
 
         rect.x = geometryInfo->GetSize().x - MENU_RIGHT_MARGIN;
         rect.width = MENU_RIGHT_MARGIN;
@@ -1782,7 +1781,7 @@ wxMenuGeometryInfo *wxGTKRenderer::GetMenuGeometry(wxWindow *win,
             h = heightText;
 
             wxCoord widthLabel;
-            dc.GetTextExtent(item->GetItemLabelText(), &widthLabel, NULL);
+            dc.GetTextExtent(item->GetLabel(), &widthLabel, NULL);
             if ( widthLabel > widthLabelMax )
             {
                 widthLabelMax = widthLabel;
@@ -1950,7 +1949,7 @@ void wxGTKRenderer::DrawArrowBorder(wxDC& dc,
             break;
 
         default:
-            wxFAIL_MSG(wxT("unknown arrow direction"));
+            wxFAIL_MSG(_T("unknown arrow direction"));
             return;
     }
 
@@ -2085,7 +2084,7 @@ void wxGTKRenderer::DrawArrow(wxDC& dc,
             break;
 
         default:
-            wxFAIL_MSG(wxT("unknown arrow direction"));
+            wxFAIL_MSG(_T("unknown arrow direction"));
     }
 
     dc.DrawPolygon(WXSIZEOF(ptArrow), ptArrow);
@@ -2162,7 +2161,7 @@ void wxGTKRenderer::DrawArrow(wxDC& dc,
             break;
 
         default:
-            wxFAIL_MSG(wxT("unknown arrow direction"));
+            wxFAIL_MSG(_T("unknown arrow direction"));
             return;
     }
 }

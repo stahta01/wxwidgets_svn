@@ -26,7 +26,6 @@
     #include "wx/module.h"
     #include "wx/palette.h"
     #include "wx/intl.h"
-    #include "wx/colour.h"
 #endif
 
 #include "wx/filefn.h"
@@ -54,14 +53,7 @@ IMPLEMENT_VARIANT_OBJECT_EXPORTED_SHALLOWCMP(wxImage,WXDLLEXPORT)
 #endif
 
 //-----------------------------------------------------------------------------
-// global data
-//-----------------------------------------------------------------------------
-
-wxList wxImage::sm_handlers;
-wxImage wxNullImage;
-
-//-----------------------------------------------------------------------------
-// wxImageRefData
+// wxImage
 //-----------------------------------------------------------------------------
 
 class wxImageRefData: public wxObjectRefData
@@ -72,7 +64,6 @@ public:
 
     int             m_width;
     int             m_height;
-    wxBitmapType    m_type;
     unsigned char  *m_data;
 
     bool            m_hasMask;
@@ -96,14 +87,13 @@ public:
     wxArrayString   m_optionNames;
     wxArrayString   m_optionValues;
 
-    wxDECLARE_NO_COPY_CLASS(wxImageRefData);
+    DECLARE_NO_COPY_CLASS(wxImageRefData)
 };
 
 wxImageRefData::wxImageRefData()
 {
     m_width = 0;
     m_height = 0;
-    m_type = wxBITMAP_TYPE_INVALID;
     m_data =
     m_alpha = (unsigned char *) NULL;
 
@@ -125,14 +115,57 @@ wxImageRefData::~wxImageRefData()
         free( m_alpha );
 }
 
+wxList wxImage::sm_handlers;
+
+wxImage wxNullImage;
 
 //-----------------------------------------------------------------------------
-// wxImage
-//-----------------------------------------------------------------------------
 
-#define M_IMGDATA static_cast<wxImageRefData*>(m_refData)
+#define M_IMGDATA wx_static_cast(wxImageRefData*, m_refData)
 
 IMPLEMENT_DYNAMIC_CLASS(wxImage, wxObject)
+
+wxImage::wxImage( int width, int height, bool clear )
+{
+    Create( width, height, clear );
+}
+
+wxImage::wxImage( int width, int height, unsigned char* data, bool static_data )
+{
+    Create( width, height, data, static_data );
+}
+
+wxImage::wxImage( int width, int height, unsigned char* data, unsigned char* alpha, bool static_data )
+{
+    Create( width, height, data, alpha, static_data );
+}
+
+wxImage::wxImage( const wxString& name, long type, int index )
+{
+    LoadFile( name, type, index );
+}
+
+wxImage::wxImage( const wxString& name, const wxString& mimetype, int index )
+{
+    LoadFile( name, mimetype, index );
+}
+
+#if wxUSE_STREAMS
+wxImage::wxImage( wxInputStream& stream, long type, int index )
+{
+    LoadFile( stream, type, index );
+}
+
+wxImage::wxImage( wxInputStream& stream, const wxString& mimetype, int index )
+{
+    LoadFile( stream, mimetype, index );
+}
+#endif // wxUSE_STREAMS
+
+wxImage::wxImage(const char* const* xpmData)
+{
+    Create(xpmData);
+}
 
 bool wxImage::Create(const char* const* xpmData)
 {
@@ -160,14 +193,12 @@ bool wxImage::Create( int width, int height, bool clear )
         return false;
     }
 
+    if (clear)
+        memset(M_IMGDATA->m_data, 0, width*height*3);
+
     M_IMGDATA->m_width = width;
     M_IMGDATA->m_height = height;
     M_IMGDATA->m_ok = true;
-
-    if (clear)
-    {
-        Clear();
-    }
 
     return true;
 }
@@ -176,7 +207,7 @@ bool wxImage::Create( int width, int height, unsigned char* data, bool static_da
 {
     UnRef();
 
-    wxCHECK_MSG( data, false, wxT("NULL data in wxImage::Create") );
+    wxCHECK_MSG( data, false, _T("NULL data in wxImage::Create") );
 
     m_refData = new wxImageRefData();
 
@@ -193,7 +224,7 @@ bool wxImage::Create( int width, int height, unsigned char* data, unsigned char*
 {
     UnRef();
 
-    wxCHECK_MSG( data, false, wxT("NULL data in wxImage::Create") );
+    wxCHECK_MSG( data, false, _T("NULL data in wxImage::Create") );
 
     m_refData = new wxImageRefData();
 
@@ -213,11 +244,6 @@ void wxImage::Destroy()
     UnRef();
 }
 
-void wxImage::Clear(unsigned char value)
-{
-    memset(M_IMGDATA->m_data, value, M_IMGDATA->m_width*M_IMGDATA->m_height*3);
-}
-
 wxObjectRefData* wxImage::CreateRefData() const
 {
     return new wxImageRefData;
@@ -225,7 +251,7 @@ wxObjectRefData* wxImage::CreateRefData() const
 
 wxObjectRefData* wxImage::CloneRefData(const wxObjectRefData* that) const
 {
-    const wxImageRefData* refData = static_cast<const wxImageRefData*>(that);
+    const wxImageRefData* refData = wx_static_cast(const wxImageRefData*, that);
     wxCHECK_MSG(refData->m_ok, NULL, wxT("invalid image") );
 
     wxImageRefData* refData_new = new wxImageRefData;
@@ -385,8 +411,7 @@ wxImage wxImage::ShrinkBy( int xFactor , int yFactor ) const
     return image;
 }
 
-wxImage
-wxImage::Scale( int width, int height, wxImageResizeQuality quality ) const
+wxImage wxImage::Scale( int width, int height, int quality ) const
 {
     wxImage image;
 
@@ -406,32 +431,78 @@ wxImage::Scale( int width, int height, wxImageResizeQuality quality ) const
     if ( old_width == width && old_height == height )
         return *this;
 
-    // resample the image using either the nearest neighbourhood, bilinear or
-    // bicubic method as specified
-    switch ( quality )
+    // Scale the image (...or more appropriately, resample the image) using
+    // either the high-quality or normal method as specified
+    if ( quality == wxIMAGE_QUALITY_HIGH )
     {
-        case wxIMAGE_QUALITY_BICUBIC:
-        case wxIMAGE_QUALITY_BILINEAR:
-            // both of these algorithms should be used for up-sampling the
-            // image only, when down-sampling always use box averaging for best
-            // results
-            if ( width < old_width && height < old_height )
-                image = ResampleBox(width, height);
-            else if ( quality == wxIMAGE_QUALITY_BILINEAR )
-                image = ResampleBilinear(width, height);
-            else if ( quality == wxIMAGE_QUALITY_BICUBIC )
-                image = ResampleBicubic(width, height);
-            break;
+        // We need to check whether we are downsampling or upsampling the image
+        if ( width < old_width && height < old_height )
+        {
+            // Downsample the image using the box averaging method for best results
+            image = ResampleBox(width, height);
+        }
+        else
+        {
+            // For upsampling or other random/wierd image dimensions we'll use
+            // a bicubic b-spline scaling method
+            image = ResampleBicubic(width, height);
+        }
+    }
+    else    // Default scaling method == simple pixel replication
+    {
+        if ( old_width % width == 0 && old_width >= width &&
+            old_height % height == 0 && old_height >= height )
+        {
+            return ShrinkBy( old_width / width , old_height / height ) ;
+        }
+        image.Create( width, height, false );
 
-        case wxIMAGE_QUALITY_NEAREST:
-            if ( old_width % width == 0 && old_width >= width &&
-                old_height % height == 0 && old_height >= height )
+        unsigned char *data = image.GetData();
+
+        wxCHECK_MSG( data, image, wxT("unable to create image") );
+
+        unsigned char *source_data = M_IMGDATA->m_data;
+        unsigned char *target_data = data;
+        unsigned char *source_alpha = 0 ;
+        unsigned char *target_alpha = 0 ;
+
+        if ( !M_IMGDATA->m_hasMask )
+        {
+            source_alpha = M_IMGDATA->m_alpha ;
+            if ( source_alpha )
             {
-                return ShrinkBy( old_width / width , old_height / height );
+                image.SetAlpha() ;
+                target_alpha = image.GetAlpha() ;
+            }
+        }
+
+        long x_delta = (old_width<<16) / width;
+        long y_delta = (old_height<<16) / height;
+
+        unsigned char* dest_pixel = target_data;
+
+        long y = 0;
+        for ( long j = 0; j < height; j++ )
+        {
+            unsigned char* src_line = &source_data[(y>>16)*old_width*3];
+            unsigned char* src_alpha_line = source_alpha ? &source_alpha[(y>>16)*old_width] : 0 ;
+
+            long x = 0;
+            for ( long i = 0; i < width; i++ )
+            {
+                unsigned char* src_pixel = &src_line[(x>>16)*3];
+                unsigned char* src_alpha_pixel = source_alpha ? &src_alpha_line[(x>>16)] : 0 ;
+                dest_pixel[0] = src_pixel[0];
+                dest_pixel[1] = src_pixel[1];
+                dest_pixel[2] = src_pixel[2];
+                dest_pixel += 3;
+                if ( source_alpha )
+                    *(target_alpha++) = *src_alpha_pixel ;
+                x += x_delta;
             }
 
-            image = ResampleNearest(width, height);
-            break;
+            y += y_delta;
+        }
     }
 
     // If the original image has a mask, apply the mask to the new image
@@ -449,63 +520,6 @@ wxImage::Scale( int width, int height, wxImageResizeQuality quality ) const
     if ( HasOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y) )
         image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y,
                 (GetOptionInt(wxIMAGE_OPTION_CUR_HOTSPOT_Y)*height)/old_height);
-
-    return image;
-}
-
-wxImage wxImage::ResampleNearest(int width, int height) const
-{
-    wxImage image;
-    image.Create( width, height, false );
-
-    unsigned char *data = image.GetData();
-
-    wxCHECK_MSG( data, image, wxT("unable to create image") );
-
-    unsigned char *source_data = M_IMGDATA->m_data;
-    unsigned char *target_data = data;
-    unsigned char *source_alpha = 0 ;
-    unsigned char *target_alpha = 0 ;
-
-    if ( !M_IMGDATA->m_hasMask )
-    {
-        source_alpha = M_IMGDATA->m_alpha ;
-        if ( source_alpha )
-        {
-            image.SetAlpha() ;
-            target_alpha = image.GetAlpha() ;
-        }
-    }
-
-    long old_height = M_IMGDATA->m_height,
-         old_width  = M_IMGDATA->m_width;
-    long x_delta = (old_width<<16) / width;
-    long y_delta = (old_height<<16) / height;
-
-    unsigned char* dest_pixel = target_data;
-
-    long y = 0;
-    for ( long j = 0; j < height; j++ )
-    {
-        unsigned char* src_line = &source_data[(y>>16)*old_width*3];
-        unsigned char* src_alpha_line = source_alpha ? &source_alpha[(y>>16)*old_width] : 0 ;
-
-        long x = 0;
-        for ( long i = 0; i < width; i++ )
-        {
-            unsigned char* src_pixel = &src_line[(x>>16)*3];
-            unsigned char* src_alpha_pixel = source_alpha ? &src_alpha_line[(x>>16)] : 0 ;
-            dest_pixel[0] = src_pixel[0];
-            dest_pixel[1] = src_pixel[1];
-            dest_pixel[2] = src_pixel[2];
-            dest_pixel += 3;
-            if ( source_alpha )
-                *(target_alpha++) = *src_alpha_pixel ;
-            x += x_delta;
-        }
-
-        y += y_delta;
-    }
 
     return image;
 }
@@ -589,92 +603,6 @@ wxImage wxImage::ResampleBox(int width, int height) const
             dst_data += 3;
             if ( src_alpha )
                 *dst_alpha++ = (unsigned char)(sum_a / averaged_pixels);
-        }
-    }
-
-    return ret_image;
-}
-
-wxImage wxImage::ResampleBilinear(int width, int height) const
-{
-    // This function implements a Bilinear algorithm for resampling.
-    wxImage ret_image(width, height, false);
-    unsigned char* src_data = M_IMGDATA->m_data;
-    unsigned char* src_alpha = M_IMGDATA->m_alpha;
-    unsigned char* dst_data = ret_image.GetData();
-    unsigned char* dst_alpha = NULL;
-
-    if ( src_alpha )
-    {
-        ret_image.SetAlpha();
-        dst_alpha = ret_image.GetAlpha();
-    }
-    double HFactor = double(M_IMGDATA->m_height) / height;
-    double WFactor = double(M_IMGDATA->m_width) / width;
-
-    int srcpixymax = M_IMGDATA->m_height - 1;
-    int srcpixxmax = M_IMGDATA->m_width - 1;
-
-    double srcpixy, srcpixy1, srcpixy2, dy, dy1;
-    double srcpixx, srcpixx1, srcpixx2, dx, dx1;
-
-    // initialize alpha values to avoid g++ warnings about possibly
-    // uninitialized variables
-    double r1, g1, b1, a1 = 0;
-    double r2, g2, b2, a2 = 0;
-
-    for ( int dsty = 0; dsty < height; dsty++ )
-    {
-        // We need to calculate the source pixel to interpolate from - Y-axis
-        srcpixy = double(dsty) * HFactor;
-        srcpixy1 = int(srcpixy);
-        srcpixy2 = ( srcpixy1 == srcpixymax ) ? srcpixy1 : srcpixy1 + 1.0;
-        dy = srcpixy - (int)srcpixy;
-        dy1 = 1.0 - dy;
-
-
-        for ( int dstx = 0; dstx < width; dstx++ )
-        {
-            // X-axis of pixel to interpolate from
-            srcpixx = double(dstx) * WFactor;
-            srcpixx1 = int(srcpixx);
-            srcpixx2 = ( srcpixx1 == srcpixxmax ) ? srcpixx1 : srcpixx1 + 1.0;
-            dx = srcpixx - (int)srcpixx;
-            dx1 = 1.0 - dx;
-
-            int x_offset1 = srcpixx1 < 0.0 ? 0 : srcpixx1 > srcpixxmax ? srcpixxmax : (int)srcpixx1;
-            int x_offset2 = srcpixx2 < 0.0 ? 0 : srcpixx2 > srcpixxmax ? srcpixxmax : (int)srcpixx2;
-            int y_offset1 = srcpixy1 < 0.0 ? 0 : srcpixy1 > srcpixymax ? srcpixymax : (int)srcpixy1;
-            int y_offset2 = srcpixy2 < 0.0 ? 0 : srcpixy2 > srcpixymax ? srcpixymax : (int)srcpixy2;
-
-            int src_pixel_index00 = y_offset1 * M_IMGDATA->m_width + x_offset1;
-            int src_pixel_index01 = y_offset1 * M_IMGDATA->m_width + x_offset2;
-            int src_pixel_index10 = y_offset2 * M_IMGDATA->m_width + x_offset1;
-            int src_pixel_index11 = y_offset2 * M_IMGDATA->m_width + x_offset2;
-
-            //first line
-            r1 = src_data[src_pixel_index00 * 3 + 0] * dx1 + src_data[src_pixel_index01 * 3 + 0] * dx;
-            g1 = src_data[src_pixel_index00 * 3 + 1] * dx1 + src_data[src_pixel_index01 * 3 + 1] * dx;
-            b1 = src_data[src_pixel_index00 * 3 + 2] * dx1 + src_data[src_pixel_index01 * 3 + 2] * dx;
-            if ( src_alpha )
-                a1 = src_alpha[src_pixel_index00] * dx1 + src_alpha[src_pixel_index01] * dx;
-
-            //second line
-            r2 = src_data[src_pixel_index10 * 3 + 0] * dx1 + src_data[src_pixel_index11 * 3 + 0] * dx;
-            g2 = src_data[src_pixel_index10 * 3 + 1] * dx1 + src_data[src_pixel_index11 * 3 + 1] * dx;
-            b2 = src_data[src_pixel_index10 * 3 + 2] * dx1 + src_data[src_pixel_index11 * 3 + 2] * dx;
-            if ( src_alpha )
-                a2 = src_alpha[src_pixel_index10] * dx1 + src_alpha[src_pixel_index11] * dx;
-
-            //result lines
-
-            dst_data[0] = static_cast<unsigned char>(r1 * dy1 + r2 * dy);
-            dst_data[1] = static_cast<unsigned char>(g1 * dy1 + g2 * dy);
-            dst_data[2] = static_cast<unsigned char>(b1 * dy1 + b2 * dy);
-            dst_data += 3;
-
-            if ( src_alpha )
-                *dst_alpha++ = static_cast<unsigned char>(a1 * dy1 + a2 * dy);
         }
     }
 
@@ -811,7 +739,7 @@ wxImage wxImage::ResampleBicubic(int width, int height) const
 }
 
 // Blur in the horizontal direction
-wxImage wxImage::BlurHorizontal(int blurRadius) const
+wxImage wxImage::BlurHorizontal(int blurRadius)
 {
     wxImage ret_image;
     ret_image.Create(M_IMGDATA->m_width, M_IMGDATA->m_height, false);
@@ -822,16 +750,19 @@ wxImage wxImage::BlurHorizontal(int blurRadius) const
     unsigned char* dst_alpha = NULL;
 
     // Check for a mask or alpha
-    if ( src_alpha )
-    {
-        ret_image.SetAlpha();
-        dst_alpha = ret_image.GetAlpha();
-    }
-    else if ( M_IMGDATA->m_hasMask )
+    if ( M_IMGDATA->m_hasMask )
     {
         ret_image.SetMaskColour(M_IMGDATA->m_maskRed,
                                 M_IMGDATA->m_maskGreen,
                                 M_IMGDATA->m_maskBlue);
+    }
+    else
+    {
+        if ( src_alpha )
+        {
+            ret_image.SetAlpha();
+            dst_alpha = ret_image.GetAlpha();
+        }
     }
 
     // number of pixels we average over
@@ -926,7 +857,7 @@ wxImage wxImage::BlurHorizontal(int blurRadius) const
 }
 
 // Blur in the vertical direction
-wxImage wxImage::BlurVertical(int blurRadius) const
+wxImage wxImage::BlurVertical(int blurRadius)
 {
     wxImage ret_image;
     ret_image.Create(M_IMGDATA->m_width, M_IMGDATA->m_height, false);
@@ -937,16 +868,19 @@ wxImage wxImage::BlurVertical(int blurRadius) const
     unsigned char* dst_alpha = NULL;
 
     // Check for a mask or alpha
-    if ( src_alpha )
-    {
-        ret_image.SetAlpha();
-        dst_alpha = ret_image.GetAlpha();
-    }
-    else if ( M_IMGDATA->m_hasMask )
+    if ( M_IMGDATA->m_hasMask )
     {
         ret_image.SetMaskColour(M_IMGDATA->m_maskRed,
                                 M_IMGDATA->m_maskGreen,
                                 M_IMGDATA->m_maskBlue);
+    }
+    else
+    {
+        if ( src_alpha )
+        {
+            ret_image.SetAlpha();
+            dst_alpha = ret_image.GetAlpha();
+        }
     }
 
     // number of pixels we average over
@@ -1041,7 +975,7 @@ wxImage wxImage::BlurVertical(int blurRadius) const
 }
 
 // The new blur function
-wxImage wxImage::Blur(int blurRadius) const
+wxImage wxImage::Blur(int blurRadius)
 {
     wxImage ret_image;
     ret_image.Create(M_IMGDATA->m_width, M_IMGDATA->m_height, false);
@@ -1283,30 +1217,21 @@ wxImage wxImage::Size( const wxSize& size, const wxPoint& pos,
 
     image.SetRGB(wxRect(), r, g, b);
 
-    // we have two coordinate systems:
-    // source:     starting at 0,0 of source image
-    // destination starting at 0,0 of destination image
-    // Documentation says:
-    // "The image is pasted into a new image [...] at the position pos relative
-    // to the upper left of the new image." this means the transition rule is:
-    // "dest coord" = "source coord" + pos;
+    wxRect subRect(pos.x, pos.y, width, height);
+    wxRect finalRect(0, 0, size.GetWidth(), size.GetHeight());
+    if (pos.x < 0)
+        finalRect.width -= pos.x;
+    if (pos.y < 0)
+        finalRect.height -= pos.y;
 
-    // calculate the intersection using source coordinates:
-    wxRect srcRect(0, 0, width, height);
-    wxRect dstRect(-pos, size);
+    subRect.Intersect(finalRect);
 
-    srcRect.Intersect(dstRect);
-
-    if (!srcRect.IsEmpty())
+    if (!subRect.IsEmpty())
     {
-        // insertion point is needed in destination coordinates.
-        // NB: it is not always "pos"!
-        wxPoint ptInsert = srcRect.GetTopLeft() + pos;
-
-        if ((srcRect.GetWidth() == width) && (srcRect.GetHeight() == height))
-            image.Paste(*this, ptInsert.x, ptInsert.y);
+        if ((subRect.GetWidth() == width) && (subRect.GetHeight() == height))
+            image.Paste(*this, pos.x, pos.y);
         else
-            image.Paste(GetSubImage(srcRect), ptInsert.x, ptInsert.y);
+            image.Paste(GetSubImage(subRect), pos.x, pos.y);
     }
 
     return image;
@@ -1437,12 +1362,7 @@ void wxImage::Replace( unsigned char r1, unsigned char g1, unsigned char b1,
         }
 }
 
-wxImage wxImage::ConvertToGreyscale(void) const
-{
-    return ConvertToGreyscale(0.299, 0.587, 0.114);
-}
-
-wxImage wxImage::ConvertToGreyscale(double weight_r, double weight_g, double weight_b) const
+wxImage wxImage::ConvertToGreyscale( double lr, double lg, double lb ) const
 {
     wxImage image;
 
@@ -1466,14 +1386,16 @@ wxImage wxImage::ConvertToGreyscale(double weight_r, double weight_g, double wei
     const long size = M_IMGDATA->m_width * M_IMGDATA->m_height;
     for ( long i = 0; i < size; i++, src += 3, dest += 3 )
     {
-        memcpy(dest, src, 3);
         // don't modify the mask
         if ( hasMask && src[0] == maskRed && src[1] == maskGreen && src[2] == maskBlue )
         {
+            memcpy(dest, src, 3);
         }
         else
         {
-            wxColour::MakeGrey(dest + 0, dest + 1, dest + 2, weight_r, weight_g, weight_b);
+            // calculate the luma
+            double luma = (src[0] * lr + src[1] * lg + src[2] * lb) + 0.5;
+            dest[0] = dest[1] = dest[2] = wx_static_cast(unsigned char, luma);
         }
     }
 
@@ -1518,40 +1440,12 @@ wxImage wxImage::ConvertToMono( unsigned char r, unsigned char g, unsigned char 
 
     for ( long i = 0; i < size; i++, srcd += 3, tard += 3 )
     {
-        bool on = (srcd[0] == r) && (srcd[1] == g) && (srcd[2] == b);
-        wxColourBase::MakeMono(tard + 0, tard + 1, tard + 2, on);
+        if (srcd[0] == r && srcd[1] == g && srcd[2] == b)
+            tard[0] = tard[1] = tard[2] = 255;
+        else
+            tard[0] = tard[1] = tard[2] = 0;
     }
 
-    return image;
-}
-
-wxImage wxImage::ConvertToDisabled(unsigned char brightness) const
-{
-    wxImage image = *this;
-
-    unsigned char mr = image.GetMaskRed();
-    unsigned char mg = image.GetMaskGreen();
-    unsigned char mb = image.GetMaskBlue();
-
-    int width = image.GetWidth();
-    int height = image.GetHeight();
-    bool has_mask = image.HasMask();
-
-    for (int y = height-1; y >= 0; --y)
-    {
-        for (int x = width-1; x >= 0; --x)
-        {
-            unsigned char* data = image.GetData() + (y*(width*3))+(x*3);
-            unsigned char* r = data;
-            unsigned char* g = data+1;
-            unsigned char* b = data+2;
-
-            if (has_mask && (*r == mr) && (*g == mg) && (*b == mb))
-                continue;
-
-            wxColour::MakeDisabled(r, g, b, brightness);
-        }
-    }
     return image;
 }
 
@@ -1567,23 +1461,6 @@ int wxImage::GetHeight() const
     wxCHECK_MSG( Ok(), 0, wxT("invalid image") );
 
     return M_IMGDATA->m_height;
-}
-
-wxBitmapType wxImage::GetType() const
-{
-    wxCHECK_MSG( IsOk(), wxBITMAP_TYPE_INVALID, wxT("invalid image") );
-
-    return M_IMGDATA->m_type;
-}
-
-void wxImage::SetType(wxBitmapType type)
-{
-    wxCHECK_RET( IsOk(), "must create the image before setting its type");
-
-    // type can be wxBITMAP_TYPE_INVALID to reset the image type to default
-    wxASSERT_MSG( type != wxBITMAP_TYPE_MAX, "invalid bitmap type" );
-
-    M_IMGDATA->m_type = type;
 }
 
 long wxImage::XYToIndex(int x, int y) const
@@ -1857,17 +1734,6 @@ void wxImage::InitAlpha()
     }
 }
 
-void wxImage::ClearAlpha()
-{
-    wxCHECK_RET( HasAlpha(), wxT("image already doesn't have an alpha channel") );
-
-    if ( !M_IMGDATA->m_staticAlpha )
-        free( M_IMGDATA->m_alpha );
-
-    M_IMGDATA->m_alpha = NULL;
-}
-
-
 // ----------------------------------------------------------------------------
 // mask support
 // ----------------------------------------------------------------------------
@@ -2019,27 +1885,15 @@ bool wxImage::SetMaskFromImage(const wxImage& mask,
 
 bool wxImage::ConvertAlphaToMask(unsigned char threshold)
 {
-    if ( !HasAlpha() )
+    if (!HasAlpha())
         return true;
 
     unsigned char mr, mg, mb;
-    if ( !FindFirstUnusedColour(&mr, &mg, &mb) )
+    if (!FindFirstUnusedColour(&mr, &mg, &mb))
     {
         wxLogError( _("No unused colour in image being masked.") );
         return false;
     }
-
-    ConvertAlphaToMask(mr, mg, mb, threshold);
-    return true;
-}
-
-void wxImage::ConvertAlphaToMask(unsigned char mr,
-                                 unsigned char mg,
-                                 unsigned char mb,
-                                 unsigned char threshold)
-{
-    if ( !HasAlpha() )
-        return;
 
     AllocExclusive();
 
@@ -2065,11 +1919,13 @@ void wxImage::ConvertAlphaToMask(unsigned char mr,
         }
     }
 
-    if ( !M_IMGDATA->m_staticAlpha )
+    if( !M_IMGDATA->m_staticAlpha )
         free(M_IMGDATA->m_alpha);
 
     M_IMGDATA->m_alpha = NULL;
     M_IMGDATA->m_staticAlpha = false;
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -2110,10 +1966,12 @@ void wxImage::SetPalette(const wxPalette& palette)
 
 void wxImage::SetOption(const wxString& name, const wxString& value)
 {
+    wxCHECK_RET( Ok(), wxT("invalid image") );
+
     AllocExclusive();
 
     int idx = M_IMGDATA->m_optionNames.Index(name, false);
-    if ( idx == wxNOT_FOUND )
+    if (idx == wxNOT_FOUND)
     {
         M_IMGDATA->m_optionNames.Add(name);
         M_IMGDATA->m_optionValues.Add(value);
@@ -2134,11 +1992,10 @@ void wxImage::SetOption(const wxString& name, int value)
 
 wxString wxImage::GetOption(const wxString& name) const
 {
-    if ( !M_IMGDATA )
-        return wxEmptyString;
+    wxCHECK_MSG( Ok(), wxEmptyString, wxT("invalid image") );
 
     int idx = M_IMGDATA->m_optionNames.Index(name, false);
-    if ( idx == wxNOT_FOUND )
+    if (idx == wxNOT_FOUND)
         return wxEmptyString;
     else
         return M_IMGDATA->m_optionValues[idx];
@@ -2151,8 +2008,9 @@ int wxImage::GetOptionInt(const wxString& name) const
 
 bool wxImage::HasOption(const wxString& name) const
 {
-    return M_IMGDATA ? M_IMGDATA->m_optionNames.Index(name, false) != wxNOT_FOUND
-                     : false;
+    wxCHECK_MSG( Ok(), false, wxT("invalid image") );
+
+    return (M_IMGDATA->m_optionNames.Index(name, false) != wxNOT_FOUND);
 }
 
 // ----------------------------------------------------------------------------
@@ -2160,7 +2018,7 @@ bool wxImage::HasOption(const wxString& name) const
 // ----------------------------------------------------------------------------
 
 bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
-                        wxBitmapType WXUNUSED_UNLESS_STREAMS(type),
+                        long WXUNUSED_UNLESS_STREAMS(type),
                         int WXUNUSED_UNLESS_STREAMS(index) )
 {
 #if HAS_FILE_STREAMS
@@ -2204,23 +2062,24 @@ bool wxImage::LoadFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
 }
 
 
+
 bool wxImage::SaveFile( const wxString& filename ) const
 {
     wxString ext = filename.AfterLast('.').Lower();
 
-    wxImageHandler *handler = FindHandler(ext, wxBITMAP_TYPE_ANY);
-    if ( !handler)
+    wxImageHandler * pHandler = FindHandler(ext, -1);
+    if (pHandler)
     {
-       wxLogError(_("Can't save image to file '%s': unknown extension."),
-                  filename);
-       return false;
+        return SaveFile(filename, pHandler->GetType());
     }
 
-    return SaveFile(filename, handler->GetType());
+    wxLogError(_("Can't save image to file '%s': unknown extension."), filename.c_str());
+
+    return false;
 }
 
 bool wxImage::SaveFile( const wxString& WXUNUSED_UNLESS_STREAMS(filename),
-                        wxBitmapType WXUNUSED_UNLESS_STREAMS(type) ) const
+                        int WXUNUSED_UNLESS_STREAMS(type) ) const
 {
 #if HAS_FILE_STREAMS
     wxCHECK_MSG( Ok(), false, wxT("invalid image") );
@@ -2270,7 +2129,7 @@ bool wxImage::CanRead( const wxString& WXUNUSED_UNLESS_STREAMS(name) )
 }
 
 int wxImage::GetImageCount( const wxString& WXUNUSED_UNLESS_STREAMS(name),
-                            wxBitmapType WXUNUSED_UNLESS_STREAMS(type) )
+                            long WXUNUSED_UNLESS_STREAMS(type) )
 {
 #if HAS_FILE_STREAMS
     wxImageFileInputStream stream(name);
@@ -2297,25 +2156,19 @@ bool wxImage::CanRead( wxInputStream &stream )
     return false;
 }
 
-int wxImage::GetImageCount( wxInputStream &stream, wxBitmapType type )
+int wxImage::GetImageCount( wxInputStream &stream, long type )
 {
     wxImageHandler *handler;
 
     if ( type == wxBITMAP_TYPE_ANY )
     {
-        const wxList& list = GetHandlers();
+        wxList &list=GetHandlers();
 
-        for ( wxList::compatibility_iterator node = list.GetFirst();
-              node;
-              node = node->GetNext() )
+        for (wxList::compatibility_iterator node = list.GetFirst(); node; node = node->GetNext())
         {
-             handler = (wxImageHandler*)node->GetData();
+             handler=(wxImageHandler*)node->GetData();
              if ( handler->CanRead(stream) )
-             {
-                 const int count = handler->GetImageCount(stream);
-                 if ( count >= 0 )
-                     return count;
-             }
+                 return handler->GetImageCount(stream);
 
         }
 
@@ -2342,80 +2195,46 @@ int wxImage::GetImageCount( wxInputStream &stream, wxBitmapType type )
     }
 }
 
-bool wxImage::DoLoad(wxImageHandler& handler, wxInputStream& stream, int index)
+bool wxImage::LoadFile( wxInputStream& stream, long type, int index )
 {
-    // save the options values which can be clobbered by the handler (e.g. many
-    // of them call Destroy() before trying to load the file)
-    const unsigned maxWidth = GetOptionInt(wxIMAGE_OPTION_MAX_WIDTH),
-                   maxHeight = GetOptionInt(wxIMAGE_OPTION_MAX_HEIGHT);
+    UnRef();
 
-    if ( !handler.LoadFile(this, stream, true/*verbose*/, index) )
-        return false;
-
-    // rescale the image to the specified size if needed
-    if ( maxWidth || maxHeight )
-    {
-        const unsigned widthOrig = GetWidth(),
-                       heightOrig = GetHeight();
-
-        // this uses the same (trivial) algorithm as the JPEG handler
-        unsigned width = widthOrig,
-                 height = heightOrig;
-        while ( (maxWidth && width > maxWidth) ||
-                    (maxHeight && height > maxHeight) )
-        {
-            width /= 2;
-            height /= 2;
-        }
-
-        if ( width != widthOrig || height != heightOrig )
-            Rescale(width, height, wxIMAGE_QUALITY_HIGH);
-    }
-
-    // Set this after Rescale, which currently does not preserve it
-    M_IMGDATA->m_type = handler.GetType();
-
-    return true;
-}
-
-bool wxImage::LoadFile( wxInputStream& stream, wxBitmapType type, int index )
-{
-    AllocExclusive();
+    m_refData = new wxImageRefData;
 
     wxImageHandler *handler;
 
     if ( type == wxBITMAP_TYPE_ANY )
     {
-        const wxList& list = GetHandlers();
-        for ( wxList::compatibility_iterator node = list.GetFirst();
-              node;
-              node = node->GetNext() )
+        wxList &list=GetHandlers();
+
+        for ( wxList::compatibility_iterator node = list.GetFirst(); node; node = node->GetNext() )
         {
-             handler = (wxImageHandler*)node->GetData();
-             if ( handler->CanRead(stream) && DoLoad(*handler, stream, index) )
-                 return true;
+             handler=(wxImageHandler*)node->GetData();
+             if ( handler->CanRead(stream) )
+                 return handler->LoadFile(this, stream, true/*verbose*/, index);
+
         }
 
         wxLogWarning( _("No handler found for image type.") );
-
         return false;
     }
-    //else: have specific type
 
     handler = FindHandler(type);
-    if ( !handler )
+
+    if (handler == 0)
     {
         wxLogWarning( _("No image handler for type %ld defined."), type );
+
         return false;
     }
 
-    if ( stream.IsSeekable() && !handler->CanRead(stream) )
+    if (stream.IsSeekable() && !handler->CanRead(stream))
     {
         wxLogError(_("Image file is not of type %ld."), type);
         return false;
     }
-
-    return DoLoad(*handler, stream, index);
+    else
+        return handler->LoadFile(this, stream, true/*verbose*/, index);
 }
 
 bool wxImage::LoadFile( wxInputStream& stream, const wxString& mimetype, int index )
@@ -2426,32 +2245,23 @@ bool wxImage::LoadFile( wxInputStream& stream, const wxString& mimetype, int ind
 
     wxImageHandler *handler = FindHandlerMime(mimetype);
 
-    if ( !handler )
+    if (handler == 0)
     {
         wxLogWarning( _("No image handler for type %s defined."), mimetype.GetData() );
+
         return false;
     }
 
-    if ( stream.IsSeekable() && !handler->CanRead(stream) )
+    if (stream.IsSeekable() && !handler->CanRead(stream))
     {
-        wxLogError(_("Image file is not of type %s."), mimetype);
+        wxLogError(_("Image file is not of type %s."), (const wxChar*) mimetype);
         return false;
     }
-
-    return DoLoad(*handler, stream, index);
+    else
+        return handler->LoadFile( this, stream, true/*verbose*/, index );
 }
 
-bool wxImage::DoSave(wxImageHandler& handler, wxOutputStream& stream) const
-{
-    wxImage * const self = const_cast<wxImage *>(this);
-    if ( !handler.SaveFile(self, stream) )
-        return false;
-
-    M_IMGDATA->m_type = handler.GetType();
-    return true;
-}
-
-bool wxImage::SaveFile( wxOutputStream& stream, wxBitmapType type ) const
+bool wxImage::SaveFile( wxOutputStream& stream, int type ) const
 {
     wxCHECK_MSG( Ok(), false, wxT("invalid image") );
 
@@ -2459,10 +2269,11 @@ bool wxImage::SaveFile( wxOutputStream& stream, wxBitmapType type ) const
     if ( !handler )
     {
         wxLogWarning( _("No image handler for type %d defined."), type );
+
         return false;
     }
 
-    return DoSave(*handler, stream);
+    return handler->SaveFile( (wxImage*)this, stream );
 }
 
 bool wxImage::SaveFile( wxOutputStream& stream, const wxString& mimetype ) const
@@ -2473,11 +2284,12 @@ bool wxImage::SaveFile( wxOutputStream& stream, const wxString& mimetype ) const
     if ( !handler )
     {
         wxLogWarning( _("No image handler for type %s defined."), mimetype.GetData() );
+
+        return false;
     }
 
-    return DoSave(*handler, stream);
+    return handler->SaveFile( (wxImage*)this, stream );
 }
-
 #endif // wxUSE_STREAMS
 
 // ----------------------------------------------------------------------------
@@ -2499,7 +2311,7 @@ void wxImage::AddHandler( wxImageHandler *handler )
         // may) we should probably refcount the duplicates.
         //   also an issue in InsertHandler below.
 
-        wxLogDebug( wxT("Adding duplicate image handler for '%s'"),
+        wxLogDebug( _T("Adding duplicate image handler for '%s'"),
                     handler->GetName().c_str() );
         delete handler;
     }
@@ -2515,7 +2327,7 @@ void wxImage::InsertHandler( wxImageHandler *handler )
     else
     {
         // see AddHandler for additional comments.
-        wxLogDebug( wxT("Inserting duplicate image handler for '%s'"),
+        wxLogDebug( _T("Inserting duplicate image handler for '%s'"),
                     handler->GetName().c_str() );
         delete handler;
     }
@@ -2544,28 +2356,24 @@ wxImageHandler *wxImage::FindHandler( const wxString& name )
 
         node = node->GetNext();
     }
-    return NULL;
+    return 0;
 }
 
-wxImageHandler *wxImage::FindHandler( const wxString& extension, wxBitmapType bitmapType )
+wxImageHandler *wxImage::FindHandler( const wxString& extension, long bitmapType )
 {
     wxList::compatibility_iterator node = sm_handlers.GetFirst();
     while (node)
     {
         wxImageHandler *handler = (wxImageHandler*)node->GetData();
-        if ((bitmapType == wxBITMAP_TYPE_ANY) || (handler->GetType() == bitmapType))
-        {
-            if (handler->GetExtension() == extension)
-                return handler;
-            if (handler->GetAltExtensions().Index(extension, false) != wxNOT_FOUND)
-                return handler;
-        }
+        if ( (handler->GetExtension().Cmp(extension) == 0) &&
+            (bitmapType == -1 || handler->GetType() == bitmapType) )
+            return handler;
         node = node->GetNext();
     }
-    return NULL;
+    return 0;
 }
 
-wxImageHandler *wxImage::FindHandler(wxBitmapType bitmapType )
+wxImageHandler *wxImage::FindHandler( long bitmapType )
 {
     wxList::compatibility_iterator node = sm_handlers.GetFirst();
     while (node)
@@ -2574,7 +2382,7 @@ wxImageHandler *wxImage::FindHandler(wxBitmapType bitmapType )
         if (handler->GetType() == bitmapType) return handler;
         node = node->GetNext();
     }
-    return NULL;
+    return 0;
 }
 
 wxImageHandler *wxImage::FindHandlerMime( const wxString& mimetype )
@@ -2586,7 +2394,7 @@ wxImageHandler *wxImage::FindHandlerMime( const wxString& mimetype )
         if (handler->GetMimeType().IsSameAs(mimetype, false)) return handler;
         node = node->GetNext();
     }
-    return NULL;
+    return 0;
 }
 
 void wxImage::InitStandardHandlers()
@@ -2620,8 +2428,6 @@ wxString wxImage::GetImageExtWildcard()
     {
         wxImageHandler* Handler = (wxImageHandler*)Node->GetData();
         fmts += wxT("*.") + Handler->GetExtension();
-        for (size_t i = 0; i < Handler->GetAltExtensions().size(); i++)
-            fmts += wxT(";*.") + Handler->GetAltExtensions()[i];
         Node = Node->GetNext();
         if ( Node ) fmts += wxT(";");
     }
@@ -2809,27 +2615,19 @@ void wxImage::RotateHue(double angle)
 IMPLEMENT_ABSTRACT_CLASS(wxImageHandler,wxObject)
 
 #if wxUSE_STREAMS
-int wxImageHandler::GetImageCount( wxInputStream& stream )
+bool wxImageHandler::LoadFile( wxImage *WXUNUSED(image), wxInputStream& WXUNUSED(stream), bool WXUNUSED(verbose), int WXUNUSED(index) )
 {
-    // NOTE: this code is the same of wxAnimationDecoder::CanRead and
-    //       wxImageHandler::CallDoCanRead
+    return false;
+}
 
-    if ( !stream.IsSeekable() )
-        return false;        // can't test unseekable stream
+bool wxImageHandler::SaveFile( wxImage *WXUNUSED(image), wxOutputStream& WXUNUSED(stream), bool WXUNUSED(verbose) )
+{
+    return false;
+}
 
-    wxFileOffset posOld = stream.TellI();
-    int n = DoGetImageCount(stream);
-
-    // restore the old position to be able to test other formats and so on
-    if ( stream.SeekI(posOld) == wxInvalidOffset )
-    {
-        wxLogDebug(wxT("Failed to rewind the stream in wxImageHandler!"));
-
-        // reading would fail anyhow as we're not at the right position
-        return false;
-    }
-
-    return n;
+int wxImageHandler::GetImageCount( wxInputStream& WXUNUSED(stream) )
+{
+    return 1;
 }
 
 bool wxImageHandler::CanRead( const wxString& name )
@@ -2847,19 +2645,19 @@ bool wxImageHandler::CanRead( const wxString& name )
 
 bool wxImageHandler::CallDoCanRead(wxInputStream& stream)
 {
-    // NOTE: this code is the same of wxAnimationDecoder::CanRead and
-    //       wxImageHandler::GetImageCount
-
-    if ( !stream.IsSeekable() )
-        return false;        // can't test unseekable stream
-
     wxFileOffset posOld = stream.TellI();
+    if ( posOld == wxInvalidOffset )
+    {
+        // can't test unseekable stream
+        return false;
+    }
+
     bool ok = DoCanRead(stream);
 
     // restore the old position to be able to test other formats and so on
     if ( stream.SeekI(posOld) == wxInvalidOffset )
     {
-        wxLogDebug(wxT("Failed to rewind the stream in wxImageHandler!"));
+        wxLogDebug(_T("Failed to rewind the stream in wxImageHandler!"));
 
         // reading would fail anyhow as we're not at the right position
         return false;
@@ -2869,42 +2667,6 @@ bool wxImageHandler::CallDoCanRead(wxInputStream& stream)
 }
 
 #endif // wxUSE_STREAMS
-
-/* static */
-wxImageResolution
-wxImageHandler::GetResolutionFromOptions(const wxImage& image, int *x, int *y)
-{
-    wxCHECK_MSG( x && y, wxIMAGE_RESOLUTION_NONE, wxT("NULL pointer") );
-
-    if ( image.HasOption(wxIMAGE_OPTION_RESOLUTIONX) &&
-         image.HasOption(wxIMAGE_OPTION_RESOLUTIONY) )
-    {
-        *x = image.GetOptionInt(wxIMAGE_OPTION_RESOLUTIONX);
-        *y = image.GetOptionInt(wxIMAGE_OPTION_RESOLUTIONY);
-    }
-    else if ( image.HasOption(wxIMAGE_OPTION_RESOLUTION) )
-    {
-        *x =
-        *y = image.GetOptionInt(wxIMAGE_OPTION_RESOLUTION);
-    }
-    else // no resolution options specified
-    {
-        *x =
-        *y = 0;
-
-        return wxIMAGE_RESOLUTION_NONE;
-    }
-
-    // get the resolution unit too
-    int resUnit = image.GetOptionInt(wxIMAGE_OPTION_RESOLUTIONUNIT);
-    if ( !resUnit )
-    {
-        // this is the default
-        resUnit = wxIMAGE_RESOLUTION_INCHES;
-    }
-
-    return (wxImageResolution)resUnit;
-}
 
 // ----------------------------------------------------------------------------
 // image histogram stuff
@@ -3059,20 +2821,15 @@ wxRotatePoint(double x, double y, double cos_angle, double sin_angle,
     return wxRotatePoint (wxRealPoint(x,y), cos_angle, sin_angle, p0);
 }
 
-wxImage wxImage::Rotate(double angle,
-                        const wxPoint& centre_of_rotation,
-                        bool interpolating,
-                        wxPoint *offset_after_rotation) const
+wxImage wxImage::Rotate(double angle, const wxPoint & centre_of_rotation, bool interpolating, wxPoint * offset_after_rotation) const
 {
-    // screen coordinates are a mirror image of "real" coordinates
-    angle = -angle;
-
-    const bool has_alpha = HasAlpha();
-
-    const int w = GetWidth();
-    const int h = GetHeight();
-
     int i;
+    angle = -angle;     // screen coordinates are a mirror image of "real" coordinates
+
+    bool has_alpha = HasAlpha();
+
+    const int w = GetWidth(),
+              h = GetHeight();
 
     // Create pointer-based array to accelerate access to wxImage's data
     unsigned char ** data = new unsigned char * [h];
@@ -3091,6 +2848,7 @@ wxImage wxImage::Rotate(double angle,
     }
 
     // precompute coefficients for rotation formula
+    // (sine and cosine of the angle)
     const double cos_angle = cos(angle);
     const double sin_angle = sin(angle);
 
@@ -3121,14 +2879,19 @@ wxImage wxImage::Rotate(double angle,
         *offset_after_rotation = wxPoint (x1a, y1a);
     }
 
-    // the rotated (destination) image is always accessed sequentially via this
-    // pointer, there is no need for pointer-based arrays here
-    unsigned char *dst = rotated.GetData();
+    // GRG: The rotated (destination) image is always accessed
+    //      sequentially, so there is no need for a pointer-based
+    //      array here (and in fact it would be slower).
+    //
+    unsigned char * dst = rotated.GetData();
 
-    unsigned char *alpha_dst = has_alpha ? rotated.GetAlpha() : NULL;
+    unsigned char * alpha_dst = NULL;
+    if (has_alpha)
+        alpha_dst = rotated.GetAlpha();
 
-    // if the original image has a mask, use its RGB values as the blank pixel,
-    // else, fall back to default (black).
+    // GRG: if the original image has a mask, use its RGB values
+    //      as the blank pixel, else, fall back to default (black).
+    //
     unsigned char blank_r = 0;
     unsigned char blank_g = 0;
     unsigned char blank_b = 0;
@@ -3148,8 +2911,9 @@ wxImage wxImage::Rotate(double angle,
     const int rH = rotated.GetHeight();
     const int rW = rotated.GetWidth();
 
-    // do the (interpolating) test outside of the loops, so that it is done
-    // only once, instead of repeating it for each pixel.
+    // GRG: I've taken the (interpolating) test out of the loops, so that
+    //      it is done only once, instead of repeating it for each pixel.
+
     if (interpolating)
     {
         for (int y = 0; y < rH; y++)
@@ -3297,7 +3061,7 @@ wxImage wxImage::Rotate(double angle,
             }
         }
     }
-    else // not interpolating
+    else    // not interpolating
     {
         for (int y = 0; y < rH; y++)
         {
@@ -3332,7 +3096,9 @@ wxImage wxImage::Rotate(double angle,
     }
 
     delete [] data;
-    delete [] alpha;
+
+    if (has_alpha)
+        delete [] alpha;
 
     return rotated;
 }

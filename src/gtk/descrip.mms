@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 22 September 2009                                                   *
+# Date : 31 October 2006                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -34,7 +34,6 @@ CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
 OBJECTS = \
-	animate.obj,\
 	app.obj,\
 	artgtk.obj,\
 	bitmap.obj,\
@@ -44,6 +43,7 @@ OBJECTS = \
 	colour.obj,\
 	collpane.obj,\
 	cursor.obj,\
+	data.obj,\
 	dataobj.obj,\
 	dc.obj,\
 	dcclient.obj,\
@@ -54,7 +54,8 @@ OBJECTS = \
 	filedlg.obj,\
 	font.obj,\
         glcanvas.obj,\
-	sockgtk.obj,\
+	gsockgtk.obj,\
+	main.obj,\
 	minifram.obj,\
 	pen.obj,\
 	popupwin.obj,\
@@ -65,6 +66,8 @@ OBJECTS = \
 	tooltip.obj,\
 	toplevel.obj,\
 	utilsgtk.obj,\
+	utilsres.obj,\
+        win_gtk.obj,\
 	window.obj
 
 OBJECTS0= \
@@ -94,15 +97,13 @@ OBJECTS0= \
 	statbox.obj,\
 	statline.obj,\
 	stattext.obj,\
-	toolbar.obj,\
+	tbargtk.obj,\
 	textctrl.obj,\
 	tglbtn.obj,\
 	msgdlg.obj,\
-	treeentry_gtk.obj,textentry.obj,filectrl.obj,print.obj,win_gtk.obj,\
-	mnemonics.obj,private.obj,assertdlg_gtk.obj,infobar.obj
+	treeentry_gtk.obj
 
 SOURCES =\
-	animate.cpp,\
 	app.cpp,\
 	artgtk.cpp, \
 	bitmap.cpp,\
@@ -119,6 +120,7 @@ SOURCES =\
         combobox.cpp,\
 	control.cpp,\
 	cursor.cpp,\
+	data.cpp,\
 	dataobj.cpp,\
 	dc.cpp,\
 	dcclient.cpp,\
@@ -133,8 +135,9 @@ SOURCES =\
 	frame.cpp,\
 	gauge.cpp,\
         glcanvas.cpp,\
-	sockgtk.cpp,\
+	gsockgtk.cpp,\
 	listbox.cpp,\
+	main.cpp,\
 	mdi.cpp,\
 	menu.cpp,\
 	minifram.cpp,\
@@ -156,17 +159,18 @@ SOURCES =\
 	statbox.cpp,\
 	statline.cpp,\
 	stattext.cpp,\
-	toolbar.cpp,\
+	tbargtk.cpp,\
 	textctrl.cpp,\
 	tglbtn.cpp,\
 	timer.cpp,\
 	tooltip.cpp,\
 	toplevel.cpp,\
 	utilsgtk.cpp,\
+	utilsres.cpp,\
+        win_gtk.c,\
 	window.cpp,\
-	treeentry_gtk.c,textentry.cpp,filectrl.cpp,print.cpp,win_gtk.cpp,\
-	mnemonics.cpp,private.cpp,assertdlg_gtk.c,infobar.cpp
-
+	treeentry_gtk.c
+   
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
 .ifdef __WXUNIVERSAL__
@@ -186,10 +190,6 @@ all : $(SOURCES)
 .endif
 .endif
 
-$(OBJECTS) : [--.include.wx]setup.h
-$(OBJECTS0) : [--.include.wx]setup.h
-
-animate.obj : animate.cpp
 app.obj : app.cpp
 artgtk.obj : artgtk.cpp
 bitmap.obj : bitmap.cpp
@@ -206,6 +206,7 @@ collpane.obj : collpane.cpp
 combobox.obj : combobox.cpp
 control.obj : control.cpp
 cursor.obj : cursor.cpp
+data.obj : data.cpp
 dataobj.obj : dataobj.cpp
 dc.obj : dc.cpp
 dcclient.obj : dcclient.cpp
@@ -220,8 +221,9 @@ fontdlg.obj : fontdlg.cpp
 frame.obj : frame.cpp
 gauge.obj : gauge.cpp
 glcanvas.obj : glcanvas.cpp
-sockgtk.obj : sockgtk.cpp
+gsockgtk.obj : gsockgtk.cpp
 listbox.obj : listbox.cpp
+main.obj : main.cpp
 msgdlg.obj : msgdlg.cpp
 mdi.obj : mdi.cpp
 menu.obj : menu.cpp
@@ -243,20 +245,14 @@ statbmp.obj : statbmp.cpp
 statbox.obj : statbox.cpp
 statline.obj : statline.cpp
 stattext.obj : stattext.cpp
-toolbar.obj : toolbar.cpp
+tbargtk.obj : tbargtk.cpp
 textctrl.obj : textctrl.cpp
 tglbtn.obj : tglbtn.cpp
 timer.obj : timer.cpp
 tooltip.obj : tooltip.cpp
 toplevel.obj : toplevel.cpp
 utilsgtk.obj : utilsgtk.cpp
+utilsres.obj : utilsres.cpp
+win_gtk.obj : win_gtk.c
 window.obj : window.cpp
 treeentry_gtk.obj : treeentry_gtk.c
-textentry.obj : textentry.cpp
-filectrl.obj : filectrl.cpp
-print.obj : print.cpp
-win_gtk.obj : win_gtk.cpp
-mnemonics.obj : mnemonics.cpp
-private.obj : private.cpp
-assertdlg_gtk.obj : assertdlg_gtk.c
-infobar.obj : infobar.cpp

@@ -22,12 +22,7 @@
 #ifndef WX_PRECOMP
 #endif // WX_PRECOMP
 
-#include "wx/ffile.h"
 #include "wx/textfile.h"
-
-#ifdef __VISUALC__
-    #define unlink _unlink
-#endif
 
 // ----------------------------------------------------------------------------
 // test class
@@ -51,7 +46,6 @@ private:
         CPPUNIT_TEST( ReadUTF8 );
         CPPUNIT_TEST( ReadUTF16 );
 #endif // wxUSE_UNICODE
-        CPPUNIT_TEST( ReadBig );
     CPPUNIT_TEST_SUITE_END();
 
     void ReadEmpty();
@@ -63,7 +57,6 @@ private:
     void ReadUTF8();
     void ReadUTF16();
 #endif // wxUSE_UNICODE
-    void ReadBig();
 
     // return the name of the test file we use
     static const char *GetTestFileName() { return "textfiletest.txt"; }
@@ -93,8 +86,8 @@ void TextFileTestCase::CreateTestFile(size_t len, const char *contents)
     FILE *f = fopen(GetTestFileName(), "wb");
     CPPUNIT_ASSERT( f );
 
-    CPPUNIT_ASSERT_EQUAL( len, fwrite(contents, 1, len, f) );
-    CPPUNIT_ASSERT_EQUAL( 0, fclose(f) );
+    CPPUNIT_ASSERT( fwrite(contents, 1, len, f) >= 0 );
+    CPPUNIT_ASSERT( fclose(f) == 0 );
 }
 
 void TextFileTestCase::ReadEmpty()
@@ -117,8 +110,8 @@ void TextFileTestCase::ReadDOS()
     CPPUNIT_ASSERT_EQUAL( (size_t)3, f.GetLineCount() );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_Dos, f.GetLineType(0) );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_None, f.GetLineType(2) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("bar")), f.GetLine(1) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("baz")), f.GetLastLine() );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("bar")), f.GetLine(1) );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("baz")), f.GetLastLine() );
 }
 
 void TextFileTestCase::ReadUnix()
@@ -131,8 +124,8 @@ void TextFileTestCase::ReadUnix()
     CPPUNIT_ASSERT_EQUAL( (size_t)3, f.GetLineCount() );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_Unix, f.GetLineType(0) );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_None, f.GetLineType(2) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("bar")), f.GetLine(1) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("baz")), f.GetLastLine() );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("bar")), f.GetLine(1) );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("baz")), f.GetLastLine() );
 }
 
 void TextFileTestCase::ReadMac()
@@ -145,8 +138,8 @@ void TextFileTestCase::ReadMac()
     CPPUNIT_ASSERT_EQUAL( (size_t)3, f.GetLineCount() );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_Mac, f.GetLineType(0) );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_None, f.GetLineType(2) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("bar")), f.GetLine(1) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("baz")), f.GetLastLine() );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("bar")), f.GetLine(1) );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("baz")), f.GetLastLine() );
 }
 
 void TextFileTestCase::ReadMixed()
@@ -160,9 +153,9 @@ void TextFileTestCase::ReadMixed()
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_Mac, f.GetLineType(0) );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_Dos, f.GetLineType(1) );
     CPPUNIT_ASSERT_EQUAL( wxTextFileType_Unix, f.GetLineType(2) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("foo")), f.GetFirstLine() );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("bar")), f.GetLine(1) );
-    CPPUNIT_ASSERT_EQUAL( wxString(wxT("baz")), f.GetLastLine() );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("foo")), f.GetFirstLine() );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("bar")), f.GetLine(1) );
+    CPPUNIT_ASSERT_EQUAL( wxString(_T("baz")), f.GetLastLine() );
 }
 
 #if wxUSE_UNICODE
@@ -207,29 +200,6 @@ void TextFileTestCase::ReadUTF16()
 }
 
 #endif // wxUSE_UNICODE
-
-void TextFileTestCase::ReadBig()
-{
-    static const size_t NUM_LINES = 10000;
-
-    {
-        wxFFile f(GetTestFileName(), "w");
-        for ( size_t n = 0; n < NUM_LINES; n++ )
-        {
-            fprintf(f.fp(), "Line %lu\n", (unsigned long)n + 1);
-        }
-    }
-
-    wxTextFile f;
-    CPPUNIT_ASSERT( f.Open(GetTestFileName()) );
-
-    CPPUNIT_ASSERT_EQUAL( NUM_LINES, f.GetLineCount() );
-    CPPUNIT_ASSERT_EQUAL( wxString("Line 1"), f[0] );
-    CPPUNIT_ASSERT_EQUAL( wxString("Line 999"), f[998] );
-    CPPUNIT_ASSERT_EQUAL( wxString("Line 1000"), f[999] );
-    CPPUNIT_ASSERT_EQUAL( wxString::Format("Line %lu", (unsigned long)NUM_LINES),
-                          f[NUM_LINES - 1] );
-}
 
 #endif // wxUSE_TEXTFILE
 

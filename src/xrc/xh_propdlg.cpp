@@ -89,14 +89,12 @@ wxObject *wxPropertySheetDialogXmlHandler::DoCreateResource()
                 }
             }
             else
-            {
-                ReportError(n, "propertysheetpage child must be a window");
-            }
+                wxLogError(wxT("Error in resource."));
             return wnd;
         }
         else
         {
-            ReportError("propertysheetpage must have a window child");
+            wxLogError(wxT("Error in resource: no control within wxPropertySheetDialog's <page> tag."));
             return NULL;
         }
     }
@@ -113,8 +111,7 @@ wxObject *wxPropertySheetDialogXmlHandler::DoCreateResource()
                    GetStyle(),
                    GetName());
 
-        if (HasParam(wxT("icon")))
-            dlg->SetIcons(GetIconBundle(wxT("icon"), wxART_FRAME_ICON));
+        if (HasParam(wxT("icon"))) dlg->SetIcon(GetIcon(wxT("icon"), wxART_FRAME_ICON));
 
         SetupWindow(dlg);
 

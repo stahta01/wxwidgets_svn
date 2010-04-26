@@ -119,7 +119,7 @@ static wxGDIImage* ConvertImage( const wxGDIImage& bitmap )
     if( !isIcon )
     {
         wxASSERT_MSG( wxDynamicCast(&bitmap, wxBitmap),
-                      wxT("not an icon and not a bitmap?") );
+                      _T("not an icon and not a bitmap?") );
 
         const wxBitmap& bmp = (const wxBitmap&)bitmap;
         wxMask *mask = bmp.GetMask();
@@ -158,7 +158,7 @@ bool wxStaticBitmap::Create(wxWindow *parent,
     m_isIcon = image->IsKindOf( CLASSINFO(wxIcon) );
 
     // create the native control
-    if ( !MSWCreateControl(wxT("STATIC"), wxEmptyString, pos, size) )
+    if ( !MSWCreateControl(_T("STATIC"), wxEmptyString, pos, size) )
     {
         // control creation failed
         return false;
@@ -188,6 +188,11 @@ bool wxStaticBitmap::Create(wxWindow *parent,
     return true;
 }
 
+wxBorder wxStaticBitmap::GetDefaultBorder() const
+{
+    return wxBORDER_NONE;
+}
+
 WXDWORD wxStaticBitmap::MSWGetStyle(long style, WXDWORD *exstyle) const
 {
     WXDWORD msStyle = wxControl::MSWGetStyle(style, exstyle);
@@ -211,10 +216,10 @@ bool wxStaticBitmap::ImageIsOk() const
 
 wxIcon wxStaticBitmap::GetIcon() const
 {
-    wxCHECK_MSG( m_image, wxIcon(), wxT("no image in wxStaticBitmap") );
+    wxCHECK_MSG( m_image, wxIcon(), _T("no image in wxStaticBitmap") );
 
     // we can't ask for an icon if all we have is a bitmap
-    wxCHECK_MSG( m_isIcon, wxIcon(), wxT("no icon in this wxStaticBitmap") );
+    wxCHECK_MSG( m_isIcon, wxIcon(), _T("no icon in this wxStaticBitmap") );
 
     return *(wxIcon *)m_image;
 }
@@ -231,7 +236,7 @@ wxBitmap wxStaticBitmap::GetBitmap() const
     }
     else // we have a bitmap
     {
-        wxCHECK_MSG( m_image, wxBitmap(), wxT("no image in wxStaticBitmap") );
+        wxCHECK_MSG( m_image, wxBitmap(), _T("no image in wxStaticBitmap") );
 
         return *(wxBitmap *)m_image;
     }
@@ -257,8 +262,6 @@ wxSize wxStaticBitmap::DoGetBestSize() const
     return wxSize(16, 16);
 }
 
-#ifndef __WXWINCE__
-
 void wxStaticBitmap::DoPaintManually(wxPaintEvent& WXUNUSED(event))
 {
     wxPaintDC dc(this);
@@ -280,8 +283,6 @@ void wxStaticBitmap::DoPaintManually(wxPaintEvent& WXUNUSED(event))
                   (size.GetHeight() - bmp.GetHeight()) / 2,
                   true /* use mask */);
 }
-
-#endif // !__WXWINCE__
 
 void wxStaticBitmap::SetImage( const wxGDIImage* image )
 {

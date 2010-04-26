@@ -1478,13 +1478,11 @@ public:
 #endif
     wxSize m_bestSize;  // Cached size
 
-    // Stuff for getting useful debugging strings
-#if wxDEBUG_LEVEL
+#ifdef __WXDEBUG__  // Stuff for getting useful debugging strings
     wxDynamicLibrary m_dllQuartz;
     LPAMGETERRORTEXT m_lpAMGetErrorText;
     wxString GetErrorString(HRESULT hrdsv);
-#endif // wxDEBUG_LEVEL
-    wxEvtHandler* m_evthandler;
+#endif // __WXDEBUG__
 
     friend class wxAMMediaEvtHandler;
     DECLARE_DYNAMIC_CLASS(wxAMMediaBackend)
@@ -1510,7 +1508,7 @@ private:
     bool m_bLoadEventSent; // Whether or not FinishLoaded was already called
                            // prevents it being called multiple times
 
-    wxDECLARE_NO_COPY_CLASS(wxAMMediaEvtHandler);
+    DECLARE_NO_COPY_CLASS(wxAMMediaEvtHandler)
 };
 
 //===========================================================================
@@ -1528,7 +1526,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxAMMediaBackend, wxMediaBackend)
 //---------------------------------------------------------------------------
 // Usual debugging macros
 //---------------------------------------------------------------------------
-#if wxDEBUG_LEVEL
+#ifdef __WXDEBUG__
 #define MAX_ERROR_TEXT_LEN 160
 
 // Get the error string for Active Movie
@@ -1575,7 +1573,6 @@ wxAMMediaBackend::wxAMMediaBackend()
 #endif
                   m_bestSize(wxDefaultSize)
 {
-   m_evthandler = NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -1594,11 +1591,7 @@ wxAMMediaBackend::~wxAMMediaBackend()
         if (GetMP())
             GetMP()->Release();
 
-        if (m_evthandler)
-        {
-            m_ctrl->RemoveEventHandler(m_evthandler);
-            delete m_evthandler;
-        }
+        m_ctrl->PopEventHandler(true);
     }
 }
 
@@ -1615,13 +1608,13 @@ bool wxAMMediaBackend::CreateControl(wxControl* ctrl, wxWindow* parent,
 {
     // First get the AMGetErrorText procedure in debug
     // mode for more meaningful messages
-#if wxDEBUG_LEVEL
-    if ( m_dllQuartz.Load(wxT("quartz.dll"), wxDL_VERBATIM) )
+#ifdef __WXDEBUG__
+    if ( m_dllQuartz.Load(_T("quartz.dll"), wxDL_VERBATIM) )
     {
         m_lpAMGetErrorText = (LPAMGETERRORTEXT)
                                 m_dllQuartz.GetSymbolAorW(wxT("AMGetErrorText"));
     }
-#endif // wxDEBUG_LEVEL
+#endif // __WXDEBUG__
 
 
 
@@ -1690,8 +1683,7 @@ bool wxAMMediaBackend::CreateControl(wxControl* ctrl, wxWindow* parent,
 #endif
                                   );
     // Connect for events
-    m_evthandler = new wxAMMediaEvtHandler(this);
-    m_ctrl->PushEventHandler(m_evthandler);
+    m_ctrl->PushEventHandler(new wxAMMediaEvtHandler(this));
 
     //
     //  Here we set up wx-specific stuff for the default
@@ -1957,12 +1949,12 @@ wxLongLong wxAMMediaBackend::GetPosition()
 }
 
 //---------------------------------------------------------------------------
-// wxAMMediaBackend::GetVolume and SetVolume()
+// wxAMMediaBackend::GetVolume
 //
-// Notice that for the IActiveMovie interface value ranges from 0 (MAX volume)
-// to -10000 (minimum volume) and the scale is logarithmic in 0.01db per step.
+// Gets the volume through the IActiveMovie interface -
+// value ranges from 0 (MAX volume) to -10000 (minimum volume).
+// -100 per decibel (Logorithmic in 0.01db per step).
 //---------------------------------------------------------------------------
-
 double wxAMMediaBackend::GetVolume()
 {
     long lVolume;
@@ -1973,20 +1965,37 @@ double wxAMMediaBackend::GetVolume()
         return 0.0;
     }
 
-    double dVolume = lVolume / 2000.; // volume is now in [-5..0] range
-    dVolume = pow(10.0, dVolume);     //                 [10^-5, 1]
-    dVolume -= 0.00001;               //                [0, 1-10^-5]
-    dVolume /= 1 - 0.00001;           //                   [0, 1]
+    // Volume conversion from Greg Hazel
+    double dVolume = (double)lVolume / 100;
 
+    // convert to 0 to 1
+    dVolume = pow(10.0, dVolume/20.0);
+    // handle -INF
+    dVolume *= 1 + pow(10.0, -5.0);
+    dVolume -= pow(10.0, -5.0);
     return dVolume;
 }
 
+//---------------------------------------------------------------------------
+// wxAMMediaBackend::SetVolume
+//
+// Sets the volume through the IActiveMovie interface -
+// value ranges from 0 (MAX volume) to -10000 (minimum volume).
+// -100 per decibel (Logorithmic in 0.01db per step).
+//---------------------------------------------------------------------------
 bool wxAMMediaBackend::SetVolume(double dVolume)
 {
-    // inverse the transformation above
-    long lVolume = static_cast<long>(2000*log10(dVolume + (1 - dVolume)*0.00001));
+    // Volume conversion from Greg Hazel
+    long lVolume;
+    // handle -INF
+    dVolume *= 1 - pow(10.0, -5.0);
+    dVolume += pow(10.0, -5.0);
+    // convert to -100db to 0db
+    dVolume = 20 * log10(dVolume);
+    // scale to -10000 to 0
+    lVolume = (long)(100 * dVolume);
 
-    HRESULT hr = GetAM()->put_Volume(lVolume);
+    HRESULT hr = GetAM()->put_Volume( lVolume );
     if(FAILED(hr))
     {
         wxAMLOG(hr);
@@ -2092,37 +2101,36 @@ void wxAMMediaBackend::DoGetDownloadProgress(wxLongLong* pLoadProgress,
                                              wxLongLong* pLoadTotal)
 {
 #ifndef __WXWINCE__
-    IUnknown* pFG = NULL;
-
-    HRESULT hr = m_pAM->get_FilterGraph(&pFG);
-
-    // notice that the call above may return S_FALSE and leave pFG NULL
-    if(SUCCEEDED(hr) && pFG)
+    LONGLONG loadTotal = 0, loadProgress = 0;
+    IUnknown* pFG;
+    IAMOpenProgress* pOP;
+    HRESULT hr;
+    hr = m_pAM->get_FilterGraph(&pFG);
+    if(SUCCEEDED(hr))
     {
-        IAMOpenProgress* pOP = NULL;
         hr = pFG->QueryInterface(IID_IAMOpenProgress, (void**)&pOP);
-        if(SUCCEEDED(hr) && pOP)
-        {
-            LONGLONG
-                loadTotal = 0,
-                loadProgress = 0;
+        if(SUCCEEDED(hr))
+    {
             hr = pOP->QueryProgress(&loadTotal, &loadProgress);
             pOP->Release();
-
-            if(SUCCEEDED(hr))
-            {
-                *pLoadProgress = loadProgress;
-                *pLoadTotal = loadTotal;
-                pFG->Release();
-                return;
-            }
         }
         pFG->Release();
     }
-#endif // !__WXWINCE__
 
-    *pLoadProgress = 0;
-    *pLoadTotal = 0;
+    if(SUCCEEDED(hr))
+    {
+        *pLoadProgress = loadProgress;
+        *pLoadTotal = loadTotal;
+    }
+    else
+#endif
+    {
+        // When not loading from a URL QueryProgress will return
+        // E_NOINTERFACE or whatever
+        // wxAMFAIL(hr);
+        *pLoadProgress = 0;
+        *pLoadTotal = 0;
+    }
 }
 
 //---------------------------------------------------------------------------

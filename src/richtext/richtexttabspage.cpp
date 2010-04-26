@@ -111,9 +111,9 @@ void wxRichTextTabsPage::CreateControls()
     itemBoxSizer4->Add(itemBoxSizer5, 0, wxGROW, 5);
 
     wxStaticText* itemStaticText6 = new wxStaticText( itemPanel1, wxID_STATIC, _("&Position (tenths of a mm):"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 5);
+    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP|wxADJUST_MINSIZE, 5);
 
-    m_tabEditCtrl = new wxTextCtrl( itemPanel1, ID_RICHTEXTTABSPAGE_TABEDIT, wxT(""), wxDefaultPosition, wxDefaultSize, 0 );
+    m_tabEditCtrl = new wxTextCtrl( itemPanel1, ID_RICHTEXTTABSPAGE_TABEDIT, _T(""), wxDefaultPosition, wxDefaultSize, 0 );
     m_tabEditCtrl->SetHelpText(_("The tab position."));
     if (wxRichTextTabsPage::ShowToolTips())
         m_tabEditCtrl->SetToolTip(_("The tab position."));
@@ -121,7 +121,7 @@ void wxRichTextTabsPage::CreateControls()
 
     wxArrayString m_tabListCtrlStrings;
     m_tabListCtrlStrings.Add(_("The tab positions."));
-    m_tabListCtrl = new wxListBox( itemPanel1, ID_RICHTEXTTABSPAGE_TABLIST, wxDefaultPosition, wxSize(80, 200), m_tabListCtrlStrings, wxLB_SINGLE );
+    m_tabListCtrl = new wxListBox( itemPanel1, ID_RICHTEXTTABSPAGE_TABLIST, wxDefaultPosition, wxSize(80, 180), m_tabListCtrlStrings, wxLB_SINGLE );
     itemBoxSizer5->Add(m_tabListCtrl, 1, wxGROW|wxLEFT|wxRIGHT|wxBOTTOM, 5);
 
     itemBoxSizer4->Add(2, 1, 1, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM, 5);
@@ -129,8 +129,8 @@ void wxRichTextTabsPage::CreateControls()
     wxBoxSizer* itemBoxSizer10 = new wxBoxSizer(wxVERTICAL);
     itemBoxSizer4->Add(itemBoxSizer10, 0, wxGROW, 5);
 
-    wxStaticText* itemStaticText11 = new wxStaticText( itemPanel1, wxID_STATIC, wxT(""), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer10->Add(itemStaticText11, 0, wxALIGN_CENTER_HORIZONTAL|wxBOTTOM, 5);
+    wxStaticText* itemStaticText11 = new wxStaticText( itemPanel1, wxID_STATIC, _T(""), wxDefaultPosition, wxDefaultSize, 0 );
+    itemBoxSizer10->Add(itemStaticText11, 0, wxALIGN_CENTER_HORIZONTAL|wxBOTTOM|wxADJUST_MINSIZE, 5);
 
     wxButton* itemButton12 = new wxButton( itemPanel1, ID_RICHTEXTTABSPAGE_NEW_TAB, _("&New"), wxDefaultPosition, wxDefaultSize, 0 );
     itemButton12->SetHelpText(_("Click to create a new tab position."));
@@ -158,7 +158,7 @@ bool wxRichTextTabsPage::TransferDataFromWindow()
 {
     wxPanel::TransferDataFromWindow();
 
-    wxTextAttr* attr = GetAttributes();
+    wxTextAttrEx* attr = GetAttributes();
 
     if (m_tabsPresent)
     {
@@ -177,7 +177,7 @@ bool wxRichTextTabsPage::TransferDataToWindow()
 {
     wxPanel::TransferDataToWindow();
 
-    wxTextAttr* attr = GetAttributes();
+    wxTextAttrEx* attr = GetAttributes();
 
     m_tabListCtrl->Clear();
     m_tabEditCtrl->SetValue(wxEmptyString);
@@ -225,7 +225,7 @@ void wxRichTextTabsPage::SortTabs()
     }
 }
 
-wxTextAttr* wxRichTextTabsPage::GetAttributes()
+wxTextAttrEx* wxRichTextTabsPage::GetAttributes()
 {
     return wxRichTextFormattingDialog::GetDialogAttributes(this);
 }

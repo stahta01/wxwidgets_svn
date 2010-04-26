@@ -61,7 +61,7 @@ public:
 
    static size_t GetNumber() { return ms_bars; }
 
-   const wxChar *GetName() const { return m_name.c_str(); }
+   const wxChar *GetName() const { return m_name; }
 
 private:
    wxString m_name;
@@ -84,31 +84,40 @@ void ListsTestCase::wxListTest()
 {
     wxListInt list1;
     int dummy[5];
-    size_t i;
+    int i;
 
-    for ( i = 0; i < WXSIZEOF(dummy); ++i )
+    for ( i = 0; i < 5; ++i )
         list1.Append(dummy + i);
 
-    CPPUNIT_ASSERT_EQUAL( WXSIZEOF(dummy), list1.GetCount() );
-    CPPUNIT_ASSERT_EQUAL( dummy + 3, list1.Item(3)->GetData() );
+    CPPUNIT_ASSERT( list1.GetCount() == 5 );
+    CPPUNIT_ASSERT( list1.Item(3)->GetData() == dummy + 3 );
     CPPUNIT_ASSERT( list1.Find(dummy + 4) );
 
-    wxListInt::compatibility_iterator node;
-    for ( i = 0, node = list1.GetFirst(); node; ++i, node = node->GetNext() )
+    wxListInt::compatibility_iterator node = list1.GetFirst();
+    i = 0;
+
+    while (node)
     {
-        CPPUNIT_ASSERT_EQUAL( dummy + i, node->GetData() );
+        CPPUNIT_ASSERT( node->GetData() == dummy + i );
+        node = node->GetNext();
+        ++i;
     }
 
-    CPPUNIT_ASSERT_EQUAL( i, list1.GetCount() );
+    CPPUNIT_ASSERT( size_t(i) == list1.GetCount() );
 
     list1.Insert(dummy + 0);
     list1.Insert(1, dummy + 1);
     list1.Insert(list1.GetFirst()->GetNext()->GetNext(), dummy + 2);
 
-    for ( i = 0, node = list1.GetFirst(); i < 3; ++i, node = node->GetNext() )
+    node = list1.GetFirst();
+    i = 0;
+
+    while (i < 3)
     {
         int* t = node->GetData();
-        CPPUNIT_ASSERT_EQUAL( dummy + i, t );
+        CPPUNIT_ASSERT( t == dummy + i );
+        node = node->GetNext();
+        ++i;
     }
 }
 
@@ -148,47 +157,14 @@ void ListsTestCase::wxStdListTest()
     {
         CPPUNIT_ASSERT( *it == i + &i );
     }
-
-    list1.clear();
-    CPPUNIT_ASSERT( list1.empty() );
-
-    it = list1.insert(list1.end(), (int *)1);
-    CPPUNIT_ASSERT_EQUAL( (int *)1, *it );
-    CPPUNIT_ASSERT( it == list1.begin() );
-    CPPUNIT_ASSERT_EQUAL( (int *)1, list1.front() );
-
-    it = list1.insert(list1.end(), (int *)2);
-    CPPUNIT_ASSERT_EQUAL( (int *)2, *it );
-    CPPUNIT_ASSERT( ++it == list1.end() );
-    CPPUNIT_ASSERT_EQUAL( (int *)2, list1.back() );
-
-    it = list1.begin();
-    wxListInt::iterator it2 = list1.insert(++it, (int *)3);
-    CPPUNIT_ASSERT_EQUAL( (int *)3, *it2 );
-
-    it = list1.begin();
-    it = list1.erase(++it, list1.end());
-    CPPUNIT_ASSERT_EQUAL( 1, list1.size() );
-    CPPUNIT_ASSERT( it == list1.end() );
-
-    wxListInt list2;
-    list2.push_back((int *)3);
-    list2.push_back((int *)4);
-    list1.insert(list1.begin(), list2.begin(), list2.end());
-    CPPUNIT_ASSERT_EQUAL( 3, list1.size() );
-    CPPUNIT_ASSERT_EQUAL( (int *)3, list1.front() );
-
-    list1.insert(list1.end(), list2.begin(), list2.end());
-    CPPUNIT_ASSERT_EQUAL( 5, list1.size() );
-    CPPUNIT_ASSERT_EQUAL( (int *)4, list1.back() );
 }
 
 void ListsTestCase::wxListCtorTest()
 {
     {
         wxListBazs list1;
-        list1.Append(new Baz(wxT("first")));
-        list1.Append(new Baz(wxT("second")));
+        list1.Append(new Baz(_T("first")));
+        list1.Append(new Baz(_T("second")));
 
         CPPUNIT_ASSERT( list1.GetCount() == 2 );
         CPPUNIT_ASSERT( Baz::GetNumber() == 2 );

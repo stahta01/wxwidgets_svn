@@ -8,14 +8,14 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTKNOTEBOOK_H_
-#define _WX_GTKNOTEBOOK_H_
+#ifndef __GTKNOTEBOOKH__
+#define __GTKNOTEBOOKH__
 
 //-----------------------------------------------------------------------------
 // internal class
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxGtkNotebookPage;
+class WXDLLIMPEXP_CORE wxGtkNotebookPage;
 
 #include "wx/list.h"
 WX_DECLARE_LIST(wxGtkNotebookPage, wxGtkNotebookPagesList);
@@ -135,10 +135,9 @@ private:
     // the padding set by SetPadding()
     int m_padding;
 
-    virtual void AddChildGTK(wxWindowGTK* child);
-
     DECLARE_DYNAMIC_CLASS(wxNotebook)
     DECLARE_EVENT_TABLE()
 };
 
-#endif // _WX_GTKNOTEBOOK_H_
+#endif
+    // __GTKNOTEBOOKH__

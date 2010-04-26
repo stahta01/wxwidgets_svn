@@ -46,13 +46,14 @@ public:
     void SetLabel( const wxString &label );
     virtual void SetLabel( const wxBitmap& bitmap ) { SetBitmapLabel(bitmap); }
 
+    virtual void SetDefault();
     virtual bool Enable(bool enable = TRUE);
 
     // implementation
     // --------------
 
-    void GTKSetHasFocus();
-    void GTKSetNotFocus();
+    void HasFocus();
+    void NotFocus();
     void StartSelect();
     void EndSelect();
     void DoApplyWidgetStyle(GtkRcStyle *style);

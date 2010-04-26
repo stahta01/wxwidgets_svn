@@ -37,11 +37,7 @@
 #endif // WX_PRECOMP
 
 #include <VFSMgr.h>
-#ifdef __WXPALMOS6__
 #include <PalmTypesCompatibility.h>
-#else
-#include <PalmCompatibility.h>
-#endif
 
 #if wxUSE_BASE
 

@@ -40,7 +40,7 @@ enum
 //
 // Callback flags (see wxOwnerDrawnComboBox::OnDrawItem)
 //
-enum wxOwnerDrawnComboBoxPaintingFlags
+enum
 {
     // when set, we are painting the selected item in control,
     // not in the popup
@@ -89,7 +89,6 @@ public:
     virtual wxSize GetAdjustedSize( int minWidth, int prefHeight, int maxHeight );
     virtual void PaintComboControl( wxDC& dc, const wxRect& rect );
     virtual void OnComboKeyEvent( wxKeyEvent& event );
-    virtual void OnComboCharEvent( wxKeyEvent& event );
     virtual void OnComboDoubleClick();
     virtual bool LazyCreate();
 
@@ -114,12 +113,12 @@ public:
     // helpers
     int GetItemAtPosition( const wxPoint& pos ) { return HitTest(pos); }
     wxCoord GetTotalHeight() const { return EstimateTotalHeight(); }
-    wxCoord GetLineHeight(int line) const { return OnGetRowHeight(line); }
+    wxCoord GetLineHeight(int line) const { return OnGetLineHeight(line); }
 
 protected:
 
-    // Called by OnComboDoubleClick and OnCombo{Key,Char}Event
-    bool HandleKey( int keycode, bool saturate, wxChar keychar = 0 );
+    // Called by OnComboDoubleClick and OnComboKeyEvent
+    bool HandleKey( int keycode, bool saturate, wxChar unicode = 0 );
 
     // sends combobox select event from the parent combo control
     void SendComboBoxEvent( int selection );
@@ -141,10 +140,9 @@ protected:
     // item: item index to be drawn, may be wxNOT_FOUND when painting combo control itself
     //       and there is no valid selection
     // flags: wxODCB_PAINTING_CONTROL is set if painting to combo control instead of list
-    //
-    // NOTE: If wxVListBoxComboPopup is used with a wxComboCtrl class not derived from
+    // NOTE: If wxVListBoxComboPopup is used with wxComboCtrl class not derived from
     //       wxOwnerDrawnComboBox, this method must be overridden.
-    virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags) const;
+    virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
 
     // This is same as in wxVListBox
     virtual wxCoord OnMeasureItem( size_t item ) const;
@@ -165,7 +163,6 @@ protected:
     void OnMouseMove(wxMouseEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
     void OnKey(wxKeyEvent& event);
-    void OnChar(wxKeyEvent& event);
     void OnLeftClick(wxMouseEvent& event);
 
     // Return the widest item width (recalculating it if necessary)
@@ -214,8 +211,6 @@ private:
 
     // Partial completion string
     wxString                m_partialCompletionString;
-
-    wxString                m_stringValue;
 
 #if wxUSE_TIMER
     // Partial completion timer
@@ -309,6 +304,8 @@ public:
     }
 
     // wxControlWithItems methods
+    virtual void Clear();
+    virtual void Delete(unsigned int n);
     virtual unsigned int GetCount() const;
     virtual wxString GetString(unsigned int n) const;
     virtual void SetString(unsigned int n, const wxString& s);
@@ -330,13 +327,9 @@ public:
     // Return the index of the widest item (recalculating it if necessary)
     virtual int GetWidestItem() { EnsurePopupControl(); return GetVListBoxComboPopup()->GetWidestItem(); }
 
-    virtual bool IsSorted() const { return HasFlag(wxCB_SORT); }
-
     wxCONTROL_ITEMCONTAINER_CLIENTDATAOBJECT_RECAST
 
 protected:
-    virtual void DoClear();
-    virtual void DoDeleteOneItem(unsigned int n);
 
     // Callback for drawing. Font, background and text colour have been
     // prepared according to selection, focus and such.
@@ -366,11 +359,12 @@ protected:
         return (wxVListBoxComboPopup*) m_popupInterface;
     }
 
-    virtual int DoInsertItems(const wxArrayStringsAdapter& items,
-                              unsigned int pos,
-                              void **clientData, wxClientDataType type);
+    virtual int DoAppend(const wxString& item);
+    virtual int DoInsert(const wxString& item, unsigned int pos);
     virtual void DoSetItemClientData(unsigned int n, void* clientData);
     virtual void* DoGetItemClientData(unsigned int n) const;
+    virtual void DoSetItemClientObject(unsigned int n, wxClientData* clientData);
+    virtual wxClientData* DoGetItemClientObject(unsigned int n) const;
 
     // temporary storage for the initial choices
     //const wxString*         m_baseChoices;

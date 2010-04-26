@@ -124,6 +124,11 @@ bool wxFrame::Create(wxWindow *parent,
                                    name ) )
         return false;
 
+    m_backgroundColour =
+        wxSystemSettings::GetColour(wxSYS_COLOUR_APPWORKSPACE);
+    m_foregroundColour = *wxBLACK;
+    m_font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+
     int x = pos.x, y = pos.y;
     int width = size.x, height = size.y;
 
@@ -169,14 +174,17 @@ bool wxFrame::Create(wxWindow *parent,
     if (height > -1)
         XtVaSetValues((Widget) m_frameShell, XmNheight, height, NULL);
 
-    PostCreation();
+    ChangeFont(false);
+
+    ChangeBackgroundColour();
+
     PreResize();
 
     wxSize newSize(width, height);
     wxSizeEvent sizeEvent(newSize, GetId());
     sizeEvent.SetEventObject(this);
 
-    HandleWindowEvent(sizeEvent);
+    GetEventHandler()->ProcessEvent(sizeEvent);
 
     return true;
 }
@@ -253,7 +261,7 @@ bool wxFrame::XmDoCreateTLW(wxWindow* WXUNUSED(parent),
 
 wxFrame::~wxFrame()
 {
-    SendDestroyEvent();
+    m_isBeingDeleted = true;
 
     if (m_clientArea)
     {
@@ -378,18 +386,12 @@ void wxFrame::DoSetClientSize(int width, int height)
     wxSizeEvent sizeEvent(newSize, GetId());
     sizeEvent.SetEventObject(this);
 
-    HandleWindowEvent(sizeEvent);
+    GetEventHandler()->ProcessEvent(sizeEvent);
 
 }
 
 void wxFrame::DoGetSize(int *width, int *height) const
 {
-    if (!m_frameShell)
-    {
-        *width = -1; *height = -1;
-        return;
-    }
-
     Dimension xx, yy;
     XtVaGetValues((Widget) m_frameShell, XmNwidth, &xx, XmNheight, &yy, NULL);
     *width = xx; *height = yy;
@@ -446,8 +448,8 @@ void wxFrame::SetTitle(const wxString& title)
 
     if( !title.empty() )
         XtVaSetValues( (Widget)m_frameShell,
-                       XmNtitle, (const char*)title.mb_str(),
-                       XmNiconName, (const char*)title.mb_str(),
+                       XmNtitle, title.c_str(),
+                       XmNiconName, title.c_str(),
                        NULL );
 }
 
@@ -462,6 +464,11 @@ void wxFrame::DoSetIcon(const wxIcon& icon)
     XtVaSetValues((Widget) m_frameShell,
                   XtNiconPixmap, icon.GetDrawable(),
                   NULL);
+}
+
+void wxFrame::SetIcon(const wxIcon& icon)
+{
+    SetIcons( wxIconBundle( icon ) );
 }
 
 void wxFrame::SetIcons(const wxIconBundle& icons)
@@ -508,7 +515,7 @@ void wxFrame::SetMenuBar(wxMenuBar *menuBar)
     }
 
     // Currently can't set it twice
-    //    wxASSERT_MSG( (m_frameMenuBar == NULL), "Cannot set the menubar more than once");
+    //    wxASSERT_MSG( (m_frameMenuBar == (wxMenuBar*) NULL), "Cannot set the menubar more than once");
 
     if (m_frameMenuBar)
     {
@@ -530,7 +537,7 @@ void wxFrame::OnSysColourChanged(wxSysColourChangedEvent& event)
     {
         wxSysColourChangedEvent event2;
         event2.SetEventObject( m_frameStatusBar );
-        m_frameStatusBar->HandleWindowEvent(event2);
+        m_frameStatusBar->ProcessEvent(event2);
     }
 
     // Propagate the event to the non-top-level children
@@ -555,6 +562,13 @@ void wxFrame::OnActivate(wxActivateEvent& event)
             return;
         }
     }
+}
+
+void wxFrame::SendSizeEvent()
+{
+    wxSizeEvent event(GetSize(), GetId());
+    event.SetEventObject(this);
+    GetEventHandler()->AddPendingEvent(event);
 }
 
 #if wxUSE_TOOLBAR

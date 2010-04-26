@@ -29,7 +29,6 @@
     #include "wx/log.h"
     #include "wx/intl.h"
     #include "wx/encinfo.h"
-    #include "wx/wxcrtvararg.h"
 #endif //WX_PRECOMP
 
 #include "wx/msw/private.h"
@@ -57,7 +56,7 @@
 
 bool wxNativeEncodingInfo::FromString(const wxString& s)
 {
-    wxStringTokenizer tokenizer(s, wxT(";"));
+    wxStringTokenizer tokenizer(s, _T(";"));
 
     wxString encid = tokenizer.GetNextToken();
 
@@ -96,7 +95,7 @@ bool wxNativeEncodingInfo::FromString(const wxString& s)
     }
     else
     {
-        if ( wxSscanf(tmp, wxT("%u"), &charset) != 1 )
+        if ( wxSscanf(tmp, _T("%u"), &charset) != 1 )
         {
             // should be a number!
             return false;
@@ -120,12 +119,12 @@ wxString wxNativeEncodingInfo::ToString() const
       // we don't have any choice but to use the raw value
       << (long)encoding
 #endif // wxUSE_FONTMAP/!wxUSE_FONTMAP
-      << wxT(';') << facename;
+      << _T(';') << facename;
 
     // ANSI_CHARSET is assumed anyhow
     if ( charset != ANSI_CHARSET )
     {
-         s << wxT(';') << charset;
+         s << _T(';') << charset;
     }
 
     return s;
@@ -138,7 +137,7 @@ wxString wxNativeEncodingInfo::ToString() const
 bool wxGetNativeFontEncoding(wxFontEncoding encoding,
                              wxNativeEncodingInfo *info)
 {
-    wxCHECK_MSG( info, false, wxT("bad pointer in wxGetNativeFontEncoding") );
+    wxCHECK_MSG( info, false, _T("bad pointer in wxGetNativeFontEncoding") );
 
     if ( encoding == wxFONTENCODING_DEFAULT )
     {
@@ -162,7 +161,7 @@ bool wxTestFontEncoding(const wxNativeEncodingInfo& info)
     wxZeroMemory(lf);       // all default values
 
     lf.lfCharSet = (BYTE)info.charset;
-    wxStrlcpy(lf.lfFaceName, info.facename.c_str(), WXSIZEOF(lf.lfFaceName));
+    wxStrncpy(lf.lfFaceName, info.facename, WXSIZEOF(lf.lfFaceName));
 
     HFONT hfont = ::CreateFontIndirect(&lf);
     if ( !hfont )
@@ -187,7 +186,7 @@ wxFontEncoding wxGetFontEncFromCharSet(int cs)
     switch ( cs )
     {
         default:
-            wxFAIL_MSG( wxT("unexpected Win32 charset") );
+            wxFAIL_MSG( _T("unexpected Win32 charset") );
             // fall through and assume the system charset
 
         case DEFAULT_CHARSET:

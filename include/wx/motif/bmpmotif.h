@@ -15,7 +15,7 @@
 #include "wx/defs.h"
 #include "wx/bitmap.h"
 
-class WXDLLIMPEXP_CORE wxBitmapCache
+class WXDLLEXPORT wxBitmapCache
 {
 public:
     wxBitmapCache()
@@ -24,7 +24,7 @@ public:
         m_armPixmap = (WXPixmap)NULL;
         m_insensPixmap = (WXPixmap)NULL;
         m_image = (WXImage)NULL;
-        m_display = NULL;
+        m_display = (WXDisplay*)NULL;
         SetColoursChanged();
     }
 

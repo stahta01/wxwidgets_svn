@@ -27,7 +27,7 @@
 // wxWindow declaration for Palm
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowPalm : public wxWindowBase
+class WXDLLEXPORT wxWindowPalm : public wxWindowBase
 {
 public:
     wxWindowPalm() { Init(); }
@@ -73,12 +73,20 @@ public:
     virtual void Refresh( bool eraseBackground = true,
                           const wxRect *rect = NULL );
     virtual void Update();
+    virtual void Freeze();
+    virtual void Thaw();
 
     virtual bool SetCursor( const wxCursor &cursor );
     virtual bool SetFont( const wxFont &font );
 
     virtual int GetCharHeight() const;
     virtual int GetCharWidth() const;
+    virtual void GetTextExtent(const wxString& string,
+                               int *x, int *y,
+                               int *descent = (int *) NULL,
+                               int *externalLeading = (int *) NULL,
+                               const wxFont *theFont = (const wxFont *) NULL)
+                               const;
 
 #if wxUSE_MENUS_NATIVE
     virtual bool DoPopupMenu( wxMenu *menu, int x, int y );
@@ -91,7 +99,7 @@ public:
     virtual int GetScrollThumb( int orient ) const;
     virtual int GetScrollRange( int orient ) const;
     virtual void ScrollWindow( int dx, int dy,
-                               const wxRect* rect = NULL );
+                               const wxRect* rect = (wxRect *) NULL );
 
     virtual bool ScrollLines(int lines);
     virtual bool ScrollPages(int pages);
@@ -124,9 +132,8 @@ public:
     // simple accessors
     // ----------------
 
-    WXHWND GetHWND() const { return m_hWnd; }
-    void SetHWND(WXHWND hWnd) { m_hWnd = hWnd; }
-    virtual WXWidget GetHandle() const { return GetHWND(); }
+    virtual WXWINHANDLE GetWinHandle() const { return m_handle; }
+    virtual WXWidget GetHandle() const { return GetWinHandle(); }
 
     // event handlers
     // --------------
@@ -201,7 +208,7 @@ public:
 
 protected:
     // the window handle
-    WXHWND                m_hWnd;
+    WXWINHANDLE m_handle;
     WXFORMPTR FrameForm;
 
     WXFORMPTR GetFormPtr();
@@ -225,11 +232,6 @@ protected:
     WXHMENU               m_hMenu; // Menu, if any
 
     // implement the base class pure virtuals
-    virtual void DoGetTextExtent(const wxString& string,
-                                 int *x, int *y,
-                                 int *descent = NULL,
-                                 int *externalLeading = NULL,
-                                 const wxFont *font = NULL) const;
     virtual void DoClientToScreen( int *x, int *y ) const;
     virtual void DoScreenToClient( int *x, int *y ) const;
     virtual void DoGetPosition( int *x, int *y ) const;
@@ -268,8 +270,14 @@ private:
     bool HandleMoving(wxRect& rect);
     bool HandleJoystickEvent(WXUINT msg, int x, int y, WXUINT flags);
 
+    // list of disabled children before last call to our Disable()
+    wxWindowList *m_childrenDisabled;
+
+    // number of calls to Freeze() minus number of calls to Thaw()
+    unsigned int m_frozenness;
+
     DECLARE_DYNAMIC_CLASS(wxWindowPalm)
-    wxDECLARE_NO_COPY_CLASS(wxWindowPalm);
+    DECLARE_NO_COPY_CLASS(wxWindowPalm)
     DECLARE_EVENT_TABLE()
 };
 

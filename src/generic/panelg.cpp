@@ -88,6 +88,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxPanel, wxWindow)
 #endif
 
 BEGIN_EVENT_TABLE(wxPanel, wxWindow)
+    EVT_SIZE(wxPanel::OnSize)
+
     WX_EVENT_TABLE_CONTROL_CONTAINER(wxPanel)
 END_EVENT_TABLE()
 
@@ -103,7 +105,7 @@ WX_DELEGATE_TO_CONTROL_CONTAINER(wxPanel, wxWindow)
 
 void wxPanel::Init()
 {
-    WX_INIT_CONTROL_CONTAINER();
+    m_container.SetContainerWindow(this);
 }
 
 bool wxPanel::Create(wxWindow *parent, wxWindowID id,
@@ -137,3 +139,42 @@ void wxPanel::InitDialog()
     GetEventHandler()->ProcessEvent(event);
 }
 
+// ----------------------------------------------------------------------------
+// event handlers
+// ----------------------------------------------------------------------------
+
+void wxPanel::OnSize(wxSizeEvent& event)
+{
+    if (GetAutoLayout())
+        Layout();
+#if wxUSE_CONSTRAINTS
+#if defined(__WXPM__) && 0
+    else
+    {
+        // Need to properly move child windows under OS/2
+
+        PSWP                        pWinSwp = GetSwp();
+
+        if (pWinSwp->cx == 0 && pWinSwp->cy == 0 && pWinSwp->fl == 0)
+        {
+            // Uninitialized
+
+            ::WinQueryWindowPos(GetHWND(), pWinSwp);
+        }
+        else
+        {
+            SWP                     vSwp;
+            int                     nYDiff;
+
+            ::WinQueryWindowPos(GetHWND(), &vSwp);
+            nYDiff = pWinSwp->cy - vSwp.cy;
+            MoveChildren(nYDiff);
+            pWinSwp->cx = vSwp.cx;
+            pWinSwp->cy = vSwp.cy;
+        }
+    }
+#endif
+#endif // wxUSE_CONSTRAINTS
+
+    event.Skip();
+}

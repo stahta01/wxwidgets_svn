@@ -27,7 +27,7 @@
     #define WidgetsBookCtrlEvent wxBookCtrlEvent
     #define EVT_WIDGETS_PAGE_CHANGING(id,func) EVT_BOOKCTRL_PAGE_CHANGING(id,func)
     #define wxEVT_COMMAND_WIDGETS_PAGE_CHANGED wxEVT_COMMAND_BOOKCTRL_PAGE_CHANGED
-    #define wxWidgetsbookEventHandler(func) wxBookCtrlEventHandler(func)
+    #define wxWidgetsbookEventHandler(func) wxBookctrlEventHandler(func)
 #endif
 
 #if wxUSE_LOG && !defined(__WXHANDHELD__)
@@ -40,7 +40,6 @@
     #define USE_ICONS_IN_BOOK 0
 #else
     #define USE_ICONS_IN_BOOK 1
-    #define ICON_SIZE         16
 #endif
 
 class WXDLLIMPEXP_FWD_CORE wxCheckBox;
@@ -92,13 +91,10 @@ class WidgetsPage : public wxPanel
 public:
     WidgetsPage(WidgetsBookCtrl *book,
                 wxImageList *imaglist,
-                const char *const icon[]);
+                const char* icon[]);
 
     // return the control shown by this page
     virtual wxControl *GetWidget() const = 0;
-
-    // return the control shown by this page, if it supports text entry interface
-    virtual wxTextEntryBase *GetTextEntry() const { return NULL; }
 
     // lazy creation of the content
     virtual void CreateContent() = 0;

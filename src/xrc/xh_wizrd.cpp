@@ -75,7 +75,7 @@ wxObject *wxWizardXmlHandler::DoCreateResource()
         {
             if ( !m_instance )
             {
-                ReportError("wxWizardPage is abstract class and must be subclassed");
+                wxLogError(wxT("wxWizardPage is abstract class, must be subclassed"));
                 return NULL;
             }
 

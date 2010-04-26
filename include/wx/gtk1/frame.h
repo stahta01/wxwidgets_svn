@@ -14,12 +14,12 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
-class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxMenu;
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
-class WXDLLIMPEXP_FWD_CORE wxToolBar;
-class WXDLLIMPEXP_FWD_CORE wxStatusBar;
+class WXDLLIMPEXP_CORE wxMDIChildFrame;
+class WXDLLIMPEXP_CORE wxMDIClientWindow;
+class WXDLLIMPEXP_CORE wxMenu;
+class WXDLLIMPEXP_CORE wxMenuBar;
+class WXDLLIMPEXP_CORE wxToolBar;
+class WXDLLIMPEXP_CORE wxStatusBar;
 
 //-----------------------------------------------------------------------------
 // wxFrame
@@ -57,7 +57,7 @@ public:
     virtual void PositionStatusBar();
 
     virtual wxStatusBar* CreateStatusBar(int number = 1,
-                                         long style = wxSTB_DEFAULT_STYLE,
+                                         long style = wxST_SIZEGRIP|wxFULL_REPAINT_ON_RESIZE,
                                          wxWindowID id = 0,
                                          const wxString& name = wxStatusLineNameStr);
 

@@ -49,9 +49,6 @@ enum wxBatteryState
 class WXDLLIMPEXP_BASE wxPowerEvent : public wxEvent
 {
 public:
-    wxPowerEvent()            // just for use by wxRTTI
-        : m_veto(false) { }
-
     wxPowerEvent(wxEventType evtType) : wxEvent(wxID_NONE, evtType)
     {
         m_veto = false;
@@ -70,18 +67,23 @@ public:
 private:
     bool m_veto;
 
-    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxPowerEvent)
+#if wxABI_VERSION >= 20806
+    DECLARE_ABSTRACT_CLASS(wxPowerEvent)
+#endif
 };
 
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_BASE, wxEVT_POWER_SUSPENDING, wxPowerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_BASE, wxEVT_POWER_SUSPENDED, wxPowerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_BASE, wxEVT_POWER_SUSPEND_CANCEL, wxPowerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_BASE, wxEVT_POWER_RESUME, wxPowerEvent );
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_POWER_SUSPENDING, 406)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_POWER_SUSPENDED, 407)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_POWER_SUSPEND_CANCEL, 408)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_BASE, wxEVT_POWER_RESUME, 444)
+END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxPowerEventFunction)(wxPowerEvent&);
 
 #define wxPowerEventHandler(func) \
-    wxEVENT_HANDLER_CAST(wxPowerEventFunction, func)
+    (wxObjectEventFunction)(wxEventFunction) \
+        wxStaticCastEvent(wxPowerEventFunction, &func)
 
 #define EVT_POWER_SUSPENDING(func) \
     wx__DECLARE_EVT0(wxEVT_POWER_SUSPENDING, wxPowerEventHandler(func))

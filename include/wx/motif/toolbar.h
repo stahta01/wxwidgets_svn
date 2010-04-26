@@ -12,7 +12,7 @@
 #ifndef _WX_TOOLBAR_H_
 #define _WX_TOOLBAR_H_
 
-class WXDLLIMPEXP_CORE wxToolBar : public wxToolBarBase
+class WXDLLEXPORT wxToolBar : public wxToolBarBase
 {
 public:
     // ctors and dtor
@@ -69,8 +69,7 @@ private:
                                           wxObject *clientData,
                                           const wxString& shortHelp,
                                           const wxString& longHelp);
-    virtual wxToolBarToolBase *CreateTool(wxControl *control,
-                                          const wxString& label);
+    virtual wxToolBarToolBase *CreateTool(wxControl *control);
 
     virtual void DoSetSize(int x, int y,
                            int width, int height,

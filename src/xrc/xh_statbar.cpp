@@ -31,16 +31,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxStatusBarXmlHandler, wxXmlResourceHandler)
 wxStatusBarXmlHandler::wxStatusBarXmlHandler()
                       :wxXmlResourceHandler()
 {
-    XRC_ADD_STYLE(wxSTB_SIZEGRIP);
-    XRC_ADD_STYLE(wxSTB_SHOW_TIPS);
-    XRC_ADD_STYLE(wxSTB_ELLIPSIZE_START);
-    XRC_ADD_STYLE(wxSTB_ELLIPSIZE_MIDDLE);
-    XRC_ADD_STYLE(wxSTB_ELLIPSIZE_END);
-    XRC_ADD_STYLE(wxSTB_DEFAULT_STYLE);
-
-    // compat style name:
     XRC_ADD_STYLE(wxST_SIZEGRIP);
-
     AddWindowStyles();
 }
 
@@ -88,17 +79,7 @@ wxObject *wxStatusBarXmlHandler::DoCreateResource()
             else if (first == wxT("wxSB_RAISED"))
                 style[i] = wxSB_RAISED;
             else if (!first.empty())
-            {
-                ReportParamError
-                (
-                    "styles",
-                    wxString::Format
-                    (
-                        "unknown status bar field style \"%s\"",
-                        first
-                    )
-                );
-            }
+                wxLogError(wxT("Error in resource, unknown statusbar field style: ") + first);
 
             if(styles.Find(wxT(',')))
                 styles.Remove(0, styles.Find(wxT(',')) + 1);

@@ -48,7 +48,11 @@
 // Externals (somewhere in src/msw/app.cpp and src/msw/window.cpp)
 //---------------------------------------------------------------------------
 extern "C" WXDLLIMPEXP_BASE HINSTANCE wxGetInstance(void);
+#ifdef __WXWINCE__
+extern WXDLLIMPEXP_CORE       wxChar *wxCanvasClassName;
+#else
 extern WXDLLIMPEXP_CORE const wxChar *wxCanvasClassName;
+#endif
 
 LRESULT WXDLLIMPEXP_CORE APIENTRY _EXPORT wxWndProc(HWND hWnd, UINT message,
                                    WPARAM wParam, LPARAM lParam);
@@ -582,7 +586,7 @@ struct IMediaPlayer2 : public IMediaPlayer
 {
     STDMETHOD(get_DVD)(struct IMediaPlayerDvd __RPC_FAR *__RPC_FAR *ppdispatch) PURE;
     STDMETHOD(GetMediaParameter)(long EntryNum, BSTR bstrParameterName, BSTR __RPC_FAR *pbstrParameterValue) PURE;
-    STDMETHOD(GetMediaParameterName)(long EntryNum, long Index, BSTR __RPC_FAR *pbstrParameterName) PURE;
+    STDMETHOD(GetMediaParameterName(long EntryNum, long Index, BSTR __RPC_FAR *pbstrParameterName) PURE;
     STDMETHOD(get_EntryCount)(long __RPC_FAR *pNumberEntries) PURE;
     STDMETHOD(GetCurrentEntry)(long __RPC_FAR *pEntryNumber) PURE;
     STDMETHOD(SetCurrentEntry)(long EntryNumber) PURE;
@@ -725,7 +729,7 @@ struct INSPlay : public INSOPlay
     STDMETHOD(put_BaseURL)(BSTR pbstrBaseURL) PURE;
     STDMETHOD(get_DefaultFrame)(BSTR __RPC_FAR *pbstrDefaultFrame) PURE;
     STDMETHOD(put_DefaultFrame)(BSTR pbstrDefaultFrame) PURE;
-    STDMETHOD(AboutBox)(void) PURE;
+    STDMETHOD(AboutBox))(void) PURE;
     STDMETHOD(Cancel)(void) PURE;
     STDMETHOD(GetCodecInstalled)(long CodecNum, VARIANT_BOOL __RPC_FAR *pCodecInstalled) PURE;
     STDMETHOD(GetCodecDescription)(long CodecNum, BSTR __RPC_FAR *pbstrCodecDescription) PURE;
@@ -1480,7 +1484,7 @@ public:
     wxTimer* m_pTimer;
     wxSize m_bestSize;
 
-#if wxDEBUG_LEVEL
+#ifdef __WXDEBUG__
     wxDynamicLibrary m_dllQuartz;
     LPAMGETERRORTEXT m_lpAMGetErrorText;
     wxString GetErrorString(HRESULT hrdsv);
@@ -1661,6 +1665,22 @@ enum
 //---------------------------------------------------------------------------
 //  QT Library
 //---------------------------------------------------------------------------
+#define wxDL_METHOD_DEFINE( rettype, name, args, shortargs, defret ) \
+    typedef rettype (* name ## Type) args ; \
+    name ## Type pfn_ ## name; \
+    rettype name args \
+    { if (m_ok) return pfn_ ## name shortargs ; return defret; }
+
+#define wxDL_VOIDMETHOD_DEFINE( name, args, shortargs ) \
+    typedef void (* name ## Type) args ; \
+    name ## Type pfn_ ## name; \
+    void name args \
+    { if (m_ok) pfn_ ## name shortargs ; }
+
+#define wxDL_METHOD_LOAD( lib, name, success ) \
+    pfn_ ## name = (name ## Type) lib.GetSymbol( wxT(#name), &success ); \
+    if (!success) return false
+
 
 class WXDLLIMPEXP_MEDIA wxQuickTimeLibrary
 {
@@ -1771,71 +1791,76 @@ public:
 
 bool wxQuickTimeLibrary::Initialize()
 {
+    m_ok = false;
+
     // Turn off the wxDynamicLibrary logging as we're prepared to handle the
     // errors
     wxLogNull nolog;
 
-    m_ok = m_dll.Load(wxT("qtmlClient.dll"));
-    if ( !m_ok )
+    if (!m_dll.Load(wxT("qtmlClient.dll")))
+    {
         return false;
+    }
 
-    wxDL_METHOD_LOAD( m_dll, StartMovie );
-    wxDL_METHOD_LOAD( m_dll, StopMovie );
-    wxDL_METHOD_LOAD( m_dll, IsMovieDone );
-    wxDL_METHOD_LOAD( m_dll, GoToBeginningOfMovie );
-    wxDL_METHOD_LOAD( m_dll, GetMoviesError );
-    wxDL_METHOD_LOAD( m_dll, EnterMovies );
-    wxDL_METHOD_LOAD( m_dll, ExitMovies );
-    wxDL_METHOD_LOAD( m_dll, InitializeQTML );
-    wxDL_METHOD_LOAD( m_dll, TerminateQTML );
-    wxDL_METHOD_LOAD( m_dll, NativePathNameToFSSpec );
-    wxDL_METHOD_LOAD( m_dll, OpenMovieFile );
-    wxDL_METHOD_LOAD( m_dll, CloseMovieFile );
-    wxDL_METHOD_LOAD( m_dll, NewMovieFromFile );
-    wxDL_METHOD_LOAD( m_dll, GetMovieRate );
-    wxDL_METHOD_LOAD( m_dll, SetMovieRate );
-    wxDL_METHOD_LOAD( m_dll, MoviesTask );
-    wxDL_METHOD_LOAD( m_dll, BlockMove );
-    wxDL_METHOD_LOAD( m_dll, NewHandleClear );
-    wxDL_METHOD_LOAD( m_dll, NewMovieFromDataRef );
-    wxDL_METHOD_LOAD( m_dll, DisposeHandle );
-    wxDL_METHOD_LOAD( m_dll, GetMovieNaturalBoundsRect );
-    wxDL_METHOD_LOAD( m_dll, GetMovieIndTrackType );
-    wxDL_METHOD_LOAD( m_dll, CreatePortAssociation );
-    wxDL_METHOD_LOAD( m_dll, DestroyPortAssociation );
-    wxDL_METHOD_LOAD( m_dll, GetNativeWindowPort );
-    wxDL_METHOD_LOAD( m_dll, SetMovieGWorld );
-    wxDL_METHOD_LOAD( m_dll, DisposeMovie );
-    wxDL_METHOD_LOAD( m_dll, SetMovieBox );
-    wxDL_METHOD_LOAD( m_dll, SetMovieTimeScale );
-    wxDL_METHOD_LOAD( m_dll, GetMovieDuration );
-    wxDL_METHOD_LOAD( m_dll, GetMovieTimeBase );
-    wxDL_METHOD_LOAD( m_dll, GetMovieTimeScale );
-    wxDL_METHOD_LOAD( m_dll, GetMovieTime );
-    wxDL_METHOD_LOAD( m_dll, SetMovieTime );
-    wxDL_METHOD_LOAD( m_dll, GetMovieVolume );
-    wxDL_METHOD_LOAD( m_dll, SetMovieVolume );
-    wxDL_METHOD_LOAD( m_dll, SetMovieTimeValue );
-    wxDL_METHOD_LOAD( m_dll, NewMovieController );
-    wxDL_METHOD_LOAD( m_dll, DisposeMovieController );
-    wxDL_METHOD_LOAD( m_dll, MCSetVisible );
-    wxDL_METHOD_LOAD( m_dll, PrePrerollMovie );
-    wxDL_METHOD_LOAD( m_dll, PrerollMovie );
-    wxDL_METHOD_LOAD( m_dll, GetMoviePreferredRate );
-    wxDL_METHOD_LOAD( m_dll, GetMovieLoadState );
-    wxDL_METHOD_LOAD( m_dll, MCDoAction );
-    wxDL_METHOD_LOAD( m_dll, MCSetControllerBoundsRect );
-    wxDL_METHOD_LOAD( m_dll, NativeEventToMacEvent );
-    wxDL_METHOD_LOAD( m_dll, MCIsPlayerEvent );
-    wxDL_METHOD_LOAD( m_dll, MCSetMovie );
-    wxDL_METHOD_LOAD( m_dll, MCSetActionFilterWithRefCon );
-    wxDL_METHOD_LOAD( m_dll, MCGetControllerInfo );
-    wxDL_METHOD_LOAD( m_dll, BeginUpdate );
-    wxDL_METHOD_LOAD( m_dll, UpdateMovie );
-    wxDL_METHOD_LOAD( m_dll, EndUpdate );
-    wxDL_METHOD_LOAD( m_dll, GetMoviesStickyError );
+    wxDL_METHOD_LOAD( m_dll, StartMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, StopMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, IsMovieDone, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GoToBeginningOfMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMoviesError, m_ok );
+    wxDL_METHOD_LOAD( m_dll, EnterMovies, m_ok );
+    wxDL_METHOD_LOAD( m_dll, ExitMovies, m_ok );
+    wxDL_METHOD_LOAD( m_dll, InitializeQTML, m_ok );
+    wxDL_METHOD_LOAD( m_dll, TerminateQTML, m_ok );
+    wxDL_METHOD_LOAD( m_dll, NativePathNameToFSSpec, m_ok );
+    wxDL_METHOD_LOAD( m_dll, OpenMovieFile, m_ok );
+    wxDL_METHOD_LOAD( m_dll, CloseMovieFile, m_ok );
+    wxDL_METHOD_LOAD( m_dll, NewMovieFromFile, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieRate, m_ok );
+    wxDL_METHOD_LOAD( m_dll, SetMovieRate, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MoviesTask, m_ok );
+    wxDL_METHOD_LOAD( m_dll, BlockMove, m_ok );
+    wxDL_METHOD_LOAD( m_dll, NewHandleClear, m_ok );
+    wxDL_METHOD_LOAD( m_dll, NewMovieFromDataRef, m_ok );
+    wxDL_METHOD_LOAD( m_dll, DisposeHandle, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieNaturalBoundsRect, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieIndTrackType, m_ok );
+    wxDL_METHOD_LOAD( m_dll, CreatePortAssociation, m_ok );
+    wxDL_METHOD_LOAD( m_dll, DestroyPortAssociation, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetNativeWindowPort, m_ok );
+    wxDL_METHOD_LOAD( m_dll, SetMovieGWorld, m_ok );
+    wxDL_METHOD_LOAD( m_dll, DisposeMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, SetMovieBox, m_ok );
+    wxDL_METHOD_LOAD( m_dll, SetMovieTimeScale, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieDuration, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieTimeBase, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieTimeScale, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieTime, m_ok );
+    wxDL_METHOD_LOAD( m_dll, SetMovieTime, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieVolume, m_ok );
+    wxDL_METHOD_LOAD( m_dll, SetMovieVolume, m_ok );
+    wxDL_METHOD_LOAD( m_dll, SetMovieTimeValue, m_ok );
+    wxDL_METHOD_LOAD( m_dll, NewMovieController, m_ok );
+    wxDL_METHOD_LOAD( m_dll, DisposeMovieController, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MCSetVisible, m_ok );
+    wxDL_METHOD_LOAD( m_dll, PrePrerollMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, PrerollMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMoviePreferredRate, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMovieLoadState, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MCDoAction, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MCSetControllerBoundsRect, m_ok );
+    wxDL_METHOD_LOAD( m_dll, NativeEventToMacEvent, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MCIsPlayerEvent, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MCSetMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MCSetActionFilterWithRefCon, m_ok );
+    wxDL_METHOD_LOAD( m_dll, MCGetControllerInfo, m_ok );
+    wxDL_METHOD_LOAD( m_dll, BeginUpdate, m_ok );
+    wxDL_METHOD_LOAD( m_dll, UpdateMovie, m_ok );
+    wxDL_METHOD_LOAD( m_dll, EndUpdate, m_ok );
+    wxDL_METHOD_LOAD( m_dll, GetMoviesStickyError, m_ok );
 
-    return m_ok;
+    m_ok = true;
+
+    return true;
 }
 
 class WXDLLIMPEXP_MEDIA wxQTMediaBackend : public wxMediaBackendCommonBase
@@ -1925,7 +1950,7 @@ private:
     wxQTMediaBackend *m_qtb;
     WXHWND m_hwnd;
 
-    wxDECLARE_NO_COPY_CLASS(wxQTMediaEvtHandler);
+    DECLARE_NO_COPY_CLASS(wxQTMediaEvtHandler)
 };
 
 
@@ -1942,7 +1967,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxAMMediaBackend, wxMediaBackend)
 //---------------------------------------------------------------------------
 // Usual debugging macros
 //---------------------------------------------------------------------------
-#if wxDEBUG_LEVEL
+#ifdef __WXDEBUG__
 #define MAX_ERROR_TEXT_LEN 160
 
 // Get the error string for Active Movie
@@ -2213,8 +2238,8 @@ bool wxAMMediaBackend::CreateControl(wxControl* ctrl, wxWindow* parent,
 {
     // First get the AMGetErrorText procedure in
     // debug mode for more meaningful messages
-#if wxDEBUG_LEVEL
-    if ( m_dllQuartz.Load(wxT("quartz.dll"), wxDL_VERBATIM) )
+#ifdef __WXDEBUG__
+    if ( m_dllQuartz.Load(_T("quartz.dll"), wxDL_VERBATIM) )
     {
         m_lpAMGetErrorText = (LPAMGETERRORTEXT)
                                 m_dllQuartz.GetSymbolAorW(wxT("AMGetErrorText"));
@@ -2778,7 +2803,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxMCIMediaBackend, wxMediaBackend)
 // Usual debugging macros for MCI returns
 //---------------------------------------------------------------------------
 
-#if wxDEBUG_LEVEL
+#ifdef __WXDEBUG__
 #define wxMCIVERIFY(arg) \
 { \
     DWORD nRet; \
@@ -2786,7 +2811,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxMCIMediaBackend, wxMediaBackend)
     { \
         TCHAR sz[5000]; \
         mciGetErrorString(nRet, sz, 5000); \
-        wxFAIL_MSG(wxString::Format(wxT("MCI Error:%s"), sz)); \
+        wxFAIL_MSG(wxString::Format(_T("MCI Error:%s"), sz)); \
     } \
 }
 #else
@@ -2924,7 +2949,7 @@ bool wxMCIMediaBackend::Load(const wxString& fileName)
     // omit this it tells MCI to select the device instead. This is good
     // because we have no reliable way of "enumerating" the devices in MCI
     MCI_OPEN_PARMS openParms;
-    openParms.lpstrElementName = fileName.wx_str();
+    openParms.lpstrElementName = (wxChar*) fileName.c_str();
 
     if (mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT,
                         (DWORD)(LPVOID)&openParms) != 0)

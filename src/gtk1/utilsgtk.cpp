@@ -19,8 +19,7 @@
 #endif
 
 #include "wx/apptrait.h"
-#include "wx/gtk1/private/timer.h"
-#include "wx/evtloop.h"
+
 #include "wx/process.h"
 
 #include "wx/unix/execute.h"
@@ -106,7 +105,7 @@ void wxDisplaySizeMM( int *width, int *height )
 
 void wxGetMousePosition( int* x, int* y )
 {
-    gdk_window_get_pointer( NULL, x, y, NULL );
+    gdk_window_get_pointer( (GdkWindow*) NULL, x, y, (GdkModifierType*) NULL );
 }
 
 bool wxColourDisplay()
@@ -134,20 +133,36 @@ static
 void GTK_EndProcessDetector(gpointer data, gint source,
                             GdkInputCondition WXUNUSED(condition) )
 {
-    wxEndProcessData * const
-        proc_data = static_cast<wxEndProcessData *>(data);
+   wxEndProcessData *proc_data = (wxEndProcessData *)data;
 
-    // child exited, end waiting
-    close(source);
+   // has the process really terminated? unfortunately GDK (or GLib) seem to
+   // generate G_IO_HUP notification even when it simply tries to read from a
+   // closed fd and hasn't terminated at all
+   int pid = (proc_data->pid > 0) ? proc_data->pid : -(proc_data->pid);
+   int status = 0;
+   int rc = waitpid(pid, &status, WNOHANG);
 
-    // don't call us again!
-    gdk_input_remove(proc_data->tag);
+   if ( rc == 0 )
+   {
+       // no, it didn't exit yet, continue waiting
+       return;
+   }
 
-    wxHandleProcessTermination(proc_data);
+   // set exit code to -1 if something bad happened
+   proc_data->exitcode = rc != -1 && WIFEXITED(status) ? WEXITSTATUS(status)
+                                                      : -1;
+
+   // child exited, end waiting
+   close(source);
+
+   // don't call us again!
+   gdk_input_remove(proc_data->tag);
+
+   wxHandleProcessTermination(proc_data);
 }
 }
 
-int wxGUIAppTraits::AddProcessCallback(wxEndProcessData *proc_data, int fd)
+int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 {
     int tag = gdk_input_add(fd,
                             GDK_INPUT_READ,
@@ -156,15 +171,6 @@ int wxGUIAppTraits::AddProcessCallback(wxEndProcessData *proc_data, int fd)
 
     return tag;
 }
-
-#if wxUSE_TIMER
-
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxGTKTimerImpl(timer);
-}
-
-#endif // wxUSE_TIMER
 
 // ----------------------------------------------------------------------------
 // wxPlatformInfo-related
@@ -180,15 +186,7 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_GTK;
 }
 
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
+wxString wxGUIAppTraits::GetDesktopEnvironment() const
 {
-    return new wxEventLoop;
+    return wxEmptyString;
 }
-
-#if wxUSE_INTL
-void wxGUIAppTraits::SetLocale()
-{
-    gtk_set_locale();
-}
-#endif
-

@@ -79,7 +79,7 @@ typedef HRESULT (__stdcall *PFNWXUENABLETHEMING)(BOOL);
     #define wxUX_THEME_DECLARE(type, func) type func(...) { return 0; }
 #endif
 
-class WXDLLIMPEXP_CORE wxUxThemeEngine
+class WXDLLEXPORT wxUxThemeEngine
 {
 public:
     // get the theme engine or NULL if themes are not available
@@ -168,7 +168,7 @@ private:
     friend class wxUxThemeModule;
 #endif // wxUSE_UXTHEME
 
-    wxDECLARE_NO_COPY_CLASS(wxUxThemeEngine);
+    DECLARE_NO_COPY_CLASS(wxUxThemeEngine)
 };
 
 #if wxUSE_UXTHEME
@@ -223,7 +223,7 @@ public:
 private:
     HTHEME m_hTheme;
 
-    wxDECLARE_NO_COPY_CLASS(wxUxThemeHandle);
+    DECLARE_NO_COPY_CLASS(wxUxThemeHandle)
 };
 
 #endif // _WX_UXTHEME_H_

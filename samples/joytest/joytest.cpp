@@ -43,18 +43,15 @@ int nButtons = 0;
 // Initialise this in OnInit, not statically
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxJoystick stick(wxJOYSTICK1);
     if (!stick.IsOk())
     {
-        wxMessageBox(wxT("No joystick detected!"));
+        wxMessageBox(_T("No joystick detected!"));
         return false;
     }
 
 #if wxUSE_SOUND
-    m_fire.Create(wxT("buttonpress.wav"));
+    m_fire.Create(_T("buttonpress.wav"));
 #endif // wxUSE_SOUND
 
     m_minX = stick.GetXMin();
@@ -64,25 +61,25 @@ bool MyApp::OnInit()
 
     // Create the main frame window
 
-    frame = new MyFrame(NULL, wxT("Joystick Demo"), wxDefaultPosition,
+    frame = new MyFrame(NULL, _T("Joystick Demo"), wxDefaultPosition,
         wxSize(500, 400), wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
 
   // Give it an icon (this is ignored in MDI mode: uses resources)
 #ifdef __WXMSW__
-    frame->SetIcon(wxIcon(wxT("joyicon")));
+    frame->SetIcon(wxIcon(_T("joyicon")));
 #endif
 #ifdef __X__
-    frame->SetIcon(wxIcon(wxT("joyicon.xbm")));
+    frame->SetIcon(wxIcon(_T("joyicon.xbm")));
 #endif
 
     // Make a menubar
     wxMenu *file_menu = new wxMenu;
 
-    file_menu->Append(JOYTEST_QUIT, wxT("&Exit"));
+    file_menu->Append(JOYTEST_QUIT, _T("&Exit"));
 
     wxMenuBar *menu_bar = new wxMenuBar;
 
-    menu_bar->Append(file_menu, wxT("&File"));
+    menu_bar->Append(file_menu, _T("&File"));
 
     // Associate the menu bar with the frame
     frame->SetMenuBar(menu_bar);
@@ -158,9 +155,9 @@ void MyCanvas::OnJoystickEvent(wxJoystickEvent& event)
 #if wxUSE_STATUSBAR
     wxString buf;
     if (event.ButtonDown())
-        buf.Printf(wxT("Joystick (%d, %d) #%i Fire!"), pt.x, pt.y, event.GetButtonChange());
+        buf.Printf(_T("Joystick (%d, %d) #%i Fire!"), pt.x, pt.y, event.GetButtonChange());
     else
-        buf.Printf(wxT("Joystick (%d, %d)  "), pt.x, pt.y);
+        buf.Printf(_T("Joystick (%d, %d)  "), pt.x, pt.y);
 
 /*
     for(int i = 0; i < nButtons; ++i)

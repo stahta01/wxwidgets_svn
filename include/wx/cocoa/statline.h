@@ -17,7 +17,7 @@
 // ========================================================================
 // wxStaticLine
 // ========================================================================
-class WXDLLIMPEXP_CORE wxStaticLine: public wxStaticLineBase// , protected wxCocoaNSButton
+class WXDLLEXPORT wxStaticLine: public wxStaticLineBase// , protected wxCocoaNSButton
 {
     DECLARE_DYNAMIC_CLASS(wxStaticLine)
     DECLARE_EVENT_TABLE()
@@ -46,7 +46,7 @@ public:
 // ------------------------------------------------------------------------
 protected:
     // Static lines cannot be enabled/disabled
-    virtual void CocoaSetEnabled(bool WXUNUSED(enable)) { }
+    virtual void CocoaSetEnabled(bool enable) { }
 // ------------------------------------------------------------------------
 // Implementation
 // ------------------------------------------------------------------------

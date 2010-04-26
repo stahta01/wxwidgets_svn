@@ -28,7 +28,7 @@
 // is used for this and also for wxGridCellCoords.
 //---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxGBPosition
+class WXDLLEXPORT wxGBPosition
 {
 public:
     wxGBPosition() : m_row(0), m_col(0) {}
@@ -50,7 +50,7 @@ private:
 };
 
 
-class WXDLLIMPEXP_CORE wxGBSpan
+class WXDLLEXPORT wxGBSpan
 {
 public:
     wxGBSpan() : m_rowspan(1), m_colspan(1) {}
@@ -72,7 +72,7 @@ private:
 };
 
 
-extern WXDLLIMPEXP_DATA_CORE(const wxGBSpan) wxDefaultSpan;
+extern WXDLLEXPORT_DATA(const wxGBSpan) wxDefaultSpan;
 
 
 //---------------------------------------------------------------------------
@@ -82,7 +82,7 @@ extern WXDLLIMPEXP_DATA_CORE(const wxGBSpan) wxDefaultSpan;
 class WXDLLIMPEXP_FWD_CORE wxGridBagSizer;
 
 
-class WXDLLIMPEXP_CORE wxGBSizerItem : public wxSizerItem
+class WXDLLEXPORT wxGBSizerItem : public wxSizerItem
 {
 public:
     // spacer
@@ -156,7 +156,7 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxGBSizerItem)
-    wxDECLARE_NO_COPY_CLASS(wxGBSizerItem);
+    DECLARE_NO_COPY_CLASS(wxGBSizerItem)
 };
 
 
@@ -165,7 +165,7 @@ private:
 //---------------------------------------------------------------------------
 
 
-class WXDLLIMPEXP_CORE wxGridBagSizer : public wxFlexGridSizer
+class WXDLLEXPORT wxGridBagSizer : public wxFlexGridSizer
 {
 public:
     wxGridBagSizer(int vgap = 0, int hgap = 0 );
@@ -286,7 +286,9 @@ public:
 
 protected:
     wxGBPosition FindEmptyCell();
+#if wxABI_VERSION >= 20808
     void AdjustForOverflow();
+#endif
 
     wxSize m_emptyCellSize;
 
@@ -294,7 +296,7 @@ protected:
 private:
 
     DECLARE_CLASS(wxGridBagSizer)
-    wxDECLARE_NO_COPY_CLASS(wxGridBagSizer);
+    DECLARE_NO_COPY_CLASS(wxGridBagSizer)
 };
 
 //---------------------------------------------------------------------------

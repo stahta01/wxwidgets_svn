@@ -14,14 +14,14 @@
 
 #include "wx/cocoa/NSButton.h"
 
-class WXDLLIMPEXP_FWD_CORE wxRadioButton;
+class WXDLLEXPORT wxRadioButton;
 
-WX_DECLARE_EXPORTED_LIST(wxRadioButton, wxRadioButtonList);
+WX_DECLARE_LIST(wxRadioButton, wxRadioButtonList);
 
 // ========================================================================
 // wxRadioButton
 // ========================================================================
-class WXDLLIMPEXP_CORE wxRadioButton: public wxControl, protected wxCocoaNSButton
+class WXDLLEXPORT wxRadioButton: public wxControl, protected wxCocoaNSButton
 {
     DECLARE_DYNAMIC_CLASS(wxRadioButton)
     DECLARE_EVENT_TABLE()

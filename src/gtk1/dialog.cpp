@@ -141,7 +141,7 @@ void wxDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
 
     wxCommandEvent cancelEvent(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
     cancelEvent.SetEventObject( this );
-    HandleWindowEvent(cancelEvent);
+    GetEventHandler()->ProcessEvent(cancelEvent);
     s_closing.DeleteObject(this);
 }
 
@@ -161,9 +161,6 @@ bool wxDialog::Show( bool show )
 
         GtkOnSize( m_x, m_y, m_width, m_height );
     }
-
-    if (show && CanDoLayoutAdaptation())
-        DoLayoutAdaptation();
 
     bool ret = wxWindow::Show( show );
 
@@ -192,11 +189,17 @@ int wxDialog::ShowModal()
 
     // use the apps top level window as parent if none given unless explicitly
     // forbidden
-    wxWindow * const parent = GetParentForModalDialog();
-    if ( parent )
+    if ( !GetParent() && !(GetWindowStyleFlag() & wxDIALOG_NO_PARENT) )
     {
-        m_parent = parent;
-        gtk_window_set_transient_for( GTK_WINDOW(m_widget), GTK_WINDOW(parent->m_widget) );
+        wxWindow *parent = wxTheApp->GetTopWindow();
+        if ( parent &&
+                parent != this &&
+                    !parent->IsBeingDeleted() &&
+                        !(parent->GetExtraStyle() & wxWS_EX_TRANSIENT) )
+        {
+            m_parent = parent;
+            gtk_window_set_transient_for( GTK_WINDOW(m_widget), GTK_WINDOW(parent->m_widget) );
+        }
     }
 
     wxBusyCursorSuspender cs; // temporarily suppress the busy cursor

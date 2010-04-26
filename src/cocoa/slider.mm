@@ -99,19 +99,24 @@ wxSlider::~wxSlider()
     DisassociateNSSlider(GetNSSlider());
 }
 
+// NOTE: We don't derive from wxCocoaNSSlider in 2.8 due to ABI
+
 void wxSlider::AssociateNSSlider(WX_NSSlider theSlider)
 {
-    wxCocoaNSSlider::AssociateNSSlider(theSlider);
     // Set the target/action.. we don't really need to unset these
     [theSlider setTarget:wxCocoaNSControl::sm_cocoaTarget];
     [theSlider setAction:@selector(wxNSControlAction:)];
+}
+
+void wxSlider::DisassociateNSSlider(WX_NSSlider theSlider)
+{
 }
 
 void wxSlider::ProcessEventType(wxEventType commandType)
 {
     wxScrollEvent event(commandType, GetId(), GetValue(), HasFlag(wxSL_VERTICAL)?wxVERTICAL:wxHORIZONTAL);
     event.SetEventObject(this);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 }
 
 static inline wxEventType wxSliderEventTypeForKeyFromEvent(NSEvent *theEvent)
@@ -130,8 +135,7 @@ static inline wxEventType wxSliderEventTypeForKeyFromEvent(NSEvent *theEvent)
             case NSPageDownFunctionKey:     return wxEVT_SCROLL_TOP;
         }
     }
-    // Overload wxEVT_ANY to mean we can't determine the event type.
-    return wxEVT_ANY;
+    return wxEVT_NULL;
 }
 
 void wxSlider::CocoaTarget_action()
@@ -155,7 +159,7 @@ void wxSlider::CocoaTarget_action()
     else
         // Don't generate an event.
         return;
-    if(sliderEventType != wxEVT_ANY)
+    if(sliderEventType != wxEVT_NULL)
         ProcessEventType(sliderEventType);
 }
 

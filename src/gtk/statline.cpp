@@ -38,6 +38,8 @@ bool wxStaticLine::Create( wxWindow *parent, wxWindowID id,
                            const wxPoint &pos, const wxSize &size,
                            long style, const wxString &name )
 {
+    m_needParent = TRUE;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, wxDefaultValidator, name ))
     {
@@ -65,7 +67,6 @@ bool wxStaticLine::Create( wxWindow *parent, wxWindowID id,
             SetSize( new_size );
         }
     }
-    g_object_ref(m_widget);
 
     m_parent->DoAddChild( this );
 

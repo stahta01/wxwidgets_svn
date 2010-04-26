@@ -38,19 +38,10 @@
 //
 //     nmake -f makefile.vc BUILD=debug SHARED=0 DEBUG_RUNTIME_LIBS=0 RUNTIME_LIBS=static all
 //
-//     Unless the run-time library settings match for wxWidgets and MFC, you
-//     will get link errors for symbols such as __mbctype, __argc, and __argv 
+//     Unless the run-time library settings match for wxWidgets and MFC, you will get
+//     link errors for symbols such as __mbctype, __argc, and __argv 
 //
-// (3) If you see bogus memory leaks within the MSVC IDE on exit, in this
-//     sample or in your own project, you must be using __WXDEBUG__ +
-//     WXUSINGDLL + _AFXDLL
-//     Unfortunately this confuses the MSVC/MFC leak detector. To do away with
-//     these bogus memory leaks, add this to the list of link objects, make it
-//     first: mfc[version][u]d.lib
-//     -  [version] -> 42 or 70 or 80 etc
-//     -  u if using Unicode
-//
-// (4) Unicode builds may produce the linker error "unresolved external symbol _WinMain@16".
+// (3) Unicode builds may produce the linker error "unresolved external symbol _WinMain@16".
 //     MFC requires you to manually add the Unicode entry point to the linker settings,
 //     Entry point symbol -> wWinMainCRTStartup
 
@@ -130,14 +121,14 @@ IMPLEMENT_APP_NO_MAIN(MyApp)
 
 CMainWindow::CMainWindow()
 {
-    LoadAccelTable( wxT("MainAccelTable") );
-    Create( NULL, wxT("Hello Foundation Application"),
-        WS_OVERLAPPEDWINDOW, rectDefault, NULL, wxT("MainMenu") );
+    LoadAccelTable( _T("MainAccelTable") );
+    Create( NULL, _T("Hello Foundation Application"),
+        WS_OVERLAPPEDWINDOW, rectDefault, NULL, _T("MainMenu") );
 }
 
 void CMainWindow::OnPaint()
 {
-    CString s = wxT("Hello, Windows!");
+    CString s = _T("Hello, Windows!");
     CPaintDC dc( this );
     CRect rect;
 
@@ -151,13 +142,13 @@ void CMainWindow::OnPaint()
 
 void CMainWindow::OnAbout()
 {
-    CDialog about( wxT("AboutBox"), this );
+    CDialog about( _T("AboutBox"), this );
     about.DoModal();
 }
 
 void CMainWindow::OnTest()
 {
-    wxMessageBox(wxT("This is a wxWidgets message box.\nWe're about to create a new wxWidgets frame."), wxT("wxWidgets"), wxOK);
+    wxMessageBox(_T("This is a wxWidgets message box.\nWe're about to create a new wxWidgets frame."), _T("wxWidgets"), wxOK);
     wxGetApp().CreateFrame();
 }
 
@@ -227,8 +218,7 @@ int CTheApp::ExitInstance()
 // Override this to provide wxWidgets message loop compatibility
 BOOL CTheApp::PreTranslateMessage(MSG *msg)
 {
-    wxEventLoop * const
-        evtLoop = static_cast<wxEventLoop *>(wxEventLoop::GetActive());
+    wxEventLoop *evtLoop = wxEventLoop::GetActive();
     if ( evtLoop && evtLoop->PreProcessMessage(msg) )
         return TRUE;
 
@@ -246,9 +236,6 @@ BOOL CTheApp::OnIdle(LONG WXUNUSED(lCount))
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if !START_WITH_MFC_WINDOW
     // as we're not inside wxWidgets main loop, the default logic doesn't work
     // in our case and we need to do this explicitly
@@ -268,10 +255,10 @@ void MyApp::ExitMainLoop()
 
 wxFrame *MyApp::CreateFrame()
 {
-    MyChild *subframe = new MyChild(NULL, wxT("Canvas Frame"), wxPoint(10, 10), wxSize(300, 300),
+    MyChild *subframe = new MyChild(NULL, _T("Canvas Frame"), wxPoint(10, 10), wxSize(300, 300),
         wxDEFAULT_FRAME_STYLE);
 
-    subframe->SetTitle(wxT("wxWidgets canvas frame"));
+    subframe->SetTitle(_T("wxWidgets canvas frame"));
 
     // Give it a status line
     subframe->CreateStatusBar();
@@ -279,12 +266,12 @@ wxFrame *MyApp::CreateFrame()
     // Make a menubar
     wxMenu *file_menu = new wxMenu;
 
-    file_menu->Append(HELLO_NEW, wxT("&New MFC Window"));
-    file_menu->Append(HELLO_QUIT, wxT("&Close"));
+    file_menu->Append(HELLO_NEW, _T("&New MFC Window"));
+    file_menu->Append(HELLO_QUIT, _T("&Close"));
 
     wxMenuBar *menu_bar = new wxMenuBar;
 
-    menu_bar->Append(file_menu, wxT("&File"));
+    menu_bar->Append(file_menu, _T("&File"));
 
     // Associate the menu bar with the frame
     subframe->SetMenuBar(menu_bar);
@@ -329,7 +316,7 @@ void MyCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 
     dc.DrawEllipse(250, 250, 100, 50);
     dc.DrawLine(50, 230, 200, 230);
-    dc.DrawText(wxT("This is a test string"), 50, 230);
+    dc.DrawText(_T("This is a test string"), 50, 230);
 }
 
 // This implements a tiny doodling program! Drag the mouse using

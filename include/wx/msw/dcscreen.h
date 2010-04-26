@@ -12,22 +12,28 @@
 #ifndef _WX_MSW_DCSCREEN_H_
 #define _WX_MSW_DCSCREEN_H_
 
-#include "wx/dcscreen.h"
-#include "wx/msw/dc.h"
+#include "wx/dc.h"
 
-class WXDLLIMPEXP_CORE wxScreenDCImpl : public wxMSWDCImpl
+class WXDLLEXPORT wxScreenDC : public wxDC
 {
 public:
     // Create a DC representing the whole screen
-    wxScreenDCImpl( wxScreenDC *owner );
+    wxScreenDC();
 
+    // Compatibility with X's requirements for drawing on top of all windows:
+    // they don't do anything under MSW
+    static bool StartDrawingOnTop(wxWindow* WXUNUSED(window)) { return true; }
+    static bool StartDrawingOnTop(wxRect* WXUNUSED(rect) = NULL) { return true; }
+    static bool EndDrawingOnTop() { return true; }
+
+protected:
     virtual void DoGetSize(int *w, int *h) const
     {
         GetDeviceSize(w, h);
     }
 
-    DECLARE_CLASS(wxScreenDCImpl)
-    wxDECLARE_NO_COPY_CLASS(wxScreenDCImpl);
+private:
+    DECLARE_DYNAMIC_CLASS_NO_COPY(wxScreenDC)
 };
 
 #endif // _WX_MSW_DCSCREEN_H_

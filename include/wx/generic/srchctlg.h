@@ -22,7 +22,7 @@ class WXDLLIMPEXP_FWD_CORE wxSearchTextCtrl;
 // wxSearchCtrl is a combination of wxTextCtrl and wxSearchButton
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSearchCtrl : public wxSearchCtrlBase
+class WXDLLEXPORT wxSearchCtrl : public wxSearchCtrlBase
 {
 public:
     // creation
@@ -62,12 +62,17 @@ public:
     virtual void ShowCancelButton( bool show );
     virtual bool IsCancelButtonVisible() const;
 
+#if wxABI_VERSION >= 20802
     // TODO: In 2.9 these should probably be virtual, and declared in the base class...
     void SetDescriptiveText(const wxString& text);
     wxString GetDescriptiveText() const;
+#endif
 
     // accessors
     // ---------
+
+    virtual wxString GetValue() const;
+    virtual void SetValue(const wxString& value);
 
     virtual wxString GetRange(long from, long to) const;
 
@@ -200,11 +205,7 @@ public:
 #endif // wxUSE_MENUS
 
 protected:
-    virtual void DoSetValue(const wxString& value, int flags);
-    virtual wxString DoGetValue() const;
-
-    virtual bool DoLoadFile(const wxString& file, int fileType);
-    virtual bool DoSaveFile(const wxString& file, int fileType);
+    virtual void DoSetValue(const wxString& value, int flags = 0);
 
     // override the base class virtuals involved into geometry calculations
     virtual wxSize DoGetBestSize() const;

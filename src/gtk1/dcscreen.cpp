@@ -10,6 +10,8 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
+#include "wx/dcscreen.h"
+
 #ifndef WX_PRECOMP
     #include "wx/window.h"
 #endif
@@ -18,25 +20,21 @@
 #include <gdk/gdkx.h>
 #include <gtk/gtk.h>
 
-#include "wx/dcscreen.h"
-#include "wx/gtk1/dcscreen.h"
-
 //-----------------------------------------------------------------------------
 // global data initialization
 //-----------------------------------------------------------------------------
 
-GdkWindow *wxScreenDCImpl::sm_overlayWindow  = NULL;
-int wxScreenDCImpl::sm_overlayWindowX = 0;
-int wxScreenDCImpl::sm_overlayWindowY = 0;
+GdkWindow *wxScreenDC::sm_overlayWindow  = (GdkWindow*) NULL;
+int wxScreenDC::sm_overlayWindowX = 0;
+int wxScreenDC::sm_overlayWindowY = 0;
 
 //-----------------------------------------------------------------------------
-// wxScreenDCImpl
+// wxScreenDC
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxScreenDCImpl, wxPaintDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC,wxPaintDC)
 
-wxScreenDCImpl::wxScreenDCImpl(wxScreenDC *owner)
-              : wxPaintDCImpl(owner)
+wxScreenDC::wxScreenDC()
 {
     m_ok = false;
     m_cmap = gdk_colormap_get_system();
@@ -52,15 +50,32 @@ wxScreenDCImpl::wxScreenDCImpl(wxScreenDC *owner)
     gdk_gc_set_subwindow( m_bgGC, GDK_INCLUDE_INFERIORS );
 }
 
-wxScreenDCImpl::~wxScreenDCImpl()
+wxScreenDC::~wxScreenDC()
 {
     gdk_gc_set_subwindow( m_penGC, GDK_CLIP_BY_CHILDREN );
     gdk_gc_set_subwindow( m_brushGC, GDK_CLIP_BY_CHILDREN );
     gdk_gc_set_subwindow( m_textGC, GDK_CLIP_BY_CHILDREN );
     gdk_gc_set_subwindow( m_bgGC, GDK_CLIP_BY_CHILDREN );
+
+    EndDrawingOnTop();
 }
 
-void wxScreenDCImpl::DoGetSize(int *width, int *height) const
+bool wxScreenDC::StartDrawingOnTop( wxWindow * )
+{
+    return true;
+}
+
+bool wxScreenDC::StartDrawingOnTop( wxRect * )
+{
+    return true;
+}
+
+bool wxScreenDC::EndDrawingOnTop()
+{
+    return true;
+}
+
+void wxScreenDC::DoGetSize(int *width, int *height) const
 {
     wxDisplaySize(width, height);
 }

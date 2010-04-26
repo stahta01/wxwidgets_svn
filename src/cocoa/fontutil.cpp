@@ -179,7 +179,7 @@ bool wxGetNativeFontEncoding(wxFontEncoding encoding,
 // private data
 // ----------------------------------------------------------------------------
 
-static wxHashTable *g_fontHash = NULL;
+static wxHashTable *g_fontHash = (wxHashTable*) NULL;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -251,7 +251,7 @@ void wxFontModule::OnExit()
 {
     delete g_fontHash;
 
-    g_fontHash = NULL;
+    g_fontHash = (wxHashTable *)NULL;
 }
 
 #endif

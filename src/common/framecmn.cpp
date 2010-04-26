@@ -95,7 +95,7 @@ void wxFrameBase::DeleteAllBars()
     if ( m_frameMenuBar )
     {
         delete m_frameMenuBar;
-        m_frameMenuBar = NULL;
+        m_frameMenuBar = (wxMenuBar *) NULL;
     }
 #endif // wxUSE_MENUS
 
@@ -103,7 +103,7 @@ void wxFrameBase::DeleteAllBars()
     if ( m_frameStatusBar )
     {
         delete m_frameStatusBar;
-        m_frameStatusBar = NULL;
+        m_frameStatusBar = (wxStatusBar *) NULL;
     }
 #endif // wxUSE_STATUSBAR
 
@@ -111,7 +111,7 @@ void wxFrameBase::DeleteAllBars()
     if ( m_frameToolBar )
     {
         delete m_frameToolBar;
-        m_frameToolBar = NULL;
+        m_frameToolBar = (wxToolBar *) NULL;
     }
 #endif // wxUSE_TOOLBAR
 }
@@ -132,8 +132,6 @@ bool wxFrameBase::IsOneOfBars(const wxWindow *win) const
     if ( win == GetToolBar() )
         return true;
 #endif // wxUSE_TOOLBAR
-
-    wxUnusedVar(win);
 
     return false;
 }
@@ -170,48 +168,64 @@ wxPoint wxFrameBase::GetClientAreaOrigin() const
     return pt;
 }
 
+
+void wxFrameBase::SendSizeEvent()
+{
+    const wxSize size = GetSize();
+    wxSizeEvent event( size, GetId() );
+    event.SetEventObject( this );
+    GetEventHandler()->AddPendingEvent( event );
+
+#ifdef __WXGTK__
+    // SendSizeEvent is typically called when a toolbar is shown
+    // or hidden, but sending the size event alone is not enough
+    // to trigger a full layout.
+    ((wxFrame*)this)->GtkOnSize(
+#ifndef __WXGTK20__
+        0, 0, size.x, size.y
+#endif // __WXGTK20__
+    );
+#endif // __WXGTK__
+}
+
+
 // ----------------------------------------------------------------------------
 // misc
 // ----------------------------------------------------------------------------
 
-#if wxUSE_MENUS
-
 bool wxFrameBase::ProcessCommand(int id)
 {
+#if wxUSE_MENUS
     wxMenuBar *bar = GetMenuBar();
     if ( !bar )
         return false;
 
-    wxMenuItem *item = bar->FindItem(id);
-    if ( !item )
-        return false;
-
-    return ProcessCommand(item);
-}
-
-bool wxFrameBase::ProcessCommand(wxMenuItem *item)
-{
-    wxCommandEvent commandEvent(wxEVT_COMMAND_MENU_SELECTED, item->GetId());
+    wxCommandEvent commandEvent(wxEVT_COMMAND_MENU_SELECTED, id);
     commandEvent.SetEventObject(this);
 
-    if (!item->IsEnabled())
-        return true;
-
-    if ((item->GetKind() == wxITEM_RADIO) && item->IsChecked() )
-        return true;
-
-    if (item->IsCheckable())
+    wxMenuItem *item = bar->FindItem(id);
+    if (item)
     {
-        item->Toggle();
+        if (!item->IsEnabled())
+            return true;
 
-        // use the new value
-        commandEvent.SetInt(item->IsChecked());
+        if ((item->GetKind() == wxITEM_RADIO) && item->IsChecked() )
+            return true;
+
+        if (item->IsCheckable())
+        {
+            item->Toggle();
+
+            // use the new value
+            commandEvent.SetInt(item->IsChecked());
+        }
     }
 
-    return HandleWindowEvent(commandEvent);
+    return GetEventHandler()->ProcessEvent(commandEvent);
+#else // !wxUSE_MENUS
+    return false;
+#endif // wxUSE_MENUS/!wxUSE_MENUS
 }
-
-#endif // wxUSE_MENUS
 
 // Do the UI update processing for this window. This is
 // provided for the application to call if it wants to
@@ -228,12 +242,14 @@ void wxFrameBase::UpdateWindowUI(long flags)
 #if wxUSE_MENUS
     if (GetMenuBar())
     {
-        // If coming from an idle event, we only want to update the menus if
-        // we're in the wxUSE_IDLEMENUUPDATES configuration, otherwise they
-        // will be update when the menu is opened later
-#if !wxUSE_IDLEMENUUPDATES
-        if ( !(flags & wxUPDATE_UI_FROMIDLE) )
-#endif // wxUSE_IDLEMENUUPDATES
+        if ((flags & wxUPDATE_UI_FROMIDLE) && !wxUSE_IDLEMENUUPDATES)
+        {
+            // If coming from an idle event, we only
+            // want to update the menus if we're
+            // in the wxUSE_IDLEMENUUPDATES configuration:
+            // so if we're not, do nothing
+        }
+        else
             DoMenuUpdates();
     }
 #endif // wxUSE_MENUS
@@ -248,23 +264,35 @@ void wxFrameBase::UpdateWindowUI(long flags)
 void wxFrameBase::OnMenuHighlight(wxMenuEvent& event)
 {
 #if wxUSE_STATUSBAR
-    (void)ShowMenuHelp(event.GetMenuId());
+    (void)ShowMenuHelp(GetStatusBar(), event.GetMenuId());
 #endif // wxUSE_STATUSBAR
 }
 
+#if !wxUSE_IDLEMENUUPDATES
 void wxFrameBase::OnMenuOpen(wxMenuEvent& event)
+#else
+void wxFrameBase::OnMenuOpen(wxMenuEvent& WXUNUSED(event))
+#endif
 {
-#if wxUSE_IDLEMENUUPDATES
-    wxUnusedVar(event);
-#else // !wxUSE_IDLEMENUUPDATES
-    // as we didn't update the menus from idle time, do it now
+#if !wxUSE_IDLEMENUUPDATES
     DoMenuUpdates(event.GetMenu());
-#endif // wxUSE_IDLEMENUUPDATES/!wxUSE_IDLEMENUUPDATES
+#endif // !wxUSE_IDLEMENUUPDATES
 }
 
 void wxFrameBase::OnMenuClose(wxMenuEvent& WXUNUSED(event))
 {
-    DoGiveHelp(wxEmptyString, false);
+    // do we have real status text to restore?
+    if ( !m_oldStatusText.empty() )
+    {
+        if ( m_statusBarPane >= 0 )
+        {
+            wxStatusBar *statbar = GetStatusBar();
+            if ( statbar )
+                statbar->SetStatusText(m_oldStatusText, m_statusBarPane);
+        }
+
+        m_oldStatusText.clear();
+    }
 }
 
 #endif // wxUSE_MENUS && wxUSE_STATUSBAR
@@ -293,7 +321,7 @@ wxStatusBar* wxFrameBase::CreateStatusBar(int number,
 {
     // the main status bar can only be created once (or else it should be
     // deleted before calling CreateStatusBar() again)
-    wxCHECK_MSG( !m_frameStatusBar, NULL,
+    wxCHECK_MSG( !m_frameStatusBar, (wxStatusBar *)NULL,
                  wxT("recreating status bar in wxFrame") );
 
     SetStatusBar(OnCreateStatusBar(number, style, id, name));
@@ -343,24 +371,27 @@ void wxFrameBase::PopStatusText(int number)
     m_frameStatusBar->PopStatusText(number);
 }
 
-bool wxFrameBase::ShowMenuHelp(int menuId)
+bool wxFrameBase::ShowMenuHelp(wxStatusBar *WXUNUSED(statbar), int menuId)
 {
 #if wxUSE_MENUS
     // if no help string found, we will clear the status bar text
-    //
-    // NB: wxID_NONE is used for (sub)menus themselves by wxMSW
     wxString helpString;
-    if ( menuId != wxID_SEPARATOR && menuId != wxID_NONE )
-    {
-        const wxMenuItem * const item = FindItemInMenuBar(menuId);
-        if ( item && !item->IsSeparator() )
-            helpString = item->GetHelp();
+    bool show = menuId != wxID_SEPARATOR && menuId != -2 /* wxID_TITLE */;
 
-        // notice that it's ok if we don't find the item because it might
-        // belong to the popup menu, so don't assert here
+    if ( show )
+    {
+        wxMenuBar *menuBar = GetMenuBar();
+        if ( menuBar )
+        {
+            // it's ok if we don't find the item because it might belong
+            // to the popup menu
+            wxMenuItem *item = menuBar->FindItem(menuId);
+            if ( item )
+                helpString = item->GetHelp();
+        }
     }
 
-    DoGiveHelp(helpString, true);
+    DoGiveHelp(helpString, show);
 
     return !helpString.empty();
 #else // !wxUSE_MENUS
@@ -384,7 +415,7 @@ void wxFrameBase::SetStatusBar(wxStatusBar *statBar)
 #endif // wxUSE_STATUSBAR
 
 #if wxUSE_MENUS || wxUSE_TOOLBAR
-void wxFrameBase::DoGiveHelp(const wxString& help, bool show)
+void wxFrameBase::DoGiveHelp(const wxString& text, bool show)
 {
 #if wxUSE_STATUSBAR
     if ( m_statusBarPane < 0 )
@@ -397,9 +428,11 @@ void wxFrameBase::DoGiveHelp(const wxString& help, bool show)
     if ( !statbar )
         return;
 
-    wxString text;
+    wxString help;
     if ( show )
     {
+        help = text;
+
         // remember the old status bar text if this is the first time we're
         // called since the menu has been opened as we're going to overwrite it
         // in our DoGiveHelp() and we want to restore it when the menu is
@@ -417,36 +450,22 @@ void wxFrameBase::DoGiveHelp(const wxString& help, bool show)
             if ( m_oldStatusText.empty() )
             {
                 // use special value to prevent us from doing this the next time
-                m_oldStatusText += wxT('\0');
+                m_oldStatusText += _T('\0');
             }
         }
-
-        m_lastHelpShown =
-        text = help;
     }
-    else // hide help, restore the original text
+    else // hide the status bar text
     {
-        // clear the last shown help string but remember its value
-        wxString lastHelpShown;
-        lastHelpShown.swap(m_lastHelpShown);
+        // i.e. restore the old one
+        help = m_oldStatusText;
 
-        // also clear the old status text but remember it too to restore it
-        // below
-        text.swap(m_oldStatusText);
-
-        if ( statbar->GetStatusText(m_statusBarPane) != lastHelpShown )
-        {
-            // if the text was changed with an explicit SetStatusText() call
-            // from the user code in the meanwhile, do not overwrite it with
-            // the old status bar contents -- this is almost certainly not what
-            // the user expects and would be very hard to avoid from user code
-            return;
-        }
+        // make sure we get the up to date text when showing it the next time
+        m_oldStatusText.clear();
     }
 
-    statbar->SetStatusText(text, m_statusBarPane);
+    statbar->SetStatusText(help, m_statusBarPane);
 #else
-    wxUnusedVar(help);
+    wxUnusedVar(text);
     wxUnusedVar(show);
 #endif // wxUSE_STATUSBAR
 }
@@ -465,7 +484,7 @@ wxToolBar* wxFrameBase::CreateToolBar(long style,
 {
     // the main toolbar can't be recreated (unless it was explicitly deleted
     // before)
-    wxCHECK_MSG( !m_frameToolBar, NULL,
+    wxCHECK_MSG( !m_frameToolBar, (wxToolBar *)NULL,
                  wxT("recreating toolbar in wxFrame") );
 
     if ( style == -1 )
@@ -502,40 +521,15 @@ wxToolBar* wxFrameBase::OnCreateToolBar(long style,
 
 void wxFrameBase::SetToolBar(wxToolBar *toolbar)
 {
-    if ( (toolbar != NULL) != (m_frameToolBar != NULL) )
+    bool hadBar = m_frameToolBar != NULL;
+    m_frameToolBar = toolbar;
+
+    if ( (m_frameToolBar != NULL) != hadBar )
     {
-        // the toolbar visibility must have changed so we need to both position
-        // the toolbar itself (if it appeared) and to relayout the frame
-        // contents in any case
-
-        if ( toolbar )
-        {
-            // we need to assign it to m_frameToolBar for PositionToolBar() to
-            // do anything
-            m_frameToolBar = toolbar;
-            PositionToolBar();
-        }
-        //else: tricky: do not reset m_frameToolBar yet as otherwise DoLayout()
-        //      wouldn't recognize the (still existing) toolbar as one of our
-        //      bars and wouldn't layout the single child of the frame correctly
-
-
-        // and this is even more tricky: we want DoLayout() to recognize the
-        // old toolbar for the purpose of not counting it among our non-bar
-        // children but we don't want to reserve any more space for it so we
-        // temporarily hide it
-        if ( m_frameToolBar )
-            m_frameToolBar->Hide();
+        PositionToolBar();
 
         DoLayout();
-
-        if ( m_frameToolBar )
-            m_frameToolBar->Show();
     }
-
-    // this might have been already done above but it's simpler to just always
-    // do it unconditionally instead of testing for whether we already did it
-    m_frameToolBar = toolbar;
 }
 
 #endif // wxUSE_TOOLBAR
@@ -591,13 +585,6 @@ void wxFrameBase::SetMenuBar(wxMenuBar *menubar)
     DetachMenuBar();
 
     this->AttachMenuBar(menubar);
-}
-
-wxMenuItem *wxFrameBase::FindItemInMenuBar(int menuId) const
-{
-    const wxMenuBar * const menuBar = GetMenuBar();
-
-    return menuBar ? menuBar->FindItem(menuId) : NULL;
 }
 
 #endif // wxUSE_MENUS

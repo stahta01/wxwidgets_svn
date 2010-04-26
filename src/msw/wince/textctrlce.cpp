@@ -171,7 +171,7 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
     sizeText.x -= sizeBtn.x + MARGIN_BETWEEN;
     if ( sizeText.x <= 0 )
     {
-        wxLogDebug(wxT("not enough space for wxSpinCtrl!"));
+        wxLogDebug(_T("not enough space for wxSpinCtrl!"));
     }
 
     wxPoint posBtn(pos);
@@ -199,7 +199,7 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
     m_hwndBuddy = (WXHWND)::CreateWindowEx
                     (
                      exStyle,                // sunken border
-                     wxT("EDIT"),             // window class
+                     _T("EDIT"),             // window class
                      valueWin,               // no window title
                      msStyle,                // style (will be shown later)
                      pos.x, pos.y,           // position
@@ -233,7 +233,7 @@ bool wxTextCtrl::Create(wxWindow *parent, wxWindowID id,
     if ( style & wxSP_WRAP )
         spiner_style |= UDS_WRAP;
 
-    if ( !MSWCreateControl(UPDOWN_CLASS, spiner_style, posBtn, sizeBtn, wxT(""), 0) )
+    if ( !MSWCreateControl(UPDOWN_CLASS, spiner_style, posBtn, sizeBtn, _T(""), 0) )
         return false;
 
     // subclass the text ctrl to be able to intercept some events
@@ -807,7 +807,7 @@ wxString wxTextCtrl::GetLineText(long lineNo) const
 
         // remove the '\n' at the end, if any (this is how this function is
         // supposed to work according to the docs)
-        if ( buf[len - 1] == wxT('\n') )
+        if ( buf[len - 1] == _T('\n') )
         {
             len--;
         }
@@ -1087,7 +1087,7 @@ void wxTextCtrl::DoMoveWindow(int x, int y, int width, int height)
     int widthText = width - widthBtn - MARGIN_BETWEEN;
     if ( widthText <= 0 )
     {
-        wxLogDebug(wxT("not enough space for wxSpinCtrl!"));
+        wxLogDebug(_T("not enough space for wxSpinCtrl!"));
     }
 
     if ( !::MoveWindow(GetBuddyHwnd(), x, y, widthText, height, TRUE) )

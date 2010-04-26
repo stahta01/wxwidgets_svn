@@ -66,7 +66,6 @@ public:
     wxHtmlHelpFrame* GetFrame() { return m_helpFrame; }
     wxHtmlHelpDialog* GetDialog() { return m_helpDialog; }
 
-#if wxUSE_CONFIG
     void UseConfig(wxConfigBase *config, const wxString& rootpath = wxEmptyString);
 
     // Assigns config object to the Ctrl. This config is then
@@ -74,7 +73,6 @@ public:
     // Ctrl and it's wxHtmlWindow
     virtual void ReadCustomization(wxConfigBase *cfg, const wxString& path = wxEmptyString);
     virtual void WriteCustomization(wxConfigBase *cfg, const wxString& path = wxEmptyString);
-#endif // wxUSE_CONFIG
 
     //// Backward compatibility with wxHelpController API
 
@@ -120,16 +118,14 @@ protected:
 
     wxHtmlHelpData      m_helpData;
     wxHtmlHelpWindow*   m_helpWindow;
-#if wxUSE_CONFIG
     wxConfigBase *      m_Config;
     wxString            m_ConfigRoot;
-#endif // wxUSE_CONFIG
     wxString            m_titleFormat;
     int                 m_FrameStyle;
     wxHtmlHelpFrame*    m_helpFrame;
     wxHtmlHelpDialog*   m_helpDialog;
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpController);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpController)
 };
 
 /*

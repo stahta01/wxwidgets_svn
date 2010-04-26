@@ -12,14 +12,14 @@
 #ifndef _WX_RADIOBOX_H_
 #define _WX_RADIOBOX_H_
 
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_FWD_CORE wxRadioButton;
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxRadioButton;
 
 // ----------------------------------------------------------------------------
 // wxRadioBox
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxRadioBox : public wxControl, public wxRadioBoxBase
+class WXDLLEXPORT wxRadioBox : public wxControl, public wxRadioBoxBase
 {
 public:
     wxRadioBox():m_radios(wxKEY_INTEGER,32)
@@ -163,7 +163,7 @@ private:
     wxHashTable m_radios;
 
     DECLARE_DYNAMIC_CLASS(wxRadioBox)
-    wxDECLARE_NO_COPY_CLASS(wxRadioBox);
+    DECLARE_NO_COPY_CLASS(wxRadioBox)
 };
 
 #endif

@@ -29,7 +29,7 @@
 #elif defined(__WXX11__)
 #include "wx/x11/minifram.h"
 #elif defined(__WXMAC__)
-#include "wx/osx/minifram.h"
+#include "wx/mac/minifram.h"
 #elif defined(__WXPM__)
 #include "wx/os2/minifram.h"
 #else

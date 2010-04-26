@@ -26,7 +26,7 @@
 #define wxIMAGE_OPTION_COMPRESSION                 wxString(wxT("Compression"))
 #define wxIMAGE_OPTION_IMAGEDESCRIPTOR             wxString(wxT("ImageDescriptor"))
 
-class WXDLLIMPEXP_CORE wxTIFFHandler: public wxImageHandler
+class WXDLLEXPORT wxTIFFHandler: public wxImageHandler
 {
 public:
     wxTIFFHandler();
@@ -34,9 +34,8 @@ public:
 #if wxUSE_STREAMS
     virtual bool LoadFile( wxImage *image, wxInputStream& stream, bool verbose=true, int index=-1 );
     virtual bool SaveFile( wxImage *image, wxOutputStream& stream, bool verbose=true );
-
+    virtual int GetImageCount( wxInputStream& stream );
 protected:
-    virtual int DoGetImageCount( wxInputStream& stream );
     virtual bool DoCanRead( wxInputStream& stream );
 #endif
 

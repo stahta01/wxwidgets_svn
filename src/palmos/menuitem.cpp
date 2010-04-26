@@ -158,6 +158,12 @@ bool wxMenuItem::IsChecked() const
     return false;
 }
 
+/* static */
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
+{
+    return wxStripMenuCodes(text);
+}
+
 // radio group stuff
 // -----------------
 
@@ -184,7 +190,7 @@ void wxMenuItem::Check(bool check)
 {
 }
 
-void wxMenuItem::SetItemLabel(const wxString& text)
+void wxMenuItem::SetText(const wxString& text)
 {
 }
 

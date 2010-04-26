@@ -28,7 +28,6 @@
     #include "wx/intl.h"
     #include "wx/string.h"
     #include "wx/menu.h"
-    #include "wx/accel.h"
 #endif //WX_PRECOMP
 
 #include "wx/cmdproc.h"
@@ -58,13 +57,10 @@ wxCommandProcessor::wxCommandProcessor(int maxCommands)
 {
     m_maxNoCommands = maxCommands;
 #if wxUSE_MENUS
-    m_commandEditMenu = NULL;
+    m_commandEditMenu = (wxMenu *) NULL;
 #endif // wxUSE_MENUS
-
-#if wxUSE_ACCEL
-    m_undoAccelerator = '\t' + wxAcceleratorEntry(wxACCEL_CTRL, 'Z').ToString();
-    m_redoAccelerator = '\t' + wxAcceleratorEntry(wxACCEL_CTRL, 'Y').ToString();
-#endif // wxUSE_ACCEL
+    m_undoAccelerator = wxT("\tCtrl+Z");
+    m_redoAccelerator = wxT("\tCtrl+Y");
 
     m_lastSavedCommand =
     m_currentCommand = wxList::compatibility_iterator();
@@ -90,7 +86,7 @@ bool wxCommandProcessor::UndoCommand(wxCommand& cmd)
 // storeIt is false.
 bool wxCommandProcessor::Submit(wxCommand *command, bool storeIt)
 {
-    wxCHECK_MSG( command, false, wxT("no command in wxCommandProcessor::Submit") );
+    wxCHECK_MSG( command, false, _T("no command in wxCommandProcessor::Submit") );
 
     if ( !DoCommand(*command) )
     {
@@ -110,7 +106,7 @@ bool wxCommandProcessor::Submit(wxCommand *command, bool storeIt)
 
 void wxCommandProcessor::Store(wxCommand *command)
 {
-    wxCHECK_RET( command, wxT("no command in wxCommandProcessor::Store") );
+    wxCHECK_RET( command, _T("no command in wxCommandProcessor::Store") );
 
     if ( (int)m_commands.GetCount() == m_maxNoCommands )
     {
@@ -168,7 +164,7 @@ bool wxCommandProcessor::Undo()
 
 bool wxCommandProcessor::Redo()
 {
-    wxCommand *redoCommand = NULL;
+    wxCommand *redoCommand = (wxCommand *) NULL;
     wxList::compatibility_iterator redoNode
 #if !wxUSE_STL
         = NULL          // just to avoid warnings

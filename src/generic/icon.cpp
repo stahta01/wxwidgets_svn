@@ -24,17 +24,15 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxIcon, wxBitmap)
 
-wxIcon::wxIcon(const char* const* bits) :
+wxIcon::wxIcon( const char **bits, int WXUNUSED(width), int WXUNUSED(height) ) :
     wxBitmap( bits )
 {
 }
 
-#ifdef wxNEEDS_CHARPP
-wxIcon::wxIcon(char **bits) :
+wxIcon::wxIcon( char **bits, int WXUNUSED(width), int WXUNUSED(height) ) :
     wxBitmap( bits )
 {
 }
-#endif
 
 wxIcon::wxIcon() :  wxBitmap()
 {

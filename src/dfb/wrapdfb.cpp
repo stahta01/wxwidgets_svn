@@ -15,11 +15,8 @@
     #pragma hdrstop
 #endif
 
-#ifndef WX_PRECOMP
-    #include "wx/intl.h"
-    #include "wx/log.h"
-#endif
-
+#include "wx/intl.h"
+#include "wx/log.h"
 #include "wx/dfb/wrapdfb.h"
 
 //-----------------------------------------------------------------------------
@@ -36,7 +33,7 @@ bool wxDfbCheckReturn(DFBResult code)
         // these are programming errors, assert:
         #define DFB_ASSERT(code)                                        \
             case code:                                                  \
-                wxFAIL_MSG( "DirectFB error: " wxT(#code) );         \
+                wxFAIL_MSG( _T("DirectFB error: ") _T(#code) );         \
                 return false                                            \
 
         DFB_ASSERT(DFB_DEAD);
@@ -105,26 +102,13 @@ wxIDirectFBSurfacePtr wxIDirectFB::GetPrimarySurface()
 {
     DFBSurfaceDescription desc;
     desc.flags = DSDESC_CAPS;
-    // NB: see dcscreen.cpp for why we request double-buffered surface
-    //
-    //     This assumes the cooperative level is DFSCL_NORMAL (that's the
-    //     default and wx doesn't modify it anywhere); if we ever support
-    //     other cooperative levels, DSCAPS_DOUBLE should *not* be used with
-    //     them.
-    desc.caps = DFBSurfaceCapabilities(DSCAPS_PRIMARY | DSCAPS_DOUBLE);
+    desc.caps = DSCAPS_PRIMARY;
     return CreateSurface(&desc);
 }
 
 //-----------------------------------------------------------------------------
 // wxIDirectFBSurface
 //-----------------------------------------------------------------------------
-
-DFBSurfacePixelFormat wxIDirectFBSurface::GetPixelFormat()
-{
-    DFBSurfacePixelFormat format = DSPF_UNKNOWN;
-    GetPixelFormat(&format);
-    return format;
-}
 
 int wxIDirectFBSurface::GetDepth()
 {
@@ -146,7 +130,7 @@ wxIDirectFBSurface::CreateCompatible(const wxSize& sz, int flags)
             return NULL;
     }
 
-    wxCHECK_MSG( size.x > 0 && size.y > 0, NULL, "invalid size" );
+    wxCHECK_MSG( size.x > 0 && size.y > 0, NULL, _T("invalid size") );
 
     DFBSurfaceDescription desc;
     desc.flags = (DFBSurfaceDescriptionFlags)(

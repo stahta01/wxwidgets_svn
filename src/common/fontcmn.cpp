@@ -45,32 +45,6 @@
 
 #include "wx/tokenzr.h"
 
-// debugger helper: this function can be called from a debugger to show what
-// the date really is
-extern const char *wxDumpFont(const wxFont *font)
-{
-    static char buf[256];
-
-    const wxFontWeight weight = font->GetWeight();
-
-    wxString s;
-    s.Printf(wxS("%s-%s-%s-%d-%d"),
-             font->GetFaceName(),
-             weight == wxFONTWEIGHT_NORMAL
-                ? wxT("normal")
-                : weight == wxFONTWEIGHT_BOLD
-                    ? wxT("bold")
-                    : wxT("light"),
-             font->GetStyle() == wxFONTSTYLE_NORMAL
-                ? wxT("regular")
-                : wxT("italic"),
-             font->GetPointSize(),
-             font->GetEncoding());
-
-    wxStrlcpy(buf, s.mb_str(), WXSIZEOF(buf));
-    return buf;
-}
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -79,142 +53,9 @@ extern const char *wxDumpFont(const wxFont *font)
 // helper functions
 // ----------------------------------------------------------------------------
 
-static inline int flags2Style(int flags)
+static void AdjustFontSize(wxFont& font, wxDC& dc, const wxSize& pixelSize)
 {
-    return flags & wxFONTFLAG_ITALIC
-                    ? wxFONTSTYLE_ITALIC
-                    : flags & wxFONTFLAG_SLANT
-                        ? wxFONTSTYLE_SLANT
-                        : wxFONTSTYLE_NORMAL;
-}
-
-static inline int flags2Weight(int flags)
-{
-    return flags & wxFONTFLAG_LIGHT
-                    ? wxFONTWEIGHT_LIGHT
-                    : flags & wxFONTFLAG_BOLD
-                        ? wxFONTWEIGHT_BOLD
-                        : wxFONTWEIGHT_NORMAL;
-}
-
-static inline bool flags2Underlined(int flags)
-{
-    return (flags & wxFONTFLAG_UNDERLINED) != 0;
-}
-
-// ----------------------------------------------------------------------------
-// wxFontBase
-// ----------------------------------------------------------------------------
-
-wxFontEncoding wxFontBase::ms_encodingDefault = wxFONTENCODING_SYSTEM;
-
-/* static */
-void wxFontBase::SetDefaultEncoding(wxFontEncoding encoding)
-{
-    // GetDefaultEncoding() should return something != wxFONTENCODING_DEFAULT
-    // and, besides, using this value here doesn't make any sense
-    wxCHECK_RET( encoding != wxFONTENCODING_DEFAULT,
-                 wxT("can't set default encoding to wxFONTENCODING_DEFAULT") );
-
-    ms_encodingDefault = encoding;
-}
-
-wxFontBase::~wxFontBase()
-{
-    // this destructor is required for Darwin
-}
-
-/* static */
-wxFont *wxFontBase::New(int size,
-                        wxFontFamily family,
-                        wxFontStyle style,
-                        wxFontWeight weight,
-                        bool underlined,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return new wxFont(size, family, style, weight, underlined, face, encoding);
-}
-
-/* static */
-wxFont *wxFontBase::New(const wxSize& pixelSize,
-                        wxFontFamily family,
-                        wxFontStyle style,
-                        wxFontWeight weight,
-                        bool underlined,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return new wxFont(pixelSize, family, style, weight, underlined,
-                      face, encoding);
-}
-
-/* static */
-wxFont *wxFontBase::New(int pointSize,
-                        wxFontFamily family,
-                        int flags,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return New(pointSize, family, flags2Style(flags), flags2Weight(flags),
-               flags2Underlined(flags), face, encoding);
-}
-
-/* static */
-wxFont *wxFontBase::New(const wxSize& pixelSize,
-                        wxFontFamily family,
-                        int flags,
-                        const wxString& face,
-                        wxFontEncoding encoding)
-{
-    return New(pixelSize, family, flags2Style(flags), flags2Weight(flags),
-               flags2Underlined(flags), face, encoding);
-}
-
-/* static */
-wxFont *wxFontBase::New(const wxNativeFontInfo& info)
-{
-    return new wxFont(info);
-}
-
-/* static */
-wxFont *wxFontBase::New(const wxString& strNativeFontDesc)
-{
-    wxNativeFontInfo fontInfo;
-    if ( !fontInfo.FromString(strNativeFontDesc) )
-        return new wxFont(*wxNORMAL_FONT);
-
-    return New(fontInfo);
-}
-
-bool wxFontBase::IsFixedWidth() const
-{
-    return GetFamily() == wxFONTFAMILY_TELETYPE;
-}
-
-wxSize wxFontBase::GetPixelSize() const
-{
-    wxScreenDC dc;
-    dc.SetFont(*(wxFont *)this);
-    return wxSize(dc.GetCharWidth(), dc.GetCharHeight());
-}
-
-bool wxFontBase::IsUsingSizeInPixels() const
-{
-    return false;
-}
-
-void wxFontBase::SetPixelSize( const wxSize& pixelSize )
-{
-    wxCHECK_RET( pixelSize.GetWidth() >= 0 && pixelSize.GetHeight() > 0,
-                 "Negative values for the pixel size or zero pixel height are not allowed" );
-
-    wxScreenDC dc;
-
-    // NOTE: this algorithm for adjusting the font size is used by all
-    //       implementations of wxFont except under wxMSW and wxGTK where
-    //       native support to font creation using pixel-size is provided.
-
+    int currentSize = 0;
     int largestGood = 0;
     int smallestBad = 0;
 
@@ -223,16 +64,15 @@ void wxFontBase::SetPixelSize( const wxSize& pixelSize )
 
     // NB: this assignment was separated from the variable definition
     // in order to fix a gcc v3.3.3 compiler crash
-    int currentSize = GetPointSize();
+    currentSize = font.GetPointSize();
     while (currentSize > 0)
     {
-        dc.SetFont(*static_cast<wxFont*>(this));
+        dc.SetFont(font);
 
         // if currentSize (in points) results in a font that is smaller
         // than required by pixelSize it is considered a good size
-        // NOTE: the pixel size width may be zero
         if (dc.GetCharHeight() <= pixelSize.GetHeight() &&
-                (pixelSize.GetWidth() == 0 ||
+                (!pixelSize.GetWidth() ||
                  dc.GetCharWidth() <= pixelSize.GetWidth()))
         {
             largestGood = currentSize;
@@ -260,11 +100,149 @@ void wxFontBase::SetPixelSize( const wxSize& pixelSize )
             currentSize = largestGood + distance / 2;
         }
 
-        SetPointSize(currentSize);
+        font.SetPointSize(currentSize);
     }
 
     if (currentSize != largestGood)
-        SetPointSize(largestGood);
+        font.SetPointSize(largestGood);
+}
+
+// ----------------------------------------------------------------------------
+// wxFontBase
+// ----------------------------------------------------------------------------
+
+wxFontEncoding wxFontBase::ms_encodingDefault = wxFONTENCODING_SYSTEM;
+
+/* static */
+void wxFontBase::SetDefaultEncoding(wxFontEncoding encoding)
+{
+    // GetDefaultEncoding() should return something != wxFONTENCODING_DEFAULT
+    // and, besides, using this value here doesn't make any sense
+    wxCHECK_RET( encoding != wxFONTENCODING_DEFAULT,
+                 _T("can't set default encoding to wxFONTENCODING_DEFAULT") );
+
+    ms_encodingDefault = encoding;
+}
+
+wxFontBase::~wxFontBase()
+{
+    // this destructor is required for Darwin
+}
+
+/* static */
+wxFont *wxFontBase::New(int size,
+                        int family,
+                        int style,
+                        int weight,
+                        bool underlined,
+                        const wxString& face,
+                        wxFontEncoding encoding)
+{
+    return new wxFont(size, family, style, weight, underlined, face, encoding);
+}
+
+static inline int flags2Style(int flags)
+{
+    return flags & wxFONTFLAG_ITALIC
+                    ? wxFONTSTYLE_ITALIC
+                    : flags & wxFONTFLAG_SLANT
+                        ? wxFONTSTYLE_SLANT
+                        : wxFONTSTYLE_NORMAL;
+}
+
+static inline int flags2Weight(int flags)
+{
+    return flags & wxFONTFLAG_LIGHT
+                    ? wxFONTWEIGHT_LIGHT
+                    : flags & wxFONTFLAG_BOLD
+                        ? wxFONTWEIGHT_BOLD
+                        : wxFONTWEIGHT_NORMAL;
+}
+
+static inline bool flags2Underlined(int flags)
+{
+    return (flags & wxFONTFLAG_UNDERLINED) != 0;
+}
+
+/* static */
+wxFont *wxFontBase::New(int pointSize,
+                        wxFontFamily family,
+                        int flags,
+                        const wxString& face,
+                        wxFontEncoding encoding)
+{
+    return New(pointSize, family, flags2Style(flags), flags2Weight(flags),
+               flags2Underlined(flags), face, encoding);
+}
+
+/* static */
+wxFont *wxFontBase::New(const wxSize& pixelSize,
+                        int family,
+                        int style,
+                        int weight,
+                        bool underlined,
+                        const wxString& face,
+                        wxFontEncoding encoding)
+{
+#if defined(__WXMSW__)
+    return new wxFont(pixelSize, family, style, weight, underlined,
+                      face, encoding);
+#else
+    wxFont *self = New(10, family, style, weight, underlined, face, encoding);
+    wxScreenDC dc;
+    AdjustFontSize(*(wxFont *)self, dc, pixelSize);
+    return self;
+#endif
+}
+
+/* static */
+wxFont *wxFontBase::New(const wxSize& pixelSize,
+                        wxFontFamily family,
+                        int flags,
+                        const wxString& face,
+                        wxFontEncoding encoding)
+{
+    return New(pixelSize, family, flags2Style(flags), flags2Weight(flags),
+               flags2Underlined(flags), face, encoding);
+}
+
+wxSize wxFontBase::GetPixelSize() const
+{
+    wxScreenDC dc;
+    dc.SetFont(*(wxFont *)this);
+    return wxSize(dc.GetCharWidth(), dc.GetCharHeight());
+}
+
+bool wxFontBase::IsUsingSizeInPixels() const
+{
+    return false;
+}
+
+void wxFontBase::SetPixelSize( const wxSize& pixelSize )
+{
+    wxScreenDC dc;
+    AdjustFontSize(*(wxFont *)this, dc, pixelSize);
+}
+
+/* static */
+wxFont *wxFontBase::New(const wxNativeFontInfo& info)
+{
+    return new wxFont(info);
+}
+
+/* static */
+wxFont *wxFontBase::New(const wxString& strNativeFontDesc)
+{
+    wxNativeFontInfo fontInfo;
+    if ( !fontInfo.FromString(strNativeFontDesc) )
+        return new wxFont(*wxNORMAL_FONT);
+
+    return New(fontInfo);
+}
+
+bool wxFontBase::IsFixedWidth() const
+{
+    return GetFamily() == wxFONTFAMILY_TELETYPE;
 }
 
 void wxFontBase::DoSetNativeFontInfo(const wxNativeFontInfo& info)
@@ -284,8 +262,6 @@ void wxFontBase::DoSetNativeFontInfo(const wxNativeFontInfo& info)
 
 wxString wxFontBase::GetNativeFontInfoDesc() const
 {
-    wxCHECK_MSG( IsOk(), wxEmptyString, wxT("invalid font") );
-
     wxString fontDesc;
     const wxNativeFontInfo *fontInfo = GetNativeFontInfo();
     if ( fontInfo )
@@ -303,8 +279,6 @@ wxString wxFontBase::GetNativeFontInfoDesc() const
 
 wxString wxFontBase::GetNativeFontInfoUserDesc() const
 {
-    wxCHECK_MSG( IsOk(), wxEmptyString, wxT("invalid font") );
-
     wxString fontDesc;
     const wxNativeFontInfo *fontInfo = GetNativeFontInfo();
     if ( fontInfo )
@@ -329,6 +303,7 @@ bool wxFontBase::SetNativeFontInfo(const wxString& info)
         return true;
     }
 
+    UnRef();
     return false;
 }
 
@@ -341,6 +316,7 @@ bool wxFontBase::SetNativeFontInfoUserDesc(const wxString& info)
         return true;
     }
 
+    UnRef();
     return false;
 }
 
@@ -350,7 +326,7 @@ bool wxFontBase::operator==(const wxFont& font) const
     // have different ref datas but still describe the same font
     return IsSameAs(font) ||
            (
-            IsOk() == font.IsOk() &&
+            Ok() == font.Ok() &&
             GetPointSize() == font.GetPointSize() &&
             // in wxGTK1 GetPixelSize() calls GetInternalFont() which uses
             // operator==() resulting in infinite recursion so we can't use it
@@ -367,111 +343,72 @@ bool wxFontBase::operator==(const wxFont& font) const
            );
 }
 
+bool wxFontBase::operator!=(const wxFont& font) const
+{
+    return !(*this == font);
+}
+
 wxString wxFontBase::GetFamilyString() const
 {
-    wxCHECK_MSG( IsOk(), "wxFONTFAMILY_DEFAULT", "invalid font" );
+    wxCHECK_MSG( Ok(), wxT("wxDEFAULT"), wxT("invalid font") );
 
     switch ( GetFamily() )
     {
-        case wxFONTFAMILY_DECORATIVE:   return "wxFONTFAMILY_DECORATIVE";
-        case wxFONTFAMILY_ROMAN:        return "wxFONTFAMILY_ROMAN";
-        case wxFONTFAMILY_SCRIPT:       return "wxFONTFAMILY_SCRIPT";
-        case wxFONTFAMILY_SWISS:        return "wxFONTFAMILY_SWISS";
-        case wxFONTFAMILY_MODERN:       return "wxFONTFAMILY_MODERN";
-        case wxFONTFAMILY_TELETYPE:     return "wxFONTFAMILY_TELETYPE";
-        case wxFONTFAMILY_UNKNOWN:      return "wxFONTFAMILY_UNKNOWN";
-        default:                        return "wxFONTFAMILY_DEFAULT";
+        case wxDECORATIVE:   return wxT("wxDECORATIVE");
+        case wxROMAN:        return wxT("wxROMAN");
+        case wxSCRIPT:       return wxT("wxSCRIPT");
+        case wxSWISS:        return wxT("wxSWISS");
+        case wxMODERN:       return wxT("wxMODERN");
+        case wxTELETYPE:     return wxT("wxTELETYPE");
+        default:             return wxT("wxDEFAULT");
     }
 }
 
 wxString wxFontBase::GetStyleString() const
 {
-    wxCHECK_MSG( IsOk(), "wxFONTSTYLE_DEFAULT", "invalid font" );
+    wxCHECK_MSG( Ok(), wxT("wxDEFAULT"), wxT("invalid font") );
 
     switch ( GetStyle() )
     {
-        case wxFONTSTYLE_NORMAL:   return "wxFONTSTYLE_NORMAL";
-        case wxFONTSTYLE_SLANT:    return "wxFONTSTYLE_SLANT";
-        case wxFONTSTYLE_ITALIC:   return "wxFONTSTYLE_ITALIC";
-        default:                   return "wxFONTSTYLE_DEFAULT";
+        case wxNORMAL:   return wxT("wxNORMAL");
+        case wxSLANT:    return wxT("wxSLANT");
+        case wxITALIC:   return wxT("wxITALIC");
+        default:         return wxT("wxDEFAULT");
     }
 }
 
 wxString wxFontBase::GetWeightString() const
 {
-    wxCHECK_MSG( IsOk(), "wxFONTWEIGHT_DEFAULT", "invalid font" );
+    wxCHECK_MSG( Ok(), wxT("wxDEFAULT"), wxT("invalid font") );
 
     switch ( GetWeight() )
     {
-        case wxFONTWEIGHT_NORMAL:   return "wxFONTWEIGHT_NORMAL";
-        case wxFONTWEIGHT_BOLD:     return "wxFONTWEIGHT_BOLD";
-        case wxFONTWEIGHT_LIGHT:    return "wxFONTWEIGHT_LIGHT";
-        default:                    return "wxFONTWEIGHT_DEFAULT";
+        case wxNORMAL:   return wxT("wxNORMAL");
+        case wxBOLD:     return wxT("wxBOLD");
+        case wxLIGHT:    return wxT("wxLIGHT");
+        default:         return wxT("wxDEFAULT");
     }
 }
 
-bool wxFontBase::SetFaceName(const wxString& facename)
+bool wxFontBase::SetFaceName(const wxString &facename)
 {
-#if wxUSE_FONTENUM
     if (!wxFontEnumerator::IsValidFacename(facename))
     {
-        UnRef();        // make IsOk() return false
+        UnRef();        // make Ok() return false
         return false;
     }
-#else // !wxUSE_FONTENUM
-    wxUnusedVar(facename);
-#endif // wxUSE_FONTENUM/!wxUSE_FONTENUM
 
     return true;
 }
 
-wxFont& wxFont::MakeBold()
-{
-    SetWeight(wxFONTWEIGHT_BOLD);
-    return *this;
-}
-
-wxFont wxFont::Bold() const
-{
-    wxFont font(*this);
-    font.MakeBold();
-    return font;
-}
-
-wxFont& wxFont::MakeItalic()
-{
-    SetStyle(wxFONTSTYLE_ITALIC);
-    return *this;
-}
-
-wxFont wxFont::Italic() const
-{
-    wxFont font(*this);
-    font.SetStyle(wxFONTSTYLE_ITALIC);
-    return font;
-}
-
-wxFont& wxFont::Scale(float x)
-{
-    SetPointSize(int(x*GetPointSize() + 0.5));
-    return *this;
-}
-
-wxFont wxFont::Scaled(float x) const
-{
-    wxFont font(*this);
-    font.Scale(x);
-    return font;
-}
 
 // ----------------------------------------------------------------------------
 // wxNativeFontInfo
 // ----------------------------------------------------------------------------
 
 // Up to now, there are no native implementations of this function:
-void wxNativeFontInfo::SetFaceName(const wxArrayString& facenames)
+void wxNativeFontInfo::SetFaceName(const wxArrayString &facenames)
 {
-#if wxUSE_FONTENUM
     for (size_t i=0; i < facenames.GetCount(); i++)
     {
         if (wxFontEnumerator::IsValidFacename(facenames[i]))
@@ -485,9 +422,6 @@ void wxNativeFontInfo::SetFaceName(const wxArrayString& facenames)
     wxString validfacename = wxFontEnumerator::GetFacenames().Item(0);
     wxLogTrace(wxT("font"), wxT("Falling back to '%s'"), validfacename.c_str());
     SetFaceName(validfacename);
-#else // !wxUSE_FONTENUM
-    SetFaceName(facenames[0]);
-#endif // wxUSE_FONTENUM/!wxUSE_FONTENUM
 }
 
 
@@ -502,7 +436,7 @@ bool wxNativeFontInfo::FromString(const wxString& s)
 {
     long l;
 
-    wxStringTokenizer tokenizer(s, wxT(";"));
+    wxStringTokenizer tokenizer(s, _T(";"));
 
     wxString token = tokenizer.GetNextToken();
     //
@@ -553,7 +487,7 @@ wxString wxNativeFontInfo::ToString() const
 {
     wxString s;
 
-    s.Printf(wxT("%d;%d;%d;%d;%d;%d;%s;%d"),
+    s.Printf(_T("%d;%d;%d;%d;%d;%d;%s;%d"),
              0,                                 // version
              pointSize,
              family,
@@ -655,7 +589,7 @@ void wxNativeFontInfo::SetEncoding(wxFontEncoding encoding_)
 // format there anyhow (but there is a well-defined standard for X11 fonts used
 // by wxGTK and wxMotif)
 
-#if defined(wxNO_NATIVE_FONTINFO) || defined(__WXMSW__) || defined (__WXPM__) || defined(__WXOSX__)
+#if defined(wxNO_NATIVE_FONTINFO) || defined(__WXMSW__) || defined (__WXPM__)
 
 wxString wxNativeFontInfo::ToUserString() const
 {
@@ -671,7 +605,7 @@ wxString wxNativeFontInfo::ToUserString() const
     switch ( GetWeight() )
     {
         default:
-            wxFAIL_MSG( wxT("unknown font weight") );
+            wxFAIL_MSG( _T("unknown font weight") );
             // fall through
 
         case wxFONTWEIGHT_NORMAL:
@@ -689,7 +623,7 @@ wxString wxNativeFontInfo::ToUserString() const
     switch ( GetStyle() )
     {
         default:
-            wxFAIL_MSG( wxT("unknown font style") );
+            wxFAIL_MSG( _T("unknown font style") );
             // fall through
 
         case wxFONTSTYLE_NORMAL:
@@ -705,74 +639,20 @@ wxString wxNativeFontInfo::ToUserString() const
     wxString face = GetFaceName();
     if ( !face.empty() )
     {
-        if (face.Contains(' ') || face.Contains(';') || face.Contains(','))
-        {
-            face.Replace("'", "");
-                // eventually remove quote characters: most systems do not
-                // allow them in a facename anyway so this usually does nothing
-
-            // make it possible for FromUserString() function to understand
-            // that the different words which compose this facename are
-            // not different adjectives or other data but rather all parts
-            // of the facename
-            desc << wxT(" '") << face << _("'");
-        }
-        else
-            desc << wxT(' ') << face;
-    }
-    else // no face name specified
-    {
-        // use the family
-        wxString familyStr;
-        switch ( GetFamily() )
-        {
-            case wxFONTFAMILY_DECORATIVE:
-                familyStr = "decorative";
-                break;
-
-            case wxFONTFAMILY_ROMAN:
-                familyStr = "roman";
-                break;
-
-            case wxFONTFAMILY_SCRIPT:
-                familyStr = "script";
-                break;
-
-            case wxFONTFAMILY_SWISS:
-                familyStr = "swiss";
-                break;
-
-            case wxFONTFAMILY_MODERN:
-                familyStr = "modern";
-                break;
-
-            case wxFONTFAMILY_TELETYPE:
-                familyStr = "teletype";
-                break;
-
-            case wxFONTFAMILY_DEFAULT:
-            case wxFONTFAMILY_UNKNOWN:
-                break;
-
-            default:
-                wxFAIL_MSG( "unknown font family" );
-        }
-
-        if ( !familyStr.empty() )
-            desc << " '" << familyStr << " family'";
+        desc << _T(' ') << face;
     }
 
     int size = GetPointSize();
     if ( size != wxNORMAL_FONT->GetPointSize() )
     {
-        desc << wxT(' ') << size;
+        desc << _T(' ') << size;
     }
 
 #if wxUSE_FONTMAP
     wxFontEncoding enc = GetEncoding();
     if ( enc != wxFONTENCODING_DEFAULT && enc != wxFONTENCODING_SYSTEM )
     {
-        desc << wxT(' ') << wxFontMapper::GetEncodingName(enc);
+        desc << _T(' ') << wxFontMapper::GetEncodingName(enc);
     }
 #endif // wxUSE_FONTMAP
 
@@ -784,13 +664,10 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
     // reset to the default state
     Init();
 
-    // ToUserString() will quote the facename if it contains spaces, commas
-    // or semicolons: we must be able to understand that quoted text is
-    // a single token:
-    wxString toparse(s);
-
     // parse a more or less free form string
-    wxStringTokenizer tokenizer(toparse, wxT(";, "), wxTOKEN_STRTOK);
+    //
+    // TODO: we should handle at least the quoted facenames
+    wxStringTokenizer tokenizer(s, _T(";, "), wxTOKEN_STRTOK);
 
     wxString face;
     unsigned long size;
@@ -798,7 +675,6 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
 #if wxUSE_FONTMAP
     bool encodingfound = false;
 #endif
-    bool insideQuotes = false;
 
     while ( tokenizer.HasMoreTokens() )
     {
@@ -806,51 +682,23 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
 
         // normalize it
         token.Trim(true).Trim(false).MakeLower();
-        if (insideQuotes)
-        {
-            if (token.StartsWith("'") ||
-                token.EndsWith("'"))
-            {
-                insideQuotes = false;
-
-                // add this last token to the facename:
-                face += " " + token;
-
-                // normalize facename:
-                face = face.Trim(true).Trim(false);
-                face.Replace("'", "");
-
-                continue;
-            }
-        }
-        else
-        {
-            if (token.StartsWith("'"))
-                insideQuotes = true;
-        }
 
         // look for the known tokens
-        if ( insideQuotes )
-        {
-            // only the facename may be quoted:
-            face += " " + token;
-            continue;
-        }
-        if ( token == wxT("underlined") || token == _("underlined") )
+        if ( token == _T("underlined") || token == _("underlined") )
         {
             SetUnderlined(true);
         }
-        else if ( token == wxT("light") || token == _("light") )
+        else if ( token == _T("light") || token == _("light") )
         {
             SetWeight(wxFONTWEIGHT_LIGHT);
             weightfound = true;
         }
-        else if ( token == wxT("bold") || token == _("bold") )
+        else if ( token == _T("bold") || token == _("bold") )
         {
             SetWeight(wxFONTWEIGHT_BOLD);
             weightfound = true;
         }
-        else if ( token == wxT("italic") || token == _("italic") )
+        else if ( token == _T("italic") || token == _("italic") )
         {
             SetStyle(wxFONTSTYLE_ITALIC);
         }
@@ -877,7 +725,7 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
                 // assume it is the face name
             if ( !face.empty() )
             {
-                face += wxT(' ');
+                face += _T(' ');
             }
 
             face += token;
@@ -895,40 +743,12 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
         // bar")
         if ( !face.empty() )
         {
-            wxString familyStr;
-            if ( face.EndsWith(" family", &familyStr) )
-            {
-                // it's not a facename but rather a font family
-                wxFontFamily family;
-                if ( familyStr == "decorative" )
-                    family = wxFONTFAMILY_DECORATIVE;
-                else if ( familyStr == "roman" )
-                    family = wxFONTFAMILY_ROMAN;
-                else if ( familyStr == "script" )
-                    family = wxFONTFAMILY_SCRIPT;
-                else if ( familyStr == "swiss" )
-                    family = wxFONTFAMILY_SWISS;
-                else if ( familyStr == "modern" )
-                    family = wxFONTFAMILY_MODERN;
-                else if ( familyStr == "teletype" )
-                    family = wxFONTFAMILY_TELETYPE;
-                else
-                    return false;
-
-                SetFamily(family);
-            }
             // NB: the check on the facename is implemented in wxFontBase::SetFaceName
             //     and not in wxNativeFontInfo::SetFaceName thus we need to explicitely
             //     call here wxFontEnumerator::IsValidFacename
-            else if (
-#if wxUSE_FONTENUM
-                    !wxFontEnumerator::IsValidFacename(face) ||
-#endif // wxUSE_FONTENUM
-                    !SetFaceName(face) )
-            {
+            if (!wxFontEnumerator::IsValidFacename(face) ||
+                !SetFaceName(face))
                 SetFaceName(wxNORMAL_FONT->GetFaceName());
-            }
-
             face.clear();
         }
     }
@@ -939,14 +759,9 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
         // NB: the check on the facename is implemented in wxFontBase::SetFaceName
         //     and not in wxNativeFontInfo::SetFaceName thus we need to explicitely
         //     call here wxFontEnumerator::IsValidFacename
-        if (
-#if wxUSE_FONTENUM
-                !wxFontEnumerator::IsValidFacename(face) ||
-#endif // wxUSE_FONTENUM
-                !SetFaceName(face) )
-            {
-                SetFaceName(wxNORMAL_FONT->GetFaceName());
-            }
+        if (!wxFontEnumerator::IsValidFacename(face) ||
+            !SetFaceName(face))
+            SetFaceName(wxNORMAL_FONT->GetFaceName());
     }
 
     // set point size to default value if size was not given
@@ -967,26 +782,3 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
 }
 
 #endif // generic or wxMSW or wxOS2
-
-
-// wxFont <-> wxString utilities, used by wxConfig
-wxString wxToString(const wxFontBase& font)
-{
-    return font.IsOk() ? font.GetNativeFontInfoDesc()
-                       : wxString();
-}
-
-bool wxFromString(const wxString& str, wxFontBase *font)
-{
-    wxCHECK_MSG( font, false, wxT("NULL output parameter") );
-
-    if ( str.empty() )
-    {
-        *font = wxNullFont;
-        return true;
-    }
-
-    return font->SetNativeFontInfo(str);
-}
-
-

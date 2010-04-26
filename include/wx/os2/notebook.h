@@ -23,7 +23,7 @@
 // wxNotebook
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebook : public wxNotebookBase
+class WXDLLEXPORT wxNotebook : public wxNotebookBase
 {
 public:
     //
@@ -155,7 +155,7 @@ public:
     // ---------
     //
     void OnSize(wxSizeEvent& rEvent);
-    void OnSelChange(wxBookCtrlEvent& rEvent);
+    void OnSelChange(wxNotebookEvent& rEvent);
     void OnSetFocus(wxFocusEvent& rEvent);
     void OnNavigationKey(wxNavigationKeyEvent& rEvent);
 

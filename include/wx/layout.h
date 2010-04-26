@@ -64,7 +64,7 @@ enum wxRelationship
 // wxIndividualLayoutConstraint: a constraint on window position
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxIndividualLayoutConstraint : public wxObject
+class WXDLLEXPORT wxIndividualLayoutConstraint : public wxObject
 {
 public:
     wxIndividualLayoutConstraint();
@@ -155,7 +155,7 @@ protected:
 // wxLayoutConstraints: the complete set of constraints for a window
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxLayoutConstraints : public wxObject
+class WXDLLEXPORT wxLayoutConstraints : public wxObject
 {
 public:
     // Edge constraints

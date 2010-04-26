@@ -99,10 +99,6 @@ bool wxDialog::Show(bool show)
     if(show)
     {
         wxAutoNSAutoreleasePool pool;
-
-    	if (CanDoLayoutAdaptation())
-        	DoLayoutAdaptation();
-
         InitDialog();
         if(IsModal())
         {   // ShowModal() will show the dialog

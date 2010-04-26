@@ -12,7 +12,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#include "wx/os2/private/timer.h"
+#include "wx/timer.h"
 
 #ifndef WX_PRECOMP
     #include "wx/list.h"
@@ -36,7 +36,7 @@
 
 // define a hash containing all the timers: it is indexed by timer id and
 // contains the corresponding timer
-WX_DECLARE_HASH_MAP(unsigned long, wxOS2TimerImpl *, wxIntegerHash, wxIntegerEqual,
+WX_DECLARE_HASH_MAP(unsigned long, wxTimer *, wxIntegerHash, wxIntegerEqual,
                     wxTimerMap);
 
 // instead of using a global here, wrap it in a static function as otherwise it
@@ -56,6 +56,12 @@ static wxTimerMap& TimerMap()
 // timer callback used for all timers
 ULONG wxTimerProc(HWND hwnd, ULONG, int nIdTimer, ULONG);
 
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -64,10 +70,37 @@ ULONG wxTimerProc(HWND hwnd, ULONG, int nIdTimer, ULONG);
 // wxTimer class
 // ----------------------------------------------------------------------------
 
-bool wxOS2TimerImpl::Start( int nMilliseconds, bool bOneShot )
+void wxTimer::Init()
 {
-    if ( !wxTimerImpl::Start( nMilliseconds, bOneShot ) )
-        return false;
+    m_ulId = 0;
+}
+
+wxTimer::~wxTimer()
+{
+    wxTimer::Stop();
+}
+
+void wxTimer::Notify()
+{
+    //
+    // The base class version generates an event if it has owner - which it
+    // should because otherwise nobody can process timer events, but it does
+    // not use the OS's ID, which OS/2 must have to figure out which timer fired
+    //
+    wxCHECK_RET( m_owner, _T("wxTimer::Notify() should be overridden.") );
+
+    wxTimerEvent                    vEvent( m_idTimer
+                                           ,m_milli
+                                          );
+
+    (void)m_owner->ProcessEvent(vEvent);
+} // end of wxTimer::Notify
+
+bool wxTimer::Start( int nMilliseconds, bool bOneShot )
+{
+    (void)wxTimerBase::Start( nMilliseconds, bOneShot );
+
+    wxCHECK_MSG( m_milli > 0L, false, wxT("invalid value for timer") );
 
     wxWindow* pWin = NULL;
 
@@ -81,14 +114,11 @@ bool wxOS2TimerImpl::Start( int nMilliseconds, bool bOneShot )
                                 );
     }
     else
-    {
         m_ulId = ::WinStartTimer( m_Hab
                                  ,NULLHANDLE
                                  ,0
                                  ,(ULONG)nMilliseconds
                                 );
-    }
-
     if (m_ulId > 0L)
     {
         // check that SetTimer() didn't reuse an existing id: according to
@@ -117,7 +147,7 @@ bool wxOS2TimerImpl::Start( int nMilliseconds, bool bOneShot )
     }
 }
 
-void wxOS2TimerImpl::Stop()
+void wxTimer::Stop()
 {
     if ( m_ulId )
     {
@@ -140,7 +170,7 @@ void wxOS2TimerImpl::Stop()
 // ----------------------------------------------------------------------------
 
 void wxProcessTimer(
-  wxOS2TimerImpl&                          rTimer
+  wxTimer&                          rTimer
 )
 {
     //

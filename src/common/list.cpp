@@ -30,7 +30,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/list.h"
-    #include "wx/crt.h"
 #endif
 
 #if !wxUSE_STL
@@ -54,7 +53,7 @@ bool wxListKey::operator==(wxListKeyValue value) const
             // by not putting return here...
 
         case wxKEY_STRING:
-            return *m_key.string == *value.string;
+            return wxStrcmp(m_key.string, value.string) == 0;
 
         case wxKEY_INTEGER:
             return m_key.integer == value.integer;
@@ -85,7 +84,7 @@ wxNodeBase::wxNodeBase(wxListBase *list,
 
         case wxKEY_STRING:
             // to be free()d later
-            m_key.string = new wxString(key.GetString());
+            m_key.string = wxStrdup(key.GetString());
             break;
 
         default:
@@ -108,7 +107,7 @@ wxNodeBase::~wxNodeBase()
     {
         if ( m_list->m_keyType == wxKEY_STRING )
         {
-            delete m_key.string;
+            free(m_key.string);
         }
 
         m_list->DetachNode(this);
@@ -141,7 +140,7 @@ int wxNodeBase::IndexOf() const
 void wxListBase::Init(wxKeyType keyType)
 {
   m_nodeFirst =
-  m_nodeLast = NULL;
+  m_nodeLast = (wxNodeBase *) NULL;
   m_count = 0;
   m_destroy = false;
   m_keyType = keyType;
@@ -165,7 +164,7 @@ void wxListBase::DoCopy(const wxListBase& list)
     m_destroy = list.m_destroy;
     m_keyType = list.m_keyType;
     m_nodeFirst =
-    m_nodeLast = NULL;
+    m_nodeLast = (wxNodeBase *) NULL;
 
     switch (m_keyType)
     {
@@ -201,7 +200,7 @@ void wxListBase::DoCopy(const wxListBase& list)
             }
     }
 
-    wxASSERT_MSG( m_count == list.m_count, wxT("logic error in wxList::DoCopy") );
+    wxASSERT_MSG( m_count == list.m_count, _T("logic error in wxList::DoCopy") );
 }
 
 wxListBase::~wxListBase()
@@ -236,12 +235,12 @@ wxNodeBase *wxListBase::AppendCommon(wxNodeBase *node)
 wxNodeBase *wxListBase::Append(void *object)
 {
     // all objects in a keyed list should have a key
-    wxCHECK_MSG( m_keyType == wxKEY_NONE, NULL,
+    wxCHECK_MSG( m_keyType == wxKEY_NONE, (wxNodeBase *)NULL,
                  wxT("need a key for the object to append") );
 
     // we use wxDefaultListKey even though it is the default parameter value
     // because gcc under Mac OS X seems to miscompile this call otherwise
-    wxNodeBase *node = CreateNode(m_nodeLast, NULL, object,
+    wxNodeBase *node = CreateNode(m_nodeLast, (wxNodeBase *)NULL, object,
                                   wxDefaultListKey);
 
     return AppendCommon(node);
@@ -251,31 +250,31 @@ wxNodeBase *wxListBase::Append(long key, void *object)
 {
     wxCHECK_MSG( (m_keyType == wxKEY_INTEGER) ||
                  (m_keyType == wxKEY_NONE && m_count == 0),
-                 NULL,
+                 (wxNodeBase *)NULL,
                  wxT("can't append object with numeric key to this list") );
 
-    wxNodeBase *node = CreateNode(m_nodeLast, NULL, object, key);
+    wxNodeBase *node = CreateNode(m_nodeLast, (wxNodeBase *)NULL, object, key);
     return AppendCommon(node);
 }
 
-wxNodeBase *wxListBase::Append (const wxString& key, void *object)
+wxNodeBase *wxListBase::Append (const wxChar *key, void *object)
 {
     wxCHECK_MSG( (m_keyType == wxKEY_STRING) ||
                  (m_keyType == wxKEY_NONE && m_count == 0),
-                 NULL,
+                 (wxNodeBase *)NULL,
                  wxT("can't append object with string key to this list") );
 
-    wxNodeBase *node = CreateNode(m_nodeLast, NULL, object, key);
+    wxNodeBase *node = CreateNode(m_nodeLast, (wxNodeBase *)NULL, object, key);
     return AppendCommon(node);
 }
 
 wxNodeBase *wxListBase::Insert(wxNodeBase *position, void *object)
 {
     // all objects in a keyed list should have a key
-    wxCHECK_MSG( m_keyType == wxKEY_NONE, NULL,
+    wxCHECK_MSG( m_keyType == wxKEY_NONE, (wxNodeBase *)NULL,
                  wxT("need a key for the object to insert") );
 
-    wxCHECK_MSG( !position || position->m_list == this, NULL,
+    wxCHECK_MSG( !position || position->m_list == this, (wxNodeBase *)NULL,
                  wxT("can't insert before a node from another list") );
 
     // previous and next node for the node being inserted
@@ -288,7 +287,7 @@ wxNodeBase *wxListBase::Insert(wxNodeBase *position, void *object)
     else
     {
         // inserting in the beginning of the list
-        prev = NULL;
+        prev = (wxNodeBase *)NULL;
         next = m_nodeFirst;
     }
 
@@ -321,7 +320,7 @@ wxNodeBase *wxListBase::Item(size_t n) const
 
     wxFAIL_MSG( wxT("invalid index in wxListBase::Item") );
 
-    return NULL;
+    return (wxNodeBase *)NULL;
 }
 
 wxNodeBase *wxListBase::Find(const wxListKey& key) const
@@ -338,7 +337,7 @@ wxNodeBase *wxListBase::Find(const wxListKey& key) const
     }
 
     // not found
-    return NULL;
+    return (wxNodeBase *)NULL;
 }
 
 wxNodeBase *wxListBase::Find(const void *object) const
@@ -350,7 +349,7 @@ wxNodeBase *wxListBase::Find(const void *object) const
     }
 
     // not found
-    return NULL;
+    return (wxNodeBase *)NULL;
 }
 
 int wxListBase::IndexOf(void *object) const
@@ -437,7 +436,7 @@ void wxListBase::Clear()
     }
 
     m_nodeFirst =
-    m_nodeLast = NULL;
+    m_nodeLast = (wxNodeBase *)NULL;
 
     m_count = 0;
 }
@@ -458,7 +457,7 @@ void *wxListBase::FirstThat(wxListIterateFunction F)
             return current->GetData();
     }
 
-    return NULL;
+    return (wxNodeBase *)NULL;
 }
 
 void *wxListBase::LastThat(wxListIterateFunction F)
@@ -469,7 +468,7 @@ void *wxListBase::LastThat(wxListIterateFunction F)
             return current->GetData();
     }
 
-    return NULL;
+    return (wxNodeBase *)NULL;
 }
 
 // (stefan.hammes@urz.uni-heidelberg.de)
@@ -574,6 +573,8 @@ void wxListBase::DeleteNodes(wxNodeBase* first, wxNodeBase* last)
 // wxList (a.k.a. wxObjectList)
 // -----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxList, wxObject)
+
 wxList::wxList( int key_type )
     : wxObjectList( (wxKeyType)key_type )
 {
@@ -593,6 +594,8 @@ static inline wxChar* MYcopystring(const wxChar* s)
     wxChar* copy = new wxChar[wxStrlen(s) + 1];
     return wxStrcpy(copy, s);
 }
+
+IMPLEMENT_DYNAMIC_CLASS(wxStringList, wxObject)
 
 // instead of WX_DEFINE_LIST(wxStringListBase) we define this function
 // ourselves
@@ -701,13 +704,9 @@ bool wxStringList::Member(const wxChar *s) const
 }
 
 #ifdef __WXWINCE__
-extern "C"
-{
-static int __cdecl
+extern "C" int __cdecl
 #else
-extern "C"
-{
-static int LINKAGEMODE
+extern "C" int LINKAGEMODE
 #endif
 
 wx_comparestrings(const void *arg1, const void *arg2)
@@ -717,8 +716,6 @@ wx_comparestrings(const void *arg1, const void *arg2)
 
   return wxStrcmp (*s1, *s2);
 }
-
-}   // end of extern "C" (required because of GCC Bug c++/33078
 
 // Sort a list of strings - deallocates old nodes, allocates new
 void wxStringList::Sort()

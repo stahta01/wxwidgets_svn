@@ -40,8 +40,9 @@ public:
     wxRect AsRect() const { return GetBox(); }
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     // wxRegionBase pure virtuals
     virtual bool DoIsEqual(const wxRegion& region) const;
@@ -57,7 +58,7 @@ protected:
     virtual bool DoXor(const wxRegion& region);
 
 
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIterator;
+    friend class WXDLLIMPEXP_CORE wxRegionIterator;
 
     DECLARE_DYNAMIC_CLASS(wxRegion);
 };

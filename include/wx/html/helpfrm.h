@@ -74,17 +74,11 @@ public:
     wxHtmlHelpFrame(wxHtmlHelpData* data = NULL) { Init(data); }
     wxHtmlHelpFrame(wxWindow* parent, wxWindowID wxWindowID,
                     const wxString& title = wxEmptyString,
-                    int style = wxHF_DEFAULT_STYLE, wxHtmlHelpData* data = NULL
-#if wxUSE_CONFIG
-                    , wxConfigBase *config=NULL, const wxString& rootpath = wxEmptyString
-#endif // wxUSE_CONFIG
-                    );
+                    int style = wxHF_DEFAULT_STYLE, wxHtmlHelpData* data = NULL,
+                    wxConfigBase *config=NULL, const wxString& rootpath = wxEmptyString);
     bool Create(wxWindow* parent, wxWindowID id, const wxString& title = wxEmptyString,
-                int style = wxHF_DEFAULT_STYLE
-#if wxUSE_CONFIG
-                , wxConfigBase *config=NULL, const wxString& rootpath = wxEmptyString
-#endif // wxUSE_CONFIG
-                );
+                int style = wxHF_DEFAULT_STYLE,
+                wxConfigBase *config=NULL, const wxString& rootpath = wxEmptyString);
     virtual ~wxHtmlHelpFrame();
 
     /// Returns the data associated with the window.
@@ -94,7 +88,7 @@ public:
     wxHtmlHelpController* GetController() const { return m_helpController; }
 
     /// Sets the help controller associated with the window.
-    void SetController(wxHtmlHelpController* controller);
+    void SetController(wxHtmlHelpController* controller) { m_helpController = controller; }
 
     /// Returns the help window.
     wxHtmlHelpWindow* GetHelpWindow() const { return m_HtmlHelpWin; }
@@ -103,10 +97,8 @@ public:
     // (for title of displayed HTML page)
     void SetTitleFormat(const wxString& format);
 
-#if wxUSE_CONFIG
     // For compatibility
     void UseConfig(wxConfigBase *config, const wxString& rootpath = wxEmptyString);
-#endif // wxUSE_CONFIG
 
     // Make the help controller's frame 'modal' if
     // needed
@@ -147,7 +139,7 @@ protected:
 private:
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpFrame);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpFrame)
 };
 
 #endif // wxUSE_WXHTML_HELP

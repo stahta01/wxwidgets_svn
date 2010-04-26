@@ -34,7 +34,9 @@
     #include "wx/log.h"
 #endif
 
-#include "wx/imaglist.h"
+#include "wx/palmos/imaglist.h"
+#include "wx/palmos/private.h"
+
 
 // ----------------------------------------------------------------------------
 // wxWin macros

@@ -40,11 +40,13 @@ wxListbookXmlHandler::wxListbookXmlHandler()
     XRC_ADD_STYLE(wxBK_TOP);
     XRC_ADD_STYLE(wxBK_BOTTOM);
 
+#if WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxLB_DEFAULT);
     XRC_ADD_STYLE(wxLB_LEFT);
     XRC_ADD_STYLE(wxLB_RIGHT);
     XRC_ADD_STYLE(wxLB_TOP);
     XRC_ADD_STYLE(wxLB_BOTTOM);
+#endif
 
     AddWindowStyles();
 }
@@ -82,29 +84,14 @@ wxObject *wxListbookXmlHandler::DoCreateResource()
                     int imgIndex = imgList->Add(bmp);
                     m_listbook->SetPageImage(m_listbook->GetPageCount()-1, imgIndex );
                 }
-                else if ( HasParam(wxT("image")) )
-                {
-                    if ( m_listbook->GetImageList() )
-                    {
-                        m_listbook->SetPageImage(m_listbook->GetPageCount()-1,
-                                                 GetLong(wxT("image")) );
-                    }
-                    else // image without image list?
-                    {
-                        ReportError(n, "image can only be used in conjunction "
-                                       "with imagelist");
-                    }
-                }
             }
             else
-            {
-                ReportError(n, "listbookpage child must be a window");
-            }
+                wxLogError(wxT("Error in resource."));
             return wnd;
         }
         else
         {
-            ReportError("listbookpage must have a window child");
+            wxLogError(wxT("Error in resource: no control within listbook's <page> tag."));
             return NULL;
         }
     }
@@ -118,10 +105,6 @@ wxObject *wxListbookXmlHandler::DoCreateResource()
                    GetPosition(), GetSize(),
                    GetStyle(wxT("style")),
                    GetName());
-
-        wxImageList *imagelist = GetImageList();
-        if ( imagelist )
-            nb->AssignImageList(imagelist);
 
         wxListbook *old_par = m_listbook;
         m_listbook = nb;

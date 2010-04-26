@@ -16,7 +16,7 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxScrollBar;
+class WXDLLIMPEXP_CORE wxScrollBar;
 
 //-----------------------------------------------------------------------------
 // wxScrollBar
@@ -56,7 +56,7 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
 protected:
     virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 

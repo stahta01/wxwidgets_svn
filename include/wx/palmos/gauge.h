@@ -14,10 +14,10 @@
 
 #if wxUSE_GAUGE
 
-WXDLLIMPEXP_DATA_CORE(extern const wxChar) wxGaugeNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxGaugeNameStr[];
 
 // Group box
-class WXDLLIMPEXP_CORE wxGauge : public wxGaugeBase
+class WXDLLEXPORT wxGauge : public wxGaugeBase
 {
 public:
     wxGauge() { }

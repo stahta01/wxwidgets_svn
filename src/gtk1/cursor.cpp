@@ -31,9 +31,10 @@ extern bool g_isIdle;
 // wxCursor
 //-----------------------------------------------------------------------------
 
-class wxCursorRefData : public wxGDIRefData
+class wxCursorRefData: public wxObjectRefData
 {
-public:
+  public:
+
     wxCursorRefData();
     virtual ~wxCursorRefData();
 
@@ -42,7 +43,7 @@ public:
 
 wxCursorRefData::wxCursorRefData()
 {
-    m_cursor = NULL;
+    m_cursor = (GdkCursor *) NULL;
 }
 
 wxCursorRefData::~wxCursorRefData()
@@ -61,7 +62,7 @@ wxCursor::wxCursor()
 
 }
 
-void wxCursor::InitFromStock( wxStockCursor cursorId )
+wxCursor::wxCursor( int cursorId )
 {
     m_refData = new wxCursorRefData();
 
@@ -315,19 +316,14 @@ wxCursor::~wxCursor()
 {
 }
 
+bool wxCursor::IsOk() const
+{
+    return (m_refData != NULL);
+}
+
 GdkCursor *wxCursor::GetCursor() const
 {
     return M_CURSORDATA->m_cursor;
-}
-
-wxGDIRefData *wxCursor::CreateGDIRefData() const
-{
-    return new wxCursorRefData;
-}
-
-wxGDIRefData *wxCursor::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxCursorRefData(*static_cast<const wxCursorRefData *>(data));
 }
 
 //-----------------------------------------------------------------------------

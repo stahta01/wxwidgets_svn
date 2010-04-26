@@ -32,7 +32,6 @@
     #include "wx/combobox.h"
     #include "wx/dcclient.h"
     #include "wx/settings.h"
-    #include "wx/textctrl.h"
 #endif
 
 #include "wx/dcbuffer.h"
@@ -42,50 +41,35 @@
 
 #if defined(__WXUNIVERSAL__)
 
-// position adjustment for wxTextCtrl, to achieve zero left margin
-// meaningless if LEFT_MARGIN_CAN_BE_SET set to 1 in combocmn.cpp
-#define TEXTCTRLXADJUST                 0
-
+#define TEXTCTRLXADJUST                 0 // position adjustment for wxTextCtrl, with zero indent
 #define TEXTCTRLYADJUST                 0
 #define TEXTXADJUST                     0 // how much is read-only text's x adjusted
 #define DEFAULT_DROPBUTTON_WIDTH        19
 
 #elif defined(__WXMSW__)
 
-// position adjustment for wxTextCtrl, to achieve zero left margin
-// meaningless if LEFT_MARGIN_CAN_BE_SET set to 1 in combocmn.cpp
-#define TEXTCTRLXADJUST                 2
-
+#define TEXTCTRLXADJUST                 2 // position adjustment for wxTextCtrl, with zero indent
 #define TEXTCTRLYADJUST                 3
 #define TEXTXADJUST                     0 // how much is read-only text's x adjusted
 #define DEFAULT_DROPBUTTON_WIDTH        17
 
 #elif defined(__WXGTK__)
 
-// position adjustment for wxTextCtrl, to achieve zero left margin
-// meaningless if LEFT_MARGIN_CAN_BE_SET set to 1 in combocmn.cpp
-#define TEXTCTRLXADJUST                 -1
-
+#define TEXTCTRLXADJUST                 -1 // position adjustment for wxTextCtrl, with zero indent
 #define TEXTCTRLYADJUST                 0
 #define TEXTXADJUST                     1 // how much is read-only text's x adjusted
 #define DEFAULT_DROPBUTTON_WIDTH        23
 
 #elif defined(__WXMAC__)
 
-// position adjustment for wxTextCtrl, to achieve zero left margin
-// meaningless if LEFT_MARGIN_CAN_BE_SET set to 1 in combocmn.cpp
-#define TEXTCTRLXADJUST                 0
-
+#define TEXTCTRLXADJUST                 0 // position adjustment for wxTextCtrl, with zero indent
 #define TEXTCTRLYADJUST                 0
 #define TEXTXADJUST                     0 // how much is read-only text's x adjusted
 #define DEFAULT_DROPBUTTON_WIDTH        22
 
 #else
 
-// position adjustment for wxTextCtrl, to achieve zero left margin
-// meaningless if LEFT_MARGIN_CAN_BE_SET set to 1 in combocmn.cpp
-#define TEXTCTRLXADJUST                 0
-
+#define TEXTCTRLXADJUST                 0 // position adjustment for wxTextCtrl, with zero indent
 #define TEXTCTRLYADJUST                 0
 #define TEXTXADJUST                     0 // how much is read-only text's x adjusted
 #define DEFAULT_DROPBUTTON_WIDTH        19
@@ -175,8 +159,7 @@ bool wxGenericComboCtrl::Create(wxWindow *parent,
     border = wxBORDER_NONE;
 
     Customize( wxCC_BUTTON_OUTSIDE_BORDER |
-               wxCC_NO_TEXT_AUTO_SELECT |
-               wxCC_BUTTON_STAYS_DOWN );
+               wxCC_NO_TEXT_AUTO_SELECT );
 
 #endif
 
@@ -252,7 +235,7 @@ void wxGenericComboCtrl::OnPaintEvent( wxPaintEvent& WXUNUSED(event) )
         // Set border colour
         wxPen pen1( wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT),
                     customBorder,
-                    wxPENSTYLE_SOLID);
+                    wxSOLID );
         dc.SetPen( pen1 );
 
         // area around both controls
@@ -295,7 +278,7 @@ void wxGenericComboCtrl::OnPaintEvent( wxPaintEvent& WXUNUSED(event) )
 
     // clear main background
     dc.DrawRectangle(rect);
-
+    
     if ( !m_btn )
     {
         // Standard button rendering
@@ -445,8 +428,7 @@ bool wxGenericComboCtrl::IsKeyPopupToggle(const wxKeyEvent& event) const
     }
     else
     {
-        if ( (keycode == WXK_DOWN && event.AltDown()) ||
-             (keycode == WXK_F4) )
+        if ( keycode == WXK_DOWN && event.AltDown() )
             return true;
     }
 

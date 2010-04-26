@@ -17,10 +17,6 @@
 #define wxCONCAT_HELPER(text, line) text ## line
 #define wxCONCAT(text, line)        wxCONCAT_HELPER(text, line)
 
-#define wxCONCAT3(x1, x2, x3) wxCONCAT(wxCONCAT(x1, x2), x3)
-#define wxCONCAT4(x1, x2, x3, x4) wxCONCAT(wxCONCAT3(x1, x2, x3), x4)
-#define wxCONCAT5(x1, x2, x3, x4, x5) wxCONCAT(wxCONCAT4(x1, x2, x3, x4), x5)
-
 /* wxSTRINGIZE works as the preprocessor # operator but also works with macros */
 #define wxSTRINGIZE_HELPER(x)       #x
 #define wxSTRINGIZE(x)              wxSTRINGIZE_HELPER(x)
@@ -57,27 +53,5 @@
  */
 #define wxEMPTY_PARAMETER_VALUE /* Fake macro parameter value */
 
-/*
-    Define __WXFUNCTION__ which is like standard __FUNCTION__ but defined as
-    NULL for the compilers which don't support the latter.
- */
-#ifndef __WXFUNCTION__
-    /* TODO: add more compilers supporting __FUNCTION__ */
-    #if defined(__DMC__)
-        /*
-           __FUNCTION__ happens to be not defined within class members
-           http://www.digitalmars.com/drn-bin/wwwnews?c%2B%2B.beta/485
-        */
-        #define __WXFUNCTION__ (NULL)
-    #elif defined(__GNUC__) || \
-          (defined(_MSC_VER) && _MSC_VER >= 1300) || \
-          defined(__FUNCTION__)
-        #define __WXFUNCTION__ __FUNCTION__
-    #else
-        /* still define __WXFUNCTION__ to avoid #ifdefs elsewhere */
-        #define __WXFUNCTION__ (NULL)
-    #endif
-#endif /* __WXFUNCTION__ already defined */
-
-#endif /* _WX_CPP_H_ */
+#endif // _WX_CPP_H_
 

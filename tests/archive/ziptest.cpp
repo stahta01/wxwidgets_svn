@@ -64,7 +64,7 @@ protected:
 
 void ZipTestCase::OnCreateArchive(wxZipOutputStream& zip)
 {
-    m_comment << wxT("Comment for test ") << m_id;
+    m_comment << _T("Comment for test ") << m_id;
     zip.SetComment(m_comment);
 }
 
@@ -84,7 +84,7 @@ void ZipTestCase::OnCreateEntry(wxZipOutputStream& zip,
         switch ((m_id + m_count) % 5) {
             case 0:
             {
-                wxString comment = wxT("Comment for ") + entry->GetName();
+                wxString comment = _T("Comment for ") + entry->GetName();
                 entry->SetComment(comment);
                 // lowercase the expected result, and the notifier should do
                 // the same for the zip entries when ModifyArchive() runs
@@ -110,7 +110,7 @@ void ZipTestCase::OnEntryExtracted(wxZipEntry& entry,
 {
     // provide some context for the error message so that we know which
     // iteration of the loop we were on
-    wxString name = wxT(" '") + entry.GetName() + wxT("'");
+    wxString name = _T(" '") + entry.GetName() + _T("'");
     string error_entry(name.mb_str());
     string error_context(" failed for entry" + error_entry);
 
@@ -175,8 +175,8 @@ void ZipPipeTestCase::runTest()
 {
     TestOutputStream out(m_options);
 
-    wxString testdata = wxT("test data to pipe through zip");
-    wxString cmd = wxT("echo ") + testdata + wxT(" | zip -q - -");
+    wxString testdata = _T("test data to pipe through zip");
+    wxString cmd = _T("echo ") + testdata + _T(" | zip -q - -");
 
     {
         PFileInputStream in(cmd);
@@ -225,23 +225,20 @@ protected:
 ziptest::ziptest()
   : ArchiveTestSuite("zip")
 {
-    AddArchiver(wxT("zip -qr %s *"));
-    AddUnArchiver(wxT("unzip -q %s"));
+    AddArchiver(_T("zip -qr %s *"));
+    AddUnArchiver(_T("unzip -q %s"));
 }
 
 ArchiveTestSuite *ziptest::makeSuite()
 {
     ArchiveTestSuite::makeSuite();
 
-#if !defined WXARC_NO_POPEN && !defined __WXMSW__
-    // If have popen then can check the piped output of 'zip - -'.
-    // The gnuwin32 build of infozip does work for this, e.g.:
-    //  C:\>echo test data to pipe through zip | zip -q > foo.zip 
-    // doesn't produce a valid zip, so disabled for now.
-    if (IsInPath(wxT("zip")))
+#ifndef WXARC_NO_POPEN 
+    // if have popen then can check the piped output of 'zip - -'
+    if (IsInPath(_T("zip")))
         for (int options = 0; options <= PipeIn; options += PipeIn) {
-            string name = Description(wxT("ZipPipeTestCase"), options,
-                                      false, wxT(""), wxT("zip -q - -"));
+            string name = Description(_T("ZipPipeTestCase"), options,
+                                      false, _T(""), _T("zip -q - -"));
             addTest(new ZipPipeTestCase(name, options));
         }
 #endif
@@ -261,13 +258,11 @@ CppUnit::Test *ziptest::makeTest(
         return NULL;
 
     if (genericInterface)
-    {
         return new ArchiveTestCase<wxArchiveClassFactory>(
                             descr, new wxZipClassFactory,
                             options, archiver, unarchiver);
-    }
-
-    return new ZipTestCase(descr, options, archiver, unarchiver);
+    else
+        return new ZipTestCase(descr, options, archiver, unarchiver);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(ziptest);

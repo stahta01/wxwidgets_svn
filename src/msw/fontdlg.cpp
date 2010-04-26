@@ -112,12 +112,17 @@ int wxFontDialog::ShowModal()
     }
     else
     {
+        // common dialog failed - why?
+#ifdef __WXDEBUG__
         DWORD dwErr = CommDlgExtendedError();
         if ( dwErr != 0 )
         {
-            wxLogError(_("Common dialog failed with error code %0lx."), dwErr);
+            // this msg is only for developers
+            wxLogError(wxT("Common dialog failed with error code %0lx."),
+                       dwErr);
         }
         //else: it was just cancelled
+#endif
 
         return wxID_CANCEL;
     }

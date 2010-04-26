@@ -24,9 +24,9 @@
 #include "wx/hashmap.h"
 
 // fwd decl
-class  WXDLLIMPEXP_CORE wxImageList;
-class  WXDLLIMPEXP_CORE wxDragImage;
-struct WXDLLIMPEXP_FWD_CORE wxTreeViewItem;
+class  WXDLLEXPORT wxImageList;
+class  WXDLLEXPORT wxDragImage;
+struct WXDLLEXPORT wxTreeViewItem;
 
 // hash storing attributes for our items
 WX_DECLARE_EXPORTED_VOIDPTR_HASH_MAP(wxTreeItemAttr *, wxMapTreeAttr);
@@ -35,7 +35,7 @@ WX_DECLARE_EXPORTED_VOIDPTR_HASH_MAP(wxTreeItemAttr *, wxMapTreeAttr);
 // wxTreeCtrl
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxTreeCtrl : public wxControl
+class WXDLLEXPORT wxTreeCtrl : public wxControl
 {
 public:
     // creation
@@ -425,7 +425,7 @@ private:
     friend class wxTreeSortHelper;
 
     DECLARE_DYNAMIC_CLASS(wxTreeCtrl)
-    wxDECLARE_NO_COPY_CLASS(wxTreeCtrl);
+    DECLARE_NO_COPY_CLASS(wxTreeCtrl)
 };
 
 #endif // wxUSE_TREECTRL

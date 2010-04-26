@@ -12,7 +12,7 @@
 #ifndef _WX_UNIX_APP_H_
 #define _WX_UNIX_APP_H_
 
-class WXDLLIMPEXP_CORE wxUniversalApp : public wxApp
+class WXDLLEXPORT wxUniversalApp : public wxApp
 {
 public:
 };

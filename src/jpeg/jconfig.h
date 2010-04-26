@@ -1,4 +1,8 @@
-#if defined(_WIN32) || defined(__OS2__)
+/* This test added by JACS as a quick fix. What should we do
+ * to make it work with configure?
+ */
+
+#if defined(_MSC_VER) || defined(__BORLANDC__) || defined (__DMC__)
 #include "jconfig.vc"
 #else
 
@@ -55,14 +59,8 @@
   #undef CHAR_IS_UNSIGNED
 #endif
 
-#ifndef HAVE_STDDEF_H
 #define HAVE_STDDEF_H
-#endif
-
-#ifndef HAVE_STDLIB_H
 #define HAVE_STDLIB_H
-#endif
-
 #undef NEED_BSD_STRINGS
 #undef NEED_SYS_TYPES_H
 #undef NEED_FAR_POINTERS

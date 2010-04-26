@@ -93,7 +93,7 @@ protected:
     wxChar NextChar();   // this should be used instead of GetC() because of Unicode issues
     wxChar NextNonSeparators();
 
-    wxDECLARE_NO_COPY_CLASS(wxTextInputStream);
+    DECLARE_NO_COPY_CLASS(wxTextInputStream)
 };
 
 typedef enum
@@ -127,8 +127,7 @@ public:
 
     wxTextOutputStream& PutChar(wxChar c);
 
-    void Flush();
-
+    wxTextOutputStream& operator<<(const wxChar *string);
     wxTextOutputStream& operator<<(const wxString& string);
     wxTextOutputStream& operator<<(char c);
 #if wxUSE_UNICODE && wxWCHAR_T_IS_REAL_TYPE
@@ -151,7 +150,7 @@ protected:
     wxMBConv *m_conv;
 #endif
 
-    wxDECLARE_NO_COPY_CLASS(wxTextOutputStream);
+    DECLARE_NO_COPY_CLASS(wxTextOutputStream)
 };
 
 #endif

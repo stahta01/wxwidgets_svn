@@ -54,19 +54,30 @@ enum
 
 typedef wxWindow wxNotebookPage;  // so far, any window can be a page
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxNotebookNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxNotebookNameStr[];
+
+#if WXWIN_COMPATIBILITY_2_4
+    #define wxNOTEBOOK_NAME wxNotebookNameStr
+#endif
 
 // ----------------------------------------------------------------------------
 // wxNotebookBase: define wxNotebook interface
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxNotebookBase : public wxBookCtrlBase
+class WXDLLEXPORT wxNotebookBase : public wxBookCtrlBase
 {
 public:
     // ctors
     // -----
 
     wxNotebookBase() { }
+
+    wxNotebookBase(wxWindow *parent,
+                   wxWindowID winid,
+                   const wxPoint& pos = wxDefaultPosition,
+                   const wxSize& size = wxDefaultSize,
+                   long style = 0,
+                   const wxString& name = wxNotebookNameStr) ;
 
     // wxNotebook-specific additions to wxBookCtrlBase interface
     // ---------------------------------------------------------
@@ -99,33 +110,50 @@ public:
     // new is -1)
     void SendPageChangedEvent(int nPageOld, int nPageNew = -1);
 
-    // wxBookCtrlBase overrides this method to return false but we do need
-    // focus because we have tabs
-    virtual bool AcceptsFocus() const { return wxControl::AcceptsFocus(); }
 
 protected:
-    wxDECLARE_NO_COPY_CLASS(wxNotebookBase);
+    DECLARE_NO_COPY_CLASS(wxNotebookBase)
 };
 
 // ----------------------------------------------------------------------------
 // notebook event class and related stuff
 // ----------------------------------------------------------------------------
 
-// wxNotebookEvent is obsolete and defined for compatibility only (notice that
-// we use #define and not typedef to also keep compatibility with the existing
-// code which forward declares it)
-#define wxNotebookEvent wxBookCtrlEvent
-typedef wxBookCtrlEventFunction wxNotebookEventFunction;
-#define wxNotebookEventHandler(func) wxBookCtrlEventHandler(func)
+class WXDLLEXPORT wxNotebookEvent : public wxBookCtrlBaseEvent
+{
+public:
+    wxNotebookEvent(wxEventType commandType = wxEVT_NULL, int winid = 0,
+                    int nSel = -1, int nOldSel = -1)
+        : wxBookCtrlBaseEvent(commandType, winid, nSel, nOldSel)
+    {
+    }
 
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_CORE, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, wxBookCtrlEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_CORE, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, wxBookCtrlEvent );
+    wxNotebookEvent(const wxNotebookEvent& event)
+        : wxBookCtrlBaseEvent(event)
+    {
+    }
+
+    virtual wxEvent *Clone() const { return new wxNotebookEvent(*this); }
+
+private:
+    DECLARE_DYNAMIC_CLASS_NO_ASSIGN(wxNotebookEvent)
+};
+
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, 802)
+    DECLARE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, 803)
+END_DECLARE_EVENT_TYPES()
+
+typedef void (wxEvtHandler::*wxNotebookEventFunction)(wxNotebookEvent&);
+
+#define wxNotebookEventHandler(func) \
+    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxNotebookEventFunction, &func)
 
 #define EVT_NOTEBOOK_PAGE_CHANGED(winid, fn) \
-    wx__DECLARE_EVT1(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, winid, wxBookCtrlEventHandler(fn))
+    wx__DECLARE_EVT1(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, winid, wxNotebookEventHandler(fn))
 
 #define EVT_NOTEBOOK_PAGE_CHANGING(winid, fn) \
-    wx__DECLARE_EVT1(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, winid, wxBookCtrlEventHandler(fn))
+    wx__DECLARE_EVT1(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, winid, wxNotebookEventHandler(fn))
 
 // ----------------------------------------------------------------------------
 // wxNotebook class itself
@@ -142,7 +170,7 @@ wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_CORE, wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING
 #elif defined(__WXGTK__)
     #include  "wx/gtk1/notebook.h"
 #elif defined(__WXMAC__)
-    #include  "wx/osx/notebook.h"
+    #include  "wx/mac/notebook.h"
 #elif defined(__WXCOCOA__)
     #include  "wx/cocoa/notebook.h"
 #elif defined(__WXPM__)

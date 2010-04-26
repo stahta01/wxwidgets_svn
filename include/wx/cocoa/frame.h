@@ -12,10 +12,10 @@
 #ifndef _WX_COCOA_FRAME_H_
 #define _WX_COCOA_FRAME_H_
 
-class WXDLLIMPEXP_FWD_CORE wxMenuBar;
-class WXDLLIMPEXP_FWD_CORE wxStatusBar;
+class WXDLLEXPORT wxMenuBar;
+class WXDLLEXPORT wxStatusBar;
 
-class WXDLLIMPEXP_CORE wxFrame: public wxFrameBase
+class WXDLLEXPORT wxFrame: public wxFrameBase
 {
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxFrame)
@@ -86,7 +86,7 @@ public:
 
     // create the main status bar by calling OnCreateStatusBar()
     virtual wxStatusBar* CreateStatusBar(int number = 1,
-                                         long style = wxSTB_DEFAULT_STYLE,
+                                         long style = wxST_SIZEGRIP,
                                          wxWindowID winid = 0,
                                          const wxString& name =
                                             wxStatusLineNameStr);

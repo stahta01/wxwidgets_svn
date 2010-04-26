@@ -389,7 +389,7 @@ bool wxReader::HasObjectClassInfo( int objectID )
     if ( objectID == wxNullObjectID || objectID == wxInvalidObjectID )
     {
         wxLogError( _("Invalid or Null Object ID passed to HasObjectClassInfo" ) ) ;
-        return false ;
+        return NULL ;
     }
     return m_data->m_classInfos.find(objectID) != m_data->m_classInfos.end() ;
 }
@@ -429,7 +429,7 @@ struct wxRuntimeDepersister::wxRuntimeDepersisterInternal
             return NULL ;
         if ( m_objects.find(objectID) == m_objects.end() )
         {
-            wxLogError( _("Passing an unknown object to GetObject") ) ;
+            wxLogError( _("Passing an unkown object to GetObject") ) ;
             return NULL ;
         }
 
@@ -842,6 +842,6 @@ void wxCodeDepersister::SetConnect(int eventSourceObjectID,
 
 #include "wx/arrimpl.cpp"
 
-WX_DEFINE_OBJARRAY(wxxVariantArray)
+WX_DEFINE_OBJARRAY(wxxVariantArray);
 
 #endif // wxUSE_EXTENDED_RTTI

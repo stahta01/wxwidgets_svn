@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        forcelnk.h
-// Purpose:     macros which force the linker to link apparently unused code
+// Purpose:     see bellow
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) Vaclav Slavik

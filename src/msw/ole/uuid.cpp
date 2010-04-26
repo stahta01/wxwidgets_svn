@@ -20,7 +20,7 @@
 #pragma hdrstop
 #endif
 
-#if wxUSE_OLE && (wxUSE_DRAG_AND_DROP || wxUSE_DATAOBJ)
+#if wxUSE_OLE && ( wxUSE_DRAG_AND_DROP || (defined(__WXDEBUG__) && wxUSE_DATAOBJ) )
 
 #ifndef WX_PRECOMP
     #include "wx/msw/wrapwin.h"
@@ -87,6 +87,11 @@ bool Uuid::operator==(const Uuid& uuid) const
     // IsEqualGUID() returns BOOL and not bool so use an explicit comparison to
     // avoid MSVC warnings about int->bool conversion
     return IsEqualGUID(m_uuid, uuid.m_uuid) == TRUE;
+}
+
+bool Uuid::operator!=(const Uuid& uuid) const
+{
+    return !(*this == uuid);
 }
 
 // dtor

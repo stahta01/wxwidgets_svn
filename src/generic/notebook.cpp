@@ -49,6 +49,9 @@
 // event table
 // ----------------------------------------------------------------------------
 
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
+
 BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
     EVT_NOTEBOOK_PAGE_CHANGED(wxID_ANY, wxNotebook::OnSelChange)
     EVT_SIZE(wxNotebook::OnSize)
@@ -59,6 +62,7 @@ BEGIN_EVENT_TABLE(wxNotebook, wxBookCtrlBase)
 END_EVENT_TABLE()
 
 IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxBookCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxCommandEvent)
 
 // ============================================================================
 // implementation
@@ -102,7 +106,7 @@ private:
 
 static int GetPageId(wxTabView *tabview, wxNotebookPage *page)
 {
-    return static_cast<wxNotebookTabView*>(tabview)->GetId(page);
+    return wx_static_cast(wxNotebookTabView*, tabview)->GetId(page);
 }
 
 // ----------------------------------------------------------------------------
@@ -112,7 +116,7 @@ static int GetPageId(wxTabView *tabview, wxNotebookPage *page)
 // common part of all ctors
 void wxNotebook::Init()
 {
-    m_tabView = NULL;
+    m_tabView = (wxNotebookTabView*) NULL;
     m_nSelection = -1;
 }
 
@@ -153,6 +157,8 @@ bool wxNotebook::Create(wxWindow *parent,
 
     if (!wxControl::Create(parent, id, pos, size, style|wxNO_BORDER, wxDefaultValidator, name))
         return false;
+
+    SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 
     SetTabView(new wxNotebookTabView(this));
 
@@ -541,7 +547,7 @@ bool wxNotebook::RefreshLayout(bool force)
     return true;
 }
 
-void wxNotebook::OnSelChange(wxBookCtrlEvent& event)
+void wxNotebook::OnSelChange(wxNotebookEvent& event)
 {
     // is it our tab control?
     if ( event.GetEventObject() == this )
@@ -565,17 +571,15 @@ void wxNotebook::OnSetFocus(wxFocusEvent& event)
 
 void wxNotebook::OnNavigationKey(wxNavigationKeyEvent& event)
 {
-    if ( event.IsWindowChange() )
-    {
+    if ( event.IsWindowChange() ) {
         // change pages
         AdvanceSelection(event.GetDirection());
     }
     else {
         // pass to the parent
-        if ( GetParent() )
-        {
+        if ( GetParent() ) {
             event.SetCurrentFocus(this);
-            GetParent()->ProcessWindowEvent(event);
+            GetParent()->ProcessEvent(event);
         }
     }
 }
@@ -711,7 +715,7 @@ void wxNotebookTabView::OnTabActivate(int activateId, int deactivateId)
   if (!m_notebook)
     return;
 
-  wxBookCtrlEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_notebook->GetId());
+  wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, m_notebook->GetId());
 
   // Translate from wxTabView's ids (which aren't position-dependent)
   // to wxNotebook's (which are).
@@ -734,7 +738,7 @@ bool wxNotebookTabView::OnTabPreActivate(int activateId, int deactivateId)
 
   if (m_notebook)
   {
-    wxBookCtrlEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_notebook->GetId());
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, m_notebook->GetId());
 
     // Translate from wxTabView's ids (which aren't position-dependent)
     // to wxNotebook's (which are).

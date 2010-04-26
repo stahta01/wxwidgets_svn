@@ -101,31 +101,31 @@ void wxRichTextStylePage::CreateControls()
     itemBoxSizer4->Add(itemBoxSizer5, 0, wxGROW, 5);
 
     wxStaticText* itemStaticText6 = new wxStaticText( itemPanel1, wxID_STATIC, _("&Style:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 5);
+    itemBoxSizer5->Add(itemStaticText6, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP|wxADJUST_MINSIZE, 5);
 
-    m_styleName = new wxTextCtrl( itemPanel1, ID_RICHTEXTSTYLEPAGE_STYLE_NAME, wxT(""), wxDefaultPosition, wxSize(300, -1), wxTE_READONLY );
+    m_styleName = new wxTextCtrl( itemPanel1, ID_RICHTEXTSTYLEPAGE_STYLE_NAME, wxEmptyString, wxDefaultPosition, wxSize(300, -1), wxTE_READONLY );
     m_styleName->SetHelpText(_("The style name."));
-    if (wxRichTextStylePage::ShowToolTips())
+    if (ShowToolTips())
         m_styleName->SetToolTip(_("The style name."));
     itemBoxSizer5->Add(m_styleName, 0, wxGROW|wxALL, 5);
 
     wxStaticText* itemStaticText8 = new wxStaticText( itemPanel1, wxID_STATIC, _("&Based on:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(itemStaticText8, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 5);
+    itemBoxSizer5->Add(itemStaticText8, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP|wxADJUST_MINSIZE, 5);
 
-    wxArrayString m_basedOnStrings;
-    m_basedOn = new wxComboBox( itemPanel1, ID_RICHTEXTSTYLEPAGE_BASED_ON, wxT(""), wxDefaultPosition, wxDefaultSize, m_basedOnStrings, wxCB_DROPDOWN );
+    wxString* m_basedOnStrings = NULL;
+    m_basedOn = new wxComboBox( itemPanel1, ID_RICHTEXTSTYLEPAGE_BASED_ON, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, m_basedOnStrings, wxCB_DROPDOWN );
     m_basedOn->SetHelpText(_("The style on which this style is based."));
-    if (wxRichTextStylePage::ShowToolTips())
+    if (ShowToolTips())
         m_basedOn->SetToolTip(_("The style on which this style is based."));
     itemBoxSizer5->Add(m_basedOn, 0, wxGROW|wxALL, 5);
 
     wxStaticText* itemStaticText10 = new wxStaticText( itemPanel1, wxID_STATIC, _("&Next style:"), wxDefaultPosition, wxDefaultSize, 0 );
-    itemBoxSizer5->Add(itemStaticText10, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP, 5);
+    itemBoxSizer5->Add(itemStaticText10, 0, wxALIGN_LEFT|wxLEFT|wxRIGHT|wxTOP|wxADJUST_MINSIZE, 5);
 
-    wxArrayString m_nextStyleStrings;
-    m_nextStyle = new wxComboBox( itemPanel1, ID_RICHTEXTSTYLEPAGE_NEXT_STYLE, wxT(""), wxDefaultPosition, wxDefaultSize, m_nextStyleStrings, wxCB_DROPDOWN );
+    wxString* m_nextStyleStrings = NULL;
+    m_nextStyle = new wxComboBox( itemPanel1, ID_RICHTEXTSTYLEPAGE_NEXT_STYLE, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, m_nextStyleStrings, wxCB_DROPDOWN );
     m_nextStyle->SetHelpText(_("The default style for the next paragraph."));
-    if (wxRichTextStylePage::ShowToolTips())
+    if (ShowToolTips())
         m_nextStyle->SetToolTip(_("The default style for the next paragraph."));
     itemBoxSizer5->Add(m_nextStyle, 0, wxGROW|wxALL, 5);
 
@@ -245,7 +245,7 @@ bool wxRichTextStylePage::TransferDataToWindow()
     return true;
 }
 
-wxTextAttr* wxRichTextStylePage::GetAttributes()
+wxTextAttrEx* wxRichTextStylePage::GetAttributes()
 {
     return wxRichTextFormattingDialog::GetDialogAttributes(this);
 }

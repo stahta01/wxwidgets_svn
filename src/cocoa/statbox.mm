@@ -75,3 +75,4 @@ wxString wxStaticBox::GetLabel() const
    wxAutoNSAutoreleasePool pool;
    return wxStringWithNSString([GetNSBox() title]);
 }
+

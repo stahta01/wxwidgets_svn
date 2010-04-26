@@ -46,20 +46,16 @@ wxHtmlHelpController::wxHtmlHelpController(int style, wxWindow* parentWindow):
     m_helpWindow = NULL;
     m_helpFrame = NULL;
     m_helpDialog = NULL;
-#if wxUSE_CONFIG
     m_Config = NULL;
     m_ConfigRoot = wxEmptyString;
-#endif // wxUSE_CONFIG
     m_titleFormat = _("Help: %s");
     m_FrameStyle = style;
 }
 
 wxHtmlHelpController::~wxHtmlHelpController()
 {
-#if wxUSE_CONFIG
     if (m_Config)
         WriteCustomization(m_Config, m_ConfigRoot);
-#endif // wxUSE_CONFIG
     if (m_helpWindow)
         DestroyHelpWindow();
 }
@@ -89,10 +85,8 @@ void wxHtmlHelpController::DestroyHelpWindow()
 
 void wxHtmlHelpController::OnCloseFrame(wxCloseEvent& evt)
 {
-#if wxUSE_CONFIG
     if (m_Config)
         WriteCustomization(m_Config, m_ConfigRoot);
-#endif // wxUSE_CONFIG
 
     evt.Skip();
 
@@ -121,7 +115,12 @@ void wxHtmlHelpController::SetTitleFormat(const wxString& title)
 // Find the top-most parent window
 wxWindow* wxHtmlHelpController::FindTopLevelWindow()
 {
-    return wxGetTopLevelParent(m_helpWindow);
+    wxWindow* parent = m_helpWindow;
+    while (parent && !parent->IsTopLevel())
+    {
+        parent = parent->GetParent();
+    }
+    return parent;
 }
 
 bool wxHtmlHelpController::AddBook(const wxFileName& book_file, bool show_wait_msg)
@@ -157,12 +156,8 @@ wxHtmlHelpFrame* wxHtmlHelpController::CreateHelpFrame(wxHtmlHelpData *data)
 {
     wxHtmlHelpFrame* frame = new wxHtmlHelpFrame(data);
     frame->SetController(this);
-    frame->Create(m_parentWindow, -1, wxEmptyString, m_FrameStyle
-#if wxUSE_CONFIG
-        , m_Config, m_ConfigRoot
-#endif // wxUSE_CONFIG
-        );
-    frame->SetTitleFormat(m_titleFormat);
+    frame->Create(m_parentWindow, -1, wxEmptyString, m_FrameStyle, m_Config, m_ConfigRoot);
+    frame->SetTitleFormat(m_titleFormat);    
     m_helpFrame = frame;
     return frame;
 }
@@ -171,7 +166,7 @@ wxHtmlHelpDialog* wxHtmlHelpController::CreateHelpDialog(wxHtmlHelpData *data)
 {
     wxHtmlHelpDialog* dialog = new wxHtmlHelpDialog(data);
     dialog->SetController(this);
-    dialog->SetTitleFormat(m_titleFormat);
+    dialog->SetTitleFormat(m_titleFormat);    
     dialog->Create(m_parentWindow, -1, wxEmptyString, m_FrameStyle);
     m_helpDialog = dialog;
     return dialog;
@@ -190,14 +185,12 @@ wxWindow* wxHtmlHelpController::CreateHelpWindow()
         return m_helpWindow;
     }
 
-#if wxUSE_CONFIG
     if (m_Config == NULL)
     {
         m_Config = wxConfigBase::Get(false);
         if (m_Config != NULL)
-            m_ConfigRoot = wxT("wxWindows/wxHtmlHelpController");
+            m_ConfigRoot = _T("wxWindows/wxHtmlHelpController");
     }
-#endif // wxUSE_CONFIG
 
     if (m_FrameStyle & wxHF_DIALOG)
     {
@@ -219,7 +212,6 @@ wxWindow* wxHtmlHelpController::CreateHelpWindow()
     return m_helpWindow;
 }
 
-#if wxUSE_CONFIG
 void wxHtmlHelpController::ReadCustomization(wxConfigBase* cfg, const wxString& path)
 {
     /* should not be called by the user; call UseConfig, and the controller
@@ -242,14 +234,13 @@ void wxHtmlHelpController::UseConfig(wxConfigBase *config, const wxString& rootp
     if (m_helpWindow) m_helpWindow->UseConfig(config, rootpath);
     ReadCustomization(config, rootpath);
 }
-#endif // wxUSE_CONFIG
 
 //// Backward compatibility with wxHelpController API
 
 bool wxHtmlHelpController::Initialize(const wxString& file)
 {
     wxString dir, filename, ext;
-    wxFileName::SplitPath(file, & dir, & filename, & ext);
+    wxSplitPath(file, & dir, & filename, & ext);
 
     if (!dir.empty())
         dir = dir + wxFILE_SEP_PATH;

@@ -26,10 +26,10 @@
 #pragma message enable nosimpint
 #endif
 
-class WXDLLIMPEXP_FWD_CORE wxMouseEvent;
-class WXDLLIMPEXP_FWD_CORE wxKeyEvent;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-class WXDLLIMPEXP_FWD_CORE wxRegion;
+class WXDLLIMPEXP_CORE wxMouseEvent;
+class WXDLLIMPEXP_CORE wxKeyEvent;
+class WXDLLIMPEXP_CORE wxWindow;
+class WXDLLIMPEXP_CORE wxRegion;
 
 // ----------------------------------------------------------------------------
 // key events related functions
@@ -67,7 +67,9 @@ void wxAllocNearestColor(Display *display,Colormap colormap,XColor *xcolor);
 void wxAllocColor(Display *display,Colormap colormap,XColor *xcolor);
 
 // For debugging
+#ifdef __WXDEBUG__
 wxString wxGetXEventName(XEvent& event);
+#endif
 
 // Is the window visible?
 bool wxWindowIsVisible(Window win);
@@ -146,7 +148,7 @@ bool wxWindowIsVisible(Window win);
 
 bool wxDoSetShape( Display* xdisplay, Window xwindow, const wxRegion& region );
 
-class WXDLLIMPEXP_CORE wxXVisualInfo
+class WXDLLEXPORT wxXVisualInfo
 {
 public:
     wxXVisualInfo();
@@ -167,7 +169,7 @@ public:
     int                   m_visualRedPrec;
     int                   m_visualGreenPrec;
     int                   m_visualBluePrec;
-
+    
     unsigned char        *m_colorCube;
 };
 

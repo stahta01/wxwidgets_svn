@@ -44,19 +44,11 @@ bool wxPopupWindow::Create( wxWindow *parent, int flags )
 
     m_mainWidget = (WXWidget)popup;
 
-    wxAddWindowToTable( (Widget) m_mainWidget, this );
-
-    DoSetSizeIntr( -1, -1, 100, 100, 0, true );
+    SetSize( 100, 100 ); // for child creation to work
 
     XtSetMappedWhenManaged( popup, False );
     XtRealizeWidget( popup );
-    XtManageChild ( popup );
-/*
-    XtTranslations ptr;
-    XtOverrideTranslations (popup,
-        ptr = XtParseTranslationTable ("<Configure>: resize()"));
-    XtFree ((char *) ptr);
-*/
+
     return true;
 }
 
@@ -67,7 +59,7 @@ bool wxPopupWindow::Show( bool show )
 
     if( show )
     {
-        XtPopup( (Widget)GetMainWidget(), XtGrabNonexclusive );
+        XtPopup( (Widget)GetMainWidget(), XtGrabNone );
     }
     else
     {

@@ -156,7 +156,7 @@ long wxExecute( const wxString& rCommand,
                       ,zArgs
                       ,zEnvs
                       ,&vResultCodes
-                      ,rCommand.c_str()
+                      ,(PSZ)rCommand.c_str()
                      );
     if (rc != NO_ERROR)
     {

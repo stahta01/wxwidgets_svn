@@ -17,7 +17,7 @@
 // ========================================================================
 // wxStaticBox
 // ========================================================================
-class WXDLLIMPEXP_CORE wxStaticBox: public wxStaticBoxBase, protected wxCocoaNSBox
+class WXDLLEXPORT wxStaticBox: public wxStaticBoxBase, protected wxCocoaNSBox
 {
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
     DECLARE_EVENT_TABLE()
@@ -49,7 +49,7 @@ public:
 // ------------------------------------------------------------------------
 protected:
     // Static boxes cannot be enabled/disabled
-    virtual void CocoaSetEnabled(bool WXUNUSED(enable)) { }
+    virtual void CocoaSetEnabled(bool enable) { }
 // ------------------------------------------------------------------------
 // Implementation
 // ------------------------------------------------------------------------

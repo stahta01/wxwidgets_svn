@@ -22,38 +22,13 @@
 
 #include "wx/window.h"      // base class
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxControlNameStr[];
-
-
-// ----------------------------------------------------------------------------
-// Ellipsize() constants
-// ----------------------------------------------------------------------------
-
-enum wxEllipsizeFlags
-{
-    wxELLIPSIZE_FLAGS_NONE = 0,
-    wxELLIPSIZE_FLAGS_PROCESS_MNEMONICS = 1,
-    wxELLIPSIZE_FLAGS_EXPAND_TABS = 2,
-
-    wxELLIPSIZE_FLAGS_DEFAULT = wxELLIPSIZE_FLAGS_PROCESS_MNEMONICS |
-                                wxELLIPSIZE_FLAGS_EXPAND_TABS
-};
-
-// NB: Don't change the order of these values, they're the same as in
-//     PangoEllipsizeMode enum.
-enum wxEllipsizeMode
-{
-    wxELLIPSIZE_NONE,
-    wxELLIPSIZE_START,
-    wxELLIPSIZE_MIDDLE,
-    wxELLIPSIZE_END
-};
+extern WXDLLEXPORT_DATA(const wxChar) wxControlNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxControl is the base class for all controls
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxControlBase : public wxWindow
+class WXDLLEXPORT wxControlBase : public wxWindow
 {
 public:
     wxControlBase() { }
@@ -71,28 +46,11 @@ public:
     // get the control alignment (left/right/centre, top/bottom/centre)
     int GetAlignment() const { return m_windowStyle & wxALIGN_MASK; }
 
-    // set label with mnemonics
-    virtual void SetLabel(const wxString& label)
-    {
-        m_labelOrig = label;
-
-        InvalidateBestSize();
-
-        wxWindow::SetLabel(label);
-    }
-
-    // return the original string, as it was passed to SetLabel()
-    // (i.e. with wx-style mnemonics)
-    virtual wxString GetLabel() const { return m_labelOrig; }
-
-    // set label text (mnemonics will be escaped)
-    virtual void SetLabelText(const wxString& text)
-    {
-        SetLabel(EscapeMnemonics(text));
-    }
+    // get the string without mnemonic characters ('&')
+    static wxString GetLabelText(const wxString& label);
 
     // get just the text of the label, without mnemonic characters ('&')
-    virtual wxString GetLabelText() const { return GetLabelText(GetLabel()); }
+    wxString GetLabelText() const { return GetLabelText(GetLabel()); }
 
     // controls by default inherit the colours of their parents, if a
     // particular control class doesn't want to do it, it can override
@@ -106,52 +64,13 @@ public:
     // if the button was clicked)
     virtual void Command(wxCommandEvent &event);
 
+    virtual void SetLabel( const wxString &label );
     virtual bool SetFont(const wxFont& font);
 
     // wxControl-specific processing after processing the update event
     virtual void DoUpdateWindowUI(wxUpdateUIEvent& event);
 
-
-
-    // static utilities for mnemonics char (&) handling
-    // ------------------------------------------------
-
-    // returns the given string without mnemonic characters ('&')
-    static wxString GetLabelText(const wxString& label);
-
-    // returns the given string without mnemonic characters ('&')
-    // this function is identic to GetLabelText() and is provided for clarity
-    // and for symmetry with the wxStaticText::RemoveMarkup() function.
-    static wxString RemoveMnemonics(const wxString& str);
-
-    // escapes (by doubling them) the mnemonics
-    static wxString EscapeMnemonics(const wxString& str);
-
-
-    // miscellaneous static utilities
-    // ------------------------------
-
-    // replaces parts of the given (multiline) string with an ellipsis if needed
-    static wxString Ellipsize(const wxString& label, const wxDC& dc,
-                              wxEllipsizeMode mode, int maxWidth,
-                              int flags = wxELLIPSIZE_FLAGS_DEFAULT);
-
-    // return the accel index in the string or -1 if none and puts the modified
-    // string into second parameter if non NULL
-    static int FindAccelIndex(const wxString& label,
-                              wxString *labelOnly = NULL);
-
-    // this is a helper for the derived class GetClassDefaultAttributes()
-    // implementation: it returns the right colours for the classes which
-    // contain something else (e.g. wxListBox, wxTextCtrl, ...) instead of
-    // being simple controls (such as wxButton, wxCheckBox, ...)
-    static wxVisualAttributes
-        GetCompositeControlsDefaultAttributes(wxWindowVariant variant);
-
 protected:
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const;
-
     // creates the control (calls wxWindowBase::CreateBase inside) and adds it
     // to the list of parents children
     bool CreateControl(wxWindowBase *parent,
@@ -165,16 +84,7 @@ protected:
     // initialize the common fields of wxCommandEvent
     void InitCommandEvent(wxCommandEvent& event) const;
 
-    // Ellipsize() helper:
-    static wxString DoEllipsizeSingleLine(const wxString& label, const wxDC& dc,
-                                          wxEllipsizeMode mode, int maxWidth,
-                                          int replacementWidth, int marginWidth);
-
-    // this field contains the label in wx format, i.e. with '&' mnemonics,
-    // as it was passed to the last SetLabel() call
-    wxString m_labelOrig;
-
-    wxDECLARE_NO_COPY_CLASS(wxControlBase);
+    DECLARE_NO_COPY_CLASS(wxControlBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -194,7 +104,7 @@ protected:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/control.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/control.h"
+    #include "wx/mac/control.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/control.h"
 #elif defined(__WXPM__)

@@ -16,7 +16,7 @@
 // wxPopupWindow
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPopupWindow : public wxPopupWindowBase
+class WXDLLEXPORT wxPopupWindow : public wxPopupWindowBase
 {
 public:
     wxPopupWindow() { }

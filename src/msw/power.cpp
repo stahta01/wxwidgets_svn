@@ -48,7 +48,7 @@ static inline bool wxGetPowerStatus(SYSTEM_POWER_STATUS *sps)
 {
     if ( !::GetSystemPowerStatus(sps) )
     {
-        wxLogLastError(wxT("GetSystemPowerStatus()"));
+        wxLogLastError(_T("GetSystemPowerStatus()"));
         return false;
     }
 
@@ -76,7 +76,7 @@ wxPowerType wxGetPowerType()
                 return wxPOWER_SOCKET;
 
             default:
-                wxLogDebug(wxT("Unknown ACLineStatus=%u"), sps.ACLineStatus);
+                wxLogDebug(_T("Unknown ACLineStatus=%u"), sps.ACLineStatus);
             case 255:
                 break;
         }

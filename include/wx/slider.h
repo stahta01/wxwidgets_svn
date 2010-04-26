@@ -31,6 +31,7 @@
 
 #define wxSL_TICKS           0x0010
 #define wxSL_AUTOTICKS       wxSL_TICKS // we don't support manual ticks
+#define wxSL_LABELS          0x0020
 #define wxSL_LEFT            0x0040
 #define wxSL_TOP             0x0080
 #define wxSL_RIGHT           0x0100
@@ -38,22 +39,19 @@
 #define wxSL_BOTH            0x0400
 #define wxSL_SELRANGE        0x0800
 #define wxSL_INVERSE         0x1000
-#define wxSL_MIN_MAX_LABELS  0x2000
-#define wxSL_VALUE_LABEL     0x4000
-#define wxSL_LABELS          (wxSL_MIN_MAX_LABELS|wxSL_VALUE_LABEL)
 
 #if WXWIN_COMPATIBILITY_2_6
     // obsolete
     #define wxSL_NOTIFY_DRAG     0x0000
 #endif // WXWIN_COMPATIBILITY_2_6
 
-extern WXDLLIMPEXP_DATA_CORE(const char) wxSliderNameStr[];
+extern WXDLLEXPORT_DATA(const wxChar) wxSliderNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxSliderBase: define wxSlider interface
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSliderBase : public wxControl
+class WXDLLEXPORT wxSliderBase : public wxControl
 {
 public:
     /* the ctor of the derived class should have the following form:
@@ -107,9 +105,6 @@ public:
 
 protected:
 
-    // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // adjust value according to wxSL_INVERSE style
     virtual int ValueInvertOrNot(int value) const
     {
@@ -120,7 +115,7 @@ protected:
     }
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxSliderBase);
+    DECLARE_NO_COPY_CLASS(wxSliderBase)
 };
 
 // ----------------------------------------------------------------------------
@@ -130,7 +125,10 @@ private:
 #if defined(__WXUNIVERSAL__)
     #include "wx/univ/slider.h"
 #elif defined(__WXMSW__)
-    #include "wx/msw/slider.h"
+    #include "wx/msw/slider95.h"
+    #if WXWIN_COMPATIBILITY_2_4
+         #define wxSlider95 wxSlider
+    #endif
 #elif defined(__WXMOTIF__)
     #include "wx/motif/slider.h"
 #elif defined(__WXGTK20__)
@@ -138,7 +136,7 @@ private:
 #elif defined(__WXGTK__)
     #include "wx/gtk1/slider.h"
 #elif defined(__WXMAC__)
-    #include "wx/osx/slider.h"
+    #include "wx/mac/slider.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/slider.h"
 #elif defined(__WXPM__)

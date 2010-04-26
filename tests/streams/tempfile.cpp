@@ -24,7 +24,29 @@
 
 #if wxUSE_STREAMS && wxUSE_FILE
 
-#include "testfile.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// Self deleting test file
+
+class TestFile
+{
+public:
+    TestFile();
+    ~TestFile() { if (wxFileExists(m_name)) wxRemoveFile(m_name); }
+    wxString GetName() const { return m_name; }
+private:
+    wxString m_name;
+};
+
+// Initialise with a test pattern so we can see if the file is replaced
+//
+TestFile::TestFile()
+{
+    wxFile file;
+    m_name = wxFileName::CreateTempFileName(_T("wxtest"), &file);
+    file.Write("Before", 6);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // The test case

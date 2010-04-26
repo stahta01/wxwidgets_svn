@@ -299,7 +299,7 @@ wxSpinCtrl* wxSpinCtrl::GetSpinForTextCtrl(
 
     // sanity check
     wxASSERT_MSG( pSpin->m_hWndBuddy == hWndBuddy,
-                  wxT("wxSpinCtrl has incorrect buddy HWND!") );
+                  _T("wxSpinCtrl has incorrect buddy HWND!") );
 
     return pSpin;
 } // end of wxSpinCtrl::GetSpinForTextCtrl
@@ -336,7 +336,7 @@ void wxSpinCtrl::OnChar (
                 InitCommandEvent(vEvent);
                 vEvent.SetString(sVal);
                 vEvent.SetInt(GetValue());
-                if (HandleWindowEvent(vEvent))
+                if (GetEventHandler()->ProcessEvent(vEvent))
                     return;
                 break;
             }
@@ -354,7 +354,7 @@ void wxSpinCtrl::OnChar (
                 vEventNav.SetDirection(!rEvent.ShiftDown());
                 vEventNav.SetWindowChange(rEvent.ControlDown());
                 vEventNav.SetEventObject(this);
-                if (GetParent()->HandleWindowEvent(vEventNav))
+                if (GetParent()->GetEventHandler()->ProcessEvent(vEventNav))
                     return;
             }
             break;
@@ -376,7 +376,7 @@ void wxSpinCtrl::OnSpinChange(
 
     vEvent.SetEventObject(this);
     vEvent.SetInt(rEventSpin.GetPosition());
-    (void)HandleWindowEvent(vEvent);
+    (void)GetEventHandler()->ProcessEvent(vEvent);
     if (rEventSpin.GetSkipped())
     {
         vEvent.Skip();
@@ -409,7 +409,7 @@ bool wxSpinCtrl::ProcessTextCommand( WXWORD wCmd,
 
             vEvent.SetString(sVal);
             vEvent.SetInt(GetValue());
-            return (HandleWindowEvent(vEvent));
+            return (GetEventHandler()->ProcessEvent(vEvent));
         }
 
         case SPBN_SETFOCUS:
@@ -420,7 +420,7 @@ bool wxSpinCtrl::ProcessTextCommand( WXWORD wCmd,
                                );
 
             vEvent.SetEventObject(this);
-            return(HandleWindowEvent(vEvent));
+            return(GetEventHandler()->ProcessEvent(vEvent));
         }
         default:
             break;
@@ -459,7 +459,7 @@ void wxSpinCtrl::SetValue(
 {
     long                            lVal;
 
-    lVal = atol(rsText.c_str());
+    lVal = atol((char*)rsText.c_str());
     wxSpinButton::SetValue(lVal);
 } // end of wxSpinCtrl::SetValue
 

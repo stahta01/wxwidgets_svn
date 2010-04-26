@@ -23,7 +23,6 @@
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
     #include "wx/msgdlg.h"
-    #include "wx/filename.h"
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/app.h"
@@ -93,8 +92,8 @@ void wxFileDialog::GetPaths (
     size_t                          nCount = m_fileNames.GetCount();
 
     rasPaths.Empty();
-    if (m_dir.Last() != wxT('\\'))
-        sDir += wxT('\\');
+    if (m_dir.Last() != _T('\\'))
+        sDir += _T('\\');
 
     for ( size_t n = 0; n < nCount; n++ )
     {
@@ -132,6 +131,11 @@ int wxFileDialog::ShowModal()
     else
         lFlags = FDS_OPEN_DIALOG;
 
+#if WXWIN_COMPATIBILITY_2_4
+    if (m_windowStyle & wxHIDE_READONLY)
+        lFlags |= FDS_SAVEAS_DIALOG;
+#endif
+
     if (m_windowStyle & wxFD_SAVE)
         lFlags |= FDS_SAVEAS_DIALOG;
     if (m_windowStyle & wxFD_MULTIPLE)
@@ -153,21 +157,21 @@ int wxFileDialog::ShowModal()
 
         switch (ch)
         {
-            case wxT('/'):
+            case _T('/'):
                 //
                 // Convert to backslash
                 //
-                ch = wxT('\\');
+                ch = _T('\\');
 
                 //
                 // Fall through
                 //
-            case wxT('\\'):
+            case _T('\\'):
                 while (i < nLen - 1)
                 {
                     wxChar          chNext = m_dir[i + 1];
 
-                    if (chNext != wxT('\\') && chNext != wxT('/'))
+                    if (chNext != _T('\\') && chNext != _T('/'))
                         break;
 
                     //
@@ -194,7 +198,7 @@ int wxFileDialog::ShowModal()
     else
         sTheFilter = m_wildCard;
 
-    wxStrtok(sTheFilter.wchar_str(), wxT("|"), &pzFilterBuffer);
+    wxStrtok((wxChar*)sTheFilter.c_str(), wxT("|"), &pzFilterBuffer);
     while(pzFilterBuffer != NULL)
     {
         if (nCount > 0 && !(nCount % 2))
@@ -249,11 +253,11 @@ int wxFileDialog::ShowModal()
             int                     nIdx = wxStrlen(zFileNameBuffer) - 1;
             wxString                sExt;
 
-            wxFileName::SplitPath( zFileNameBuffer
-                                    ,&m_path
-                                    ,&m_fileName
-                                    ,&sExt
-                                  );
+            wxSplitPath( zFileNameBuffer
+                        ,&m_path
+                        ,&m_fileName
+                        ,&sExt
+                       );
             if (zFileNameBuffer[nIdx] == wxT('.') || sExt.empty())
             {
                 zFileNameBuffer[nIdx] = wxT('\0');

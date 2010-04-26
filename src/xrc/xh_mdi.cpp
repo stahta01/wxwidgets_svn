@@ -18,12 +18,12 @@
 #if wxUSE_XRC && wxUSE_MDI
 
 #include "wx/xrc/xh_mdi.h"
-#include "wx/mdi.h"
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/dialog.h" // to get wxDEFAULT_DIALOG_STYLE
+    #include "wx/mdi.h"
 #endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxMdiXmlHandler, wxXmlResourceHandler)
@@ -88,7 +88,7 @@ wxWindow *wxMdiXmlHandler::CreateFrame()
 
         if ( !mdiParent )
         {
-            ReportError("parent of wxMDIChildFrame must be wxMDIParentFrame");
+            wxLogError(wxT("Parent of wxMDIParentFrame must be wxMDIParentFrame."));
             return NULL;
         }
 
@@ -117,7 +117,7 @@ wxObject *wxMdiXmlHandler::DoCreateResource()
     {
         wxFrame* f = wxDynamicCast(frame, wxFrame);
         if (f)
-            f->SetIcons(GetIconBundle(wxT("icon"), wxART_FRAME_ICON));
+            f->SetIcon(GetIcon(wxT("icon"), wxART_FRAME_ICON));
     }
 
     SetupWindow(frame);

@@ -187,7 +187,7 @@ wxSizerItem* wxGridBagSizer::Add( wxWindow *window,
     else
     {
         delete item;
-        return NULL;
+        return (wxSizerItem*)NULL;
     }
 }
 
@@ -201,7 +201,7 @@ wxSizerItem* wxGridBagSizer::Add( wxSizer *sizer,
     else
     {
         delete item;
-        return NULL;
+        return (wxSizerItem*)NULL;
     }
 }
 
@@ -215,7 +215,7 @@ wxSizerItem* wxGridBagSizer::Add( int width, int height,
     else
     {
         delete item;
-        return NULL;
+        return (wxSizerItem*)NULL;
     }
 }
 
@@ -227,18 +227,6 @@ wxSizerItem* wxGridBagSizer::Add( wxGBSizerItem *item )
     item->SetGBSizer(this);
     if ( item->GetWindow() )
         item->GetWindow()->SetContainingSizer( this );
-
-    // extend the number of rows/columns of the underlying wxFlexGridSizer if
-    // necessary
-    int row, col;
-    item->GetEndPos(row, col);
-    row++;
-    col++;
-
-    if ( row > GetRows() )
-        SetRows(row);
-    if ( col > GetCols() )
-        SetCols(col);
 
     return item;
 }
@@ -278,7 +266,7 @@ wxGBPosition wxGridBagSizer::GetItemPosition(size_t index)
 {
     wxGBPosition badpos(-1,-1);
     wxSizerItemList::compatibility_iterator node = m_children.Item( index );
-    wxCHECK_MSG( node, badpos, wxT("Failed to find item.") );
+    wxCHECK_MSG( node, badpos, _T("Failed to find item.") );
     wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
     return item->GetPos();
 }
@@ -304,7 +292,7 @@ bool wxGridBagSizer::SetItemPosition(wxSizer *sizer, const wxGBPosition& pos)
 bool wxGridBagSizer::SetItemPosition(size_t index, const wxGBPosition& pos)
 {
     wxSizerItemList::compatibility_iterator node = m_children.Item( index );
-    wxCHECK_MSG( node, false, wxT("Failed to find item.") );
+    wxCHECK_MSG( node, false, _T("Failed to find item.") );
     wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
     return item->SetPos(pos);
 }
@@ -315,7 +303,7 @@ wxGBSpan wxGridBagSizer::GetItemSpan(wxWindow *window)
 {
     wxGBSpan badspan(-1,-1);
     wxGBSizerItem* item = FindItem(window);
-    wxCHECK_MSG( item, badspan, wxT("Failed to find item.") );
+    wxCHECK_MSG( item, badspan, _T("Failed to find item.") );
     return item->GetSpan();
 }
 
@@ -324,7 +312,7 @@ wxGBSpan wxGridBagSizer::GetItemSpan(wxSizer *sizer)
 {
     wxGBSpan badspan(-1,-1);
     wxGBSizerItem* item = FindItem(sizer);
-    wxCHECK_MSG( item, badspan, wxT("Failed to find item.") );
+    wxCHECK_MSG( item, badspan, _T("Failed to find item.") );
     return item->GetSpan();
 }
 
@@ -333,7 +321,7 @@ wxGBSpan wxGridBagSizer::GetItemSpan(size_t index)
 {
     wxGBSpan badspan(-1,-1);
     wxSizerItemList::compatibility_iterator node = m_children.Item( index );
-    wxCHECK_MSG( node, badspan, wxT("Failed to find item.") );
+    wxCHECK_MSG( node, badspan, _T("Failed to find item.") );
     wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
     return item->GetSpan();
 }
@@ -359,7 +347,7 @@ bool wxGridBagSizer::SetItemSpan(wxSizer *sizer, const wxGBSpan& span)
 bool wxGridBagSizer::SetItemSpan(size_t index, const wxGBSpan& span)
 {
     wxSizerItemList::compatibility_iterator node = m_children.Item( index );
-    wxCHECK_MSG( node, false, wxT("Failed to find item.") );
+    wxCHECK_MSG( node, false, _T("Failed to find item.") );
     wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
     return item->SetSpan(span);
 }
@@ -465,7 +453,7 @@ wxSize wxGridBagSizer::CalcMin()
     while (node)
     {
         wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
-        if ( item->IsShown() )
+        if ( item->ShouldAccountFor() )
         {
             int row, col, endrow, endcol;
 
@@ -520,7 +508,7 @@ void wxGridBagSizer::RecalcSizes()
     m_cols = m_colWidths.GetCount();
     int idx, width, height;
 
-    AdjustForGrowables(sz);
+    AdjustForGrowables(sz, m_calculatedMinSize, m_rows, m_cols);
 
     // Find the start positions on the window of the rows and columns
     wxArrayInt rowpos;
@@ -551,7 +539,7 @@ void wxGridBagSizer::RecalcSizes()
         int row, col, endrow, endcol;
         wxGBSizerItem* item = (wxGBSizerItem*)node->GetData();
 
-        if ( item->IsShown() )
+        if ( item->ShouldAccountFor() )
         {
             item->GetPos(row, col);
             item->GetEndPos(endrow, endcol);
@@ -583,7 +571,7 @@ void wxGridBagSizer::RecalcSizes()
 void wxGridBagSizer::AdjustForOverflow()
 {
     int row, col;
-
+    
     for (row=0; row<(int)m_rowHeights.GetCount(); row++)
     {
         int rowExtra=INT_MAX;
@@ -592,12 +580,12 @@ void wxGridBagSizer::AdjustForOverflow()
         {
             wxGBPosition pos(row,col);
             wxGBSizerItem* item = FindItemAtPosition(pos);
-            if ( !item || !item->IsShown() )
+            if ( !item || !item->ShouldAccountFor() )
                 continue;
 
             int endrow, endcol;
             item->GetEndPos(endrow, endcol);
-
+            
             // If the item starts in this position and doesn't span rows, then
             // just look at the whole item height
             if ( item->GetPos() == pos && endrow == row )
@@ -617,7 +605,7 @@ void wxGridBagSizer::AdjustForOverflow()
 
                 if ( itemHeight < 0 )
                     itemHeight = 0;
-
+                
                 // and check how much is left
                 rowExtra = wxMin(rowExtra, rowHeight - itemHeight);
             }
@@ -635,12 +623,12 @@ void wxGridBagSizer::AdjustForOverflow()
         {
             wxGBPosition pos(row,col);
             wxGBSizerItem* item = FindItemAtPosition(pos);
-            if ( !item || !item->IsShown() )
+            if ( !item || !item->ShouldAccountFor() )
                 continue;
 
             int endrow, endcol;
             item->GetEndPos(endrow, endcol);
-
+            
             if ( item->GetPos() == pos && endcol == col )
             {
                 int itemWidth = item->CalcMin().GetWidth();
@@ -656,15 +644,13 @@ void wxGridBagSizer::AdjustForOverflow()
 
                 if ( itemWidth < 0 )
                     itemWidth = 0;
-
+                
                 colExtra = wxMin(colExtra, colWidth - itemWidth);
             }
         }
         if ( colExtra && colExtra != INT_MAX )
             m_colWidths[col] -= colExtra;
     }
-
-
 }
 
 //---------------------------------------------------------------------------
@@ -741,56 +727,56 @@ wxSizerItem* wxGridBagSizer::Add( int width, int height, int, int flag, int bord
 wxSizerItem* wxGridBagSizer::Add( wxSizerItem * )
 {
     wxFAIL_MSG(wxT("Invalid Add form called."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 wxSizerItem* wxGridBagSizer::Prepend( wxWindow *, int, int, int, wxObject*  )
 {
     wxFAIL_MSG(wxT("Prepend should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 wxSizerItem* wxGridBagSizer::Prepend( wxSizer *, int, int, int, wxObject*  )
 {
     wxFAIL_MSG(wxT("Prepend should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 wxSizerItem* wxGridBagSizer::Prepend( int, int, int, int, int, wxObject*  )
 {
     wxFAIL_MSG(wxT("Prepend should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 wxSizerItem* wxGridBagSizer::Prepend( wxSizerItem * )
 {
     wxFAIL_MSG(wxT("Prepend should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 
 wxSizerItem* wxGridBagSizer::Insert( size_t, wxWindow *, int, int, int, wxObject*  )
 {
     wxFAIL_MSG(wxT("Insert should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 wxSizerItem* wxGridBagSizer::Insert( size_t, wxSizer *, int, int, int, wxObject*  )
 {
     wxFAIL_MSG(wxT("Insert should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 wxSizerItem* wxGridBagSizer::Insert( size_t, int, int, int, int, int, wxObject*  )
 {
     wxFAIL_MSG(wxT("Insert should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 wxSizerItem* wxGridBagSizer::Insert( size_t, wxSizerItem * )
 {
     wxFAIL_MSG(wxT("Insert should not be used with wxGridBagSizer."));
-    return NULL;
+    return (wxSizerItem*)NULL;
 }
 
 

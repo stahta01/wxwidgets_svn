@@ -60,14 +60,6 @@ enum
 // radio boxes
 enum
 {
-    ButtonImagePos_Left,
-    ButtonImagePos_Right,
-    ButtonImagePos_Top,
-    ButtonImagePos_Bottom
-};
-
-enum
-{
     ButtonHAlign_Left,
     ButtonHAlign_Centre,
     ButtonHAlign_Right
@@ -121,20 +113,16 @@ protected:
     // ------------
 
     // the check/radio boxes for styles
-    wxCheckBox *m_chkBitmapOnly,
-               *m_chkTextAndBitmap,
+    wxCheckBox *m_chkBitmap,
+               *m_chkImage,
                *m_chkFit,
-               *m_chkAuthNeeded,
                *m_chkDefault;
 
     // more checkboxes for wxBitmapButton only
-    wxCheckBox *m_chkUsePressed,
+    wxCheckBox *m_chkUseSelected,
                *m_chkUseFocused,
-               *m_chkUseCurrent,
+               *m_chkUseHover,
                *m_chkUseDisabled;
-
-    // and an image position choice used if m_chkTextAndBitmap is on
-    wxRadioBox *m_radioImagePos;
 
     wxRadioBox *m_radioHAlign,
                *m_radioVAlign;
@@ -175,24 +163,22 @@ END_EVENT_TABLE()
     #define FAMILY_CTRLS NATIVE_CTRLS
 #endif
 
-IMPLEMENT_WIDGETS_PAGE(ButtonWidgetsPage, wxT("Button"), FAMILY_CTRLS );
+IMPLEMENT_WIDGETS_PAGE(ButtonWidgetsPage, _T("Button"), FAMILY_CTRLS );
 
 ButtonWidgetsPage::ButtonWidgetsPage(WidgetsBookCtrl *book,
                                      wxImageList *imaglist)
                   : WidgetsPage(book, imaglist, button_xpm)
 {
     // init everything
-    m_chkBitmapOnly =
-    m_chkTextAndBitmap =
+    m_chkBitmap =
+    m_chkImage =
     m_chkFit =
-    m_chkAuthNeeded =
     m_chkDefault =
-    m_chkUsePressed =
+    m_chkUseSelected =
     m_chkUseFocused =
-    m_chkUseCurrent =
+    m_chkUseHover =
     m_chkUseDisabled = (wxCheckBox *)NULL;
 
-    m_radioImagePos =
     m_radioHAlign =
     m_radioVAlign = (wxRadioBox *)NULL;
 
@@ -207,62 +193,51 @@ void ButtonWidgetsPage::CreateContent()
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
     // left pane
-    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, wxT("&Set style"));
+    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
 
     wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
-    m_chkBitmapOnly = CreateCheckBoxAndAddToSizer(sizerLeft, "&Bitmap only");
-    m_chkTextAndBitmap = CreateCheckBoxAndAddToSizer(sizerLeft, "Text &and bitmap");
-    m_chkFit = CreateCheckBoxAndAddToSizer(sizerLeft, wxT("&Fit exactly"));
-    m_chkAuthNeeded = CreateCheckBoxAndAddToSizer(sizerLeft, wxT("Require a&uth"));
-    m_chkDefault = CreateCheckBoxAndAddToSizer(sizerLeft, wxT("&Default"));
+    m_chkBitmap = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Bitmap button"));
+    m_chkImage = CreateCheckBoxAndAddToSizer(sizerLeft, _T("With &image"));
+    m_chkFit = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Fit exactly"));
+    m_chkDefault = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Default"));
+
+#ifndef __WXUNIVERSAL__
+    // only wxUniv currently supports buttons with images
+    m_chkImage->Disable();
+#endif // !wxUniv
 
     sizerLeft->AddSpacer(5);
 
     wxSizer *sizerUseLabels =
-        new wxStaticBoxSizer(wxVERTICAL, this,
-                "&Use the following bitmaps in addition to the normal one?");
-    m_chkUsePressed = CreateCheckBoxAndAddToSizer(sizerUseLabels,
-        "&Pressed (small help icon)");
-    m_chkUseFocused = CreateCheckBoxAndAddToSizer(sizerUseLabels,
-        "&Focused (small error icon)");
-    m_chkUseCurrent = CreateCheckBoxAndAddToSizer(sizerUseLabels,
-        "&Current (small warning icon)");
-    m_chkUseDisabled = CreateCheckBoxAndAddToSizer(sizerUseLabels,
-        "&Disabled (broken image icon)");
+        new wxStaticBoxSizer(wxVERTICAL, this, _T("&Use the following labels?"));
+    m_chkUseSelected = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Pushed"));
+    m_chkUseFocused = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Focused"));
+    m_chkUseHover = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Hover"));
+    m_chkUseDisabled = CreateCheckBoxAndAddToSizer(sizerUseLabels, _T("&Disabled"));
     sizerLeft->Add(sizerUseLabels, wxSizerFlags().Expand().Border());
 
-    sizerLeft->AddSpacer(10);
-
-    static const wxString dirs[] =
-    {
-        "left", "right", "top", "bottom",
-    };
-    m_radioImagePos = new wxRadioBox(this, wxID_ANY, "Image &position",
-                                     wxDefaultPosition, wxDefaultSize,
-                                     WXSIZEOF(dirs), dirs);
-    sizerLeft->Add(m_radioImagePos, 0, wxGROW | wxALL, 5);
     sizerLeft->AddSpacer(15);
 
     // should be in sync with enums Button[HV]Align!
     static const wxString halign[] =
     {
-        wxT("left"),
-        wxT("centre"),
-        wxT("right"),
+        _T("left"),
+        _T("centre"),
+        _T("right"),
     };
 
     static const wxString valign[] =
     {
-        wxT("top"),
-        wxT("centre"),
-        wxT("bottom"),
+        _T("top"),
+        _T("centre"),
+        _T("bottom"),
     };
 
-    m_radioHAlign = new wxRadioBox(this, wxID_ANY, wxT("&Horz alignment"),
+    m_radioHAlign = new wxRadioBox(this, wxID_ANY, _T("&Horz alignment"),
                                    wxDefaultPosition, wxDefaultSize,
                                    WXSIZEOF(halign), halign);
-    m_radioVAlign = new wxRadioBox(this, wxID_ANY, wxT("&Vert alignment"),
+    m_radioVAlign = new wxRadioBox(this, wxID_ANY, _T("&Vert alignment"),
                                    wxDefaultPosition, wxDefaultSize,
                                    WXSIZEOF(valign), valign);
 
@@ -271,18 +246,18 @@ void ButtonWidgetsPage::CreateContent()
 
     sizerLeft->Add(5, 5, 0, wxGROW | wxALL, 5); // spacer
 
-    wxButton *btn = new wxButton(this, ButtonPage_Reset, wxT("&Reset"));
+    wxButton *btn = new wxButton(this, ButtonPage_Reset, _T("&Reset"));
     sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
-    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY, wxT("&Operations"));
+    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY, _T("&Operations"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxSizer *sizerRow = CreateSizerWithTextAndButton(ButtonPage_ChangeLabel,
-                                                     wxT("Change label"),
+                                                     _T("Change label"),
                                                      wxID_ANY,
                                                      &m_textLabel);
-    m_textLabel->SetValue(wxT("&Press me!"));
+    m_textLabel->SetValue(_T("&Press me!"));
 
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
@@ -308,18 +283,16 @@ void ButtonWidgetsPage::CreateContent()
 
 void ButtonWidgetsPage::Reset()
 {
-    m_chkBitmapOnly->SetValue(false);
+    m_chkBitmap->SetValue(false);
     m_chkFit->SetValue(true);
-    m_chkAuthNeeded->SetValue(false);
-    m_chkTextAndBitmap->SetValue(false);
+    m_chkImage->SetValue(false);
     m_chkDefault->SetValue(false);
 
-    m_chkUsePressed->SetValue(true);
+    m_chkUseSelected->SetValue(true);
     m_chkUseFocused->SetValue(true);
-    m_chkUseCurrent->SetValue(true);
+    m_chkUseHover->SetValue(true);
     m_chkUseDisabled->SetValue(true);
 
-    m_radioImagePos->SetSelection(ButtonImagePos_Left);
     m_radioHAlign->SetSelection(ButtonHAlign_Centre);
     m_radioVAlign->SetSelection(ButtonVAlign_Centre);
 }
@@ -355,7 +328,7 @@ void ButtonWidgetsPage::CreateButton()
             break;
 
         default:
-            wxFAIL_MSG(wxT("unexpected radiobox selection"));
+            wxFAIL_MSG(_T("unexpected radiobox selection"));
             // fall through
 
         case ButtonHAlign_Centre:
@@ -373,7 +346,7 @@ void ButtonWidgetsPage::CreateButton()
             break;
 
         default:
-            wxFAIL_MSG(wxT("unexpected radiobox selection"));
+            wxFAIL_MSG(_T("unexpected radiobox selection"));
             // fall through
 
         case ButtonVAlign_Centre:
@@ -385,21 +358,19 @@ void ButtonWidgetsPage::CreateButton()
             break;
     }
 
-    bool showsBitmap = false;
-    if ( m_chkBitmapOnly->GetValue() )
+    const bool isBitmapButton = m_chkBitmap->GetValue();
+    if ( isBitmapButton )
     {
-        showsBitmap = true;
-
         wxBitmapButton *bbtn = new wxBitmapButton(this, ButtonPage_Button,
-                                                  CreateBitmap(wxT("normal")));
-        if ( m_chkUsePressed->GetValue() )
-            bbtn->SetBitmapPressed(CreateBitmap(wxT("pushed")));
+                                                  CreateBitmap(_T("normal")));
+        if ( m_chkUseSelected->GetValue() )
+            bbtn->SetBitmapSelected(CreateBitmap(_T("pushed")));
         if ( m_chkUseFocused->GetValue() )
-            bbtn->SetBitmapFocus(CreateBitmap(wxT("focused")));
-        if ( m_chkUseCurrent->GetValue() )
-            bbtn->SetBitmapCurrent(CreateBitmap(wxT("hover")));
+            bbtn->SetBitmapFocus(CreateBitmap(_T("focused")));
+        if ( m_chkUseHover->GetValue() )
+            bbtn->SetBitmapHover(CreateBitmap(_T("hover")));
         if ( m_chkUseDisabled->GetValue() )
-            bbtn->SetBitmapDisabled(CreateBitmap(wxT("disabled")));
+            bbtn->SetBitmapDisabled(CreateBitmap(_T("disabled")));
         m_button = bbtn;
     }
     else // normal button
@@ -409,38 +380,22 @@ void ButtonWidgetsPage::CreateButton()
                                 flags);
     }
 
-    if ( !showsBitmap && m_chkTextAndBitmap->GetValue() )
+    m_chkUseSelected->Enable(isBitmapButton);
+    m_chkUseFocused->Enable(isBitmapButton);
+    m_chkUseHover->Enable(isBitmapButton);
+    m_chkUseDisabled->Enable(isBitmapButton);
+
+#ifdef __WXUNIVERSAL__
+    if ( m_chkImage->GetValue() )
     {
-        showsBitmap = true;
-
-        static const wxDirection positions[] =
-        {
-            wxLEFT, wxRIGHT, wxTOP, wxBOTTOM
-        };
-
-        m_button->SetBitmap(wxArtProvider::GetIcon(wxART_INFORMATION),
-                            positions[m_radioImagePos->GetSelection()]);
-
-        if ( m_chkUsePressed->GetValue() )
-            m_button->SetBitmapPressed(wxArtProvider::GetIcon(wxART_HELP));
-        if ( m_chkUseFocused->GetValue() )
-            m_button->SetBitmapFocus(wxArtProvider::GetIcon(wxART_ERROR));
-        if ( m_chkUseCurrent->GetValue() )
-            m_button->SetBitmapCurrent(wxArtProvider::GetIcon(wxART_WARNING));
-        if ( m_chkUseDisabled->GetValue() )
-            m_button->SetBitmapDisabled(wxArtProvider::GetIcon(wxART_MISSING_IMAGE));
+        m_button->SetImageLabel(wxArtProvider::GetIcon(wxART_INFORMATION));
     }
-
-    m_chkUsePressed->Enable(showsBitmap);
-    m_chkUseFocused->Enable(showsBitmap);
-    m_chkUseCurrent->Enable(showsBitmap);
-    m_chkUseDisabled->Enable(showsBitmap);
-
-    if ( m_chkAuthNeeded->GetValue() )
-        m_button->SetAuthNeeded();
+#endif // wxUniv
 
     if ( m_chkDefault->GetValue() )
+    {
         m_button->SetDefault();
+    }
 
     AddButtonToSizer();
 
@@ -480,13 +435,11 @@ void ButtonWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
 void ButtonWidgetsPage::OnButtonChangeLabel(wxCommandEvent& WXUNUSED(event))
 {
     m_button->SetLabel(m_textLabel->GetValue());
-
-    m_sizerButton->Layout();
 }
 
 void ButtonWidgetsPage::OnButton(wxCommandEvent& WXUNUSED(event))
 {
-    wxLogMessage(wxT("Test button clicked."));
+    wxLogMessage(_T("Test button clicked."));
 }
 
 // ----------------------------------------------------------------------------
@@ -498,11 +451,11 @@ wxBitmap ButtonWidgetsPage::CreateBitmap(const wxString& label)
     wxBitmap bmp(180, 70); // shouldn't hardcode but it's simpler like this
     wxMemoryDC dc;
     dc.SelectObject(bmp);
-    dc.SetBackground(wxBrush(*wxCYAN));
+    dc.SetBackground(wxBrush(*wxWHITE));
     dc.Clear();
-    dc.SetTextForeground(*wxBLACK);
-    dc.DrawLabel(wxStripMenuCodes(m_textLabel->GetValue()) + wxT("\n")
-                    wxT("(") + label + wxT(" state)"),
+    dc.SetTextForeground(*wxBLUE);
+    dc.DrawLabel(wxStripMenuCodes(m_textLabel->GetValue()) + _T("\n")
+                    _T("(") + label + _T(" state)"),
                  wxArtProvider::GetBitmap(wxART_INFORMATION),
                  wxRect(10, 10, bmp.GetWidth() - 20, bmp.GetHeight() - 20),
                  wxALIGN_CENTRE);

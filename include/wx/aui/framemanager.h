@@ -226,7 +226,7 @@ public:
         *this = source;
     }
 
-    bool IsOk() const { return window != NULL; }
+    bool IsOk() const { return (window != NULL) ? true : false; }
     bool IsFixed() const { return !HasFlag(optionResizable); }
     bool IsResizable() const { return HasFlag(optionResizable); }
     bool IsShown() const { return !HasFlag(optionHidden); }
@@ -299,7 +299,9 @@ public:
     wxAuiPaneInfo& RightDockable(bool b = true) { return SetFlag(optionRightDockable, b); }
     wxAuiPaneInfo& Floatable(bool b = true) { return SetFlag(optionFloatable, b); }
     wxAuiPaneInfo& Movable(bool b = true) { return SetFlag(optionMovable, b); }
+#if wxABI_VERSION >= 20807
     wxAuiPaneInfo& DockFixed(bool b = true) { return SetFlag(optionDockFixed, b); }
+#endif
 
     wxAuiPaneInfo& Dockable(bool b = true)
     {
@@ -332,18 +334,18 @@ public:
         return *this;
     }
 
-    wxAuiPaneInfo& SetFlag(int flag, bool option_state)
+    wxAuiPaneInfo& SetFlag(unsigned int flag, bool option_state)
     {
         if (option_state)
             state |= flag;
-        else
+             else
             state &= ~flag;
         return *this;
     }
 
-    bool HasFlag(int flag) const
+    bool HasFlag(unsigned int flag) const
     {
-        return (state & flag) != 0;
+        return (state & flag) ? true:false;
     }
 
 #ifdef SWIG
@@ -424,7 +426,7 @@ class WXDLLIMPEXP_FWD_AUI wxAuiFloatingFrame;
 
 class WXDLLIMPEXP_AUI wxAuiManager : public wxEvtHandler
 {
-    friend class wxAuiFloatingFrame;
+friend class wxAuiFloatingFrame;
 
 public:
 
@@ -483,7 +485,6 @@ public:
 public:
 
     virtual wxAuiFloatingFrame* CreateFloatingFrame(wxWindow* parent, const wxAuiPaneInfo& p);
-    virtual bool CanDockPanel(const wxAuiPaneInfo & p);
 
     void StartPaneDrag(
                  wxWindow* pane_window,
@@ -501,8 +502,6 @@ public:
 
     virtual void ShowHint(const wxRect& rect);
     virtual void HideHint();
-
-    void OnHintActivate(wxActivateEvent& event);
 
 public:
 
@@ -561,8 +560,10 @@ protected:
                               wxArrayInt& positions,
                               wxArrayInt& sizes);
 
+#if wxABI_VERSION >= 20810
     /// Ends a resize action, or for live update, resizes the sash
     bool DoEndResizeAction(wxMouseEvent& event);
+#endif
 
 public:
 
@@ -580,7 +581,6 @@ protected:
     void OnLeftDown(wxMouseEvent& evt);
     void OnLeftUp(wxMouseEvent& evt);
     void OnMotion(wxMouseEvent& evt);
-    void OnCaptureLost(wxMouseCaptureLostEvent& evt);
     void OnLeaveWindow(wxMouseEvent& evt);
     void OnChildFocus(wxChildFocusEvent& evt);
     void OnHintFadeTimer(wxTimerEvent& evt);
@@ -618,7 +618,6 @@ protected:
     wxAuiDockUIPart* m_hover_button;// button uipart being hovered over
     wxRect m_last_hint;          // last hint rectangle
     wxPoint m_last_mouse_move;   // last mouse move position (see OnMotion)
-    int  m_currentDragItem;
     bool m_skipping;
     bool m_has_maximized;
 
@@ -746,12 +745,12 @@ public:
     }
 #endif // SWIG
 
-    bool IsOk() const { return dock_direction != 0; }
-    bool IsHorizontal() const { return dock_direction == wxAUI_DOCK_TOP ||
-                             dock_direction == wxAUI_DOCK_BOTTOM; }
-    bool IsVertical() const { return dock_direction == wxAUI_DOCK_LEFT ||
+    bool IsOk() const { return (dock_direction != 0) ? true : false; }
+    bool IsHorizontal() const { return (dock_direction == wxAUI_DOCK_TOP ||
+                             dock_direction == wxAUI_DOCK_BOTTOM) ? true:false; }
+    bool IsVertical() const { return (dock_direction == wxAUI_DOCK_LEFT ||
                              dock_direction == wxAUI_DOCK_RIGHT ||
-                             dock_direction == wxAUI_DOCK_CENTER; }
+                             dock_direction == wxAUI_DOCK_CENTER) ? true:false; }
 public:
     wxAuiPaneInfoPtrArray panes; // array of panes
     wxRect rect;              // current rectangle
@@ -804,18 +803,21 @@ public:
 
 
 #ifndef SWIG
+// wx event machinery
 
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_BUTTON, wxAuiManagerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_CLOSE, wxAuiManagerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_MAXIMIZE, wxAuiManagerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_RESTORE, wxAuiManagerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_AUI, wxEVT_AUI_RENDER, wxAuiManagerEvent );
-wxDECLARE_EXPORTED_EVENT( WXDLLIMPEXP_AUI, wxEVT_AUI_FIND_MANAGER, wxAuiManagerEvent );
+BEGIN_DECLARE_EVENT_TYPES()
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_BUTTON, 0)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_CLOSE, 0)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_MAXIMIZE, 0)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_AUI, wxEVT_AUI_PANE_RESTORE, 0)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_AUI, wxEVT_AUI_RENDER, 0)
+    DECLARE_EXPORTED_EVENT_TYPE(WXDLLIMPEXP_AUI, wxEVT_AUI_FIND_MANAGER, 0)
+END_DECLARE_EVENT_TYPES()
 
 typedef void (wxEvtHandler::*wxAuiManagerEventFunction)(wxAuiManagerEvent&);
 
 #define wxAuiManagerEventHandler(func) \
-    wxEVENT_HANDLER_CAST(wxAuiManagerEventFunction, func)
+    (wxObjectEventFunction)(wxEventFunction)wxStaticCastEvent(wxAuiManagerEventFunction, &func)
 
 #define EVT_AUI_PANE_BUTTON(func) \
    wx__DECLARE_EVT0(wxEVT_AUI_PANE_BUTTON, wxAuiManagerEventHandler(func))

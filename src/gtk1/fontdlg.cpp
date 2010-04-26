@@ -84,7 +84,7 @@ void gtk_fontdialog_ok_callback( GtkWidget *WXUNUSED(widget), wxFontDialog *dial
 
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, wxID_OK);
     event.SetEventObject( dialog );
-    dialog->HandleWindowEvent( event );
+    dialog->GetEventHandler()->ProcessEvent( event );
 }
 }
 
@@ -101,7 +101,7 @@ void gtk_fontdialog_cancel_callback( GtkWidget *WXUNUSED(w), wxFontDialog *dialo
 
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, wxID_CANCEL);
     event.SetEventObject( dialog );
-    dialog->HandleWindowEvent( event );
+    dialog->GetEventHandler()->ProcessEvent( event );
 }
 }
 
@@ -164,7 +164,7 @@ bool wxFontDialog::DoCreate(wxWindow *parent)
         else
         {
             // this is not supposed to happen!
-            wxFAIL_MSG(wxT("font is ok but no native font info?"));
+            wxFAIL_MSG(_T("font is ok but no native font info?"));
         }
     }
 

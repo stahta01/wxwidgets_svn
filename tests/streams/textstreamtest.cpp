@@ -104,15 +104,15 @@ TextStreamTestCase::TextStreamTestCase()
 
 void TextStreamTestCase::Endline()
 {
-    wxFileOutputStream* pOutFile = new wxFileOutputStream(wxT("test.txt"));
+    wxFileOutputStream* pOutFile = new wxFileOutputStream(_T("test.txt"));
     wxTextOutputStream* pOutText = new wxTextOutputStream(*pOutFile);
-    *pOutText   << wxT("Test text") << endl
-                << wxT("More Testing Text (There should be newline before this)");
+    *pOutText   << _T("Test text") << endl
+                << _T("More Testing Text (There should be newline before this)");
 
     delete pOutText;
     delete pOutFile;
 
-    wxFileInputStream* pInFile = new wxFileInputStream(wxT("test.txt"));
+    wxFileInputStream* pInFile = new wxFileInputStream(_T("test.txt"));
 
     char szIn[9 + NEWLINELEN];
 
@@ -129,7 +129,7 @@ template <typename T>
 static void DoTestRoundTrip(const T *values, size_t numValues)
 {
     {
-        wxFileOutputStream fileOut(wxT("test.txt"));
+        wxFileOutputStream fileOut(_T("test.txt"));
         wxTextOutputStream textOut(fileOut);
 
         for ( size_t n = 0; n < numValues; n++ )
@@ -139,7 +139,7 @@ static void DoTestRoundTrip(const T *values, size_t numValues)
     }
 
     {
-        wxFileInputStream fileIn(wxT("test.txt"));
+        wxFileInputStream fileIn(_T("test.txt"));
         wxTextInputStream textIn(fileIn);
 
         T value;
@@ -185,7 +185,7 @@ void TextStreamTestCase::TestULongLong()
 
 #if wxUSE_UNICODE
 
-static const wchar_t txtWchar[4] =
+const static wchar_t txtWchar[4] =
 {
     0x0041, // LATIN CAPITAL LETTER A
     0x0100, // A WITH BREVE, LATIN SMALL LETTER
@@ -193,28 +193,28 @@ static const wchar_t txtWchar[4] =
     0x0100, // A WITH BREVE, LATIN SMALL LETTER
 };
 
-static const unsigned char txtUtf8[6] =
+const static unsigned char txtUtf8[6] =
 {
     0x41, 0xc4, 0x80, 0x41, 0xc4, 0x80,
 };
 
-static const unsigned char txtUtf16le[8] =
+const static unsigned char txtUtf16le[8] =
 {
     0x41, 0x00, 0x00, 0x01, 0x41, 0x00, 0x00, 0x01,
 };
 
-static const unsigned char txtUtf16be[8] =
+const static unsigned char txtUtf16be[8] =
 {
     0x00, 0x41, 0x01, 0x00, 0x00, 0x41, 0x01, 0x00,
 };
 
-static const unsigned char txtUtf32le[16] =
+const static unsigned char txtUtf32le[16] =
 {
     0x41, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
     0x41, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
 };
 
-static const unsigned char txtUtf32be[16] =
+const static unsigned char txtUtf32be[16] =
 {
     0x00, 0x00, 0x00, 0x41, 0x00, 0x00, 0x01, 0x00,
     0x00, 0x00, 0x00, 0x41, 0x00, 0x00, 0x01, 0x00,
@@ -265,7 +265,7 @@ void TextStreamTestCase::TestInput(const wxMBConv& conv,
 
     CPPUNIT_ASSERT_EQUAL( WXSIZEOF(txtWchar), temp.length() );
 
-    CPPUNIT_ASSERT_EQUAL( 0, memcmp(txtWchar, temp.wc_str(), sizeof(txtWchar)) );
+    CPPUNIT_ASSERT_EQUAL( 0, memcmp(txtWchar, temp.c_str(), sizeof(txtWchar)) );
 }
 
 #endif // wxUSE_UNICODE

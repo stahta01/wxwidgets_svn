@@ -180,7 +180,7 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
                 }
                 case SHAPE_DRAG_TEXT:
                 {
-                    m_dragImage = new MyDragImage(this, wxString(wxT("Dragging some test text")), wxCursor(wxCURSOR_HAND));
+                    m_dragImage = new MyDragImage(this, wxString(_T("Dragging some test text")), wxCursor(wxCURSOR_HAND));
                     break;
                 }
                 case SHAPE_DRAG_ICON:
@@ -316,16 +316,16 @@ BEGIN_EVENT_TABLE(MyFrame,wxFrame)
 END_EVENT_TABLE()
 
 MyFrame::MyFrame()
-: wxFrame( (wxFrame *)NULL, wxID_ANY, wxT("wxDragImage sample"),
+: wxFrame( (wxFrame *)NULL, wxID_ANY, _T("wxDragImage sample"),
           wxPoint(20,20), wxSize(470,360) )
 {
     wxMenu *file_menu = new wxMenu();
-    file_menu->Append( wxID_ABOUT, wxT("&About..."));
-    file_menu->AppendCheckItem( TEST_USE_SCREEN, wxT("&Use whole screen for dragging"), wxT("Use whole screen"));
-    file_menu->Append( wxID_EXIT, wxT("E&xit"));
+    file_menu->Append( wxID_ABOUT, _T("&About..."));
+    file_menu->AppendCheckItem( TEST_USE_SCREEN, _T("&Use whole screen for dragging"), _T("Use whole screen"));
+    file_menu->Append( wxID_EXIT, _T("E&xit"));
 
     wxMenuBar *menu_bar = new wxMenuBar();
-    menu_bar->Append(file_menu, wxT("&File"));
+    menu_bar->Append(file_menu, _T("&File"));
 
     SetIcon(wxICON(mondrian));
     SetMenuBar( menu_bar );
@@ -346,9 +346,9 @@ void MyFrame::OnQuit( wxCommandEvent &WXUNUSED(event) )
 
 void MyFrame::OnAbout( wxCommandEvent &WXUNUSED(event) )
 {
-    (void)wxMessageBox( wxT("wxDragImage demo\n")
-        wxT("Julian Smart (c) 2000"),
-        wxT("About wxDragImage Demo"),
+    (void)wxMessageBox( _T("wxDragImage demo\n")
+        _T("Julian Smart (c) 2000"),
+        _T("About wxDragImage Demo"),
         wxICON_INFORMATION | wxOK );
 }
 
@@ -368,29 +368,29 @@ MyApp::MyApp()
 
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_LIBPNG
     wxImage::AddHandler( new wxPNGHandler );
 #endif
 
     wxImage image;
-    if (image.LoadFile(wxT("backgrnd.png"), wxBITMAP_TYPE_PNG))
+    if (image.LoadFile(_T("backgrnd.png"), wxBITMAP_TYPE_PNG))
     {
         m_background = wxBitmap(image);
     }
 
     MyFrame *frame = new MyFrame();
 
-    wxString rootName(wxT("shape0"));
+    wxString rootName(_T("shape0"));
 
-    for (int i = 1; i < 4; i++)
+    int i;
+    for (i = 1; i < 4; i++)
     {
+        wxString filename;
+        filename.Printf(wxT("%s%d.png"), (const wxChar*)rootName, i);
     /* For some reason under wxX11, the 2nd LoadFile in this loop fails, with
        a BadMatch inside CreateFromImage (inside ConvertToBitmap). This happens even if you copy
        the first file over the second file. */
-        if (image.LoadFile(wxString::Format("%s%d.png", rootName, i), wxBITMAP_TYPE_PNG))
+        if (image.LoadFile(filename, wxBITMAP_TYPE_PNG))
         {
             DragShape* newShape = new DragShape(wxBitmap(image));
             newShape->SetPosition(wxPoint(i*50, i*50));

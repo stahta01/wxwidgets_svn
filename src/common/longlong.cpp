@@ -1172,7 +1172,7 @@ void *wxULongLongWx::asArray(void) const
             while ( ll != 0 )                                        \
             {                                                        \
                 long digit = (ll % 10).ToLong();                     \
-                result.Prepend((wxChar)(wxT('0') - digit));          \
+                result.Prepend((wxChar)(_T('0') - digit));           \
                 ll /= 10;                                            \
             }                                                        \
         }                                                            \
@@ -1181,15 +1181,15 @@ void *wxULongLongWx::asArray(void) const
             while ( ll != 0 )                                        \
             {                                                        \
                 long digit = (ll % 10).ToLong();                     \
-                result.Prepend((wxChar)(wxT('0') + digit));          \
+                result.Prepend((wxChar)(_T('0') + digit));           \
                 ll /= 10;                                            \
             }                                                        \
         }                                                            \
                                                                      \
         if ( result.empty() )                                        \
-            result = wxT('0');                                       \
+            result = _T('0');                                        \
         else if ( neg )                                              \
-            result.Prepend(wxT('-'));                                \
+            result.Prepend(_T('-'));                                 \
                                                                      \
         return result;                                               \
     }
@@ -1204,12 +1204,12 @@ void *wxULongLongWx::asArray(void) const
                                                                      \
         while ( ll != 0 )                                            \
         {                                                            \
-            result.Prepend((wxChar)(wxT('0') + (ll % 10).ToULong())); \
+            result.Prepend((wxChar)(_T('0') + (ll % 10).ToULong())); \
             ll /= 10;                                                \
         }                                                            \
                                                                      \
         if ( result.empty() )                                        \
-            result = wxT('0');                                       \
+            result = _T('0');                                        \
                                                                      \
         return result;                                               \
     }
@@ -1263,7 +1263,7 @@ WXDLLIMPEXP_BASE wxTextOutputStream& operator<< (wxTextOutputStream& o, const wx
     return o << ll.ToString();
 }
 
-#define READ_STRING_CHAR(s, idx, len) ((idx!=len) ? (wxChar)s[idx++] : wxT('\0'))
+#define READ_STRING_CHAR(s, idx, len) ((wxChar) ((idx!=len) ? s[idx++] : 0))
 
 WXDLLIMPEXP_BASE class wxTextInputStream &operator>>(class wxTextInputStream &o, wxULongLong &ll)
 {
