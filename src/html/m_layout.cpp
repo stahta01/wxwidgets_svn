@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/image.h"
 #endif
 
@@ -79,8 +79,14 @@ public:
               wxHtmlRenderingInfo& WXUNUSED(info)) {}
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxHtmlPageBreakCell);
+    DECLARE_NO_COPY_CLASS(wxHtmlPageBreakCell)
 };
+
+// Comparison routine for bsearch into an int* array of pagebreaks.
+extern "C" int wxCMPFUNC_CONV wxInteger_compare(void const* i0, void const* i1)
+{
+    return *(int*)i0 - *(int*)i1;
+}
 
 bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_pagebreaks) const
 {
@@ -94,7 +100,7 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_page
     // vertical position. Otherwise we'd be setting a pagebreak above
     // the current cell, which is incorrect, or duplicating a
     // pagebreak that has already been set.
-    if( known_pagebreaks.GetCount() == 0 || *pagebreak <= m_PosY)
+    if( known_pagebreaks.Count() == 0 || *pagebreak <= m_PosY)
     {
         return false;
     }
@@ -110,7 +116,11 @@ bool wxHtmlPageBreakCell::AdjustPagebreak(int* pagebreak, wxArrayInt& known_page
 
 
     // Search the array of pagebreaks to see whether we've already set
-    // a pagebreak here.
+    // a pagebreak here. The standard bsearch() function is appropriate
+    // because the array of pagebreaks through known_pagebreaks[number_of_pages]
+    // is known to be sorted in strictly increasing order. '1 + number_of_pages'
+    // is used as a bsearch() argument because the array contains a leading
+    // zero plus one element for each page.
     int where = known_pagebreaks.Index( total_height);
     // Add a pagebreak only if there isn't one already set here.
     if( wxNOT_FOUND != where)
@@ -284,8 +294,10 @@ TAG_HANDLER_BEGIN(TITLE, "TITLE")
         wxHtmlWindowInterface *winIface = m_WParser->GetWindowInterface();
         if (winIface)
         {
-            wxString title(tag.GetBeginIter(), tag.GetEndIter1());
-#if !wxUSE_UNICODE
+            wxString title = m_WParser->GetSource()->Mid(
+                                    tag.GetBeginPos(),
+                                    tag.GetEndPos1()-tag.GetBeginPos());
+#if !wxUSE_UNICODE && wxUSE_WCHAR_T
             const wxFontEncoding enc = m_WParser->GetInputEncoding();
             if ( enc != wxFONTENCODING_DEFAULT )
             {
@@ -339,9 +351,11 @@ TAG_HANDLER_BEGIN(BODY, "BODY")
                 wxInputStream *is = fileBgImage->GetStream();
                 if ( is )
                 {
+#if !defined(__WXMSW__) || wxUSE_WXDIB
                     wxImage image(*is);
                     if ( image.Ok() )
                         winIface->SetHTMLBackgroundImage(image);
+#endif
                 }
 
                 delete fileBgImage;

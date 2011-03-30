@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/palmos/help.cpp
+// Name:        src/palmos/helpwin.cpp
 // Purpose:     Help system: WinHelp implementation
 // Author:      William Osborne - minimal working wxPalmOS port
 // Modified by:
@@ -22,6 +22,12 @@
 #endif
 
 #include "wx/filefn.h"
+
+#include <time.h>
+
+#include "wx/palmos/private.h"
+
+#include <string.h>
 
 
 IMPLEMENT_DYNAMIC_CLASS(wxWinHelpController, wxHelpControllerBase)

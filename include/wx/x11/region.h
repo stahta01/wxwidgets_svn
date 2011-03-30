@@ -39,7 +39,7 @@ public:
         InitRect(rect.x, rect.y, rect.width, rect.height);
     }
 
-    wxRegion( size_t n, const wxPoint *points, wxPolygonFillMode fillStyle = wxODDEVEN_RULE );
+    wxRegion( size_t n, const wxPoint *points, int fillStyle = wxODDEVEN_RULE );
 
     wxRegion( const wxBitmap& bmp)
     {
@@ -61,8 +61,9 @@ public:
     WXRegion *GetX11Region() const;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     // wxRegionBase pure virtuals
     virtual bool DoIsEqual(const wxRegion& region) const;

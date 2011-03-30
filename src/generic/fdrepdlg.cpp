@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/fdrepdlg.cpp
+// Name:        src/generic/fdrepgg.cpp
 // Purpose:     Find/Replace dialogs
 // Author:      Markus Greither and Vadim Zeitlin
 // Modified by:
 // Created:     05/25/01
-// RCS-ID:      $Id$
+// RCS-ID:
 // Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -87,8 +87,6 @@ bool wxGenericFindReplaceDialog::Create(wxWindow *parent,
                                         const wxString& title,
                                         int style)
 {
-    parent = GetParentForModalDialog(parent, style);
-
     if ( !wxDialog::Create(parent, wxID_ANY, title,
                            wxDefaultPosition, wxDefaultSize,
                            wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
@@ -100,7 +98,7 @@ bool wxGenericFindReplaceDialog::Create(wxWindow *parent,
     SetData(data);
 
     wxCHECK_MSG( m_FindReplaceData, false,
-                 wxT("can't create dialog without data") );
+                 _T("can't create dialog without data") );
 
     bool isPda = (wxSystemSettings::GetScreenType() <= wxSYS_SCREEN_PDA);
 

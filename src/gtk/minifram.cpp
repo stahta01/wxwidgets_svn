@@ -20,10 +20,8 @@
     #include "wx/image.h"
 #endif
 
-#include "wx/gtk/dcclient.h"
-
-#include <gtk/gtk.h>
-#include "wx/gtk/private/gtk2-compat.h"
+#include "wx/gtk/win_gtk.h"
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // data
@@ -31,6 +29,7 @@
 
 extern bool        g_blockEventsOnDrag;
 extern bool        g_blockEventsOnScroll;
+extern GtkWidget  *wxGetRootWindow();
 
 //-----------------------------------------------------------------------------
 // "expose_event" of m_mainWidget
@@ -61,14 +60,15 @@ static wxColor LightContrastColour(const wxColour& c)
 extern "C" {
 static gboolean gtk_window_own_expose_callback(GtkWidget* widget, GdkEventExpose* gdk_event, wxMiniFrame* win)
 {
-    if (!win->m_hasVMT || gdk_event->count > 0 ||
-        gdk_event->window != gtk_widget_get_window(widget))
-    {
-        return false;
-    }
+    // don't need to install idle handler, its done from "event" signal
 
-    gtk_paint_shadow (gtk_widget_get_style(widget),
-                      gtk_widget_get_window(widget),
+    if (!win->m_hasVMT || gdk_event->count > 0)
+        return false;
+
+    GtkPizza *pizza = GTK_PIZZA(widget);
+
+    gtk_paint_shadow (widget->style,
+                      pizza->bin_window,
                       GTK_STATE_NORMAL,
                       GTK_SHADOW_OUT,
                       NULL, NULL, NULL, // FIXME: No clipping?
@@ -78,10 +78,8 @@ static gboolean gtk_window_own_expose_callback(GtkWidget* widget, GdkEventExpose
     int style = win->GetWindowStyle();
 
     wxClientDC dc(win);
-
-    wxDCImpl *impl = dc.GetImpl();
-    wxClientDCImpl *gtk_impl = wxDynamicCast( impl, wxClientDCImpl );
-    gtk_impl->m_gdkwindow = gtk_widget_get_window(widget); // Hack alert
+    // Hack alert
+    dc.m_window = pizza->bin_window;
 
     if (style & wxRESIZE_BORDER)
     {
@@ -90,15 +88,18 @@ static gboolean gtk_window_own_expose_callback(GtkWidget* widget, GdkEventExpose
         dc.DrawRectangle( win->m_width - 14, win->m_height-14, 14, 14 );
     }
 
-    if (win->m_miniTitle && !win->GetTitle().empty())
+    if (!win->GetTitle().empty() &&
+        ((style & wxCAPTION) ||
+         (style & wxTINY_CAPTION_HORIZ) ||
+         (style & wxTINY_CAPTION_VERT)))
     {
         dc.SetFont( *wxSMALL_FONT );
 
         wxBrush brush( LightContrastColour( wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT) ) );
         dc.SetBrush( brush );
         dc.SetPen( *wxTRANSPARENT_PEN );
-        dc.DrawRectangle( win->m_miniEdge-1,
-                          win->m_miniEdge-1,
+        dc.DrawRectangle( win->m_miniEdge-1, 
+                          win->m_miniEdge-1, 
                           win->m_width - (2*(win->m_miniEdge-1)),
                           15  );
 
@@ -108,7 +109,6 @@ static gboolean gtk_window_own_expose_callback(GtkWidget* widget, GdkEventExpose
         if (style & wxCLOSE_BOX)
             dc.DrawBitmap( win->m_closeButton, win->m_width-18, 3, true );
     }
-
     return false;
 }
 }
@@ -118,15 +118,18 @@ static gboolean gtk_window_own_expose_callback(GtkWidget* widget, GdkEventExpose
 //-----------------------------------------------------------------------------
 
 extern "C" {
-static gboolean
-gtk_window_button_press_callback(GtkWidget* widget, GdkEventButton* gdk_event, wxMiniFrame* win)
+static gint gtk_window_button_press_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxMiniFrame *win )
 {
-    if (!win->m_hasVMT || gdk_event->window != gtk_widget_get_window(widget))
-        return false;
+    // don't need to install idle handler, its done from "event" signal
+
+    if (!win->m_hasVMT) return FALSE;
     if (g_blockEventsOnDrag) return TRUE;
     if (g_blockEventsOnScroll) return TRUE;
 
     if (win->m_isDragging) return TRUE;
+
+    GtkPizza *pizza = GTK_PIZZA(widget);
+    if (gdk_event->window != pizza->bin_window) return TRUE;
 
     int style = win->GetWindowStyle();
 
@@ -138,7 +141,7 @@ gtk_window_button_press_callback(GtkWidget* widget, GdkEventButton* gdk_event, w
     {
         GtkWidget *ancestor = gtk_widget_get_toplevel( widget );
 
-        GdkWindow *source = gtk_widget_get_window(widget);
+        GdkWindow *source = GTK_PIZZA(widget)->bin_window;
 
         int org_x = 0;
         int org_y = 0;
@@ -154,7 +157,8 @@ gtk_window_button_press_callback(GtkWidget* widget, GdkEventButton* gdk_event, w
         return TRUE;
     }
 
-    if (win->m_miniTitle && (style & wxCLOSE_BOX))
+    if ((style & wxCLOSE_BOX) &&
+        ((style & wxCAPTION) || (style & wxTINY_CAPTION_HORIZ) || (style & wxTINY_CAPTION_VERT)))
     {
         if ((y > 3) && (y < 19) && (x > win->m_width-19) && (x < win->m_width-3))
         {
@@ -163,12 +167,11 @@ gtk_window_button_press_callback(GtkWidget* widget, GdkEventButton* gdk_event, w
         }
     }
 
-    if (y >= win->m_miniEdge + win->m_miniTitle)
-        return true;
+    if (y > win->m_miniEdge-1 + 15) return TRUE;
 
-    gdk_window_raise(gtk_widget_get_window(win->m_widget));
+    gdk_window_raise( win->m_widget->window );
 
-    gdk_pointer_grab( gtk_widget_get_window(widget), false,
+    gdk_pointer_grab( widget->window, FALSE,
                       (GdkEventMask)
                          (GDK_BUTTON_PRESS_MASK |
                           GDK_BUTTON_RELEASE_MASK |
@@ -176,8 +179,8 @@ gtk_window_button_press_callback(GtkWidget* widget, GdkEventButton* gdk_event, w
                           GDK_POINTER_MOTION_HINT_MASK  |
                           GDK_BUTTON_MOTION_MASK        |
                           GDK_BUTTON1_MOTION_MASK),
-                      NULL,
-                      NULL,
+                      (GdkWindow *) NULL,
+                      (GdkCursor *) NULL,
                       (unsigned int) GDK_CURRENT_TIME );
 
     win->m_diffX = x;
@@ -196,13 +199,14 @@ gtk_window_button_press_callback(GtkWidget* widget, GdkEventButton* gdk_event, w
 //-----------------------------------------------------------------------------
 
 extern "C" {
-static gboolean
-gtk_window_button_release_callback(GtkWidget* widget, GdkEventButton* gdk_event, wxMiniFrame* win)
+static gint gtk_window_button_release_callback( GtkWidget *widget, GdkEventButton *gdk_event, wxMiniFrame *win )
 {
-    if (!win->m_hasVMT || gdk_event->window != gtk_widget_get_window(widget))
-        return false;
+    // don't need to install idle handler, its done from "event" signal
+
+    if (!win->m_hasVMT) return FALSE;
     if (g_blockEventsOnDrag) return TRUE;
     if (g_blockEventsOnScroll) return TRUE;
+
     if (!win->m_isDragging) return TRUE;
 
     win->m_isDragging = false;
@@ -213,7 +217,7 @@ gtk_window_button_release_callback(GtkWidget* widget, GdkEventButton* gdk_event,
     gdk_pointer_ungrab ( (guint32)GDK_CURRENT_TIME );
     int org_x = 0;
     int org_y = 0;
-    gdk_window_get_origin(gtk_widget_get_window(widget), &org_x, &org_y);
+    gdk_window_get_origin( widget->window, &org_x, &org_y );
     x += org_x - win->m_diffX;
     y += org_y - win->m_diffY;
     win->m_x = x;
@@ -230,16 +234,14 @@ gtk_window_button_release_callback(GtkWidget* widget, GdkEventButton* gdk_event,
 
 extern "C" {
 static gboolean
-gtk_window_leave_callback(GtkWidget *widget,
-                          GdkEventCrossing* gdk_event,
-                          wxMiniFrame *win)
+gtk_window_leave_callback( GtkWidget *widget, GdkEventCrossing *gdk_event, wxMiniFrame *win )
 {
+    // don't need to install idle handler, its done from "event" signal
+
     if (!win->m_hasVMT) return FALSE;
     if (g_blockEventsOnDrag) return FALSE;
-    if (gdk_event->window != gtk_widget_get_window(widget))
-        return false;
 
-    gdk_window_set_cursor(gtk_widget_get_window(widget), NULL);
+    gdk_window_set_cursor( widget->window, NULL );
 
     return FALSE;
 }
@@ -250,11 +252,12 @@ gtk_window_leave_callback(GtkWidget *widget,
 //-----------------------------------------------------------------------------
 
 extern "C" {
-static gboolean
+static gint
 gtk_window_motion_notify_callback( GtkWidget *widget, GdkEventMotion *gdk_event, wxMiniFrame *win )
 {
-    if (!win->m_hasVMT || gdk_event->window != gtk_widget_get_window(widget))
-        return false;
+    // don't need to install idle handler, its done from "event" signal
+
+    if (!win->m_hasVMT) return FALSE;
     if (g_blockEventsOnDrag) return TRUE;
     if (g_blockEventsOnScroll) return TRUE;
 
@@ -279,10 +282,9 @@ gtk_window_motion_notify_callback( GtkWidget *widget, GdkEventMotion *gdk_event,
         if (style & wxRESIZE_BORDER)
         {
             if ((x > win->m_width-14) && (y > win->m_height-14))
-               gdk_window_set_cursor(gtk_widget_get_window(widget), gdk_cursor_new(GDK_BOTTOM_RIGHT_CORNER));
+               gdk_window_set_cursor( widget->window, gdk_cursor_new( GDK_BOTTOM_RIGHT_CORNER ) );
             else
-               gdk_window_set_cursor(gtk_widget_get_window(widget), NULL);
-            win->GTKUpdateCursor(false);
+               gdk_window_set_cursor( widget->window, NULL );
         }
         return TRUE;
     }
@@ -292,12 +294,13 @@ gtk_window_motion_notify_callback( GtkWidget *widget, GdkEventMotion *gdk_event,
 
     int org_x = 0;
     int org_y = 0;
-    gdk_window_get_origin(gtk_widget_get_window(widget), &org_x, &org_y);
+    gdk_window_get_origin( widget->window, &org_x, &org_y );
     x += org_x - win->m_diffX;
     y += org_y - win->m_diffY;
     win->m_x = x;
     win->m_y = y;
     gtk_window_move( GTK_WINDOW(win->m_widget), x, y );
+
 
     return TRUE;
 }
@@ -319,8 +322,7 @@ bool wxMiniFrame::Create( wxWindow *parent, wxWindowID id, const wxString &title
       const wxPoint &pos, const wxSize &size,
       long style, const wxString &name )
 {
-    m_miniTitle = 0;
-    if (style & wxCAPTION)
+    if ((style & wxCAPTION) || (style & wxTINY_CAPTION_HORIZ) || (style & wxTINY_CAPTION_VERT))
         m_miniTitle = 16;
 
     if (style & wxRESIZE_BORDER)
@@ -335,43 +337,13 @@ bool wxMiniFrame::Create( wxWindow *parent, wxWindowID id, const wxString &title
 
     wxFrame::Create( parent, id, title, pos, size, style, name );
 
-    // Use a GtkEventBox for the title and borders. Using m_widget for this
-    // almost works, except that setting the resize cursor has no effect.
-    GtkWidget* eventbox = gtk_event_box_new();
-    gtk_widget_add_events(eventbox,
-        GDK_POINTER_MOTION_MASK |
-        GDK_POINTER_MOTION_HINT_MASK);
-    gtk_widget_show(eventbox);
-    // Use a GtkAlignment to position m_mainWidget inside the decorations
-    GtkWidget* alignment = gtk_alignment_new(0, 0, 1, 1);
-    gtk_alignment_set_padding(GTK_ALIGNMENT(alignment),
-        m_miniTitle + m_miniEdge, m_miniEdge, m_miniEdge, m_miniEdge);
-    gtk_widget_show(alignment);
-    // The GtkEventBox and GtkAlignment go between m_widget and m_mainWidget
-    gtk_widget_reparent(m_mainWidget, alignment);
-    gtk_container_add(GTK_CONTAINER(eventbox), alignment);
-    gtk_container_add(GTK_CONTAINER(m_widget), eventbox);
-
-    m_gdkDecor = 0;
-    m_gdkFunc = 0;
-    if (style & wxRESIZE_BORDER)
-       m_gdkFunc = GDK_FUNC_RESIZE;
-    gtk_window_set_default_size(GTK_WINDOW(m_widget), m_width, m_height);
-    m_decorSize.Set(0, 0);
-    m_deferShow = false;
-
-    // don't allow sizing smaller than decorations
-    GdkGeometry geom;
-    geom.min_width  = 2 * m_miniEdge;
-    geom.min_height = 2 * m_miniEdge + m_miniTitle;
-    gtk_window_set_geometry_hints(GTK_WINDOW(m_widget), NULL, &geom, GDK_HINT_MIN_SIZE);
-
     if (m_parent && (GTK_IS_WINDOW(m_parent->m_widget)))
     {
         gtk_window_set_transient_for( GTK_WINDOW(m_widget), GTK_WINDOW(m_parent->m_widget) );
     }
 
-    if (m_miniTitle && (style & wxCLOSE_BOX))
+    if ((style & wxCLOSE_BOX) &&
+        ((style & wxCAPTION) || (style & wxTINY_CAPTION_HORIZ) || (style & wxTINY_CAPTION_VERT)))
     {
         wxImage img = wxBitmap((const char*)close_bits, 16, 16).ConvertToImage();
         img.Replace(0,0,0,123,123,123);
@@ -380,53 +352,27 @@ bool wxMiniFrame::Create( wxWindow *parent, wxWindowID id, const wxString &title
     }
 
     /* these are called when the borders are drawn */
-    g_signal_connect_after(eventbox, "expose_event",
+    g_signal_connect (m_mainWidget, "expose_event",
                       G_CALLBACK (gtk_window_own_expose_callback), this );
 
     /* these are required for dragging the mini frame around */
-    g_signal_connect (eventbox, "button_press_event",
+    g_signal_connect (m_mainWidget, "button_press_event",
                       G_CALLBACK (gtk_window_button_press_callback), this);
-    g_signal_connect (eventbox, "button_release_event",
+    g_signal_connect (m_mainWidget, "button_release_event",
                       G_CALLBACK (gtk_window_button_release_callback), this);
-    g_signal_connect (eventbox, "motion_notify_event",
+    g_signal_connect (m_mainWidget, "motion_notify_event",
                       G_CALLBACK (gtk_window_motion_notify_callback), this);
-    g_signal_connect (eventbox, "leave_notify_event",
+    g_signal_connect (m_mainWidget, "leave_notify_event",
                       G_CALLBACK (gtk_window_leave_callback), this);
     return true;
-}
-
-void wxMiniFrame::DoGetClientSize(int* width, int* height) const
-{
-    wxFrame::DoGetClientSize(width, height);
-    if (width)
-    {
-        *width -= 2 * m_miniEdge;
-        if (*width < 0) *width = 0;
-    }
-    if (height)
-    {
-        *height -= m_miniTitle + 2 * m_miniEdge;
-        if (*height < 0) *height = 0;
-    }
-}
-
-// Keep min size at least as large as decorations
-void wxMiniFrame::DoSetSizeHints(int minW, int minH, int maxW, int maxH, int incW, int incH)
-{
-    const int w = 2 * m_miniEdge;
-    const int h = 2 * m_miniEdge + m_miniTitle;
-    if (minW < w) minW = w;
-    if (minH < h) minH = h;
-    wxFrame::DoSetSizeHints(minW, minH, maxW, maxH, incW, incH);
 }
 
 void wxMiniFrame::SetTitle( const wxString &title )
 {
     wxFrame::SetTitle( title );
 
-    GdkWindow* window = gtk_widget_get_window(gtk_bin_get_child(GTK_BIN(m_widget)));
-    if (window)
-        gdk_window_invalidate_rect(window, NULL, false);
+    if (GTK_PIZZA(m_mainWidget)->bin_window)
+        gdk_window_invalidate_rect( GTK_PIZZA(m_mainWidget)->bin_window, NULL, true );
 }
 
 #endif // wxUSE_MINIFRAME

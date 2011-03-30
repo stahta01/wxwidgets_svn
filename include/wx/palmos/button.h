@@ -16,7 +16,7 @@
 // Pushbutton
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxButton : public wxButtonBase
+class WXDLLEXPORT wxButton : public wxButtonBase
 {
 public:
     wxButton() { }
@@ -43,7 +43,7 @@ public:
 
     virtual ~wxButton();
 
-    virtual wxWindow *SetDefault();
+    virtual void SetDefault();
 
     // implementation from now on
     virtual void Command(wxCommandEvent& event);

@@ -24,19 +24,19 @@
   #pragma hdrstop
 #endif
 
-#if wxUSE_FONTENUM
-
-#include "wx/fontenum.h"
+#if wxUSE_FONTMAP
 
 #ifndef WX_PRECOMP
     #include "wx/gdicmn.h"
     #include "wx/font.h"
+    #include "wx/encinfo.h"
     #include "wx/dynarray.h"
-    #include "wx/msw/private.h"
 #endif
 
-#include "wx/encinfo.h"
+#include "wx/msw/private.h"
+
 #include "wx/fontutil.h"
+#include "wx/fontenum.h"
 #include "wx/fontmap.h"
 
 // ----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ private:
     // the list of facenames we already found while enumerating facenames
     wxArrayString m_facenames;
 
-    wxDECLARE_NO_COPY_CLASS(wxFontEnumeratorHelper);
+    DECLARE_NO_COPY_CLASS(wxFontEnumeratorHelper)
 };
 
 // ----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ private:
 
 #ifndef __WXMICROWIN__
 int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
-                                  DWORD dwStyle, LPARAM lParam);
+                                  DWORD dwStyle, LONG lParam);
 #endif
 
 // ============================================================================
@@ -160,13 +160,13 @@ void wxFontEnumeratorHelper::DoEnumerate()
 
 #ifdef __WXWINCE__
     ::EnumFontFamilies(hDC,
-                       m_facename.empty() ? NULL : m_facename.wx_str(),
+                       m_facename.empty() ? NULL : m_facename.c_str(),
                        (wxFONTENUMPROC)wxFontEnumeratorProc,
                        (LPARAM)this) ;
 #else // __WIN32__
     LOGFONT lf;
     lf.lfCharSet = (BYTE)m_charset;
-    wxStrlcpy(lf.lfFaceName, m_facename.c_str(), WXSIZEOF(lf.lfFaceName));
+    wxStrncpy(lf.lfFaceName, m_facename, WXSIZEOF(lf.lfFaceName));
     lf.lfPitchAndFamily = 0;
     ::EnumFontFamiliesEx(hDC, &lf, (wxFONTENUMPROC)wxFontEnumeratorProc,
                          (LPARAM)this, 0 /* reserved */) ;
@@ -269,7 +269,7 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 
 #ifndef __WXMICROWIN__
 int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
-                                  DWORD WXUNUSED(dwStyle), LPARAM lParam)
+                                  DWORD WXUNUSED(dwStyle), LONG lParam)
 {
 
     // we used to process TrueType fonts only, but there doesn't seem to be any
@@ -289,4 +289,4 @@ int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
 }
 #endif
 
-#endif // wxUSE_FONTENUM
+#endif // wxUSE_FONTMAP

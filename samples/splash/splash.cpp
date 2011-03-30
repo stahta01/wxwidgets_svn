@@ -123,13 +123,10 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
     wxImage::AddHandler(new wxPNGHandler);
 
     // create the main application window
-    MyFrame *frame = new MyFrame(wxT("wxSplashScreen sample application"));
+    MyFrame *frame = new MyFrame(_T("wxSplashScreen sample application"));
 
     wxBitmap bitmap;
 
@@ -138,7 +135,7 @@ bool MyApp::OnInit()
 
     bool ok = frame->m_isPda
             ? bitmap.Ok()
-            : bitmap.LoadFile(wxT("splash.png"), wxBITMAP_TYPE_PNG);
+            : bitmap.LoadFile(_T("splash.png"), wxBITMAP_TYPE_PNG);
 
     if (ok)
     {
@@ -147,11 +144,7 @@ bool MyApp::OnInit()
             6000, frame, wxID_ANY, wxDefaultPosition, wxDefaultSize,
             wxSIMPLE_BORDER|wxSTAY_ON_TOP);
     }
-
-#if !defined(__WXGTK20__)
-    // we don't need it at least on wxGTK with GTK+ 2.12.9
     wxYield();
-#endif
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -182,14 +175,14 @@ MyFrame::MyFrame(const wxString& title)
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(wxID_ABOUT, wxT("&About...\tF1"), wxT("Show about frame"));
+    helpMenu->Append(wxID_ABOUT, _T("&About...\tF1"), _T("Show about frame"));
 
-    menuFile->Append(wxID_EXIT, wxT("E&xit\tAlt-X"), wxT("Quit this program"));
+    menuFile->Append(wxID_EXIT, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(menuFile, wxT("&File"));
-    menuBar->Append(helpMenu, wxT("&Help"));
+    menuBar->Append(menuFile, _T("&File"));
+    menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
@@ -198,7 +191,7 @@ MyFrame::MyFrame(const wxString& title)
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
-    SetStatusText(wxT("Welcome to wxWidgets!"));
+    SetStatusText(_T("Welcome to wxWidgets!"));
 #endif // wxUSE_STATUSBAR
 }
 
@@ -219,30 +212,27 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 
     bool ok = m_isPda
             ? bitmap.Ok()
-            : bitmap.LoadFile(wxT("splash.png"), wxBITMAP_TYPE_PNG);
+            : bitmap.LoadFile(_T("splash.png"), wxBITMAP_TYPE_PNG);
 
     if (ok)
     {
         wxImage image = bitmap.ConvertToImage();
-
         // do not scale on already small screens
         if (!m_isPda)
             image.Rescale( bitmap.GetWidth()/2, bitmap.GetHeight()/2 );
-
         bitmap = wxBitmap(image);
         wxSplashScreen *splash = new wxSplashScreen(bitmap,
             wxSPLASH_CENTRE_ON_PARENT | wxSPLASH_NO_TIMEOUT,
             0, this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
             wxSIMPLE_BORDER|wxSTAY_ON_TOP);
-
         wxWindow *win = splash->GetSplashWindow();
 #if wxUSE_MEDIACTRL
-        wxMediaCtrl *media = new wxMediaCtrl( win, wxID_EXIT, wxT("press.mpg"), wxPoint(2,2));
+        wxMediaCtrl *media = new wxMediaCtrl( win, wxID_EXIT, _T("press.mpg"), wxPoint(2,2));
         media->Play();
 #else
         wxStaticText *text = new wxStaticText( win,
                                                wxID_EXIT,
-                                               wxT("click somewhere\non this image"),
+                                               _T("click somewhere\non image"),
                                                wxPoint(m_isPda ? 0 : 13,
                                                        m_isPda ? 0 : 11)
                                              );

@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 14 December 2010                                                    *
+# Date : 1 September 2006                                                    *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -43,11 +43,9 @@ CC_DEFINE =
 .c.obj :
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
-OBJECTS = dockart.obj,floatpane.obj,framemanager.obj,auibook.obj,tabmdi.obj,\
-	auibar.obj
+OBJECTS = dockart.obj,floatpane.obj,framemanager.obj,auibook.obj,tabmdi.obj
 
-SOURCES = dockart.cpp floatpane.cpp framemanager.cpp auibook.cpp tabmdi.cpp \
-	auibar.cpp
+SOURCES = dockart.cpp floatpane.cpp framemanager.cpp auibook.cpp tabmdi.cpp
   
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -67,11 +65,8 @@ all : $(SOURCES)
 .endif
 .endif
 
-$(OBJECTS) : [--.include.wx]setup.h
-
 dockart.obj : dockart.cpp
 floatpane.obj : floatpane.cpp
 framemanager.obj : framemanager.cpp
 auibook.obj :  auibook.cpp
 tabmdi.obj : tabmdi.cpp
-auibar.obj : auibar.cpp

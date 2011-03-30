@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/radiobut.h
+// Name:        radiobut.h
 // Purpose:     wxRadioButton class
 // Author:      David Webster
 // Modified by:
@@ -14,7 +14,7 @@
 
 #include "wx/control.h"
 
-class WXDLLIMPEXP_CORE wxRadioButton: public wxControl
+class WXDLLEXPORT wxRadioButton: public wxControl
 {
 public:
     inline wxRadioButton() { Init(); }
@@ -66,7 +66,6 @@ public:
     virtual void    SetFocus(void);
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
     virtual wxSize DoGetBestSize() const;
 
 private:

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mgl/dcscreen.h
+// Name:        dcscreen.h
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -16,13 +16,13 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxScreenDC;
+class WXDLLEXPORT wxScreenDC;
 
 //-----------------------------------------------------------------------------
 // wxScreenDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxScreenDC: public wxDC
+class WXDLLEXPORT wxScreenDC: public wxDC
 {
 public:
     wxScreenDC();
@@ -31,7 +31,7 @@ public:
     static bool StartDrawingOnTop(wxWindow *WXUNUSED(window)) { return TRUE; }
     static bool StartDrawingOnTop(wxRect *WXUNUSED(rect) = NULL) { return TRUE; }
     static bool EndDrawingOnTop() { return TRUE; }
-
+  
 private:
     DECLARE_DYNAMIC_CLASS(wxScreenDC)
 };

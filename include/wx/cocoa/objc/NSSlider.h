@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/cocoa/objc/NSSlider.h
+// Name:        wx/cocoa/objc/NSView.h
 // Purpose:     WXNSSlider class
 // Author:      David Elliott
 // Modified by:
 // Created:     2007/08/10 (move from NSSlider.mm)
 // RCS-ID:      $Id$
 // Copyright:   (c) 2007 Software 2000 Ltd.
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef __WX_COCOA_OBJC_NSSLIDER_H__

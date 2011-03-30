@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/help.h
+// Name:        help.h
 // Purpose:     wxHelpController base header
 // Author:      wxWidgets Team
 // Modified by:

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/caret.h
+// Name:        generic/caret.h
 // Purpose:     generic wxCaret class
 // Author:      Vadim Zeitlin (original code by Robert Roebling)
 // Modified by:
@@ -20,9 +20,9 @@
     #define wxHAS_CARET_USING_OVERLAYS
 #endif
 
-class WXDLLIMPEXP_FWD_CORE wxCaret;
+class WXDLLIMPEXP_CORE wxCaret;
 
-class WXDLLIMPEXP_CORE wxCaretTimer : public wxTimer
+class WXDLLEXPORT wxCaretTimer : public wxTimer
 {
 public:
     wxCaretTimer(wxCaret *caret);
@@ -70,7 +70,7 @@ protected:
     void Refresh();
 
     // draw the caret on the given DC
-    void DoDraw(wxDC *dc, wxWindow* win);
+    void DoDraw(wxDC *dc);
 
 private:
     // GTK specific initialization

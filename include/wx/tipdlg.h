@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/tipdlg.h
+// Name:        tipdlg.h
 // Purpose:     declaration of wxTipDialog
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -61,10 +61,8 @@ protected:
 // specified text file as the source of tips (each line is a tip).
 //
 // NB: the caller is responsible for deleting the pointer!
-#if wxUSE_TEXTFILE
 WXDLLIMPEXP_ADV wxTipProvider *wxCreateFileTipProvider(const wxString& filename,
                                                        size_t currentTip);
-#endif // wxUSE_TEXTFILE
 
 // ----------------------------------------------------------------------------
 // wxTipDialog

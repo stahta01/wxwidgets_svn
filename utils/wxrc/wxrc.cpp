@@ -8,6 +8,9 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+// To fix compilation when using Sun CC we must define wxT() for this file.
+#define wxNEEDS_T
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -19,7 +22,6 @@
 #ifndef WX_PRECOMP
     #include "wx/app.h"
     #include "wx/log.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/cmdline.h"
@@ -30,7 +32,6 @@
 #include "wx/utils.h"
 #include "wx/hashset.h"
 #include "wx/mimetype.h"
-#include "wx/vector.h"
 
 WX_DECLARE_HASH_SET(wxString, wxStringHash, wxStringEqual, StringSet);
 
@@ -66,8 +67,8 @@ private:
         while (node)
         {
             if (node->GetName() == wxT("object")
-                && node->GetAttribute(wxT("class"),&classValue)
-                && node->GetAttribute(wxT("name"),&nameValue))
+                && node->GetPropVal(wxT("class"),&classValue)
+                && node->GetPropVal(wxT("name"),&nameValue))
             {
                 m_wdata.Add(XRCWidgetData(nameValue,classValue));
             }
@@ -112,7 +113,7 @@ public:
         return m_wdata;
     }
 
-    bool CanBeUsedWithXRCCTRL(const wxString& name)
+    bool IsRealClass(const wxString& name)
     {
         if (name == wxT("tool") ||
             name == wxT("data") ||
@@ -136,11 +137,11 @@ public:
         file.Write(wxT("class ") + m_className + wxT(" : public ") + m_parentClassName
                    + wxT(" {\nprotected:\n"));
         size_t i;
-        for(i=0;i<m_wdata.GetCount();++i)
+        for(i=0;i<m_wdata.Count();++i)
         {
             const XRCWidgetData& w = m_wdata.Item(i);
-            if( !CanBeUsedWithXRCCTRL(w.GetClass()) ) continue;
-            if( w.GetName().empty() ) continue;
+            if( !IsRealClass(w.GetClass()) ) continue;
+            if( w.GetName().Length() == 0 ) continue;
             file.Write(
                 wxT(" ") + w.GetClass() + wxT("* ") + w.GetName()
                 + wxT(";\n"));
@@ -151,11 +152,11 @@ public:
                    +  wxT("\"), wxT(\"")
                    +  m_parentClassName
                    +  wxT("\"));\n"));
-        for(i=0;i<m_wdata.GetCount();++i)
+        for(i=0;i<m_wdata.Count();++i)
         {
             const XRCWidgetData& w = m_wdata.Item(i);
-            if( !CanBeUsedWithXRCCTRL(w.GetClass()) ) continue;
-            if( w.GetName().empty() ) continue;
+            if( !IsRealClass(w.GetClass()) ) continue;
+            if( w.GetName().Length() == 0 ) continue;
             file.Write( wxT("  ")
                         + w.GetName()
                         + wxT(" = XRCCTRL(*this,\"")
@@ -203,22 +204,6 @@ public:
 WX_DECLARE_OBJARRAY(XRCWndClassData,ArrayOfXRCWndClassData);
 WX_DEFINE_OBJARRAY(ArrayOfXRCWndClassData)
 
-struct ExtractedString
-{
-    ExtractedString() : lineNo(-1) {}
-    ExtractedString(const wxString& str_,
-                    const wxString& filename_, int lineNo_)
-        : str(str_), filename(filename_), lineNo(lineNo_)
-    {}
-
-    wxString str;
-
-    wxString filename;
-    int      lineNo;
-};
-
-typedef wxVector<ExtractedString> ExtractedStrings;
-
 
 class XmlResApp : public wxAppConsole
 {
@@ -240,8 +225,8 @@ private:
     void MakePackagePython(const wxArrayString& flist);
 
     void OutputGettext();
-    ExtractedStrings FindStrings();
-    ExtractedStrings FindStrings(const wxString& filename, wxXmlNode *node);
+    wxArrayString FindStrings();
+    wxArrayString FindStrings(wxXmlNode *node);
 
     bool flagVerbose, flagCPP, flagPython, flagGettext;
     wxString parOutput, parFuncname, parOutputPath;
@@ -259,22 +244,23 @@ int XmlResApp::OnRun()
 {
     static const wxCmdLineEntryDesc cmdLineDesc[] =
     {
-        { wxCMD_LINE_SWITCH, "h", "help",  "show help message", wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-        { wxCMD_LINE_SWITCH, "v", "verbose", "be verbose" },
-        { wxCMD_LINE_SWITCH, "e", "extra-cpp-code",  "output C++ header file with XRC derived classes" },
-        { wxCMD_LINE_SWITCH, "c", "cpp-code",  "output C++ source rather than .rsc file" },
-        { wxCMD_LINE_SWITCH, "p", "python-code",  "output wxPython source rather than .rsc file" },
-        { wxCMD_LINE_SWITCH, "g", "gettext",  "output list of translatable strings (to stdout or file if -o used)" },
-        { wxCMD_LINE_OPTION, "n", "function",  "C++/Python function name (with -c or -p) [InitXmlResource]" },
-        { wxCMD_LINE_OPTION, "o", "output",  "output file [resource.xrs/cpp]" },
+        { wxCMD_LINE_SWITCH, wxT("h"), wxT("help"),  wxT("show help message"),
+              wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+        { wxCMD_LINE_SWITCH, wxT("v"), wxT("verbose"), wxT("be verbose"), (wxCmdLineParamType)0, 0 },
+        { wxCMD_LINE_SWITCH, wxT("e"), wxT("extra-cpp-code"),  wxT("output C++ header file with XRC derived classes"), (wxCmdLineParamType)0, 0 },
+        { wxCMD_LINE_SWITCH, wxT("c"), wxT("cpp-code"),  wxT("output C++ source rather than .rsc file"), (wxCmdLineParamType)0, 0 },
+        { wxCMD_LINE_SWITCH, wxT("p"), wxT("python-code"),  wxT("output wxPython source rather than .rsc file"), (wxCmdLineParamType)0, 0 },
+        { wxCMD_LINE_SWITCH, wxT("g"), wxT("gettext"),  wxT("output list of translatable strings (to stdout or file if -o used)"), (wxCmdLineParamType)0, 0 },
+        { wxCMD_LINE_OPTION, wxT("n"), wxT("function"),  wxT("C++/Python function name (with -c or -p) [InitXmlResource]"), (wxCmdLineParamType)0, 0 },
+        { wxCMD_LINE_OPTION, wxT("o"), wxT("output"),  wxT("output file [resource.xrs/cpp]"), (wxCmdLineParamType)0, 0 },
 #if 0 // not yet implemented
-        { wxCMD_LINE_OPTION, "l", "list-of-handlers",  "output list of necessary handlers to this file" },
+        { wxCMD_LINE_OPTION, wxT("l"), wxT("list-of-handlers"),  wxT("output list of necessary handlers to this file"), (wxCmdLineParamType)0, 0 },
 #endif
-        { wxCMD_LINE_PARAM,  NULL, NULL, "input file(s)",
+        { wxCMD_LINE_PARAM,  NULL, NULL, wxT("input file(s)"),
               wxCMD_LINE_VAL_STRING,
               wxCMD_LINE_PARAM_MULTIPLE | wxCMD_LINE_OPTION_MANDATORY },
 
-        wxCMD_LINE_DESC_END
+        { wxCMD_LINE_NONE, NULL, NULL, NULL, (wxCmdLineParamType)0, 0 }
     };
 
     wxCmdLineParser parser(cmdLineDesc, argc, argv);
@@ -301,14 +287,14 @@ int XmlResApp::OnRun()
 
 void XmlResApp::ParseParams(const wxCmdLineParser& cmdline)
 {
-    flagGettext = cmdline.Found("g");
-    flagVerbose = cmdline.Found("v");
-    flagCPP = cmdline.Found("c");
-    flagPython = cmdline.Found("p");
-    flagH = flagCPP && cmdline.Found("e");
+    flagGettext = cmdline.Found(wxT("g"));
+    flagVerbose = cmdline.Found(wxT("v"));
+    flagCPP = cmdline.Found(wxT("c"));
+    flagPython = cmdline.Found(wxT("p"));
+    flagH = flagCPP && cmdline.Found(wxT("e"));
 
 
-    if (!cmdline.Found("o", &parOutput))
+    if (!cmdline.Found(wxT("o"), &parOutput))
     {
         if (flagGettext)
             parOutput = wxEmptyString;
@@ -331,7 +317,7 @@ void XmlResApp::ParseParams(const wxCmdLineParser& cmdline)
     }
     if (!parOutputPath) parOutputPath = wxT(".");
 
-    if (!cmdline.Found("n", &parFuncname))
+    if (!cmdline.Found(wxT("n"), &parFuncname))
         parFuncname = wxT("InitXmlResource");
 
     for (size_t i = 0; i < cmdline.GetParamCount(); i++)
@@ -402,7 +388,7 @@ wxArrayString XmlResApp::PrepareTempFiles()
 {
     wxArrayString flist;
 
-    for (size_t i = 0; i < parFiles.GetCount(); i++)
+    for (size_t i = 0; i < parFiles.Count(); i++)
     {
         if (flagVerbose)
             wxPrintf(wxT("processing ") + parFiles[i] +  wxT("...\n"));
@@ -417,7 +403,7 @@ wxArrayString XmlResApp::PrepareTempFiles()
         }
 
         wxString name, ext, path;
-        wxFileName::SplitPath(parFiles[i], &path, &name, &ext);
+        wxSplitPath(parFiles[i], &path, &name, &ext);
 
         FindFilesInXML(doc.GetRoot(), flist, path);
         if (flagH)
@@ -426,8 +412,8 @@ wxArrayString XmlResApp::PrepareTempFiles()
                 wxString classValue,nameValue;
                 while(node){
                     if(node->GetName() == wxT("object")
-                     && node->GetAttribute(wxT("class"),&classValue)
-                     && node->GetAttribute(wxT("name"),&nameValue)){
+                     && node->GetPropVal(wxT("class"),&classValue)
+                     && node->GetPropVal(wxT("name"),&nameValue)){
 
                       aXRCWndClassData.Add(
                         XRCWndClassData(nameValue,classValue,node)
@@ -461,7 +447,7 @@ static bool NodeContainsFilename(wxXmlNode *node)
    // wxBitmapButton:
    wxXmlNode *parent = node->GetParent();
    if (parent != NULL &&
-       parent->GetAttribute(wxT("class"), wxT("")) == wxT("wxBitmapButton") &&
+       parent->GetPropVal(wxT("class"), wxT("")) == wxT("wxBitmapButton") &&
        (name == wxT("focus") ||
         name == wxT("disabled") ||
         name == wxT("hover") ||
@@ -471,17 +457,15 @@ static bool NodeContainsFilename(wxXmlNode *node)
    // wxBitmap or wxIcon toplevel resources:
    if ( name == wxT("object") )
    {
-       wxString klass = node->GetAttribute(wxT("class"), wxEmptyString);
-       if (klass == wxT("wxBitmap") ||
-               klass == wxT("wxIcon") ||
-                klass == wxT("data") )
+       wxString klass = node->GetPropVal(wxT("class"), wxEmptyString);
+       if (klass == wxT("wxBitmap") || klass == wxT("wxIcon"))
            return true;
    }
 
    // URLs in wxHtmlWindow:
    if ( name == wxT("url") &&
         parent != NULL &&
-        parent->GetAttribute(wxT("class"), wxT("")) == wxT("wxHtmlWindow") )
+        parent->GetPropVal(wxT("class"), wxT("")) == wxT("wxHtmlWindow") )
    {
        // FIXME: this is wrong for e.g. http:// URLs
        return true;
@@ -538,7 +522,7 @@ void XmlResApp::FindFilesInXML(wxXmlNode *node, wxArrayString& flist, const wxSt
 
 void XmlResApp::DeleteTempFiles(const wxArrayString& flist)
 {
-    for (size_t i = 0; i < flist.GetCount(); i++)
+    for (size_t i = 0; i < flist.Count(); i++)
         wxRemoveFile(parOutputPath + wxFILE_SEP_PATH + flist[i]);
 }
 
@@ -548,7 +532,7 @@ void XmlResApp::MakePackageZIP(const wxArrayString& flist)
 {
     wxString files;
 
-    for (size_t i = 0; i < flist.GetCount(); i++)
+    for (size_t i = 0; i < flist.Count(); i++)
         files += flist[i] + wxT(" ");
     files.RemoveLast();
 
@@ -582,12 +566,10 @@ static wxString FileToCppArray(wxString filename, int num)
     wxASSERT_MSG( offset >= 0 , wxT("Invalid file length") );
 
     const size_t lng = wx_truncate_cast(size_t, offset);
-    wxASSERT_MSG( static_cast<wxFileOffset>(lng) == offset,
-                  wxT("Huge file not supported") );
+    wxASSERT_MSG( !(lng - offset), wxT("Huge file not supported") );
 
     snum.Printf(wxT("%i"), num);
-    output.Printf(wxT("static size_t xml_res_size_") + snum + wxT(" = %lu;\n"),
-                  static_cast<unsigned long>(lng));
+    output.Printf(wxT("static size_t xml_res_size_") + snum + wxT(" = %i;\n"), lng);
     output += wxT("static unsigned char xml_res_file_") + snum + wxT("[] = {\n");
     // we cannot use string literals because MSVC is dumb wannabe compiler
     // with arbitrary limitation to 2048 strings :(
@@ -619,56 +601,56 @@ static wxString FileToCppArray(wxString filename, int num)
 void XmlResApp::MakePackageCPP(const wxArrayString& flist)
 {
     wxFFile file(parOutput, wxT("wt"));
-    unsigned i;
+    size_t i;
 
     if (flagVerbose)
         wxPrintf(wxT("creating C++ source file ") + parOutput +  wxT("...\n"));
 
-    file.Write(""
-"//\n"
-"// This file was automatically generated by wxrc, do not edit by hand.\n"
-"//\n\n"
-"#include <wx/wxprec.h>\n"
-"\n"
-"#ifdef __BORLANDC__\n"
-"    #pragma hdrstop\n"
-"#endif\n"
-"\n"
-""
-"#include <wx/filesys.h>\n"
-"#include <wx/fs_mem.h>\n"
-"#include <wx/xrc/xmlres.h>\n"
-"#include <wx/xrc/xh_all.h>\n"
-"\n"
-"#if wxCHECK_VERSION(2,8,5) && wxABI_VERSION >= 20805\n"
-"    #define XRC_ADD_FILE(name, data, size, mime) \\\n"
-"        wxMemoryFSHandler::AddFileWithMimeType(name, data, size, mime)\n"
-"#else\n"
-"    #define XRC_ADD_FILE(name, data, size, mime) \\\n"
-"        wxMemoryFSHandler::AddFile(name, data, size)\n"
-"#endif\n"
-"\n");
+    file.Write(wxT("")
+wxT("//\n")
+wxT("// This file was automatically generated by wxrc, do not edit by hand.\n")
+wxT("//\n\n")
+wxT("#include <wx/wxprec.h>\n")
+wxT("\n")
+wxT("#ifdef __BORLANDC__\n")
+wxT("    #pragma hdrstop\n")
+wxT("#endif\n")
+wxT("\n")
+wxT("")
+wxT("#include <wx/filesys.h>\n")
+wxT("#include <wx/fs_mem.h>\n")
+wxT("#include <wx/xrc/xmlres.h>\n")
+wxT("#include <wx/xrc/xh_all.h>\n")
+wxT("\n")
+wxT("#if wxCHECK_VERSION(2,8,5) && wxABI_VERSION >= 20805\n")
+wxT("    #define XRC_ADD_FILE(name, data, size, mime) \\\n")
+wxT("        wxMemoryFSHandler::AddFileWithMimeType(name, data, size, mime)\n")
+wxT("#else\n")
+wxT("    #define XRC_ADD_FILE(name, data, size, mime) \\\n")
+wxT("        wxMemoryFSHandler::AddFile(name, data, size)\n")
+wxT("#endif\n")
+wxT("\n"));
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
         file.Write(
               FileToCppArray(parOutputPath + wxFILE_SEP_PATH + flist[i], i));
 
-    file.Write(""
-"void " + parFuncname + "()\n"
-"{\n"
-"\n"
-"    // Check for memory FS. If not present, load the handler:\n"
-"    {\n"
-"        wxMemoryFSHandler::AddFile(wxT(\"XRC_resource/dummy_file\"), wxT(\"dummy one\"));\n"
-"        wxFileSystem fsys;\n"
-"        wxFSFile *f = fsys.OpenFile(wxT(\"memory:XRC_resource/dummy_file\"));\n"
-"        wxMemoryFSHandler::RemoveFile(wxT(\"XRC_resource/dummy_file\"));\n"
-"        if (f) delete f;\n"
-"        else wxFileSystem::AddHandler(new wxMemoryFSHandler);\n"
-"    }\n"
-"\n");
+    file.Write(wxT("")
+wxT("void ") + parFuncname + wxT("()\n")
+wxT("{\n")
+wxT("\n")
+wxT("    // Check for memory FS. If not present, load the handler:\n")
+wxT("    {\n")
+wxT("        wxMemoryFSHandler::AddFile(wxT(\"XRC_resource/dummy_file\"), wxT(\"dummy one\"));\n")
+wxT("        wxFileSystem fsys;\n")
+wxT("        wxFSFile *f = fsys.OpenFile(wxT(\"memory:XRC_resource/dummy_file\"));\n")
+wxT("        wxMemoryFSHandler::RemoveFile(wxT(\"XRC_resource/dummy_file\"));\n")
+wxT("        if (f) delete f;\n")
+wxT("        else wxFileSystem::AddHandler(new wxMemoryFSHandler);\n")
+wxT("    }\n")
+wxT("\n"));
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
     {
         wxString s;
 
@@ -688,44 +670,43 @@ void XmlResApp::MakePackageCPP(const wxArrayString& flist)
         }
 #endif // wxUSE_MIMETYPE
 
-        s.Printf("    XRC_ADD_FILE(wxT(\"XRC_resource/" + flist[i] +
-                 "\"), xml_res_file_%u, xml_res_size_%u, wxT(\"%s\"));\n",
+        s.Printf(wxT("    XRC_ADD_FILE(wxT(\"XRC_resource/") + flist[i] +
+                 wxT("\"), xml_res_file_%i, xml_res_size_%i, wxT(\"%s\"));\n"),
                  i, i, mime.c_str());
         file.Write(s);
     }
 
-    for (i = 0; i < parFiles.GetCount(); i++)
+    for (i = 0; i < parFiles.Count(); i++)
     {
-        file.Write("    wxXmlResource::Get()->Load(wxT(\"memory:XRC_resource/" +
-                   GetInternalFileName(parFiles[i], flist) + "\"));\n");
+        file.Write(wxT("    wxXmlResource::Get()->Load(wxT(\"memory:XRC_resource/") +
+                   GetInternalFileName(parFiles[i], flist) + wxT("\"));\n"));
     }
 
-    file.Write("}\n");
+    file.Write(wxT("}\n"));
 
 
 }
 
 void XmlResApp::GenCPPHeader()
 {
-    // Generate the output header in the same directory as the source file.
-    wxFileName headerName(parOutput);
-    headerName.SetExt("h");
+    wxString fileSpec = ((parOutput.BeforeLast('.')).AfterLast('/')).AfterLast('\\');
+    wxString heaFileName = fileSpec + wxT(".h");
 
-    wxFFile file(headerName.GetFullPath(), wxT("wt"));
+    wxFFile file(heaFileName, wxT("wt"));
     file.Write(
-"//\n"
-"// This file was automatically generated by wxrc, do not edit by hand.\n"
-"//\n\n"
-"#ifndef __"  + headerName.GetName() + "_h__\n"
-"#define __"  + headerName.GetName() + "_h__\n"
+wxT("//\n")
+wxT("// This file was automatically generated by wxrc, do not edit by hand.\n")
+wxT("//\n\n")
+wxT("#ifndef __")  + fileSpec + wxT("_h__\n")
+wxT("#define __")  + fileSpec + wxT("_h__\n")
 );
-    for(size_t i=0;i<aXRCWndClassData.GetCount();++i){
+    for(size_t i=0;i<aXRCWndClassData.Count();++i){
                 aXRCWndClassData.Item(i).GenerateHeaderCode(file);
     }
     file.Write(
-                "\nvoid \n"
+                wxT("\nvoid \n")
                 + parFuncname
-                + "();\n#endif\n");
+                + wxT("();\n#endif\n"));
 }
 
 static wxString FileToPythonArray(wxString filename, int num)
@@ -738,11 +719,10 @@ static wxString FileToPythonArray(wxString filename, int num)
     wxASSERT_MSG( offset >= 0 , wxT("Invalid file length") );
 
     const size_t lng = wx_truncate_cast(size_t, offset);
-    wxASSERT_MSG( static_cast<wxFileOffset>(lng) == offset,
-                  wxT("Huge file not supported") );
+    wxASSERT_MSG( !(offset - lng), wxT("Huge file not supported") );
 
     snum.Printf(wxT("%i"), num);
-    output = "    xml_res_file_" + snum + " = '''\\\n";
+    output = wxT("    xml_res_file_") + snum + wxT(" = '''\\\n");
 
     unsigned char *buffer = new unsigned char[lng];
     file.Read(buffer, lng);
@@ -781,62 +761,62 @@ static wxString FileToPythonArray(wxString filename, int num)
 void XmlResApp::MakePackagePython(const wxArrayString& flist)
 {
     wxFFile file(parOutput, wxT("wt"));
-    unsigned i;
+    size_t i;
 
     if (flagVerbose)
         wxPrintf(wxT("creating Python source file ") + parOutput +  wxT("...\n"));
 
     file.Write(
-       "#\n"
-       "# This file was automatically generated by wxrc, do not edit by hand.\n"
-       "#\n\n"
-       "import wx\n"
-       "import wx.xrc\n\n"
+       wxT("#\n")
+       wxT("# This file was automatically generated by wxrc, do not edit by hand.\n")
+       wxT("#\n\n")
+       wxT("import wx\n")
+       wxT("import wx.xrc\n\n")
     );
 
 
-    file.Write("def " + parFuncname + "():\n");
+    file.Write(wxT("def ") + parFuncname + wxT("():\n"));
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
         file.Write(
           FileToPythonArray(parOutputPath + wxFILE_SEP_PATH + flist[i], i));
 
     file.Write(
-        "    # check if the memory filesystem handler has been loaded yet, and load it if not\n"
-        "    wx.MemoryFSHandler.AddFile('XRC_resource/dummy_file', 'dummy value')\n"
-        "    fsys = wx.FileSystem()\n"
-        "    f = fsys.OpenFile('memory:XRC_resource/dummy_file')\n"
-        "    wx.MemoryFSHandler.RemoveFile('XRC_resource/dummy_file')\n"
-        "    if f is not None:\n"
-        "        f.Destroy()\n"
-        "    else:\n"
-        "        wx.FileSystem.AddHandler(wx.MemoryFSHandler())\n"
-        "\n"
-        "    # load all the strings as memory files and load into XmlRes\n"
+        wxT("    # check if the memory filesystem handler has been loaded yet, and load it if not\n")
+        wxT("    wx.MemoryFSHandler.AddFile('XRC_resource/dummy_file', 'dummy value')\n")
+        wxT("    fsys = wx.FileSystem()\n")
+        wxT("    f = fsys.OpenFile('memory:XRC_resource/dummy_file')\n")
+        wxT("    wx.MemoryFSHandler.RemoveFile('XRC_resource/dummy_file')\n")
+        wxT("    if f is not None:\n")
+        wxT("        f.Destroy()\n")
+        wxT("    else:\n")
+        wxT("        wx.FileSystem.AddHandler(wx.MemoryFSHandler())\n")
+        wxT("\n")
+        wxT("    # load all the strings as memory files and load into XmlRes\n")
         );
 
 
-    for (i = 0; i < flist.GetCount(); i++)
+    for (i = 0; i < flist.Count(); i++)
     {
         wxString s;
-        s.Printf("    wx.MemoryFSHandler.AddFile('XRC_resource/" + flist[i] +
-                 "', xml_res_file_%u)\n", i);
+        s.Printf(wxT("    wx.MemoryFSHandler.AddFile('XRC_resource/") + flist[i] +
+                 wxT("', xml_res_file_%i)\n"), i);
         file.Write(s);
     }
-    for (i = 0; i < parFiles.GetCount(); i++)
+    for (i = 0; i < parFiles.Count(); i++)
     {
-        file.Write("    wx.xrc.XmlResource.Get().Load('memory:XRC_resource/" +
-                   GetInternalFileName(parFiles[i], flist) + "')\n");
+        file.Write(wxT("    wx.xrc.XmlResource.Get().Load('memory:XRC_resource/") +
+                   GetInternalFileName(parFiles[i], flist) + wxT("')\n"));
     }
 
-    file.Write("\n");
+    file.Write(wxT("\n"));
 }
 
 
 
 void XmlResApp::OutputGettext()
 {
-    ExtractedStrings str = FindStrings();
+    wxArrayString str = FindStrings();
 
     wxFFile fout;
     if (parOutput.empty())
@@ -844,28 +824,19 @@ void XmlResApp::OutputGettext()
     else
         fout.Open(parOutput, wxT("wt"));
 
-    for (ExtractedStrings::const_iterator i = str.begin(); i != str.end(); ++i)
-    {
-        const wxFileName filename(i->filename);
-
-        wxString s;
-        s.Printf("#line %d \"%s\"\n",
-                 i->lineNo, filename.GetFullPath(wxPATH_UNIX));
-
-        fout.Write(s);
-        fout.Write("_(\"" + i->str + "\");\n");
-    }
+    for (size_t i = 0; i < str.GetCount(); i++)
+        fout.Write(wxT("_(\"") + str[i] + wxT("\");\n"));
 
     if (!parOutput) fout.Detach();
 }
 
 
 
-ExtractedStrings XmlResApp::FindStrings()
+wxArrayString XmlResApp::FindStrings()
 {
-    ExtractedStrings arr, a2;
+    wxArrayString arr, a2;
 
-    for (size_t i = 0; i < parFiles.GetCount(); i++)
+    for (size_t i = 0; i < parFiles.Count(); i++)
     {
         if (flagVerbose)
             wxPrintf(wxT("processing ") + parFiles[i] +  wxT("...\n"));
@@ -877,8 +848,7 @@ ExtractedStrings XmlResApp::FindStrings()
             retCode = 1;
             continue;
         }
-        a2 = FindStrings(parFiles[i], doc.GetRoot());
-
+        a2 = FindStrings(doc.GetRoot());
         WX_APPEND_ARRAY(arr, a2);
     }
 
@@ -925,10 +895,9 @@ static wxString ConvertText(const wxString& str)
 }
 
 
-ExtractedStrings
-XmlResApp::FindStrings(const wxString& filename, wxXmlNode *node)
+wxArrayString XmlResApp::FindStrings(wxXmlNode *node)
 {
-    ExtractedStrings arr;
+    wxArrayString arr;
 
     wxXmlNode *n = node;
     if (n == NULL) return arr;
@@ -955,24 +924,16 @@ XmlResApp::FindStrings(const wxString& filename, wxXmlNode *node)
             // ...and known to contain translatable string
         {
             if (!flagGettext ||
-                node->GetAttribute(wxT("translate"), wxT("1")) != wxT("0"))
+                node->GetPropVal(wxT("translate"), wxT("1")) != wxT("0"))
             {
-                arr.push_back
-                    (
-                        ExtractedString
-                        (
-                            ConvertText(n->GetContent()),
-                            filename,
-                            n->GetLineNumber()
-                        )
-                    );
+                arr.Add(ConvertText(n->GetContent()));
             }
         }
 
         // subnodes:
         if (n->GetType() == wxXML_ELEMENT_NODE)
         {
-            ExtractedStrings a2 = FindStrings(filename, n);
+            wxArrayString a2 = FindStrings(n);
             WX_APPEND_ARRAY(arr, a2);
         }
 

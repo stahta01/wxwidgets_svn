@@ -71,7 +71,7 @@ private:
 #endif // !wxUSE_POPUPWIN
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxTipWindowView);
+    DECLARE_NO_COPY_CLASS(wxTipWindowView)
 };
 
 // ============================================================================
@@ -267,7 +267,7 @@ void wxTipWindowView::Adjust(const wxString& text, wxCoord maxLength)
     bool breakLine = false;
     for ( const wxChar *p = text.c_str(); ; p++ )
     {
-        if ( *p == wxT('\n') || *p == wxT('\0') )
+        if ( *p == _T('\n') || *p == _T('\0') )
         {
             dc.GetTextExtent(current, &width, &height);
             if ( width > widthMax )
@@ -287,7 +287,7 @@ void wxTipWindowView::Adjust(const wxString& text, wxCoord maxLength)
             current.clear();
             breakLine = false;
         }
-        else if ( breakLine && (*p == wxT(' ') || *p == wxT('\t')) )
+        else if ( breakLine && (*p == _T(' ') || *p == _T('\t')) )
         {
             // word boundary - break the line here
             m_parent->m_textLines.Add(current);
@@ -326,8 +326,8 @@ void wxTipWindowView::OnPaint(wxPaintEvent& WXUNUSED(event))
     rect.height = size.y;
 
     // first filll the background
-    dc.SetBrush(wxBrush(GetBackgroundColour(), wxBRUSHSTYLE_SOLID));
-    dc.SetPen(wxPen(GetForegroundColour(), 1, wxPENSTYLE_SOLID));
+    dc.SetBrush(wxBrush(GetBackgroundColour(), wxSOLID));
+    dc.SetPen( wxPen(GetForegroundColour(), 1, wxSOLID) );
     dc.DrawRectangle(rect);
 
     // and then draw the text line by line

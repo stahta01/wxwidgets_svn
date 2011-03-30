@@ -82,6 +82,7 @@ WX_IMPLEMENT_GET_OBJC_CLASS(wxNSMenuItemTarget,NSObject)
 // ============================================================================
 // wxMenuItemCocoa implementation
 // ============================================================================
+IMPLEMENT_DYNAMIC_CLASS(wxMenuItem, wxObject)
 wxMenuItemCocoaHash wxMenuItemCocoa::sm_cocoaHash;
 
 wxObjcAutoRefFromAlloc<struct objc_object *> wxMenuItemCocoa::sm_cocoaTarget = [[WX_GET_OBJC_CLASS(wxNSMenuItemTarget) alloc] init];
@@ -98,6 +99,12 @@ wxMenuItem *wxMenuItemBase::New(wxMenu *parentMenu,
                                 wxMenu *subMenu)
 {
     return new wxMenuItem(parentMenu, itemid, name, help, kind, subMenu);
+}
+
+/* static */
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
+{
+    return wxStripMenuCodes(text);
 }
 
 void wxMenuItemCocoa::CocoaSetKeyEquivalent()
@@ -278,9 +285,9 @@ void wxMenuItem::Check(bool check)
     }
 }
 
-void wxMenuItem::SetItemLabel(const wxString& label)
+void wxMenuItem::SetText(const wxString& label)
 {
-    wxMenuItemBase::SetItemLabel(label);
+    wxMenuItemBase::SetText(label);
     wxCHECK_RET(m_kind != wxITEM_SEPARATOR, wxT("Separator items do not have titles."));
     [m_cocoaNSMenuItem setTitle: wxNSStringWithWxString(wxStripMenuCodes(label))];
     CocoaSetKeyEquivalent();

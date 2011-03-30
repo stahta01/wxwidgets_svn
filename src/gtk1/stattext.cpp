@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/stattext.cpp
+// Name:        stattext.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -26,6 +26,8 @@ void wxgtk_window_size_request_callback(GtkWidget *widget,
 //-----------------------------------------------------------------------------
 // wxStaticText
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxStaticText,wxControl)
 
 wxStaticText::wxStaticText()
 {

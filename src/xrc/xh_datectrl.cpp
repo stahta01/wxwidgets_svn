@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_datectrl.cpp
+// Name:        xh_datectrl.cpp
 // Purpose:     XML resource handler for wxDatePickerCtrl
 // Author:      Vaclav Slavik
 // Created:     2005-02-07
@@ -40,7 +40,7 @@ wxObject *wxDateCtrlXmlHandler::DoCreateResource()
                   GetID(),
                   wxDefaultDateTime,
                   GetPosition(), GetSize(),
-                  GetStyle(wxT("style"), wxDP_DEFAULT | wxDP_SHOWCENTURY),
+                  GetStyle(_T("style"), wxDP_DEFAULT | wxDP_SHOWCENTURY),
                   wxDefaultValidator,
                   GetName());
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/palmos/help.h
+// Name:        wx/palmos/helpwin.h
 // Purpose:     Help system: WinHelp implementation
 // Author:      William Osborne - minimal working wxPalmOS port
 // Modified by:
@@ -18,7 +18,7 @@
 
 #include "wx/helpbase.h"
 
-class WXDLLIMPEXP_CORE wxPalmHelpController: public wxHelpControllerBase
+class WXDLLEXPORT wxPalmHelpController: public wxHelpControllerBase
 {
     DECLARE_CLASS(wxPalmHelpController)
 

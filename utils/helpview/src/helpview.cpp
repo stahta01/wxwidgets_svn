@@ -42,11 +42,16 @@ protected:
 
 IMPLEMENT_APP(hvApp)
 
+BEGIN_EVENT_TABLE(hvApp, wxApp)
+    EVT_IDLE(hvApp::OnIdle)
+END_EVENT_TABLE()
+
 hvApp::hvApp()
 {
 #if wxUSE_IPC
     m_server = NULL;
 #endif
+    m_exitIfNoMainWindow = false;
 }
 
 bool hvApp::OnInit()
@@ -55,14 +60,19 @@ bool hvApp::OnInit()
     delete wxLog::SetActiveTarget(new wxLogStderr); // So dialog boxes aren't used
 #endif
 
+    // Don't exit on frame deletion, since the help window is programmed
+    // to cause the app to exit even if it is still open. We need to have the app
+    // close by other means.
+    SetExitOnFrameDelete(false);
+
     wxArtProvider::Push(new AlternateArtProvider);
 
-#if defined( __WXOSX_MAC__ ) && wxOSX_USE_CARBON
+#ifdef __WXMAC__
     wxApp::s_macAboutMenuItemId = wxID_ABOUT;
     wxFileName::MacRegisterDefaultTypeAndCreator( wxT("htb") , 'HTBD' , 'HTBA' ) ;
 #endif
 
-    int istyle = wxHF_DEFAULT_STYLE;
+    int istyle = wxHF_DEFAULT_STYLE|wxHF_OPEN_FILES;
 
     wxString service, windowName, titleFormat, argStr;
     wxString book[10];
@@ -218,10 +228,20 @@ bool hvApp::OnInit()
 #endif
 
     m_helpController->DisplayContents();
+    SetTopWindow(m_helpController->GetFrame());
+    m_exitIfNoMainWindow = true;
 
     return true;
 }
 
+void hvApp::OnIdle(wxIdleEvent& event)
+{
+    if (m_exitIfNoMainWindow && !GetTopWindow())
+        ExitMainLoop();
+
+    event.Skip();
+    event.RequestMore();
+}
 
 int hvApp::OnExit()
 {
@@ -265,7 +285,7 @@ bool hvApp::OpenBook(wxHtmlHelpController* controller)
     if ( !s.empty() )
     {
         wxString ext = s.Right(4).Lower();
-        if (ext == wxT(".zip") || ext == wxT(".htb") || ext == wxT(".hhp"))
+        if (ext == _T(".zip") || ext == _T(".htb") || ext == _T(".hhp"))
         {
             wxBusyCursor bcur;
             wxFileName fileName(s);
@@ -312,7 +332,7 @@ if ( id == artId ) return wxBitmap(xpmRc##_xpm);
 #else
 #define CREATE_STD_ICON(iconId, xpmRc) \
 { \
-    wxIcon icon(wxT(iconId)); \
+    wxIcon icon(_T(iconId)); \
     wxBitmap bmp; \
     bmp.CopyFromIcon(icon); \
     return bmp; \
@@ -407,12 +427,14 @@ hvConnection::~hvConnection()
     wxGetApp().GetConnections().DeleteObject(this);
 }
 
-bool hvConnection::OnExec(const wxString& WXUNUSED(topic),
-                          const wxString& data)
+bool hvConnection::OnExecute(const wxString& WXUNUSED(topic),
+                             wxChar *data,
+                             int WXUNUSED(size),
+                             wxIPCFormat WXUNUSED(format))
 {
     //    wxLogStatus("Execute command: %s", data);
 
-    if ( data == "--intstring" )
+    if ( !wxStrncmp( data, wxT("--intstring"), 11 ) )
     {
         long i;
         wxString argStr = data;
@@ -436,12 +458,10 @@ bool hvConnection::OnExec(const wxString& WXUNUSED(topic),
 
 bool hvConnection::OnPoke(const wxString& WXUNUSED(topic),
                           const wxString& item,
-                          const void *buf,
-                          size_t size,
-                          wxIPCFormat format)
+                          wxChar *data,
+                          int WXUNUSED(size),
+                          wxIPCFormat WXUNUSED(format))
 {
-    const wxString data = GetTextFromData(buf, size, format);
-
     //    wxLogStatus("Poke command: %s = %s", item.c_str(), data);
     //topic is not tested
 
@@ -485,6 +505,20 @@ bool hvConnection::OnPoke(const wxString& WXUNUSED(topic),
         }
     }
 
+    return true;
+}
+
+wxChar *hvConnection::OnRequest(const wxString& WXUNUSED(topic),
+                                const wxString& WXUNUSED(item),
+                                int * WXUNUSED(size),
+                                wxIPCFormat WXUNUSED(format))
+{
+    return NULL;
+}
+
+bool hvConnection::OnStartAdvise(const wxString& WXUNUSED(topic),
+                                 const wxString& WXUNUSED(item))
+{
     return true;
 }
 

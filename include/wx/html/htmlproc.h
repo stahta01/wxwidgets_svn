@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/html/htmlprep.h
+// Name:        htmlprep.h
 // Purpose:     HTML processor
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$

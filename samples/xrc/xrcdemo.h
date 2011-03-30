@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Name:        xmldemo.h
+// Name:        xmldemo.cpp
 // Purpose:     XML resources sample: Main application file
 // Author:      Robert O'Connor (rob@medicalmnemonics.com), Vaclav Slavik
 // RCS-ID:      $Id$

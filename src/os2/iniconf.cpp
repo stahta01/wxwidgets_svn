@@ -255,11 +255,11 @@ bool wxIniConfig::IsEmpty() const
 
 //  GetPrivateProfileString(m_strGroup, NULL, "",
 //                          szBuf, WXSIZEOF(szBuf), m_strLocalFilename);
-    if ( !::wxIsEmpty(szBuf) )
+    if ( !::IsEmpty(szBuf) )
         return false;
 
 //  GetProfileString(m_strGroup, NULL, "", szBuf, WXSIZEOF(szBuf));
-//  if ( !::wxIsEmpty(szBuf) )
+//  if ( !::IsEmpty(szBuf) )
 //      return false;
 
     return true;
@@ -281,14 +281,14 @@ bool wxIniConfig::Read(const wxString& szKey, wxString *pstr) const
     // NB: the lpDefault param to GetPrivateProfileString can't be NULL
 //  GetPrivateProfileString(m_strGroup, strKey, "",
 //                          szBuf, WXSIZEOF(szBuf), m_strLocalFilename);
-    if ( ::wxIsEmpty((PSZ)szBuf) )
+    if ( ::IsEmpty((PSZ)szBuf) )
     {
         // now look in win.ini
         wxString strKey = GetKeyName(path.Name());
         // GetProfileString(m_strGroup, strKey, "", szBuf, WXSIZEOF(szBuf));
     }
 
-    if ( ::wxIsEmpty((PSZ)szBuf) )
+    if ( ::IsEmpty((PSZ)szBuf) )
     {
         return false;
     }
@@ -310,14 +310,14 @@ bool wxIniConfig::Read(const wxString& szKey, wxString *pstr,
     // NB: the lpDefault param to GetPrivateProfileString can't be NULL
     // GetPrivateProfileString(m_strGroup, strKey, "",
     //                         szBuf, WXSIZEOF(szBuf), m_strLocalFilename);
-    if ( ::wxIsEmpty((PSZ)szBuf) )
+    if ( ::IsEmpty((PSZ)szBuf) )
     {
       // now look in win.ini
       wxString strKey = GetKeyName(path.Name());
       // GetProfileString(m_strGroup, strKey, "", szBuf, WXSIZEOF(szBuf));
     }
 
-    if ( ::wxIsEmpty((PSZ)szBuf) )
+    if ( ::IsEmpty((PSZ)szBuf) )
     {
         *pstr = szDefault;
         return false;
@@ -372,9 +372,7 @@ bool wxIniConfig::Write(const wxString& szKey, const wxString& WXUNUSED(szValue)
 //                                       szValue, m_strLocalFilename) != 0;
 
     if ( !bOk )
-    {
         wxLogLastError(wxT("WritePrivateProfileString"));
-    }
 
     return bOk;
 }
@@ -419,9 +417,7 @@ bool wxIniConfig::DeleteEntry(const wxString& szKey, bool bGroupIfEmptyAlso)
                       //                             NULL, m_strLocalFilename) != 0;
 
     if ( !bOk )
-    {
         wxLogLastError(wxT("WritePrivateProfileString"));
-    }
 
     return bOk;
 }
@@ -436,9 +432,7 @@ bool wxIniConfig::DeleteGroup(const wxString& szKey)
                     //                             NULL, m_strLocalFilename) != 0;
 
   if ( !bOk )
-  {
     wxLogLastError(wxT("WritePrivateProfileString"));
-  }
 
   return bOk;
 }

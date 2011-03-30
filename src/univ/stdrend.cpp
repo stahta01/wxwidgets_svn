@@ -151,7 +151,7 @@ wxStdRenderer::ArrowDirection wxStdRenderer::GetArrowDirection(wxDirection dir)
             return Arrow_Down;
 
         default:
-            wxFAIL_MSG(wxT("unknown arrow direction"));
+            wxFAIL_MSG(_T("unknown arrow direction"));
     }
 
     return Arrow_Max;
@@ -199,7 +199,7 @@ void wxStdRenderer::DrawButtonSurface(wxDC& dc,
 // ----------------------------------------------------------------------------
 
 void
-wxStdRenderer::DrawFocusRect(wxWindow* WXUNUSED(win), wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
+wxStdRenderer::DrawFocusRect(wxDC& dc, const wxRect& rect, int WXUNUSED(flags))
 {
     // draw the pixels manually because the "dots" in wxPen with wxDOT style
     // may be short traits and not really dots
@@ -290,7 +290,7 @@ void wxStdRenderer::DrawButtonLabel(wxDC& dc,
     {
         rectLabel.Inflate(-1);
 
-        DrawFocusRect(NULL, dc, rectLabel);
+        DrawFocusRect(dc, rectLabel);
     }
 }
 
@@ -412,19 +412,18 @@ void wxStdRenderer::DrawBorder(wxDC& dc,
 
     switch ( border )
     {
-        case wxBORDER_SUNKEN:
         case wxBORDER_THEME:
+        case wxBORDER_SUNKEN:
             DrawSunkenBorder(dc, &rect);
             break;
 
-        // wxBORDER_DOUBLE and wxBORDER_THEME are currently the same value.
+        // wxBORDER_DOUBLE is no longer supported since wxBORDER_THEME takes on the same value
 #if 0
         case wxBORDER_DOUBLE:
             DrawAntiSunkenBorder(dc, &rect);
             DrawExtraBorder(dc, &rect);
             break;
 #endif
-
         case wxBORDER_STATIC:
             DrawStaticBorder(dc, &rect);
             break;
@@ -438,7 +437,7 @@ void wxStdRenderer::DrawBorder(wxDC& dc,
             break;
 
         default:
-            wxFAIL_MSG(wxT("unknown border type"));
+            wxFAIL_MSG(_T("unknown border type"));
             // fall through
 
         case wxBORDER_DEFAULT:
@@ -471,7 +470,7 @@ wxRect wxStdRenderer::GetBorderDimensions(wxBorder border) const
             break;
 #endif
         default:
-            wxFAIL_MSG(wxT("unknown border type"));
+            wxFAIL_MSG(_T("unknown border type"));
             // fall through
 
         case wxBORDER_DEFAULT:
@@ -637,7 +636,7 @@ void wxStdRenderer::DrawItem(wxDC& dc,
 
     if ( flags & wxCONTROL_FOCUSED )
     {
-        DrawFocusRect(NULL, dc, rect, flags);
+        DrawFocusRect(dc, rect, flags);
     }
 }
 
@@ -679,9 +678,9 @@ void wxStdRenderer::DrawCheckButton(wxDC& dc,
                                     int indexAccel)
 {
     if (bitmap.Ok())
-        DrawCheckOrRadioButton(dc, label, bitmap, rect, flags, align, indexAccel);
+         DrawCheckOrRadioButton(dc, label, bitmap, rect, flags, align, indexAccel);
     else
-        DrawCheckOrRadioButton(dc, label, GetCheckBitmap(flags), rect, flags, align, indexAccel);
+         DrawCheckOrRadioButton(dc, label, GetCheckBitmap(flags), rect, flags, align, indexAccel);
 }
 
 void wxStdRenderer::DrawRadioButton(wxDC& dc,
@@ -692,11 +691,10 @@ void wxStdRenderer::DrawRadioButton(wxDC& dc,
                                     wxAlignment align,
                                     int indexAccel)
 {
-    if (bitmap.Ok())
-        DrawCheckOrRadioButton(dc, label, bitmap, rect, flags, align, indexAccel);
-    else
-        DrawCheckOrRadioButton(dc, label, GetRadioBitmap(flags), rect, flags, align, indexAccel);
-
+    if (bitmap.Ok()) 
+       DrawCheckOrRadioButton(dc, label, bitmap, rect, flags, align, indexAccel);
+    else   
+       DrawCheckOrRadioButton(dc, label, GetRadioBitmap(flags), rect, flags, align, indexAccel);
 }
 
 void wxStdRenderer::DrawCheckOrRadioButton(wxDC& dc,
@@ -862,7 +860,7 @@ wxSize wxStdRenderer::GetStatusBarBorders() const
     wxRect flat = GetBorderDimensions(wxBORDER_STATIC);
     wxASSERT_MSG( raised.x == raised.width && raised.y == raised.height &&
                   flat.x == flat.width && flat.y == flat.height,
-                  wxT("this code expects uniform borders, you must override GetStatusBarBorders") );
+                  _T("this code expects uniform borders, you must override GetStatusBarBorders") );
 
     // take the larger of flat/raised values:
     wxSize border(wxMax(raised.x, flat.x), wxMax(raised.y, flat.y));
@@ -892,8 +890,6 @@ void wxStdRenderer::DrawStatusField(wxDC& dc,
         DrawBorder(dc, wxBORDER_RAISED, rect, flags, &rectIn);
     else if ( style != wxSB_FLAT )
         DrawBorder(dc, wxBORDER_STATIC, rect, flags, &rectIn);
-    else
-        rectIn = rect;
 
     rectIn.Deflate(GetStatusBarFieldMargins());
 

@@ -90,7 +90,7 @@ wxUnknownWidgetXmlHandler::wxUnknownWidgetXmlHandler()
 wxObject *wxUnknownWidgetXmlHandler::DoCreateResource()
 {
     wxASSERT_MSG( m_instance == NULL,
-                  wxT("'unknown' controls can't be subclassed, use wxXmlResource::AttachUnknownControl") );
+                  _T("'unknown' controls can't be subclassed, use wxXmlResource::AttachUnknownControl") );
 
     wxPanel *panel =
         new wxUnknownControlContainer(m_parentAsWindow,

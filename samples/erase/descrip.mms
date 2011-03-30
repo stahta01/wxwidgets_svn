@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                                                                            *
 # Make file for VMS                                                          *
-# Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 9 October 2009                                                      *
+# Author : J.Jansen (joukj@hrem.stm.tudelft.nl)                              *
+# Date : 10 November 1999                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -10,23 +10,13 @@
 
 .ifdef __WXMOTIF__
 CXX_DEFINE = /define=(__WXMOTIF__=1)/name=(as_is,short)\
-	   /assume=(nostdnew,noglobal_array_new)/incl=([],[-])
+	   /assume=(nostdnew,noglobal_array_new)
 .else
 .ifdef __WXGTK__
 CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)/incl=([],[-])
-.else
-.ifdef __WXGTK2__
-CXX_DEFINE = /define=(__WXGTK__=1,VMS_GTK2=1)/float=ieee/name=(as_is,short)/ieee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)/incl=([],[-])
-.else
-.ifdef __WXX11__
-CXX_DEFINE = /define=(__WXX11__=1,__WXUNIVERSAL__==1)/float=ieee\
-	/name=(as_is,short)/assume=(nostdnew,noglobal_array_new)/incl=([],[-])
+	   /assume=(nostdnew,noglobal_array_new)
 .else
 CXX_DEFINE =
-.endif
-.endif
 .endif
 .endif
 
@@ -37,41 +27,21 @@ CXX_DEFINE =
 
 all :
 .ifdef __WXMOTIF__
-	$(MMS)$(MMSQUALIFIERS) erase.exe
+	$(MMS)$(MMSQUALIFIERS) minimal.exe
 .else
 .ifdef __WXGTK__
-	$(MMS)$(MMSQUALIFIERS) erase_gtk.exe
-.else
-.ifdef __WXGTK2__
-	$(MMS)$(MMSQUALIFIERS) erase_gtk2.exe
-.else
-.ifdef __WXX11__
-	$(MMS)$(MMSQUALIFIERS) erase_x11.exe
+	$(MMS)$(MMSQUALIFIERS) minimal_gtk.exe
 .endif
 .endif
-.endif
-.endif
-
-OBJS=erase.obj
 
 .ifdef __WXMOTIF__
-erase.exe : $(OBJS)
-	cxxlink $(OBJS),[--.lib]vms/opt
+minimal.exe : minimal.obj
+	cxxlink minimal,[--.lib]vms/opt
 .else
 .ifdef __WXGTK__
-erase_gtk.exe : $(OBJS)
-	cxxlink/exec=erase_gtk.exe $(OBJS),[--.lib]vms_gtk/opt
-.else
-.ifdef __WXGTK2__
-erase_gtk2.exe : $(OBJS)
-	cxxlink/exec=erase_gtk2.exe $(OBJS),[--.lib]vms_gtk2/opt
-.else
-.ifdef __WXX11__
-erase_x11.exe : $(OBJS)
-	cxxlink/exec=erase_x11.exe $(OBJS),[--.lib]vms_x11_univ/opt
-.endif
-.endif
+minimal_gtk.exe : minimal.obj
+	cxxlink/exec=minimal_gtk.exe minimal,[--.lib]vms_gtk/opt
 .endif
 .endif
 
-erase.obj : erase.cpp
+minimal.obj : minimal.cpp

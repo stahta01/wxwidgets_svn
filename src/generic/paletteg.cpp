@@ -28,12 +28,12 @@ struct wxPaletteEntry
     unsigned char red, green, blue;
 };
 
-class wxPaletteRefData : public wxGDIRefData
+class wxPaletteRefData: public wxObjectRefData
 {
-public:
-    wxPaletteRefData();
-    wxPaletteRefData(const wxPaletteRefData& palette);
-    virtual ~wxPaletteRefData();
+  public:
+
+    wxPaletteRefData(void);
+    virtual ~wxPaletteRefData(void);
 
     int m_count;
     wxPaletteEntry *m_entries;
@@ -43,14 +43,6 @@ wxPaletteRefData::wxPaletteRefData()
 {
     m_count = 0;
     m_entries = NULL;
-}
-
-wxPaletteRefData::wxPaletteRefData(const wxPaletteRefData& palette)
-{
-    m_count = palette.m_count;
-    m_entries = new wxPaletteEntry[m_count];
-    for ( int i = 0; i < m_count; i++ )
-        m_entries[i] = palette.m_entries[i];
 }
 
 wxPaletteRefData::~wxPaletteRefData()
@@ -78,12 +70,17 @@ wxPalette::~wxPalette()
 {
 }
 
+bool wxPalette::IsOk() const
+{
+    return (m_refData != NULL);
+}
+
 int wxPalette::GetColoursCount() const
 {
     if (m_refData)
         return M_PALETTEDATA->m_count;
-
-    return 0;
+    
+    return 0;    
 }
 
 bool wxPalette::Create(int n,
@@ -143,16 +140,6 @@ bool wxPalette::GetRGB(int pixel,
     if (green) *green = p.green;
     if (blue) *blue = p.blue;
     return true;
-}
-
-wxGDIRefData *wxPalette::CreateGDIRefData() const
-{
-    return new wxPaletteRefData;
-}
-
-wxGDIRefData *wxPalette::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxPaletteRefData(*static_cast<const wxPaletteRefData *>(data));
 }
 
 #endif // wxUSE_PALETTE

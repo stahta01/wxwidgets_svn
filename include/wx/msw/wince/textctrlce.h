@@ -6,7 +6,7 @@
 // Created:     30.08.2004
 // RCS-ID:      $Id$
 // Copyright:   (c) Wlodzimierz Skiba
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TEXTCTRLCE_H_
@@ -14,10 +14,10 @@
 
 #include "wx/dynarray.h"
 
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+class WXDLLEXPORT wxTextCtrl;
 WX_DEFINE_EXPORTED_ARRAY_PTR(wxTextCtrl *, wxArrayTextSpins);
 
-class WXDLLIMPEXP_CORE wxTextCtrl : public wxTextCtrlBase
+class WXDLLEXPORT wxTextCtrl : public wxTextCtrlBase
 {
 public:
     // creation

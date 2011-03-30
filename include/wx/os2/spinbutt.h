@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/spinbutt.h
+// Name:        spinbutt.h
 // Purpose:     wxSpinButton class
 // Author:      David Webster
 // Modified by:
@@ -22,7 +22,7 @@ extern MRESULT EXPENTRY wxSpinCtrlWndProc(
 , MPARAM                            lParam
 );
 
-class WXDLLIMPEXP_CORE wxSpinButton: public wxSpinButtonBase
+class WXDLLEXPORT wxSpinButton: public wxSpinButtonBase
 {
 public:
     // Construction

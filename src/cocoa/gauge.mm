@@ -6,7 +6,7 @@
 // Created:     2003/07/15
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -26,6 +26,8 @@
 #import <Foundation/NSException.h>
 
 #include <math.h>
+
+IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
 
 BEGIN_EVENT_TABLE(wxGauge, wxGaugeBase)
 END_EVENT_TABLE()

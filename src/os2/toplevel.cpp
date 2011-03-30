@@ -6,7 +6,7 @@
 // Created:     30.12.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -150,7 +150,7 @@ void wxTopLevelWindowOS2::Init()
     m_hFrame    = NULLHANDLE;
     memset(&m_vSwp, 0, sizeof(SWP));
     memset(&m_vSwpClient, 0, sizeof(SWP));
-    m_pWinLastFocused = NULL;
+    m_pWinLastFocused = (wxWindow *)NULL;
 } // end of wxTopLevelWindowIOS2::Init
 
 void wxTopLevelWindowOS2::OnActivate(
@@ -162,7 +162,7 @@ void wxTopLevelWindowOS2::OnActivate(
         //
         // Restore focus to the child which was last focused
         //
-        wxLogTrace(wxT("focus"), wxT("wxTLW %08lx activated."), m_hWnd);
+        wxLogTrace(_T("focus"), _T("wxTLW %08lx activated."), m_hWnd);
 
         wxWindow*                   pParent = m_pWinLastFocused ? m_pWinLastFocused->GetParent()
                                                                 : NULL;
@@ -200,8 +200,8 @@ void wxTopLevelWindowOS2::OnActivate(
             pWin = pWin->GetParent();
         }
 
-        wxLogTrace(wxT("focus"),
-                   wxT("wxTLW %08lx deactivated, last focused: %08lx."),
+        wxLogTrace(_T("focus"),
+                   _T("wxTLW %08lx deactivated, last focused: %08lx."),
                    m_hWnd,
                    m_pWinLastFocused ? GetHwndOf(m_pWinLastFocused)
                                      : NULL);
@@ -246,7 +246,9 @@ WXDWORD wxTopLevelWindowOS2::OS2GetStyle(
         // Invalid for frame windows under PM
     }
 
-    if (lStyle & wxTINY_CAPTION)
+    if (lStyle & wxTINY_CAPTION_VERT)
+        lMsflags |= FCF_TASKLIST;
+    if (lStyle & wxTINY_CAPTION_HORIZ)
         lMsflags |= FCF_TASKLIST;
 
     if ((lStyle & wxRESIZE_BORDER) == 0)
@@ -279,7 +281,7 @@ WXHWND wxTopLevelWindowOS2::OS2GetParent() const
             //
             // This flag doesn't make sense then and will be ignored
             //
-            wxFAIL_MSG( wxT("wxFRAME_FLOAT_ON_PARENT but no parent?") );
+            wxFAIL_MSG( _T("wxFRAME_FLOAT_ON_PARENT but no parent?") );
         }
         else
         {
@@ -482,8 +484,8 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
      hFrame = ::WinCreateStdWindow( hParent
                                    ,ulStyleFlags          // frame-window style
                                    ,(PULONG)&lFlags       // window style
-                                   ,wxString(wxFrameClassName).c_str() // class name
-                                   ,rsTitle.c_str()       // window title
+                                   ,(PSZ)wxFrameClassName // class name
+                                   ,(PSZ)rsTitle.c_str()  // window title
                                    ,0L                    // default client style
                                    ,NULLHANDLE            // resource in executable file
                                    ,0                     // resource id
@@ -493,7 +495,7 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(wxT("Error creating frame. Error: %s\n"), sError.c_str());
+        wxLogError(_T("Error creating frame. Error: %s\n"), sError.c_str());
         return false;
     }
 
@@ -517,7 +519,7 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(wxT("Error creating frame. Error: %s\n"), sError.c_str());
+        wxLogError(_T("Error creating frame. Error: %s\n"), sError.c_str());
         return false;
     }
 
@@ -551,7 +553,7 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
     //
     if (nWidth == (int)CW_USEDEFAULT)
     {
-        //
+       //
         // The exact number doesn't matter, the dialog will be resized
         // again soon anyhow but it should be big enough to allow
         // calculation relying on "totalSize - clientSize > 0" work, i.e.
@@ -586,7 +588,7 @@ bool wxTopLevelWindowOS2::CreateFrame( const wxString& rsTitle,
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(wxT("Error sizing frame. Error: %s\n"), sError.c_str());
+        wxLogError(_T("Error sizing frame. Error: %s\n"), sError.c_str());
         return false;
     }
     lStyle =  ::WinQueryWindowULong( m_hWnd
@@ -788,7 +790,7 @@ bool wxTopLevelWindowOS2::Show( bool bShow )
         ::WinEnableWindow(m_hFrame, TRUE);
 
         vEvent.SetEventObject(this);
-        HandleWindowEvent(vEvent);
+        GetEventHandler()->ProcessEvent(vEvent);
     }
     else
     {
@@ -870,28 +872,17 @@ void wxTopLevelWindowOS2::Restore()
 } // end of wxTopLevelWindowOS2::Restore
 
 // generate an artificial resize event
-void wxTopLevelWindowOS2::SendSizeEvent(int flags)
+void wxTopLevelWindowOS2::SendSizeEvent()
 {
     if (!m_bIconized)
     {
         RECTL                       vRect = wxGetWindowRect(GetHwnd());
 
-        if ( flags & wxSEND_EVENT_POST )
-        {
-            (void)::WinPostMsg( m_hFrame
-                               ,WM_SIZE
-                               ,MPFROM2SHORT(vRect.xRight - vRect.xLeft, vRect.yTop - vRect.yBottom)
-                               ,MPFROM2SHORT(vRect.xRight - vRect.xLeft, vRect.yTop - vRect.yBottom)
-                              );
-        }
-        else // send it
-        {
-            (void)::WinSendMsg( m_hFrame
-                               ,WM_SIZE
-                               ,MPFROM2SHORT(vRect.xRight - vRect.xLeft, vRect.yTop - vRect.yBottom)
-                               ,MPFROM2SHORT(vRect.xRight - vRect.xLeft, vRect.yTop - vRect.yBottom)
-                              );
-        }
+        (void)::WinPostMsg( m_hFrame
+                           ,WM_SIZE
+                           ,MPFROM2SHORT(vRect.xRight - vRect.xLeft, vRect.yTop - vRect.yBottom)
+                           ,MPFROM2SHORT(vRect.xRight - vRect.xLeft, vRect.yTop - vRect.yBottom)
+                          );
     }
 } // end of wxTopLevelWindowOS2::SendSizeEvent
 
@@ -974,7 +965,7 @@ bool wxTopLevelWindowOS2::ShowFullScreen( bool bShow,
 
         wxSize full( nWidth, nHeight );
         wxSizeEvent vEvent( full, GetId() );
-        HandleWindowEvent(vEvent);
+        GetEventHandler()->ProcessEvent(vEvent);
         return true;
     }
     else
@@ -1004,6 +995,13 @@ bool wxTopLevelWindowOS2::ShowFullScreen( bool bShow,
 // wxTopLevelWindowOS2 misc
 // ----------------------------------------------------------------------------
 
+void wxTopLevelWindowOS2::SetIcon(
+  const wxIcon&                     rIcon
+)
+{
+    SetIcons(wxIconBundle(rIcon));
+} // end of wxTopLevelWindowOS2::SetIcon
+
 void wxTopLevelWindowOS2::SetIcons(
   const wxIconBundle&               rIcons
 )
@@ -1013,9 +1011,9 @@ void wxTopLevelWindowOS2::SetIcons(
     //
     wxTopLevelWindowBase::SetIcons(rIcons);
 
-    const wxIcon& vIcon = rIcons.GetIconOfExactSize(32);
+    const wxIcon&                   vIcon = rIcons.GetIcon(wxSize(32, 32));
 
-    if (vIcon.Ok())
+    if (vIcon.Ok() && vIcon.GetWidth() == 32 && vIcon.GetHeight() == 32)
     {
         ::WinSendMsg( m_hFrame
                      ,WM_SETICON
@@ -1039,7 +1037,7 @@ bool wxTopLevelWindowOS2::EnableCloseButton( bool bEnable )
 
     if (!hMenu)
     {
-        wxLogLastError(wxT("GetSystemMenu"));
+        wxLogLastError(_T("GetSystemMenu"));
         return false;
     }
 
@@ -1091,7 +1089,7 @@ void wxTLWHiddenParentModule::OnExit()
     {
         if (!::WinDestroyWindow(m_shWnd))
         {
-            wxLogLastError(wxT("DestroyWindow(hidden TLW parent)"));
+            wxLogLastError(_T("DestroyWindow(hidden TLW parent)"));
         }
         m_shWnd = NULL;
     }
@@ -1106,7 +1104,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
     {
         if (!m_szClassName)
         {
-            static const wxChar*    zHIDDEN_PARENT_CLASS = wxT("wxTLWHiddenParent");
+            static const wxChar*    zHIDDEN_PARENT_CLASS = _T("wxTLWHiddenParent");
 
             if (!::WinRegisterClass( wxGetInstance()
                                     ,(PSZ)zHIDDEN_PARENT_CLASS
@@ -1115,7 +1113,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
                                     ,sizeof(ULONG)
                                    ))
             {
-                wxLogLastError(wxT("RegisterClass(\"wxTLWHiddenParent\")"));
+                wxLogLastError(_T("RegisterClass(\"wxTLWHiddenParent\")"));
             }
             else
             {
@@ -1137,7 +1135,7 @@ HWND wxTLWHiddenParentModule::GetHWND()
                                      NULL );
         if (!m_shWnd)
         {
-            wxLogLastError(wxT("CreateWindow(hidden TLW parent)"));
+            wxLogLastError(_T("CreateWindow(hidden TLW parent)"));
         }
     }
     return m_shWnd;

@@ -311,9 +311,8 @@ bool wxTaskBarIconCustomStatusItemImpl::RemoveIcon()
 
 bool wxTaskBarIconCustomStatusItemImpl::PopupMenu(wxMenu *menu)
 {
-    wxCHECK_MSG(menu, false, "can't popup a NULL menu");
-
-    wxMenuInvokingWindowSetter setInvokingWin(*menu, m_iconWindow);
+    wxASSERT(menu);
+    menu->SetInvokingWindow(m_iconWindow);
     menu->UpdateUI();
 
     if([m_cocoaNSStatusItem respondsToSelector:@selector(popUpStatusItemMenu:)])
@@ -329,6 +328,7 @@ bool wxTaskBarIconCustomStatusItemImpl::PopupMenu(wxMenu *menu)
             eventNumber:0 clickCount:1 pressure:0.0];
         [NSMenu popUpContextMenu:menu->GetNSMenu() withEvent:nsevent forView:m_iconWindow->GetNSView()];
     }
+    menu->SetInvokingWindow(NULL);
     return true;
 }
 
@@ -390,7 +390,7 @@ void wxTaskBarIconWindowCustom::OnPaint(wxPaintEvent &event)
 
 // This neatly solves the problem of DLL separation.  If the wxAdvanced
 // library (which this file is part of) is loaded then this category is
-// defined and we get dock menu behaviour without app.mm ever having to
+// defined and we get dock menu behavior without app.mm ever having to
 // know we exist.  C++ did sucketh so. :-)
 
 @interface wxNSApplicationDelegate(wxTaskBarIconNSApplicationDelegateCategory)

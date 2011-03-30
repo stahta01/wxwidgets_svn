@@ -20,6 +20,8 @@
 
 #include "wx/os2/private.h"
 
+IMPLEMENT_DYNAMIC_CLASS(wxScrollBar, wxControl)
+
 // Scrollbar
 bool wxScrollBar::Create(wxWindow* pParent,
                          wxWindowID vId,
@@ -223,7 +225,7 @@ bool wxScrollBar::OS2OnScroll ( int    WXUNUSED(nOrientation),
     vEvent.SetOrientation(IsVertical() ? wxVERTICAL : wxHORIZONTAL);
     vEvent.SetPosition(nPosition);
     vEvent.SetEventObject(this);
-    return HandleWindowEvent(vEvent);
+    return GetEventHandler()->ProcessEvent(vEvent);
 } // end of wxScrollBar::OS2OnScroll
 
 void wxScrollBar::SetThumbPosition ( int nViewStart )

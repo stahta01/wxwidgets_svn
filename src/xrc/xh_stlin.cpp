@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_stlin.cpp
+// Name:        xh_stbox.cpp
 // Purpose:     XRC resource for wxStaticLine
 // Author:      Brian Gavin
 // Created:     2000/09/09

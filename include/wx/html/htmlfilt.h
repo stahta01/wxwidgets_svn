@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/html/htmlfilt.h
+// Name:        htmlfilt.h
 // Purpose:     filters
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$

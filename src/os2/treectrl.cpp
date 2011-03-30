@@ -80,7 +80,11 @@ public:
     wxTreeItemInternalData() {}
     ~wxTreeItemInternalData()
     {
-        wxDELETE(m_pAttr);
+        if(m_pAttr)
+        {
+            delete m_pAttr;
+            m_pAttr = NULL;
+        }
     }
 
     wxTreeItemAttr*                 m_pAttr;
@@ -178,7 +182,7 @@ private:
                  );
 
     const wxTreeCtrl*               m_pTree;
-    wxDECLARE_NO_COPY_CLASS(wxTreeTraversal);
+    DECLARE_NO_COPY_CLASS(wxTreeTraversal)
 }; // end of CLASS wxTreeTraversal
 
 //
@@ -253,6 +257,8 @@ private:
 // ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxTreeCtrl, wxControl)
 
 // ----------------------------------------------------------------------------
 // constants
@@ -538,6 +544,30 @@ wxImageList* wxTreeCtrl::GetImageList () const
 {
     return m_pImageListNormal;
 } // end of wxTreeCtrl::GetImageList
+
+#if WXWIN_COMPATIBILITY_2_4
+
+wxImageList* wxTreeCtrl::GetImageList(int nVal) const
+{
+    return GetImageList();
+}
+
+void wxTreeCtrl::SetImageList(wxImageList* pImageList, int nVal)
+{
+    SetImageList(pImageList);
+}
+
+int wxTreeCtrl::GetItemSelectedImage(const wxTreeItemId& rItem) const
+{
+    return GetItemImage(rItem, wxTreeItemIcon_Selected);
+}
+
+void wxTreeCtrl::SetItemSelectedImage(const wxTreeItemId& rItem, int nImage)
+{
+    SetItemImage(rItem, nImage, wxTreeItemIcon_Selected);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 wxImageList* wxTreeCtrl::GetStateImageList () const
 {
@@ -1473,6 +1503,28 @@ wxTreeItemId wxTreeCtrl::DoInsertItem (
     return wxTreeItemId((long)pRecord->m_ulItemId);
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+
+// for compatibility only
+wxTreeItemId wxTreeCtrl::InsertItem (
+  const wxTreeItemId&               rParent
+, const wxString&                   rsText
+, int                               nImage
+, int                               nSelImage
+, long                              lInsertAfter
+)
+{
+    return DoInsertItem( rParent
+                        ,wxTreeItemId(lInsertAfter)
+                        ,rsText
+                        ,nImage
+                        ,nSelImage
+                        ,NULL
+                       );
+} // end of wxTreeCtrl::InsertItem
+
+#endif // WXWIN_COMPATIBILITY_2_4
+
 wxTreeItemId wxTreeCtrl::AddRoot (
   const wxString&                   rsText
 , int                               nImage
@@ -1585,7 +1637,7 @@ void wxTreeCtrl::Delete (
         delete (wxTreeItemAttr *)m_vAttrs.Delete((long)rItem.m_pItem);
     }
     vEvent.SetEventType(vEventType);
-    HandleWindowEvent(vEvent);
+    GetEventHandler()->ProcessEvent(vEvent);
 } // end of wxTreeCtrl::Delete
 
 // delete all children (but don't delete the item itself)
@@ -1712,6 +1764,20 @@ void wxTreeCtrl::Toggle (
              ,wxTREE_EXPAND_TOGGLE
             );
 } // end of wxTreeCtrl::Toggle
+
+#if WXWIN_COMPATIBILITY_2_4
+
+void wxTreeCtrl::ExpandItem (
+  const wxTreeItemId&               rItem
+, int                               nAction
+)
+{
+    DoExpand( rItem
+             ,nAction
+            );
+} // end of wxTreeCtrl::ExpandItem
+
+#endif // WXWIN_COMPATIBILITY_2_4
 
 void wxTreeCtrl::Unselect ()
 {
@@ -2052,7 +2118,7 @@ MRESULT wxTreeCtrl::OS2WindowProc (
                     break;
             }
             vEvent.SetEventType(vEventType);
-            bProcessed = HandleWindowEvent(vEvent);
+            bProcessed = GetEventHandler()->ProcessEvent(vEvent);
             break;
     }
     if (!bProcessed)

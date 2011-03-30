@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 14 December 2010                                                    *
+# Date : 20 September 2006                                                   *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -15,7 +15,7 @@ CC_DEFINE = /define=(__WXGTK__=1,__WXUNIVERSAL__==1)/float=ieee\
 	/name=(as_is,short)/ieee=denorm
 .else
 CXX_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm\
-	   /assume=(nostdnew,noglobal_array_new)/list/show=all
+	   /assume=(nostdnew,noglobal_array_new)
 CC_DEFINE = /define=(__WXGTK__=1)/float=ieee/name=(as_is,short)/iee=denorm
 .endif
 
@@ -44,7 +44,7 @@ OBJECTS = \
 	filedlg.obj,\
 	font.obj,\
         glcanvas.obj,\
-	sockgtk.obj,\
+	gsockgtk.obj,\
 	main.obj,\
 	minifram.obj,\
 	pen.obj,\
@@ -87,10 +87,10 @@ OBJECTS0= \
 	statbox.obj,\
 	statline.obj,\
 	stattext.obj,\
-	toolbar.obj,\
+	tbargtk.obj,\
 	textctrl.obj,\
 	tglbtn.obj,\
-	msgdlg.obj,mnemonics.obj
+	msgdlg.obj
 
 SOURCES =\
 	app.cpp,\
@@ -121,7 +121,7 @@ SOURCES =\
 	frame.cpp,\
 	gauge.cpp,\
         glcanvas.cpp,\
-	sockgtk.cpp,\
+	gsockgtk.cpp,\
 	listbox.cpp,\
 	main.cpp,\
 	mdi.cpp,\
@@ -145,7 +145,7 @@ SOURCES =\
 	statbox.cpp,\
 	statline.cpp,\
 	stattext.cpp,\
-	toolbar.cpp,\
+	tbargtk.cpp,\
 	textctrl.cpp,\
 	tglbtn.cpp,\
 	timer.cpp,\
@@ -154,7 +154,7 @@ SOURCES =\
 	utilsgtk.cpp,\
 	utilsres.cpp,\
         win_gtk.c,\
-	window.cpp,mnemonics.cpp
+	window.cpp
    
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -167,9 +167,6 @@ all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS0)
 	library [--.lib]libwx_gtk.olb $(OBJECTS0)
 .endif
-
-$(OBJECTS) : [--.include.wx]setup.h
-$(OBJECTS0) : [--.include.wx]setup.h
 
 app.obj : app.cpp
 bitmap.obj : bitmap.cpp
@@ -199,7 +196,7 @@ fontdlg.obj : fontdlg.cpp
 frame.obj : frame.cpp
 gauge.obj : gauge.cpp
 glcanvas.obj : glcanvas.cpp
-sockgtk.obj : sockgtk.cpp
+gsockgtk.obj : gsockgtk.cpp
 listbox.obj : listbox.cpp
 main.obj : main.cpp
 msgdlg.obj : msgdlg.cpp
@@ -223,7 +220,7 @@ statbmp.obj : statbmp.cpp
 statbox.obj : statbox.cpp
 statline.obj : statline.cpp
 stattext.obj : stattext.cpp
-toolbar.obj : toolbar.cpp
+tbargtk.obj : tbargtk.cpp
 textctrl.obj : textctrl.cpp
 tglbtn.obj : tglbtn.cpp
 timer.obj : timer.cpp
@@ -233,4 +230,3 @@ utilsgtk.obj : utilsgtk.cpp
 utilsres.obj : utilsres.cpp
 win_gtk.obj : win_gtk.c
 window.obj : window.cpp
-mnemonics.obj : mnemonics.cpp

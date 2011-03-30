@@ -59,8 +59,8 @@
 // ----------------------------------------------------------------------------
 
 // the application icon (under Windows and OS/2 it is in resources)
-#if !defined(__WXMSW__) && !defined(__WXPM__)
-    #include "../sample.xpm"
+#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXMAC__) || defined(__WXMGL__) || defined(__WXX11__)
+    #include "mondrian.xpm"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -163,9 +163,6 @@ IMPLEMENT_APP(MyApp)
 // 'Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_ACCESSIBILITY
     // Note: JAWS for Windows will only speak the context-sensitive
     // help if you use this help provider:
@@ -175,7 +172,7 @@ bool MyApp::OnInit()
     wxHelpProvider::Set(new wxSimpleHelpProvider());
 
     // create the main application window
-    MyFrame *frame = new MyFrame(wxT("AccessTest wxWidgets App"),
+    MyFrame *frame = new MyFrame(_T("AccessTest wxWidgets App"),
                                  wxPoint(50, 50), wxSize(450, 340));
 
     // and show it (the frames, unlike simple controls, are not shown when
@@ -187,7 +184,7 @@ bool MyApp::OnInit()
     // application would exit immediately.
     return true;
 #else
-    wxMessageBox( wxT("This sample has to be compiled with wxUSE_ACCESSIBILITY"), wxT("Building error"), wxOK);
+    wxMessageBox( _T("This sample has to be compiled with wxUSE_ACCESSIBILITY"), _T("Building error"), wxOK);
     return false;
 #endif // wxUSE_ACCESSIBILITY
 }
@@ -329,7 +326,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
     SetAccessible(new FrameAccessible(this));
 
     // set the frame icon
-    SetIcon(wxICON(sample));
+    SetIcon(wxICON(mondrian));
 
 #if wxUSE_MENUS
     // create a menu bar
@@ -337,16 +334,16 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(AccessTest_About, wxT("&About..."), wxT("Show about dialog"));
+    helpMenu->Append(AccessTest_About, _T("&About..."), _T("Show about dialog"));
 
-    menuFile->Append(AccessTest_Query, wxT("Query"), wxT("Query the window hierarchy"));
+    menuFile->Append(AccessTest_Query, _T("Query"), _T("Query the window hierarchy"));
     menuFile->AppendSeparator();
-    menuFile->Append(AccessTest_Quit, wxT("E&xit\tAlt-X"), wxT("Quit this program"));
+    menuFile->Append(AccessTest_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(menuFile, wxT("&File"));
-    menuBar->Append(helpMenu, wxT("&Help"));
+    menuBar->Append(menuFile, _T("&File"));
+    menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
@@ -355,7 +352,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size, 
 #if 0 // wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
-    SetStatusText(wxT("Welcome to wxWidgets!"));
+    SetStatusText(_T("Welcome to wxWidgets!"));
 #endif // wxUSE_STATUSBAR
 
 
@@ -395,10 +392,10 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxString msg;
-    msg.Printf( wxT("This is the About dialog of the AccessTest sample.\n")
-                wxT("Welcome to %s"), wxVERSION_STRING);
+    msg.Printf( _T("This is the About dialog of the AccessTest sample.\n")
+                _T("Welcome to %s"), wxVERSION_STRING);
 
-    wxMessageBox(msg, wxT("About AccessTest"), wxOK | wxICON_INFORMATION, this);
+    wxMessageBox(msg, _T("About AccessTest"), wxOK | wxICON_INFORMATION, this);
 }
 
 void MyFrame::OnQuery(wxCommandEvent& WXUNUSED(event))
@@ -431,7 +428,7 @@ void MyFrame::OnQuery(wxCommandEvent& WXUNUSED(event))
             accessibleFrame->Release();
             return;
         }
-
+        
 
         long obtained = 0;
         VARIANT *var = new VARIANT[childCount];
@@ -441,7 +438,7 @@ void MyFrame::OnQuery(wxCommandEvent& WXUNUSED(event))
             VariantInit(& (var[i]));
             var[i].vt = VT_DISPATCH;
         }
-
+        
         if (S_OK == AccessibleChildren(accessibleFrame, 0, childCount, var, &obtained))
         {
             for (i = 0; i < childCount; i++)
@@ -452,7 +449,7 @@ void MyFrame::OnQuery(wxCommandEvent& WXUNUSED(event))
                     if (var[i].pdispVal->QueryInterface(IID_IAccessible, (LPVOID*) & childAccessible) == S_OK)
                     {
                         var[i].pdispVal->Release();
-
+                        
                         wxString name, role;
                         GetInfo(childAccessible, 0, name, role);
                         wxString str;
@@ -565,10 +562,10 @@ void MyFrame::GetInfo(IAccessible* accessible, int id, wxString& name, wxString&
     VariantInit(& var);
     var.vt = VT_I4;
     var.lVal = id;
-
+    
     BSTR bStrName = 0;
     HRESULT hResult = accessible->get_accName(var, & bStrName);
-
+    
     if (hResult == S_OK)
     {
         name = wxConvertStringFromOle(bStrName);
@@ -578,23 +575,23 @@ void MyFrame::GetInfo(IAccessible* accessible, int id, wxString& name, wxString&
     {
         name = wxT("NO NAME");
     }
-
+    
     VARIANT varRole;
     VariantInit(& varRole);
-
+    
     hResult = accessible->get_accRole(var, & varRole);
-
+    
     if (hResult == S_OK && varRole.vt == VT_I4)
     {
         wxChar buf[256];
         GetRoleText(varRole.lVal, buf, 256);
-
+        
         role = buf;
     }
     else
     {
         role = wxT("NO ROLE");
-    }
+    }    
 }
 
 /*
@@ -717,14 +714,14 @@ wxAccStatus SplitterWindowAccessible::Navigate(wxNavDir navDir, int fromId,
                     return wxACC_FALSE;
             }
             break;
-
+            
         case wxNAVDIR_LASTCHILD:
             {
                 if (fromId == 2)
                     return wxACC_FALSE;
             }
             break;
-
+            
         case wxNAVDIR_LEFT:
             {
                 if (splitter->GetSplitMode() != wxSPLIT_HORIZONTAL)
@@ -748,7 +745,7 @@ wxAccStatus SplitterWindowAccessible::Navigate(wxNavDir navDir, int fromId,
             // below line is not executed due to earlier return
             break;
             #endif
-
+            
         case wxNAVDIR_NEXT:
             {
                 if (fromId == 1)
@@ -769,7 +766,7 @@ wxAccStatus SplitterWindowAccessible::Navigate(wxNavDir navDir, int fromId,
             // below line is not executed due to earlier return
             break;
             #endif
-
+            
         case wxNAVDIR_PREVIOUS:
             {
                 if (fromId == 3)
@@ -790,7 +787,7 @@ wxAccStatus SplitterWindowAccessible::Navigate(wxNavDir navDir, int fromId,
             // below line is not executed due to earlier return
             break;
             #endif
-
+            
         case wxNAVDIR_RIGHT:
             {
                 if (splitter->GetSplitMode() != wxSPLIT_HORIZONTAL)
@@ -809,13 +806,13 @@ wxAccStatus SplitterWindowAccessible::Navigate(wxNavDir navDir, int fromId,
                     }
                 }
                 // Can't go right spatially if split horizontally.
-                return wxACC_FALSE;
+                return wxACC_FALSE;           
             }
             #if 0
             // below line is not executed due to earlier return
             break;
             #endif
-
+            
         case wxNAVDIR_UP:
             {
                 if (splitter->GetSplitMode() != wxSPLIT_VERTICAL)
@@ -834,14 +831,14 @@ wxAccStatus SplitterWindowAccessible::Navigate(wxNavDir navDir, int fromId,
                 }
 
                 // Can't go up spatially if split vertically.
-                return wxACC_FALSE;
+                return wxACC_FALSE;           
                 #if 0
                 // below line is not executed due to earlier return
                 break;
                 #endif
             }
         }
-
+        
     }
     // Let the framework handle the other cases.
     return wxACC_NOT_IMPLEMENTED;

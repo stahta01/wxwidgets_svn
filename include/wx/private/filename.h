@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/private/filename.h
+// Name:        include/wx/private/filename.h
 // Purpose:     Internal declarations for src/common/filename.cpp
 // Author:      Mike Wetherell
 // Modified by:

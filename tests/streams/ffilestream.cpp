@@ -4,7 +4,7 @@
 // Author:      Hans Van Leemputten
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 Hans Van Leemputten
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -26,8 +26,8 @@
 
 #define DATABUFFER_SIZE     1024
 
-static const wxString FILENAME_FFILEINSTREAM = wxT("ffileinstream.test");
-static const wxString FILENAME_FFILEOUTSTREAM = wxT("ffileoutstream.test");
+static const wxString FILENAME_FFILEINSTREAM = _T("ffileinstream.test");
+static const wxString FILENAME_FFILEOUTSTREAM = _T("ffileoutstream.test");
 
 ///////////////////////////////////////////////////////////////////////////////
 // The test case
@@ -47,7 +47,6 @@ public:
         CPPUNIT_TEST(Input_Read);
         CPPUNIT_TEST(Input_Eof);
         CPPUNIT_TEST(Input_LastRead);
-        CPPUNIT_TEST(Input_CanRead);
         CPPUNIT_TEST(Input_SeekI);
         CPPUNIT_TEST(Input_TellI);
         CPPUNIT_TEST(Input_Peek);

@@ -2,7 +2,7 @@
 // Name:        wx/palmos/imaglist.h
 // Purpose:     wxImageList class
 // Author:      William Osborne - minimal working wxPalmOS port
-// Modified by: Yunhui Fu
+// Modified by:
 // Created:     10/13/04
 // RCS-ID:      $Id$
 // Copyright:   (c) William Osborne
@@ -28,11 +28,24 @@
  * used.
  */
 
+// Flags for Draw
+#define wxIMAGELIST_DRAW_NORMAL         0x0001
+#define wxIMAGELIST_DRAW_TRANSPARENT    0x0002
+#define wxIMAGELIST_DRAW_SELECTED       0x0004
+#define wxIMAGELIST_DRAW_FOCUSED        0x0008
+
+// Flag values for Set/GetImageList
+enum {
+    wxIMAGE_LIST_NORMAL, // Normal icons
+    wxIMAGE_LIST_SMALL,  // Small icons
+    wxIMAGE_LIST_STATE   // State icons: unimplemented (see WIN32 documentation)
+};
+
 // Eventually we'll make this a reference-counted wxGDIObject. For
 // now, the app must take care of ownership issues. That is, the
 // image lists must be explicitly deleted after the control(s) that uses them
 // is (are) deleted, or when the app exits.
-class WXDLLIMPEXP_CORE wxImageList : public wxObject
+class WXDLLEXPORT wxImageList : public wxObject
 {
 public:
   /*

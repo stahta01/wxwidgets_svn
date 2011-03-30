@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/splash.h
+// Name:        splash.h
 // Purpose:     Splash screen class
 // Author:      Julian Smart
 // Modified by:
@@ -60,7 +60,7 @@ protected:
 
     DECLARE_DYNAMIC_CLASS(wxSplashScreen)
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxSplashScreen);
+    DECLARE_NO_COPY_CLASS(wxSplashScreen)
 };
 
 /*
@@ -84,7 +84,7 @@ protected:
     wxBitmap    m_bitmap;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxSplashScreenWindow);
+    DECLARE_NO_COPY_CLASS(wxSplashScreenWindow)
 };
 
 

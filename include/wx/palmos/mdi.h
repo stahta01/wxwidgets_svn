@@ -14,16 +14,16 @@
 
 #include "wx/frame.h"
 
-WXDLLIMPEXP_DATA_CORE(extern const wxChar) wxStatusLineNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxStatusLineNameStr[];
 
-class WXDLLIMPEXP_FWD_CORE wxMDIClientWindow;
-class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+class WXDLLEXPORT wxMDIClientWindow;
+class WXDLLEXPORT wxMDIChildFrame;
 
 // ---------------------------------------------------------------------------
 // wxMDIParentFrame
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIParentFrame : public wxFrame
+class WXDLLEXPORT wxMDIParentFrame : public wxFrame
 {
 public:
     wxMDIParentFrame();
@@ -99,18 +99,18 @@ protected:
     bool m_parentFrameActive;
 
 private:
-    friend class WXDLLIMPEXP_FWD_CORE wxMDIChildFrame;
+    friend class WXDLLEXPORT wxMDIChildFrame;
 
     DECLARE_EVENT_TABLE()
     DECLARE_DYNAMIC_CLASS(wxMDIParentFrame)
-    wxDECLARE_NO_COPY_CLASS(wxMDIParentFrame);
+    DECLARE_NO_COPY_CLASS(wxMDIParentFrame)
 };
 
 // ---------------------------------------------------------------------------
 // wxMDIChildFrame
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIChildFrame : public wxFrame
+class WXDLLEXPORT wxMDIChildFrame : public wxFrame
 {
 public:
     wxMDIChildFrame() { Init(); }
@@ -183,7 +183,7 @@ private:
 // wxMDIClientWindow
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMDIClientWindow : public wxWindow
+class WXDLLEXPORT wxMDIClientWindow : public wxWindow
 {
 public:
     wxMDIClientWindow() { Init(); }

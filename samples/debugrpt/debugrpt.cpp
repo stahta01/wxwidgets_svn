@@ -6,7 +6,7 @@
 // Created:     2005-01-20
 // RCS-ID:      $Id$
 // Copyright:   (c) 2005 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -51,9 +51,9 @@ class MyDebugReport : public wxDebugReportUpload
 public:
     MyDebugReport() : wxDebugReportUpload
                        (
-                        wxT("http://your.url.here/"),
-                        wxT("report:file"),
-                        wxT("action")
+                        _T("http://your.url.here/"),
+                        _T("report:file"),
+                        _T("action")
                        )
     {
     }
@@ -66,19 +66,19 @@ protected:
     {
         if ( reply.IsEmpty() )
         {
-            wxLogError(wxT("Didn't receive the expected server reply."));
+            wxLogError(_T("Didn't receive the expected server reply."));
             return false;
         }
 
-        wxString s(wxT("Server replied:\n"));
+        wxString s(_T("Server replied:\n"));
 
         const size_t count = reply.GetCount();
         for ( size_t n = 0; n < count; n++ )
         {
-            s << wxT('\t') << reply[n] << wxT('\n');
+            s << _T('\t') << reply[n] << _T('\n');
         }
 
-        wxLogMessage(wxT("%s"), s.c_str());
+        wxLogMessage(_T("%s"), s.c_str());
 
         return true;
     }
@@ -97,12 +97,12 @@ public:
     {
         if ( !wxDebugReportCompress::DoProcess() )
             return false;
-        wxMailMessage msg(GetReportName() + wxT(" crash report"),
-                          wxT("vadim@wxwindows.org"),
+        wxMailMessage msg(GetReportName() + _T(" crash report"),
+                          _T("vadim@wxwindows.org"),
                           wxEmptyString, // mail body
                           wxEmptyString, // from address
                           GetCompressedFileName(),
-                          wxT("crashreport.zip"));
+                          _T("crashreport.zip"));
 
         return wxEmail::Send(msg);
     }
@@ -115,7 +115,7 @@ public:
 // ----------------------------------------------------------------------------
 
 // just some functions to get a slightly deeper stack trace
-static void bar(const char *p)
+static void bar(const wxChar *p)
 {
     char *pc = 0;
     *pc = *p;
@@ -125,15 +125,15 @@ static void bar(const char *p)
 
 void baz(const wxString& s)
 {
-    printf("baz: %s\n", (const char*)s.c_str());
+    printf("baz: %s\n", s.c_str());
 }
 
 void foo(int n)
 {
     if ( n % 2 )
-        baz("odd");
+        baz(wxT("odd"));
     else
-        bar("even");
+        bar(wxT("even"));
 }
 
 // ----------------------------------------------------------------------------
@@ -169,7 +169,7 @@ private:
     // number of lines drawn in OnPaint()
     int m_numLines;
 
-    wxDECLARE_NO_COPY_CLASS(MyFrame);
+    DECLARE_NO_COPY_CLASS(MyFrame)
     DECLARE_EVENT_TABLE()
 };
 
@@ -204,7 +204,7 @@ public:
 private:
     bool m_uploadReport;
 
-    wxDECLARE_NO_COPY_CLASS(MyApp);
+    DECLARE_NO_COPY_CLASS(MyApp)
 };
 
 IMPLEMENT_APP(MyApp)
@@ -229,34 +229,33 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
 END_EVENT_TABLE()
 
 MyFrame::MyFrame()
-       : wxFrame(NULL, wxID_ANY, wxT("wxWidgets Debug Report Sample"),
-                 wxDefaultPosition, wxDefaultSize, wxFULL_REPAINT_ON_RESIZE|wxDEFAULT_FRAME_STYLE)
+       : wxFrame(NULL, wxID_ANY, _T("wxWidgets Debug Report Sample"))
 {
     m_numLines = 10;
 
     SetIcon(wxICON(sample));
 
     wxMenu *menuFile = new wxMenu;
-    menuFile->Append(DebugRpt_Quit, wxT("E&xit\tAlt-X"));
+    menuFile->Append(DebugRpt_Quit, _T("E&xit\tAlt-X"));
 
     wxMenu *menuReport = new wxMenu;
-    menuReport->Append(DebugRpt_Crash, wxT("Report for &crash\tCtrl-C"),
-                       wxT("Provoke a crash inside the program and create report for it"));
-    menuReport->Append(DebugRpt_Current, wxT("Report for c&urrent context\tCtrl-U"),
-                       wxT("Create report for the current program context"));
-    menuReport->Append(DebugRpt_Paint, wxT("Report for &paint handler\tCtrl-P"),
-                       wxT("Provoke a repeatable crash in wxEVT_PAINT handler"));
+    menuReport->Append(DebugRpt_Crash, _T("Report for &crash\tCtrl-C"),
+                       _T("Provoke a crash inside the program and create report for it"));
+    menuReport->Append(DebugRpt_Current, _T("Report for c&urrent context\tCtrl-U"),
+                       _T("Create report for the current program context"));
+    menuReport->Append(DebugRpt_Paint, _T("Report for &paint handler\tCtrl-P"),
+                       _T("Provoke a repeatable crash in wxEVT_PAINT handler"));
     menuReport->AppendSeparator();
-    menuReport->AppendCheckItem(DebugRpt_Upload, wxT("Up&load debug report"),
-                       wxT("You need to configure a web server accepting debug report uploads to use this function"));
+    menuReport->AppendCheckItem(DebugRpt_Upload, _T("Up&load debug report"),
+                       _T("You need to configure a web server accepting debug report uploads to use this function"));
 
     wxMenu *menuHelp = new wxMenu;
-    menuHelp->Append(DebugRpt_About, wxT("&About...\tF1"));
+    menuHelp->Append(DebugRpt_About, _T("&About...\tF1"));
 
     wxMenuBar *mbar = new wxMenuBar();
-    mbar->Append(menuFile, wxT("&File"));
-    mbar->Append(menuReport, wxT("&Report"));
-    mbar->Append(menuHelp, wxT("&Help"));
+    mbar->Append(menuFile, _T("&File"));
+    mbar->Append(menuReport, _T("&Report"));
+    mbar->Append(menuHelp, _T("&Help"));
     SetMenuBar(mbar);
 
     CreateStatusBar();
@@ -301,8 +300,8 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
     wxMessageBox
     (
-        wxT("wxDebugReport sample\n(c) 2005 Vadim Zeitlin <vadim@wxwindows.org>"),
-        wxT("wxWidgets Debug Report Sample"),
+        _T("wxDebugReport sample\n(c) 2005 Vadim Zeitlin <vadim@wxwindows.org>"),
+        _T("wxWidgets Debug Report Sample"),
         wxOK | wxICON_INFORMATION,
         this
     );
@@ -322,7 +321,7 @@ void MyFrame::OnPaint(wxPaintEvent& WXUNUSED(event))
 
 MyApp::MyApp()
 {
-    // user needs to explicitly enable this
+    // user needs to explicitely enable this
     m_uploadReport = false;
 
     // call this to tell the library to call our OnFatalException()
@@ -356,23 +355,23 @@ void MyApp::GenerateReport(wxDebugReport::Context ctx)
     // you can also call report->AddFile(...) with your own log files, files
     // created using wxRegKey::Export() and so on, here we just add a test
     // file containing the date of the crash
-    wxFileName fn(report->GetDirectory(), wxT("timestamp.my"));
-    wxFFile file(fn.GetFullPath(), wxT("w"));
+    wxFileName fn(report->GetDirectory(), _T("timestamp.my"));
+    wxFFile file(fn.GetFullPath(), _T("w"));
     if ( file.IsOpened() )
     {
         wxDateTime dt = wxDateTime::Now();
-        file.Write(dt.FormatISODate() + wxT(' ') + dt.FormatISOTime());
+        file.Write(dt.FormatISODate() + _T(' ') + dt.FormatISOTime());
         file.Close();
     }
 
-    report->AddFile(fn.GetFullName(), wxT("timestamp of this report"));
+    report->AddFile(fn.GetFullName(), _T("timestamp of this report"));
 
     // can also add an existing file directly, it will be copied
     // automatically
 #ifdef __WXMSW__
-    report->AddFile(wxT("c:\\autoexec.bat"), wxT("DOS startup file"));
+    report->AddFile(_T("c:\\autoexec.bat"), _T("DOS startup file"));
 #else
-    report->AddFile(wxT("/etc/motd"), wxT("Message of the day"));
+    report->AddFile(_T("/etc/motd"), _T("Message of the day"));
 #endif
 
     // calling Show() is not mandatory, but is more polite
@@ -382,11 +381,11 @@ void MyApp::GenerateReport(wxDebugReport::Context ctx)
         {
             if ( m_uploadReport )
             {
-                wxLogMessage(wxT("Report successfully uploaded."));
+                wxLogMessage(_T("Report successfully uploaded."));
             }
             else
             {
-                wxLogMessage(wxT("Report generated in \"%s\"."),
+                wxLogMessage(_T("Report generated in \"%s\"."),
                              report->GetCompressedFileName().c_str());
                 report->Reset();
             }

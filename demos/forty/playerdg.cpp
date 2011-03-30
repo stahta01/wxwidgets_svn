@@ -37,10 +37,10 @@ PlayerSelectionDialog::PlayerSelectionDialog(
                             wxWindow* parent,
                             ScoreFile* file
                             ) :
-    wxDialog(parent, wxID_ANY, wxT("Player Selection"), wxDefaultPosition),
+    wxDialog(parent, wxID_ANY, _T("Player Selection"), wxDefaultPosition),
     m_scoreFile(file)
 {
-    wxStaticText* msg = new wxStaticText(this, wxID_ANY, wxT("Please select a name or type a new one:"));
+    wxStaticText* msg = new wxStaticText(this, wxID_ANY, _T("Please select a name or type a new one:"));
 
     wxListBox* list = new wxListBox(
                         this, ID_LISTBOX,
@@ -114,11 +114,11 @@ void PlayerSelectionDialog::ButtonCallback(wxCommandEvent& event)
     if (event.GetId() == wxID_OK)
     {
         wxString name = m_textField->GetValue();
-        if ( !name.empty() )
+        if (!name.IsNull() && name.Length() > 0)
         {
-            if (name.Contains(wxT('@')))
+            if (name.Contains(_T('@')))
             {
-                wxMessageBox(wxT("Names should not contain the '@' character"), wxT("Forty Thieves"));
+                wxMessageBox(_T("Names should not contain the '@' character"), _T("Forty Thieves"));
             }
             else
             {
@@ -128,7 +128,7 @@ void PlayerSelectionDialog::ButtonCallback(wxCommandEvent& event)
         }
         else
         {
-             wxMessageBox(wxT("Please enter your name"), wxT("Forty Thieves"));
+             wxMessageBox(_T("Please enter your name"), _T("Forty Thieves"));
         }
     }
     else

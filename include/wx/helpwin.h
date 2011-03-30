@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/helpwin.h
+// Name:        helpwin.h
 // Purpose:     Includes Windows or OS/2 help
 // Author:      Julian Smart
 // Modified by:

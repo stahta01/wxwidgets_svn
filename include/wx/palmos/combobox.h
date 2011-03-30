@@ -20,7 +20,7 @@
 // Combobox control
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxComboBox: public wxChoice
+class WXDLLEXPORT wxComboBox: public wxChoice
 {
 public:
     wxComboBox() { }

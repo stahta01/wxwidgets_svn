@@ -40,6 +40,11 @@ PORTNAME = msw
 !endif
 WXDEBUGFLAG =
 !ifeq BUILD debug
+!ifeq DEBUG_FLAG default
+WXDEBUGFLAG = d
+!endif
+!endif
+!ifeq DEBUG_FLAG 1
 WXDEBUGFLAG = d
 !endif
 WXUNICODEFLAG =
@@ -179,6 +184,10 @@ __LIB_PNG_p =
 !ifeq USE_GUI 1
 __LIB_PNG_p = wxpng$(WXDEBUGFLAG).lib
 !endif
+__GDIPLUS_LIB_p =
+!ifeq USE_GDIPLUS 1
+__GDIPLUS_LIB_p = gdiplus.lib
+!endif
 __CAIRO_LIB_p =
 !ifeq USE_CAIRO 1
 __CAIRO_LIB_p = cairo.lib
@@ -192,8 +201,13 @@ __WXUNIV_DEFINE_p =
 __WXUNIV_DEFINE_p = -d__WXUNIVERSAL__
 !endif
 __DEBUG_DEFINE_p =
-!ifeq DEBUG_FLAG 0
-__DEBUG_DEFINE_p = -dwxDEBUG_LEVEL=0
+!ifeq BUILD debug
+!ifeq DEBUG_FLAG default
+__DEBUG_DEFINE_p = -d__WXDEBUG__
+!endif
+!endif
+!ifeq DEBUG_FLAG 1
+__DEBUG_DEFINE_p = -d__WXDEBUG__
 !endif
 __NDEBUG_DEFINE_p =
 !ifeq BUILD release
@@ -212,11 +226,12 @@ __THREAD_DEFINE_p =
 __THREAD_DEFINE_p = -dwxNO_THREADS
 !endif
 __UNICODE_DEFINE_p =
-!ifeq UNICODE 0
-__UNICODE_DEFINE_p = -dwxUSE_UNICODE=0
-!endif
 !ifeq UNICODE 1
 __UNICODE_DEFINE_p = -d_UNICODE
+!endif
+__GFXCTX_DEFINE_p =
+!ifeq USE_GDIPLUS 1
+__GFXCTX_DEFINE_p = -dwxUSE_GRAPHICS_CONTEXT=1
 !endif
 ____CAIRO_INCLUDEDIR_FILENAMES =
 !ifeq USE_CAIRO 1
@@ -229,20 +244,19 @@ __DLLFLAG_p = -dWXUSINGDLL
 
 ### Variables: ###
 
-WX_RELEASE_NODOT = 29
-COMPILER_PREFIX = wat
+WX_RELEASE_NODOT = 28
 OBJS = &
-	$(COMPILER_PREFIX)_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
-LIBDIRNAME = .\..\..\lib\$(COMPILER_PREFIX)_$(LIBTYPE_SUFFIX)$(CFG)
+	wat_$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)$(WXDLLFLAG)$(CFG)
+LIBDIRNAME = .\..\..\lib\wat_$(LIBTYPE_SUFFIX)$(CFG)
 SETUPHDIR = &
 	$(LIBDIRNAME)\$(PORTNAME)$(WXUNIVNAME)$(WXUNICODEFLAG)$(WXDEBUGFLAG)
 FORTY_CXXFLAGS = $(__DEBUGINFO_0) $(__OPTIMIZEFLAG_2) $(__THREADSFLAG_5) &
 	$(__RUNTIME_LIBS_6) -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) &
 	$(__NDEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) &
-	$(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p) -i=$(SETUPHDIR) &
-	-i=.\..\..\include $(____CAIRO_INCLUDEDIR_FILENAMES) -wx -wcd=549 -wcd=656 &
-	-wcd=657 -wcd=667 -i=. $(__DLLFLAG_p) -i=.\..\..\samples -dNOPCH &
-	$(__RTTIFLAG_7) $(__EXCEPTIONSFLAG_8) $(CPPFLAGS) $(CXXFLAGS)
+	$(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p) $(__GFXCTX_DEFINE_p) &
+	-i=$(SETUPHDIR) -i=.\..\..\include $(____CAIRO_INCLUDEDIR_FILENAMES) -wx &
+	-wcd=549 -wcd=656 -wcd=657 -wcd=667 -i=. $(__DLLFLAG_p) -i=.\..\..\samples &
+	-dNOPCH $(__RTTIFLAG_7) $(__EXCEPTIONSFLAG_8) $(CPPFLAGS) $(CXXFLAGS)
 FORTY_OBJECTS =  &
 	$(OBJS)\forty_forty.obj &
 	$(OBJS)\forty_canvas.obj &
@@ -277,7 +291,7 @@ $(OBJS)\forty.exe :  $(FORTY_OBJECTS) $(OBJS)\forty_forty.res
 	@%append $(OBJS)\forty.lbc option caseexact
 	@%append $(OBJS)\forty.lbc  $(__DEBUGINFO_1)  libpath $(LIBDIRNAME) system nt_win ref '_WinMain@16' $(____CAIRO_LIBDIR_FILENAMES_p) $(LDFLAGS)
 	@for %i in ($(FORTY_OBJECTS)) do @%append $(OBJS)\forty.lbc file %i
-	@for %i in ( $(__WXLIB_HTML_p)  $(__WXLIB_ADV_p)  $(__WXLIB_XML_p)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__CAIRO_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib) do @%append $(OBJS)\forty.lbc library %i
+	@for %i in ( $(__WXLIB_HTML_p)  $(__WXLIB_ADV_p)  $(__WXLIB_XML_p)  $(__WXLIB_CORE_p)  $(__WXLIB_BASE_p)  $(__WXLIB_MONO_p) $(__LIB_TIFF_p) $(__LIB_JPEG_p) $(__LIB_PNG_p)  wxzlib$(WXDEBUGFLAG).lib  wxregex$(WXUNICODEFLAG)$(WXDEBUGFLAG).lib wxexpat$(WXDEBUGFLAG).lib $(EXTRALIBS_FOR_BASE)  $(__GDIPLUS_LIB_p) $(__CAIRO_LIB_p) kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib) do @%append $(OBJS)\forty.lbc library %i
 	@%append $(OBJS)\forty.lbc option resource=$(OBJS)\forty_forty.res
 	@for %i in () do @%append $(OBJS)\forty.lbc option stack=%i
 	wlink @$(OBJS)\forty.lbc
@@ -311,5 +325,5 @@ $(OBJS)\forty_scorefil.obj :  .AUTODEPEND .\scorefil.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(FORTY_CXXFLAGS) $<
 
 $(OBJS)\forty_forty.res :  .AUTODEPEND .\forty.rc
-	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__NDEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  -i=$(SETUPHDIR) -i=.\..\..\include $(____CAIRO_INCLUDEDIR_FILENAMES) -i=. $(__DLLFLAG_p) -i=.\..\..\samples -dNOPCH $<
+	wrc -q -ad -bt=nt -r -fo=$^@    -d__WXMSW__ $(__WXUNIV_DEFINE_p) $(__DEBUG_DEFINE_p) $(__NDEBUG_DEFINE_p) $(__EXCEPTIONS_DEFINE_p) $(__RTTI_DEFINE_p) $(__THREAD_DEFINE_p) $(__UNICODE_DEFINE_p)  $(__GFXCTX_DEFINE_p) -i=$(SETUPHDIR) -i=.\..\..\include $(____CAIRO_INCLUDEDIR_FILENAMES) -i=. $(__DLLFLAG_p) -i=.\..\..\samples -dNOPCH $<
 

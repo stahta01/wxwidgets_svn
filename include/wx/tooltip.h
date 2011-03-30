@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/tooltip.h
+// Name:        tooltip.h
 // Purpose:     wxToolTip base header
 // Author:      Robert Roebling
 // Modified by:
@@ -25,7 +25,7 @@
 #elif defined(__WXGTK__)
 #include "wx/gtk1/tooltip.h"
 #elif defined(__WXMAC__)
-#include "wx/osx/tooltip.h"
+#include "wx/mac/tooltip.h"
 #elif defined(__WXCOCOA__)
 #include "wx/cocoa/tooltip.h"
 #elif defined(__WXPM__)

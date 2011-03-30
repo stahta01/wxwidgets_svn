@@ -20,7 +20,7 @@
 
 #if wxUSE_FILESYSTEM && wxUSE_FS_INET
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/module.h"
 #endif
 
@@ -107,6 +107,7 @@ wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
     {
         wxInputStream *s = url.GetInputStream();
         wxString content = url.GetProtocol().GetContentType();
+        if (content == wxEmptyString) content = GetMimeTypeFromExt(location);
         if (s)
         {
             wxString tmpfile =
@@ -129,7 +130,7 @@ wxFSFile* wxInternetFSHandler::OpenFile(wxFileSystem& WXUNUSED(fs),
         }
     }
 
-    return NULL; // incorrect URL
+    return (wxFSFile*) NULL; // incorrect URL
 #endif
 }
 
@@ -152,7 +153,7 @@ class wxFileSystemInternetModule : public wxModule
             return true;
         }
 
-        virtual void OnExit()
+        virtual void OnExit() 
         {
             delete wxFileSystem::RemoveHandler(m_handler);
         }

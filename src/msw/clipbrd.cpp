@@ -90,15 +90,13 @@ bool wxOpenClipboard()
         gs_wxClipboardIsOpen = ::OpenClipboard((HWND)win->GetHWND()) != 0;
 
         if ( !gs_wxClipboardIsOpen )
-        {
             wxLogSysError(_("Failed to open the clipboard."));
-        }
 
         return gs_wxClipboardIsOpen;
     }
     else
     {
-        wxLogDebug(wxT("Cannot open clipboard without a main window."));
+        wxLogDebug(wxT("Can not open clipboard without a main window."));
 
         return false;
     }
@@ -549,9 +547,6 @@ wxClipboard::~wxClipboard()
 
 void wxClipboard::Clear()
 {
-    if ( IsUsingPrimarySelection() )
-        return;
-
 #if wxUSE_OLE_CLIPBOARD
     if (m_lastDataObject)
     {
@@ -618,9 +613,6 @@ bool wxClipboard::IsOpened() const
 
 bool wxClipboard::SetData( wxDataObject *data )
 {
-    if ( IsUsingPrimarySelection() )
-        return false;
-
 #if !wxUSE_OLE_CLIPBOARD
     (void)wxEmptyClipboard();
 #endif // wxUSE_OLE_CLIPBOARD
@@ -633,9 +625,6 @@ bool wxClipboard::SetData( wxDataObject *data )
 
 bool wxClipboard::AddData( wxDataObject *data )
 {
-    if ( IsUsingPrimarySelection() )
-        return false;
-
     wxCHECK_MSG( data, false, wxT("data is invalid") );
 
 #if wxUSE_OLE_CLIPBOARD
@@ -729,14 +718,11 @@ void wxClipboard::Close()
 
 bool wxClipboard::IsSupported( const wxDataFormat& format )
 {
-    return !IsUsingPrimarySelection() && wxIsClipboardFormatAvailable(format);
+    return wxIsClipboardFormatAvailable(format);
 }
 
 bool wxClipboard::GetData( wxDataObject& data )
 {
-    if ( IsUsingPrimarySelection() )
-        return false;
-
 #if wxUSE_OLE_CLIPBOARD
     IDataObject *pDataObject = NULL;
     HRESULT hr = OleGetClipboard(&pDataObject);
@@ -772,7 +758,7 @@ bool wxClipboard::GetData( wxDataObject& data )
     // enumerate all explicit formats on the clipboard.
     // note that this does not include implicit / synthetic (automatically
     // converted) formats.
-#if wxDEBUG_LEVEL >= 2
+#ifdef __WXDEBUG__
     // get the format enumerator
     IEnumFORMATETC *pEnumFormatEtc = NULL;
     hr = pDataObject->EnumFormatEtc(DATADIR_GET, &pEnumFormatEtc);
@@ -805,7 +791,7 @@ bool wxClipboard::GetData( wxDataObject& data )
 
         pEnumFormatEtc->Release();
     }
-#endif // wxDEBUG_LEVEL >= 2
+#endif // Debug
 
     STGMEDIUM medium;
     // stop at the first valid format found on the clipboard

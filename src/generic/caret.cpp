@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/caret.cpp
+// Name:        generic/caret.cpp
 // Purpose:     generic wxCaret class implementation
 // Author:      Vadim Zeitlin (original code by Robert Roebling)
 // Modified by:
@@ -225,7 +225,7 @@ void wxCaret::Refresh()
     }
     else
     {
-        DoDraw( &dcWin, GetWindow() );
+        DoDraw( &dcWin );
     }
 #else
     wxMemoryDC dcMem;
@@ -243,8 +243,16 @@ void wxCaret::Refresh()
         if ( m_xOld == -1 && m_yOld == -1 )
         {
             // save the part we're going to overdraw
+
+            int x = m_x,
+                y = m_y;
+#if defined(__WXGTK__) && !defined(__WX_DC_BLIT_FIXED__)
+            wxPoint pt = dcWin.GetDeviceOrigin();
+            x += pt.x;
+            y += pt.y;
+#endif // broken wxGTK wxDC::Blit
             dcMem.Blit(0, 0, m_width, m_height,
-                       &dcWin, m_x, m_y);
+                       &dcWin, x, y);
 
             m_xOld = m_x;
             m_yOld = m_y;
@@ -253,28 +261,44 @@ void wxCaret::Refresh()
         //      more
 
         // and draw the caret there
-        DoDraw(&dcWin, GetWindow());
+        DoDraw(&dcWin);
     }
 #endif
 }
 
-void wxCaret::DoDraw(wxDC *dc, wxWindow* win)
+void wxCaret::DoDraw(wxDC *dc)
 {
-    wxPen pen(*wxBLACK_PEN);
-    wxBrush brush(*wxBLACK_BRUSH);
-    if (win)
+#if defined(__WXGTK__) || defined(__WXMAC__)
+    wxClientDC* clientDC = wxDynamicCast(dc, wxClientDC);
+    if (clientDC)
     {
-        wxColour backgroundColour(win->GetBackgroundColour());
-        if (backgroundColour.Red() < 100 &&
-            backgroundColour.Green() < 100 &&
-            backgroundColour.Blue() < 100)
+        wxPen pen(*wxBLACK_PEN);
+        wxBrush brush(*wxBLACK_BRUSH);
+#ifdef __WXGTK__
+        wxWindow* win = clientDC->m_owner;
+#else
+        wxWindow* win = clientDC->GetWindow();
+#endif
+        if (win)
         {
-            pen = *wxWHITE_PEN;
-            brush = *wxWHITE_BRUSH;
+            wxColour backgroundColour(win->GetBackgroundColour());
+            if (backgroundColour.Red() < 100 &&
+                backgroundColour.Green() < 100 &&
+                backgroundColour.Blue() < 100)
+            {
+                pen = *wxWHITE_PEN;
+                brush = *wxWHITE_BRUSH;
+            }
         }
+        dc->SetPen( pen );
+        dc->SetBrush(m_hasFocus ? brush : *wxTRANSPARENT_BRUSH);
     }
-    dc->SetPen( pen );
-    dc->SetBrush(m_hasFocus ? brush : *wxTRANSPARENT_BRUSH);
+    else
+#endif
+    {
+        dc->SetBrush(*(m_hasFocus ? wxBLACK_BRUSH : wxTRANSPARENT_BRUSH));
+        dc->SetPen(*wxBLACK_PEN);
+    }
 
     // VZ: unfortunately, the rectangle comes out a pixel smaller when this is
     //     done under wxGTK - no idea why

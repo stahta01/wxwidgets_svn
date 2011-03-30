@@ -25,25 +25,46 @@
 
 #if wxUSE_DATEPICKCTRL
 
+#include "wx/datectrl.h"
+
+// use this version if we're explicitly requested to do it or if it's the only
+// one we have
+#if !defined(wxHAS_NATIVE_DATEPICKCTRL) || \
+        (defined(wxUSE_DATEPICKCTRL_GENERIC) && wxUSE_DATEPICKCTRL_GENERIC)
+
 #ifndef WX_PRECOMP
     #include "wx/dialog.h"
     #include "wx/dcmemory.h"
-    #include "wx/intl.h"
     #include "wx/panel.h"
     #include "wx/textctrl.h"
     #include "wx/valtext.h"
 #endif
 
+#ifdef wxHAS_NATIVE_DATEPICKCTRL
+    // this header is not included from wx/datectrl.h if we have a native
+    // version, but we do need it here
+    #include "wx/generic/datectrl.h"
+#else
+    // we need to define _WX_DEFINE_DATE_EVENTS_ before including wx/dateevt.h to
+    // define the event types we use if we're the only date picker control version
+    // being compiled -- otherwise it's defined in the native version implementation
+    #define _WX_DEFINE_DATE_EVENTS_
+#endif
+
+#include "wx/dateevt.h"
+
 #include "wx/calctrl.h"
 #include "wx/combo.h"
-
-#include "wx/datectrl.h"
-#include "wx/generic/datectrl.h"
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
+#if defined(__WXMSW__)
+    #define CALBORDER         0
+#else
+    #define CALBORDER         4
+#endif
 
 // ----------------------------------------------------------------------------
 // global variables
@@ -75,13 +96,42 @@ public:
     {
         if ( !wxCalendarCtrl::Create(parent, wxID_ANY, wxDefaultDateTime,
                               wxPoint(0, 0), wxDefaultSize,
-                              wxCAL_SEQUENTIAL_MONTH_SELECTION
-                              | wxCAL_SHOW_HOLIDAYS | wxBORDER_SUNKEN) )
+                              wxCAL_SHOW_HOLIDAYS | wxBORDER_SUNKEN) )
             return false;
 
-        SetFormat(GetLocaleDateFormat());
+        wxWindow *yearControl = wxCalendarCtrl::GetYearControl();
 
-        m_useSize  = wxCalendarCtrl::GetBestSize();
+        wxClientDC dc(yearControl);
+        dc.SetFont(yearControl->GetFont());
+        wxCoord width, dummy;
+        dc.GetTextExtent(wxT("2000"), &width, &dummy);
+        width += ConvertDialogToPixels(wxSize(20, 0)).x;
+
+        wxSize calSize = wxCalendarCtrl::GetBestSize();
+        wxSize yearSize = yearControl->GetSize();
+        yearSize.x = width;
+
+        wxPoint yearPosition = yearControl->GetPosition();
+
+        SetFormat(wxT("%x"));
+
+        width = yearPosition.x + yearSize.x+2+CALBORDER/2;
+        if (width < calSize.x-4)
+            width = calSize.x-4;
+
+        int calPos = (width-calSize.x)/2;
+        if (calPos == -1)
+        {
+            calPos = 0;
+            width += 2;
+        }
+        wxCalendarCtrl::SetSize(calPos, 0, calSize.x, calSize.y);
+        yearControl->SetSize(width-yearSize.x-CALBORDER/2, yearPosition.y,
+                             yearSize.x, yearSize.y);
+        wxCalendarCtrl::GetMonthControl()->Move(0, 0);
+
+        m_useSize.x = width+CALBORDER/2;
+        m_useSize.y = calSize.y-2+CALBORDER;
 
         wxWindow* tx = m_combo->GetTextCtrl();
         if ( !tx )
@@ -113,7 +163,7 @@ public:
         else // invalid date
         {
             wxASSERT_MSG( HasDPFlag(wxDP_ALLOWNONE),
-                            wxT("this control must have a valid date") );
+                            _T("this control must have a valid date") );
 
             m_combo->SetText(wxEmptyString);
         }
@@ -130,7 +180,7 @@ public:
 
         if ( !s.empty() )
         {
-            pDt->ParseFormat(s.c_str(), m_format);
+            pDt->ParseFormat(s, m_format);
             if ( !pDt->IsValid() )
                 return false;
         }
@@ -140,10 +190,14 @@ public:
 
     void SendDateEvent(const wxDateTime& dt)
     {
+        //
         // Sends both wxCalendarEvent and wxDateEvent
         wxWindow* datePicker = m_combo->GetParent();
 
-        wxCalendarEvent cev(datePicker, dt, wxEVT_CALENDAR_SEL_CHANGED);
+        wxCalendarEvent cev((wxCalendarCtrl*) this, wxEVT_CALENDAR_SEL_CHANGED);
+        cev.SetEventObject(datePicker);
+        cev.SetId(datePicker->GetId());
+        cev.SetDate(dt);
         datePicker->GetEventHandler()->ProcessEvent(cev);
 
         wxDateEvent event(datePicker, dt, wxEVT_DATE_CHANGED);
@@ -190,7 +244,7 @@ private:
 
         if ( !dt.IsValid() && HasDPFlag(wxDP_ALLOWNONE) )
             return;
-
+        
         // notify that we had to change the date after validation
         if ( (dt.IsValid() && (!dtOld.IsValid() || dt != dtOld)) ||
                 (!dt.IsValid() && dtOld.IsValid()) )
@@ -200,30 +254,54 @@ private:
         }
     }
 
-    bool HasDPFlag(int flag) const
+    bool HasDPFlag(int flag)
     {
         return m_combo->GetParent()->HasFlag(flag);
     }
 
-    // Return the format to be used for the dates shown by the control. This
-    // functions honours wxDP_SHOWCENTURY flag.
-    wxString GetLocaleDateFormat() const
+    bool SetFormat(const wxChar *fmt)
     {
-        wxString fmt = wxLocale::GetInfo(wxLOCALE_SHORT_DATE_FMT);
-        if ( HasDPFlag(wxDP_SHOWCENTURY) )
-            fmt.Replace("%y", "%Y");
+        m_format.clear();
 
-        return fmt;
-    }
+        wxDateTime dt;
+        dt.ParseFormat(wxT("2003-10-13"), wxT("%Y-%m-%d"));
+        wxString str(dt.Format(fmt));
 
-    bool SetFormat(const wxString& fmt)
-    {
-        m_format = fmt;
+        const wxChar *p = str.c_str();
+        while ( *p )
+        {
+            int n=wxAtoi(p);
+            if (n == dt.GetDay())
+            {
+                m_format.Append(wxT("%d"));
+                p += 2;
+            }
+            else if (n == (int)dt.GetMonth()+1)
+            {
+                m_format.Append(wxT("%m"));
+                p += 2;
+            }
+            else if (n == dt.GetYear())
+            {
+                m_format.Append(wxT("%Y"));
+                p += 4;
+            }
+            else if (n == (dt.GetYear() % 100))
+            {
+                if ( HasDPFlag(wxDP_SHOWCENTURY) )
+                    m_format.Append(wxT("%Y"));
+                else
+                    m_format.Append(wxT("%y"));
+                p += 2;
+            }
+            else
+                m_format.Append(*p++);
+        }
 
         if ( m_combo )
         {
             wxArrayString allowedChars;
-            for ( wxChar c = wxT('0'); c <= wxT('9'); c++ )
+            for ( wxChar c = _T('0'); c <= _T('9'); c++ )
                 allowedChars.Add(wxString(c, 1));
 
             const wxChar *p2 = m_format.c_str();
@@ -283,7 +361,9 @@ private:
 BEGIN_EVENT_TABLE(wxCalendarComboPopup, wxCalendarCtrl)
     EVT_KEY_DOWN(wxCalendarComboPopup::OnCalKey)
     EVT_CALENDAR_SEL_CHANGED(wxID_ANY, wxCalendarComboPopup::OnSelChange)
-    EVT_CALENDAR_PAGE_CHANGED(wxID_ANY, wxCalendarComboPopup::OnSelChange)
+    EVT_CALENDAR_DAY(wxID_ANY, wxCalendarComboPopup::OnSelChange)
+    EVT_CALENDAR_MONTH(wxID_ANY, wxCalendarComboPopup::OnSelChange)
+    EVT_CALENDAR_YEAR(wxID_ANY, wxCalendarComboPopup::OnSelChange)
     EVT_CALENDAR(wxID_ANY, wxCalendarComboPopup::OnSelChange)
 END_EVENT_TABLE()
 
@@ -316,7 +396,7 @@ bool wxDatePickerCtrlGeneric::Create(wxWindow *parent,
                                      const wxString& name)
 {
     wxASSERT_MSG( !(style & wxDP_SPIN),
-                  wxT("wxDP_SPIN style not supported, use wxDP_DEFAULT") );
+                  _T("wxDP_SPIN style not supported, use wxDP_DEFAULT") );
 
     if ( !wxControl::Create(parent, id, pos, size,
                             style | wxCLIP_CHILDREN | wxWANTS_CHARS | wxBORDER_NONE,
@@ -333,6 +413,7 @@ bool wxDatePickerCtrlGeneric::Create(wxWindow *parent,
     m_combo->SetCtrlMainWnd(this);
 
     m_popup = new wxCalendarComboPopup();
+    m_cal = m_popup;
 
 #if defined(__WXMSW__)
     // without this keyboard navigation in month control doesn't work
@@ -352,6 +433,7 @@ void wxDatePickerCtrlGeneric::Init()
 {
     m_combo = NULL;
     m_popup = NULL;
+    m_cal = NULL;
 }
 
 wxDatePickerCtrlGeneric::~wxDatePickerCtrlGeneric()
@@ -365,6 +447,7 @@ bool wxDatePickerCtrlGeneric::Destroy()
 
     m_combo = NULL;
     m_popup = NULL;
+    m_cal = NULL;
 
     return wxControl::Destroy();
 }
@@ -376,16 +459,6 @@ bool wxDatePickerCtrlGeneric::Destroy()
 wxSize wxDatePickerCtrlGeneric::DoGetBestSize() const
 {
     return m_combo->GetBestSize();
-}
-
-wxWindowList wxDatePickerCtrlGeneric::GetCompositeWindowParts() const
-{
-    wxWindowList parts;
-    if (m_combo)
-        parts.push_back(m_combo);
-    if (m_popup)
-        parts.push_back(m_popup);
-    return parts;
 }
 
 // ----------------------------------------------------------------------------
@@ -416,7 +489,11 @@ void wxDatePickerCtrlGeneric::SetValue(const wxDateTime& date)
 
 bool wxDatePickerCtrlGeneric::GetRange(wxDateTime *dt1, wxDateTime *dt2) const
 {
-    return m_popup->GetDateRange(dt1, dt2);
+    if (dt1)
+        *dt1 = m_popup->GetLowerDateLimit();
+    if (dt2)
+        *dt2 = m_popup->GetUpperDateLimit();
+    return true;
 }
 
 
@@ -424,11 +501,6 @@ void
 wxDatePickerCtrlGeneric::SetRange(const wxDateTime &dt1, const wxDateTime &dt2)
 {
     m_popup->SetDateRange(dt1, dt2);
-}
-
-wxCalendarCtrl *wxDatePickerCtrlGeneric::GetCalendar() const
-{
-    return m_popup;
 }
 
 // ----------------------------------------------------------------------------
@@ -449,12 +521,12 @@ void wxDatePickerCtrlGeneric::OnText(wxCommandEvent &ev)
 {
     ev.SetEventObject(this);
     ev.SetId(GetId());
-    GetParent()->GetEventHandler()->ProcessEvent(ev);
+    GetParent()->ProcessEvent(ev);
 
     // We'll create an additional event if the date is valid.
     // If the date isn't valid, the user's probably in the middle of typing
     wxDateTime dt;
-    if ( !m_popup || !m_popup->ParseDateTime(m_combo->GetValue(), &dt) )
+    if ( !m_popup->ParseDateTime(m_combo->GetValue(), &dt) )
         return;
 
     m_popup->SendDateEvent(dt);
@@ -466,6 +538,8 @@ void wxDatePickerCtrlGeneric::OnFocus(wxFocusEvent& WXUNUSED(event))
     m_combo->SetFocus();
 }
 
+
+#endif // wxUSE_DATEPICKCTRL_GENERIC
 
 #endif // wxUSE_DATEPICKCTRL
 

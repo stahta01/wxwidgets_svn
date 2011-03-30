@@ -19,7 +19,7 @@
 // ========================================================================
 // wxSlider
 // ========================================================================
-class WXDLLIMPEXP_CORE wxSlider: public wxSliderBase, protected wxCocoaNSSlider
+class WXDLLEXPORT wxSlider: public wxSliderBase// , protected wxCocoaNSSlider
 {
     DECLARE_DYNAMIC_CLASS(wxSlider)
     DECLARE_EVENT_TABLE()
@@ -56,17 +56,18 @@ public:
 protected:
     // Override this so we can use wxCocoaNSControl's target
     void AssociateNSSlider(WX_NSSlider theSlider);
+    void DisassociateNSSlider(WX_NSSlider theSlider);
 
     // Helper method to do the real work
-    virtual void ProcessEventType(wxEventType commandType);
+    void ProcessEventType(wxEventType commandType);
 
     // from wxCocoaNSControl:
     virtual void CocoaTarget_action();
 
     // from wxCocoaNSSlider:
-    virtual void CocoaNotification_startTracking(WX_NSNotification notification);
-    virtual void CocoaNotification_continueTracking(WX_NSNotification notification);
-    virtual void CocoaNotification_stopTracking(WX_NSNotification notification);
+    /*virtual*/ void CocoaNotification_startTracking(WX_NSNotification notification);
+    /*virtual*/ void CocoaNotification_continueTracking(WX_NSNotification notification);
+    /*virtual*/ void CocoaNotification_stopTracking(WX_NSNotification notification);
 
 // ------------------------------------------------------------------------
 // Implementation
@@ -92,16 +93,14 @@ public:
     // these methods get/set the length of the slider pointer in pixels
     virtual void SetThumbLength(int lenPixels);
     virtual int GetThumbLength() const;
-
+    
     // copied from (wxSliderCocoa.h)
+    virtual void SetTickFreq(int n, int pos);
     virtual int GetTickFreq() const;
-    virtual void ClearTicks() { SetTickFreq(0); }
+    virtual void ClearTicks() { SetTickFreq(0, 0); }
 
     virtual void SetTickPos(int pos);
 
-protected:
-    // Platform-specific implementation of SetTickFreq
-    virtual void DoSetTickFreq(int freq);
 };
 
 #endif

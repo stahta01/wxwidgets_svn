@@ -42,7 +42,22 @@
 #endif
 
 
+const wxChar wxBitmapComboBoxNameStr[] = wxT("bitmapComboBox");
+
+
+// These macros allow wxArrayPtrVoid to be used in more convenient manner
+#define GetBitmapPtr(n)     ((wxBitmap*)m_bitmaps[n])
+
+
+#define IMAGE_SPACING_RIGHT         4  // Space left of image
+
+#define IMAGE_SPACING_LEFT          4  // Space right of image, left of text
+
+#define IMAGE_SPACING_VERTICAL      2  // Space top and bottom of image
+
 #define IMAGE_SPACING_CTRL_VERTICAL 7  // Spacing used in control size calculation
+
+#define EXTRA_FONT_HEIGHT           0  // Add to increase min. height of list items
 
 
 // ============================================================================
@@ -59,6 +74,8 @@ IMPLEMENT_DYNAMIC_CLASS(wxBitmapComboBox, wxOwnerDrawnComboBox)
 
 void wxBitmapComboBox::Init()
 {
+    m_fontHeight = 0;
+    m_imgAreaWidth = 0;
     m_inResize = false;
 }
 
@@ -97,7 +114,7 @@ bool wxBitmapComboBox::Create(wxWindow *parent,
         return false;
     }
 
-    UpdateInternals();
+    PostCreate();
 
     return true;
 }
@@ -121,14 +138,22 @@ bool wxBitmapComboBox::Create(wxWindow *parent,
         return false;
     }
 
-    UpdateInternals();
+    PostCreate();
 
     return true;
 }
 
+void wxBitmapComboBox::PostCreate()
+{
+    m_fontHeight = GetCharHeight() + EXTRA_FONT_HEIGHT;
+
+    while ( m_bitmaps.GetCount() < GetCount() )
+        m_bitmaps.Add( new wxBitmap() );
+}
+
 wxBitmapComboBox::~wxBitmapComboBox()
 {
-    DoClear();
+    Clear();
 }
 
 // ----------------------------------------------------------------------------
@@ -137,42 +162,100 @@ wxBitmapComboBox::~wxBitmapComboBox()
 
 void wxBitmapComboBox::SetItemBitmap(unsigned int n, const wxBitmap& bitmap)
 {
+    wxCHECK_RET( n < GetCount(), wxT("invalid item index") );
     OnAddBitmap(bitmap);
-    DoSetItemBitmap(n, bitmap);
+    *GetBitmapPtr(n) = bitmap;
 
     if ( (int)n == GetSelection() )
         Refresh();
 }
 
-int wxBitmapComboBox::DoInsertItems(const wxArrayStringsAdapter & items,
-                                    unsigned int pos,
-                                    void **clientData, wxClientDataType type)
+wxBitmap wxBitmapComboBox::GetItemBitmap(unsigned int n) const
 {
-    const unsigned int numItems = items.GetCount();
-    const unsigned int countNew = GetCount() + numItems;
+    wxCHECK_MSG( n < GetCount(), wxNullBitmap, wxT("invalid item index") );
+    return *GetBitmapPtr(n);
+}
 
-    wxASSERT( numItems == 1 || !HasFlag(wxCB_SORT) );  // Sanity check
+int wxBitmapComboBox::Insert(const wxString& item, const wxBitmap& bitmap,
+                             unsigned int pos, void *clientData)
+{
+    int n = DoInsertWithImage(item, bitmap, pos);
+    if ( n != wxNOT_FOUND )
+        SetClientData(n, clientData);
 
-    m_bitmaps.Alloc(countNew);
+    return n;
+}
 
-    for ( unsigned int i = 0; i < numItems; i++ )
+int wxBitmapComboBox::Insert(const wxString& item, const wxBitmap& bitmap,
+                             unsigned int pos, wxClientData *clientData)
+{
+    int n = DoInsertWithImage(item, bitmap, pos);
+    if ( n != wxNOT_FOUND )
+        SetClientObject(n, clientData);
+
+    return n;
+}
+
+bool wxBitmapComboBox::OnAddBitmap(const wxBitmap& bitmap)
+{
+    if ( bitmap.Ok() )
     {
-        m_bitmaps.Insert(new wxBitmap(wxNullBitmap), pos + i);
+        int width = bitmap.GetWidth();
+        int height = bitmap.GetHeight();
+
+        if ( m_usedImgSize.x <= 0 )
+        {
+            //
+            // If size not yet determined, get it from this image.
+            m_usedImgSize.x = width;
+            m_usedImgSize.y = height;
+
+            InvalidateBestSize();
+            wxSize newSz = GetBestSize();
+            wxSize sz = GetSize();
+            if ( newSz.y > sz.y )
+                SetSize(sz.x, newSz.y);
+            else
+                DetermineIndent();
+        }
+
+        wxCHECK_MSG(width == m_usedImgSize.x && height == m_usedImgSize.y,
+                    false,
+                    wxT("you can only add images of same size"));
     }
 
-    const int index = wxOwnerDrawnComboBox::DoInsertItems(items, pos,
-                                                          clientData, type);
+    return true;
+}
 
-    if ( index == wxNOT_FOUND )
+bool wxBitmapComboBox::DoInsertBitmap(const wxBitmap& bitmap, unsigned int pos)
+{
+    if ( !OnAddBitmap(bitmap) )
+        return false;
+
+    // NB: We must try to set the image before DoInsert or
+    //     DoAppend because OnMeasureItem might be called
+    //     before it returns.
+    m_bitmaps.Insert( new wxBitmap(bitmap), pos);
+
+    return true;
+}
+
+int wxBitmapComboBox::DoAppendWithImage(const wxString& item, const wxBitmap& image)
+{
+    unsigned int pos = m_bitmaps.size();
+
+    if ( !DoInsertBitmap(image, pos) )
+        return wxNOT_FOUND;
+
+    int index = wxOwnerDrawnComboBox::DoAppend(item);
+
+    if ( index < 0 )
+        index = m_bitmaps.size();
+
+    // Need to re-check the index incase DoAppend sorted
+    if ( (unsigned int) index != pos )
     {
-        for ( int i = numItems-1; i >= 0; i-- )
-            BCBDoDeleteOneItem(pos + i);
-    }
-    else if ( ((unsigned int)index) != pos )
-    {
-        // Move pre-inserted empty bitmap into correct position
-        // (usually happens when combo box has wxCB_SORT style)
-        wxBitmap* bmp = static_cast<wxBitmap*>(m_bitmaps[pos]);
+        wxBitmap* bmp = GetBitmapPtr(pos);
         m_bitmaps.RemoveAt(pos);
         m_bitmaps.Insert(bmp, index);
     }
@@ -180,75 +263,73 @@ int wxBitmapComboBox::DoInsertItems(const wxArrayStringsAdapter & items,
     return index;
 }
 
-int wxBitmapComboBox::Append(const wxString& item, const wxBitmap& bitmap)
+int wxBitmapComboBox::DoInsertWithImage(const wxString& item,
+                                        const wxBitmap& image,
+                                        unsigned int pos)
 {
-    const int n = wxOwnerDrawnComboBox::Append(item);
-    if(n != wxNOT_FOUND)
-        SetItemBitmap(n, bitmap);
-    return n;
+    wxCHECK_MSG( IsValidInsert(pos), wxNOT_FOUND, wxT("invalid item index") );
+
+    if ( !DoInsertBitmap(image, pos) )
+        return wxNOT_FOUND;
+
+    return wxOwnerDrawnComboBox::DoInsert(item, pos);
 }
 
-int wxBitmapComboBox::Append(const wxString& item, const wxBitmap& bitmap,
-                             void *clientData)
+int wxBitmapComboBox::DoAppend(const wxString& item)
 {
-    const int n = wxOwnerDrawnComboBox::Append(item, clientData);
-    if(n != wxNOT_FOUND)
-        SetItemBitmap(n, bitmap);
-    return n;
+    return DoAppendWithImage(item, wxNullBitmap);
 }
 
-int wxBitmapComboBox::Append(const wxString& item, const wxBitmap& bitmap,
-                             wxClientData *clientData)
+int wxBitmapComboBox::DoInsert(const wxString& item, unsigned int pos)
 {
-    const int n = wxOwnerDrawnComboBox::Append(item, clientData);
-    if(n != wxNOT_FOUND)
-        SetItemBitmap(n, bitmap);
-    return n;
+    return DoInsertWithImage(item, wxNullBitmap, pos);
 }
 
-int wxBitmapComboBox::Insert(const wxString& item,
-                             const wxBitmap& bitmap,
-                             unsigned int pos)
+void wxBitmapComboBox::Clear()
 {
-    const int n = wxOwnerDrawnComboBox::Insert(item, pos);
-    if(n != wxNOT_FOUND)
-        SetItemBitmap(n, bitmap);
-    return n;
+    wxOwnerDrawnComboBox::Clear();
+
+    unsigned int i;
+
+    for ( i=0; i<m_bitmaps.size(); i++ )
+        delete GetBitmapPtr(i);
+
+    m_bitmaps.Empty();
+
+    m_usedImgSize.x = 0;
+    m_usedImgSize.y = 0;
+
+    DetermineIndent();
 }
 
-int wxBitmapComboBox::Insert(const wxString& item, const wxBitmap& bitmap,
-                             unsigned int pos, void *clientData)
+void wxBitmapComboBox::Delete(unsigned int n)
 {
-    const int n = wxOwnerDrawnComboBox::Insert(item, pos, clientData);
-    if(n != wxNOT_FOUND)
-        SetItemBitmap(n, bitmap);
-    return n;
-}
-
-int wxBitmapComboBox::Insert(const wxString& item, const wxBitmap& bitmap,
-                             unsigned int pos, wxClientData *clientData)
-{
-    const int n = wxOwnerDrawnComboBox::Insert(item, pos, clientData);
-    if(n != wxNOT_FOUND)
-        SetItemBitmap(n, bitmap);
-    return n;
-}
-
-void wxBitmapComboBox::DoClear()
-{
-    wxOwnerDrawnComboBox::DoClear();
-    wxBitmapComboBoxBase::BCBDoClear();
-}
-
-void wxBitmapComboBox::DoDeleteOneItem(unsigned int n)
-{
-    wxOwnerDrawnComboBox::DoDeleteOneItem(n);
-    wxBitmapComboBoxBase::BCBDoDeleteOneItem(n);
+    wxOwnerDrawnComboBox::Delete(n);
+    delete GetBitmapPtr(n);
+    m_bitmaps.RemoveAt(n);
 }
 
 // ----------------------------------------------------------------------------
 // wxBitmapComboBox event handlers and such
 // ----------------------------------------------------------------------------
+
+void wxBitmapComboBox::DetermineIndent()
+{
+    //
+    // Recalculate amount of empty space needed in front of
+    // text in control itself.
+    int indent = m_imgAreaWidth = 0;
+
+    if ( m_usedImgSize.x > 0 )
+    {
+        indent = m_usedImgSize.x + IMAGE_SPACING_LEFT + IMAGE_SPACING_RIGHT;
+        m_imgAreaWidth = indent;
+
+        indent -= 3;
+    }
+
+    SetCustomPaintWidth(indent);
+}
 
 void wxBitmapComboBox::OnSize(wxSizeEvent& event)
 {
@@ -267,17 +348,13 @@ wxSize wxBitmapComboBox::DoGetBestSize() const
 {
     wxSize sz = wxOwnerDrawnComboBox::DoGetBestSize();
 
-    if ( HasFlag(wxCB_READONLY) )
-    {
-        // Scale control to match height of highest image.
-        int h2 = m_usedImgSize.y + IMAGE_SPACING_CTRL_VERTICAL;
+    // Scale control to match height of highest image.
+    int h2 = m_usedImgSize.y + IMAGE_SPACING_CTRL_VERTICAL;
 
-        if ( h2 > sz.y )
-            sz.y = h2;
+    if ( h2 > sz.y )
+        sz.y = h2;
 
-        CacheBestSize(sz);
-    }
-
+    CacheBestSize(sz);
     return sz;
 }
 
@@ -288,7 +365,7 @@ wxSize wxBitmapComboBox::DoGetBestSize() const
 bool wxBitmapComboBox::SetFont(const wxFont& font)
 {
     bool res = wxOwnerDrawnComboBox::SetFont(font);
-    UpdateInternals();
+    m_fontHeight = GetCharHeight() + EXTRA_FONT_HEIGHT;
     return res;
 }
 
@@ -303,14 +380,34 @@ void wxBitmapComboBox::OnDrawBackground(wxDC& dc,
 {
     if ( GetCustomPaintWidth() == 0 ||
          !(flags & wxODCB_PAINTING_SELECTED) ||
-         item < 0 ||
-         ( (flags & wxODCB_PAINTING_CONTROL) && (GetInternalFlags() & wxCC_FULL_BUTTON)) )
+         item < 0 )
     {
         wxOwnerDrawnComboBox::OnDrawBackground(dc, rect, item, flags);
         return;
     }
 
-    wxBitmapComboBoxBase::DrawBackground(dc, rect, item, flags);
+    //
+    // Just paint simple selection background under where is text
+    // (ie. emulate what MSW image choice does).
+    //
+
+    int xPos = 0;  // Starting x of selection rectangle
+    const int vSizeDec = 1;  // Vertical size reduction of selection rectangle edges
+
+    xPos = GetCustomPaintWidth() + 2;
+
+    wxCoord x, y;
+    GetTextExtent(GetString(item), &x, &y, 0, 0);
+
+    dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT));
+
+    wxColour selCol = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
+    dc.SetPen(selCol);
+    dc.SetBrush(selCol);
+    dc.DrawRectangle(rect.x+xPos,
+                     rect.y+vSizeDec,
+                     x + 4,
+                     rect.height-(vSizeDec*2));
 }
 
 void wxBitmapComboBox::OnDrawItem(wxDC& dc,
@@ -320,6 +417,7 @@ void wxBitmapComboBox::OnDrawItem(wxDC& dc,
 {
     wxString text;
     int imgAreaWidth = m_imgAreaWidth;
+    bool drawText;
 
     if ( imgAreaWidth == 0 )
     {
@@ -330,20 +428,40 @@ void wxBitmapComboBox::OnDrawItem(wxDC& dc,
     if ( flags & wxODCB_PAINTING_CONTROL )
     {
         text = GetValue();
-        if ( !HasFlag(wxCB_READONLY) )
-            text.clear();
+        if ( HasFlag(wxCB_READONLY) )
+            drawText = true;
+        else
+            drawText = false;
     }
     else
     {
         text = GetString(item);
+        drawText = true;
     }
 
-    wxBitmapComboBoxBase::DrawItem(dc, rect, item, text, flags);
+    const wxBitmap& bmp = *GetBitmapPtr(item);
+    if ( bmp.Ok() )
+    {
+        wxCoord w = bmp.GetWidth();
+        wxCoord h = bmp.GetHeight();
+
+        // Draw the image centered
+        dc.DrawBitmap(bmp,
+                      rect.x + (m_usedImgSize.x-w)/2 + IMAGE_SPACING_LEFT,
+                      rect.y + (rect.height-h)/2,
+                      true);
+    }
+
+    if ( drawText )
+        dc.DrawText(GetString(item),
+                    rect.x + imgAreaWidth + 1,
+                    rect.y + (rect.height-dc.GetCharHeight())/2);
 }
 
-wxCoord wxBitmapComboBox::OnMeasureItem(size_t item) const
+wxCoord wxBitmapComboBox::OnMeasureItem(size_t WXUNUSED(item)) const
 {
-    return wxBitmapComboBoxBase::MeasureItem(item);
+    int imgHeightArea = m_usedImgSize.y + 2;
+    return imgHeightArea > m_fontHeight ? imgHeightArea : m_fontHeight;
 }
 
 wxCoord wxBitmapComboBox::OnMeasureItemWidth(size_t item) const

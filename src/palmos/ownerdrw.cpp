@@ -45,7 +45,8 @@ public:
 
     virtual void OnExit()
     {
-        wxDELETE(ms_systemMenuFont);
+        delete ms_systemMenuFont;
+        ms_systemMenuFont = NULL;
     }
 
     static wxFont* ms_systemMenuFont;

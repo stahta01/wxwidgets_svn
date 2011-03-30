@@ -39,6 +39,8 @@
 // implementation
 // ============================================================================
 
+IMPLEMENT_ABSTRACT_CLASS(wxStaticText, wxControl)
+
 // ----------------------------------------------------------------------------
 // creation
 // ----------------------------------------------------------------------------
@@ -61,6 +63,26 @@ bool wxStaticText::Create(wxWindow *parent,
 }
 
 // ----------------------------------------------------------------------------
+// size management
+// ----------------------------------------------------------------------------
+
+void wxStaticText::SetLabel(const wxString& label)
+{
+    wxControl::SetLabel(label);
+}
+
+wxSize wxStaticText::DoGetBestClientSize() const
+{
+    wxStaticText *self = wxConstCast(this, wxStaticText);
+    wxClientDC dc(self);
+    dc.SetFont(GetFont());
+    wxCoord width, height;
+    dc.GetMultiLineTextExtent(GetLabel(), &width, &height);
+
+    return wxSize(width, height);
+}
+
+// ----------------------------------------------------------------------------
 // drawing
 // ----------------------------------------------------------------------------
 
@@ -68,29 +90,5 @@ void wxStaticText::DoDraw(wxControlRenderer *renderer)
 {
     renderer->DrawLabel();
 }
-
-void wxStaticText::SetLabel(const wxString& str)
-{
-    // save original label
-    m_labelOrig = str;
-
-    // draw as real label the abbreviated version of it
-    DoSetLabel(GetEllipsizedLabel());
-}
-
-void wxStaticText::DoSetLabel(const wxString& str)
-{
-    UnivDoSetLabel(str);
-}
-
-wxString wxStaticText::DoGetLabel() const
-{
-    return wxControl::GetLabel();
-}
-
-/*
-   FIXME: UpdateLabel() should be called on size events to allow correct
-          dynamic ellipsizing of the label
-*/
 
 #endif // wxUSE_STATTEXT

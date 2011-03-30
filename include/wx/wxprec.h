@@ -20,7 +20,7 @@
     defined(__MWERKS__)    || \
     defined(__WATCOMC__)   || \
     defined(__BORLANDC__)
-
+         
 
     // If user did not request NOCPH and we're not building using configure
     // then assume user wants precompiled headers.
@@ -36,9 +36,9 @@
 
 #ifdef WX_PRECOMP
 
-// include "wx/chartype.h" first to ensure that UNICODE macro is correctly set
+// include "wx/wxchar.h" first to ensure that UNICODE macro is correctly set
 // _before_ including <windows.h>
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 
 // include standard Windows headers
 #if defined(__WXMSW__)

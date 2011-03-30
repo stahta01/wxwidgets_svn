@@ -17,7 +17,7 @@
 // ========================================================================
 // wxBitmapButton
 // ========================================================================
-class WXDLLIMPEXP_CORE wxBitmapButton : public wxBitmapButtonBase
+class WXDLLEXPORT wxBitmapButton : public wxBitmapButtonBase
 {
     DECLARE_DYNAMIC_CLASS(wxBitmapButton)
     DECLARE_EVENT_TABLE()

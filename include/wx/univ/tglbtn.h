@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/univ/tglbtn.h
+// Name:        wx/univ/button.h
 // Purpose:     wxToggleButton for wxUniversal
 // Author:      Vadim Zeitlin
 // Modified by: David Bjorkevik
@@ -13,6 +13,8 @@
 #define _WX_UNIV_TGLBTN_H_
 
 #include "wx/button.h"
+
+extern WXDLLEXPORT_DATA(const wxChar) wxCheckBoxNameStr[];
 
 // ----------------------------------------------------------------------------
 // wxToggleButton: a push button
@@ -55,8 +57,6 @@ public:
     bool GetValue() const { return m_value; }
 
 protected:
-    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
-
     // the current value
     bool m_value;
 

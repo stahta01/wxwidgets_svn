@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/spinbutt.mm
+// Name:        cocoa/spinbutt.mm
 // Purpose:     wxSpinButton
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/07/14
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:   	wxWindows licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -19,6 +19,9 @@
 
 #import <AppKit/NSStepper.h>
 
+IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
+
+IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
 BEGIN_EVENT_TABLE(wxSpinButton, wxSpinButtonBase)
 END_EVENT_TABLE()
 // WX_IMPLEMENT_COCOA_OWNER(wxSpinButton,NSStepper,NSControl,NSView)
@@ -77,7 +80,7 @@ void wxSpinButton::CocoaTarget_action()
     wxSpinEvent event(wxEVT_SCROLL_THUMBTRACK, GetId());
     event.SetPosition(GetValue());
     event.SetEventObject(this);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 }
 
 #endif // wxUSE_SPINBTN

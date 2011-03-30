@@ -21,7 +21,6 @@
 
 #ifndef WX_PRECOMP
     #include "wx/frame.h"
-    #include "wx/log.h"
     #include "wx/menu.h"
 #endif
 
@@ -89,15 +88,7 @@ wxObject *wxMenuXmlHandler::DoCreateResource()
                 kind = wxITEM_RADIO;
             if (GetBool(wxT("checkable")))
             {
-                if ( kind != wxITEM_NORMAL )
-                {
-                    ReportParamError
-                    (
-                        "checkable",
-                        "menu item can't have both <radio> and <checkable> properties"
-                    );
-                }
-
+                wxASSERT_MSG( kind == wxITEM_NORMAL, _T("can't have both checkable and radion button at once") );
                 kind = wxITEM_CHECK;
             }
 
@@ -106,17 +97,7 @@ wxObject *wxMenuXmlHandler::DoCreateResource()
 
 #if (!defined(__WXMSW__) && !defined(__WXPM__)) || wxUSE_OWNER_DRAWN
             if (HasParam(wxT("bitmap")))
-            {
-                // currently only wxMSW has support for using different checked
-                // and unchecked bitmaps for menu items
-#ifdef __WXMSW__
-                if (HasParam(wxT("bitmap2")))
-                    mitem->SetBitmaps(GetBitmap(wxT("bitmap2"), wxART_MENU),
-                                      GetBitmap(wxT("bitmap"), wxART_MENU));
-                else
-#endif // __WXMSW__
-                    mitem->SetBitmap(GetBitmap(wxT("bitmap"), wxART_MENU));
-            }
+                mitem->SetBitmap(GetBitmap(wxT("bitmap"), wxART_MENU));
 #endif
             p_menu->Append(mitem);
             mitem->Enable(GetBool(wxT("enabled"), true));
@@ -152,7 +133,7 @@ wxObject *wxMenuBarXmlHandler::DoCreateResource()
 
     const int style = GetStyle();
     wxASSERT_MSG(!style || !m_instance,
-                 "cannot use <style> with pre-created menubar");
+                 wxT("cannot use <style> with pre-created menubar"));
 
     if ( m_instance )
         menubar = wxDynamicCast(m_instance, wxMenuBar);

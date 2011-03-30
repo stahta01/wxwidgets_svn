@@ -28,6 +28,8 @@
 // macros
 // ---------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap, wxControl)
+
 BEGIN_EVENT_TABLE(wxStaticBitmap, wxWindow)
     EVT_PAINT(wxStaticBitmap::OnPaint)
 END_EVENT_TABLE()
@@ -41,7 +43,7 @@ static wxGDIImage* ConvertImage(
     if(!bIsIcon )
     {
         wxASSERT_MSG( wxDynamicCast(&rBitmap, wxBitmap),
-                      wxT("not an icon and not a bitmap?") );
+                      _T("not an icon and not a bitmap?") );
 
         const wxBitmap&             rBmp = (const wxBitmap&)rBitmap;
         wxMask*                     pMask = rBmp.GetMask();
@@ -139,7 +141,9 @@ bool wxStaticBitmap::ImageIsOk() const
 
 void wxStaticBitmap::Free()
 {
-    wxDELETE(m_pImage);
+    if (m_pImage)
+        delete m_pImage;
+    m_pImage = NULL;
 } // end of wxStaticBitmap::Free
 
 wxSize wxStaticBitmap::DoGetBestSize() const

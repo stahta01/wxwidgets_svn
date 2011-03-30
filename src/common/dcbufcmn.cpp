@@ -34,9 +34,6 @@
 // implementation
 // ============================================================================
 
-IMPLEMENT_DYNAMIC_CLASS(wxBufferedDC,wxMemoryDC)
-IMPLEMENT_ABSTRACT_CLASS(wxBufferedPaintDC,wxBufferedDC)
-
 // ----------------------------------------------------------------------------
 // wxSharedDCBufferManager: helper class maintaining backing store bitmap
 // ----------------------------------------------------------------------------
@@ -51,9 +48,6 @@ public:
 
     static wxBitmap* GetBuffer(int w, int h)
     {
-        if ( ms_usingSharedBuffer )
-            return new wxBitmap(w, h);
-
         if ( !ms_buffer ||
                 w > ms_buffer->GetWidth() ||
                     h > ms_buffer->GetHeight() )
@@ -69,33 +63,16 @@ public:
 
             ms_buffer = new wxBitmap(w, h);
         }
-
-        ms_usingSharedBuffer = true;
         return ms_buffer;
-    }
-
-    static void ReleaseBuffer(wxBitmap* buffer)
-    {
-        if ( buffer == ms_buffer )
-        {
-            wxASSERT_MSG( ms_usingSharedBuffer, wxT("shared buffer already released") );
-            ms_usingSharedBuffer = false;
-        }
-        else
-        {
-            delete buffer;
-        }
     }
 
 private:
     static wxBitmap *ms_buffer;
-    static bool ms_usingSharedBuffer;
 
     DECLARE_DYNAMIC_CLASS(wxSharedDCBufferManager)
 };
 
 wxBitmap* wxSharedDCBufferManager::ms_buffer = NULL;
-bool wxSharedDCBufferManager::ms_usingSharedBuffer = false;
 
 IMPLEMENT_DYNAMIC_CLASS(wxSharedDCBufferManager, wxModule)
 
@@ -111,48 +88,8 @@ void wxBufferedDC::UseBuffer(wxCoord w, wxCoord h)
             m_dc->GetSize(&w, &h);
 
         m_buffer = wxSharedDCBufferManager::GetBuffer(w, h);
-        m_style |= wxBUFFER_USES_SHARED_BUFFER;
     }
 
     SelectObject(*m_buffer);
-
-    // now that the DC is valid we can inherit the attributes (fonts, colours,
-    // layout direction, ...) from the original DC
-    if ( m_dc && m_dc->IsOk() )
-        CopyAttributes(*m_dc);
 }
 
-void wxBufferedDC::UnMask()
-{
-    wxCHECK_RET( m_dc, wxT("no underlying wxDC?") );
-    wxASSERT_MSG( m_buffer && m_buffer->IsOk(), wxT("invalid backing store") );
-
-    wxCoord x = 0,
-            y = 0;
-
-    // Ensure the scale matches the device
-    SetUserScale(1.0, 1.0);
-
-    if ( m_style & wxBUFFER_CLIENT_AREA )
-        GetDeviceOrigin(&x, &y);
-
-    // avoid blitting too much: if we were created for a bigger bitmap (and
-    // reused for a smaller one later) we should only blit the real bitmap area
-    // and not the full allocated back buffer
-    int widthDC,
-        heightDC;
-
-    m_dc->GetSize(&widthDC, &heightDC);
-
-    int widthBuf = m_buffer->GetWidth(),
-        heightBuf = m_buffer->GetHeight();
-
-    m_dc->Blit(0, 0,
-               wxMin(widthDC, widthBuf), wxMin(heightDC, heightBuf),
-               this,
-               -x, -y);
-    m_dc = NULL;
-
-    if ( m_style & wxBUFFER_USES_SHARED_BUFFER )
-        wxSharedDCBufferManager::ReleaseBuffer(m_buffer);
-}

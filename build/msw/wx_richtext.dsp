@@ -18,12 +18,20 @@ CFG=richtext - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
+!MESSAGE "richtext - Win32 DLL Universal Unicode Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "richtext - Win32 DLL Universal Unicode Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "richtext - Win32 DLL Universal Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "richtext - Win32 DLL Universal Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "richtext - Win32 DLL Unicode Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "richtext - Win32 DLL Unicode Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "richtext - Win32 DLL Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "richtext - Win32 DLL Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "richtext - Win32 Universal Unicode Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "richtext - Win32 Universal Unicode Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "richtext - Win32 Universal Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "richtext - Win32 Universal Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "richtext - Win32 Unicode Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "richtext - Win32 Unicode Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "richtext - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "richtext - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
@@ -35,32 +43,32 @@ CFG=richtext - Win32 Debug
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+!IF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Release"
 
 # PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "..\..\lib\vc_dll"
 # PROP BASE Intermediate_Dir "vc_mswunivudll\richtext"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
+# PROP Use_Debug_Libraries 0
 # PROP Output_Dir "..\..\lib\vc_dll"
 # PROP Intermediate_Dir "vc_mswunivudll\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswunivu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivudll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv292u_richtext_vc_custom.pdb /opt:ref /opt:icf /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
-# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswunivu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivudll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv292u_richtext_vc_custom.pdb /opt:ref /opt:icf /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswunivu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivudll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmswuniv28u_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswunivu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivudll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmswuniv28u_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
 # ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
 # ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv292u_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
-# ADD RSC /l 0x409 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv292u_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD BASE RSC /l 0x409 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28u_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28u_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmswuniv29u_adv.lib ..\..\lib\vc_dll\wxmswuniv29u_html.lib ..\..\lib\vc_dll\wxbase29u_xml.lib ..\..\lib\vc_dll\wxmswuniv29u_core.lib ..\..\lib\vc_dll\wxbase29u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv292u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv29u_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv292u_richtext_vc_custom.pdb"
-# ADD LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmswuniv29u_adv.lib ..\..\lib\vc_dll\wxmswuniv29u_html.lib ..\..\lib\vc_dll\wxbase29u_xml.lib ..\..\lib\vc_dll\wxmswuniv29u_core.lib ..\..\lib\vc_dll\wxbase29u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv292u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv29u_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv292u_richtext_vc_custom.pdb"
+# ADD BASE LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28u_adv.lib ..\..\lib\vc_dll\wxmswuniv28u_html.lib ..\..\lib\vc_dll\wxbase28u_xml.lib ..\..\lib\vc_dll\wxmswuniv28u_core.lib ..\..\lib\vc_dll\wxbase28u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28u_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmswuniv28u_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28u_adv.lib ..\..\lib\vc_dll\wxmswuniv28u_html.lib ..\..\lib\vc_dll\wxbase28u_xml.lib ..\..\lib\vc_dll\wxmswuniv28u_core.lib ..\..\lib\vc_dll\wxbase28u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28u_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmswuniv28u_richtext_vc_custom.pdb"
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -72,45 +80,95 @@ LINK32=link.exe
 # PROP Output_Dir "..\..\lib\vc_dll"
 # PROP Intermediate_Dir "vc_mswunivuddll\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswunivud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv292ud_richtext_vc_custom.pdb /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
-# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswunivud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv292ud_richtext_vc_custom.pdb /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
-# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
-# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv292ud_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
-# ADD RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv292ud_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswunivud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv28ud_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswunivud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv28ud_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28ud_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswunivud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28ud_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmswuniv29ud_adv.lib ..\..\lib\vc_dll\wxmswuniv29ud_html.lib ..\..\lib\vc_dll\wxbase29ud_xml.lib ..\..\lib\vc_dll\wxmswuniv29ud_core.lib ..\..\lib\vc_dll\wxbase29ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv292ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv29ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv292ud_richtext_vc_custom.pdb"
-# ADD LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmswuniv29ud_adv.lib ..\..\lib\vc_dll\wxmswuniv29ud_html.lib ..\..\lib\vc_dll\wxbase29ud_xml.lib ..\..\lib\vc_dll\wxmswuniv29ud_core.lib ..\..\lib\vc_dll\wxbase29ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv292ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv29ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv292ud_richtext_vc_custom.pdb"
+# ADD BASE LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28ud_adv.lib ..\..\lib\vc_dll\wxmswuniv28ud_html.lib ..\..\lib\vc_dll\wxbase28ud_xml.lib ..\..\lib\vc_dll\wxmswuniv28ud_core.lib ..\..\lib\vc_dll\wxbase28ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv28ud_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28ud_adv.lib ..\..\lib\vc_dll\wxmswuniv28ud_html.lib ..\..\lib\vc_dll\wxbase28ud_xml.lib ..\..\lib\vc_dll\wxmswuniv28ud_core.lib ..\..\lib\vc_dll\wxbase28ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv28ud_richtext_vc_custom.pdb"
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "..\..\lib\vc_dll"
+# PROP BASE Intermediate_Dir "vc_mswunivdll\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\..\lib\vc_dll"
+# PROP Intermediate_Dir "vc_mswunivdll\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswuniv" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivdll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmswuniv28_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswuniv" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivdll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmswuniv28_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "NDEBUG" /i "..\..\lib\vc_dll\mswuniv" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "NDEBUG" /i "..\..\lib\vc_dll\mswuniv" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28_adv.lib ..\..\lib\vc_dll\wxmswuniv28_html.lib ..\..\lib\vc_dll\wxbase28_xml.lib ..\..\lib\vc_dll\wxmswuniv28_core.lib ..\..\lib\vc_dll\wxbase28.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmswuniv28_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28_adv.lib ..\..\lib\vc_dll\wxmswuniv28_html.lib ..\..\lib\vc_dll\wxbase28_xml.lib ..\..\lib\vc_dll\wxmswuniv28_core.lib ..\..\lib\vc_dll\wxbase28.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmswuniv28_richtext_vc_custom.pdb"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir "..\..\lib\vc_dll"
-# PROP BASE Intermediate_Dir "vc_mswudll\richtext"
+# PROP BASE Intermediate_Dir "vc_mswunivddll\richtext"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "..\..\lib\vc_dll"
-# PROP Intermediate_Dir "vc_mswudll\richtext"
+# PROP Intermediate_Dir "vc_mswunivddll\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswudll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw292u_richtext_vc_custom.pdb /opt:ref /opt:icf /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
-# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswudll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw292u_richtext_vc_custom.pdb /opt:ref /opt:icf /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
-# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
-# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "__WXMSW__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw292u_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
-# ADD RSC /l 0x409 /d "__WXMSW__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw292u_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswunivd" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv28d_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswunivd" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswunivddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmswuniv28d_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /i "..\..\lib\vc_dll\mswunivd" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28d_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXUNIVERSAL__" /d "__WXDEBUG__" /i "..\..\lib\vc_dll\mswunivd" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmswuniv28d_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmsw29u_adv.lib ..\..\lib\vc_dll\wxmsw29u_html.lib ..\..\lib\vc_dll\wxbase29u_xml.lib ..\..\lib\vc_dll\wxmsw29u_core.lib ..\..\lib\vc_dll\wxbase29u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw292u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw29u_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw292u_richtext_vc_custom.pdb"
-# ADD LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmsw29u_adv.lib ..\..\lib\vc_dll\wxmsw29u_html.lib ..\..\lib\vc_dll\wxbase29u_xml.lib ..\..\lib\vc_dll\wxmsw29u_core.lib ..\..\lib\vc_dll\wxbase29u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw292u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw29u_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw292u_richtext_vc_custom.pdb"
+# ADD BASE LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28d_adv.lib ..\..\lib\vc_dll\wxmswuniv28d_html.lib ..\..\lib\vc_dll\wxbase28d_xml.lib ..\..\lib\vc_dll\wxmswuniv28d_core.lib ..\..\lib\vc_dll\wxbase28d.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28d_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28d_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv28d_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmswuniv28d_adv.lib ..\..\lib\vc_dll\wxmswuniv28d_html.lib ..\..\lib\vc_dll\wxbase28d_xml.lib ..\..\lib\vc_dll\wxmswuniv28d_core.lib ..\..\lib\vc_dll\wxbase28d.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmswuniv28d_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmswuniv28d_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmswuniv28d_richtext_vc_custom.pdb"
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "..\..\lib\vc_dll"
+# PROP BASE Intermediate_Dir "vc_mswudll\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\..\lib\vc_dll"
+# PROP Intermediate_Dir "vc_mswudll\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswudll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmsw28u_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\mswu" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswudll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmsw28u_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "__WXMSW__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28u_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "__WXMSW__" /d "NDEBUG" /d "_UNICODE" /i "..\..\lib\vc_dll\mswu" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28u_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28u_adv.lib ..\..\lib\vc_dll\wxmsw28u_html.lib ..\..\lib\vc_dll\wxbase28u_xml.lib ..\..\lib\vc_dll\wxmsw28u_core.lib ..\..\lib\vc_dll\wxbase28u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28u_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmsw28u_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28u_adv.lib ..\..\lib\vc_dll\wxmsw28u_html.lib ..\..\lib\vc_dll\wxbase28u_xml.lib ..\..\lib\vc_dll\wxmsw28u_core.lib ..\..\lib\vc_dll\wxbase28u.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28u_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28u_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmsw28u_richtext_vc_custom.pdb"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -122,43 +180,93 @@ LINK32=link.exe
 # PROP Output_Dir "..\..\lib\vc_dll"
 # PROP Intermediate_Dir "vc_mswuddll\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw292ud_richtext_vc_custom.pdb /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
-# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw292ud_richtext_vc_custom.pdb /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
-# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
-# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
-# ADD BASE RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw292ud_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
-# ADD RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw292ud_richtext_vc_custom /i "..\..\src\tiff\libtiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw28ud_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswud" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswuddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw28ud_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28ud_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /d "_UNICODE" /i "..\..\lib\vc_dll\mswud" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28ud_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmsw29ud_adv.lib ..\..\lib\vc_dll\wxmsw29ud_html.lib ..\..\lib\vc_dll\wxbase29ud_xml.lib ..\..\lib\vc_dll\wxmsw29ud_core.lib ..\..\lib\vc_dll\wxbase29ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw292ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw29ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw292ud_richtext_vc_custom.pdb"
-# ADD LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib wininet.lib ..\..\lib\vc_dll\wxmsw29ud_adv.lib ..\..\lib\vc_dll\wxmsw29ud_html.lib ..\..\lib\vc_dll\wxbase29ud_xml.lib ..\..\lib\vc_dll\wxmsw29ud_core.lib ..\..\lib\vc_dll\wxbase29ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw292ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw29ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw292ud_richtext_vc_custom.pdb"
+# ADD BASE LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28ud_adv.lib ..\..\lib\vc_dll\wxmsw28ud_html.lib ..\..\lib\vc_dll\wxbase28ud_xml.lib ..\..\lib\vc_dll\wxmsw28ud_core.lib ..\..\lib\vc_dll\wxbase28ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw28ud_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28ud_adv.lib ..\..\lib\vc_dll\wxmsw28ud_html.lib ..\..\lib\vc_dll\wxbase28ud_xml.lib ..\..\lib\vc_dll\wxmsw28ud_core.lib ..\..\lib\vc_dll\wxbase28ud.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28ud_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28ud_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw28ud_richtext_vc_custom.pdb"
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "..\..\lib\vc_dll"
+# PROP BASE Intermediate_Dir "vc_mswdll\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\..\lib\vc_dll"
+# PROP Intermediate_Dir "vc_mswdll\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\msw" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswdll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmsw28_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_dll\msw" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswdll\wxprec_richtextdll.pch" /Fd..\..\lib\vc_dll\wxmsw28_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "__WXMSW__" /D "NDEBUG" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "__WXMSW__" /d "NDEBUG" /i "..\..\lib\vc_dll\msw" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "__WXMSW__" /d "NDEBUG" /i "..\..\lib\vc_dll\msw" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28_adv.lib ..\..\lib\vc_dll\wxmsw28_html.lib ..\..\lib\vc_dll\wxbase28_xml.lib ..\..\lib\vc_dll\wxmsw28_core.lib ..\..\lib\vc_dll\wxbase28.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmsw28_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregex.lib wxexpat.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28_adv.lib ..\..\lib\vc_dll\wxmsw28_html.lib ..\..\lib\vc_dll\wxbase28_xml.lib ..\..\lib\vc_dll\wxmsw28_core.lib ..\..\lib\vc_dll\wxbase28.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28_richtext.lib" /pdb:"..\..\lib\vc_dll\wxmsw28_richtext_vc_custom.pdb"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "..\..\lib\vc_dll"
+# PROP BASE Intermediate_Dir "vc_mswddll\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "..\..\lib\vc_dll"
+# PROP Intermediate_Dir "vc_mswddll\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswd" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw28d_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_dll\mswd" /I "..\..\include" /W4 /Yu"wx/wxprec.h" /Fp"vc_mswddll\wxprec_richtextdll.pch" /Zi /Fd..\..\lib\vc_dll\wxmsw28d_richtext_vc_custom.pdb /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /c
+# ADD BASE MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD MTL /nologo /D "WIN32" /D "_USRDLL" /D "DLL_EXPORTS" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXBUILDING" /D "WXUSINGDLL" /D "WXMAKINGDLL_RICHTEXT" /mktyplib203 /win32
+# ADD BASE RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /i "..\..\lib\vc_dll\mswd" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28d_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+# ADD RSC /l 0x409 /d "_DEBUG" /d "__WXMSW__" /d "__WXDEBUG__" /i "..\..\lib\vc_dll\mswd" /i "..\..\include" /d "WXBUILDING" /d WXDLLNAME=wxmsw28d_richtext_vc_custom /i "..\..\src\tiff" /i "..\..\src\jpeg" /i "..\..\src\png" /i "..\..\src\zlib" /i "..\..\src\regex" /i "..\..\src\expat\lib" /d "WXUSINGDLL" /d WXMAKINGDLL_RICHTEXT
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28d_adv.lib ..\..\lib\vc_dll\wxmsw28d_html.lib ..\..\lib\vc_dll\wxbase28d_xml.lib ..\..\lib\vc_dll\wxmsw28d_core.lib ..\..\lib\vc_dll\wxbase28d.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28d_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28d_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw28d_richtext_vc_custom.pdb"
+# ADD LINK32 wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexd.lib wxexpatd.lib kernel32.lib user32.lib gdi32.lib comdlg32.lib winspool.lib winmm.lib shell32.lib comctl32.lib ole32.lib oleaut32.lib uuid.lib rpcrt4.lib advapi32.lib wsock32.lib odbc32.lib ..\..\lib\vc_dll\wxmsw28d_adv.lib ..\..\lib\vc_dll\wxmsw28d_html.lib ..\..\lib\vc_dll\wxbase28d_xml.lib ..\..\lib\vc_dll\wxmsw28d_core.lib ..\..\lib\vc_dll\wxbase28d.lib /nologo /dll /machine:i386 /out:"..\..\lib\vc_dll\wxmsw28d_richtext_vc_custom.dll" /libpath:"..\..\lib\vc_dll" /implib:"..\..\lib\vc_dll\wxmsw28d_richtext.lib" /debug /pdb:"..\..\lib\vc_dll\wxmsw28d_richtext_vc_custom.pdb"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "..\..\lib\vc_lib"
 # PROP BASE Intermediate_Dir "vc_mswunivu\richtext"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
+# PROP Use_Debug_Libraries 0
 # PROP Output_Dir "..\..\lib\vc_lib"
 # PROP Intermediate_Dir "vc_mswunivu\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswunivu" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv29u_richtext.pdb /opt:ref /opt:icf /Yu"wx/wxprec.h" /Fp"vc_mswunivu\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
-# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswunivu" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv29u_richtext.pdb /opt:ref /opt:icf /Yu"wx/wxprec.h" /Fp"vc_mswunivu\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswunivu" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmswuniv28u_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivu\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswunivu" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmswuniv28u_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivu\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv29u_richtext.lib"
-# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv29u_richtext.lib"
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28u_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28u_richtext.lib"
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -170,41 +278,87 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\vc_lib"
 # PROP Intermediate_Dir "vc_mswunivud\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswunivud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv29ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivud\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_UNICODE" /D "WXBUILDING" /c
-# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswunivud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv29ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivud\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswunivud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv28ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivud\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswunivud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv28ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivud\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv29ud_richtext.lib"
-# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv29ud_richtext.lib"
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28ud_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28ud_richtext.lib"
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "..\..\lib\vc_lib"
+# PROP BASE Intermediate_Dir "vc_mswuniv\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\..\lib\vc_lib"
+# PROP Intermediate_Dir "vc_mswuniv\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswuniv" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmswuniv28_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswuniv\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswuniv" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmswuniv28_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswuniv\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "NDEBUG" /D "WXBUILDING" /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28_richtext.lib"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir "..\..\lib\vc_lib"
-# PROP BASE Intermediate_Dir "vc_mswu\richtext"
+# PROP BASE Intermediate_Dir "vc_mswunivd\richtext"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "..\..\lib\vc_lib"
-# PROP Intermediate_Dir "vc_mswu\richtext"
+# PROP Intermediate_Dir "vc_mswunivd\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswu" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw29u_richtext.pdb /opt:ref /opt:icf /Yu"wx/wxprec.h" /Fp"vc_mswu\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
-# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswu" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw29u_richtext.pdb /opt:ref /opt:icf /Yu"wx/wxprec.h" /Fp"vc_mswu\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswunivd" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv28d_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivd\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswunivd" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmswuniv28d_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswunivd\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXUNIVERSAL__" /D "__WXDEBUG__" /D "WXBUILDING" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw29u_richtext.lib"
-# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw29u_richtext.lib"
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28d_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmswuniv28d_richtext.lib"
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "..\..\lib\vc_lib"
+# PROP BASE Intermediate_Dir "vc_mswu\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\..\lib\vc_lib"
+# PROP Intermediate_Dir "vc_mswu\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswu" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmsw28u_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswu\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\mswu" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmsw28u_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswu\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "NDEBUG" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28u_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28u_richtext.lib"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -216,27 +370,81 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\..\lib\vc_lib"
 # PROP Intermediate_Dir "vc_mswud\richtext"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw29ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswud\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "_UNICODE" /D "WXBUILDING" /c
-# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw29ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswud\wxprec_richtextlib.pch" /I "..\..\src\tiff\libtiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw28ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswud\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswud" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw28ud_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswud\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "_UNICODE" /D "WXBUILDING" /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw29ud_richtext.lib"
-# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw29ud_richtext.lib"
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28ud_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28ud_richtext.lib"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Release"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "..\..\lib\vc_lib"
+# PROP BASE Intermediate_Dir "vc_msw\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\..\lib\vc_lib"
+# PROP Intermediate_Dir "vc_msw\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\msw" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmsw28_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_msw\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "NDEBUG" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MD /O2 /GR /EHsc /I "..\..\lib\vc_lib\msw" /I "..\..\include" /W4 /Fd..\..\lib\vc_lib\wxmsw28_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_msw\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "__WXMSW__" /D "NDEBUG" /D "WXBUILDING" /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28_richtext.lib"
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Debug"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "..\..\lib\vc_lib"
+# PROP BASE Intermediate_Dir "vc_mswd\richtext"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "..\..\lib\vc_lib"
+# PROP Intermediate_Dir "vc_mswd\richtext"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswd" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw28d_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswd\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXBUILDING" /c
+# ADD CPP /nologo /FD /MDd /Od /Gm /GR /EHsc /I "..\..\lib\vc_lib\mswd" /I "..\..\include" /W4 /Zi /Fd..\..\lib\vc_lib\wxmsw28d_richtext.pdb /Yu"wx/wxprec.h" /Fp"vc_mswd\wxprec_richtextlib.pch" /I "..\..\src\tiff" /I "..\..\src\jpeg" /I "..\..\src\png" /I "..\..\src\zlib" /I "..\..\src\regex" /I "..\..\src\expat\lib" /D "WIN32" /D "_LIB" /D "_DEBUG" /D "__WXMSW__" /D "__WXDEBUG__" /D "WXBUILDING" /c
+# ADD BASE RSC /l 0x409
+# ADD RSC /l 0x409
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28d_richtext.lib"
+# ADD LIB32 /nologo /out:"..\..\lib\vc_lib\wxmsw28d_richtext.lib"
 
 !ENDIF
 
 # Begin Target
 
+# Name "richtext - Win32 DLL Universal Unicode Release"
+# Name "richtext - Win32 DLL Universal Unicode Debug"
 # Name "richtext - Win32 DLL Universal Release"
 # Name "richtext - Win32 DLL Universal Debug"
+# Name "richtext - Win32 DLL Unicode Release"
+# Name "richtext - Win32 DLL Unicode Debug"
 # Name "richtext - Win32 DLL Release"
 # Name "richtext - Win32 DLL Debug"
+# Name "richtext - Win32 Universal Unicode Release"
+# Name "richtext - Win32 Universal Unicode Debug"
 # Name "richtext - Win32 Universal Release"
 # Name "richtext - Win32 Universal Debug"
+# Name "richtext - Win32 Unicode Release"
+# Name "richtext - Win32 Unicode Debug"
 # Name "richtext - Win32 Release"
 # Name "richtext - Win32 Debug"
 # Begin Group "Common Sources"
@@ -256,10 +464,22 @@ SOURCE=..\..\src\common\dummy.cpp
 
 SOURCE=..\..\src\msw\version.rc
 
-!IF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+!IF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Release"
+
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Debug"
+
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
 
 
 !ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Debug"
+
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Release"
+
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Debug"
 
 
 !ELSEIF  "$(CFG)" == "richtext - Win32 DLL Release"
@@ -268,11 +488,27 @@ SOURCE=..\..\src\msw\version.rc
 !ELSEIF  "$(CFG)" == "richtext - Win32 DLL Debug"
 
 
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Debug"
+
+# PROP Exclude_From_Build 1
+
 !ELSEIF  "$(CFG)" == "richtext - Win32 Universal Release"
 
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "richtext - Win32 Universal Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Debug"
 
 # PROP Exclude_From_Build 1
 
@@ -295,7 +531,19 @@ SOURCE=..\..\src\msw\version.rc
 
 SOURCE=..\..\include\wx\msw\setup.h
 
-!IF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+!IF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Release"
+
+# Begin Custom Build - 
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Debug"
+
+# Begin Custom Build - 
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
 
 # Begin Custom Build - 
 
@@ -307,7 +555,7 @@ SOURCE=..\..\include\wx\msw\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswu\wx\setup.h
 InputPath=..\..\include\wx\msw\setup.h
@@ -317,13 +565,45 @@ InputPath=..\..\include\wx\msw\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswud\wx\setup.h
 InputPath=..\..\include\wx\msw\setup.h
 
 "..\..\lib\vc_dll\mswud\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy "$(InputPath)" ..\..\lib\vc_dll\mswud\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\msw\wx\setup.h
+InputPath=..\..\include\wx\msw\setup.h
+
+"..\..\lib\vc_dll\msw\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_dll\msw\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\mswd\wx\setup.h
+InputPath=..\..\include\wx\msw\setup.h
+
+"..\..\lib\vc_dll\mswd\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_dll\mswd\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Release"
+
+# Begin Custom Build - 
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Debug"
+
+# Begin Custom Build - 
 
 # End Custom Build
 
@@ -339,7 +619,7 @@ InputPath=..\..\include\wx\msw\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswu\wx\setup.h
 InputPath=..\..\include\wx\msw\setup.h
@@ -349,13 +629,33 @@ InputPath=..\..\include\wx\msw\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswud\wx\setup.h
 InputPath=..\..\include\wx\msw\setup.h
 
 "..\..\lib\vc_lib\mswud\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy "$(InputPath)" ..\..\lib\vc_lib\mswud\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\msw\wx\setup.h
+InputPath=..\..\include\wx\msw\setup.h
+
+"..\..\lib\vc_lib\msw\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_lib\msw\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\mswd\wx\setup.h
+InputPath=..\..\include\wx\msw\setup.h
+
+"..\..\lib\vc_lib\mswd\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_lib\mswd\wx\setup.h
 
 # End Custom Build
 
@@ -366,7 +666,7 @@ InputPath=..\..\include\wx\msw\setup.h
 
 SOURCE=..\..\include\wx\univ\setup.h
 
-!IF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+!IF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswunivu\wx\setup.h
 InputPath=..\..\include\wx\univ\setup.h
@@ -376,13 +676,45 @@ InputPath=..\..\include\wx\univ\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswunivud\wx\setup.h
 InputPath=..\..\include\wx\univ\setup.h
 
 "..\..\lib\vc_dll\mswunivud\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy "$(InputPath)" ..\..\lib\vc_dll\mswunivud\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\mswuniv\wx\setup.h
+InputPath=..\..\include\wx\univ\setup.h
+
+"..\..\lib\vc_dll\mswuniv\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_dll\mswuniv\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\mswunivd\wx\setup.h
+InputPath=..\..\include\wx\univ\setup.h
+
+"..\..\lib\vc_dll\mswunivd\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_dll\mswunivd\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Release"
+
+# Begin Custom Build - 
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Debug"
+
+# Begin Custom Build - 
 
 # End Custom Build
 
@@ -398,7 +730,7 @@ InputPath=..\..\include\wx\univ\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswunivu\wx\setup.h
 InputPath=..\..\include\wx\univ\setup.h
@@ -408,13 +740,45 @@ InputPath=..\..\include\wx\univ\setup.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswunivud\wx\setup.h
 InputPath=..\..\include\wx\univ\setup.h
 
 "..\..\lib\vc_lib\mswunivud\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy "$(InputPath)" ..\..\lib\vc_lib\mswunivud\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\mswuniv\wx\setup.h
+InputPath=..\..\include\wx\univ\setup.h
+
+"..\..\lib\vc_lib\mswuniv\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_lib\mswuniv\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\mswunivd\wx\setup.h
+InputPath=..\..\include\wx\univ\setup.h
+
+"..\..\lib\vc_lib\mswunivd\wx\setup.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy "$(InputPath)" ..\..\lib\vc_lib\mswunivd\wx\setup.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Release"
+
+# Begin Custom Build - 
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Debug"
+
+# Begin Custom Build - 
 
 # End Custom Build
 
@@ -441,7 +805,7 @@ InputPath=..\..\include\wx\univ\setup.h
 
 SOURCE=..\..\include\wx\msw\genrcdefs.h
 
-!IF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+!IF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswunivu\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
@@ -451,7 +815,7 @@ InputPath=..\..\include\wx\msw\genrcdefs.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswunivud\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
@@ -461,7 +825,27 @@ InputPath=..\..\include\wx\msw\genrcdefs.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\mswuniv\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_dll\mswuniv\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_dll\mswuniv\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_dll\mswuniv\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Universal Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\mswunivd\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_dll\mswunivd\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_dll\mswunivd\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_dll\mswunivd\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswu\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
@@ -471,7 +855,7 @@ InputPath=..\..\include\wx\msw\genrcdefs.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_dll\mswud\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
@@ -481,7 +865,27 @@ InputPath=..\..\include\wx\msw\genrcdefs.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\msw\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_dll\msw\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_dll\msw\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_dll\msw\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 DLL Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_dll\mswd\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_dll\mswd\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_dll\mswd\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_dll\mswd\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswunivu\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
@@ -491,7 +895,7 @@ InputPath=..\..\include\wx\msw\genrcdefs.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswunivud\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
@@ -501,7 +905,27 @@ InputPath=..\..\include\wx\msw\genrcdefs.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Release"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\mswuniv\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_lib\mswuniv\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_lib\mswuniv\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_lib\mswuniv\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Universal Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\mswunivd\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_lib\mswunivd\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_lib\mswunivd\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_lib\mswunivd\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Release"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswu\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
@@ -511,13 +935,33 @@ InputPath=..\..\include\wx\msw\genrcdefs.h
 
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "richtext - Win32 Debug"
+!ELSEIF  "$(CFG)" == "richtext - Win32 Unicode Debug"
 
 # Begin Custom Build - Creating ..\..\lib\vc_lib\mswud\wx\msw\rcdefs.h
 InputPath=..\..\include\wx\msw\genrcdefs.h
 
 "..\..\lib\vc_lib\mswud\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_lib\mswud\wx\msw"
 	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_lib\mswud\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Release"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\msw\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_lib\msw\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_lib\msw\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_lib\msw\wx\msw\rcdefs.h"
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "richtext - Win32 Debug"
+
+# Begin Custom Build - Creating ..\..\lib\vc_lib\mswd\wx\msw\rcdefs.h
+InputPath=..\..\include\wx\msw\genrcdefs.h
+
+"..\..\lib\vc_lib\mswd\wx\msw\rcdefs.h" : "$(SOURCE)" "..\..\lib\vc_lib\mswd\wx\msw"
+	cl /EP /nologo "$(InputPath)" > "..\..\lib\vc_lib\mswd\wx\msw\rcdefs.h"
 
 # End Custom Build
 
@@ -543,10 +987,6 @@ SOURCE=..\..\include\wx\richtext\richtextformatdlg.h
 # Begin Source File
 
 SOURCE=..\..\include\wx\richtext\richtexthtml.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\include\wx\richtext\richtextimagedlg.h
 # End Source File
 # Begin Source File
 
@@ -587,10 +1027,6 @@ SOURCE=..\..\src\richtext\richtextformatdlg.cpp
 # Begin Source File
 
 SOURCE=..\..\src\richtext\richtexthtml.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\richtext\richtextimagedlg.cpp
 # End Source File
 # Begin Source File
 

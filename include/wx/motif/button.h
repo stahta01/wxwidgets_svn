@@ -13,8 +13,10 @@
 #define _WX_BUTTON_H_
 
 // Pushbutton
-class WXDLLIMPEXP_CORE wxButton: public wxButtonBase
+class WXDLLEXPORT wxButton: public wxButtonBase
 {
+    DECLARE_DYNAMIC_CLASS(wxButton)
+
 public:
     wxButton() { }
     wxButton(wxWindow *parent,
@@ -35,23 +37,23 @@ public:
         const wxValidator& validator = wxDefaultValidator,
         const wxString& name = wxButtonNameStr);
 
-    virtual wxWindow *SetDefault();
+    virtual void SetDefault();
     virtual void Command(wxCommandEvent& event);
 
     static wxSize GetDefaultSize();
 
     // Implementation
-    virtual wxSize GetMinSize() const;
-
 protected:
+
     virtual wxSize DoGetBestSize() const;
 
 private:
+
+    virtual wxSize GetMinSize() const;
     wxSize OldGetBestSize() const;
     wxSize OldGetMinSize() const;
     void SetDefaultShadowThicknessAndResize();
-
-    DECLARE_DYNAMIC_CLASS(wxButton)
 };
 
-#endif // _WX_BUTTON_H_
+#endif
+// _WX_BUTTON_H_

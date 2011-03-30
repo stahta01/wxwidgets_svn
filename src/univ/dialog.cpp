@@ -41,6 +41,8 @@ BEGIN_EVENT_TABLE(wxDialog,wxDialogBase)
     EVT_CLOSE   (wxDialog::OnCloseWindow)
 END_EVENT_TABLE()
 
+IMPLEMENT_DYNAMIC_CLASS(wxDialog,wxTopLevelWindow)
+
 void wxDialog::Init()
 {
     m_returnCode = 0;
@@ -51,9 +53,6 @@ void wxDialog::Init()
 
 wxDialog::~wxDialog()
 {
-    // if the dialog is modal, this will end its event loop
-    Show(false);
-
     delete m_eventLoop;
 }
 
@@ -72,7 +71,7 @@ bool wxDialog::Create(wxWindow *parent,
 
 void wxDialog::OnApply(wxCommandEvent &WXUNUSED(event))
 {
-    if ( Validate() )
+    if ( Validate() ) 
         TransferDataFromWindow();
 }
 
@@ -141,18 +140,19 @@ bool wxDialog::Show(bool show)
         // if we had disabled other app windows, reenable them back now because
         // if they stay disabled Windows will activate another window (one
         // which is enabled, anyhow) and we will lose activation
-        wxDELETE(m_windowDisabler);
+        if ( m_windowDisabler )
+        {
+            delete m_windowDisabler;
+            m_windowDisabler = NULL;
+        }
 
         if ( IsModal() )
             EndModal(wxID_CANCEL);
     }
 
-    if (show && CanDoLayoutAdaptation())
-        DoLayoutAdaptation();
-
     bool ret = wxDialogBase::Show(show);
 
-    if ( show )
+    if ( show ) 
         InitDialog();
 
     return ret;
@@ -173,17 +173,20 @@ int wxDialog::ShowModal()
 
     // use the apps top level window as parent if none given unless explicitly
     // forbidden
-    wxWindow * const parent = GetParentForModalDialog();
-    if ( parent && parent != this )
+    if ( !GetParent() && !(GetWindowStyleFlag() & wxDIALOG_NO_PARENT) )
     {
-        m_parent = parent;
+        wxWindow *parent = wxTheApp->GetTopWindow();
+        if ( parent && parent != this )
+        {
+            m_parent = parent;
+        }
     }
 
     Show(true);
 
     m_isShowingModal = true;
 
-    wxASSERT_MSG( !m_windowDisabler, wxT("disabling windows twice?") );
+    wxASSERT_MSG( !m_windowDisabler, _T("disabling windows twice?") );
 
 #if defined(__WXGTK__) || defined(__WXMGL__)
     wxBusyCursorSuspender suspender;
@@ -201,7 +204,7 @@ int wxDialog::ShowModal()
 
 void wxDialog::EndModal(int retCode)
 {
-    wxASSERT_MSG( m_eventLoop, wxT("wxDialog is not modal") );
+    wxASSERT_MSG( m_eventLoop, _T("wxDialog is not modal") );
 
     SetReturnCode(retCode);
 

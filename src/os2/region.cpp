@@ -221,7 +221,7 @@ wxRegion::wxRegion(const wxRect& rRect)
                                      );
 } // end of wxRegion::wxRegion
 
-wxRegion::wxRegion(size_t n, const wxPoint *points, wxPolygonFillMode WXUNUSED(fillStyle))
+wxRegion::wxRegion(size_t n, const wxPoint *points, int WXUNUSED(fillStyle))
 {
     // TO DO
 }
@@ -233,12 +233,12 @@ wxRegion::~wxRegion()
 {
 } // end of wxRegion::~wxRegion
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }
@@ -260,7 +260,7 @@ bool wxRegion::DoOffset( wxCoord x, wxCoord y )
 #if 0
     if ( ::OffsetRgn(GetHrgn(), x, y) == ERROR )
     {
-        wxLogLastError(wxT("OffsetRgn"));
+        wxLogLastError(_T("OffsetRgn"));
 
         return false;
     }
@@ -297,7 +297,7 @@ bool wxRegion::DoCombine( const wxRegion& rRegion, wxRegionOp eOp )
                 break;
 
             default:
-                wxFAIL_MSG( wxT("unknown region operation") );
+                wxFAIL_MSG( _T("unknown region operation") );
                 // fall through
 
             case wxRGN_AND:

@@ -1,21 +1,13 @@
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // Name:        cube.cpp
 // Purpose:     wxGLCanvas demo program
 // Author:      Julian Smart
-// Modified by: Vadim Zeitlin to use new wxGLCanvas API (2007-04-09)
+// Modified by:
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
-
-// ============================================================================
-// declarations
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// headers
-// ----------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -33,397 +25,504 @@
 #endif
 
 #include "cube.h"
+#include "../../sample.xpm"
 
-#if !defined(__WXMSW__) && !defined(__WXPM__)
-    #include "../../sample.xpm"
+#ifndef __WXMSW__     // for StopWatch, see remark below
+  #if defined(__WXMAC__) && !defined(__DARWIN__)
+    #include <utime.h>
+    #include <unistd.h>
+  #else
+    #include <sys/time.h>
+    #include <sys/unistd.h>
+  #endif
+#else
+#include <sys/timeb.h>
 #endif
 
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
+#define ID_NEW_WINDOW 10000
+#define ID_DEF_ROTATE_LEFT_KEY 10001
+#define ID_DEF_ROTATE_RIGHT_KEY 10002
 
-// control ids
-enum
+/*----------------------------------------------------------
+  Control to get a keycode
+  ----------------------------------------------------------*/
+class ScanCodeCtrl : public wxTextCtrl
 {
-    SpinTimer = wxID_HIGHEST + 1
+public:
+    ScanCodeCtrl( wxWindow* parent, wxWindowID id, int code,
+        const wxPoint& pos, const wxSize& size );
+
+    void OnChar( wxKeyEvent& WXUNUSED(event) )
+    {
+        // Do nothing
+    }
+
+    void OnKeyDown(wxKeyEvent& event);
+
+private:
+
+    // Any class wishing to process wxWidgets events must use this macro
+    DECLARE_EVENT_TABLE()
 };
 
-// ----------------------------------------------------------------------------
-// helper functions
-// ----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE( ScanCodeCtrl, wxTextCtrl )
+    EVT_CHAR( ScanCodeCtrl::OnChar )
+    EVT_KEY_DOWN( ScanCodeCtrl::OnKeyDown )
+END_EVENT_TABLE()
 
-static void CheckGLError()
+ScanCodeCtrl::ScanCodeCtrl( wxWindow* parent, wxWindowID id, int code,
+    const wxPoint& pos, const wxSize& size )
+    : wxTextCtrl( parent, id, wxEmptyString, pos, size )
 {
-    GLenum errLast = GL_NO_ERROR;
-
-    for ( ;; )
-    {
-        GLenum err = glGetError();
-        if ( err == GL_NO_ERROR )
-            return;
-
-        // normally the error is reset by the call to glGetError() but if
-        // glGetError() itself returns an error, we risk looping forever here
-        // so check that we get a different error than the last time
-        if ( err == errLast )
-        {
-            wxLogError(wxT("OpenGL error state couldn't be reset."));
-            return;
-        }
-
-        errLast = err;
-
-        wxLogError(wxT("OpenGL error %d"), err);
-    }
+    SetValue( wxString::Format(wxT("0x%04x"), code) );
 }
 
-// function to draw the texture for cube faces
-static wxImage DrawDice(int size, unsigned num)
+void ScanCodeCtrl::OnKeyDown( wxKeyEvent& event )
 {
-    wxASSERT_MSG( num >= 1 && num <= 6, wxT("invalid dice index") );
-
-    const int dot = size/16;        // radius of a single dot
-    const int gap = 5*size/32;      // gap between dots
-
-    wxBitmap bmp(size, size);
-    wxMemoryDC dc;
-    dc.SelectObject(bmp);
-    dc.SetBackground(*wxWHITE_BRUSH);
-    dc.Clear();
-    dc.SetBrush(*wxBLACK_BRUSH);
-
-    // the upper left and lower right points
-    if ( num != 1 )
-    {
-        dc.DrawCircle(gap + dot, gap + dot, dot);
-        dc.DrawCircle(size - gap - dot, size - gap - dot, dot);
-    }
-
-    // draw the central point for odd dices
-    if ( num % 2 )
-    {
-        dc.DrawCircle(size/2, size/2, dot);
-    }
-
-    // the upper right and lower left points
-    if ( num > 3 )
-    {
-        dc.DrawCircle(size - gap - dot, gap + dot, dot);
-        dc.DrawCircle(gap + dot, size - gap - dot, dot);
-    }
-
-    // finally those 2 are only for the last dice
-    if ( num == 6 )
-    {
-        dc.DrawCircle(gap + dot, size/2, dot);
-        dc.DrawCircle(size - gap - dot, size/2, dot);
-    }
-
-    dc.SelectObject(wxNullBitmap);
-
-    return bmp.ConvertToImage();
+    SetValue( wxString::Format(wxT("0x%04x"), event.GetKeyCode()) );
 }
 
-// ============================================================================
-// implementation
-// ============================================================================
+/*------------------------------------------------------------------
+ Dialog for defining a keypress
+-------------------------------------------------------------------*/
 
-// ----------------------------------------------------------------------------
-// TestGLContext
-// ----------------------------------------------------------------------------
-
-TestGLContext::TestGLContext(wxGLCanvas *canvas)
-             : wxGLContext(canvas)
+class ScanCodeDialog : public wxDialog
 {
-    SetCurrent(*canvas);
+public:
+    ScanCodeDialog( wxWindow* parent, wxWindowID id, const int code,
+        const wxString &descr, const wxString& title );
+    int GetValue();
 
-    // set up the parameters we want to use
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_TEXTURE_2D);
+private:
 
-    // add slightly more light, the default lighting is rather dark
-    GLfloat ambient[] = { 0.5, 0.5, 0.5, 0.5 };
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+    ScanCodeCtrl       *m_ScanCode;
+    wxTextCtrl         *m_Description;
+};
 
-    // set viewing projection
+ScanCodeDialog::ScanCodeDialog( wxWindow* parent, wxWindowID id,
+    const int code, const wxString &descr, const wxString& title )
+    : wxDialog( parent, id, title, wxDefaultPosition, wxSize(96*2,76*2) )
+{
+    new wxStaticText( this, wxID_ANY, _T("Scancode"), wxPoint(4*2,3*2),
+        wxSize(31*2,12*2) );
+    m_ScanCode = new ScanCodeCtrl( this, wxID_ANY, code, wxPoint(37*2,6*2),
+        wxSize(53*2,14*2) );
+
+    new wxStaticText( this, wxID_ANY, _T("Description"), wxPoint(4*2,24*2),
+        wxSize(32*2,12*2) );
+    m_Description = new wxTextCtrl( this, wxID_ANY, descr, wxPoint(37*2,27*2),
+        wxSize(53*2,14*2) );
+
+    new wxButton( this, wxID_OK, _T("Ok"), wxPoint(20*2,50*2), wxSize(20*2,13*2) );
+    new wxButton( this, wxID_CANCEL, _T("Cancel"), wxPoint(44*2,50*2),
+        wxSize(25*2,13*2) );
+}
+
+int ScanCodeDialog::GetValue()
+{
+    int code;
+    wxString buf = m_ScanCode->GetValue();
+    wxSscanf( buf.c_str(), _T("%i"), &code );
+    return code;
+}
+
+/*----------------------------------------------------------------------
+  Utility function to get the elapsed time (in msec) since a given point
+  in time (in sec)  (because current version of wxGetElapsedTime doesn´t
+  works right with glibc-2.1 and linux, at least for me)
+-----------------------------------------------------------------------*/
+unsigned long StopWatch( unsigned long *sec_base )
+{
+  unsigned long secs,msec;
+
+#if defined(__WXMSW__)
+  struct timeb tb;
+  ftime( &tb );
+  secs = tb.time;
+  msec = tb.millitm;
+#elif defined(__WXMAC__) && !defined(__DARWIN__)
+  wxLongLong tl = wxGetLocalTimeMillis();
+  secs = (unsigned long) (tl.GetValue() / 1000);
+  msec = (unsigned long) (tl.GetValue() - secs*1000);
+#else
+  // think every unice has gettimeofday
+  struct timeval tv;
+  gettimeofday( &tv, (struct timezone *)NULL );
+  secs = tv.tv_sec;
+  msec = tv.tv_usec/1000;
+#endif
+
+  if( *sec_base == 0 )
+    *sec_base = secs;
+
+  return( (secs-*sec_base)*1000 + msec );
+}
+
+/*----------------------------------------------------------------
+  Implementation of Test-GLCanvas
+-----------------------------------------------------------------*/
+
+BEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
+    EVT_SIZE(TestGLCanvas::OnSize)
+    EVT_PAINT(TestGLCanvas::OnPaint)
+    EVT_ERASE_BACKGROUND(TestGLCanvas::OnEraseBackground)
+    EVT_KEY_DOWN( TestGLCanvas::OnKeyDown )
+    EVT_KEY_UP( TestGLCanvas::OnKeyUp )
+    EVT_ENTER_WINDOW( TestGLCanvas::OnEnterWindow )
+END_EVENT_TABLE()
+
+unsigned long  TestGLCanvas::m_secbase = 0;
+int            TestGLCanvas::m_TimeInitialized = 0;
+unsigned long  TestGLCanvas::m_xsynct;
+unsigned long  TestGLCanvas::m_gsynct;
+
+TestGLCanvas::TestGLCanvas(wxWindow *parent, wxWindowID id,
+    const wxPoint& pos, const wxSize& size, long style, const wxString& name)
+    : wxGLCanvas(parent, (wxGLCanvas*) NULL, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name )
+{
+    m_init = false;
+    m_gllist = 0;
+    m_rleft = WXK_LEFT;
+    m_rright = WXK_RIGHT;
+}
+
+TestGLCanvas::TestGLCanvas(wxWindow *parent, const TestGLCanvas *other,
+    wxWindowID id, const wxPoint& pos, const wxSize& size, long style,
+    const wxString& name )
+    : wxGLCanvas(parent, other->GetContext(), id, pos, size, style|wxFULL_REPAINT_ON_RESIZE , name)
+{
+    m_init = false;
+    m_gllist = other->m_gllist; // share display list
+    m_rleft = WXK_LEFT;
+    m_rright = WXK_RIGHT;
+}
+
+TestGLCanvas::~TestGLCanvas()
+{
+}
+
+void TestGLCanvas::Render()
+{
+    wxPaintDC dc(this);
+
+#ifndef __WXMOTIF__
+    if (!GetContext()) return;
+#endif
+
+    SetCurrent();
+    // Init OpenGL once, but after SetCurrent
+    if (!m_init)
+    {
+        InitGL();
+        m_init = true;
+    }
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
+    glMatrixMode(GL_MODELVIEW);
 
-    // create the textures to use for cube sides: they will be reused by all
-    // canvases (which is probably not critical in the case of simple textures
-    // we use here but could be really important for a real application where
-    // each texture could take many megabytes)
-    glGenTextures(WXSIZEOF(m_textures), m_textures);
-
-    for ( unsigned i = 0; i < WXSIZEOF(m_textures); i++ )
-    {
-        glBindTexture(GL_TEXTURE_2D, m_textures[i]);
-
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        const wxImage img(DrawDice(256, i + 1));
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.GetWidth(), img.GetHeight(),
-                     0, GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
-    }
-
-    CheckGLError();
-}
-
-void TestGLContext::DrawRotatedCube(float xangle, float yangle)
-{
+    /* clear color and depth buffers */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, -2.0f);
-    glRotatef(xangle, 1.0f, 0.0f, 0.0f);
-    glRotatef(yangle, 0.0f, 1.0f, 0.0f);
-
-    // draw six faces of a cube of size 1 centered at (0, 0, 0)
-    glBindTexture(GL_TEXTURE_2D, m_textures[0]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 0.0f, 1.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, m_textures[1]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, m_textures[2]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 1.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f, 0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, m_textures[3]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f,-1.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, m_textures[4]);
-    glBegin(GL_QUADS);
-        glNormal3f( 1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, m_textures[5]);
-    glBegin(GL_QUADS);
-        glNormal3f(-1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f,-0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-    glEnd();
-
-    glFlush();
-
-    CheckGLError();
-}
-
-
-// ----------------------------------------------------------------------------
-// MyApp: the application object
-// ----------------------------------------------------------------------------
-
-IMPLEMENT_APP(MyApp)
-
-bool MyApp::OnInit()
-{
-    if ( !wxApp::OnInit() )
-        return false;
-
-    new MyFrame();
-
-    return true;
-}
-
-int MyApp::OnExit()
-{
-    delete m_glContext;
-
-    return wxApp::OnExit();
-}
-
-TestGLContext& MyApp::GetContext(wxGLCanvas *canvas)
-{
-    if ( !m_glContext )
+    if( m_gllist == 0 )
     {
-        // Create the OpenGL context for the first window which needs it:
-        // subsequently created windows will all share the same context.
-        m_glContext = new TestGLContext(canvas);
+        m_gllist = glGenLists( 1 );
+        glNewList( m_gllist, GL_COMPILE_AND_EXECUTE );
+        /* draw six faces of a cube */
+        glBegin(GL_QUADS);
+        glNormal3f( 0.0f, 0.0f, 1.0f);
+        glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
+        glVertex3f(-0.5f,-0.5f, 0.5f); glVertex3f( 0.5f,-0.5f, 0.5f);
+
+        glNormal3f( 0.0f, 0.0f,-1.0f);
+        glVertex3f(-0.5f,-0.5f,-0.5f); glVertex3f(-0.5f, 0.5f,-0.5f);
+        glVertex3f( 0.5f, 0.5f,-0.5f); glVertex3f( 0.5f,-0.5f,-0.5f);
+
+        glNormal3f( 0.0f, 1.0f, 0.0f);
+        glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f( 0.5f, 0.5f,-0.5f);
+        glVertex3f(-0.5f, 0.5f,-0.5f); glVertex3f(-0.5f, 0.5f, 0.5f);
+
+        glNormal3f( 0.0f,-1.0f, 0.0f);
+        glVertex3f(-0.5f,-0.5f,-0.5f); glVertex3f( 0.5f,-0.5f,-0.5f);
+        glVertex3f( 0.5f,-0.5f, 0.5f); glVertex3f(-0.5f,-0.5f, 0.5f);
+
+        glNormal3f( 1.0f, 0.0f, 0.0f);
+        glVertex3f( 0.5f, 0.5f, 0.5f); glVertex3f( 0.5f,-0.5f, 0.5f);
+        glVertex3f( 0.5f,-0.5f,-0.5f); glVertex3f( 0.5f, 0.5f,-0.5f);
+
+        glNormal3f(-1.0f, 0.0f, 0.0f);
+        glVertex3f(-0.5f,-0.5f,-0.5f); glVertex3f(-0.5f,-0.5f, 0.5f);
+        glVertex3f(-0.5f, 0.5f, 0.5f); glVertex3f(-0.5f, 0.5f,-0.5f);
+        glEnd();
+
+        glEndList();
+    }
+    else
+    {
+        glCallList(m_gllist);
     }
 
-    m_glContext->SetCurrent(*canvas);
-
-    return *m_glContext;
-}
-
-// ----------------------------------------------------------------------------
-// TestGLCanvas
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
-    EVT_PAINT(TestGLCanvas::OnPaint)
-    EVT_KEY_DOWN(TestGLCanvas::OnKeyDown)
-    EVT_TIMER(SpinTimer, TestGLCanvas::OnSpinTimer)
-END_EVENT_TABLE()
-
-TestGLCanvas::TestGLCanvas(wxWindow *parent)
-    // With perspective OpenGL graphics, the wxFULL_REPAINT_ON_RESIZE style
-    // flag should always be set, because even making the canvas smaller should
-    // be followed by a paint event that updates the entire canvas with new
-    // viewport settings.
-    : wxGLCanvas(parent, wxID_ANY, NULL /* attribs */,
-                 wxDefaultPosition, wxDefaultSize,
-                 wxFULL_REPAINT_ON_RESIZE),
-      m_xangle(30.0),
-      m_yangle(30.0),
-      m_spinTimer(this,SpinTimer)
-{
-}
-
-void TestGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
-{
-    // This is required even though dc is not used otherwise.
-    wxPaintDC dc(this);
-
-    // Set the OpenGL viewport according to the client size of this canvas.
-    // This is done here rather than in a wxSizeEvent handler because our
-    // OpenGL rendering context (and thus viewport setting) is used with
-    // multiple canvases: If we updated the viewport in the wxSizeEvent
-    // handler, changing the size of one canvas causes a viewport setting that
-    // is wrong when next another canvas is repainted.
-    const wxSize ClientSize = GetClientSize();
-
-    glViewport(0, 0, ClientSize.x, ClientSize.y);
-
-    // Render the graphics and swap the buffers.
-    wxGetApp().GetContext(this).DrawRotatedCube(m_xangle, m_yangle);
+    glFlush();
     SwapBuffers();
 }
 
-void TestGLCanvas::Spin(float xSpin, float ySpin)
+void TestGLCanvas::OnEnterWindow( wxMouseEvent& WXUNUSED(event) )
 {
-    m_xangle += xSpin;
-    m_yangle += ySpin;
-
-    Refresh(false);
+    SetFocus();
 }
 
-void TestGLCanvas::OnKeyDown(wxKeyEvent& event)
+void TestGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {
-    float angle = 5.0;
+    Render();
+}
 
-    switch ( event.GetKeyCode() )
+void TestGLCanvas::OnSize(wxSizeEvent& event)
+{
+    // this is also necessary to update the context on some platforms
+    wxGLCanvas::OnSize(event);
+
+    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
+    int w, h;
+    GetClientSize(&w, &h);
+#ifndef __WXMOTIF__
+    if (GetContext())
+#endif
     {
-        case WXK_RIGHT:
-            Spin( 0.0, -angle );
-            break;
-
-        case WXK_LEFT:
-            Spin( 0.0, angle );
-            break;
-
-        case WXK_DOWN:
-            Spin( -angle, 0.0 );
-            break;
-
-        case WXK_UP:
-            Spin( angle, 0.0 );
-            break;
-
-        case WXK_SPACE:
-            if ( m_spinTimer.IsRunning() )
-                m_spinTimer.Stop();
-            else
-                m_spinTimer.Start( 25 );
-            break;
-
-        default:
-            event.Skip();
-            return;
+        SetCurrent();
+        glViewport(0, 0, (GLint) w, (GLint) h);
     }
 }
 
-void TestGLCanvas::OnSpinTimer(wxTimerEvent& WXUNUSED(event))
+void TestGLCanvas::OnEraseBackground(wxEraseEvent& WXUNUSED(event))
 {
-    Spin(0.0, 4.0);
+  // Do nothing, to avoid flashing.
+}
+
+void TestGLCanvas::InitGL()
+{
+    SetCurrent();
+
+    /* set viewing projection */
+    glMatrixMode(GL_PROJECTION);
+    glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
+
+    /* position viewer */
+    glMatrixMode(GL_MODELVIEW);
+    glTranslatef(0.0f, 0.0f, -2.0f);
+
+    /* position object */
+    glRotatef(30.0f, 1.0f, 0.0f, 0.0f);
+    glRotatef(30.0f, 0.0f, 1.0f, 0.0f);
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+}
+
+GLfloat TestGLCanvas::CalcRotateSpeed( unsigned long acceltime )
+{
+  GLfloat t,v;
+
+  t = ((GLfloat)acceltime) / 1000.0f;
+
+  if( t < 0.5f )
+    v = t;
+  else if( t < 1.0f )
+    v = t * (2.0f - t);
+  else
+    v = 0.75f;
+
+  return(v);
+}
+
+GLfloat TestGLCanvas::CalcRotateAngle( unsigned long lasttime,
+                                  unsigned long acceltime )
+{
+    GLfloat t,s1,s2;
+
+    t = ((GLfloat)(acceltime - lasttime)) / 1000.0f;
+    s1 = CalcRotateSpeed( lasttime );
+    s2 = CalcRotateSpeed( acceltime );
+
+    return( t * (s1 + s2) * 135.0f );
+}
+
+void TestGLCanvas::Action( long code, unsigned long lasttime,
+                           unsigned long acceltime )
+{
+    GLfloat angle = CalcRotateAngle( lasttime, acceltime );
+
+    if (code == m_rleft)
+        Rotate( angle );
+    else if (code == m_rright)
+            Rotate( -angle );
+}
+
+void TestGLCanvas::OnKeyDown( wxKeyEvent& event )
+{
+    long evkey = event.GetKeyCode();
+    if (evkey == 0) return;
+
+    if (!m_TimeInitialized)
+    {
+        m_TimeInitialized = 1;
+        m_xsynct = event.GetTimestamp();
+        m_gsynct = StopWatch(&m_secbase);
+
+        m_Key = evkey;
+        m_StartTime = 0;
+        m_LastTime = 0;
+        m_LastRedraw = 0;
+    }
+
+    unsigned long currTime = event.GetTimestamp() - m_xsynct;
+
+    if (evkey != m_Key)
+    {
+        m_Key = evkey;
+        m_LastRedraw = m_StartTime = m_LastTime = currTime;
+    }
+
+    if (currTime >= m_LastRedraw)      // Redraw:
+    {
+        Action( m_Key, m_LastTime-m_StartTime, currTime-m_StartTime );
+
+#if defined(__WXMAC__) && !defined(__DARWIN__)
+        m_LastRedraw = currTime;    // StopWatch() doesn't work on Mac...
+#else
+        m_LastRedraw = StopWatch(&m_secbase) - m_gsynct;
+#endif
+        m_LastTime = currTime;
+    }
+
+    event.Skip();
+}
+
+void TestGLCanvas::OnKeyUp( wxKeyEvent& event )
+{
+    m_Key = 0;
+    m_StartTime = 0;
+    m_LastTime = 0;
+    m_LastRedraw = 0;
+
+    event.Skip();
+}
+
+void TestGLCanvas::Rotate( GLfloat deg )
+{
+    SetCurrent();
+
+    glMatrixMode(GL_MODELVIEW);
+    glRotatef((GLfloat)deg, 0.0f, 0.0f, 1.0f);
+    Refresh(false);
 }
 
 
-// ----------------------------------------------------------------------------
-// MyFrame: main application window
-// ----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------
+  Main Window
+-------------------------------------------------------------------------*/
 
 BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(wxID_NEW, MyFrame::OnNewWindow)
-    EVT_MENU(wxID_CLOSE, MyFrame::OnClose)
+    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+    EVT_MENU( ID_NEW_WINDOW, MyFrame::OnNewWindow)
+    EVT_MENU( ID_DEF_ROTATE_LEFT_KEY, MyFrame::OnDefRotateLeftKey)
+    EVT_MENU( ID_DEF_ROTATE_RIGHT_KEY, MyFrame::OnDefRotateRightKey)
 END_EVENT_TABLE()
 
-MyFrame::MyFrame()
-       : wxFrame(NULL, wxID_ANY, wxT("wxWidgets OpenGL Cube Sample"))
+// My frame constructor
+MyFrame::MyFrame(wxWindow *parent, const wxString& title, const wxPoint& pos,
+    const wxSize& size, long style)
+    : wxFrame(parent, wxID_ANY, title, pos, size, style)
 {
-    new TestGLCanvas(this);
-
-    SetIcon(wxICON(sample));
-
-    // Make a menubar
-    wxMenu *menu = new wxMenu;
-    menu->Append(wxID_NEW);
-    menu->AppendSeparator();
-    menu->Append(wxID_CLOSE);
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(menu, wxT("&Cube"));
-
-    SetMenuBar(menuBar);
-
-    CreateStatusBar();
-
-    SetClientSize(400, 400);
-    Show();
-
-    // test IsDisplaySupported() function:
-    static const int attribs[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, 0 };
-    wxLogStatus("Double-buffered display %s supported",
-                wxGLCanvas::IsDisplaySupported(attribs) ? "is" : "not");
+    m_canvas = NULL;
+    SetIcon(wxIcon(sample_xpm));
 }
 
-void MyFrame::OnClose(wxCommandEvent& WXUNUSED(event))
+// Intercept menu commands
+void MyFrame::OnExit( wxCommandEvent& WXUNUSED(event) )
 {
     // true is to force the frame to close
     Close(true);
 }
 
-void MyFrame::OnNewWindow( wxCommandEvent& WXUNUSED(event) )
+/*static*/ MyFrame *MyFrame::Create(MyFrame *parentFrame, bool isCloneWindow)
 {
-    new MyFrame();
+    wxString str = wxT("wxWidgets OpenGL Cube Sample");
+    if (isCloneWindow) str += wxT(" - Clone");
+
+    MyFrame *frame = new MyFrame(NULL, str, wxDefaultPosition,
+        wxSize(400, 300));
+
+    // Make a menubar
+    wxMenu *winMenu = new wxMenu;
+
+    winMenu->Append(wxID_EXIT, _T("&Close"));
+    winMenu->Append(ID_NEW_WINDOW, _T("&New") );
+    wxMenuBar *menuBar = new wxMenuBar;
+    menuBar->Append(winMenu, _T("&Window"));
+
+    winMenu = new wxMenu;
+    winMenu->Append(ID_DEF_ROTATE_LEFT_KEY, _T("Rotate &left"));
+    winMenu->Append(ID_DEF_ROTATE_RIGHT_KEY, _T("Rotate &right"));
+    menuBar->Append(winMenu, _T("&Key"));
+
+    frame->SetMenuBar(menuBar);
+
+    if (parentFrame)
+    {
+        frame->m_canvas = new TestGLCanvas( frame, parentFrame->m_canvas,
+            wxID_ANY, wxDefaultPosition, wxDefaultSize );
+    }
+    else
+    {
+        frame->m_canvas = new TestGLCanvas(frame, wxID_ANY,
+            wxDefaultPosition, wxDefaultSize);
+    }
+
+    // Show the frame
+    frame->Show(true);
+
+    return frame;
 }
 
+void MyFrame::OnNewWindow( wxCommandEvent& WXUNUSED(event) )
+{
+    (void) Create(this, true);
+}
+
+void MyFrame::OnDefRotateLeftKey( wxCommandEvent& WXUNUSED(event) )
+{
+    ScanCodeDialog dial( this, wxID_ANY, m_canvas->m_rleft,
+        wxString(_T("Left")), _T("Define key") );
+
+    int result = dial.ShowModal();
+
+    if( result == wxID_OK )
+        m_canvas->m_rleft = dial.GetValue();
+}
+
+void MyFrame::OnDefRotateRightKey( wxCommandEvent& WXUNUSED(event) )
+{
+    ScanCodeDialog dial( this, wxID_ANY, m_canvas->m_rright,
+        wxString(_T("Right")), _T("Define key") );
+
+    int result = dial.ShowModal();
+
+    if( result == wxID_OK )
+        m_canvas->m_rright = dial.GetValue();
+}
+
+/*------------------------------------------------------------------
+  Application object ( equivalent to main() )
+------------------------------------------------------------------ */
+
+IMPLEMENT_APP(MyApp)
+
+bool MyApp::OnInit()
+{
+    // Create the main frame window
+    (void) MyFrame::Create(NULL);
+
+    return true;
+}

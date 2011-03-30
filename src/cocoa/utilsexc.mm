@@ -142,8 +142,7 @@ WX_IMPLEMENT_GET_OBJC_CLASS(wxTaskHandler,NSObject)
 
 long wxExecute(const wxString& command,
                int sync,
-               wxProcess *handle,
-               const wxExecuteEnv *env)
+               wxProcess *handle)
 {
     NSTask* theTask = [[NSTask alloc] init];
 

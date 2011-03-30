@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver  2.9.2
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.12
+%define ver2 2.8
+%define rel  0
 
 # Configurable settings (use --with(out) unicode on rpmbuild command line):
 %define unicode 0
@@ -73,7 +73,7 @@ cd obj-shared
 %if %{unicode}
                               --enable-unicode
 %else
-                              --disable-unicode \
+                              --with-odbc
 %endif
 $MAKE
 cd ..
@@ -84,7 +84,7 @@ cd obj-static
 %if %{unicode}
                               --enable-unicode
 %else
-                              --disable-unicode \
+                              --with-odbc
 %endif
 $MAKE
 cd ..
@@ -123,7 +123,7 @@ ln -sf %{_libdir}/wx/config/%{wxconfig} %{_bindir}/%{wxconfiglink}
 %preun devel
 if test -f %{_bindir}/wx-config -a -f /usr/bin/md5sum ; then
     SUM1=`md5sum %{_libdir}/wx/config/%{wxconfig} | cut -c 0-32`
-    SUM2=`md5sum %{_bindir}/wx-config | cut -c 0-32`  
+    SUM2=`md5sum %{_bindir}/wx-config | cut -c 0-32`
     if test "x$SUM1" = "x$SUM2" ; then
         rm -f %{_bindir}/wx-config
     fi

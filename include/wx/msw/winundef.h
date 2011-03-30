@@ -123,11 +123,11 @@
 
     inline HWND APIENTRY FindText(LPFINDREPLACE lpfindreplace)
     {
-        #ifdef _UNICODE
+        #ifdef UNICODE
             return FindTextW(lpfindreplace);
         #else
             return FindTextA(lpfindreplace);
-        #endif
+        #endif // !UNICODE
     }
 #endif
 

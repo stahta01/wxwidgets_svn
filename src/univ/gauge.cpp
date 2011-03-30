@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/gauge/gauge.cpp
+// Name:        src/gauge/gaugecmn.cpp
 // Purpose:     wxGauge for wxUniversal
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     20.02.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 SciTech Software, Inc. (www.scitechsoft.com)
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -32,6 +32,8 @@
 #endif //WX_PRECOMP
 
 #include "wx/univ/renderer.h"
+
+IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
 
 // ============================================================================
 // implementation

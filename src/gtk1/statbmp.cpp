@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/statbmp.cpp
+// Name:        statbmp.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -21,6 +21,8 @@
 // wxStaticBitmap
 //-----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxStaticBitmap,wxControl)
+
 wxStaticBitmap::wxStaticBitmap(void)
 {
 }
@@ -35,7 +37,7 @@ wxStaticBitmap::wxStaticBitmap( wxWindow *parent, wxWindowID id, const wxBitmap 
 // empty bitmap, so that we can create GtkPixmap widget:
 static char * bogus_xpm[] = {
 "2 2 1 1",
-"  c None",
+" 	c None",
 "  ",
 "  "};
 
@@ -72,7 +74,7 @@ void wxStaticBitmap::SetBitmap( const wxBitmap &bitmap )
 
     if (m_bitmap.Ok())
     {
-        GdkBitmap *mask = NULL;
+        GdkBitmap *mask = (GdkBitmap *) NULL;
         if (m_bitmap.GetMask())
             mask = m_bitmap.GetMask()->GetBitmap();
 

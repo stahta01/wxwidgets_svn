@@ -40,7 +40,7 @@ wxFontInstance::wxFontInstance(float ptSize, bool aa, font_lib_t *fontLib)
 {
     m_font = MGL_loadFontInstance(fontLib, ptSize, 0.0, 0.0, aa);
 
-    wxASSERT_MSG( m_font, wxT("cannot create font instance") );
+    wxASSERT_MSG( m_font, _T("cannot create font instance") );
 }
 
 wxFontInstance::~wxFontInstance()
@@ -59,7 +59,7 @@ void wxFontFace::Acquire()
 
     if ( m_refCnt == 1 )
     {
-        wxCHECK_RET( m_fontLib == NULL, wxT("font lib already created") );
+        wxCHECK_RET( m_fontLib == NULL, _T("font lib already created") );
 
         wxLogTrace("mgl_font", "opening library '%s'", m_fileName.mb_str());
         m_fontLib = MGL_openFontLib(m_fileName.fn_str());
@@ -72,7 +72,7 @@ void wxFontFace::Release()
 
     if ( m_refCnt == 0 )
     {
-        wxCHECK_RET( m_fontLib != NULL, wxT("font lib not created") );
+        wxCHECK_RET( m_fontLib != NULL, _T("font lib not created") );
 
         wxLogTrace("mgl_font", "closing library '%s'", m_fileName.mb_str());
         MGL_closeFontLib(m_fontLib);
@@ -94,7 +94,7 @@ wxFontInstance *wxFontFace::GetFontInstance(float ptSize, bool aa)
     }
 
     // Small characters don't look good when antialiased with the algorithm
-    // that FreeType uses (mere 2x2 supersampling), so let's disable AA
+    // that FreeType uses (mere 2x2 supersampling), so lets disable AA
     // completely for small fonts. Bitmap fonts are not antialiased either.
     if ( ptSize <= gs_antialiasingThreshold ||
          m_fontLib->fontLibType == MGL_BITMAPFONT_LIB )
@@ -107,7 +107,7 @@ wxFontInstance *wxFontFace::GetFontInstance(float ptSize, bool aa)
 
 wxFontInstance *wxFontFace::CreateFontInstance(float ptSize, bool aa)
 {
-    wxASSERT_MSG( m_fontLib, wxT("font library not loaded!") );
+    wxASSERT_MSG( m_fontLib, _T("font library not loaded!") );
 
     return new wxFontInstance(ptSize, aa, m_fontLib);
 }
@@ -156,14 +156,14 @@ wxString wxFontsManager::GetDefaultFacename(wxFontFamily family) const
     switch ( family )
     {
         case wxSCRIPT:
-            return wxT("Script");
+            return _T("Script");
         case wxDECORATIVE:
-            return wxT("Charter");
+            return _T("Charter");
         case wxROMAN:
-            return wxT("Times");
+            return _T("Times");
         case wxTELETYPE:
         case wxMODERN:
-            return wxT("Courier");
+            return _T("Courier");
         case wxSWISS:
         case wxDEFAULT:
         default:

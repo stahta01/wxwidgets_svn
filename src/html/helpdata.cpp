@@ -18,7 +18,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/intl.h"
     #include "wx/log.h"
 #endif
@@ -51,11 +51,11 @@ static const wxChar* ReadLine(const wxChar *line, wxChar *buf, size_t bufsize)
     wxChar *endptr = buf + bufsize - 1;
     const wxChar *readptr = line;
 
-    while (*readptr != 0 && *readptr != wxT('\r') && *readptr != wxT('\n') &&
+    while (*readptr != 0 && *readptr != _T('\r') && *readptr != _T('\n') &&
            writeptr != endptr)
         *(writeptr++) = *(readptr++);
     *writeptr = 0;
-    while (*readptr == wxT('\r') || *readptr == wxT('\n'))
+    while (*readptr == _T('\r') || *readptr == _T('\n'))
         readptr++;
     if (*readptr == 0)
         return NULL;
@@ -125,9 +125,9 @@ public:
     wxObject* GetProduct() { return NULL; }
 
 protected:
-    virtual void AddText(const wxString& WXUNUSED(txt)) {}
+    virtual void AddText(const wxChar* WXUNUSED(txt)) {}
 
-    wxDECLARE_NO_COPY_CLASS(HP_Parser);
+    DECLARE_NO_COPY_CLASS(HP_Parser)
 };
 
 
@@ -170,7 +170,7 @@ class HP_TagHandler : public wxHtmlTagHandler
             m_parentItem = NULL;
         }
 
-    wxDECLARE_NO_COPY_CLASS(HP_TagHandler);
+    DECLARE_NO_COPY_CLASS(HP_TagHandler)
 };
 
 
@@ -255,7 +255,7 @@ wxString wxHtmlHelpDataItem::GetIndentedName() const
 {
     wxString s;
     for (int i = 1; i < level; i++)
-        s << wxT("   ");
+        s << _T("   ");
     s << name;
     return s;
 }
@@ -265,10 +265,17 @@ IMPLEMENT_DYNAMIC_CLASS(wxHtmlHelpData, wxObject)
 
 wxHtmlHelpData::wxHtmlHelpData()
 {
+#if WXWIN_COMPATIBILITY_2_4
+    m_cacheContents = NULL;
+    m_cacheIndex = NULL;
+#endif
 }
 
 wxHtmlHelpData::~wxHtmlHelpData()
 {
+#if WXWIN_COMPATIBILITY_2_4
+    CleanCompatibilityData();
+#endif
 }
 
 bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys,
@@ -284,7 +291,7 @@ bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys,
     HP_TagHandler *handler = new HP_TagHandler(book);
     parser.AddTagHandler(handler);
 
-    f = ( contentsfile.empty() ? NULL : fsys.OpenFile(contentsfile) );
+    f = ( contentsfile.empty() ? (wxFSFile*) NULL : fsys.OpenFile(contentsfile) );
     if (f)
     {
         buf.clear();
@@ -298,7 +305,7 @@ bool wxHtmlHelpData::LoadMSProject(wxHtmlBookRecord *book, wxFileSystem& fsys,
         wxLogError(_("Cannot open contents file: %s"), contentsfile.c_str());
     }
 
-    f = ( indexfile.empty() ? NULL : fsys.OpenFile(indexfile) );
+    f = ( indexfile.empty() ? (wxFSFile*) NULL : fsys.OpenFile(indexfile) );
     if (f)
     {
         buf.clear();
@@ -475,10 +482,11 @@ void wxHtmlHelpData::SetTempDir(const wxString& path)
         m_tempPath = path;
     else
     {
-        wxFileName fn(path);
-        fn.MakeAbsolute();
+        if (wxIsAbsolutePath(path)) m_tempPath = path;
+        else m_tempPath = wxGetCwd() + _T("/") + path;
 
-        m_tempPath = fn.GetPath(wxPATH_GET_VOLUME | wxPATH_GET_SEPARATOR);
+        if (m_tempPath[m_tempPath.length() - 1] != _T('/'))
+            m_tempPath << _T('/');
     }
 }
 
@@ -568,6 +576,7 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
     // Now store the contents range
     bookr->SetContentsRange(cont_start, m_contents.size());
 
+#if wxUSE_WCHAR_T
     // MS HTML Help files [written by MS HTML Help Workshop] are broken
     // in that the data are iso-8859-1 (including HTML entities), but must
     // be interpreted as being in language's windows charset. Correct the
@@ -595,6 +604,11 @@ bool wxHtmlHelpData::AddBookParam(const wxFSFile& bookfile,
         }
         #undef CORRECT_STR
     }
+#else
+    wxUnusedVar(IndexOld);
+    wxUnusedVar(ContentsOld);
+    wxASSERT_MSG(encoding == wxFONTENCODING_SYSTEM, wxT("Help files need charset conversion, but wxUSE_WCHAR_T is 0"));
+#endif // wxUSE_WCHAR_T/!wxUSE_WCHAR_T
 
     m_bookRecords.Add(bookr);
     if (!m_index.empty())
@@ -667,16 +681,16 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
         for (wxChar *ch = linebuf; *ch != wxT('\0') && *ch != wxT('='); ch++)
            *ch = (wxChar)wxTolower(*ch);
 
-        if (wxStrstr(linebuf, wxT("title=")) == linebuf)
-            title = linebuf + wxStrlen(wxT("title="));
-        if (wxStrstr(linebuf, wxT("default topic=")) == linebuf)
-            start = linebuf + wxStrlen(wxT("default topic="));
-        if (wxStrstr(linebuf, wxT("index file=")) == linebuf)
-            index = linebuf + wxStrlen(wxT("index file="));
-        if (wxStrstr(linebuf, wxT("contents file=")) == linebuf)
-            contents = linebuf + wxStrlen(wxT("contents file="));
-        if (wxStrstr(linebuf, wxT("charset=")) == linebuf)
-            charset = linebuf + wxStrlen(wxT("charset="));
+        if (wxStrstr(linebuf, _T("title=")) == linebuf)
+            title = linebuf + wxStrlen(_T("title="));
+        if (wxStrstr(linebuf, _T("default topic=")) == linebuf)
+            start = linebuf + wxStrlen(_T("default topic="));
+        if (wxStrstr(linebuf, _T("index file=")) == linebuf)
+            index = linebuf + wxStrlen(_T("index file="));
+        if (wxStrstr(linebuf, _T("contents file=")) == linebuf)
+            contents = linebuf + wxStrlen(_T("contents file="));
+        if (wxStrstr(linebuf, _T("charset=")) == linebuf)
+            charset = linebuf + wxStrlen(_T("charset="));
     } while (lineptr != NULL);
 
     wxFontEncoding enc = wxFONTENCODING_SYSTEM;
@@ -689,34 +703,24 @@ bool wxHtmlHelpData::AddBook(const wxString& book)
                               title, contents, index, start, fsys.GetPath());
     delete fi;
 
+#if WXWIN_COMPATIBILITY_2_4
+    CleanCompatibilityData();
+#endif
+
     return rtval;
 }
 
 wxString wxHtmlHelpData::FindPageByName(const wxString& x)
 {
+    int cnt;
     int i;
+    wxFileSystem fsys;
+    wxFSFile *f;
 
-    bool has_non_ascii = false;
-    wxString::const_iterator it;
-    for (it = x.begin(); it != x.end(); ++it)
+    // 1. try to open given file:
+    cnt = m_bookRecords.GetCount();
+    for (i = 0; i < cnt; i++)
     {
-        wxUniChar ch = *it;
-        if (!ch.IsAscii())
-        {
-            has_non_ascii = true;
-            break;
-        }
-    }
-
-    int cnt = m_bookRecords.GetCount();
-
-    if (!has_non_ascii)
-    {
-      wxFileSystem fsys;
-      wxFSFile *f;
-      // 1. try to open given file:
-      for (i = 0; i < cnt; i++)
-      {
         f = fsys.OpenFile(m_bookRecords[i].GetFullPath(x));
         if (f)
         {
@@ -724,7 +728,6 @@ wxString wxHtmlHelpData::FindPageByName(const wxString& x)
             delete f;
             return url;
         }
-      }
     }
 
 
@@ -776,6 +779,90 @@ wxString wxHtmlHelpData::FindPageById(int id)
     return wxEmptyString;
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+wxHtmlContentsItem::wxHtmlContentsItem()
+    : m_Level(0), m_ID(wxID_ANY), m_Name(NULL), m_Page(NULL), m_Book(NULL),
+      m_autofree(false)
+{
+}
+
+wxHtmlContentsItem::wxHtmlContentsItem(const wxHtmlHelpDataItem& d)
+{
+    m_autofree = true;
+    m_Level = d.level;
+    m_ID = d.id;
+    m_Name = wxStrdup(d.name.c_str());
+    m_Page = wxStrdup(d.page.c_str());
+    m_Book = d.book;
+}
+
+wxHtmlContentsItem& wxHtmlContentsItem::operator=(const wxHtmlContentsItem& d)
+{
+    if (m_autofree)
+    {
+        free(m_Name);
+        free(m_Page);
+    }
+    m_autofree = true;
+    m_Level = d.m_Level;
+    m_ID = d.m_ID;
+    m_Name = d.m_Name ? wxStrdup(d.m_Name) : NULL;
+    m_Page = d.m_Page ? wxStrdup(d.m_Page) : NULL;
+    m_Book = d.m_Book;
+    return *this;
+}
+
+wxHtmlContentsItem::~wxHtmlContentsItem()
+{
+    if (m_autofree)
+    {
+        free(m_Name);
+        free(m_Page);
+    }
+}
+
+wxHtmlContentsItem* wxHtmlHelpData::GetContents()
+{
+    if (!m_cacheContents && !m_contents.empty())
+    {
+        size_t len = m_contents.size();
+        m_cacheContents = new wxHtmlContentsItem[len];
+        for (size_t i = 0; i < len; i++)
+            m_cacheContents[i] = m_contents[i];
+    }
+    return m_cacheContents;
+}
+
+int wxHtmlHelpData::GetContentsCnt()
+{
+    return m_contents.size();
+}
+
+wxHtmlContentsItem* wxHtmlHelpData::GetIndex()
+{
+    if (!m_cacheContents && !m_index.empty())
+    {
+        size_t len = m_index.size();
+        m_cacheContents = new wxHtmlContentsItem[len];
+        for (size_t i = 0; i < len; i++)
+            m_cacheContents[i] = m_index[i];
+    }
+    return m_cacheContents;
+}
+
+int wxHtmlHelpData::GetIndexCnt()
+{
+    return m_index.size();
+}
+
+void wxHtmlHelpData::CleanCompatibilityData()
+{
+    delete[] m_cacheContents;
+    m_cacheContents = NULL;
+    delete[] m_cacheIndex;
+    m_cacheIndex = NULL;
+}
+#endif // WXWIN_COMPATIBILITY_2_4
 
 //----------------------------------------------------------------------------------
 // wxHtmlSearchStatus functions
@@ -813,6 +900,15 @@ wxHtmlSearchStatus::wxHtmlSearchStatus(wxHtmlHelpData* data, const wxString& key
     m_Active = (m_CurIndex < m_MaxIndex);
 }
 
+#if WXWIN_COMPATIBILITY_2_4
+wxHtmlContentsItem* wxHtmlSearchStatus::GetContentsItem()
+{
+    static wxHtmlContentsItem it;
+    it = wxHtmlContentsItem(*m_CurItem);
+    return &it;
+}
+#endif
+
 bool wxHtmlSearchStatus::Search()
 {
     wxFSFile *file;
@@ -837,11 +933,11 @@ bool wxHtmlSearchStatus::Search()
     {
         const wxChar *p1, *p2;
         for (p1 = thepage.c_str(), p2 = m_LastPage.c_str();
-             *p1 != 0 && *p1 != wxT('#') && *p1 == *p2; p1++, p2++) {}
+             *p1 != 0 && *p1 != _T('#') && *p1 == *p2; p1++, p2++) {}
 
         m_LastPage = thepage;
 
-        if (*p1 == 0 || *p1 == wxT('#'))
+        if (*p1 == 0 || *p1 == _T('#'))
             return false;
     }
     else m_LastPage = thepage;
@@ -885,7 +981,7 @@ void wxHtmlSearchEngine::LookFor(const wxString& keyword, bool case_sensitive, b
 
 static inline bool WHITESPACE(wxChar c)
 {
-    return c == wxT(' ') || c == wxT('\n') || c == wxT('\r') || c == wxT('\t');
+    return c == _T(' ') || c == _T('\n') || c == _T('\r') || c == _T('\t');
 }
 
 // replace continuous spaces by one single space
@@ -904,7 +1000,7 @@ static inline wxString CompressSpaces(const wxString & str)
             {
                 continue;
             }
-            ch = wxT(' ');
+            ch = _T(' ');
             space_counted = true;
         }
         else
@@ -936,19 +1032,19 @@ bool wxHtmlSearchEngine::Scan(const wxFSFile& file)
             wxChar c = *pBufStr;
             if (insideTag)
             {
-                if (c == wxT('>'))
+                if (c == _T('>'))
                 {
                     insideTag = false;
                     // replace the tag by an empty space
-                    c = wxT(' ');
+                    c = _T(' ');
                 }
                 else
                     continue;
             }
-            else if (c == wxT('<'))
+            else if (c == _T('<'))
             {
                 wxChar nextCh = *(pBufStr + 1);
-                if (nextCh == wxT('/') || !WHITESPACE(nextCh))
+                if (nextCh == _T('/') || !WHITESPACE(nextCh))
                 {
                     insideTag = true;
                     continue;
@@ -964,10 +1060,10 @@ bool wxHtmlSearchEngine::Scan(const wxFSFile& file)
     if (m_WholeWords)
     {
         // insert ' ' at the beginning and at the end
-        keyword.insert( 0, wxT(" ") );
-        keyword.append( wxT(" ") );
-        bufStr.insert( 0, wxT(" ") );
-        bufStr.append( wxT(" ") );
+        keyword.insert( 0, _T(" ") );
+        keyword.append( _T(" ") );
+        bufStr.insert( 0, _T(" ") );
+        bufStr.append( _T(" ") );
     }
 
     // remove continuous spaces

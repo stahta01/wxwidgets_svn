@@ -1,7 +1,7 @@
 %define pref /usr
-%define ver  2.9.2
-%define ver2 2.9
-%define rel  1
+%define ver  2.8.12
+%define ver2 2.8
+%define rel  0
 
 # Configurable settings (use --with(out) unicode on rpmbuild cmd line):
 %define unicode 0
@@ -13,12 +13,12 @@
 %if %{unicode}
     %define wxbasename   wx-base-unicode
     %define name         wx-%{portname}-unicode
-    %define wxconfig     %{portname}-unicode-%{ver2}
+    %define wxconfig     %{portname}-unicode-release-%{ver2}
     %define wxconfiglink wx%{portname}u-%{ver2}-config
 %else
     %define wxbasename   wx-base
     %define name         wx-%{portname}
-    %define wxconfig     %{portname}-ansi-%{ver2}
+    %define wxconfig     %{portname}-ansi-release-%{ver2}
     %define wxconfiglink wx%{portname}-%{ver2}-config
 %endif
 
@@ -72,6 +72,23 @@ Requires: %{name}-devel = %{ver}
 %description static
 Static libraries for wxX11. You need them if you want to link statically against wxX11.
 
+%package contrib
+Summary: Contrib libraries for wxX11.
+Group: X11/Libraries
+Requires: %{name} = %{ver}
+
+%description contrib
+Contributed libraries for wxX11.
+
+%package contrib-devel
+Summary: Contrib libraries for wxX11.
+Group: X11/Libraries
+Requires: %{name}-contrib = %{ver}
+Requires: %{name}-devel = %{ver}
+
+%description contrib-devel
+Header files for contributed libraries for wxX11.
+
 %prep
 %setup -q -n wxX11-%{ver}
 
@@ -88,10 +105,14 @@ cd obj-shared
 %if %{unicode}
                               --enable-unicode \
 %else
-                              --disable-unicode \
+                              --with-odbc \
 %endif
+                              --with-opengl
 $MAKE
-cd ..
+
+cd contrib/src
+$MAKE
+cd ../../..
 
 mkdir obj-static
 cd obj-static
@@ -99,7 +120,7 @@ cd obj-static
 %if %{unicode}
                               --enable-unicode \
 %else
-                              --disable-unicode \
+                              --with-odbc \
 %endif
                               --with-opengl
 $MAKE
@@ -115,30 +136,22 @@ rm -rf $RPM_BUILD_ROOT
 # --- wxBase headers list begins here ---
 cat <<EOF >wxbase-headers.files
 wx/afterstd.h
-wx/any.h
-wx/anystr.h
 wx/app.h
 wx/apptrait.h
 wx/archive.h
 wx/arrimpl.cpp
 wx/arrstr.h
-wx/atomic.h
-wx/base64.h
 wx/beforestd.h
 wx/buffer.h
 wx/build.h
-wx/chartype.h
-wx/checkeddelete.h
 wx/chkconf.h
 wx/clntdata.h
-wx/cmdargs.h
 wx/cmdline.h
 wx/confbase.h
 wx/config.h
 wx/convauto.h
 wx/containr.h
 wx/cpp.h
-wx/crt.h
 wx/datetime.h
 wx/datstrm.h
 wx/dde.h
@@ -146,16 +159,13 @@ wx/debug.h
 wx/defs.h
 wx/dir.h
 wx/dlimpexp.h
-wx/dlist.h
 wx/dynarray.h
 wx/dynlib.h
 wx/dynload.h
 wx/encconv.h
 wx/event.h
-wx/evtloop.h
 wx/except.h
 wx/features.h
-wx/flags.h
 wx/ffile.h
 wx/file.h
 wx/fileconf.h
@@ -179,8 +189,8 @@ wx/iosfwrap.h
 wx/ioswrap.h
 wx/ipc.h
 wx/ipcbase.h
-wx/kbdstate.h
-wx/language.h
+wx/isql.h
+wx/isqlext.h
 wx/link.h
 wx/list.h
 wx/listimpl.cpp
@@ -192,39 +202,27 @@ wx/memory.h
 wx/memtext.h
 wx/mimetype.h
 wx/module.h
-wx/mousestate.h
 wx/msgout.h
-wx/msgqueue.h
 wx/mstream.h
-wx/numformatter.h
 wx/object.h
 wx/platform.h
 wx/platinfo.h
 wx/power.h
 wx/process.h
 wx/ptr_scpd.h
-wx/ptr_shrd.h
 wx/recguard.h
 wx/regex.h
-wx/rtti.h
-wx/scopedarray.h
-wx/scopedptr.h
 wx/scopeguard.h
-wx/sharedptr.h
 wx/snglinst.h
 wx/sstream.h
 wx/stack.h
 wx/stackwalk.h
 wx/stdpaths.h
-wx/stdstream.h
 wx/stockitem.h
 wx/stopwatch.h
 wx/strconv.h
 wx/stream.h
 wx/string.h
-wx/stringimpl.h
-wx/stringops.h
-wx/strvararg.h
 wx/sysopt.h
 wx/tarstrm.h
 wx/textbuf.h
@@ -232,75 +230,48 @@ wx/textfile.h
 wx/thread.h
 wx/thrimpl.cpp
 wx/timer.h
-wx/tls.h
 wx/tokenzr.h
-wx/tracker.h
-wx/translation.h
 wx/txtstrm.h
-wx/typeinfo.h
 wx/types.h
-wx/unichar.h
 wx/uri.h
-wx/ustring.h
 wx/utils.h
 wx/variant.h
 wx/vector.h
 wx/version.h
-wx/versioninfo.h
 wx/volume.h
-wx/weakref.h
 wx/wfstream.h
 wx/wx.h
 wx/wxchar.h
-wx/wxcrt.h
-wx/wxcrtbase.h
-wx/wxcrtvararg.h
 wx/wxprec.h
-wx/xlocale.h
 wx/xti.h
-wx/xti2.h
 wx/xtistrm.h
-wx/xtictor.h
-wx/xtihandler.h
-wx/xtiprop.h
-wx/xtitypes.h
 wx/zipstrm.h
 wx/zstream.h
-wx/meta/convertible.h
-wx/meta/if.h
-wx/meta/implicitconversion.h
-wx/meta/int2type.h
-wx/meta/movable.h
-wx/meta/pod.h
-wx/fswatcher.h
-wx/generic/fswatcher.h
-wx/unix/app.h
 wx/unix/apptbase.h
 wx/unix/apptrait.h
-wx/unix/chkconf.h
-wx/unix/evtloop.h
-wx/unix/evtloopsrc.h
-wx/unix/pipe.h
-wx/unix/stdpaths.h
-wx/unix/stackwalk.h
-wx/unix/tls.h
-wx/unix/fswatcher_kqueue.h
 wx/unix/execute.h
 wx/unix/mimetype.h
-wx/unix/fswatcher_inotify.h
+wx/unix/pipe.h
+wx/unix/private.h
+wx/unix/stackwalk.h
+wx/unix/stdpaths.h
 wx/fs_inet.h
+wx/gsocket.h
 wx/protocol/file.h
 wx/protocol/ftp.h
 wx/protocol/http.h
-wx/protocol/log.h
 wx/protocol/protocol.h
 wx/sckaddr.h
 wx/sckipc.h
 wx/sckstrm.h
 wx/socket.h
 wx/url.h
+wx/unix/gsockunx.h
 wx/xml/xml.h
 wx/xtixml.h
+wx/db.h
+wx/dbkeyg.h
+wx/dbtable.h
 EOF
 # --- wxBase headers list ends here ---
 for f in `cat wxbase-headers-list` ; do
@@ -309,6 +280,10 @@ done
 
 # list of all core headers:
 find $RPM_BUILD_ROOT%{_includedir}/wx-%{ver2} -type f | sed -e "s,$RPM_BUILD_ROOT,,g" >core-headers.files
+
+# contrib stuff:
+(cd obj-shared/contrib/src; make prefix=$RPM_BUILD_ROOT%{pref} install)
+(cd obj-shared/utils/wxrc; make prefix=$RPM_BUILD_ROOT%{pref} install)
 
 # remove wxBase files so that RPM doesn't complain about unpackaged files:
 rm -f $RPM_BUILD_ROOT%{_libdir}/libwx_base*
@@ -353,11 +328,26 @@ rm -f %{_bindir}/%{wxconfiglink}
 %postun gl
 /sbin/ldconfig
 
+%post contrib
+/sbin/ldconfig
+
+%postun contrib
+/sbin/ldconfig
+
+%post contrib-devel
+/sbin/ldconfig
+
+%postun contrib-devel
+/sbin/ldconfig
+
 %files
 %defattr(-,root,root)
 %doc COPYING.LIB *.txt
 %{_libdir}/libwx_%{portname}*_adv-%{ver2}.so.*
 %{_libdir}/libwx_%{portname}*_core-%{ver2}.so.*
+%if !%{unicode}
+    %{_libdir}/libwx_%{portname}*_dbgrid-%{ver2}.so.*
+%endif
 %{_libdir}/libwx_%{portname}*_html-%{ver2}.so.*
 %{_libdir}/libwx_%{portname}*_media-%{ver2}.so.*
 %{_libdir}/libwx_%{portname}*_qa-%{ver2}.so.*
@@ -368,6 +358,9 @@ rm -f %{_bindir}/%{wxconfiglink}
 %defattr(-,root,root)
 %{_libdir}/libwx_%{portname}*_adv-%{ver2}.so
 %{_libdir}/libwx_%{portname}*_core-%{ver2}.so
+%if !%{unicode}
+    %{_libdir}/libwx_%{portname}*_dbgrid-%{ver2}.so
+%endif
 %{_libdir}/libwx_%{portname}*_gl-%{ver2}.so
 %{_libdir}/libwx_%{portname}*_html-%{ver2}.so
 %{_libdir}/libwx_%{portname}*_media-%{ver2}.so
@@ -385,3 +378,52 @@ rm -f %{_bindir}/%{wxconfiglink}
 %defattr (-,root,root)
 %{_libdir}/libwx_%{portname}*_*-%{ver2}.a
 
+%files contrib
+%defattr(-,root,root)
+%{_libdir}/libwx_%{portname}*_animate-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_deprecated-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_fl-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_gizmos-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_mmedia-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_ogl-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_plot-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_stc-%{ver2}.so.*
+%{_libdir}/libwx_%{portname}*_svg-%{ver2}.so.*
+
+%files contrib-devel
+%defattr(-,root,root)
+%dir %{_includedir}/wx-%{ver2}/wx/animate
+%{_includedir}/wx-%{ver2}/wx/animate/*
+%{_libdir}/libwx_%{portname}*_animate-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/deprecated
+%{_includedir}/wx-%{ver2}/wx/deprecated/*
+%{_libdir}/libwx_%{portname}*_deprecated-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/fl
+%{_includedir}/wx-%{ver2}/wx/fl/*
+%{_libdir}/libwx_%{portname}*_fl-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/gizmos
+%{_includedir}/wx-%{ver2}/wx/gizmos/*
+%{_libdir}/libwx_%{portname}*_gizmos-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/mmedia
+%{_includedir}/wx-%{ver2}/wx/mmedia/*
+%{_libdir}/libwx_%{portname}*_mmedia-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/ogl
+%{_includedir}/wx-%{ver2}/wx/ogl/*
+%{_libdir}/libwx_%{portname}*_ogl-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/plot
+%{_includedir}/wx-%{ver2}/wx/plot/*
+%{_libdir}/libwx_%{portname}*_plot-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/stc
+%{_includedir}/wx-%{ver2}/wx/stc/*
+%{_libdir}/libwx_%{portname}*_stc-%{ver2}.so
+
+%dir %{_includedir}/wx-%{ver2}/wx/svg
+%{_includedir}/wx-%{ver2}/wx/svg/*
+%{_libdir}/libwx_%{portname}*_svg-%{ver2}.so

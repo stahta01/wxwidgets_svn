@@ -20,7 +20,7 @@ typedef struct CGRect NSRect;
 typedef struct _NSRect NSRect;
 #endif
 
-class WXDLLIMPEXP_CORE wxRegion : public wxRegionGeneric
+class WXDLLEXPORT wxRegion : public wxRegionGeneric
 {
 public:
     wxRegion(wxCoord x, wxCoord y, wxCoord w, wxCoord h)
@@ -55,7 +55,7 @@ private:
     DECLARE_DYNAMIC_CLASS(wxRegion);
 };
 
-class WXDLLIMPEXP_CORE wxRegionIterator : public wxRegionIteratorGeneric
+class WXDLLEXPORT wxRegionIterator : public wxRegionIteratorGeneric
 {
 //    DECLARE_DYNAMIC_CLASS(wxRegionIteratorGeneric);
 public:

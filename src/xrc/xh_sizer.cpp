@@ -31,7 +31,6 @@
 #endif
 
 #include "wx/gbsizer.h"
-#include "wx/wrapsizer.h"
 #include "wx/notebook.h"
 #include "wx/tokenzr.h"
 
@@ -78,17 +77,9 @@ wxSizerXmlHandler::wxSizerXmlHandler()
     XRC_ADD_STYLE(wxALIGN_CENTER_VERTICAL);
     XRC_ADD_STYLE(wxALIGN_CENTRE_VERTICAL);
 
+    XRC_ADD_STYLE(wxADJUST_MINSIZE);
     XRC_ADD_STYLE(wxFIXED_MINSIZE);
     XRC_ADD_STYLE(wxRESERVE_SPACE_EVEN_IF_HIDDEN);
-
-    // this flag doesn't do anything any more but we can just ignore its
-    // occurrences in the old resource files instead of raising a fuss because
-    // of it
-    AddStyle("wxADJUST_MINSIZE", 0);
-
-    // wxWrapSizer-specific flags
-    XRC_ADD_STYLE(wxEXTEND_LAST_ON_EACH_LINE);
-    XRC_ADD_STYLE(wxREMOVE_LEADING_SPACES);
 }
 
 
@@ -115,47 +106,15 @@ wxObject* wxSizerXmlHandler::DoCreateResource()
 }
 
 
-wxSizer* wxSizerXmlHandler::DoCreateSizer(const wxString& name)
-{
-    if (name == wxT("wxBoxSizer"))
-        return Handle_wxBoxSizer();
-#if wxUSE_STATBOX
-    else if (name == wxT("wxStaticBoxSizer"))
-        return Handle_wxStaticBoxSizer();
-#endif
-    else if (name == wxT("wxGridSizer"))
-    {
-        if ( !ValidateGridSizerChildren() )
-            return NULL;
-        return Handle_wxGridSizer();
-    }
-    else if (name == wxT("wxFlexGridSizer"))
-    {
-        return Handle_wxFlexGridSizer();
-    }
-    else if (name == wxT("wxGridBagSizer"))
-    {
-        return Handle_wxGridBagSizer();
-    }
-    else if (name == wxT("wxWrapSizer"))
-    {
-        return Handle_wxWrapSizer();
-    }
-
-    ReportError(wxString::Format("unknown sizer class \"%s\"", name));
-    return NULL;
-}
 
 
-
-bool wxSizerXmlHandler::IsSizerNode(wxXmlNode *node) const
+bool wxSizerXmlHandler::IsSizerNode(wxXmlNode *node)
 {
     return (IsOfClass(node, wxT("wxBoxSizer"))) ||
            (IsOfClass(node, wxT("wxStaticBoxSizer"))) ||
            (IsOfClass(node, wxT("wxGridSizer"))) ||
            (IsOfClass(node, wxT("wxFlexGridSizer"))) ||
-           (IsOfClass(node, wxT("wxGridBagSizer"))) ||
-           (IsOfClass(node, wxT("wxWrapSizer")));
+           (IsOfClass(node, wxT("wxGridBagSizer")));
 }
 
 
@@ -188,11 +147,11 @@ wxObject* wxSizerXmlHandler::Handle_sizeritem()
         wxWindow *wnd = wxDynamicCast(item, wxWindow);
 
         if (sizer)
-            sitem->AssignSizer(sizer);
+            sitem->SetSizer(sizer);
         else if (wnd)
-            sitem->AssignWindow(wnd);
+            sitem->SetWindow(wnd);
         else
-            ReportError(n, "unexpected item in sizer");
+            wxLogError(wxT("Error in resource."));
 
         // finally, set other wxSizerItem attributes
         SetSizerItemAttributes(sitem);
@@ -202,7 +161,7 @@ wxObject* wxSizerXmlHandler::Handle_sizeritem()
     }
     else /*n == NULL*/
     {
-        ReportError("no window/sizer/spacer within sizeritem object");
+        wxLogError(wxT("Error in resource: no window/sizer/spacer within sizeritem object."));
         return NULL;
     }
 }
@@ -210,15 +169,11 @@ wxObject* wxSizerXmlHandler::Handle_sizeritem()
 
 wxObject* wxSizerXmlHandler::Handle_spacer()
 {
-    if ( !m_parentSizer )
-    {
-        ReportError("spacer only allowed inside a sizer");
-        return NULL;
-    }
+    wxCHECK_MSG(m_parentSizer, NULL, wxT("Incorrect syntax of XRC resource: spacer not within sizer!"));
 
     wxSizerItem* sitem = MakeSizerItem();
     SetSizerItemAttributes(sitem);
-    sitem->AssignSpacer(GetSize());
+    sitem->SetSpacer(GetSize());
     AddSizerItem(sitem);
     return NULL;
 }
@@ -226,22 +181,37 @@ wxObject* wxSizerXmlHandler::Handle_spacer()
 
 wxObject* wxSizerXmlHandler::Handle_sizer()
 {
+    wxSizer *sizer = NULL;
+
     wxXmlNode *parentNode = m_node->GetParent();
 
-    if ( !m_parentSizer &&
-            (!parentNode || parentNode->GetType() != wxXML_ELEMENT_NODE ||
-             !m_parentAsWindow) )
+    wxCHECK_MSG(m_parentSizer != NULL ||
+                (parentNode && parentNode->GetType() == wxXML_ELEMENT_NODE &&
+                 m_parentAsWindow), NULL,
+                wxT("Sizer must have a window parent node"));
+
+    if (m_class == wxT("wxBoxSizer"))
+        sizer = Handle_wxBoxSizer();
+
+#if wxUSE_STATBOX
+    else if (m_class == wxT("wxStaticBoxSizer"))
+        sizer = Handle_wxStaticBoxSizer();
+#endif
+
+    else if (m_class == wxT("wxGridSizer"))
+        sizer = Handle_wxGridSizer();
+
+    else if (m_class == wxT("wxFlexGridSizer"))
+        sizer = Handle_wxFlexGridSizer();
+
+    else if (m_class == wxT("wxGridBagSizer"))
+        sizer = Handle_wxGridBagSizer();
+
+    if ( !sizer )
     {
-        ReportError("sizer must have a window parent");
+        wxLogError(_T("Failed to create size of class \"%s\""), m_class.c_str());
         return NULL;
     }
-
-    // Create the sizer of the appropriate class.
-    wxSizer * const sizer = DoCreateSizer(m_class);
-
-    // creation of sizer failed for some (already reported) reason, so exit:
-    if ( !sizer )
-        return NULL;
 
     wxSize minsize = GetSize(wxT("minsize"));
     if (!(minsize == wxDefaultSize))
@@ -257,13 +227,6 @@ wxObject* wxSizerXmlHandler::Handle_sizer()
     m_isGBS = (m_class == wxT("wxGridBagSizer"));
 
     CreateChildren(m_parent, true/*only this handler*/);
-
-    // set growable rows and cols for sizers which support this
-    if ( wxFlexGridSizer *flexsizer = wxDynamicCast(sizer, wxFlexGridSizer) )
-    {
-        SetGrowables(flexsizer, wxT("growablerows"), true);
-        SetGrowables(flexsizer, wxT("growablecols"), false);
-    }
 
     // restore state
     m_isInside = old_ins;
@@ -288,10 +251,8 @@ wxObject* wxSizerXmlHandler::Handle_sizer()
         }
         m_node = nd;
 
-        if (m_parentAsWindow->IsTopLevel())
-        {
+        if (m_parentAsWindow->GetWindowStyle() & (wxMAXIMIZE_BOX | wxRESIZE_BORDER))
             sizer->SetSizeHints(m_parentAsWindow);
-        }
     }
 
     return sizer;
@@ -324,114 +285,46 @@ wxSizer*  wxSizerXmlHandler::Handle_wxGridSizer()
 }
 
 
-wxFlexGridSizer* wxSizerXmlHandler::Handle_wxFlexGridSizer()
+wxSizer*  wxSizerXmlHandler::Handle_wxFlexGridSizer()
 {
-    if ( !ValidateGridSizerChildren() )
-        return NULL;
-    return new wxFlexGridSizer(GetLong(wxT("rows")), GetLong(wxT("cols")),
-                               GetDimension(wxT("vgap")), GetDimension(wxT("hgap")));
-}
-
-
-wxGridBagSizer* wxSizerXmlHandler::Handle_wxGridBagSizer()
-{
-    if ( !ValidateGridSizerChildren() )
-        return NULL;
-    return new wxGridBagSizer(GetDimension(wxT("vgap")), GetDimension(wxT("hgap")));
-}
-
-wxSizer*  wxSizerXmlHandler::Handle_wxWrapSizer()
-{
-    wxWrapSizer *sizer = new wxWrapSizer(GetStyle("orient"), GetStyle("flag"));
+    wxFlexGridSizer *sizer =
+        new wxFlexGridSizer(GetLong(wxT("rows")), GetLong(wxT("cols")),
+                            GetDimension(wxT("vgap")), GetDimension(wxT("hgap")));
+    SetGrowables(sizer, wxT("growablerows"), true);
+    SetGrowables(sizer, wxT("growablecols"), false);
     return sizer;
 }
 
 
-bool wxSizerXmlHandler::ValidateGridSizerChildren()
+wxSizer*  wxSizerXmlHandler::Handle_wxGridBagSizer()
 {
-    int rows = GetLong("rows");
-    int cols = GetLong("cols");
-
-    if  ( rows && cols )
-    {
-        // fixed number of cells, need to verify children count
-        int children = 0;
-        for ( wxXmlNode *n = m_node->GetChildren(); n; n = n->GetNext() )
-        {
-            if ( n->GetType() == wxXML_ELEMENT_NODE &&
-                 (n->GetName() == "object" || n->GetName() == "object_ref") )
-            {
-                children++;
-            }
-        }
-
-        if ( children > rows * cols )
-        {
-            ReportError
-            (
-                wxString::Format
-                (
-                    "too many children in grid sizer: %d > %d x %d"
-                    " (consider omitting the number of rows or columns)",
-                    children,
-                    cols,
-                    rows
-                )
-            );
-            return false;
-        }
-    }
-
-    return true;
+    wxGridBagSizer *sizer =
+        new wxGridBagSizer(GetDimension(wxT("vgap")), GetDimension(wxT("hgap")));
+    SetGrowables(sizer, wxT("growablerows"), true);
+    SetGrowables(sizer, wxT("growablecols"), false);
+    return sizer;
 }
+
+
 
 
 void wxSizerXmlHandler::SetGrowables(wxFlexGridSizer* sizer,
                                      const wxChar* param,
                                      bool rows)
 {
-    int nrows, ncols;
-    sizer->CalcRowsCols(nrows, ncols);
-    const int nslots = rows ? nrows : ncols;
-
     wxStringTokenizer tkn;
+    unsigned long l;
     tkn.SetString(GetParamValue(param), wxT(","));
-
     while (tkn.HasMoreTokens())
     {
-        unsigned long l;
         if (!tkn.GetNextToken().ToULong(&l))
-        {
-            ReportParamError
-            (
-                param,
-                "value must be comma-separated list of row numbers"
-            );
-            break;
+            wxLogError(wxT("growable[rows|cols] must be comma-separated list of row numbers"));
+        else {
+            if (rows)
+                sizer->AddGrowableRow(l);
+            else
+                sizer->AddGrowableCol(l);
         }
-
-        if ( (int)l >= nslots )
-        {
-            ReportParamError
-            (
-                param,
-                wxString::Format
-                (
-                    "invalid %s index %d: must be less than %d",
-                    rows ? "row" : "column",
-                    l,
-                    nslots
-                )
-            );
-
-            // ignore incorrect value, still try to process the rest
-            continue;
-        }
-
-        if (rows)
-            sizer->AddGrowableRow(l);
-        else
-            sizer->AddGrowableCol(l);
     }
 }
 
@@ -480,9 +373,6 @@ void wxSizerXmlHandler::SetSizerItemAttributes(wxSizerItem* sitem)
         gbsitem->SetPos(GetGBPos(wxT("cellpos")));
         gbsitem->SetSpan(GetGBSpan(wxT("cellspan")));
     }
-
-    // record the id of the item, if any, for use by XRCSIZERITEM()
-    sitem->SetId(GetID());
 }
 
 void wxSizerXmlHandler::AddSizerItem(wxSizerItem* sitem)
@@ -543,13 +433,13 @@ wxObject *wxStdDialogButtonSizerXmlHandler::DoCreateResource()
             if (button)
                 m_parentSizer->AddButton(button);
             else
-                ReportError(n, "expected wxButton");
+                wxLogError(wxT("Error in resource - expected button."));
 
             return item;
         }
         else /*n == NULL*/
         {
-            ReportError("no button within wxStdDialogButtonSizer");
+            wxLogError(wxT("Error in resource: no button within wxStdDialogButtonSizer."));
             return NULL;
         }
     }

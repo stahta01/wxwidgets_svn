@@ -130,15 +130,9 @@ public:
                   const wxRect& rect,
                   wxAuiPaneInfo& pane);
 
-    void DrawIcon(wxDC& dc,
-                  const wxRect& rect,
-                  wxAuiPaneInfo& pane);
-
 protected:
 
     void DrawCaptionBackground(wxDC& dc, const wxRect& rect, bool active);
-
-    void InitBitmaps();
 
 protected:
 

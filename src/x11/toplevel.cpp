@@ -6,7 +6,7 @@
 // Created:     24.09.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Julian Smart
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -198,9 +198,9 @@ bool wxTopLevelWindowX11::Create(wxWindow *parent,
     {
        if (GetExtraStyle() & wxTOPLEVEL_EX_DIALOG)
        {
-            if (GetParent() && GetParent()->X11GetMainWindow())
+            if (GetParent() && GetParent()->GetMainWindow())
             {
-                Window xparentwindow = (Window) GetParent()->X11GetMainWindow();
+                Window xparentwindow = (Window) GetParent()->GetMainWindow();
                 XSetTransientForHint( xdisplay, xwindow, xparentwindow );
             }
         }
@@ -220,7 +220,7 @@ bool wxTopLevelWindowX11::Create(wxWindow *parent,
     if (GetParent())
     {
         wm_hints.flags |= WindowGroupHint;
-        wm_hints.window_group = (Window) GetParent()->X11GetMainWindow();
+        wm_hints.window_group = (Window) GetParent()->GetMainWindow();
     }
     wm_hints.input = True;
     wm_hints.initial_state = NormalState;
@@ -268,7 +268,7 @@ void wxTopLevelWindowX11::OnInternalIdle()
     {
         wxSizeEvent event( GetClientSize(), GetId() );
         event.SetEventObject( this );
-        HandleWindowEvent( event );
+        GetEventHandler()->ProcessEvent( event );
 
         m_needResizeInIdle = false;
     }
@@ -285,7 +285,7 @@ bool wxTopLevelWindowX11::Show(bool show)
         wxSizeEvent event(GetSize(), GetId());
 
         event.SetEventObject(this);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
 
         m_needResizeInIdle = false;
     }
@@ -299,7 +299,7 @@ bool wxTopLevelWindowX11::Show(bool show)
 // wxTopLevelWindowX11 maximize/minimize
 // ----------------------------------------------------------------------------
 
-void wxTopLevelWindowX11::Maximize(bool WXUNUSED(maximize))
+void wxTopLevelWindowX11::Maximize(bool maximize)
 {
     // TODO
 }
@@ -312,16 +312,10 @@ bool wxTopLevelWindowX11::IsMaximized() const
 
 void wxTopLevelWindowX11::Iconize(bool iconize)
 {
-    if ( !iconize )
-    {
-        Restore();
-        return;
-    }
-
-    if (!m_iconized && X11GetMainWindow())
+    if (!m_iconized && GetMainWindow())
     {
         if (XIconifyWindow(wxGlobalDisplay(),
-            (Window) X11GetMainWindow(), DefaultScreen(wxGlobalDisplay())) != 0)
+            (Window) GetMainWindow(), DefaultScreen(wxGlobalDisplay())) != 0)
             m_iconized = true;
     }
 }
@@ -334,9 +328,9 @@ bool wxTopLevelWindowX11::IsIconized() const
 void wxTopLevelWindowX11::Restore()
 {
     // This is the way to deiconify the window, according to the X FAQ
-    if (m_iconized && X11GetMainWindow())
+    if (m_iconized && GetMainWindow())
     {
-        XMapWindow(wxGlobalDisplay(), (Window) X11GetMainWindow());
+        XMapWindow(wxGlobalDisplay(), (Window) GetMainWindow());
         m_iconized = false;
     }
 }
@@ -377,9 +371,10 @@ bool wxTopLevelWindowX11::ShowFullScreen(bool show, long style)
 
 void wxTopLevelWindowX11::DoSetIcon(const wxIcon& icon)
 {
-    if (icon.Ok() && X11GetMainWindow())
+    if (icon.Ok() && GetMainWindow())
     {
-#if !wxUSE_NANOX
+#if wxUSE_NANOX
+#else
         XWMHints *wmHints = XAllocWMHints();
         wmHints->icon_pixmap = (Pixmap) icon.GetPixmap();
 
@@ -391,7 +386,7 @@ void wxTopLevelWindowX11::DoSetIcon(const wxIcon& icon)
             wmHints->icon_mask = (Pixmap) icon.GetMask()->GetBitmap();
         }
 
-        XSetWMHints(wxGlobalDisplay(), (Window) X11GetMainWindow(), wmHints);
+        XSetWMHints(wxGlobalDisplay(), (Window) GetMainWindow(), wmHints);
         XFree(wmHints);
 #endif
     }
@@ -403,13 +398,13 @@ void wxTopLevelWindowX11::SetIcons(const wxIconBundle& icons )
     wxTopLevelWindowBase::SetIcons( icons );
 
     DoSetIcon( icons.GetIcon( -1 ) );
-    wxSetIconsX11( wxGlobalDisplay(), X11GetMainWindow(), icons );
+    wxSetIconsX11( wxGlobalDisplay(), GetMainWindow(), icons );
 }
 
 bool wxTopLevelWindowX11::SetShape(const wxRegion& region)
 {
     return wxDoSetShape( wxGlobalDisplay(),
-                         (Window)X11GetMainWindow(),
+                         (Window)GetMainWindow(),
                          region );
 }
 
@@ -417,18 +412,18 @@ void wxTopLevelWindowX11::SetTitle(const wxString& title)
 {
     m_title = title;
 
-    if (X11GetMainWindow())
+    if (GetMainWindow())
     {
 #if wxUSE_UNICODE
         //  I wonder of e.g. Metacity takes UTF-8 here
-        XStoreName(wxGlobalDisplay(), (Window) X11GetMainWindow(),
+        XStoreName(wxGlobalDisplay(), (Window) GetMainWindow(),
             (const char*) title.ToAscii() );
-        XSetIconName(wxGlobalDisplay(), (Window) X11GetMainWindow(),
+        XSetIconName(wxGlobalDisplay(), (Window) GetMainWindow(),
             (const char*) title.ToAscii() );
 #else
-        XStoreName(wxGlobalDisplay(), (Window) X11GetMainWindow(),
+        XStoreName(wxGlobalDisplay(), (Window) GetMainWindow(),
             (const char*) title);
-        XSetIconName(wxGlobalDisplay(), (Window) X11GetMainWindow(),
+        XSetIconName(wxGlobalDisplay(), (Window) GetMainWindow(),
             (const char*) title);
 #endif
     }
@@ -484,7 +479,7 @@ void wxTopLevelWindowX11::DoSetClientSize(int width, int height)
     size_hints.flags = PSize;
     size_hints.width = width;
     size_hints.height = height;
-    XSetWMNormalHints( wxGlobalDisplay(), (Window) X11GetMainWindow(), &size_hints );
+    XSetWMNormalHints( wxGlobalDisplay(), (Window) GetMainWindow(), &size_hints );
 #endif
 
     wxWindowX11::DoSetClientSize(width, height);
@@ -523,7 +518,7 @@ void wxTopLevelWindowX11::DoSetSize(int x, int y, int width, int height, int siz
     size_hints.y = m_y;
     size_hints.width = m_width;
     size_hints.height = m_height;
-    XSetWMNormalHints( wxGlobalDisplay(), (Window) X11GetMainWindow(), &size_hints);
+    XSetWMNormalHints( wxGlobalDisplay(), (Window) GetMainWindow(), &size_hints);
 #endif
 
     wxWindowX11::DoSetSize(x, y, width, height, sizeFlags);
@@ -693,7 +688,8 @@ bool wxSetWMDecorations(Window w, long style)
     }
 
     if ((style & wxCAPTION) ||
-        (style & wxTINY_CAPTION))
+        (style & wxTINY_CAPTION_HORIZ) ||
+        (style & wxTINY_CAPTION_VERT))
     {
         wmProp.props |= GR_WM_PROPS_CAPTION ;
         wmProp.flags |= GR_WM_FLAGS_PROPS ;

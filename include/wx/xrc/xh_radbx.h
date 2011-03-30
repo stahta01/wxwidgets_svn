@@ -28,21 +28,14 @@ private:
     bool m_insideBox;
 
     // the items labels
-    wxArrayString m_labels;
+    wxArrayString labels;
 
-#if wxUSE_TOOLTIPS
     // the items tooltips
-    wxArrayString m_tooltips;
-#endif // wxUSE_TOOLTIPS
+    wxArrayString tooltips;
 
     // the item help text
-    wxArrayString m_helptexts;
-    wxArrayInt    m_helptextSpecified;
-
-    // if the corresponding array element is 1, the radiobox item is
-    // disabled/hidden
-    wxArrayInt m_isEnabled,
-               m_isShown;
+    wxArrayString helptexts;
+    wxArrayInt    helptextSpecified;
 };
 
 #endif // wxUSE_XRC && wxUSE_RADIOBOX

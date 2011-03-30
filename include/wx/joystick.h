@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/joystick.h
+// Name:        joystick.h
 // Purpose:     wxJoystick base header
 // Author:      wxWidgets Team
 // Modified by:
@@ -25,9 +25,9 @@
 #elif defined(__WXX11__)
 #include "wx/unix/joystick.h"
 #elif defined(__DARWIN__)
-#include "wx/osx/core/joystick.h"
+#include "wx/mac/corefoundation/joystick.h"
 #elif defined(__WXMAC__)
-#include "wx/osx/joystick.h"
+#include "wx/mac/joystick.h"
 #elif defined(__WXPM__)
 #include "wx/os2/joystick.h"
 #endif

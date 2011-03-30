@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -42,7 +42,6 @@ public:
         CPPUNIT_TEST(Input_Read);
         CPPUNIT_TEST(Input_Eof);
         CPPUNIT_TEST(Input_LastRead);
-        CPPUNIT_TEST(Input_CanRead);
         CPPUNIT_TEST(Input_SeekI);
         CPPUNIT_TEST(Input_TellI);
         CPPUNIT_TEST(Input_Peek);
@@ -56,20 +55,15 @@ public:
         //CPPUNIT_TEST(Output_TellO);
 
         // Other test specific for String stream test case.
-        CPPUNIT_TEST(Output_Check);
     CPPUNIT_TEST_SUITE_END();
 
 protected:
-    void Output_Check();
+    // Add own test here.
 
 private:
     // Implement base class functions.
     virtual wxStringInputStream  *DoCreateInStream();
     virtual wxStringOutputStream *DoCreateOutStream();
-
-    // output the given string to wxStringOutputStream and check that its
-    // contents is exactly the same string
-    void CheckString(const wxString& text);
 
     wxString m_str;
 };
@@ -80,7 +74,7 @@ strStream::strStream()
     m_str.reserve(LEN);
     for ( size_t n = 0; n < LEN; n++ )
     {
-        m_str += wxChar(wxT('A') + n % (wxT('Z') - wxT('A') + 1));
+        m_str += _T('A') + n % (_T('Z') - _T('A') + 1);
     }
 }
 
@@ -102,21 +96,6 @@ wxStringOutputStream *strStream::DoCreateOutStream()
     return pStrOutStream;
 }
 
-void strStream::CheckString(const wxString& text)
-{
-    wxStringOutputStream sos;
-
-    const wxCharBuffer buf(text.To8BitData());
-    sos.Write(buf, buf.length());
-
-    CPPUNIT_ASSERT_EQUAL( text, sos.GetString() );
-}
-
-void strStream::Output_Check()
-{
-    CheckString("Hello world!");
-    CheckString(wxString("hi\0dden", 8));
-}
 
 // Register the stream sub suite, by using some stream helper macro.
 STREAM_TEST_SUBSUITE_NAMED_REGISTRATION(strStream)

@@ -7,7 +7,7 @@
 // Created:     08.02.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Johnny C. Norris II
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -43,11 +43,11 @@ static void gtk_togglebutton_clicked_callback(GtkWidget *WXUNUSED(widget), wxTog
     wxCommandEvent event(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, cb->GetId());
     event.SetInt(cb->GetValue());
     event.SetEventObject(cb);
-    cb->HandleWindowEvent(event);
+    cb->GetEventHandler()->ProcessEvent(event);
 }
 }
 
-wxDEFINE_EVENT( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEvent );
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED)
 
 // ------------------------------------------------------------------------
 // wxToggleBitmapButton
@@ -136,7 +136,7 @@ void wxToggleBitmapButton::OnSetBitmap()
 {
     if (!m_bitmap.Ok()) return;
 
-    GdkBitmap *mask = NULL;
+    GdkBitmap *mask = (GdkBitmap *) NULL;
     if (m_bitmap.GetMask()) mask = m_bitmap.GetMask()->GetBitmap();
 
     GtkWidget *child = BUTTON_CHILD(m_widget);

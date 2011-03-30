@@ -6,7 +6,7 @@
 // Created:     27.03.01
 // Id:          $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin
-// Licence:     wxWindows licence
+// License:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -41,8 +41,8 @@
 
 #include "wx/sizer.h"
 
-#include "itemcontainer.h"
 #include "widgets.h"
+#if 1
 #include "icons/combobox.xpm"
 
 // ----------------------------------------------------------------------------
@@ -53,9 +53,6 @@
 enum
 {
     ComboPage_Reset = wxID_HIGHEST,
-    ComboPage_Popup,
-    ComboPage_Dismiss,
-    ComboPage_SetCurrent,
     ComboPage_CurText,
     ComboPage_InsertionPointText,
     ComboPage_Insert,
@@ -70,10 +67,7 @@ enum
     ComboPage_Delete,
     ComboPage_DeleteText,
     ComboPage_DeleteSel,
-    ComboPage_SetValue,
-    ComboPage_SetValueText,
-    ComboPage_Combo,
-    ComboPage_ContainerTests
+    ComboPage_Combo
 };
 
 // kinds of comboboxes
@@ -88,14 +82,12 @@ enum
 // ComboboxWidgetsPage
 // ----------------------------------------------------------------------------
 
-class ComboboxWidgetsPage : public ItemContainerWidgetsPage
+class ComboboxWidgetsPage : public WidgetsPage
 {
 public:
     ComboboxWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
 
     virtual wxControl *GetWidget() const { return m_combobox; }
-    virtual wxTextEntryBase *GetTextEntry() const { return m_combobox; }
-    virtual wxItemContainer* GetContainer() const { return m_combobox; }
     virtual void RecreateWidget() { CreateCombo(); }
 
     // lazy creation of the content
@@ -104,8 +96,6 @@ public:
 protected:
     // event handlers
     void OnButtonReset(wxCommandEvent& event);
-    void OnButtonPopup(wxCommandEvent&) { m_combobox->Popup(); }
-    void OnButtonDismiss(wxCommandEvent&) { m_combobox->Dismiss(); }
     void OnButtonChange(wxCommandEvent& event);
     void OnButtonDelete(wxCommandEvent& event);
     void OnButtonDeleteSel(wxCommandEvent& event);
@@ -114,16 +104,13 @@ protected:
     void OnButtonAdd(wxCommandEvent& event);
     void OnButtonAddSeveral(wxCommandEvent& event);
     void OnButtonAddMany(wxCommandEvent& event);
-    void OnButtonSetValue(wxCommandEvent& event);
-    void OnButtonSetCurrent(wxCommandEvent& event);
 
-    void OnDropdown(wxCommandEvent& event);
-    void OnCloseup(wxCommandEvent& event);
     void OnComboBox(wxCommandEvent& event);
     void OnComboText(wxCommandEvent& event);
 
     void OnCheckOrRadioBox(wxCommandEvent& event);
 
+    void OnUpdateUICurText(wxUpdateUIEvent& event);
     void OnUpdateUIInsertionPointText(wxUpdateUIEvent& event);
 
     void OnUpdateUIInsert(wxUpdateUIEvent& event);
@@ -132,7 +119,6 @@ protected:
     void OnUpdateUIDeleteButton(wxUpdateUIEvent& event);
     void OnUpdateUIDeleteSelButton(wxUpdateUIEvent& event);
     void OnUpdateUIResetButton(wxUpdateUIEvent& event);
-    void OnUpdateUISetCurrent(wxUpdateUIEvent& event);
 
     // reset the combobox parameters
     void Reset();
@@ -159,9 +145,7 @@ protected:
     wxTextCtrl *m_textInsert,
                *m_textAdd,
                *m_textChange,
-               *m_textSetValue,
-               *m_textDelete,
-               *m_textCur;
+               *m_textDelete;
 
 private:
     DECLARE_EVENT_TABLE()
@@ -174,8 +158,6 @@ private:
 
 BEGIN_EVENT_TABLE(ComboboxWidgetsPage, WidgetsPage)
     EVT_BUTTON(ComboPage_Reset, ComboboxWidgetsPage::OnButtonReset)
-    EVT_BUTTON(ComboPage_Popup, ComboboxWidgetsPage::OnButtonPopup)
-    EVT_BUTTON(ComboPage_Dismiss, ComboboxWidgetsPage::OnButtonDismiss)
     EVT_BUTTON(ComboPage_Change, ComboboxWidgetsPage::OnButtonChange)
     EVT_BUTTON(ComboPage_Delete, ComboboxWidgetsPage::OnButtonDelete)
     EVT_BUTTON(ComboPage_DeleteSel, ComboboxWidgetsPage::OnButtonDeleteSel)
@@ -184,14 +166,12 @@ BEGIN_EVENT_TABLE(ComboboxWidgetsPage, WidgetsPage)
     EVT_BUTTON(ComboPage_Add, ComboboxWidgetsPage::OnButtonAdd)
     EVT_BUTTON(ComboPage_AddSeveral, ComboboxWidgetsPage::OnButtonAddSeveral)
     EVT_BUTTON(ComboPage_AddMany, ComboboxWidgetsPage::OnButtonAddMany)
-    EVT_BUTTON(ComboPage_SetValue, ComboboxWidgetsPage::OnButtonSetValue)
-    EVT_BUTTON(ComboPage_SetCurrent, ComboboxWidgetsPage::OnButtonSetCurrent)
-    EVT_BUTTON(ComboPage_ContainerTests, ItemContainerWidgetsPage::OnButtonTestItemContainer)
 
     EVT_TEXT_ENTER(ComboPage_InsertText, ComboboxWidgetsPage::OnButtonInsert)
     EVT_TEXT_ENTER(ComboPage_AddText, ComboboxWidgetsPage::OnButtonAdd)
     EVT_TEXT_ENTER(ComboPage_DeleteText, ComboboxWidgetsPage::OnButtonDelete)
 
+    EVT_UPDATE_UI(ComboPage_CurText, ComboboxWidgetsPage::OnUpdateUICurText)
     EVT_UPDATE_UI(ComboPage_InsertionPointText, ComboboxWidgetsPage::OnUpdateUIInsertionPointText)
 
     EVT_UPDATE_UI(ComboPage_Reset, ComboboxWidgetsPage::OnUpdateUIResetButton)
@@ -203,11 +183,8 @@ BEGIN_EVENT_TABLE(ComboboxWidgetsPage, WidgetsPage)
     EVT_UPDATE_UI(ComboPage_Change, ComboboxWidgetsPage::OnUpdateUIDeleteSelButton)
     EVT_UPDATE_UI(ComboPage_ChangeText, ComboboxWidgetsPage::OnUpdateUIDeleteSelButton)
     EVT_UPDATE_UI(ComboPage_DeleteSel, ComboboxWidgetsPage::OnUpdateUIDeleteSelButton)
-    EVT_UPDATE_UI(ComboPage_SetCurrent, ComboboxWidgetsPage::OnUpdateUISetCurrent)
 
     EVT_COMBOBOX(ComboPage_Combo, ComboboxWidgetsPage::OnComboBox)
-    EVT_COMBOBOX_DROPDOWN(ComboPage_Combo, ComboboxWidgetsPage::OnDropdown)
-    EVT_COMBOBOX_CLOSEUP(ComboPage_Combo, ComboboxWidgetsPage::OnCloseup)
     EVT_TEXT(ComboPage_Combo, ComboboxWidgetsPage::OnComboText)
     EVT_TEXT_ENTER(ComboPage_Combo, ComboboxWidgetsPage::OnComboText)
 
@@ -225,13 +202,13 @@ END_EVENT_TABLE()
     #define FAMILY_CTRLS NATIVE_CTRLS
 #endif
 
-IMPLEMENT_WIDGETS_PAGE(ComboboxWidgetsPage, wxT("Combobox"),
+IMPLEMENT_WIDGETS_PAGE(ComboboxWidgetsPage, _T("Combobox"),
                        FAMILY_CTRLS | WITH_ITEMS_CTRLS | COMBO_CTRLS
                        );
 
 ComboboxWidgetsPage::ComboboxWidgetsPage(WidgetsBookCtrl *book,
                                          wxImageList *imaglist)
-                  : ItemContainerWidgetsPage(book, imaglist, combobox_xpm)
+                  : WidgetsPage(book, imaglist, combobox_xpm)
 {
     // init everything
     m_chkSort =
@@ -252,63 +229,51 @@ void ComboboxWidgetsPage::CreateContent()
     */
     wxSizer *sizerTop = new wxBoxSizer(wxHORIZONTAL);
 
-    // upper left pane
+    // left pane
+    wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T("&Set style"));
 
     // should be in sync with ComboKind_XXX values
     static const wxString kinds[] =
     {
-        wxT("default"),
-        wxT("simple"),
-        wxT("drop down"),
+        _T("default"),
+        _T("simple"),
+        _T("drop down"),
     };
 
-    m_radioKind = new wxRadioBox(this, wxID_ANY, wxT("Combobox &kind:"),
+    m_radioKind = new wxRadioBox(this, wxID_ANY, _T("Combobox &kind:"),
                                  wxDefaultPosition, wxDefaultSize,
                                  WXSIZEOF(kinds), kinds,
                                  1, wxRA_SPECIFY_COLS);
 
-    wxSizer *sizerLeftTop = new wxStaticBoxSizer(wxVERTICAL, this, "&Set style");
+    wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
-    m_chkSort = CreateCheckBoxAndAddToSizer(sizerLeftTop, wxT("&Sort items"));
-    m_chkReadonly = CreateCheckBoxAndAddToSizer(sizerLeftTop, wxT("&Read only"));
-    m_chkFilename = CreateCheckBoxAndAddToSizer(sizerLeftTop, wxT("&File name"));
+    m_chkSort = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Sort items"));
+    m_chkReadonly = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&Read only"));
+    m_chkFilename = CreateCheckBoxAndAddToSizer(sizerLeft, _T("&File name"));
     m_chkFilename->Disable(); // not implemented yet
 
-    sizerLeftTop->Add(5, 5, 0, wxGROW | wxALL, 5); // spacer
-    sizerLeftTop->Add(m_radioKind, 0, wxGROW | wxALL, 5);
+    sizerLeft->Add(5, 5, 0, wxGROW | wxALL, 5); // spacer
+    sizerLeft->Add(m_radioKind, 0, wxGROW | wxALL, 5);
 
-    wxButton *btn = new wxButton(this, ComboPage_Reset, wxT("&Reset"));
-    sizerLeftTop->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
-
-    // lower left pane
-    wxSizer *sizerLeftBottom = new wxStaticBoxSizer(wxVERTICAL, this, "&Popup");
-    sizerLeftBottom->Add(new wxButton(this, ComboPage_Popup, "&Show"),
-                         wxSizerFlags().Border().Centre());
-    sizerLeftBottom->Add(new wxButton(this, ComboPage_Dismiss, "&Hide"),
-                         wxSizerFlags().Border().Centre());
-
-
-    wxSizer *sizerLeft = new wxBoxSizer(wxVERTICAL);
-    sizerLeft->Add(sizerLeftTop);
-    sizerLeft->AddSpacer(10);
-    sizerLeft->Add(sizerLeftBottom);
+    wxButton *btn = new wxButton(this, ComboPage_Reset, _T("&Reset"));
+    sizerLeft->Add(btn, 0, wxALIGN_CENTRE_HORIZONTAL | wxALL, 15);
 
     // middle pane
     wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY,
-        wxT("&Change combobox contents"));
+        _T("&Change combobox contents"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxSizer *sizerRow;
 
-    sizerRow = CreateSizerWithTextAndButton(ComboPage_SetCurrent,
-                                            wxT("Current &selection"),
-                                            ComboPage_CurText,
-                                            &m_textCur);
+    wxTextCtrl *text;
+    sizerRow = CreateSizerWithTextAndLabel(_T("Current selection"),
+                                           ComboPage_CurText,
+                                           &text);
+    text->SetEditable(false);
 
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
-    wxTextCtrl *text;
-    sizerRow = CreateSizerWithTextAndLabel(wxT("Insertion Point"),
+    sizerRow = CreateSizerWithTextAndLabel(_T("Insertion Point"),
                                            ComboPage_InsertionPointText,
                                            &text);
     text->SetEditable(false);
@@ -316,51 +281,40 @@ void ComboboxWidgetsPage::CreateContent()
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndButton(ComboPage_Insert,
-                                            wxT("&Insert this string"),
+                                            _T("&Insert this string"),
                                             ComboPage_InsertText,
                                             &m_textInsert);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndButton(ComboPage_Add,
-                                            wxT("&Add this string"),
+                                            _T("&Add this string"),
                                             ComboPage_AddText,
                                             &m_textAdd);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
-    btn = new wxButton(this, ComboPage_AddSeveral, wxT("&Append a few strings"));
+    btn = new wxButton(this, ComboPage_AddSeveral, _T("&Append a few strings"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
-    btn = new wxButton(this, ComboPage_AddMany, wxT("Append &many strings"));
+    btn = new wxButton(this, ComboPage_AddMany, _T("Append &many strings"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndButton(ComboPage_Change,
-                                            wxT("C&hange current"),
+                                            _T("C&hange current"),
                                             ComboPage_ChangeText,
                                             &m_textChange);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
     sizerRow = CreateSizerWithTextAndButton(ComboPage_Delete,
-                                            wxT("&Delete this item"),
+                                            _T("&Delete this item"),
                                             ComboPage_DeleteText,
                                             &m_textDelete);
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 
-    btn = new wxButton(this, ComboPage_DeleteSel, wxT("Delete &selection"));
+    btn = new wxButton(this, ComboPage_DeleteSel, _T("Delete &selection"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
 
-    btn = new wxButton(this, ComboPage_Clear, wxT("&Clear"));
+    btn = new wxButton(this, ComboPage_Clear, _T("&Clear"));
     sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
-
-    sizerRow = CreateSizerWithTextAndButton(ComboPage_SetValue,
-                                            wxT("SetValue"),
-                                            ComboPage_SetValueText,
-                                            &m_textSetValue);
-    sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
-
-    btn = new wxButton(this, ComboPage_ContainerTests, wxT("Run &tests"));
-    sizerMiddle->Add(btn, 0, wxALL | wxGROW, 5);
-
-
 
     // right pane
     wxSizer *sizerRight = new wxBoxSizer(wxVERTICAL);
@@ -406,7 +360,7 @@ void ComboboxWidgetsPage::CreateCombo()
     switch ( m_radioKind->GetSelection() )
     {
         default:
-            wxFAIL_MSG( wxT("unknown combo kind") );
+            wxFAIL_MSG( _T("unknown combo kind") );
             // fall through
 
         case ComboKind_Default:
@@ -450,7 +404,7 @@ void ComboboxWidgetsPage::CreateCombo()
         m_combobox->Append(items[n]);
     }
 
-    m_sizerCombo->Add(m_combobox, 0, wxGROW | wxALL, 5);
+    m_sizerCombo->Add(m_combobox, 1, wxGROW | wxALL, 5);
     m_sizerCombo->Layout();
 }
 
@@ -473,7 +427,7 @@ void ComboboxWidgetsPage::OnButtonChange(wxCommandEvent& WXUNUSED(event))
 #ifndef __WXGTK__
         m_combobox->SetString(sel, m_textChange->GetValue());
 #else
-        wxLogMessage(wxT("Not implemented in wxGTK"));
+        wxLogMessage(_T("Not implemented in wxGTK"));
 #endif
     }
 }
@@ -499,12 +453,6 @@ void ComboboxWidgetsPage::OnButtonDeleteSel(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void ComboboxWidgetsPage::OnButtonSetValue(wxCommandEvent& WXUNUSED(event))
-{
-    wxString value = m_textSetValue->GetValue();
-    m_combobox->SetValue( value );
-}
-
 void ComboboxWidgetsPage::OnButtonClear(wxCommandEvent& WXUNUSED(event))
 {
     m_combobox->Clear();
@@ -518,7 +466,7 @@ void ComboboxWidgetsPage::OnButtonInsert(wxCommandEvent& WXUNUSED(event))
     if ( !m_textInsert->IsModified() )
     {
         // update the default string
-        m_textInsert->SetValue(wxString::Format(wxT("test item %u"), ++s_item));
+        m_textInsert->SetValue(wxString::Format(_T("test item %u"), ++s_item));
     }
 
     if (m_combobox->GetSelection() >= 0)
@@ -533,7 +481,7 @@ void ComboboxWidgetsPage::OnButtonAdd(wxCommandEvent& WXUNUSED(event))
     if ( !m_textAdd->IsModified() )
     {
         // update the default string
-        m_textAdd->SetValue(wxString::Format(wxT("test item %u"), ++s_item));
+        m_textAdd->SetValue(wxString::Format(_T("test item %u"), ++s_item));
     }
 
     m_combobox->Append(s);
@@ -544,30 +492,27 @@ void ComboboxWidgetsPage::OnButtonAddMany(wxCommandEvent& WXUNUSED(event))
     // "many" means 1000 here
     for ( unsigned int n = 0; n < 1000; n++ )
     {
-        m_combobox->Append(wxString::Format(wxT("item #%u"), n));
+        m_combobox->Append(wxString::Format(_T("item #%u"), n));
     }
-}
-
-void ComboboxWidgetsPage::OnButtonSetCurrent(wxCommandEvent& WXUNUSED(event))
-{
-    long n;
-    if ( !m_textCur->GetValue().ToLong(&n) )
-        return;
-
-    m_combobox->SetSelection(n);
 }
 
 void ComboboxWidgetsPage::OnButtonAddSeveral(wxCommandEvent& WXUNUSED(event))
 {
-    m_combobox->Append(wxT("First"));
-    m_combobox->Append(wxT("another one"));
-    m_combobox->Append(wxT("and the last (very very very very very very very very very very long) one"));
+    m_combobox->Append(_T("First"));
+    m_combobox->Append(_T("another one"));
+    m_combobox->Append(_T("and the last (very very very very very very very very very very long) one"));
+}
+
+void ComboboxWidgetsPage::OnUpdateUICurText(wxUpdateUIEvent& event)
+{
+    if (m_combobox)
+        event.SetText( wxString::Format(_T("%d"), m_combobox->GetSelection()) );
 }
 
 void ComboboxWidgetsPage::OnUpdateUIInsertionPointText(wxUpdateUIEvent& event)
 {
     if (m_combobox)
-        event.SetText( wxString::Format(wxT("%ld"), m_combobox->GetInsertionPoint()) );
+        event.SetText( wxString::Format(_T("%ld"), m_combobox->GetInsertionPoint()) );
 }
 
 void ComboboxWidgetsPage::OnUpdateUIResetButton(wxUpdateUIEvent& event)
@@ -616,14 +561,6 @@ void ComboboxWidgetsPage::OnUpdateUIAddSeveral(wxUpdateUIEvent& event)
         event.Enable(!(m_combobox->GetWindowStyle() & wxCB_SORT));
 }
 
-void ComboboxWidgetsPage::OnUpdateUISetCurrent(wxUpdateUIEvent& event)
-{
-    long n;
-    event.Enable( m_textCur->GetValue().ToLong(&n) &&
-                    (n == wxNOT_FOUND ||
-                        (n >= 0 && (unsigned)n < m_combobox->GetCount())) );
-}
-
 void ComboboxWidgetsPage::OnComboText(wxCommandEvent& event)
 {
     if (!m_combobox)
@@ -632,28 +569,22 @@ void ComboboxWidgetsPage::OnComboText(wxCommandEvent& event)
     wxString s = event.GetString();
 
     wxASSERT_MSG( s == m_combobox->GetValue(),
-                  wxT("event and combobox values should be the same") );
+                  _T("event and combobox values should be the same") );
 
     if (event.GetEventType() == wxEVT_COMMAND_TEXT_ENTER)
-    {
-        wxLogMessage(wxT("Combobox enter pressed (now '%s')"), s.c_str());
-    }
+        wxLogMessage(_T("Combobox enter pressed (now '%s')"), s.c_str());
     else
-    {
-        wxLogMessage(wxT("Combobox text changed (now '%s')"), s.c_str());
-    }
+        wxLogMessage(_T("Combobox text changed (now '%s')"), s.c_str());
 }
 
 void ComboboxWidgetsPage::OnComboBox(wxCommandEvent& event)
 {
     long sel = event.GetInt();
-    const wxString selstr = wxString::Format(wxT("%ld"), sel);
-    m_textDelete->SetValue(selstr);
-    m_textCur->SetValue(selstr);
+    m_textDelete->SetValue(wxString::Format(_T("%ld"), sel));
 
-    wxLogMessage(wxT("Combobox item %ld selected"), sel);
+    wxLogMessage(_T("Combobox item %ld selected"), sel);
 
-    wxLogMessage(wxT("Combobox GetValue(): %s"), m_combobox->GetValue().c_str() );
+    wxLogMessage(_T("Combobox GetValue(): %s"), m_combobox->GetValue().c_str() );
 }
 
 void ComboboxWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
@@ -661,14 +592,6 @@ void ComboboxWidgetsPage::OnCheckOrRadioBox(wxCommandEvent& WXUNUSED(event))
     CreateCombo();
 }
 
-void ComboboxWidgetsPage::OnDropdown(wxCommandEvent& WXUNUSED(event))
-{
-    wxLogMessage(wxT("Combobox dropped down"));
-}
+#endif //wxUSE_COMBOBOX
 
-void ComboboxWidgetsPage::OnCloseup(wxCommandEvent& WXUNUSED(event))
-{
-    wxLogMessage(wxT("Combobox closed up"));
-}
-
-#endif // wxUSE_COMBOBOX
+#endif

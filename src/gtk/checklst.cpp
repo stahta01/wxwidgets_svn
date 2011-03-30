@@ -24,7 +24,7 @@
 // "toggled"
 //-----------------------------------------------------------------------------
 extern "C" {
-static void gtk_checklist_toggled(GtkCellRendererToggle * WXUNUSED(renderer),
+static void gtk_checklist_toggled(GtkCellRendererToggle *renderer,
                                   gchar                 *stringpath,
                                   wxCheckListBox        *listbox)
 {
@@ -35,16 +35,17 @@ static void gtk_checklist_toggled(GtkCellRendererToggle * WXUNUSED(renderer),
                               listbox->GetId() );
     new_event.SetEventObject( listbox );
     new_event.SetInt( gtk_tree_path_get_indices(path)[0] );
-    new_event.SetString( listbox->GetString( new_event.GetInt() ));
     gtk_tree_path_free(path);
     listbox->Check( new_event.GetInt(), !listbox->IsChecked(new_event.GetInt()));
-    listbox->HandleWindowEvent( new_event );
+    listbox->GetEventHandler()->ProcessEvent( new_event );
 }
 }
 
 //-----------------------------------------------------------------------------
 // wxCheckListBox
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxCheckListBox,wxListBox)
 
 wxCheckListBox::wxCheckListBox() : wxListBox()
 {
@@ -86,12 +87,7 @@ void wxCheckListBox::DoCreateCheckList()
         gtk_tree_view_column_new_with_attributes( "", renderer,
                                                   "active", 0,
                                                   NULL );
-#if wxUSE_LIBHILDON2
-    gtk_tree_view_column_set_fixed_width(column, 40);
-#else
-    gtk_tree_view_column_set_fixed_width(column, 22);
-#endif // wxUSE_LIBHILDON2/!wxUSE_LIBHILDON2
-
+    gtk_tree_view_column_set_fixed_width(column, 20);
     gtk_tree_view_column_set_sizing(column, GTK_TREE_VIEW_COLUMN_FIXED);
     gtk_tree_view_column_set_clickable(column, TRUE);
 

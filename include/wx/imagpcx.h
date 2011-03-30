@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/imagpcx.h
+// Name:        imagpcx.h
 // Purpose:     wxImage PCX handler
 // Author:      Guillermo Rodriguez Garcia <guille@iies.es>
 // RCS-ID:      $Id$
@@ -18,7 +18,7 @@
 //-----------------------------------------------------------------------------
 
 #if wxUSE_PCX
-class WXDLLIMPEXP_CORE wxPCXHandler : public wxImageHandler
+class WXDLLEXPORT wxPCXHandler : public wxImageHandler
 {
 public:
     inline wxPCXHandler()

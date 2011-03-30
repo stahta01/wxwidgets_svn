@@ -346,9 +346,8 @@ private:
     int m_level;
     wxFileOffset m_offsetAdjustment;
     wxString m_Comment;
-    bool m_endrecWritten;
 
-    wxDECLARE_NO_COPY_CLASS(wxZipOutputStream);
+    DECLARE_NO_COPY_CLASS(wxZipOutputStream)
 };
 
 
@@ -446,7 +445,7 @@ private:
     friend class wxArchiveFSHandler;
 #endif
 
-    wxDECLARE_NO_COPY_CLASS(wxZipInputStream);
+    DECLARE_NO_COPY_CLASS(wxZipInputStream)
 };
 
 

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/filedlg.h
+// Name:        filedlg.h
 // Purpose:     wxFileDialog class
 // Author:      David Webster
 // Modified by:
@@ -16,7 +16,7 @@
 // wxFileDialog
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileDialog: public wxFileDialogBase
+class WXDLLEXPORT wxFileDialog: public wxFileDialogBase
 {
 DECLARE_DYNAMIC_CLASS(wxFileDialog)
 public:

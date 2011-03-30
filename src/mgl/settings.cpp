@@ -34,7 +34,8 @@ public:
     virtual bool OnInit() { return true; }
     virtual void OnExit()
     {
-        wxDELETE(gs_fontDefault);
+        delete gs_fontDefault;
+        gs_fontDefault = NULL;
     }
 
 private:
@@ -90,6 +91,9 @@ int wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(w
         case wxSYS_SCREEN_Y:
             wxDisplaySize(NULL, &val);
             return val;
+        case wxSYS_VSCROLL_X:
+        case wxSYS_HSCROLL_Y:
+            return 15;
         default:
         {
         }
@@ -108,7 +112,7 @@ bool wxSystemSettingsNative::HasFeature(wxSystemFeature index)
             return false;
 
         default:
-            wxFAIL_MSG( wxT("unknown feature") );
+            wxFAIL_MSG( _T("unknown feature") );
     }
 
     return false;

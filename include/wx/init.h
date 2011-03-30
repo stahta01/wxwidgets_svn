@@ -13,7 +13,7 @@
 #define _WX_INIT_H_
 
 #include "wx/defs.h"
-#include "wx/chartype.h"
+#include "wx/wxchar.h"
 
 // ----------------------------------------------------------------------------
 // wxEntry helper functions which allow to have more fine grained control
@@ -55,15 +55,14 @@ extern int WXDLLIMPEXP_BASE wxEntry(int& argc, char **argv);
 
 // ----------------------------------------------------------------------------
 // Using the library without (explicit) application object: you may avoid using
-// wxDECLARE_APP and wxIMPLEMENT_APP macros and call the functions below instead at
+// DECLARE_APP and IMPLEMENT_APP macros and call the functions below instead at
 // the program startup and termination
 // ----------------------------------------------------------------------------
 
 // initialize the library (may be called as many times as needed, but each
 // call to wxInitialize() must be matched by wxUninitialize())
-extern bool WXDLLIMPEXP_BASE wxInitialize();
-extern bool WXDLLIMPEXP_BASE wxInitialize(int argc, wxChar **argv);
-#if wxUSE_UNICODE
+extern bool WXDLLIMPEXP_BASE wxInitialize(int argc = 0, wxChar **argv = NULL);
+#if wxUSE_UNICODE && wxABI_VERSION >= 20811
 extern bool WXDLLIMPEXP_BASE wxInitialize(int argc, char **argv);
 #endif
 
@@ -77,17 +76,12 @@ class WXDLLIMPEXP_BASE wxInitializer
 {
 public:
     // initialize the library
-    wxInitializer()
-    {
-        m_ok = wxInitialize();
-    }
-
-    wxInitializer(int argc, wxChar **argv)
+    wxInitializer(int argc = 0, wxChar **argv = NULL)
     {
         m_ok = wxInitialize(argc, argv);
     }
 
-#if wxUSE_UNICODE
+#if wxUSE_UNICODE && wxABI_VERSION >= 20811
     wxInitializer(int argc, char **argv)
     {
         m_ok = wxInitialize(argc, argv);

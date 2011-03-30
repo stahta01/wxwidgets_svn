@@ -106,9 +106,9 @@ static wxWindowMGL* wxGetTopLevelParent(wxWindowMGL *win)
 static void wxCaptureScreenshot(bool activeWindowOnly)
 {
 #ifdef __DOS__
-    #define SCREENSHOT_FILENAME wxT("sshot%03i.png")
+    #define SCREENSHOT_FILENAME _T("sshot%03i.png")
 #else
-    #define SCREENSHOT_FILENAME wxT("screenshot-%03i.png")
+    #define SCREENSHOT_FILENAME _T("screenshot-%03i.png")
 #endif
     static int screenshot_num = 0;
     wxString screenshot;
@@ -128,7 +128,7 @@ static void wxCaptureScreenshot(bool activeWindowOnly)
     g_displayDC->savePNGFromDC(screenshot.mb_str(),
                                r.x, r. y, r.x+r.width, r.y+r.height);
 
-    wxMessageBox(wxString::Format(wxT("Screenshot captured: %s"),
+    wxMessageBox(wxString::Format(_T("Screenshot captured: %s"),
                                   screenshot.c_str()));
 }
 
@@ -184,7 +184,7 @@ static ibool MGLAPI wxWindowMouseHandler(window_t *wnd, event_t *e)
     {
         case EVT_MOUSEDOWN:
             // Change focus if the user clicks outside focused window:
-            if ( win->CanAcceptFocus() && wxWindow::FindFocus() != win )
+            if ( win->AcceptsFocus() && wxWindow::FindFocus() != win )
                 win->SetFocus();
 
             if ( e->message & EVT_DBLCLICK )
@@ -235,12 +235,12 @@ static ibool MGLAPI wxWindowMouseHandler(window_t *wnd, event_t *e)
 
                         event2.SetEventObject(gs_windowUnderMouse);
                         event2.SetEventType(wxEVT_LEAVE_WINDOW);
-                        gs_windowUnderMouse->HandleWindowEvent(event2);
+                        gs_windowUnderMouse->GetEventHandler()->ProcessEvent(event2);
                     }
 
                     wxMouseEvent event3(event);
                     event3.SetEventType(wxEVT_ENTER_WINDOW);
-                    win->HandleWindowEvent(event3);
+                    win->GetEventHandler()->ProcessEvent(event3);
 
                     gs_windowUnderMouse = win;
                 }
@@ -257,7 +257,7 @@ static ibool MGLAPI wxWindowMouseHandler(window_t *wnd, event_t *e)
                     wxMouseEvent evt(inside ?
                                      wxEVT_ENTER_WINDOW : wxEVT_LEAVE_WINDOW);
                     evt.SetEventObject(win);
-                    win->HandleWindowEvent(evt);
+                    win->GetEventHandler()->ProcessEvent(evt);
                     gs_windowUnderMouse = inside ? win : NULL;
                 }
             }
@@ -276,7 +276,7 @@ static ibool MGLAPI wxWindowMouseHandler(window_t *wnd, event_t *e)
     else
     {
         event.SetEventType(type);
-        return win->HandleWindowEvent(event);
+        return win->GetEventHandler()->ProcessEvent(event);
     }
 }
 
@@ -288,8 +288,8 @@ static long wxScanToKeyCode(event_t *event, bool translate)
     #ifdef __WXDEBUG__
       #define KEY(mgl_key,wx_key) \
         case mgl_key: \
-          wxLogTrace(wxT("keyevents"), \
-                     wxT("key " #mgl_key ", mapped to " #wx_key)); \
+          wxLogTrace(_T("keyevents"), \
+                     _T("key " #mgl_key ", mapped to " #wx_key)); \
           key = wx_key; \
           break;
     #else
@@ -460,6 +460,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
     event.SetEventObject(win);
     event.SetTimestamp(e->when);
     event.m_keyCode = wxScanToKeyCode(e, true);
+    event.m_scanCode = 0; // not used by wx at all
     event.m_x = where.x;
     event.m_y = where.y;
     event.m_shiftDown = ( e->modifiers & EVT_SHIFTKEY ) != 0;
@@ -470,7 +471,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
     if ( e->what == EVT_KEYUP )
     {
         event.SetEventType(wxEVT_KEY_UP);
-        return win->HandleWindowEvent(event);
+        return win->GetEventHandler()->ProcessEvent(event);
     }
     else
     {
@@ -480,7 +481,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
         event.SetEventType(wxEVT_KEY_DOWN);
         event2 = event;
 
-        ret = win->HandleWindowEvent(event);
+        ret = win->GetEventHandler()->ProcessEvent(event);
 
         // wxMSW doesn't send char events with Alt pressed
         // Only send wxEVT_CHAR event if not processed yet. Thus, ALT-x
@@ -489,7 +490,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
         if ( !ret && event2.m_keyCode != 0 )
         {
             event2.SetEventType(wxEVT_CHAR);
-            ret = win->HandleWindowEvent(event2);
+            ret = win->GetEventHandler()->ProcessEvent(event2);
         }
 
         // Synthetize navigation key event, but do it only if the TAB key
@@ -504,7 +505,7 @@ static ibool MGLAPI wxWindowKeybHandler(window_t *wnd, event_t *e)
             // Ctrl-TAB changes the (parent) window, i.e. switch notebook page:
             navEvent.SetWindowChange(event.m_controlDown);
             navEvent.SetCurrentFocus(wxStaticCast(win, wxWindow));
-            ret = win->HandleWindowEvent(navEvent);
+            ret = win->GetParent()->GetEventHandler()->ProcessEvent(navEvent);
         }
 
         // Finally, process special meaning keys that are usually
@@ -543,14 +544,13 @@ void wxWindowMGL::Init()
     if ( !g_winMng )
     {
         if ( !wxTheApp->SetDisplayMode(wxGetDefaultDisplayMode()) )
-        {
             wxLogFatalError(_("Cannot initialize display."));
-        }
     }
 
     // mgl specific:
     m_wnd = NULL;
     m_isShown = true;
+    m_frozen = false;
     m_paintMGLDC = NULL;
     m_eraseBackground = -1;
 }
@@ -559,6 +559,8 @@ void wxWindowMGL::Init()
 wxWindowMGL::~wxWindowMGL()
 {
     SendDestroyEvent();
+
+    m_isBeingDeleted = true;
 
     if ( gs_mouseCapture == this )
         ReleaseMouse();
@@ -693,24 +695,24 @@ void wxWindowMGL::SetFocus()
         {
             wxActivateEvent event(wxEVT_ACTIVATE, false, gs_activeFrame->GetId());
             event.SetEventObject(gs_activeFrame);
-            gs_activeFrame->HandleWindowEvent(event);
+            gs_activeFrame->GetEventHandler()->ProcessEvent(event);
         }
 
         gs_activeFrame = active;
         wxActivateEvent event(wxEVT_ACTIVATE, true, gs_activeFrame->GetId());
         event.SetEventObject(gs_activeFrame);
-        gs_activeFrame->HandleWindowEvent(event);
+        gs_activeFrame->GetEventHandler()->ProcessEvent(event);
     }
 
     // notify the parent keeping track of focus for the kbd navigation
     // purposes that we got it
     wxChildFocusEvent eventFocus((wxWindow*)this);
-    HandleWindowEvent(eventFocus);
+    GetEventHandler()->ProcessEvent(eventFocus);
 
     wxFocusEvent event(wxEVT_SET_FOCUS, GetId());
     event.SetEventObject(this);
     event.SetWindow((wxWindow*)oldFocusedWindow);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 
 #if wxUSE_CARET
     // caret needs to be informed about focus change
@@ -739,7 +741,7 @@ void wxWindowMGL::KillFocus()
     wxFocusEvent event(wxEVT_KILL_FOCUS, GetId());
     event.SetEventObject(this);
     event.SetWindow(gs_toBeFocusedWindow);
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 }
 
 // ----------------------------------------------------------------------------
@@ -1054,7 +1056,7 @@ void wxWindowMGL::DoSetSize(int x, int y, int width, int height, int sizeFlags)
         wxSize newSize(width, height);
         wxSizeEvent event(newSize, GetId());
         event.SetEventObject(this);
-        HandleWindowEvent(event);
+        GetEventHandler()->ProcessEvent(event);
     }
 }
 
@@ -1081,11 +1083,10 @@ int wxWindowMGL::GetCharWidth() const
     return dc.GetCharWidth();
 }
 
-void wxWindowMGL::DoGetTextExtent(const wxString& string,
-                                  int *x, int *y,
-                                  int *descent,
-                                  int *externalLeading,
-                                  const wxFont *theFont) const
+void wxWindowMGL::GetTextExtent(const wxString& string,
+                             int *x, int *y,
+                             int *descent, int *externalLeading,
+                             const wxFont *theFont) const
 {
     wxScreenDC dc;
     if (!theFont)
@@ -1097,6 +1098,14 @@ void wxWindowMGL::DoGetTextExtent(const wxString& string,
 // ---------------------------------------------------------------------------
 // painting
 // ---------------------------------------------------------------------------
+
+void wxWindowMGL::Clear()
+{
+    wxClientDC dc((wxWindow *)this);
+    wxBrush brush(GetBackgroundColour(), wxSOLID);
+    dc.SetBackground(brush);
+    dc.Clear();
+}
 
 void wxWindowMGL::Refresh(bool eraseBack, const wxRect *rect)
 {
@@ -1118,31 +1127,33 @@ void wxWindowMGL::Refresh(bool eraseBack, const wxRect *rect)
 
 void wxWindowMGL::Update()
 {
-    if ( !IsFrozen() )
+    if ( !m_frozen )
         MGL_wmUpdateDC(g_winMng);
 }
 
-void wxWindowMGL::DoFreeze()
+void wxWindowMGL::Freeze()
 {
+    m_frozen = true;
     m_refreshAfterThaw = false;
 }
 
-void wxWindowMGL::DoThaw()
+void wxWindowMGL::Thaw()
 {
+    m_frozen = false;
     if ( m_refreshAfterThaw )
         Refresh();
 }
 
 void wxWindowMGL::HandlePaint(MGLDevCtx *dc)
 {
-    if ( IsFrozen() )
+    if ( m_frozen )
     {
         // Don't paint anything if the window is frozen.
         m_refreshAfterThaw = true;
         return;
     }
 
-#if wxDEBUG_LEVEL >= 2
+#ifdef __WXDEBUG__
     // FIXME_MGL -- debugging stuff, to be removed!
     static int debugPaintEvents = -1;
     if ( debugPaintEvents == -1 )
@@ -1153,7 +1164,7 @@ void wxWindowMGL::HandlePaint(MGLDevCtx *dc)
         dc->fillRect(-1000,-1000,2000,2000);
         wxMilliSleep(50);
     }
-#endif // wxDEBUG_LEVEL >= 2
+#endif
 
     MGLRegion clip;
     dc->getClipRegion(clip);
@@ -1172,17 +1183,17 @@ void wxWindowMGL::HandlePaint(MGLDevCtx *dc)
         wxWindowDC dc((wxWindow*)this);
         wxEraseEvent eventEr(m_windowId, &dc);
         eventEr.SetEventObject(this);
-        HandleWindowEvent(eventEr);
+        GetEventHandler()->ProcessEvent(eventEr);
     }
     m_eraseBackground = -1;
 
     wxNcPaintEvent eventNc(GetId());
     eventNc.SetEventObject(this);
-    HandleWindowEvent(eventNc);
+    GetEventHandler()->ProcessEvent(eventNc);
 
     wxPaintEvent eventPt(GetId());
     eventPt.SetEventObject(this);
-    HandleWindowEvent(eventPt);
+    GetEventHandler()->ProcessEvent(eventPt);
 
 #if wxUSE_CARET
     if ( caret )
@@ -1205,4 +1216,15 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 {
     window_t *wnd = MGL_wmGetWindowAtPosition(g_winMng, pt.x, pt.y);
     return (wxWindow*)wnd->userData;
+}
+
+
+// ---------------------------------------------------------------------------
+// idle events processing
+// ---------------------------------------------------------------------------
+
+void wxWindowMGL::OnInternalIdle()
+{
+    if (wxUpdateUIEvent::CanUpdate(this) && IsShown())
+        UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
 }

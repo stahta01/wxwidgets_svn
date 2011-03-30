@@ -27,8 +27,10 @@ typedef struct _GdkPixbufAnimationIter GdkPixbufAnimationIter;
 class WXDLLIMPEXP_ADV wxAnimation : public wxAnimationBase
 {
 public:
+#if wxABI_VERSION >= 20810
     wxAnimation(const wxString &name, wxAnimationType type = wxANIMATION_TYPE_ANY)
         : m_pixbuf(NULL) { LoadFile(name, type); }
+#endif
     wxAnimation(GdkPixbufAnimation *p = NULL);
     wxAnimation(const wxAnimation&);
     ~wxAnimation() { UnRef(); }
@@ -113,7 +115,6 @@ public:     // event handler
 public:     // public API
 
     virtual bool LoadFile(const wxString& filename, wxAnimationType type = wxANIMATION_TYPE_ANY);
-    virtual bool Load(wxInputStream& stream, wxAnimationType type = wxANIMATION_TYPE_ANY);
 
     virtual void SetAnimation(const wxAnimation &anim);
     virtual wxAnimation GetAnimation() const

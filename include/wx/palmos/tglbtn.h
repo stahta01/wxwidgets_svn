@@ -13,10 +13,10 @@
 #ifndef _WX_TOGGLEBUTTON_H_
 #define _WX_TOGGLEBUTTON_H_
 
-#include "wx/checkbox.h" // wxCheckBoxNameStr, in datacmn.cpp
+WXDLLEXPORT_DATA(extern const wxChar) wxCheckBoxNameStr[];
 
 // Checkbox item (single checkbox)
-class WXDLLIMPEXP_CORE wxToggleButton : public wxToggleButtonBase
+class WXDLLEXPORT wxToggleButton : public wxControl
 {
 public:
     wxToggleButton() {}

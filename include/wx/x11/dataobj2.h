@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/x11/dataobj2.h
+// Name:        gtk/dataobj2.h
 // Purpose:     declaration of standard wxDataObjectSimple-derived classes
 // Author:      Robert Roebling
 // Created:     19.10.99 (extracted from gtk/dataobj.h)
@@ -49,7 +49,7 @@ public:
     }
 
 protected:
-    void Init() { m_pngData = NULL; m_pngSize = 0; }
+    void Init() { m_pngData = (void *)NULL; m_pngSize = 0; }
     void Clear() { free(m_pngData); }
     void ClearAll() { Clear(); Init(); }
 

@@ -6,7 +6,7 @@
 // Created:     27 Sep 2003
 // Id:          $Id$
 // Copyright:   (c) 2006 Wlodzmierz Skiba
-// Licence:     wxWindows licence
+// License:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -132,14 +132,14 @@ void ToggleWidgetsPage::CreateContent()
 //    wxSizer *sizerLeft = new wxStaticBoxSizer(box, wxVERTICAL);
 
     // middle pane
-    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY, wxT("&Operations"));
+    wxStaticBox *box2 = new wxStaticBox(this, wxID_ANY, _T("&Operations"));
     wxSizer *sizerMiddle = new wxStaticBoxSizer(box2, wxVERTICAL);
 
     wxSizer *sizerRow = CreateSizerWithTextAndButton(TogglePage_ChangeLabel,
-                                                     wxT("Change label"),
+                                                     _T("Change label"),
                                                      wxID_ANY,
                                                      &m_textLabel);
-    m_textLabel->SetValue(wxT("&Toggle me!"));
+    m_textLabel->SetValue(_T("&Toggle me!"));
 
     sizerMiddle->Add(sizerRow, 0, wxALL | wxGROW, 5);
 

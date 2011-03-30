@@ -6,7 +6,7 @@
 // Created:     2003/03/16
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -33,6 +33,8 @@
 
 BEGIN_EVENT_TABLE(wxFrame, wxFrameBase)
 END_EVENT_TABLE()
+
+IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxTopLevelWindow)
 
 void wxFrame::Init()
 {

@@ -6,7 +6,7 @@
 // Created:     27 Sep 2003
 // Id:          $Id$
 // Copyright:   (c) 2003 wxWindows team
-// Licence:     wxWindows licence
+// License:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -185,9 +185,9 @@ void DatePickerWidgetsPage::Reset()
     const wxDateTime today = wxDateTime::Today();
 
     m_datePicker->SetValue(today);
-    m_day->SetValue(wxString::Format(wxT("%d"), today.GetDay()));
-    m_month->SetValue(wxString::Format(wxT("%d"), today.GetMonth() + 1));
-    m_year->SetValue(wxString::Format(wxT("%d"), today.GetYear()));
+    m_day->SetValue(wxString::Format(_T("%d"), today.GetDay()));
+    m_month->SetValue(wxString::Format(_T("%d"), today.GetMonth()));
+    m_year->SetValue(wxString::Format(_T("%d"), today.GetYear()));
 }
 
 void DatePickerWidgetsPage::CreateDatePicker()
@@ -237,12 +237,12 @@ void DatePickerWidgetsPage::OnButtonSet(wxCommandEvent& WXUNUSED(event))
         }
         else
         {
-            wxLogError(wxT("Date is invalid"));
+            wxLogError(_T("Date is invalid"));
         }
     }
     else
     {
-        wxLogError(wxT("One of inputs is not number"));
+        wxLogError(_T("One of inputs is not number"));
     }
 }
 

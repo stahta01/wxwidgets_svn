@@ -9,14 +9,6 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-// ============================================================================
-// declarations
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// headers
-// ----------------------------------------------------------------------------
-
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -25,7 +17,7 @@
 #endif
 
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+#include "wx/wx.h"
 #endif
 
 // the application icon (under Windows and OS/2 it is in resources)
@@ -36,114 +28,36 @@
 #include "smile.xpm"
 
 #include "wx/taskbar.h"
-
 #include "tbtest.h"
 
-// ----------------------------------------------------------------------------
-// global variables
-// ----------------------------------------------------------------------------
-
-static MyDialog *gs_dialog = NULL;
-
-// ============================================================================
-// implementation
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// MyApp
-// ----------------------------------------------------------------------------
+// Declare two frames
+MyDialog   *dialog = NULL;
 
 IMPLEMENT_APP(MyApp)
 
-bool MyApp::OnInit()
+bool MyApp::OnInit(void)
 {
-    if ( !wxApp::OnInit() )
-        return false;
+    // Create the main frame window
+    dialog = new MyDialog(NULL, wxID_ANY, wxT("wxTaskBarIcon Test Dialog"), wxDefaultPosition, wxSize(365, 290));
 
-    if ( !wxTaskBarIcon::IsAvailable() )
-    {
-        wxMessageBox
-        (
-            "There appears to be no system tray support in your current environment. This sample may not behave as expected.",
-            "Warning",
-            wxOK | wxICON_EXCLAMATION
-        );
-    }
-
-    // Create the main window
-    gs_dialog = new MyDialog(wxT("wxTaskBarIcon Test Dialog"));
-
-    gs_dialog->Show(true);
+    dialog->Show(true);
 
     return true;
 }
 
 
-// ----------------------------------------------------------------------------
-// MyDialog implementation
-// ----------------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(MyDialog, wxDialog)
-    EVT_BUTTON(wxID_ABOUT, MyDialog::OnAbout)
     EVT_BUTTON(wxID_OK, MyDialog::OnOK)
     EVT_BUTTON(wxID_EXIT, MyDialog::OnExit)
     EVT_CLOSE(MyDialog::OnCloseWindow)
 END_EVENT_TABLE()
 
 
-MyDialog::MyDialog(const wxString& title)
-        : wxDialog(NULL, wxID_ANY, title)
+MyDialog::MyDialog(wxWindow* parent, const wxWindowID id, const wxString& title,
+    const wxPoint& pos, const wxSize& size, const long windowStyle):
+  wxDialog(parent, id, title, pos, size, windowStyle)
 {
-    wxSizer * const sizerTop = new wxBoxSizer(wxVERTICAL);
-
-    wxSizerFlags flags;
-    flags.Border(wxALL, 10);
-
-    sizerTop->Add(new wxStaticText
-                      (
-                        this,
-                        wxID_ANY,
-                        wxT("Press 'Hide me' to hide this window, Exit to quit.")
-                      ), flags);
-
-    sizerTop->Add(new wxStaticText
-                      (
-                        this,
-                        wxID_ANY,
-                        wxT("Double-click on the taskbar icon to show me again.")
-                      ), flags);
-
-    sizerTop->AddStretchSpacer()->SetMinSize(200, 50);
-
-    wxSizer * const sizerBtns = new wxBoxSizer(wxHORIZONTAL);
-    sizerBtns->Add(new wxButton(this, wxID_ABOUT, wxT("&About")), flags);
-    sizerBtns->Add(new wxButton(this, wxID_OK, wxT("&Hide")), flags);
-    sizerBtns->Add(new wxButton(this, wxID_EXIT, wxT("E&xit")), flags);
-
-    sizerTop->Add(sizerBtns, flags.Align(wxALIGN_CENTER_HORIZONTAL));
-    SetSizerAndFit(sizerTop);
-    Centre();
-
-    m_taskBarIcon = new MyTaskBarIcon();
-
-    // we should be able to show up to 128 characters on recent Windows versions
-    // (and 64 on Win9x)
-    if ( !m_taskBarIcon->SetIcon(wxICON(sample),
-                                 "wxTaskBarIcon Sample\n"
-                                 "With a very, very, very, very\n"
-                                 "long tooltip whose length is\n"
-                                 "greater than 64 characters.") )
-    {
-        wxLogError(wxT("Could not set icon."));
-    }
-
-#if defined(__WXOSX__) && wxOSX_USE_COCOA
-    m_dockIcon = new MyTaskBarIcon(wxTaskBarIcon::DOCK);
-    if ( !m_dockIcon->SetIcon(wxICON(sample)) )
-    {
-        wxLogError(wxT("Could not set icon."));
-    }
-#endif
+    Init();
 }
 
 MyDialog::~MyDialog()
@@ -152,22 +66,6 @@ MyDialog::~MyDialog()
 #if defined(__WXCOCOA__)
     delete m_dockIcon;
 #endif
-}
-
-void MyDialog::OnAbout(wxCommandEvent& WXUNUSED(event))
-{
-    static const char * const title = "About wxWidgets Taskbar Sample";
-    static const char * const message
-        = "wxWidgets sample showing wxTaskBarIcon class\n"
-          "\n"
-          "(C) 1997 Julian Smart\n"
-          "(C) 2007 Vadim Zeitlin";
-
-#if defined(__WXMSW__) && wxUSE_TASKBARICON_BALLOONS
-    m_taskBarIcon->ShowBalloon(title, message, 15000, wxICON_INFORMATION);
-#else // !__WXMSW__
-    wxMessageBox(message, title, wxICON_INFORMATION|wxOK, this);
-#endif // __WXMSW__/!__WXMSW__
 }
 
 void MyDialog::OnOK(wxCommandEvent& WXUNUSED(event))
@@ -185,15 +83,31 @@ void MyDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
     Destroy();
 }
 
-
-// ----------------------------------------------------------------------------
-// MyTaskBarIcon implementation
-// ----------------------------------------------------------------------------
-
-enum
+void MyDialog::Init(void)
 {
+  (void)new wxStaticText(this, wxID_ANY, _T("Press 'Hide me' to hide me, Exit to quit."),
+                         wxPoint(10, 20));
+
+  (void)new wxStaticText(this, wxID_ANY, _T("Double-click on the taskbar icon to show me again."),
+                         wxPoint(10, 40));
+
+  (void)new wxButton(this, wxID_EXIT, _T("Exit"), wxPoint(185, 230), wxSize(80, 25));
+  (new wxButton(this, wxID_OK, _T("Hide me"), wxPoint(100, 230), wxSize(80, 25)))->SetDefault();
+  Centre(wxBOTH);
+   
+  m_taskBarIcon = new MyTaskBarIcon();
+#if defined(__WXCOCOA__)
+  m_dockIcon = new MyTaskBarIcon(wxTaskBarIcon::DOCK);
+#endif
+  if (!m_taskBarIcon->SetIcon(wxICON(sample), wxT("wxTaskBarIcon Sample")))
+        wxMessageBox(wxT("Could not set icon."));
+}
+
+
+enum {
     PU_RESTORE = 10001,
     PU_NEW_ICON,
+    PU_OLD_ICON,
     PU_EXIT,
     PU_CHECKMARK,
     PU_SUB1,
@@ -206,6 +120,7 @@ BEGIN_EVENT_TABLE(MyTaskBarIcon, wxTaskBarIcon)
     EVT_MENU(PU_RESTORE, MyTaskBarIcon::OnMenuRestore)
     EVT_MENU(PU_EXIT,    MyTaskBarIcon::OnMenuExit)
     EVT_MENU(PU_NEW_ICON,MyTaskBarIcon::OnMenuSetNewIcon)
+    EVT_MENU(PU_OLD_ICON,MyTaskBarIcon::OnMenuSetOldIcon)
     EVT_MENU(PU_CHECKMARK,MyTaskBarIcon::OnMenuCheckmark)
     EVT_UPDATE_UI(PU_CHECKMARK,MyTaskBarIcon::OnMenuUICheckmark)
     EVT_TASKBAR_LEFT_DCLICK  (MyTaskBarIcon::OnLeftButtonDClick)
@@ -215,24 +130,24 @@ END_EVENT_TABLE()
 
 void MyTaskBarIcon::OnMenuRestore(wxCommandEvent& )
 {
-    gs_dialog->Show(true);
+    dialog->Show(true);
 }
 
 void MyTaskBarIcon::OnMenuExit(wxCommandEvent& )
 {
-    gs_dialog->Close(true);
+    dialog->Close(true);
 }
 
 static bool check = true;
 
 void MyTaskBarIcon::OnMenuCheckmark(wxCommandEvent& )
 {
-    check = !check;
+       check =!check;
 }
 
 void MyTaskBarIcon::OnMenuUICheckmark(wxUpdateUIEvent &event)
 {
-    event.Check(check);
+       event.Check( check );
 }
 
 void MyTaskBarIcon::OnMenuSetNewIcon(wxCommandEvent&)
@@ -243,6 +158,18 @@ void MyTaskBarIcon::OnMenuSetNewIcon(wxCommandEvent&)
         wxMessageBox(wxT("Could not set new icon."));
 }
 
+void MyTaskBarIcon::OnMenuSetOldIcon(wxCommandEvent&)
+{
+    if (IsIconInstalled())
+    {
+        RemoveIcon();
+    }
+    else
+    {
+        wxMessageBox(wxT("wxTaskBarIcon Sample - icon already is the old version"));
+    }
+}
+
 void MyTaskBarIcon::OnMenuSub(wxCommandEvent&)
 {
     wxMessageBox(wxT("You clicked on a submenu!"));
@@ -251,30 +178,29 @@ void MyTaskBarIcon::OnMenuSub(wxCommandEvent&)
 // Overridables
 wxMenu *MyTaskBarIcon::CreatePopupMenu()
 {
+    // Try creating menus different ways
+    // TODO: Probably try calling SetBitmap with some XPMs here
     wxMenu *menu = new wxMenu;
-    menu->Append(PU_RESTORE, wxT("&Restore main window"));
+    menu->Append(PU_RESTORE, _T("&Restore TBTest"));
     menu->AppendSeparator();
-    menu->Append(PU_NEW_ICON, wxT("&Set New Icon"));
+    menu->Append(PU_OLD_ICON, _T("&Restore Old Icon"));    
+    menu->Append(PU_NEW_ICON, _T("&Set New Icon"));
     menu->AppendSeparator();
-    menu->AppendCheckItem(PU_CHECKMARK, wxT("Test &check mark"));
+    menu->Append(PU_CHECKMARK, _T("Checkmark"),wxT(""), wxITEM_CHECK);
     menu->AppendSeparator();
     wxMenu *submenu = new wxMenu;
-    submenu->Append(PU_SUB1, wxT("One submenu"));
+    submenu->Append(PU_SUB1, _T("One submenu"));
     submenu->AppendSeparator();
-    submenu->Append(PU_SUB2, wxT("Another submenu"));
-    menu->Append(PU_SUBMAIN, wxT("Submenu"), submenu);
-    /* OSX has built-in quit menu for the dock menu, but not for the status item */
-#ifdef __WXOSX__ 
-    if ( OSXIsStatusItem() )
+    submenu->Append(PU_SUB2, _T("Another submenu"));
+    menu->Append(PU_SUBMAIN, _T("Submenu"), submenu);
+#ifndef __WXMAC_OSX__ /*Mac has built-in quit menu*/
+    menu->AppendSeparator();
+    menu->Append(PU_EXIT,    _T("E&xit"));
 #endif
-    {
-        menu->AppendSeparator();
-        menu->Append(PU_EXIT,    wxT("E&xit"));
-    }
     return menu;
 }
 
 void MyTaskBarIcon::OnLeftButtonDClick(wxTaskBarIconEvent&)
 {
-    gs_dialog->Show(true);
+    dialog->Show(true);
 }

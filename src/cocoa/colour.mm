@@ -6,7 +6,7 @@
 // Created:     2003/06/17
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -21,6 +21,8 @@
 #include "wx/cocoa/ObjcRef.h"
 
 #import <AppKit/NSColor.h>
+
+IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
 
 void wxColour::Init()
 {

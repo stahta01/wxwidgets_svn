@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/theme.cpp
+// Name:        univ/theme.cpp
 // Purpose:     implementation of wxTheme
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -39,16 +39,16 @@
 // implementation
 // ============================================================================
 
-wxThemeInfo *wxTheme::ms_allThemes = NULL;
-wxTheme *wxTheme::ms_theme = NULL;
+wxThemeInfo *wxTheme::ms_allThemes = (wxThemeInfo *)NULL;
+wxTheme *wxTheme::ms_theme = (wxTheme *)NULL;
 
 // ----------------------------------------------------------------------------
 // "dynamic" theme creation
 // ----------------------------------------------------------------------------
 
 wxThemeInfo::wxThemeInfo(Constructor c,
-                         const wxString& n,
-                         const wxString& d)
+                         const wxChar *n,
+                         const wxChar *d)
            : name(n), desc(d), ctor(c)
 {
     // insert us (in the head of) the linked list
@@ -70,7 +70,7 @@ wxThemeInfo::wxThemeInfo(Constructor c,
         info = info->next;
     }
 
-    return NULL;
+    return (wxTheme *)NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ wxThemeInfo::wxThemeInfo(Constructor c,
     wxString nameDefTheme;
 
     // use the environment variable first
-    const wxChar *p = wxGetenv(wxT("WXTHEME"));
+    const wxChar *p = wxGetenv(_T("WXTHEME"));
     if ( p )
     {
         nameDefTheme = p;
@@ -152,7 +152,7 @@ wxTheme::~wxTheme()
 // wxDelegateTheme
 // ----------------------------------------------------------------------------
 
-wxDelegateTheme::wxDelegateTheme(const wxString& theme)
+wxDelegateTheme::wxDelegateTheme(const wxChar *theme)
 {
     m_themeName = theme;
     m_theme = NULL;

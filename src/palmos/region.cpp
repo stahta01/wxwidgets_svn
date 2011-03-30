@@ -65,7 +65,7 @@ wxRegion::wxRegion(const wxRect& rect)
 {
 }
 
-wxRegion::wxRegion(size_t n, const wxPoint *points, wxPolygonFillMode fillStyle)
+wxRegion::wxRegion(size_t n, const wxPoint *points, int fillStyle)
 {
 }
 
@@ -73,12 +73,12 @@ wxRegion::~wxRegion()
 {
 }
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateRefData() const
 {
     return NULL;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneRefData(const wxObjectRefData *data) const
 {
     return NULL;
 }

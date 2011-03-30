@@ -15,14 +15,13 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/dynarray.h"
     #include "wx/brush.h"
     #include "wx/colour.h"
     #include "wx/dc.h"
     #include "wx/settings.h"
     #include "wx/module.h"
-    #include "wx/wxcrtvararg.h"
 #endif
 
 #include "wx/html/htmlcell.h"
@@ -150,7 +149,7 @@ bool wxHtmlCell::ProcessMouseClick(wxHtmlWindowInterface *window,
                                    const wxPoint& pos,
                                    const wxMouseEvent& event)
 {
-    wxCHECK_MSG( window, false, wxT("window interface must be provided") );
+    wxCHECK_MSG( window, false, _T("window interface must be provided") );
 
 #if WXWIN_COMPATIBILITY_2_6
     // NB: this hack puts the body of ProcessMouseClick() into OnMouseClick()
@@ -164,7 +163,7 @@ bool wxHtmlCell::ProcessMouseClick(wxHtmlWindowInterface *window,
 
 void wxHtmlCell::OnMouseClick(wxWindow *, int, int, const wxMouseEvent& event)
 {
-    wxCHECK_RET( gs_helperOnMouseClick, wxT("unexpected call to OnMouseClick") );
+    wxCHECK_RET( gs_helperOnMouseClick, _T("unexpected call to OnMouseClick") );
     wxHtmlWindowInterface *window = gs_helperOnMouseClick->window;
     const wxPoint& pos = gs_helperOnMouseClick->pos;
 #endif // WXWIN_COMPATIBILITY_2_6
@@ -201,9 +200,9 @@ wxCursor wxHtmlCell::GetMouseCursor(wxHtmlWindowInterface *window) const
 #if WXWIN_COMPATIBILITY_2_6
     // NB: Older versions of wx used GetCursor() virtual method in place of
     //     GetMouseCursor(interface). This code ensures that user code that
-    //     overridden GetCursor() continues to work. The trick is that the base
+    //     overriden GetCursor() continues to work. The trick is that the base
     //     wxHtmlCell::GetCursor() method simply returns wxNullCursor, so we
-    //     know that GetCursor() was overridden iff it returns valid cursor.
+    //     know that GetCursor() was overriden iff it returns valid cursor.
     wxCursor cur = GetCursor();
     if (cur.Ok())
         return cur;
@@ -237,7 +236,8 @@ bool wxHtmlCell::AdjustPagebreak(int *pagebreak,
 
 void wxHtmlCell::SetLink(const wxHtmlLinkInfo& link)
 {
-    wxDELETE(m_Link);
+    if (m_Link) delete m_Link;
+    m_Link = NULL;
     if (link.GetHref() != wxEmptyString)
         m_Link = new wxHtmlLinkInfo(link);
 }
@@ -341,7 +341,7 @@ bool wxHtmlCell::IsBefore(wxHtmlCell *cell) const
         }
     }
 
-    wxFAIL_MSG(wxT("Cells are in different trees"));
+    wxFAIL_MSG(_T("Cells are in different trees"));
     return false;
 }
 
@@ -355,11 +355,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxHtmlWordCell, wxHtmlCell)
 wxHtmlWordCell::wxHtmlWordCell(const wxString& word, const wxDC& dc) : wxHtmlCell()
 {
     m_Word = word;
-    wxCoord w, h, d;
-    dc.GetTextExtent(m_Word, &w, &h, &d);
-    m_Width = w;
-    m_Height = h;
-    m_Descent = d;
+    dc.GetTextExtent(m_Word, &m_Width, &m_Height, &m_Descent);
     SetCanLiveOnPagebreak(false);
     m_allowLinebreak = true;
 }
@@ -463,8 +459,6 @@ void wxHtmlWordCell::Split(const wxDC& dc,
 
     pos1 = i;
     pos2 = j;
-
-    wxASSERT( pos2 >= pos1 );
 }
 
 void wxHtmlWordCell::SetSelectionPrivPos(const wxDC& dc, wxHtmlSelection *s) const
@@ -498,18 +492,18 @@ static void SwitchSelState(wxDC& dc, wxHtmlRenderingInfo& info,
 
     if ( toSelection )
     {
-        dc.SetBackgroundMode(wxBRUSHSTYLE_SOLID);
+        dc.SetBackgroundMode(wxSOLID);
         dc.SetTextForeground(info.GetStyle().GetSelectedTextColour(fg));
         dc.SetTextBackground(info.GetStyle().GetSelectedTextBgColour(bg));
         dc.SetBackground(wxBrush(info.GetStyle().GetSelectedTextBgColour(bg),
-                                 wxBRUSHSTYLE_SOLID));
+                                 wxSOLID));
     }
     else
     {
-        dc.SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
+        dc.SetBackgroundMode(wxTRANSPARENT);
         dc.SetTextForeground(fg);
         dc.SetTextBackground(bg);
-        dc.SetBackground(wxBrush(bg, wxBRUSHSTYLE_SOLID));
+        dc.SetBackground(wxBrush(bg, wxSOLID));
     }
 }
 
@@ -580,12 +574,12 @@ void wxHtmlWordCell::Draw(wxDC& dc, int x, int y,
         wxHtmlSelectionState selstate = info.GetState().GetSelectionState();
         // Not changing selection state, draw the word in single mode:
         if ( selstate != wxHTML_SEL_OUT &&
-             dc.GetBackgroundMode() != wxBRUSHSTYLE_SOLID )
+             dc.GetBackgroundMode() != wxSOLID )
         {
             SwitchSelState(dc, info, true);
         }
         else if ( selstate == wxHTML_SEL_OUT &&
-                  dc.GetBackgroundMode() == wxBRUSHSTYLE_SOLID )
+                  dc.GetBackgroundMode() == wxSOLID )
         {
             SwitchSelState(dc, info, false);
         }
@@ -618,17 +612,6 @@ void wxHtmlWordCell::Draw(wxDC& dc, int x, int y,
     }
 }
 
-wxCursor wxHtmlWordCell::GetMouseCursor(wxHtmlWindowInterface *window) const
-{
-    if ( !GetLink() )
-    {
-        return window->GetHTMLCursor(wxHtmlWindowInterface::HTMLCursor_Text);
-    }
-    else
-    {
-        return wxHtmlCell::GetMouseCursor(window);
-    }
-}
 
 wxString wxHtmlWordCell::ConvertToText(wxHtmlSelection *s) const
 {
@@ -646,75 +629,29 @@ wxString wxHtmlWordCell::ConvertToText(wxHtmlSelection *s) const
         // TODO: but this really needs to be fixed in some better way later...
         if ( priv != wxDefaultPosition )
         {
-            const int part1 = priv.x;
-            const int part2 = priv.y;
+            int part1 = priv.x;
+            int part2 = priv.y;
             if ( part1 == part2 )
                 return wxEmptyString;
-            return GetPartAsText(part1, part2);
+            return m_Word.Mid(part1, part2-part1);
         }
         //else: return the whole word below
     }
 
-    return GetAllAsText();
+    return m_Word;
 }
 
-wxString wxHtmlWordWithTabsCell::GetAllAsText() const
+wxCursor wxHtmlWordCell::GetMouseCursor(wxHtmlWindowInterface *window) const
 {
-    return m_wordOrig;
-}
-
-wxString wxHtmlWordWithTabsCell::GetPartAsText(int begin, int end) const
-{
-    // NB: The 'begin' and 'end' positions are in the _displayed_ text
-    //     (stored in m_Word) and not in the text with tabs that should
-    //     be copied to clipboard (m_wordOrig).
-    //
-    // NB: Because selection is performed on displayed text, it's possible
-    //     to select e.g. "half of TAB character" -- IOW, 'begin' and 'end'
-    //     may be in the middle of TAB character expansion into ' 's. In this
-    //     case, we copy the TAB character to clipboard once.
-
-    wxASSERT( begin < end );
-
-    const unsigned SPACES_PER_TAB = 8;
-
-    wxString sel;
-
-    int pos = 0;
-    wxString::const_iterator i = m_wordOrig.begin();
-
-    // find the beginning of text to copy:
-    for ( ; pos < begin; ++i )
+    if ( !GetLink() )
     {
-        if ( *i == '\t' )
-        {
-            pos += 8 - (m_linepos + pos) % SPACES_PER_TAB;
-            if ( pos >= begin )
-            {
-                sel += '\t';
-            }
-        }
-        else
-        {
-            ++pos;
-        }
+        return window->GetHTMLCursor(wxHtmlWindowInterface::HTMLCursor_Text);
     }
-
-    // copy the content until we reach 'end':
-    for ( ; pos < end; ++i )
+    else
     {
-        const wxChar c = *i;
-        sel += c;
-
-        if ( c == '\t' )
-            pos += 8 - (m_linepos + pos) % SPACES_PER_TAB;
-        else
-            ++pos;
+        return wxHtmlCell::GetMouseCursor(window);
     }
-
-    return sel;
 }
-
 
 
 //-----------------------------------------------------------------------------
@@ -734,7 +671,7 @@ wxHtmlContainerCell::wxHtmlContainerCell(wxHtmlContainerCell *parent) : wxHtmlCe
     m_IndentLeft = m_IndentRight = m_IndentTop = m_IndentBottom = 0;
     m_WidthFloat = 100; m_WidthFloatUnits = wxHTML_UNITS_PERCENT;
     m_UseBkColour = false;
-    m_Border = 0;
+    m_UseBorder = false;
     m_MinHeight = 0;
     m_MinHeightAlign = wxHTML_ALIGN_TOP;
     m_LastLayout = -1;
@@ -1113,7 +1050,7 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
 
     if (m_UseBkColour)
     {
-        wxBrush myb = wxBrush(m_BkColour, wxBRUSHSTYLE_SOLID);
+        wxBrush myb = wxBrush(m_BkColour, wxSOLID);
 
         int real_y1 = mMax(ylocal, view_y1);
         int real_y2 = mMin(ylocal + m_Height - 1, view_y2);
@@ -1123,11 +1060,10 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
         dc.DrawRectangle(xlocal, real_y1, m_Width, real_y2 - real_y1 + 1);
     }
 
-    if (m_Border == 1)
+    if (m_UseBorder)
     {
-        // draw thin border using lines
-        wxPen mypen1(m_BorderColour1, 1, wxPENSTYLE_SOLID);
-        wxPen mypen2(m_BorderColour2, 1, wxPENSTYLE_SOLID);
+        wxPen mypen1(m_BorderColour1, 1, wxSOLID);
+        wxPen mypen2(m_BorderColour2, 1, wxSOLID);
 
         dc.SetPen(mypen1);
         dc.DrawLine(xlocal, ylocal, xlocal, ylocal + m_Height - 1);
@@ -1136,56 +1072,7 @@ void wxHtmlContainerCell::Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
         dc.DrawLine(xlocal + m_Width - 1, ylocal, xlocal +  m_Width - 1, ylocal + m_Height - 1);
         dc.DrawLine(xlocal, ylocal + m_Height - 1, xlocal + m_Width, ylocal + m_Height - 1);
     }
-    else if (m_Border> 0)
-    {
-        wxBrush mybrush1(m_BorderColour1, wxBRUSHSTYLE_SOLID);
-        wxBrush mybrush2(m_BorderColour2, wxBRUSHSTYLE_SOLID);
 
-        // draw upper left corner
-        // 0---------------5
-        // |              /
-        // | 3-----------4
-        // | |
-        // | 2
-        // |/
-        // 1
-
-        wxPoint poly[6];
-        poly[0].x =m_PosX; poly[0].y = m_PosY ;
-        poly[1].x =m_PosX; poly[1].y = m_PosY + m_Height;
-        poly[2].x =m_PosX + m_Border; poly[2].y = poly[1].y - m_Border;
-        poly[3].x =poly[2].x ; poly[3].y = m_PosY + m_Border;
-        poly[4].x =m_PosX + m_Width - m_Border; poly[4].y = poly[3].y;
-        poly[5].x =m_PosX + m_Width; poly[5].y = m_PosY;
-
-        dc.SetBrush(mybrush1);
-        dc.SetPen(*wxTRANSPARENT_PEN);
-        dc.DrawPolygon(6, poly, x, y);
-
-        // draw lower right corner reusing point 1,2,4 and 5
-        //                 5
-        //                /|
-        //               4 |
-        //               | |
-        //   2-----------3 |
-        //  /              |
-        // 1---------------0
-        dc.SetBrush(mybrush2);
-        poly[0].x = poly[5].x; poly[0].y = poly[1].y;
-        poly[3].x = poly[4].x; poly[3].y = poly[2].y;
-        dc.DrawPolygon(6, poly, x, y);
-
-        // smooth color transition like firefox
-        wxColour borderMediumColour(
-            (m_BorderColour1.Red() + m_BorderColour2.Red()) /2 ,
-            (m_BorderColour1.Green() + m_BorderColour2.Green()) /2 ,
-            (m_BorderColour1.Blue() + m_BorderColour2.Blue()) /2
-            );
-        wxPen mypen3(borderMediumColour, 1, wxPENSTYLE_SOLID);
-        dc.SetPen(mypen3);
-        dc.DrawLines(2, &poly[1], x, y - 1); // between 1 and 2
-        dc.DrawLines(2, &poly[4], x, y - 1); // between 4 and 5
-    }
     if (m_Cells)
     {
         // draw container's contents:
@@ -1391,7 +1278,7 @@ bool wxHtmlContainerCell::ProcessMouseClick(wxHtmlWindowInterface *window,
 void wxHtmlContainerCell::OnMouseClick(wxWindow*,
                                        int, int, const wxMouseEvent& event)
 {
-    wxCHECK_RET( gs_helperOnMouseClick, wxT("unexpected call to OnMouseClick") );
+    wxCHECK_RET( gs_helperOnMouseClick, _T("unexpected call to OnMouseClick") );
     wxHtmlWindowInterface *window = gs_helperOnMouseClick->window;
     const wxPoint& pos = gs_helperOnMouseClick->pos;
 #endif // WXWIN_COMPATIBILITY_2_6
@@ -1563,13 +1450,13 @@ void wxHtmlColourCell::DrawInvisible(wxDC& dc,
         if (state.GetSelectionState() != wxHTML_SEL_IN)
         {
             dc.SetTextBackground(m_Colour);
-            dc.SetBackground(wxBrush(m_Colour, wxBRUSHSTYLE_SOLID));
+            dc.SetBackground(wxBrush(m_Colour, wxSOLID));
         }
         else
         {
             wxColour c = info.GetStyle().GetSelectedTextBgColour(m_Colour);
             dc.SetTextBackground(c);
-            dc.SetBackground(wxBrush(c, wxBRUSHSTYLE_SOLID));
+            dc.SetBackground(wxBrush(c, wxSOLID));
         }
     }
 }
@@ -1638,7 +1525,7 @@ void wxHtmlWidgetCell::Draw(wxDC& WXUNUSED(dc),
     wxScrolledWindow *scrolwin =
         wxDynamicCast(m_Wnd->GetParent(), wxScrolledWindow);
     wxCHECK_RET( scrolwin,
-                 wxT("widget cells can only be placed in wxHtmlWindow") );
+                 _T("widget cells can only be placed in wxHtmlWindow") );
 
     scrolwin->GetViewStart(&stx, &sty);
     m_Wnd->SetSize(absx - wxHTML_SCROLL_STEP * stx,

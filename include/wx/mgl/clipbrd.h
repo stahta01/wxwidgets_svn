@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/mgl/clipbrd.h
+// Name:        clipboard.h
 // Purpose:
 // Author:      Vaclav Slavik
 // Id:          $Id$
@@ -22,7 +22,7 @@
 // wxClipboard
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxClipboard : public wxClipboardBase
+class WXDLLEXPORT wxClipboard : public wxClipboardBase
 {
 public:
     wxClipboard() {}
@@ -52,6 +52,11 @@ public:
     // clears wxTheClipboard and the system's clipboard if possible
     virtual void Clear() {}
 
+    // If primary == TRUE, use primary selection in all further ops,
+    // primary == FALSE resets it.
+    virtual void UsePrimarySelection(bool primary = TRUE)
+        { m_usePrimary = primary; }
+    
     // implementation from now on
     bool              m_open;
     bool              m_ownsClipboard;
@@ -64,6 +69,7 @@ public:
 
     bool              m_formatSupported;
     GdkAtom           m_targetRequested;
+    bool              m_usePrimary;
     wxDataObject     *m_receivedData;
 
 private:

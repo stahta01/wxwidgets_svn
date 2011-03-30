@@ -18,7 +18,7 @@
 // now, the app must take care of ownership issues. That is, the
 // image lists must be explicitly deleted after the control(s) that uses them
 // is (are) deleted, or when the app exits.
-class WXDLLIMPEXP_CORE wxImageList : public wxObject
+class WXDLLEXPORT wxImageList : public wxObject
 {
 public:
   /*
@@ -199,7 +199,7 @@ public:
 protected:
   WXHIMAGELIST m_hImageList;
 
-  DECLARE_DYNAMIC_CLASS_NO_COPY(wxImageList)
+  DECLARE_DYNAMIC_CLASS(wxImageList)
 };
 
 #endif

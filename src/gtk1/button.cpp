@@ -12,8 +12,10 @@
 
 #if wxUSE_BUTTON
 
+#include "wx/button.h"
+
 #ifndef WX_PRECOMP
-    #include "wx/button.h"
+    #include "wx/toplevel.h"
 #endif
 
 #include "wx/stockitem.h"
@@ -55,7 +57,7 @@ static void gtk_button_clicked_callback( GtkWidget *WXUNUSED(widget), wxButton *
 
     wxCommandEvent event(wxEVT_COMMAND_BUTTON_CLICKED, button->GetId());
     event.SetEventObject(button);
-    button->HandleWindowEvent(event);
+    button->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -93,6 +95,8 @@ gtk_button_style_set_callback( GtkWidget *m_widget, GtkStyle *WXUNUSED(style), w
 //-----------------------------------------------------------------------------
 // wxButton
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxButton,wxControl)
 
 wxButton::wxButton()
 {
@@ -153,17 +157,18 @@ bool wxButton::Create(  wxWindow *parent, wxWindowID id, const wxString &label,
 }
 
 
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
-    wxWindow *oldDefault = wxButtonBase::SetDefault();
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    wxCHECK_RET( tlw, _T("button without top level window?") );
+
+    tlw->SetDefaultItem(this);
 
     GTK_WIDGET_SET_FLAGS( m_widget, GTK_CAN_DEFAULT );
     gtk_widget_grab_default( m_widget );
 
     // resize for default border
     gtk_button_style_set_callback( m_widget, NULL, this );
-
-    return oldDefault;
 }
 
 /* static */

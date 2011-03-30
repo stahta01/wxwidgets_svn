@@ -27,6 +27,7 @@
 // macros
 // ----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxCheckBox, wxControl)
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapCheckBox, wxCheckBox)
 
 extern void  wxAssociateWinWithHandle( HWND         hWnd
@@ -95,7 +96,7 @@ bool wxCheckBox::Create(wxWindow* pParent,
 void wxCheckBox::SetLabel( const wxString& rsLabel )
 {
     wxString  sLabel=::wxPMTextToLabel(rsLabel);
-    ::WinSetWindowText(GetHwnd(), sLabel.c_str());
+    ::WinSetWindowText(GetHwnd(), (PSZ)sLabel.c_str());
 } // end of wxCheckBox::SetLabel
 
 wxSize wxCheckBox::DoGetBestSize() const

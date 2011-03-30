@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/debughlp.h
+// Name:        wx/msw/wrapdbgh.h
 // Purpose:     wraps dbghelp.h standard file
 // Author:      Vadim Zeitlin
 // Modified by:

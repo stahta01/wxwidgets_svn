@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/types.h
+// Name:        types.h
 // Purpose:     Type identifiers, used by resource system
 // Author:      Julian Smart
 // Modified by:

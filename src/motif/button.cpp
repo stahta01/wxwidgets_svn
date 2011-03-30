@@ -34,6 +34,8 @@
 
 void wxButtonCallback (Widget w, XtPointer clientData, XtPointer ptr);
 
+IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
+
 #define MIN_WIDTH 78
 #define MIN_LARGE_HEIGHT 30
 
@@ -51,7 +53,6 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& lbl,
 
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     wxXmString text( GetLabelText(label) );
 
@@ -84,9 +85,10 @@ bool wxButton::Create(wxWindow *parent, wxWindowID id, const wxString& lbl,
     if( size.x != -1 ) best.x = size.x;
     if( size.y != -1 ) best.y = size.y;
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, best.x, best.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -119,9 +121,11 @@ void wxButton::SetDefaultShadowThicknessAndResize()
 }
 
 
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
-    wxWindow *oldDefault = wxButtonBase::SetDefault();
+    wxTopLevelWindow *tlw = wxDynamicCast(wxGetTopLevelParent(this), wxTopLevelWindow);
+    if ( tlw )
+        tlw->SetDefaultItem(this);
 
     // We initially do not set XmNdefaultShadowThickness, to have
     // small buttons.  Unfortunately, buttons are now mis-aligned. We
@@ -143,8 +147,6 @@ wxWindow *wxButton::SetDefault()
     XtVaSetValues ((Widget) parent->GetMainWidget(),
                    XmNdefaultButton, (Widget) GetMainWidget(),
                    NULL);
-
-    return oldDefault;
 }
 
 static inline bool wxMotifLargeButtons()

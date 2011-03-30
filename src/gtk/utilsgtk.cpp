@@ -18,23 +18,17 @@
     #include "wx/log.h"
 #endif
 
+#include "wx/sysopt.h"
 #include "wx/apptrait.h"
 #include "wx/process.h"
-#include "wx/sysopt.h"
 #include "wx/unix/execute.h"
 
-#include "wx/gtk/private/timer.h"
-#include "wx/evtloop.h"
-
-#include <gtk/gtk.h>
-#include <gdk/gdkx.h>
-
-#if wxDEBUG_LEVEL
+#ifdef __WXDEBUG__
     #include "wx/gtk/assertdlg_gtk.h"
     #if wxUSE_STACKWALKER
         #include "wx/stackwalk.h"
     #endif // wxUSE_STACKWALKER
-#endif // wxDEBUG_LEVEL
+#endif // __WXDEBUG__
 
 #include <stdarg.h>
 #include <string.h>
@@ -43,10 +37,26 @@
 #include <sys/wait.h>   // for WNOHANG
 #include <unistd.h>
 
-#if wxUSE_DETECT_SM
-    #include <X11/SM/SMlib.h>
+#include "glib.h"
+#include "gdk/gdk.h"
+#include "gtk/gtk.h"
+#include "gdk/gdkx.h"
 
-    #include "wx/unix/utilsx11.h"
+#ifdef HAVE_X11_XKBLIB_H
+    /* under HP-UX and Solaris 2.6, at least, XKBlib.h defines structures with
+     * field named "explicit" - which is, of course, an error for a C++
+     * compiler. To be on the safe side, just redefine it everywhere. */
+    #define explicit __wx_explicit
+
+    #include "X11/XKBlib.h"
+
+    #undef explicit
+#endif // HAVE_X11_XKBLIB_H
+
+
+#if wxUSE_DETECT_SM
+    #include "X11/Xlib.h"
+    #include "X11/SM/SMlib.h"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -66,6 +76,57 @@ void wxBell()
     gdk_beep();
 }
 #endif
+
+/* Don't synthesize KeyUp events holding down a key and producing
+   KeyDown events with autorepeat. */
+#ifdef HAVE_X11_XKBLIB_H
+bool wxSetDetectableAutoRepeat( bool flag )
+{
+    Bool result;
+    XkbSetDetectableAutoRepeat( GDK_DISPLAY(), flag, &result );
+    return result;       /* true if keyboard hardware supports this mode */
+}
+#else
+bool wxSetDetectableAutoRepeat( bool WXUNUSED(flag) )
+{
+    return false;
+}
+#endif
+
+// Escapes string so that it is valid Pango markup XML string:
+wxString wxEscapeStringForPangoMarkup(const wxString& str)
+{
+    size_t len = str.length();
+    wxString out;
+    out.Alloc(len);
+    for (size_t i = 0; i < len; i++)
+    {
+        wxChar c = str[i];
+        switch (c)
+        {
+            case _T('&'):
+                out << _T("&amp;");
+                break;
+            case _T('<'):
+                out << _T("&lt;");
+                break;
+            case _T('>'):
+                out << _T("&gt;");
+                break;
+            case _T('\''):
+                out << _T("&apos;");
+                break;
+            case _T('"'):
+                out << _T("&quot;");
+                break;
+            default:
+                out << c;
+                break;
+        }
+    }
+    return out;
+}
+
 
 // ----------------------------------------------------------------------------
 // display characterstics
@@ -90,7 +151,7 @@ void wxDisplaySizeMM( int *width, int *height )
 
 void wxGetMousePosition( int* x, int* y )
 {
-    gdk_window_get_pointer( NULL, x, y, NULL );
+    gdk_window_get_pointer( (GdkWindow*) NULL, x, y, (GdkModifierType*) NULL );
 }
 
 bool wxColourDisplay()
@@ -100,7 +161,7 @@ bool wxColourDisplay()
 
 int wxDisplayDepth()
 {
-    return gtk_widget_get_visual(wxGetRootWindow())->depth;
+    return gdk_drawable_get_visual( wxGetRootWindow()->window )->depth;
 }
 
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
@@ -110,17 +171,17 @@ wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
 
 #if !wxUSE_UNICODE
 
-WXDLLIMPEXP_CORE wxCharBuffer
-wxConvertToGTK(const wxString& s, wxFontEncoding enc)
+WXDLLIMPEXP_CORE 
+wxCharBuffer wxConvertToGTK(const wxString& s, wxFontEncoding enc)
 {
     wxWCharBuffer wbuf;
     if ( enc == wxFONTENCODING_SYSTEM || enc == wxFONTENCODING_DEFAULT )
     {
-        wbuf = wxConvUI->cMB2WC(s.c_str());
+        wbuf = wxConvUI->cMB2WC(s);
     }
     else // another encoding, use generic conversion class
     {
-        wbuf = wxCSConv(enc).cMB2WC(s.c_str());
+        wbuf = wxCSConv(enc).cMB2WC(s);
     }
 
     if ( !wbuf && !s.empty() )
@@ -131,80 +192,60 @@ wxConvertToGTK(const wxString& s, wxFontEncoding enc)
         // we choose ISO8859-1 here arbitrarily, it's just the most common
         // encoding probably and, also importantly here, conversion from it
         // never fails as it's done internally by wxCSConv
-        wbuf = wxCSConv(wxFONTENCODING_ISO8859_1).cMB2WC(s.c_str());
+        wbuf = wxCSConv(wxFONTENCODING_ISO8859_1).cMB2WC(s);
     }
 
     return wxConvUTF8.cWC2MB(wbuf);
 }
 
-WXDLLIMPEXP_CORE wxCharBuffer
-wxConvertFromGTK(const wxString& s, wxFontEncoding enc)
-{
-    // this conversion should never fail as GTK+ always uses UTF-8 internally
-    // so there are no complications here
-    const wxWCharBuffer wbuf(wxConvUTF8.cMB2WC(s.c_str()));
-    if ( enc == wxFONTENCODING_SYSTEM )
-        return wxConvUI->cWC2MB(wbuf);
-
-    return wxCSConv(enc).cWC2MB(wbuf);
-}
-
 #endif // !wxUSE_UNICODE
-
-// Returns NULL if version is certainly greater or equal than major.minor.micro
-// Returns string describing the error if version is lower than
-// major.minor.micro OR it cannot be determined and one should not rely on the
-// availability of pango version major.minor.micro, nor the non-availability
-const gchar *wx_pango_version_check (int major, int minor, int micro)
-{
-    // NOTE: you don't need to use this macro to check for Pango features
-    //       added in pango-1.4 or earlier since GTK 2.4 (our minimum requirement
-    //       for GTK lib) required pango 1.4...
-
-#ifdef PANGO_VERSION_MAJOR
-    if (!gtk_check_version (2,11,0))
-    {
-        // GTK+ 2.11 requires Pango >= 1.15.3 and pango_version_check
-        // was added in Pango 1.15.2 thus we know for sure the pango lib we're
-        // using has the pango_version_check function:
-        return pango_version_check (major, minor, micro);
-    }
-
-    return "can't check";
-#else // !PANGO_VERSION_MAJOR
-    wxUnusedVar(major);
-    wxUnusedVar(minor);
-    wxUnusedVar(micro);
-
-    return "too old headers";
-#endif
-}
-
 
 // ----------------------------------------------------------------------------
 // subprocess routines
 // ----------------------------------------------------------------------------
 
 extern "C" {
-static gboolean EndProcessDetector(GIOChannel* source, GIOCondition, void* data)
+static
+void GTK_EndProcessDetector(gpointer data, gint source,
+                            GdkInputCondition WXUNUSED(condition) )
 {
-    wxEndProcessData * const
-        proc_data = static_cast<wxEndProcessData *>(data);
+   wxEndProcessData *proc_data = (wxEndProcessData *)data;
 
-    // child exited, end waiting
-    close(g_io_channel_unix_get_fd(source));
+   // has the process really terminated? unfortunately GDK (or GLib) seem to
+   // generate G_IO_HUP notification even when it simply tries to read from a
+   // closed fd and hasn't terminated at all
+   int pid = (proc_data->pid > 0) ? proc_data->pid : -(proc_data->pid);
+   int status = 0;
+   int rc = waitpid(pid, &status, WNOHANG);
 
-    wxHandleProcessTermination(proc_data);
+   if ( rc == 0 )
+   {
+       // no, it didn't exit yet, continue waiting
+       return;
+   }
 
-    // don't call us again!
-    return false;
+   // set exit code to -1 if something bad happened
+   proc_data->exitcode = rc != -1 && WIFEXITED(status) ? WEXITSTATUS(status)
+                                                      : -1;
+
+   // child exited, end waiting
+   close(source);
+
+   // don't call us again!
+   gdk_input_remove(proc_data->tag);
+
+   wxHandleProcessTermination(proc_data);
 }
 }
 
-int wxGUIAppTraits::AddProcessCallback(wxEndProcessData *proc_data, int fd)
+int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
 {
-    return g_io_add_watch(
-        g_io_channel_unix_new(fd), G_IO_IN, EndProcessDetector, proc_data);
+    int tag = gdk_input_add(fd,
+                            GDK_INPUT_READ,
+                            GTK_EndProcessDetector,
+                            (gpointer)proc_data);
+
+    return tag;
 }
 
 
@@ -223,35 +264,32 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_GTK;
 }
 
-#if wxUSE_TIMER
-
-wxTimerImpl *wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxGTKTimerImpl(timer);
-}
-
-#endif // wxUSE_TIMER
-
 #if wxUSE_DETECT_SM
 static wxString GetSM()
 {
-    wxX11Display dpy;
+    class Dpy
+    {
+    public:
+        Dpy() { m_dpy = XOpenDisplay(NULL); }
+        ~Dpy() { if ( m_dpy ) XCloseDisplay(m_dpy); }
+
+        operator Display *() const { return m_dpy; }
+    private:
+        Display *m_dpy;
+    } dpy;
+
     if ( !dpy )
         return wxEmptyString;
 
-    char smerr[256];
     char *client_id;
     SmcConn smc_conn = SmcOpenConnection(NULL, NULL,
                                          999, 999,
                                          0 /* mask */, NULL /* callbacks */,
                                          NULL, &client_id,
-                                         WXSIZEOF(smerr), smerr);
+                                         0, NULL);
 
     if ( !smc_conn )
-    {
-        wxLogDebug("Failed to connect to session manager: %s", smerr);
         return wxEmptyString;
-    }
 
     char *vendor = SmcVendor(smc_conn);
     wxString ret = wxString::FromAscii( vendor );
@@ -269,21 +307,9 @@ static wxString GetSM()
 // wxGUIAppTraits
 //-----------------------------------------------------------------------------
 
-wxEventLoopBase *wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop();
-}
+#ifdef __WXDEBUG__
 
-
-#if wxUSE_INTL
-void wxGUIAppTraits::SetLocale()
-{
-    gtk_set_locale();
-    wxUpdateLocaleIsUtf8();
-}
-#endif
-
-#if wxDEBUG_LEVEL && wxUSE_STACKWALKER
+#if wxUSE_STACKWALKER
 
 // private helper class
 class StackDump : public wxStackWalker
@@ -322,183 +348,81 @@ private:
     GtkAssertDialog *m_dlg;
 };
 
-static void get_stackframe_callback(void* p)
+// the callback functions must be extern "C" to comply with GTK+ declarations
+extern "C"
 {
-    StackDump* dump = static_cast<StackDump*>(p);
-    // skip over frames up to including wxOnAssert()
-    dump->ProcessFrames(3);
+    void get_stackframe_callback(StackDump *dump)
+    {
+        // skip over frames up to including wxOnAssert()
+        dump->ProcessFrames(3);
+    }
 }
 
-#endif // wxDEBUG_LEVEL && wxUSE_STACKWALKER
+#endif      // wxUSE_STACKWALKER
 
 bool wxGUIAppTraits::ShowAssertDialog(const wxString& msg)
 {
-#if wxDEBUG_LEVEL
-    // we can't show the dialog from another thread
-    if ( wxIsMainThread() )
-    {
-        // under GTK2 we prefer to use a dialog widget written using directly
-        // in GTK+ as use a dialog written using wxWidgets would need the
-        // wxWidgets idle processing to work correctly which might not be the
-        // case when assert happens
-        GtkWidget *dialog = gtk_assert_dialog_new();
-        gtk_assert_dialog_set_message(GTK_ASSERT_DIALOG(dialog), msg.mb_str());
+    // under GTK2 we prefer to use a dialog widget written using directly GTK+;
+    // in fact we cannot use a dialog written using wxWidgets: it would need
+    // the wxWidgets idle processing to work correctly!
+    GtkWidget *dialog = gtk_assert_dialog_new();
+    gtk_assert_dialog_set_message(GTK_ASSERT_DIALOG(dialog), msg.mb_str());
 
 #if wxUSE_STACKWALKER
-        // save the current stack ow...
-        StackDump dump(GTK_ASSERT_DIALOG(dialog));
-        dump.SaveStack(100); // showing more than 100 frames is not very useful
+    // don't show more than maxLines or we could get a dialog too tall to be
+    // shown on screen: 20 should be ok everywhere as even with 15 pixel high
+    // characters it is still only 300 pixels...
+    static const int maxLines = 20;
 
-        // ...but process it only if the user needs it
-        gtk_assert_dialog_set_backtrace_callback
-        (
-            GTK_ASSERT_DIALOG(dialog),
-            get_stackframe_callback,
-            &dump
-        );
-#endif // wxUSE_STACKWALKER
+    // save current stack frame...
+    StackDump dump(GTK_ASSERT_DIALOG(dialog));
+    dump.SaveStack(maxLines);
 
-        gint result = gtk_dialog_run(GTK_DIALOG (dialog));
-        bool returnCode = false;
-        switch (result)
-        {
-            case GTK_ASSERT_DIALOG_STOP:
-                wxTrap();
-                break;
-            case GTK_ASSERT_DIALOG_CONTINUE:
-                // nothing to do
-                break;
-            case GTK_ASSERT_DIALOG_CONTINUE_SUPPRESSING:
-                // no more asserts
-                returnCode = true;
-                break;
+    // ...but process it only if the user needs it
+    gtk_assert_dialog_set_backtrace_callback(GTK_ASSERT_DIALOG(dialog),
+                                             (GtkAssertDialogStackFrameCallback)get_stackframe_callback,
+                                             &dump);
+#endif      // wxUSE_STACKWALKER
 
-            default:
-                wxFAIL_MSG( wxT("unexpected return code from GtkAssertDialog") );
-        }
+    gint result = gtk_dialog_run(GTK_DIALOG (dialog));
+    bool returnCode = false;
+    switch (result)
+    {
+    case GTK_ASSERT_DIALOG_STOP:
+        wxTrap();
+        break;
+    case GTK_ASSERT_DIALOG_CONTINUE:
+        // nothing to do
+        break;
+    case GTK_ASSERT_DIALOG_CONTINUE_SUPPRESSING:
+        // no more asserts
+        returnCode = true;
+        break;
 
-        gtk_widget_destroy(dialog);
-        return returnCode;
+    default:
+        wxFAIL_MSG( _T("unexpected return code from GtkAssertDialog") );
     }
-#endif // wxDEBUG_LEVEL
 
-    return wxAppTraitsBase::ShowAssertDialog(msg);
+    gtk_widget_destroy(dialog);
+    return returnCode;
 }
+
+#endif  // __WXDEBUG__
 
 wxString wxGUIAppTraits::GetDesktopEnvironment() const
 {
-    wxString de = wxSystemOptions::GetOption(wxT("gtk.desktop"));
 #if wxUSE_DETECT_SM
-    if ( de.empty() )
-    {
-        static const wxString s_SM = GetSM();
+    const wxString SM = GetSM();
 
-        if (s_SM == wxT("GnomeSM"))
-            de = wxT("GNOME");
-        else if (s_SM == wxT("KDE"))
-            de = wxT("KDE");
-    }
+    if (SM == wxT("GnomeSM"))
+        return wxT("GNOME");
+
+    if (SM == wxT("KDE"))
+        return wxT("KDE");
 #endif // wxUSE_DETECT_SM
 
-    return de;
+    return wxEmptyString;
 }
 
-#ifdef __WXGTK26__
 
-// see the hack below in wxCmdLineParser::GetUsageString().
-// TODO: replace this hack with a g_option_group_get_entries()
-//       call as soon as such function exists;
-//       see http://bugzilla.gnome.org/show_bug.cgi?id=431021 for the relative
-//       feature request
-struct _GOptionGroup
-{
-  gchar           *name;
-  gchar           *description;
-  gchar           *help_description;
-
-  GDestroyNotify   destroy_notify;
-  gpointer         user_data;
-
-  GTranslateFunc   translate_func;
-  GDestroyNotify   translate_notify;
-  gpointer     translate_data;
-
-  GOptionEntry    *entries;
-  gint             n_entries;
-
-  GOptionParseFunc pre_parse_func;
-  GOptionParseFunc post_parse_func;
-  GOptionErrorFunc error_func;
-};
-
-wxString wxGetNameFromGtkOptionEntry(const GOptionEntry *opt)
-{
-    wxString ret;
-
-    if (opt->short_name)
-        ret << wxT("-") << opt->short_name;
-    if (opt->long_name)
-    {
-        if (!ret.empty())
-            ret << wxT(", ");
-        ret << wxT("--") << opt->long_name;
-
-        if (opt->arg_description)
-            ret << wxT("=") << opt->arg_description;
-    }
-
-    return wxT("  ") + ret;
-}
-
-#endif // __WXGTK26__
-
-wxString
-wxGUIAppTraits::GetStandardCmdLineOptions(wxArrayString& names,
-                                          wxArrayString& desc) const
-{
-    wxString usage;
-
-#ifdef __WXGTK26__
-    if (!gtk_check_version(2,6,0))
-    {
-        // since GTK>=2.6, we can use the glib_check_version() symbol...
-
-        // check whether GLib version is greater than 2.6 but also lower than 2.19
-        // because, as we use the undocumented _GOptionGroup struct, we don't want
-        // to run this code with future versions which might change it (2.19 is the
-        // latest one at the time of this writing)
-        if (!glib_check_version(2,6,0) && glib_check_version(2,20,0))
-        {
-            usage << _("The following standard GTK+ options are also supported:\n");
-
-            // passing true here means that the function can open the default
-            // display while parsing (not really used here anyhow)
-            GOptionGroup *gtkOpts = gtk_get_option_group(true);
-
-            // WARNING: here we access the internals of GOptionGroup:
-            GOptionEntry *entries = ((_GOptionGroup*)gtkOpts)->entries;
-            unsigned int n_entries = ((_GOptionGroup*)gtkOpts)->n_entries;
-            wxArrayString namesOptions, descOptions;
-
-            for ( size_t n = 0; n < n_entries; n++ )
-            {
-                if ( entries[n].flags & G_OPTION_FLAG_HIDDEN )
-                    continue;       // skip
-
-                names.push_back(wxGetNameFromGtkOptionEntry(&entries[n]));
-
-                const gchar * const entryDesc = entries[n].description;
-                desc.push_back(wxString(entryDesc));
-            }
-
-            g_option_group_free (gtkOpts);
-        }
-    }
-#else
-    wxUnusedVar(names);
-    wxUnusedVar(desc);
-#endif // __WXGTK26__
-
-    return usage;
-}
 

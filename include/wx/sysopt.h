@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/sysopt.h
+// Name:        sysopt.h
 // Purpose:     wxSystemOptions
 // Author:      Julian Smart
 // Modified by:
@@ -18,11 +18,7 @@
 // Enables an application to influence the wxWidgets implementation
 // ----------------------------------------------------------------------------
 
-class
-#if wxUSE_SYSTEM_OPTIONS
-WXDLLIMPEXP_BASE
-#endif
-wxSystemOptions : public wxObject
+class WXDLLIMPEXP_BASE wxSystemOptions : public wxObject
 {
 public:
     wxSystemOptions() { }

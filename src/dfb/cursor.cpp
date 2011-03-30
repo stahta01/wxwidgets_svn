@@ -22,22 +22,11 @@
 // wxCursorRefData
 //-----------------------------------------------------------------------------
 
-class wxCursorRefData : public wxGDIRefData
+class wxCursorRefData: public wxObjectRefData
 {
 public:
     wxCursorRefData(const wxBitmap& bmp = wxNullBitmap, int id = -1)
         : m_id(id), m_bitmap(bmp) {}
-
-    virtual bool IsOk() const { return m_bitmap.IsOk(); }
-
-    // Create a deep copy of this object.
-    wxCursorRefData *Clone() const
-    {
-        wxBitmap bitmapCopy(m_bitmap);
-        bitmapCopy.UnShare();
-
-        return new wxCursorRefData(bitmapCopy, m_id);
-    }
 
     int      m_id;
     wxBitmap m_bitmap;
@@ -52,26 +41,41 @@ public:
 
 IMPLEMENT_DYNAMIC_CLASS(wxCursor, wxObject)
 
-void wxCursor::InitFromStock(wxStockCursor cursorId)
+wxCursor::wxCursor(int cursorId)
 {
 #warning "FIXME -- implement the cursor as bitmaps (that's what DFB uses)"
 }
 
+wxCursor::wxCursor(const char WXUNUSED(bits)[],
+                   int WXUNUSED(width),
+                   int WXUNUSED(height),
+                   int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY),
+                   const char WXUNUSED(maskBits)[],
+                   wxColour * WXUNUSED(fg), wxColour * WXUNUSED(bg) )
+{
+#warning "FIXME"
+}
+
 wxCursor::wxCursor(const wxString& cursor_file,
-                   wxBitmapType type,
+                   long flags,
                    int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY))
 {
 #warning "FIXME"
 }
 
-wxGDIRefData *wxCursor::CreateGDIRefData() const
+bool wxCursor::IsOk() const
+{
+    return m_refData && M_CURSOR->m_bitmap.Ok();
+}
+
+wxObjectRefData *wxCursor::CreateRefData() const
 {
     return new wxCursorRefData;
 }
 
-wxGDIRefData *wxCursor::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxCursor::CloneRefData(const wxObjectRefData *data) const
 {
-    return static_cast<const wxCursorRefData *>(data)->Clone();
+    return new wxCursorRefData(*(wxCursorRefData *)data);
 }
 
 

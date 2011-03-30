@@ -57,63 +57,62 @@ void FontMapperTestCase::NamesAndDesc()
     static const wxChar *charsets[] =
     {
         // some valid charsets
-        wxT("us-ascii"    ),
-        wxT("iso8859-1"   ),
-        wxT("iso-8859-12" ),
-        wxT("koi8-r"      ),
-        wxT("utf-7"       ),
-        wxT("cp1250"      ),
-        wxT("windows-1252"),
+        _T("us-ascii"    ),
+        _T("iso8859-1"   ),
+        _T("iso-8859-12" ),
+        _T("koi8-r"      ),
+        _T("utf-7"       ),
+        _T("cp1250"      ),
+        _T("windows-1252"),
 
         // and now some bogus ones
-        wxT(""            ),
-        wxT("cp1249"      ),
-        wxT("iso--8859-1" ),
-        wxT("iso-8859-19" ),
+        _T(""            ),
+        _T("cp1249"      ),
+        _T("iso--8859-1" ),
+        _T("iso-8859-19" ),
     };
 
     static const wxChar *names[] =
     {
         // some valid charsets
-        wxT("default"     ),
-        wxT("iso-8859-1"  ),
-        wxT("iso-8859-12" ),
-        wxT("koi8-r"      ),
-        wxT("utf-7"       ),
-        wxT("windows-1250"),
-        wxT("windows-1252"),
+        _T("default"     ),
+        _T("iso-8859-1"  ),
+        _T("iso-8859-12" ),
+        _T("koi8-r"      ),
+        _T("utf-7"       ),
+        _T("windows-1250"),
+        _T("windows-1252"),
 
         // and now some bogus ones
-        wxT("default"     ),
-        wxT("unknown--1"  ),
-        wxT("unknown--1"  ),
-        wxT("unknown--1"  ),
+        _T("default"     ),
+        _T("unknown--1"  ),
+        _T("unknown--1"  ),
+        _T("unknown--1"  ),
     };
 
     static const wxChar *descriptions[] =
     {
         // some valid charsets
-        wxT("Default encoding"                  ),
-        wxT("Western European (ISO-8859-1)"     ),
-        wxT("Indian (ISO-8859-12)"              ),
-        wxT("KOI8-R"                            ),
-        wxT("Unicode 7 bit (UTF-7)"             ),
-        wxT("Windows Central European (CP 1250)"),
-        wxT("Windows Western European (CP 1252)"),
+        _T("Default encoding"                  ),
+        _T("Western European (ISO-8859-1)"     ),
+        _T("Indian (ISO-8859-12)"              ),
+        _T("KOI8-R"                            ),
+        _T("Unicode 7 bit (UTF-7)"             ),
+        _T("Windows Central European (CP 1250)"),
+        _T("Windows Western European (CP 1252)"),
 
         // and now some bogus ones
-        wxT("Default encoding"                  ),
-        wxT("Unknown encoding (-1)"             ),
-        wxT("Unknown encoding (-1)"             ),
-        wxT("Unknown encoding (-1)"             ),
+        _T("Default encoding"                  ),
+        _T("Unknown encoding (-1)"             ),
+        _T("Unknown encoding (-1)"             ),
+        _T("Unknown encoding (-1)"             ),
     };
 
-    wxFontMapperBase& fmap = *wxFontMapperBase::Get();
     for ( size_t n = 0; n < WXSIZEOF(charsets); n++ )
     {
-        wxFontEncoding enc = fmap.CharsetToEncoding(charsets[n]);
-        CPPUNIT_ASSERT_EQUAL( names[n], fmap.GetEncodingName(enc).Lower() );
-        CPPUNIT_ASSERT_EQUAL( descriptions[n], fmap.GetEncodingDescription(enc) );
+        wxFontEncoding enc = wxFontMapperBase::Get()->CharsetToEncoding(charsets[n]);
+        CPPUNIT_ASSERT( wxFontMapperBase::Get()->GetEncodingName(enc).CmpNoCase(names[n]) == 0 );
+        CPPUNIT_ASSERT( wxFontMapperBase::Get()->GetEncodingDescription(enc) == descriptions[n] );
     }
 }
 

@@ -13,7 +13,6 @@
 #include "wx/textctrl.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/log.h"
     #include "wx/utils.h"
@@ -24,7 +23,6 @@
 
 #include "wx/strconv.h"
 #include "wx/fontutil.h"        // for wxNativeFontInfo (GetNativeFontInfo())
-#include "wx/evtloop.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,21 +55,8 @@ static void wxGtkTextInsert(GtkWidget *text,
                             const char *txt,
                             size_t len)
 {
-    wxFont tmpFont;
-    GdkFont *font;
-    if (attr.HasFont())
-    {
-        tmpFont = attr.GetFont();
-
-        // FIXME: if this crashes because tmpFont goes out of scope and the GdkFont is
-        // deleted, then we need to call gdk_font_ref on font.
-        // This is because attr.GetFont() now returns a temporary font since wxTextAttr
-        // no longer stores a wxFont object, for efficiency.
-
-        font = tmpFont.GetInternalFont();
-    }
-    else
-        font  = NULL;
+    GdkFont *font = attr.HasFont() ? attr.GetFont().GetInternalFont()
+                                   : NULL;
 
     GdkColor *colFg = attr.HasTextColour() ? attr.GetTextColour().GetColor()
                                            : NULL;
@@ -91,9 +76,9 @@ static void wxGtkTextInsert(GtkWidget *text,
 extern "C" {
 static void
 gtk_insert_text_callback(GtkEditable *editable,
-                         const gchar *WXUNUSED(new_text),
-                         gint WXUNUSED(new_text_length),
-                         gint *WXUNUSED(position),
+                         const gchar *new_text,
+                         gint new_text_length,
+                         gint *position,
                          wxTextCtrl *win)
 {
     if (g_isIdle)
@@ -102,7 +87,7 @@ gtk_insert_text_callback(GtkEditable *editable,
     // we should only be called if we have a max len limit at all
     GtkEntry *entry = GTK_ENTRY (editable);
 
-    wxCHECK_RET( entry->text_max_length, wxT("shouldn't be called") );
+    wxCHECK_RET( entry->text_max_length, _T("shouldn't be called") );
 
     // check that we don't overflow the max length limit
     //
@@ -121,7 +106,7 @@ gtk_insert_text_callback(GtkEditable *editable,
         wxCommandEvent event(wxEVT_COMMAND_TEXT_MAXLEN, win->GetId());
         event.SetEventObject(win);
         event.SetString(win->GetValue());
-        win->HandleWindowEvent( event );
+        win->GetEventHandler()->ProcessEvent( event );
     }
 }
 }
@@ -132,7 +117,7 @@ gtk_insert_text_callback(GtkEditable *editable,
 
 extern "C" {
 static void
-gtk_text_changed_callback( GtkWidget *WXUNUSED(widget), wxTextCtrl *win )
+gtk_text_changed_callback( GtkWidget *widget, wxTextCtrl *win )
 {
     if ( win->IgnoreTextUpdate() )
         return;
@@ -147,7 +132,7 @@ gtk_text_changed_callback( GtkWidget *WXUNUSED(widget), wxTextCtrl *win )
 
     wxCommandEvent event( wxEVT_COMMAND_TEXT_UPDATED, win->GetId() );
     event.SetEventObject( win );
-    win->HandleWindowEvent( event );
+    win->GetEventHandler()->ProcessEvent( event );
 }
 }
 
@@ -177,6 +162,8 @@ gtk_scrollbar_changed_callback( GtkWidget *WXUNUSED(widget), wxTextCtrl *win )
 // which implicitly calls wxYield()) so we override GtkText::draw() and simply
 // don't do anything if we're inside wxYield()
 
+extern bool wxIsInsideYield;
+
 extern "C" {
     typedef void (*GtkDrawCallback)(GtkWidget *widget, GdkRectangle *rect);
 }
@@ -186,11 +173,10 @@ static GtkDrawCallback gs_gtk_text_draw = NULL;
 extern "C" {
 static void wxgtk_text_draw( GtkWidget *widget, GdkRectangle *rect)
 {
-    wxEventLoopBase* loop = wxEventLoopBase::GetActive();
-    if ( loop && !loop->IsYielding() )
+    if ( !wxIsInsideYield )
     {
         wxCHECK_RET( gs_gtk_text_draw != wxgtk_text_draw,
-                     wxT("infinite recursion in wxgtk_text_draw aborted") );
+                     _T("infinite recursion in wxgtk_text_draw aborted") );
 
         gs_gtk_text_draw(widget, rect);
     }
@@ -200,6 +186,8 @@ static void wxgtk_text_draw( GtkWidget *widget, GdkRectangle *rect)
 //-----------------------------------------------------------------------------
 //  wxTextCtrl
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
 
 BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
     EVT_CHAR(wxTextCtrl::OnChar)
@@ -223,7 +211,7 @@ void wxTextCtrl::Init()
     m_modified = false;
     SetUpdateFont(false);
     m_text =
-    m_vScrollbar = NULL;
+    m_vScrollbar = (GtkWidget *)NULL;
 }
 
 wxTextCtrl::~wxTextCtrl()
@@ -271,7 +259,7 @@ bool wxTextCtrl::Create( wxWindow *parent,
     if (multi_line)
     {
         // create our control ...
-        m_text = gtk_text_new( NULL, NULL );
+        m_text = gtk_text_new( (GtkAdjustment *) NULL, (GtkAdjustment *) NULL );
 
         // ... and put into the upper left hand corner of the table
         bool bHasHScrollbar = false;
@@ -404,7 +392,7 @@ void wxTextCtrl::CalculateScrollbar()
     }
 }
 
-wxString wxTextCtrl::DoGetValue() const
+wxString wxTextCtrl::GetValue() const
 {
     wxCHECK_MSG( m_text != NULL, wxEmptyString, wxT("invalid text ctrl") );
 
@@ -702,26 +690,32 @@ void wxTextCtrl::SetEditable( bool editable )
     }
 }
 
-void wxTextCtrl::DoEnable( bool enable )
+bool wxTextCtrl::Enable( bool enable )
 {
+    if (!wxWindowBase::Enable(enable))
+    {
+        // nothing to do
+        return false;
+    }
+
     if (m_windowStyle & wxTE_MULTILINE)
     {
         gtk_text_set_editable( GTK_TEXT(m_text), enable );
+        OnParentEnable(enable);
     }
     else
     {
         gtk_widget_set_sensitive( m_text, enable );
     }
+
+    return true;
 }
 
 // wxGTK-specific: called recursively by Enable,
 // to give widgets an oppprtunity to correct their colours after they
 // have been changed by Enable
-void wxTextCtrl::OnEnabled( bool WXUNUSED(enable) )
+void wxTextCtrl::OnParentEnable( bool enable )
 {
-    if ( IsSingleLine() )
-        return;
-
     // If we have a custom background colour, we use this colour in both
     // disabled and enabled mode, or we end up with a different colour under the
     // text.
@@ -816,7 +810,7 @@ void wxTextCtrl::SetSelection( long from, long to )
          !GTK_TEXT(m_text)->line_start_cache )
     {
         // tell the programmer that it didn't work
-        wxLogDebug(wxT("Can't call SetSelection() before realizing the control"));
+        wxLogDebug(_T("Can't call SetSelection() before realizing the control"));
         return;
     }
 
@@ -998,7 +992,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &key_event )
         wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
         event.SetEventObject(this);
         event.SetString(GetValue());
-        if (HandleWindowEvent(event)) return;
+        if (GetEventHandler()->ProcessEvent(event)) return;
     }
 
     if ((key_event.GetKeyCode() == WXK_RETURN) && !(m_windowStyle & wxTE_MULTILINE))
@@ -1071,7 +1065,7 @@ void wxTextCtrl::ChangeFontGlobally()
     // possible!
     wxASSERT_MSG( (m_windowStyle & wxTE_MULTILINE) && m_updateFont,
 
-                  wxT("shouldn't be called for single line controls") );
+                  _T("shouldn't be called for single line controls") );
 
     wxString value = GetValue();
     if ( !value.empty() )
@@ -1145,7 +1139,7 @@ bool wxTextCtrl::SetStyle( long start, long end, const wxTextAttr& style )
         gint l = gtk_text_get_length( GTK_TEXT(m_text) );
 
         wxCHECK_MSG( start >= 0 && end <= l, false,
-                     wxT("invalid range in wxTextCtrl::SetStyle") );
+                     _T("invalid range in wxTextCtrl::SetStyle") );
 
         gint old_pos = gtk_editable_get_position( GTK_EDITABLE(m_text) );
         char *text = gtk_editable_get_chars( GTK_EDITABLE(m_text), start, end );
@@ -1246,7 +1240,7 @@ void wxTextCtrl::OnInternalIdle()
 
     if (cursor.Ok())
     {
-        GdkWindow *window = NULL;
+        GdkWindow *window = (GdkWindow*) NULL;
         if (HasFlag(wxTE_MULTILINE))
             window = GTK_TEXT(m_text)->text_area;
         else
@@ -1289,7 +1283,7 @@ wxSize wxTextCtrl::DoGetBestSize() const
 // freeze/thaw
 // ----------------------------------------------------------------------------
 
-void wxTextCtrl::DoFreeze()
+void wxTextCtrl::Freeze()
 {
     if ( HasFlag(wxTE_MULTILINE) )
     {
@@ -1297,7 +1291,7 @@ void wxTextCtrl::DoFreeze()
     }
 }
 
-void wxTextCtrl::DoThaw()
+void wxTextCtrl::Thaw()
 {
     if ( HasFlag(wxTE_MULTILINE) )
     {

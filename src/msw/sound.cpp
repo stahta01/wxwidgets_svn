@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msw/sound.cpp
+// Name:        sound.cpp
 // Purpose:     wxSound
 // Author:      Julian Smart
 // Modified by: 2005-07-29: Vadim Zeitlin: redesign
@@ -70,7 +70,7 @@ private:
     GlobalPtr m_waveData;
     GlobalPtrLock m_waveDataPtr;
 
-    wxDECLARE_NO_COPY_CLASS(wxSoundDataMemory);
+    DECLARE_NO_COPY_CLASS(wxSoundDataMemory)
 };
 
 // class for sound files and resources
@@ -90,7 +90,7 @@ private:
     const wxString m_name;
     const bool m_isResource;
 
-    wxDECLARE_NO_COPY_CLASS(wxSoundDataFile);
+    DECLARE_NO_COPY_CLASS(wxSoundDataFile)
 };
 
 // ============================================================================
@@ -144,7 +144,11 @@ wxSound::~wxSound()
 
 void wxSound::Free()
 {
-    wxDELETE(m_data);
+    if ( m_data )
+    {
+        delete m_data;
+        m_data = NULL;
+    }
 }
 
 bool wxSound::CheckCreatedOk()

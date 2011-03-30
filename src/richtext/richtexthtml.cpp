@@ -53,7 +53,7 @@ wxRichTextHTMLHandler::wxRichTextHTMLHandler(const wxString& name, const wxStrin
 bool wxRichTextHTMLHandler::CanHandle(const wxString& filename) const
 {
     wxString path, file, ext;
-    wxFileName::SplitPath(filename, & path, & file, & ext);
+    wxSplitPath(filename, & path, & file, & ext);
 
     return (ext.Lower() == wxT("html") || ext.Lower() == wxT("htm"));
 }
@@ -85,7 +85,8 @@ bool wxRichTextHTMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream&
         customEncoding = new wxCSConv(GetEncoding());
         if (!customEncoding->IsOk())
         {
-            wxDELETE(customEncoding);
+            delete customEncoding;
+            customEncoding = NULL;
         }
     }
     if (customEncoding)
@@ -101,8 +102,8 @@ bool wxRichTextHTMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream&
         wxTextOutputStream str(stream, wxEOL_NATIVE);
 #endif
 
-        wxRichTextAttr currentParaStyle = buffer->GetAttributes();
-        wxRichTextAttr currentCharStyle = buffer->GetAttributes();
+        wxTextAttrEx currentParaStyle = buffer->GetAttributes();
+        wxTextAttrEx currentCharStyle = buffer->GetAttributes();
 
         if ((GetFlags() & wxRICHTEXT_HANDLER_NO_HEADER_FOOTER) == 0)
             str << wxT("<html><head></head><body>\n");
@@ -123,7 +124,7 @@ bool wxRichTextHTMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream&
 
             if (para)
             {
-                wxRichTextAttr paraStyle(para->GetCombinedAttributes());
+                wxTextAttrEx paraStyle(para->GetCombinedAttributes());
 
                 BeginParagraphFormatting(currentParaStyle, paraStyle, str);
 
@@ -134,7 +135,7 @@ bool wxRichTextHTMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream&
                     wxRichTextPlainText* textObj = wxDynamicCast(obj, wxRichTextPlainText);
                     if (textObj && !textObj->IsEmpty())
                     {
-                        wxRichTextAttr charStyle(para->GetCombinedAttributes(obj->GetAttributes()));
+                        wxTextAttrEx charStyle(para->GetCombinedAttributes(obj->GetAttributes()));
                         BeginCharacterFormatting(currentCharStyle, charStyle, paraStyle, str);
 
                         wxString text = textObj->GetText();
@@ -184,39 +185,22 @@ bool wxRichTextHTMLHandler::DoSaveFile(wxRichTextBuffer *buffer, wxOutputStream&
     return true;
 }
 
-void wxRichTextHTMLHandler::BeginCharacterFormatting(const wxRichTextAttr& currentStyle, const wxRichTextAttr& thisStyle, const wxRichTextAttr& WXUNUSED(paraStyle), wxTextOutputStream& str)
+void wxRichTextHTMLHandler::BeginCharacterFormatting(const wxTextAttrEx& currentStyle, const wxTextAttrEx& thisStyle, const wxTextAttrEx& WXUNUSED(paraStyle), wxTextOutputStream& str)
 {
     wxString style;
 
     // Is there any change in the font properties of the item?
-    if (thisStyle.GetFontFaceName() != currentStyle.GetFontFaceName())
+    if (thisStyle.GetFont().GetFaceName() != currentStyle.GetFont().GetFaceName())
     {
-        wxString faceName(thisStyle.GetFontFaceName());
+        wxString faceName(thisStyle.GetFont().GetFaceName());
         style += wxString::Format(wxT(" face=\"%s\""), faceName.c_str());
     }
-    if (thisStyle.GetFontSize() != currentStyle.GetFontSize())
-        style += wxString::Format(wxT(" size=\"%ld\""), PtToSize(thisStyle.GetFontSize()));
-
-    bool bTextColourChanged = (thisStyle.GetTextColour() != currentStyle.GetTextColour());
-    bool bBackgroundColourChanged = (thisStyle.GetBackgroundColour() != currentStyle.GetBackgroundColour());
-    if (bTextColourChanged || bBackgroundColourChanged)
+    if (thisStyle.GetFont().GetPointSize() != currentStyle.GetFont().GetPointSize())
+        style += wxString::Format(wxT(" size=\"%ld\""), PtToSize(thisStyle.GetFont().GetPointSize()));
+    if (thisStyle.GetTextColour() != currentStyle.GetTextColour() )
     {
-        style += wxT(" style=\"");
-
-        if (bTextColourChanged)
-        {
-            wxString color(thisStyle.GetTextColour().GetAsString(wxC2S_HTML_SYNTAX));
-            style += wxString::Format(wxT("color: %s"), color.c_str());
-        }
-        if (bTextColourChanged && bBackgroundColourChanged)
-            style += wxT(";");
-        if (bBackgroundColourChanged)
-        {
-            wxString color(thisStyle.GetBackgroundColour().GetAsString(wxC2S_HTML_SYNTAX));
-            style += wxString::Format(wxT("background-color: %s"), color.c_str());
-        }
-
-        style += wxT("\"");
+        wxString color(thisStyle.GetTextColour().GetAsString(wxC2S_HTML_SYNTAX));
+        style += wxString::Format(wxT(" color=\"%s\""), color.c_str());
     }
 
     if (style.size())
@@ -225,27 +209,27 @@ void wxRichTextHTMLHandler::BeginCharacterFormatting(const wxRichTextAttr& curre
         m_font = true;
     }
 
-    if (thisStyle.GetFontWeight() == wxBOLD)
+    if (thisStyle.GetFont().GetWeight() == wxBOLD)
         str << wxT("<b>");
-    if (thisStyle.GetFontStyle() == wxITALIC)
+    if (thisStyle.GetFont().GetStyle() == wxITALIC)
         str << wxT("<i>");
-    if (thisStyle.GetFontUnderlined())
+    if (thisStyle.GetFont().GetUnderlined())
         str << wxT("<u>");
 
     if (thisStyle.HasURL())
         str << wxT("<a href=\"") << thisStyle.GetURL() << wxT("\">");
 }
 
-void wxRichTextHTMLHandler::EndCharacterFormatting(const wxRichTextAttr& WXUNUSED(currentStyle), const wxRichTextAttr& thisStyle, const wxRichTextAttr& WXUNUSED(paraStyle), wxTextOutputStream& stream)
+void wxRichTextHTMLHandler::EndCharacterFormatting(const wxTextAttrEx& WXUNUSED(currentStyle), const wxTextAttrEx& thisStyle, const wxTextAttrEx& WXUNUSED(paraStyle), wxTextOutputStream& stream)
 {
     if (thisStyle.HasURL())
         stream << wxT("</a>");
 
-    if (thisStyle.GetFontUnderlined())
+    if (thisStyle.GetFont().GetUnderlined())
         stream << wxT("</u>");
-    if (thisStyle.GetFontStyle() == wxITALIC)
+    if (thisStyle.GetFont().GetStyle() == wxITALIC)
         stream << wxT("</i>");
-    if (thisStyle.GetFontWeight() == wxBOLD)
+    if (thisStyle.GetFont().GetWeight() == wxBOLD)
         stream << wxT("</b>");
 
     if (m_font)
@@ -256,7 +240,7 @@ void wxRichTextHTMLHandler::EndCharacterFormatting(const wxRichTextAttr& WXUNUSE
 }
 
 /// Begin paragraph formatting
-void wxRichTextHTMLHandler::BeginParagraphFormatting(const wxRichTextAttr& WXUNUSED(currentStyle), const wxRichTextAttr& thisStyle, wxTextOutputStream& str)
+void wxRichTextHTMLHandler::BeginParagraphFormatting(const wxTextAttrEx& WXUNUSED(currentStyle), const wxTextAttrEx& thisStyle, wxTextOutputStream& str)
 {
     if (thisStyle.HasPageBreak())
     {
@@ -338,7 +322,7 @@ void wxRichTextHTMLHandler::BeginParagraphFormatting(const wxRichTextAttr& WXUNU
             str << wxT(">");
 
             // TODO: convert to pixels
-            int indentPixels = static_cast<int>(indentLeftMM*10/4);
+            int indentPixels = indentLeftMM*10/4;
 
             if ((GetFlags() & wxRICHTEXT_HANDLER_USE_CSS) == 0)
             {
@@ -384,7 +368,7 @@ void wxRichTextHTMLHandler::BeginParagraphFormatting(const wxRichTextAttr& WXUNU
 }
 
 /// End paragraph formatting
-void wxRichTextHTMLHandler::EndParagraphFormatting(const wxRichTextAttr& WXUNUSED(currentStyle), const wxRichTextAttr& thisStyle, wxTextOutputStream& stream)
+void wxRichTextHTMLHandler::EndParagraphFormatting(const wxTextAttrEx& WXUNUSED(currentStyle), const wxTextAttrEx& thisStyle, wxTextOutputStream& stream)
 {
     if (thisStyle.HasFont())
         stream << wxT("</font>");
@@ -422,18 +406,18 @@ void wxRichTextHTMLHandler::CloseLists(int level, wxTextOutputStream& str)
 }
 
 /// Output font tag
-void wxRichTextHTMLHandler::OutputFont(const wxRichTextAttr& style, wxTextOutputStream& stream)
+void wxRichTextHTMLHandler::OutputFont(const wxTextAttrEx& style, wxTextOutputStream& stream)
 {
     if (style.HasFont())
     {
-        stream << wxString::Format(wxT("<font face=\"%s\" size=\"%ld\""), style.GetFontFaceName().c_str(), PtToSize(style.GetFontSize()));
+        stream << wxString::Format(wxT("<font face=\"%s\" size=\"%ld\""), style.GetFont().GetFaceName().c_str(), PtToSize(style.GetFont().GetPointSize()));
         if (style.HasTextColour())
             stream << wxString::Format(wxT(" color=\"%s\""), style.GetTextColour().GetAsString(wxC2S_HTML_SYNTAX).c_str());
         stream << wxT(" >");
     }
 }
 
-int wxRichTextHTMLHandler::TypeOfList( const wxRichTextAttr& thisStyle, wxString& tag )
+int wxRichTextHTMLHandler::TypeOfList( const wxTextAttrEx& thisStyle, wxString& tag )
 {
     // We can use number attribute of li tag but not all the browsers support it.
     // also wxHtmlWindow doesn't support type attribute.
@@ -461,7 +445,7 @@ int wxRichTextHTMLHandler::TypeOfList( const wxRichTextAttr& thisStyle, wxString
         return 0;
 }
 
-wxString wxRichTextHTMLHandler::GetAlignment( const wxRichTextAttr& thisStyle )
+wxString wxRichTextHTMLHandler::GetAlignment( const wxTextAttrEx& thisStyle )
 {
     switch( thisStyle.GetAlignment() )
     {
@@ -487,27 +471,20 @@ void wxRichTextHTMLHandler::WriteImage(wxRichTextImage* image, wxOutputStream& s
 #if wxUSE_FILESYSTEM
     if (GetFlags() & wxRICHTEXT_HANDLER_SAVE_IMAGES_TO_MEMORY)
     {
-#if 0
         if (!image->GetImage().Ok() && image->GetImageBlock().GetData())
             image->LoadFromBlock();
         if (image->GetImage().Ok() && !image->GetImageBlock().GetData())
             image->MakeBlock();
-#endif
 
-        if (image->GetImageBlock().IsOk())
+        if (image->GetImage().Ok())
         {
-            wxImage img;
-            image->GetImageBlock().Load(img);
-            if (img.IsOk())
-            {
-                wxString ext(image->GetImageBlock().GetExtension());
-                wxString tempFilename(wxString::Format(wxT("image%d.%s"), sm_fileCounter, ext));
-                wxMemoryFSHandler::AddFile(tempFilename, img, image->GetImageBlock().GetImageType());
+            wxString ext(image->GetImageBlock().GetExtension());
+            wxString tempFilename(wxString::Format(wxT("image%d.%s"), sm_fileCounter, (const wxChar*) ext));
+            wxMemoryFSHandler::AddFile(tempFilename, image->GetImage(), image->GetImageBlock().GetImageType());
 
-                m_imageLocations.Add(tempFilename);
+            m_imageLocations.Add(tempFilename);
 
-                str << wxT("memory:") << tempFilename;
-            }
+            str << wxT("memory:") << tempFilename;
         }
         else
             str << wxT("memory:?");
@@ -516,21 +493,19 @@ void wxRichTextHTMLHandler::WriteImage(wxRichTextImage* image, wxOutputStream& s
     }
     else if (GetFlags() & wxRICHTEXT_HANDLER_SAVE_IMAGES_TO_FILES)
     {
-#if 0
         if (!image->GetImage().Ok() && image->GetImageBlock().GetData())
             image->LoadFromBlock();
         if (image->GetImage().Ok() && !image->GetImageBlock().GetData())
             image->MakeBlock();
-#endif
 
-        if (image->GetImageBlock().Ok())
+        if (image->GetImage().Ok())
         {
             wxString tempDir(GetTempDir());
             if (tempDir.IsEmpty())
                 tempDir = wxFileName::GetTempDir();
 
             wxString ext(image->GetImageBlock().GetExtension());
-            wxString tempFilename(wxString::Format(wxT("%s/image%d.%s"), tempDir, sm_fileCounter, ext));
+            wxString tempFilename(wxString::Format(wxT("%s/image%d.%s"), (const wxChar*) tempDir, sm_fileCounter, (const wxChar*) ext));
             image->GetImageBlock().Write(tempFilename);
 
             m_imageLocations.Add(tempFilename);
@@ -548,17 +523,14 @@ void wxRichTextHTMLHandler::WriteImage(wxRichTextImage* image, wxOutputStream& s
         str << wxT("data:");
         str << GetMimeType(image->GetImageBlock().GetImageType());
         str << wxT(";base64,");
-#if 0
+
         if (image->GetImage().Ok() && !image->GetImageBlock().GetData())
             image->MakeBlock();
-#endif
-        if (image->GetImageBlock().Ok())
-        {
-            wxChar* data = b64enc( image->GetImageBlock().GetData(), image->GetImageBlock().GetDataSize() );
-            str << data;
 
-            delete[] data;
-        }
+        wxChar* data = b64enc( image->GetImageBlock().GetData(), image->GetImageBlock().GetDataSize() );
+        str << data;
+
+        delete[] data;
     }
 
     str << wxT("\" />");

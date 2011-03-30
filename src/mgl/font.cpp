@@ -36,6 +36,8 @@ typedef wxFontMgrFontRefData wxFontRefData;
 // wxFont
 // ----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxFont, wxGDIObject)
+
 bool wxFont::Create(const wxNativeFontInfo& info)
 {
     return Create(info.pointSize, info.family, info.style, info.weight,
@@ -43,9 +45,9 @@ bool wxFont::Create(const wxNativeFontInfo& info)
 }
 
 bool wxFont::Create(int pointSize,
-                    wxFontFamily family,
-                    wxFontStyle style,
-                    wxFontWeight weight,
+                    int family,
+                    int style,
+                    int weight,
                     bool underlined,
                     const wxString& face,
                     wxFontEncoding encoding)
@@ -55,12 +57,12 @@ bool wxFont::Create(int pointSize,
     return true;
 }
 
-wxGDIRefData *wxFont::CreateGDIRefData() const
+wxObjectRefData *wxFont::CreateRefData() const
 {
     return new wxFontRefData;
 }
 
-wxGDIRefData *wxFont::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxFont::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxFontRefData(*(wxFontRefData *)data);
 }
@@ -93,21 +95,23 @@ wxString wxFont::GetFaceName() const
     return M_FONTDATA->GetFaceName();
 }
 
-wxFontFamily wxFont::DoGetFamily() const
+int wxFont::GetFamily() const
 {
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
+
     return M_FONTDATA->GetFamily();
 }
 
-wxFontStyle wxFont::GetStyle() const
+int wxFont::GetStyle() const
 {
-    wxCHECK_MSG( Ok(), wxFONTSTYLE_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->GetStyle();
 }
 
-wxFontWeight wxFont::GetWeight() const
+int wxFont::GetWeight() const
 {
-    wxCHECK_MSG( Ok(), wxFONTWEIGHT_MAX, wxT("invalid font") );
+    wxCHECK_MSG( Ok(), 0, wxT("invalid font") );
 
     return M_FONTDATA->GetWeight();
 }
@@ -141,6 +145,13 @@ const wxNativeFontInfo *wxFont::GetNativeFontInfo() const
     return M_FONTDATA->GetNativeFontInfo();
 }
 
+bool wxFont::GetNoAntiAliasing() const
+{
+    wxCHECK_MSG( Ok(), false, wxT("invalid font") );
+
+    return M_FONTDATA->GetNoAntiAliasing();
+}
+
 // ----------------------------------------------------------------------------
 // change font attributes
 // ----------------------------------------------------------------------------
@@ -151,19 +162,19 @@ void wxFont::SetPointSize(int pointSize)
     M_FONTDATA->SetPointSize(pointSize);
 }
 
-void wxFont::SetFamily(wxFontFamily family)
+void wxFont::SetFamily(int family)
 {
     AllocExclusive();
     M_FONTDATA->SetFamily(family);
 }
 
-void wxFont::SetStyle(wxFontStyle style)
+void wxFont::SetStyle(int style)
 {
     AllocExclusive();
     M_FONTDATA->SetStyle(style);
 }
 
-void wxFont::SetWeight(wxFontWeight weight)
+void wxFont::SetWeight(int weight)
 {
     AllocExclusive();
     M_FONTDATA->SetWeight(weight);
@@ -188,3 +199,8 @@ void wxFont::SetEncoding(wxFontEncoding encoding)
     M_FONTDATA->SetEncoding(encoding);
 }
 
+void wxFont::SetNoAntiAliasing(bool no)
+{
+    AllocExclusive();
+    M_FONTDATA->SetNoAntiAliasing(no);
+}

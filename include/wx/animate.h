@@ -24,14 +24,14 @@
 class WXDLLIMPEXP_FWD_ADV wxAnimation;
 
 extern WXDLLIMPEXP_DATA_ADV(wxAnimation) wxNullAnimation;
-extern WXDLLIMPEXP_DATA_ADV(const char) wxAnimationCtrlNameStr[];
+extern WXDLLIMPEXP_DATA_ADV(const wxChar) wxAnimationCtrlNameStr[];
 
 
 // ----------------------------------------------------------------------------
 // wxAnimationBase
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_ADV wxAnimationBase : public wxObject
+class WXDLLIMPEXP_ADV wxAnimationBase : public wxGDIObject
 {
 public:
     wxAnimationBase() {}
@@ -65,7 +65,7 @@ protected:
 
 // default style does not include wxAC_NO_AUTORESIZE, that is, the control
 // auto-resizes by default to fit the new animation when SetAnimation() is called
-#define wxAC_DEFAULT_STYLE       (wxBORDER_NONE)
+#define wxAC_DEFAULT_STYLE       (wxNO_BORDER)
 
 class WXDLLIMPEXP_ADV wxAnimationCtrlBase : public wxControl
 {
@@ -75,8 +75,6 @@ public:
     // public API
     virtual bool LoadFile(const wxString& filename,
                           wxAnimationType type = wxANIMATION_TYPE_ANY) = 0;
-    virtual bool Load(wxInputStream& stream,
-                      wxAnimationType type = wxANIMATION_TYPE_ANY) = 0;
 
     virtual void SetAnimation(const wxAnimation &anim) = 0;
     virtual wxAnimation GetAnimation() const = 0;

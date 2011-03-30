@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/timer.cpp
+// Name:        gtk/timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,11 +7,12 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
+// For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
 #if wxUSE_TIMER
 
-#include "wx/gtk1/private/timer.h"
+#include "wx/timer.h"
 
 #include "gtk/gtk.h"
 
@@ -19,14 +20,21 @@
 // wxTimer
 // ----------------------------------------------------------------------------
 
-extern "C" {
-static gint timeout_callback(void *data)
-{
-    wxTimerImpl * const timer = (wxTimerImpl *)data;
+IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
 
-    const bool keepGoing = !timer->IsOneShot();
-    if ( !keepGoing )
+extern "C" {
+static gint timeout_callback( gpointer data )
+{
+    wxTimer *timer = (wxTimer*)data;
+
+    // Don't change the order of anything in this callback!
+
+    const bool oneshot = timer->IsOneShot();
+    if ( oneshot )
+    {
+        // This sets m_tag to -1
         timer->Stop();
+    }
 
     // When getting called from GDK's timer handler we
     // are no longer within GDK's grab on the GUI
@@ -38,28 +46,43 @@ static gint timeout_callback(void *data)
     // Release lock again.
     gdk_threads_leave();
 
-    return keepGoing;
+    if ( oneshot )
+        return FALSE;
+
+    return TRUE;
 }
 }
 
-bool wxGTKTimerImpl::Start(int millisecs, bool oneShot)
+void wxTimer::Init()
 {
-    if ( !wxTimerImpl::Start(millisecs, oneShot) )
-        return false;
+    m_tag = -1;
+    m_milli = 1000;
+}
 
-    wxASSERT_MSG( m_tag == -1, wxT("shouldn't be still running") );
+wxTimer::~wxTimer()
+{
+    wxTimer::Stop();
+}
+
+bool wxTimer::Start( int millisecs, bool oneShot )
+{
+    (void)wxTimerBase::Start(millisecs, oneShot);
+
+    if (m_tag != -1)
+        gtk_timeout_remove( m_tag );
 
     m_tag = gtk_timeout_add( m_milli, timeout_callback, this );
 
-    return true;
+    return TRUE;
 }
 
-void wxGTKTimerImpl::Stop()
+void wxTimer::Stop()
 {
-    wxASSERT_MSG( m_tag != -1, wxT("should be running") );
-
-    gtk_timeout_remove( m_tag );
-    m_tag = -1;
+    if (m_tag != -1)
+    {
+        gtk_timeout_remove( m_tag );
+        m_tag = -1;
+    }
 }
 
 #endif // wxUSE_TIMER

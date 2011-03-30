@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/bmpbuttn.h
+// Name:        bmpbuttn.h
 // Purpose:     wxBitmapButton class
 // Author:      David Webster
 // Modified by:
@@ -15,11 +15,11 @@
 #include "wx/button.h"
 #include "wx/dcclient.h"
 
-WXDLLIMPEXP_DATA_CORE(extern const char) wxButtonNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxButtonNameStr[];
 
 #define wxDEFAULT_BUTTON_MARGIN 4
 
-class WXDLLIMPEXP_CORE wxBitmapButton: public wxBitmapButtonBase
+class WXDLLEXPORT wxBitmapButton: public wxBitmapButtonBase
 {
 public:
     inline wxBitmapButton()
@@ -66,6 +66,7 @@ public:
     //
     // Implementation
     //
+    virtual void SetDefault();
     virtual bool OS2OnDraw(WXDRAWITEMSTRUCT* pItem);
 
 private:

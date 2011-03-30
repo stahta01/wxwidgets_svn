@@ -15,7 +15,7 @@
 
 class MGLRegion;
 
-class WXDLLIMPEXP_CORE wxRegion : public wxRegionBase
+class WXDLLEXPORT wxRegion : public wxRegionBase
 {
 public:
     wxRegion();
@@ -23,7 +23,7 @@ public:
     wxRegion(const wxPoint& topLeft, const wxPoint& bottomRight);
     wxRegion(const wxRect& rect);
     wxRegion(const MGLRegion& region);
-    wxRegion(size_t n, const wxPoint *points, wxPolygonFillMode fillStyle = wxODDEVEN_RULE );
+    wxRegion(size_t n, const wxPoint *points, int fillStyle = wxODDEVEN_RULE );
     wxRegion(const wxBitmap& bmp)
     {
         Union(bmp);
@@ -44,8 +44,9 @@ public:
     const MGLRegion& GetMGLRegion() const;
 
 protected:
-    virtual wxGDIRefData *CreateGDIRefData() const;
-    virtual wxGDIRefData *CloneGDIRefData(const wxGDIRefData *data) const;
+    // ref counting code
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     // wxRegionBase pure virtuals
     virtual bool DoIsEqual(const wxRegion& region) const;
@@ -62,13 +63,13 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxRegion);
-    friend class WXDLLIMPEXP_FWD_CORE wxRegionIterator;
+    friend class WXDLLEXPORT wxRegionIterator;
 };
 
 
 WX_DECLARE_EXPORTED_LIST(wxRect, wxRegionRectList);
 
-class WXDLLIMPEXP_CORE wxRegionIterator : public wxObject
+class WXDLLEXPORT wxRegionIterator : public wxObject
 {
 public:
     wxRegionIterator(void);

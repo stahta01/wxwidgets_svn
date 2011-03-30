@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/statline.h
+// Name:        msw/statline.h
 // Purpose:     MSW version of wxStaticLine class
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
@@ -15,7 +15,7 @@
 // wxStaticLine
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticLine : public wxStaticLineBase
+class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 {
 public:
     // constructors and pseudo-constructors
@@ -38,7 +38,7 @@ public:
                  long style = wxLI_HORIZONTAL,
                  const wxString &name = wxStaticLineNameStr );
 
-    // overridden base class virtuals
+    // overriden base class virtuals
     virtual bool AcceptsFocus() const { return false; }
 
     // usually overridden base class virtuals

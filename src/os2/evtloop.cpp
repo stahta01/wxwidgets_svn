@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Name:        src/os2/evtloop.cpp
-// Purpose:     implements wxGUIEventLoop for PM
+// Purpose:     implements wxEventLoop for PM
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     01.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -33,10 +33,9 @@
 
 #include "wx/evtloop.h"
 #include "wx/tooltip.h"
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 
 #include "wx/os2/private.h"
-#include "wx/os2/private/timer.h"       // for wxTimerProc
 
 #if wxUSE_THREADS
     // define the array of QMSG strutures
@@ -197,16 +196,16 @@ bool wxEventLoopImpl::SendIdleMessage()
 }
 
 // ============================================================================
-// wxGUIEventLoop implementation
+// wxEventLoop implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// wxGUIEventLoop running and exiting
+// wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
-    wxASSERT_MSG( !m_impl, wxT("should have been deleted in Run()") );
+    wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -227,21 +226,21 @@ wxGUIEventLoop::~wxGUIEventLoop()
 class CallEventLoopMethod
 {
 public:
-    typedef void (wxGUIEventLoop::*FuncType)();
+    typedef void (wxEventLoop::*FuncType)();
 
-    CallEventLoopMethod(wxGUIEventLoop *evtLoop, FuncType fn)
+    CallEventLoopMethod(wxEventLoop *evtLoop, FuncType fn)
         : m_evtLoop(evtLoop), m_fn(fn) { }
     ~CallEventLoopMethod() { (m_evtLoop->*m_fn)(); }
 
 private:
-    wxGUIEventLoop *m_evtLoop;
+    wxEventLoop *m_evtLoop;
     FuncType m_fn;
 };
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
-    wxCHECK_MSG( !IsRunning(), -1, wxT("can't reenter a message loop") );
+    wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
     // SendIdleMessage() and Dispatch() below may throw so the code here should
     // be exception-safe, hence we must use local objects for all actions we
@@ -249,7 +248,7 @@ int wxGUIEventLoop::Run()
     wxEventLoopActivator activate(this);
     wxEventLoopImplTiedPtr impl(&m_impl, new wxEventLoopImpl);
 
-    CallEventLoopMethod  callOnExit(this, &wxGUIEventLoop::OnExit);
+    CallEventLoopMethod  callOnExit(this, &wxEventLoop::OnExit);
 
     for ( ;; )
     {
@@ -283,9 +282,9 @@ int wxGUIEventLoop::Run()
     return m_impl->GetExitCode();
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
-    wxCHECK_RET( IsRunning(), wxT("can't call Exit() if not running") );
+    wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
     m_impl->SetExitCode(rc);
 
@@ -293,18 +292,18 @@ void wxGUIEventLoop::Exit(int rc)
 }
 
 // ----------------------------------------------------------------------------
-// wxGUIEventLoop message processing dispatching
+// wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     QMSG msg;
     return ::WinPeekMsg(vHabmain, &msg, 0, 0, 0, PM_NOREMOVE) != 0;
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
-    wxCHECK_MSG( IsRunning(), false, wxT("can't call Dispatch() if not running") );
+    wxCHECK_MSG( IsRunning(), false, _T("can't call Dispatch() if not running") );
 
     QMSG msg;
     BOOL bRc = ::WinGetMsg(vHabmain, &msg, (HWND) NULL, 0, 0);
@@ -365,53 +364,3 @@ bool wxGUIEventLoop::Dispatch()
 
     return true;
 }
-
-//
-// Yield to incoming messages
-//
-bool wxGUIEventLoop::YieldFor(long eventsToProcess)
-{
-    HAB vHab = 0;
-    QMSG vMsg;
-
-    //
-    // Disable log flushing from here because a call to wxYield() shouldn't
-    // normally result in message boxes popping up &c
-    //
-    wxLog::Suspend();
-
-    m_isInsideYield = true;
-    m_eventsToProcessInsideYield = eventsToProcess;
-
-    //
-    // We want to go back to the main message loop
-    // if we see a WM_QUIT. (?)
-    //
-    while (::WinPeekMsg(vHab, &vMsg, (HWND)NULL, 0, 0, PM_NOREMOVE) && vMsg.msg != WM_QUIT)
-    {
-        // TODO: implement event filtering using the eventsToProcess mask
-
-#if wxUSE_THREADS
-        wxMutexGuiLeaveOrEnter();
-#endif // wxUSE_THREADS
-        if (!wxTheApp->Dispatch())
-            break;
-    }
-
-    //
-    // If they are pending events, we must process them.
-    //
-    if (wxTheApp)
-    {
-        wxTheApp->ProcessPendingEvents();
-        wxTheApp->HandleSockets();
-    }
-
-    //
-    // Let the logs be flashed again
-    //
-    wxLog::Resume();
-    m_isInsideYield = false;
-
-    return true;
-} // end of wxYield

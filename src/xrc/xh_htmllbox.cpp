@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_simplehtmllbox.cpp
+// Name:        xh_simplehtmllbox.cpp
 // Purpose:     XML resource handler for wxSimpleHtmlListBox
 // Author:      Francesco Montorsi
 // Created:     2006/10/21
@@ -50,7 +50,7 @@ wxObject *wxSimpleHtmlListBoxXmlHandler::DoCreateResource()
                         GetID(),
                         GetPosition(), GetSize(),
                         strList,
-                        GetStyle(wxT("style"), wxHLB_DEFAULT_STYLE),
+                        GetStyle(_T("style"), wxHLB_DEFAULT_STYLE),
                         wxDefaultValidator,
                         GetName());
 

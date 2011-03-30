@@ -77,7 +77,7 @@ wxPaletteRefData::wxPaletteRefData()
 
 wxPaletteRefData::~wxPaletteRefData()
 {
-    Display *display = NULL;
+    Display *display = (Display*) NULL;
 
     wxList::compatibility_iterator node, next;
 
@@ -170,22 +170,7 @@ bool wxPalette::Create(int n, const unsigned char *red, const unsigned char *gre
     return true;
 }
 
-wxGDIRefData *wxPalette::CreateGDIRefData() const
-{
-    return new wxPaletteRefData;
-}
-
-wxGDIRefData *
-wxPalette::CloneGDIRefData(const wxGDIRefData * WXUNUSED(data)) const
-{
-    wxFAIL_MSG( wxS("Cloning palettes is not implemented in wxX11.") );
-
-    return new wxPaletteRefData;
-}
-
-int wxPalette::GetPixel(unsigned char WXUNUSED(red),
-                        unsigned char WXUNUSED(green),
-                        unsigned char WXUNUSED(blue)) const
+int wxPalette::GetPixel(unsigned char red, unsigned char green, unsigned char blue) const
 {
     if ( !m_refData )
         return wxNOT_FOUND;

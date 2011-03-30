@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/accel.h
+// Name:        accel.h
 // Purpose:     wxAcceleratorTable class
 // Author:      David Webster
 // Modified by:
@@ -14,7 +14,7 @@
 
 #include "wx/object.h"
 
-class WXDLLIMPEXP_FWD_CORE wxAcceleratorTable;
+class WXDLLEXPORT wxAcceleratorTable;
 
 // Hold Ctrl key down
 #define wxACCEL_ALT     0x01
@@ -28,7 +28,7 @@ class WXDLLIMPEXP_FWD_CORE wxAcceleratorTable;
  // Hold no key down
 #define wxACCEL_NORMAL  0x00
 
-class WXDLLIMPEXP_CORE wxAcceleratorTable: public wxObject
+class WXDLLEXPORT wxAcceleratorTable: public wxObject
 {
 DECLARE_DYNAMIC_CLASS(wxAcceleratorTable)
 public:
@@ -51,8 +51,8 @@ public:
                   ) const;
 };
 
-WXDLLIMPEXP_DATA_CORE(extern wxAcceleratorTable) wxNullAcceleratorTable;
+WXDLLEXPORT_DATA(extern wxAcceleratorTable) wxNullAcceleratorTable;
 
-WXDLLIMPEXP_CORE wxString wxPMTextToLabel(const wxString& rsTitle);
+WXDLLEXPORT wxString wxPMTextToLabel(const wxString& rsTitle);
 #endif
     // _WX_ACCEL_H_

@@ -6,7 +6,7 @@
 // Created:     2003/08/02
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -26,6 +26,7 @@
 // ========================================================================
 class WXDLLEXPORT wxPenRefData: public wxGDIRefData
 {
+    friend class WXDLLEXPORT wxPen;
 public:
     wxPenRefData(const wxColour& colour = wxNullColour,
         int width = 1, int style = wxSOLID,
@@ -80,9 +81,6 @@ protected:
     static const CGFloat scm_patternShortDash[];
     static const int scm_countDotDash;
     static const CGFloat scm_patternDotDash[];
-
-    friend class WXDLLIMPEXP_FWD_CORE wxPen;
-
 private:
     // Don't allow assignment
     wxPenRefData& operator=(const wxPenRefData& data);
@@ -269,12 +267,12 @@ wxPen::wxPen(const wxBitmap& stipple, int width)
     m_refData = new wxPenRefData(wxNullColour,width,wxSTIPPLE,stipple);
 }
 
-wxGDIRefData *wxPen::CreateGDIRefData() const
+wxObjectRefData *wxPen::CreateRefData() const
 {
     return new wxPenRefData;
 }
 
-wxGDIRefData *wxPen::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxPen::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxPenRefData(*(wxPenRefData *)data);
 }
@@ -327,7 +325,7 @@ void wxPen::SetStipple(const wxBitmap& Stipple)
     M_PENDATA->SetStipple(Stipple);
 }
 
-wxColour wxPen::GetColour() const
+wxColour& wxPen::GetColour() const
 {
     return (M_PENDATA ? M_PENDATA->m_colour : wxNullColour);
 }

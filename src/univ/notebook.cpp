@@ -71,6 +71,15 @@ protected:
 #endif
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+static const size_t INVALID_PAGE = (size_t)-1;
+
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -105,12 +114,17 @@ END_EVENT_TABLE()
 // implementation
 // ============================================================================
 
+IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxBookCtrlBase)
+IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxCommandEvent)
+
 // ----------------------------------------------------------------------------
 // wxNotebook creation
 // ----------------------------------------------------------------------------
 
 void wxNotebook::Init()
 {
+    m_sel = INVALID_PAGE;
+
     m_heightTab =
     m_widthMax = 0;
 
@@ -152,14 +166,14 @@ bool wxNotebook::Create(wxWindow *parent,
 
 wxString wxNotebook::GetPageText(size_t nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxEmptyString, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxEmptyString, _T("invalid notebook page") );
 
     return m_titles[nPage];
 }
 
 bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), false, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), false, _T("invalid notebook page") );
 
     if ( strText != m_titles[nPage] )
     {
@@ -182,17 +196,17 @@ bool wxNotebook::SetPageText(size_t nPage, const wxString& strText)
 
 int wxNotebook::GetPageImage(size_t nPage) const
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
 
     return m_images[nPage];
 }
 
 bool wxNotebook::SetPageImage(size_t nPage, int nImage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), false, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), false, _T("invalid notebook page") );
 
     wxCHECK_MSG( m_imageList && nImage < m_imageList->GetImageCount(), false,
-                 wxT("invalid image index in SetPageImage()") );
+                 _T("invalid image index in SetPageImage()") );
 
     if ( nImage != m_images[nPage] )
     {
@@ -221,12 +235,12 @@ wxNotebook::~wxNotebook()
 
 int wxNotebook::DoSetSelection(size_t nPage, int flags)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), wxNOT_FOUND, _T("invalid notebook page") );
 
-    if ( (int)nPage == m_selection )
+    if ( (size_t)nPage == m_sel )
     {
         // don't do anything if there is nothing to do
-        return m_selection;
+        return m_sel;
     }
 
     if ( flags & SetSelection_SendEvent )
@@ -234,51 +248,51 @@ int wxNotebook::DoSetSelection(size_t nPage, int flags)
         if ( !SendPageChangingEvent(nPage) )
         {
             // program doesn't allow the page change
-            return m_selection;
+            return m_sel;
         }
     }
 
-    // we need to change m_selection first, before calling RefreshTab() below as
+    // we need to change m_sel first, before calling RefreshTab() below as
     // otherwise the previously selected tab wouldn't be redrawn properly under
     // wxGTK which calls Refresh() immediately and not during the next event
     // loop iteration as wxMSW does and as it should
-    int selOld = m_selection;
+    size_t selOld = m_sel;
 
-    m_selection = nPage;
+    m_sel = nPage;
 
-    if ( selOld != wxNOT_FOUND )
+    if ( selOld != INVALID_PAGE )
     {
         RefreshTab(selOld, true /* this tab was selected */);
 
         m_pages[selOld]->Hide();
     }
 
-    if ( m_selection != wxNOT_FOUND ) // this is impossible - but test nevertheless
+    if ( m_sel != INVALID_PAGE ) // this is impossible - but test nevertheless
     {
         if ( HasSpinBtn() )
         {
             // keep it in sync
-            m_spinbtn->SetValue(m_selection);
+            m_spinbtn->SetValue(m_sel);
         }
 
-        if ( nPage < m_firstVisible )
+        if ( m_sel < m_firstVisible )
         {
             // selection is to the left of visible part of tabs
-            ScrollTo(nPage);
+            ScrollTo(m_sel);
         }
-        else if ( nPage > m_lastFullyVisible )
+        else if ( m_sel > m_lastFullyVisible )
         {
             // selection is to the right of visible part of tabs
-            ScrollLastTo(nPage);
+            ScrollLastTo(m_sel);
         }
         else // we already see this tab
         {
             // no need to scroll
-            RefreshTab(nPage);
+            RefreshTab(m_sel);
         }
 
-        m_pages[nPage]->SetSize(GetPageRect());
-        m_pages[nPage]->Show();
+        m_pages[m_sel]->SetSize(GetPageRect());
+        m_pages[m_sel]->Show();
     }
 
     if ( flags & SetSelection_SendEvent )
@@ -302,7 +316,7 @@ bool wxNotebook::InsertPage(size_t nPage,
 {
     size_t nPages = GetPageCount();
     wxCHECK_MSG( nPage == nPages || IS_VALID_PAGE(nPage), false,
-                 wxT("invalid notebook page in InsertPage()") );
+                 _T("invalid notebook page in InsertPage()") );
 
     // modify the data
     m_pages.Insert(pPage, nPage);
@@ -366,6 +380,9 @@ bool wxNotebook::DeleteAllPages()
     m_accels.Clear();
     m_widths.Clear();
 
+    // it is not valid any longer
+    m_sel = INVALID_PAGE;
+
     // spin button is not needed any more
     UpdateSpinBtn();
 
@@ -376,7 +393,7 @@ bool wxNotebook::DeleteAllPages()
 
 wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
 {
-    wxCHECK_MSG( IS_VALID_PAGE(nPage), NULL, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(nPage), NULL, _T("invalid notebook page") );
 
     wxNotebookPage *page = m_pages[nPage];
     m_pages.RemoveAt(nPage);
@@ -398,25 +415,23 @@ wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
     size_t count = GetPageCount();
     if ( count )
     {
-        wxASSERT_MSG( m_selection != wxNOT_FOUND, "should have selection" );
-
-        if ( (size_t)m_selection == nPage )
+        if ( m_sel == (size_t)nPage )
         {
             // avoid sending event to this page which doesn't exist in the
             // notebook any more
-            m_selection = wxNOT_FOUND;
+            m_sel = INVALID_PAGE;
 
             SetSelection(nPage == count ? nPage - 1 : nPage);
         }
-        else if ( (size_t)m_selection > nPage )
+        else if ( m_sel > (size_t)nPage )
         {
             // no need to change selection, just adjust the index
-            m_selection--;
+            m_sel--;
         }
     }
     else // no more tabs left
     {
-        m_selection = wxNOT_FOUND;
+        m_sel = INVALID_PAGE;
     }
 
     // have to refresh everything
@@ -431,18 +446,18 @@ wxNotebookPage *wxNotebook::DoRemovePage(size_t nPage)
 
 void wxNotebook::RefreshCurrent()
 {
-    if ( m_selection != wxNOT_FOUND )
+    if ( m_sel != INVALID_PAGE )
     {
-        RefreshTab(m_selection);
+        RefreshTab(m_sel);
     }
 }
 
 void wxNotebook::RefreshTab(int page, bool forceSelected)
 {
-    wxCHECK_RET( IS_VALID_PAGE(page), wxT("invalid notebook page") );
+    wxCHECK_RET( IS_VALID_PAGE(page), _T("invalid notebook page") );
 
     wxRect rect = GetTabRect(page);
-    if ( forceSelected || (page == m_selection) )
+    if ( forceSelected || ((size_t)page == m_sel) )
     {
         const wxSize indent = GetRenderer()->GetTabIndent();
         rect.Inflate(indent.x, indent.y);
@@ -485,7 +500,7 @@ void wxNotebook::DoDrawTab(wxDC& dc, const wxRect& rect, size_t n)
     }
 
     int flags = 0;
-    if ( (int)n == m_selection )
+    if ( n == m_sel )
     {
         flags |= wxCONTROL_SELECTED;
 
@@ -549,7 +564,7 @@ void wxNotebook::DoDraw(wxControlRenderer *renderer)
     {
         GetTabSize(n, &rect.width, &rect.height);
 
-        if ( (int)n == m_selection )
+        if ( n == m_sel )
         {
             // don't redraw it now as this tab has to be drawn over the other
             // ones as it takes more place and spills over to them
@@ -580,7 +595,7 @@ void wxNotebook::DoDraw(wxControlRenderer *renderer)
     // now redraw the selected tab
     if ( rectSel.width )
     {
-        DoDrawTab(dc, rectSel, m_selection);
+        DoDrawTab(dc, rectSel, m_sel);
     }
 
     dc.DestroyClippingRegion();
@@ -606,7 +621,7 @@ int wxNotebook::HitTest(const wxPoint& pt, long *flags) const
     switch ( GetTabOrientation() )
     {
         default:
-            wxFAIL_MSG(wxT("unknown tab orientation"));
+            wxFAIL_MSG(_T("unknown tab orientation"));
             // fall through
 
         case wxTOP:
@@ -679,7 +694,7 @@ wxDirection wxNotebook::GetTabOrientation() const
 wxRect wxNotebook::GetTabRect(int page) const
 {
     wxRect rect;
-    wxCHECK_MSG( IS_VALID_PAGE(page), rect, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(page), rect, _T("invalid notebook page") );
 
     // calc the size of this tab and of the preceding ones
     wxCoord widthThis, widthBefore;
@@ -782,7 +797,7 @@ wxRect wxNotebook::GetTabsPart() const
 
 void wxNotebook::GetTabSize(int page, wxCoord *w, wxCoord *h) const
 {
-    wxCHECK_RET( w && h, wxT("NULL pointer in GetTabSize") );
+    wxCHECK_RET( w && h, _T("NULL pointer in GetTabSize") );
 
     if ( IsVertical() )
     {
@@ -801,7 +816,7 @@ void wxNotebook::GetTabSize(int page, wxCoord *w, wxCoord *h) const
 
 void wxNotebook::SetTabSize(const wxSize& sz)
 {
-    wxCHECK_RET( FixedSizeTabs(), wxT("SetTabSize() ignored") );
+    wxCHECK_RET( FixedSizeTabs(), _T("SetTabSize() ignored") );
 
     if ( IsVertical() )
     {
@@ -822,7 +837,7 @@ wxSize wxNotebook::CalcTabSize(int page) const
 
     wxSize size;
 
-    wxCHECK_MSG( IS_VALID_PAGE(page), size, wxT("invalid notebook page") );
+    wxCHECK_MSG( IS_VALID_PAGE(page), size, _T("invalid notebook page") );
 
     GetTextExtent(m_titles[page], &size.x, &size.y);
 
@@ -897,28 +912,27 @@ void wxNotebook::Relayout()
 
         UpdateSpinBtn();
 
-        if ( m_selection != wxNOT_FOUND )
+        if ( m_sel != INVALID_PAGE )
         {
             // resize the currently shown page
             wxRect rectPage = GetPageRect();
 
-            m_pages[m_selection]->SetSize(rectPage);
+            m_pages[m_sel]->SetSize(rectPage);
 
             // also scroll it into view if needed (note that m_lastVisible
             // was updated by the call to UpdateSpinBtn() above, this is why it
             // is needed here)
             if ( HasSpinBtn() )
             {
-                const size_t selection = m_selection;
-                if ( selection < m_firstVisible )
+                if ( m_sel < m_firstVisible )
                 {
                     // selection is to the left of visible part of tabs
-                    ScrollTo(selection);
+                    ScrollTo(m_sel);
                 }
-                else if ( selection > m_lastFullyVisible )
+                else if ( m_sel > m_lastFullyVisible )
                 {
                     // selection is to the right of visible part of tabs
-                    ScrollLastTo(selection);
+                    ScrollLastTo(m_sel);
                 }
             }
         }
@@ -1123,7 +1137,7 @@ void wxNotebook::UpdateSpinBtn()
             m_spinbtn = new wxNotebookSpinBtn(this);
 
             // set the correct value to keep it in sync
-            m_spinbtn->SetValue(m_selection);
+            m_spinbtn->SetValue(m_sel);
         }
 
         // position it correctly
@@ -1164,7 +1178,7 @@ void wxNotebook::PositionSpinBtn()
     switch ( GetTabOrientation() )
     {
         default:
-            wxFAIL_MSG(wxT("unknown tab orientation"));
+            wxFAIL_MSG(_T("unknown tab orientation"));
             // fall through
 
         case wxTOP:
@@ -1195,12 +1209,12 @@ void wxNotebook::PositionSpinBtn()
 // wxNotebook scrolling
 // ----------------------------------------------------------------------------
 
-void wxNotebook::ScrollTo(size_t page)
+void wxNotebook::ScrollTo(int page)
 {
-    wxCHECK_RET( IS_VALID_PAGE(page), wxT("invalid notebook page") );
+    wxCHECK_RET( IS_VALID_PAGE(page), _T("invalid notebook page") );
 
     // set the first visible tab and offset (easy)
-    m_firstVisible = page;
+    m_firstVisible = (size_t)page;
     m_offset = 0;
     for ( size_t n = 0; n < m_firstVisible; n++ )
     {
@@ -1213,9 +1227,9 @@ void wxNotebook::ScrollTo(size_t page)
     RefreshAllTabs();
 }
 
-void wxNotebook::ScrollLastTo(size_t page)
+void wxNotebook::ScrollLastTo(int page)
 {
-    wxCHECK_RET( IS_VALID_PAGE(page), wxT("invalid notebook page") );
+    wxCHECK_RET( IS_VALID_PAGE(page), _T("invalid notebook page") );
 
     // go backwards until we find the first tab which can be made visible
     // without hiding the given one
@@ -1251,7 +1265,7 @@ void wxNotebook::ScrollLastTo(size_t page)
     ScrollTo(m_firstVisible);
 
     // consitency check: the page we were asked to show should be shown
-    wxASSERT_MSG( (size_t)page < m_lastVisible, wxT("bug in ScrollLastTo") );
+    wxASSERT_MSG( (size_t)page < m_lastVisible, _T("bug in ScrollLastTo") );
 }
 
 // ----------------------------------------------------------------------------

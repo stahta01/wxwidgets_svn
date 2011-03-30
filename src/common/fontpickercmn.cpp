@@ -39,10 +39,10 @@
 // implementation
 // ============================================================================
 
-const char wxFontPickerCtrlNameStr[] = "fontpicker";
-const char wxFontPickerWidgetNameStr[] = "fontpickerwidget";
+const wxChar wxFontPickerCtrlNameStr[] = wxT("fontpicker");
+const wxChar wxFontPickerWidgetNameStr[] = wxT("fontpickerwidget");
 
-wxDEFINE_EVENT(wxEVT_COMMAND_FONTPICKER_CHANGED, wxFontPickerEvent);
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_FONTPICKER_CHANGED)
 IMPLEMENT_DYNAMIC_CLASS(wxFontPickerCtrl, wxPickerBase)
 IMPLEMENT_DYNAMIC_CLASS(wxFontPickerEvent, wxCommandEvent)
 

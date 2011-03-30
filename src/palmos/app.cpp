@@ -39,7 +39,7 @@
     #include "wx/dialog.h"
     #include "wx/msgdlg.h"
     #include "wx/intl.h"
-    #include "wx/crt.h"
+    #include "wx/wxchar.h"
     #include "wx/log.h"
     #include "wx/module.h"
 #endif
@@ -47,7 +47,6 @@
 #include "wx/apptrait.h"
 #include "wx/filename.h"
 #include "wx/dynlib.h"
-#include "wx/evtloop.h"
 
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
@@ -100,16 +99,19 @@ void *wxGUIAppTraits::BeforeChildWaitLoop()
     return NULL;
 }
 
+void wxGUIAppTraits::AlwaysYield()
+{
+    wxYield();
+}
+
 void wxGUIAppTraits::AfterChildWaitLoop(void *dataOrig)
 {
 }
 
-#if wxUSE_THREADS
 bool wxGUIAppTraits::DoMessageFromThreadWait()
 {
     return false;
 }
-#endif // wxUSE_THREADS
 
 wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
 {
@@ -117,17 +119,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
     return wxPORT_PALMOS;
 }
 
-#if wxUSE_TIMER
-wxTimerImpl* wxGUIAppTraits::CreateTimerImpl(wxTimer *timer)
-{
-    return new wxPalmOSTimerImpl(timer);
-};
-#endif // wxUSE_TIMER
-
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
-}
 // ===========================================================================
 // wxApp implementation
 // ===========================================================================
@@ -141,6 +132,7 @@ int wxApp::m_nCmdShow = 0;
 IMPLEMENT_DYNAMIC_CLASS(wxApp, wxEvtHandler)
 
 BEGIN_EVENT_TABLE(wxApp, wxEvtHandler)
+    EVT_IDLE(wxApp::OnIdle)
     EVT_END_SESSION(wxApp::OnEndSession)
     EVT_QUERY_END_SESSION(wxApp::OnQueryEndSession)
 END_EVENT_TABLE()
@@ -211,7 +203,8 @@ void wxApp::CleanUp()
     // unregister the classes now
     UnregisterWindowClasses();
 
-    wxDELETE(wxWinHandleHash);
+    delete wxWinHandleHash;
+    wxWinHandleHash = NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -225,26 +218,27 @@ wxApp::wxApp()
 
 wxApp::~wxApp()
 {
-    wxChar **argv_tmp;
-    argv_tmp = argv;
-    // src/palmos/main.cpp
     // our cmd line arguments are allocated inside wxEntry(HINSTANCE), they
     // don't come from main(), so we have to free them
+
     while ( argc )
     {
         // m_argv elements were allocated by wxStrdup()
-        if (argv_tmp[--argc]) {
-            free((void *)(argv_tmp[--argc]));
-        }
+        free(argv[--argc]);
     }
+
     // but m_argv itself -- using new[]
-    delete [] argv_tmp;
-    //argv = NULL;
+    delete [] argv;
 }
 
 // ----------------------------------------------------------------------------
 // wxApp idle handling
 // ----------------------------------------------------------------------------
+
+void wxApp::OnIdle(wxIdleEvent& event)
+{
+    wxAppBase::OnIdle(event);
+}
 
 void wxApp::WakeUpIdle()
 {
@@ -279,6 +273,13 @@ void wxApp::OnQueryEndSession(wxCloseEvent& event)
 int wxApp::GetComCtl32Version()
 {
     return 0;
+}
+
+// Yield to incoming messages
+
+bool wxApp::Yield(bool onlyIfNeeded)
+{
+    return true;
 }
 
 #if wxUSE_EXCEPTIONS

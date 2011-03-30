@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/mediactrl.mm
+// Name:        src/cocoa/mediactrl.cpp
 // Purpose:     Built-in Media Backends for Cocoa
 // Author:      Ryan Norton <wxprojects@comcast.net>
 // Modified by:

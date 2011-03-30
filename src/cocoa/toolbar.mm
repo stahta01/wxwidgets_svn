@@ -6,7 +6,7 @@
 // Created:     2003/08/17
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -60,8 +60,8 @@ public:
         CreateButtonCell();
     }
 
-    wxToolBarTool(wxToolBar *tbar, wxControl *control, const wxString& label)
-        : wxToolBarToolBase(tbar, control, label)
+    wxToolBarTool(wxToolBar *tbar, wxControl *control)
+        : wxToolBarToolBase(tbar, control)
     {
         Init();
     }
@@ -208,10 +208,9 @@ wxToolBarToolBase *wxToolBar::CreateTool(int toolid,
                              clientData, shortHelpString, longHelpString);
 }
 
-wxToolBarToolBase *
-wxToolBar::CreateTool(wxControl *control, const wxString& label)
+wxToolBarToolBase *wxToolBar::CreateTool(wxControl *control)
 {
-    return new wxToolBarTool(this, control, label);
+    return new wxToolBarTool(this, control);
 }
 
 void wxToolBar::SetWindowStyleFlag( long style )

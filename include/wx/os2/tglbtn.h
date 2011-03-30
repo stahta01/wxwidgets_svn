@@ -7,14 +7,16 @@
 // Created:     08.02.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2005 David A Webster
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_TOGGLEBUTTON_H_
 #define _WX_TOGGLEBUTTON_H_
 
+extern WXDLLEXPORT_DATA(const wxChar) wxCheckBoxNameStr[];
+
 // Checkbox item (single checkbox)
-class WXDLLIMPEXP_CORE wxToggleButton : public wxToggleButtonBase
+class WXDLLEXPORT wxToggleButton : public wxControl
 {
 public:
     wxToggleButton() {}

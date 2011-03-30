@@ -23,7 +23,6 @@
     #include "wx/utils.h"
     #include "wx/window.h"
     #include "wx/image.h"
-    #include "wx/log.h"
 #endif
 
 #ifdef __VMS__
@@ -50,21 +49,15 @@ WX_DECLARE_LIST(wxXCursor, wxXCursorList);
 #include "wx/listimpl.cpp"
 WX_DEFINE_LIST(wxXCursorList)
 
-class WXDLLEXPORT wxCursorRefData: public wxGDIRefData
+class WXDLLEXPORT wxCursorRefData: public wxObjectRefData
 {
+    friend class WXDLLEXPORT wxCursor;
 public:
     wxCursorRefData();
     virtual ~wxCursorRefData();
 
     wxXCursorList m_cursors;  // wxXCursor objects, one per display
     wxStockCursor m_cursorId; // wxWidgets standard cursor id
-
-private:
-    // There is no way to copy m_cursor so we can't implement a copy ctor
-    // properly.
-    wxDECLARE_NO_COPY_CLASS(wxCursorRefData);
-
-    friend class wxCursor;
 };
 
 #define M_CURSORDATA ((wxCursorRefData *)m_refData)
@@ -245,20 +238,16 @@ void wxCursor::Create(WXPixmap pixmap, WXPixmap mask_pixmap,
 }
 
 wxCursor::wxCursor(const char bits[], int width, int height,
-                   int hotSpotX, int hotSpotY, const char maskBits[] ,
-                   const wxColour* WXUNUSED(fg), const wxColour* WXUNUSED(bg) )
+                   int hotSpotX, int hotSpotY, const char maskBits[])
 {
     Create(bits, width, height, hotSpotX, hotSpotY, maskBits);
 }
 
-wxCursor::wxCursor(const wxString& name, wxBitmapType type,
-                   int hotSpotX, int hotSpotY)
+wxCursor::wxCursor(const wxString& name, long flags, int hotSpotX, int hotSpotY)
 {
     // Must be an XBM file
-    if (type != wxBITMAP_TYPE_XBM) {
-        wxLogError("Invalid cursor bitmap type '%d'", type);
+    if (flags != wxBITMAP_TYPE_XBM)
         return;
-    }
 
     m_refData = new wxCursorRefData;
 
@@ -270,7 +259,7 @@ wxCursor::wxCursor(const wxString& name, wxBitmapType type,
     int screen_num =  DefaultScreen (dpy);
 
     int value = XReadBitmapFile (dpy, RootWindow (dpy, screen_num),
-                                 name.mb_str(),
+                                 wxConstCast(name.c_str(), char),
                                  &w, &h, &pixmap, &hotX, &hotY);
 
     if (value == BitmapSuccess)
@@ -294,7 +283,7 @@ wxCursor::wxCursor(const wxString& name, wxBitmapType type,
 }
 
 // Cursors by stock number
-void wxCursor::InitFromStock(wxStockCursor id)
+wxCursor::wxCursor(wxStockCursor id)
 {
     m_refData = new wxCursorRefData;
     M_CURSORDATA->m_cursorId = id;
@@ -304,17 +293,9 @@ wxCursor::~wxCursor()
 {
 }
 
-wxGDIRefData *wxCursor::CreateGDIRefData() const
+bool wxCursor::IsOk() const
 {
-    return new wxCursorRefData;
-}
-
-wxGDIRefData *
-wxCursor::CloneGDIRefData(const wxGDIRefData * WXUNUSED(data)) const
-{
-    wxFAIL_MSG( wxS("Cloning cursors is not implemented in wxMotif.") );
-
-    return new wxCursorRefData;
+    return m_refData != NULL;
 }
 
 // Motif-specific: create/get a cursor for the current display

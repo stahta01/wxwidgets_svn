@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/dndcmn.cpp
+// Name:        common/dndcmn.cpp
 // Author:      Robert Roebling
 // Modified by:
 // Created:     19.10.99

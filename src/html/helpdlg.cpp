@@ -6,7 +6,7 @@
 // Author:      Harm van der Heijden, Vaclav Slavik and Julian Smart
 // RCS-ID:      $Id$
 // Copyright:   (c) Harm van der Heijden, Vaclav Slavik and Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h"
@@ -18,7 +18,7 @@
 
 #if wxUSE_WXHTML_HELP
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/object.h"
     #include "wx/intl.h"
     #include "wx/log.h"
@@ -30,7 +30,7 @@
     #include "wx/radiobox.h"
     #include "wx/menu.h"
     #include "wx/msgdlg.h"
-#endif // WX_PRECOMP
+#endif // WXPRECOMP
 
 #include "wx/html/htmlwin.h"
 #include "wx/html/helpdlg.h"

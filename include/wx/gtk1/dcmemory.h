@@ -10,41 +10,27 @@
 #ifndef __GTKDCMEMORYH__
 #define __GTKDCMEMORYH__
 
-#include "wx/dcmemory.h"
-#include "wx/gtk1/dcclient.h"
+#include "wx/defs.h"
+#include "wx/dcclient.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxMemoryDCImpl;
+class WXDLLIMPEXP_CORE wxMemoryDC;
 
 //-----------------------------------------------------------------------------
-// wxMemoryDCImpl
+// wxMemoryDC
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxMemoryDCImpl : public wxWindowDCImpl
+class WXDLLIMPEXP_CORE wxMemoryDC : public wxWindowDC, public wxMemoryDCBase
 {
 public:
-    wxMemoryDCImpl(wxMemoryDC *owner)
-        : wxWindowDCImpl(owner)
-    {
-        Init();
-    }
-
-    wxMemoryDCImpl(wxMemoryDC *owner, wxBitmap& bitmap)
-        : wxWindowDCImpl(owner)
-    {
-        Init();
-
-        DoSelect(bitmap);
-    }
-
-    wxMemoryDCImpl(wxMemoryDC *owner, wxDC *dc);
-    virtual ~wxMemoryDCImpl();
-
-    virtual void DoSelect(const wxBitmap& bitmap);
-    virtual void DoGetSize( int *width, int *height ) const;
+    wxMemoryDC() { Init(); }
+    wxMemoryDC(wxBitmap& bitmap) { Init(); SelectObject(bitmap); }
+    wxMemoryDC( wxDC *dc ); // Create compatible DC
+    virtual ~wxMemoryDC();
+    void DoGetSize( int *width, int *height ) const;
 
     // these get reimplemented for mono-bitmaps to behave
     // more like their Win32 couterparts. They now interpret
@@ -59,11 +45,15 @@ public:
     // implementation
     wxBitmap  m_selected;
 
+protected:
+    virtual void DoSelect(const wxBitmap& bitmap);
+
 private:
     void Init();
 
-    DECLARE_DYNAMIC_CLASS(wxMemoryDCImpl)
+    DECLARE_DYNAMIC_CLASS(wxMemoryDC)
 };
 
-#endif // __GTKDCMEMORYH__
+#endif
+    // __GTKDCMEMORYH__
 

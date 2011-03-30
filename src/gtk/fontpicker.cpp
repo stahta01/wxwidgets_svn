@@ -17,7 +17,7 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_FONTPICKERCTRL
+#if wxUSE_FONTPICKERCTRL && defined(__WXGTK24__)
 
 #include "wx/fontpicker.h"
 
@@ -42,7 +42,7 @@ static void gtk_fontbutton_setfont_callback(GtkFontButton *widget,
 
     // fire the colour-changed event
     wxFontPickerEvent event(p, p->GetId(), p->GetSelectedFont());
-    p->HandleWindowEvent(event);
+    p->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -50,7 +50,7 @@ static void gtk_fontbutton_setfont_callback(GtkFontButton *widget,
 // wxFontButton
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxFontButton, wxButton)
+IMPLEMENT_DYNAMIC_CLASS(wxFontButton, wxGenericFontButton)
 
 bool wxFontButton::Create( wxWindow *parent, wxWindowID id,
                         const wxFont &initial,
@@ -58,41 +58,48 @@ bool wxFontButton::Create( wxWindow *parent, wxWindowID id,
                         long style, const wxValidator& validator,
                         const wxString &name )
 {
-    if (!PreCreation( parent, pos, size ) ||
-        !wxControl::CreateBase(parent, id, pos, size, style, validator, name))
+    if (!gtk_check_version(2,4,0))
     {
-        wxFAIL_MSG( wxT("wxFontButton creation failed") );
-        return false;
+        m_needParent = true;
+        m_acceptsFocus = true;
+
+        if (!PreCreation( parent, pos, size ) ||
+            !wxControl::CreateBase(parent, id, pos, size, style, validator, name))
+        {
+            wxFAIL_MSG( wxT("wxFontButton creation failed") );
+            return false;
+        }
+
+        m_widget = gtk_font_button_new();
+
+        // set initial font
+        m_selectedFont = initial.IsOk() ? initial : *wxNORMAL_FONT;
+        UpdateFont();
+
+        // honour the fontbutton styles
+        bool showall = (style & wxFNTP_FONTDESC_AS_LABEL) != 0,
+             usefont = (style & wxFNTP_USEFONT_FOR_LABEL) != 0;
+        gtk_font_button_set_show_style(GTK_FONT_BUTTON(m_widget), showall);
+        gtk_font_button_set_show_size(GTK_FONT_BUTTON(m_widget), showall);
+
+        gtk_font_button_set_use_size(GTK_FONT_BUTTON(m_widget), usefont);
+        gtk_font_button_set_use_font(GTK_FONT_BUTTON(m_widget), usefont);
+
+        gtk_widget_show( GTK_WIDGET(m_widget) );
+
+        // GtkFontButton signals
+        g_signal_connect(m_widget, "font-set",
+                        G_CALLBACK(gtk_fontbutton_setfont_callback), this);
+
+
+        m_parent->DoAddChild( this );
+
+        PostCreation(size);
+        SetInitialSize(size);
     }
-
-    m_widget = gtk_font_button_new();
-    g_object_ref(m_widget);
-
-    // set initial font
-    m_selectedFont = initial.IsOk() ? initial : *wxNORMAL_FONT;
-    UpdateFont();
-
-    // honour the fontbutton styles
-    bool showall = (style & wxFNTP_FONTDESC_AS_LABEL) != 0,
-         usefont = (style & wxFNTP_USEFONT_FOR_LABEL) != 0;
-    gtk_font_button_set_show_style(GTK_FONT_BUTTON(m_widget), showall);
-    gtk_font_button_set_show_size(GTK_FONT_BUTTON(m_widget), showall);
-
-    gtk_font_button_set_use_size(GTK_FONT_BUTTON(m_widget), usefont);
-    gtk_font_button_set_use_font(GTK_FONT_BUTTON(m_widget), usefont);
-
-    gtk_widget_show(m_widget);
-
-    // GtkFontButton signals
-    g_signal_connect(m_widget, "font-set",
-                    G_CALLBACK(gtk_fontbutton_setfont_callback), this);
-
-
-    m_parent->DoAddChild( this );
-
-    PostCreation(size);
-    SetInitialSize(size);
-
+    else
+        return wxGenericFontButton::Create(parent, id, initial, pos, size,
+                                           style, validator, name);
     return true;
 }
 
@@ -102,11 +109,16 @@ wxFontButton::~wxFontButton()
 
 void wxFontButton::UpdateFont()
 {
-    const wxNativeFontInfo *info = m_selectedFont.GetNativeFontInfo();
-    wxASSERT_MSG( info, wxT("The fontbutton's internal font is not valid ?") );
+    if (!gtk_check_version(2,4,0))
+    {
+        const wxNativeFontInfo *info = m_selectedFont.GetNativeFontInfo();
+        wxASSERT_MSG( info, wxT("The fontbutton's internal font is not valid ?") );
 
-    const wxString& fontname = info->ToString();
-    gtk_font_button_set_font_name(GTK_FONT_BUTTON(m_widget), wxGTK_CONV(fontname));
+        const wxString& fontname = info->ToString();
+        gtk_font_button_set_font_name(GTK_FONT_BUTTON(m_widget), wxGTK_CONV(fontname));
+    }
+    else
+        wxGenericFontButton::UpdateFont();
 }
 
-#endif // wxUSE_FONTPICKERCTRL
+#endif      // wxUSE_FONTPICKERCTRL && defined(__WXGTK24__)

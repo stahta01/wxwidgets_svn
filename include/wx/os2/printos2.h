@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/printos2.h
+// Name:        print.h
 // Purpose:     wxOS2Printer, wxOS2PrintPreview classes
 // Author:      David Webster
 // Modified by:
@@ -20,7 +20,7 @@
  * Represents the printer: manages printing a wxPrintout object
  */
 
-class WXDLLIMPEXP_CORE wxOS2Printer: public wxPrinterBase
+class WXDLLEXPORT wxOS2Printer: public wxPrinterBase
 {
     DECLARE_DYNAMIC_CLASS(wxOS2Printer)
 
@@ -39,7 +39,7 @@ private:
  * Programmer creates an object of this class to preview a wxPrintout.
  */
 
-class WXDLLIMPEXP_CORE wxOS2PrintPreview: public wxPrintPreviewBase
+class WXDLLEXPORT wxOS2PrintPreview: public wxPrintPreviewBase
 {
     DECLARE_CLASS(wxOS2PrintPreview)
 

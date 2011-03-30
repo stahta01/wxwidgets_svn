@@ -70,7 +70,8 @@ void wxSystemSettingsModule::OnExit()
 {
     sm_optionNames.Clear();
     sm_optionValues.Clear();
-    wxDELETE(gs_fontDefault);
+    delete gs_fontDefault;
+    gs_fontDefault = NULL;
 }
 
 wxColour wxSystemSettingsNative::GetColour(
@@ -171,8 +172,8 @@ wxColour wxSystemSettingsNative::GetColour(
             vSysClr = SYSCLR_SCROLLBAR;
             break;
 
-        case wxSYS_COLOUR_HIGHLIGHTTEXT:
         case wxSYS_COLOUR_LISTBOXHIGHLIGHTTEXT:
+        case wxSYS_COLOUR_HIGHLIGHTTEXT:
             vSysClr = SYSCLR_HILITEFOREGROUND;
             break;
 
@@ -248,7 +249,7 @@ wxFont wxSystemSettingsNative::GetFont(
                               wxFONTWEIGHT_NORMAL   );
                 break;
         default:
-                wxFAIL_MSG( wxT("stock font not found") );
+                wxFAIL_MSG( _T("stock font not found") );
                 return GetFont(wxSYS_ANSI_VAR_FONT);
     }
 

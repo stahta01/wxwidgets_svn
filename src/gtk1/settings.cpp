@@ -14,6 +14,7 @@
 #include "wx/settings.h"
 
 #ifndef WX_PRECOMP
+    #include "wx/cmndata.h"
     #include "wx/toplevel.h"
 #endif
 
@@ -81,7 +82,7 @@ static bool GetColourFromGTKWidget(int& red, int& green, int& blue,
     switch ( type )
     {
         default:
-            wxFAIL_MSG( wxT("unexpected GTK widget type") );
+            wxFAIL_MSG( _T("unexpected GTK widget type") );
             // fall through
 
         case wxGTK_BUTTON:
@@ -107,7 +108,7 @@ static bool GetColourFromGTKWidget(int& red, int& green, int& blue,
         switch ( colour )
         {
             default:
-                wxFAIL_MSG( wxT("unexpected GTK colour type") );
+                wxFAIL_MSG( _T("unexpected GTK colour type") );
                 // fall through
 
             case wxGTK_FG:
@@ -148,7 +149,7 @@ static void GetTooltipColors()
     gs_objects.m_colTooltip = wxColor(c.red >> SHIFT, c.green >> SHIFT, c.blue >> SHIFT);
     c = tooltips->tip_window->style->fg[GTK_STATE_NORMAL];
     gs_objects.m_colTooltipText = wxColor(c.red >> SHIFT, c.green >> SHIFT, c.blue >> SHIFT);
-    gtk_object_sink(reinterpret_cast<GtkObject*>(tooltips));
+    gtk_object_sink(wx_reinterpret_cast(GtkObject*, tooltips));
 }
 
 wxColour wxSystemSettingsNative::GetColour( wxSystemColour index )
@@ -281,8 +282,8 @@ wxColour wxSystemSettingsNative::GetColour( wxSystemColour index )
             }
             return gs_objects.m_colTooltipText;
 
-        case wxSYS_COLOUR_LISTBOXHIGHLIGHTTEXT:
         case wxSYS_COLOUR_HIGHLIGHTTEXT:
+        case wxSYS_COLOUR_LISTBOXHIGHLIGHTTEXT:
             if (!gs_objects.m_colHighlightText.Ok())
             {
                 wxColour hclr = GetColour(wxSYS_COLOUR_HIGHLIGHT);
@@ -325,7 +326,7 @@ wxColour wxSystemSettingsNative::GetColour( wxSystemColour index )
 
         case wxSYS_COLOUR_MAX:
         default:
-            wxFAIL_MSG( wxT("unknown system colour index") );
+            wxFAIL_MSG( _T("unknown system colour index") );
     }
 
     return *wxWHITE;
@@ -358,8 +359,7 @@ wxFont wxSystemSettingsNative::GetFont( wxSystemFont index )
     }
 }
 
-int
-wxSystemSettingsNative::GetMetric(wxSystemMetric index, wxWindow* WXUNUSED(win))
+int wxSystemSettingsNative::GetMetric( wxSystemMetric index, wxWindow* win )
 {
     switch (index)
     {

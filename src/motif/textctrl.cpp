@@ -59,6 +59,8 @@ static void wxTextWindowGainFocusProc(Widget w, XtPointer clientData, XmAnyCallb
 static void wxTextWindowLoseFocusProc(Widget w, XtPointer clientData, XmAnyCallbackStruct *cbs);
 static void wxTextWindowActivateProc(Widget w, XtPointer clientData, XmAnyCallbackStruct *ptr);
 
+    IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+
     BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
         EVT_DROP_FILES(wxTextCtrl::OnDropFiles)
         EVT_CHAR(wxTextCtrl::OnChar)
@@ -88,7 +90,7 @@ static void wxTextWindowActivateProc(Widget w, XtPointer clientData, XmAnyCallba
 // Text item
 wxTextCtrl::wxTextCtrl()
 {
-    m_tempCallbackStruct = NULL;
+    m_tempCallbackStruct = (void*) NULL;
     m_modified = false;
     m_processedDefault = false;
 }
@@ -104,11 +106,12 @@ bool wxTextCtrl::Create(wxWindow *parent,
 {
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
-    m_tempCallbackStruct = NULL;
+    m_tempCallbackStruct = (void*) NULL;
     m_modified = false;
     m_processedDefault = false;
+
+    m_backgroundColour = *wxWHITE;
 
     Widget parentWidget = (Widget) parent->GetClientWidget();
 
@@ -128,18 +131,17 @@ bool wxTextCtrl::Create(wxWindow *parent,
         Arg args[8];
         int count = 0;
         XtSetArg (args[count], XmNscrollHorizontal, wantHorizScroll); ++count;
-        if( m_font.IsOk() )
-            XtSetArg (args[count], (String) wxFont::GetFontTag(),
-                      m_font.GetFontType( XtDisplay(parentWidget) ) ); ++count;
+        XtSetArg (args[count], (String) wxFont::GetFontTag(),
+                  m_font.GetFontType( XtDisplay(parentWidget) ) ); ++count;
         XtSetArg (args[count], XmNwordWrap, wantWordWrap); ++count;
-        XtSetArg (args[count], XmNvalue, (const char*)value.mb_str()); ++count;
+        XtSetArg (args[count], XmNvalue, value.c_str()); ++count;
         XtSetArg (args[count], XmNeditable,
                   style & wxTE_READONLY ? False : True); ++count;
         XtSetArg (args[count], XmNeditMode, XmMULTI_LINE_EDIT ); ++count;
 
         m_mainWidget =
             (WXWidget) XmCreateScrolledText(parentWidget,
-                                            name.char_str(),
+                                            wxConstCast(name.c_str(), char),
                                             args, count);
 
         XtManageChild ((Widget) m_mainWidget);
@@ -148,11 +150,11 @@ bool wxTextCtrl::Create(wxWindow *parent,
     {
         m_mainWidget = (WXWidget)XtVaCreateManagedWidget
                                  (
-                                  name.mb_str(),
+                                  wxConstCast(name.c_str(), char),
                                   xmTextWidgetClass,
                                   parentWidget,
                                   wxFont::GetFontTag(), m_font.GetFontType( XtDisplay(parentWidget) ),
-                                  XmNvalue, (const char*)value.mb_str(),
+                                  XmNvalue, value.c_str(),
                                   XmNeditable, (style & wxTE_READONLY) ?
                                       False : True,
                                   NULL
@@ -161,7 +163,7 @@ bool wxTextCtrl::Create(wxWindow *parent,
 #if 0
         // TODO: Is this relevant? What does it do?
         int noCols = 2;
-        if (!value.empty() && (value.length() > (unsigned int) noCols))
+        if (!value.IsNull() && (value.length() > (unsigned int) noCols))
             noCols = value.length();
         XtVaSetValues((Widget) m_mainWidget,
                       XmNcolumns, noCols,
@@ -188,9 +190,10 @@ bool wxTextCtrl::Create(wxWindow *parent,
 
     XtAddCallback((Widget) m_mainWidget, XmNlosingFocusCallback, (XtCallbackProc)wxTextWindowLoseFocusProc, (XtPointer)this);
 
-    PostCreation();
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL,
                   pos.x, pos.y, size.x, size.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -213,7 +216,14 @@ wxString wxTextCtrl::GetValue() const
     }
     else
     {
-        str = wxTextEntry::GetValue();
+        // just get the string from Motif
+        char *s = XmTextGetString ((Widget) m_mainWidget);
+        if ( s )
+        {
+            str = s;
+            XtFree (s);
+        }
+        //else: return empty string
 
         if ( m_tempCallbackStruct )
         {
@@ -230,7 +240,7 @@ void wxTextCtrl::DoSetValue(const wxString& text, int flags)
 {
     m_inSetValue = true;
 
-    XmTextSetString ((Widget) m_mainWidget, text.char_str());
+    XmTextSetString ((Widget) m_mainWidget, wxConstCast(text.c_str(), char));
     XtVaSetValues ((Widget) m_mainWidget,
                    XmNcursorPosition, text.length(),
                    NULL);
@@ -243,6 +253,159 @@ void wxTextCtrl::DoSetValue(const wxString& text, int flags)
 
     if ( flags & SetValue_SendEvent )
         SendTextUpdatedEvent();
+}
+
+// Clipboard operations
+void wxTextCtrl::Copy()
+{
+    XmTextCopy((Widget) m_mainWidget, CurrentTime);
+}
+
+void wxTextCtrl::Cut()
+{
+    XmTextCut((Widget) m_mainWidget, CurrentTime);
+}
+
+void wxTextCtrl::Paste()
+{
+    XmTextPaste((Widget) m_mainWidget);
+}
+
+bool wxTextCtrl::CanCopy() const
+{
+    // Can copy if there's a selection
+    long from, to;
+    GetSelection(& from, & to);
+    return (from != to) ;
+}
+
+bool wxTextCtrl::CanCut() const
+{
+    // Can cut if there's a selection
+    long from, to;
+    GetSelection(& from, & to);
+    return (from != to) && (IsEditable());
+}
+
+bool wxTextCtrl::CanPaste() const
+{
+    return IsEditable() ;
+}
+
+// Undo/redo
+void wxTextCtrl::Undo()
+{
+    // Not possible in Motif
+}
+
+void wxTextCtrl::Redo()
+{
+    // Not possible in Motif
+}
+
+bool wxTextCtrl::CanUndo() const
+{
+    // No Undo in Motif
+    return false;
+}
+
+bool wxTextCtrl::CanRedo() const
+{
+    // No Redo in Motif
+    return false;
+}
+
+// If the return values from and to are the same, there is no
+// selection.
+void wxTextCtrl::GetSelection(long* from, long* to) const
+{
+    XmTextPosition left, right;
+
+    XmTextGetSelectionPosition((Widget) m_mainWidget, & left, & right);
+
+    *from = (long) left;
+    *to = (long) right;
+}
+
+bool wxTextCtrl::IsEditable() const
+{
+    return (XmTextGetEditable((Widget) m_mainWidget) != 0);
+}
+
+void wxTextCtrl::SetEditable(bool editable)
+{
+    XmTextSetEditable((Widget) m_mainWidget, (Boolean) editable);
+}
+
+void wxTextCtrl::SetInsertionPoint(long pos)
+{
+    XmTextSetInsertionPosition ((Widget) m_mainWidget, (XmTextPosition) pos);
+}
+
+void wxTextCtrl::SetInsertionPointEnd()
+{
+    wxTextPos pos = GetLastPosition();
+    SetInsertionPoint(pos);
+}
+
+long wxTextCtrl::GetInsertionPoint() const
+{
+    return (long) XmTextGetInsertionPosition ((Widget) m_mainWidget);
+}
+
+wxTextPos wxTextCtrl::GetLastPosition() const
+{
+    return (long) XmTextGetLastPosition ((Widget) m_mainWidget);
+}
+
+void wxTextCtrl::Replace(long from, long to, const wxString& value)
+{
+    XmTextReplace ((Widget) m_mainWidget, (XmTextPosition) from, (XmTextPosition) to,
+        wxConstCast(value.c_str(), char));
+}
+
+void wxTextCtrl::Remove(long from, long to)
+{
+    XmTextSetSelection ((Widget) m_mainWidget, (XmTextPosition) from, (XmTextPosition) to,
+                      (Time) 0);
+    XmTextRemove ((Widget) m_mainWidget);
+}
+
+void wxTextCtrl::SetSelection(long from, long to)
+{
+    if( to == -1 )
+        to = GetLastPosition();
+
+    XmTextSetSelection ((Widget) m_mainWidget, (XmTextPosition) from, (XmTextPosition) to,
+                      (Time) 0);
+}
+
+void wxTextCtrl::WriteText(const wxString& text)
+{
+    long textPosition = GetInsertionPoint() + text.length();
+    XmTextInsert ((Widget) m_mainWidget, GetInsertionPoint(),
+                  wxConstCast(text.c_str(), char));
+    XtVaSetValues ((Widget) m_mainWidget, XmNcursorPosition, textPosition, NULL);
+    SetInsertionPoint(textPosition);
+    XmTextShowPosition ((Widget) m_mainWidget, textPosition);
+    m_modified = true;
+}
+
+void wxTextCtrl::AppendText(const wxString& text)
+{
+    wxTextPos textPosition = GetLastPosition() + text.length();
+    XmTextInsert ((Widget) m_mainWidget, GetLastPosition(),
+                  wxConstCast(text.c_str(), char));
+    XtVaSetValues ((Widget) m_mainWidget, XmNcursorPosition, textPosition, NULL);
+    SetInsertionPoint(textPosition);
+    XmTextShowPosition ((Widget) m_mainWidget, textPosition);
+    m_modified = true;
+}
+
+void wxTextCtrl::Clear()
+{
+    XmTextSetString ((Widget) m_mainWidget, wxMOTIF_STR(""));
+    m_modified = false;
 }
 
 bool wxTextCtrl::IsModified() const
@@ -385,7 +548,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
         XmTextVerifyCallbackStruct *textStruct =
             (XmTextVerifyCallbackStruct *) m_tempCallbackStruct;
         textStruct->doit = True;
-        if (wxIsascii(event.m_keyCode) && (textStruct->text->length == 1))
+        if (isascii(event.m_keyCode) && (textStruct->text->length == 1))
         {
             textStruct->text->ptr[0] = (char)((event.m_keyCode == WXK_RETURN) ? 10 : event.m_keyCode);
         }
@@ -465,7 +628,7 @@ void wxTextCtrl::DoSendEvents(void *wxcbs, long keycode)
     // the character passed through)
     cbs->doit = False;
 
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 
     if ( !InSetValue() && m_processedDefault )
     {
@@ -500,8 +663,8 @@ wxSize wxDoGetSingleTextCtrlBestSize( Widget textWidget,
     int x, y;
     window->GetTextExtent( value, &x, &y );
 
-    if( x < 90 )
-        x = 90;
+    if( x < 100 )
+        x = 100;
 
     return wxSize( x + 2 * xmargin + 2 * highlight + 2 * shadow,
                    // MBN: +2 necessary: Lesstif bug or mine?
@@ -513,16 +676,10 @@ wxSize wxTextCtrl::DoGetBestSize() const
     if( IsSingleLine() )
     {
         wxSize best = wxControl::DoGetBestSize();
-#if wxCHECK_MOTIF_VERSION( 2, 3 )
-        // OpenMotif 2.3 gives way too big X sizes
-        wxSize other_best = wxDoGetSingleTextCtrlBestSize
-                                ( (Widget) GetTopWidget(), this );
-        return wxSize( other_best.x, best.y );
-#else
-        if( best.x < 90 ) best.x = 90;
+
+        if( best.x < 110 ) best.x = 110;
 
         return best;
-#endif
     }
     else
         return wxWindow::DoGetBestSize();
@@ -661,7 +818,7 @@ wxTextWindowGainFocusProc (Widget w, XtPointer clientData, XmAnyCallbackStruct *
     wxTextCtrl *tw = (wxTextCtrl *) clientData;
     wxFocusEvent event(wxEVT_SET_FOCUS, tw->GetId());
     event.SetEventObject(tw);
-    tw->HandleWindowEvent(event);
+    tw->GetEventHandler()->ProcessEvent(event);
 }
 
 static void
@@ -673,7 +830,7 @@ wxTextWindowLoseFocusProc (Widget w, XtPointer clientData, XmAnyCallbackStruct *
     wxTextCtrl *tw = (wxTextCtrl *) clientData;
     wxFocusEvent event(wxEVT_KILL_FOCUS, tw->GetId());
     event.SetEventObject(tw);
-    tw->HandleWindowEvent(event);
+    tw->GetEventHandler()->ProcessEvent(event);
 }
 
 static void wxTextWindowActivateProc(Widget w, XtPointer clientData,

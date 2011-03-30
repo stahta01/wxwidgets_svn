@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/cocoa/clipbrd.h
+// Name:        wx/cocoa/clipboard.h
 // Purpose:     wxClipboard
 // Author:      David Elliott <dfe@cox.net>
 // Modified by:

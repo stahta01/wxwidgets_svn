@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/timer.cpp
+// Name:        gtk/timer.cpp
 // Purpose:     wxTimer implementation
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -12,24 +12,30 @@
 
 #if wxUSE_TIMER
 
-#include "wx/gtk/private/timer.h"
+#include "wx/timer.h"
 #include "wx/app.h"
 
 #include <gtk/gtk.h>
 
 // ----------------------------------------------------------------------------
-// wxTimerImpl
+// wxTimer
 // ----------------------------------------------------------------------------
 
+IMPLEMENT_ABSTRACT_CLASS(wxTimer, wxEvtHandler)
+
 extern "C" {
-
-static gboolean timeout_callback(gpointer data)
+static gint timeout_callback( gpointer data )
 {
-    wxGTKTimerImpl *timer = (wxGTKTimerImpl*)data;
+    wxTimer *timer = (wxTimer*)data;
 
-    const bool keepGoing = !timer->IsOneShot();
-    if ( !keepGoing )
+    // Don't change the order of anything in this callback!
+
+    const bool oneshot = timer->IsOneShot();
+    if ( oneshot )
+    {
+        // This sets m_tag to -1
         timer->Stop();
+    }
 
     // When getting called from GDK's timer handler we
     // are no longer within GDK's grab on the GUI
@@ -45,29 +51,43 @@ static gboolean timeout_callback(gpointer data)
     if (app)
         app->WakeUpIdle();
 
-    return keepGoing;
+    if ( oneshot )
+        return FALSE;
+
+    return TRUE;
+}
 }
 
-} // extern "C"
-
-bool wxGTKTimerImpl::Start(int millisecs, bool oneShot)
+void wxTimer::Init()
 {
-    if ( !wxTimerImpl::Start(millisecs, oneShot) )
-        return false;
-
-    wxASSERT_MSG( !m_sourceId, wxT("shouldn't be still running") );
-
-    m_sourceId = g_timeout_add(m_milli, timeout_callback, this);
-
-    return true;
+    m_tag = -1;
+    m_milli = 1000;
 }
 
-void wxGTKTimerImpl::Stop()
+wxTimer::~wxTimer()
 {
-    wxASSERT_MSG( m_sourceId, wxT("should be running") );
+    wxTimer::Stop();
+}
 
-    g_source_remove(m_sourceId);
-    m_sourceId = 0;
+bool wxTimer::Start( int millisecs, bool oneShot )
+{
+    (void)wxTimerBase::Start(millisecs, oneShot);
+
+    if (m_tag != -1)
+        g_source_remove( m_tag );
+
+    m_tag = g_timeout_add( m_milli, timeout_callback, this );
+
+    return TRUE;
+}
+
+void wxTimer::Stop()
+{
+    if (m_tag != -1)
+    {
+        g_source_remove( m_tag );
+        m_tag = -1;
+    }
 }
 
 #endif // wxUSE_TIMER

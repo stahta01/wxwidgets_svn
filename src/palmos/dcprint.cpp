@@ -62,7 +62,7 @@ wxPrinterDC::wxPrinterDC(const wxString& driver_name,
                          const wxString& device_name,
                          const wxString& file,
                          bool interactive,
-                         wxPrintOrientation orientation)
+                         int orientation)
 {
 }
 
@@ -100,7 +100,7 @@ void wxPrinterDC::EndPage()
 {
 }
 
-wxRect wxPrinterDC::GetPaperRect() const
+wxRect wxPrinterDC::GetPaperRect()
 {
     // Use page rect if we can't get paper rect.
     wxCoord w, h;
@@ -143,7 +143,7 @@ bool wxPrinterDC::DoBlit(wxCoord xdest, wxCoord ydest,
                          wxCoord width, wxCoord height,
                          wxDC *source,
                          wxCoord WXUNUSED(xsrc), wxCoord WXUNUSED(ysrc),
-                         wxRasterOperationMode WXUNUSED(rop), bool useMask,
+                         int WXUNUSED(rop), bool useMask,
                          wxCoord WXUNUSED(xsrcMask), wxCoord WXUNUSED(ysrcMask))
 {
     return false;

@@ -44,12 +44,10 @@ private:
     void OnDerivedDialogToolOrMenuCommand(wxCommandEvent& event);
     void OnControlsToolOrMenuCommand(wxCommandEvent& event);
     void OnUncenteredToolOrMenuCommand(wxCommandEvent& event);
-    void OnObjRefToolOrMenuCommand(wxCommandEvent& event);
     void OnCustomClassToolOrMenuCommand(wxCommandEvent& event);
     void OnPlatformPropertyToolOrMenuCommand(wxCommandEvent& event);
     void OnArtProviderToolOrMenuCommand(wxCommandEvent& event);
     void OnVariableExpansionToolOrMenuCommand(wxCommandEvent& event);
-    void OnRecursiveLoad(wxCommandEvent& event);
     void OnAnimationCtrlPlay(wxCommandEvent& event);
 
     // Any class wishing to process wxWidgets events must use this macro

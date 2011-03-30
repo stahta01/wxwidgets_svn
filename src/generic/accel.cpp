@@ -94,8 +94,8 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
         const wxAcceleratorEntry& entry = entries[i];
 
         int keycode = entry.GetKeyCode();
-        if ( wxIsascii(keycode) )
-            keycode = wxToupper(keycode);
+        if ( isascii(keycode) )
+            keycode = toupper(keycode);
 
         M_ACCELDATA->m_accels.Append(new wxAcceleratorEntry(entry.GetFlags(),
                                                             keycode,
@@ -152,7 +152,7 @@ void wxAcceleratorTable::Remove(const wxAcceleratorEntry& entry)
         node = node->GetNext();
     }
 
-    wxFAIL_MSG(wxT("deleting inexistent accel from wxAcceleratorTable"));
+    wxFAIL_MSG(_T("deleting inexistent accel from wxAcceleratorTable"));
 }
 
 // ----------------------------------------------------------------------------

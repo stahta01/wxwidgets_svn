@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/statline.cpp
+// Name:        statline.cpp
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -20,6 +20,8 @@
 //-----------------------------------------------------------------------------
 // wxStaticLine
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxStaticLine, wxControl)
 
 wxStaticLine::wxStaticLine()
 {

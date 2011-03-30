@@ -6,7 +6,7 @@
 // Author:      Harm van der Heijden, Vaclav Slavik, Julian Smart
 // RCS-ID:      $Id$
 // Copyright:   (c) Harm van der Heijden, Vaclav Slavik, Julian Smart
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_HELPDLG_H_
@@ -81,7 +81,7 @@ protected:
     wxHtmlHelpController* m_helpController;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxHtmlHelpDialog);
+    DECLARE_NO_COPY_CLASS(wxHtmlHelpDialog)
 };
 
 #endif

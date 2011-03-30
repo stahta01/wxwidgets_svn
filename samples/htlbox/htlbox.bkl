@@ -8,6 +8,7 @@
         <wx-lib>html</wx-lib>
         <wx-lib>core</wx-lib>
         <wx-lib>base</wx-lib>
+        <win32-res>htlbox.rc</win32-res>
     </exe>
 
 </makefile>

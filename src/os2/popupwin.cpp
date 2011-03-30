@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/popupwin.cpp
+// Name:        os2/popupwin.cpp
 // Purpose:     implements wxPopupWindow for OS2
 // Author:      Dave Webster
 // Modified by:
 // Created:     13.05.02
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Dave Webster <dwebster@bhmi.com>
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================

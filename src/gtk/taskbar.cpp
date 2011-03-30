@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////
 // File:        src/gtk/taskbar.cpp
-// Purpose:     wxTaskBarIcon
+// Purpose:     wxTaskBarIcon (src/unix/taskbarx11.cpp) helper for GTK2
 // Author:      Vaclav Slavik
-// Modified by: Paul Cornett
+// Modified by:
 // Created:     2004/05/29
 // RCS-ID:      $Id$
 // Copyright:   (c) Vaclav Slavik, 2004
@@ -12,302 +12,136 @@
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
-#if wxUSE_TASKBARICON
-
-#include "wx/taskbar.h"
+#include "wx/gtk/taskbarpriv.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/toplevel.h"
+    #include "wx/log.h"
+    #include "wx/frame.h"
     #include "wx/menu.h"
-    #include "wx/icon.h"
 #endif
+
+#include <gdk/gdkx.h>
+
+#ifdef __WXGTK20__
+#include <gtk/gtkversion.h>
+#if GTK_CHECK_VERSION(2, 1, 0)
+
+#include "gtk/gtk.h"
 
 #include "eggtrayicon.h"
-#include <gtk/gtk.h>
 
-#if !GTK_CHECK_VERSION(2,10,0)
-    typedef struct _GtkStatusIcon GtkStatusIcon;
-#endif
-
-class wxTaskBarIcon::Private
+wxTaskBarIconAreaBase::wxTaskBarIconAreaBase()
 {
-public:
-    Private(wxTaskBarIcon* taskBarIcon);
-    ~Private();
-    void SetIcon();
-    void size_allocate(int width, int height);
+    if (IsProtocolSupported())
+    {
+        m_widget = GTK_WIDGET(egg_tray_icon_new("systray icon"));
+        gtk_window_set_resizable(GTK_WINDOW(m_widget), false);
 
-    // owning wxTaskBarIcon
-    wxTaskBarIcon* m_taskBarIcon;
-    // used when GTK+ >= 2.10
-    GtkStatusIcon* m_statusIcon;
-    // used when GTK+ < 2.10
-    GtkWidget* m_eggTrayIcon;
-    // for PopupMenu
-    wxWindow* m_win;
-    // for tooltip when GTK+ < 2.10
-    GtkTooltips* m_tooltips;
-    wxBitmap m_bitmap;
-    wxString m_tipText;
-    // width and height of available space, only used when GTK+ < 2.10
-    int m_size;
-};
+        wxLogTrace(_T("systray"), _T("using freedesktop.org systray spec"));
+    }
+
+    wxTopLevelWindow::Create(
+            NULL, wxID_ANY, _T("systray icon"),
+            wxDefaultPosition, wxDefaultSize,
+            wxDEFAULT_FRAME_STYLE | wxFRAME_NO_TASKBAR | wxSIMPLE_BORDER |
+            wxFRAME_SHAPED,
+            wxEmptyString /*eggtray doesn't like setting wmclass*/);
+
+    m_invokingWindow = NULL;
+}
+
+bool wxTaskBarIconAreaBase::IsProtocolSupported()
+{
+    static int s_supported = -1;
+    if (s_supported == -1)
+    {
+        Display *display = GDK_DISPLAY();
+        Screen *screen = DefaultScreenOfDisplay(display);
+
+        char name[32];
+        g_snprintf(name, sizeof(name), "_NET_SYSTEM_TRAY_S%d",
+            XScreenNumberOfScreen(screen));
+        Atom atom = XInternAtom(display, name, False);
+
+        Window manager = XGetSelectionOwner(display, atom);
+
+        s_supported = (manager != None);
+    }
+
+    return (bool)s_supported;
+}
+
+//-----------------------------------------------------------------------------
+// Pop-up menu stuff
 //-----------------------------------------------------------------------------
 
-extern "C" {
-static void
-icon_size_allocate(GtkWidget*, GtkAllocation* alloc, wxTaskBarIcon::Private* priv)
-{
-    priv->size_allocate(alloc->width, alloc->height);
-}
+extern "C" WXDLLIMPEXP_CORE void gtk_pop_hide_callback( GtkWidget *widget, bool* is_waiting  );
 
-static void
-icon_destroy(GtkWidget*, wxTaskBarIcon::Private* priv)
-{
-    // Icon window destroyed, probably because tray program has died.
-    // Recreate icon so it will appear if tray program is restarted.
-    priv->m_eggTrayIcon = NULL;
-    priv->SetIcon();
-}
+extern WXDLLIMPEXP_CORE void SetInvokingWindow( wxMenu *menu, wxWindow* win );
 
-static void
-icon_activate(void*, wxTaskBarIcon* taskBarIcon)
+extern "C" WXDLLIMPEXP_CORE
+    void wxPopupMenuPositionCallback( GtkMenu *menu,
+                                      gint *x, gint *y,
+                                      gboolean * WXUNUSED(whatever),
+                                      gpointer user_data );
+
+#if wxUSE_MENUS_NATIVE
+bool wxTaskBarIconAreaBase::DoPopupMenu( wxMenu *menu, int x, int y )
 {
-    // activate occurs from single click with GTK+
-    wxTaskBarIconEvent event(wxEVT_TASKBAR_LEFT_DOWN, taskBarIcon);
-    if (!taskBarIcon->SafelyProcessEvent(event))
+    wxCHECK_MSG( m_widget != NULL, false, wxT("invalid window") );
+
+    wxCHECK_MSG( menu != NULL, false, wxT("invalid popup-menu") );
+
+    // NOTE: if you change this code, you need to update
+    //       the same code in window.cpp as well. This
+    //       is ugly code duplication, I know,
+
+    SetInvokingWindow( menu, this );
+
+    menu->UpdateUI( m_invokingWindow );
+
+    bool is_waiting = true;
+
+    gulong handler = g_signal_connect (menu->m_menu, "hide",
+                                       G_CALLBACK (gtk_pop_hide_callback),
+                                       &is_waiting);
+
+    wxPoint pos;
+    gpointer userdata;
+    GtkMenuPositionFunc posfunc;
+    if ( x == -1 && y == -1 )
     {
-        // if single click not handled, send double click for compatibility
-        event.SetEventType(wxEVT_TASKBAR_LEFT_DCLICK);
-        taskBarIcon->SafelyProcessEvent(event);
-    }
-}
-
-static gboolean
-icon_popup_menu(GtkWidget*, wxTaskBarIcon* taskBarIcon)
-{
-    wxTaskBarIconEvent event(wxEVT_TASKBAR_CLICK, taskBarIcon);
-    taskBarIcon->SafelyProcessEvent(event);
-    return true;
-}
-
-static gboolean
-icon_button_press_event(GtkWidget*, GdkEventButton* event, wxTaskBarIcon* taskBarIcon)
-{
-    if (event->type == GDK_BUTTON_PRESS)
-    {
-        if (event->button == 1)
-            icon_activate(NULL, taskBarIcon);
-        else if (event->button == 3)
-            icon_popup_menu(NULL, taskBarIcon);
-    }
-    return false;
-}
-
-#if GTK_CHECK_VERSION(2,10,0)
-static void
-status_icon_popup_menu(GtkStatusIcon*, guint, guint, wxTaskBarIcon* taskBarIcon)
-{
-    icon_popup_menu(NULL, taskBarIcon);
-}
-#endif
-} // extern "C"
-//-----------------------------------------------------------------------------
-
-bool wxTaskBarIconBase::IsAvailable()
-{
-    char name[32];
-    g_snprintf(name, sizeof(name), "_NET_SYSTEM_TRAY_S%d",
-        gdk_x11_get_default_screen());
-    Atom atom = gdk_x11_get_xatom_by_name(name);
-
-    Window manager = XGetSelectionOwner(gdk_x11_get_default_xdisplay(), atom);
-
-    return manager != None;
-}
-//-----------------------------------------------------------------------------
-
-wxTaskBarIcon::Private::Private(wxTaskBarIcon* taskBarIcon)
-{
-    m_taskBarIcon = taskBarIcon;
-    m_statusIcon = NULL;
-    m_eggTrayIcon = NULL;
-    m_win = NULL;
-    m_tooltips = NULL;
-    m_size = 0;
-}
-
-wxTaskBarIcon::Private::~Private()
-{
-    if (m_statusIcon)
-        g_object_unref(m_statusIcon);
-    else if (m_eggTrayIcon)
-    {
-        g_signal_handlers_disconnect_by_func(m_eggTrayIcon, (void*)icon_destroy, this);
-        gtk_widget_destroy(m_eggTrayIcon);
-    }
-    if (m_win)
-    {
-        m_win->PopEventHandler();
-        m_win->Destroy();
-    }
-    if (m_tooltips)
-    {
-        gtk_object_destroy(GTK_OBJECT(m_tooltips));
-        g_object_unref(m_tooltips);
-    }
-}
-
-void wxTaskBarIcon::Private::SetIcon()
-{
-#if GTK_CHECK_VERSION(2,10,0)
-    if (gtk_check_version(2,10,0) == NULL)
-    {
-        if (m_statusIcon)
-            gtk_status_icon_set_from_pixbuf(m_statusIcon, m_bitmap.GetPixbuf());
-        else
-        {
-            m_statusIcon = gtk_status_icon_new_from_pixbuf(m_bitmap.GetPixbuf());
-            g_signal_connect(m_statusIcon, "activate",
-                G_CALLBACK(icon_activate), m_taskBarIcon);
-            g_signal_connect(m_statusIcon, "popup_menu",
-                G_CALLBACK(status_icon_popup_menu), m_taskBarIcon);
-        }
+        // use GTK's default positioning algorithm
+        userdata = NULL;
+        posfunc = NULL;
     }
     else
-#endif
     {
-        m_size = 0;
-        if (m_eggTrayIcon)
-        {
-            GtkWidget* image = gtk_bin_get_child(GTK_BIN(m_eggTrayIcon));
-            gtk_image_set_from_pixbuf(GTK_IMAGE(image), m_bitmap.GetPixbuf());
-        }
-        else
-        {
-            m_eggTrayIcon = GTK_WIDGET(egg_tray_icon_new("wxTaskBarIcon"));
-            gtk_widget_add_events(m_eggTrayIcon, GDK_BUTTON_PRESS_MASK);
-            g_signal_connect(m_eggTrayIcon, "size_allocate",
-                G_CALLBACK(icon_size_allocate), this);
-            g_signal_connect(m_eggTrayIcon, "destroy",
-                G_CALLBACK(icon_destroy), this);
-            g_signal_connect(m_eggTrayIcon, "button_press_event",
-                G_CALLBACK(icon_button_press_event), m_taskBarIcon);
-            g_signal_connect(m_eggTrayIcon, "popup_menu",
-                G_CALLBACK(icon_popup_menu), m_taskBarIcon);
-            GtkWidget* image = gtk_image_new_from_pixbuf(m_bitmap.GetPixbuf());
-            gtk_container_add(GTK_CONTAINER(m_eggTrayIcon), image);
-            gtk_widget_show_all(m_eggTrayIcon);
-        }
+        pos = ClientToScreen(wxPoint(x, y));
+        userdata = &pos;
+        posfunc = wxPopupMenuPositionCallback;
     }
-#if wxUSE_TOOLTIPS
-    const char *tip_text = NULL;
-    if (!m_tipText.empty())
-        tip_text = m_tipText.c_str();
 
-#if GTK_CHECK_VERSION(2,10,0)
-    if (m_statusIcon)
+    gtk_menu_popup(
+                  GTK_MENU(menu->m_menu),
+                  (GtkWidget *) NULL,           // parent menu shell
+                  (GtkWidget *) NULL,           // parent menu item
+                  posfunc,                      // function to position it
+                  userdata,                     // client data
+                  0,                            // button used to activate it
+                  gtk_get_current_event_time()
+                );
+
+    while (is_waiting)
     {
-#if GTK_CHECK_VERSION(2,16,0)
-        if (GTK_CHECK_VERSION(3,0,0) || gtk_check_version(2,16,0) == NULL)
-            gtk_status_icon_set_tooltip_text(m_statusIcon, tip_text);
-        else
-#endif
-        {
-#if !GTK_CHECK_VERSION(3,0,0) && !defined(GTK_DISABLE_DEPRECATED)
-            gtk_status_icon_set_tooltip(m_statusIcon, tip_text);
-#endif
-        }
+        gtk_main_iteration();
     }
-    else
-#endif // GTK_CHECK_VERSION(2,10,0)
-    {
-#if !GTK_CHECK_VERSION(3,0,0) && !defined(GTK_DISABLE_DEPRECATED)
-        if (tip_text && m_tooltips == NULL)
-        {
-            m_tooltips = gtk_tooltips_new();
-            g_object_ref(m_tooltips);
-            gtk_object_sink(GTK_OBJECT(m_tooltips));
-        }
-        if (m_tooltips)
-            gtk_tooltips_set_tip(m_tooltips, m_eggTrayIcon, tip_text, "");
-#endif
-    }
-#endif // wxUSE_TOOLTIPS
-}
 
-void wxTaskBarIcon::Private::size_allocate(int width, int height)
-{
-    int size = height;
-    EggTrayIcon* icon = EGG_TRAY_ICON(m_eggTrayIcon);
-    if (egg_tray_icon_get_orientation(icon) == GTK_ORIENTATION_VERTICAL)
-        size = width;
-    if (m_size == size)
-        return;
-    m_size = size;
-    int w = m_bitmap.GetWidth();
-    int h = m_bitmap.GetHeight();
-    if (w > size || h > size)
-    {
-        if (w > size) w = size;
-        if (h > size) h = size;
-        GdkPixbuf* pixbuf =
-            gdk_pixbuf_scale_simple(m_bitmap.GetPixbuf(), w, h, GDK_INTERP_BILINEAR);
-        GtkImage* image = GTK_IMAGE(gtk_bin_get_child(GTK_BIN(m_eggTrayIcon)));
-        gtk_image_set_from_pixbuf(image, pixbuf);
-        g_object_unref(pixbuf);
-    }
-}
-//-----------------------------------------------------------------------------
+    g_signal_handler_disconnect (menu->m_menu, handler);
 
-IMPLEMENT_DYNAMIC_CLASS(wxTaskBarIcon, wxEvtHandler)
-
-wxTaskBarIcon::wxTaskBarIcon()
-{
-    m_priv = new Private(this);
-}
-
-wxTaskBarIcon::~wxTaskBarIcon()
-{
-    delete m_priv;
-}
-
-bool wxTaskBarIcon::SetIcon(const wxIcon& icon, const wxString& tooltip)
-{
-    m_priv->m_bitmap = icon;
-    m_priv->m_tipText = tooltip;
-    m_priv->SetIcon();
     return true;
 }
+#endif // wxUSE_MENUS_NATIVE
 
-bool wxTaskBarIcon::RemoveIcon()
-{
-    delete m_priv;
-    m_priv = new Private(this);
-    return true;
-}
-
-bool wxTaskBarIcon::IsIconInstalled() const
-{
-    return m_priv->m_statusIcon || m_priv->m_eggTrayIcon;
-}
-
-bool wxTaskBarIcon::PopupMenu(wxMenu* menu)
-{
-#if wxUSE_MENUS
-    if (m_priv->m_win == NULL)
-    {
-        m_priv->m_win = new wxTopLevelWindow(
-            NULL, wxID_ANY, wxString(), wxDefaultPosition, wxDefaultSize, 0);
-        m_priv->m_win->PushEventHandler(this);
-    }
-    wxPoint point(-1, -1);
-#ifdef __WXUNIVERSAL__
-    point = wxGetMousePosition();
-#endif
-    m_priv->m_win->PopupMenu(menu, point);
-#endif // wxUSE_MENUS
-    return true;
-}
-
-#endif // wxUSE_TASKBARICON
+#endif // __WXGTK20__
+#endif // GTK_CHECK_VERSION(2, 1, 0)

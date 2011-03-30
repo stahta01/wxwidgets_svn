@@ -1,4 +1,5 @@
-#include "../sample.rc"
+mondrian ICON "mondrian.ico"
+#include "wx/msw/wx.rc"
 
 new BITMAP "bitmaps/new.bmp"
 open BITMAP "bitmaps/open.bmp"

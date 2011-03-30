@@ -18,7 +18,7 @@
 // wxStaticBitmap
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticBitmap : public wxStaticBitmapBase
+class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase
 {
 public:
     wxStaticBitmap()

@@ -15,7 +15,7 @@
 
 #if wxUSE_HTML && wxUSE_STREAMS
 
-#ifndef WX_PRECOMP
+#ifndef WXPRECOMP
     #include "wx/brush.h"
     #include "wx/dc.h"
 #endif
@@ -41,10 +41,10 @@ class wxHtmlListmarkCell : public wxHtmlCell
         void Draw(wxDC& dc, int x, int y, int view_y1, int view_y2,
                   wxHtmlRenderingInfo& info);
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlListmarkCell);
+    DECLARE_NO_COPY_CLASS(wxHtmlListmarkCell)
 };
 
-wxHtmlListmarkCell::wxHtmlListmarkCell(wxDC* dc, const wxColour& clr) : wxHtmlCell(), m_Brush(clr, wxBRUSHSTYLE_SOLID)
+wxHtmlListmarkCell::wxHtmlListmarkCell(wxDC* dc, const wxColour& clr) : wxHtmlCell(), m_Brush(clr, wxSOLID)
 {
     m_Width =  dc->GetCharHeight();
     m_Height = dc->GetCharHeight();
@@ -93,7 +93,7 @@ class wxHtmlListCell : public wxHtmlContainerCell
         void AddRow(wxHtmlContainerCell *mark, wxHtmlContainerCell *cont);
         virtual void Layout(int w);
 
-    wxDECLARE_NO_COPY_CLASS(wxHtmlListCell);
+    DECLARE_NO_COPY_CLASS(wxHtmlListCell)
 };
 
 wxHtmlListCell::wxHtmlListCell(wxHtmlContainerCell *parent) : wxHtmlContainerCell(parent)

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/motif/scrolbar.h
+// Name:        wx/motif/scrollbar.h
 // Purpose:     wxScrollBar class
 // Author:      Julian Smart
 // Modified by:
@@ -13,7 +13,7 @@
 #define _WX_SCROLBAR_H_
 
 // Scrollbar item
-class WXDLLIMPEXP_CORE wxScrollBar: public wxScrollBarBase
+class WXDLLEXPORT wxScrollBar: public wxScrollBarBase
 {
     DECLARE_DYNAMIC_CLASS(wxScrollBar)
 

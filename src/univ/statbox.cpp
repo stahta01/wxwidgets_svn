@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/statbox.cpp
+// Name:        univ/statbox.cpp
 // Purpose:     wxStaticBox implementation
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -36,6 +36,8 @@
 // ============================================================================
 // implementation
 // ============================================================================
+
+IMPLEMENT_DYNAMIC_CLASS(wxStaticBox, wxControl)
 
 // ----------------------------------------------------------------------------
 // wxStaticBox

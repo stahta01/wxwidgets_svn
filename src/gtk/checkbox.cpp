@@ -14,7 +14,7 @@
 
 #include "wx/checkbox.h"
 
-#include <gtk/gtk.h>
+#include "wx/gtk/private.h"
 
 //-----------------------------------------------------------------------------
 // data
@@ -29,9 +29,13 @@ extern bool           g_blockEventsOnDrag;
 extern "C" {
 static void gtk_checkbox_toggled_callback(GtkWidget *widget, wxCheckBox *cb)
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!cb->m_hasVMT) return;
 
     if (g_blockEventsOnDrag) return;
+
+    if (cb->m_blockEvent) return;
 
     // Transitions for 3state checkbox must be done manually, GTK's checkbox
     // is 2state with additional "undetermined state" flag which isn't
@@ -47,7 +51,7 @@ static void gtk_checkbox_toggled_callback(GtkWidget *widget, wxCheckBox *cb)
             bool active = gtk_toggle_button_get_active(toggle);
             bool inconsistent = gtk_toggle_button_get_inconsistent(toggle);
 
-            cb->GTKDisableEvents();
+            cb->m_blockEvent = true;
 
             if (!active && !inconsistent)
             {
@@ -67,10 +71,10 @@ static void gtk_checkbox_toggled_callback(GtkWidget *widget, wxCheckBox *cb)
             }
             else
             {
-                wxFAIL_MSG(wxT("3state wxCheckBox in unexpected state!"));
+                wxFAIL_MSG(_T("3state wxCheckBox in unexpected state!"));
             }
 
-            cb->GTKEnableEvents();
+            cb->m_blockEvent = false;
         }
         else
         {
@@ -82,13 +86,15 @@ static void gtk_checkbox_toggled_callback(GtkWidget *widget, wxCheckBox *cb)
     wxCommandEvent event(wxEVT_COMMAND_CHECKBOX_CLICKED, cb->GetId());
     event.SetInt(cb->Get3StateValue());
     event.SetEventObject(cb);
-    cb->HandleWindowEvent(event);
+    cb->GetEventHandler()->ProcessEvent(event);
 }
 }
 
 //-----------------------------------------------------------------------------
 // wxCheckBox
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxCheckBox,wxControl)
 
 wxCheckBox::wxCheckBox()
 {
@@ -103,13 +109,21 @@ bool wxCheckBox::Create(wxWindow *parent,
                         const wxValidator& validator,
                         const wxString &name )
 {
-    WXValidateStyle( &style );
+    m_needParent = true;
+    m_acceptsFocus = true;
+    m_blockEvent = false;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxCheckBox creation failed") );
         return false;
     }
+
+    wxASSERT_MSG( (style & wxCHK_ALLOW_3RD_STATE_FOR_USER) == 0 ||
+                  (style & wxCHK_3STATE) != 0,
+                  wxT("Using wxCHK_ALLOW_3RD_STATE_FOR_USER")
+                  wxT(" style flag for a 2-state checkbox is useless") );
 
     if ( style & wxALIGN_RIGHT )
     {
@@ -131,10 +145,9 @@ bool wxCheckBox::Create(wxWindow *parent,
     else
     {
         m_widgetCheckbox = gtk_check_button_new_with_label("");
-        m_widgetLabel = gtk_bin_get_child(GTK_BIN(m_widgetCheckbox));
+        m_widgetLabel = GTK_BIN(m_widgetCheckbox)->child;
         m_widget = m_widgetCheckbox;
     }
-    g_object_ref(m_widget);
     SetLabel( label );
 
     g_signal_connect (m_widgetCheckbox, "toggled",
@@ -147,18 +160,6 @@ bool wxCheckBox::Create(wxWindow *parent,
     return true;
 }
 
-void wxCheckBox::GTKDisableEvents()
-{
-    g_signal_handlers_block_by_func(m_widgetCheckbox,
-        (gpointer) gtk_checkbox_toggled_callback, this);
-}
-
-void wxCheckBox::GTKEnableEvents()
-{
-    g_signal_handlers_unblock_by_func(m_widgetCheckbox,
-        (gpointer) gtk_checkbox_toggled_callback, this);
-}
-
 void wxCheckBox::SetValue( bool state )
 {
     wxCHECK_RET( m_widgetCheckbox != NULL, wxT("invalid checkbox") );
@@ -166,11 +167,11 @@ void wxCheckBox::SetValue( bool state )
     if (state == GetValue())
         return;
 
-    GTKDisableEvents();
+    m_blockEvent = true;
 
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(m_widgetCheckbox), state );
 
-    GTKEnableEvents();
+    m_blockEvent = false;
 }
 
 bool wxCheckBox::GetValue() const
@@ -203,21 +204,20 @@ void wxCheckBox::SetLabel( const wxString& label )
 {
     wxCHECK_RET( m_widgetLabel != NULL, wxT("invalid checkbox") );
 
-    // save the label inside m_label in case user calls GetLabel() later
-    wxControl::SetLabel(label);
-
     GTKSetLabelForLabel(GTK_LABEL(m_widgetLabel), label);
 }
 
 bool wxCheckBox::Enable( bool enable )
 {
-    if (!base_type::Enable(enable))
+    bool isEnabled = IsEnabled();
+
+    if ( !wxControl::Enable( enable ) )
         return false;
 
     gtk_widget_set_sensitive( m_widgetLabel, enable );
 
-    if (enable)
-        GTKFixSensitivity();
+    if (!isEnabled && enable)
+        wxGtkFixSensitivity(this);
 
     return true;
 }
@@ -231,6 +231,11 @@ void wxCheckBox::DoApplyWidgetStyle(GtkRcStyle *style)
 GdkWindow *wxCheckBox::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
 {
     return GTK_BUTTON(m_widgetCheckbox)->event_window;
+}
+
+wxSize wxCheckBox::DoGetBestSize() const
+{
+    return wxControl::DoGetBestSize();
 }
 
 // static

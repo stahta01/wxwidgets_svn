@@ -22,6 +22,8 @@
 
 #include "wx/os2/private.h"
 
+IMPLEMENT_DYNAMIC_CLASS(wxStaticBox, wxControl)
+
 bool wxStaticBox::Create( wxWindow*       pParent,
                           wxWindowID      vId,
                           const wxString& rsLabel,

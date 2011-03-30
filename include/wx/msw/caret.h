@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/caret.h
+// Name:        msw/caret.h
 // Purpose:     wxCaret class - the MSW implementation of wxCaret
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -12,7 +12,7 @@
 #ifndef _WX_CARET_H_
 #define _WX_CARET_H_
 
-class WXDLLIMPEXP_CORE wxCaret : public wxCaretBase
+class WXDLLEXPORT wxCaret : public wxCaretBase
 {
 public:
     wxCaret() { Init(); }
@@ -56,7 +56,7 @@ protected:
 private:
     bool m_hasCaret;
 
-    wxDECLARE_NO_COPY_CLASS(wxCaret);
+    DECLARE_NO_COPY_CLASS(wxCaret)
 };
 
 #endif // _WX_CARET_H_

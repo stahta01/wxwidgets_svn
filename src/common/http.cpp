@@ -32,12 +32,6 @@
 #include "wx/url.h"
 #include "wx/protocol/http.h"
 #include "wx/sckstrm.h"
-#include "wx/thread.h"
-
-
-// ----------------------------------------------------------------------------
-// wxHTTP
-// ----------------------------------------------------------------------------
 
 IMPLEMENT_DYNAMIC_CLASS(wxHTTP, wxProtocol)
 IMPLEMENT_PROTOCOL(wxHTTP, wxT("http"), wxT("80"), true)
@@ -63,15 +57,10 @@ wxHTTP::~wxHTTP()
 
 void wxHTTP::ClearHeaders()
 {
-    m_headers.clear();
+  m_headers.clear();
 }
 
-void wxHTTP::ClearCookies()
-{
-    m_cookies.clear();
-}
-
-wxString wxHTTP::GetContentType() const
+wxString wxHTTP::GetContentType()
 {
     return GetHeader(wxT("Content-Type"));
 }
@@ -86,7 +75,7 @@ wxHTTP::wxHeaderIterator wxHTTP::FindHeader(const wxString& header)
     wxHeaderIterator it = m_headers.begin();
     for ( wxHeaderIterator en = m_headers.end(); it != en; ++it )
     {
-        if ( header.CmpNoCase(it->first) == 0 )
+        if ( wxStricmp(it->first, header) == 0 )
             break;
     }
 
@@ -98,31 +87,7 @@ wxHTTP::wxHeaderConstIterator wxHTTP::FindHeader(const wxString& header) const
     wxHeaderConstIterator it = m_headers.begin();
     for ( wxHeaderConstIterator en = m_headers.end(); it != en; ++it )
     {
-        if ( header.CmpNoCase(it->first) == 0 )
-            break;
-    }
-
-    return it;
-}
-
-wxHTTP::wxCookieIterator wxHTTP::FindCookie(const wxString& cookie)
-{
-    wxCookieIterator it = m_cookies.begin();
-    for ( wxCookieIterator en = m_cookies.end(); it != en; ++it )
-    {
-        if ( cookie.CmpNoCase(it->first) == 0 )
-            break;
-    }
-
-    return it;
-}
-
-wxHTTP::wxCookieConstIterator wxHTTP::FindCookie(const wxString& cookie) const
-{
-    wxCookieConstIterator it = m_cookies.begin();
-    for ( wxCookieConstIterator en = m_cookies.end(); it != en; ++it )
-    {
-        if ( cookie.CmpNoCase(it->first) == 0 )
+        if ( wxStricmp(it->first, header) == 0 )
             break;
     }
 
@@ -150,17 +115,8 @@ wxString wxHTTP::GetHeader(const wxString& header) const
     return it == m_headers.end() ? wxGetEmptyString() : it->second;
 }
 
-wxString wxHTTP::GetCookie(const wxString& cookie) const
-{
-    wxCookieConstIterator it = FindCookie(cookie);
-
-    return it == m_cookies.end() ? wxGetEmptyString() : it->second;
-}
-
 wxString wxHTTP::GenerateAuthString(const wxString& user, const wxString& pass) const
 {
-    // TODO: Use wxBase64Encode() now that we have it instead of reproducing it
-
     static const char *base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     wxString buf;
@@ -185,7 +141,7 @@ wxString wxHTTP::GenerateAuthString(const wxString& user, const wxString& pass) 
         } else {
             buf << wxString::Format(wxT("%c%c"), base64[((from[0] << 4) & 0x30) | ((from[1] >> 4) & 0xf)], base64[(from[1] << 2) & 0x3c]);
         }
-        buf << wxT("=");
+        buf << wxString::Format(wxT("="));
     }
 
     return buf;
@@ -216,32 +172,19 @@ bool wxHTTP::ParseHeaders()
     wxStringTokenizer tokenzr;
 
     ClearHeaders();
-    ClearCookies();
     m_read = true;
 
     for ( ;; )
     {
-        m_lastError = ReadLine(this, line);
-        if (m_lastError != wxPROTO_NOERR)
+        m_perr = ReadLine(this, line);
+        if (m_perr != wxPROTO_NOERR)
             return false;
 
-        if ( line.empty() )
+        if (line.length() == 0)
             break;
 
         wxString left_str = line.BeforeFirst(':');
-        if(!left_str.CmpNoCase("Set-Cookie"))
-        {
-            wxString cookieName = line.AfterFirst(':').Strip(wxString::both).BeforeFirst('=');
-            wxString cookieValue = line.AfterFirst(':').Strip(wxString::both).AfterFirst('=').BeforeFirst(';');
-            m_cookies[cookieName] = cookieValue;
-
-            // For compatibility
-            m_headers[left_str] = line.AfterFirst(':').Strip(wxString::both);
-        }
-        else
-        {
-            m_headers[left_str] = line.AfterFirst(':').Strip(wxString::both);
-        }
+        m_headers[left_str] = line.AfterFirst(':').Strip(wxString::both);
     }
     return true;
 }
@@ -251,15 +194,17 @@ bool wxHTTP::Connect(const wxString& host, unsigned short port)
     wxIPV4address *addr;
 
     if (m_addr) {
-        wxDELETE(m_addr);
+        delete m_addr;
+        m_addr = NULL;
         Close();
     }
 
     m_addr = addr = new wxIPV4address();
 
     if (!addr->Hostname(host)) {
-        wxDELETE(m_addr);
-        m_lastError = wxPROTO_NETERR;
+        delete m_addr;
+        m_addr = NULL;
+        m_perr = wxPROTO_NETERR;
         return false;
     }
 
@@ -268,16 +213,12 @@ bool wxHTTP::Connect(const wxString& host, unsigned short port)
     else if (!addr->Service(wxT("http")))
         addr->Service(80);
 
-    wxString hostHdr = host;
-    if ( port && port != 80 )
-        hostHdr << wxT(":") << port;
-    SetHeader(wxT("Host"), hostHdr);
+    SetHeader(wxT("Host"), host);
 
-    m_lastError = wxPROTO_NOERR;
     return true;
 }
 
-bool wxHTTP::Connect(const wxSockAddress& addr, bool WXUNUSED(wait))
+bool wxHTTP::Connect(wxSockAddress& addr, bool WXUNUSED(wait))
 {
     if (m_addr) {
         delete m_addr;
@@ -287,16 +228,9 @@ bool wxHTTP::Connect(const wxSockAddress& addr, bool WXUNUSED(wait))
     m_addr = addr.Clone();
 
     wxIPV4address *ipv4addr = wxDynamicCast(&addr, wxIPV4address);
-    if ( ipv4addr )
-    {
-        wxString hostHdr = ipv4addr->OrigHostname();
-        unsigned short port = ipv4addr->Service();
-        if ( port && port != 80 )
-            hostHdr << wxT(":") << port;
-        SetHeader(wxT("Host"), hostHdr);
-    }
+    if (ipv4addr)
+        SetHeader(wxT("Host"), ipv4addr->OrigHostname());
 
-    m_lastError = wxPROTO_NOERR;
     return true;
 }
 
@@ -312,7 +246,7 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
 
         case wxHTTP_POST:
             request = wxT("POST");
-            if ( GetHeader( wxT("Content-Length") ).empty() )
+            if ( GetHeader( wxT("Content-Length") ).IsNull() )
                 SetHeader( wxT("Content-Length"), wxString::Format( wxT("%lu"), (unsigned long)m_post_buf.Len() ) );
             break;
 
@@ -323,7 +257,7 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
     m_http_response = 0;
 
     // If there is no User-Agent defined, define it.
-    if ( GetHeader(wxT("User-Agent")).empty() )
+    if (GetHeader(wxT("User-Agent")).IsNull())
         SetHeader(wxT("User-Agent"), wxT("wxWidgets 2.x"));
 
     // Send authentication information
@@ -340,29 +274,19 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
 
     wxString buf;
     buf.Printf(wxT("%s %s HTTP/1.0\r\n"), request, path.c_str());
-    const wxWX2MBbuf pathbuf = buf.mb_str();
-    Write(pathbuf, strlen(pathbuf));
+    const wxWX2MBbuf pathbuf = wxConvLocal.cWX2MB(buf);
+    Write(pathbuf, strlen(wxMBSTRINGCAST pathbuf));
     SendHeaders();
     Write("\r\n", 2);
 
     if ( req == wxHTTP_POST ) {
-        // Post data can be arbitrary binary data when the "binary" content
-        // transfer encoding is used so don't assume it's ASCII only or
-        // NUL-terminated.
-        {
-            const wxScopedCharBuffer buf(m_post_buf.To8BitData());
-            Write(buf, buf.length());
-        } // delete the buffer before modifying the string it points to, it
-          // wouldn't really be a problem here even if we didn't do this
-          // because we won't use this buffer again but this will avoid any
-          // nasty surprises in the future if this code changes
-
+        Write(m_post_buf.mbc_str(), m_post_buf.Len());
         m_post_buf = wxEmptyString;
     }
 
     wxString tmp_str;
-    m_lastError = ReadLine(this, tmp_str);
-    if (m_lastError != wxPROTO_NOERR) {
+    m_perr = ReadLine(this, tmp_str);
+    if (m_perr != wxPROTO_NOERR) {
         RestoreState();
         return false;
     }
@@ -370,7 +294,6 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
     if (!tmp_str.Contains(wxT("HTTP/"))) {
         // TODO: support HTTP v0.9 which can have no header.
         // FIXME: tmp_str is not put back in the in-queue of the socket.
-        m_lastError = wxPROTO_NOERR;
         SetHeader(wxT("Content-Length"), wxT("-1"));
         SetHeader(wxT("Content-Type"), wxT("none/none"));
         RestoreState();
@@ -386,7 +309,7 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
 
     m_http_response = wxAtoi(tmp_str2);
 
-    switch ( tmp_str2[0u].GetValue() )
+    switch (tmp_str2[0u])
     {
         case wxT('1'):
             /* INFORMATION / SUCCESS */
@@ -401,25 +324,15 @@ bool wxHTTP::BuildRequest(const wxString& path, wxHTTP_Req req)
             break;
 
         default:
-            m_lastError = wxPROTO_NOFILE;
+            m_perr = wxPROTO_NOFILE;
             RestoreState();
             return false;
     }
 
-    m_lastError = wxPROTO_NOERR;
     ret_value = ParseHeaders();
     RestoreState();
     return ret_value;
 }
-
-bool wxHTTP::Abort(void)
-{
-    return wxSocketClient::Close();
-}
-
-// ----------------------------------------------------------------------------
-// wxHTTPStream and wxHTTP::GetInputStream
-// ----------------------------------------------------------------------------
 
 class wxHTTPStream : public wxSocketInputStream
 {
@@ -435,12 +348,12 @@ public:
 protected:
     size_t OnSysRead(void *buffer, size_t bufsize);
 
-    wxDECLARE_NO_COPY_CLASS(wxHTTPStream);
+    DECLARE_NO_COPY_CLASS(wxHTTPStream)
 };
 
 size_t wxHTTPStream::OnSysRead(void *buffer, size_t bufsize)
 {
-    if (m_read_bytes >= m_httpsize)
+    if (m_httpsize > 0 && m_read_bytes >= m_httpsize)
     {
         m_lasterror = wxSTREAM_EOF;
         return 0;
@@ -455,10 +368,15 @@ size_t wxHTTPStream::OnSysRead(void *buffer, size_t bufsize)
         // which is equivalent to getting a READ_ERROR, for clients however this
         // must be translated into EOF, as it is the expected way of signalling
         // end end of the content
-        m_lasterror = wxSTREAM_EOF;
+        m_lasterror = wxSTREAM_EOF ;
     }
 
     return ret;
+}
+
+bool wxHTTP::Abort(void)
+{
+    return wxSocketClient::Close();
 }
 
 wxInputStream *wxHTTP::GetInputStream(const wxString& path)
@@ -467,7 +385,7 @@ wxInputStream *wxHTTP::GetInputStream(const wxString& path)
 
     wxString new_path;
 
-    m_lastError = wxPROTO_CONNERR;  // all following returns share this type of error
+    m_perr = wxPROTO_CONNERR;
     if (!m_addr)
         return NULL;
 
@@ -489,7 +407,7 @@ wxInputStream *wxHTTP::GetInputStream(const wxString& path)
     inp_stream = new wxHTTPStream(this);
 
     if (!GetHeader(wxT("Content-Length")).empty())
-        inp_stream->m_httpsize = wxAtoi(GetHeader(wxT("Content-Length")));
+        inp_stream->m_httpsize = wxAtoi(WXSTRINGCAST GetHeader(wxT("Content-Length")));
     else
         inp_stream->m_httpsize = (size_t)-1;
 
@@ -498,8 +416,6 @@ wxInputStream *wxHTTP::GetInputStream(const wxString& path)
     Notify(false);
     SetFlags(wxSOCKET_BLOCK | wxSOCKET_WAITALL);
 
-    // no error; reset m_lastError
-    m_lastError = wxPROTO_NOERR;
     return inp_stream;
 }
 

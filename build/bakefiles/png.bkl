@@ -30,6 +30,7 @@
         <sources>
             src/png/png.c
             src/png/pngerror.c
+            src/png/pnggccrd.c
             src/png/pngget.c
             src/png/pngmem.c
             src/png/pngpread.c
@@ -39,6 +40,7 @@
             src/png/pngrutil.c
             src/png/pngset.c
             src/png/pngtrans.c
+            src/png/pngvcrd.c
             src/png/pngwio.c
             src/png/pngwrite.c
             src/png/pngwtran.c

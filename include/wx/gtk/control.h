@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/control.h
+// Name:        control.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -43,8 +43,12 @@ public:
             const wxValidator& validator = wxDefaultValidator,
             const wxString& name = wxControlNameStr);
 
+    virtual void SetLabel( const wxString &label );
+    virtual wxString GetLabel() const;
 
     virtual wxVisualAttributes GetDefaultAttributes() const;
+
+    virtual void OnInternalIdle();
 
 protected:
     virtual wxSize DoGetBestSize() const;
@@ -52,9 +56,6 @@ protected:
 
     // sets the label to the given string and also sets it for the given widget
     void GTKSetLabelForLabel(GtkLabel *w, const wxString& label);
-#if wxUSE_MARKUP
-    void GTKSetLabelWithMarkupForLabel(GtkLabel *w, const wxString& label);
-#endif // wxUSE_MARKUP
 
     // GtkFrame helpers
     GtkWidget* GTKCreateFrame(const wxString& label);
@@ -66,10 +67,10 @@ protected:
     static wxString GTKRemoveMnemonics(const wxString& label);
 
     // converts wx label to GTK+ label, i.e. basically replace "&"s with "_"s
+    //
+    // for GTK+ 1 (which doesn't support mnemonics) this is the same as
+    // GTKRemoveMnemonics()
     static wxString GTKConvertMnemonics(const wxString &label);
-
-    // converts wx label to GTK+ labels preserving Pango markup
-    static wxString GTKConvertMnemonicsWithMarkup(const wxString& label);
 
     // These are used by GetDefaultAttributes
     static wxVisualAttributes
@@ -94,11 +95,14 @@ protected:
     // override this and return true.
     virtual bool UseGTKStyleBase() const { return false; }
 
-    // Fix sensitivity due to bug in GTK+ < 2.14
-    void GTKFixSensitivity(bool onlyIfUnderMouse = true);
+    // this field contains the label in wx format, i.e. with "&" mnemonics
+    wxString m_label;
 
 private:
     DECLARE_DYNAMIC_CLASS(wxControl)
 };
+
+// Fix sensitivity due to bug in GTK+ < 2.14
+void WXDLLEXPORT wxGtkFixSensitivity(wxWindow* ctrl);
 
 #endif // _WX_GTK_CONTROL_H_

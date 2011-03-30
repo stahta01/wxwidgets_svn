@@ -437,7 +437,7 @@ CXX = g++
 minimal: minimal.o
     $(CXX) -o minimal minimal.o `wx-config --libs` 
 
-minimal.o: minimal.cpp
+minimal.o: minimal.cpp mondrian.xpm
     $(CXX) `wx-config --cxxflags` -c minimal.cpp -o minimal.o
 
 clean: 

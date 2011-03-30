@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/imagpnm.h
+// Name:        imagpnm.h
 // Purpose:     wxImage PNM handler
 // Author:      Sylvain Bougnoux
 // RCS-ID:      $Id$
@@ -17,16 +17,13 @@
 //-----------------------------------------------------------------------------
 
 #if wxUSE_PNM
-class WXDLLIMPEXP_CORE wxPNMHandler : public wxImageHandler
+class WXDLLEXPORT wxPNMHandler : public wxImageHandler
 {
 public:
     inline wxPNMHandler()
     {
         m_name = wxT("PNM file");
         m_extension = wxT("pnm");
-        m_altExtensions.Add(wxT("ppm"));
-        m_altExtensions.Add(wxT("pgm"));
-        m_altExtensions.Add(wxT("pbm"));
         m_type = wxBITMAP_TYPE_PNM;
         m_mime = wxT("image/pnm");
     }

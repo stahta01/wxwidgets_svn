@@ -149,13 +149,16 @@
 
 #include "wx/cmdproc.h"
 
-#if wxDEBUG_LEVEL >= 2
-    // turn extra wxTextCtrl-specific debugging on/off
-    #define WXDEBUG_TEXT
+// turn extra wxTextCtrl-specific debugging on/off
+#define WXDEBUG_TEXT
 
-    // turn wxTextCtrl::Replace() debugging on (slows down code a *lot*!)
-    #define WXDEBUG_TEXT_REPLACE
-#endif // wxDEBUG_LEVEL >= 2
+// turn wxTextCtrl::Replace() debugging on (slows down code a *lot*!)
+#define WXDEBUG_TEXT_REPLACE
+
+#ifndef __WXDEBUG__
+    #undef WXDEBUG_TEXT
+    #undef WXDEBUG_TEXT_REPLACE
+#endif
 
 // wxStringTokenize only needed for debug checks
 #ifdef WXDEBUG_TEXT_REPLACE
@@ -209,8 +212,8 @@ static inline void OrderPositions(wxTextPos& from, wxTextPos& to)
 // ----------------------------------------------------------------------------
 
 // names of text ctrl commands
-#define wxTEXT_COMMAND_INSERT wxT("insert")
-#define wxTEXT_COMMAND_REMOVE wxT("remove")
+#define wxTEXT_COMMAND_INSERT _T("insert")
+#define wxTEXT_COMMAND_REMOVE _T("remove")
 
 // the value which is never used for text position, even not -1 which is
 // sometimes used for some special meaning
@@ -315,7 +318,7 @@ public:
     // for the first one)
     wxTextCoord GetRowStart(wxTextCoord row) const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         return row ? m_rowsStart[row - 1] : 0;
     }
@@ -325,7 +328,7 @@ public:
     // be given to us)
     wxTextCoord GetRowLength(wxTextCoord row, wxTextCoord lenLine) const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         // note that m_rowsStart[row] is the same as GetRowStart(row + 1) (but
         // slightly more efficient) and lenLine is the same as the start of the
@@ -337,7 +340,7 @@ public:
     // return the width of the row in pixels
     wxCoord GetRowWidth(wxTextCoord row) const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         return m_rowsWidth[row];
     }
@@ -345,7 +348,7 @@ public:
     // return the number of rows
     size_t GetRowCount() const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         return m_rowsStart.GetCount() + 1;
     }
@@ -353,7 +356,7 @@ public:
     // return the number of additional (i.e. after the first one) rows
     size_t GetExtraRowCount() const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         return m_rowsStart.GetCount();
     }
@@ -361,7 +364,7 @@ public:
     // return the first row of this line
     wxTextCoord GetFirstRow() const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         return m_rowFirst;
     }
@@ -369,7 +372,7 @@ public:
     // return the first row of the next line
     wxTextCoord GetNextRow() const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         return m_rowFirst + m_rowsStart.GetCount() + 1;
     }
@@ -377,7 +380,7 @@ public:
     // this just provides direct access to m_rowsStart aerray for efficiency
     wxTextCoord GetExtraRowStart(wxTextCoord row) const
     {
-        wxASSERT_MSG( IsValid(), wxT("this line hadn't been laid out") );
+        wxASSERT_MSG( IsValid(), _T("this line hadn't been laid out") );
 
         return m_rowsStart[row];
     }
@@ -408,14 +411,14 @@ public:
                                                 : GetRowStart(n + 1);
 
                 wxASSERT_MSG( colRowEnd < colNextRowStart,
-                              wxT("this column is not in this row at all!") );
+                              _T("this column is not in this row at all!") );
 
                 return colRowEnd == colNextRowStart - 1;
             }
         }
 
         // caller got it wrong
-        wxFAIL_MSG( wxT("this column is not in the start of the row!") );
+        wxFAIL_MSG( _T("this column is not in the start of the row!") );
 
         return false;
     }
@@ -522,8 +525,8 @@ public:
 
     // we don't use these methods as they don't make sense for us as we need a
     // wxTextCtrl to be applied
-    virtual bool Do() { wxFAIL_MSG(wxT("shouldn't be called")); return false; }
-    virtual bool Undo() { wxFAIL_MSG(wxT("shouldn't be called")); return false; }
+    virtual bool Do() { wxFAIL_MSG(_T("shouldn't be called")); return false; }
+    virtual bool Undo() { wxFAIL_MSG(_T("shouldn't be called")); return false; }
 
     // instead, our command processor uses these methods
     virtual bool Do(wxTextCtrl *text) = 0;
@@ -633,6 +636,8 @@ BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
     EVT_SIZE(wxTextCtrl::OnSize)
 END_EVENT_TABLE()
 
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+
 // ----------------------------------------------------------------------------
 // creation
 // ----------------------------------------------------------------------------
@@ -740,7 +745,7 @@ bool wxTextCtrl::Create(wxWindow *parent,
         // we might support it but it's quite useless and other ports don't
         // support it anyhow
         wxASSERT_MSG( !(style & wxTE_PASSWORD),
-                      wxT("wxTE_PASSWORD can't be used with multiline ctrls") );
+                      _T("wxTE_PASSWORD can't be used with multiline ctrls") );
     }
 
     RecalcFontMetrics();
@@ -785,23 +790,21 @@ wxTextCtrl::~wxTextCtrl()
 
 void wxTextCtrl::DoSetValue(const wxString& value, int flags)
 {
-    if ( value != GetValue() )
+    if ( IsSingleLine() && (value == GetValue()) )
     {
-        EventsSuppressor noeventsIf(this, !(flags & SetValue_SendEvent));
-
-        Replace(0, GetLastPosition(), value);
-
-        if ( IsSingleLine() )
-        {
-            SetInsertionPoint(0);
-        }
+        // nothing changed
+        return;
     }
-    else // nothing changed
+
+    Replace(0, GetLastPosition(), value);
+
+    if ( IsSingleLine() )
     {
-        // still send event for consistency
-        if ( flags & SetValue_SendEvent )
-            SendTextUpdatedEvent();
+        SetInsertionPoint(0);
     }
+
+    if ( flags & SetValue_SendEvent )
+        SendTextUpdatedEvent();
 }
 
 const wxArrayString& wxTextCtrl::GetLines() const
@@ -814,7 +817,7 @@ size_t wxTextCtrl::GetLineCount() const
     return MData().m_lines.GetCount();
 }
 
-wxString wxTextCtrl::DoGetValue() const
+wxString wxTextCtrl::GetValue() const
 {
     // for multiline controls we don't always store the total value but only
     // recompute it when asked - and to invalidate it we just empty it in
@@ -832,7 +835,7 @@ wxString wxTextCtrl::DoGetValue() const
         size_t count = lines.GetCount();
         for ( size_t n = 1; n < count; n++ )
         {
-            self->m_value << wxT('\n') << lines[n];
+            self->m_value << _T('\n') << lines[n];
         }
     }
 
@@ -947,7 +950,7 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
          !PositionToXY(from, &colStart, &lineStart) ||
          !PositionToXY(to, &colEnd, &lineEnd) )
     {
-        wxFAIL_MSG(wxT("invalid range in wxTextCtrl::Replace"));
+        wxFAIL_MSG(_T("invalid range in wxTextCtrl::Replace"));
 
         return;
     }
@@ -1034,7 +1037,7 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
             if ( line > lineStart )
             {
                 // from the previous line
-                textOrig += wxT('\n');
+                textOrig += _T('\n');
             }
 
             textOrig += linesOld[line];
@@ -1055,7 +1058,7 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
         if ( (size_t)colStart == linesOld[lineStart].length() )
         {
             // text appended, refresh just enough to show the new text
-            widthNewText = GetTextWidth(text.BeforeFirst(wxT('\n')));
+            widthNewText = GetTextWidth(text.BeforeFirst(_T('\n')));
         }
         else // text inserted, refresh till the end of line
         {
@@ -1081,7 +1084,7 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
         for ( const wxChar *p = textNew.c_str(); ; p++ )
         {
             // end of line/text?
-            if ( !*p || *p == wxT('\n') )
+            if ( !*p || *p == _T('\n') )
             {
                 lines.Add(wxString(curLineStart, p));
                 if ( !*p )
@@ -1094,7 +1097,7 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
 #ifdef WXDEBUG_TEXT_REPLACE
         // (3a) all empty tokens should be counted as replacing with "foo" and
         //      with "foo\n" should have different effects
-        wxArrayString lines2 = wxStringTokenize(textNew, wxT("\n"),
+        wxArrayString lines2 = wxStringTokenize(textNew, _T("\n"),
                                                 wxTOKEN_RET_EMPTY_ALL);
 
         if ( lines2.IsEmpty() )
@@ -1103,10 +1106,10 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
         }
 
         wxASSERT_MSG( lines.GetCount() == lines2.GetCount(),
-                      wxT("Replace() broken") );
+                      _T("Replace() broken") );
         for ( size_t n = 0; n < lines.GetCount(); n++ )
         {
-            wxASSERT_MSG( lines[n] == lines2[n], wxT("Replace() broken") );
+            wxASSERT_MSG( lines[n] == lines2[n], _T("Replace() broken") );
         }
 #endif // WXDEBUG_TEXT_REPLACE
 
@@ -1237,7 +1240,7 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
 #ifdef WXDEBUG_TEXT_REPLACE
     // optimized code above should give the same result as straightforward
     // computation in the beginning
-    wxASSERT_MSG( GetValue() == textTotalNew, wxT("error in Replace()") );
+    wxASSERT_MSG( GetValue() == textTotalNew, _T("error in Replace()") );
 #endif // WXDEBUG_TEXT_REPLACE
 
     // update the current position: note that we always put the cursor at the
@@ -1261,8 +1264,6 @@ void wxTextCtrl::Replace(wxTextPos from, wxTextPos to, const wxString& text)
 
     // now call it to do the rest (not related to refreshing)
     ClearSelection();
-
-    SendTextUpdatedEventIfAllowed();
 }
 
 void wxTextCtrl::Remove(wxTextPos from, wxTextPos to)
@@ -1295,7 +1296,7 @@ void wxTextCtrl::AppendText(const wxString& text)
 void wxTextCtrl::SetInsertionPoint(wxTextPos pos)
 {
     wxCHECK_RET( pos >= 0 && pos <= GetLastPosition(),
-                 wxT("insertion point position out of range") );
+                 _T("insertion point position out of range") );
 
     // don't do anything if it didn't change
     if ( pos != m_curPos )
@@ -1325,7 +1326,7 @@ void wxTextCtrl::InitInsertionPoint()
 void wxTextCtrl::MoveInsertionPoint(wxTextPos pos)
 {
     wxASSERT_MSG( pos >= 0 && pos <= GetLastPosition(),
-                 wxT("DoSetInsertionPoint() can only be called with valid pos") );
+                 _T("DoSetInsertionPoint() can only be called with valid pos") );
 
     m_curPos = pos;
     PositionToXY(m_curPos, &m_curCol, &m_curRow);
@@ -1375,7 +1376,7 @@ wxTextPos wxTextCtrl::GetLastPosition() const
         }
 
         // more probable reason of this would be to forget to update m_posLast
-        wxASSERT_MSG( pos == m_posLast, wxT("bug in GetLastPosition()") );
+        wxASSERT_MSG( pos == m_posLast, _T("bug in GetLastPosition()") );
 #endif // WXDEBUG_TEXT
 
         pos = m_posLast;
@@ -1423,12 +1424,12 @@ wxString wxTextCtrl::GetSelectionText() const
             {
                 // take the end of the first line
                 sel = GetLines()[lineStart].c_str() + colStart;
-                sel += wxT('\n');
+                sel += _T('\n');
 
                 // all intermediate ones
                 for ( wxTextCoord line = lineStart + 1; line < lineEnd; line++ )
                 {
-                    sel << GetLines()[line] << wxT('\n');
+                    sel << GetLines()[line] << _T('\n');
                 }
 
                 // and the start of the last one
@@ -1465,7 +1466,7 @@ void wxTextCtrl::SetSelection(wxTextPos from, wxTextPos to)
         OrderPositions(from, to);
 
         wxCHECK_RET( to <= GetLastPosition(),
-                     wxT("invalid range in wxTextCtrl::SetSelection") );
+                     _T("invalid range in wxTextCtrl::SetSelection") );
 
         if ( from != m_selStart || to != m_selEnd )
         {
@@ -1477,7 +1478,7 @@ void wxTextCtrl::SetSelection(wxTextPos from, wxTextPos to)
             m_selStart = from;
             m_selEnd = to;
 
-            wxLogTrace(wxT("text"), wxT("Selection range is %ld-%ld"),
+            wxLogTrace(_T("text"), _T("Selection range is %ld-%ld"),
                        m_selStart, m_selEnd);
 
             // refresh only the part of text which became (un)selected if
@@ -1651,14 +1652,14 @@ int wxTextCtrl::GetLineLength(wxTextCoord line) const
 {
     if ( IsSingleLine() )
     {
-        wxASSERT_MSG( line == 0, wxT("invalid GetLineLength() parameter") );
+        wxASSERT_MSG( line == 0, _T("invalid GetLineLength() parameter") );
 
         return m_value.length();
     }
     else // multiline
     {
         wxCHECK_MSG( (size_t)line < GetLineCount(), -1,
-                     wxT("line index out of range") );
+                     _T("line index out of range") );
 
         return GetLines()[line].length();
     }
@@ -1668,7 +1669,7 @@ wxString wxTextCtrl::GetLineText(wxTextCoord line) const
 {
     if ( IsSingleLine() )
     {
-        wxASSERT_MSG( line == 0, wxT("invalid GetLineLength() parameter") );
+        wxASSERT_MSG( line == 0, _T("invalid GetLineLength() parameter") );
 
         return m_value;
     }
@@ -1678,7 +1679,7 @@ wxString wxTextCtrl::GetLineText(wxTextCoord line) const
         if (line == 0 && GetLineCount() == 0) return wxEmptyString ;
 
         wxCHECK_MSG( (size_t)line < GetLineCount(), wxEmptyString,
-                     wxT("line index out of range") );
+                     _T("line index out of range") );
 
         return GetLines()[line];
     }
@@ -1760,7 +1761,7 @@ bool wxTextCtrl::PositionToXY(wxTextPos pos,
 
 #ifdef WXDEBUG_TEXT
                 wxASSERT_MSG( XYToPosition(pos - posCur, nLine) == pos,
-                              wxT("XYToPosition() or PositionToXY() broken") );
+                              _T("XYToPosition() or PositionToXY() broken") );
 #endif // WXDEBUG_TEXT
 
                 return true;
@@ -1898,7 +1899,7 @@ wxPoint wxTextCtrl::GetCaretPosition() const
     wxCoord xCaret, yCaret;
     if ( !PositionToDeviceXY(m_curPos, &xCaret, &yCaret) )
     {
-        wxFAIL_MSG( wxT("Caret can't be beyond the text!") );
+        wxFAIL_MSG( _T("Caret can't be beyond the text!") );
     }
 
     return wxPoint(xCaret, yCaret);
@@ -1964,7 +1965,7 @@ void wxTextCtrl::ShowPosition(wxTextPos pos)
                 {
                     // finding the last line is easy if each line has exactly
                     // one row
-                    yEnd = yStart + rectText.height / GetLineHeight();
+                    yEnd = yStart + rectText.height / GetLineHeight() - 1;
                 }
 
                 if ( yEnd < y )
@@ -2279,7 +2280,7 @@ bool wxTextCtrlInsertCommand::Do(wxTextCtrl *text)
 
 bool wxTextCtrlInsertCommand::Undo(wxTextCtrl *text)
 {
-    wxCHECK_MSG( CanUndo(), false, wxT("impossible to undo insert cmd") );
+    wxCHECK_MSG( CanUndo(), false, _T("impossible to undo insert cmd") );
 
     // remove the text from where we inserted it
     text->Remove(m_from, m_from + m_text.length());
@@ -2316,7 +2317,7 @@ bool wxTextCtrlRemoveCommand::Undo(wxTextCtrl *text)
 void wxTextCtrl::Undo()
 {
     // the caller must check it
-    wxASSERT_MSG( CanUndo(), wxT("can't call Undo() if !CanUndo()") );
+    wxASSERT_MSG( CanUndo(), _T("can't call Undo() if !CanUndo()") );
 
     m_cmdProcessor->Undo();
 }
@@ -2324,7 +2325,7 @@ void wxTextCtrl::Undo()
 void wxTextCtrl::Redo()
 {
     // the caller must check it
-    wxASSERT_MSG( CanRedo(), wxT("can't call Undo() if !CanUndo()") );
+    wxASSERT_MSG( CanRedo(), _T("can't call Undo() if !CanUndo()") );
 
     m_cmdProcessor->Redo();
 }
@@ -2417,7 +2418,7 @@ void wxTextCtrl::UpdateTextRect()
             WData().m_rowFirstInvalid = 0;
 
             // increase timestamp: this means that the lines which had been
-            // laid out before will be relaid out the next time LayoutLines()
+            // laid out before will be relayd out the next time LayoutLines()
             // is called because their timestamp will be smaller than the
             // current one
             WData().m_timestamp++;
@@ -2455,7 +2456,7 @@ void wxTextCtrl::UpdateLastVisible()
         case wxTE_HT_BELOW:
             */
         default:
-            wxFAIL_MSG(wxT("unexpected HitTestLine() return value"));
+            wxFAIL_MSG(_T("unexpected HitTestLine() return value"));
             // fall through
 
         case wxTE_HT_ON_TEXT:
@@ -2491,7 +2492,7 @@ void wxTextCtrl::UpdateLastVisible()
     // SData().m_colStart, we need an absolute offset into string
     SData().m_colLastVisible += SData().m_colStart;
 
-    wxLogTrace(wxT("text"), wxT("Last visible column/position is %d/%ld"),
+    wxLogTrace(_T("text"), _T("Last visible column/position is %d/%ld"),
                (int) SData().m_colLastVisible, (long) SData().m_posLastVisible);
 }
 
@@ -2563,7 +2564,7 @@ wxTextCoord wxTextCtrl::GetRowInLine(wxTextCoord line,
                                      wxTextCoord col,
                                      wxTextCoord *colRowStart) const
 {
-    wxASSERT_MSG( WrapLines(), wxT("shouldn't be called") );
+    wxASSERT_MSG( WrapLines(), _T("shouldn't be called") );
 
     const wxWrappedLineData& lineData = WData().m_linesData[line];
 
@@ -2591,7 +2592,7 @@ wxTextCoord wxTextCtrl::GetRowInLine(wxTextCoord line,
         *colRowStart = lineData.GetRowStart(row);
 
         // this can't happen, of course
-        wxASSERT_MSG( *colRowStart <= col, wxT("GetRowInLine() is broken") );
+        wxASSERT_MSG( *colRowStart <= col, _T("GetRowInLine() is broken") );
     }
 
     return row;
@@ -2632,12 +2633,12 @@ void wxTextCtrl::LayoutLine(wxTextCoord line, wxWrappedLineData& lineData) const
 
 void wxTextCtrl::LayoutLines(wxTextCoord lineLast) const
 {
-    wxASSERT_MSG( WrapLines(), wxT("should only be used for line wrapping") );
+    wxASSERT_MSG( WrapLines(), _T("should only be used for line wrapping") );
 
     // if we were called, some line was dirty and if it was dirty we must have
     // had m_rowFirstInvalid set to something too
     wxTextCoord lineFirst = WData().m_rowFirstInvalid;
-    wxASSERT_MSG( lineFirst != -1, wxT("nothing to layout?") );
+    wxASSERT_MSG( lineFirst != -1, _T("nothing to layout?") );
 
     wxTextCoord rowFirst, rowCur;
     if ( lineFirst )
@@ -2690,7 +2691,7 @@ size_t wxTextCtrl::GetPartOfWrappedLine(const wxChar* text,
                                         wxCoord *widthReal) const
 {
     // this function is slow, it shouldn't be called unless really needed
-    wxASSERT_MSG( WrapLines(), wxT("shouldn't be called") );
+    wxASSERT_MSG( WrapLines(), _T("shouldn't be called") );
 
     wxString s(text);
     wxTextCoord col;
@@ -2702,7 +2703,7 @@ size_t wxTextCtrl::GetPartOfWrappedLine(const wxChar* text,
         case wxTE_HT_BELOW:
             */
         default:
-            wxFAIL_MSG(wxT("unexpected HitTestLine() return value"));
+            wxFAIL_MSG(_T("unexpected HitTestLine() return value"));
             // fall through
 
         case wxTE_HT_ON_TEXT:
@@ -2942,7 +2943,7 @@ wxTextCtrlHitTestResult wxTextCtrl::HitTestLine(const wxString& line,
             }
 
             // this is not supposed to happen
-            wxASSERT_MSG( matchDir, wxT("logic error in wxTextCtrl::HitTest") );
+            wxASSERT_MSG( matchDir, _T("logic error in wxTextCtrl::HitTest") );
 
             if ( matchDir == Match_Right )
                 col++;
@@ -2966,11 +2967,11 @@ wxTextCtrlHitTestResult wxTextCtrl::HitTestLine(const wxString& line,
             dc.GetTextExtent(text, &width2, NULL);
 
             wxASSERT_MSG( (width1 <= x) && (x < width2),
-                          wxT("incorrect HitTestLine() result") );
+                          _T("incorrect HitTestLine() result") );
         }
         else // we return last char
         {
-            wxASSERT_MSG( x >= width1, wxT("incorrect HitTestLine() result") );
+            wxASSERT_MSG( x >= width1, _T("incorrect HitTestLine() result") );
         }
     }
 #endif // WXDEBUG_TEXT
@@ -3275,7 +3276,7 @@ bool wxTextCtrl::GetLineAndRow(wxTextCoord row,
 
 void wxTextCtrl::ShowHorzPosition(wxCoord pos)
 {
-    wxASSERT_MSG( IsSingleLine(), wxT("doesn't work for multiline") );
+    wxASSERT_MSG( IsSingleLine(), _T("doesn't work for multiline") );
 
     // pos is the logical position to show
 
@@ -3314,7 +3315,7 @@ void wxTextCtrl::ShowHorzPosition(wxCoord pos)
 void wxTextCtrl::ScrollText(wxTextCoord col)
 {
     wxASSERT_MSG( IsSingleLine(),
-                  wxT("ScrollText() is for single line controls only") );
+                  _T("ScrollText() is for single line controls only") );
 
     // never scroll beyond the left border
     if ( col < 0 )
@@ -3509,7 +3510,7 @@ void wxTextCtrl::RecalcFontMetrics()
 
 void wxTextCtrl::RecalcMaxWidth()
 {
-    wxASSERT_MSG( !IsSingleLine(), wxT("only used for multiline") );
+    wxASSERT_MSG( !IsSingleLine(), _T("only used for multiline") );
 
     MData().m_widthMax = -1;
     (void)GetMaxWidth();
@@ -3543,14 +3544,14 @@ wxCoord wxTextCtrl::GetMaxWidth() const
         }
     }
 
-    wxASSERT_MSG( MData().m_widthMax != -1, wxT("should have at least 1 line") );
+    wxASSERT_MSG( MData().m_widthMax != -1, _T("should have at least 1 line") );
 
     return MData().m_widthMax;
 }
 
 void wxTextCtrl::UpdateScrollbars()
 {
-    wxASSERT_MSG( !IsSingleLine(), wxT("only used for multiline") );
+    wxASSERT_MSG( !IsSingleLine(), _T("only used for multiline") );
 
     wxSize size = GetRealTextArea().GetSize();
 
@@ -3673,7 +3674,7 @@ void wxTextCtrl::RefreshSelection()
 void wxTextCtrl::RefreshLineRange(wxTextCoord lineFirst, wxTextCoord lineLast)
 {
     wxASSERT_MSG( lineFirst <= lineLast || !lineLast,
-                  wxT("no lines to refresh") );
+                  _T("no lines to refresh") );
 
     wxRect rect;
     // rect.x is already 0
@@ -3690,7 +3691,7 @@ void wxTextCtrl::RefreshLineRange(wxTextCoord lineFirst, wxTextCoord lineLast)
         // lineFirst may be beyond the last line only if we refresh till
         // the end, otherwise it's illegal
         wxASSERT_MSG( lineFirst == GetNumberOfLines() && !lineLast,
-                      wxT("invalid line range") );
+                      _T("invalid line range") );
 
         rowFirst = GetRowAfterLine(lineFirst - 1);
     }
@@ -3716,7 +3717,7 @@ void wxTextCtrl::RefreshLineRange(wxTextCoord lineFirst, wxTextCoord lineLast)
 void wxTextCtrl::RefreshTextRange(wxTextPos start, wxTextPos end)
 {
     wxCHECK_RET( start != -1 && end != -1,
-                 wxT("invalid RefreshTextRange() arguments") );
+                 _T("invalid RefreshTextRange() arguments") );
 
     // accept arguments in any order as it is more conenient for the caller
     OrderPositions(start, end);
@@ -3772,7 +3773,7 @@ void wxTextCtrl::RefreshColRange(wxTextCoord line,
     wxString text = GetLineText(line);
 
     wxASSERT_MSG( (size_t)start <= text.length() && count,
-                  wxT("invalid RefreshColRange() parameter") );
+                  _T("invalid RefreshColRange() parameter") );
 
     RefreshPixelRange(line,
                       GetTextWidth(text.Left((size_t)start)),
@@ -3904,7 +3905,7 @@ void wxTextCtrl::RefreshTextRect(const wxRect& rectClient, bool textOnly)
     if ( rect.y < m_rectText.y )
         rect.y = m_rectText.y;
 
-    wxLogTrace(wxT("text"), wxT("Refreshing (%d, %d)-(%d, %d)"),
+    wxLogTrace(_T("text"), _T("Refreshing (%d, %d)-(%d, %d)"),
                rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 
     Refresh(true, &rect);
@@ -3954,7 +3955,7 @@ wxString wxTextCtrl::GetTextToShow(const wxString& text) const
 {
     wxString textShown;
     if ( IsPassword() )
-        textShown = wxString(wxT('*'), text.length());
+        textShown = wxString(_T('*'), text.length());
     else
         textShown = text;
 
@@ -4033,7 +4034,7 @@ void wxTextCtrl::DoDrawTextInRect(wxDC& dc, const wxRect& rectUpdate)
 
         if ( (ht == wxTE_HT_BEYOND) || (ht == wxTE_HT_BELOW) )
         {
-            wxASSERT_MSG( line <= lineEnd, wxT("how did we get that far?") );
+            wxASSERT_MSG( line <= lineEnd, _T("how did we get that far?") );
 
             if ( line == lineEnd )
             {
@@ -4114,7 +4115,7 @@ void wxTextCtrl::DoDrawTextInRect(wxDC& dc, const wxRect& rectUpdate)
         }
 
         // calculate the text coords on screen
-        wxASSERT_MSG( colStart >= colRowStart, wxT("invalid string part") );
+        wxASSERT_MSG( colStart >= colRowStart, _T("invalid string part") );
         wxCoord ofsStart = GetTextWidth(
                                     textLine.Mid(colRowStart,
                                                  colStart - colRowStart));
@@ -4124,7 +4125,7 @@ void wxTextCtrl::DoDrawTextInRect(wxDC& dc, const wxRect& rectUpdate)
         // do draw the text
         renderer->DrawTextLine(dc, text, rectText, selStart, selEnd,
                                GetStateFlags());
-        wxLogTrace(wxT("text"), wxT("Line %ld: positions %ld-%ld redrawn."),
+        wxLogTrace(_T("text"), _T("Line %ld: positions %ld-%ld redrawn."),
                    line, colStart, colEnd);
     }
 }
@@ -4132,7 +4133,7 @@ void wxTextCtrl::DoDrawTextInRect(wxDC& dc, const wxRect& rectUpdate)
 void wxTextCtrl::DoDrawLineWrapMarks(wxDC& dc, const wxRect& rectUpdate)
 {
     wxASSERT_MSG( WrapLines() && WData().m_widthMark,
-                  wxT("shouldn't be called at all") );
+                  _T("shouldn't be called at all") );
 
     wxRenderer *renderer = GetRenderer();
 
@@ -4196,7 +4197,6 @@ void wxTextCtrl::DoDraw(wxControlRenderer *renderer)
     // FIXME: is this really a bug in wxMSW?
     rectTextArea.width--;
 #endif // __WXMSW__
-    dc.DestroyClippingRegion();
     dc.SetClippingRegion(rectTextArea);
 
     // adjust for scrolling
@@ -4308,7 +4308,7 @@ void wxTextCtrl::CreateCaret()
     else
     {
         // read only controls don't have the caret
-        caret = NULL;
+        caret = (wxCaret *)NULL;
     }
 
     // SetCaret() will delete the old caret if any
@@ -4345,7 +4345,7 @@ size_t wxTextCtrl::GetLinesPerPage() const
 wxTextPos wxTextCtrl::GetPositionAbove()
 {
     wxCHECK_MSG( !IsSingleLine(), INVALID_POS_VALUE,
-                 wxT("can't move cursor vertically in a single line control") );
+                 _T("can't move cursor vertically in a single line control") );
 
     // move the cursor up by one ROW not by one LINE: this means that
     // we should really use HitTest() and not just go to the same
@@ -4378,7 +4378,7 @@ wxTextPos wxTextCtrl::GetPositionAbove()
 wxTextPos wxTextCtrl::GetPositionBelow()
 {
     wxCHECK_MSG( !IsSingleLine(), INVALID_POS_VALUE,
-                 wxT("can't move cursor vertically in a single line control") );
+                 _T("can't move cursor vertically in a single line control") );
 
     // see comments for wxACTION_TEXT_UP
     wxPoint pt = GetCaretPosition() - m_rectText.GetPosition();
@@ -4427,7 +4427,7 @@ bool wxTextCtrl::PerformAction(const wxControlAction& actionOrig,
 
     // the command this action corresponds to or NULL if this action doesn't
     // change text at all or can't be undone
-    wxTextCtrlCommand *command = NULL;
+    wxTextCtrlCommand *command = (wxTextCtrlCommand *)NULL;
 
     wxString action;
     bool del = false,
@@ -4707,7 +4707,7 @@ bool wxTextCtrl::PerformAction(const wxControlAction& actionOrig,
 
     if ( textChanged )
     {
-        wxASSERT_MSG( IsEditable(), wxT("non editable control changed?") );
+        wxASSERT_MSG( IsEditable(), _T("non editable control changed?") );
 
         wxCommandEvent event(wxEVT_COMMAND_TEXT_UPDATED, GetId());
         InitCommandEvent(event);
@@ -4740,7 +4740,7 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
             }
             else // interpret <Enter> normally: insert new line
             {
-                PerformAction(wxACTION_TEXT_INSERT, -1, wxT('\n'));
+                PerformAction(wxACTION_TEXT_INSERT, -1, _T('\n'));
             }
         }
         else if ( keycode < 255 && isprint(keycode) )
@@ -4759,11 +4759,11 @@ void wxTextCtrl::OnChar(wxKeyEvent& event)
         }
 #endif
     }
-#if wxDEBUG_LEVEL >= 2
+#ifdef __WXDEBUG__
     // Ctrl-R refreshes the control in debug mode
     else if ( event.ControlDown() && event.GetKeyCode() == 'r' )
         Refresh();
-#endif // wxDEBUG_LEVEL >= 2
+#endif // __WXDEBUG__
 
     event.Skip();
 }
@@ -4783,7 +4783,7 @@ wxInputHandler *wxTextCtrl::GetStdInputHandler(wxInputHandler *handlerDef)
 wxStdTextCtrlInputHandler::wxStdTextCtrlInputHandler(wxInputHandler *inphand)
                          : wxStdInputHandler(inphand)
 {
-    m_winCapture = NULL;
+    m_winCapture = (wxTextCtrl *)NULL;
 }
 
 /* static */
@@ -4933,7 +4933,7 @@ bool wxStdTextCtrlInputHandler::HandleMouse(wxInputConsumer *consumer,
 {
     if ( event.LeftDown() )
     {
-        wxASSERT_MSG( !m_winCapture, wxT("left button going down twice?") );
+        wxASSERT_MSG( !m_winCapture, _T("left button going down twice?") );
 
         wxTextCtrl *text = wxStaticCast(consumer->GetInputWindow(), wxTextCtrl);
 
@@ -4960,7 +4960,7 @@ bool wxStdTextCtrlInputHandler::HandleMouse(wxInputConsumer *consumer,
             m_winCapture->ShowCaret();
 
             m_winCapture->ReleaseMouse();
-            m_winCapture = NULL;
+            m_winCapture = (wxTextCtrl *)NULL;
         }
     }
 

@@ -7,7 +7,7 @@
 // Created:     08.02.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Johnny C. Norris II
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _WX_GTK_TOGGLEBUTTON_H_
@@ -19,14 +19,20 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxToggleButton;
-class WXDLLIMPEXP_FWD_CORE wxToggleBitmapButton;
+class WXDLLIMPEXP_CORE wxToggleButton;
+class WXDLLIMPEXP_CORE wxToggleBitmapButton;
+
+//-----------------------------------------------------------------------------
+// global data
+//-----------------------------------------------------------------------------
+
+extern WXDLLIMPEXP_CORE const wxChar wxCheckBoxNameStr[];
 
 //-----------------------------------------------------------------------------
 // wxToggleBitmapButton
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxToggleBitmapButton: public wxToggleButtonBase
+class WXDLLIMPEXP_CORE wxToggleBitmapButton: public wxControl
 {
 public:
     // construction/destruction

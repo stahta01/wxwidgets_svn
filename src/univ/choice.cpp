@@ -31,6 +31,8 @@
     #include "wx/arrstr.h"
 #endif
 
+IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
+
 BEGIN_EVENT_TABLE(wxChoice, wxComboBox)
     EVT_COMBOBOX(wxID_ANY, wxChoice::OnComboBox)
 END_EVENT_TABLE()

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/sound.h
+// Name:        sound.h
 // Purpose:     wxSound class (loads and plays short Windows .wav files).
 //              Optional on non-Windows platforms.
 // Author:      David Webster
@@ -33,7 +33,7 @@ public:
 
 protected:
   bool  Free();
-
+  
   bool  DoPlay(unsigned flags) const;
 
 private:

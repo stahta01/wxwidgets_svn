@@ -34,6 +34,7 @@
 
 #include "wx/dynlib.h"
 
+#define _WX_DEFINE_DATE_EVENTS_
 #include "wx/dateevt.h"
 
 #include <Control.h>
@@ -122,8 +123,7 @@ bool wxDatePickerCtrl::SendClickEvent()
     int16_t day = m_dt.GetDay();
     int16_t year = m_dt.GetYear();
 
-    //if(!SelectDay(selectDayByDay,&month,&day,&year,wxT("Pick date")))
-    if(!SelectDay(selectDayByDay,&month,&day,&year, "Pick date"))
+    if(!SelectDay(selectDayByDay,&month,&day,&year,_T("Pick date")))
         return false;
     wxDateTime dt(m_dt);
     dt.Set((wxDateTime::wxDateTime_t)day,

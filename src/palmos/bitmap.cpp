@@ -45,6 +45,10 @@
 
 #include "wx/xpmdecod.h"
 
+#ifdef wxHAVE_RAW_BITMAP
+#include "wx/rawbmp.h"
+#endif
+
 // missing from mingw32 header
 #ifndef CLR_INVALID
     #define CLR_INVALID ((COLORREF)-1)
@@ -77,6 +81,10 @@ public:
     wxPalette     m_bitmapPalette;
 #endif // wxUSE_PALETTE
 
+#ifdef __WXDEBUG__
+    wxDC         *m_selectedInto;
+#endif // __WXDEBUG__
+
 #if wxUSE_WXDIB
     wxDIB *m_dib;
 #endif
@@ -88,7 +96,7 @@ public:
 private:
     wxMask       *m_bitmapMask;
 
-    wxDECLARE_NO_COPY_CLASS(wxBitmapRefData);
+    DECLARE_NO_COPY_CLASS(wxBitmapRefData)
 };
 
 // ----------------------------------------------------------------------------
@@ -143,6 +151,9 @@ IMPLEMENT_DYNAMIC_CLASS(wxBitmapHandler, wxObject)
 
 wxBitmapRefData::wxBitmapRefData()
 {
+#ifdef __WXDEBUG__
+    m_selectedInto = NULL;
+#endif
     m_bitmapMask = NULL;
 
     m_hBitmap = (WXHBITMAP) NULL;
@@ -191,9 +202,17 @@ bool wxBitmap::CopyFromDIB(const wxDIB& dib)
 
 #endif // NEVER_USE_DIB
 
+wxBitmap::~wxBitmap()
+{
+}
+
 wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
 {
     Init();
+}
+
+wxBitmap::wxBitmap(int w, int h, int d)
+{
 }
 
 wxBitmap::wxBitmap(int w, int h, const wxDC& dc)
@@ -294,13 +313,26 @@ wxBitmap wxBitmap::GetSubBitmap( const wxRect& rect) const
 #if wxUSE_PALETTE
 wxPalette* wxBitmap::GetPalette() const
 {
-    return NULL;
+    return (wxPalette *) NULL;
 }
 #endif
 
 wxMask *wxBitmap::GetMask() const
 {
-    return NULL;
+    return (wxMask *) NULL;
+}
+
+#ifdef __WXDEBUG__
+
+wxDC *wxBitmap::GetSelectedInto() const
+{
+    return (wxDC *) NULL;
+}
+
+#endif
+
+void wxBitmap::UseAlpha()
+{
 }
 
 bool wxBitmap::HasAlpha() const
@@ -311,6 +343,14 @@ bool wxBitmap::HasAlpha() const
 // ----------------------------------------------------------------------------
 // wxBitmap setters
 // ----------------------------------------------------------------------------
+
+#ifdef __WXDEBUG__
+
+void wxBitmap::SetSelectedInto(wxDC *dc)
+{
+}
+
+#endif
 
 #if wxUSE_PALETTE
 
@@ -327,6 +367,18 @@ void wxBitmap::SetMask(wxMask *mask)
 // ----------------------------------------------------------------------------
 // raw bitmap access support
 // ----------------------------------------------------------------------------
+
+#ifdef wxHAVE_RAW_BITMAP
+void *wxBitmap::GetRawData(wxPixelDataBase& data, int bpp)
+{
+    return NULL;
+}
+
+void wxBitmap::UngetRawData(wxPixelDataBase& dataBase)
+{
+    return;
+}
+#endif // #ifdef wxHAVE_RAW_BITMAP
 
 // ----------------------------------------------------------------------------
 // wxMask

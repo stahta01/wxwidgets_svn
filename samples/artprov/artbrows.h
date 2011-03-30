@@ -6,7 +6,7 @@
 // Created:     2002/04/05
 // RCS-ID:      $Id$
 // Copyright:   (c) Vaclav Slavik
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ARTBROWS_H__
@@ -30,7 +30,7 @@ public:
 private:
     void OnSelectItem(wxListEvent &event);
     void OnChooseClient(wxCommandEvent &event);
-
+    
     wxListCtrl *m_list;
     wxStaticBitmap *m_canvas;
     wxStaticText *m_text;

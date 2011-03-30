@@ -6,7 +6,7 @@
 // Created:     05.11.99
 // RCS-ID:      $Id$
 // Copyright:   (c) Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -179,7 +179,7 @@ bool wxGetNativeFontEncoding(wxFontEncoding encoding,
 // private data
 // ----------------------------------------------------------------------------
 
-static wxHashTable *g_fontHash = NULL;
+static wxHashTable *g_fontHash = (wxHashTable*) NULL;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -249,7 +249,9 @@ bool wxFontModule::OnInit()
 
 void wxFontModule::OnExit()
 {
-    wxDELETE(g_fontHash);
+    delete g_fontHash;
+
+    g_fontHash = (wxHashTable *)NULL;
 }
 
 #endif

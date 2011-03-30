@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/helpwin.h
+// Name:        helpwin.h
 // Purpose:     Help system: WinHelp implementation
 // Author:      Julian Smart
 // Modified by:
@@ -18,7 +18,7 @@
 
 #include "wx/helpbase.h"
 
-class WXDLLIMPEXP_CORE wxWinHelpController: public wxHelpControllerBase
+class WXDLLEXPORT wxWinHelpController: public wxHelpControllerBase
 {
     DECLARE_CLASS(wxWinHelpController)
 

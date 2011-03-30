@@ -80,15 +80,23 @@ wxCursor::wxCursor(const wxImage& image)
 }
 #endif
 
+wxCursor::wxCursor(const char WXUNUSED(bits)[],
+                   int WXUNUSED(width),
+                   int WXUNUSED(height),
+                   int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY),
+                   const char WXUNUSED(maskBits)[])
+{
+}
+
 wxCursor::wxCursor(const wxString& filename,
-                   wxBitmapType kind,
+                   long kind,
                    int hotSpotX,
                    int hotSpotY)
 {
 }
 
 // Cursors by stock number
-void wxCursor::InitFromStock(wxStockCursor idCursor)
+wxCursor::wxCursor(int idCursor)
 {
 }
 

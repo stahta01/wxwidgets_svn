@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/joystick.h
+// Name:        joystick.h
 // Purpose:     wxJoystick class
 // Author:      David Webster
 // Modified by:
@@ -14,7 +14,7 @@
 
 #include "wx/event.h"
 
-class WXDLLIMPEXP_ADV wxJoystick: public wxObject
+class WXDLLEXPORT wxJoystick: public wxObject
 {
   DECLARE_DYNAMIC_CLASS(wxJoystick)
  public:

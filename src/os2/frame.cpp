@@ -52,6 +52,14 @@ BEGIN_EVENT_TABLE(wxFrame, wxFrameBase)
     EVT_SYS_COLOUR_CHANGED(wxFrame::OnSysColourChanged)
 END_EVENT_TABLE()
 
+IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxWindow)
+
+#if wxUSE_MINIFRAME
+#include "wx/minifram.h"
+IMPLEMENT_DYNAMIC_CLASS(wxMiniFrame, wxFrame)
+#endif // wxUSE_MINIFRAME
+
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -125,8 +133,7 @@ bool wxFrame::Create( wxWindow*       pParent,
 
 wxFrame::~wxFrame()
 {
-    SendDestroyEvent();
-
+    m_isBeingDeleted = true;
     DeleteAllBars();
 } // end of wxFrame::~wxFrame
 
@@ -279,7 +286,7 @@ void wxFrame::PositionStatusBar()
         {
             vError = ::WinGetLastError(vHabmain);
             sError = wxPMErrorToStr(vError);
-            wxLogError(wxT("Error setting parent for StatusBar. Error: %s\n"), sError.c_str());
+            wxLogError(_T("Error setting parent for StatusBar. Error: %s\n"), sError.c_str());
             return;
         }
     }
@@ -403,14 +410,14 @@ void wxFrame::InternalSetMenuBar()
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(wxT("Error setting parent for submenu. Error: %s\n"), sError.c_str());
+        wxLogError(_T("Error setting parent for submenu. Error: %s\n"), sError.c_str());
     }
 
     if (!::WinSetOwner(m_hMenu, m_hFrame))
     {
         vError = ::WinGetLastError(vHabmain);
         sError = wxPMErrorToStr(vError);
-        wxLogError(wxT("Error setting parent for submenu. Error: %s\n"), sError.c_str());
+        wxLogError(_T("Error setting parent for submenu. Error: %s\n"), sError.c_str());
     }
     ::WinSendMsg(m_hFrame, WM_UPDATEFRAME, (MPARAM)FCF_MENU, (MPARAM)0);
 } // end of wxFrame::InternalSetMenuBar
@@ -432,7 +439,7 @@ void wxFrame::OnSysColourChanged(
         wxSysColourChangedEvent     vEvent2;
 
         vEvent2.SetEventObject(m_frameStatusBar);
-        m_frameStatusBar->HandleWindowEvent(vEvent2);
+        m_frameStatusBar->GetEventHandler()->ProcessEvent(vEvent2);
     }
 #endif //wxUSE_STATUSBAR
 
@@ -498,7 +505,7 @@ bool wxFrame::ShowFullScreen( bool bShow, long lStyle )
         if ((lStyle & wxFULLSCREEN_NOSTATUSBAR) && pTheStatusBar)
         {
             m_nFsStatusBarFields = pTheStatusBar->GetFieldsCount();
-            SetStatusBar(NULL);
+            SetStatusBar((wxStatusBar*) NULL);
             delete pTheStatusBar;
         }
         else
@@ -569,7 +576,7 @@ bool wxFrame::ShowFullScreen( bool bShow, long lStyle )
         wxSize sz( nWidth, nHeight );
         wxSizeEvent vEvent( sz, GetId() );
 
-        HandleWindowEvent(vEvent);
+        GetEventHandler()->ProcessEvent(vEvent);
         return true;
     }
     else
@@ -1050,11 +1057,11 @@ bool wxFrame::HandleMenuSelect( WXWORD nItem,
             wxMenuEvent                     vEvent(wxEVT_MENU_HIGHLIGHT, nItem);
 
             vEvent.SetEventObject(this);
-            HandleWindowEvent(vEvent); // return value would be ignored by PM
+            GetEventHandler()->ProcessEvent(vEvent); // return value would be ignored by PM
         }
         else
         {
-            DoGiveHelp(wxEmptyString, true);
+            DoGiveHelp(wxEmptyString, false);
             return false;
         }
     }
@@ -1378,3 +1385,20 @@ wxWindow* wxFrame::GetClient()
     return wxFindWinFromHandle((WXHWND)::WinWindowFromID(m_hFrame, FID_CLIENT));
 }
 
+void wxFrame::SendSizeEvent()
+{
+    if (!m_bIconized)
+    {
+        RECTL                       vRect = wxGetWindowRect(GetHwnd());
+
+        ::WinPostMsg( GetHwnd()
+                     ,WM_SIZE
+                     ,MPFROM2SHORT( vRect.xRight - vRect.xLeft
+                                   ,vRect.xRight - vRect.xLeft
+                                  )
+                     ,MPFROM2SHORT( vRect.yTop - vRect.yBottom
+                                   ,vRect.yTop - vRect.yBottom
+                                  )
+                    );
+    }
+}

@@ -171,7 +171,7 @@ private:
 
     HANDLE m_mutex;
 
-    wxDECLARE_NO_COPY_CLASS(wxMutexInternal);
+    DECLARE_NO_COPY_CLASS(wxMutexInternal)
 };
 
 // all mutexes are recursive under Win32 so we don't use mutexType
@@ -224,7 +224,7 @@ public:
 private:
     HANDLE m_semaphore;
 
-    wxDECLARE_NO_COPY_CLASS(wxSemaphoreInternal);
+    DECLARE_NO_COPY_CLASS(wxSemaphoreInternal)
 };
 
 wxSemaphoreInternal::wxSemaphoreInternal(int initialcount, int maxcount)
@@ -339,7 +339,7 @@ private:
     // reaches 0 we kill the owning wxThread -- and die ourselves with it
     LONG m_nRef;
 
-    wxDECLARE_NO_COPY_CLASS(wxThreadInternal);
+    DECLARE_NO_COPY_CLASS(wxThreadInternal)
 };
 
 // small class which keeps a thread alive during its lifetime
@@ -412,6 +412,10 @@ void wxThread::Yield()
 {
 }
 
+void wxThread::Sleep(unsigned long milliseconds)
+{
+}
+
 int wxThread::GetCPUCount()
 {
     return 1;
@@ -467,12 +471,12 @@ wxThreadError wxThread::Resume()
 // stopping thread
 // ---------------
 
-wxThread::ExitCode wxThread::Wait(wxThreadWait WXUNUSED(waitMode))
+wxThread::ExitCode wxThread::Wait()
 {
     return 0;
 }
 
-wxThreadError wxThread::Delete(ExitCode *pRc, wxThreadWait WXUNUSED(waitMode))
+wxThreadError wxThread::Delete(ExitCode *pRc)
 {
     return wxTHREAD_NO_ERROR;
 }
@@ -553,11 +557,11 @@ void wxThreadModule::OnExit()
 // not a mutex, so the names are a bit confusing
 // ----------------------------------------------------------------------------
 
-void wxMutexGuiEnterImpl()
+void WXDLLIMPEXP_BASE wxMutexGuiEnter()
 {
 }
 
-void wxMutexGuiLeaveImpl()
+void WXDLLIMPEXP_BASE wxMutexGuiLeave()
 {
 }
 

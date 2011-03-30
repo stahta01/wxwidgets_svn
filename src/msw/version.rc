@@ -6,7 +6,7 @@
 // Created:     09.07.00
 // RCS-ID:      $Id$
 // Copyright:   (c) 2000 Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWidgets license
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "wx/version.h"
@@ -25,16 +25,10 @@
     #define DLL_FLAGS 0x0L
 #endif
 
-// 0x0409 is US English, 0x04b0 is Unicode and 0x0000 is 7 bit ASCII. see
-// http://msdn.microsoft.com/en-us/library/aa381049(VS.85).aspx for the full
-// list of languages and charsets
-#define LANG 0x0409
 #ifdef _UNICODE
-    #define CHARSET 0x4b0
-    #define LANG_WITH_CHARSET "040904b0"
+    #define LANG "04090000"
 #else
-    #define CHARSET 0
-    #define LANG_WITH_CHARSET "04090000"
+    #define LANG "040904b0"
 #endif
 
 1 VERSIONINFO
@@ -48,7 +42,8 @@
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK LANG_WITH_CHARSET
+        // US English Ascii; see http://msdn.microsoft.com/library/psdk/winui/rc_3rxn.htm for codes
+        BLOCK LANG
         BEGIN
             VALUE "Comments", "wxWidgets cross-platform GUI framework\0"
             VALUE "CompanyName", "wxWidgets development team\0"
@@ -63,9 +58,5 @@ BEGIN
             VALUE "ProductVersion", wxVERSION_NUM_DOT_STRING "\0"
             VALUE "SpecialBuild", "\0"
         END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-            VALUE "Translation", LANG, CHARSET
     END
 END

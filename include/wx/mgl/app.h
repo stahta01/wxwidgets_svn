@@ -18,15 +18,15 @@
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxApp;
-class WXDLLIMPEXP_FWD_BASE wxLog;
-class WXDLLIMPEXP_FWD_CORE wxEventLoop;
+class WXDLLEXPORT wxApp;
+class WXDLLEXPORT wxLog;
+class WXDLLEXPORT wxEventLoop;
 
 //-----------------------------------------------------------------------------
 // wxApp
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxApp: public wxAppBase
+class WXDLLEXPORT wxApp: public wxAppBase
 {
 public:
     wxApp();
@@ -44,12 +44,14 @@ public:
 
     virtual void Exit();
     virtual void WakeUpIdle();
+    virtual bool Yield(bool onlyIfNeeded = FALSE);
 
     virtual wxVideoMode GetDisplayMode() const { return m_displayMode; }
     virtual bool SetDisplayMode(const wxVideoMode& mode);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxApp)
+    DECLARE_EVENT_TABLE()
 
     wxVideoMode m_displayMode;
 };

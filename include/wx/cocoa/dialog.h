@@ -17,10 +17,12 @@
 #include "wx/panel.h"
 #include "wx/cocoa/NSPanel.h"
 
+WXDLLEXPORT_DATA(extern const wxChar) wxDialogNameStr[];
+
 // ========================================================================
 // wxDialog
 // ========================================================================
-class WXDLLIMPEXP_CORE wxDialog : public wxDialogBase, protected wxCocoaNSPanel
+class WXDLLEXPORT wxDialog : public wxDialogBase, protected wxCocoaNSPanel
 {
     DECLARE_DYNAMIC_CLASS(wxDialog)
     WX_DECLARE_COCOA_OWNER(NSPanel,NSWindow,NSWindow)

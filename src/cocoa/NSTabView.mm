@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/NSTabView.mm
+// Name:        cocoa/NSTabView.mm
 // Purpose:     wxCocoaNSTabView
 // Author:      David Elliott
 // Modified by:
 // Created:     2004/04/08
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"

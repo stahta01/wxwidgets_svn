@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/spinctrl.cpp
+// Name:        src/gtk1/spinbutt.cpp
 // Purpose:     wxSpinCtrl
 // Author:      Robert
 // Modified by:
@@ -60,7 +60,7 @@ static void gtk_spinctrl_callback( GtkWidget *WXUNUSED(widget), wxSpinCtrl *win 
     // values in range 5..50 is then, ummm, quite challenging (hint: you can't
     // enter 1!) (VZ)
     event.SetInt( (int)ceil(win->m_adjust->value) );
-    win->HandleWindowEvent( event );
+    win->GetEventHandler()->ProcessEvent( event );
 }
 }
 
@@ -82,13 +82,15 @@ gtk_spinctrl_text_changed_callback( GtkWidget *WXUNUSED(widget), wxSpinCtrl *win
 
     // see above
     event.SetInt( (int)ceil(win->m_adjust->value) );
-    win->HandleWindowEvent( event );
+    win->GetEventHandler()->ProcessEvent( event );
 }
 }
 
 //-----------------------------------------------------------------------------
 // wxSpinCtrl
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxSpinCtrl,wxControl)
 
 BEGIN_EVENT_TABLE(wxSpinCtrl, wxControl)
     EVT_CHAR(wxSpinCtrl::OnChar)
@@ -281,7 +283,7 @@ void wxSpinCtrl::OnChar( wxKeyEvent &event )
         GtkSpinButton *gsb = GTK_SPIN_BUTTON(m_widget);
         wxString val = wxGTK_CONV_BACK( gtk_entry_get_text( &gsb->entry ) );
         evt.SetString( val );
-        if (HandleWindowEvent(evt)) return;
+        if (GetEventHandler()->ProcessEvent(evt)) return;
     }
 
     event.Skip();

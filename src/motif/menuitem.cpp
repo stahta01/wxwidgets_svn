@@ -63,6 +63,8 @@ static void wxMenuItemDisarmCallback(Widget w, XtPointer clientData, XtPointer p
 // dynamic classes implementation
 // ----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxMenuItem, wxObject)
+
 // ----------------------------------------------------------------------------
 // wxMenuItem
 // ----------------------------------------------------------------------------
@@ -132,6 +134,12 @@ void wxMenuItem::Check(bool bDoCheck)
 
         wxMenuItemBase::Check(bDoCheck);
     }
+}
+
+/* static */
+wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
+{
+    return wxStripMenuCodes(text);
 }
 
 // ----------------------------------------------------------------------------
@@ -276,7 +284,7 @@ void wxMenuItem::DestroyItem(bool full)
                 wxMenuItemDisarmCallback, (XtPointer) this);
         }
     }
-    else if (IsSeparator())
+    else if (GetId() == wxID_SEPARATOR)
     {
         ;      // Nothing
 
@@ -300,7 +308,7 @@ void wxMenuItem::DestroyItem(bool full)
     }
 }
 
-void wxMenuItem::SetItemLabel(const wxString& label)
+void wxMenuItem::SetText(const wxString& label)
 {
     char mnem = wxFindMnemonic (label);
     wxString label2 = wxStripMenuCodes(label);
@@ -358,7 +366,7 @@ void wxMenuItemCallback (Widget WXUNUSED(w), XtPointer clientData,
             event.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
             item->GetMenuBar()->GetMenuBarFrame()
-                ->HandleWindowEvent(event);
+                ->GetEventHandler()->ProcessEvent(event);
         }
         // this is the child of a popup menu
         else if (item->GetTopMenu())
@@ -390,7 +398,7 @@ void wxMenuItemArmCallback (Widget WXUNUSED(w), XtPointer clientData,
             menuEvent.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
             item->GetMenuBar()->GetMenuBarFrame()
-                ->HandleWindowEvent(menuEvent);
+                ->GetEventHandler()->ProcessEvent(menuEvent);
         }
     }
 }
@@ -410,7 +418,7 @@ wxMenuItemDisarmCallback (Widget WXUNUSED(w), XtPointer clientData,
             menuEvent.SetEventObject(item->GetMenuBar()->GetMenuBarFrame());
 
             item->GetMenuBar()->GetMenuBarFrame()
-                ->HandleWindowEvent(menuEvent);
+                ->GetEventHandler()->ProcessEvent(menuEvent);
         }
     }
 }

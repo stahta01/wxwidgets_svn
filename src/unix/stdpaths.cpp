@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/unix/stdpaths.cpp
+// Name:        unix/stdpaths.cpp
 // Purpose:     wxStandardPaths implementation for Unix & OpenVMS systems
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     2004-10-19
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 Vadim Zeitlin <vadim@wxwindows.org>
-// Licence:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -29,14 +29,10 @@
 #include "wx/stdpaths.h"
 
 #ifndef WX_PRECOMP
-    #include "wx/app.h"
-    #include "wx/wxcrt.h"
     #include "wx/utils.h"
 #endif //WX_PRECOMP
 
 #include "wx/filename.h"
-#include "wx/log.h"
-#include "wx/textfile.h"
 
 #if defined( __LINUX__ ) || defined( __VMS )
     #include <unistd.h>
@@ -56,7 +52,6 @@ wxString wxStandardPaths::GetUserConfigDir() const
     return wxFileName::GetHomeDir();
 }
 
-
 // ============================================================================
 // wxStandardPaths implementation for VMS
 // ============================================================================
@@ -67,7 +62,7 @@ wxString wxStandardPaths::GetInstallPrefix() const
 {
     if ( m_prefix.empty() )
     {
-        const_cast<wxStandardPaths *>(this)->m_prefix = wxT("/sys$system");
+        wx_const_cast(wxStandardPaths *, this)->m_prefix = wxT("/sys$system");
     }
 
     return m_prefix;
@@ -75,17 +70,17 @@ wxString wxStandardPaths::GetInstallPrefix() const
 
 wxString wxStandardPaths::GetConfigDir() const
 {
-   return wxT("/sys$manager");
+   return _T("/sys$manager");
 }
 
 wxString wxStandardPaths::GetDataDir() const
 {
-   return AppendAppInfo(GetInstallPrefix() + wxT("/sys$share"));
+   return AppendAppName(GetInstallPrefix() + _T("/sys$share"));
 }
 
 wxString wxStandardPaths::GetLocalDataDir() const
 {
-   return AppendAppInfo(wxT("/sys$manager"));
+   return AppendAppName(_T("/sys$manager"));
 }
 
 wxString wxStandardPaths::GetUserDataDir() const
@@ -99,7 +94,7 @@ wxString wxStandardPaths::GetPluginsDir() const
 }
 
 wxString
-wxStandardPaths::GetLocalizedResourcesDir(const wxString& lang,
+wxStandardPaths::GetLocalizedResourcesDir(const wxChar *lang,
                                           ResourceCat category) const
 {
     return wxStandardPathsBase::GetLocalizedResourcesDir(lang, category);
@@ -174,7 +169,7 @@ wxString wxStandardPaths::GetInstallPrefix() const
 {
     if ( m_prefix.empty() )
     {
-        wxStandardPaths *pathPtr = const_cast<wxStandardPaths *>(this);
+        wxStandardPaths *pathPtr = wx_const_cast(wxStandardPaths *, this);
         pathPtr->DetectPrefix();
     }
 
@@ -187,91 +182,37 @@ wxString wxStandardPaths::GetInstallPrefix() const
 
 wxString wxStandardPaths::GetConfigDir() const
 {
-   return wxT("/etc");
+   return _T("/etc");
 }
 
 wxString wxStandardPaths::GetDataDir() const
 {
-    // allow to override the location of the data directory by setting
-    // WX_APPNAME_DATA_DIR environment variable: this is very useful in
-    // practice for running well-written (and so using wxStandardPaths to find
-    // their files) wx applications without installing them
-    static const wxString
-      envOverride(
-        getenv(
-            ("WX_" + wxTheApp->GetAppName().Upper() + "_DATA_DIR").c_str()
-        )
-      );
-
-    if ( !envOverride.empty() )
-        return envOverride;
-
-   return AppendAppInfo(GetInstallPrefix() + wxT("/share"));
+   return AppendAppName(GetInstallPrefix() + _T("/share"));
 }
 
 wxString wxStandardPaths::GetLocalDataDir() const
 {
-   return AppendAppInfo(wxT("/etc"));
+   return AppendAppName(_T("/etc"));
 }
 
 wxString wxStandardPaths::GetUserDataDir() const
 {
-   return AppendAppInfo(wxFileName::GetHomeDir() + wxT("/."));
+   return AppendAppName(wxFileName::GetHomeDir() + _T("/."));
 }
 
 wxString wxStandardPaths::GetPluginsDir() const
 {
-    return AppendAppInfo(GetInstallPrefix() + wxT("/lib"));
+    return AppendAppName(GetInstallPrefix() + _T("/lib"));
 }
 
 wxString
-wxStandardPaths::GetLocalizedResourcesDir(const wxString& lang,
+wxStandardPaths::GetLocalizedResourcesDir(const wxChar *lang,
                                           ResourceCat category) const
 {
     if ( category != ResourceCat_Messages )
         return wxStandardPathsBase::GetLocalizedResourcesDir(lang, category);
 
-    return GetInstallPrefix() + wxT("/share/locale/") + lang + wxT("/LC_MESSAGES");
-}
-
-wxString wxStandardPaths::GetDocumentsDir() const
-{
-    {
-        wxLogNull logNull;
-        wxString homeDir = wxFileName::GetHomeDir();
-        wxString configPath;
-        if (wxGetenv(wxT("XDG_CONFIG_HOME")))
-            configPath = wxGetenv(wxT("XDG_CONFIG_HOME"));
-        else
-            configPath = homeDir + wxT("/.config");
-        wxString dirsFile = configPath + wxT("/user-dirs.dirs");
-        if (wxFileExists(dirsFile))
-        {
-            wxTextFile textFile;
-            if (textFile.Open(dirsFile))
-            {
-                size_t i;
-                for (i = 0; i < textFile.GetLineCount(); i++)
-                {
-                    wxString line(textFile[i]);
-                    int pos = line.Find(wxT("XDG_DOCUMENTS_DIR"));
-                    if (pos != wxNOT_FOUND)
-                    {
-                        wxString value = line.AfterFirst(wxT('='));
-                        value.Replace(wxT("$HOME"), homeDir);
-                        value.Trim(true);
-                        value.Trim(false);
-                        if (!value.IsEmpty() && wxDirExists(value))
-                            return value;
-                        else
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
-    return wxStandardPathsBase::GetDocumentsDir();
+    return GetInstallPrefix() + _T("/share/locale/") + lang + _T("/LC_MESSAGES");
 }
 
 #endif // __VMS/!__VMS

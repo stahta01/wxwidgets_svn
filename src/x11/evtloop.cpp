@@ -6,7 +6,7 @@
 // Created:     01.06.01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Julian Smart
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -26,19 +26,19 @@
     #include "wx/hash.h"
     #include "wx/app.h"
     #include "wx/window.h"
+    #include "wx/timer.h"
     #include "wx/module.h"
 #endif
 
-#include "wx/private/fdiodispatcher.h"
+#include "wx/private/socketevtdispatch.h"
 #include "wx/unix/private.h"
 #include "wx/x11/private.h"
-#include "wx/generic/private/timer.h"
+#include "X11/Xlib.h"
 
 #if wxUSE_THREADS
     #include "wx/thread.h"
 #endif
 
-#include <X11/Xlib.h>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -98,8 +98,31 @@ bool wxEventLoopImpl::ProcessEvent(XEvent *event)
     return false;
 }
 
-bool wxEventLoopImpl::PreProcessEvent(XEvent *WXUNUSED(event))
+bool wxEventLoopImpl::PreProcessEvent(XEvent *event)
 {
+    // TODO
+#if 0
+    HWND hWnd = msg->hwnd;
+    wxWindow *wndThis = wxGetWindowFromHWND((WXHWND)hWnd);
+
+
+    // try translations first; find the youngest window with a translation
+    // table.
+    wxWindow *wnd;
+    for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
+    {
+        if ( wnd->MSWTranslateMessage((WXMSG *)msg) )
+            return true;
+    }
+
+    // Anyone for a non-translation message? Try youngest descendants first.
+    for ( wnd = wndThis; wnd; wnd = wnd->GetParent() )
+    {
+        if ( wnd->MSWProcessMessage((WXMSG *)msg) )
+            return true;
+    }
+#endif
+
     return false;
 }
 
@@ -120,15 +143,15 @@ bool wxEventLoopImpl::SendIdleEvent()
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
-    wxASSERT_MSG( !m_impl, wxT("should have been deleted in Run()") );
+    wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
-    wxCHECK_MSG( !m_impl, -1, wxT("can't reenter a message loop") );
+    wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
     m_impl = new wxEventLoopImpl;
 
@@ -142,7 +165,7 @@ int wxGUIEventLoop::Run()
         while ( ! Pending() )
         {
 #if wxUSE_TIMER
-            wxGenericTimerImpl::NotifyTimers(); // TODO: is this the correct place for it?
+            wxTimer::NotifyTimers(); // TODO: is this the correct place for it?
 #endif
             if (!m_impl->SendIdleEvent())
             {
@@ -162,37 +185,36 @@ int wxGUIEventLoop::Run()
     OnExit();
 
     int exitcode = m_impl->GetExitCode();
-    wxDELETE(m_impl);
+    delete m_impl;
+    m_impl = NULL;
 
     return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
-    if ( m_impl )
-    {
-        m_impl->SetExitCode(rc);
-        m_impl->m_keepGoing = false;
-    }
+    wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
+
+    m_impl->SetExitCode(rc);
+    m_impl->m_keepGoing = false;
 }
 
 // ----------------------------------------------------------------------------
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     XFlush( wxGlobalDisplay() );
     return (XPending( wxGlobalDisplay() ) > 0);
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
-    // see comment in wxEventLoopManual::ProcessEvents()
-    if ( wxTheApp )
-        wxTheApp->ProcessPendingEvents();
-
     XEvent event;
+
+    // Start off by checking if any of our child processes have finished.
+    wxCheckForFinishedChildren();
 
     // TODO allowing for threads, as per e.g. wxMSW
 
@@ -231,7 +253,7 @@ bool wxGUIEventLoop::Dispatch()
             // An X11 event was pending, get it
             if (wxFD_ISSET( fd, &readset ))
                 XNextEvent( wxGlobalDisplay(), &event );
-        }
+        }    
 #endif
     }
     else
@@ -241,39 +263,9 @@ bool wxGUIEventLoop::Dispatch()
 
 #if wxUSE_SOCKETS
     // handle any pending socket events:
-    wxFDIODispatcher::DispatchPending();
+    wxSocketEventDispatcher::Get().RunLoop();
 #endif
 
     (void) m_impl->ProcessEvent( &event );
-    return true;
-}
-
-bool wxGUIEventLoop::YieldFor(long eventsToProcess)
-{
-    // Sometimes only 2 yields seem
-    // to do the trick, e.g. in the
-    // progress dialog
-    int i;
-    for (i = 0; i < 2; i++)
-    {
-        m_isInsideYield = true;
-        m_eventsToProcessInsideYield = eventsToProcess;
-
-        // Call dispatch at least once so that sockets
-        // can be tested
-        wxTheApp->Dispatch();
-
-        // TODO: implement event filtering using the eventsToProcess mask
-        while (wxTheApp && wxTheApp->Pending())
-            wxTheApp->Dispatch();
-
-#if wxUSE_TIMER
-        wxGenericTimerImpl::NotifyTimers();
-#endif
-        ProcessIdle();
-
-        m_isInsideYield = false;
-    }
-
     return true;
 }

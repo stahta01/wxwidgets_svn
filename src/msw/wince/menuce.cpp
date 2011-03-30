@@ -6,7 +6,7 @@
 // Created:     28.05.2004
 // RCS-ID:      $Id$
 // Copyright:   (c) Wlodzimierz Skiba
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -54,7 +54,11 @@ wxTopLevelWindowMSW::ButtonMenu::ButtonMenu()
 
 wxTopLevelWindowMSW::ButtonMenu::~ButtonMenu()
 {
-    wxDELETE(m_menu);
+    if(m_menu)
+    {
+        delete m_menu;
+        m_menu = NULL;
+    };
 }
 
 void wxTopLevelWindowMSW::SetLeftMenu(int id, const wxString& label, wxMenu *subMenu)
@@ -221,7 +225,7 @@ void wxTopLevelWindowMSW::ReloadAllButtons()
 
     if (!SHCreateMenuBar(&menu_bar))
     {
-        wxFAIL_MSG( wxT("SHCreateMenuBar failed") );
+        wxFAIL_MSG( _T("SHCreateMenuBar failed") );
         return;
     }
 

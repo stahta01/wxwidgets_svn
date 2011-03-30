@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/mgl/dirmgl.cpp
+// Name:        src/mgl/dir.cpp
 // Purpose:     wxDir implementation for MGL
 // Author:      Vaclav Slavik, Vadim Zeitlin
 // Modified by:
@@ -87,7 +87,7 @@ wxDirData::wxDirData(const wxString& dirname)
 
     // throw away the trailing slashes
     size_t n = m_dirname.length();
-    wxCHECK_RET( n, wxT("empty dir name in wxDir") );
+    wxCHECK_RET( n, _T("empty dir name in wxDir") );
 
     while ( n > 0 && m_dirname[--n] == wxFILE_SEP_PATH ) {}
 
@@ -104,7 +104,7 @@ void wxDirData::SetFileSpec(const wxString& filespec)
 {
 #ifdef __DOS__
     if ( filespec.empty() )
-        m_filespec = wxT("*.*");
+        m_filespec = _T("*.*");
     else
 #endif
     m_filespec = filespec;
@@ -179,6 +179,17 @@ bool wxDirData::Read(wxString *filename)
     return true;
 }
 
+
+// ----------------------------------------------------------------------------
+// wxDir helpers
+// ----------------------------------------------------------------------------
+
+/* static */
+bool wxDir::Exists(const wxString& dir)
+{
+    return wxDirExists(dir);
+}
+
 // ----------------------------------------------------------------------------
 // wxDir construction/destruction
 // ----------------------------------------------------------------------------
@@ -239,7 +250,7 @@ bool wxDir::GetFirst(wxString *filename,
                      const wxString& filespec,
                      int flags) const
 {
-    wxCHECK_MSG( IsOpened(), false, wxT("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
 
     M_DIR->Rewind();
 
@@ -251,9 +262,9 @@ bool wxDir::GetFirst(wxString *filename,
 
 bool wxDir::GetNext(wxString *filename) const
 {
-    wxCHECK_MSG( IsOpened(), false, wxT("must wxDir::Open() first") );
+    wxCHECK_MSG( IsOpened(), false, _T("must wxDir::Open() first") );
 
-    wxCHECK_MSG( filename, false, wxT("bad pointer in wxDir::GetNext()") );
+    wxCHECK_MSG( filename, false, _T("bad pointer in wxDir::GetNext()") );
 
     return M_DIR->Read(filename);
 }

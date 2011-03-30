@@ -1,21 +1,20 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/cocoa/dcclient.mm
-// Purpose:     wxWindowDCImpl, wxPaintDCImpl, and wxClientDCImpl classes
+// Purpose:     wxWindowDC, wxPaintDC, and wxClientDC classes
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/04/01
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:   	wxWindows licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
     #include "wx/log.h"
     #include "wx/window.h"
+    #include "wx/dcclient.h"
 #endif //WX_PRECOMP
-
-#include "wx/cocoa/dcclient.h"
 
 #import <AppKit/NSView.h>
 #import <AppKit/NSAffineTransform.h>
@@ -25,31 +24,29 @@
 #import <AppKit/NSWindow.h>
 
 /*
- * wxWindowDCImpl
+ * wxWindowDC
  */
-IMPLEMENT_ABSTRACT_CLASS(wxWindowDCImpl, wxCocoaDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxWindowDC, wxDC)
 
-wxWindowDCImpl::wxWindowDCImpl(wxDC *owner)
-:   wxCocoaDCImpl(owner)
-,   m_window(NULL)
+wxWindowDC::wxWindowDC(void)
+:   m_window(NULL)
 ,   m_lockedNSView(NULL)
 {
 };
 
-wxWindowDCImpl::wxWindowDCImpl(wxDC *owner, wxWindow *window)
-:   wxCocoaDCImpl(owner)
-,   m_window(window)
+wxWindowDC::wxWindowDC( wxWindow *window )
+:   m_window(window)
 ,   m_lockedNSView(NULL)
 {
     wxLogDebug(wxT("non-client window DC's are not supported, oh well"));
 };
 
-wxWindowDCImpl::~wxWindowDCImpl(void)
+wxWindowDC::~wxWindowDC(void)
 {
     CocoaUnwindStackAndLoseFocus();
 };
 
-bool wxWindowDCImpl::CocoaLockFocusOnNSView(WX_NSView nsview)
+bool wxWindowDC::CocoaLockFocusOnNSView(WX_NSView nsview)
 {
     if([nsview lockFocusIfCanDraw])
     {
@@ -62,7 +59,7 @@ bool wxWindowDCImpl::CocoaLockFocusOnNSView(WX_NSView nsview)
     return false;
 }
 
-bool wxWindowDCImpl::CocoaUnlockFocusOnNSView()
+bool wxWindowDC::CocoaUnlockFocusOnNSView()
 {
     [[m_lockedNSView window] flushWindow];
     [m_lockedNSView unlockFocus];
@@ -70,9 +67,9 @@ bool wxWindowDCImpl::CocoaUnlockFocusOnNSView()
     return true;
 }
 
-bool wxWindowDCImpl::CocoaLockFocus()
+bool wxWindowDC::CocoaLockFocus()
 {
-    wxLogTrace(wxTRACE_COCOA,wxT("Locking focus on wxWindowDCImpl=%p, NSView=%p"),this, m_window->GetNonClientNSView());
+    wxLogTrace(wxTRACE_COCOA,wxT("Locking focus on wxWindowDC=%p, NSView=%p"),this, m_window->GetNonClientNSView());
     NSAffineTransform *newTransform = CocoaGetWxToBoundsTransform([m_window->GetNonClientNSView() isFlipped], [m_window->GetNonClientNSView() bounds].size.height);
     [newTransform retain];
     [m_cocoaWxToBoundsTransform release];
@@ -80,13 +77,13 @@ bool wxWindowDCImpl::CocoaLockFocus()
     return CocoaLockFocusOnNSView(m_window->GetNonClientNSView());
 }
 
-bool wxWindowDCImpl::CocoaUnlockFocus()
+bool wxWindowDC::CocoaUnlockFocus()
 {
-    wxLogTrace(wxTRACE_COCOA,wxT("Unlocking focus on wxWindowDCImpl=%p, NSView=%p"),this, m_window->GetNonClientNSView());
+    wxLogTrace(wxTRACE_COCOA,wxT("Unlocking focus on wxWindowDC=%p, NSView=%p"),this, m_window->GetNonClientNSView());
     return CocoaUnlockFocusOnNSView();
 }
 
-bool wxWindowDCImpl::CocoaGetBounds(void *rectData)
+bool wxWindowDC::CocoaGetBounds(void *rectData)
 {
     if(!rectData)
         return false;
@@ -98,29 +95,27 @@ bool wxWindowDCImpl::CocoaGetBounds(void *rectData)
 }
 
 /*
- * wxClientDCImpl
+ * wxClientDC
  */
-IMPLEMENT_ABSTRACT_CLASS(wxClientDCImpl, wxWindowDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxClientDC, wxWindowDC)
 
-wxClientDCImpl::wxClientDCImpl(wxDC *owner)
-:   wxWindowDCImpl(owner)
+wxClientDC::wxClientDC(void)
 {
 };
 
-wxClientDCImpl::wxClientDCImpl(wxDC *owner, wxWindow *window)
-:   wxWindowDCImpl(owner)
+wxClientDC::wxClientDC( wxWindow *window )
 {
     m_window = window;
 };
 
-wxClientDCImpl::~wxClientDCImpl(void)
+wxClientDC::~wxClientDC(void)
 {
     CocoaUnwindStackAndLoseFocus();
 };
 
-bool wxClientDCImpl::CocoaLockFocus()
+bool wxClientDC::CocoaLockFocus()
 {
-    wxLogTrace(wxTRACE_COCOA,wxT("Locking focus on wxClientDCImpl=%p, NSView=%p"),this, m_window->GetNSView());
+    wxLogTrace(wxTRACE_COCOA,wxT("Locking focus on wxClientDC=%p, NSView=%p"),this, m_window->GetNSView());
     NSAffineTransform *newTransform = m_window->CocoaGetWxToBoundsTransform();
     [newTransform retain];
     [m_cocoaWxToBoundsTransform release];
@@ -128,27 +123,25 @@ bool wxClientDCImpl::CocoaLockFocus()
     return CocoaLockFocusOnNSView(m_window->GetNSView());
 }
 
-bool wxClientDCImpl::CocoaUnlockFocus()
+bool wxClientDC::CocoaUnlockFocus()
 {
-    wxLogTrace(wxTRACE_COCOA,wxT("Unlocking focus on wxClientDCImpl=%p, NSView=%p"),this, m_window->GetNSView());
+    wxLogTrace(wxTRACE_COCOA,wxT("Unlocking focus on wxClientDC=%p, NSView=%p"),this, m_window->GetNSView());
     return CocoaUnlockFocusOnNSView();
 }
 
 /*
- * wxPaintDCImpl
+ * wxPaintDC
  */
-IMPLEMENT_ABSTRACT_CLASS(wxPaintDCImpl, wxWindowDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxPaintDC, wxWindowDC)
 
-wxPaintDCImpl::wxPaintDCImpl(wxDC *owner)
-:   wxWindowDCImpl(owner)
+wxPaintDC::wxPaintDC(void)
 {
 };
 
-wxPaintDCImpl::wxPaintDCImpl(wxDC *owner, wxWindow *window)
-:   wxWindowDCImpl(owner)
+wxPaintDC::wxPaintDC( wxWindow *window )
 {
     m_window = window;
-    wxASSERT_MSG([NSView focusView]==window->GetNSView(), wxT("PaintDC's NSView does not have focus.  Please use wxPaintDCImpl only as the first DC created in a paint handler"));
+    wxASSERT_MSG([NSView focusView]==window->GetNSView(), wxT("PaintDC's NSView does not have focus.  Please use wxPaintDC only as the first DC created in a paint handler"));
     sm_cocoaDCStack.Insert(this);
     m_lockedNSView = window->GetNSView();
     NSAffineTransform *newTransform = window->CocoaGetWxToBoundsTransform();
@@ -158,20 +151,20 @@ wxPaintDCImpl::wxPaintDCImpl(wxDC *owner, wxWindow *window)
     CocoaApplyTransformations();
 };
 
-wxPaintDCImpl::~wxPaintDCImpl(void)
+wxPaintDC::~wxPaintDC(void)
 {
     CocoaUnwindStackAndLoseFocus();
 };
 
-bool wxPaintDCImpl::CocoaLockFocus()
+bool wxPaintDC::CocoaLockFocus()
 {
-    wxFAIL_MSG(wxT("wxPaintDCImpl cannot be asked to lock focus!"));
+    wxFAIL_MSG(wxT("wxPaintDC cannot be asked to lock focus!"));
     return false;
 }
 
-bool wxPaintDCImpl::CocoaUnlockFocus()
+bool wxPaintDC::CocoaUnlockFocus()
 {
-    // wxPaintDCImpl focus can never be unlocked.
+    // wxPaintDC focus can never be unlocked.
     return false;
 }
 

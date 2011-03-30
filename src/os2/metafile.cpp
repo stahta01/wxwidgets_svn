@@ -40,7 +40,7 @@ IMPLEMENT_ABSTRACT_CLASS(wxMetafileDC, wxDC)
 wxMetafileRefData::wxMetafileRefData(void)
 {
     m_metafile = 0;
-    m_windowsMappingMode = MM_ANISOTROPIC;
+    m_windowsMappingMode = wxMM_ANISOTROPIC;
 }
 
 wxMetafileRefData::~wxMetafileRefData(void)
@@ -56,7 +56,7 @@ wxMetafile::wxMetafile(const wxString& file)
 {
     m_refData = new wxMetafileRefData;
 
-    M_METAFILEDATA->m_windowsMappingMode = MM_ANISOTROPIC;
+    M_METAFILEDATA->m_windowsMappingMode = wxMM_ANISOTROPIC;
     M_METAFILEDATA->m_metafile = 0;
     if (!file.empty())
         M_METAFILEDATA->m_metafile = (WXHANDLE)0; // TODO: GetMetaFile(file);
@@ -64,16 +64,6 @@ wxMetafile::wxMetafile(const wxString& file)
 
 wxMetafile::~wxMetafile(void)
 {
-}
-
-wxGDIRefData *wxMetafile::CreateGDIRefData() const
-{
-    return new wxMetafileRefData;
-}
-
-wxGDIRefData *wxMetafile::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxMetafileRefData(*static_cast<const wxMetafileRefData *>(data));
 }
 
 bool wxMetafile::SetClipboard(int width, int height)
@@ -132,8 +122,7 @@ void wxMetafile::SetWindowsMappingMode(int mm)
 
 // Original constructor that does not takes origin and extent. If you use this,
 // *DO* give origin/extent arguments to wxMakeMetafilePlaceable.
-wxMetafileDCImpl::wxMetafileDCImpl(wxDC *owner, const wxString& file)
-    : wxPMDCImpl(owner)
+wxMetafileDC::wxMetafileDC(const wxString& file)
 {
   m_metaFile = NULL;
   m_minX = 10000;
@@ -142,7 +131,7 @@ wxMetafileDCImpl::wxMetafileDCImpl(wxDC *owner, const wxString& file)
   m_maxY = -10000;
 //  m_title = NULL;
 
-  if ( wxFileExists(file) )
+  if (!file.IsNull() && wxFileExists(file))
     wxRemoveFile(file);
 
   // TODO
@@ -163,12 +152,11 @@ wxMetafileDCImpl::wxMetafileDCImpl(wxDC *owner, const wxString& file)
 
 // New constructor that takes origin and extent. If you use this, don't
 // give origin/extent arguments to wxMakeMetafilePlaceable.
-wxMetafileDCImpl::wxMetafileDCImpl( wxDC *owner, const wxString& file,
-                                    int WXUNUSED(xext),
-                                    int WXUNUSED(yext),
-                                    int WXUNUSED(xorg),
-                                    int WXUNUSED(yorg) )
-    : wxPMDCImpl(owner)
+wxMetafileDC::wxMetafileDC( const wxString& file,
+                            int WXUNUSED(xext),
+                            int WXUNUSED(yext),
+                            int WXUNUSED(xorg),
+                            int WXUNUSED(yorg) )
 {
     m_minX = 10000;
     m_minY = 10000;
@@ -185,26 +173,27 @@ wxMetafileDCImpl::wxMetafileDCImpl( wxDC *owner, const wxString& file,
 //  ::SetWindowExtEx((HDC) m_hDC,xext,yext, NULL);
 
     // Actual Windows mapping mode, for future reference.
-    m_windowsMappingMode = MM_ANISOTROPIC;
+    m_windowsMappingMode = wxMM_ANISOTROPIC;
 
     SetMapMode(wxMM_TEXT); // NOTE: does not set HDC mapmode (this is correct)
 }
 
-wxMetafileDCImpl::~wxMetafileDCImpl(void)
+wxMetafileDC::~wxMetafileDC(void)
 {
   m_hDC = 0;
 }
 
-void wxMetafileDCImpl::DoGetTextExtent(const wxString& WXUNUSED(string),
-                                     wxCoord *WXUNUSED(x),
-                                     wxCoord *WXUNUSED(y),
-                                     wxCoord *WXUNUSED(descent),
-                                     wxCoord *WXUNUSED(externalLeading),
-                                     const wxFont *theFont) const
+void wxMetafileDC::GetTextExtent(const wxString& WXUNUSED(string),
+                                 long *WXUNUSED(x),
+                                 long *WXUNUSED(y),
+                                 long *WXUNUSED(descent),
+                                 long *WXUNUSED(externalLeading),
+                                 wxFont *theFont,
+                                 bool WXUNUSED(use16bit) ) const
 {
-    const wxFont *fontToUse = theFont;
+    wxFont *fontToUse = theFont;
     if (!fontToUse)
-        fontToUse = &m_font;
+        fontToUse = (wxFont*) &m_font;
 
     // TODO:
 /*
@@ -228,7 +217,7 @@ void wxMetafileDCImpl::DoGetTextExtent(const wxString& WXUNUSED(string),
 */
 }
 
-wxMetafile *wxMetafileDCImpl::Close(void)
+wxMetafile *wxMetafileDC::Close(void)
 {
   SelectOldObjects(m_hDC);
   HANDLE mf = 0; // TODO: CloseMetaFile((HDC) m_hDC);
@@ -243,7 +232,7 @@ wxMetafile *wxMetafileDCImpl::Close(void)
   return NULL;
 }
 
-void wxMetafileDCImpl::SetMapMode(wxMappingMode mode)
+void wxMetafileDC::SetMapMode(int mode)
 {
   m_mappingMode = mode;
 

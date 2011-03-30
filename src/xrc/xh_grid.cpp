@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/xrc/xh_grid.cpp
+// Name:        xh_grid.h
 // Purpose:     XML resource handler for the grid control
 // Author:      Agron Selimaj
 // Created:     2005/08/11

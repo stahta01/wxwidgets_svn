@@ -19,7 +19,6 @@
 #if wxUSE_ZLIB && wxUSE_STREAMS
 
 #include "wx/zstream.h"
-#include "wx/versioninfo.h"
 
 #ifndef WX_PRECOMP
     #include "wx/intl.h"
@@ -45,14 +44,6 @@ enum {
 };
 
 
-wxVersionInfo wxGetZlibVersionInfo()
-{
-    return wxVersionInfo("zlib",
-                         ZLIB_VERNUM >> 12,
-                         (ZLIB_VERNUM >> 8) & 0x0F,
-                         (ZLIB_VERNUM & 0xFF) / 0x10);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // Zlib Class factory
 
@@ -69,8 +60,8 @@ wxZlibClassFactory::wxZlibClassFactory()
 const wxChar * const *
 wxZlibClassFactory::GetProtocols(wxStreamProtocolType type) const
 {
-    static const wxChar *mimes[] = { wxT("application/x-deflate"), NULL };
-    static const wxChar *encs[] =  { wxT("deflate"), NULL };
+    static const wxChar *mimes[] = { _T("application/x-deflate"), NULL };
+    static const wxChar *encs[] =  { _T("deflate"), NULL };
     static const wxChar *empty[] = { NULL };
 
     switch (type) {
@@ -97,14 +88,14 @@ wxGzipClassFactory::wxGzipClassFactory()
 const wxChar * const *
 wxGzipClassFactory::GetProtocols(wxStreamProtocolType type) const
 {
-    static const wxChar *protos[] =
-        { wxT("gzip"), NULL };
-    static const wxChar *mimes[] =
-        { wxT("application/gzip"), wxT("application/x-gzip"), NULL };
-    static const wxChar *encs[] =
-        { wxT("gzip"), NULL };
-    static const wxChar *exts[] =
-        { wxT(".gz"), wxT(".gzip"), NULL };
+    static const wxChar *protos[] =     
+        { _T("gzip"), NULL };
+    static const wxChar *mimes[] =     
+        { _T("application/gzip"), _T("application/x-gzip"), NULL };
+    static const wxChar *encs[] = 
+        { _T("gzip"), NULL };
+    static const wxChar *exts[] =    
+        { _T(".gz"), _T(".gzip"), NULL };
     static const wxChar *empty[] =
         { NULL };
 
@@ -140,6 +131,13 @@ void wxZlibInputStream::Init(int flags)
   m_z_buffer = new unsigned char[ZSTREAM_BUFFER_SIZE];
   m_z_size = ZSTREAM_BUFFER_SIZE;
   m_pos = 0;
+
+#if WXWIN_COMPATIBILITY_2_4
+  // treat compatibility mode as auto
+  m_24compatibilty = flags == wxZLIB_24COMPATIBLE;
+  if (m_24compatibilty)
+    flags = wxZLIB_AUTO;
+#endif
 
   // if gzip is asked for but not supported...
   if ((flags == wxZLIB_GZIP || flags == wxZLIB_AUTO) && !CanHandleGZip()) {
@@ -233,9 +231,12 @@ size_t wxZlibInputStream::OnSysRead(void *buffer, size_t size)
       // by the parent strean,
       m_lasterror = wxSTREAM_READ_ERROR;
       if (m_parent_i_stream->Eof())
-      {
+#if WXWIN_COMPATIBILITY_2_4
+        if (m_24compatibilty)
+          m_lasterror = wxSTREAM_EOF;
+        else
+#endif
           wxLogError(_("Can't read inflate stream: unexpected EOF in underlying stream."));
-      }
       break;
 
     default:
@@ -257,16 +258,6 @@ size_t wxZlibInputStream::OnSysRead(void *buffer, size_t size)
   int major = atoi(zlibVersion());
   int minor = dot ? atoi(dot + 1) : 0;
   return major > 1 || (major == 1 && minor >= 2);
-}
-
-bool wxZlibInputStream::SetDictionary(const char *data, const size_t datalen)
-{
-    return (inflateSetDictionary(m_inflate, (Bytef*)data, datalen) == Z_OK);
-}
-
-bool wxZlibInputStream::SetDictionary(const wxMemoryBuffer &buf)
-{
-    return SetDictionary((char*)buf.GetData(), buf.GetDataLen());
 }
 
 
@@ -344,8 +335,11 @@ bool wxZlibOutputStream::Close()
  {
   DoFlush(true);
    deflateEnd(m_deflate);
-   wxDELETE(m_deflate);
-   wxDELETEA(m_z_buffer);
+   delete m_deflate;
+
+  m_deflate = NULL;
+   delete[] m_z_buffer;
+  m_z_buffer = NULL;
 
   return wxFilterOutputStream::Close() && IsOk();
  }
@@ -428,16 +422,6 @@ size_t wxZlibOutputStream::OnSysWrite(const void *buffer, size_t size)
 /* static */ bool wxZlibOutputStream::CanHandleGZip()
 {
   return wxZlibInputStream::CanHandleGZip();
-}
-
-bool wxZlibOutputStream::SetDictionary(const char *data, const size_t datalen)
-{
-    return (deflateSetDictionary(m_deflate, (Bytef*)data, datalen) == Z_OK);
-}
-
-bool wxZlibOutputStream::SetDictionary(const wxMemoryBuffer &buf)
-{
-    return SetDictionary((char*)buf.GetData(), buf.GetDataLen());
 }
 
 #endif

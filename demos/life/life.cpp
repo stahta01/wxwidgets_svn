@@ -150,7 +150,7 @@ IMPLEMENT_APP(LifeApp)
 
 // some shortcuts
 #define ADD_TOOL(id, bmp, tooltip, help) \
-    toolBar->AddTool(id, wxEmptyString, bmp, wxNullBitmap, wxITEM_NORMAL, tooltip, help)
+    toolBar->AddTool(id, bmp, wxNullBitmap, false, wxDefaultCoord, wxDefaultCoord, (wxObject *)NULL, tooltip, help)
 
 
 // --------------------------------------------------------------------------
@@ -163,8 +163,9 @@ bool LifeApp::OnInit()
     // create the main application window
     LifeFrame *frame = new LifeFrame();
 
-    // show it
+    // show it and tell the application that it's our main window
     frame->Show(true);
+    SetTopWindow(frame);
 
     // just for Motif
 #ifdef __WXMOTIF__
@@ -353,10 +354,10 @@ void LifeFrame::UpdateInfoText()
 {
     wxString msg;
 
-    msg.Printf(_(" Generation: %lu (T: %lu ms),  Population: %lu "),
+    msg.Printf(_(" Generation: %u (T: %u ms),  Population: %u "),
                m_tics,
                m_topspeed? 0 : m_interval,
-               static_cast<unsigned long>(m_life->GetNumCells()));
+               m_life->GetNumCells());
     m_text->SetLabel(msg);
 }
 
@@ -692,7 +693,7 @@ void LifeNavigator::OnClose(wxCloseEvent& event)
 // canvas constructor
 LifeCanvas::LifeCanvas(wxWindow *parent, Life *life, bool interactive)
           : wxWindow(parent, wxID_ANY, wxDefaultPosition, wxSize(100, 100),
-            wxFULL_REPAINT_ON_RESIZE | wxHSCROLL | wxVSCROLL
+            wxFULL_REPAINT_ON_RESIZE
 #if !defined(__SMARTPHONE__) && !defined(__POCKETPC__)
             |wxSUNKEN_BORDER
 #else

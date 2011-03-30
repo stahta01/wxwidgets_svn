@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/spinbutt.cpp
+// Name:        univ/spinbutt.cpp
 // Purpose:     implementation of the universal version of wxSpinButton
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -37,6 +37,9 @@
 // ============================================================================
 // implementation of wxSpinButton
 // ============================================================================
+
+IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
+IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
 
 // ----------------------------------------------------------------------------
 // creation

@@ -61,7 +61,8 @@ public:
 
     virtual void OnExit()
     {
-        wxDELETE(wxPluginLibrary::ms_classes);
+        delete wxPluginLibrary::ms_classes;
+        wxPluginLibrary::ms_classes = NULL;
         wxPluginManager::ClearManifest();
     }
 
@@ -76,9 +77,9 @@ wxPluginLibrary::wxPluginLibrary(const wxString &libname, int flags)
         : m_linkcount(1)
         , m_objcount(0)
 {
-    m_before = wxClassInfo::GetFirst();
+    m_before = wxClassInfo::sm_first;
     Load( libname, flags );
-    m_after = wxClassInfo::GetFirst();
+    m_after = wxClassInfo::sm_first;
 
     if( m_handle != 0 )
     {
@@ -104,7 +105,7 @@ wxPluginLibrary::~wxPluginLibrary()
 wxPluginLibrary *wxPluginLibrary::RefLib()
 {
     wxCHECK_MSG( m_linkcount > 0, NULL,
-                 wxT("Library had been already deleted!") );
+                 _T("Library had been already deleted!") );
 
     ++m_linkcount;
     return this;
@@ -113,7 +114,7 @@ wxPluginLibrary *wxPluginLibrary::RefLib()
 bool wxPluginLibrary::UnrefLib()
 {
     wxASSERT_MSG( m_objcount == 0,
-                  wxT("Library unloaded before all objects were destroyed") );
+                  _T("Library unloaded before all objects were destroyed") );
 
     if ( m_linkcount == 0 || --m_linkcount == 0 )
     {
@@ -130,7 +131,7 @@ bool wxPluginLibrary::UnrefLib()
 
 void wxPluginLibrary::UpdateClasses()
 {
-    for (const wxClassInfo *info = m_after; info != m_before; info = info->GetNext())
+    for (wxClassInfo *info = m_after; info != m_before; info = info->m_next)
     {
         if( info->GetClassName() )
         {
@@ -147,7 +148,7 @@ void wxPluginLibrary::RestoreClasses()
     if (!ms_classes)
         return;
 
-    for(const wxClassInfo *info = m_after; info != m_before; info = info->GetNext())
+    for(wxClassInfo *info = m_after; info != m_before; info = info->m_next)
     {
         ms_classes->erase(ms_classes->find(info->GetClassName()));
     }
@@ -164,15 +165,15 @@ void wxPluginLibrary::RegisterModules()
     // though, as there is currently no way to Unregister it without it.
 
     wxASSERT_MSG( m_linkcount == 1,
-                  wxT("RegisterModules should only be called for the first load") );
+                  _T("RegisterModules should only be called for the first load") );
 
-    for ( const wxClassInfo *info = m_after; info != m_before; info = info->GetNext())
+    for ( wxClassInfo *info = m_after; info != m_before; info = info->m_next)
     {
         if( info->IsKindOf(CLASSINFO(wxModule)) )
         {
             wxModule *m = wxDynamicCast(info->CreateObject(), wxModule);
 
-            wxASSERT_MSG( m, wxT("wxDynamicCast of wxModule failed") );
+            wxASSERT_MSG( m, _T("wxDynamicCast of wxModule failed") );
 
             m_wxmodules.push_back(m);
             wxModule::RegisterModule(m);
@@ -187,7 +188,7 @@ void wxPluginLibrary::RegisterModules()
     {
         if( !(*it)->Init() )
         {
-            wxLogDebug(wxT("wxModule::Init() failed for wxPluginLibrary"));
+            wxLogDebug(_T("wxModule::Init() failed for wxPluginLibrary"));
 
             // XXX: Watch this, a different hash implementation might break it,
             //      a good hash implementation would let us fix it though.
@@ -257,8 +258,8 @@ wxPluginManager::LoadLibrary(const wxString &libname, int flags)
 
     if ( entry )
     {
-        wxLogTrace(wxT("dll"),
-                   wxT("LoadLibrary(%s): already loaded."), realname.c_str());
+        wxLogTrace(_T("dll"),
+                   _T("LoadLibrary(%s): already loaded."), realname.c_str());
 
         entry->RefLib();
     }
@@ -270,20 +271,20 @@ wxPluginManager::LoadLibrary(const wxString &libname, int flags)
         {
             (*ms_manifest)[realname] = entry;
 
-            wxLogTrace(wxT("dll"),
-                       wxT("LoadLibrary(%s): loaded ok."), realname.c_str());
+            wxLogTrace(_T("dll"),
+                       _T("LoadLibrary(%s): loaded ok."), realname.c_str());
 
         }
         else
         {
-            wxLogTrace(wxT("dll"),
-                       wxT("LoadLibrary(%s): failed to load."), realname.c_str());
+            wxLogTrace(_T("dll"),
+                       _T("LoadLibrary(%s): failed to load."), realname.c_str());
 
             // we have created entry just above
             if ( !entry->UnrefLib() )
             {
                 // ... so UnrefLib() is supposed to delete it
-                wxFAIL_MSG( wxT("Currently linked library is not loaded?") );
+                wxFAIL_MSG( _T("Currently linked library is not loaded?") );
             }
 
             entry = NULL;
@@ -308,13 +309,13 @@ bool wxPluginManager::UnloadLibrary(const wxString& libname)
 
     if ( !entry )
     {
-        wxLogDebug(wxT("Attempt to unload library '%s' which is not loaded."),
+        wxLogDebug(_T("Attempt to unload library '%s' which is not loaded."),
                    libname.c_str());
 
         return false;
     }
 
-    wxLogTrace(wxT("dll"), wxT("UnloadLibrary(%s)"), realname.c_str());
+    wxLogTrace(_T("dll"), _T("UnloadLibrary(%s)"), realname.c_str());
 
     if ( !entry->UnrefLib() )
     {
@@ -340,7 +341,7 @@ bool wxPluginManager::Load(const wxString &libname, int flags)
 
 void wxPluginManager::Unload()
 {
-    wxCHECK_RET( m_entry, wxT("unloading an invalid wxPluginManager?") );
+    wxCHECK_RET( m_entry, _T("unloading an invalid wxPluginManager?") );
 
     for ( wxDLManifest::iterator i = ms_manifest->begin();
           i != ms_manifest->end();

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/spinbutt.h
+// Name:        wx/univ/spinbutt.h
 // Purpose:     wxSpinButton class
 // Author:      Julian Smart
 // Modified by:
@@ -17,7 +17,7 @@
 
 #if wxUSE_SPINBTN
 
-class WXDLLIMPEXP_CORE wxSpinButton : public wxSpinButtonBase
+class WXDLLEXPORT wxSpinButton : public wxSpinButtonBase
 {
 public:
     // construction
@@ -56,9 +56,6 @@ public:
 
     // a wxSpinButton can't do anything useful with focus, only wxSpinCtrl can
     virtual bool AcceptsFocus() const { return false; }
-
-    // returns true if the platform should explicitly apply a theme border
-    virtual bool CanApplyThemeBorder() const { return false; }
 
 protected:
    virtual wxSize DoGetBestSize() const;

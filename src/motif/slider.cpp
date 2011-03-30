@@ -36,6 +36,8 @@
 
 static void wxSliderCallback (Widget widget, XtPointer clientData, XmScaleCallbackStruct * cbs);
 
+IMPLEMENT_DYNAMIC_CLASS(wxSlider, wxControl)
+
 BEGIN_EVENT_TABLE(wxSlider, wxControl)
 END_EVENT_TABLE()
 
@@ -62,7 +64,6 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
 
     if( !CreateControl( parent, id, pos, size, style, validator, name ) )
         return false;
-    PreCreation();
 
     m_lineSize = 1;
     m_windowStyle = style;
@@ -92,8 +93,10 @@ bool wxSlider::Create(wxWindow *parent, wxWindowID id,
     XtAddCallback (sliderWidget, XmNvalueChangedCallback, (XtCallbackProc) wxSliderCallback, (XtPointer) this);
     XtAddCallback (sliderWidget, XmNdragCallback, (XtCallbackProc) wxSliderCallback, (XtPointer) this);
 
-    PostCreation();
+    ChangeFont(false);
     AttachWidget (parent, m_mainWidget, (WXWidget) NULL, pos.x, pos.y, size.x, size.y);
+
+    ChangeBackgroundColour();
 
     return true;
 }
@@ -219,13 +222,13 @@ void wxSliderCallback (Widget widget, XtPointer clientData,
     XtVaGetValues (widget, XmNvalue, &commandInt, NULL);
     event.SetInt(commandInt);
     event.SetEventObject(slider);
-    slider->HandleWindowEvent(event);
+    slider->GetEventHandler()->ProcessEvent(event);
 
     // Also send a wxCommandEvent for compatibility.
     wxCommandEvent event2(wxEVT_COMMAND_SLIDER_UPDATED, slider->GetId());
     event2.SetEventObject(slider);
     event2.SetInt( event.GetInt() );
-    slider->HandleWindowEvent(event2);
+    slider->GetEventHandler()->ProcessEvent(event2);
 }
 
 #endif // wxUSE_SLIDER

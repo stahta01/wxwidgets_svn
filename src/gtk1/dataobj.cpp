@@ -58,7 +58,13 @@ wxDataFormat::wxDataFormat( wxDataFormatId type )
     SetType( type );
 }
 
-void wxDataFormat::InitFromString( const wxString &id )
+wxDataFormat::wxDataFormat( const wxChar *id )
+{
+    PrepareFormats();
+    SetId( id );
+}
+
+wxDataFormat::wxDataFormat( const wxString &id )
 {
     PrepareFormats();
     SetId( id );
@@ -134,11 +140,12 @@ void wxDataFormat::SetId( NativeFormat format )
         m_type = wxDF_PRIVATE;
 }
 
-void wxDataFormat::SetId( const wxString& id )
+void wxDataFormat::SetId( const wxChar *id )
 {
     PrepareFormats();
     m_type = wxDF_PRIVATE;
-    m_format = gdk_atom_intern( id.ToAscii(), FALSE );
+    wxString tmp( id );
+    m_format = gdk_atom_intern( (const char*) tmp.ToAscii(), FALSE );
 }
 
 void wxDataFormat::PrepareFormats()
@@ -251,12 +258,12 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
         if ( (*p == '\r' && *(p+1) == '\n') || !*p )
         {
             size_t lenPrefix = 5; // strlen("file:")
-            if ( filename.Left(lenPrefix).MakeLower() == wxT("file:") )
+            if ( filename.Left(lenPrefix).MakeLower() == _T("file:") )
             {
                 // sometimes the syntax is "file:filename", sometimes it's
                 // URL-like: "file://filename" - deal with both
-                if ( filename[lenPrefix] == wxT('/') &&
-                     filename[lenPrefix + 1] == wxT('/') )
+                if ( filename[lenPrefix] == _T('/') &&
+                     filename[lenPrefix + 1] == _T('/') )
                 {
                     // skip the slashes
                     lenPrefix += 2;
@@ -267,7 +274,7 @@ bool wxFileDataObject::SetData(size_t WXUNUSED(size), const void *buf)
             }
             else
             {
-                wxLogDebug(wxT("Unsupported URI '%s' in wxFileDataObject"),
+                wxLogDebug(_T("Unsupported URI '%s' in wxFileDataObject"),
                            filename.c_str());
             }
 

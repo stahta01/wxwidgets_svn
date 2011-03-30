@@ -25,7 +25,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxAcceleratorTable, wxObject)
 
 class WXDLLEXPORT wxAcceleratorRefData: public wxObjectRefData
 {
-    friend class wxAcceleratorTable;
+    friend class WXDLLEXPORT wxAcceleratorTable;
 public:
     wxAcceleratorRefData();
     virtual ~wxAcceleratorRefData();
@@ -40,18 +40,19 @@ public:
 wxAcceleratorRefData::wxAcceleratorRefData()
 {
     m_count = 0;
-    m_entries = NULL;
+    m_entries = (wxAcceleratorEntry*) NULL;
 }
 
 wxAcceleratorRefData::~wxAcceleratorRefData()
 {
-    wxDELETEA(m_entries);
+    delete[] m_entries;
+    m_entries = (wxAcceleratorEntry*) NULL;
     m_count = 0;
 }
 
 wxAcceleratorTable::wxAcceleratorTable()
 {
-    m_refData = NULL;
+    m_refData = (wxAcceleratorRefData*) NULL;
 }
 
 wxAcceleratorTable::~wxAcceleratorTable()
@@ -81,7 +82,7 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
 
 bool wxAcceleratorTable::IsOk() const
 {
-    return (m_refData != NULL);
+    return (m_refData != (wxAcceleratorRefData*) NULL);
 }
 
 int wxAcceleratorTable::GetCount() const
@@ -107,8 +108,8 @@ bool wxAcceleratorEntry::MatchesEvent(const wxKeyEvent& event) const
     bool accShiftDown = ((GetFlags() & wxACCEL_SHIFT) == wxACCEL_SHIFT);
     int  accKeyCode = GetKeyCode();
     int  accKeyCode2 = GetKeyCode();
-    if (wxIsascii(accKeyCode2))
-        accKeyCode2 = wxTolower(accKeyCode2);
+    if (isascii(accKeyCode2))
+        accKeyCode2 = tolower(accKeyCode2);
 
     return ((eventAltDown == accAltDown) && (eventCtrlDown == accCtrlDown) &&
         (eventShiftDown == accShiftDown) &&

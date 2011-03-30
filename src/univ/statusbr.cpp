@@ -96,7 +96,7 @@ wxRect wxStatusBarUniv::GetTotalFieldRect(wxCoord *borderBetweenFields)
         // the total width for the fields doesn't include the borders between
         // them
         m_widthsAbs = CalculateAbsWidths(rect.width -
-                                         *borderBetweenFields*(m_panes.GetCount() - 1));
+                                         *borderBetweenFields*(m_nFields - 1));
     }
 
     return rect;
@@ -115,7 +115,7 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
 
     // do draw the fields
     int flags = IsEnabled() ? 0 : (int)wxCONTROL_DISABLED;
-    for ( int n = 0; n < (int)m_panes.GetCount(); n++ )
+    for ( int n = 0; n < m_nFields; n++ )
     {
         rect.width = m_widthsAbs[n];
 
@@ -126,22 +126,27 @@ void wxStatusBarUniv::DoDraw(wxControlRenderer *renderer)
             // the size grip may be drawn only on the last field and only if we
             // have the corresponding style and even then only if we really can
             // resize this frame
-            if ( n == (int)m_panes.GetCount() - 1 &&
-                 HasFlag(wxSTB_SIZEGRIP) &&
+            if ( n == m_nFields - 1 &&
+                 HasFlag(wxST_SIZEGRIP) &&
                  GetParent()->HasFlag(wxRESIZE_BORDER) &&
                  parentTLW && !parentTLW->IsMaximized() )
             {
                 flags |= wxCONTROL_SIZEGRIP;
             }
 
-            m_renderer->DrawStatusField(dc, rect, GetStatusText(n), flags, m_panes[n].GetStyle());
+            int style;
+            if (m_statusStyles)
+                style = m_statusStyles[n];
+            else
+                style = wxSB_NORMAL;
+            m_renderer->DrawStatusField(dc, rect, m_statusText[n], flags, style);
         }
 
         rect.x += rect.width + borderBetweenFields;
     }
 }
 
-void wxStatusBarUniv::DoUpdateStatusText(int i)
+void wxStatusBarUniv::RefreshField(int i)
 {
     wxRect rect;
     if ( GetFieldRect(i, rect) )
@@ -151,13 +156,41 @@ void wxStatusBarUniv::DoUpdateStatusText(int i)
 }
 
 // ----------------------------------------------------------------------------
+// fields text
+// ----------------------------------------------------------------------------
+
+void wxStatusBarUniv::SetStatusText(const wxString& text, int number)
+{
+    wxCHECK_RET( number >= 0 && number < m_nFields,
+                 _T("invalid status bar field index in SetStatusText()") );
+
+    if ( text == m_statusText[number] )
+    {
+        // nothing changed
+        return;
+    }
+
+    m_statusText[number] = text;
+
+    RefreshField(number);
+}
+
+wxString wxStatusBarUniv::GetStatusText(int number) const
+{
+    wxCHECK_MSG( number >= 0 && number < m_nFields, wxEmptyString,
+                 _T("invalid status bar field index") );
+
+    return m_statusText[number];
+}
+
+// ----------------------------------------------------------------------------
 // fields count/widths
 // ----------------------------------------------------------------------------
 
 void wxStatusBarUniv::SetFieldsCount(int number, const int *widths)
 {
+    m_statusText.SetCount(number);
     wxStatusBarBase::SetFieldsCount(number, widths);
-
     m_widthsAbs.Empty();
 }
 
@@ -176,25 +209,25 @@ void wxStatusBarUniv::OnSize(wxSizeEvent& event)
 {
     // we don't need to refresh the fields whose width didn't change, so find
     // the first field whose width did change and refresh starting from it
-    size_t field;
-    if ( m_bSameWidthForAllPanes )
+    int field;
+    if ( m_statusWidths )
     {
-        // hence all fields widths have changed
-        field = 0;
-    }
-    else
-    {
-        for ( field = 0; field < m_panes.GetCount(); field++ )
+        for ( field = 0; field < m_nFields; field++ )
         {
-            if ( m_panes[field].GetWidth() < 0 )
+            if ( m_statusWidths[field] < 0 )
             {
                 // var width field
                 break;
             }
         }
     }
+    else // all fields have the same width
+    {
+        // hence all fields widths have changed
+        field = 0;
+    }
 
-    if ( field < m_panes.GetCount() )
+    if ( field < m_nFields )
     {
         // call this before invalidating the old widths as we want to use them,
         // not the new ones
@@ -215,8 +248,8 @@ void wxStatusBarUniv::OnSize(wxSizeEvent& event)
 
 bool wxStatusBarUniv::GetFieldRect(int n, wxRect& rect) const
 {
-    wxCHECK_MSG( n >= 0 && (size_t)n < m_panes.GetCount(), false,
-                 wxT("invalid field index in GetFieldRect()") );
+    wxCHECK_MSG( n >= 0 && n < m_nFields, false,
+                 _T("invalid field index in GetFieldRect()") );
 
     // this is a fix for a bug exhibited by the statbar sample: if
     // GetFieldRect() is called from the derived class OnSize() handler, then
@@ -239,7 +272,7 @@ wxRect wxStatusBarUniv::DoGetFieldRect(int n) const
     // it's the caller responsability to check this, if unsure - call
     // GetFieldRect() instead
     wxCHECK_MSG( !m_widthsAbs.IsEmpty(), rect,
-                 wxT("can't be called if we don't have the widths") );
+                 _T("can't be called if we don't have the widths") );
 
     for ( int i = 0; i <= n; i++ )
     {

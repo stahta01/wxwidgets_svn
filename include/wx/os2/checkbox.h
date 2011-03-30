@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/checkbox.h
+// Name:        checkbox.h
 // Purpose:     wxCheckBox class
 // Author:      David Webster
 // Modified by:
@@ -15,8 +15,8 @@
 #include "wx/control.h"
 
 // Checkbox item (single checkbox)
-class WXDLLIMPEXP_FWD_CORE wxBitmap;
-class WXDLLIMPEXP_CORE wxCheckBox : public wxCheckBoxBase
+class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxCheckBox : public wxCheckBoxBase
 {
  public:
     inline wxCheckBox() { }
@@ -66,7 +66,7 @@ private:
   DECLARE_DYNAMIC_CLASS(wxCheckBox)
 };
 
-class WXDLLIMPEXP_CORE wxBitmapCheckBox: public wxCheckBox
+class WXDLLEXPORT wxBitmapCheckBox: public wxCheckBox
 {
  public:
 

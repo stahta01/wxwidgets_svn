@@ -31,13 +31,6 @@
 
 #include <mgraph.hpp>
 
-static bitmap_t *MyMGL_createBitmap(int width, int height,
-                                    int bpp, pixel_format_t *pf)
-{
-    MGLMemoryDC mdc(width, height, bpp, pf);
-    return MGL_getBitmapFromDC(mdc.getDC(), 0, 0, width, height, TRUE);
-}
-
 //-----------------------------------------------------------------------------
 // MGL pixel formats:
 //-----------------------------------------------------------------------------
@@ -58,18 +51,14 @@ static pixel_format_t gs_pixel_format_wxImage =
     {0xFF,0x00,0, 0xFF,0x08,0, 0xFF,0x10,0, 0x00,0x00,0}; // RGB 24bpp for wxImage
 
 //-----------------------------------------------------------------------------
-// wxBitmapRefData
+// wxBitmap
 //-----------------------------------------------------------------------------
 
-class wxBitmapRefData: public wxGDIRefData
+class wxBitmapRefData: public wxObjectRefData
 {
 public:
     wxBitmapRefData();
-    wxBitmapRefData(int width, int height, int bpp);
-    wxBitmapRefData(const wxBitmapRefData& data);
     virtual ~wxBitmapRefData();
-
-    virtual bool IsOk() const { return m_bitmap != NULL; }
 
     int             m_width;
     int             m_height;
@@ -77,16 +66,52 @@ public:
     wxPalette      *m_palette;
     wxMask         *m_mask;
     bitmap_t       *m_bitmap;
-
-private:
-    void DoCreateBitmap(int width, int height, int depth);
 };
 
-void wxBitmapRefData::DoCreateBitmap(int width, int height, int depth)
+wxBitmapRefData::wxBitmapRefData()
 {
-    m_width = width;
-    m_height = height;
-    m_bpp = depth;
+    m_mask = NULL;
+    m_width = 0;
+    m_height = 0;
+    m_bpp = 0;
+    m_palette = NULL;
+    m_bitmap = NULL;
+}
+
+wxBitmapRefData::~wxBitmapRefData()
+{
+    if ( m_bitmap )
+        MGL_unloadBitmap(m_bitmap);
+    delete m_mask;
+    delete m_palette;
+}
+
+//-----------------------------------------------------------------------------
+
+#define M_BMPDATA ((wxBitmapRefData *)m_refData)
+
+
+IMPLEMENT_ABSTRACT_CLASS(wxBitmapHandler, wxBitmapHandlerBase)
+IMPLEMENT_DYNAMIC_CLASS(wxBitmap,wxBitmapBase)
+
+wxBitmap::wxBitmap(int width, int height, int depth)
+{
+    Create(width, height, depth);
+}
+
+
+static bitmap_t *MyMGL_createBitmap(int width, int height,
+                                    int bpp, pixel_format_t *pf)
+{
+    MGLMemoryDC mdc(width, height, bpp, pf);
+    return MGL_getBitmapFromDC(mdc.getDC(), 0, 0, width, height, TRUE);
+}
+
+bool wxBitmap::Create(int width, int height, int depth)
+{
+    UnRef();
+
+    wxCHECK_MSG( (width > 0) && (height > 0), false, wxT("invalid bitmap size") );
 
     pixel_format_t pf_dummy;
     pixel_format_t *pf;
@@ -104,7 +129,6 @@ void wxBitmapRefData::DoCreateBitmap(int width, int height, int depth)
         case 1:
         case 8:
             pf = NULL;
-            mglDepth = 8; // we emulate monochrome bitmaps using 8 bit ones
             break;
         case 15:
             pf = &gs_pixel_format_15;
@@ -120,81 +144,27 @@ void wxBitmapRefData::DoCreateBitmap(int width, int height, int depth)
             break;
         default:
             wxFAIL_MSG(wxT("invalid bitmap depth"));
-            m_bitmap = NULL;
-            return;
+            return false;
     }
 
-    m_bitmap = MyMGL_createBitmap(width, height, mglDepth, pf);
-}
+    m_refData = new wxBitmapRefData();
+    M_BMPDATA->m_mask = (wxMask *) NULL;
+    M_BMPDATA->m_palette = (wxPalette *) NULL;
+    M_BMPDATA->m_width = width;
+    M_BMPDATA->m_height = height;
+    M_BMPDATA->m_bpp = mglDepth;
 
-wxBitmapRefData::wxBitmapRefData()
-{
-    m_width =
-    m_height =
-    m_bpp = 0;
-
-    m_palette = NULL;
-    m_mask = NULL;
-
-    m_bitmap = NULL;
-}
-
-wxBitmapRefData::wxBitmapRefData(int width, int height, int bpp)
-{
-    DoCreateBitmap(width, height, bpp);
-
-    m_palette = NULL;
-    m_mask = NULL;
-}
-
-wxBitmapRefData::wxBitmapRefData(const wxBitmapRefData& data)
-{
-    DoCreateBitmap(data.m_width, data.m_height, data.m_bpp);
-
-    m_palette = NULL; // FIXME: should copy
-    m_mask = NULL; // FIXME: should copy
-}
-
-wxBitmapRefData::~wxBitmapRefData()
-{
-    if ( m_bitmap )
-        MGL_unloadBitmap(m_bitmap);
-    delete m_mask;
-    delete m_palette;
-}
-
-
-//-----------------------------------------------------------------------------
-// wxBitmap
-//-----------------------------------------------------------------------------
-
-#define M_BMPDATA ((wxBitmapRefData *)m_refData)
-
-IMPLEMENT_DYNAMIC_CLASS(wxBitmap,wxBitmapBase)
-
-wxGDIRefData *wxBitmap::CreateGDIRefData() const
-{
-    return new wxBitmapRefData;
-}
-
-wxGDIRefData *wxBitmap::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxBitmapRefData(*static_cast<const wxBitmapRefData *>(data));
-}
-
-bool wxBitmap::Create(int width, int height, int depth)
-{
-    UnRef();
-
-    wxCHECK_MSG( (width > 0) && (height > 0), false, wxT("invalid bitmap size") );
-
-    m_refData = new wxBitmapRefData(width, height, depth);
-
-    if ( depth == 1 )
+    if ( mglDepth != 1 )
+    {
+        M_BMPDATA->m_bitmap = MyMGL_createBitmap(width, height, mglDepth, pf);
+    }
+    else
     {
         // MGL does not support mono DCs, so we have to emulate them with
         // 8bpp ones. We do that by using a special palette with color 0
         // set to black and all other colors set to white.
+
+        M_BMPDATA->m_bitmap = MyMGL_createBitmap(width, height, 8, pf);
         SetMonoPalette(wxColour(255, 255, 255), wxColour(0, 0, 0));
     }
 
@@ -297,6 +267,11 @@ wxBitmap::wxBitmap(const char bits[], int width, int height, int depth)
     delete bdc;
 }
 
+bool wxBitmap::IsOk() const
+{
+    return (m_refData != NULL && M_BMPDATA->m_bitmap != NULL);
+}
+
 int wxBitmap::GetHeight() const
 {
     wxCHECK_MSG( Ok(), -1, wxT("invalid bitmap") );
@@ -320,7 +295,7 @@ int wxBitmap::GetDepth() const
 
 wxMask *wxBitmap::GetMask() const
 {
-    wxCHECK_MSG( Ok(), NULL, wxT("invalid bitmap") );
+    wxCHECK_MSG( Ok(), (wxMask *) NULL, wxT("invalid bitmap") );
 
     return M_BMPDATA->m_mask;
 }
@@ -428,7 +403,7 @@ MGLDevCtx *wxBitmap::CreateTmpDC() const
 
 bool wxBitmap::LoadFile(const wxString &name, wxBitmapType type)
 {
-    AllocExclusive();
+    UnRef();
 
     if ( type == wxBITMAP_TYPE_BMP || type == wxBITMAP_TYPE_PNG ||
          type == wxBITMAP_TYPE_PCX || type == wxBITMAP_TYPE_JPEG )
@@ -457,6 +432,8 @@ bool wxBitmap::LoadFile(const wxString &name, wxBitmapType type)
             return true;
         }
     }
+
+    m_refData = new wxBitmapRefData();
 
     return handler->LoadFile(this, name, type, -1, -1);
 }
@@ -498,7 +475,8 @@ void wxBitmap::SetPalette(const wxPalette& palette)
     wxCHECK_RET( GetDepth() > 1 && GetDepth() <= 8, wxT("cannot set palette for bitmap of this depth") );
 
     AllocExclusive();
-    wxDELETE(M_BMPDATA->m_palette);
+    delete M_BMPDATA->m_palette;
+    M_BMPDATA->m_palette = NULL;
 
     if ( !palette.Ok() ) return;
 

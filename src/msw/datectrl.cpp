@@ -31,14 +31,13 @@
     #include "wx/app.h"
     #include "wx/intl.h"
     #include "wx/dcclient.h"
-    #include "wx/settings.h"
     #include "wx/msw/private.h"
 #endif
 
 #include "wx/datectrl.h"
+#include "wx/dynlib.h"
 
-#include "wx/msw/private/datecontrols.h"
-
+#define _WX_DEFINE_DATE_EVENTS_
 #include "wx/dateevt.h"
 
 // apparently some versions of mingw define these macros erroneously
@@ -57,6 +56,33 @@ IMPLEMENT_DYNAMIC_CLASS(wxDatePickerCtrl, wxControl)
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// helpers for wxDateTime <-> SYSTEMTIME conversion
+// ----------------------------------------------------------------------------
+
+static inline void wxFromSystemTime(wxDateTime *dt, const SYSTEMTIME& st)
+{
+    dt->Set(st.wDay,
+            wx_static_cast(wxDateTime::Month, wxDateTime::Jan + st.wMonth - 1),
+            st.wYear,
+            0, 0, 0);
+}
+
+static inline void wxToSystemTime(SYSTEMTIME *st, const wxDateTime& dt)
+{
+    const wxDateTime::Tm tm(dt.GetTm());
+
+    st->wYear = (WXWORD)tm.year;
+    st->wMonth = (WXWORD)(tm.mon - wxDateTime::Jan + 1);
+    st->wDay = tm.mday;
+
+    st->wDayOfWeek =
+    st->wHour =
+    st->wMinute =
+    st->wSecond =
+    st->wMilliseconds = 0;
+}
+
+// ----------------------------------------------------------------------------
 // wxDatePickerCtrl creation
 // ----------------------------------------------------------------------------
 
@@ -70,8 +96,51 @@ wxDatePickerCtrl::Create(wxWindow *parent,
                          const wxValidator& validator,
                          const wxString& name)
 {
-    if ( !wxMSWDateControls::CheckInitialization() )
-        return false;
+    // although we already call InitCommonControls() in app.cpp which is
+    // supposed to initialize all common controls, in comctl32.dll 4.72 (and
+    // presumably earlier versions 4.70 and 4.71, date time picker not being
+    // supported in < 4.70 anyhow) it does not do it and we have to initialize
+    // it explicitly
+    static bool s_initDone = false; // MT-ok: used from GUI thread only
+    if ( !s_initDone )
+    {
+#ifndef __WXWINCE__
+        if ( wxApp::GetComCtl32Version() < 470 )
+        {
+            wxLogError(_("This system doesn't support date picker control, please upgrade your version of comctl32.dll"));
+
+            return false;
+        }
+#endif
+
+#if wxUSE_DYNLIB_CLASS
+        INITCOMMONCONTROLSEX icex;
+        icex.dwSize = sizeof(icex);
+        icex.dwICC = ICC_DATE_CLASSES;
+
+        wxDynamicLibrary dllComCtl32(
+#ifdef __WXWINCE__
+            _T("commctrl.dll")
+#else
+            _T("comctl32.dll")
+#endif
+            , wxDL_VERBATIM);
+
+        if ( dllComCtl32.IsLoaded() )
+        {
+            typedef BOOL (WINAPI *ICCEx_t)(INITCOMMONCONTROLSEX *);
+            wxDYNLIB_FUNCTION( ICCEx_t, InitCommonControlsEx, dllComCtl32 );
+
+            if ( pfnInitCommonControlsEx )
+            {
+                (*pfnInitCommonControlsEx)(&icex);
+            }
+
+            s_initDone = true;
+        }
+#endif
+    }
+
 
     // use wxDP_SPIN if wxDP_DEFAULT (0) was given as style
     if ( !(style & wxDP_DROPDOWN) )
@@ -124,7 +193,8 @@ WXDWORD wxDatePickerCtrl::MSWGetStyle(long style, WXDWORD *exstyle) const
 
 wxSize wxDatePickerCtrl::DoGetBestSize() const
 {
-    wxClientDC dc(const_cast<wxDatePickerCtrl *>(this));
+    wxClientDC dc(wx_const_cast(wxDatePickerCtrl *, this));
+    dc.SetFont(GetFont());
 
     // we can't use FormatDate() here as the CRT doesn't always use the same
     // format as the date picker control
@@ -148,7 +218,7 @@ wxSize wxDatePickerCtrl::DoGetBestSize() const
         const DWORD rc = ::GetLastError();
         if ( rc != ERROR_INSUFFICIENT_BUFFER )
         {
-            wxLogApiError(wxT("GetDateFormat"), rc);
+            wxLogApiError(_T("GetDateFormat"), rc);
 
             // fall back on wxDateTime, what else to do?
             s = wxDateTime::Today().FormatDate();
@@ -156,23 +226,13 @@ wxSize wxDatePickerCtrl::DoGetBestSize() const
         }
     }
 
-    // the best size for the control is bigger than just the string
-    // representation of todays date because the control must accommodate any
-    // date and while the widths of all digits are usually about the same, the
-    // width of the month string varies a lot, so try to account for it
-    s += wxT("WW");
+    // the control adds a lot of extra space around separators
+    s.Replace(_T(","), _T("    ,    "));
 
     int x, y;
     dc.GetTextExtent(s, &x, &y);
 
-    // account for the drop-down arrow or spin arrows
-    x += wxSystemSettings::GetMetric(wxSYS_HSCROLL_ARROW_X);
-
-    // and for the checkbox if we have it
-    if ( HasFlag(wxDP_ALLOWNONE) )
-        x += 3*GetCharWidth();
-
-    wxSize best(x, EDIT_HEIGHT_FROM_CHAR_HEIGHT(y));
+    wxSize best(x + 40 /* margin + arrows */, EDIT_HEIGHT_FROM_CHAR_HEIGHT(y));
     CacheBestSize(best);
     return best;
 }
@@ -184,16 +244,16 @@ wxSize wxDatePickerCtrl::DoGetBestSize() const
 void wxDatePickerCtrl::SetValue(const wxDateTime& dt)
 {
     wxCHECK_RET( dt.IsValid() || HasFlag(wxDP_ALLOWNONE),
-                    wxT("this control requires a valid date") );
+                    _T("this control requires a valid date") );
 
     SYSTEMTIME st;
     if ( dt.IsValid() )
-        dt.GetAsMSWSysTime(&st);
+        wxToSystemTime(&st, dt);
     if ( !DateTime_SetSystemtime(GetHwnd(),
                                  dt.IsValid() ? GDT_VALID : GDT_NONE,
                                  &st) )
     {
-        wxLogDebug(wxT("DateTime_SetSystemtime() failed"));
+        wxLogDebug(_T("DateTime_SetSystemtime() failed"));
     }
 
     // we need to keep only the date part, times don't make sense for this
@@ -205,18 +265,18 @@ void wxDatePickerCtrl::SetValue(const wxDateTime& dt)
 
 wxDateTime wxDatePickerCtrl::GetValue() const
 {
-#if wxDEBUG_LEVEL
+#ifdef __WXDEBUG__
     wxDateTime dt;
     SYSTEMTIME st;
     if ( DateTime_GetSystemtime(GetHwnd(), &st) == GDT_VALID )
     {
-        dt.SetFromMSWSysDate(st);
+        wxFromSystemTime(&dt, st);
     }
 
     wxASSERT_MSG( m_date.IsValid() == dt.IsValid() &&
                     (!dt.IsValid() || dt == m_date),
-                  wxT("bug in wxDatePickerCtrl: m_date not in sync") );
-#endif // wxDEBUG_LEVEL
+                  _T("bug in wxDatePickerCtrl: m_date not in sync") );
+#endif // __WXDEBUG__
 
     return m_date;
 }
@@ -228,19 +288,19 @@ void wxDatePickerCtrl::SetRange(const wxDateTime& dt1, const wxDateTime& dt2)
     DWORD flags = 0;
     if ( dt1.IsValid() )
     {
-        dt1.GetAsMSWSysTime(st + 0);
+        wxToSystemTime(&st[0], dt1);
         flags |= GDTR_MIN;
     }
 
     if ( dt2.IsValid() )
     {
-        dt2.GetAsMSWSysTime(st + 1);
+        wxToSystemTime(&st[1], dt2);
         flags |= GDTR_MAX;
     }
 
     if ( !DateTime_SetRange(GetHwnd(), flags, st) )
     {
-        wxLogDebug(wxT("DateTime_SetRange() failed"));
+        wxLogDebug(_T("DateTime_SetRange() failed"));
     }
 }
 
@@ -252,7 +312,7 @@ bool wxDatePickerCtrl::GetRange(wxDateTime *dt1, wxDateTime *dt2) const
     if ( dt1 )
     {
         if ( flags & GDTR_MIN )
-            dt1->SetFromMSWSysDate(st[0]);
+            wxFromSystemTime(dt1, st[0]);
         else
             *dt1 = wxDefaultDateTime;
     }
@@ -260,7 +320,7 @@ bool wxDatePickerCtrl::GetRange(wxDateTime *dt1, wxDateTime *dt2) const
     if ( dt2 )
     {
         if ( flags & GDTR_MAX )
-            dt2->SetFromMSWSysDate(st[1]);
+            wxFromSystemTime(dt2, st[1]);
         else
             *dt2 = wxDefaultDateTime;
     }
@@ -283,7 +343,7 @@ wxDatePickerCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             NMDATETIMECHANGE *dtch = (NMDATETIMECHANGE *)hdr;
             wxDateTime dt;
             if ( dtch->dwFlags == GDT_VALID )
-                dt.SetFromMSWSysDate(dtch->st);
+                wxFromSystemTime(&dt, dtch->st);
 
             // filter out duplicate DTN_DATETIMECHANGE events which the native
             // control sends us when using wxDP_DROPDOWN style
@@ -292,7 +352,7 @@ wxDatePickerCtrl::MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result)
             {
                 m_date = dt;
                 wxDateEvent event(this, dt, wxEVT_DATE_CHANGED);
-                if ( HandleWindowEvent(event) )
+                if ( GetEventHandler()->ProcessEvent(event) )
                 {
                     *result = 0;
                     return true;

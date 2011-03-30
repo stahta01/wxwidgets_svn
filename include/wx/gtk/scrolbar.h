@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/scrolbar.h
+// Name:        scrolbar.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -9,6 +9,14 @@
 
 #ifndef _WX_GTK_SCROLLBAR_H_
 #define _WX_GTK_SCROLLBAR_H_
+
+#include "wx/defs.h"
+
+//-----------------------------------------------------------------------------
+// classes
+//-----------------------------------------------------------------------------
+
+class WXDLLIMPEXP_CORE wxScrollBar;
 
 //-----------------------------------------------------------------------------
 // wxScrollBar
@@ -48,7 +56,11 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
+    
+protected:
+    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
+private:
     DECLARE_DYNAMIC_CLASS(wxScrollBar)
 };
 

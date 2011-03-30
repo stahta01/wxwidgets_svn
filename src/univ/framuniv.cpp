@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/framuniv.cpp
+// Name:        src/univ/frame.cpp
 // Purpose:     wxFrame class for wxUniversal
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -41,6 +41,8 @@ BEGIN_EVENT_TABLE(wxFrame, wxFrameBase)
     EVT_SIZE(wxFrame::OnSize)
     EVT_SYS_COLOUR_CHANGED(wxFrame::OnSysColourChanged)
 END_EVENT_TABLE()
+
+IMPLEMENT_DYNAMIC_CLASS(wxFrame, wxTopLevelWindow)
 
 // ----------------------------------------------------------------------------
 // ctors
@@ -88,6 +90,13 @@ void wxFrame::OnSize(wxSizeEvent& event)
 #endif // wxUSE_TOOLBAR
 
     event.Skip();
+}
+
+void wxFrame::SendSizeEvent()
+{
+    wxSizeEvent event(GetSize(), GetId());
+    event.SetEventObject(this);
+    GetEventHandler()->ProcessEvent(event);
 }
 
 #if wxUSE_MENUS

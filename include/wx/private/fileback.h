@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/private/fileback.h
+// Name:        include/wx/private/fileback.h
 // Purpose:     Back an input stream with memory or a file
 // Author:      Mike Wetherell
 // RCS-ID:      $Id$
@@ -75,7 +75,7 @@ private:
     wxBackingFile m_backer;
     wxFileOffset m_pos;
 
-    wxDECLARE_NO_COPY_CLASS(wxBackedInputStream);
+    DECLARE_NO_COPY_CLASS(wxBackedInputStream)
 };
 
 #endif // wxUSE_FILESYSTEM

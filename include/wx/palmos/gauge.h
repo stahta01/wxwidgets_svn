@@ -14,10 +14,10 @@
 
 #if wxUSE_GAUGE
 
-WXDLLIMPEXP_DATA_CORE(extern const wxChar) wxGaugeNameStr[];
+WXDLLEXPORT_DATA(extern const wxChar) wxGaugeNameStr[];
 
 // Group box
-class WXDLLIMPEXP_CORE wxGauge : public wxGaugeBase
+class WXDLLEXPORT wxGauge : public wxGaugeBase
 {
 public:
     wxGauge() { }
@@ -47,7 +47,7 @@ public:
     virtual void SetRange(int range);
     virtual void SetValue(int pos);
 
-    // overridden base class virtuals
+    // overriden base class virtuals
     virtual bool SetForegroundColour(const wxColour& col);
     virtual bool SetBackgroundColour(const wxColour& col);
 

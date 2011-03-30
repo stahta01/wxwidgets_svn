@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/notebook.mm
+// Name:        cocoa/notebook.mm
 // Purpose:     wxNotebook
 // Author:      David Elliott
 // Modified by:
 // Created:     2004/04/08
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 David Elliott
-// Licence:   	wxWindows licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -125,9 +125,16 @@ WX_DECLARE_GET_OBJC_CLASS(WXCTabViewImageItem,NSTabViewItem)
 WX_IMPLEMENT_GET_OBJC_CLASS(WXCTabViewImageItem,NSTabViewItem)
 
 // ========================================================================
+// wxNotebookEvent
+// ========================================================================
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED)
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING)
+IMPLEMENT_DYNAMIC_CLASS(wxNotebookEvent, wxNotifyEvent)
+
+// ========================================================================
 // wxNotebook
 // ========================================================================
-
+IMPLEMENT_DYNAMIC_CLASS(wxNotebook, wxBookCtrlBase)
 BEGIN_EVENT_TABLE(wxNotebook, wxNotebookBase)
 END_EVENT_TABLE()
 WX_IMPLEMENT_COCOA_OWNER(wxNotebook,NSTabView,NSView,NSView)
@@ -301,14 +308,14 @@ int wxNotebook::GetSelection() const
 {
     NSTabViewItem *selectedItem = [GetNSTabView() selectedTabViewItem];
     if(!selectedItem)
-        return wxNOT_FOUND;
+        return -1;
     return [GetNSTabView() indexOfTabViewItem:selectedItem];
 }
 
 void wxNotebook::CocoaDelegate_tabView_didSelectTabViewItem(WX_NSTabViewItem tabViewItem)
 {
     // FIXME: oldSel probably == newSel
-    wxBookCtrlEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, GetId(),
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED, GetId(),
         [GetNSTabView() indexOfTabViewItem:tabViewItem], GetSelection());
     event.SetEventObject(this);
     GetEventHandler()->ProcessEvent(event);
@@ -316,10 +323,10 @@ void wxNotebook::CocoaDelegate_tabView_didSelectTabViewItem(WX_NSTabViewItem tab
 
 bool wxNotebook::CocoaDelegate_tabView_shouldSelectTabViewItem(WX_NSTabViewItem tabViewItem)
 {
-    wxBookCtrlEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, GetId(),
+    wxNotebookEvent event(wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING, GetId(),
         [GetNSTabView() indexOfTabViewItem:tabViewItem], GetSelection());
     event.SetEventObject(this);
-    return !HandleWindowEvent(event) || event.IsAllowed();
+    return !GetEventHandler()->ProcessEvent(event) || event.IsAllowed();
 }
 
 #endif // wxUSE_NOTEBOOK

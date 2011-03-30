@@ -20,6 +20,8 @@
 // wxGauge
 //-----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxGauge, wxControl)
+
 bool wxGauge::Create( wxWindow *parent,
                       wxWindowID id,
                       int range,
@@ -29,6 +31,8 @@ bool wxGauge::Create( wxWindow *parent,
                       const wxValidator& validator,
                       const wxString& name )
 {
+    m_needParent = true;
+
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
@@ -39,7 +43,6 @@ bool wxGauge::Create( wxWindow *parent,
     m_rangeMax = range;
 
     m_widget = gtk_progress_bar_new();
-    g_object_ref(m_widget);
     if ( style & wxGA_VERTICAL )
     {
         gtk_progress_bar_set_orientation( GTK_PROGRESS_BAR(m_widget),
@@ -60,7 +63,7 @@ bool wxGauge::Create( wxWindow *parent,
 void wxGauge::DoSetGauge()
 {
     wxASSERT_MSG( 0 <= m_gaugePos && m_gaugePos <= m_rangeMax,
-                  wxT("invalid gauge position in DoSetGauge()") );
+                  _T("invalid gauge position in DoSetGauge()") );
 
     gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (m_widget),
                                    m_rangeMax ? ((double)m_gaugePos)/m_rangeMax : 0.0);
@@ -88,7 +91,7 @@ void wxGauge::SetRange( int range )
 
 void wxGauge::SetValue( int pos )
 {
-    wxCHECK_RET( pos <= m_rangeMax, wxT("invalid value in wxGauge::SetValue()") );
+    wxCHECK_RET( pos <= m_rangeMax, _T("invalid value in wxGauge::SetValue()") );
 
     m_gaugePos = pos;
 

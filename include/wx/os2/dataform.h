@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/dataform.h
+// Name:        mac/dataform.h
 // Purpose:     declaration of the wxDataFormat class
 // Author:      Stefan Csomor
 // Modified by:
@@ -16,7 +16,7 @@ class wxDataFormat
 {
 public:
     wxDataFormat(unsigned int uFormat = wxDF_INVALID) { m_uFormat = uFormat; }
-    wxDataFormat(const wxString& zFormat) { SetId(zFormat); }
+    wxDataFormat(const wxChar* zFormat) { SetId(zFormat); }
 
     wxDataFormat& operator=(unsigned int uFormat) { m_uFormat = uFormat; return(*this); }
     wxDataFormat& operator=(const wxDataFormat& rFormat) {m_uFormat = rFormat.m_uFormat; return(*this); }
@@ -42,7 +42,7 @@ public:
     // application-specific formats
     //
     wxString GetId(void) const;
-    void     SetId(const wxString& pId);
+    void     SetId(const wxChar* pId);
 
 private:
     unsigned int                    m_uFormat;

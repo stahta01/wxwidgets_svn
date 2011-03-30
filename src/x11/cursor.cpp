@@ -19,7 +19,6 @@
     #include "wx/utils.h"
     #include "wx/icon.h"
     #include "wx/gdicmn.h"
-    #include "wx/image.h"
 #endif
 
 #include "wx/x11/private.h"
@@ -32,7 +31,7 @@
 // wxCursor
 //-----------------------------------------------------------------------------
 
-class wxCursorRefData: public wxGDIRefData
+class wxCursorRefData: public wxObjectRefData
 {
 public:
 
@@ -41,11 +40,6 @@ public:
 
     WXCursor     m_cursor;
     WXDisplay   *m_display;
-
-private:
-    // There is no way to copy m_cursor so we can't implement a copy ctor
-    // properly.
-    wxDECLARE_NO_COPY_CLASS(wxCursorRefData);
 };
 
 wxCursorRefData::wxCursorRefData()
@@ -71,7 +65,7 @@ wxCursor::wxCursor()
 
 }
 
-void wxCursor::InitFromStock( wxStockCursor cursorId )
+wxCursor::wxCursor( int cursorId )
 {
     m_refData = new wxCursorRefData();
 
@@ -129,15 +123,15 @@ void wxCursor::InitFromStock( wxStockCursor cursorId )
 #endif
 }
 
-wxCursor::wxCursor(const wxString& WXUNUSED(name),
-                    wxBitmapType WXUNUSED(type),
-                    int WXUNUSED(hotSpotX), int WXUNUSED(hotSpotY))
+wxCursor::wxCursor(const char bits[], int width, int  height,
+                   int hotSpotX, int hotSpotY,
+                   const char maskBits[], wxColour *fg, wxColour *bg)
 {
-   wxFAIL_MSG( wxT("wxCursor creation from file not yet implemented") );
+   wxFAIL_MSG( wxT("wxCursor creation from bits not yet implemented") );
 }
 
 #if wxUSE_IMAGE
-wxCursor::wxCursor( const wxImage & WXUNUSED(image) )
+wxCursor::wxCursor( const wxImage & image )
 {
    wxFAIL_MSG( wxT("wxCursor creation from wxImage not yet implemented") );
 }
@@ -147,17 +141,9 @@ wxCursor::~wxCursor()
 {
 }
 
-wxGDIRefData *wxCursor::CreateGDIRefData() const
+bool wxCursor::IsOk() const
 {
-    return new wxCursorRefData;
-}
-
-wxGDIRefData *
-wxCursor::CloneGDIRefData(const wxGDIRefData * WXUNUSED(data)) const
-{
-    wxFAIL_MSG( wxS("Cloning cursors is not implemented in wxX11.") );
-
-    return new wxCursorRefData;
+    return (m_refData != NULL);
 }
 
 WXCursor wxCursor::GetCursor() const

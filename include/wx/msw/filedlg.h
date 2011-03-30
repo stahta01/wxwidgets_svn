@@ -16,7 +16,7 @@
 // wxFileDialog
 //-------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxFileDialog: public wxFileDialogBase
+class WXDLLEXPORT wxFileDialog: public wxFileDialogBase
 {
 public:
     wxFileDialog(wxWindow *parent,
@@ -29,40 +29,26 @@ public:
                  const wxSize& sz = wxDefaultSize,
                  const wxString& name = wxFileDialogNameStr);
 
+    virtual void SetPath(const wxString& path);
     virtual void GetPaths(wxArrayString& paths) const;
     virtual void GetFilenames(wxArrayString& files) const;
-#ifndef __WXWINCE__
-    virtual bool SupportsExtraControl() const { return true; }
-    void MSWOnInitDialogHook(WXHWND hwnd);
-#endif // __WXWINCE__
 
     virtual int ShowModal();
-
-    // wxMSW-specific implementation from now on
-    // -----------------------------------------
-
-    // called from the hook procedure on CDN_INITDONE reception
-    virtual void MSWOnInitDone(WXHWND hDlg);
 
 protected:
 
 #if !(defined(__SMARTPHONE__) && defined(__WXWINCE__))
     virtual void DoMoveWindow(int x, int y, int width, int height);
-    virtual void DoCentre(int dir);
     virtual void DoGetSize( int *width, int *height ) const;
     virtual void DoGetPosition( int *x, int *y ) const;
 #endif // !(__SMARTPHONE__ && __WXWINCE__)
 
 private:
     wxArrayString m_fileNames;
-
-    // remember if our SetPosition() or Centre() (which requires special
-    // treatment) was called
     bool m_bMovedWindow;
-    int m_centreDir;        // nothing to do if 0
 
     DECLARE_DYNAMIC_CLASS(wxFileDialog)
-    wxDECLARE_NO_COPY_CLASS(wxFileDialog);
+    DECLARE_NO_COPY_CLASS(wxFileDialog)
 };
 
 #endif // _WX_FILEDLG_H_

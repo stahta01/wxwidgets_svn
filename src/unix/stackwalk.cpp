@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/unix/stackwalk.cpp
+// Name:        msw/stackwalk.cpp
 // Purpose:     wxStackWalker implementation for Unix/glibc
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -67,7 +67,7 @@ public:
 private:
     FILE *m_fp;
 
-    wxDECLARE_NO_COPY_CLASS(wxStdioPipe);
+    DECLARE_NO_COPY_CLASS(wxStdioPipe)
 };
 
 // ============================================================================
@@ -92,13 +92,13 @@ void wxStackFrame::OnGetName()
     // format is: "module(funcname+offset) [address]" but the part in
     // parentheses can be not present
     wxString syminfo = wxString::FromAscii(m_syminfo);
-    const size_t posOpen = syminfo.find(wxT('('));
+    const size_t posOpen = syminfo.find(_T('('));
     if ( posOpen != wxString::npos )
     {
-        const size_t posPlus = syminfo.find(wxT('+'), posOpen + 1);
+        const size_t posPlus = syminfo.find(_T('+'), posOpen + 1);
         if ( posPlus != wxString::npos )
         {
-            const size_t posClose = syminfo.find(wxT(')'), posPlus + 1);
+            const size_t posClose = syminfo.find(_T(')'), posPlus + 1);
             if ( posClose != wxString::npos )
             {
                 if ( m_name.empty() )
@@ -249,12 +249,12 @@ int wxStackWalker::InitFrames(wxStackFrame *arr, size_t n, void **addresses, cha
             name = wxString::FromAscii(g_buf);
             name.RemoveLast(); // trailing newline
 
-            if ( name == wxT("??") )
+            if ( name == _T("??") )
                 name.clear();
         }
         else
         {
-            wxLogDebug(wxT("cannot read addr2line output for stack frame #%lu"),
+            wxLogDebug(_T("cannot read addr2line output for stack frame #%lu"),
                        (unsigned long)i);
             return false;
         }
@@ -265,7 +265,7 @@ int wxStackWalker::InitFrames(wxStackFrame *arr, size_t n, void **addresses, cha
             filename = wxString::FromAscii(g_buf);
             filename.RemoveLast();
 
-            const size_t posColon = filename.find(wxT(':'));
+            const size_t posColon = filename.find(_T(':'));
             if ( posColon != wxString::npos )
             {
                 // parse line number (it's ok if it fails, this will just leave
@@ -274,13 +274,13 @@ int wxStackWalker::InitFrames(wxStackFrame *arr, size_t n, void **addresses, cha
 
                 // remove line number from 'filename'
                 filename.erase(posColon);
-                if ( filename == wxT("??") )
+                if ( filename == _T("??") )
                     filename.clear();
             }
             else
             {
-                wxLogDebug(wxT("Unexpected addr2line format: \"%s\" - ")
-                           wxT("the semicolon is missing"),
+                wxLogDebug(_T("Unexpected addr2line format: \"%s\" - ")
+                           _T("the semicolon is missing"),
                            filename.c_str());
             }
         }

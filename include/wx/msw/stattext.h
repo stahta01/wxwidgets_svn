@@ -12,7 +12,7 @@
 #ifndef _WX_STATTEXT_H_
 #define _WX_STATTEXT_H_
 
-class WXDLLIMPEXP_CORE wxStaticText : public wxStaticTextBase
+class WXDLLEXPORT wxStaticText : public wxStaticTextBase
 {
 public:
     wxStaticText() { }
@@ -44,12 +44,10 @@ public:
 
 protected:
     // implement/override some base class virtuals
+    virtual wxBorder GetDefaultBorder() const;
     virtual void DoSetSize(int x, int y, int w, int h,
                            int sizeFlags = wxSIZE_AUTO);
-    virtual wxSize DoGetBestClientSize() const;
-
-    virtual wxString DoGetLabel() const;
-    virtual void DoSetLabel(const wxString& str);
+    virtual wxSize DoGetBestSize() const;
 
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxStaticText)
 };

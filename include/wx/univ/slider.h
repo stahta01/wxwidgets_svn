@@ -36,7 +36,7 @@
 // wxSlider
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxSlider : public wxSliderBase,
+class WXDLLEXPORT wxSlider : public wxSliderBase,
                              public wxControlWithThumb
 {
 public:
@@ -77,6 +77,7 @@ public:
     virtual void SetThumbLength(int lenPixels);
     virtual int GetThumbLength() const;
 
+    virtual void SetTickFreq(int n, int WXUNUSED(dummy) = 0);
     virtual int GetTickFreq() const { return m_tickFreq; }
 
     // wxUniv-specific methods
@@ -135,9 +136,6 @@ protected:
     {
         INVALID_THUMB_VALUE = -0xffff
     };
-
-    // Platform-specific implementation of SetTickFreq
-    virtual void DoSetTickFreq(int freq);
 
     // overridden base class virtuals
     virtual wxSize DoGetBestClientSize() const;

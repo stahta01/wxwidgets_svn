@@ -21,12 +21,13 @@
 
 #include "wx/scrolwin.h"
 #include "wx/arrstr.h"
+#include "wx/datetime.h"
 
 //-----------------------------------------------------------------------------
 // classes
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
+class WXDLLIMPEXP_CORE wxTextCtrl;
 
 //-----------------------------------------------------------------------------
 // helpers
@@ -204,6 +205,9 @@ public:
 
     void SetModified() { m_modified = true; }
 
+    virtual void Freeze();
+    virtual void Thaw();
+
     // textctrl specific scrolling
     virtual bool ScrollLines(int lines);
     virtual bool ScrollPages(int pages);
@@ -359,7 +363,7 @@ private:
 // wxTextCtrl types
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStdTextCtrlInputHandler : public wxStdInputHandler
+class WXDLLEXPORT wxStdTextCtrlInputHandler : public wxStdInputHandler
 {
 public:
     wxStdTextCtrlInputHandler(wxInputHandler *inphand) : wxStdInputHandler(inphand) {}

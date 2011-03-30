@@ -5,7 +5,7 @@
 // Created:     2006-02-19
 // RCS-ID:      $Id$
 // Copyright:   Vince Harron
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx.h".
@@ -50,6 +50,55 @@ static const wxCoord ICON_MARGIN = 0;
 static const wxCoord ICON_OFFSET = 0;
 #endif
 
+// ----------------------------------------------------------------------------
+// TODO: These functions or something like them should probably be made
+// public.  There are similar functions in src/aui/dockart.cpp...
+
+static double wxBlendColour(double fg, double bg, double alpha)
+{
+    double result = bg + (alpha * (fg - bg));
+    if (result < 0.0)
+        result = 0.0;
+    if (result > 255)
+        result = 255;
+    return result;
+}
+
+static wxColor wxStepColour(const wxColor& c, int ialpha)
+{
+    if (ialpha == 100)
+        return c;
+
+    double r = c.Red(), g = c.Green(), b = c.Blue();
+    double bg;
+
+    // ialpha is 0..200 where 0 is completely black
+    // and 200 is completely white and 100 is the same
+    // convert that to normal alpha 0.0 - 1.0
+    ialpha = wxMin(ialpha, 200);
+    ialpha = wxMax(ialpha, 0);
+    double alpha = ((double)(ialpha - 100.0))/100.0;
+
+    if (ialpha > 100)
+    {
+        // blend with white
+        bg = 255.0;
+        alpha = 1.0 - alpha;  // 0 = transparent fg; 1 = opaque fg
+    }
+     else
+    {
+        // blend with black
+        bg = 0.0;
+        alpha = 1.0 + alpha;  // 0 = transparent fg; 1 = opaque fg
+    }
+
+    r = wxBlendColour(r, bg, alpha);
+    g = wxBlendColour(g, bg, alpha);
+    b = wxBlendColour(b, bg, alpha);
+
+    return wxColour((unsigned char)r, (unsigned char)g, (unsigned char)b);
+}
+
 #define LIGHT_STEP 160
 
 // ----------------------------------------------------------------------------
@@ -85,24 +134,6 @@ public:
         return m_descriptiveText;
     }
 
-
-    // provide access to the base class protected methods to wxSearchCtrl which
-    // needs to forward to them
-    void DoSetValue(const wxString& value, int flags)
-    {
-        wxTextCtrl::DoSetValue(value, flags);
-    }
-
-    bool DoLoadFile(const wxString& file, int fileType)
-    {
-        return wxTextCtrl::DoLoadFile(file, fileType);
-    }
-
-    bool DoSaveFile(const wxString& file, int fileType)
-    {
-        return wxTextCtrl::DoSaveFile(file, fileType);
-    }
-
 protected:
     void OnText(wxCommandEvent& eventText)
     {
@@ -134,7 +165,7 @@ protected:
         {
             ChangeValue(m_descriptiveText);
             SetInsertionPoint(0);
-            SetForegroundColour(m_defaultFG.ChangeLightness (LIGHT_STEP));
+            SetForegroundColour(wxStepColour(m_defaultFG, LIGHT_STEP));
         }
     }
 
@@ -192,14 +223,6 @@ protected:
     {
         wxCommandEvent event(m_eventType, m_search->GetId());
         event.SetEventObject(m_search);
-
-        if ( m_eventType == wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN )
-        {
-            // it's convenient to have the string to search for directly in the
-            // event instead of having to retrieve it from the control in the
-            // event handler code later, so provide it here
-            event.SetString(m_search->GetValue());
-        }
 
         GetEventHandler()->ProcessEvent(event);
 
@@ -298,21 +321,17 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
             const wxValidator& validator,
             const wxString& name)
 {
-    // force border style for more native appearance
-    style &= ~wxBORDER_MASK;
-#ifdef __WXGTK__
-    style |= wxBORDER_SUNKEN;
-#elif defined(__WXMSW__)
-    // Don't set the style explicitly, let GetDefaultBorder() work it out, unless
-    // we will get a sunken border (e.g. on Windows 200) in which case we must
-    // override with a simple border.
-    if (GetDefaultBorder() == wxBORDER_SUNKEN)
-        style |= wxBORDER_SIMPLE;
-#else
-    style |= wxBORDER_SIMPLE;
+	int borderStyle = wxBORDER_SIMPLE;
+
+#if defined(__WXMSW__)
+    borderStyle = GetThemedBorderStyle();
+    if (borderStyle == wxBORDER_SUNKEN)
+        borderStyle = wxBORDER_SIMPLE;
+#elif defined(__WXGTK__)
+    borderStyle = wxBORDER_SUNKEN;
 #endif
-    if ( !wxSearchCtrlBaseBaseClass::Create(parent, id, pos, size,
-                                            style, validator, name) )
+
+    if ( !wxTextCtrlBase::Create(parent, id, pos, size, borderStyle | (style & ~wxBORDER_MASK), validator, name) )
     {
         return false;
     }
@@ -320,12 +339,10 @@ bool wxSearchCtrl::Create(wxWindow *parent, wxWindowID id,
     m_text = new wxSearchTextCtrl(this, value, style & ~wxBORDER_MASK);
     m_text->SetDescriptiveText(_("Search"));
 
-    m_searchButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,
-                                        m_searchBitmap);
-    m_cancelButton = new wxSearchButton(this,
-                                        wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,
-                                        m_cancelBitmap);
+    wxSize sizeText = m_text->GetBestSize();
+
+    m_searchButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_SEARCH_BTN,m_searchBitmap);
+    m_cancelButton = new wxSearchButton(this,wxEVT_COMMAND_SEARCHCTRL_CANCEL_BTN,m_cancelBitmap);
 
     SetForegroundColour( m_text->GetForegroundColour() );
     m_searchButton->SetForegroundColour( m_text->GetForegroundColour() );
@@ -491,8 +508,6 @@ void wxSearchCtrl::LayoutControls(int x, int y, int width, int height)
     y += BORDER;
     width -= horizontalBorder*2;
     height -= BORDER*2;
-    if (width < 0) width = 0;
-    if (height < 0) height = 0;
 
     wxSize sizeSearch(0,0);
     wxSize sizeCancel(0,0);
@@ -519,7 +534,6 @@ void wxSearchCtrl::LayoutControls(int x, int y, int width, int height)
         cancelMargin = 0;
     }
     wxCoord textWidth = width - sizeSearch.x - sizeCancel.x - searchMargin - cancelMargin - 1;
-    if (textWidth < 0) textWidth = 0;
 
     // position the subcontrols inside the client area
 
@@ -536,7 +550,7 @@ void wxSearchCtrl::LayoutControls(int x, int y, int width, int height)
 // accessors
 // ---------
 
-wxString wxSearchCtrl::DoGetValue() const
+wxString wxSearchCtrl::GetValue() const
 {
     wxString value = m_text->GetValue();
     if (value == m_text->GetDescriptiveText())
@@ -544,6 +558,11 @@ wxString wxSearchCtrl::DoGetValue() const
     else
         return value;
 }
+void wxSearchCtrl::SetValue(const wxString& value)
+{
+    m_text->SetValue(value);
+}
+
 wxString wxSearchCtrl::GetRange(long from, long to) const
 {
     return m_text->GetRange(from, to);
@@ -765,7 +784,7 @@ long wxSearchCtrl::GetInsertionPoint() const
 {
     return m_text->GetInsertionPoint();
 }
-long wxSearchCtrl::GetLastPosition() const
+wxTextPos wxSearchCtrl::GetLastPosition() const
 {
     return m_text->GetLastPosition();
 }
@@ -873,17 +892,9 @@ wxTextCtrl& operator<<(const wxChar c);
 
 void wxSearchCtrl::DoSetValue(const wxString& value, int flags)
 {
-    m_text->DoSetValue(value, flags);
-}
-
-bool wxSearchCtrl::DoLoadFile(const wxString& file, int fileType)
-{
-    return m_text->DoLoadFile(file, fileType);
-}
-
-bool wxSearchCtrl::DoSaveFile(const wxString& file, int fileType)
-{
-    return m_text->DoSaveFile(file, fileType);
+    m_text->ChangeValue( value );
+    if ( flags & SetValue_SendEvent )
+        SendTextUpdatedEvent();
 }
 
 // do the window-specific processing after processing the update event
@@ -918,7 +929,7 @@ static int GetMultiplier()
 wxBitmap wxSearchCtrl::RenderSearchBitmap( int x, int y, bool renderDrop )
 {
     wxColour bg = GetBackgroundColour();
-    wxColour fg = GetForegroundColour().ChangeLightness(LIGHT_STEP-20);
+    wxColour fg = wxStepColour(GetForegroundColour(), LIGHT_STEP-20);
 
     //===============================================================================
     // begin drawing code
@@ -1023,7 +1034,7 @@ wxBitmap wxSearchCtrl::RenderSearchBitmap( int x, int y, bool renderDrop )
 wxBitmap wxSearchCtrl::RenderCancelBitmap( int x, int y )
 {
     wxColour bg = GetBackgroundColour();
-    wxColour fg = GetForegroundColour().ChangeLightness(LIGHT_STEP);
+    wxColour fg = wxStepColour(GetForegroundColour(), LIGHT_STEP);
 
     //===============================================================================
     // begin drawing code

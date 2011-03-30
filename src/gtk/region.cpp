@@ -32,7 +32,7 @@
 // wxRegionRefData: private class containing the information about the region
 // ----------------------------------------------------------------------------
 
-class wxRegionRefData : public wxGDIRefData
+class wxRegionRefData : public wxObjectRefData
 {
 public:
     wxRegionRefData()
@@ -41,7 +41,7 @@ public:
     }
 
     wxRegionRefData(const wxRegionRefData& refData)
-        : wxGDIRefData()
+        : wxObjectRefData()
     {
         m_region = gdk_region_copy(refData.m_region);
     }
@@ -90,8 +90,7 @@ wxRegion::wxRegion( GdkRegion *region )
     M_REGIONDATA->m_region = gdk_region_copy( region );
 }
 
-wxRegion::wxRegion( size_t n, const wxPoint *points,
-                    wxPolygonFillMode fillStyle )
+wxRegion::wxRegion( size_t n, const wxPoint *points, int fillStyle )
 {
     GdkPoint *gdkpoints = new GdkPoint[n];
     for ( size_t i = 0 ; i < n ; i++ )
@@ -120,12 +119,12 @@ wxRegion::~wxRegion()
     // m_refData unrefed in ~wxObject
 }
 
-wxGDIRefData *wxRegion::CreateGDIRefData() const
+wxObjectRefData *wxRegion::CreateRefData() const
 {
     return new wxRegionRefData;
 }
 
-wxGDIRefData *wxRegion::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxRegion::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxRegionRefData(*(wxRegionRefData *)data);
 }
@@ -179,7 +178,7 @@ bool wxRegion::DoUnionWithRect(const wxRect& r)
 
 bool wxRegion::DoUnionWithRegion( const wxRegion& region )
 {
-    wxCHECK_MSG( region.Ok(), false, wxT("invalid region") );
+    wxCHECK_MSG( region.Ok(), false, _T("invalid region") );
 
     if (!m_refData)
     {
@@ -198,7 +197,7 @@ bool wxRegion::DoUnionWithRegion( const wxRegion& region )
 
 bool wxRegion::DoIntersect( const wxRegion& region )
 {
-    wxCHECK_MSG( region.Ok(), false, wxT("invalid region") );
+    wxCHECK_MSG( region.Ok(), false, _T("invalid region") );
 
     if (!m_refData)
     {
@@ -215,7 +214,7 @@ bool wxRegion::DoIntersect( const wxRegion& region )
 
 bool wxRegion::DoSubtract( const wxRegion& region )
 {
-    wxCHECK_MSG( region.Ok(), false, wxT("invalid region") );
+    wxCHECK_MSG( region.Ok(), false, _T("invalid region") );
 
     if (!m_refData)
     {
@@ -232,7 +231,7 @@ bool wxRegion::DoSubtract( const wxRegion& region )
 
 bool wxRegion::DoXor( const wxRegion& region )
 {
-    wxCHECK_MSG( region.Ok(), false, wxT("invalid region") );
+    wxCHECK_MSG( region.Ok(), false, _T("invalid region") );
 
     if (!m_refData)
     {
@@ -328,7 +327,7 @@ wxRegionContain wxRegion::DoContainsRect(const wxRect& r) const
 GdkRegion *wxRegion::GetRegion() const
 {
     if (!m_refData)
-        return NULL;
+        return (GdkRegion*) NULL;
 
     return M_REGIONDATA->m_region;
 }
@@ -422,28 +421,28 @@ wxRegionIterator wxRegionIterator::operator ++ (int)
 
 wxCoord wxRegionIterator::GetX() const
 {
-    wxCHECK_MSG( HaveRects(), 0, wxT("invalid wxRegionIterator") );
+    wxCHECK_MSG( HaveRects(), 0, _T("invalid wxRegionIterator") );
 
     return m_rects[m_current].x;
 }
 
 wxCoord wxRegionIterator::GetY() const
 {
-    wxCHECK_MSG( HaveRects(), 0, wxT("invalid wxRegionIterator") );
+    wxCHECK_MSG( HaveRects(), 0, _T("invalid wxRegionIterator") );
 
     return m_rects[m_current].y;
 }
 
 wxCoord wxRegionIterator::GetW() const
 {
-    wxCHECK_MSG( HaveRects(), 0, wxT("invalid wxRegionIterator") );
+    wxCHECK_MSG( HaveRects(), 0, _T("invalid wxRegionIterator") );
 
     return m_rects[m_current].width;
 }
 
 wxCoord wxRegionIterator::GetH() const
 {
-    wxCHECK_MSG( HaveRects(), 0, wxT("invalid wxRegionIterator") );
+    wxCHECK_MSG( HaveRects(), 0, _T("invalid wxRegionIterator") );
 
     return m_rects[m_current].height;
 }
@@ -460,7 +459,7 @@ wxRect wxRegionIterator::GetRect() const
 wxRegionIterator& wxRegionIterator::operator=(const wxRegionIterator& ri)
 {
     wxDELETEA(m_rects);
-
+    
     m_current = ri.m_current;
     m_numRects = ri.m_numRects;
     if ( m_numRects )

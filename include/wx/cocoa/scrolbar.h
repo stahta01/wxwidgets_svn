@@ -17,7 +17,7 @@
 // ========================================================================
 // wxScrollBar
 // ========================================================================
-class WXDLLIMPEXP_CORE wxScrollBar: public wxScrollBarBase, protected wxCocoaNSScroller
+class WXDLLEXPORT wxScrollBar: public wxScrollBarBase, protected wxCocoaNSScroller
 {
     DECLARE_DYNAMIC_CLASS(wxScrollBar)
     DECLARE_EVENT_TABLE()

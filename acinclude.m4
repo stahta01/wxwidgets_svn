@@ -23,7 +23,7 @@ ac_ext=mm
 ])
 
 dnl ===========================================================================
-dnl macros to find a file in the list of include/lib paths
+dnl macros to find the a file in the list of include/lib paths
 dnl ===========================================================================
 
 dnl ---------------------------------------------------------------------------
@@ -33,7 +33,7 @@ dnl ---------------------------------------------------------------------------
 AC_DEFUN([WX_PATH_FIND_INCLUDES],
 [
 ac_find_includes=
-for ac_dir in $1 /usr/include
+for ac_dir in $1 /usr/include;
   do
     if test -f "$ac_dir/$2"; then
       ac_find_includes=$ac_dir
@@ -49,7 +49,7 @@ dnl ---------------------------------------------------------------------------
 AC_DEFUN([WX_PATH_FIND_LIBRARIES],
 [
   ac_find_libraries=
-  for ac_dir in $1
+  for ac_dir in $1;
   do
     for ac_extension in a so sl dylib dll.a; do
       if test -f "$ac_dir/lib$2.$ac_extension"; then
@@ -101,7 +101,7 @@ dnl after calling this function
 dnl ---------------------------------------------------------------------------
 AC_DEFUN([WX_LINK_PATH_EXIST],
 [
-  dnl never add -L/usr/libXXX explicitly to libpath
+  dnl never add -L/usr/libXXX explicitely to libpath
   if test "$1" = "default location"; then
     ac_path_to_link=""
   else
@@ -132,7 +132,7 @@ AC_DEFUN([WX_CPP_NEW_HEADERS],
     AC_LANG_SAVE
     AC_LANG_CPLUSPLUS
 
-    AC_CHECK_HEADERS([iostream],,, [ ])
+    AC_CHECK_HEADERS(iostream,,, [ ])
 
     if test "$ac_cv_header_iostream" = "yes" ; then
       ifelse([$1], , :, [$1])
@@ -141,6 +141,43 @@ AC_DEFUN([WX_CPP_NEW_HEADERS],
     fi
 
     AC_LANG_RESTORE
+])
+
+dnl ---------------------------------------------------------------------------
+dnl WX_CPP_BOOL checks whether the C++ compiler has a built in bool type
+dnl
+dnl call WX_CPP_BOOL - will define HAVE_BOOL if the compiler supports bool
+dnl ---------------------------------------------------------------------------
+
+AC_DEFUN([WX_CPP_BOOL],
+[
+  AC_CACHE_CHECK([if C++ compiler supports bool], wx_cv_cpp_bool,
+  [
+    AC_LANG_SAVE
+    AC_LANG_CPLUSPLUS
+
+    AC_TRY_COMPILE(
+      [
+      ],
+      [
+        bool b = true;
+
+        return 0;
+      ],
+      [
+        wx_cv_cpp_bool=yes
+      ],
+      [
+        wx_cv_cpp_bool=no
+      ]
+    )
+
+    AC_LANG_RESTORE
+  ])
+
+  if test "$wx_cv_cpp_bool" = "yes"; then
+    AC_DEFINE(HAVE_BOOL)
+  fi
 ])
 
 dnl ---------------------------------------------------------------------------
@@ -247,7 +284,7 @@ AC_DEFUN([WX_CHECK_FUNCS],
 
     if eval test \$wx_cv_func_$wx_func = yes
     then
-      AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$wx_func]))
+      AC_DEFINE_UNQUOTED([AS_TR_CPP([HAVE_$wx_func])])
       $2
     else
       :
@@ -287,7 +324,7 @@ AC_TRY_RUN([main () {
 }], [ac_cv_c_bigendian=no], [ac_cv_c_bigendian=yes], [ac_cv_c_bigendian=unknown])
 fi])
 if test $ac_cv_c_bigendian = unknown; then
-  AC_MSG_WARN([Assuming little-endian target machine - this may be overridden by adding the line "ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}" to config.cache file])
+  AC_MSG_WARN([Assuming little-endian target machine - this may be overriden by adding the line "ac_cv_c_bigendian=${ac_cv_c_bigendian='yes'}" to config.cache file])
 fi
 if test $ac_cv_c_bigendian = yes; then
   AC_DEFINE(WORDS_BIGENDIAN)
@@ -295,19 +332,35 @@ fi
 ])
 
 dnl ---------------------------------------------------------------------------
-dnl override AC_ARG_ENABLE/WITH to handle options defaults
+dnl override AC_ARG_ENABLE/WITH to cache the results in .cache file
 dnl ---------------------------------------------------------------------------
+
+AC_DEFUN([WX_ARG_CACHE_INIT],
+        [
+          wx_arg_cache_file="configarg.cache"
+          echo "loading argument cache $wx_arg_cache_file"
+          rm -f ${wx_arg_cache_file}.tmp
+          touch ${wx_arg_cache_file}.tmp
+          touch ${wx_arg_cache_file}
+        ])
+
+AC_DEFUN([WX_ARG_CACHE_FLUSH],
+        [
+          echo "saving argument cache $wx_arg_cache_file"
+          mv ${wx_arg_cache_file}.tmp ${wx_arg_cache_file}
+        ])
+
+dnl return the name of the variable to store the value of the given
+dnl WX_ARG_WITH/ENABLE option
+AC_DEFUN([WX_ARG_CACHE_NAME],)
 
 dnl this macro checks for a three-valued command line --with argument:
 dnl   possible arguments are 'yes', 'no', 'sys', or 'builtin'
 dnl usage: WX_ARG_SYS_WITH(option, helpmessage, variable-name)
-dnl
-dnl the default value (used if the option is not specified at all) is the value
-dnl of wxUSE_ALL_FEATURES (which is "yes" by default but can be changed by
-dnl giving configure --disable-all-features option)
 AC_DEFUN([WX_ARG_SYS_WITH],
         [
           AC_MSG_CHECKING([for --with-$1])
+          no_cache=0
           AC_ARG_WITH($1, [$2],
                       [
                         if test "$withval" = yes; then
@@ -323,10 +376,20 @@ AC_DEFUN([WX_ARG_SYS_WITH],
                         fi
                       ],
                       [
-                        AS_TR_SH(wx_cv_use_$1)='$3=${'DEFAULT_$3":-$wxUSE_ALL_FEATURES}"
+                        LINE=`grep "$3" ${wx_arg_cache_file}`
+                        if test "x$LINE" != x ; then
+                          eval "DEFAULT_$LINE"
+                        else
+                          no_cache=1
+                        fi
+
+                        AS_TR_SH(wx_cv_use_$1)='$3='$DEFAULT_$3
                       ])
 
           eval "$AS_TR_SH(wx_cv_use_$1)"
+          if test "$no_cache" != 1; then
+            echo $AS_TR_SH(wx_cv_use_$1) >> ${wx_arg_cache_file}.tmp
+          fi
 
           if test "$$3" = yes; then
             AC_MSG_RESULT(yes)
@@ -341,20 +404,13 @@ AC_DEFUN([WX_ARG_SYS_WITH],
           fi
         ])
 
-dnl this macro simply checks for a command line argument
+dnl this macro checks for a command line argument and caches the result
 dnl usage: WX_ARG_WITH(option, helpmessage, variable-name, [withstring])
 AC_DEFUN([WX_ARG_WITH],
         [
           withstring=$4
-          defaultval=$wxUSE_ALL_FEATURES
-          if test -z "$defaultval"; then
-              if test x"$withstring" = xwithout; then
-                  defaultval=yes
-              else
-                  defaultval=no
-              fi
-          fi
           AC_MSG_CHECKING([for --${withstring:-with}-$1])
+          no_cache=0
           AC_ARG_WITH($1, [$2],
                       [
                         if test "$withval" = yes; then
@@ -364,50 +420,39 @@ AC_DEFUN([WX_ARG_WITH],
                         fi
                       ],
                       [
-                        AS_TR_SH(wx_cv_use_$1)='$3=${'DEFAULT_$3":-$defaultval}"
+                        LINE=`grep "$3" ${wx_arg_cache_file}`
+                        if test "x$LINE" != x ; then
+                          eval "DEFAULT_$LINE"
+                        else
+                          no_cache=1
+                        fi
+
+                        AS_TR_SH(wx_cv_use_$1)='$3='$DEFAULT_$3
                       ])
 
           eval "$AS_TR_SH(wx_cv_use_$1)"
-
-          if test x"$withstring" = xwithout; then
-            if test $$3 = yes; then
-              result=no
-            else
-              result=yes
-            fi
-          else
-            result=$$3
+          if test "$no_cache" != 1; then
+            echo $AS_TR_SH(wx_cv_use_$1) >> ${wx_arg_cache_file}.tmp
           fi
 
-          AC_MSG_RESULT($result)
+          if test "$$3" = yes; then
+            AC_MSG_RESULT(yes)
+          else
+            AC_MSG_RESULT(no)
+          fi
         ])
 
-dnl same as WX_ARG_WITH but makes it clear that the option is enabled by default
-AC_DEFUN([WX_ARG_WITHOUT], [WX_ARG_WITH($1, [$2], $3, without)])
-
 dnl like WX_ARG_WITH but uses AC_ARG_ENABLE instead of AC_ARG_WITH
-dnl usage: WX_ARG_ENABLE(option, helpmessage, var, [enablestring], [default])
+dnl usage: WX_ARG_ENABLE(option, helpmessage, variable-name, enablestring)
 dnl
-dnl enablestring can be omitted or a literal string "disable" and allows to
-dnl show "checking for --disable-foo" message when running configure instead of
-dnl the default "checking for --enable-foo" one whih is useful for the options
-dnl enabled by default
-dnl
-dnl the "default" argument can be omitted or contain the default value to use
-dnl for the option if it's unspecified
+dnl enablestring is a hack and allows to show "checking for --disable-foo"
+dnl message when running configure instead of the default "checking for
+dnl --enable-foo" one whih is useful for the options enabled by default
 AC_DEFUN([WX_ARG_ENABLE],
         [
           enablestring=$4
-          defaultval=$5
-          if test -z "$defaultval"; then
-              if test x"$enablestring" = xdisable; then
-                  defaultval=yes
-              else
-                  defaultval=no
-              fi
-          fi
-
           AC_MSG_CHECKING([for --${enablestring:-enable}-$1])
+          no_cache=0
           AC_ARG_ENABLE($1, [$2],
                         [
                           if test "$enableval" = yes; then
@@ -417,30 +462,28 @@ AC_DEFUN([WX_ARG_ENABLE],
                           fi
                         ],
                         [
-                          AS_TR_SH(wx_cv_use_$1)='$3=${'DEFAULT_$3":-$defaultval}"
+                          LINE=`grep "$3" ${wx_arg_cache_file}`
+                          if test "x$LINE" != x ; then
+                            eval "DEFAULT_$LINE"
+                          else
+                            no_cache=1
+                          fi
+
+                          AS_TR_SH(wx_cv_use_$1)='$3='$DEFAULT_$3
                         ])
 
           eval "$AS_TR_SH(wx_cv_use_$1)"
-
-          if test x"$enablestring" = xdisable; then
-            if test $$3 = no; then
-              result=yes
-            else
-              result=no
-            fi
-          else
-            result=$$3
+          if test "$no_cache" != 1; then
+            echo $AS_TR_SH(wx_cv_use_$1) >> ${wx_arg_cache_file}.tmp
           fi
 
-          AC_MSG_RESULT($result)
+          if test "$$3" = yes; then
+            AC_MSG_RESULT(yes)
+          else
+            AC_MSG_RESULT(no)
+          fi
         ])
 
-dnl the same as WX_ARG_ENABLE but makes it more clear that the option is
-dnl enabled by default
-AC_DEFUN([WX_ARG_DISABLE], [WX_ARG_ENABLE($1, [$2], $3, disable)])
-
-dnl same as WX_ARG_ENABLE but defaults to wxUSE_ALL_FEATURES instead of "yes"
-AC_DEFUN([WX_ARG_FEATURE], [WX_ARG_ENABLE($1, [$2], $3,, $wxUSE_ALL_FEATURES)])
 
 dnl Like WX_ARG_ENABLE but accepts a parameter.
 dnl
@@ -453,21 +496,32 @@ dnl
 dnl  --enable-foo       wxUSE_FOO=yes
 dnl  --disable-foo      wxUSE_FOO=no
 dnl  --enable-foo=bar   wxUSE_FOO=bar
-dnl  <not given>        wxUSE_FOO=$DEFAULT_wxUSE_FOO
+dnl  <not given>        value from configarg.cache or wxUSE_FOO=no
 dnl
 AC_DEFUN([WX_ARG_ENABLE_PARAM],
         [
           enablestring=$4
           AC_MSG_CHECKING([for --${enablestring:-enable}-$1])
+          no_cache=0
           AC_ARG_ENABLE($1, [$2],
                         [
                           wx_cv_use_$1="$3='$enableval'"
                         ],
                         [
-                          wx_cv_use_$1='$3='$DEFAULT_$3
+                          LINE=`grep "$3" ${wx_arg_cache_file}`
+                          if test "x$LINE" != x ; then
+                            eval "DEFAULT_$LINE"
+                            wx_cv_use_$1='$3='$DEFAULT_$3
+                          else
+                            no_cache=1
+                            wx_cv_use_$1="$3=no"
+                          fi
                         ])
 
           eval "$wx_cv_use_$1"
+          if test "$no_cache" != 1; then
+            echo $wx_cv_use_$1 >> ${wx_arg_cache_file}.tmp
+          fi
 
           AC_MSG_RESULT([$$3])
         ])
@@ -704,6 +758,82 @@ if test "$enable_largefile" != no; then
         AC_DEFINE(HAVE_LARGEFILE_SUPPORT)
     fi
     AC_MSG_RESULT($wx_largefile)
+fi
+])
+
+
+dnl Available from the GNU Autoconf Macro Archive at:
+dnl http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_const_cast.html
+dnl
+AC_DEFUN([AC_CXX_CONST_CAST],
+[AC_CACHE_CHECK(whether the compiler supports const_cast<>,
+ac_cv_cxx_const_cast,
+[AC_LANG_SAVE
+ AC_LANG_CPLUSPLUS
+ AC_TRY_COMPILE(,[int x = 0;const int& y = x;int& z = const_cast<int&>(y);return z;],
+ ac_cv_cxx_const_cast=yes, ac_cv_cxx_const_cast=no)
+ AC_LANG_RESTORE
+])
+if test "$ac_cv_cxx_const_cast" = yes; then
+  AC_DEFINE(HAVE_CONST_CAST,,[define if the compiler supports const_cast<>])
+fi
+])
+
+dnl http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_reinterpret_cast.html
+AC_DEFUN([AC_CXX_REINTERPRET_CAST],
+[AC_CACHE_CHECK(whether the compiler supports reinterpret_cast<>,
+ac_cv_cxx_reinterpret_cast,
+[AC_LANG_SAVE
+ AC_LANG_CPLUSPLUS
+ AC_TRY_COMPILE([#include <typeinfo>
+class Base { public : Base () {} virtual void f () = 0;};
+class Derived : public Base { public : Derived () {} virtual void f () {} };
+class Unrelated { public : Unrelated () {} };
+int g (Unrelated&) { return 0; }],[
+Derived d;Base& b=d;Unrelated& e=reinterpret_cast<Unrelated&>(b);return g(e);],
+ ac_cv_cxx_reinterpret_cast=yes, ac_cv_cxx_reinterpret_cast=no)
+ AC_LANG_RESTORE
+])
+if test "$ac_cv_cxx_reinterpret_cast" = yes; then
+  AC_DEFINE(HAVE_REINTERPRET_CAST,,
+            [define if the compiler supports reinterpret_cast<>])
+fi
+])
+
+dnl and http://www.gnu.org/software/ac-archive/htmldoc/ac_cxx_static_cast.html
+AC_DEFUN([AC_CXX_STATIC_CAST],
+[AC_CACHE_CHECK(whether the compiler supports static_cast<>,
+ac_cv_cxx_static_cast,
+[AC_LANG_SAVE
+ AC_LANG_CPLUSPLUS
+ AC_TRY_COMPILE([#include <typeinfo>
+class Base { public : Base () {} virtual void f () = 0; };
+class Derived : public Base { public : Derived () {} virtual void f () {} };
+int g (Derived&) { return 0; }],[
+Derived d; Base& b = d; Derived& s = static_cast<Derived&> (b); return g (s);],
+ ac_cv_cxx_static_cast=yes, ac_cv_cxx_static_cast=no)
+ AC_LANG_RESTORE
+])
+if test "$ac_cv_cxx_static_cast" = yes; then
+  AC_DEFINE(HAVE_STATIC_CAST,, [define if the compiler supports static_cast<>])
+fi
+])
+
+dnl http://autoconf-archive.cryp.to/ac_cxx_dynamic_cast.html
+AC_DEFUN([AC_CXX_DYNAMIC_CAST],
+[AC_CACHE_CHECK(whether the compiler supports dynamic_cast<>,
+ac_cv_cxx_dynamic_cast,
+[AC_LANG_SAVE
+ AC_LANG_CPLUSPLUS
+ AC_TRY_COMPILE([#include <typeinfo>
+class Base { public : Base () {} virtual void f () = 0;};
+class Derived : public Base { public : Derived () {} virtual void f () {} };],[
+Derived d; Base& b=d; return dynamic_cast<Derived*>(&b) ? 0 : 1;],
+ ac_cv_cxx_dynamic_cast=yes, ac_cv_cxx_dynamic_cast=no)
+ AC_LANG_RESTORE
+])
+if test "$ac_cv_cxx_dynamic_cast" = yes; then
+  AC_DEFINE(HAVE_DYNAMIC_CAST,,[define if the compiler supports dynamic_cast<>])
 fi
 ])
 

@@ -28,6 +28,8 @@
 #include "wx/slider.h"
 #include "wx/os2/private.h"
 
+IMPLEMENT_DYNAMIC_CLASS(wxSlider, wxControl)
+
 wxSlider::wxSlider()
 {
     m_hStaticValue = 0L;
@@ -970,13 +972,13 @@ bool wxSlider::OS2OnScroll( int    WXUNUSED(nOrientation),
 
     vEvent.SetPosition(nNewPos);
     vEvent.SetEventObject(this);
-    HandleWindowEvent(vEvent);
+    GetEventHandler()->ProcessEvent(vEvent);
 
     wxCommandEvent vCevent( wxEVT_COMMAND_SLIDER_UPDATED, GetId() );
 
     vCevent.SetInt(nNewPos);
     vCevent.SetEventObject(this);
-    return (HandleWindowEvent(vCevent));
+    return (GetEventHandler()->ProcessEvent(vCevent));
 } // end of wxSlider::OS2OnScroll
 
 void wxSlider::SetLineSize( int nLineSize )
@@ -1074,7 +1076,7 @@ void wxSlider::SetTick(
 } // end of wxSlider::SetTick
 
 // For trackbars only
-void wxSlider::DoSetTickFreq( int n )
+void wxSlider::SetTickFreq( int n, int WXUNUSED(nPos) )
 {
     SLDCDATA  vSlData;
     WNDPARAMS vWndParams;

@@ -45,8 +45,6 @@ public:
 #endif
     ~wxTextInputStream();
 
-    const wxInputStream& GetInputStream() const { return m_input; }
-
     wxUint32 Read32(int base = 10); // base may be between 2 and 36, inclusive, or the special 0 (= C format)
     wxUint16 Read16(int base = 10);
     wxUint8  Read8(int base = 10);
@@ -95,7 +93,7 @@ protected:
     wxChar NextChar();   // this should be used instead of GetC() because of Unicode issues
     wxChar NextNonSeparators();
 
-    wxDECLARE_NO_COPY_CLASS(wxTextInputStream);
+    DECLARE_NO_COPY_CLASS(wxTextInputStream)
 };
 
 typedef enum
@@ -118,8 +116,6 @@ public:
 #endif
     virtual ~wxTextOutputStream();
 
-    const wxOutputStream& GetOutputStream() const { return m_output; }
-
     void SetMode( wxEOL mode = wxEOL_NATIVE );
     wxEOL GetMode() { return m_mode; }
 
@@ -131,8 +127,7 @@ public:
 
     wxTextOutputStream& PutChar(wxChar c);
 
-    void Flush();
-
+    wxTextOutputStream& operator<<(const wxChar *string);
     wxTextOutputStream& operator<<(const wxString& string);
     wxTextOutputStream& operator<<(char c);
 #if wxUSE_UNICODE && wxWCHAR_T_IS_REAL_TYPE
@@ -155,7 +150,7 @@ protected:
     wxMBConv *m_conv;
 #endif
 
-    wxDECLARE_NO_COPY_CLASS(wxTextOutputStream);
+    DECLARE_NO_COPY_CLASS(wxTextOutputStream)
 };
 
 #endif

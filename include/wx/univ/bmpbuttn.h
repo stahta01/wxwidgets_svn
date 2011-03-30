@@ -12,7 +12,7 @@
 #ifndef _WX_UNIV_BMPBUTTN_H_
 #define _WX_UNIV_BMPBUTTN_H_
 
-class WXDLLIMPEXP_CORE wxBitmapButton : public wxBitmapButtonBase
+class WXDLLEXPORT wxBitmapButton : public wxBitmapButtonBase
 {
 public:
     wxBitmapButton() { }
@@ -40,7 +40,7 @@ public:
 
     virtual void SetMargins(int x, int y)
     {
-        SetBitmapMargins(x, y);
+        SetImageMargins(x, y);
 
         wxBitmapButtonBase::SetMargins(x, y);
     }
@@ -59,8 +59,8 @@ protected:
     // called when one of the bitmap is changed by user
     virtual void OnSetBitmap();
 
-    // set bitmap to the given one if it's ok or to the normal bitmap and
-    // return true if the bitmap really changed
+    // set bitmap to the given one if it's ok or to m_bmpNormal and return
+    // true if the bitmap really changed
     bool ChangeBitmap(const wxBitmap& bmp);
 
 private:

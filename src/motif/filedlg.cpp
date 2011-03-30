@@ -88,20 +88,21 @@ void wxFileSelOk(Widget WXUNUSED(fs), XtPointer WXUNUSED(client_data), XmFileSel
 
 static wxString ParseWildCard( const wxString& wild )
 {
-#if wxDEBUG_LEVEL
-    static const char *msg =
-        "Motif file dialog does not understand this wildcard syntax";
+#ifdef __WXDEBUG__
+    static const wxChar* msg =
+        _T("Motif file dialog does not understand this ")
+        _T("wildcard syntax");
 #endif
 
     wxArrayString wildDescriptions, wildFilters;
     const size_t count = wxParseCommonDialogsFilter(wild,
                                                     wildDescriptions,
                                                     wildFilters);
-    wxCHECK_MSG( count, wxT("*.*"), wxT("wxFileDialog: bad wildcard string") );
-    wxCHECK_MSG( count == 1, wxT("*.*"), msg );
+    wxCHECK_MSG( count, _T("*.*"), wxT("wxFileDialog: bad wildcard string") );
+    wxCHECK_MSG( count == 1, _T("*.*"), msg );
 
     // check for *.txt;*.rtf
-    wxStringTokenizer tok2( wildFilters[0], wxT(";") );
+    wxStringTokenizer tok2( wildFilters[0], _T(";") );
     wxString wildcard = tok2.GetNextToken();
 
     wxCHECK_MSG( tok2.CountTokens() <= 1, wildcard, msg );
@@ -165,15 +166,12 @@ int wxFileDialog::ShowModal()
     Arg args[10];
     int ac = 0;
 
-    if (m_backgroundColour.Ok())
-    {
-        wxComputeColours (dpy, & m_backgroundColour, NULL);
+    wxComputeColours (dpy, & m_backgroundColour, (wxColour*) NULL);
 
-        XtSetArg(args[ac], XmNbackground, g_itemColors[wxBACK_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNtopShadowColor, g_itemColors[wxTOPS_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNbottomShadowColor, g_itemColors[wxBOTS_INDEX].pixel); ac++;
-        XtSetArg(args[ac], XmNforeground, g_itemColors[wxFORE_INDEX].pixel); ac++;
-    }
+    XtSetArg(args[ac], XmNbackground, g_itemColors[wxBACK_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNtopShadowColor, g_itemColors[wxTOPS_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNbottomShadowColor, g_itemColors[wxBOTS_INDEX].pixel); ac++;
+    XtSetArg(args[ac], XmNforeground, g_itemColors[wxFORE_INDEX].pixel); ac++;
 
     wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
 
@@ -228,9 +226,9 @@ int wxFileDialog::ShowModal()
 
     Widget shell = XtParent(fileSel);
 
-    if ( !m_message.empty() )
+    if (!m_message.IsNull())
         XtVaSetValues(shell,
-                      XmNtitle, (const char*)m_message.mb_str(),
+                      XmNtitle, wxConstCast(m_message.c_str(), char),
                       NULL);
 
     if (!m_wildCard.empty())
@@ -243,7 +241,7 @@ int wxFileDialog::ShowModal()
         else
             filter = wildCard;
 
-        XmTextSetString(filterWidget, filter.char_str());
+        XmTextSetString(filterWidget, wxConstCast(filter.c_str(), char));
         XmFileSelectionDoSearch(fileSel, NULL);
     }
 
@@ -271,7 +269,8 @@ int wxFileDialog::ShowModal()
 
     if (!entirePath.empty())
     {
-        XmTextSetString(selectionWidget, entirePath.char_str());
+        XmTextSetString(selectionWidget,
+                        wxConstCast(entirePath.c_str(), char));
     }
 
     XtAddCallback(fileSel, XmNcancelCallback,

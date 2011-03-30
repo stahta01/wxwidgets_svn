@@ -4,7 +4,7 @@
 // Author:      Mike Wetherell
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 Mike Wetherell
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -35,8 +35,6 @@
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
-
-#if wxUSE_REGEX
 
 // for all others, include the necessary headers
 #ifndef WX_PRECOMP
@@ -87,7 +85,7 @@ private:
     void parseFlags(const wxString& flags);
     void doTest(int flavor);
     static wxString quote(const wxString& arg);
-    const wxChar *convError() const { return wxT("<cannot convert>"); }
+    const wxChar *convError() const { return _T("<cannot convert>"); }
 
     // assertions - adds some information about the test that failed
     void fail(const wxString& msg) const;
@@ -142,13 +140,13 @@ RegExTestCase::RegExTestCase(
         badconv = badconv || *m_expected.rbegin() == convError();
     }
 
-    failIf(badconv, wxT("cannot convert to default character encoding"));
+    failIf(badconv, _T("cannot convert to default character encoding"));
 
     // the flags need further parsing...
     parseFlags(m_flags);
 
 #ifndef wxHAS_REGEX_ADVANCED
-    failIf(!m_basic && !m_extended, wxT("advanced regexs not available"));
+    failIf(!m_basic && !m_extended, _T("advanced regexs not available"));
 #endif
 }
 
@@ -160,7 +158,7 @@ int wxWcscmp(const wchar_t* s1, const wchar_t* s2)
     if (nLen1 != nLen2)
         return nLen1 - nLen2;
 
-    return memcmp(s1, s2, nLen1*sizeof(wchar_t));
+    return wxTmemcmp(s1, s2, nLen1);
 }
 
 // convert a string from UTF8 to the internal encoding
@@ -172,17 +170,16 @@ wxString RegExTestCase::Conv(const char *str)
 
     if (!buf || wxWcscmp(wxConvCurrent->cWX2WC(buf), wstr) != 0)
         return convError();
-
-    return buf;
+    else
+        return buf;
 }
 
 // Parse flags
 //
 void RegExTestCase::parseFlags(const wxString& flags)
 {
-    for ( wxString::const_iterator p = flags.begin(); p != flags.end(); ++p )
-    {
-        switch ( (*p).GetValue() ) {
+    for (const wxChar *p = flags; *p; p++) {
+        switch (*p) {
             // noop
             case '-': break;
 
@@ -212,7 +209,7 @@ void RegExTestCase::parseFlags(const wxString& flags)
             // anything else we must skip the test
             default:
                 fail(wxString::Format(
-                     wxT("requires unsupported flag '%c'"), *p));
+                     _T("requires unsupported flag '%c'"), *p));
         }
     }
 }
@@ -239,29 +236,29 @@ void RegExTestCase::doTest(int flavor)
 
     // 'e' - test that the pattern fails to compile
     if (m_mode == 'e') {
-        failIf(re.IsValid(), wxT("compile succeeded (should fail)"));
+        failIf(re.IsValid(), _T("compile succeeded (should fail)"));
         return;
     }
-    failIf(!re.IsValid(), wxT("compile failed"));
+    failIf(!re.IsValid(), _T("compile failed"));
 
     bool matches = re.Matches(m_data, m_matchFlags);
 
     // 'f' or 'p' - test that the pattern does not match
     if (m_mode == 'f' || m_mode == 'p') {
-        failIf(matches, wxT("match succeeded (should fail)"));
+        failIf(matches, _T("match succeeded (should fail)"));
         return;
     }
 
     // otherwise 'm' or 'i' - test the pattern does match
-    failIf(!matches, wxT("match failed"));
+    failIf(!matches, _T("match failed"));
 
     if (m_compileFlags & wxRE_NOSUB)
         return;
 
     // check wxRegEx has correctly counted the number of subexpressions
     wxString msg;
-    msg << wxT("GetMatchCount() == ") << re.GetMatchCount()
-        << wxT(", expected ") << m_expected.size();
+    msg << _T("GetMatchCount() == ") << re.GetMatchCount()
+        << _T(", expected ") << m_expected.size();
     failIf(m_expected.size() != re.GetMatchCount(), msg);
 
     for (size_t i = 0; i < m_expected.size(); i++) {
@@ -269,32 +266,28 @@ void RegExTestCase::doTest(int flavor)
         size_t start, len;
 
         msg.clear();
-        msg << wxT("wxRegEx::GetMatch failed for match ") << i;
+        msg << _T("wxRegEx::GetMatch failed for match ") << i;
         failIf(!re.GetMatch(&start, &len, i), msg);
 
         // m - check the match returns the strings given
         if (m_mode == 'm')
-        {
             if (start < INT_MAX)
                 result = m_data.substr(start, len);
             else
-                result = wxT("");
-        }
+                result = _T("");
 
         // i - check the match returns the offsets given
         else if (m_mode == 'i')
-        {
             if (start > INT_MAX)
-                result = wxT("-1 -1");
+                result = _T("-1 -1");
             else if (start + len > 0)
-                result << start << wxT(" ") << start + len - 1;
+                result << start << _T(" ") << start + len - 1;
             else
-                result << start << wxT(" -1");
-        }
+                result << start << _T(" -1");
 
         msg.clear();
-        msg << wxT("match(") << i << wxT(") == ") << quote(result)
-            << wxT(", expected == ") << quote(m_expected[i]);
+        msg << _T("match(") << i << _T(") == ") << quote(result)
+            << _T(", expected == ") << quote(m_expected[i]);
         failIf(result != m_expected[i], msg);
     }
 }
@@ -306,16 +299,16 @@ void RegExTestCase::fail(const wxString& msg) const
     wxString str;
     wxArrayString::const_iterator it;
 
-    str << (wxChar)m_mode << wxT(" ") << m_id << wxT(" ") << m_flags << wxT(" ")
-        << quote(m_pattern) << wxT(" ") << quote(m_data);
+    str << (wxChar)m_mode << _T(" ") << m_id << _T(" ") << m_flags << _T(" ")
+        << quote(m_pattern) << _T(" ") << quote(m_data);
 
     for (it = m_expected.begin(); it != m_expected.end(); ++it)
-        str << wxT(" ") << quote(*it);
+        str << _T(" ") << quote(*it);
 
     if (str.length() > 77)
-        str = str.substr(0, 74) + wxT("...");
+        str = str.substr(0, 74) + _T("...");
 
-    str << wxT("\n ") << msg;
+    str << _T("\n ") << msg;
 
     // no lossy convs so using utf8
     CPPUNIT_FAIL(string(str.mb_str(wxConvUTF8)));
@@ -325,24 +318,24 @@ void RegExTestCase::fail(const wxString& msg) const
 //
 wxString RegExTestCase::quote(const wxString& arg)
 {
-    const wxChar *needEscape = wxT("\a\b\t\n\v\f\r\"\\");
-    const wxChar *escapes = wxT("abtnvfr\"\\");
+    const wxChar *needEscape = _T("\a\b\t\n\v\f\r\"\\");
+    const wxChar *escapes = _T("abtnvfr\"\\");
     wxString str;
 
     for (size_t i = 0; i < arg.length(); i++) {
-        wxChar ch = (wxChar)arg[i];
+        wxUChar ch = arg[i];
         const wxChar *p = wxStrchr(needEscape, ch);
 
         if (p)
-            str += wxString::Format(wxT("\\%c"), escapes[p - needEscape]);
+            str += wxString::Format(_T("\\%c"), escapes[p - needEscape]);
         else if (wxIscntrl(ch))
-            str += wxString::Format(wxT("\\%03o"), ch);
+            str += wxString::Format(_T("\\%03o"), ch);
         else
-            str += (wxChar)ch;
+            str += ch;
     }
 
     return str.length() == arg.length() && str.find(' ') == wxString::npos ?
-        str : wxT("\"") + str + wxT("\"");
+        str : _T("\"") + str + _T("\"");
 }
 
 
@@ -382,7 +375,7 @@ void RegExTestSuite::add(
             name, mode, id, flags, pattern, data, expected_results));
     }
     catch (Exception& e) {
-        wxLogInfo(wxString::Format(wxT("skipping: %s\n %s\n"),
+        wxLogInfo(wxString::Format(_T("skipping: %s\n %s\n"),
             wxString(name.c_str(), wxConvUTF8).c_str(),
             wxString(e.what(), wxConvUTF8).c_str()));
     }
@@ -395,5 +388,3 @@ void RegExTestSuite::add(
 
 
 #endif // wxHAS_REGEX_ADVANCED
-
-#endif // wxUSE_REGEX

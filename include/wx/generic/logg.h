@@ -14,10 +14,6 @@
 
 #if wxUSE_GUI
 
-class WXDLLIMPEXP_FWD_CORE wxTextCtrl;
-class WXDLLIMPEXP_FWD_CORE wxLogFrame;
-class WXDLLIMPEXP_FWD_CORE wxWindow;
-
 // ----------------------------------------------------------------------------
 // the following log targets are only compiled in if the we're compiling the
 // GUI part (andnot just the base one) of the library, they're implemented in
@@ -27,20 +23,20 @@ class WXDLLIMPEXP_FWD_CORE wxWindow;
 #if wxUSE_TEXTCTRL
 
 // log everything to a text window (GUI only of course)
-class WXDLLIMPEXP_CORE wxLogTextCtrl : public wxLog
+class WXDLLEXPORT wxLogTextCtrl : public wxLog
 {
 public:
     wxLogTextCtrl(wxTextCtrl *pTextCtrl);
 
 protected:
     // implement sink function
-    virtual void DoLogText(const wxString& msg);
+    virtual void DoLogString(const wxChar *szString, time_t t);
 
 private:
     // the control we use
     wxTextCtrl *m_pTextCtrl;
 
-    wxDECLARE_NO_COPY_CLASS(wxLogTextCtrl);
+    DECLARE_NO_COPY_CLASS(wxLogTextCtrl)
 };
 
 #endif // wxUSE_TEXTCTRL
@@ -51,7 +47,7 @@ private:
 
 #if wxUSE_LOGGUI
 
-class WXDLLIMPEXP_CORE wxLogGui : public wxLog
+class WXDLLEXPORT wxLogGui : public wxLog
 {
 public:
     // ctor
@@ -61,21 +57,10 @@ public:
     virtual void Flush();
 
 protected:
-    virtual void DoLogRecord(wxLogLevel level,
-                             const wxString& msg,
-                             const wxLogRecordInfo& info);
-
-    // return the title to be used for the log dialog, depending on m_bErrors
-    // and m_bWarnings values
-    wxString GetTitle() const;
-
-    // return the icon (one of wxICON_XXX constants) to be used for the dialog
-    // depending on m_bErrors/m_bWarnings
-    int GetSeverityIcon() const;
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
 
     // empty everything
     void Clear();
-
 
     wxArrayString m_aMessages;      // the log message texts
     wxArrayInt    m_aSeverity;      // one of wxLOG_XXX values
@@ -84,19 +69,6 @@ protected:
                   m_bWarnings,      // any warnings?
                   m_bHasMessages;   // any messages at all?
 
-private:
-    // this method is called to show a single log message, it uses
-    // wxMessageBox() by default
-    virtual void DoShowSingleLogMessage(const wxString& message,
-                                        const wxString& title,
-                                        int style);
-
-    // this method is called to show multiple log messages, it uses wxLogDialog
-    virtual void DoShowMultipleLogMessages(const wxArrayString& messages,
-                                           const wxArrayInt& severities,
-                                           const wxArrayLong& times,
-                                           const wxString& title,
-                                           int style);
 };
 
 #endif // wxUSE_LOGGUI
@@ -110,11 +82,11 @@ private:
 
 #if wxUSE_LOGWINDOW
 
-class WXDLLIMPEXP_CORE wxLogWindow : public wxLogPassThrough
+class WXDLLEXPORT wxLogWindow : public wxLogPassThrough
 {
 public:
-    wxLogWindow(wxWindow *pParent,        // the parent frame (can be NULL)
-                const wxString& szTitle,  // the title of the frame
+    wxLogWindow(wxWindow *pParent,         // the parent frame (can be NULL)
+                const wxChar *szTitle,    // the title of the frame
                 bool bShow = true,        // show window immediately?
                 bool bPassToOld = true);  // pass messages to the old target?
 
@@ -140,12 +112,13 @@ public:
     virtual void OnFrameDelete(wxFrame *frame);
 
 protected:
-    virtual void DoLogTextAtLevel(wxLogLevel level, const wxString& msg);
+    virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t);
+    virtual void DoLogString(const wxChar *szString, time_t t);
 
 private:
     wxLogFrame *m_pLogFrame;      // the log frame
 
-    wxDECLARE_NO_COPY_CLASS(wxLogWindow);
+    DECLARE_NO_COPY_CLASS(wxLogWindow)
 };
 
 #endif // wxUSE_LOGWINDOW

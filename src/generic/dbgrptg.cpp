@@ -6,7 +6,7 @@
 // Created:     2005-01-21
 // RCS-ID:      $Id$
 // Copyright:   (c) 2005 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -46,7 +46,6 @@
 
 #ifdef __WXMSW__
     #include "wx/evtloop.h"     // for SetCriticalWindow()
-    #include "wx/scopeguard.h"
 #endif // __WXMSW__
 
 // ----------------------------------------------------------------------------
@@ -64,7 +63,7 @@ private:
     // the text we show
     wxTextCtrl *m_text;
 
-    wxDECLARE_NO_COPY_CLASS(wxDumpPreviewDlg);
+    DECLARE_NO_COPY_CLASS(wxDumpPreviewDlg)
 };
 
 wxDumpPreviewDlg::wxDumpPreviewDlg(wxWindow *parent,
@@ -139,7 +138,7 @@ private:
 #endif // wxUSE_FILEDLG
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxDumpOpenExternalDlg);
+    DECLARE_NO_COPY_CLASS(wxDumpOpenExternalDlg)
 };
 
 BEGIN_EVENT_TABLE(wxDumpOpenExternalDlg, wxDialog)
@@ -273,7 +272,7 @@ private:
     wxArrayString m_files;
 
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(wxDebugReportDialog);
+    DECLARE_NO_COPY_CLASS(wxDebugReportDialog)
 };
 
 // ============================================================================
@@ -313,15 +312,15 @@ wxDebugReportDialog::wxDebugReportDialog(wxDebugReport& dbgrpt)
     debugDir = debugDirFilename.GetPath();
 #endif
     msg << _("A debug report has been generated in the directory\n")
-        << wxT('\n')
-        << wxT("             \"") << debugDir << wxT("\"\n")
-        << wxT('\n')
+        << _T('\n')
+        << _T("             \"") << debugDir << _T("\"\n")
+        << _T('\n')
         << _("The report contains the files listed below. If any of these files contain private information,\nplease uncheck them and they will be removed from the report.\n")
-        << wxT('\n')
+        << _T('\n')
         << _("If you wish to suppress this debug report completely, please choose the \"Cancel\" button,\nbut be warned that it may hinder improving the program, so if\nat all possible please do continue with the report generation.\n")
-        << wxT('\n')
+        << _T('\n')
         << _("              Thank you and we're sorry for the inconvenience!\n")
-        << wxT("\n\n"); // just some white space to separate from other stuff
+        << _T("\n\n"); // just some white space to separate from other stuff
 
     const wxSizerFlags flagsFixed(SizerFlags(0));
     const wxSizerFlags flagsExpand(SizerFlags(1));
@@ -387,7 +386,7 @@ bool wxDebugReportDialog::TransferDataToWindow()
             desc;
         if ( m_dbgrpt.GetFile(n, &name, &desc) )
         {
-            m_checklst->Append(name + wxT(" (") + desc + wxT(')'));
+            m_checklst->Append(name + _T(" (") + desc + _T(')'));
             m_checklst->Check(n);
 
             m_files.Add(name);
@@ -414,7 +413,7 @@ bool wxDebugReportDialog::TransferDataFromWindow()
     if ( !notes.empty() )
     {
         // for now filename fixed, could make it configurable in the future...
-        m_dbgrpt.AddText(wxT("notes.txt"), notes, wxT("user notes"));
+        m_dbgrpt.AddText(_T("notes.txt"), notes, _T("user notes"));
     }
 
     return true;
@@ -427,7 +426,7 @@ bool wxDebugReportDialog::TransferDataFromWindow()
 void wxDebugReportDialog::OnView(wxCommandEvent& )
 {
     const int sel = m_checklst->GetSelection();
-    wxCHECK_RET( sel != wxNOT_FOUND, wxT("invalid selection in OnView()") );
+    wxCHECK_RET( sel != wxNOT_FOUND, _T("invalid selection in OnView()") );
 
     wxFileName fn(m_dbgrpt.GetDirectory(), m_files[sel]);
     wxString str;
@@ -443,7 +442,7 @@ void wxDebugReportDialog::OnView(wxCommandEvent& )
 void wxDebugReportDialog::OnOpen(wxCommandEvent& )
 {
     const int sel = m_checklst->GetSelection();
-    wxCHECK_RET( sel != wxNOT_FOUND, wxT("invalid selection in OnOpen()") );
+    wxCHECK_RET( sel != wxNOT_FOUND, _T("invalid selection in OnOpen()") );
 
     wxFileName fn(m_dbgrpt.GetDirectory(), m_files[sel]);
 
@@ -472,7 +471,7 @@ void wxDebugReportDialog::OnOpen(wxCommandEvent& )
             if ( !cmd.empty() )
             {
 #if wxUSE_MIMETYPE
-                if ( cmd.find(wxT('%')) != wxString::npos )
+                if ( cmd.find(_T('%')) != wxString::npos )
                 {
                     command = wxFileType::ExpandCommand(cmd, fn.GetFullPath());
                 }
@@ -480,7 +479,7 @@ void wxDebugReportDialog::OnOpen(wxCommandEvent& )
 #endif // wxUSE_MIMETYPE
                 {
                     // append the file name to the end
-                    command << cmd << wxT(" \"") << fn.GetFullPath() << wxT('"');
+                    command << cmd << _T(" \"") << fn.GetFullPath() << _T('"');
                 }
             }
         }
@@ -518,9 +517,6 @@ bool wxDebugReportPreviewStd::Show(wxDebugReport& dbgrpt) const
     // before entering the event loop (from ShowModal()), block the event
     // handling for all other windows as this could result in more crashes
     wxEventLoop::SetCriticalWindow(&dlg);
-
-    wxON_BLOCK_EXIT1( wxEventLoop::SetCriticalWindow,
-                        static_cast<wxWindow *>(NULL) );
 #endif // __WXMSW__
 
     return dlg.ShowModal() == wxID_OK && dbgrpt.GetFilesCount() != 0;

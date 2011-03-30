@@ -27,10 +27,6 @@ public:
 
     // Clean up message queue.
     virtual void TerminateGui(unsigned long ulHab);
-
-#if wxUSE_SOCKETS
-    virtual wxFDIOManager *GetFDIOManager();
-#endif
 };
 
 #endif // _WX_OS2_APPTBASE_H_

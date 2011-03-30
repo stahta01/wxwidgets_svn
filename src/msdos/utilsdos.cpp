@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/msdos/utilsdos.cpp
+// Name:        src/msdos/utils.cpp
 // Purpose:     DOS implementations of utility functions
 // Author:      Vaclav Slavik, M.J.Wetherell
 // Id:          $Id$
@@ -96,11 +96,11 @@ bool wxGetEnv(const wxString& var, wxString *value)
     return true;
 }
 
-static bool wxDoSetEnv(const wxString& variable, const char *value)
+bool wxSetEnv(const wxString& variable, const wxChar *value)
 {
     wxString s = variable;
     if ( value )
-        s << wxT('=') << value;
+        s << _T('=') << value;
 
     // transform to ANSI
     const char *p = s.mb_str();
@@ -111,17 +111,6 @@ static bool wxDoSetEnv(const wxString& variable, const char *value)
 
     return putenv(buf) == 0;
 }
-
-bool wxSetEnv(const wxString& variable, const wxString& value)
-{
-    return wxDoSetEnv(variable, value.mb_str());
-}
-
-bool wxUnsetEnv(const wxString& variable)
-{
-    return wxDoSetEnv(variable, NULL);
-}
-
 
 //----------------------------------------------------------------------------
 // Hostname, username, home directory
@@ -179,7 +168,7 @@ const wxChar* wxGetHomeDir(wxString *home)
         {
             strDir = szHome;
             // when msys sets %HOME% it uses '/' (cygwin uses '\\')
-            strDir.Replace(wxT("/"), wxT("\\"));
+            strDir.Replace(_T("/"), _T("\\"));
         }
     }
 
@@ -196,44 +185,44 @@ const wxChar* wxGetHomeDir(wxString *home)
             wxString prog(wxTheApp->argv[0]);
 #ifdef __DJGPP__
             // djgpp startup code switches the slashes around, so restore them
-            prog.Replace(wxT("/"), wxT("\\"));
+            prog.Replace(_T("/"), _T("\\"));
 #endif
             // it needs to be a full path to be usable
-            if ( prog.compare(1, 2, wxT(":\\")) == 0 )
-                wxFileName::SplitPath(prog, &strDir, NULL, NULL);
+            if ( prog.compare(1, 2, _T(":\\")) == 0 )
+                wxSplitPath(prog, &strDir, NULL, NULL);
         }
         if ( strDir.empty() )
         {
-            strDir = wxT(".");
+            strDir = _T(".");
         }
     }
 
     return strDir.c_str();
 }
 
-wxString wxGetUserHome(const wxString& user)
+wxChar *wxGetUserHome(const wxString& user)
 {
-    wxString home;
+    static wxString home;
 
     if (user.empty() || user == wxGetUserId())
-        wxGetHomeDir(&home);
-
-    return home;
+        return wx_const_cast(wxChar*, wxGetHomeDir(&home));
+    else
+        return _T("");
 }
 
 // returns %UserName%, $USER or just "user"
 //
 bool wxGetUserId(wxChar *buf, int n)
 {
-    const wxChar *user = wxGetenv(wxT("UserName"));
+    const wxChar *user = wxGetenv(_T("UserName"));
 
     if (!user)
-        user = wxGetenv(wxT("USER"));
+        user = wxGetenv(_T("USER"));
 
     if (!user)
-        user = wxT("user");
+        user = _T("user");
 
-    wxStrlcpy(buf, user, n);
+    wxStrncpy(buf, user, n);
     return true;
 }
 
@@ -246,15 +235,15 @@ bool wxGetUserName(wxChar *buf, int n)
 //
 bool wxGetHostName(wxChar *buf, int n)
 {
-    const wxChar *host = wxGetenv(wxT("ComputerName"));
+    const wxChar *host = wxGetenv(_T("ComputerName"));
 
     if (!host)
-        host = wxGetenv(wxT("HOSTNAME"));
+        host = wxGetenv(_T("HOSTNAME"));
 
     if (!host)
-        host = wxT("host");
+        host = _T("host");
 
-    wxStrlcpy(buf, host, n);
+    wxStrncpy(buf, host, n);
     return true;
 }
 
@@ -264,10 +253,10 @@ bool wxGetFullHostName(wxChar *buf, int n)
 {
     wxGetHostName(buf, n);
 
-    const wxChar *domain = wxGetenv(wxT("UserDnsDomain"));
+    const wxChar *domain = wxGetenv(_T("UserDnsDomain"));
 
     if (domain)
-        wxStrncat(wxStrncat(buf, wxT("."), n), domain, n);
+        wxStrncat(wxStrncat(buf, _T("."), n), domain, n);
 
     return true;
 }
@@ -293,7 +282,7 @@ int wxKill(long pid, wxSignal sig, wxKillError *rc, int WXUNUSED(flags))
     }
     else
     {
-        wxLogDebug(wxT("wxKill can only send signals to the current process under MSDOS"));
+        wxLogDebug(_T("wxKill can only send signals to the current process under MSDOS"));
         if (rc)
             *rc = wxKILL_NO_PROCESS;
     }
@@ -307,15 +296,12 @@ bool wxShell(const wxString& command /*=wxEmptyString*/)
     int result = system(command);
 
     if (result == -1)
-    {
         wxLogSysError(_("can't execute '%s'"), command.c_str());
-    }
 
     return result == 0;
 }
 
-long wxExecute(const wxString& command, int flags, wxProcess *process,
-        const wxExecuteEnv *env)
+long wxExecute(const wxString& command, int flags, wxProcess *process)
 {
     // FIXME: shouldn't depend on wxCmdLineParser
     wxArrayString args(wxCmdLineParser::ConvertStringToArgs(command));
@@ -324,7 +310,7 @@ long wxExecute(const wxString& command, int flags, wxProcess *process,
 
     argv[n] = NULL;
     while (n-- > 0)
-        argv[n] = const_cast<wxChar*>((const char *)args[n].c_str());
+        argv[n] = wx_const_cast(wxChar*, args[n].c_str());
 
     long result = wxExecute(argv, flags, process);
 
@@ -340,7 +326,7 @@ class wxTempFileInStream : public wxFFileInputStream
 {
 public:
     wxTempFileInStream(const wxString& name)
-        : wxFFileInputStream(name, wxT("rt"))
+        : wxFFileInputStream(name, _T("rt"))
     { }
 
     virtual ~wxTempFileInStream()
@@ -410,9 +396,7 @@ bool wxRedirectableFd::Reopen(const wxString& name, int flags)
     }
 
     if (!result)
-    {
         wxLogSysError(_("error opening '%s'"), name.c_str());
-    }
 
     return result;
 }
@@ -440,8 +424,7 @@ wxString wxRedirectableFd::Release()
 
 // wxExecute implementation
 //
-long wxExecute(wxChar **argv, int flags, wxProcess *process,
-        const wxString* cwd, const wxEnvVariableHashMap* env)
+long wxExecute(wxChar **argv, int flags, wxProcess *process)
 {
 #if wxUSE_STREAMS
     const int STDIN = 0;
@@ -454,14 +437,14 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process,
     if (redirect)
     {
         // close stdin/out/err and reopen them as files
-        if (!in.Reopen(wxT("NUL"), O_RDONLY | O_TEXT))
+        if (!in.Reopen(_T("NUL"), O_RDONLY | O_TEXT))
             return -1;
 
-        if (!out.Reopen(wxFileName::CreateTempFileName(wxT("out")),
+        if (!out.Reopen(wxFileName::CreateTempFileName(_T("out")),
                         O_CREAT | O_WRONLY | O_TRUNC | O_TEXT))
             return -1;
 
-        if (!err.Reopen(wxFileName::CreateTempFileName(wxT("err")),
+        if (!err.Reopen(wxFileName::CreateTempFileName(_T("err")),
                         O_CREAT | O_WRONLY | O_TRUNC | O_TEXT))
             return -1;
     }
@@ -472,14 +455,12 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process,
     int result = spawnvp(mode, argv[0], argv);
 
     if (result == -1)
-    {
         wxLogSysError(_("can't execute '%s'"), argv[0]);
-    }
 
 #if wxUSE_STREAMS
     if (redirect)
         process->SetPipeStreams(new wxTempFileInStream(out.Release()),
-                                new wxFFileOutputStream(wxT("NUL"), wxT("wt")),
+                                new wxFFileOutputStream(_T("NUL"), _T("wt")),
                                 new wxTempFileInStream(err.Release()));
 #endif // wxUSE_STREAMS
 
@@ -493,7 +474,7 @@ long wxExecute(wxChar **argv, int flags, wxProcess *process,
 
 wxString wxGetOsDescription()
 {
-    wxString osname(wxT("DOS"));
+    wxString osname(_T("DOS"));
     return osname;
 }
 

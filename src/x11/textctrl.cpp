@@ -131,6 +131,8 @@ WX_DEFINE_OBJARRAY(wxSourceLineArray);
 //  wxTextCtrl
 //-----------------------------------------------------------------------------
 
+IMPLEMENT_DYNAMIC_CLASS(wxTextCtrl, wxTextCtrlBase)
+
 BEGIN_EVENT_TABLE(wxTextCtrl, wxTextCtrlBase)
     EVT_PAINT(wxTextCtrl::OnPaint)
     EVT_ERASE_BACKGROUND(wxTextCtrl::OnEraseBackground)
@@ -1556,7 +1558,7 @@ void wxTextCtrl::DrawLine( wxDC &dc, int x, int y, const wxString &line2, int li
 
         size_t pos = 0;
         wxString token( GetNextToken( line, pos ) );
-        while ( !token.empty() )
+        while (!token.IsNull())
         {
             if (m_keywords.Index( token ) != wxNOT_FOUND)
             {
@@ -1899,7 +1901,7 @@ void wxTextCtrl::OnChar( wxKeyEvent &event )
                 wxCommandEvent event(wxEVT_COMMAND_TEXT_ENTER, m_windowId);
                 event.SetEventObject(this);
                 event.SetString(GetValue());
-                if (HandleWindowEvent(event)) return;
+                if (GetEventHandler()->ProcessEvent(event)) return;
             }
 
             if (IsSingleLine())
@@ -2371,6 +2373,18 @@ wxSize wxTextCtrl::DoGetBestSize() const
     {
         return wxSize(80, 60);
     }
+}
+
+// ----------------------------------------------------------------------------
+// freeze/thaw
+// ----------------------------------------------------------------------------
+
+void wxTextCtrl::Freeze()
+{
+}
+
+void wxTextCtrl::Thaw()
+{
 }
 
 void wxTextCtrl::OnSetFocus( wxFocusEvent& event )

@@ -25,7 +25,7 @@
 
 #include "wx/os2/private.h"
 #include "wx/evtloop.h"
-#include "wx/scopedptr.h"
+#include "wx/ptr_scpd.h"
 
 #define wxDIALOG_DEFAULT_X 300
 #define wxDIALOG_DEFAULT_Y 300
@@ -33,6 +33,7 @@
 #define wxDIALOG_DEFAULT_WIDTH 500
 #define wxDIALOG_DEFAULT_HEIGHT 500
 
+IMPLEMENT_DYNAMIC_CLASS(wxDialog, wxTopLevelWindow)
 
 // ----------------------------------------------------------------------------
 // wxDialogModalData
@@ -71,9 +72,9 @@ wxDEFINE_TIED_SCOPED_PTR_TYPE(wxDialogModalData);
 
 void wxDialog::Init()
 {
-    m_pOldFocus = NULL;
+    m_pOldFocus = (wxWindow *)NULL;
     m_isShown = false;
-    m_pWindowDisabler = NULL;
+    m_pWindowDisabler = (wxWindowDisabler *)NULL;
     m_modalData = NULL;
     SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_3DFACE));
 } // end of wxDialog::Init
@@ -114,7 +115,7 @@ bool wxDialog::Create( wxWindow*       pParent,
     //
     // Must defer setting the title until after dialog is created and sized
     //
-    if ( !rsTitle.empty() )
+    if (!rsTitle.IsNull())
         SetTitle(rsTitle);
     return true;
 } // end of wxDialog::Create
@@ -146,7 +147,7 @@ void wxDialog::SetModal(bool WXUNUSED(bFlag))
 
 wxDialog::~wxDialog()
 {
-    SendDestroyEvent();
+    m_isBeingDeleted = true;
 
     // this will also reenable all the other windows for a modal dialog
     Show(false);
@@ -165,6 +166,28 @@ bool wxDialog::IsModalShowing() const
 
 #endif // WXWIN_COMPATIBILITY_2_6
 
+wxWindow *wxDialog::FindSuitableParent() const
+{
+    // first try to use the currently active window
+    HWND hwndFg = ::WinQueryActiveWindow(HWND_DESKTOP);
+    wxWindow *parent = hwndFg ? wxFindWinFromHandle((WXHWND)hwndFg)
+                              : NULL;
+    if ( !parent )
+    {
+        // next try the main app window
+        parent = wxTheApp->GetTopWindow();
+    }
+
+    // finally, check if the parent we found is really suitable
+    if ( !parent || parent == (wxWindow *)this || !parent->IsShown() )
+    {
+        // don't use this one
+        parent = NULL;
+    }
+
+    return parent;
+}
+
 bool wxDialog::Show( bool bShow )
 {
     if ( bShow == IsShown() )
@@ -179,15 +202,16 @@ bool wxDialog::Show( bool bShow )
         // and we will lose activation
         m_modalData->ExitLoop();
 #if 0
-        wxDELETE(m_pWindowDisabler);
+        if (m_pWindowDisabler)
+        {
+            delete m_pWindowDisabler;
+            m_pWindowDisabler = NULL;
+        }
 #endif
     }
 
     if (bShow)
     {
-        if (CanDoLayoutAdaptation())
-            DoLayoutAdaptation();
-
         // this usually will result in TransferDataToWindow() being called
         // which will change the controls values so do it before showing as
         // otherwise we could have some flicker
@@ -198,7 +222,7 @@ bool wxDialog::Show( bool bShow )
 
     wxString title = GetTitle();
     if (!title.empty())
-        ::WinSetWindowText((HWND)GetHwnd(), title.c_str());
+        ::WinSetWindowText((HWND)GetHwnd(), (PSZ)title.c_str());
 
     if ( bShow )
     {
@@ -219,7 +243,7 @@ bool wxDialog::Show( bool bShow )
 //
 int wxDialog::ShowModal()
 {
-    wxASSERT_MSG( !IsModal(), wxT("wxDialog::ShowModal() reentered?") );
+    wxASSERT_MSG( !IsModal(), _T("wxDialog::ShowModal() reentered?") );
 
     m_endModalCalled = false;
 
@@ -231,7 +255,11 @@ int wxDialog::ShowModal()
     if ( !m_endModalCalled )
     {
         // modal dialog needs a parent window, so try to find one
-        wxWindow * const parent = GetParentForModalDialog();
+        wxWindow *parent = GetParent();
+        if ( !parent )
+        {
+            parent = FindSuitableParent();
+        }
 
         // remember where the focus was
         wxWindow *oldFocus = m_pOldFocus;
@@ -283,7 +311,7 @@ void wxDialog::EndModal(
   int                               nRetCode
 )
 {
-    wxASSERT_MSG( IsModal(), wxT("EndModal() called for non modal dialog") );
+    wxASSERT_MSG( IsModal(), _T("EndModal() called for non modal dialog") );
 
     m_endModalCalled = true;
     SetReturnCode(nRetCode);

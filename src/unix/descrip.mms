@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 7 January 2011                                                      *
+# Date : 13 February 2006                                                    *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -43,14 +43,14 @@ CC_DEFINE =
 .c.obj :
 	cc $(CFLAGS)$(CC_DEFINE) $(MMS$TARGET_NAME).c
 
-OBJECTS = appunix.obj,apptraits.obj,\
+OBJECTS =       baseunix.obj,\
 		dialup.obj,\
 		dir.obj,\
 		displayx11.obj,\
 		dlunix.obj,\
 		fontenum.obj,\
 		fontutil.obj,\
-		sockunix.obj,\
+		gsocket.obj,\
 		mimetype.obj,\
 		threadpsx.obj,\
 		utilsunx.obj,\
@@ -60,18 +60,16 @@ OBJECTS = appunix.obj,apptraits.obj,\
 		sound.obj,\
 		sound_sdl.obj,\
 		stdpaths.obj,\
-		taskbarx11.obj,\
-		timerunx.obj,evtloopunix.obj,fdiounix.obj,uiactionx11.obj,\
-		mediactrl.obj
+		taskbarx11.obj
 
-SOURCES = appunix.cpp,apptraits.cpp,\
+SOURCES =       baseunix.cpp,\
 		dialup.cpp,\
 		dir.cpp,\
 		displayx11.cpp,\
 		dlunix.cpp,\
 		fontenum.cpp,\
 		fontutil.cpp,\
-		sockunix.cpp,\
+		gsocket.cpp,\
 		mimetype.cpp,\
 		threadpsx.cpp,\
 		utilsunx.cpp,\
@@ -81,9 +79,7 @@ SOURCES = appunix.cpp,apptraits.cpp,\
 		sound.cpp,\
 		sound_sdl.cpp,\
 		stdpaths.cpp,\
-		taskbarx11.cpp,\
-		timerunx.cpp,evtloopunix.cpp,fdiounix.cpp,uiactionx11.cpp,\
-		mediactrl.cpp
+		taskbarx11.cpp
 
 all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
@@ -103,20 +99,16 @@ all : $(SOURCES)
 .endif
 .endif
 
-$(OBJECTS) : [--.include.wx]setup.h
-
-appunix.obj : appunix.cpp
-apptraits.obj : apptraits.cpp
+baseunix.obj : baseunix.cpp
 dialup.obj : dialup.cpp
 dir.obj : dir.cpp
 dlunix.obj : dlunix.cpp
 fontenum.obj : fontenum.cpp
 fontutil.obj : fontutil.cpp
-sockunix.obj : sockunix.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/nowarn sockunix.cpp
+gsocket.obj : gsocket.cpp
+	cxx $(CXXFLAGS)$(CXX_DEFINE)/nowarn gsocket.cpp
 mimetype.obj : mimetype.cpp
 threadpsx.obj : threadpsx.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/nowarn threadpsx.cpp
 utilsunx.obj : utilsunx.cpp
 utilsx11.obj : utilsx11.cpp
 joystick.obj : joystick.cpp
@@ -126,9 +118,3 @@ sound_sdl.obj : sound_sdl.cpp
 stdpaths.obj : stdpaths.cpp
 taskbarx11.obj : taskbarx11.cpp
 displayx11.obj : displayx11.cpp
-timerunx.obj : timerunx.cpp
-evtloopunix.obj : evtloopunix.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/nowarn evtloopunix.cpp
-fdiounix.obj : fdiounix.cpp
-uiactionx11.obj : uiactionx11.cpp
-mediactrl.obj : mediactrl.cpp

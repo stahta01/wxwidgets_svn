@@ -59,6 +59,8 @@ public:
 // implementation
 // ============================================================================
 
+IMPLEMENT_DYNAMIC_CLASS(wxCheckBox, wxControl)
+
 // ----------------------------------------------------------------------------
 // wxCheckBox
 // ----------------------------------------------------------------------------
@@ -78,7 +80,6 @@ bool wxCheckBox::Create(wxWindow *parent,
                         const wxValidator& validator,
                         const wxString &name)
 {
-    WXValidateStyle( &style );
     if ( !wxControl::Create(parent, id, pos, size, style, validator, name) )
         return false;
 
@@ -216,7 +217,7 @@ void wxCheckBox::DoSet3StateValue(wxCheckBoxState state)
     {
         case wxCHK_UNCHECKED:    status = Status_Unchecked;   break;
         case wxCHK_CHECKED:      status = Status_Checked; break;
-        default:                 wxFAIL_MSG(wxT("Unknown checkbox state"));
+        default:                 wxFAIL_MSG(_T("Unknown checkbox state"));
         case wxCHK_UNDETERMINED: status = Status_3rdState;  break;
     }
     if ( status != m_status )

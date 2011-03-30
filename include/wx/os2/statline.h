@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/statline.h
+// Name:        msw/statline.h
 // Purpose:     MSW version of wxStaticLine class
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
@@ -15,7 +15,7 @@
 // wxStaticLine
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticLine : public wxStaticLineBase
+class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 {
 
 public:
@@ -44,7 +44,7 @@ public:
     inline static int    GetDefaultSize(void) { return 2; }
 
     //
-    // Overridden base class virtuals
+    // Overriden base class virtuals
     //
     inline virtual bool AcceptsFocus(void) const {return FALSE;}
 

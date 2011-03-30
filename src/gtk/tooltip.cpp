@@ -24,9 +24,7 @@
 // global data
 //-----------------------------------------------------------------------------
 
-#if !GTK_CHECK_VERSION(3,0,0) && !defined(GTK_DISABLE_DEPRECATED)
-static GtkTooltips *gs_tooltips = NULL;
-#endif
+static GtkTooltips *gs_tooltips = (GtkTooltips*) NULL;
 
 //-----------------------------------------------------------------------------
 // wxToolTip
@@ -35,94 +33,66 @@ static GtkTooltips *gs_tooltips = NULL;
 IMPLEMENT_ABSTRACT_CLASS(wxToolTip, wxObject)
 
 wxToolTip::wxToolTip( const wxString &tip )
-    : m_text(tip)
 {
-    m_window = NULL;
+    m_text = tip;
+    m_window = (wxWindow*) NULL;
 }
 
 void wxToolTip::SetTip( const wxString &tip )
 {
     m_text = tip;
-    if (m_window)
-        m_window->GTKApplyToolTip(wxGTK_CONV_SYS(m_text));
+    Apply( m_window );
 }
 
-void wxToolTip::GTKSetWindow(wxWindow* win)
+void wxToolTip::Apply( wxWindow *win )
 {
-    wxASSERT(win);
+    if (!win)
+        return;
+
+    if ( !gs_tooltips )
+        gs_tooltips = gtk_tooltips_new();
+
     m_window = win;
-    m_window->GTKApplyToolTip(wxGTK_CONV_SYS(m_text));
+
+    if (m_text.empty())
+        m_window->ApplyToolTip( gs_tooltips, (wxChar*) NULL );
+    else
+        m_window->ApplyToolTip( gs_tooltips, m_text );
 }
 
 /* static */
-void wxToolTip::GTKApply(GtkWidget* widget, const char* tip)
+void wxToolTip::Apply(GtkWidget *w, const wxCharBuffer& tip)
 {
-#if GTK_CHECK_VERSION(2, 12, 0)
-    if (GTK_CHECK_VERSION(3,0,0) || gtk_check_version(2,12,0) == NULL)
-        gtk_widget_set_tooltip_text(widget, tip);
-    else
-#endif
-    {
-#if !GTK_CHECK_VERSION(3,0,0) && !defined(GTK_DISABLE_DEPRECATED)
-        if ( !gs_tooltips )
-            gs_tooltips = gtk_tooltips_new();
+    if ( !gs_tooltips )
+        gs_tooltips = gtk_tooltips_new();
 
-        gtk_tooltips_set_tip(gs_tooltips, widget, tip, NULL);
-#endif
-    }
+    gtk_tooltips_set_tip(gs_tooltips, w, tip, NULL);
 }
 
 void wxToolTip::Enable( bool flag )
 {
-#if GTK_CHECK_VERSION(2, 12, 0)
-    if (GTK_CHECK_VERSION(3,0,0) || gtk_check_version(2,12,0) == NULL)
-    {
-        GtkSettings* settings = gtk_settings_get_default();
-        if (settings)
-            gtk_settings_set_long_property(settings, "gtk-enable-tooltips", flag, NULL);
-    }
-    else
-#endif
-    {
-#if !GTK_CHECK_VERSION(3,0,0) && !defined(GTK_DISABLE_DEPRECATED)
-        if (!gs_tooltips)
-            gs_tooltips = gtk_tooltips_new();
+    if (!gs_tooltips)
+        return;
 
-        if (flag)
-            gtk_tooltips_enable( gs_tooltips );
-        else
-            gtk_tooltips_disable( gs_tooltips );
-#endif
-    }
+    if (flag)
+        gtk_tooltips_enable( gs_tooltips );
+    else
+        gtk_tooltips_disable( gs_tooltips );
 }
+
+G_BEGIN_DECLS
+void gtk_tooltips_set_delay (GtkTooltips *tooltips,
+                             guint delay);
+G_END_DECLS
 
 void wxToolTip::SetDelay( long msecs )
 {
-#if GTK_CHECK_VERSION(2, 12, 0)
-    if (GTK_CHECK_VERSION(3,0,0) || gtk_check_version(2,12,0) == NULL)
-    {
-        GtkSettings* settings = gtk_settings_get_default();
-        if (settings)
-            gtk_settings_set_long_property(settings, "gtk-tooltip-timeout", msecs, NULL);
-    }
-    else
-#endif
-    {
-#if !GTK_CHECK_VERSION(3,0,0) && !defined(GTK_DISABLE_DEPRECATED)
-        if (!gs_tooltips)
-            gs_tooltips = gtk_tooltips_new();
+    if (!gs_tooltips)
+        return;
 
-        gtk_tooltips_set_delay( gs_tooltips, (int)msecs );
-#endif
-    }
-}
-
-void wxToolTip::SetAutoPop( long WXUNUSED(msecs) )
-{
-}
-
-void wxToolTip::SetReshow( long WXUNUSED(msecs) )
-{
+    // FIXME: This is a deprecated function and might not even have an effect.
+    // Try to not use it, after which remove the prototype above.
+    gtk_tooltips_set_delay( gs_tooltips, (int)msecs );
 }
 
 #endif // wxUSE_TOOLTIPS

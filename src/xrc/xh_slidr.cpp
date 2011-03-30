@@ -23,11 +23,6 @@
     #include "wx/slider.h"
 #endif
 
-static const long DEFAULT_VALUE = 0;
-static const long DEFAULT_MIN = 0;
-static const long DEFAULT_MAX = 100;
-
-
 IMPLEMENT_DYNAMIC_CLASS(wxSliderXmlHandler, wxXmlResourceHandler)
 
 wxSliderXmlHandler::wxSliderXmlHandler()
@@ -53,9 +48,9 @@ wxObject *wxSliderXmlHandler::DoCreateResource()
 
     control->Create(m_parentAsWindow,
                     GetID(),
-                    GetLong(wxT("value"), DEFAULT_VALUE),
-                    GetLong(wxT("min"), DEFAULT_MIN),
-                    GetLong(wxT("max"), DEFAULT_MAX),
+                    GetLong(wxT("value"), wxSL_DEFAULT_VALUE),
+                    GetLong(wxT("min"), wxSL_DEFAULT_MIN),
+                    GetLong(wxT("max"), wxSL_DEFAULT_MAX),
                     GetPosition(), GetSize(),
                     GetStyle(),
                     wxDefaultValidator,
@@ -63,7 +58,7 @@ wxObject *wxSliderXmlHandler::DoCreateResource()
 
     if( HasParam(wxT("tickfreq")))
     {
-        control->SetTickFreq(GetLong(wxT("tickfreq")));
+        control->SetTickFreq(GetLong(wxT("tickfreq")), 0);
     }
     if( HasParam(wxT("pagesize")))
     {

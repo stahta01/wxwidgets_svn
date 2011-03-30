@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/ole/dataform.h
+// Name:        msw/ole/dataform.h
 // Purpose:     declaration of the wxDataFormat class
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -16,21 +16,14 @@
 // wxDataFormat identifies the single format of data
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxDataFormat
+class WXDLLEXPORT wxDataFormat
 {
 public:
     // the clipboard formats under Win32 are WORD's
     typedef unsigned short NativeFormat;
 
     wxDataFormat(NativeFormat format = wxDF_INVALID) { m_format = format; }
-
-    // we need constructors from all string types as implicit conversions to
-    // wxString don't apply when we already rely on implicit conversion of a,
-    // for example, "char *" string to wxDataFormat, and existing code does it
-    wxDataFormat(const wxString& format) { SetId(format); }
-    wxDataFormat(const char *format) { SetId(format); }
-    wxDataFormat(const wchar_t *format) { SetId(format); }
-    wxDataFormat(const wxCStrData& format) { SetId(format); }
+    wxDataFormat(const wxChar *format) { SetId(format); }
 
     wxDataFormat& operator=(NativeFormat format)
         { m_format = format; return *this; }
@@ -62,7 +55,7 @@ public:
     // string ids are used for custom types - this SetId() must be used for
     // application-specific formats
     wxString GetId() const;
-    void SetId(const wxString& format);
+    void SetId(const wxChar *format);
 
     // returns true if the format is one of those defined in wxDataFormatId
     bool IsStandard() const { return m_format > 0 && m_format < wxDF_PRIVATE; }

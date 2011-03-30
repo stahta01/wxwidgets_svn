@@ -6,7 +6,7 @@
 // Created:     28.12.2004
 // RCS-ID:      $Id$
 // Copyright:   (c) Wlodzimierz Skiba
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifndef _PREFCONF_H_
@@ -71,13 +71,15 @@ protected:
   // implement read/write methods
   virtual bool DoReadString(const wxString& key, wxString *pStr) const;
   virtual bool DoReadLong(const wxString& key, long *plResult) const;
-  virtual bool DoReadBinary(const wxString& key, wxMemoryBuffer *buf) const;
 
   virtual bool DoWriteString(const wxString& key, const wxString& szValue);
   virtual bool DoWriteLong(const wxString& key, long lValue);
-  virtual bool DoWriteBinary(const wxString& key, const wxMemoryBuffer& buf);
 
 private:
+  // no copy ctor/assignment operator
+  wxPrefConfig(const wxPrefConfig&);
+  wxPrefConfig& operator=(const wxPrefConfig&);
+
   // current path (not '/' terminated)
   wxString  m_strPath;
 
@@ -86,9 +88,6 @@ private:
 
   // current group modified ?
   bool m_modGroup;
-
-  wxDECLARE_NO_COPY_CLASS(wxPrefConfig);
-  DECLARE_ABSTRACT_CLASS(wxPrefConfig)
 };
 
 #endif // wxUSE_CONFIG

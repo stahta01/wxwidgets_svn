@@ -25,7 +25,7 @@
 // wxColour
 //-----------------------------------------------------------------------------
 
-class wxColourRefData : public wxGDIRefData
+class wxColourRefData: public wxObjectRefData
 {
 public:
     wxColourRefData()
@@ -34,11 +34,11 @@ public:
         m_color.green = 0;
         m_color.blue = 0;
         m_color.pixel = 0;
-        m_colormap = NULL;
+        m_colormap = (WXColormap *) NULL;
         m_hasPixel = false;
     }
-
-    wxColourRefData(const wxColourRefData& data)
+    wxColourRefData(const wxColourRefData& data):
+        wxObjectRefData()
     {
         m_color = data.m_color;
         m_colormap = data.m_colormap;
@@ -50,7 +50,7 @@ public:
         FreeColour();
     }
 
-    bool operator==(const wxColourRefData& data) const
+    bool operator == (const wxColourRefData& data) const
     {
         return (m_colormap == data.m_colormap &&
                 m_hasPixel == data.m_hasPixel &&
@@ -141,6 +141,8 @@ void wxColourRefData::AllocColour( WXColormap cmap )
 
 #define SHIFT (8*(sizeof(short int)-sizeof(char)))
 
+IMPLEMENT_DYNAMIC_CLASS(wxColour,wxGDIObject)
+
 wxColour::~wxColour()
 {
 }
@@ -160,12 +162,12 @@ bool wxColour::operator == ( const wxColour& col ) const
 
 }
 
-wxGDIRefData *wxColour::CreateGDIRefData() const
+wxObjectRefData *wxColour::CreateRefData() const
 {
     return new wxColourRefData;
 }
 
-wxGDIRefData *wxColour::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxColour::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxColourRefData(*(wxColourRefData *)data);
 }
@@ -238,17 +240,17 @@ unsigned long wxColour::GetPixel() const
 
 WXColor *wxColour::GetColor() const
 {
-    wxCHECK_MSG( Ok(), NULL, wxT("invalid colour") );
+    wxCHECK_MSG( Ok(), (WXColor *) NULL, wxT("invalid colour") );
 
     return (WXColor*) &M_COLDATA->m_color;
 }
 
-bool wxColour::FromString(const wxString& name)
+bool wxColour::FromString(const wxChar *name)
 {
     Display *dpy = wxGlobalDisplay();
     WXColormap colormap = wxTheApp->GetMainColormap( dpy );
     XColor xcol;
-    if ( XParseColor( dpy, (Colormap)colormap, name.mbc_str(), &xcol ) )
+    if ( XParseColor( dpy, (Colormap)colormap, wxConvertWX2MB(name), &xcol ) )
     {
         UnRef();
 

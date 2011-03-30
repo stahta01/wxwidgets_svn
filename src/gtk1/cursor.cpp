@@ -31,23 +31,19 @@ extern bool g_isIdle;
 // wxCursor
 //-----------------------------------------------------------------------------
 
-class wxCursorRefData : public wxGDIRefData
+class wxCursorRefData: public wxObjectRefData
 {
-public:
+  public:
+
     wxCursorRefData();
     virtual ~wxCursorRefData();
 
     GdkCursor *m_cursor;
-
-private:
-    // There is no way to copy m_cursor so we can't implement a copy ctor
-    // properly.
-    wxDECLARE_NO_COPY_CLASS(wxCursorRefData);
 };
 
 wxCursorRefData::wxCursorRefData()
 {
-    m_cursor = NULL;
+    m_cursor = (GdkCursor *) NULL;
 }
 
 wxCursorRefData::~wxCursorRefData()
@@ -66,7 +62,7 @@ wxCursor::wxCursor()
 
 }
 
-void wxCursor::InitFromStock( wxStockCursor cursorId )
+wxCursor::wxCursor( int cursorId )
 {
     m_refData = new wxCursorRefData();
 
@@ -320,22 +316,14 @@ wxCursor::~wxCursor()
 {
 }
 
+bool wxCursor::IsOk() const
+{
+    return (m_refData != NULL);
+}
+
 GdkCursor *wxCursor::GetCursor() const
 {
     return M_CURSORDATA->m_cursor;
-}
-
-wxGDIRefData *wxCursor::CreateGDIRefData() const
-{
-    return new wxCursorRefData;
-}
-
-wxGDIRefData *
-wxCursor::CloneGDIRefData(const wxGDIRefData * WXUNUSED(data)) const
-{
-    wxFAIL_MSG( wxS("Cloning cursors is not implemented in wxGTK.") );
-
-    return new wxCursorRefData;
 }
 
 //-----------------------------------------------------------------------------

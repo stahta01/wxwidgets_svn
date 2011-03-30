@@ -4,7 +4,7 @@
 // Author:      Mike Wetherell
 // RCS-ID:      $Id$
 // Copyright:   (c) 2005 Mike Wetherell
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -18,8 +18,6 @@
     #include "wx/wx.h"
 #endif
 
-#if wxUSE_STREAMS
-
 #ifdef __UNIX__
     #include <sys/socket.h>
 #endif
@@ -32,11 +30,7 @@
 #include "wx/sckstrm.h"
 #include "wx/mstream.h"
 
-#ifdef __VISUALC__
-    #define isatty _isatty
-    #define fdopen _fdopen
-    #define fileno _fileno
-#endif
+#if wxUSE_STREAMS
 
 ///////////////////////////////////////////////////////////////////////////////
 // The test case
@@ -113,7 +107,7 @@ void FileKindTestCase::File()
 {
     TempFile tmp; // put first
     wxFile file;
-    tmp.m_name = wxFileName::CreateTempFileName(wxT("wxft"), &file);
+    tmp.m_name = wxFileName::CreateTempFileName(_T("wxft"), &file);
     TestFd(file, true);
     file.Close();
 

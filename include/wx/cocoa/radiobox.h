@@ -18,7 +18,7 @@ DECLARE_WXCOCOA_OBJC_CLASS(NSMatrix);
 // ========================================================================
 // wxRadioBox
 // ========================================================================
-class WXDLLIMPEXP_CORE wxRadioBox: public wxControl, public wxRadioBoxBase// , protected wxCocoaNSButton
+class WXDLLEXPORT wxRadioBox: public wxControl, public wxRadioBoxBase// , protected wxCocoaNSButton
 {
     DECLARE_DYNAMIC_CLASS(wxRadioBox)
     DECLARE_EVENT_TABLE()
@@ -93,8 +93,8 @@ public:
 // Cocoa callbacks
 // ------------------------------------------------------------------------
 protected:
-    // Radio boxes cannot be enabled/disabled
-    virtual void CocoaSetEnabled(bool WXUNUSED(enable)) { }
+    // Static boxes cannot be enabled/disabled
+    virtual void CocoaSetEnabled(bool enable) { }
     virtual void CocoaTarget_action(void);
 // ------------------------------------------------------------------------
 // Implementation
@@ -110,7 +110,7 @@ public:
     virtual void SetString(unsigned int n, const wxString& label);
     // change the individual radio button state
 protected:
-    // We don't want the typical wxCocoaNSBox behaviour because our real
+    // We don't want the typical wxCocoaNSBox behavior because our real
     // implementation is by using an NSMatrix as the NSBox's contentView.
     WX_NSMatrix GetNSMatrix() const;
     void AssociateNSBox(WX_NSBox theBox);

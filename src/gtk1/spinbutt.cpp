@@ -66,7 +66,7 @@ static void gtk_spinbutt_callback( GtkWidget *WXUNUSED(widget), wxSpinButton *wi
     event.SetPosition( value );
     event.SetEventObject( win );
 
-    if ((win->HandleWindowEvent( event )) &&
+    if ((win->GetEventHandler()->ProcessEvent( event )) &&
         !event.IsAllowed() )
     {
         /* program has vetoed */
@@ -94,7 +94,7 @@ static void gtk_spinbutt_callback( GtkWidget *WXUNUSED(widget), wxSpinButton *wi
         wxSpinEvent event2( command, win->GetId());
         event2.SetPosition( value );
         event2.SetEventObject( win );
-        win->HandleWindowEvent( event2 );
+        win->GetEventHandler()->ProcessEvent( event2 );
     }
 }
 }
@@ -102,6 +102,9 @@ static void gtk_spinbutt_callback( GtkWidget *WXUNUSED(widget), wxSpinButton *wi
 //-----------------------------------------------------------------------------
 // wxSpinButton
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxSpinButton,wxControl)
+IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
 
 BEGIN_EVENT_TABLE(wxSpinButton, wxControl)
     EVT_SIZE(wxSpinButton::OnSize)

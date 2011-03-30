@@ -128,8 +128,7 @@ MRESULT APIENTRY wxExecuteWindowCbk( HWND   hWnd,
 
 long wxExecute( const wxString& rCommand,
                 int flags,
-                wxProcess* pHandler,
-                const wxExecuteEnv *env)
+                wxProcess* pHandler)
 {
     if (rCommand.empty())
     {
@@ -157,7 +156,7 @@ long wxExecute( const wxString& rCommand,
                       ,zArgs
                       ,zEnvs
                       ,&vResultCodes
-                      ,rCommand.c_str()
+                      ,(PSZ)rCommand.c_str()
                      );
     if (rc != NO_ERROR)
     {
@@ -220,7 +219,6 @@ long wxExecute(
   char**                            ppArgv
 , int                               flags
 , wxProcess*                        pHandler
-, const wxExecuteEnv *env
 )
 {
     wxString                        sCommand;
@@ -236,7 +234,6 @@ long wxExecute(
     return wxExecute( sCommand
                      ,flags
                      ,pHandler
-                     , env
                     );
 }
 

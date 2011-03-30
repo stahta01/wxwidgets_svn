@@ -70,13 +70,13 @@ static void gtk_scrollbar_callback( GtkAdjustment *adjust,
     {
         wxScrollEvent event( g_currentUpDownEvent, win->GetId(), value, orient );
         event.SetEventObject( win );
-        win->HandleWindowEvent( event );
+        win->GetEventHandler()->ProcessEvent( event );
     }
 
     // throw other event (wxEVT_SCROLL_THUMBTRACK)
     wxScrollEvent event( command, win->GetId(), value, orient );
     event.SetEventObject( win );
-    win->HandleWindowEvent( event );
+    win->GetEventHandler()->ProcessEvent( event );
 
 /*
     wxCommandEvent cevent( wxEVT_COMMAND_SCROLLBAR_UPDATED, win->GetId() );
@@ -149,7 +149,7 @@ gtk_scrollbar_button_release_callback( GtkRange *WXUNUSED(widget),
 
         wxScrollEvent event( command, win->GetId(), value, orient );
         event.SetEventObject( win );
-        win->HandleWindowEvent( event );
+        win->GetEventHandler()->ProcessEvent( event );
     }
 
     win->m_isScrolling = false;
@@ -164,6 +164,8 @@ gtk_scrollbar_button_release_callback( GtkRange *WXUNUSED(widget),
 //-----------------------------------------------------------------------------
 // wxScrollBar
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxScrollBar,wxControl)
 
 wxScrollBar::~wxScrollBar()
 {
@@ -186,9 +188,9 @@ bool wxScrollBar::Create(wxWindow *parent, wxWindowID id,
     m_oldPos = 0.0;
 
     if ((style & wxSB_VERTICAL) == wxSB_VERTICAL)
-        m_widget = gtk_vscrollbar_new( NULL );
+        m_widget = gtk_vscrollbar_new( (GtkAdjustment *) NULL );
     else
-        m_widget = gtk_hscrollbar_new( NULL );
+        m_widget = gtk_hscrollbar_new( (GtkAdjustment *) NULL );
 
     m_adjust = gtk_range_get_adjustment( GTK_RANGE(m_widget) );
 

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/stdpaths.h
+// Name:        wx/msw/stdpaths.h
 // Purpose:     wxStandardPaths for OS/2
 // Author:      Stefan Neis
 // Modified by:

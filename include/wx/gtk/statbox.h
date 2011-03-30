@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/gtk/statbox.h
+// Name:        wx/gtk/stabox.h
 // Purpose:
 // Author:      Robert Roebling
 // Id:          $Id$
@@ -7,8 +7,8 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTKSTATICBOX_H_
-#define _WX_GTKSTATICBOX_H_
+#ifndef __GTKSTATICBOXH__
+#define __GTKSTATICBOXH__
 
 //-----------------------------------------------------------------------------
 // wxStaticBox
@@ -40,19 +40,18 @@ public:
 
     // implementation
 
-    virtual bool IsTransparentForMouse() const { return true; }
+    virtual bool IsTransparentForMouse() const { return TRUE; }
 
     virtual void GetBordersForSizer(int *borderTop, int *borderOther) const;
-
-    virtual void AddChild( wxWindowBase *child );
 
 protected:
     virtual bool GTKWidgetNeedsMnemonic() const;
     virtual void GTKWidgetDoSetMnemonic(GtkWidget* w);
 
     void DoApplyWidgetStyle(GtkRcStyle *style);
-
+    
+private:
     DECLARE_DYNAMIC_CLASS(wxStaticBox)
 };
 
-#endif // _WX_GTKSTATICBOX_H_
+#endif // __GTKSTATICBOXH__

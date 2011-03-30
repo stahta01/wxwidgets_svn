@@ -7,8 +7,8 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_GTK_SLIDER_H_
-#define _WX_GTK_SLIDER_H_
+#ifndef __GTKSLIDERH__
+#define __GTKSLIDERH__
 
 // ----------------------------------------------------------------------------
 // wxSlider
@@ -58,27 +58,17 @@ public:
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
-
+    
     // implementation
-    void GTKDisableEvents();
-    void GTKEnableEvents();
-    bool GTKEventsDisabled() const;
-
     double m_pos;
     int m_scrollEventType;
     bool m_needThumbRelease;
-    GtkWidget *m_scale;
 
 protected:
-    GtkWidget *m_minLabel,*m_maxLabel;
-    bool m_blockScrollEvent;
-
     virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
-    // set the slider value unconditionally
-    void GTKSetValue(int value);
-
+private:
     DECLARE_DYNAMIC_CLASS(wxSlider)
 };
 
-#endif // _WX_GTK_SLIDER_H_
+#endif // __GTKSLIDERH__

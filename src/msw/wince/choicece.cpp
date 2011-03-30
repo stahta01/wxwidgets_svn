@@ -6,7 +6,7 @@
 // Created:     29.07.2004
 // RCS-ID:      $Id$
 // Copyright:   (c) Wlodzimierz Skiba
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -33,6 +33,12 @@
 #endif
 
 #include "wx/spinbutt.h" // for wxSpinnerBestSize
+
+#if wxUSE_EXTENDED_RTTI
+// TODO
+#else
+IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
+#endif
 
 #define GetBuddyHwnd()      (HWND)(m_hwndBuddy)
 
@@ -107,7 +113,7 @@ wxChoice *wxChoice::GetChoiceForListBox(WXHWND hwndBuddy)
 
     // sanity check
     wxASSERT_MSG( choice->m_hwndBuddy == hwndBuddy,
-                  wxT("wxChoice has incorrect buddy HWND!") );
+                  _T("wxChoice has incorrect buddy HWND!") );
 
     return choice;
 }
@@ -163,7 +169,7 @@ bool wxChoice::CreateAndInit(wxWindow *parent,
     sizeText.x -= sizeBtn.x + MARGIN_BETWEEN;
     if ( sizeText.x <= 0 )
     {
-        wxLogDebug(wxT("not enough space for wxSpinCtrl!"));
+        wxLogDebug(_T("not enough space for wxSpinCtrl!"));
     }
 
     wxPoint posBtn(pos);
@@ -180,7 +186,7 @@ bool wxChoice::CreateAndInit(wxWindow *parent,
     m_hwndBuddy = (WXHWND)::CreateWindowEx
                     (
                      exStyle,                // sunken border
-                     wxT("LISTBOX"),         // window class
+                     _T("LISTBOX"),          // window class
                      NULL,                   // no window title
                      msStyle,                // style (will be shown later)
                      pos.x, pos.y,           // position
@@ -319,50 +325,68 @@ bool wxChoice::MSWCommand(WXUINT param, WXWORD WXUNUSED(id))
 
 wxChoice::~wxChoice()
 {
-    Clear();
+    Free();
 }
 
 // ----------------------------------------------------------------------------
 // adding/deleting items to/from the list
 // ----------------------------------------------------------------------------
 
-int wxChoice::DoInsertItems(const wxArrayStringsAdapter& items,
-                            unsigned int pos,
-                            void **clientData,
-                            wxClientDataType type)
+int wxChoice::DoAppend(const wxString& item)
 {
-    MSWAllocStorage(items, LB_INITSTORAGE);
+    int n = (int)::SendMessage(GetBuddyHwnd(), LB_ADDSTRING, 0, (LPARAM)item.c_str());
 
-    const bool append = pos == GetCount();
-    const unsigned msg = append ? LB_ADDSTRING : LB_INSERTSTRING;
-    if ( append )
-        pos = 0;
-
-    int n = wxNOT_FOUND;
-
-    const unsigned int numItems = items.GetCount();
-    for ( unsigned int i = 0; i < numItems; ++i )
+    if ( n == LB_ERR )
     {
-        n = MSWInsertOrAppendItem(pos, items[i], msg);
-        if ( !append )
-            pos++;
-
-        AssignNewItemClientData(n, clientData, i, type);
+        wxLogLastError(wxT("SendMessage(LB_ADDSTRING)"));
     }
 
     return n;
 }
 
-void wxChoice::DoDeleteOneItem(unsigned int n)
+int wxChoice::DoInsert(const wxString& item, unsigned int pos)
+{
+    wxCHECK_MSG(!(GetWindowStyle() & wxCB_SORT), -1, wxT("can't insert into choice"));
+    wxCHECK_MSG(IsValidInsert(pos), -1, wxT("invalid index"));
+
+    int n = (int)::SendMessage(GetBuddyHwnd(), LB_INSERTSTRING, pos, (LPARAM)item.c_str());
+    if ( n == LB_ERR )
+    {
+        wxLogLastError(wxT("SendMessage(LB_INSERTSTRING)"));
+    }
+
+    return n;
+}
+
+void wxChoice::Delete(unsigned int n)
 {
     wxCHECK_RET( IsValid(n), wxT("invalid item index in wxChoice::Delete") );
+
+    if ( HasClientObjectData() )
+    {
+        delete GetClientObject(n);
+    }
 
     ::SendMessage(GetBuddyHwnd(), LB_DELETESTRING, n, 0);
 }
 
-void wxChoice::DoClear()
+void wxChoice::Clear()
 {
+    Free();
+
     ::SendMessage(GetBuddyHwnd(), LB_RESETCONTENT, 0, 0);
+}
+
+void wxChoice::Free()
+{
+    if ( HasClientObjectData() )
+    {
+        unsigned int count = GetCount();
+        for ( unsigned int n = 0; n < count; n++ )
+        {
+            delete GetClientObject(n);
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -478,6 +502,16 @@ void* wxChoice::DoGetItemClientData(unsigned int n) const
     return (void *)rc;
 }
 
+void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData* clientData)
+{
+    DoSetItemClientData(n, clientData);
+}
+
+wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData *)DoGetItemClientData(n);
+}
+
 // ----------------------------------------------------------------------------
 // size calculations
 // ----------------------------------------------------------------------------
@@ -511,7 +545,7 @@ void wxChoice::DoMoveWindow(int x, int y, int width, int height)
     int widthText = width - widthBtn - MARGIN_BETWEEN;
     if ( widthText <= 0 )
     {
-        wxLogDebug(wxT("not enough space for wxSpinCtrl!"));
+        wxLogDebug(_T("not enough space for wxSpinCtrl!"));
     }
 
     if ( !::MoveWindow(GetBuddyHwnd(), x, y, widthText, height, TRUE) )

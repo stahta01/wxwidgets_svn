@@ -6,7 +6,7 @@
 // Created:     25/10/98
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998-2002 wxWidgets team
-// Licence:     wxWindows licence
+// License:     wxWindows license
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/choicebk.h"
@@ -40,7 +40,7 @@ public:
     void OnType(wxCommandEvent& event);
     void OnOrient(wxCommandEvent& event);
     void OnShowImages(wxCommandEvent& event);
-    void OnStyle(wxCommandEvent& event);
+    void OnMulti(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
 
     void OnAddPage(wxCommandEvent& event);
@@ -49,8 +49,7 @@ public:
     void OnDeleteCurPage(wxCommandEvent& event);
     void OnDeleteLastPage(wxCommandEvent& event);
     void OnNextPage(wxCommandEvent& event);
-    void OnChangeSelection(wxCommandEvent &event);
-    void OnSetSelection(wxCommandEvent &event);
+    void OnGoHome(wxCommandEvent &event);
 
     void OnAddSubPage(wxCommandEvent& event);
     void OnAddPageBefore(wxCommandEvent& event);
@@ -106,11 +105,7 @@ private:
     } m_type;
     int m_orient;
     bool m_chkShowImages;
-    bool m_fixedWidth;
     bool m_multi;
-    bool m_noPageTheme;
-    bool m_buttonBar;
-    bool m_horzLayout;
 
     // Controls
 
@@ -146,11 +141,7 @@ enum ID_COMMANDS
     ID_ORIENT_RIGHT,
     ID_ORIENT_MAX,
     ID_SHOW_IMAGES,
-    ID_FIXEDWIDTH,
     ID_MULTI,
-    ID_NOPAGETHEME,
-    ID_BUTTONBAR,
-    ID_HORZ_LAYOUT,
     ID_ADD_PAGE,
     ID_ADD_PAGE_NO_SELECT,
     ID_INSERT_PAGE,
@@ -159,8 +150,7 @@ enum ID_COMMANDS
     ID_NEXT_PAGE,
     ID_ADD_PAGE_BEFORE,
     ID_ADD_SUB_PAGE,
-    ID_CHANGE_SELECTION,
-    ID_SET_SELECTION,
+    ID_GO_HOME,
 
 #if wxUSE_HELP
     ID_CONTEXT_HELP,
@@ -168,22 +158,21 @@ enum ID_COMMANDS
     ID_HITTEST
 };
 
-
 /*
-    Name of each notebook page.
-    Used as a label for a page, and used when cloning the notebook
-    to decide what type of page it is.
+Name of each notebook page.
+Used as a label for a page, and used when cloning the notebook
+to decide what type of page it is.
 */
 
-#define I_WAS_INSERTED_PAGE_NAME        wxT("Inserted")
-#define RADIOBUTTONS_PAGE_NAME          wxT("Radiobuttons")
-#define VETO_PAGE_NAME                  wxT("Veto")
-#define MAXIMIZED_BUTTON_PAGE_NAME      wxT("Maximized button")
+#define I_WAS_INSERTED_PAGE_NAME  wxT("Inserted")
+#define RADIOBUTTONS_PAGE_NAME wxT("Radiobuttons")
+#define VETO_PAGE_NAME wxT("Veto")
+#define MAXIMIZED_BUTTON_PAGE_NAME wxT("Maximized button")
 
 // Pages that can be added by the user
-#define INSERTED_PAGE_NAME              wxT("Inserted ")
-#define ADDED_PAGE_NAME                 wxT("Added ")
-#define ADDED_PAGE_NAME_BEFORE          wxT(" Inserted before ")
-#define ADDED_SUB_PAGE_NAME             wxT(" Inserted sub-page ")
+#define INSERTED_PAGE_NAME wxT("Inserted ")
+#define ADDED_PAGE_NAME wxT("Added ")
+#define ADDED_PAGE_NAME_BEFORE wxT(" Inserted before ")
+#define ADDED_SUB_PAGE_NAME wxT(" Inserted sub-page ")
 
 

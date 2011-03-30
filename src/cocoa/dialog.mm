@@ -6,7 +6,7 @@
 // Created:     2002/12/15
 // RCS-ID:      $Id$
 // Copyright:   2002 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -99,10 +99,6 @@ bool wxDialog::Show(bool show)
     if(show)
     {
         wxAutoNSAutoreleasePool pool;
-
-    	if (CanDoLayoutAdaptation())
-        	DoLayoutAdaptation();
-
         InitDialog();
         if(IsModal())
         {   // ShowModal() will show the dialog

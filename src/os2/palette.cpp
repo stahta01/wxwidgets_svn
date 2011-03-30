@@ -104,16 +104,6 @@ bool wxPalette::Create( int n,
     return true;
 } // end of wxPalette::Create
 
-wxGDIRefData *wxPalette::CreateGDIRefData() const
-{
-    return new wxPaletteRefData;
-}
-
-wxGDIRefData *wxPalette::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxPaletteRefData(*static_cast<const wxPaletteRefData *>(data));
-}
-
 int wxPalette::GetPixel( unsigned char cRed,
                          unsigned char cGreen,
                          unsigned char cBlue) const

@@ -27,7 +27,7 @@
     #define WidgetsBookCtrlEvent wxBookCtrlEvent
     #define EVT_WIDGETS_PAGE_CHANGING(id,func) EVT_BOOKCTRL_PAGE_CHANGING(id,func)
     #define wxEVT_COMMAND_WIDGETS_PAGE_CHANGED wxEVT_COMMAND_BOOKCTRL_PAGE_CHANGED
-    #define wxWidgetsbookEventHandler(func) wxBookCtrlEventHandler(func)
+    #define wxWidgetsbookEventHandler(func) wxBookctrlEventHandler(func)
 #endif
 
 #if wxUSE_LOG && !defined(__WXHANDHELD__)
@@ -40,7 +40,6 @@
     #define USE_ICONS_IN_BOOK 0
 #else
     #define USE_ICONS_IN_BOOK 1
-    #define ICON_SIZE         16
 #endif
 
 class WXDLLIMPEXP_FWD_CORE wxCheckBox;
@@ -52,7 +51,6 @@ class WXDLLIMPEXP_FWD_CORE WidgetsBookCtrl;
 class WidgetsPageInfo;
 
 #include "wx/panel.h"
-#include "wx/vector.h"
 
 // INTRODUCING NEW PAGES DON'T FORGET TO ADD ENTRIES TO 'WidgetsCategories'
 enum
@@ -84,8 +82,6 @@ enum
     ALL_CTRLS        = 1 << ALL_PAGE
 };
 
-typedef wxVector<wxControl *> Widgets;
-
 // ----------------------------------------------------------------------------
 // WidgetsPage: a book page demonstrating some widget
 // ----------------------------------------------------------------------------
@@ -95,25 +91,16 @@ class WidgetsPage : public wxPanel
 public:
     WidgetsPage(WidgetsBookCtrl *book,
                 wxImageList *imaglist,
-                const char *const icon[]);
+                const char* icon[]);
 
     // return the control shown by this page
     virtual wxControl *GetWidget() const = 0;
 
-    // return the control shown by this page, if it supports text entry interface
-    virtual wxTextEntryBase *GetTextEntry() const { return NULL; }
-
     // lazy creation of the content
     virtual void CreateContent() = 0;
 
-    // some pages show additional controls, in this case override this one to
-    // return all of them (including the one returned by GetWidget())
-    virtual Widgets GetWidgets() const
-    {
-        Widgets widgets;
-        widgets.push_back(GetWidget());
-        return widgets;
-    }
+    // some pages show 2 controls, in this case override this one as well
+    virtual wxControl *GetWidget2() const { return NULL; }
 
     // recreate the control shown by this page
     //

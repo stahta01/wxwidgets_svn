@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/tglbtn.cpp
+// Name:        univ/tglbtn.cpp
 // Purpose:     wxToggleButton
 // Author:      Vadim Zeitlin
 // Modified by: David Bjorkevik
@@ -19,7 +19,7 @@
 
 #include "wx/tglbtn.h"
 
-wxDEFINE_EVENT( wxEVT_COMMAND_TOGGLEBUTTON_CLICKED, wxCommandEvent );
+DEFINE_EVENT_TYPE(wxEVT_COMMAND_TOGGLEBUTTON_CLICKED)
 
 IMPLEMENT_DYNAMIC_CLASS(wxToggleButton, wxButton)
 

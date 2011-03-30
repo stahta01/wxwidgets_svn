@@ -6,7 +6,7 @@
 // Created:     2003/03/16
 // Id:          $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -29,6 +29,7 @@
 #import <Foundation/NSNotification.h>
 #import <Foundation/NSDictionary.h>
 
+IMPLEMENT_DYNAMIC_CLASS(wxChoice, wxControl)
 BEGIN_EVENT_TABLE(wxChoice, wxChoiceBase)
 END_EVENT_TABLE()
 // WX_IMPLEMENT_COCOA_OWNER(wxChoice,NSButton,NSControl,NSView)
@@ -107,7 +108,16 @@ wxChoice::~wxChoice()
 {
     DisassociateNSMenu([(NSPopUpButton*)m_cocoaNSView menu]);
 
-    Clear();
+    if(m_sortedStrings)
+        m_sortedStrings->Clear();
+    delete m_sortedStrings;
+
+    if(HasClientObjectData())
+    {
+        for(unsigned int i=0; i < m_itemsClientData.GetCount(); i++)
+            delete (wxClientData*)m_itemsClientData.Item(i);
+    }
+    m_itemsClientData.Clear();
 }
 
 void wxChoice::CocoaNotification_menuDidSendAction(WX_NSNotification notification)
@@ -121,21 +131,28 @@ void wxChoice::CocoaNotification_menuDidSendAction(WX_NSNotification notificatio
     event.SetInt(index);
     event.SetEventObject(this);
     event.SetString(GetStringSelection());
-    HandleWindowEvent(event);
+    GetEventHandler()->ProcessEvent(event);
 }
 
-void wxChoice::DoClear()
+void wxChoice::Clear()
 {
     if(m_sortedStrings)
         m_sortedStrings->Clear();
+    if(HasClientObjectData())
+    {
+        for(unsigned int i=0; i < m_itemsClientData.GetCount(); i++)
+            delete (wxClientData*)m_itemsClientData.Item(i);
+    }
     m_itemsClientData.Clear();
     [(NSPopUpButton*)m_cocoaNSView removeAllItems];
 }
 
-void wxChoice::DoDeleteOneItem(unsigned int n)
+void wxChoice::Delete(unsigned int n)
 {
     if(m_sortedStrings)
         m_sortedStrings->RemoveAt(n);
+    if(HasClientObjectData())
+        delete (wxClientData*)m_itemsClientData.Item(n);
     m_itemsClientData.RemoveAt(n);
     [(NSPopUpButton*)m_cocoaNSView removeItemAtIndex:n];
 }
@@ -169,35 +186,57 @@ int wxChoice::GetSelection() const
     return [(NSPopUpButton*)m_cocoaNSView indexOfSelectedItem];
 }
 
-int wxChoice::DoInsertItems(const wxArrayStringsAdapter & items,
-                            unsigned int pos,
-                            void **clientData, wxClientDataType type)
+int wxChoice::DoAppend(const wxString& title)
 {
+    wxAutoNSAutoreleasePool pool;
     NSMenu *nsmenu = [(NSPopUpButton*)m_cocoaNSView menu];
-    NSMenuItem *item = NULL;
-
-    unsigned int numItems = items.GetCount();
-    for ( unsigned int i = 0; i < numItems; ++i, ++pos )
+    NSMenuItem *item;
+    if(m_sortedStrings)
     {
-        const wxString& str = items[i];
-        int idx = m_sortedStrings ? m_sortedStrings->Add(str) : pos;
-
-        item = [nsmenu insertItemWithTitle:wxNSStringWithWxString(str)
-            action: nil keyEquivalent:@"" atIndex:idx];
-        m_itemsClientData.Insert(NULL, idx);
-        AssignNewItemClientData(idx, clientData, i, type);
+        int sortedIndex = m_sortedStrings->Add(title);
+        item = [nsmenu insertItemWithTitle:
+                wxNSStringWithWxString(title)
+            action: nil keyEquivalent:@"" atIndex:sortedIndex];
+        m_itemsClientData.Insert(NULL, sortedIndex);
     }
+    else
+    {
+        item = [nsmenu addItemWithTitle:wxNSStringWithWxString(title)
+            action: nil keyEquivalent:@""];
+        m_itemsClientData.Add(NULL);
+    }
+    return [nsmenu indexOfItem:item];
+}
+
+int wxChoice::DoInsert(const wxString& title, unsigned int pos)
+{
+    if(m_sortedStrings)
+        return DoAppend(title);
+    NSMenu *nsmenu = [(NSPopUpButton*)m_cocoaNSView menu];
+    NSMenuItem *item = [nsmenu insertItemWithTitle:wxNSStringWithWxString(title)
+        action: nil keyEquivalent:@"" atIndex:pos];
+    m_itemsClientData.Insert(NULL, pos);
     return [nsmenu indexOfItem:item];
 }
 
 void wxChoice::DoSetItemClientData(unsigned int n, void *data)
 {
-    m_itemsClientData[n] = data;
+    m_itemsClientData.Item(n) = data;
 }
 
 void* wxChoice::DoGetItemClientData(unsigned int n) const
 {
-    return m_itemsClientData[n];
+    return m_itemsClientData.Item(n);
+}
+
+void wxChoice::DoSetItemClientObject(unsigned int n, wxClientData *data)
+{
+    m_itemsClientData.Item(n) = data;
+}
+
+wxClientData* wxChoice::DoGetItemClientObject(unsigned int n) const
+{
+    return (wxClientData*)m_itemsClientData.Item(n);
 }
 
 void wxChoice::SetSelection(int n)
@@ -206,4 +245,4 @@ void wxChoice::SetSelection(int n)
     [(NSPopUpButton*)m_cocoaNSView selectItemAtIndex:n];
 }
 
-#endif // wxUSE_CHOICE
+#endif

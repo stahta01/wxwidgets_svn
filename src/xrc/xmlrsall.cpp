@@ -75,12 +75,6 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_COMBOBOX
     AddHandler(new wxComboBoxXmlHandler);
 #endif
-#if wxUSE_COMBOCTRL
-    AddHandler(new wxComboCtrlXmlHandler);
-#endif
-#if wxUSE_COMMANDLINKBUTTON
-    AddHandler(new wxCommandLinkButtonXmlHandler);
-#endif
 #if wxUSE_DATEPICKCTRL
     AddHandler(new wxDateCtrlXmlHandler);
 #endif
@@ -89,12 +83,6 @@ void wxXmlResource::InitAllHandlers()
 #endif
 #if wxUSE_DIRPICKERCTRL
     AddHandler(new wxDirPickerCtrlXmlHandler);
-#endif
-#if wxUSE_EDITABLELISTBOX
-    AddHandler(new wxEditableListBoxXmlHandler);
-#endif
-#if wxUSE_FILECTRL
-    AddHandler(new wxFileCtrlXmlHandler);
 #endif
 #if wxUSE_FILEPICKERCTRL
     AddHandler(new wxFilePickerCtrlXmlHandler);
@@ -149,9 +137,6 @@ void wxXmlResource::InitAllHandlers()
 #if wxUSE_SCROLLBAR
     AddHandler(new wxScrollBarXmlHandler);
 #endif
-#if wxUSE_SEARCHCTRL
-    AddHandler(new wxSearchCtrlXmlHandler);
-#endif
 #if wxUSE_SLIDER
     AddHandler(new wxSliderXmlHandler);
 #endif
@@ -187,9 +172,6 @@ void wxXmlResource::InitAllHandlers()
 #endif
 #if wxUSE_TOOLBAR
     AddHandler(new wxToolBarXmlHandler);
-#endif
-#if wxUSE_TOOLBOOK
-    AddHandler(new wxToolbookXmlHandler);
 #endif
 #if wxUSE_TREEBOOK
     AddHandler(new wxTreebookXmlHandler);

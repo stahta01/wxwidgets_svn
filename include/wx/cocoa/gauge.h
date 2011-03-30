@@ -19,7 +19,7 @@ DECLARE_WXCOCOA_OBJC_CLASS(NSProgressIndicator);
 // ========================================================================
 // wxGauge
 // ========================================================================
-class WXDLLIMPEXP_CORE wxGauge: public wxGaugeBase// , protected wxCocoaNSProgressIndicator
+class WXDLLEXPORT wxGauge: public wxGaugeBase// , protected wxCocoaNSProgressIndicator
 {
     DECLARE_DYNAMIC_CLASS(wxGauge)
     DECLARE_EVENT_TABLE()
@@ -54,7 +54,7 @@ public:
     inline WX_NSProgressIndicator GetNSProgressIndicator() const { return (WX_NSProgressIndicator)m_cocoaNSView; }
 protected:
     // NSProgressIndicator cannot be enabled/disabled
-    virtual void CocoaSetEnabled(bool WXUNUSED(enable)) { }
+    virtual void CocoaSetEnabled(bool enable) { }
 // ------------------------------------------------------------------------
 // Implementation
 // ------------------------------------------------------------------------

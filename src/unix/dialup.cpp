@@ -1,11 +1,11 @@
 // -*- c++ -*- ////////////////////////////////////////////////////////////////
 // Name:        src/unix/dialup.cpp
 // Purpose:     Network related wxWidgets classes and functions
-// Author:      Karsten BallÃ¼der
+// Author:      Karsten Ballüder
 // Modified by:
 // Created:     03.10.99
 // RCS-ID:      $Id$
-// Copyright:   (c) Karsten BallÃ¼der
+// Copyright:   (c) Karsten Ballüder
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -26,10 +26,10 @@
     #include "wx/timer.h"
 #endif // !PCH
 
-#include "wx/filename.h"
+#include "wx/filefn.h"
 #include "wx/ffile.h"
 #include "wx/process.h"
-#include "wx/crt.h"
+#include "wx/wxchar.h"
 
 #include <stdlib.h>
 
@@ -43,8 +43,8 @@
 #include <arpa/inet.h>
 #include <errno.h>
 
-wxDEFINE_EVENT( wxEVT_DIALUP_CONNECTED, wxDialUpEvent );
-wxDEFINE_EVENT( wxEVT_DIALUP_DISCONNECTED, wxDialUpEvent );
+DEFINE_EVENT_TYPE(wxEVT_DIALUP_CONNECTED)
+DEFINE_EVENT_TYPE(wxEVT_DIALUP_DISCONNECTED)
 
 // ----------------------------------------------------------------------------
 // A class which groups functions dealing with connecting to the network from a
@@ -250,7 +250,7 @@ public:
 
    virtual void Notify()
    {
-       wxLogTrace(wxT("dialup"), wxT("Checking dial up network status."));
+       wxLogTrace(_T("dialup"), wxT("Checking dial up network status."));
 
        m_dupman->CheckStatus();
    }
@@ -292,15 +292,15 @@ wxDialUpManagerImpl::wxDialUpManagerImpl()
    m_BeaconPort = 80;
 
 #ifdef __SGI__
-   m_ConnectCommand = wxT("/usr/etc/ppp");
+   m_ConnectCommand = _T("/usr/etc/ppp");
 #elif defined(__LINUX__)
    // default values for Debian/GNU linux
-   m_ConnectCommand = wxT("pon");
-   m_HangUpCommand = wxT("poff");
+   m_ConnectCommand = _T("pon");
+   m_HangUpCommand = _T("poff");
 #endif
 
-   wxChar * dial = wxGetenv(wxT("WXDIALUP_DIALCMD"));
-   wxChar * hup = wxGetenv(wxT("WXDIALUP_HUPCMD"));
+   wxChar * dial = wxGetenv(_T("WXDIALUP_DIALCMD"));
+   wxChar * hup = wxGetenv(_T("WXDIALUP_HUPCMD"));
    SetConnectCommand(dial ? wxString(dial) : m_ConnectCommand,
                      hup ? wxString(hup) : m_HangUpCommand);
 }
@@ -336,7 +336,8 @@ wxDialUpManagerImpl::Dial(const wxString &isp,
         m_DialPId = (int)wxExecute(cmd, false, m_DialProcess);
         if(m_DialPId == 0)
         {
-            wxDELETE(m_DialProcess);
+            delete m_DialProcess;
+            m_DialProcess = NULL;
             return false;
         }
         else
@@ -378,7 +379,8 @@ bool wxDialUpManagerImpl::EnableAutoCheckOnlineStatus(size_t nSeconds)
    bool rc = m_timer->Start(nSeconds*1000);
    if(! rc)
    {
-      wxDELETE(m_timer);
+      delete m_timer;
+      m_timer = NULL;
    }
    return rc;
 }
@@ -388,14 +390,15 @@ void wxDialUpManagerImpl::DisableAutoCheckOnlineStatus()
    if(m_timer != NULL)
    {
       m_timer->Stop();
-      wxDELETE(m_timer);
+      delete m_timer;
+      m_timer = NULL;
    }
 }
 
 
 void wxDialUpManagerImpl::SetWellKnownHost(const wxString& hostname, int portno)
 {
-   if( hostname.empty() )
+   if(hostname.length() == 0)
    {
       m_BeaconHost = WXDIALUP_MANAGER_DEFAULT_BEACONHOST;
       m_BeaconPort = 80;
@@ -404,7 +407,7 @@ void wxDialUpManagerImpl::SetWellKnownHost(const wxString& hostname, int portno)
 
    // does hostname contain a port number?
    wxString port = hostname.After(wxT(':'));
-   if( !port.empty() )
+   if(port.length())
    {
       m_BeaconHost = hostname.Before(wxT(':'));
       m_BeaconPort = wxAtoi(port);
@@ -506,7 +509,7 @@ void wxDialUpManagerImpl::CheckStatusInternal()
             break;
 
         default:
-            wxFAIL_MSG(wxT("Unexpected netDeviceType"));
+            wxFAIL_MSG(_T("Unexpected netDeviceType"));
     }
 }
 
@@ -594,7 +597,7 @@ wxDialUpManagerImpl::CheckProcNet()
     int netDevice = NetDevice_Unknown;
 
 #ifdef __LINUX__
-    if (wxFileExists(wxT("/proc/net/route")))
+    if (wxFileExists(_T("/proc/net/route")))
     {
         // cannot use wxFile::Length because file doesn't support seeking, so
         // use stdio directly
@@ -608,10 +611,7 @@ wxDialUpManagerImpl::CheckProcNet()
 
             while (fgets(output, 256, f) != NULL)
             {
-                // Test for the known network interface names
-                if ( strstr(output, "eth")
-                        || strstr(output, "wlan")
-                        || strstr(output, "ath") )
+                if ( strstr(output, "eth") ) // network card
                 {
                     netDevice |= NetDevice_LAN;
                 }
@@ -645,18 +645,18 @@ wxDialUpManagerImpl::CheckIfconfig()
     // first time check for ifconfig location
     if ( m_CanUseIfconfig == -1 ) // unknown
     {
-        static const wxChar *const ifconfigLocations[] =
+        static const wxChar *ifconfigLocations[] =
         {
-            wxT("/sbin"),         // Linux, FreeBSD, Darwin
-            wxT("/usr/sbin"),     // SunOS, Solaris, AIX, HP-UX
-            wxT("/usr/etc"),      // IRIX
-            wxT("/etc"),          // AIX 5
+            _T("/sbin"),         // Linux, FreeBSD, Darwin
+            _T("/usr/sbin"),     // SunOS, Solaris, AIX, HP-UX
+            _T("/usr/etc"),      // IRIX
+            _T("/etc"),          // AIX 5
         };
 
         for ( size_t n = 0; n < WXSIZEOF(ifconfigLocations); n++ )
         {
             wxString path(ifconfigLocations[n]);
-            path << wxT("/ifconfig");
+            path << _T("/ifconfig");
 
             if ( wxFileExists(path) )
             {
@@ -670,21 +670,20 @@ wxDialUpManagerImpl::CheckIfconfig()
     {
         wxLogNull ln; // suppress all error messages
 
-        wxASSERT_MSG( !m_IfconfigPath.empty(),
-                      wxT("can't use ifconfig if it wasn't found") );
+        wxASSERT_MSG( m_IfconfigPath.length(),
+                      _T("can't use ifconfig if it wasn't found") );
 
-        wxString tmpfile = wxFileName::CreateTempFileName( wxT("_wxdialuptest") );
+        wxString tmpfile = wxGetTempFileName( wxT("_wxdialuptest") );
         wxString cmd = wxT("/bin/sh -c \'");
         cmd << m_IfconfigPath;
 #if defined(__AIX__) || \
-    defined(__NETBSD__) || \
     defined(__OSF__) || \
     defined(__SOLARIS__) || defined (__SUNOS__)
         // need to add -a flag
         cmd << wxT(" -a");
 #elif defined(__LINUX__) || defined(__SGI__)
         // nothing to be added to ifconfig
-#elif defined(__FREEBSD__) || defined(__DARWIN__) || defined(__QNX__)
+#elif defined(__FREEBSD__) || defined(__DARWIN__)
         // add -l flag
         cmd << wxT(" -l");
 #elif defined(__HPUX__)
@@ -703,7 +702,7 @@ wxDialUpManagerImpl::CheckIfconfig()
        cmd << wxT(" >") << tmpfile <<  wxT('\'');
         /* I tried to add an option to wxExecute() to not close stdout,
            so we could let ifconfig write directly to the tmpfile, but
-           this does not work. That should be faster, as it doesn't call
+           this does not work. That should be faster, as it doesn´t call
            the shell first. I have no idea why. :-(  (KB) */
         if ( wxExecute(cmd,true /* sync */) == 0 )
         {
@@ -721,9 +720,9 @@ wxDialUpManagerImpl::CheckIfconfig()
 
 #if defined(__SOLARIS__) || defined (__SUNOS__)
                     // dialup device under SunOS/Solaris
-                    hasModem = strstr(output.fn_str(),"ipdptp") != NULL;
-                    hasLAN = strstr(output.fn_str(), "hme") != NULL;
-#elif defined(__LINUX__) || defined (__FREEBSD__) || defined (__QNX__)
+                    hasModem = strstr(output.fn_str(),"ipdptp") != (char *)NULL;
+                    hasLAN = strstr(output.fn_str(), "hme") != (char *)NULL;
+#elif defined(__LINUX__) || defined (__FREEBSD__)
                     hasModem = strstr(output.fn_str(),"ppp")    // ppp
                         || strstr(output.fn_str(),"sl")  // slip
                         || strstr(output.fn_str(),"pl"); // plip
@@ -747,7 +746,7 @@ wxDialUpManagerImpl::CheckIfconfig()
         }
         else // could not run ifconfig correctly
         {
-            m_CanUseIfconfig = 0; // don't try again
+            m_CanUseIfconfig = 0; // don´t try again
         }
 
         (void) wxRemoveFile(tmpfile);
@@ -767,9 +766,9 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
         if (wxFileExists( wxT("SYS$SYSTEM:TCPIP$PING.EXE") ))
             m_PingPath = wxT("$SYS$SYSTEM:TCPIP$PING");
 #elif defined(__AIX__)
-        m_PingPath = wxT("/etc/ping");
+        m_PingPath = _T("/etc/ping");
 #elif defined(__SGI__)
-        m_PingPath = wxT("/usr/etc/ping");
+        m_PingPath = _T("/usr/etc/ping");
 #else
         if (wxFileExists( wxT("/bin/ping") ))
             m_PingPath = wxT("/bin/ping");
@@ -799,8 +798,7 @@ wxDialUpManagerImpl::NetConnection wxDialUpManagerImpl::CheckPing()
       defined(__LINUX__) || \
       defined(__OSF__) || \
       defined(__SGI__) || \
-      defined(__VMS) || \
-      defined(__QNX__)
+      defined(__VMS)
     cmd << wxT("-c 1 "); // only ping once
 #elif defined(__HPUX__)
     cmd << wxT("64 1 "); // only ping once (need also specify the packet size)

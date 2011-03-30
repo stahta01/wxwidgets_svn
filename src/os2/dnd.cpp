@@ -329,44 +329,44 @@ wxDataFormat wxDropTarget::GetSupportedFormat (
             case wxDF_TEXT:
             case wxDF_FILENAME:
             case wxDF_HTML:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_TEXT");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_TEXT");
                 break;
 
             case wxDF_OEMTEXT:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_OEMTEXT");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_OEMTEXT");
                 break;
 
             case wxDF_BITMAP:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_BITMAP");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_BITMAP");
                 break;
 
             case wxDF_METAFILE:
             case wxDF_ENHMETAFILE:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_METAFILE");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_METAFILE");
                 break;
 
             case wxDF_TIFF:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_TIFF");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_TIFF");
                 break;
 
             case wxDF_SYLK:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_SYLK");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_SYLK");
                 break;
 
             case wxDF_DIF:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_DIF");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_DIF");
                 break;
 
             case wxDF_DIB:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_DIB");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_DIB");
                 break;
 
             case wxDF_PALETTE:
@@ -375,19 +375,19 @@ wxDataFormat wxDropTarget::GetSupportedFormat (
             case wxDF_WAVE:
             case wxDF_UNICODETEXT:
             case wxDF_LOCALE:
-                sMechanism = wxT("DRM_OS2FILE");
-                sFormat    = wxT("DRF_UNKNOWN");
+                sMechanism = _T("DRM_OS2FILE");
+                sFormat    = _T("DRF_UNKNOWN");
                 break;
 
             case wxDF_PRIVATE:
-                sMechanism = wxT("DRM_OBJECT");
-                sFormat    = wxT("DRF_UNKNOWN");
+                sMechanism = _T("DRM_OBJECT");
+                sFormat    = _T("DRF_UNKNOWN");
                 break;
         }
         for (i = 0; i < ulItems; i++)
         {
             pDragItem = ::DrgQueryDragitemPtr(pDataSource, i);
-            if (::DrgVerifyRMF(pDragItem, sMechanism.c_str(), sFormat.c_str()))
+            if (::DrgVerifyRMF(pDragItem, (PSZ)sMechanism.c_str(), (PSZ)sFormat.c_str()))
             {
                 bValid = true;
                 break;
@@ -560,7 +560,7 @@ void wxDropSource::Init ()
                                  ,(void*)pzBuffer
                                 );
 
-    wxStrcpy(zFormats, wxT("<DRM_OS2FILE, DRF_UNKNOWN>"));
+    wxStrcpy(zFormats, _T("<DRM_OS2FILE, DRF_UNKNOWN>"));
     wxStrcpy(zContainer, GetDataObject()->GetPreferredFormat().GetId());
 
     hStrRMF       = ::DrgAddStrHandle((PSZ)zFormats);

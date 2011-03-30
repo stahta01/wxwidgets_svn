@@ -9,6 +9,14 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 // for compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
 
@@ -22,67 +30,27 @@
     #include "wx/app.h"
 #endif //WX_PRECOMP
 
+// see the comment near the declaration of wxRunningEventLoopCount in
+// src/msw/thread.cpp for the explanation of this hack
+#if defined(__WXMSW__) && wxUSE_THREADS
+
+extern WXDLLIMPEXP_DATA_BASE(int) wxRunningEventLoopCount;
+struct wxRunningEventLoopCounter
+{
+    wxRunningEventLoopCounter() { wxRunningEventLoopCount++; }
+    ~wxRunningEventLoopCounter() { wxRunningEventLoopCount--; }
+};
+
+#endif // __WXMSW__
+
 // ----------------------------------------------------------------------------
-// wxEventLoopBase
+// globals
 // ----------------------------------------------------------------------------
 
-wxEventLoopBase *wxEventLoopBase::ms_activeLoop = NULL;
-
-wxEventLoopBase::wxEventLoopBase()
-{
-    m_isInsideYield = false;
-    m_eventsToProcessInsideYield = wxEVT_CATEGORY_ALL;
-}
-
-bool wxEventLoopBase::IsMain() const
-{
-    if (wxTheApp)
-        return wxTheApp->GetMainLoop() == this;
-    return false;
-}
-
-/* static */
-void wxEventLoopBase::SetActive(wxEventLoopBase* loop)
-{
-    ms_activeLoop = loop;
-
-    if (wxTheApp)
-        wxTheApp->OnEventLoopEnter(loop);
-}
-
-void wxEventLoopBase::OnExit()
-{
-    if (wxTheApp)
-        wxTheApp->OnEventLoopExit(this);
-}
-
-void wxEventLoopBase::WakeUpIdle()
-{
-    WakeUp();
-}
-
-bool wxEventLoopBase::ProcessIdle()
-{
-    return wxTheApp && wxTheApp->ProcessIdle();
-}
-
-bool wxEventLoopBase::Yield(bool onlyIfNeeded)
-{
-    if ( m_isInsideYield )
-    {
-        if ( !onlyIfNeeded )
-        {
-            wxFAIL_MSG( wxT("wxYield called recursively" ) );
-        }
-
-        return false;
-    }
-
-    return YieldFor(wxEVT_CATEGORY_ALL);
-}
+wxEventLoop *wxEventLoopBase::ms_activeLoop = NULL;
 
 // wxEventLoopManual is unused in the other ports
-#if defined(__WXMSW__) || defined(__WXDFB__) || ( ( defined(__UNIX__) && !defined(__WXOSX__) ) && wxUSE_BASE)
+#if defined(__WXMSW__) || defined(__WXMAC__) || defined(__WXDFB__)
 
 // ============================================================================
 // wxEventLoopManual implementation
@@ -94,33 +62,22 @@ wxEventLoopManual::wxEventLoopManual()
     m_shouldExit = false;
 }
 
-bool wxEventLoopManual::ProcessEvents()
-{
-    // process pending wx events first as they correspond to low-level events
-    // which happened before, i.e. typically pending events were queued by a
-    // previous call to Dispatch() and if we didn't process them now the next
-    // call to it might enqueue them again (as happens with e.g. socket events
-    // which would be generated as long as there is input available on socket
-    // and this input is only removed from it when pending event handlers are
-    // executed)
-    if ( wxTheApp )
-        wxTheApp->ProcessPendingEvents();
-
-    return Dispatch();
-}
-
 int wxEventLoopManual::Run()
 {
     // event loops are not recursive, you need to create another loop!
-    wxCHECK_MSG( !IsRunning(), -1, wxT("can't reenter a message loop") );
+    wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
-    // ProcessIdle() and ProcessEvents() below may throw so the code here should
+    // ProcessIdle() and Dispatch() below may throw so the code here should
     // be exception-safe, hence we must use local objects for all actions we
     // should undo
-    wxEventLoopActivator activate(this);
+    wxEventLoopActivator activate(wx_static_cast(wxEventLoop *, this));
+
+#if defined(__WXMSW__) && wxUSE_THREADS
+    wxRunningEventLoopCounter evtLoopCounter;
+#endif // __WXMSW__
 
     // we must ensure that OnExit() is called even if an exception is thrown
-    // from inside ProcessEvents() but we must call it from Exit() in normal
+    // from inside Dispatch() but we must call it from Exit() in normal
     // situations because it is supposed to be called synchronously,
     // wxModalEventLoop depends on this (so we can't just use ON_BLOCK_EXIT or
     // something similar here)
@@ -139,7 +96,7 @@ int wxEventLoopManual::Run()
 
                 // generate and process idle events for as long as we don't
                 // have anything else to do
-                while ( !Pending() && ProcessIdle() && !m_shouldExit )
+                while ( !Pending() && (wxTheApp && wxTheApp->ProcessIdle()) )
                     ;
 
                 // if the "should exit" flag is set, the loop should terminate
@@ -148,15 +105,14 @@ int wxEventLoopManual::Run()
                 if ( m_shouldExit )
                 {
                     while ( Pending() )
-                        ProcessEvents();
+                        Dispatch();
 
                     break;
                 }
 
-                // a message came or no more idle processing to do, dispatch
-                // all the pending events and call Dispatch() to wait for the
-                // next message
-                if ( !ProcessEvents() )
+                // a message came or no more idle processing to do, sit in
+                // Dispatch() waiting for the next message
+                if ( !Dispatch() )
                 {
                     // we got WM_QUIT
                     break;
@@ -195,7 +151,7 @@ int wxEventLoopManual::Run()
 
 void wxEventLoopManual::Exit(int rc)
 {
-    wxCHECK_RET( IsRunning(), wxT("can't call Exit() if not running") );
+    wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
     m_exitcode = rc;
     m_shouldExit = true;
@@ -214,4 +170,3 @@ void wxEventLoopManual::Exit(int rc)
 }
 
 #endif // __WXMSW__ || __WXMAC__ || __WXDFB__
-

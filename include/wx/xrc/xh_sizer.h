@@ -18,6 +18,8 @@
 #include "wx/sizer.h"
 #include "wx/gbsizer.h"
 
+class WXDLLIMPEXP_FWD_CORE wxSizer;
+
 class WXDLLIMPEXP_XRC wxSizerXmlHandler : public wxXmlResourceHandler
 {
     DECLARE_DYNAMIC_CLASS(wxSizerXmlHandler)
@@ -27,16 +29,13 @@ public:
     virtual wxObject *DoCreateResource();
     virtual bool CanHandle(wxXmlNode *node);
 
-protected:
-    virtual wxSizer* DoCreateSizer(const wxString& name);
-    virtual bool IsSizerNode(wxXmlNode *node) const;
-
 private:
     bool m_isInside;
     bool m_isGBS;
 
     wxSizer *m_parentSizer;
 
+    bool IsSizerNode(wxXmlNode *node);
 
     wxObject* Handle_sizeritem();
     wxObject* Handle_spacer();
@@ -46,11 +45,9 @@ private:
     wxSizer*  Handle_wxStaticBoxSizer();
 #endif
     wxSizer*  Handle_wxGridSizer();
-    wxFlexGridSizer* Handle_wxFlexGridSizer();
-    wxGridBagSizer* Handle_wxGridBagSizer();
-    wxSizer*  Handle_wxWrapSizer();
+    wxSizer*  Handle_wxFlexGridSizer();
+    wxSizer*  Handle_wxGridBagSizer();
 
-    bool ValidateGridSizerChildren();
     void SetGrowables(wxFlexGridSizer* fsizer, const wxChar* param, bool rows);
     wxGBPosition GetGBPos(const wxString& param);
     wxGBSpan GetGBSpan(const wxString& param);

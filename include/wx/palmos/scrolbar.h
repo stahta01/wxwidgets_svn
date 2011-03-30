@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/palmos/scrolbar.h
+// Name:        wx/palmos/scrollbar.h
 // Purpose:     wxScrollBar class
 // Author:      William Osborne - minimal working wxPalmOS port
 // Modified by:
@@ -13,7 +13,7 @@
 #define _WX_SCROLBAR_H_
 
 // Scrollbar item
-class WXDLLIMPEXP_CORE wxScrollBar: public wxScrollBarBase
+class WXDLLEXPORT wxScrollBar: public wxScrollBarBase
 {
 public:
     wxScrollBar() { m_pageSize = 0; m_viewSize = 0; m_objectSize = 0; }

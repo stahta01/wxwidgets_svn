@@ -13,7 +13,7 @@
 #define _WX_STATBOX_H_
 
 // Group box
-class WXDLLIMPEXP_CORE wxStaticBox : public wxStaticBoxBase
+class WXDLLEXPORT wxStaticBox : public wxStaticBoxBase
 {
 public:
     wxStaticBox() { }
@@ -40,7 +40,7 @@ public:
 
     virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
 
-    // overridden base class virtuals
+    // overriden base class virtuals
     virtual bool AcceptsFocus() const { return FALSE; }
 
 protected:

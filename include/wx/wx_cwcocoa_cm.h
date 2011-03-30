@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/wx_cwcocoa_cm.h
+// Name:        include/wx/wx_cwcocoa_cm.h
 // Purpose:     Metrowerks wxCocoa PCH common definitions
 // Author:      Tommy Tian (tommy.tian@webex.com)
 // Modified by:
@@ -77,7 +77,7 @@
     */
 #elif defined( __WXCOCOA__) //tommy
     #if defined(__OBJC__)
-        #include "CocoaHeaders.m"
+        #include "CocoaHeaders.m"        
     #endif //defined(__OBJC__)
 #endif
 

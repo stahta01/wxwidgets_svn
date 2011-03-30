@@ -35,15 +35,15 @@ public:
     wxGenericAboutDialog() { Init(); }
 
     // ctor which fully initializes the object
-    wxGenericAboutDialog(const wxAboutDialogInfo& info, wxWindow* parent = NULL)
+    wxGenericAboutDialog(const wxAboutDialogInfo& info)
     {
         Init();
 
-        (void)Create(info, parent);
+        (void)Create(info);
     }
 
     // this method must be called if and only if the default ctor was used
-    bool Create(const wxAboutDialogInfo& info, wxWindow* parent = NULL);
+    bool Create(const wxAboutDialogInfo& info);
 
 protected:
     // this virtual method may be overridden to add some more controls to the
@@ -79,7 +79,7 @@ private:
 
 // unlike wxAboutBox which can show either the native or generic about dialog,
 // this function always shows the generic one
-WXDLLIMPEXP_ADV void wxGenericAboutBox(const wxAboutDialogInfo& info, wxWindow* parent = NULL);
+WXDLLIMPEXP_ADV void wxGenericAboutBox(const wxAboutDialogInfo& info);
 
 #endif // wxUSE_ABOUTDLG
 

@@ -17,7 +17,7 @@ DECLARE_WXCOCOA_OBJC_CLASS(NSImageView);
 // ========================================================================
 // wxStaticBitmap
 // ========================================================================
-class WXDLLIMPEXP_CORE wxStaticBitmap : public wxStaticBitmapBase //, protected wxCocoaNSxxx
+class WXDLLEXPORT wxStaticBitmap : public wxStaticBitmapBase //, protected wxCocoaNSxxx
 {
     DECLARE_DYNAMIC_CLASS(wxStaticBitmap)
     DECLARE_EVENT_TABLE()
@@ -47,7 +47,9 @@ public:
 // Cocoa specifics
 // ------------------------------------------------------------------------
     WX_NSImageView GetNSImageView() { return (WX_NSImageView)m_cocoaNSView; }
+#if wxUSE_ABI_INCOMPATIBLE_FEATURES
     wxBitmap m_bitmap;
+#endif
 
 // ------------------------------------------------------------------------
 // Implementation

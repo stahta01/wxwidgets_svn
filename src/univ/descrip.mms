@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 4 November 2010                                                     *
+# Date : 22 September 2006                                                   *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -26,6 +26,7 @@ OBJECTS = \
 		checkbox.obj,\
 		checklst.obj,\
 		choice.obj,\
+		colschem.obj,\
 		control.obj,\
 		dialog.obj,\
 		framuniv.obj,\
@@ -39,7 +40,6 @@ OBJECTS = \
 		scrarrow.obj,\
 		scrolbar.obj,\
 		scrthumb.obj,\
-		settingsuniv.obj,\
 		slider.obj,\
 		spinbutt.obj,\
 		statbmp.obj,\
@@ -67,6 +67,7 @@ SOURCES =\
 		checkbox.cpp \
 		checklst.cpp \
 		choice.cpp \
+		colschem.cpp \
 		control.cpp \
 		dialog.cpp \
 		framuniv.cpp \
@@ -80,7 +81,6 @@ SOURCES =\
 		scrarrow.cpp \
 		scrolbar.cpp \
 		scrthumb.cpp \
-		settingsuniv.cpp \
 		slider.cpp \
 		spinbutt.cpp \
 		statbmp.cpp \
@@ -106,13 +106,12 @@ all : $(SOURCES)
 	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
 	library [--.lib]libwx_x11_univ.olb $(OBJECTS)
 
-$(OBJECTS) : [--.include.wx]setup.h
-
 bmpbuttn.obj : bmpbuttn.cpp
 button.obj : button.cpp
 checkbox.obj : checkbox.cpp
 checklst.obj : checklst.cpp
 choice.obj : choice.cpp
+colschem.obj : colschem.cpp
 control.obj : control.cpp
 dialog.obj : dialog.cpp
 framuniv.obj : framuniv.cpp
@@ -122,12 +121,10 @@ inphand.obj : inphand.cpp
 listbox.obj : listbox.cpp
 menu.obj : menu.cpp
 notebook.obj : notebook.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/warn=disable=(INTSIGNCHANGE) notebook.cpp
 radiobut.obj : radiobut.cpp
 scrarrow.obj : scrarrow.cpp
 scrolbar.obj : scrolbar.cpp
 scrthumb.obj : scrthumb.cpp
-settingsuniv.obj : settingsuniv.cpp
 slider.obj : slider.cpp
 spinbutt.obj : spinbutt.cpp
 statbmp.obj : statbmp.cpp
@@ -144,7 +141,7 @@ winuniv.obj : winuniv.cpp
 combobox.obj : combobox.cpp
 ctrlrend.obj : ctrlrend.cpp
 gtk.obj : [.themes]gtk.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/object=gtk.obj [.themes]gtk.cpp
+	cxx $(CXXFLAGS)$(CXX_DEFINE) [.themes]gtk.cpp
 metal.obj : [.themes]metal.cpp
 	cxx $(CXXFLAGS)$(CXX_DEFINE) [.themes]metal.cpp
 radiobox.obj : radiobox.cpp

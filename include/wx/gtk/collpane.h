@@ -12,11 +12,13 @@
 #ifndef _WX_COLLAPSABLE_PANEL_H_GTK_
 #define _WX_COLLAPSABLE_PANEL_H_GTK_
 
+#include "wx/generic/collpaneg.h"
+
 // ----------------------------------------------------------------------------
 // wxCollapsiblePane
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxCollapsiblePane : public wxCollapsiblePaneBase
+class WXDLLIMPEXP_CORE wxCollapsiblePane : public wxGenericCollapsiblePane
 {
 public:
     wxCollapsiblePane() { Init(); }
@@ -49,12 +51,9 @@ public:
                 const wxValidator& val = wxDefaultValidator,
                 const wxString& name = wxCollapsiblePaneNameStr);
 
-    virtual void Collapse(bool collapse = true);
-    virtual bool IsCollapsed() const;
-    virtual void SetLabel(const wxString& str);
-
-    virtual wxWindow *GetPane() const { return m_pPane; }
-    virtual wxString GetLabel() const { return m_strLabel; }
+    void Collapse(bool collapse = true);
+    bool IsCollapsed() const;
+    void SetLabel(const wxString &str);
 
 protected:
     virtual wxSize DoGetBestSize() const;
@@ -63,15 +62,8 @@ public:     // used by GTK callbacks
     bool m_bIgnoreNextChange;
     wxSize m_szCollapsed;
 
-    wxWindow *m_pPane;
-
-    // the button label without ">>" or "<<"
-    wxString m_strLabel;
-
 private:
     void OnSize(wxSizeEvent&);
-    virtual void AddChildGTK(wxWindowGTK* child);
-    GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
     DECLARE_DYNAMIC_CLASS(wxCollapsiblePane)
     DECLARE_EVENT_TABLE()

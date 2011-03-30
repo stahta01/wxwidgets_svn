@@ -5,7 +5,7 @@
 # Author:      Mike Wetherell
 # RCS-ID:      $Id$
 # Copyright:   (c) Mike Wetherell
-# Licence:     wxWindows licence
+# Licence:     wxWidgets licence
 #############################################################################
 
 #

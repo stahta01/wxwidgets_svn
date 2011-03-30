@@ -36,7 +36,7 @@ Pixmap XCreateInsensitivePixmap( Display *display, Pixmap pixmap );
 
 static inline wxCharBuffer GetCacheImageName(WXImage image)
 {
-    return wxString::Format(wxT("wxBitmap_%p"), image).ToAscii();
+    return wxString::Format(_T("wxBitmap_%p"), image).ToAscii();
 }
 
 wxBitmapCache::~wxBitmapCache()
@@ -74,7 +74,7 @@ void wxBitmapCache::SetBitmap( const wxBitmap& bitmap )
         {
             XmUninstallImage( (XImage*)m_image );
             XtFree( (char*)(XImage*)m_image );
-            m_image = NULL;
+            m_image = (WXImage*)NULL;
         }
     }
 }
@@ -263,7 +263,7 @@ XCreateInsensitivePixmap( Display *display, Pixmap pixmap )
     stipple = XCreateBitmapFromData( display, pixmap, stipple_data, 16, 16 );
     if ( 0 != stipple )
     {
-        gc = XCreateGC( display, pixmap, (XtGCMask)0, NULL );
+        gc = XCreateGC( display, pixmap, (XtGCMask)0, (XGCValues*)NULL );
         if ( NULL != gc )
         {
             /* Create an identical copy of the argument pixmap.

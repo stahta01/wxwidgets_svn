@@ -69,7 +69,7 @@ void wxFontFaceBase::Release()
 
 wxFontInstance *wxFontFaceBase::GetFontInstance(float ptSize, bool aa)
 {
-    wxASSERT_MSG( m_refCnt > 0, wxT("font library not loaded!") );
+    wxASSERT_MSG( m_refCnt > 0, _T("font library not loaded!") );
 
     for ( wxFontInstanceList::const_iterator i = m_instances->begin();
           i != m_instances->end(); ++i )
@@ -103,7 +103,7 @@ wxFontFace *wxFontBundleBase::GetFace(FaceType type) const
 {
     wxFontFace *f = m_faces[type];
 
-    wxCHECK_MSG( f, NULL, wxT("no such face in font bundle") );
+    wxCHECK_MSG( f, NULL, _T("no such face in font bundle") );
 
     f->Acquire();
 
@@ -113,9 +113,8 @@ wxFontFace *wxFontBundleBase::GetFace(FaceType type) const
 wxFontFace *
 wxFontBundleBase::GetFaceForFont(const wxFontMgrFontRefData& font) const
 {
-    wxASSERT_MSG( font.GetFaceName().empty() ||
-                  GetName().CmpNoCase(font.GetFaceName()) == 0,
-                  wxT("calling GetFaceForFont for incompatible font") );
+    wxASSERT_MSG( font.GetFaceName().empty() || font.GetFaceName() == GetName(),
+                  _T("calling GetFaceForFont for incompatible font") );
 
     int type = FaceType_Regular;
 
@@ -133,15 +132,13 @@ wxFontBundleBase::GetFaceForFont(const wxFontMgrFontRefData& font) const
 
     if ( !HasFace((FaceType)type) )
     {
-        // if we can't get the exact font requested, substitute it with
-        // some other variant:
         for (int i = 0; i < FaceType_Max; i++)
         {
             if ( HasFace((FaceType)i) )
                 return GetFace((FaceType)i);
         }
 
-        wxFAIL_MSG( wxT("no face") );
+        wxFAIL_MSG( _T("no face") );
         return NULL;
     }
 
@@ -225,15 +222,19 @@ void wxFontsManagerBase::AddBundle(wxFontBundle *bundle)
 // ----------------------------------------------------------------------------
 
 wxFontMgrFontRefData::wxFontMgrFontRefData(int size,
-                                           wxFontFamily family,
-                                           wxFontStyle style,
-                                           wxFontWeight weight,
+                                           int family,
+                                           int style,
+                                           int weight,
                                            bool underlined,
                                            const wxString& faceName,
                                            wxFontEncoding encoding)
 {
-    if ( family == wxFONTFAMILY_DEFAULT )
-        family = wxFONTFAMILY_SWISS;
+    if ( family == wxDEFAULT )
+        family = wxSWISS;
+    if ( style == wxDEFAULT )
+        style = wxNORMAL;
+    if ( weight == wxDEFAULT )
+        weight = wxNORMAL;
     if ( size == wxDEFAULT )
         size = 12;
 
@@ -245,6 +246,8 @@ wxFontMgrFontRefData::wxFontMgrFontRefData(int size,
     m_info.underlined = underlined;
     m_info.encoding = encoding;
 
+    m_noAA = false;
+
     m_fontFace = NULL;
     m_fontBundle = NULL;
     m_fontValid = false;
@@ -253,6 +256,7 @@ wxFontMgrFontRefData::wxFontMgrFontRefData(int size,
 wxFontMgrFontRefData::wxFontMgrFontRefData(const wxFontMgrFontRefData& data)
 {
     m_info = data.m_info;
+    m_noAA = data.m_noAA;
 
     m_fontFace = data.m_fontFace;
     m_fontBundle = data.m_fontBundle;
@@ -278,7 +282,7 @@ wxFontMgrFontRefData::GetFontInstance(float scale, bool antialiased) const
 {
     wxConstCast(this, wxFontMgrFontRefData)->EnsureValidFont();
     return m_fontFace->GetFontInstance(m_info.pointSize * scale,
-                                       antialiased);
+                                       antialiased && !m_noAA);
 }
 
 void wxFontMgrFontRefData::SetPointSize(int pointSize)
@@ -287,21 +291,21 @@ void wxFontMgrFontRefData::SetPointSize(int pointSize)
     m_fontValid = false;
 }
 
-void wxFontMgrFontRefData::SetFamily(wxFontFamily family)
+void wxFontMgrFontRefData::SetFamily(int family)
 {
-    m_info.family = family;
+    m_info.family = (wxFontFamily)family;
     m_fontValid = false;
 }
 
-void wxFontMgrFontRefData::SetStyle(wxFontStyle style)
+void wxFontMgrFontRefData::SetStyle(int style)
 {
-    m_info.style = style;
+    m_info.style = (wxFontStyle)style;
     m_fontValid = false;
 }
 
-void wxFontMgrFontRefData::SetWeight(wxFontWeight weight)
+void wxFontMgrFontRefData::SetWeight(int weight)
 {
-    m_info.weight = weight;
+    m_info.weight = (wxFontWeight)weight;
     m_fontValid = false;
 }
 
@@ -322,6 +326,12 @@ void wxFontMgrFontRefData::SetEncoding(wxFontEncoding encoding)
     m_info.encoding = encoding;
     m_fontValid = false;
 }
+
+void wxFontMgrFontRefData::SetNoAntiAliasing(bool no)
+{
+    m_noAA = no;
+}
+
 
 void wxFontMgrFontRefData::EnsureValidFont()
 {

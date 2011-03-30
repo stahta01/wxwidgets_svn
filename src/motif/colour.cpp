@@ -32,6 +32,8 @@
 
 #include "wx/motif/private.h"
 
+IMPLEMENT_DYNAMIC_CLASS(wxColour, wxObject)
+
 wxCOMPILE_TIME_ASSERT( sizeof(WXPixel) == sizeof(Pixel), PixelSizeIsOk );
 
 // Colour

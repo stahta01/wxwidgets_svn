@@ -9,10 +9,10 @@
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
-class MyTaskBarIcon : public wxTaskBarIcon
+class MyTaskBarIcon: public wxTaskBarIcon
 {
 public:
-#if defined(__WXOSX__) && wxOSX_USE_COCOA
+#if defined(__WXCOCOA__)
     MyTaskBarIcon(wxTaskBarIconType iconType = DEFAULT_TYPE)
     :   wxTaskBarIcon(iconType)
 #else
@@ -24,38 +24,40 @@ public:
     void OnMenuRestore(wxCommandEvent&);
     void OnMenuExit(wxCommandEvent&);
     void OnMenuSetNewIcon(wxCommandEvent&);
-    void OnMenuCheckmark(wxCommandEvent&);
-    void OnMenuUICheckmark(wxUpdateUIEvent&);
+    void OnMenuSetOldIcon(wxCommandEvent&);
+       void OnMenuCheckmark(wxCommandEvent&);
+       void OnMenuUICheckmark(wxUpdateUIEvent&);
     void OnMenuSub(wxCommandEvent&);
     virtual wxMenu *CreatePopupMenu();
 
-    DECLARE_EVENT_TABLE()
+DECLARE_EVENT_TABLE()
 };
 
 
 // Define a new application
-class MyApp : public wxApp
+class MyApp: public wxApp
 {
 public:
-    virtual bool OnInit();
+    bool OnInit(void);
 };
 
 class MyDialog: public wxDialog
 {
 public:
-    MyDialog(const wxString& title);
-    virtual ~MyDialog();
+    MyDialog(wxWindow* parent, const wxWindowID id, const wxString& title,
+        const wxPoint& pos, const wxSize& size, const long windowStyle = wxDEFAULT_DIALOG_STYLE);
+    ~MyDialog();
 
-protected:
-    void OnAbout(wxCommandEvent& event);
     void OnOK(wxCommandEvent& event);
     void OnExit(wxCommandEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
+    void Init(void);
 
+protected:
     MyTaskBarIcon   *m_taskBarIcon;
-#if defined(__WXOSX__) && wxOSX_USE_COCOA
+#if defined(__WXCOCOA__)
     MyTaskBarIcon   *m_dockIcon;
 #endif
 
-    DECLARE_EVENT_TABLE()
+DECLARE_EVENT_TABLE()
 };

@@ -2,7 +2,7 @@
 #                                                                            *
 # Make file for VMS                                                          *
 # Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                             *
-# Date : 21 March 2011                                                       *
+# Date : 31 October 2006                                                     *
 #                                                                            *
 #*****************************************************************************
 .first
@@ -46,17 +46,21 @@ CC_DEFINE =
 
 OBJECTS = \
 		aboutdlgg.obj,\
+		animateg.obj,\
 		busyinfo.obj,\
-		calctrlg.obj,\
+		calctrl.obj,\
 		caret.obj,\
 		choicbkg.obj,\
 		choicdgg.obj,\
+		colrdlgg.obj,\
+		clrpickerg.obj,\
 		datectlg.obj,\
 		dcpsg.obj,\
 		dirctrlg.obj,\
 		dirdlgg.obj,\
 		fdrepdlg.obj,\
 		fontdlgg.obj,\
+		fontpickerg.obj,\
 		grid.obj,\
 		gridctrl.obj,\
 		gridsel.obj,\
@@ -88,21 +92,16 @@ OBJECTS = \
 		treebkg.obj,\
 		treectlg.obj,\
 		wizard.obj,\
-		hyperlinkg.obj,\
+		hyperlink.obj,\
 		filepickerg.obj,\
-		bmpcboxg.obj,\
-		filectrlg.obj,srchctlg.obj,notifmsgg.obj,headerctrlg.obj,\
-		grideditors.obj,vlbox.obj,vscroll.obj,stattextg.obj,\
-		editlbox.obj,datavgen.obj,dbgrptg.obj,dragimgg.obj,\
-		richmsgdlgg.obj,commandlinkbuttong.obj,spinctlg.obj,\
-		markuptext.obj
+		bmpcboxg.obj
 
 SOURCES = \
 		aboutdlgg.cpp,\
 		accel.cpp,\
 		animateg.cpp,\
 		busyinfo.cpp,\
-		calctrlg.cpp,\
+		calctrl.cpp,\
 		caret.cpp,\
 		choicbkg.cpp,\
 		choicdgg.cpp,\
@@ -161,67 +160,53 @@ SOURCES = \
 		splash.cpp,\
 		timer.cpp,\
 		vlbox.cpp,\
-		hyperlinkg.cpp,\
+		hyperlink.cpp,\
 		filepickerg.cpp,\
 		vscroll.cpp,\
-		icon.cpp,bmpcboxg.cpp,filectrlg.cpp,srchctlg.cpp,notifmsgg.cpp\
-		,headerctrlg.cpp,grideditors.cpp,stattextg.cpp,editlbox.cpp,\
-		datavgen.cpp,dbgrptg.cpp,dragimgg.cpp,richmsgdlgg.cpp,\
-		commandlinkbuttong.cpp,spinctlg.cpp markuptext.cpp
+		icon.cpp,bmpcboxg.cpp
 
 .ifdef __WXMOTIF__
-OBJECTS0=statusbr.obj,statline.obj,notebook.obj,spinctlg.obj,collpaneg.obj,\
-	combog.obj,animateg.obj,colrdlgg.obj,clrpickerg.obj,fontpickerg.obj,\
-	mdig.obj,infobar.obj
+OBJECTS0=,statusbr.obj,statline.obj,notebook.obj,spinctlg.obj,collpaneg.obj,\
+	combog.obj
 .else
 .ifdef __WXX11__
-OBJECTS0=accel.obj,filedlgg.obj,dragimgg.obj,fdrepdlg.obj,htmllbox.obj,\
+OBJECTS0=,accel.obj,filedlgg.obj,dragimgg.obj,fdrepdlg.obj,htmllbox.obj,\
 	listbkg.obj,mdig.obj,spinctlg.obj,splash.obj,timer.obj,\
-	combog.obj,icon.obj,collpaneg.obj,animateg.obj,\
-	colrdlgg.obj,clrpickerg.obj,fontpickerg.obj,infobar.obj
+	vlbox.obj,vscroll.obj,combog.obj,icon.obj,collpaneg.obj
 .else
 .ifdef __WXGTK__
-OBJECTS0=accel.obj,statusbr.obj,filedlgg.obj,paletteg.obj,\
-	combog.obj,icon.obj,collpaneg.obj,animateg.obj,\
-	colrdlgg.obj,clrpickerg.obj,fontpickerg.obj,infobar.obj
+OBJECTS0=,accel.obj,statusbr.obj,filedlgg.obj,paletteg.obj,vlbox.obj,\
+	vscroll.obj,combog.obj,icon.obj,collpaneg.obj
 .else
-OBJECTS0=accel.obj,statusbr.obj,filedlgg.obj,paletteg.obj,\
-	combog.obj,icon.obj
+OBJECTS0=,accel.obj,statusbr.obj,filedlgg.obj,paletteg.obj,vlbox.obj,\
+	vscroll.obj,combog.obj,icon.obj
 .endif
 .endif
 .endif
 
 all : $(SOURCES)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)
-	$(MMS)$(MMSQUALIFIERS) $(OBJECTS0)
+	$(MMS)$(MMSQUALIFIERS) $(OBJECTS)$(OBJECTS0)
 .ifdef __WXMOTIF__
-	library/crea [--.lib]libwx_motif.olb $(OBJECTS)
-	library [--.lib]libwx_motif.olb $(OBJECTS0)
+	library/crea [--.lib]libwx_motif.olb $(OBJECTS)$(OBJECTS0)
 .else
 .ifdef __WXGTK__
-	library/crea [--.lib]libwx_gtk.olb $(OBJECTS)
-	library [--.lib]libwx_gtk.olb $(OBJECTS0)
+	library/crea [--.lib]libwx_gtk.olb $(OBJECTS)$(OBJECTS0)
 .else
 .ifdef __WXGTK2__
-	library/crea [--.lib]libwx_gtk2.olb $(OBJECTS)
-	library [--.lib]libwx_gtk2.olb $(OBJECTS0)
+	library/crea [--.lib]libwx_gtk2.olb $(OBJECTS)$(OBJECTS0)
 .else
 .ifdef __WXX11__
-	library/crea [--.lib]libwx_x11_univ.olb $(OBJECTS)
-	library [--.lib]libwx_x11_univ.olb $(OBJECTS0)
+	library/crea [--.lib]libwx_x11_univ.olb $(OBJECTS)$(OBJECTS0)
 .endif
 .endif
 .endif
 .endif
-
-$(OBJECTS) : [--.include.wx]setup.h
-$(OBJECTS0) : [--.include.wx]setup.h
 
 aboutdlgg.obj : aboutdlgg.cpp
 accel.obj : accel.cpp
 animateg.obj : animateg.cpp
 busyinfo.obj : busyinfo.cpp
-calctrlg.obj : calctrlg.cpp
+calctrl.obj : calctrl.cpp
 caret.obj : caret.cpp
 choicdgg.obj : choicdgg.cpp
 clrpickerg.obj : clrpickerg.cpp
@@ -286,21 +271,6 @@ toolbkg.obj : toolbkg.cpp
 treebkg.obj : treebkg.cpp
 combog.obj : combog.cpp
 fontpickerg.obj : fontpickerg.cpp
-hyperlinkg.obj : hyperlinkg.cpp
+hyperlink.obj : hyperlink.cpp
 filepickerg.obj : filepickerg.cpp
 bmpcboxg.obj : bmpcboxg.cpp
-filectrlg.obj : filectrlg.cpp
-srchctlg.obj : srchctlg.cpp
-notifmsgg.obj : notifmsgg.cpp
-stattextg.obj : stattextg.cpp
-headerctrlg.obj : headerctrlg.cpp
-grideditors.obj : grideditors.cpp
-infobar.obj : infobar.cpp
-datavgen.obj : datavgen.cpp
-	cxx $(CXXFLAGS)$(CXX_DEFINE)/warn=disable=(UNSCOMZER) datavgen.cpp
-dbgrptg.obj : dbgrptg.cpp
-dragimgg.obj : dragimgg.cpp
-richmsgdlgg.obj : richmsgdlgg.cpp
-commandlinkbuttong.obj : commandlinkbuttong.cpp
-spinctlg.obj : spinctlg.cpp
-markuptext.obj : markuptext.cpp

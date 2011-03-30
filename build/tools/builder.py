@@ -141,8 +141,8 @@ class GNUMakeBuilder(Builder):
         Builder.__init__(self, commandName=commandName, formatName=formatName)
 
 
-class XcodeBuilder(Builder):
-    def __init__(self, commandName="xcodebuild", formatName="Xcode"):
+class XCodeBuilder(Builder):
+    def __init__(self, commandName="xcodebuild", formatName="XCode"):
         Builder.__init__(self, commandName=commandName, formatName=formatName)
 
 
@@ -223,7 +223,7 @@ class MSVCProjectBuilder(Builder):
 
         return False
 
-builders = [GNUMakeBuilder, XcodeBuilder, AutoconfBuilder, MSVCBuilder, MSVCProjectBuilder]
+builders = [GNUMakeBuilder, XCodeBuilder, AutoconfBuilder, MSVCBuilder, MSVCProjectBuilder]
 
 def getAvailableBuilders():
     availableBuilders = {}

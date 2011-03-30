@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/cocoa/private/fontfactory.h
+// Name:        wx/cocoa/fontfactory.h
 // Purpose:     wxFontFactory class
 // Author:      David Elliott
 // Modified by:

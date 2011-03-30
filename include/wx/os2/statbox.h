@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/statbox.h
+// Name:        statbox.h
 // Purpose:     wxStaticBox class
 // Author:      David Webster
 // Modified by:
@@ -15,7 +15,7 @@
 #include "wx/control.h"
 
 // Group box
-class WXDLLIMPEXP_CORE wxStaticBox : public wxStaticBoxBase
+class WXDLLEXPORT wxStaticBox : public wxStaticBoxBase
 {
 public:
     inline wxStaticBox() {}
@@ -50,7 +50,7 @@ public:
                                  );
 
     //
-    // overridden base class virtuals
+    // overriden base class virtuals
     //
     inline virtual bool AcceptsFocus(void) const { return FALSE; }
 

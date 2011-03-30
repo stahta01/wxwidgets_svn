@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/generic/laywin.cpp
+// Name:        laywin.cpp
 // Purpose:     Implements a simple layout algorithm, plus
 //              wxSashLayoutWindow which is an example of a window with
 //              layout-awareness (via event handlers). This is suited to
@@ -21,25 +21,20 @@
 
 #ifndef WX_PRECOMP
     #include "wx/frame.h"
+    #include "wx/mdi.h"
 #endif
 
 #include "wx/laywin.h"
-#include "wx/mdi.h"
-
 
 IMPLEMENT_DYNAMIC_CLASS(wxQueryLayoutInfoEvent, wxEvent)
 IMPLEMENT_DYNAMIC_CLASS(wxCalculateLayoutEvent, wxEvent)
 
-wxDEFINE_EVENT( wxEVT_QUERY_LAYOUT_INFO, wxQueryLayoutInfoEvent );
-wxDEFINE_EVENT( wxEVT_CALCULATE_LAYOUT, wxCalculateLayoutEvent );
-
-
-// ----------------------------------------------------------------------------
-// wxSashLayoutWindow
-// ----------------------------------------------------------------------------
+DEFINE_EVENT_TYPE(wxEVT_QUERY_LAYOUT_INFO)
+DEFINE_EVENT_TYPE(wxEVT_CALCULATE_LAYOUT)
 
 #if wxUSE_SASH
 IMPLEMENT_CLASS(wxSashLayoutWindow, wxSashWindow)
+
 BEGIN_EVENT_TABLE(wxSashLayoutWindow, wxSashWindow)
     EVT_CALCULATE_LAYOUT(wxSashLayoutWindow::OnCalculateLayout)
     EVT_QUERY_LAYOUT_INFO(wxSashLayoutWindow::OnQueryLayoutInfo)
@@ -179,10 +174,9 @@ void wxSashLayoutWindow::OnCalculateLayout(wxCalculateLayoutEvent& event)
 }
 #endif // wxUSE_SASH
 
-
-// ----------------------------------------------------------------------------
-// wxLayoutAlgorithm
-// ----------------------------------------------------------------------------
+/*
+ * wxLayoutAlgorithm
+ */
 
 #if wxUSE_MDI_ARCHITECTURE
 

@@ -52,7 +52,7 @@ wxPen::~wxPen()
 }
 
 // Should implement Create
-wxPen::wxPen(const wxColour& col, int Width, wxPenStyle Style)
+wxPen::wxPen(const wxColour& col, int Width, int Style)
 {
 }
 
@@ -80,6 +80,10 @@ bool wxPen::IsFree() const
     return false;
 }
 
+void wxPen::Unshare()
+{
+}
+
 void wxPen::SetColour(const wxColour& col)
 {
 }
@@ -92,7 +96,7 @@ void wxPen::SetWidth(int Width)
 {
 }
 
-void wxPen::SetStyle(wxPenStyle Style)
+void wxPen::SetStyle(int Style)
 {
 }
 
@@ -104,21 +108,10 @@ void wxPen::SetDashes(int nb_dashes, const wxDash *Dash)
 {
 }
 
-void wxPen::SetJoin(wxPenJoin Join)
+void wxPen::SetJoin(int Join)
 {
 }
 
-void wxPen::SetCap(wxPenCap Cap)
+void wxPen::SetCap(int Cap)
 {
 }
-
-wxGDIRefData *wxPen::CreateGDIRefData() const
-{
-    return new wxPenRefData();
-}
-
-wxGDIRefData *wxPen::CloneGDIRefData(const wxGDIRefData *data) const
-{
-    return new wxPenRefData(*static_cast<const wxPenRefData *>(data));
-}
-

@@ -1,12 +1,12 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/cocoa/statline2.mm
+// Name:        cocoa/statline.mm
 // Purpose:     wxStaticLine
 // Author:      David Elliott
 // Modified by:
 // Created:     2003/02/15
-// RCS-ID:      $Id$
+// RCS-ID:      $Id: 
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:   	wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -19,6 +19,7 @@
 
 #import <AppKit/NSBox.h>
 
+IMPLEMENT_DYNAMIC_CLASS(wxStaticLine, wxControl)
 BEGIN_EVENT_TABLE(wxStaticLine, wxStaticLineBase)
 END_EVENT_TABLE()
 // WX_IMPLEMENT_COCOA_OWNER(wxStaticLine,NSTextField,NSControl,NSView)

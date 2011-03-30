@@ -6,7 +6,7 @@
 // Created:     01.11.02
 // RCS-ID:      $Id$
 // Copyright:   (c) 2002 Mattia Barbon
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -28,7 +28,6 @@
 #endif //WX_PRECOMP
 
 #include "wx/evtloop.h"
-#include "wx/thread.h"
 
 #ifdef __VMS__
     #pragma message disable nosimpint
@@ -97,15 +96,15 @@ bool wxEventLoopImpl::SendIdleMessage()
 // wxEventLoop running and exiting
 // ----------------------------------------------------------------------------
 
-wxGUIEventLoop::~wxGUIEventLoop()
+wxEventLoop::~wxEventLoop()
 {
-    wxASSERT_MSG( !m_impl, wxT("should have been deleted in Run()") );
+    wxASSERT_MSG( !m_impl, _T("should have been deleted in Run()") );
 }
 
-int wxGUIEventLoop::Run()
+int wxEventLoop::Run()
 {
     // event loops are not recursive, you need to create another loop!
-    wxCHECK_MSG( !IsRunning(), -1, wxT("can't reenter a message loop") );
+    wxCHECK_MSG( !IsRunning(), -1, _T("can't reenter a message loop") );
 
     wxEventLoopActivator activate(this);
 
@@ -121,14 +120,15 @@ int wxGUIEventLoop::Run()
     OnExit();
 
     int exitcode = m_impl->GetExitCode();
-    wxDELETE(m_impl);
+    delete m_impl;
+    m_impl = NULL;
 
     return exitcode;
 }
 
-void wxGUIEventLoop::Exit(int rc)
+void wxEventLoop::Exit(int rc)
 {
-    wxCHECK_RET( IsRunning(), wxT("can't call Exit() if not running") );
+    wxCHECK_RET( IsRunning(), _T("can't call Exit() if not running") );
 
     m_impl->SetExitCode(rc);
     m_impl->SetKeepGoing( false );
@@ -136,30 +136,16 @@ void wxGUIEventLoop::Exit(int rc)
     ::wxBreakDispatch();
 }
 
-bool wxGUIEventLoop::YieldFor(long eventsToProcess)
-{
-    m_isInsideYield = true;
-    m_eventsToProcessInsideYield = eventsToProcess;
-
-    while (wxTheApp && wxTheApp->Pending())
-        // TODO: implement event filtering using the eventsToProcess mask
-        wxTheApp->Dispatch();
-
-    m_isInsideYield = false;
-
-    return true;
-}
-
 // ----------------------------------------------------------------------------
 // wxEventLoop message processing dispatching
 // ----------------------------------------------------------------------------
 
-bool wxGUIEventLoop::Pending() const
+bool wxEventLoop::Pending() const
 {
     return XtAppPending( (XtAppContext)wxTheApp->GetAppContext() ) != 0;
 }
 
-bool wxGUIEventLoop::Dispatch()
+bool wxEventLoop::Dispatch()
 {
     XEvent event;
     XtAppContext context = (XtAppContext)wxTheApp->GetAppContext();
@@ -311,7 +297,7 @@ bool CheckForKeyDown(XEvent* event)
         wxKeyEvent keyEvent(wxEVT_KEY_DOWN);
         wxTranslateKeyEvent(keyEvent, win, (Widget) 0, event);
 
-        return win->HandleWindowEvent( keyEvent );
+        return win->GetEventHandler()->ProcessEvent( keyEvent );
     }
 
     return false;
@@ -337,7 +323,7 @@ bool CheckForKeyUp(XEvent* event)
         wxKeyEvent keyEvent(wxEVT_KEY_UP);
         wxTranslateKeyEvent(keyEvent, win, (Widget) 0, event);
 
-        return win->HandleWindowEvent( keyEvent );
+        return win->GetEventHandler()->ProcessEvent( keyEvent );
     }
 
     return false;
@@ -347,7 +333,7 @@ bool CheckForKeyUp(XEvent* event)
 // executes one main loop iteration (declared in include/wx/motif/private.h)
 // ----------------------------------------------------------------------------
 
-bool wxDoEventLoopIteration( wxGUIEventLoop& evtLoop )
+bool wxDoEventLoopIteration( wxEventLoop& evtLoop )
 {
     bool moreRequested, pendingEvents;
 

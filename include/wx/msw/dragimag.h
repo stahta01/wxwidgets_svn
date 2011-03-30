@@ -99,7 +99,7 @@
  * wxDragImage
  */
 
-class WXDLLIMPEXP_CORE wxDragImage: public wxObject
+class WXDLLEXPORT wxDragImage: public wxObject
 {
 public:
 
@@ -214,7 +214,7 @@ public:
 
     // Begin drag. hotspot is the location of the drag position relative to the upper-left
     // corner of the image.
-    bool BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullScreen = false, wxRect* rect = NULL);
+    bool BeginDrag(const wxPoint& hotspot, wxWindow* window, bool fullScreen = false, wxRect* rect = (wxRect*) NULL);
 
     // Begin drag. hotspot is the location of the drag position relative to the upper-left
     // corner of the image. This is full screen only. fullScreenRect gives the
@@ -266,7 +266,7 @@ protected:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxDragImage)
-    wxDECLARE_NO_COPY_CLASS(wxDragImage);
+    DECLARE_NO_COPY_CLASS(wxDragImage)
 };
 
 #endif // wxUSE_DRAGIMAGE

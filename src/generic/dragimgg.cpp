@@ -69,13 +69,13 @@ void wxGenericDragImage::Init()
 {
     m_isDirty = false;
     m_isShown = false;
-    m_windowDC = NULL;
-    m_window = NULL;
+    m_windowDC = (wxDC*) NULL;
+    m_window = (wxWindow*) NULL;
     m_fullScreen = false;
 #ifdef wxHAS_NATIVE_OVERLAY
     m_dcOverlay = NULL;
 #else
-    m_pBackingBitmap = NULL;
+    m_pBackingBitmap = (wxBitmap*) NULL;
 #endif
 }
 
@@ -172,7 +172,7 @@ bool wxGenericDragImage::Create(const wxString& str, const wxCursor& cursor)
 {
     wxFont font(wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT));
 
-    wxCoord w = 0, h = 0;
+    long w = 0, h = 0;
     wxScreenDC dc;
     dc.SetFont(font);
     dc.GetTextExtent(str, & w, & h);
@@ -187,7 +187,7 @@ bool wxGenericDragImage::Create(const wxString& str, const wxCursor& cursor)
     dc2.SetFont(font);
     dc2.SetBackground(* wxWHITE_BRUSH);
     dc2.Clear();
-    dc2.SetBackgroundMode(wxBRUSHSTYLE_TRANSPARENT);
+    dc2.SetBackgroundMode(wxTRANSPARENT);
     dc2.SetTextForeground(* wxLIGHT_GREY);
     dc2.DrawText(str, 0, 0);
     dc2.DrawText(str, 1, 0);
@@ -236,7 +236,7 @@ bool wxGenericDragImage::BeginDrag(const wxPoint& hotspot,
                                    bool fullScreen,
                                    wxRect* rect)
 {
-    wxCHECK_MSG( window, false, wxT("Window must not be null in BeginDrag."));
+    wxASSERT_MSG( (window != 0), wxT("Window must not be null in BeginDrag."));
 
     // The image should be offset by this amount
     m_offset = hotspot;
@@ -249,13 +249,16 @@ bool wxGenericDragImage::BeginDrag(const wxPoint& hotspot,
     m_isDirty = false;
     m_isDirty = false;
 
-    if (m_cursor.Ok())
+    if (window)
     {
-        m_oldCursor = window->GetCursor();
-        window->SetCursor(m_cursor);
-    }
+        window->CaptureMouse();
 
-    window->CaptureMouse();
+        if (m_cursor.Ok())
+        {
+            m_oldCursor = window->GetCursor();
+            window->SetCursor(m_cursor);
+        }
+    }
 
     // Make a copy of the window so we can repair damage done as the image is
     // dragged.
@@ -358,7 +361,8 @@ bool wxGenericDragImage::EndDrag()
 #else
         m_windowDC->DestroyClippingRegion();
 #endif
-        wxDELETE(m_windowDC);
+        delete m_windowDC;
+        m_windowDC = (wxDC*) NULL;
     }
 
 #ifndef wxHAS_NATIVE_OVERLAY
@@ -372,7 +376,7 @@ bool wxGenericDragImage::EndDrag()
 // is non-NULL, or in screen coordinates if NULL.
 bool wxGenericDragImage::Move(const wxPoint& pt)
 {
-    wxASSERT_MSG( (m_windowDC != NULL), wxT("No window DC in wxGenericDragImage::Move()") );
+    wxASSERT_MSG( (m_windowDC != (wxDC*) NULL), wxT("No window DC in wxGenericDragImage::Move()") );
 
     wxPoint pt2(pt);
     if (m_fullScreen)
@@ -396,7 +400,7 @@ bool wxGenericDragImage::Move(const wxPoint& pt)
 
 bool wxGenericDragImage::Show()
 {
-    wxASSERT_MSG( (m_windowDC != NULL), wxT("No window DC in wxGenericDragImage::Show()") );
+    wxASSERT_MSG( (m_windowDC != (wxDC*) NULL), wxT("No window DC in wxGenericDragImage::Show()") );
 
     // Show at the current position
 
@@ -434,7 +438,7 @@ bool wxGenericDragImage::UpdateBackingFromWindow(wxDC& windowDC, wxMemoryDC& des
 
 bool wxGenericDragImage::Hide()
 {
-    wxASSERT_MSG( (m_windowDC != NULL), wxT("No window DC in wxGenericDragImage::Hide()") );
+    wxASSERT_MSG( (m_windowDC != (wxDC*) NULL), wxT("No window DC in wxGenericDragImage::Hide()") );
 
     // Repair the old position
 
@@ -450,16 +454,13 @@ bool wxGenericDragImage::Hide()
 }
 
 // More efficient: erase and redraw simultaneously if possible
-bool wxGenericDragImage::RedrawImage(const wxPoint& oldPos,
-                                     const wxPoint& newPos,
+bool wxGenericDragImage::RedrawImage(const wxPoint& oldPos, const wxPoint& newPos,
                                      bool eraseOld, bool drawNew)
 {
     if (!m_windowDC)
         return false;
 
 #ifdef wxHAS_NATIVE_OVERLAY
-    wxUnusedVar(oldPos);
-
     wxDCOverlay dcoverlay( m_overlay, (wxWindowDC*) m_windowDC ) ;
     if ( eraseOld )
         dcoverlay.Clear() ;

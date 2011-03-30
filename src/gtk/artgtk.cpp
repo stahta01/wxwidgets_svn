@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk/artgtk.cpp
+// Name:        src/gtk/artstd.cpp
 // Purpose:     stock wxArtProvider instance with native GTK+ stock icons
 // Author:      Vaclav Slavik
 // Modified by:
@@ -20,7 +20,19 @@
     #pragma hdrstop
 #endif
 
+#if !defined(__WXUNIVERSAL__)
+
 #include "wx/artprov.h"
+
+#ifndef WX_PRECOMP
+    #include "wx/module.h"
+#endif
+
+#include <gtk/gtkversion.h>
+#if GTK_CHECK_VERSION(2, 9, 0)
+    // gtk_object_sink
+    #undef GTK_DISABLE_DEPRECATED
+#endif
 #include "wx/gtk/private.h"
 
 // compatibility with older GTK+ versions:
@@ -41,8 +53,6 @@ class wxGTK2ArtProvider : public wxArtProvider
 protected:
     virtual wxBitmap CreateBitmap(const wxArtID& id, const wxArtClient& client,
                                   const wxSize& size);
-    virtual wxIconBundle CreateIconBundle(const wxArtID& id,
-                                          const wxArtClient& client);
 };
 
 /*static*/ void wxArtProvider::InitNativeProvider()
@@ -54,10 +64,7 @@ protected:
 // CreateBitmap routine
 // ----------------------------------------------------------------------------
 
-namespace
-{
-
-wxString wxArtIDToStock(const wxArtID& id)
+static const char *wxArtIDToStock(const wxArtID& id)
 {
     #define ART(wxid, gtkid) \
            if (id == wxid) return gtkid;
@@ -81,8 +88,6 @@ wxString wxArtIDToStock(const wxArtID& id)
     ART(wxART_GO_DOWN,                             GTK_STOCK_GO_DOWN)
     ART(wxART_GO_TO_PARENT,                        GTK_STOCK_GO_UP)
     ART(wxART_GO_HOME,                             GTK_STOCK_HOME)
-    ART(wxART_GOTO_FIRST,                          GTK_STOCK_GOTO_FIRST)
-    ART(wxART_GOTO_LAST,                           GTK_STOCK_GOTO_LAST)
     ART(wxART_FILE_OPEN,                           GTK_STOCK_OPEN)
     ART(wxART_PRINT,                               GTK_STOCK_PRINT)
     ART(wxART_HELP,                                GTK_STOCK_HELP)
@@ -90,14 +95,17 @@ wxString wxArtIDToStock(const wxArtID& id)
     //ART(wxART_REPORT_VIEW,                         )
     //ART(wxART_LIST_VIEW,                           )
     //ART(wxART_NEW_DIR,                             )
+#ifdef __WXGTK24__
     ART(wxART_FOLDER,                              GTK_STOCK_DIRECTORY)
     ART(wxART_FOLDER_OPEN,                         GTK_STOCK_DIRECTORY)
+#endif
     //ART(wxART_GO_DIR_UP,                           )
     ART(wxART_EXECUTABLE_FILE,                     GTK_STOCK_EXECUTE)
     ART(wxART_NORMAL_FILE,                         GTK_STOCK_FILE)
     ART(wxART_TICK_MARK,                           GTK_STOCK_APPLY)
     ART(wxART_CROSS_MARK,                          GTK_STOCK_CANCEL)
 
+#ifdef __WXGTK24__
     ART(wxART_FLOPPY,                              GTK_STOCK_FLOPPY)
     ART(wxART_CDROM,                               GTK_STOCK_CDROM)
     ART(wxART_HARDDISK,                            GTK_STOCK_HARDDISK)
@@ -115,28 +123,22 @@ wxString wxArtIDToStock(const wxArtID& id)
     ART(wxART_UNDO,                                GTK_STOCK_UNDO)
     ART(wxART_REDO,                                GTK_STOCK_REDO)
 
-    ART(wxART_PLUS,                                GTK_STOCK_ADD)
-    ART(wxART_MINUS,                               GTK_STOCK_REMOVE)
-
-    ART(wxART_CLOSE,                               GTK_STOCK_CLOSE)
     ART(wxART_QUIT,                                GTK_STOCK_QUIT)
 
     ART(wxART_FIND,                                GTK_STOCK_FIND)
     ART(wxART_FIND_AND_REPLACE,                    GTK_STOCK_FIND_AND_REPLACE)
+#endif
+
+    return NULL;
 
     #undef ART
-
-    // allow passing GTK+ stock IDs to wxArtProvider -- if a recognized wx
-    // ID wasn't found, pass it to GTK+ in the hope it is a GTK+ or theme
-    // icon name:
-    return id;
 }
 
-GtkIconSize ArtClientToIconSize(const wxArtClient& client)
+GtkIconSize wxArtClientToIconSize(const wxArtClient& client)
 {
     if (client == wxART_TOOLBAR)
         return GTK_ICON_SIZE_LARGE_TOOLBAR;
-    else if (client == wxART_MENU || client == wxART_FRAME_ICON)
+    else if (client == wxART_MENU)
         return GTK_ICON_SIZE_MENU;
     else if (client == wxART_CMN_DIALOG || client == wxART_MESSAGE_BOX)
         return GTK_ICON_SIZE_DIALOG;
@@ -146,7 +148,7 @@ GtkIconSize ArtClientToIconSize(const wxArtClient& client)
         return GTK_ICON_SIZE_INVALID; // this is arbitrary
 }
 
-GtkIconSize FindClosestIconSize(const wxSize& size)
+static GtkIconSize FindClosestIconSize(const wxSize& size)
 {
     #define NUM_SIZES 6
     static struct
@@ -193,7 +195,10 @@ GtkIconSize FindClosestIconSize(const wxSize& size)
     return best;
 }
 
-GdkPixbuf *CreateStockIcon(const char *stockid, GtkIconSize size)
+
+static GtkStyle *gs_gtkStyle = NULL;
+
+static GdkPixbuf *CreateStockIcon(const char *stockid, GtkIconSize size)
 {
     // FIXME: This code is not 100% correct, because stock pixmap are
     //        context-dependent and may be affected by theme engine, the
@@ -203,85 +208,68 @@ GdkPixbuf *CreateStockIcon(const char *stockid, GtkIconSize size)
     //        with "stock-id" representation (in addition to pixmap and pixbuf
     //        ones) and would convert it to pixbuf when rendered.
 
-    GtkStyle* style = gtk_widget_get_style(wxGTKPrivate::GetButtonWidget());
-    GtkIconSet* iconset = gtk_style_lookup_icon_set(style, stockid);
+    if (gs_gtkStyle == NULL)
+    {
+        GtkWidget *widget = gtk_button_new();
+        gs_gtkStyle = gtk_rc_get_style(widget);
+        wxASSERT( gs_gtkStyle != NULL );
+        g_object_ref(gs_gtkStyle);
+        gtk_object_sink((GtkObject*)widget);
+    }
+
+    GtkIconSet *iconset = gtk_style_lookup_icon_set(gs_gtkStyle, stockid);
 
     if (!iconset)
         return NULL;
 
-    return gtk_icon_set_render_icon(iconset, style,
+    return gtk_icon_set_render_icon(iconset, gs_gtkStyle,
                                     gtk_widget_get_default_direction(),
                                     GTK_STATE_NORMAL, size, NULL, NULL);
 }
 
-GdkPixbuf *CreateThemeIcon(const char *iconname, int size)
+#ifdef __WXGTK24__
+static GdkPixbuf *CreateThemeIcon(const char *iconname,
+                                  GtkIconSize iconsize, const wxSize& sz)
 {
-    return gtk_icon_theme_load_icon
-           (
-               gtk_icon_theme_get_default(),
-               iconname,
-               size,
-               (GtkIconLookupFlags)0,
-               NULL
-           );
-}
-
-
-// creates either stock or theme icon
-GdkPixbuf *CreateGtkIcon(const char *icon_name,
-                         GtkIconSize stock_size, const wxSize& pixel_size)
-{
-    // try stock GTK+ icon first
-    GdkPixbuf *pixbuf = CreateStockIcon(icon_name, stock_size);
-    if ( pixbuf )
-        return pixbuf;
-
-    // if that fails, try theme icon
-    wxSize size(pixel_size);
-    if ( pixel_size == wxDefaultSize )
-        gtk_icon_size_lookup(stock_size, &size.x, &size.y);
-    return CreateThemeIcon(icon_name, size.x);
-}
-
-template<typename SizeType, typename LoaderFunc>
-wxIconBundle DoCreateIconBundle(const char *stockid,
-                                const SizeType *sizes_from,
-                                const SizeType *sizes_to,
-                                LoaderFunc get_icon)
-
-{
-    wxIconBundle bundle;
-
-    for ( const SizeType *i = sizes_from; i != sizes_to; ++i )
+    wxSize size(sz);
+    if (size == wxDefaultSize)
     {
-        GdkPixbuf *pixbuf = get_icon(stockid, *i);
-        if ( !pixbuf )
-            continue;
-
-        wxIcon icon;
-        icon.SetPixbuf(pixbuf);
-        bundle.AddIcon(icon);
+        gtk_icon_size_lookup(iconsize, &size.x, &size.y);
     }
 
-    return bundle;
+    return gtk_icon_theme_load_icon(
+                    gtk_icon_theme_get_default(),
+                    iconname,
+                    size.x,
+                    (GtkIconLookupFlags)0, NULL);
 }
-
-} // anonymous namespace
+#endif
 
 wxBitmap wxGTK2ArtProvider::CreateBitmap(const wxArtID& id,
                                          const wxArtClient& client,
                                          const wxSize& size)
 {
-    const wxString stockid = wxArtIDToStock(id);
-
+    wxCharBuffer stockid = wxArtIDToStock(id);
     GtkIconSize stocksize = (size == wxDefaultSize) ?
-                                ArtClientToIconSize(client) :
+                                wxArtClientToIconSize(client) :
                                 FindClosestIconSize(size);
+
     // we must have some size, this is arbitrary
     if (stocksize == GTK_ICON_SIZE_INVALID)
         stocksize = GTK_ICON_SIZE_BUTTON;
 
-    GdkPixbuf *pixbuf = CreateGtkIcon(stockid.utf8_str(), stocksize, size);
+    // allow passing GTK+ stock IDs to wxArtProvider:
+    if (!stockid)
+        stockid = id.ToAscii();
+
+    GdkPixbuf *pixbuf = CreateStockIcon(stockid, stocksize);
+
+#ifdef __WXGTK24__
+    if (!pixbuf && !gtk_check_version(2,4,0))
+    {
+        pixbuf = CreateThemeIcon(stockid, stocksize, size);
+    }
+#endif
 
     if (pixbuf && size != wxDefaultSize &&
         (size.x != gdk_pixbuf_get_width(pixbuf) ||
@@ -303,73 +291,26 @@ wxBitmap wxGTK2ArtProvider::CreateBitmap(const wxArtID& id,
     return bmp;
 }
 
-wxIconBundle
-wxGTK2ArtProvider::CreateIconBundle(const wxArtID& id,
-                                    const wxArtClient& WXUNUSED(client))
-{
-    const wxString stockid = wxArtIDToStock(id);
-
-    // try to load the bundle as stock icon first
-    GtkStyle* style = gtk_widget_get_style(wxGTKPrivate::GetButtonWidget());
-    GtkIconSet* iconset = gtk_style_lookup_icon_set(style, stockid.utf8_str());
-    if ( iconset )
-    {
-        GtkIconSize *sizes;
-        gint n_sizes;
-        gtk_icon_set_get_sizes(iconset, &sizes, &n_sizes);
-        wxIconBundle bundle = DoCreateIconBundle
-                              (
-                                  stockid.utf8_str(),
-                                  sizes, sizes + n_sizes,
-                                  &CreateStockIcon
-                              );
-        g_free(sizes);
-        return bundle;
-    }
-
-    // otherwise try icon themes
-#ifdef __WXGTK26__
-    if ( !gtk_check_version(2,6,0) )
-    {
-        gint *sizes = gtk_icon_theme_get_icon_sizes
-                      (
-                          gtk_icon_theme_get_default(),
-                          stockid.utf8_str()
-                      );
-        if ( !sizes )
-            return wxNullIconBundle;
-
-        gint *last = sizes;
-        while ( *last )
-            last++;
-
-        wxIconBundle bundle = DoCreateIconBundle
-                              (
-                                  stockid.utf8_str(),
-                                  sizes, last,
-                                  &CreateThemeIcon
-                              );
-        g_free(sizes);
-        return bundle;
-    }
-#endif // __WXGTK26__
-
-    return wxNullIconBundle;
-}
-
 // ----------------------------------------------------------------------------
-// wxArtProvider::GetNativeSizeHint()
+// Cleanup
 // ----------------------------------------------------------------------------
 
-/*static*/
-wxSize wxArtProvider::GetNativeSizeHint(const wxArtClient& client)
+class wxArtGtkModule: public wxModule
 {
-    // Gtk has specific sizes for each client, see artgtk.cpp
-    GtkIconSize gtk_size = ArtClientToIconSize(client);
-    // no size hints for this client
-    if (gtk_size == GTK_ICON_SIZE_INVALID)
-        return wxDefaultSize;
-    gint width, height;
-    gtk_icon_size_lookup( gtk_size, &width, &height);
-    return wxSize(width, height);
-}
+public:
+    bool OnInit() { return true; }
+    void OnExit()
+    {
+        if (gs_gtkStyle)
+        {
+            g_object_unref(gs_gtkStyle);
+            gs_gtkStyle = NULL;
+        }
+    }
+
+    DECLARE_DYNAMIC_CLASS(wxArtGtkModule)
+};
+
+IMPLEMENT_DYNAMIC_CLASS(wxArtGtkModule, wxModule)
+
+#endif // !defined(__WXUNIVERSAL__)

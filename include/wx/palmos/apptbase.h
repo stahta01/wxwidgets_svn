@@ -26,19 +26,20 @@ public:
     // some opaque data which will be passed later to AfterChildWaitLoop()
     virtual void *BeforeChildWaitLoop() = 0;
 
+    // process pending Windows messages, even in console app
+    virtual void AlwaysYield() = 0;
+
     // called after starting to wait for the child termination, the parameter
     // is the return value of BeforeChildWaitLoop()
     virtual void AfterChildWaitLoop(void *data) = 0;
 
 
-#if wxUSE_THREADS
     // wxThread helpers
     // ----------------
 
     // process a message while waiting for a(nother) thread, should return
     // false if and only if we have to exit the application
     virtual bool DoMessageFromThreadWait() = 0;
-#endif // wxUSE_THREADS
 };
 
 #endif // _WX_PALMOS_APPTBASE_H_

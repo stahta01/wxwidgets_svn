@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/snglinst.cpp
+// Name:        os2/snglinst.cpp
 // Purpose:     implements wxSingleInstanceChecker class for OS/2 using
 //              named mutexes
 // Author:      Vadim Zeitlin
@@ -7,7 +7,7 @@
 // Created:     08.02.2009
 // RCS-ID:      $Id$
 // Copyright:   (c) 2001 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     wxWindows licence
+// License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -67,7 +67,7 @@ public:
             return true;
         } else {
             m_anotherRunning = false;  // we don't know for sure in this case
-            wxLogLastError(wxT("DosCreateMutexSem"));
+            wxLogLastError(_T("DosCreateMutexSem"));
             return false;
         }
     }
@@ -83,7 +83,7 @@ public:
         {
             if ( !::DosCloseMutexSem(m_hMutex) )
             {
-                wxLogLastError(wxT("DosCloseMutexSem"));
+                wxLogLastError(_T("DosCloseMutexSem"));
             }
         }
     }
@@ -107,19 +107,19 @@ bool wxSingleInstanceChecker::Create(const wxString& name,
                                      const wxString& WXUNUSED(path))
 {
     wxASSERT_MSG( !m_impl,
-                  wxT("calling wxSingleInstanceChecker::Create() twice?") );
+                  _T("calling wxSingleInstanceChecker::Create() twice?") );
 
     // creating unnamed mutex doesn't have the same semantics!
-    wxASSERT_MSG( !name.empty(), wxT("mutex name can't be empty") );
+    wxASSERT_MSG( !name.empty(), _T("mutex name can't be empty") );
 
     m_impl = new wxSingleInstanceCheckerImpl;
 
     return m_impl->Create(name);
 }
 
-bool wxSingleInstanceChecker::DoIsAnotherRunning() const
+bool wxSingleInstanceChecker::IsAnotherRunning() const
 {
-    wxCHECK_MSG( m_impl, false, wxT("must call Create() first") );
+    wxCHECK_MSG( m_impl, false, _T("must call Create() first") );
 
     return m_impl->IsAnotherRunning();
 }

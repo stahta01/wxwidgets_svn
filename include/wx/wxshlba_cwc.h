@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/wxshlba_cwc.h
+// Name:        wx_cw.h
 // Purpose:     wxWidgets definitions for CodeWarrior builds
 // Author:      Stefan Csomor
 // Modified by:

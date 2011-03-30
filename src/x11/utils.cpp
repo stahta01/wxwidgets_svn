@@ -34,8 +34,6 @@
 #endif
 
 #include "wx/apptrait.h"
-#include "wx/generic/private/timer.h"
-#include "wx/evtloop.h"
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -83,10 +81,63 @@ void wxFlushEvents()
     // ??
 }
 
-bool wxCheckForInterrupt(wxWindow *WXUNUSED(wnd))
+bool wxCheckForInterrupt(wxWindow *wnd)
 {
     wxFAIL_MSG(wxT("wxCheckForInterrupt not yet implemented."));
     return false;
+}
+
+// ----------------------------------------------------------------------------
+// wxExecute stuff
+// ----------------------------------------------------------------------------
+
+WX_DECLARE_HASH_MAP( int, wxEndProcessData*, wxIntegerHash, wxIntegerEqual, wxProcMap );
+
+static wxProcMap *gs_procmap;
+
+int wxAddProcessCallback(wxEndProcessData *proc_data, int fd)
+{
+    if (!gs_procmap) gs_procmap = new wxProcMap();
+    (*gs_procmap)[fd] = proc_data;
+    return 1;
+}
+
+void wxCheckForFinishedChildren()
+{
+    wxProcMap::iterator it;
+    if (!gs_procmap) return;
+    if (gs_procmap->size() == 0) {
+      // Map empty, delete it.
+      delete gs_procmap;
+      gs_procmap = NULL;
+      return;
+    }
+    for (it = gs_procmap->begin();it != gs_procmap->end(); ++it)
+    {
+        wxEndProcessData *proc_data = it->second;
+        int pid = (proc_data->pid > 0) ? proc_data->pid : -(proc_data->pid);
+        int status = 0;
+        // has the process really terminated?
+        int rc = waitpid(pid, &status, WNOHANG);
+        if (rc == 0)
+            continue;       // no, it didn't exit yet, continue waiting
+
+        // set exit code to -1 if something bad happened
+        proc_data->exitcode = rc != -1 && WIFEXITED(status) ?
+                   WEXITSTATUS(status) : -1;
+
+        // child exited, end waiting
+        close(it->first);
+
+        // don't call us again!
+        gs_procmap->erase(it->first);
+
+        wxHandleProcessTermination(proc_data);
+
+        // Iterator is invalid. Handle any further children in subsequent
+        // calls.
+        break;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -118,10 +169,6 @@ wxPortId wxGUIAppTraits::GetToolkitVersion(int *verMaj, int *verMin) const
     return wxPORT_X11;
 }
 
-wxEventLoopBase* wxGUIAppTraits::CreateEventLoop()
-{
-    return new wxEventLoop;
-}
 
 // ----------------------------------------------------------------------------
 // display info
@@ -365,11 +412,12 @@ void wxAllocColor(Display *d,Colormap cmp,XColor *xc)
 {
     if (!XAllocColor(d,cmp,xc))
     {
-        //          cout << "wxAllocColor : Warning : Cannot allocate color, attempt find nearest !\n";
+        //          cout << "wxAllocColor : Warning : Can not allocate color, attempt find nearest !\n";
         wxAllocNearestColor(d,cmp,xc);
     }
 }
 
+#ifdef __WXDEBUG__
 wxString wxGetXEventName(XEvent& event)
 {
 #if wxUSE_NANOX
@@ -377,7 +425,7 @@ wxString wxGetXEventName(XEvent& event)
     return str;
 #else
     int type = event.xany.type;
-    static const char* event_name[] = {
+    static char* event_name[] = {
         "", "unknown(-)",                                         // 0-1
         "KeyPress", "KeyRelease", "ButtonPress", "ButtonRelease", // 2-5
         "MotionNotify", "EnterNotify", "LeaveNotify", "FocusIn",  // 6-9
@@ -394,4 +442,12 @@ wxString wxGetXEventName(XEvent& event)
         return wxString::FromAscii(event_name[type]);
 #endif
 }
+#endif
 
+bool wxWindowIsVisible(Window win)
+{
+    XWindowAttributes wa;
+    XGetWindowAttributes(wxGlobalDisplay(), win, &wa);
+
+    return (wa.map_state == IsViewable);
+}

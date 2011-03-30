@@ -16,10 +16,10 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-
+ 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
-
+ 
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
@@ -125,7 +125,7 @@ bool MyApp::OnInit()
         return false;
 
     // create the main application window
-    MyFrame *frame = new MyFrame("Minimal wxWidgets App");
+    MyFrame *frame = new MyFrame(_T("Minimal wxWidgets App"));
 
     // and show it (the frames, unlike simple controls, are not shown when
     // created initially)
@@ -154,14 +154,14 @@ MyFrame::MyFrame(const wxString& title)
 
     // the "About" item should be in the help menu
     wxMenu *helpMenu = new wxMenu;
-    helpMenu->Append(Minimal_About, "&About...\tF1", "Show about dialog");
+    helpMenu->Append(Minimal_About, _T("&About...\tF1"), _T("Show about dialog"));
 
-    fileMenu->Append(Minimal_Quit, "E&xit\tAlt-X", "Quit this program");
+    fileMenu->Append(Minimal_Quit, _T("E&xit\tAlt-X"), _T("Quit this program"));
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar();
-    menuBar->Append(fileMenu, "&File");
-    menuBar->Append(helpMenu, "&Help");
+    menuBar->Append(fileMenu, _T("&File"));
+    menuBar->Append(helpMenu, _T("&Help"));
 
     // ... and attach this menu bar to the frame
     SetMenuBar(menuBar);
@@ -170,7 +170,7 @@ MyFrame::MyFrame(const wxString& title)
 #if wxUSE_STATUSBAR
     // create a status bar just for fun (by default with 1 pane only)
     CreateStatusBar(2);
-    SetStatusText("Welcome to wxWidgets!");
+    SetStatusText(_T("Welcome to wxWidgets!"));
 #endif // wxUSE_STATUSBAR
 }
 
@@ -185,16 +185,15 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox(wxString::Format
-                 (
-                    "Welcome to %s!\n"
-                    "\n"
-                    "This is the minimal wxWidgets sample\n"
-                    "running under %s.",
+    wxMessageBox(wxString::Format(
+                    _T("Welcome to %s!\n")
+                    _T("\n")
+                    _T("This is the minimal wxWidgets sample\n")
+                    _T("running under %s."),
                     wxVERSION_STRING,
-                    wxGetOsDescription()
+                    wxGetOsDescription().c_str()
                  ),
-                 "About wxWidgets minimal sample",
+                 _T("About wxWidgets minimal sample"),
                  wxOK | wxICON_INFORMATION,
                  this);
 }

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/html/forcelnk.h
-// Purpose:     macros which force the linker to link apparently unused code
+// Name:        forcelnk.h
+// Purpose:     see bellow
 // Author:      Vaclav Slavik
 // RCS-ID:      $Id$
 // Copyright:   (c) Vaclav Slavik
@@ -56,7 +56,6 @@ See mod_*.cpp and htmlwin.cpp for example :-)
     FORCE_LINK(m_hline) \
     FORCE_LINK(m_links) \
     FORCE_LINK(m_tables) \
-    FORCE_LINK(m_span) \
     FORCE_LINK(m_style)
 
 

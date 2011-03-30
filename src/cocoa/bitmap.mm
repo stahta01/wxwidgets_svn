@@ -6,7 +6,7 @@
 // Created:     2003/07/19
 // RCS-ID:      $Id$
 // Copyright:   (c) 2003 David Elliott
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////
 
 #include "wx/wxprec.h"
@@ -39,7 +39,6 @@ IMPLEMENT_ABSTRACT_CLASS(wxBitmapHandler, wxBitmapHandlerBase)
 // ========================================================================
 // wxBitmapRefData
 // ========================================================================
-
 class wxBitmapRefData: public wxGDIRefData
 {
     friend class wxBitmap;
@@ -47,8 +46,6 @@ public:
     wxBitmapRefData();
     wxBitmapRefData( const wxBitmapRefData& data );
     virtual ~wxBitmapRefData();
-
-    virtual bool IsOk() const { return m_ok; }
 
 protected:
     int                 m_width;
@@ -61,6 +58,8 @@ protected:
     WX_NSBitmapImageRep m_cocoaNSBitmapImageRep;
     wxMask             *m_bitmapMask; // Optional mask
 };
+
+#define M_BITMAPDATA ((wxBitmapRefData *)m_refData)
 
 wxBitmapRefData::wxBitmapRefData()
 {
@@ -101,9 +100,6 @@ wxBitmapRefData::~wxBitmapRefData()
 // ========================================================================
 // wxBitmap
 // ========================================================================
-
-#define M_BITMAPDATA ((wxBitmapRefData *)m_refData)
-
 IMPLEMENT_DYNAMIC_CLASS(wxBitmap, wxGDIObject)
 
 wxBitmap::wxBitmap()
@@ -127,6 +123,11 @@ wxBitmap::wxBitmap(const char bits[], int the_width, int the_height, int no_bits
     /* TODO: create the bitmap from data */
 }
 
+wxBitmap::wxBitmap(int w, int h, int d)
+{
+    (void)Create(w, h, d);
+}
+
 wxBitmap::wxBitmap(NSImage* cocoaNSImage)
 {
     (void) Create(cocoaNSImage);
@@ -147,12 +148,12 @@ wxBitmap::wxBitmap(const wxString& filename, wxBitmapType type)
     LoadFile(filename, type);
 }
 
-wxGDIRefData *wxBitmap::CreateGDIRefData() const
+wxObjectRefData *wxBitmap::CreateRefData() const
 {
     return new wxBitmapRefData;
 }
 
-wxGDIRefData *wxBitmap::CloneGDIRefData(const wxGDIRefData *data) const
+wxObjectRefData *wxBitmap::CloneRefData(const wxObjectRefData *data) const
 {
     return new wxBitmapRefData(*(wxBitmapRefData*)data);
 }
@@ -254,6 +255,11 @@ void wxBitmap::SetMask(wxMask *mask)
         m_refData = new wxBitmapRefData;
 
     M_BITMAPDATA->m_bitmapMask = mask ;
+}
+
+bool wxBitmap::IsOk() const
+{
+    return m_refData && M_BITMAPDATA->m_ok;
 }
 
 wxPalette* wxBitmap::GetPalette() const
@@ -436,8 +442,8 @@ wxBitmap wxBitmap::GetSubBitmap(const wxRect& rect) const
     NSRect imageRect = {{0,0}, [nsimage size]};
     imageRect.origin.x = imageRect.size.width * rect.x / GetWidth();
     imageRect.origin.y = imageRect.size.height * rect.y / GetHeight();
-    imageRect.size.width *= static_cast<CGFloat>(rect.width) / GetWidth();
-    imageRect.size.height *= static_cast<CGFloat>(rect.height) / GetHeight();
+    imageRect.size.width *= wx_static_cast(CGFloat, rect.width) / GetWidth();
+    imageRect.size.height *= wx_static_cast(CGFloat, rect.height) / GetHeight();
 
     NSBitmapImageRep *newBitmapRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:imageRect];
     [nsimage unlockFocus];
@@ -520,7 +526,7 @@ void *wxBitmap::GetRawData(wxPixelDataBase& data, int bpp)
 
     if([bitmapRep bitsPerPixel]!=bpp)
     {
-        wxFAIL_MSG( wxT("incorrect bitmap type in wxBitmap::GetRawData()") );
+        wxFAIL_MSG( _T("incorrect bitmap type in wxBitmap::GetRawData()") );
         return NULL;
     }
     data.m_width = [bitmapRep pixelsWide];
@@ -537,6 +543,10 @@ void *wxBitmap::GetRawData(wxPixelDataBase& data, int bpp)
 }
 
 void wxBitmap::UngetRawData(wxPixelDataBase& data)
+{   // TODO
+}
+
+void wxBitmap::UseAlpha()
 {   // TODO
 }
 

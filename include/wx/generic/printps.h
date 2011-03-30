@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/printps.h
+// Name:        printps.h
 // Purpose:     wxPostScriptPrinter, wxPostScriptPrintPreview
 //              wxGenericPageSetupDialog
 // Author:      Julian Smart
@@ -21,10 +21,10 @@
 // Represents the printer: manages printing a wxPrintout object
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPostScriptPrinter : public wxPrinterBase
+class WXDLLEXPORT wxPostScriptPrinter : public wxPrinterBase
 {
 public:
-    wxPostScriptPrinter(wxPrintDialogData *data = NULL);
+    wxPostScriptPrinter(wxPrintDialogData *data = (wxPrintDialogData *) NULL);
     virtual ~wxPostScriptPrinter();
 
     virtual bool Print(wxWindow *parent, wxPrintout *printout, bool prompt = true);
@@ -40,12 +40,12 @@ private:
 // wxPrintout.
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxPostScriptPrintPreview : public wxPrintPreviewBase
+class WXDLLEXPORT wxPostScriptPrintPreview : public wxPrintPreviewBase
 {
 public:
     wxPostScriptPrintPreview(wxPrintout *printout,
-                             wxPrintout *printoutForPrinting = NULL,
-                             wxPrintDialogData *data = NULL);
+                             wxPrintout *printoutForPrinting = (wxPrintout *) NULL,
+                             wxPrintDialogData *data = (wxPrintDialogData *) NULL);
     wxPostScriptPrintPreview(wxPrintout *printout,
                              wxPrintout *printoutForPrinting,
                              wxPrintData *data);

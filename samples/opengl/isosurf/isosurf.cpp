@@ -2,7 +2,7 @@
 // Name:        isosurf.cpp
 // Purpose:     wxGLCanvas demo program
 // Author:      Brian Paul (original gltk version), Wolfram Gloger
-// Modified by: Julian Smart, Francesco Montorsi
+// Modified by: Julian Smart
 // Created:     04/01/98
 // RCS-ID:      $Id$
 // Copyright:   (c) Julian Smart
@@ -27,348 +27,120 @@
 #include "wx/timer.h"
 #include "wx/glcanvas.h"
 #include "wx/math.h"
-#include "wx/log.h"
-#include "wx/cmdline.h"
-#include "wx/wfstream.h"
-#include "wx/zstream.h"
-#include "wx/txtstrm.h"
+
+#if defined(__WXMAC__) || defined(__WXCOCOA__)
+#   ifdef __DARWIN__
+#       include <OpenGL/gl.h>
+#       include <OpenGL/glu.h>
+#   else
+#       include <gl.h>
+#       include <glu.h>
+#   endif
+#else
+#   include <GL/gl.h>
+#   include <GL/glu.h>
+#endif
+
+// disabled because this has apparently changed in OpenGL 1.2, so doesn't link
+// correctly if this is on...
+#ifdef GL_EXT_vertex_array
+#undef GL_EXT_vertex_array
+#endif
 
 #include "isosurf.h"
+
+#if !defined(__WXMSW__) && !defined(__WXPM__)
 #include "../../sample.xpm"
-
-
-// global options which can be set through command-line options
-GLboolean g_use_vertex_arrays = GL_FALSE;
-GLboolean g_doubleBuffer = GL_TRUE;
-GLboolean g_smooth = GL_TRUE;
-GLboolean g_lighting = GL_TRUE;
-
-
-
-//---------------------------------------------------------------------------
-// MyApp
-//---------------------------------------------------------------------------
-
-IMPLEMENT_APP(MyApp)
-
-bool MyApp::OnInit()
-{
-    if ( !wxApp::OnInit() )
-        return false;
-
-    // Create the main frame window
-    MyFrame *frame = new MyFrame(NULL, wxT("wxWidgets OpenGL Isosurf Sample"));
-
-    return true;
-}
-
-void MyApp::OnInitCmdLine(wxCmdLineParser& parser)
-{
-    parser.AddSwitch("", "sb", "Do not use double buffering");
-    parser.AddSwitch("", "db", "Use double buffering");
-    parser.AddSwitch("", "va", "Use vertex arrays");
-
-    wxApp::OnInitCmdLine(parser);
-}
-
-bool MyApp::OnCmdLineParsed(wxCmdLineParser& parser)
-{
-    if (parser.Found("sb"))
-        g_doubleBuffer = GL_FALSE;
-    else if (parser.Found("db"))
-        g_doubleBuffer = GL_TRUE;
-
-    if (parser.Found("va"))
-        g_use_vertex_arrays = GL_TRUE;
-
-    return wxApp::OnCmdLineParsed(parser);
-}
-
-//---------------------------------------------------------------------------
-// MyFrame
-//---------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
-END_EVENT_TABLE()
-
-MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
-                 const wxSize& size, long style)
-    : wxFrame(frame, wxID_ANY, title, pos, size, style),
-      m_canvas(NULL)
-{
-    SetIcon(wxICON(sample));
-
-
-    // Make a menubar
-    wxMenu *fileMenu = new wxMenu;
-
-    fileMenu->Append(wxID_EXIT, wxT("E&xit"));
-    wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(fileMenu, wxT("&File"));
-    SetMenuBar(menuBar);
-
-
-  // Make a TestGLCanvas
-
-  // JACS
-#ifdef __WXMSW__
-    int *gl_attrib = NULL;
-#else
-    int gl_attrib[20] =
-        { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
-        WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
-        WX_GL_DOUBLEBUFFER,
-#  if defined(__WXMAC__) || defined(__WXCOCOA__)
-        GL_NONE };
-#  else
-        None };
-#  endif
 #endif
 
-    if (!g_doubleBuffer)
+// The following part is taken largely unchanged from the original C Version
+
+GLboolean speed_test = GL_FALSE;
+GLboolean use_vertex_arrays = GL_FALSE;
+
+GLboolean doubleBuffer = GL_TRUE;
+
+GLboolean smooth = GL_TRUE;
+GLboolean lighting = GL_TRUE;
+
+
+#define MAXVERTS 10000
+
+static GLfloat verts[MAXVERTS][3];
+static GLfloat norms[MAXVERTS][3];
+static GLint numverts;
+
+static GLfloat xrot;
+static GLfloat yrot;
+
+
+static void read_surface( const wxChar *filename )
+{
+    FILE *f = wxFopen(filename,_T("r"));
+    if (!f)
     {
-        wxLogWarning("Disabling double buffering");
-
-#ifdef __WXGTK__
-        gl_attrib[9] = None;
-#endif
-        g_doubleBuffer = GL_FALSE;
-    }
-
-    // Show the frame
-    Show(true);
-
-    m_canvas = new TestGLCanvas(this, wxID_ANY, gl_attrib);
-}
-
-MyFrame::~MyFrame()
-{
-    delete m_canvas;
-}
-
-// Intercept menu commands
-void MyFrame::OnExit( wxCommandEvent& WXUNUSED(event) )
-{
-    // true is to force the frame to close
-    Close(true);
-}
-
-
-//---------------------------------------------------------------------------
-// TestGLCanvas
-//---------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
-    EVT_SIZE(TestGLCanvas::OnSize)
-    EVT_PAINT(TestGLCanvas::OnPaint)
-    EVT_CHAR(TestGLCanvas::OnChar)
-    EVT_MOUSE_EVENTS(TestGLCanvas::OnMouseEvent)
-END_EVENT_TABLE()
-
-TestGLCanvas::TestGLCanvas(wxWindow *parent,
-                           wxWindowID id,
-                           int* gl_attrib)
-    : wxGLCanvas(parent, id, gl_attrib)
-{
-    m_xrot = 0;
-    m_yrot = 0;
-    m_numverts = 0;
-
-    // Explicitly create a new rendering context instance for this canvas.
-    m_glRC = new wxGLContext(this);
-
-    // Make the new context current (activate it for use) with this canvas.
-    SetCurrent(*m_glRC);
-
-    InitGL();
-    InitMaterials();
-    LoadSurface("isosurf.dat.gz");
-}
-
-TestGLCanvas::~TestGLCanvas()
-{
-    delete m_glRC;
-}
-
-void TestGLCanvas::LoadSurface(const wxString& filename)
-{
-    // FIXME
-    // we need to set english locale to force wxTextInputStream's calls to
-    // wxStrtod to use the point and not the comma as decimal separator...
-    // (the isosurf.dat contains points and not commas)...
-    wxLocale l(wxLANGUAGE_ENGLISH);
-
-    wxZlibInputStream* stream =
-        new wxZlibInputStream(new wxFFileInputStream(filename));
-    if (!stream || !stream->IsOk())
-    {
-        wxLogError("Cannot load '%s' type of files!", filename.c_str());
-        delete stream;
+        wxString msg = _T("Couldn't read ");
+        msg += filename;
+        wxMessageBox(msg);
         return;
     }
 
+    numverts = 0;
+    while (!feof(f) && numverts<MAXVERTS)
     {
-        // we suppose to have in input a text file containing floating numbers
-        // space/newline-separated... first 3 numbers are the coordinates of a
-        // vertex and the following 3 are the relative vertex normal and so on...
-
-        wxTextInputStream inFile(*stream);
-        m_numverts = 0;
-
-        while (!stream->Eof() && m_numverts < MAXVERTS)// && m_numverts<MAXVERTS)
-        {
-            inFile >> m_verts[m_numverts][0] >> m_verts[m_numverts][1] >> m_verts[m_numverts][2];
-            inFile >> m_norms[m_numverts][0] >> m_norms[m_numverts][1] >> m_norms[m_numverts][2];
-
-            m_numverts++;
-        }
-
-        // discard last vertex; it is a zero caused by the EOF
-        m_numverts--;
+        fscanf( f, "%f %f %f  %f %f %f",
+            &verts[numverts][0], &verts[numverts][1], &verts[numverts][2],
+            &norms[numverts][0], &norms[numverts][1], &norms[numverts][2] );
+        numverts++;
     }
 
-    delete stream;
+    numverts--;
 
-    wxLogMessage(wxT("Loaded %d vertices, %d triangles from '%s'"),
-                 m_numverts, m_numverts-2, filename.c_str());
+    wxPrintf(_T("%d vertices, %d triangles\n"), numverts, numverts-2);
 
-    // NOTE: for some reason under wxGTK the following is required to avoid that
-    //       the surface gets rendered in a small rectangle in the top-left corner of the frame
-    PostSizeEventToParent();
+    fclose(f);
 }
 
-void TestGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
+
+static void draw_surface()
 {
-    // This is a dummy, to avoid an endless succession of paint messages.
-    // OnPaint handlers must always create a wxPaintDC.
-    wxPaintDC dc(this);
+    GLint i;
 
-    // This is normally only necessary if there is more than one wxGLCanvas
-    // or more than one wxGLContext in the application.
-    SetCurrent(*m_glRC);
-
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    glPushMatrix();
-    glRotatef( m_yrot, 0.0f, 1.0f, 0.0f );
-    glRotatef( m_xrot, 1.0f, 0.0f, 0.0f );
-
-    // draw the surface
-    if (g_use_vertex_arrays)
+#ifdef GL_EXT_vertex_array
+    if (use_vertex_arrays)
     {
-        glDrawArrays( GL_TRIANGLE_STRIP, 0, m_numverts );
+        glDrawArraysEXT( GL_TRIANGLE_STRIP, 0, numverts );
     }
     else
+#endif
     {
         glBegin( GL_TRIANGLE_STRIP );
-
-        for (int i=0;i<m_numverts;i++)
+        for (i=0;i<numverts;i++)
         {
-            glNormal3fv( m_norms[i] );
-            glVertex3fv( m_verts[i] );
+            glNormal3fv( norms[i] );
+            glVertex3fv( verts[i] );
         }
-
         glEnd();
     }
+}
+
+
+static void draw1()
+{
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    glPushMatrix();
+    glRotatef( yrot, 0.0f, 1.0f, 0.0f );
+    glRotatef( xrot, 1.0f, 0.0f, 0.0f );
+
+    draw_surface();
 
     glPopMatrix();
-    glFlush(); // Not really necessary: buffer swapping below implies glFlush()
 
-    SwapBuffers();
+    glFlush();
 }
 
-void TestGLCanvas::OnSize(wxSizeEvent& event)
-{
-    // This is normally only necessary if there is more than one wxGLCanvas
-    // or more than one wxGLContext in the application.
-    SetCurrent(*m_glRC);
 
-    // It's up to the application code to update the OpenGL viewport settings.
-    // This is OK here only because there is only one canvas that uses the
-    // context. See the cube sample for that case that multiple canvases are
-    // made current with one context.
-    glViewport(0, 0, event.GetSize().x, event.GetSize().y);
-}
-
-void TestGLCanvas::OnChar(wxKeyEvent& event)
-{
-    switch( event.GetKeyCode() )
-    {
-    case WXK_ESCAPE:
-        wxTheApp->ExitMainLoop();
-        return;
-
-    case WXK_LEFT:
-        m_yrot -= 15.0;
-        break;
-
-    case WXK_RIGHT:
-        m_yrot += 15.0;
-        break;
-
-    case WXK_UP:
-        m_xrot += 15.0;
-        break;
-
-    case WXK_DOWN:
-        m_xrot -= 15.0;
-        break;
-
-    case 's': case 'S':
-        g_smooth = !g_smooth;
-        if (g_smooth)
-            glShadeModel(GL_SMOOTH);
-        else
-            glShadeModel(GL_FLAT);
-        break;
-
-    case 'l': case 'L':
-        g_lighting = !g_lighting;
-        if (g_lighting)
-            glEnable(GL_LIGHTING);
-        else
-            glDisable(GL_LIGHTING);
-        break;
-
-    default:
-        event.Skip();
-        return;
-    }
-
-    Refresh(false);
-}
-
-void TestGLCanvas::OnMouseEvent(wxMouseEvent& event)
-{
-    static int dragging = 0;
-    static float last_x, last_y;
-
-    // Allow default processing to happen, or else the canvas cannot gain focus
-    // (for key events).
-    event.Skip();
-
-    if (event.LeftIsDown())
-    {
-        if (!dragging)
-        {
-            dragging = 1;
-        }
-        else
-        {
-            m_yrot += (event.GetX() - last_x)*1.0;
-            m_xrot += (event.GetY() - last_y)*1.0;
-            Refresh(false);
-        }
-        last_x = event.GetX();
-        last_y = event.GetY();
-    }
-    else
-    {
-        dragging = 0;
-    }
-}
-
-void TestGLCanvas::InitMaterials()
+static void InitMaterials()
 {
     static const GLfloat ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
     static const GLfloat diffuse[4] = {0.5f, 1.0f, 1.0f, 1.0f};
@@ -404,7 +176,8 @@ void TestGLCanvas::InitMaterials()
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, front_mat_diffuse);
 }
 
-void TestGLCanvas::InitGL()
+
+static void Init(void)
 {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -421,12 +194,286 @@ void TestGLCanvas::InitGL()
     glLoadIdentity();
     glTranslatef( 0.0, 0.0, -6.0 );
 
-    if (g_use_vertex_arrays)
+#ifdef GL_EXT_vertex_array
+    if (use_vertex_arrays)
     {
-        glVertexPointer( 3, GL_FLOAT, 0, m_verts );
-        glNormalPointer( GL_FLOAT, 0, m_norms );
-        glEnable( GL_VERTEX_ARRAY );
-        glEnable( GL_NORMAL_ARRAY );
+        glVertexPointerEXT( 3, GL_FLOAT, 0, numverts, verts );
+        glNormalPointerEXT( GL_FLOAT, 0, numverts, norms );
+        glEnable( GL_VERTEX_ARRAY_EXT );
+        glEnable( GL_NORMAL_ARRAY_EXT );
     }
+#endif
+}
+
+static GLenum Args(int argc, wxChar **argv)
+{
+    GLint i;
+
+    for (i = 1; i < argc; i++)
+    {
+        if (wxStrcmp(argv[i], _T("-sb")) == 0)
+        {
+            doubleBuffer = GL_FALSE;
+        }
+        else if (wxStrcmp(argv[i], _T("-db")) == 0)
+        {
+            doubleBuffer = GL_TRUE;
+        }
+        else if (wxStrcmp(argv[i], _T("-speed")) == 0)
+        {
+            speed_test = GL_TRUE;
+            doubleBuffer = GL_TRUE;
+        }
+        else if (wxStrcmp(argv[i], _T("-va")) == 0)
+        {
+            use_vertex_arrays = GL_TRUE;
+        }
+        else
+        {
+            wxString msg = _T("Bad option: ");
+            msg += argv[i];
+            wxMessageBox(msg);
+            return GL_FALSE;
+        }
+    }
+
+    return GL_TRUE;
+}
+
+// The following part was written for wxWidgets 1.66
+MyFrame *frame = NULL;
+
+IMPLEMENT_APP(MyApp)
+
+// `Main program' equivalent, creating windows and returning main app frame
+bool MyApp::OnInit()
+{
+    Args(argc, argv);
+
+    // Create the main frame window
+    frame = new MyFrame(NULL, wxT("wxWidgets OpenGL Isosurf Sample"),
+        wxDefaultPosition, wxDefaultSize);
+
+    // Give it an icon
+    frame->SetIcon(wxICON(sample));
+
+    // Make a menubar
+    wxMenu *fileMenu = new wxMenu;
+
+    fileMenu->Append(wxID_EXIT, _T("E&xit"));
+    wxMenuBar *menuBar = new wxMenuBar;
+    menuBar->Append(fileMenu, _T("&File"));
+    frame->SetMenuBar(menuBar);
+
+  // Make a TestGLCanvas
+
+  // JACS
+#ifdef __WXMSW__
+    int *gl_attrib = NULL;
+#else
+    int gl_attrib[20] = { WX_GL_RGBA, WX_GL_MIN_RED, 1, WX_GL_MIN_GREEN, 1,
+        WX_GL_MIN_BLUE, 1, WX_GL_DEPTH_SIZE, 1,
+        WX_GL_DOUBLEBUFFER,
+#  if defined(__WXMAC__) || defined(__WXCOCOA__)
+        GL_NONE };
+#  else
+        None };
+#  endif
+#endif
+
+    if(!doubleBuffer)
+    {
+        printf("don't have double buffer, disabling\n");
+#ifdef __WXGTK__
+        gl_attrib[9] = None;
+#endif
+        doubleBuffer = GL_FALSE;
+    }
+
+    frame->m_canvas = new TestGLCanvas(frame, wxID_ANY, wxDefaultPosition,
+        wxDefaultSize, 0, _T("TestGLCanvas"), gl_attrib );
+
+  // Show the frame
+    frame->Show(true);
+
+    frame->m_canvas->SetCurrent();
+    read_surface( _T("isosurf.dat") );
+
+    Init();
+
+    return true;
+}
+
+BEGIN_EVENT_TABLE(MyFrame, wxFrame)
+    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+END_EVENT_TABLE()
+
+// My frame constructor
+MyFrame::MyFrame(wxFrame *frame, const wxString& title, const wxPoint& pos,
+    const wxSize& size, long style)
+    : wxFrame(frame, wxID_ANY, title, pos, size, style)
+{
+    m_canvas = NULL;
+}
+
+MyFrame::~MyFrame()
+{
+    delete m_canvas;
+}
+
+// Intercept menu commands
+void MyFrame::OnExit( wxCommandEvent& WXUNUSED(event) )
+{
+    // true is to force the frame to close
+    Close(true);
+}
+
+/*
+ * TestGLCanvas implementation
+ */
+
+BEGIN_EVENT_TABLE(TestGLCanvas, wxGLCanvas)
+    EVT_SIZE(TestGLCanvas::OnSize)
+    EVT_PAINT(TestGLCanvas::OnPaint)
+    EVT_CHAR(TestGLCanvas::OnChar)
+    EVT_MOUSE_EVENTS(TestGLCanvas::OnMouseEvent)
+    EVT_ERASE_BACKGROUND(TestGLCanvas::OnEraseBackground)
+END_EVENT_TABLE()
+
+TestGLCanvas::TestGLCanvas(wxWindow *parent, wxWindowID id,
+    const wxPoint& pos, const wxSize& size, long style,
+    const wxString& name, int* gl_attrib)
+    : wxGLCanvas(parent, id, pos, size, style|wxFULL_REPAINT_ON_RESIZE, name, gl_attrib)
+{
+    parent->Show(true);
+    SetCurrent();
+
+    /* Make sure server supports the vertex array extension */
+    char* extensions = (char *) glGetString( GL_EXTENSIONS );
+    if (!extensions || !strstr( extensions, "GL_EXT_vertex_array" ))
+    {
+        use_vertex_arrays = GL_FALSE;
+    }
+}
+
+
+void TestGLCanvas::OnPaint( wxPaintEvent& WXUNUSED(event) )
+{
+    // This is a dummy, to avoid an endless succession of paint messages.
+    // OnPaint handlers must always create a wxPaintDC.
+    wxPaintDC dc(this);
+
+#ifndef __WXMOTIF__
+    if (!GetContext()) return;
+#endif
+
+    SetCurrent();
+
+    draw1();
+    SwapBuffers();
+}
+
+void TestGLCanvas::OnSize(wxSizeEvent& event)
+{
+    // this is also necessary to update the context on some platforms
+    wxGLCanvas::OnSize(event);
+
+    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
+    int w, h;
+    GetClientSize(&w, &h);
+#ifndef __WXMOTIF__
+    if (GetContext())
+#endif
+    {
+        SetCurrent();
+        glViewport(0, 0, (GLint) w, (GLint) h);
+    }
+}
+
+void TestGLCanvas::OnChar(wxKeyEvent& event)
+{
+    switch( event.GetKeyCode() )
+    {
+    case WXK_ESCAPE:
+        wxTheApp->ExitMainLoop();
+        return;
+
+    case WXK_LEFT:
+        yrot -= 15.0;
+        break;
+
+    case WXK_RIGHT:
+        yrot += 15.0;
+        break;
+
+    case WXK_UP:
+        xrot += 15.0;
+        break;
+
+    case WXK_DOWN:
+        xrot -= 15.0;
+        break;
+
+    case 's': case 'S':
+        smooth = !smooth;
+        if (smooth)
+        {
+            glShadeModel(GL_SMOOTH);
+        }
+        else
+        {
+            glShadeModel(GL_FLAT);
+        }
+        break;
+
+    case 'l': case 'L':
+        lighting = !lighting;
+        if (lighting)
+        {
+            glEnable(GL_LIGHTING);
+        }
+        else
+        {
+            glDisable(GL_LIGHTING);
+        }
+        break;
+
+    default:
+        event.Skip();
+        return;
+    }
+
+    Refresh(false);
+}
+
+void TestGLCanvas::OnMouseEvent(wxMouseEvent& event)
+{
+    static int dragging = 0;
+    static float last_x, last_y;
+
+    //printf("%f %f %d\n", event.GetX(), event.GetY(), (int)event.LeftIsDown());
+    if(event.LeftIsDown())
+    {
+        if(!dragging)
+        {
+            dragging = 1;
+        }
+        else
+        {
+            yrot += (event.GetX() - last_x)*1.0;
+            xrot += (event.GetY() - last_y)*1.0;
+            Refresh(false);
+        }
+        last_x = event.GetX();
+        last_y = event.GetY();
+    }
+    else
+        dragging = 0;
+
+}
+
+void TestGLCanvas::OnEraseBackground( wxEraseEvent& WXUNUSED(event) )
+{
+    // Do nothing, to avoid flashing.
 }
 

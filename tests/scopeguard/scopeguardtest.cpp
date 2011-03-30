@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // RCS-ID:      $Id$
 // Copyright:   (c) 2005 Vadim Zeitlin
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -21,7 +21,6 @@
     #pragma hdrstop
 #endif
 
-#include "wx/string.h"
 #include "wx/scopeguard.h"
 
 // ----------------------------------------------------------------------------
@@ -61,23 +60,12 @@ public:
         CPPUNIT_TEST(Dismiss);
         CPPUNIT_TEST(BlockExit);
         CPPUNIT_TEST(BlockExitObj);
-        CPPUNIT_TEST(BlockExitThis);
-        CPPUNIT_TEST(BlockExitSetVar);
     CPPUNIT_TEST_SUITE_END();
 
     void Normal();
     void Dismiss();
     void BlockExit();
     void BlockExitObj();
-    void BlockExitThis();
-    void BlockExitSetVar();
-
-private:
-    void Zero() { m_count = 0; }
-    void Set(int n) { m_count = n; }
-    void Sum(int n, int m) { m_count = n + m; }
-
-    int m_count;
 };
 
 // register in the unnamed registry so that these tests are run by default
@@ -184,64 +172,3 @@ void ScopeGuardTestCase::BlockExitObj()
     CPPUNIT_ASSERT_EQUAL( 5, count2.GetCount() );
 }
 
-void ScopeGuardTestCase::BlockExitThis()
-{
-    m_count = 1;
-
-    {
-        wxON_BLOCK_EXIT_THIS0(ScopeGuardTestCase::Zero);
-
-        CPPUNIT_ASSERT_EQUAL( 1, m_count );
-    }
-    CPPUNIT_ASSERT_EQUAL( 0, m_count );
-
-    {
-        wxON_BLOCK_EXIT_THIS1(ScopeGuardTestCase::Set, 17);
-
-        CPPUNIT_ASSERT_EQUAL( 0, m_count );
-    }
-    CPPUNIT_ASSERT_EQUAL( 17, m_count );
-
-    {
-        wxON_BLOCK_EXIT_THIS2(ScopeGuardTestCase::Sum, 2, 3);
-        CPPUNIT_ASSERT_EQUAL( 17, m_count );
-    }
-    CPPUNIT_ASSERT_EQUAL( 5, m_count );
-}
-
-void ScopeGuardTestCase::BlockExitSetVar()
-{
-    m_count = 1;
-    {
-        wxON_BLOCK_EXIT_SET(m_count, 17);
-
-        CPPUNIT_ASSERT_EQUAL( 1, m_count );
-    }
-    CPPUNIT_ASSERT_EQUAL( 17, m_count );
-
-
-    int count = 1;
-    {
-        wxON_BLOCK_EXIT_SET(count, 17);
-
-        CPPUNIT_ASSERT_EQUAL( 1, count );
-    }
-    CPPUNIT_ASSERT_EQUAL( 17, count );
-
-
-    wxString s("hi");
-    {
-        wxON_BLOCK_EXIT_SET(s, "bye");
-
-        CPPUNIT_ASSERT_EQUAL( "hi", s );
-    }
-    CPPUNIT_ASSERT_EQUAL( "bye", s );
-
-    ScopeGuardTestCase *p = this;
-    {
-        wxON_BLOCK_EXIT_NULL(p);
-
-        CPPUNIT_ASSERT( p );
-    }
-    CPPUNIT_ASSERT( !p );
-}

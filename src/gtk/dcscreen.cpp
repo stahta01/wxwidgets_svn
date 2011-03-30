@@ -11,7 +11,6 @@
 #include "wx/wxprec.h"
 
 #include "wx/dcscreen.h"
-#include "wx/gtk/dcscreen.h"
 
 #ifndef WX_PRECOMP
     #include "wx/window.h"
@@ -22,22 +21,24 @@
 #include <gtk/gtk.h>
 
 //-----------------------------------------------------------------------------
-// wxScreenDCImpl
+// global data initialization
 //-----------------------------------------------------------------------------
 
-IMPLEMENT_ABSTRACT_CLASS(wxScreenDCImpl, wxWindowDCImpl)
+GdkWindow *wxScreenDC::sm_overlayWindow  = (GdkWindow*) NULL;
+int wxScreenDC::sm_overlayWindowX = 0;
+int wxScreenDC::sm_overlayWindowY = 0;
 
-wxScreenDCImpl::wxScreenDCImpl( wxScreenDC *owner )
-  : wxWindowDCImpl( owner )
-{
-    Init();
-}
+//-----------------------------------------------------------------------------
+// wxScreenDC
+//-----------------------------------------------------------------------------
 
-void wxScreenDCImpl::Init()
+IMPLEMENT_DYNAMIC_CLASS(wxScreenDC,wxPaintDC)
+
+wxScreenDC::wxScreenDC()
 {
     m_ok = false;
     m_cmap = gdk_colormap_get_system();
-    m_gdkwindow = gdk_get_default_root_window();
+    m_window = gdk_get_default_root_window();
 
     m_context = gdk_pango_context_get();
     // Note: The Sun customised version of Pango shipping with Solaris 10
@@ -56,15 +57,32 @@ void wxScreenDCImpl::Init()
     gdk_gc_set_subwindow( m_bgGC, GDK_INCLUDE_INFERIORS );
 }
 
-wxScreenDCImpl::~wxScreenDCImpl()
+wxScreenDC::~wxScreenDC()
 {
     gdk_gc_set_subwindow( m_penGC, GDK_CLIP_BY_CHILDREN );
     gdk_gc_set_subwindow( m_brushGC, GDK_CLIP_BY_CHILDREN );
     gdk_gc_set_subwindow( m_textGC, GDK_CLIP_BY_CHILDREN );
     gdk_gc_set_subwindow( m_bgGC, GDK_CLIP_BY_CHILDREN );
+
+    EndDrawingOnTop();
 }
 
-void wxScreenDCImpl::DoGetSize(int *width, int *height) const
+bool wxScreenDC::StartDrawingOnTop( wxWindow * )
+{
+    return true;
+}
+
+bool wxScreenDC::StartDrawingOnTop( wxRect * )
+{
+    return true;
+}
+
+bool wxScreenDC::EndDrawingOnTop()
+{
+    return true;
+}
+
+void wxScreenDC::DoGetSize(int *width, int *height) const
 {
     wxDisplaySize(width, height);
 }

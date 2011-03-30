@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/msw/printwin.h
+// Name:        printwin.h
 // Purpose:     wxWindowsPrinter, wxWindowsPrintPreview classes
 // Author:      Julian Smart
 // Modified by:
@@ -18,12 +18,13 @@
 // Represents the printer: manages printing a wxPrintout object
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowsPrinter : public wxPrinterBase
+class WXDLLEXPORT wxWindowsPrinter : public wxPrinterBase
 {
     DECLARE_DYNAMIC_CLASS(wxWindowsPrinter)
 
 public:
     wxWindowsPrinter(wxPrintDialogData *data = NULL);
+    virtual ~wxWindowsPrinter();
 
     virtual bool Print(wxWindow *parent,
                        wxPrintout *printout,
@@ -33,7 +34,9 @@ public:
     virtual bool Setup(wxWindow *parent);
 
 private:
-    wxDECLARE_NO_COPY_CLASS(wxWindowsPrinter);
+    WXFARPROC     m_lpAbortProc;
+
+    DECLARE_NO_COPY_CLASS(wxWindowsPrinter)
 };
 
 // ---------------------------------------------------------------------------
@@ -41,7 +44,7 @@ private:
 // wxPrintout.
 // ---------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxWindowsPrintPreview : public wxPrintPreviewBase
+class WXDLLEXPORT wxWindowsPrintPreview : public wxPrintPreviewBase
 {
 public:
     wxWindowsPrintPreview(wxPrintout *printout,
@@ -55,11 +58,7 @@ public:
     virtual bool Print(bool interactive);
     virtual void DetermineScaling();
 
-protected:
-#if wxUSE_ENH_METAFILE
-    virtual bool RenderPageIntoBitmap(wxBitmap& bmp, int pageNum);
-#endif
-
+private:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxWindowsPrintPreview)
 };
 

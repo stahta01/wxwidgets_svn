@@ -27,6 +27,8 @@
 
 #include "wx/os2/private.h"
 
+IMPLEMENT_DYNAMIC_CLASS(wxRadioButton, wxControl)
+
 extern void  wxAssociateWinWithHandle( HWND         hWnd
                                       ,wxWindowOS2* pWin
                                      );
@@ -81,7 +83,7 @@ bool wxRadioButton::Create( wxWindow* pParent,
     if (HasFlag(wxCLIP_SIBLINGS))
         lSstyle |= WS_CLIPSIBLINGS;
 
-    if (!OS2CreateControl( wxT("BUTTON")
+    if (!OS2CreateControl( _T("BUTTON")
                           ,lSstyle
                           ,rPos
                           ,rSize
@@ -200,7 +202,7 @@ void wxRadioButton::SetValue( bool bValue )
         const wxWindowList&         rSiblings = GetParent()->GetChildren();
         wxWindowList::compatibility_iterator nodeThis = rSiblings.Find(this);
 
-        wxCHECK_RET(nodeThis, wxT("radio button not a child of its parent?"));
+        wxCHECK_RET(nodeThis, _T("radio button not a child of its parent?"));
 
         //
         // If it's not the first item of the group ...

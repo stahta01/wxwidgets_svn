@@ -26,7 +26,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxCollapsiblePaneXmlHandler, wxXmlResourceHandler)
 
-wxCollapsiblePaneXmlHandler::wxCollapsiblePaneXmlHandler()
+wxCollapsiblePaneXmlHandler::wxCollapsiblePaneXmlHandler() 
 : wxXmlResourceHandler(), m_isInside(false)
 {
     XRC_ADD_STYLE(wxCP_NO_TLW_RESIZE);
@@ -54,7 +54,7 @@ wxObject *wxCollapsiblePaneXmlHandler::DoCreateResource()
         }
         else
         {
-            ReportError("no control within panewindow");
+            wxLogError(wxT("Error in resource: no control within collapsible pane's <panewindow> tag."));
             return NULL;
         }
     }
@@ -65,7 +65,7 @@ wxObject *wxCollapsiblePaneXmlHandler::DoCreateResource()
         wxString label = GetParamValue(wxT("label"));
         if (label.empty())
         {
-            ReportParamError("label", "label cannot be empty");
+            wxLogError(wxT("Error in resource: empty label for wxCollapsiblePane"));
             return NULL;
         }
 
@@ -73,11 +73,11 @@ wxObject *wxCollapsiblePaneXmlHandler::DoCreateResource()
                     GetID(),
                     label,
                     GetPosition(), GetSize(),
-                    GetStyle(wxT("style"), wxCP_DEFAULT_STYLE),
+                    GetStyle(_T("style"), wxCP_DEFAULT_STYLE),
                     wxDefaultValidator,
                     GetName());
 
-        ctrl->Collapse(GetBool(wxT("collapsed")));
+        ctrl->Collapse(GetBool(_T("collapsed")));
         SetupWindow(ctrl);
 
         wxCollapsiblePane *old_par = m_collpane;

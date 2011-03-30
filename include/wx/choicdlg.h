@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/choicdlg.h
+// Name:        wx/choicdgg.h
 // Purpose:     Includes generic choice dialog file
 // Author:      Julian Smart
 // Modified by:

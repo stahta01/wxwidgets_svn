@@ -30,7 +30,6 @@
 #include "wx/utils.h"
 #include "wx/clipbrd.h"
 #include "wx/dataobj.h"
-#include "wx/stopwatch.h"
 
 #include "../../sample.xpm"
 
@@ -49,33 +48,19 @@ public:
 class MyHtmlWindow : public wxHtmlWindow
 {
 public:
-    MyHtmlWindow(wxWindow *parent) : wxHtmlWindow( parent )
-    {
-        // no custom background initially to avoid confusing people
-        m_drawCustomBg = false;
-    }
+    MyHtmlWindow(wxWindow *parent) : wxHtmlWindow( parent ) { }
 
     virtual wxHtmlOpeningStatus OnOpeningURL(wxHtmlURLType WXUNUSED(type),
                                              const wxString& WXUNUSED(url),
                                              wxString *WXUNUSED(redirect)) const;
 
-    // toggle drawing of custom background
-    void DrawCustomBg(bool draw)
-    {
-        m_drawCustomBg = draw;
-        Refresh();
-    }
-
 private:
-#if wxUSE_CLIPBOARD
     void OnClipboardEvent(wxClipboardTextEvent& event);
-#endif // wxUSE_CLIPBOARD
-    void OnEraseBgEvent(wxEraseEvent& event);
 
-    bool m_drawCustomBg;
-
+#if wxUSE_CLIPBOARD
     DECLARE_EVENT_TABLE()
-    wxDECLARE_NO_COPY_CLASS(MyHtmlWindow);
+#endif // wxUSE_CLIPBOARD
+    DECLARE_NO_COPY_CLASS(MyHtmlWindow)
 };
 
 // Define a new frame type: this is going to be our main frame
@@ -93,7 +78,6 @@ public:
     void OnBack(wxCommandEvent& event);
     void OnForward(wxCommandEvent& event);
     void OnProcessor(wxCommandEvent& event);
-    void OnDrawCustomBg(wxCommandEvent& event);
 
     void OnHtmlLinkClicked(wxHtmlLinkEvent& event);
     void OnHtmlCellHover(wxHtmlCellEvent &event);
@@ -136,8 +120,7 @@ enum
     ID_DefaultWebBrowser,
     ID_Back,
     ID_Forward,
-    ID_Processor,
-    ID_DrawCustomBg
+    ID_Processor
 };
 
 // ----------------------------------------------------------------------------
@@ -152,7 +135,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(ID_Back, MyFrame::OnBack)
     EVT_MENU(ID_Forward, MyFrame::OnForward)
     EVT_MENU(ID_Processor, MyFrame::OnProcessor)
-    EVT_MENU(ID_DrawCustomBg, MyFrame::OnDrawCustomBg)
 
     EVT_HTML_LINK_CLICKED(wxID_ANY, MyFrame::OnHtmlLinkClicked)
     EVT_HTML_CELL_HOVER(wxID_ANY, MyFrame::OnHtmlCellHover)
@@ -172,9 +154,6 @@ IMPLEMENT_APP(MyApp)
 // `Main program' equivalent: the program execution "starts" here
 bool MyApp::OnInit()
 {
-    if ( !wxApp::OnInit() )
-        return false;
-
 #if wxUSE_SYSTEM_OPTIONS
     wxSystemOptions::SetOption(wxT("no-maskblt"), 1);
 #endif
@@ -210,14 +189,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     wxMenu *menuFile = new wxMenu;
     wxMenu *menuNav = new wxMenu;
 
-    menuFile->Append(ID_PageOpen, _("&Open HTML page...\tCtrl-O"));
+    menuFile->Append(ID_PageOpen, _("&Open HTML page..."));
     menuFile->Append(ID_DefaultLocalBrowser, _("&Open current page with default browser"));
     menuFile->Append(ID_DefaultWebBrowser, _("Open a &web page with default browser"));
     menuFile->AppendSeparator();
     menuFile->Append(ID_Processor, _("&Remove bold attribute"),
                      wxEmptyString, wxITEM_CHECK);
-    menuFile->AppendSeparator();
-    menuFile->AppendCheckItem(ID_DrawCustomBg, "&Draw custom background");
+
     menuFile->AppendSeparator();
     menuFile->Append(wxID_EXIT, _("&Close frame"));
     menuNav->Append(ID_Back, _("Go &BACK"));
@@ -252,13 +230,13 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     m_Html = new MyHtmlWindow(this);
     m_Html->SetRelatedFrame(this, _("HTML : %s"));
 #if wxUSE_STATUSBAR
-    m_Html->SetRelatedStatusBar(1);
+    m_Html->SetRelatedStatusBar(0);
 #endif // wxUSE_STATUSBAR
     m_Html->ReadCustomization(wxConfig::Get());
     m_Html->LoadFile(wxFileName(wxT("test.htm")));
     m_Html->AddProcessor(m_Processor);
 
-    wxTextCtrl *text = new wxTextCtrl(this, wxID_ANY, wxT(""),
+    wxTextCtrl *text = new wxTextCtrl(this, wxID_ANY, _T(""),
                                       wxDefaultPosition, wxDefaultSize,
                                       wxTE_MULTILINE);
 
@@ -289,15 +267,7 @@ void MyFrame::OnPageOpen(wxCommandEvent& WXUNUSED(event))
         wxEmptyString, wxEmptyString, wxT("HTML files|*.htm;*.html"));
 
     if (!p.empty())
-    {
-#if wxUSE_STOPWATCH
-        wxStopWatch sw;
-#endif
         m_Html->LoadFile(wxFileName(p));
-#if wxUSE_STOPWATCH
-        wxLogStatus("Loaded \"%s\" in %lums", p, sw.Time());
-#endif
-    }
 #endif // wxUSE_FILEDLG
 }
 
@@ -341,11 +311,6 @@ void MyFrame::OnProcessor(wxCommandEvent& WXUNUSED(event))
     m_Html->LoadPage(m_Html->GetOpenedPage());
 }
 
-void MyFrame::OnDrawCustomBg(wxCommandEvent& event)
-{
-    m_Html->DrawCustomBg(event.IsChecked());
-}
-
 void MyFrame::OnHtmlLinkClicked(wxHtmlLinkEvent &event)
 {
     wxLogMessage(wxT("The url '%s' has been clicked!"), event.GetLinkInfo().GetHref().c_str());
@@ -374,18 +339,15 @@ wxHtmlOpeningStatus MyHtmlWindow::OnOpeningURL(wxHtmlURLType WXUNUSED(type),
                                                const wxString& url,
                                                wxString *WXUNUSED(redirect)) const
 {
-    GetRelatedFrame()->SetStatusText(url + wxT(" lately opened"),1);
+    GetRelatedFrame()->SetStatusText(url + _T(" lately opened"),1);
     return wxHTML_OPEN;
 }
 
-BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
 #if wxUSE_CLIPBOARD
+BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
     EVT_TEXT_COPY(wxID_ANY, MyHtmlWindow::OnClipboardEvent)
-#endif // wxUSE_CLIPBOARD
-    EVT_ERASE_BACKGROUND(MyHtmlWindow::OnEraseBgEvent)
 END_EVENT_TABLE()
 
-#if wxUSE_CLIPBOARD
 void MyHtmlWindow::OnClipboardEvent(wxClipboardTextEvent& WXUNUSED(event))
 {
     // explicitly call wxHtmlWindow::CopySelection() method
@@ -398,43 +360,17 @@ void MyHtmlWindow::OnClipboardEvent(wxClipboardTextEvent& WXUNUSED(event))
             const wxString text = data.GetText();
             const size_t maxTextLength = 100;
 
-            wxLogStatus(wxString::Format(wxT("Clipboard: '%s%s'"),
+            wxLogStatus(wxString::Format(_T("Clipboard: '%s%s'"),
                         wxString(text, maxTextLength).c_str(),
-                        (text.length() > maxTextLength) ? wxT("...")
-                                                        : wxT("")));
+                        (text.length() > maxTextLength) ? _T("...")
+                                                        : _T("")));
+
             wxTheClipboard->Close();
 
             return;
         }
     }
 
-    wxLogStatus(wxT("Clipboard: nothing"));
+    wxLogStatus(_T("Clipboard: nothing"));
 }
 #endif // wxUSE_CLIPBOARD
-
-void MyHtmlWindow::OnEraseBgEvent(wxEraseEvent& event)
-{
-    if ( !m_drawCustomBg )
-    {
-        event.Skip();
-        return;
-    }
-
-    // draw a background grid to show that this handler is indeed executed
-
-    wxDC& dc = *event.GetDC();
-    dc.SetPen(*wxBLUE_PEN);
-    dc.Clear();
-
-    const wxSize size = GetVirtualSize();
-    for ( int x = 0; x < size.x; x += 15 )
-    {
-        dc.DrawLine(x, 0, x, size.y);
-    }
-
-    for ( int y = 0; y < size.y; y += 15 )
-    {
-        dc.DrawLine(0, y, size.x, y);
-    }
-}
-

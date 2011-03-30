@@ -4,7 +4,7 @@
 // Author:      Hans Van Leemputten
 // RCS-ID:      $Id$
 // Copyright:   (c) 2004 Hans Van Leemputten
-// Licence:     wxWindows licence
+// Licence:     wxWidgets licence
 ///////////////////////////////////////////////////////////////////////////////
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -53,7 +53,6 @@ Test *StreamCase::suite()
     STREAM_REGISTER_SUB_SUITE(tempStream);
     STREAM_REGISTER_SUB_SUITE(zlibStream);
     STREAM_REGISTER_SUB_SUITE(backStream);
-    STREAM_REGISTER_SUB_SUITE(socketStream);
 
     extern CppUnit::Test* GetlargeFileSuite();
     Test *lfs = GetlargeFileSuite();

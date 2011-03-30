@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/os2/button.h
+// Name:        button.h
 // Purpose:     wxButton class
 // Author:      David Webster
 // Modified by:
@@ -15,9 +15,9 @@
 #include "wx/control.h"
 
 // Pushbutton
-class WXDLLIMPEXP_CORE wxButton: public wxButtonBase
+class WXDLLEXPORT wxButton: public wxButtonBase
 {
-public:
+ public:
     inline wxButton() {}
     inline wxButton( wxWindow*          pParent
                     ,wxWindowID         vId
@@ -49,11 +49,10 @@ public:
                 ,const wxValidator& rValidator = wxDefaultValidator
                 ,const wxString&    rsName = wxButtonNameStr
                );
-
+    
     virtual ~wxButton();
 
-    virtual wxWindow *SetDefault();
-
+    virtual void     SetDefault(void);
     static wxSize    GetDefaultSize(void);
     virtual void     Command(wxCommandEvent& rEvent);
     virtual bool     OS2Command( WXUINT uParam

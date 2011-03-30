@@ -13,7 +13,6 @@
 #include "wx/wxprec.h"
 
 #include "wx/dcmemory.h"
-#include "wx/os2/dcmemory.h"
 
 #ifndef WX_PRECOMP
     #include "wx/utils.h"
@@ -23,37 +22,21 @@
 
 #include "wx/os2/private.h"
 
-IMPLEMENT_ABSTRACT_CLASS(wxMemoryDCImpl, wxPMDCImpl)
+IMPLEMENT_DYNAMIC_CLASS(wxMemoryDC, wxDC)
 
 /////////////////////////////////////////////////////////////////////////////
 // Memory DC
 /////////////////////////////////////////////////////////////////////////////
 
-wxMemoryDCImpl::wxMemoryDCImpl( wxMemoryDC *owner )
-        : wxPMDCImpl( owner )
+wxMemoryDC::wxMemoryDC(
+  wxDC*                             pOldDC
+)
 {
-    CreateCompatible(NULL);
-    Init();
-}
-
-wxMemoryDCImpl::wxMemoryDCImpl( wxMemoryDC *owner, wxBitmap& bitmap )
-        : wxPMDCImpl( owner )
-{
-    CreateCompatible(NULL);
-    Init();
-    DoSelect(bitmap);
-}
-
-wxMemoryDCImpl::wxMemoryDCImpl( wxMemoryDC *owner, wxDC *pOldDC)
-        : wxPMDCImpl( owner )
-{
-    wxCHECK_RET( pOldDC, wxT("NULL dc in wxMemoryDC ctor") );
-
     CreateCompatible(pOldDC);
     Init();
 } // end of wxMemoryDC::wxMemoryDC
 
-void wxMemoryDCImpl::Init()
+void wxMemoryDC::Init()
 {
     if (m_ok)
     {
@@ -67,7 +50,7 @@ void wxMemoryDCImpl::Init()
     memset(&m_vRclPaint, 0, sizeof(m_vRclPaint));
 } // end of wxMemoryDC::Init
 
-bool wxMemoryDCImpl::CreateCompatible( wxDC* WXUNUSED(pDC) )
+bool wxMemoryDC::CreateCompatible( wxDC* WXUNUSED(pDC) )
 {
     HDC           hDC;
     HPS           hPS;
@@ -129,7 +112,7 @@ bool wxMemoryDCImpl::CreateCompatible( wxDC* WXUNUSED(pDC) )
     return m_ok;
 } // end of wxMemoryDC::CreateCompatible
 
-void wxMemoryDCImpl::DoSelect(
+void wxMemoryDC::DoSelect(
   const wxBitmap&                   rBitmap
 )
 {
@@ -150,7 +133,7 @@ void wxMemoryDCImpl::DoSelect(
     // Check for whether the bitmap is already selected into a device context
     //
     wxCHECK_RET( !rBitmap.GetSelectedInto() ||
-                 (rBitmap.GetSelectedInto() == GetOwner()),
+                 (rBitmap.GetSelectedInto() == this),
                  wxT("Bitmap is selected in another wxMemoryDC, delete the first wxMemoryDC or use SelectObject(NULL)") );
 
     WXHBITMAP                       hBmp = rBitmap.GetHBITMAP();
@@ -186,7 +169,7 @@ void wxMemoryDCImpl::DoSelect(
         m_hOldBitmap = (WXHBITMAP)::GpiSetBitmap(m_hPS, NULLHANDLE);
         return;
     }
-    m_vSelectedBitmap.SetSelectedInto(GetOwner());
+    m_vSelectedBitmap.SetSelectedInto(this);
     m_hOldBitmap = (WXHBITMAP)::GpiSetBitmap(m_hPS, (HBITMAP)hBmp);
 
     if (m_hOldBitmap == HBM_ERROR)
@@ -196,7 +179,7 @@ void wxMemoryDCImpl::DoSelect(
     }
 } // end of wxMemoryDC::SelectObject
 
-void wxMemoryDCImpl::DoGetSize(
+void wxMemoryDC::DoGetSize(
   int*                              pWidth
 , int*                              pHeight
 ) const

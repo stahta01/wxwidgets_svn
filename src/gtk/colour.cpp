@@ -20,10 +20,10 @@
 // wxColour
 //-----------------------------------------------------------------------------
 
-class wxColourRefData : public wxGDIRefData
+class wxColourRefData: public wxObjectRefData
 {
 public:
-    wxColourRefData(guint16 red, guint16 green, guint16 blue, wxByte alpha = 0xff)
+    wxColourRefData(guint16 red, guint16 green, guint16 blue, guint16 alpha)
     {
         m_color.red =
         m_red = red;
@@ -50,9 +50,9 @@ public:
     guint16 m_red;
     guint16 m_green;
     guint16 m_blue;
-    wxByte m_alpha;
+    guint16 m_alpha;
 
-    wxDECLARE_NO_COPY_CLASS(wxColourRefData);
+    DECLARE_NO_COPY_CLASS(wxColourRefData)
 };
 
 void wxColourRefData::FreeColour()
@@ -83,14 +83,16 @@ void wxColourRefData::AllocColour( GdkColormap *cmap )
 
 //-----------------------------------------------------------------------------
 
-#define M_COLDATA static_cast<wxColourRefData*>(m_refData)
+#define M_COLDATA wx_static_cast(wxColourRefData*, m_refData)
 
 // GDK's values are in 0..65535 range, ours are in 0..255
 #define SHIFT  8
 
+IMPLEMENT_DYNAMIC_CLASS(wxColour,wxGDIObject)
+
 wxColour::wxColour(const GdkColor& gdkColor)
 {
-    m_refData = new wxColourRefData(gdkColor.red, gdkColor.green, gdkColor.blue);
+    m_refData = new wxColourRefData(gdkColor.red, gdkColor.green, gdkColor.blue, 0xFFFF /*opaque alpha in 16 bit*/);
 }
 
 wxColour::~wxColour()
@@ -106,7 +108,7 @@ bool wxColour::operator == ( const wxColour& col ) const
         return false;
 
     wxColourRefData* refData = M_COLDATA;
-    wxColourRefData* that_refData = static_cast<wxColourRefData*>(col.m_refData);
+    wxColourRefData* that_refData = wx_static_cast(wxColourRefData*, col.m_refData);
     return refData->m_red == that_refData->m_red &&
            refData->m_green == that_refData->m_green &&
            refData->m_blue == that_refData->m_blue &&
@@ -122,7 +124,7 @@ void wxColour::InitRGBA(unsigned char red, unsigned char green, unsigned char bl
         (guint16(red) << SHIFT) + red,
         (guint16(green) << SHIFT) + green,
         (guint16(blue) << SHIFT) + blue,
-        alpha);
+        (guint16(alpha) << SHIFT) + alpha);
 }
 
 unsigned char wxColour::Red() const
@@ -150,7 +152,7 @@ unsigned char wxColour::Alpha() const
 {
     wxCHECK_MSG( Ok(), 0, wxT("invalid colour") );
 
-    return M_COLDATA->m_alpha;
+    return wxByte(M_COLDATA->m_alpha >> SHIFT);
 }
 
 void wxColour::CalcPixel( GdkColormap *cmap )
@@ -167,14 +169,18 @@ int wxColour::GetPixel() const
     return M_COLDATA->m_color.pixel;
 }
 
+#ifdef __WXGTK24__
 const GdkColor *wxColour::GetColor() const
+#else
+      GdkColor *wxColour::GetColor() const
+#endif
 {
     wxCHECK_MSG( Ok(), NULL, wxT("invalid colour") );
 
     return &M_COLDATA->m_color;
 }
 
-bool wxColour::FromString(const wxString& str)
+bool wxColour::FromString(const wxChar *str)
 {
     GdkColor colGDK;
     if ( gdk_color_parse( wxGTK_CONV_SYS( str ), &colGDK ) )

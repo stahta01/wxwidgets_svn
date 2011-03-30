@@ -10,7 +10,7 @@
 // Created:     20.06.2003 (extracted from common/timercmn.cpp)
 // RCS-ID:      $Id$
 // Copyright:   (c) 1998-2003 wxWidgets Team
-// Licence:     wxWindows licence
+// License:     wxWindows license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -58,15 +58,12 @@
 #   undef HAVE_GETTIMEOFDAY
 #endif
 
-#ifndef __WXPALMOS5__
 #ifndef __WXWINCE__
 #include <time.h>
 #else
 #include "wx/msw/private.h"
 #include "wx/msw/wince/time.h"
 #endif
-#endif // __WXPALMOS5__
-
 
 #if !defined(__WXMAC__) && !defined(__WXWINCE__)
     #include <sys/types.h>      // for time_t
@@ -79,11 +76,35 @@
     #include <sys/timeb.h>
 #endif
 
+#ifdef __WXMAC__
+#ifndef __DARWIN__
+    #include <Timer.h>
+    #include <DriverServices.h>
+#else
+    #include <Carbon/Carbon.h>
+#endif
+#endif
+
 #ifdef __WXPALMOS__
     #include <DateTime.h>
     #include <TimeMgr.h>
     #include <SystemMgr.h>
 #endif
+
+// ----------------------------------------------------------------------------
+// macros
+// ----------------------------------------------------------------------------
+
+// on some really old systems gettimeofday() doesn't have the second argument,
+// define wxGetTimeOfDay() to hide this difference
+#ifdef HAVE_GETTIMEOFDAY
+    #ifdef WX_GETTIMEOFDAY_NO_TZ
+        struct timezone;
+        #define wxGetTimeOfDay(tv, tz)      gettimeofday(tv)
+    #else
+        #define wxGetTimeOfDay(tv, tz)      gettimeofday((tv), (tz))
+    #endif
+#endif // HAVE_GETTIMEOFDAY
 
 // ============================================================================
 // implementation
@@ -258,7 +279,7 @@ wxLongLong wxGetLocalTimeMillis()
 
 #elif defined(HAVE_GETTIMEOFDAY)
     struct timeval tp;
-    if ( wxGetTimeOfDay(&tp) != -1 )
+    if ( wxGetTimeOfDay(&tp, (struct timezone *)NULL) != -1 )
     {
         val *= tp.tv_sec;
         return (val + (tp.tv_usec / 1000));
@@ -276,6 +297,26 @@ wxLongLong wxGetLocalTimeMillis()
     (void)::ftime(&tp);
     val *= tp.time;
     return (val + tp.millitm);
+#elif defined(__WXMAC__)
+
+    static UInt64 gMilliAtStart = 0;
+
+    Nanoseconds upTime = AbsoluteToNanoseconds( UpTime() );
+
+    if ( gMilliAtStart == 0 )
+    {
+        time_t start = time(NULL);
+        gMilliAtStart = ((UInt64) start) * 1000000L;
+        gMilliAtStart -= upTime.lo / 1000 ;
+        gMilliAtStart -= ( ( (UInt64) upTime.hi ) << 32 ) / (1000 * 1000);
+    }
+
+    UInt64 millival = gMilliAtStart;
+    millival += upTime.lo / (1000 * 1000);
+    millival += ( ( (UInt64) upTime.hi ) << 32 ) / (1000 * 1000);
+    val = millival;
+
+    return val;
 #else // no gettimeofday() nor ftime()
     // We use wxGetLocalTime() to get the seconds since
     // 00:00:00 Jan 1st 1970 and then whatever is available

@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/os2/spinbutt.cpp
+// Name:        spinbutt.cpp
 // Purpose:     wxSpinButton
 // Author:      David Webster
 // Modified by:
@@ -28,6 +28,8 @@ extern void  wxAssociateWinWithHandle( HWND         hWnd
                                       ,wxWindowOS2* pWin
                                      );
 
+IMPLEMENT_DYNAMIC_CLASS(wxSpinEvent, wxNotifyEvent)
+
 #include "wx/os2/private.h"
 
 // ============================================================================
@@ -37,6 +39,8 @@ extern void  wxAssociateWinWithHandle( HWND         hWnd
 // ----------------------------------------------------------------------------
 // wxWin macros
 // ----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxSpinButton, wxControl)
 
 bool wxSpinButton::Create(
   wxWindow*                         pParent
@@ -193,7 +197,7 @@ bool wxSpinButton::OS2OnScroll( int    WXUNUSED(nOrientation),
 
     vEvent.SetPosition(nVal);
     vEvent.SetEventObject(this);
-    return(HandleWindowEvent(vEvent));
+    return(GetEventHandler()->ProcessEvent(vEvent));
 } // end of wxSpinButton::OS2OnScroll
 
 bool wxSpinButton::OS2Command( WXUINT WXUNUSED(uCmd),

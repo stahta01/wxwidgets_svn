@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/gtk1/scrolwin.cpp
+// Name:        gtk/scrolwin.cpp
 // Purpose:     wxScrolledWindow implementation
 // Author:      Robert Roebling
 // Modified by: Ron Lee
@@ -36,7 +36,7 @@
 // wxScrollHelper implementation
 // ----------------------------------------------------------------------------
 
-void wxScrollHelper::SetScrollbars(int pixelsPerUnitX, int pixelsPerUnitY,
+void wxScrollHelperNative::SetScrollbars(int pixelsPerUnitX, int pixelsPerUnitY,
                                          int noUnitsX, int noUnitsY,
                                          int xPos, int yPos,
                                          bool noRefresh)
@@ -73,7 +73,7 @@ void wxScrollHelper::SetScrollbars(int pixelsPerUnitX, int pixelsPerUnitY,
     m_targetWindow->m_hasScrolling = pixelsPerUnitX || pixelsPerUnitY;
 }
 
-void wxScrollHelper::DoAdjustScrollbar(GtkAdjustment *adj,
+void wxScrollHelperNative::DoAdjustScrollbar(GtkAdjustment *adj,
                                              int pixelsPerLine,
                                              int winSize,
                                              int virtSize,
@@ -127,7 +127,7 @@ void wxScrollHelper::DoAdjustScrollbar(GtkAdjustment *adj,
     gtk_signal_emit_by_name( GTK_OBJECT(adj), "changed" );
 }
 
-void wxScrollHelper::AdjustScrollbars()
+void wxScrollHelperNative::AdjustScrollbars()
 {
     int w, h;
     int vw, vh;
@@ -141,7 +141,7 @@ void wxScrollHelper::AdjustScrollbars()
                       &m_yScrollPosition, &m_yScrollLines, &m_yScrollLinesPerPage);
 }
 
-void wxScrollHelper::DoScrollOneDir(int orient,
+void wxScrollHelperNative::DoScroll(int orient,
                                     GtkAdjustment *adj,
                                     int pos,
                                     int pixelsPerLine,
@@ -169,19 +169,13 @@ void wxScrollHelper::DoScrollOneDir(int orient,
     }
 }
 
-void wxScrollHelper::DoScroll( int x_pos, int y_pos )
+void wxScrollHelperNative::Scroll( int x_pos, int y_pos )
 {
-    wxCHECK_RET( m_targetWindow != 0, wxT("No target window") );
+    wxCHECK_RET( m_targetWindow != 0, _T("No target window") );
 
-    DoScrollOneDir(wxHORIZONTAL, m_win->m_hAdjust, x_pos, m_xScrollPixelsPerLine,
+    DoScroll(wxHORIZONTAL, m_win->m_hAdjust, x_pos, m_xScrollPixelsPerLine,
                 &m_xScrollPosition);
-    DoScrollOneDir(wxVERTICAL, m_win->m_vAdjust, y_pos, m_yScrollPixelsPerLine,
+    DoScroll(wxVERTICAL, m_win->m_vAdjust, y_pos, m_yScrollPixelsPerLine,
                 &m_yScrollPosition);
-}
-
-void wxScrollHelper::DoShowScrollbars(wxScrollbarVisibility WXUNUSED(horz),
-                                      wxScrollbarVisibility WXUNUSED(vert))
-{
-    // TODO: not supported/implemented
 }
 

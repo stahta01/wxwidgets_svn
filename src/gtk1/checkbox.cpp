@@ -36,8 +36,7 @@ extern wxWindowGTK   *g_delayedFocus;
 //-----------------------------------------------------------------------------
 
 extern "C" {
-static void gtk_checkbox_toggled_callback(GtkWidget *WXUNUSED(widget),
-                                          wxCheckBox *cb)
+static void gtk_checkbox_toggled_callback(GtkWidget *widget, wxCheckBox *cb)
 {
     if (g_isIdle) wxapp_install_idle_handler();
 
@@ -50,13 +49,15 @@ static void gtk_checkbox_toggled_callback(GtkWidget *WXUNUSED(widget),
     wxCommandEvent event(wxEVT_COMMAND_CHECKBOX_CLICKED, cb->GetId());
     event.SetInt(cb->GetValue());
     event.SetEventObject(cb);
-    cb->HandleWindowEvent(event);
+    cb->GetEventHandler()->ProcessEvent(event);
 }
 }
 
 //-----------------------------------------------------------------------------
 // wxCheckBox
 //-----------------------------------------------------------------------------
+
+IMPLEMENT_DYNAMIC_CLASS(wxCheckBox,wxControl)
 
 wxCheckBox::wxCheckBox()
 {
@@ -75,13 +76,17 @@ bool wxCheckBox::Create(wxWindow *parent,
     m_acceptsFocus = true;
     m_blockEvent = false;
 
-    WXValidateStyle(&style);
     if (!PreCreation( parent, pos, size ) ||
         !CreateBase( parent, id, pos, size, style, validator, name ))
     {
         wxFAIL_MSG( wxT("wxCheckBox creation failed") );
         return false;
     }
+
+    wxASSERT_MSG( (style & wxCHK_ALLOW_3RD_STATE_FOR_USER) == 0 ||
+                  (style & wxCHK_3STATE) != 0,
+                  wxT("Using wxCHK_ALLOW_3RD_STATE_FOR_USER")
+                  wxT(" style flag for a 2-state checkbox is useless") );
 
     if ( style & wxALIGN_RIGHT )
     {

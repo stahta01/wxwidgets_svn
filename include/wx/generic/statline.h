@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/generic/statline.h
+// Name:        generic/statline.h
 // Purpose:     a generic wxStaticLine class
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
@@ -17,7 +17,7 @@ class wxStaticBox;
 // wxStaticLine
 // ----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_CORE wxStaticLine : public wxStaticLineBase
+class WXDLLEXPORT wxStaticLine : public wxStaticLineBase
 {
     DECLARE_DYNAMIC_CLASS(wxStaticLine)
 

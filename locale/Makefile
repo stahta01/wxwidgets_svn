@@ -1,14 +1,14 @@
-# this is the makefile for generating wxstd.pot message catalog file and
+# this is the makefile for generating wxstd.po message catalog file and
 # building lang.mo files from the translated lang.po catalogs
 
-# this makefile may be invoked to build either wxstd.pot or any lang.mo
+# this makefile may be invoked to build either wxstd.po or any lang.mo
 
 # Autodetect the languages we support.  Currently this relies on make
 # being called with this dir as the cwd, but if we generate this file
 # with configure an explicit path should be specified -- RL.
 
-WX_LINGUAS := $(shell ls *.po */*.po 2> /dev/null | sed 's/wxstd.pot//g' | sed 's/.po//g')
-WX_LINGUAS_UPDATE := $(shell ls *.po 2> /dev/null | sed 's/wxstd.pot//g' | sed 's/.po//g')
+WX_LINGUAS := $(shell ls *.po */*.po 2> /dev/null | sed 's/wxstd.po//g' | sed 's/.po//g')
+WX_LINGUAS_UPDATE := $(shell ls *.po 2> /dev/null | sed 's/wxstd.po//g' | sed 's/.po//g')
 
 # the programs we use (TODO: use configure to detect them)
 MSGFMT=msgfmt --verbose
@@ -23,17 +23,19 @@ XGETTEXT_ARGS=-C -k_ -kwxPLURAL:1,2 -kwxTRANSLATE -s -j
 %.mo: %.po
 	$(MSGFMT) -c -o $@ $<
 
-# a PO file must be updated from wxstd.pot to include new translations
+# a PO file must be updated from wxstd.po to include new translations
 # (but not manually maintained platform-specific files like msw/it.po)
-$(foreach lang,$(WX_LINGUAS_UPDATE),$(lang).po): wxstd.pot
+$(foreach lang,$(WX_LINGUAS_UPDATE),$(lang).po): wxstd.po
 
 %.po:
-	if [ -f $@ ]; then $(MSGMERGE) $@ wxstd.pot > $@.new && mv $@.new $@; else cp wxstd.pot $@; fi
+	if [ -f $@ ]; then $(MSGMERGE) $@ wxstd.po > $@.new && mv $@.new $@; else cp wxstd.po $@; fi
 
-wxstd.pot:
+wxstd.po:
 	touch $@
-	find ../include -name "*.h" | $(XARGS) $(XGETTEXT) $(XGETTEXT_ARGS) -o wxstd.pot
-	find ../src -name "*.cpp" | $(XARGS) $(XGETTEXT) $(XGETTEXT_ARGS) -o wxstd.pot
+	find ../include -name "*.h" | $(XARGS) $(XGETTEXT) $(XGETTEXT_ARGS) -o wxstd.po
+	find ../src -name "*.cpp" | $(XARGS) $(XGETTEXT) $(XGETTEXT_ARGS) -o wxstd.po
+	find ../contrib/include -name "*.h" | $(XARGS) $(XGETTEXT) $(XGETTEXT_ARGS) -o wxstd.po
+	find ../contrib/src -name "*.cpp" | $(XARGS) $(XGETTEXT) $(XGETTEXT_ARGS) -o wxstd.po
 
 allpo: force-update
 	@-for t in $(WX_LINGUAS_UPDATE); do $(MAKE) $$t.po; done
@@ -42,7 +44,7 @@ allmo:
 	@for t in $(WX_LINGUAS); do $(MAKE) $$t.mo; done
 
 force-update:
-	$(RM) wxstd.pot
+	$(RM) wxstd.po
 
 # print out the percentage of the translated strings
 stats: FORCE

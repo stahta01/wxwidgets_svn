@@ -14,16 +14,20 @@
 
 #include "wx/radiobox.h"
 
+#ifndef WX_PRECOMP
+    #include "wx/log.h"
+    #include "wx/frame.h"
+    #include "wx/dialog.h"
+#endif
+
 #if wxUSE_TOOLTIPS
     #include "wx/tooltip.h"
 #endif
 
 #include "wx/gtk/private.h"
-
 #include <gdk/gdkkeysyms.h>
-#if GTK_CHECK_VERSION(3,0,0)
-#include <gdk/gdkkeysyms-compat.h>
-#endif
+
+#include "wx/gtk/win_gtk.h"
 
 //-----------------------------------------------------------------------------
 // wxGTKRadioButtonInfo
@@ -45,7 +49,7 @@ public:
 //-----------------------------------------------------------------------------
 
 #include "wx/listimpl.cpp"
-WX_DEFINE_LIST( wxRadioBoxButtonsInfoList )
+WX_DEFINE_LIST(wxRadioBoxButtonsInfoList)
 
 extern bool          g_blockEventsOnDrag;
 
@@ -56,16 +60,18 @@ extern bool          g_blockEventsOnDrag;
 extern "C" {
 static void gtk_radiobutton_clicked_callback( GtkToggleButton *button, wxRadioBox *rb )
 {
+    if (g_isIdle) wxapp_install_idle_handler();
+
     if (!rb->m_hasVMT) return;
     if (g_blockEventsOnDrag) return;
 
-    if (!gtk_toggle_button_get_active(button)) return;
+    if (!button->active) return;
 
     wxCommandEvent event( wxEVT_COMMAND_RADIOBOX_SELECTED, rb->GetId() );
     event.SetInt( rb->GetSelection() );
     event.SetString( rb->GetStringSelection() );
     event.SetEventObject( rb );
-    rb->HandleWindowEvent(event);
+    rb->GetEventHandler()->ProcessEvent(event);
 }
 }
 
@@ -76,6 +82,8 @@ static void gtk_radiobutton_clicked_callback( GtkToggleButton *button, wxRadioBo
 extern "C" {
 static gint gtk_radiobox_keypress_callback( GtkWidget *widget, GdkEventKey *gdk_event, wxRadioBox *rb )
 {
+    // don't need to install idle handler, its done from "event" signal
+
     if (!rb->m_hasVMT) return FALSE;
     if (g_blockEventsOnDrag) return FALSE;
 
@@ -90,7 +98,7 @@ static gint gtk_radiobox_keypress_callback( GtkWidget *widget, GdkEventKey *gdk_
         // CTRL-TAB changes the (parent) window, i.e. switch notebook page
         new_event.SetWindowChange( (gdk_event->state & GDK_CONTROL_MASK) );
         new_event.SetCurrentFocus( rb );
-        return rb->GetParent()->HandleWindowEvent(new_event);
+        return rb->GetParent()->GetEventHandler()->ProcessEvent( new_event );
     }
 
     if ((gdk_event->keyval != GDK_Up) &&
@@ -136,33 +144,46 @@ static gint gtk_radiobox_keypress_callback( GtkWidget *widget, GdkEventKey *gdk_
 }
 
 extern "C" {
-static gint gtk_radiobutton_focus_out( GtkWidget * WXUNUSED(widget),
-                                       GdkEventFocus *WXUNUSED(event),
-                                       wxRadioBox *win )
+static gint gtk_radiobutton_focus_in( GtkWidget *widget,
+                                      GdkEvent *WXUNUSED(event),
+                                      wxRadioBox *win )
 {
-    // NB: This control is composed of several GtkRadioButton widgets and
-    //     when focus changes from one of them to another in the same
-    //     wxRadioBox, we get a focus-out event followed by focus-in for
-    //     another GtkRadioButton owned by the same control. We don't want
-    //     to generate two spurious wxEVT_SET_FOCUS events in this case,
-    //     so we defer sending wx events until idle time.
-    win->GTKHandleFocusOut();
+    if ( win->m_lostFocus )
+    {
+        // no, we didn't really lose it
+        win->m_lostFocus = FALSE;
+    }
+    else if ( !win->m_hasFocus )
+    {
+        win->m_hasFocus = true;
 
-    // never stop the signal emission, it seems to break the kbd handling
-    // inside the radiobox
+        wxFocusEvent event( wxEVT_SET_FOCUS, win->GetId() );
+        event.SetEventObject( win );
+
+        // never stop the signal emission, it seems to break the kbd handling
+        // inside the radiobox
+        (void)win->GetEventHandler()->ProcessEvent( event );
+    }
+
     return FALSE;
 }
 }
 
 extern "C" {
-static gint gtk_radiobutton_focus_in( GtkWidget * WXUNUSED(widget),
-                                      GdkEventFocus *WXUNUSED(event),
-                                      wxRadioBox *win )
+static gint gtk_radiobutton_focus_out( GtkWidget *widget,
+                                       GdkEvent *WXUNUSED(event),
+                                       wxRadioBox *win )
 {
-    win->GTKHandleFocusIn();
+  //    wxASSERT_MSG( win->m_hasFocus, _T("got focus out without any focus in?") );
+  // Replace with a warning, else we dump core a lot!
+  //  if (!win->m_hasFocus)
+  //      wxLogWarning(_T("Radiobox got focus out without any focus in.") );
 
-    // never stop the signal emission, it seems to break the kbd handling
-    // inside the radiobox
+    // we might have lost the focus, but may be not - it may have just gone to
+    // another button in the same radiobox, so we'll check for it in the next
+    // idle iteration (leave m_hasFocus == true for now)
+    win->m_lostFocus = true;
+
     return FALSE;
 }
 }
@@ -195,6 +216,15 @@ static void gtk_radiobutton_size_allocate( GtkWidget *widget,
 
 IMPLEMENT_DYNAMIC_CLASS(wxRadioBox,wxControl)
 
+void wxRadioBox::Init()
+{
+    m_needParent = true;
+    m_acceptsFocus = true;
+
+    m_hasFocus =
+    m_lostFocus = false;
+}
+
 bool wxRadioBox::Create( wxWindow *parent, wxWindowID id,
                          const wxString& title,
                          const wxPoint &pos, const wxSize &size,
@@ -222,7 +252,6 @@ bool wxRadioBox::Create( wxWindow *parent, wxWindowID id, const wxString& title,
     }
 
     m_widget = GTKCreateFrame(title);
-    g_object_ref(m_widget);
     wxControl::SetLabel(title);
     if ( HasFlag(wxNO_BORDER) )
     {
@@ -239,7 +268,7 @@ bool wxRadioBox::Create( wxWindow *parent, wxWindowID id, const wxString& title,
     unsigned int num_of_cols = GetColumnCount();
     unsigned int num_of_rows = GetRowCount();
 
-    GtkRadioButton *rbtn = NULL;
+    GtkRadioButton *rbtn = (GtkRadioButton*) NULL;
 
     GtkWidget *table = gtk_table_new( num_of_rows, num_of_cols, FALSE );
     gtk_table_set_col_spacings( GTK_TABLE(table), 1 );
@@ -248,15 +277,14 @@ bool wxRadioBox::Create( wxWindow *parent, wxWindowID id, const wxString& title,
     gtk_container_add( GTK_CONTAINER(m_widget), table );
 
     wxString label;
-    GSList *radio_button_group = NULL;
+    GSList *radio_button_group = (GSList *) NULL;
     for (unsigned int i = 0; i < (unsigned int)n; i++)
     {
         if ( i != 0 )
             radio_button_group = gtk_radio_button_get_group( GTK_RADIO_BUTTON(rbtn) );
 
         label.Empty();
-        for ( wxString::const_iterator pc = choices[i].begin();
-              pc != choices[i].end(); ++pc )
+        for ( const wxChar *pc = choices[i]; *pc; pc++ )
         {
             if ( *pc != wxT('&') )
                 label += *pc;
@@ -352,6 +380,25 @@ bool wxRadioBox::Show( bool show )
     return true;
 }
 
+void wxRadioBox::SetFocus()
+{
+    wxCHECK_RET( m_widget != NULL, wxT("invalid radiobox") );
+
+    if (m_buttonsInfo.GetCount() == 0) return;
+
+    wxRadioBoxButtonsInfoList::compatibility_iterator node = m_buttonsInfo.GetFirst();
+    while (node)
+    {
+        GtkToggleButton *button = GTK_TOGGLE_BUTTON( node->GetData()->button );
+        if (button->active)
+        {
+            gtk_widget_grab_focus( GTK_WIDGET(button) );
+            return;
+        }
+        node = node->GetNext();
+    }
+}
+
 void wxRadioBox::SetSelection( int n )
 {
     wxCHECK_RET( m_widget != NULL, wxT("invalid radiobox") );
@@ -379,7 +426,7 @@ int wxRadioBox::GetSelection(void) const
     while (node)
     {
         GtkToggleButton *button = GTK_TOGGLE_BUTTON( node->GetData()->button );
-        if (gtk_toggle_button_get_active(button)) return count;
+        if (button->active) return count;
         count++;
         node = node->GetNext();
     }
@@ -397,7 +444,7 @@ wxString wxRadioBox::GetString(unsigned int n) const
 
     wxCHECK_MSG( node, wxEmptyString, wxT("radiobox wrong index") );
 
-    GtkLabel* label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(node->GetData()->button)));
+    GtkLabel *label = GTK_LABEL(GTK_BIN(node->GetData()->button)->child);
 
     wxString str( wxGTK_CONV_BACK( gtk_label_get_text(label) ) );
 
@@ -419,13 +466,15 @@ void wxRadioBox::SetString(unsigned int item, const wxString& label)
 
     wxCHECK_RET( node, wxT("radiobox wrong index") );
 
-    GtkLabel* g_label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(node->GetData()->button)));
+    GtkLabel *g_label = GTK_LABEL(GTK_BIN(node->GetData()->button)->child);
 
     gtk_label_set_text( g_label, wxGTK_CONV( label ) );
 }
 
 bool wxRadioBox::Enable( bool enable )
 {
+    bool isEnabled = IsEnabled();
+
     if ( !wxControl::Enable( enable ) )
         return false;
 
@@ -433,15 +482,15 @@ bool wxRadioBox::Enable( bool enable )
     while (node)
     {
         GtkButton *button = GTK_BUTTON( node->GetData()->button );
-        GtkLabel *label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(button)));
+        GtkLabel *label = GTK_LABEL(GTK_BIN(button)->child);
 
         gtk_widget_set_sensitive( GTK_WIDGET(button), enable );
         gtk_widget_set_sensitive( GTK_WIDGET(label), enable );
         node = node->GetNext();
     }
 
-    if (enable)
-        GTKFixSensitivity();
+    if (!isEnabled && enable)
+        wxGtkFixSensitivity(this);
 
     return true;
 }
@@ -455,7 +504,7 @@ bool wxRadioBox::Enable(unsigned int item, bool enable)
     wxCHECK_MSG( node, false, wxT("radiobox wrong index") );
 
     GtkButton *button = GTK_BUTTON( node->GetData()->button );
-    GtkLabel *label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(button)));
+    GtkLabel *label = GTK_LABEL(GTK_BIN(button)->child);
 
     gtk_widget_set_sensitive( GTK_WIDGET(button), enable );
     gtk_widget_set_sensitive( GTK_WIDGET(label), enable );
@@ -475,7 +524,7 @@ bool wxRadioBox::IsItemEnabled(unsigned int item) const
 
     // don't use GTK_WIDGET_IS_SENSITIVE() here, we want to return true even if
     // the parent radiobox is disabled
-    return gtk_widget_get_sensitive(GTK_WIDGET(button));
+    return GTK_WIDGET_SENSITIVE(GTK_WIDGET(button));
 }
 
 bool wxRadioBox::Show(unsigned int item, bool show)
@@ -506,7 +555,7 @@ bool wxRadioBox::IsItemShown(unsigned int item) const
 
     GtkButton *button = GTK_BUTTON( node->GetData()->button );
 
-    return gtk_widget_get_visible(GTK_WIDGET(button));
+    return GTK_WIDGET_VISIBLE(GTK_WIDGET(button));
 }
 
 unsigned int wxRadioBox::GetCount() const
@@ -519,8 +568,9 @@ void wxRadioBox::GtkDisableEvents()
     wxRadioBoxButtonsInfoList::compatibility_iterator node = m_buttonsInfo.GetFirst();
     while (node)
     {
-        g_signal_handlers_block_by_func(node->GetData()->button,
-            (gpointer)gtk_radiobutton_clicked_callback, this);
+        g_signal_handlers_disconnect_by_func (node->GetData()->button,
+                                              (gpointer) gtk_radiobutton_clicked_callback,
+                                              this);
 
         node = node->GetNext();
     }
@@ -531,8 +581,8 @@ void wxRadioBox::GtkEnableEvents()
     wxRadioBoxButtonsInfoList::compatibility_iterator node = m_buttonsInfo.GetFirst();
     while (node)
     {
-        g_signal_handlers_unblock_by_func(node->GetData()->button,
-            (gpointer)gtk_radiobutton_clicked_callback, this);
+        g_signal_connect (node->GetData()->button, "clicked",
+                          G_CALLBACK (gtk_radiobutton_clicked_callback), this);
 
         node = node->GetNext();
     }
@@ -548,7 +598,7 @@ void wxRadioBox::DoApplyWidgetStyle(GtkRcStyle *style)
         GtkWidget *widget = GTK_WIDGET( node->GetData()->button );
 
         gtk_widget_modify_style( widget, style );
-        gtk_widget_modify_style(gtk_bin_get_child(GTK_BIN(widget)), style);
+        gtk_widget_modify_style(GTK_BIN(widget)->child, style);
 
         node = node->GetNext();
     }
@@ -565,7 +615,7 @@ void wxRadioBox::GTKWidgetDoSetMnemonic(GtkWidget* w)
 }
 
 #if wxUSE_TOOLTIPS
-void wxRadioBox::GTKApplyToolTip(const char* tip)
+void wxRadioBox::ApplyToolTip(GtkTooltips * WXUNUSED(tips), const wxChar *tip)
 {
     // set this tooltip for all radiobuttons which don't have their own tips
     unsigned n = 0;
@@ -575,7 +625,8 @@ void wxRadioBox::GTKApplyToolTip(const char* tip)
     {
         if ( !GetItemToolTip(n) )
         {
-            wxToolTip::GTKApply(GTK_WIDGET(node->GetData()->button), tip);
+            wxToolTip::Apply(GTK_WIDGET(node->GetData()->button),
+                             wxConvCurrent->cWX2MB(tip));
         }
     }
 }
@@ -588,28 +639,43 @@ void wxRadioBox::DoSetItemToolTip(unsigned int n, wxToolTip *tooltip)
     if ( tooltip )
         buf = wxGTK_CONV(tooltip->GetTip());
 
-    wxToolTip::GTKApply(GTK_WIDGET(m_buttonsInfo[n]->button), buf);
+    wxToolTip::Apply(GTK_WIDGET(m_buttonsInfo[n]->button), buf);
 }
 
 #endif // wxUSE_TOOLTIPS
 
 GdkWindow *wxRadioBox::GTKGetWindow(wxArrayGdkWindows& windows) const
 {
-    windows.push_back(gtk_widget_get_window(m_widget));
+    windows.push_back(m_widget->window);
 
     wxRadioBoxButtonsInfoList::compatibility_iterator node = m_buttonsInfo.GetFirst();
     while (node)
     {
         GtkWidget *button = GTK_WIDGET( node->GetData()->button );
 
-        // don't put NULL pointers in the 'windows' array!
-        if (gtk_widget_get_window(button))
-            windows.push_back(gtk_widget_get_window(button));
+        if (button->window)
+            windows.push_back(button->window);
 
         node = node->GetNext();
     }
 
     return NULL;
+}
+
+void wxRadioBox::OnInternalIdle()
+{
+    wxControl::OnInternalIdle();
+
+    if ( m_lostFocus )
+    {
+        m_hasFocus = false;
+        m_lostFocus = false;
+
+        wxFocusEvent event( wxEVT_KILL_FOCUS, GetId() );
+        event.SetEventObject( this );
+
+        (void)GetEventHandler()->ProcessEvent( event );
+    }
 }
 
 // static

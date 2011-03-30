@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        src/univ/button.cpp
+// Name:        univ/button.cpp
 // Purpose:     wxButton
 // Author:      Vadim Zeitlin
 // Modified by:
@@ -79,6 +79,8 @@ static const wxCoord DEFAULT_BTN_MARGIN_Y = 0;
 // implementation
 // ============================================================================
 
+IMPLEMENT_DYNAMIC_CLASS(wxButton, wxControl)
+
 // ----------------------------------------------------------------------------
 // creation
 // ----------------------------------------------------------------------------
@@ -126,7 +128,7 @@ bool wxButton::Create(wxWindow *parent,
     SetLabel(label);
 
     if (bitmap.Ok())
-        SetBitmap(bitmap); // SetInitialSize called by SetBitmap()
+        SetImageLabel(bitmap); // SetInitialSize called by SetImageLabel()
     else
         SetInitialSize(size);
 
@@ -211,7 +213,7 @@ void wxButton::DoDraw(wxControlRenderer *renderer)
         renderer->DrawButtonBorder();
     }
 
-    renderer->DrawButtonLabel(m_bitmap, m_marginBmpX, m_marginBmpY);
+    renderer->DrawLabel(m_bitmap, m_marginBmpX, m_marginBmpY);
 }
 
 bool wxButton::DoDrawBackground(wxDC& dc)
@@ -313,17 +315,14 @@ wxInputHandler *wxButton::GetStdInputHandler(wxInputHandler *handlerDef)
 // misc
 // ----------------------------------------------------------------------------
 
-void wxButton::DoSetBitmap(const wxBitmap& bitmap, State which)
+void wxButton::SetImageLabel(const wxBitmap& bitmap)
 {
-    // we support only one bitmap right now, although this wouldn't be
-    // difficult to change
-    if ( which == State_Normal )
-        m_bitmap = bitmap;
+    m_bitmap = bitmap;
 
-    SetBitmapMargins(DEFAULT_BTN_MARGIN_X, DEFAULT_BTN_MARGIN_Y);
+    SetImageMargins(DEFAULT_BTN_MARGIN_X, DEFAULT_BTN_MARGIN_Y);
 }
 
-void wxButton::DoSetBitmapMargins(wxCoord x, wxCoord y)
+void wxButton::SetImageMargins(wxCoord x, wxCoord y)
 {
     m_marginBmpX = x + 2;
     m_marginBmpY = y + 2;
@@ -331,11 +330,9 @@ void wxButton::DoSetBitmapMargins(wxCoord x, wxCoord y)
     SetInitialSize(wxDefaultSize);
 }
 
-wxWindow *wxButton::SetDefault()
+void wxButton::SetDefault()
 {
     m_isDefault = true;
-
-    return wxButtonBase::SetDefault();
 }
 
 // ============================================================================

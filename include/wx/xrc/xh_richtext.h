@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/xrc/xh_richtext.h
+// Name:        wx/xrc/xh_text.h
 // Purpose:     XML resource handler for wxRichTextCtrl
 // Author:      Julian Smart
 // Created:     2006-11-08
