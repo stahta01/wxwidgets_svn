@@ -23,7 +23,7 @@
         dialog) under MSW.
     @style{wxALIGN_LEFT}
         Same as wxTE_LEFT for wxTextCtrl: the text is left aligned.
-    @style{wxALIGN_CENTRE_HORIZONTAL}
+    @style{wxALIGN_CENTRE}
         Same as wxTE_CENTRE for wxTextCtrl: the text is centered.
     @style{wxALIGN_RIGHT}
         Same as wxTE_RIGHT for wxTextCtrl: the text is right aligned (this is
