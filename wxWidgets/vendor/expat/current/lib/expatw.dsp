@@ -38,12 +38,12 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release-w"
-# PROP Intermediate_Dir "Release-w"
+# PROP Output_Dir "..\win32\bin\Release"
+# PROP Intermediate_Dir "..\win32\tmp\Release-w"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "EXPAT_EXPORTS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "COMPILED_FROM_DSP" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "EXPAT_EXPORTS" /D "XML_UNICODE_WCHAR_T" /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "COMPILED_FROM_DSP" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "XML_UNICODE_WCHAR_T" /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -53,8 +53,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /pdb:none /machine:I386 /out:"Release-w\libexpatw.dll"
+# ADD BASE LINK32 /nologo /dll /machine:I386
+# ADD LINK32 /nologo /dll /pdb:none /machine:I386 /out:"..\win32\bin\Release\libexpatw.dll"
 
 !ELSEIF  "$(CFG)" == "expatw - Win32 Debug"
 
@@ -65,12 +65,12 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug-w"
-# PROP Intermediate_Dir "Debug-w"
+# PROP Output_Dir "..\win32\bin\Debug"
+# PROP Intermediate_Dir "..\win32\tmp\Debug-w"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "EXPAT_EXPORTS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /D "_DEBUG" /D "COMPILED_FROM_DSP" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "EXPAT_EXPORTS" /D "XML_UNICODE_WCHAR_T" /FR /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /GX /ZI /Od /D "_DEBUG" /D "COMPILED_FROM_DSP" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "XML_UNICODE_WCHAR_T" /FR /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -79,8 +79,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /pdb:none /debug /machine:I386 /out:"Debug-w\libexpatw.dll"
+# ADD BASE LINK32 /nologo /dll /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 /nologo /dll /pdb:none /debug /machine:I386 /out:"..\win32\bin\Debug\libexpatw.dll"
 
 !ENDIF 
 
@@ -116,6 +116,14 @@ SOURCE=.\xmlrole.c
 
 SOURCE=.\xmltok.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\xmltok_impl.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\xmltok_ns.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -134,7 +142,15 @@ SOURCE=.\expat.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\expat_external.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\iasciitab.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\internal.h
 # End Source File
 # Begin Source File
 
