@@ -2889,7 +2889,7 @@ protected:
 };
 
 /**
-    @class wxRichTextParagraphLayoutBox
+    @class wxRichTextParagraphBox
 
     This class knows how to lay out paragraphs.
 
