@@ -329,11 +329,16 @@ void wxCommandProcessor::ClearCommands()
 
 bool wxCommandProcessor::IsDirty() const
 {
+    if ( m_commands.empty() )
+    {
+        // If we have never been modified, we can't be dirty.
+        return false;
+    }
+
     if ( !m_lastSavedCommand )
     {
-        // We have never been saved, so we are dirty if and only if we have any
-        // commands at all.
-        return m_currentCommand;
+        // If we have been modified but have never been saved, we're dirty.
+        return true;
     }
 
     if ( !m_currentCommand )

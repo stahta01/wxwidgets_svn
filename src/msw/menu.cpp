@@ -793,6 +793,9 @@ wxMenuItem *wxMenu::DoRemove(wxMenuItem *item)
         node = node->GetNext();
     }
 
+    // DoRemove() (unlike Remove) can only be called for an existing item!
+    wxCHECK_MSG( node, NULL, wxT("bug in wxMenu::Remove logic") );
+
 #if wxUSE_ACCEL
     // remove the corresponding accel from the accel table
     int n = FindAccel(item->GetId());
@@ -1364,6 +1367,10 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
         (GetHmenu() != 0);
 #endif
 
+    int mswpos = (!isAttached || (pos == m_menus.GetCount()))
+        ?   -1 // append the menu
+        :   MSWPositionForWxMenu(GetMenu(pos),pos);
+
     if ( !wxMenuBarBase::Insert(pos, menu, title) )
         return false;
 
@@ -1391,33 +1398,9 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
             wxLogLastError(wxT("TB_INSERTBUTTON"));
             return false;
         }
+        wxUnusedVar(mswpos);
 #else
-        // We have a problem with the index if there is an extra "Window" menu
-        // in this menu bar, which is added by wxMDIParentFrame to it directly
-        // using Windows API (so that it remains invisible to the user code),
-        // but which does affect the indices of the items we insert after it.
-        // So we check if any of the menus before the insertion position is a
-        // foreign one and adjust the insertion index accordingly.
-        int mswExtra = 0;
-
-        // Skip all this if the total number of menus matches (notice that the
-        // internal menu count has already been incremented by wxMenuBarBase::
-        // Insert() call above, hence -1).
-        int mswCount = ::GetMenuItemCount(GetHmenu());
-        if ( mswCount != -1 &&
-                static_cast<unsigned>(mswCount) != GetMenuCount() - 1 )
-        {
-            wxMenuList::compatibility_iterator node = m_menus.GetFirst();
-            for ( size_t n = 0; n < pos; n++ )
-            {
-                if ( ::GetSubMenu(GetHmenu(), n) != GetHmenuOf(node->GetData()) )
-                    mswExtra++;
-                else
-                    node = node->GetNext();
-            }
-        }
-
-        if ( !::InsertMenu(GetHmenu(), pos + mswExtra,
+        if ( !::InsertMenu(GetHmenu(), mswpos,
                            MF_BYPOSITION | MF_POPUP | MF_STRING,
                            (UINT_PTR)GetHmenuOf(menu), title.t_str()) )
         {

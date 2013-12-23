@@ -68,7 +68,7 @@ END_EVENT_TABLE()
 
 IMPLEMENT_CLASS(wxNumberEntryDialog, wxDialog)
 
-bool wxNumberEntryDialog::Create(wxWindow *parent,
+wxNumberEntryDialog::wxNumberEntryDialog(wxWindow *parent,
                                          const wxString& message,
                                          const wxString& prompt,
                                          const wxString& caption,
@@ -76,14 +76,10 @@ bool wxNumberEntryDialog::Create(wxWindow *parent,
                                          long min,
                                          long max,
                                          const wxPoint& pos)
+                   : wxDialog(GetParentForModalDialog(parent, 0),
+                              wxID_ANY, caption,
+                              pos, wxDefaultSize)
 {
-    if ( !wxDialog::Create(GetParentForModalDialog(parent, 0),
-                           wxID_ANY, caption,
-                           pos, wxDefaultSize) )
-    {
-        return false;
-    }
-
     m_value = value;
     m_max = max;
     m_min = min;
@@ -132,8 +128,6 @@ bool wxNumberEntryDialog::Create(wxWindow *parent,
     m_spinctrl->SetFocus();
 
     wxEndBusyCursor();
-
-    return true;
 }
 
 void wxNumberEntryDialog::OnOK(wxCommandEvent& WXUNUSED(event))

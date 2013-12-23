@@ -397,8 +397,6 @@ wxModalEventLoop::wxModalEventLoop(WXWindow modalNativeWindow)
 
 // END move into a evtloop_osx.cpp
 
-#define OSX_USE_MODAL_SESSION 1
-
 void wxModalEventLoop::OSXDoRun()
 {
     wxMacAutoreleasePool pool;
@@ -414,70 +412,13 @@ void wxModalEventLoop::OSXDoRun()
             [NSApp sendEvent:event];
         }
     }
-#if OSX_USE_MODAL_SESSION
-    if ( m_modalWindow )
-    {
-        BeginModalSession(m_modalWindow);
-        wxCFEventLoop::OSXDoRun();
-    }
-    else
-#endif
-    {
-        [NSApp runModalForWindow:m_modalNativeWindow];
-    }
+    
+    [NSApp runModalForWindow:m_modalNativeWindow];
 }
 
 void wxModalEventLoop::OSXDoStop()
 {
-#if OSX_USE_MODAL_SESSION
-    if ( m_modalWindow )
-    {
-        EndModalSession();
-    }
-    else
-#endif
-    {
-        [NSApp abortModal];
-    }
-}
-
-// we need our own version of ProcessIdle here in order to
-// avoid deletion of pending objects, because ProcessIdle is running
-// to soon and ends up in destroying the object too early, ie before
-// a stack allocated instance is removed resulting in double deletes
-bool wxModalEventLoop::ProcessIdle()
-{
-    bool needMore = false;
-    if ( wxTheApp )
-    {
-        // synthesize an idle event and check if more of them are needed
-        wxIdleEvent event;
-        event.SetEventObject(wxTheApp);
-        wxTheApp->ProcessEvent(event);
-        
-#if wxUSE_LOG
-        // flush the logged messages if any (do this after processing the events
-        // which could have logged new messages)
-        wxLog::FlushActive();
-#endif
-        needMore = event.MoreRequested();
-        
-        wxWindowList::compatibility_iterator node = wxTopLevelWindows.GetFirst();
-        while (node)
-        {
-            wxWindow* win = node->GetData();
-            
-            // Don't send idle events to the windows that are about to be destroyed
-            // anyhow, this is wasteful and unexpected.
-            if ( !wxPendingDelete.Member(win) && win->SendIdleEvents(event) )
-                needMore = true;
-            node = node->GetNext();
-        }
-        
-        wxUpdateUIEvent::ResetUpdateTime();
-
-    }
-    return needMore;
+    [NSApp abortModal];
 }
 
 void wxGUIEventLoop::BeginModalSession( wxWindow* modalWindow )

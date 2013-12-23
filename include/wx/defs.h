@@ -953,10 +953,6 @@ typedef wxUint16 wxWord;
             #define SIZEOF_LONG 4
         #endif
 
-        #ifndef SIZEOF_LONG_LONG
-            #define SIZEOF_LONG_LONG 8
-        #endif
-
         #ifndef SIZEOF_WCHAR_T
             /* Windows uses UTF-16 */
             #define SIZEOF_WCHAR_T 2
@@ -2293,13 +2289,8 @@ enum wxStandardID
     wxID_OSX_HIDE = wxID_OSX_MENU_FIRST,
     wxID_OSX_HIDEOTHERS,
     wxID_OSX_SHOWALL,
-#if wxABI_VERSION >= 30001
-    wxID_OSX_SERVICES,
-    wxID_OSX_MENU_LAST = wxID_OSX_SERVICES,
-#else
     wxID_OSX_MENU_LAST = wxID_OSX_SHOWALL,
-#endif
-
+    
     /*  IDs used by generic file dialog (13 consecutive starting from this value) */
     wxID_FILEDLGG = 5900,
 

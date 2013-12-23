@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        src/richtext/richtextliststylepage.cpp
-// Purpose:     Implements the rich text formatting dialog list style page.
+// Purpose:
 // Author:      Julian Smart
 // Modified by:
 // Created:     10/18/2006 11:36:37 AM

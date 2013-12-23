@@ -276,20 +276,21 @@ BEGIN_EVENT_TABLE(wxContextHelpButton, wxBitmapButton)
     EVT_BUTTON(wxID_CONTEXT_HELP, wxContextHelpButton::OnContextHelp)
 END_EVENT_TABLE()
 
-bool wxContextHelpButton::Create(wxWindow* parent,
+wxContextHelpButton::wxContextHelpButton(wxWindow* parent,
                                          wxWindowID id,
                                          const wxPoint& pos,
                                          const wxSize& size,
                                          long style)
-{
-    return wxBitmapButton::Create(parent, id,
 #if defined(__WXPM__)
-                                  wxBitmap(wxCSQUERY_BITMAP,
-                                           wxBITMAP_TYPE_BMP_RESOURCE),
+                   : wxBitmapButton(parent, id, wxBitmap(wxCSQUERY_BITMAP
+                                                         ,wxBITMAP_TYPE_BMP_RESOURCE
+                                                        ),
+                                    pos, size, style)
 #else
-                                  wxBitmap(csquery_xpm),
+                   : wxBitmapButton(parent, id, wxBitmap(csquery_xpm),
+                                    pos, size, style)
 #endif
-                                  pos, size, style);
+{
 }
 
 void wxContextHelpButton::OnContextHelp(wxCommandEvent& WXUNUSED(event))

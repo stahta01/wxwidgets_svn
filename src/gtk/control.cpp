@@ -254,9 +254,9 @@ wxControl::GetDefaultAttributesFromGTKWidget(GtkWidget* widget,
     gtk_style_context_get_background_color(sc, stateFlag, &c);
     attr.colBg = wxColour(c);
     wxNativeFontInfo info;
-    gtk_style_context_get(
-        sc, stateFlag, GTK_STYLE_PROPERTY_FONT, &info.description, NULL);
+    info.description = const_cast<PangoFontDescription*>(gtk_style_context_get_font(sc, stateFlag));
     attr.font = wxFont(info);
+    info.description = NULL;
 #else
     GtkStyle* style;
 

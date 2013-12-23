@@ -1598,18 +1598,6 @@ wxTreeItemId wxTreeCtrl::DoInsertItem(const wxTreeItemId& parent,
     return DoInsertAfter(parent, idPrev, text, image, selectedImage, data);
 }
 
-bool wxTreeCtrl::MSWDeleteItem(const wxTreeItemId& item)
-{
-    TempSetter set(m_changingSelection);
-    if ( !TreeView_DeleteItem(GetHwnd(), HITEM(item)) )
-    {
-        wxLogLastError(wxT("TreeView_DeleteItem"));
-        return false;
-    }
-
-    return true;
-}
-
 void wxTreeCtrl::Delete(const wxTreeItemId& item)
 {
     // unlock tree selections on vista, without this the
@@ -1631,8 +1619,14 @@ void wxTreeCtrl::Delete(const wxTreeItemId& item)
             }
         }
 
-        if ( !MSWDeleteItem(item) )
-            return;
+        {
+            TempSetter set(m_changingSelection);
+            if ( !TreeView_DeleteItem(GetHwnd(), HITEM(item)) )
+            {
+                wxLogLastError(wxT("TreeView_DeleteItem"));
+                return;
+            }
+        }
 
         if ( !selected )
         {
@@ -1663,7 +1657,10 @@ void wxTreeCtrl::Delete(const wxTreeItemId& item)
     }
     else
     {
-        MSWDeleteItem(item);
+        if ( !TreeView_DeleteItem(GetHwnd(), HITEM(item)) )
+        {
+            wxLogLastError(wxT("TreeView_DeleteItem"));
+        }
     }
 }
 

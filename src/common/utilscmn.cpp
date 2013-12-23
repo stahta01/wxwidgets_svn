@@ -1205,7 +1205,6 @@ wxString wxStripMenuCodes(const wxString& in, int flags)
             if ( ++it == in.end() )
             {
                 wxLogDebug(wxT("Invalid menu string '%s'"), in.c_str());
-                break;
             }
             else
             {

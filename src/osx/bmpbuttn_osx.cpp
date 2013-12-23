@@ -66,7 +66,7 @@ wxSize wxBitmapButton::DoGetBestSize() const
 
     if ( GetBitmapLabel().IsOk() )
     {
-        best += GetBitmapLabel().GetScaledSize();
+        best += GetBitmapLabel().GetSize();
     }
 
     return best;

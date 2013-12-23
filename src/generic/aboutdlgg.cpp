@@ -277,24 +277,16 @@ void wxGenericAboutDialog::AddCollapsiblePane(const wxString& title,
 
 void wxGenericAboutDialog::OnCloseWindow(wxCloseEvent& event)
 {
-    // safeguards in case the window is still shown using ShowModal
-    if ( !IsModal() )
-        Destroy();
+    Destroy();
 
     event.Skip();
 }
 
-void wxGenericAboutDialog::OnOK(wxCommandEvent& event)
+void wxGenericAboutDialog::OnOK(wxCommandEvent& WXUNUSED(event))
 {
-    // safeguards in case the window is still shown using ShowModal
-    if ( !IsModal() )
-    {
-        // By default a modeless dialog would be just hidden, destroy this one
-        // instead.
-        Destroy();
-    }
-    else
-        event.Skip();
+    // By default a modeless dialog would be just hidden, destroy this one
+    // instead.
+    Destroy();
 }
 
 #endif // !wxUSE_MODAL_ABOUT_DIALOG

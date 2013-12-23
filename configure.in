@@ -14,7 +14,7 @@ dnl ---------------------------------------------------------------------------
 dnl initialization
 dnl ---------------------------------------------------------------------------
 
-AC_INIT([wxWidgets], [3.1.0], [wx-dev@lists.wxwidgets.org])
+AC_INIT([wxWidgets], [3.0.0], [wx-dev@lists.wxwidgets.org])
 
 dnl the file passed to AC_CONFIG_SRCDIR should be specific to our package
 AC_CONFIG_SRCDIR([wx-config.in])
@@ -39,7 +39,7 @@ dnl
 dnl wx_release_number += 1
 
 wx_major_version_number=3
-wx_minor_version_number=1
+wx_minor_version_number=0
 wx_release_number=0
 wx_subrelease_number=0
 
@@ -2316,9 +2316,8 @@ if test "$have_cos" = 1 -a "$have_floor" = 1; then
     AC_MSG_RESULT(yes)
 else
     AC_MSG_RESULT(no)
-    save_LIBS="$LIBS"
     LIBS="$LIBS -lm"
-    dnl use different functions to avoid configure caching
+    # use different functions to avoid configure caching
     have_sin=0
     have_ceil=0
     AC_CHECK_FUNCS(sin, have_sin=1)
@@ -2328,9 +2327,7 @@ else
         AC_MSG_RESULT(yes)
     else
         AC_MSG_RESULT(no)
-        dnl not sure we should warn the user, crash, etc. but don't link with
-        dnl -lm it might result in failure of the subsequent tests too
-        LIBS="$save_LIBS"
+        # not sure we should warn the user, crash, etc.
     fi
 fi
 
@@ -4239,37 +4236,6 @@ if test "$ac_cv_func_vsscanf" = "yes"; then
 
     if test "$wx_cv_func_vsscanf_decl" = "yes"; then
         AC_DEFINE(HAVE_VSSCANF_DECL)
-
-        dnl we know there is a vsscanf() declaration, but it can be broken by
-        dnl declaring vsscanf() as taking a non-const first argument (this
-        dnl happens at least under HP-UX 11.31, see #15638).
-        AC_CACHE_CHECK([if vsscanf() declaration is broken], wx_cv_func_broken_vsscanf_decl,
-            [
-                AC_TRY_COMPILE(
-                    [
-                        #include <stdio.h>
-                        #include <stdarg.h>
-                        #ifdef __MSL__
-                        #if __MSL__ >= 0x6000
-                        namespace std {}
-                        using namespace std;
-                        #endif
-                        #endif
-                    ],
-                    [
-                        const char *buf;
-                        va_list args;
-                        vsscanf(buf, "%s", args);
-                    ],
-                    wx_cv_func_broken_vsscanf_decl=no,
-                    wx_cv_func_broken_vsscanf_decl=yes
-                )
-            ]
-        )
-
-        if test "$wx_cv_func_broken_vsscanf_decl" = "yes"; then
-            AC_DEFINE(HAVE_BROKEN_VSSCANF_DECL)
-        fi
     fi
 fi
 AC_LANG_POP()
@@ -6360,9 +6326,25 @@ dnl ---------------------------------------------------------------------------
 if test "$wxUSE_GUI" = "yes" -a "$wxUSE_JOYSTICK" = "yes"; then
     wxUSE_JOYSTICK=no
 
-    dnl under MSW and OS X we always have joystick support
-    if test "$TOOLKIT" = "MSW" -o "$TOOLKIT" = "OSX_COCOA" -o "$TOOLKIT" = "COCOA"; then
+    dnl under MSW we always have joystick support
+    if test "$TOOLKIT" = "MSW"; then
         wxUSE_JOYSTICK=yes
+
+    dnl mac only available on darwin
+    elif test "$TOOLKIT" = "OSX" -o "$TOOLKIT" = "COCOA"; then
+        if test "$USE_DARWIN" = 1; then
+            dnl check for a bug in the headers, some have bad setEventCallout
+            AC_MSG_CHECKING([headers have declarations needed for joystick support])
+            AC_LANG_PUSH(C++)
+            AC_TRY_COMPILE( [ #include <IOKit/hid/IOHIDLib.h> ],
+                            [ IOHIDQueueInterface *qi = NULL;
+                              IOHIDCallbackFunction cb = NULL;
+                              qi->setEventCallout(NULL, cb, NULL, NULL); ],
+                            [ wxUSE_JOYSTICK=yes ]
+                          )
+            AC_LANG_POP()
+            AC_MSG_RESULT($wxUSE_JOYSTICK)
+        fi
 
     dnl joystick support is only for Linux 2.1.x or greater
     else
@@ -7633,6 +7615,7 @@ dnl ---------------------------------------------------------------------------
 STD_BASE_LIBS="base"
 STD_GUI_LIBS=""
 BUILT_WX_LIBS="base"
+ALL_WX_LIBS="xrc stc gl media qa html adv core xml net base"
 
 if test "$wxUSE_SOCKETS" = "yes" ; then
     STD_BASE_LIBS="net $STD_BASE_LIBS"
@@ -7686,6 +7669,7 @@ if test "$wxUSE_GUI" = "yes"; then
     fi
 fi
 
+AC_SUBST(ALL_WX_LIBS)
 AC_SUBST(BUILT_WX_LIBS)
 AC_SUBST(STD_BASE_LIBS)
 AC_SUBST(STD_GUI_LIBS)

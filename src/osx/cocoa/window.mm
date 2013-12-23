@@ -1388,7 +1388,24 @@ void wxWidgetCocoaImpl::insertText(NSString* text, WXWidget slf, void *_cmd)
         {
             // If we don't have a corresponding key event (e.g. IME-composed
             // characters), send wxEVT_CHAR without sending wxEVT_KEY_DOWN.
-            result = DoHandleCharEvent(NULL,text);
+            for (NSUInteger i = 0; i < [text length]; ++i)
+            {
+                wxKeyEvent wxevent(wxEVT_CHAR);
+                wxevent.m_shiftDown = wxevent.m_controlDown = wxevent.m_altDown = wxevent.m_metaDown = false;
+                wxevent.m_rawCode = 0;
+                wxevent.m_rawFlags = 0;
+                wxevent.SetTimestamp();
+                unichar aunichar = [text characterAtIndex:i];
+                wxevent.m_uniChar = aunichar;
+                wxevent.m_keyCode = aunichar < 0x80 ? aunichar : WXK_NONE;
+                wxWindowMac* peer = GetWXPeer();
+                if ( peer )
+                {
+                    wxevent.SetEventObject(peer);
+                    wxevent.SetId(peer->GetId());
+                }
+                result = GetWXPeer()->OSXHandleKeyEvent(wxevent) || result;
+            }
         }
     }
     if ( !result )
@@ -2688,29 +2705,16 @@ void wxWidgetCocoaImpl::InstallEventHandler( WXWidget control )
 bool wxWidgetCocoaImpl::DoHandleCharEvent(NSEvent *event, NSString *text)
 {
     bool result = false;
-    wxWindowMac* peer = GetWXPeer();
-    if ( peer )
+    
+    for (NSUInteger i = 0; i < [text length]; ++i)
     {
-        for (NSUInteger i = 0; i < [text length]; ++i)
-        {
-            wxKeyEvent wxevent(wxEVT_CHAR);
-            wxevent.m_shiftDown = wxevent.m_controlDown = wxevent.m_altDown = wxevent.m_metaDown = false;
-            wxevent.m_rawCode = 0;
-            wxevent.m_rawFlags = 0;
-            if ( event )
-                wxevent.SetTimestamp( (int)([event timestamp] * 1000) ) ;
-            unichar aunichar = [text characterAtIndex:i];
-    #if wxUSE_UNICODE
-            wxevent.m_uniChar = aunichar;
-    #endif
-            wxevent.m_keyCode = aunichar < 0x80 ? aunichar : WXK_NONE;
+        wxKeyEvent wxevent(wxEVT_CHAR);
+        unichar c = [text characterAtIndex:i];
+        SetupKeyEvent( wxevent, event, [NSString stringWithCharacters:&c length:1]);
 
-            wxevent.SetEventObject(peer);
-            wxevent.SetId(peer->GetId());
-            
-            result = peer->OSXHandleKeyEvent(wxevent) || result;
-        }
+        result = GetWXPeer()->OSXHandleKeyEvent(wxevent) || result;
     }
+    
     return result;
 }
 
