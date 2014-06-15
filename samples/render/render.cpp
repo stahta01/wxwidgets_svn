@@ -66,7 +66,7 @@ public:
                                   int WXUNUSED(flags) = 0,
                                   wxHeaderSortIconType WXUNUSED(sortArrow)
                                     = wxHDR_SORT_ICON_NONE,
-                                  wxHeaderButtonParams* params = NULL) wxOVERRIDE
+                                  wxHeaderButtonParams* params = NULL)
     {
         wxDCBrushChanger setBrush(dc, *wxBLUE_BRUSH);
         wxDCTextColourChanger setFgCol(dc, *wxWHITE);
@@ -86,7 +86,7 @@ public:
 // cases, but we show this here just for completeness)
 class MyTraits : public wxGUIAppTraits
 {
-    virtual wxRendererNative *CreateRenderer() wxOVERRIDE
+    virtual wxRendererNative *CreateRenderer()
     {
         // it will be deleted on program shutdown by wxWidgets itself
         return new MyRenderer;
@@ -97,10 +97,10 @@ class MyTraits : public wxGUIAppTraits
 class MyApp : public wxApp
 {
 public:
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 
     // if we want MyTraits to be used we must override CreateTraits()
-    virtual wxAppTraits *CreateTraits() wxOVERRIDE { return new MyTraits; }
+    virtual wxAppTraits *CreateTraits() { return new MyTraits; }
 };
 
 // Define a new frame type: this is going to be our main frame

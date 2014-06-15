@@ -130,13 +130,18 @@ void wxGUIEventLoop::ScheduleExit(int rc)
     ::wxBreakDispatch();
 }
 
-void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
+bool wxGUIEventLoop::YieldFor(long eventsToProcess)
 {
+    m_isInsideYield = true;
+    m_eventsToProcessInsideYield = eventsToProcess;
+
     while (wxTheApp && wxTheApp->Pending())
         // TODO: implement event filtering using the eventsToProcess mask
         wxTheApp->Dispatch();
 
-    wxEventLoopBase::DoYieldFor(eventsToProcess);
+    m_isInsideYield = false;
+
+    return true;
 }
 
 // ----------------------------------------------------------------------------

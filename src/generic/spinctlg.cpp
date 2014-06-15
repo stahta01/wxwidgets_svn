@@ -404,10 +404,6 @@ void wxSpinCtrlGenericBase::OnSpinButton(wxSpinEvent& event)
 {
     event.Skip();
 
-    // Pressing the spin button should also give the focus to the text part of
-    // the control, at least this is how the native control behaves under MSW.
-    SetFocus();
-
     // Sync the textctrl since the user expects that the button will modify
     // what they see in the textctrl.
     SyncSpinToText(SendEvent_None);
@@ -680,7 +676,7 @@ wxString wxSpinCtrl::DoValueToText(double val)
 
         default:
             wxFAIL_MSG( wxS("Unsupported spin control base") );
-            wxFALLTHROUGH;
+            // Fall through
 
         case 10:
             return wxString::Format("%ld", static_cast<long>(val));

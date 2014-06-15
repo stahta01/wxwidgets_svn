@@ -67,7 +67,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+#ifndef __WATCOMC__
+    #if !(defined(_MSC_VER) && (_MSC_VER > 800))
+        #include <errno.h>
+    #endif
+#endif
 #include <stdarg.h>
 
 #if wxUSE_IPC
@@ -75,7 +79,15 @@
 #endif // wxUSE_IPC
 
 #include "wx/msw/private/hiddenwin.h"
-#include "wx/msw/private/event.h"
+
+// FIXME-VC6: These are not defined in VC6 SDK headers.
+#ifndef BELOW_NORMAL_PRIORITY_CLASS
+    #define BELOW_NORMAL_PRIORITY_CLASS 0x4000
+#endif
+
+#ifndef ABOVE_NORMAL_PRIORITY_CLASS
+    #define ABOVE_NORMAL_PRIORITY_CLASS 0x8000
+#endif
 
 // ----------------------------------------------------------------------------
 // constants
@@ -95,7 +107,7 @@ static const wxChar *wxMSWEXEC_WNDCLASSNAME = wxT("_wxExecute_Internal_Class");
 static const wxChar *gs_classForHiddenWindow = NULL;
 
 // event used to wake up threads waiting in wxExecuteThread
-static wxWinAPI::Event gs_heventShutdown;
+static HANDLE gs_heventShutdown = NULL;
 
 // handles of all threads monitoring the execution of asynchronously running
 // processes
@@ -140,16 +152,17 @@ public:
     virtual bool OnInit() { return true; }
     virtual void OnExit()
     {
-        if ( gs_heventShutdown.IsOk() )
+        if ( gs_heventShutdown )
         {
             // stop any threads waiting for the termination of asynchronously
             // running processes
-            if ( !gs_heventShutdown.Set() )
+            if ( !::SetEvent(gs_heventShutdown) )
             {
                 wxLogDebug(wxT("Failed to set shutdown event in wxExecuteModule"));
             }
 
-            gs_heventShutdown.Close();
+            ::CloseHandle(gs_heventShutdown);
+            gs_heventShutdown = NULL;
 
             // now wait until they terminate
             if ( !gs_asyncThreads.empty() )
@@ -287,10 +300,11 @@ static DWORD __stdcall wxExecuteThread(void *arg)
     wxExecuteData * const data = (wxExecuteData *)arg;
 
     // create the shutdown event if we're the first thread starting to wait
-    if ( !gs_heventShutdown.IsOk() )
+    if ( !gs_heventShutdown )
     {
         // create a manual initially non-signalled event object
-        if ( !gs_heventShutdown.Create(wxWinAPI::Event::ManualReset, wxWinAPI::Event::Nonsignaled) )
+        gs_heventShutdown = ::CreateEvent(NULL, TRUE, FALSE, NULL);
+        if ( !gs_heventShutdown )
         {
             wxLogDebug(wxT("CreateEvent() in wxExecuteThread failed"));
         }

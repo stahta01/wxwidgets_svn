@@ -50,7 +50,7 @@
 #endif
 
 // Doesn't work with Cygwin at present
-#if wxUSE_SOCKETS && (defined(__WXWINCE__) || defined(__CYGWIN32__))
+#if wxUSE_SOCKETS && (defined(__GNUWIN32_OLD__) || defined(__WXWINCE__) || defined(__CYGWIN32__))
     // apparently we need to include winsock.h to get WSADATA and other stuff
     // used in wxGetFullHostName() with the old mingw32 versions
     #include <winsock.h>
@@ -96,7 +96,11 @@
     #endif
 #endif
 
-#include <errno.h>
+#ifndef __WATCOMC__
+    #if !(defined(_MSC_VER) && (_MSC_VER > 800))
+        #include <errno.h>
+    #endif
+#endif
 
 // For wxKillAllChildren
 #include <tlhelp32.h>
@@ -210,7 +214,7 @@ bool wxGetFullHostName(wxChar *buf, int maxSize)
 
                         if ( pHostEnt )
                         {
-                            host = pHostEnt->h_name;
+                            host = wxString::FromAscii(pHostEnt->h_name);
                         }
                     }
                 }
@@ -468,46 +472,108 @@ bool wxGetDiskSpace(const wxString& WXUNUSED_IN_WINCE(path),
     if ( path.empty() )
         return false;
 
-#if defined(__WIN32__)
-    ULARGE_INTEGER bytesFree, bytesTotal;
+// old w32api don't have ULARGE_INTEGER
+#if defined(__WIN32__) && \
+    (!defined(__GNUWIN32__) || wxCHECK_W32API_VERSION( 0, 3 ))
+    // GetDiskFreeSpaceEx() is not available under original Win95, check for
+    // it
+    typedef BOOL (WINAPI *GetDiskFreeSpaceEx_t)(LPCTSTR,
+                                                PULARGE_INTEGER,
+                                                PULARGE_INTEGER,
+                                                PULARGE_INTEGER);
 
-    // may pass the path as is, GetDiskFreeSpaceEx() is smart enough
-    if ( !::GetDiskFreeSpaceEx(path.t_str(),
-                               &bytesFree,
-                               &bytesTotal,
-                               NULL) )
+    GetDiskFreeSpaceEx_t
+        pGetDiskFreeSpaceEx = (GetDiskFreeSpaceEx_t)::GetProcAddress
+                              (
+                                ::GetModuleHandle(wxT("kernel32.dll")),
+#if wxUSE_UNICODE
+                                "GetDiskFreeSpaceExW"
+#else
+                                "GetDiskFreeSpaceExA"
+#endif
+                              );
+
+    if ( pGetDiskFreeSpaceEx )
     {
-        wxLogLastError(wxT("GetDiskFreeSpaceEx"));
+        ULARGE_INTEGER bytesFree, bytesTotal;
 
-        return false;
-    }
+        // may pass the path as is, GetDiskFreeSpaceEx() is smart enough
+        if ( !pGetDiskFreeSpaceEx(path.t_str(),
+                                  &bytesFree,
+                                  &bytesTotal,
+                                  NULL) )
+        {
+            wxLogLastError(wxT("GetDiskFreeSpaceEx"));
 
-    // ULARGE_INTEGER is a union of a 64 bit value and a struct containing
-    // two 32 bit fields which may be or may be not named - try to make it
-    // compile in all cases
+            return false;
+        }
+
+        // ULARGE_INTEGER is a union of a 64 bit value and a struct containing
+        // two 32 bit fields which may be or may be not named - try to make it
+        // compile in all cases
 #if defined(__BORLANDC__) && !defined(_ANONYMOUS_STRUCT)
-    #define UL(ul) ul.u
+        #define UL(ul) ul.u
 #else // anon union
-    #define UL(ul) ul
+        #define UL(ul) ul
 #endif
-    if ( pTotal )
-    {
+        if ( pTotal )
+        {
 #if wxUSE_LONGLONG
-        *pTotal = wxDiskspaceSize_t(UL(bytesTotal).HighPart, UL(bytesTotal).LowPart);
+            *pTotal = wxDiskspaceSize_t(UL(bytesTotal).HighPart, UL(bytesTotal).LowPart);
 #else
-        *pTotal = wxDiskspaceSize_t(UL(bytesTotal).LowPart);
+            *pTotal = wxDiskspaceSize_t(UL(bytesTotal).LowPart);
 #endif
-    }
+        }
 
-    if ( pFree )
-    {
+        if ( pFree )
+        {
 #if wxUSE_LONGLONG
-        *pFree = wxLongLong(UL(bytesFree).HighPart, UL(bytesFree).LowPart);
+            *pFree = wxLongLong(UL(bytesFree).HighPart, UL(bytesFree).LowPart);
 #else
-        *pFree = wxDiskspaceSize_t(UL(bytesFree).LowPart);
+            *pFree = wxDiskspaceSize_t(UL(bytesFree).LowPart);
 #endif
+        }
     }
+    else
 #endif // Win32
+    {
+        // there's a problem with drives larger than 2GB, GetDiskFreeSpaceEx()
+        // should be used instead - but if it's not available, fall back on
+        // GetDiskFreeSpace() nevertheless...
+
+        DWORD lSectorsPerCluster,
+              lBytesPerSector,
+              lNumberOfFreeClusters,
+              lTotalNumberOfClusters;
+
+        // FIXME: this is wrong, we should extract the root drive from path
+        //        instead, but this is the job for wxFileName...
+        if ( !::GetDiskFreeSpace(path.t_str(),
+                                 &lSectorsPerCluster,
+                                 &lBytesPerSector,
+                                 &lNumberOfFreeClusters,
+                                 &lTotalNumberOfClusters) )
+        {
+            wxLogLastError(wxT("GetDiskFreeSpace"));
+
+            return false;
+        }
+
+        wxDiskspaceSize_t lBytesPerCluster = (wxDiskspaceSize_t) lSectorsPerCluster;
+        lBytesPerCluster *= lBytesPerSector;
+
+        if ( pTotal )
+        {
+            *pTotal = lBytesPerCluster;
+            *pTotal *= lTotalNumberOfClusters;
+        }
+
+        if ( pFree )
+        {
+            *pFree = lBytesPerCluster;
+            *pFree *= lNumberOfFreeClusters;
+        }
+    }
 
     return true;
 #endif
@@ -795,14 +861,61 @@ int wxKill(long pid, wxSignal sig, wxKillError *krc, int flags)
     return 0;
 }
 
+typedef HANDLE (WINAPI *CreateToolhelp32Snapshot_t)(DWORD,DWORD);
+typedef BOOL (WINAPI *Process32_t)(HANDLE,LPPROCESSENTRY32);
+
+CreateToolhelp32Snapshot_t lpfCreateToolhelp32Snapshot;
+Process32_t lpfProcess32First, lpfProcess32Next;
+
+static void InitToolHelp32()
+{
+    static bool s_initToolHelpDone = false;
+
+    if (s_initToolHelpDone)
+        return;
+
+    s_initToolHelpDone = true;
+
+    lpfCreateToolhelp32Snapshot = NULL;
+    lpfProcess32First = NULL;
+    lpfProcess32Next = NULL;
+
+#if wxUSE_DYNLIB_CLASS
+
+    wxDynamicLibrary dllKernel(wxT("kernel32.dll"), wxDL_VERBATIM);
+
+    // Get procedure addresses.
+    // We are linking to these functions of Kernel32
+    // explicitly, because otherwise a module using
+    // this code would fail to load under Windows NT,
+    // which does not have the Toolhelp32
+    // functions in the Kernel 32.
+    lpfCreateToolhelp32Snapshot =
+        (CreateToolhelp32Snapshot_t)dllKernel.RawGetSymbol(wxT("CreateToolhelp32Snapshot"));
+
+    lpfProcess32First =
+        (Process32_t)dllKernel.RawGetSymbol(wxT("Process32First"));
+
+    lpfProcess32Next =
+        (Process32_t)dllKernel.RawGetSymbol(wxT("Process32Next"));
+
+#endif // wxUSE_DYNLIB_CLASS
+}
+
 // By John Skiff
 int wxKillAllChildren(long pid, wxSignal sig, wxKillError *krc)
 {
+    InitToolHelp32();
+
     if (krc)
         *krc = wxKILL_OK;
 
+    // If not implemented for this platform (e.g. NT 4.0), silently ignore
+    if (!lpfCreateToolhelp32Snapshot || !lpfProcess32First || !lpfProcess32Next)
+        return 0;
+
     // Take a snapshot of all processes in the system.
-    HANDLE hProcessSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    HANDLE hProcessSnap = lpfCreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
         if (krc)
             *krc = wxKILL_ERROR;
@@ -816,7 +929,7 @@ int wxKillAllChildren(long pid, wxSignal sig, wxKillError *krc)
 
     // Walk the snapshot of the processes, and for each process,
     // kill it if its parent is pid.
-    if (!::Process32First(hProcessSnap, &pe)) {
+    if (!lpfProcess32First(hProcessSnap, &pe)) {
         // Can't get first process.
         if (krc)
             *krc = wxKILL_ERROR;
@@ -829,7 +942,7 @@ int wxKillAllChildren(long pid, wxSignal sig, wxKillError *krc)
             if (wxKill(pe.th32ProcessID, sig, krc))
                 return -1;
         }
-    } while (::Process32Next (hProcessSnap, &pe));
+    } while (lpfProcess32Next (hProcessSnap, &pe));
 
 
     return 0;
@@ -965,7 +1078,21 @@ unsigned long wxGetProcessId()
 
 bool wxIsDebuggerRunning()
 {
-    return ::IsDebuggerPresent() != 0;
+#if wxUSE_DYNLIB_CLASS
+    // IsDebuggerPresent() is not available under Win95, so load it dynamically
+    wxDynamicLibrary dll(wxT("kernel32.dll"), wxDL_VERBATIM);
+
+    typedef BOOL (WINAPI *IsDebuggerPresent_t)();
+    if ( !dll.HasSymbol(wxT("IsDebuggerPresent")) )
+    {
+        // no way to know, assume no
+        return false;
+    }
+
+    return (*(IsDebuggerPresent_t)dll.GetSymbol(wxT("IsDebuggerPresent")))() != 0;
+#else
+    return false;
+#endif
 }
 
 // ----------------------------------------------------------------------------

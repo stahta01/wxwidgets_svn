@@ -111,8 +111,17 @@ int wxGUIEventLoop::DispatchTimeout(unsigned long timeout)
     return true;
 }
 
-void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
+bool wxGUIEventLoop::YieldFor(long eventsToProcess)
 {
+#if wxUSE_LOG
+    // disable log flushing from here because a call to wxYield() shouldn't
+    // normally result in message boxes popping up &c
+    wxLog::Suspend();
+#endif // wxUSE_LOG
+
+    m_isInsideYield = true;
+    m_eventsToProcessInsideYield = eventsToProcess;
+
     // Run the event loop until it is out of events
     while (1)
     {
@@ -148,5 +157,15 @@ void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
         the main thread waits and then notify the main thread by posting
         an event.
      */
-    wxEventLoopBase::DoYieldFor(eventsToProcess);
+    if (wxTheApp)
+        wxTheApp->ProcessPendingEvents();
+
+#if wxUSE_LOG
+    // let the logs be flashed again
+    wxLog::Resume();
+#endif // wxUSE_LOG
+
+    m_isInsideYield = false;
+
+    return true;
 }

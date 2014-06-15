@@ -100,8 +100,8 @@ public:
 };
 
 
-// All ports except wxMSW use wxBitmapHandler and wxBitmapBase as
-// base class for wxBitmapHandler; wxMSW uses wxGDIImageHandler as
+// All ports except wxMSW and wxOS2 use wxBitmapHandler and wxBitmapBase as
+// base class for wxBitmapHandler; wxMSW and wxOS2 use wxGDIImageHandler as
 // base class since it allows some code reuse there.
 #if wxUSE_BITMAP_BASE
 
@@ -175,7 +175,7 @@ public:
     virtual bool Create(int width, int height, int depth = wxBITMAP_SCREEN_DEPTH) = 0;
     virtual bool Create(const wxSize& sz, int depth = wxBITMAP_SCREEN_DEPTH) = 0;
     virtual bool CreateScaled(int w, int h, int d, double logicalScale)
-        { return Create(wxRound(w*logicalScale), wxRound(h*logicalScale), d); }
+        { return Create(w*logicalScale,h*logicalScale,d); }
 
     virtual int GetHeight() const = 0;
     virtual int GetWidth() const = 0;
@@ -189,7 +189,7 @@ public:
     virtual double GetScaledWidth() const { return GetWidth() / GetScaleFactor(); }
     virtual double GetScaledHeight() const { return GetHeight() / GetScaleFactor(); }
     virtual wxSize GetScaledSize() const
-        { return wxSize(wxRound(GetScaledWidth()), wxRound(GetScaledHeight())); }
+    { return wxSize(GetScaledWidth(), GetScaledHeight()); }
 
 #if wxUSE_IMAGE
     virtual wxImage ConvertToImage() const = 0;
@@ -290,6 +290,9 @@ protected:
 #elif defined(__WXCOCOA__)
     #define wxBITMAP_DEFAULT_TYPE    wxBITMAP_TYPE_BMP_RESOURCE
     #include "wx/cocoa/bitmap.h"
+#elif defined(__WXPM__)
+    #define wxBITMAP_DEFAULT_TYPE    wxBITMAP_TYPE_BMP_RESOURCE
+    #include "wx/os2/bitmap.h"
 #endif
 
 #if wxUSE_IMAGE

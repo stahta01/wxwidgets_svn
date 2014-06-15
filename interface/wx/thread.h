@@ -336,7 +336,7 @@ public:
             wxDECLARE_EVENT_TABLE();
         };
 
-        wxDEFINE_EVENT(myEVT_THREAD_UPDATE, wxThreadEvent);
+        wxDEFINE_EVENT(myEVT_THREAD_UPDATE, wxThreadEvent)
         wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
             EVT_THREAD(wxID_ANY, myEVT_THREAD_UPDATE, MyFrame::OnThreadUpdate)
             EVT_CLOSE(MyFrame::OnClose)
@@ -779,8 +779,6 @@ enum wxThreadError
         MyThread *m_pThread;
         wxCriticalSection m_pThreadCS;    // protects the m_pThread pointer
 
-        friend class MyThread;            // allow it to access our m_pThread
-
         wxDECLARE_EVENT_TABLE();
     };
 
@@ -791,8 +789,8 @@ enum wxThreadError
         EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_MYTHREAD_COMPLETED, MyFrame::OnThreadCompletion)
     wxEND_EVENT_TABLE()
 
-    wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_COMPLETED, wxThreadEvent);
-    wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_UPDATE, wxThreadEvent);
+    wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_COMPLETED, wxThreadEvent)
+    wxDEFINE_EVENT(wxEVT_COMMAND_MYTHREAD_UPDATE, wxThreadEvent)
 
     void MyFrame::DoStartThread()
     {
@@ -1106,15 +1104,6 @@ public:
         (i.e.\ the thread identifiers may be reused).
     */
     wxThreadIdType GetId() const;
-
-    /**
-        Gets the native thread handle.
-
-        This method only exists in wxMSW, use GetId() in portable code.
-
-        @since 3.1.0
-    */
-    WXHANDLE MSWGetHandle() const;
 
     /**
         Returns the thread kind as it was given in the ctor.

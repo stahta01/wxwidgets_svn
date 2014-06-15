@@ -497,9 +497,6 @@ int wxFileDialog::ShowModal()
 
     long msw_flags = OFN_HIDEREADONLY;
 
-    if ( HasFdFlag(wxFD_NO_FOLLOW) )
-        msw_flags |= OFN_NODEREFERENCELINKS;
-
     if ( HasFdFlag(wxFD_FILE_MUST_EXIST) )
         msw_flags |= OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
     /*

@@ -59,6 +59,10 @@
 #include "wx/motif/private.h"
 #include "wx/motif/dcclient.h"
 
+#ifdef __EMX__
+    #include <float.h>          // for M_PI
+#endif // __EMX__
+
 #include "bdiag.xbm"
 #include "fdiag.xbm"
 #include "cdiag.xbm"

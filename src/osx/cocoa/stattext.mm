@@ -76,7 +76,7 @@ public:
         m_lineBreak = lineBreak;
     }
 
-    virtual void SetLabel(const wxString& title, wxFontEncoding encoding) wxOVERRIDE
+    virtual void SetLabel(const wxString& title, wxFontEncoding encoding)
     {
         wxCFStringRef text( title , encoding );
 
@@ -87,7 +87,7 @@ public:
     }
 
 #if wxUSE_MARKUP
-    virtual void SetLabelMarkup( const wxString& markup) wxOVERRIDE
+    virtual void SetLabelMarkup( const wxString& markup)
     {
         wxMarkupToAttrString toAttr(GetWXPeer(), markup);
 

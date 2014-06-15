@@ -47,7 +47,7 @@ while @c __WINDOWS__ should be used for the platform tests.}
 @itemdef{__WXOSX_MAC__, Mac OS X (Carbon or Cocoa)}
 @itemdef{__WXOSX_OR_COCOA__, Any Mac OS X port (wxOSX-Carbon, wxOSX-Cocoa or 
                         wxCocoa)}
-@itemdef{__WXPM__, OS/2 native Presentation Manager (not used any longer).}
+@itemdef{__WXPM__, OS/2 native Presentation Manager}
 @itemdef{__WXSTUBS__, Stubbed version ('template' wxWin implementation)}
 @itemdef{__WXXT__, Xt; mutually exclusive with WX_MOTIF, not implemented in wxWidgets 2.x}
 @itemdef{__WXX11__, wxX11 (__WXUNIVERSAL__ will be also defined)}
@@ -146,7 +146,7 @@ compiler used.
 @itemdef{__BORLANDC__, Borland C++. The value of the macro corresponds
                         to the compiler version: 500 is 5.0.}
 @itemdef{__DJGPP__, DJGPP}
-@itemdef{__DIGITALMARS__, Digital Mars (not used any more).}
+@itemdef{__DIGITALMARS__, Digital Mars}
 @itemdef{__EVC4__, Embedded Visual C++ 4 (can be only used for building wxWinCE)}
 @itemdef{__GNUG__, Gnu C++ on any platform, see also wxCHECK_GCC_VERSION}
 @itemdef{__GNUWIN32__, Gnu-Win32 compiler, see also wxCHECK_W32API_VERSION}
@@ -156,8 +156,8 @@ compiler used.
 @itemdef{__MINGW64__, MinGW-w64 in 64 bit builds}
 @itemdef{__MINGW64_TOOLCHAIN__, MinGW-w64 in either 32 or 64 bit builds}
 @itemdef{__SUNCC__, Sun CC, see also wxCHECK_SUNCC_VERSION}
-@itemdef{__SYMANTECC__, Symantec C++ (not used any more).}
-@itemdef{__VISAGECPP__, IBM Visual Age (OS/2) (not used any more).}
+@itemdef{__SYMANTECC__, Symantec C++}
+@itemdef{__VISAGECPP__, IBM Visual Age (OS/2)}
 @itemdef{__VISUALC__, Microsoft Visual C++, see also ::wxCHECK_VISUALC_VERSION.
                     The value of this macro corresponds to the compiler version:
                     @c 1020 for @c 4.2 (the first supported version), @c 1100 for
@@ -167,8 +167,7 @@ compiler used.
                     for compiler version being precisely 7.}
 @itemdef{__XLC__, AIX compiler}
 @itemdef{__WATCOMC__, Watcom C++. The value of this macro corresponds to
-                    the compiler version, @c 1100 is @c 11.0 and @c 1200 is OpenWatcom
-                    (not used any more).}
+                    the compiler version, @c 1100 is @c 11.0 and @c 1200 is OpenWatcom.}
 @endDefList
 
 

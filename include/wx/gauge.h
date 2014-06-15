@@ -27,6 +27,11 @@
 // Win32 only, is default (and only) on some other platforms
 #define wxGA_SMOOTH          0x0020
 
+#if WXWIN_COMPATIBILITY_2_6
+    // obsolete style
+    #define wxGA_PROGRESSBAR     0
+#endif // WXWIN_COMPATIBILITY_2_6
+
 // GTK and Mac always have native implementation of the indeterminate mode
 // wxMSW has native implementation only if comctl32.dll >= 6.00
 #if !defined(__WXGTK20__) && !defined(__WXMAC__) && !defined(__WXCOCOA__)
@@ -79,10 +84,10 @@ public:
     virtual int GetBezelFace() const;
 
     // overridden base class virtuals
-    virtual bool AcceptsFocus() const wxOVERRIDE { return false; }
+    virtual bool AcceptsFocus() const { return false; }
 
 protected:
-    virtual wxBorder GetDefaultBorder() const wxOVERRIDE { return wxBORDER_NONE; }
+    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 
     // the max position
     int m_rangeMax;
@@ -111,6 +116,8 @@ protected:
     #include "wx/osx/gauge.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/gauge.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/gauge.h"
 #endif
 
 #endif // wxUSE_GAUGE

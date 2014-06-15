@@ -58,6 +58,9 @@
 #include "wx/osx/printdlg.h"
 #include "wx/osx/private/print.h"
 #include "wx/osx/dcprint.h"
+#elif defined(__WXPM__)
+#include "wx/os2/dcprint.h"
+#include "wx/generic/prntdlgg.h"
 #else
 #include "wx/generic/prntdlgg.h"
 #include "wx/dcps.h"
@@ -101,6 +104,8 @@ wxPrinterBase *wxNativePrintFactory::CreatePrinter( wxPrintDialogData *data )
     return new wxWindowsPrinter( data );
 #elif defined(__WXMAC__)
     return new wxMacPrinter( data );
+#elif defined(__WXPM__)
+    return new wxOS2Printer( data );
 #else
     return new wxPostScriptPrinter( data );
 #endif
@@ -113,6 +118,8 @@ wxPrintPreviewBase *wxNativePrintFactory::CreatePrintPreview( wxPrintout *previe
     return new wxWindowsPrintPreview( preview, printout, data );
 #elif defined(__WXMAC__)
     return new wxMacPrintPreview( preview, printout, data );
+#elif defined(__WXPM__)
+    return new wxOS2PrintPreview( preview, printout, data );
 #else
     return new wxPostScriptPrintPreview( preview, printout, data );
 #endif
@@ -125,6 +132,8 @@ wxPrintPreviewBase *wxNativePrintFactory::CreatePrintPreview( wxPrintout *previe
     return new wxWindowsPrintPreview( preview, printout, data );
 #elif defined(__WXMAC__)
     return new wxMacPrintPreview( preview, printout, data );
+#elif defined(__WXPM__)
+    return new wxOS2PrintPreview( preview, printout, data );
 #else
     return new wxPostScriptPrintPreview( preview, printout, data );
 #endif
@@ -278,8 +287,8 @@ class wxPrintFactoryModule: public wxModule
 {
 public:
     wxPrintFactoryModule() {}
-    bool OnInit() wxOVERRIDE { return true; }
-    void OnExit() wxOVERRIDE { wxPrintFactory::SetPrintFactory( NULL ); }
+    bool OnInit() { return true; }
+    void OnExit() { wxPrintFactory::SetPrintFactory( NULL ); }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxPrintFactoryModule)
@@ -855,10 +864,6 @@ wxPreviewCanvas::wxPreviewCanvas(wxPrintPreviewBase *preview, wxWindow *parent,
                                  const wxPoint& pos, const wxSize& size, long style, const wxString& name):
 wxScrolledWindow(parent, wxID_ANY, pos, size, style | wxFULL_REPAINT_ON_RESIZE, name)
 {
-    // As we rely on getting idle events, do this to ensure that we do receive
-    // them even when using wxIDLE_PROCESS_SPECIFIED global idle mode.
-    SetExtraStyle(wxWS_EX_PROCESS_IDLE);
-
     m_printPreview = preview;
 #ifdef __WXMAC__
     // The app workspace colour is always white, but we should have

@@ -23,10 +23,10 @@ public:
     wxFileProto();
     virtual ~wxFileProto();
 
-    bool Abort() wxOVERRIDE { return true; }
-    wxString GetContentType() const wxOVERRIDE { return wxEmptyString; }
+    bool Abort() { return true; }
+    wxString GetContentType() const { return wxEmptyString; }
 
-    wxInputStream *GetInputStream(const wxString& path) wxOVERRIDE;
+    wxInputStream *GetInputStream(const wxString& path);
 
 protected:
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxFileProto)

@@ -36,8 +36,13 @@ public:
 };
 
 typedef void (wxEvtHandler::*MyEventFunction)(MyEvent&);
+#ifndef wxHAS_EVENT_BIND
+    #define MyEventHandler(func) wxEVENT_HANDLER_CAST(MyEventFunction, func)
+#else
+    #define MyEventHandler(func) &func
+#endif
 #define EVT_MYEVENT(func) \
-    wx__DECLARE_EVT0(MyEventType, &func)
+    wx__DECLARE_EVT0(MyEventType, MyEventHandler(func))
 
 class AnotherEvent : public wxEvent
 {
@@ -131,7 +136,9 @@ BEGIN_EVENT_TABLE(MyClassWithEventTable, wxEvtHandler)
     EVT_IDLE(MyClassWithEventTable::OnIdle)
 
     EVT_MYEVENT(MyClassWithEventTable::OnMyEvent)
+#ifdef wxHAS_EVENT_BIND
     EVT_MYEVENT(MyClassWithEventTable::OnEvent)
+#endif
 
     // this shouldn't compile:
     //EVT_MYEVENT(MyClassWithEventTable::OnIdle)
@@ -156,6 +163,7 @@ private:
         CPPUNIT_TEST( LegacyConnect );
         CPPUNIT_TEST( DisconnectWildcard );
         CPPUNIT_TEST( AutoDisconnect );
+#ifdef wxHAS_EVENT_BIND
         CPPUNIT_TEST( BindFunction );
         CPPUNIT_TEST( BindStaticMethod );
         CPPUNIT_TEST( BindFunctor );
@@ -164,12 +172,14 @@ private:
         CPPUNIT_TEST( BindFunctionUsingBaseEvent );
         CPPUNIT_TEST( BindNonHandler );
         CPPUNIT_TEST( InvalidBind );
+#endif // wxHAS_EVENT_BIND
     CPPUNIT_TEST_SUITE_END();
 
     void BuiltinConnect();
     void LegacyConnect();
     void DisconnectWildcard();
     void AutoDisconnect();
+#ifdef wxHAS_EVENT_BIND
     void BindFunction();
     void BindStaticMethod();
     void BindFunctor();
@@ -178,6 +188,7 @@ private:
     void BindFunctionUsingBaseEvent();
     void BindNonHandler();
     void InvalidBind();
+#endif // wxHAS_EVENT_BIND
 
 
     // these member variables exceptionally don't use "m_" prefix because
@@ -207,6 +218,7 @@ void EvtHandlerTestCase::BuiltinConnect()
     handler.Connect(wxEVT_IDLE, (wxObjectEventFunction)(wxEventFunction)&MyHandler::OnIdle);
     handler.Disconnect(wxEVT_IDLE, (wxObjectEventFunction)(wxEventFunction)&MyHandler::OnIdle);
 
+#ifdef wxHAS_EVENT_BIND
     handler.Bind(wxEVT_IDLE, GlobalOnIdle);
     handler.Unbind(wxEVT_IDLE, GlobalOnIdle);
 
@@ -219,6 +231,7 @@ void EvtHandlerTestCase::BuiltinConnect()
 
     handler.Bind(wxEVT_IDLE, &MyHandler::StaticOnIdle);
     handler.Unbind(wxEVT_IDLE, &MyHandler::StaticOnIdle);
+#endif // wxHAS_EVENT_BIND
 }
 
 void EvtHandlerTestCase::LegacyConnect()
@@ -265,6 +278,8 @@ void EvtHandlerTestCase::AutoDisconnect()
     // there should be nothing to disconnect anymore
     CPPUNIT_ASSERT(!source.Disconnect(wxID_ANY, wxEVT_IDLE));
 }
+
+#ifdef wxHAS_EVENT_BIND
 
 void EvtHandlerTestCase::BindFunction()
 {
@@ -459,3 +474,5 @@ void EvtHandlerTestCase::InvalidBind()
     myHandler.Bind(MyEventType, &MyHandler::OnMyEvent, &mySink);
 #endif
 }
+
+#endif // wxHAS_EVENT_BIND

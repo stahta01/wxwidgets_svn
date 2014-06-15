@@ -52,7 +52,7 @@ public:
         m_contextHelp = contextHelp;
     }
 
-    virtual bool ProcessEvent(wxEvent& event) wxOVERRIDE;
+    virtual bool ProcessEvent(wxEvent& event);
 
 //// Data
     wxContextHelp* m_contextHelp;
@@ -250,6 +250,8 @@ bool wxContextHelp::DispatchEvent(wxWindow* win, const wxPoint& pt)
  * to put the application into context help mode.
  */
 
+#ifndef __WXPM__
+
 static const char * csquery_xpm[] = {
 "12 11 2 1",
 "  c None",
@@ -266,6 +268,7 @@ static const char * csquery_xpm[] = {
 "     ..     ",
 "            "};
 
+#endif
 
 IMPLEMENT_CLASS(wxContextHelpButton, wxBitmapButton)
 
@@ -273,15 +276,21 @@ BEGIN_EVENT_TABLE(wxContextHelpButton, wxBitmapButton)
     EVT_BUTTON(wxID_CONTEXT_HELP, wxContextHelpButton::OnContextHelp)
 END_EVENT_TABLE()
 
-bool wxContextHelpButton::Create(wxWindow* parent,
+wxContextHelpButton::wxContextHelpButton(wxWindow* parent,
                                          wxWindowID id,
                                          const wxPoint& pos,
                                          const wxSize& size,
                                          long style)
+#if defined(__WXPM__)
+                   : wxBitmapButton(parent, id, wxBitmap(wxCSQUERY_BITMAP
+                                                         ,wxBITMAP_TYPE_BMP_RESOURCE
+                                                        ),
+                                    pos, size, style)
+#else
+                   : wxBitmapButton(parent, id, wxBitmap(csquery_xpm),
+                                    pos, size, style)
+#endif
 {
-    return wxBitmapButton::Create(parent, id,
-                                  wxBitmap(csquery_xpm),
-                                  pos, size, style);
 }
 
 void wxContextHelpButton::OnContextHelp(wxCommandEvent& WXUNUSED(event))
@@ -472,8 +481,8 @@ wxString wxContextId(int id)
 class wxHelpProviderModule : public wxModule
 {
 public:
-    bool OnInit() wxOVERRIDE;
-    void OnExit() wxOVERRIDE;
+    bool OnInit();
+    void OnExit();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxHelpProviderModule)

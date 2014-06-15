@@ -58,6 +58,10 @@
 #endif // Windows
 
 
+#ifdef  __WXPM__
+    #include <time.h>
+#endif
+
 #if wxUSE_LOG_DIALOG
     #include "wx/listctrl.h"
     #include "wx/imaglist.h"
@@ -66,10 +70,8 @@
 
 #include "wx/time.h"
 
-#ifdef __SMARTPHONE__
 // the suffix we add to the button to show that the dialog can be expanded
 #define EXPAND_SUFFIX wxT(" >>")
-#endif
 
 #define CAN_SAVE_FILES (wxUSE_FILE && wxUSE_FILEDLG)
 
@@ -234,7 +236,7 @@ wxString wxLogGui::GetTitle() const
 
         default:
             wxFAIL_MSG( "unexpected icon severity" );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxICON_INFORMATION:
             titleFormat = _("%s Information");
@@ -392,7 +394,7 @@ void wxLogGui::DoLogRecord(wxLogLevel level,
 #endif // wxUSE_LOG_DIALOG
                 m_bErrors = true;
             }
-            wxFALLTHROUGH;
+            // fall through
 
         case wxLOG_Warning:
             if ( !m_bErrors ) {
@@ -446,7 +448,7 @@ public:
     virtual ~wxLogFrame();
 
     // Don't prevent the application from exiting if just this frame remains.
-    virtual bool ShouldPreventAppExit() const wxOVERRIDE { return false; }
+    virtual bool ShouldPreventAppExit() const { return false; }
 
     // menu callbacks
     void OnClose(wxCommandEvent& event);

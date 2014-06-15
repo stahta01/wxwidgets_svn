@@ -60,7 +60,7 @@ void wxBell()
     
     [appleEventManager setEventHandler:self andSelector:@selector(handleOpenAppEvent:withReplyEvent:)
                          forEventClass:kCoreEventClass andEventID:kAEOpenApplication];
-
+    
     [appleEventManager setEventHandler:self andSelector:@selector(handleQuitAppEvent:withReplyEvent:)
                          forEventClass:kCoreEventClass andEventID:kAEQuitApplication];
 
@@ -277,50 +277,6 @@ void wxBell()
 }
 @end
 
-
-// more on bringing non-bundled apps to the foreground
-// https://devforums.apple.com/thread/203753
-
-#if 0 
-
-// one possible solution is also quoted here
-// from http://stackoverflow.com/questions/7596643/when-calling-transformprocesstype-the-app-menu-doesnt-show-up
-
-@interface wxNSNonBundledAppHelper : NSObject {
-    
-}
-
-+ (void)transformToForegroundApplication;
-
-@end
-
-@implementation wxNSNonBundledAppHelper
-
-+ (void)transformToForegroundApplication {
-    for (NSRunningApplication * app in [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.finder"]) {
-        [app activateWithOptions:NSApplicationActivateIgnoringOtherApps];
-        break;
-    }
-    [self performSelector:@selector(transformStep2) withObject:nil afterDelay:0.1];
-}
-
-+ (void)transformStep2
-{
-    ProcessSerialNumber psn = { 0, kCurrentProcess };
-    (void) TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-    
-    [self performSelector:@selector(transformStep3) withObject:nil afterDelay:0.1];
-}
-
-+ (void)transformStep3
-{
-    [[NSRunningApplication currentApplication] activateWithOptions:NSApplicationActivateIgnoringOtherApps];
-}
-
-@end
-
-#endif
-
 // here we subclass NSApplication, for the purpose of being able to override sendEvent.
 @interface wxNSApplication : NSApplication
 {
@@ -397,7 +353,7 @@ bool wxApp::DoInitGui()
     if (!sm_isEmbedded)
     {
         [wxNSApplication sharedApplication];
-        
+
         if ( OSXIsGUIApplication() )
         {
             CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle() ) ;

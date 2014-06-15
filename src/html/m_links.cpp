@@ -36,9 +36,9 @@ public:
     void Draw(wxDC& WXUNUSED(dc),
               int WXUNUSED(x), int WXUNUSED(y),
               int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-              wxHtmlRenderingInfo& WXUNUSED(info)) wxOVERRIDE {}
+              wxHtmlRenderingInfo& WXUNUSED(info)) {}
 
-    virtual const wxHtmlCell* Find(int condition, const void* param) const wxOVERRIDE
+    virtual const wxHtmlCell* Find(int condition, const void* param) const
     {
         if ((condition == wxHTML_COND_ISANCHOR) &&
             (m_AnchorName == (*((const wxString*)param))))

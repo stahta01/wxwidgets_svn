@@ -46,7 +46,7 @@
 
 #include "wx/private/selectdispatcher.h"
 #include "wx/private/fdiodispatcher.h"
-#include "wx/unix/private/execute.h"
+#include "wx/unix/execute.h"
 #include "wx/unix/pipe.h"
 #include "wx/unix/private.h"
 
@@ -147,10 +147,20 @@
 #if !defined(HAVE_USLEEP) && \
     ((defined(__SUN__) && !defined(__SunOs_5_6) && \
                          !defined(__SunOs_5_7) && !defined(__SUNPRO_CC)) || \
-     defined(__osf__))
+     defined(__osf__) || defined(__EMX__))
     extern "C"
     {
-        int usleep(unsigned int usec);
+        #ifdef __EMX__
+            /* I copied this from the XFree86 diffs. AV. */
+            #define INCL_DOSPROCESS
+            #include <os2.h>
+            inline void usleep(unsigned long delay)
+            {
+                DosSleep(delay ? (delay/1000l) : 1l);
+            }
+        #else // Unix
+            int usleep(unsigned int usec);
+        #endif // __EMX__/Unix
     };
 
     #define HAVE_USLEEP 1
@@ -295,14 +305,14 @@ bool wxPipeInputStream::CanRead() const
     {
         case -1:
             wxLogSysError(_("Impossible to get child process input"));
-            wxFALLTHROUGH;
+            // fall through
 
         case 0:
             return false;
 
         default:
             wxFAIL_MSG(wxT("unexpected select() return value"));
-            wxFALLTHROUGH;
+            // still fall through
 
         case 1:
             // input available -- or maybe not, as select() returns 1 when a
@@ -336,7 +346,7 @@ size_t wxPipeOutputStream::OnSysWrite(const void *buffer, size_t size)
 #endif
            // do not treat it as an error
            m_file->ClearLastError();
-           wxFALLTHROUGH;
+           // fall through
 
        // no error
        case 0:
@@ -649,7 +659,7 @@ long wxExecute(char **argv, int flags, wxProcess *process,
         //     always opened so don't do it any more, after all there doesn't
         //     seem to be any real problem with keeping them opened
 
-#if !defined(__VMS)
+#if !defined(__VMS) && !defined(__EMX__)
         if ( flags & wxEXEC_MAKE_GROUP_LEADER )
         {
             // Set process group to child process' pid.  Then killing -pid

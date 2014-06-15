@@ -202,10 +202,12 @@ WXDLLIMPEXP_BASE void *calloc( size_t num, size_t size );
 #define wxCRT_StrtoulW   wcstoul
 
 #ifdef __VISUALC__
-    #define wxCRT_StrtollA   _strtoi64
-    #define wxCRT_StrtoullA  _strtoui64
-    #define wxCRT_StrtollW   _wcstoi64
-    #define wxCRT_StrtoullW  _wcstoui64
+    #if __VISUALC__ >= 1300 && !defined(__WXWINCE__)
+        #define wxCRT_StrtollA   _strtoi64
+        #define wxCRT_StrtoullA  _strtoui64
+        #define wxCRT_StrtollW   _wcstoi64
+        #define wxCRT_StrtoullW  _wcstoui64
+    #endif /* VC++ 7+ */
 #else
     #ifdef HAVE_STRTOULL
         #define wxCRT_StrtollA   strtoll
@@ -241,7 +243,9 @@ WXDLLIMPEXP_BASE void *calloc( size_t num, size_t size );
 
 /* define wxCRT_StricmpA/W and wxCRT_StrnicmpA/W for various compilers */
 
-#if defined(__BORLANDC__) || defined(__DJGPP__)
+#if defined(__BORLANDC__) || defined(__WATCOMC__) || \
+        defined(__VISAGECPP__) || \
+        defined(__EMX__) || defined(__DJGPP__)
     #define wxCRT_StricmpA stricmp
     #define wxCRT_StrnicmpA strnicmp
 #elif defined(__SYMANTEC__) || (defined(__VISUALC__) && !defined(__WXWINCE__))
@@ -439,17 +443,30 @@ WXDLLIMPEXP_BASE wchar_t *wxCRT_StrtokW(wchar_t *psz, const wchar_t *delim, wcha
     #define wxCRT_Rename  rename
 
 #else /* Unicode filenames */
-    /* WinCE CRT doesn't provide these functions so use our own */
-    #ifdef __WXWINCE__
-        WXDLLIMPEXP_BASE int wxCRT_Rename(const wchar_t *src,
-                                          const wchar_t *dst);
-        WXDLLIMPEXP_BASE int wxCRT_Remove(const wchar_t *path);
+    /* special case: these functions are missing under Win9x with Unicows so we
+       have to implement them ourselves */
+    #if wxUSE_UNICODE_MSLU || defined(__WX_STRICT_ANSI_GCC__)
+            WXDLLIMPEXP_BASE FILE* wxMSLU__wfopen(const wchar_t *name, const wchar_t *mode);
+            WXDLLIMPEXP_BASE FILE* wxMSLU__wfreopen(const wchar_t *name, const wchar_t *mode, FILE *stream);
+            WXDLLIMPEXP_BASE int wxMSLU__wrename(const wchar_t *oldname, const wchar_t *newname);
+            WXDLLIMPEXP_BASE int wxMSLU__wremove(const wchar_t *name);
+            #define wxCRT_Fopen     wxMSLU__wfopen
+            #define wxCRT_Freopen   wxMSLU__wfreopen
+            #define wxCRT_Remove    wxMSLU__wremove
+            #define wxCRT_Rename    wxMSLU__wrename
     #else
-        #define wxCRT_Rename   _wrename
-        #define wxCRT_Remove _wremove
+        /* WinCE CRT doesn't provide these functions so use our own */
+        #ifdef __WXWINCE__
+            WXDLLIMPEXP_BASE int wxCRT_Rename(const wchar_t *src,
+                                              const wchar_t *dst);
+            WXDLLIMPEXP_BASE int wxCRT_Remove(const wchar_t *path);
+        #else
+            #define wxCRT_Rename   _wrename
+            #define wxCRT_Remove _wremove
+        #endif
+        #define wxCRT_Fopen    _wfopen
+        #define wxCRT_Freopen  _wfreopen
     #endif
-    #define wxCRT_Fopen    _wfopen
-    #define wxCRT_Freopen  _wfreopen
 
 #endif /* wxMBFILES/!wxMBFILES */
 
@@ -596,17 +613,23 @@ WXDLLIMPEXP_BASE size_t wxCRT_StrftimeW(wchar_t *s, size_t max,
                                 ctype.h
    ------------------------------------------------------------------------- */
 
-#define wxCRT_IsalnumW(c)   iswalnum(c)
-#define wxCRT_IsalphaW(c)   iswalpha(c)
-#define wxCRT_IscntrlW(c)   iswcntrl(c)
-#define wxCRT_IsdigitW(c)   iswdigit(c)
-#define wxCRT_IsgraphW(c)   iswgraph(c)
-#define wxCRT_IslowerW(c)   iswlower(c)
-#define wxCRT_IsprintW(c)   iswprint(c)
-#define wxCRT_IspunctW(c)   iswpunct(c)
-#define wxCRT_IsspaceW(c)   iswspace(c)
-#define wxCRT_IsupperW(c)   iswupper(c)
-#define wxCRT_IsxdigitW(c)  iswxdigit(c)
+#ifdef __WATCOMC__
+  #define WXWCHAR_T_CAST(c) (wint_t)(c)
+#else
+  #define WXWCHAR_T_CAST(c) c
+#endif
+
+#define wxCRT_IsalnumW(c)   iswalnum(WXWCHAR_T_CAST(c))
+#define wxCRT_IsalphaW(c)   iswalpha(WXWCHAR_T_CAST(c))
+#define wxCRT_IscntrlW(c)   iswcntrl(WXWCHAR_T_CAST(c))
+#define wxCRT_IsdigitW(c)   iswdigit(WXWCHAR_T_CAST(c))
+#define wxCRT_IsgraphW(c)   iswgraph(WXWCHAR_T_CAST(c))
+#define wxCRT_IslowerW(c)   iswlower(WXWCHAR_T_CAST(c))
+#define wxCRT_IsprintW(c)   iswprint(WXWCHAR_T_CAST(c))
+#define wxCRT_IspunctW(c)   iswpunct(WXWCHAR_T_CAST(c))
+#define wxCRT_IsspaceW(c)   iswspace(WXWCHAR_T_CAST(c))
+#define wxCRT_IsupperW(c)   iswupper(WXWCHAR_T_CAST(c))
+#define wxCRT_IsxdigitW(c)  iswxdigit(WXWCHAR_T_CAST(c))
 
 #ifdef __GLIBC__
     #if defined(__GLIBC__) && (__GLIBC__ == 2) && (__GLIBC_MINOR__ == 0)
@@ -620,7 +643,7 @@ WXDLLIMPEXP_BASE size_t wxCRT_StrftimeW(wchar_t *s, size_t max,
         #define wxCRT_ToupperW   towupper
     #endif
 #else /* !__GLIBC__ */
-    /* There is a bug in MSVC RTL: toxxx() functions dosn't do anything
+    /* There is a bug in VC6 C RTL: toxxx() functions dosn't do anything
        with signed chars < 0, so "fix" it here. */
     #define wxCRT_TolowerW(c)   towlower((wxUChar)(wxChar)(c))
     #define wxCRT_ToupperW(c)   towupper((wxUChar)(wxChar)(c))

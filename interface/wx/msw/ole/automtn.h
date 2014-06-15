@@ -285,7 +285,7 @@ public:
                return false;
         }
     }
-    range.PutProperty("Value", wxVariant(new wxVariantDataSafeArray(safeArray.Detach())));
+    range.PutProperty("Value", wxVariant(new wxVariantDataSafeArray(sa.Detach())));
     @endcode
 
     If you you received wxVariantDataSafeArray as a result of wxAutomationObject method call:

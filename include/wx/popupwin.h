@@ -44,7 +44,7 @@ public:
     virtual void Position(const wxPoint& ptOrigin,
                           const wxSize& size);
 
-    virtual bool IsTopLevel() const wxOVERRIDE { return true; }
+    virtual bool IsTopLevel() const { return true; }
 
     wxDECLARE_NO_COPY_CLASS(wxPopupWindowBase);
 };
@@ -53,6 +53,8 @@ public:
 // include the real class declaration
 #if defined(__WXMSW__)
     #include "wx/msw/popupwin.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/popupwin.h"
 #elif defined(__WXGTK20__)
     #include "wx/gtk/popupwin.h"
 #elif defined(__WXGTK__)
@@ -105,10 +107,10 @@ public:
     virtual bool ProcessLeftDown(wxMouseEvent& event);
 
     // Overridden to grab the input on some plaforms
-    virtual bool Show( bool show = true ) wxOVERRIDE;
+    virtual bool Show( bool show = true );
 
     // Override to implement delayed destruction of this window.
-    virtual bool Destroy() wxOVERRIDE;
+    virtual bool Destroy();
 
 protected:
     // common part of all ctors

@@ -76,6 +76,8 @@ private:
     #include "wx/osx/scrolbar.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/scrolbar.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/scrolbar.h"
 #endif
 
 #endif // wxUSE_SCROLLBAR

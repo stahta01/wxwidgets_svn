@@ -34,8 +34,6 @@
 #endif
 
 #include "wx/msw/private.h"
-#include "wx/renderer.h"
-#include "wx/msw/uxtheme.h"
 
 // ============================================================================
 // wxRadioButton implementation
@@ -84,13 +82,10 @@ bool wxRadioButton::Create(wxWindow *parent,
 
 void wxRadioButton::SetValue(bool value)
 {
-    m_isChecked = value;
+    ::SendMessage(GetHwnd(), BM_SETCHECK,
+                  value ? BST_CHECKED : BST_UNCHECKED, 0);
 
-    if ( !IsOwnerDrawn() )
-        ::SendMessage(GetHwnd(), BM_SETCHECK,
-                      value ? BST_CHECKED : BST_UNCHECKED, 0);
-    else // owner drawn buttons don't react to this message
-        Refresh();
+    m_isChecked = value;
 
     if ( !value )
         return;
@@ -193,12 +188,9 @@ void wxRadioButton::SetValue(bool value)
 
 bool wxRadioButton::GetValue() const
 {
-    if ( !IsOwnerDrawn() )
-    {
-        wxASSERT_MSG( m_isChecked ==
-                        (::SendMessage(GetHwnd(), BM_GETCHECK, 0, 0L) != 0),
-                      wxT("wxRadioButton::m_isChecked is out of sync?") );
-    }
+    wxASSERT_MSG( m_isChecked ==
+                    (::SendMessage(GetHwnd(), BM_GETCHECK, 0, 0L) != 0),
+                  wxT("wxRadioButton::m_isChecked is out of sync?") );
 
     return m_isChecked;
 }
@@ -302,32 +294,6 @@ WXDWORD wxRadioButton::MSWGetStyle(long style, WXDWORD *exstyle) const
 
 
     return msStyle;
-}
-
-// ----------------------------------------------------------------------------
-// owner drawn radio button stuff
-// ----------------------------------------------------------------------------
-
-int wxRadioButton::MSWGetButtonStyle() const
-{
-    return BS_RADIOBUTTON;
-}
-
-void wxRadioButton::MSWOnButtonResetOwnerDrawn()
-{
-    // ensure that controls state is consistent with internal state
-    ::SendMessage(GetHwnd(), BM_SETCHECK,
-                  m_isChecked ? BST_CHECKED : BST_UNCHECKED, 0);
-}
-
-int wxRadioButton::MSWGetButtonCheckedFlag() const
-{
-    return m_isChecked ? wxCONTROL_CHECKED : wxCONTROL_NONE;
-}
-
-void wxRadioButton::MSWDrawButtonBitmap(wxDC& dc, const wxRect& rect, int flags)
-{
-    wxRendererNative::Get().DrawRadioBitmap(this, dc, rect, flags);
 }
 
 #endif // wxUSE_RADIOBTN

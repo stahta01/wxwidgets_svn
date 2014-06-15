@@ -54,7 +54,7 @@
 // Otherwise wx itself must ensure that when the parent is disabled its
 // children are disabled too, and their initial state is restored when the
 // parent is enabled back.
-#if defined(__WXMSW__)
+#if defined(__WXMSW__) || defined(__WXPM__)
     // must do everything ourselves
     #undef wxHAS_NATIVE_ENABLED_MANAGEMENT
 #elif defined(__WXOSX__)
@@ -74,6 +74,7 @@
 
 class WXDLLIMPEXP_FWD_CORE wxCaret;
 class WXDLLIMPEXP_FWD_CORE wxControl;
+class WXDLLIMPEXP_FWD_CORE wxCursor;
 class WXDLLIMPEXP_FWD_CORE wxDC;
 class WXDLLIMPEXP_FWD_CORE wxDropTarget;
 class WXDLLIMPEXP_FWD_CORE wxLayoutConstraints;
@@ -236,7 +237,7 @@ public:
 
         // window id uniquely identifies the window among its siblings unless
         // it is wxID_ANY which means "don't care"
-    virtual void SetId( wxWindowID winid ) { m_windowId = winid; }
+    void SetId( wxWindowID winid ) { m_windowId = winid; }
     wxWindowID GetId() const { return m_windowId; }
 
         // generate a unique id (or count of them consecutively), returns a
@@ -882,10 +883,13 @@ public:
     bool HandleWindowEvent(wxEvent& event) const;
 
         // disable wxEvtHandler double-linked list mechanism:
-    virtual void SetNextHandler(wxEvtHandler *handler) wxOVERRIDE;
-    virtual void SetPreviousHandler(wxEvtHandler *handler) wxOVERRIDE;
+    virtual void SetNextHandler(wxEvtHandler *handler);
+    virtual void SetPreviousHandler(wxEvtHandler *handler);
 
 
+    // Watcom doesn't allow reducing access with using access declaration, see
+    // #10749
+#ifndef __WATCOMC__
 protected:
 
     // NOTE: we change the access specifier of the following wxEvtHandler functions
@@ -906,6 +910,7 @@ protected:
     using wxEvtHandler::ProcessPendingEvents;
     using wxEvtHandler::AddPendingEvent;
     using wxEvtHandler::QueueEvent;
+#endif // __WATCOMC__
 
 public:
 
@@ -1527,8 +1532,8 @@ protected:
                     const wxString& name);
 
     // event handling specific to wxWindow
-    virtual bool TryBefore(wxEvent& event) wxOVERRIDE;
-    virtual bool TryAfter(wxEvent& event) wxOVERRIDE;
+    virtual bool TryBefore(wxEvent& event);
+    virtual bool TryAfter(wxEvent& event);
 
     enum WindowOrder
     {
@@ -1922,6 +1927,13 @@ inline void wxWindowBase::SetInitialBestSize(const wxSize& size)
         #define wxWindowCocoa wxWindow
     #endif // wxUniv
     #include "wx/cocoa/window.h"
+#elif defined(__WXPM__)
+    #ifdef __WXUNIVERSAL__
+        #define wxWindowNative wxWindowOS2
+    #else // !wxUniv
+        #define wxWindowOS2 wxWindow
+    #endif // wxUniv/!wxUniv
+    #include "wx/os2/window.h"
 #endif
 
 // for wxUniversal, we now derive the real wxWindow from wxWindow<platform>,
@@ -1960,6 +1972,11 @@ extern WXDLLIMPEXP_CORE wxWindow *wxGetActiveWindow();
 
 // get the (first) top level parent window
 WXDLLIMPEXP_CORE wxWindow* wxGetTopLevelParent(wxWindow *win);
+
+#if WXWIN_COMPATIBILITY_2_6
+    wxDEPRECATED_MSG("use wxWindow::NewControlId() instead")
+    inline wxWindowID NewControlId() { return wxWindowBase::NewControlId(); }
+#endif // WXWIN_COMPATIBILITY_2_6
 
 #if wxUSE_ACCESSIBILITY
 // ----------------------------------------------------------------------------

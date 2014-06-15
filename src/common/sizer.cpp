@@ -617,6 +617,19 @@ bool wxSizerItem::IsShown() const
     return false;
 }
 
+#if WXWIN_COMPATIBILITY_2_6
+void wxSizerItem::SetOption( int option )
+{
+    SetProportion( option );
+}
+
+int wxSizerItem::GetOption() const
+{
+    return GetProportion();
+}
+#endif // WXWIN_COMPATIBILITY_2_6
+
+
 //---------------------------------------------------------------------------
 // wxSizer
 //---------------------------------------------------------------------------
@@ -661,6 +674,13 @@ void wxSizer::SetContainingWindow(wxWindow *win)
         }
     }
 }
+
+#if WXWIN_COMPATIBILITY_2_6
+bool wxSizer::Remove( wxWindow *window )
+{
+    return Detach( window );
+}
+#endif // WXWIN_COMPATIBILITY_2_6
 
 bool wxSizer::Remove( wxSizer *sizer )
 {

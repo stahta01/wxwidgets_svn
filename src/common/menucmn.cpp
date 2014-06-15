@@ -324,10 +324,12 @@ void wxMenuItemBase::SetHelp(const wxString& str)
     }
 }
 
+#ifndef __WXPM__
 wxString wxMenuItemBase::GetLabelText(const wxString& text)
 {
     return wxStripMenuCodes(text);
 }
+#endif
 
 #if WXWIN_COMPATIBILITY_2_8
 wxString wxMenuItemBase::GetLabelFromText(const wxString& text)
@@ -421,25 +423,21 @@ wxMenuItem *wxMenuBase::Remove(wxMenuItem *item)
 {
     wxCHECK_MSG( item, NULL, wxT("invalid item in wxMenu::Remove") );
 
+    return DoRemove(item);
+}
+
+wxMenuItem *wxMenuBase::DoRemove(wxMenuItem *item)
+{
     wxMenuItemList::compatibility_iterator node = m_items.Find(item);
 
     // if we get here, the item is valid or one of Remove() functions is broken
-    wxCHECK_MSG( node, NULL, wxT("removing item not in the menu?") );
-
-    // call DoRemove() before removing the item from the list of items as the
-    // existing code in port-specific implementation may rely on the item still
-    // being there (this is the case for at least wxMSW)
-    wxMenuItem* const item2 = DoRemove(item);
+    wxCHECK_MSG( node, NULL, wxT("bug in wxMenu::Remove logic") );
 
     // we detach the item, but we do delete the list node (i.e. don't call
     // DetachNode() here!)
     m_items.Erase(node);
 
-    return item2;
-}
-
-wxMenuItem *wxMenuBase::DoRemove(wxMenuItem *item)
-{
+    // item isn't attached to anything any more
     item->SetMenu(NULL);
     wxMenu *submenu = item->GetSubMenu();
     if ( submenu )
@@ -461,7 +459,7 @@ bool wxMenuBase::Delete(wxMenuItem *item)
 
 bool wxMenuBase::DoDelete(wxMenuItem *item)
 {
-    wxMenuItem *item2 = Remove(item);
+    wxMenuItem *item2 = DoRemove(item);
     wxCHECK_MSG( item2, false, wxT("failed to delete menu item") );
 
     // don't delete the submenu
@@ -481,7 +479,7 @@ bool wxMenuBase::Destroy(wxMenuItem *item)
 
 bool wxMenuBase::DoDestroy(wxMenuItem *item)
 {
-    wxMenuItem *item2 = Remove(item);
+    wxMenuItem *item2 = DoRemove(item);
     wxCHECK_MSG( item2, false, wxT("failed to delete menu item") );
 
     delete item2;

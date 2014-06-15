@@ -120,6 +120,23 @@
 #include <unistd.h>
 #endif
 
+#ifdef __WATCOMC__
+#include <io.h>
+#include <sys/utime.h>
+#include <sys/stat.h>
+#endif
+
+#ifdef __VISAGECPP__
+#ifndef MAX_PATH
+#define MAX_PATH 256
+#endif
+#endif
+
+#ifdef __EMX__
+#include <os2.h>
+#define MAX_PATH _MAX_PATH
+#endif
+
 #ifndef S_ISREG
     #define S_ISREG(mode) ((mode) & S_IFREG)
 #endif
@@ -307,7 +324,7 @@ static bool IsUNCPath(const wxString& path, wxPathFormat format)
 // the appropriate file with an extra twist that it also works when there is no
 // wxFileName object at all, as is the case in static methods.
 
-#if defined(__UNIX_LIKE__) || defined(__WXMAC__)
+#if defined(__UNIX_LIKE__) || defined(__WXMAC__) || defined(__OS2__) || (defined(__DOS__) && defined(__WATCOMC__))
     #define wxHAVE_LSTAT
 #endif
 
@@ -478,7 +495,7 @@ void wxFileName::SetPath( const wxString& pathOrig, wxPathFormat format )
 
         default:
             wxFAIL_MSG( wxT("Unknown path format") );
-            wxFALLTHROUGH;
+            // !! Fall through !!
 
         case wxPATH_UNIX:
             m_relative = leadingChar != wxT('/');
@@ -636,7 +653,7 @@ void RemoveTrailingSeparatorsFromPath(wxString& strPath)
     }
 }
 
-#endif // __WINDOWS_ 
+#endif // __WINDOWS__ || __OS2__
 
 bool
 wxFileSystemObjectExists(const wxString& path, int flags)
@@ -670,6 +687,34 @@ wxFileSystemObjectExists(const wxString& path, int flags)
     // Anything else must be a file (perhaps we should check for
     // FILE_ATTRIBUTE_REPARSE_POINT?)
     return acceptFile;
+#elif defined(__OS2__)
+    if ( acceptDir )
+    {
+        // OS/2 can't handle "d:", it wants either "d:\" or "d:."
+        if (strPath.length() == 2 && strPath[1u] == wxT(':'))
+            strPath << wxT('.');
+    }
+
+    FILESTATUS3 Info = {{0}};
+    APIRET rc = ::DosQueryPathInfo((PSZ)(WXSTRINGCAST strPath), FIL_STANDARD,
+            (void*) &Info, sizeof(FILESTATUS3));
+
+    if ( rc == NO_ERROR )
+    {
+        if ( Info.attrFile & FILE_DIRECTORY )
+            return acceptDir;
+        else
+            return acceptFile;
+    }
+
+    // We consider that the path must exist if we get a sharing violation for
+    // it but we don't know what is it in this case.
+    if ( rc == ERROR_SHARING_VIOLATION )
+        return flags & wxFILE_EXISTS_ANY;
+
+    // Any other error (usually ERROR_PATH_NOT_FOUND), means there is nothing
+    // there.
+    return false;
 #else // Non-MSW, non-OS/2
     wxStructStat st;
     if ( !StatAny(st, strPath, flags) )
@@ -1845,7 +1890,7 @@ wxString wxFileName::GetForbiddenChars(wxPathFormat format)
     {
         default :
             wxFAIL_MSG( wxT("Unknown path format") );
-            wxFALLTHROUGH;
+            // !! Fall through !!
 
         case wxPATH_UNIX:
             break;
@@ -1900,7 +1945,7 @@ wxString wxFileName::GetPathSeparators(wxPathFormat format)
 
         default:
             wxFAIL_MSG( wxT("Unknown wxPATH_XXX style") );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxPATH_UNIX:
             seps = wxFILE_SEP_PATH_UNIX;
@@ -2049,7 +2094,7 @@ wxString wxFileName::GetPath( int flags, wxPathFormat format ) const
 
         default:
             wxFAIL_MSG( wxT("Unknown path format") );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxPATH_UNIX:
             if ( !m_relative )
@@ -2098,7 +2143,7 @@ wxString wxFileName::GetPath( int flags, wxPathFormat format ) const
 
             default:
                 wxFAIL_MSG( wxT("Unexpected path format") );
-                wxFALLTHROUGH;
+                // still fall through
 
             case wxPATH_DOS:
             case wxPATH_UNIX:
@@ -2293,7 +2338,7 @@ wxPathFormat wxFileName::GetFormat( wxPathFormat format )
 {
     if (format == wxPATH_NATIVE)
     {
-#if defined(__WINDOWS__) || defined(__DOS__)
+#if defined(__WINDOWS__) || defined(__OS2__) || defined(__DOS__)
         format = wxPATH_DOS;
 #elif defined(__VMS)
         format = wxPATH_VMS;
@@ -2615,7 +2660,7 @@ bool wxFileName::SetTimes(const wxDateTime *dtAccess,
             return true;
         }
     }
-#elif defined(__UNIX_LIKE__)
+#elif defined(__UNIX_LIKE__) || (defined(__DOS__) && defined(__WATCOMC__))
     wxUnusedVar(dtCreate);
 
     if ( !dtAccess && !dtMod )

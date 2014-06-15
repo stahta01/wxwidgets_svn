@@ -86,6 +86,14 @@
 #   endif
 #endif /* wxUSE_TASKBARICON_BALLOONS */
 
+#ifndef wxUSE_UNICODE_MSLU
+#    ifdef wxABORT_ON_CONFIG_ERROR
+#        error "wxUSE_UNICODE_MSLU must be defined."
+#    else
+#        define wxUSE_UNICODE_MSLU 0
+#    endif
+#endif  /* wxUSE_UNICODE_MSLU */
+
 #ifndef wxUSE_UXTHEME
 #    ifdef wxABORT_ON_CONFIG_ERROR
 #        error "wxUSE_UXTHEME must be defined."
@@ -93,6 +101,19 @@
 #        define wxUSE_UXTHEME 0
 #    endif
 #endif  /* wxUSE_UXTHEME */
+
+/*
+ * We don't want to give an error if wxUSE_UNICODE_MSLU is enabled but
+ * wxUSE_UNICODE is not as this would make it impossible to simply set the
+ * former in wx/setup.h as then the library wouldn't compile in non-Unicode
+ * configurations, so instead simply unset it silently when it doesn't make
+ * sense.
+ */
+#if wxUSE_UNICODE_MSLU && !wxUSE_UNICODE
+#   undef wxUSE_UNICODE_MSLU
+#   define wxUSE_UNICODE_MSLU 0
+#endif
+
 
 /*
  * Unfortunately we can't use compiler TLS support if the library can be used
@@ -118,6 +139,25 @@
 /*
  * disable the settings which don't work for some compilers
  */
+
+#ifndef wxUSE_NORLANDER_HEADERS
+#   if ( wxCHECK_WATCOM_VERSION(1,0) || defined(__WINE__) ) || \
+       ((defined(__MINGW32__) || defined(__CYGWIN__)) && ((__GNUC__>2) ||((__GNUC__==2) && (__GNUC_MINOR__>=95))))
+#       define wxUSE_NORLANDER_HEADERS 1
+#   else
+#       define wxUSE_NORLANDER_HEADERS 0
+#   endif
+#endif
+
+/*
+ * See WINVER definition in wx/msw/wrapwin.h for the explanation of this test
+ * logic.
+ */
+#if (defined(__VISUALC__) && (__VISUALC__ < 1300)) && \
+        (!defined(WINVER) || WINVER < 0x0500)
+#   undef wxUSE_TASKBARICON_BALLOONS
+#   define wxUSE_TASKBARICON_BALLOONS 0
+#endif
 
 /*
  * All of the settings below require SEH support (__try/__catch) and can't work
@@ -171,6 +211,12 @@
 #   define wxUSE_DEBUG_NEW_ALWAYS          0
 #endif /* wxUSE_MFC */
 
+#if (defined(__GNUWIN32__) && !wxUSE_NORLANDER_HEADERS)
+    /* GnuWin32 doesn't have appropriate headers for e.g. IUnknown. */
+#   undef wxUSE_DRAG_AND_DROP
+#   define wxUSE_DRAG_AND_DROP 0
+#endif
+
 #if !wxUSE_OWNER_DRAWN && !defined(__WXUNIVERSAL__)
 #   undef wxUSE_CHECKLISTBOX
 #   define wxUSE_CHECKLISTBOX 0
@@ -219,6 +265,19 @@
 
 #endif /* __BORLANDC__ */
 
+/* DMC++ doesn't have definitions for date picker control, so use generic control
+ */
+#ifdef __DMC__
+#   if wxUSE_DATEPICKCTRL
+#       undef wxUSE_DATEPICKCTRL_GENERIC
+#       undef wxUSE_DATEPICKCTRL
+#   endif
+#   define wxUSE_DATEPICKCTRL 0
+#   define wxUSE_DATEPICKCTRL_GENERIC 1
+#endif
+
+
+
 /*
    un/redefine the options which we can't compile (after checking that they're
    defined
@@ -228,6 +287,11 @@
 #       undef wxUSE_ACTIVEX
 #       define wxUSE_ACTIVEX 0
 #   endif /* wxUSE_ACTIVEX */
+
+#   if wxUSE_UNICODE_MSLU
+#       undef wxUSE_UNICODE_MSLU
+#       define wxUSE_UNICODE_MSLU 0
+#   endif /* wxUSE_UNICODE_MSLU */
 #endif /* __WINE__ */
 
 

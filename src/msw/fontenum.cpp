@@ -146,6 +146,12 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
     return true;
 }
 
+#if defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ) && !wxUSE_NORLANDER_HEADERS
+    #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+#else
+    #define wxFONTENUMPROC FONTENUMPROC
+#endif
+
 void wxFontEnumeratorHelper::DoEnumerate()
 {
 #ifndef __WXMICROWIN__
@@ -154,14 +160,14 @@ void wxFontEnumeratorHelper::DoEnumerate()
 #ifdef __WXWINCE__
     ::EnumFontFamilies(hDC,
                        m_facename.empty() ? NULL : wxMSW_CONV_LPCTSTR(m_facename),
-                       (FONTENUMPROC)wxFontEnumeratorProc,
+                       (wxFONTENUMPROC)wxFontEnumeratorProc,
                        (LPARAM)this) ;
 #else // __WIN32__
     LOGFONT lf;
     lf.lfCharSet = (BYTE)m_charset;
     wxStrlcpy(lf.lfFaceName, m_facename.c_str(), WXSIZEOF(lf.lfFaceName));
     lf.lfPitchAndFamily = 0;
-    ::EnumFontFamiliesEx(hDC, &lf, (FONTENUMPROC)wxFontEnumeratorProc,
+    ::EnumFontFamiliesEx(hDC, &lf, (wxFONTENUMPROC)wxFontEnumeratorProc,
                          (LPARAM)this, 0 /* reserved */) ;
 #endif // Win32/CE
 

@@ -48,6 +48,7 @@ public:
         m_finished = false;
     }
 
+    void AcceptChangesAndFinish();
     void SetFocusOnIdle( bool focus = true ) { m_focusOnIdle = focus; }
 
 protected:
@@ -1926,7 +1927,9 @@ wxDataViewColumn *wxDataViewListCtrl::AppendToggleColumn( const wxString &label,
         new wxDataViewToggleRenderer( wxT("bool"), mode ),
         GetStore()->GetColumnCount()-1, width, align, flags );
 
-    return wxDataViewCtrl::AppendColumn( ret ) ? ret : NULL;
+    wxDataViewCtrl::AppendColumn( ret );
+
+    return ret;
 }
 
 wxDataViewColumn *wxDataViewListCtrl::AppendProgressColumn( const wxString &label,
@@ -1938,7 +1941,9 @@ wxDataViewColumn *wxDataViewListCtrl::AppendProgressColumn( const wxString &labe
         new wxDataViewProgressRenderer( wxEmptyString, wxT("long"), mode ),
         GetStore()->GetColumnCount()-1, width, align, flags );
 
-    return wxDataViewCtrl::AppendColumn( ret ) ? ret : NULL;
+    wxDataViewCtrl::AppendColumn( ret );
+
+    return ret;
 }
 
 wxDataViewColumn *wxDataViewListCtrl::AppendIconTextColumn( const wxString &label,
@@ -1950,7 +1955,9 @@ wxDataViewColumn *wxDataViewListCtrl::AppendIconTextColumn( const wxString &labe
         new wxDataViewIconTextRenderer( wxT("wxDataViewIconText"), mode ),
         GetStore()->GetColumnCount()-1, width, align, flags );
 
-    return wxDataViewCtrl::AppendColumn( ret ) ? ret : NULL;
+    wxDataViewCtrl::AppendColumn( ret );
+
+    return ret;
 }
 
 void wxDataViewListCtrl::OnSize( wxSizeEvent &event )

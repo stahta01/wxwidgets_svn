@@ -304,9 +304,7 @@ enum wxTextBoxAttrFlags
     wxTEXT_BOX_ATTR_CLEAR                   = 0x00000002,
     wxTEXT_BOX_ATTR_COLLAPSE_BORDERS        = 0x00000004,
     wxTEXT_BOX_ATTR_VERTICAL_ALIGNMENT      = 0x00000008,
-    wxTEXT_BOX_ATTR_BOX_STYLE_NAME          = 0x00000010,
-    wxTEXT_BOX_ATTR_WHITESPACE              = 0x00000020,
-    wxTEXT_BOX_ATTR_CORNER_RADIUS           = 0x00000040
+    wxTEXT_BOX_ATTR_BOX_STYLE_NAME          = 0x00000010
 };
 
 /**
@@ -801,7 +799,7 @@ enum wxTextBoxAttrClearStyle
 };
 
 /**
-    Collapse mode styles.
+    Collapse mode styles. TODO: can they be switched on per side?
  */
 enum wxTextBoxAttrCollapseMode
 {
@@ -818,21 +816,6 @@ enum wxTextBoxAttrVerticalAlignment
     wxTEXT_BOX_ATTR_VERTICAL_ALIGNMENT_TOP  =       1,
     wxTEXT_BOX_ATTR_VERTICAL_ALIGNMENT_CENTRE =     2,
     wxTEXT_BOX_ATTR_VERTICAL_ALIGNMENT_BOTTOM  =    3
-};
-
-/**
-    Whitespace values mirroring the CSS white-space attribute.
-    Only wxTEXT_BOX_ATTR_WHITESPACE_NO_WRAP is currently implemented,
-    in table cells.
- */
-enum wxTextBoxAttrWhitespaceMode
-{
-    wxTEXT_BOX_ATTR_WHITESPACE_NONE                 = 0,
-    wxTEXT_BOX_ATTR_WHITESPACE_NORMAL               = 1,
-    wxTEXT_BOX_ATTR_WHITESPACE_NO_WRAP              = 2,
-    wxTEXT_BOX_ATTR_WHITESPACE_PREFORMATTED         = 3,
-    wxTEXT_BOX_ATTR_WHITESPACE_PREFORMATTED_LINE    = 4,
-    wxTEXT_BOX_ATTR_WHITESPACE_PREFORMATTED_WRAP    = 5
 };
 
 /**
@@ -1265,37 +1248,6 @@ public:
     bool HasCollapseBorders() const { return HasFlag(wxTEXT_BOX_ATTR_COLLAPSE_BORDERS); }
 
     /**
-        Returns the whitespace mode.
-    */
-    wxTextBoxAttrWhitespaceMode GetWhitespaceMode() const { return m_whitespaceMode; }
-
-    /**
-        Sets the whitespace mode.
-    */
-    void SetWhitespaceMode(wxTextBoxAttrWhitespaceMode whitespace) { m_whitespaceMode = whitespace; m_flags |= wxTEXT_BOX_ATTR_WHITESPACE; }
-
-    /**
-        Returns @true if the whitespace flag is present.
-    */
-    bool HasWhitespaceMode() const { return HasFlag(wxTEXT_BOX_ATTR_WHITESPACE); }
-
-    /**
-        Returns @true if the corner radius flag is present.
-    */
-    bool HasCornerRadius() const { return HasFlag(wxTEXT_BOX_ATTR_CORNER_RADIUS); }
-
-    /**
-        Returns the corner radius value.
-    */
-    const wxTextAttrDimension& GetCornerRadius() const { return m_cornerRadius; }
-    wxTextAttrDimension& GetCornerRadius() { return m_cornerRadius; }
-
-    /**
-        Sets the corner radius value.
-    */
-    void SetCornerRadius(const wxTextAttrDimension& dim) { m_cornerRadius = dim; m_flags |= wxTEXT_BOX_ATTR_CORNER_RADIUS; }
-
-    /**
         Returns the vertical alignment.
     */
     wxTextBoxAttrVerticalAlignment GetVerticalAlignment() const { return m_verticalAlignment; }
@@ -1541,8 +1493,6 @@ public:
     wxTextBoxAttrClearStyle         m_clearMode;
     wxTextBoxAttrCollapseMode       m_collapseMode;
     wxTextBoxAttrVerticalAlignment  m_verticalAlignment;
-    wxTextBoxAttrWhitespaceMode     m_whitespaceMode;
-    wxTextAttrDimension             m_cornerRadius;
     wxString                        m_boxStyleName;
 };
 
@@ -2211,8 +2161,7 @@ public:
     */
     wxRichTextDrawingContext(wxRichTextBuffer* buffer);
 
-    void Init()
-    { m_buffer = NULL; m_enableVirtualAttributes = true; m_enableImages = true; m_layingOut = false; m_enableDelayedImageLoading = false; }
+    void Init() { m_buffer = NULL; m_enableVirtualAttributes = true; }
 
     /**
         Does this object have virtual attributes?
@@ -2270,47 +2219,8 @@ public:
 
     bool GetVirtualAttributesEnabled() const { return m_enableVirtualAttributes; }
 
-    /**
-        Enable or disable images
-    */
-
-    void EnableImages(bool b) { m_enableImages = b; }
-
-    /**
-        Returns @true if images are enabled.
-    */
-
-    bool GetImagesEnabled() const { return m_enableImages; }
-
-    /**
-        Set laying out flag
-    */
-
-    void SetLayingOut(bool b) { m_layingOut = b; }
-
-    /**
-        Returns @true if laying out.
-    */
-
-    bool GetLayingOut() const { return m_layingOut; }
-
-    /**
-        Enable or disable delayed image loading
-    */
-
-    void EnableDelayedImageLoading(bool b) { m_enableDelayedImageLoading = b; }
-
-    /**
-        Returns @true if delayed image loading is enabled.
-    */
-
-    bool GetDelayedImageLoading() const { return m_enableDelayedImageLoading; }
-
     wxRichTextBuffer*   m_buffer;
     bool                m_enableVirtualAttributes;
-    bool                m_enableImages;
-    bool                m_enableDelayedImageLoading;
-    bool                m_layingOut;
 };
 
 /**
@@ -2442,6 +2352,7 @@ public:
     virtual bool Merge(wxRichTextObject* WXUNUSED(object), wxRichTextDrawingContext& WXUNUSED(context)) { return false; }
 
     /**
+        JACS
         Returns @true if this object can potentially be split, by virtue of having
         different virtual attributes for individual sub-objects.
     */
@@ -2850,7 +2761,7 @@ public:
     /**
         Draws a border.
     */
-    static bool DrawBorder(wxDC& dc, wxRichTextBuffer* buffer, const wxRichTextAttr& attr, const wxTextAttrBorders& borders, const wxRect& rect, int flags = 0);
+    static bool DrawBorder(wxDC& dc, wxRichTextBuffer* buffer, const wxTextAttrBorders& attr, const wxRect& rect, int flags = 0);
 
     /**
         Returns the various rectangles of the box model in pixels. You can either specify @a contentRect (inner)
@@ -4309,8 +4220,6 @@ public:
     virtual ~wxRichTextParagraph();
     wxRichTextParagraph(const wxRichTextParagraph& obj): wxRichTextCompositeObject() { Copy(obj); }
 
-    void Init();
-
 // Overridables
 
     virtual bool Draw(wxDC& dc, wxRichTextDrawingContext& context, const wxRichTextRange& range, const wxRichTextSelection& selection, const wxRect& rect, int descent, int style);
@@ -4444,23 +4353,10 @@ public:
     */
     void LayoutFloat(wxDC& dc, wxRichTextDrawingContext& context, const wxRect& rect, const wxRect& parentRect, int style, wxRichTextFloatCollector* floatCollector);
 
-    /**
-        Whether the paragraph is impacted by floating objects from above.
-    */
-    int GetImpactedByFloatingObjects() const { return m_impactedByFloatingObjects; }
-
-    /**
-        Sets whether the paragraph is impacted by floating objects from above.
-    */
-    void SetImpactedByFloatingObjects(int i) { m_impactedByFloatingObjects = i; }
-
 protected:
 
     // The lines that make up the wrapped paragraph
-    wxRichTextLineList  m_cachedLines;
-
-    // Whether the paragraph is impacted by floating objects from above
-    int                 m_impactedByFloatingObjects;
+    wxRichTextLineList m_cachedLines;
 
     // Default tabstops
     static wxArrayInt  sm_defaultTabs;
@@ -4755,8 +4651,6 @@ class WXDLLIMPEXP_RICHTEXT wxRichTextImage: public wxRichTextObject
 {
     DECLARE_DYNAMIC_CLASS(wxRichTextImage)
 public:
-    enum { ImageState_Unloaded, ImageState_Loaded, ImageState_Bad };
-
 // Constructors
 
     /**
@@ -4839,12 +4733,12 @@ public:
     /**
         Sets the image cache.
     */
-    void SetImageCache(const wxBitmap& bitmap) { m_imageCache = bitmap; m_originalImageSize = wxSize(bitmap.GetWidth(), bitmap.GetHeight()); m_imageState = ImageState_Loaded; }
+    void SetImageCache(const wxBitmap& bitmap) { m_imageCache = bitmap; m_originalImageSize = wxSize(bitmap.GetWidth(), bitmap.GetHeight()); }
 
     /**
         Resets the image cache.
     */
-    void ResetImageCache() { m_imageCache = wxNullBitmap; m_originalImageSize = wxSize(-1, -1); m_imageState = ImageState_Unloaded; }
+    void ResetImageCache() { m_imageCache = wxNullBitmap; m_originalImageSize = wxSize(-1, -1); }
 
     /**
         Returns the image block containing the raw data.
@@ -4866,12 +4760,7 @@ public:
     /**
         Creates a cached image at the required size.
     */
-    virtual bool LoadImageCache(wxDC& dc, wxRichTextDrawingContext& context, wxSize& retImageSize, bool resetCache = false, const wxSize& parentSize = wxDefaultSize);
-
-    /**
-        Do the loading and scaling
-    */
-    virtual bool LoadAndScaleImageCache(wxImage& image, const wxSize& sz, bool delayLoading, bool& changed);
+    virtual bool LoadImageCache(wxDC& dc, bool resetCache = false, const wxSize& parentSize = wxDefaultSize);
 
     /**
         Gets the original image size.
@@ -4883,21 +4772,10 @@ public:
     */
     void SetOriginalImageSize(const wxSize& sz) { m_originalImageSize = sz; }
 
-    /**
-        Gets the image state.
-    */
-    int GetImageState() const { return m_imageState; }
-
-    /**
-        Sets the image state.
-    */
-    void SetImageState(int state) { m_imageState = state; }
-
 protected:
     wxRichTextImageBlock    m_imageBlock;
     wxBitmap                m_imageCache;
     wxSize                  m_originalImageSize;
-    int                     m_imageState;
 };
 
 class WXDLLIMPEXP_FWD_RICHTEXT wxRichTextCommand;
@@ -5762,25 +5640,13 @@ public:
 
 // Accessors
 
-    /**
-        Returns the column span. The default is 1.
-    */
     int GetColSpan() const;
 
-    /**
-        Sets the column span.
-    */
-    void SetColSpan(int span);
+    void SetColSpan(long span) { GetProperties().SetProperty(wxT("colspan"), span); }
 
-    /**
-        Returns the row span. The default is 1.
-    */
     int GetRowSpan() const;
 
-    /**
-        Sets the row span.
-    */
-    void SetRowSpan(int span);
+    void SetRowSpan(long span) { GetProperties().SetProperty(wxT("rowspan"), span); }
 
 // Operations
 
@@ -6222,9 +6088,7 @@ public:
         Updates the control appearance, optimizing if possible given information from the call to Layout.
     */
     void UpdateAppearance(long caretPosition, bool sendUpdateEvent = false,
-                          const wxRect& oldFloatRect = wxRect(),
-                          wxArrayInt* optimizationLineCharPositions = NULL, wxArrayInt* optimizationLineYPositions = NULL,
-                          bool isDoCmd = true);
+                            wxArrayInt* optimizationLineCharPositions = NULL, wxArrayInt* optimizationLineYPositions = NULL, bool isDoCmd = true);
 
     /**
         Replaces the buffer paragraphs with the given fragment.
@@ -6277,8 +6141,7 @@ public:
     /**
         Calculate arrays for refresh optimization.
     */
-    void CalculateRefreshOptimizations(wxArrayInt& optimizationLineCharPositions, wxArrayInt& optimizationLineYPositions,
-                                       wxRect& oldFloatRect);
+    void CalculateRefreshOptimizations(wxArrayInt& optimizationLineCharPositions, wxArrayInt& optimizationLineYPositions);
 
     /**
         Sets the position used for e.g. insertion.
@@ -6722,7 +6585,7 @@ public:
     virtual bool GetDataHere(const wxDataFormat&, void *buf) const { return GetDataHere(buf); }
     virtual bool SetData(const wxDataFormat&, size_t len, const void *buf) { return SetData(len, buf); }
 
-protected:
+private:
     wxDataFormat            m_formatRichTextBuffer;     // our custom format
     wxRichTextBuffer*       m_richTextBuffer;           // our data
     static const wxChar*    ms_richTextBufferFormatId;  // our format id

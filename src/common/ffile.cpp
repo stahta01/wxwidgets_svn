@@ -31,6 +31,10 @@
     #include "wx/crt.h"
 #endif
 
+#ifdef __WINDOWS__
+#include "wx/msw/mslu.h"
+#endif
+
 #include "wx/ffile.h"
 
 // ============================================================================
@@ -121,9 +125,6 @@ bool wxFFile::ReadAll(wxString *str, const wxMBConv& conv)
 
 size_t wxFFile::Read(void *pBuf, size_t nCount)
 {
-    if ( !nCount )
-        return 0;
-
     wxCHECK_MSG( pBuf, 0, wxT("invalid parameter") );
     wxCHECK_MSG( IsOpened(), 0, wxT("can't read from closed file") );
 
@@ -138,9 +139,6 @@ size_t wxFFile::Read(void *pBuf, size_t nCount)
 
 size_t wxFFile::Write(const void *pBuf, size_t nCount)
 {
-    if ( !nCount )
-        return 0;
-
     wxCHECK_MSG( pBuf, 0, wxT("invalid parameter") );
     wxCHECK_MSG( IsOpened(), 0, wxT("can't write to closed file") );
 
@@ -191,7 +189,7 @@ bool wxFFile::Seek(wxFileOffset ofs, wxSeekMode mode)
     {
         default:
             wxFAIL_MSG(wxT("unknown seek mode"));
-            wxFALLTHROUGH;
+            // still fall through
 
         case wxFromStart:
             origin = SEEK_SET;

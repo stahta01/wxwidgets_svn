@@ -39,6 +39,8 @@
 
 #include "wx/except.h"
 
+#include "wx/dynlib.h"
+
 // must have this symbol defined to get _beginthread/_endthread declarations
 #ifndef _MT
     #define _MT
@@ -60,7 +62,8 @@
 // which should be used instead of Win32 ::CreateThread() if possible
 #if defined(__VISUALC__) || \
     (defined(__BORLANDC__) && (__BORLANDC__ >= 0x500)) || \
-    (defined(__GNUG__) && defined(__MSVCRT__))
+    (defined(__GNUG__) && defined(__MSVCRT__)) || \
+    defined(__WATCOMC__)
 
 #ifndef __WXWINCE__
     #undef wxUSE_BEGIN_THREAD
@@ -163,7 +166,21 @@ void wxCriticalSection::Enter()
 
 bool wxCriticalSection::TryEnter()
 {
-    return ::TryEnterCriticalSection((CRITICAL_SECTION *)m_buffer) != 0;
+#if wxUSE_DYNLIB_CLASS
+    typedef BOOL
+      (WINAPI *TryEnterCriticalSection_t)(LPCRITICAL_SECTION lpCriticalSection);
+
+    static TryEnterCriticalSection_t
+        pfnTryEnterCriticalSection = (TryEnterCriticalSection_t)
+            wxDynamicLibrary(wxT("kernel32.dll")).
+                GetSymbol(wxT("TryEnterCriticalSection"));
+
+    return pfnTryEnterCriticalSection
+            ? (*pfnTryEnterCriticalSection)((CRITICAL_SECTION *)m_buffer) != 0
+            : false;
+#else
+    return false;
+#endif
 }
 
 void wxCriticalSection::Leave()
@@ -645,6 +662,14 @@ bool wxThreadInternal::Create(wxThread *thread, unsigned int stackSize)
     // creation instead of Win32 API one because otherwise we will have memory
     // leaks if the thread uses C RTL (and most threads do)
 #ifdef wxUSE_BEGIN_THREAD
+
+    // Watcom is reported to not like 0 stack size (which means "use default"
+    // for the other compilers and is also the default value for stackSize)
+#ifdef __WATCOMC__
+    if ( !stackSize )
+        stackSize = 10240;
+#endif // __WATCOMC__
+
     m_hThread = (HANDLE)_beginthreadex
                         (
                           NULL,                             // default security
@@ -1005,7 +1030,35 @@ bool wxThread::SetConcurrency(size_t WXUNUSED_IN_WINCE(level))
         return false;
     }
 
-    if ( ::SetProcessAffinityMask(hProcess, dwProcMask) == 0 )
+    // set it: we can't link to SetProcessAffinityMask() because it doesn't
+    // exist in Win9x, use RT binding instead
+
+    typedef BOOL (WINAPI *SETPROCESSAFFINITYMASK)(HANDLE, DWORD_PTR);
+
+    // can use static var because we're always in the main thread here
+    static SETPROCESSAFFINITYMASK pfnSetProcessAffinityMask = NULL;
+
+    if ( !pfnSetProcessAffinityMask )
+    {
+        HMODULE hModKernel = ::LoadLibrary(wxT("kernel32"));
+        if ( hModKernel )
+        {
+            pfnSetProcessAffinityMask = (SETPROCESSAFFINITYMASK)
+                ::GetProcAddress(hModKernel, "SetProcessAffinityMask");
+        }
+
+        // we've discovered a MT version of Win9x!
+        wxASSERT_MSG( pfnSetProcessAffinityMask,
+                      wxT("this system has several CPUs but no SetProcessAffinityMask function?") );
+    }
+
+    if ( !pfnSetProcessAffinityMask )
+    {
+        // msg given above - do it only once
+        return false;
+    }
+
+    if ( pfnSetProcessAffinityMask(hProcess, dwProcMask) == 0 )
     {
         wxLogLastError(wxT("SetProcessAffinityMask"));
 
@@ -1171,13 +1224,6 @@ unsigned long wxThread::GetId() const
     wxCriticalSectionLocker lock(const_cast<wxCriticalSection &>(m_critsect));
 
     return (unsigned long)m_internal->GetId();
-}
-
-WXHANDLE wxThread::MSWGetHandle() const
-{
-    wxCriticalSectionLocker lock(const_cast<wxCriticalSection &>(m_critsect));
-
-    return m_internal->GetHandle();
 }
 
 bool wxThread::IsRunning() const

@@ -26,7 +26,9 @@
 
 #include "wx/msw/private.h"
 
-#include <mmsystem.h>
+#if !defined(__GNUWIN32_OLD__) || defined(__CYGWIN10__)
+    #include <mmsystem.h>
+#endif
 
 // Why doesn't BC++ have joyGetPosEx?
 #if !defined(__WIN32__) || defined(__BORLANDC__)

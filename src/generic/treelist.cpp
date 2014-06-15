@@ -363,24 +363,24 @@ public:
 
 
     // Implement the base class pure virtual methods.
-    virtual unsigned GetColumnCount() const wxOVERRIDE;
-    virtual wxString GetColumnType(unsigned col) const wxOVERRIDE;
+    virtual unsigned GetColumnCount() const;
+    virtual wxString GetColumnType(unsigned col) const;
     virtual void GetValue(wxVariant& variant,
                           const wxDataViewItem& item,
-                          unsigned col) const wxOVERRIDE;
+                          unsigned col) const;
     virtual bool SetValue(const wxVariant& variant,
                           const wxDataViewItem& item,
-                          unsigned col) wxOVERRIDE;
-    virtual wxDataViewItem GetParent(const wxDataViewItem& item) const wxOVERRIDE;
-    virtual bool IsContainer(const wxDataViewItem& item) const wxOVERRIDE;
-    virtual bool HasContainerColumns(const wxDataViewItem& item) const wxOVERRIDE;
+                          unsigned col);
+    virtual wxDataViewItem GetParent(const wxDataViewItem& item) const;
+    virtual bool IsContainer(const wxDataViewItem& item) const;
+    virtual bool HasContainerColumns(const wxDataViewItem& item) const;
     virtual unsigned GetChildren(const wxDataViewItem& item,
-                                 wxDataViewItemArray& children) const wxOVERRIDE;
-    virtual bool IsListModel() const wxOVERRIDE { return m_isFlat; }
+                                 wxDataViewItemArray& children) const;
+    virtual bool IsListModel() const { return m_isFlat; }
     virtual int Compare(const wxDataViewItem& item1,
                         const wxDataViewItem& item2,
                         unsigned col,
-                        bool ascending) const wxOVERRIDE;
+                        bool ascending) const;
 
 private:
     // The control we're associated with.
@@ -427,6 +427,12 @@ public:
     {
     }
 
+    bool IsSameAs(const wxDataViewCheckIconText& other) const
+    {
+        return wxDataViewIconText::IsSameAs(other) &&
+                m_checkedState == other.m_checkedState;
+    }
+
     // There is no encapsulation anyhow, so just expose this field directly.
     wxCheckBoxState m_checkedState;
 
@@ -450,18 +456,18 @@ public:
     {
     }
 
-    virtual bool SetValue(const wxVariant& value) wxOVERRIDE
+    virtual bool SetValue(const wxVariant& value)
     {
         m_value << value;
         return true;
     }
 
-    virtual bool GetValue(wxVariant& WXUNUSED(value)) const wxOVERRIDE
+    virtual bool GetValue(wxVariant& WXUNUSED(value)) const
     {
         return false;
     }
 
-    wxSize GetSize() const wxOVERRIDE
+    wxSize GetSize() const
     {
         wxSize size = GetCheckSize();
         size.x += MARGIN_CHECK_ICON;
@@ -488,7 +494,7 @@ public:
         return size;
     }
 
-    virtual bool Render(wxRect cell, wxDC* dc, int state) wxOVERRIDE
+    virtual bool Render(wxRect cell, wxDC* dc, int state)
     {
         // Draw the checkbox first.
         int renderFlags = 0;
@@ -546,7 +552,7 @@ public:
                               wxDataViewModel *model,
                               const wxDataViewItem & item,
                               unsigned int WXUNUSED(col),
-                              const wxMouseEvent *mouseEvent) wxOVERRIDE
+                              const wxMouseEvent *mouseEvent)
     {
         if ( mouseEvent )
         {
@@ -658,16 +664,20 @@ wxTreeListModel::InsertItem(Node* parent,
     wxScopedPtr<Node>
         newItem(new Node(parent, text, imageClosed, imageOpened, data));
 
+    // FIXME-VC6: This compiler refuses to compare "Node* previous" with
+    //            wxTLI_XXX without some help.
+    const wxTreeListItem previousItem(previous);
+
     // If we have no children at all, then inserting as last child is the same
     // as inserting as the first one so check for it here too.
-    if ( previous == wxTLI_FIRST ||
-            (previous == wxTLI_LAST && !parent->GetChild()) )
+    if ( previousItem == wxTLI_FIRST ||
+            (previousItem == wxTLI_LAST && !parent->GetChild()) )
     {
         parent->InsertChild(newItem.get());
     }
     else // Not the first item, find the previous one.
     {
-        if ( previous == wxTLI_LAST )
+        if ( previousItem == wxTLI_LAST )
         {
             previous = parent->GetChild();
 

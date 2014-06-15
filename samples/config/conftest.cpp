@@ -40,8 +40,8 @@ class MyApp: public wxApp
 {
 public:
   // implement base class virtuals
-  virtual bool OnInit() wxOVERRIDE;
-  virtual int OnExit() wxOVERRIDE;
+  virtual bool OnInit();
+  virtual int OnExit();
 };
 
 class MyFrame: public wxFrame

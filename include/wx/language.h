@@ -31,7 +31,7 @@
 */
 enum wxLanguage
 {
-    /// User's default/preferred language as got from OS.
+    /// User's default/preffered language as got from OS.
     wxLANGUAGE_DEFAULT,
 
     /// Unknown language, returned if wxLocale::GetSystemLanguage fails.
@@ -78,6 +78,7 @@ enum wxLanguage
     wxLANGUAGE_BRETON,
     wxLANGUAGE_BULGARIAN,
     wxLANGUAGE_BURMESE,
+    wxLANGUAGE_CAMBODIAN,
     wxLANGUAGE_CATALAN,
     wxLANGUAGE_CHINESE,
     wxLANGUAGE_CHINESE_SIMPLIFIED,
@@ -154,7 +155,6 @@ enum wxLanguage
     wxLANGUAGE_KASHMIRI_INDIA,
     wxLANGUAGE_KAZAKH,
     wxLANGUAGE_KERNEWEK,
-    wxLANGUAGE_KHMER,
     wxLANGUAGE_KINYARWANDA,
     wxLANGUAGE_KIRGHIZ,
     wxLANGUAGE_KIRUNDI,
@@ -272,11 +272,7 @@ enum wxLanguage
     wxLANGUAGE_ZULU,
 
     /// For custom, user-defined languages.
-    wxLANGUAGE_USER_DEFINED,
-
-
-    /// Obsolete synonym.
-    wxLANGUAGE_CAMBODIAN = wxLANGUAGE_KHMER
+    wxLANGUAGE_USER_DEFINED
 };
 
 // --- --- --- generated code ends here --- --- ---

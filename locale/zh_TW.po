@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: wxWidgets 3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-21 17:22+0100\n"
+"POT-Creation-Date: 2014-02-21 14:54+0100\n"
 "PO-Revision-Date: 2013-02-27 14:58+0800\n"
 "Last-Translator: Wei-Lun Chao <bluebat@member.fsf.org>\n"
 "Language-Team: Chinese (traditional) <zh-l10n@linux.org.tw>\n"
@@ -51,7 +51,7 @@ msgstr " (錯誤 %ld: %s)"
 msgid " (in module \"%s\")"
 msgstr "(在模組中：\"%s\")"
 
-#: ../src/common/docview.cpp:1631
+#: ../src/common/docview.cpp:1624
 msgid " - "
 msgstr " - "
 
@@ -104,12 +104,12 @@ msgstr "#9 信封, 3 7/8 x 8 7/8 英吋"
 msgid "%"
 msgstr ""
 
-#: ../src/html/helpwnd.cpp:1045
+#: ../src/html/helpwnd.cpp:1044
 #, c-format
 msgid "%d of %lu"
 msgstr "%d / %lu"
 
-#: ../src/html/helpwnd.cpp:1692 ../src/html/helpwnd.cpp:1730
+#: ../src/html/helpwnd.cpp:1681 ../src/html/helpwnd.cpp:1719
 #, c-format
 msgid "%i of %i"
 msgstr "%i / %i"
@@ -120,12 +120,12 @@ msgid "%ld byte"
 msgid_plural "%ld bytes"
 msgstr[0] "%ld 位元組"
 
-#: ../src/html/helpwnd.cpp:1047
+#: ../src/html/helpwnd.cpp:1046
 #, c-format
 msgid "%lu of %lu"
 msgstr "%lu / %lu"
 
-#: ../src/common/cmdline.cpp:1215
+#: ../src/common/cmdline.cpp:1050
 #, c-format
 msgid "%s (or %s)"
 msgstr "%s (或 %s)"
@@ -198,7 +198,7 @@ msgstr "遞增(&A)"
 msgid "&Back"
 msgstr "回傳(&B)"
 
-#: ../src/richtext/richtextstylepage.cpp:115
+#: ../src/richtext/richtextstylepage.cpp:113
 msgid "&Based on:"
 msgstr "基於(&B):"
 
@@ -206,7 +206,7 @@ msgstr "基於(&B):"
 msgid "&Before a paragraph:"
 msgstr "段落之前(&B):"
 
-#: ../src/richtext/richtextfontpage.cpp:262
+#: ../src/richtext/richtextfontpage.cpp:271
 msgid "&Bg colour:"
 msgstr "背景顏色(&B)："
 
@@ -218,21 +218,21 @@ msgstr "粗體(&B)"
 msgid "&Bottom"
 msgstr "底端(&B)"
 
-#: ../src/richtext/richtextborderspage.cpp:347
-#: ../src/richtext/richtextborderspage.cpp:516
-#: ../src/richtext/richtextmarginspage.cpp:259
-#: ../src/richtext/richtextmarginspage.cpp:373
+#: ../src/richtext/richtextborderspage.cpp:343
+#: ../src/richtext/richtextborderspage.cpp:512
+#: ../src/richtext/richtextmarginspage.cpp:260
+#: ../src/richtext/richtextmarginspage.cpp:374
 #: ../src/richtext/richtextsizepage.cpp:637
 #: ../src/richtext/richtextsizepage.cpp:644
 msgid "&Bottom:"
 msgstr "底端(&B):"
 
-#: ../include/wx/richtext/richtextbuffer.h:3641
+#: ../include/wx/richtext/richtextbuffer.h:3578
 msgid "&Box"
 msgstr "文字方塊(&B)"
 
 #: ../src/richtext/richtextliststylepage.cpp:210
-#: ../src/richtext/richtextbulletspage.cpp:146
+#: ../src/richtext/richtextbulletspage.cpp:159
 msgid "&Bullet style:"
 msgstr "項目符號樣式(&B):"
 
@@ -250,7 +250,7 @@ msgstr "取消(&C)"
 msgid "&Cascade"
 msgstr "層疊排列(&C)"
 
-#: ../include/wx/richtext/richtextbuffer.h:5717
+#: ../include/wx/richtext/richtextbuffer.h:5639
 msgid "&Cell"
 msgstr "儲存格(&C)"
 
@@ -272,7 +272,7 @@ msgstr "關閉(&C)"
 msgid "&Color"
 msgstr "顏色(&C)："
 
-#: ../src/richtext/richtextfontpage.cpp:249
+#: ../src/richtext/richtextfontpage.cpp:258
 msgid "&Colour:"
 msgstr "顏色(&C)："
 
@@ -297,7 +297,7 @@ msgstr "自訂(&C)..."
 msgid "&Debug report preview:"
 msgstr "除錯報告預覽(&D): "
 
-#: ../src/richtext/richtexttabspage.cpp:138
+#: ../src/richtext/richtexttabspage.cpp:142
 #: ../src/richtext/richtextctrl.cpp:334 ../src/osx/textctrl_osx.cpp:585
 #: ../src/common/stockitem.cpp:152 ../src/msw/textctrl.cpp:2337
 msgid "&Delete"
@@ -367,7 +367,7 @@ msgstr "字族(&F)："
 msgid "&Font for Level..."
 msgstr "層級字型(&F)..."
 
-#: ../src/richtext/richtextfontpage.cpp:147
+#: ../src/richtext/richtextfontpage.cpp:156
 #: ../src/richtext/richtextsymboldlg.cpp:400
 msgid "&Font:"
 msgstr "字型(&F)："
@@ -444,11 +444,11 @@ msgid "&Left"
 msgstr "左側(&L)"
 
 #: ../src/richtext/richtextindentspage.cpp:195
-#: ../src/richtext/richtextborderspage.cpp:245
-#: ../src/richtext/richtextborderspage.cpp:414
+#: ../src/richtext/richtextborderspage.cpp:241
+#: ../src/richtext/richtextborderspage.cpp:410
 #: ../src/richtext/richtextliststylepage.cpp:381
-#: ../src/richtext/richtextmarginspage.cpp:186
-#: ../src/richtext/richtextmarginspage.cpp:300
+#: ../src/richtext/richtextmarginspage.cpp:187
+#: ../src/richtext/richtextmarginspage.cpp:301
 #: ../src/richtext/richtextsizepage.cpp:532
 #: ../src/richtext/richtextsizepage.cpp:539
 msgid "&Left:"
@@ -474,7 +474,7 @@ msgstr "移動物件至(&M):"
 msgid "&Network"
 msgstr "網路(&N)"
 
-#: ../src/richtext/richtexttabspage.cpp:132 ../src/common/stockitem.cpp:176
+#: ../src/richtext/richtexttabspage.cpp:136 ../src/common/stockitem.cpp:176
 msgid "&New"
 msgstr "新增(&N)"
 
@@ -491,11 +491,11 @@ msgstr "下一個(&N) 》"
 msgid "&Next Paragraph"
 msgstr "下個段落(&N)"
 
-#: ../src/generic/tipdlg.cpp:271
+#: ../src/generic/tipdlg.cpp:276
 msgid "&Next Tip"
 msgstr "下一祕訣(&N)"
 
-#: ../src/richtext/richtextstylepage.cpp:125
+#: ../src/richtext/richtextstylepage.cpp:123
 msgid "&Next style:"
 msgstr "下一樣式(&N)："
 
@@ -507,7 +507,7 @@ msgstr "否(&N)"
 msgid "&Notes:"
 msgstr "注意(&N)："
 
-#: ../src/richtext/richtextbulletspage.cpp:251
+#: ../src/richtext/richtextbulletspage.cpp:264
 msgid "&Number:"
 msgstr "編號(&N):"
 
@@ -534,7 +534,7 @@ msgstr "換頁符號(&P)"
 msgid "&Paste"
 msgstr "貼上(&P)"
 
-#: ../include/wx/richtext/richtextbuffer.h:4783
+#: ../include/wx/richtext/richtextbuffer.h:4705
 msgid "&Picture"
 msgstr "圖片(&P)"
 
@@ -542,7 +542,7 @@ msgstr "圖片(&P)"
 msgid "&Point size:"
 msgstr "字點大小(&P)："
 
-#: ../src/richtext/richtexttabspage.cpp:110
+#: ../src/richtext/richtexttabspage.cpp:114
 msgid "&Position (tenths of a mm):"
 msgstr "位置(&P) (十分之一公釐)"
 
@@ -568,7 +568,7 @@ msgstr "上個段落(&P)"
 msgid "&Print..."
 msgstr "列印(&P)…"
 
-#: ../src/richtext/richtextctrl.cpp:338 ../src/richtext/richtextctrl.cpp:5090
+#: ../src/richtext/richtextctrl.cpp:338 ../src/richtext/richtextctrl.cpp:5054
 #: ../src/common/stockitem.cpp:184
 msgid "&Properties"
 msgstr "性質(&P)"
@@ -609,11 +609,11 @@ msgid "&Right"
 msgstr "右側(&R)"
 
 #: ../src/richtext/richtextindentspage.cpp:213
-#: ../src/richtext/richtextborderspage.cpp:279
-#: ../src/richtext/richtextborderspage.cpp:448
+#: ../src/richtext/richtextborderspage.cpp:275
+#: ../src/richtext/richtextborderspage.cpp:444
 #: ../src/richtext/richtextliststylepage.cpp:399
-#: ../src/richtext/richtextmarginspage.cpp:211
-#: ../src/richtext/richtextmarginspage.cpp:325
+#: ../src/richtext/richtextmarginspage.cpp:212
+#: ../src/richtext/richtextmarginspage.cpp:326
 #: ../src/richtext/richtextsizepage.cpp:602
 #: ../src/richtext/richtextsizepage.cpp:609
 msgid "&Right:"
@@ -631,7 +631,7 @@ msgstr "另存為(&S)"
 msgid "&See details"
 msgstr "看細節(&S)"
 
-#: ../src/generic/tipdlg.cpp:265
+#: ../src/generic/tipdlg.cpp:270
 msgid "&Show tips at startup"
 msgstr "啟動時顯示小祕訣(&S)"
 
@@ -639,7 +639,7 @@ msgstr "啟動時顯示小祕訣(&S)"
 msgid "&Size"
 msgstr "大小(&S)"
 
-#: ../src/richtext/richtextfontpage.cpp:159
+#: ../src/richtext/richtextfontpage.cpp:168
 msgid "&Size:"
 msgstr "大小(&S)："
 
@@ -660,11 +660,11 @@ msgstr "拼字檢查(&S)"
 msgid "&Stop"
 msgstr "停止(&S)"
 
-#: ../src/richtext/richtextfontpage.cpp:275 ../src/common/stockitem.cpp:199
+#: ../src/richtext/richtextfontpage.cpp:284 ../src/common/stockitem.cpp:199
 msgid "&Strikethrough"
 msgstr "刪除線(&S)"
 
-#: ../src/generic/fontdlgg.cpp:382 ../src/richtext/richtextstylepage.cpp:106
+#: ../src/generic/fontdlgg.cpp:382 ../src/richtext/richtextstylepage.cpp:104
 msgid "&Style:"
 msgstr "樣式(&S)："
 
@@ -677,16 +677,16 @@ msgid "&Subset:"
 msgstr "子集合(&S):"
 
 #: ../src/richtext/richtextliststylepage.cpp:268
-#: ../src/richtext/richtextbulletspage.cpp:209
+#: ../src/richtext/richtextbulletspage.cpp:222
 msgid "&Symbol:"
 msgstr "樣式(&S)："
 
-#: ../src/richtext/richtextborderspage.cpp:383
-#: ../src/richtext/richtextborderspage.cpp:552
+#: ../src/richtext/richtextborderspage.cpp:379
+#: ../src/richtext/richtextborderspage.cpp:548
 msgid "&Synchronize values"
 msgstr ""
 
-#: ../include/wx/richtext/richtextbuffer.h:5823
+#: ../include/wx/richtext/richtextbuffer.h:5733
 msgid "&Table"
 msgstr "表格(&T) "
 
@@ -694,10 +694,10 @@ msgstr "表格(&T) "
 msgid "&Top"
 msgstr "頂端(&T)"
 
-#: ../src/richtext/richtextborderspage.cpp:313
-#: ../src/richtext/richtextborderspage.cpp:482
-#: ../src/richtext/richtextmarginspage.cpp:234
-#: ../src/richtext/richtextmarginspage.cpp:348
+#: ../src/richtext/richtextborderspage.cpp:309
+#: ../src/richtext/richtextborderspage.cpp:478
+#: ../src/richtext/richtextmarginspage.cpp:235
+#: ../src/richtext/richtextmarginspage.cpp:349
 #: ../src/richtext/richtextsizepage.cpp:567
 #: ../src/richtext/richtextsizepage.cpp:574
 msgid "&Top:"
@@ -707,7 +707,7 @@ msgstr "頂端(&T):"
 msgid "&Underline"
 msgstr "底線(&U)"
 
-#: ../src/richtext/richtextfontpage.cpp:234
+#: ../src/richtext/richtextfontpage.cpp:243
 msgid "&Underlining:"
 msgstr "加底線(&U)："
 
@@ -757,40 +757,26 @@ msgstr "視窗(&W)"
 msgid "&Yes"
 msgstr "是(&Y)"
 
-#: ../src/common/valtext.cpp:256
-#, fuzzy, c-format
-msgid "'%s' contains illegal characters"
-msgstr "'%s' 應該只含有字母字元。"
-
-#: ../src/common/valtext.cpp:254
-#, fuzzy, c-format
-msgid "'%s' doesn't consist only of valid characters"
-msgstr "'%s' 應該只含有字母字元。"
-
 #: ../src/common/config.cpp:523 ../src/msw/regconf.cpp:258
 #, c-format
 msgid "'%s' has extra '..', ignored."
 msgstr "'%s' 有額外的 '..'，已忽略。"
 
-#: ../src/common/cmdline.cpp:1107 ../src/common/cmdline.cpp:1125
+#: ../src/common/valtext.cpp:165 ../src/common/valtext.cpp:167
+#: ../src/common/valtext.cpp:254 ../src/common/valtext.cpp:256
+#, c-format
+msgid "'%s' is invalid"
+msgstr "'%s' 是無效的"
+
+#: ../src/common/cmdline.cpp:948 ../src/common/cmdline.cpp:966
 #, c-format
 msgid "'%s' is not a correct numeric value for option '%s'."
 msgstr "'%s' 不是選項 '%s' 的正確數值。"
 
-#: ../src/common/translation.cpp:1087
+#: ../src/common/translation.cpp:1086
 #, c-format
 msgid "'%s' is not a valid message catalog."
 msgstr "'%s' 不是有效的訊息登錄檔。"
-
-#: ../src/common/valtext.cpp:165
-#, fuzzy, c-format
-msgid "'%s' is not one of the valid strings"
-msgstr "'%s' 不是有效的訊息登錄檔。"
-
-#: ../src/common/valtext.cpp:167
-#, fuzzy, c-format
-msgid "'%s' is one of the invalid strings"
-msgstr "'%s' 是無效的"
 
 #: ../src/common/textbuf.cpp:239
 #, c-format
@@ -823,16 +809,16 @@ msgid "'%s' should only contain digits."
 msgstr "'%s' 應該只含數字字元。"
 
 #: ../src/richtext/richtextliststylepage.cpp:229
-#: ../src/richtext/richtextbulletspage.cpp:166
+#: ../src/richtext/richtextbulletspage.cpp:179
 msgid "(*)"
 msgstr "(*)"
 
-#: ../src/html/helpwnd.cpp:977
+#: ../src/html/helpwnd.cpp:976
 msgid "(Help)"
 msgstr "(說明)"
 
 #: ../src/richtext/richtextliststylepage.cpp:481
-#: ../src/richtext/richtextbulletspage.cpp:273
+#: ../src/richtext/richtextbulletspage.cpp:286
 msgid "(None)"
 msgstr "(無)"
 
@@ -840,8 +826,8 @@ msgstr "(無)"
 msgid "(Normal text)"
 msgstr "(正常文字)"
 
-#: ../src/html/helpwnd.cpp:427 ../src/html/helpwnd.cpp:1120
-#: ../src/html/helpwnd.cpp:1756
+#: ../src/html/helpwnd.cpp:426 ../src/html/helpwnd.cpp:1119
+#: ../src/html/helpwnd.cpp:1745
 msgid "(bookmarks)"
 msgstr "(書籤)"
 
@@ -850,10 +836,10 @@ msgstr "(書籤)"
 #: ../src/richtext/richtextindentspage.cpp:287
 #: ../src/richtext/richtextindentspage.cpp:311
 #: ../src/richtext/richtextindentspage.cpp:326
-#: ../src/richtext/richtextformatdlg.cpp:887
-#: ../src/richtext/richtextfontpage.cpp:347
-#: ../src/richtext/richtextfontpage.cpp:351
-#: ../src/richtext/richtextfontpage.cpp:355
+#: ../src/richtext/richtextformatdlg.cpp:867
+#: ../src/richtext/richtextfontpage.cpp:331
+#: ../src/richtext/richtextfontpage.cpp:335
+#: ../src/richtext/richtextfontpage.cpp:339
 #: ../src/richtext/richtextliststylepage.cpp:448
 #: ../src/richtext/richtextliststylepage.cpp:460
 #: ../src/richtext/richtextliststylepage.cpp:461
@@ -861,17 +847,17 @@ msgid "(none)"
 msgstr "(無)"
 
 #: ../src/richtext/richtextliststylepage.cpp:492
-#: ../src/richtext/richtextbulletspage.cpp:284
+#: ../src/richtext/richtextbulletspage.cpp:297
 msgid "*"
 msgstr "*"
 
 #: ../src/richtext/richtextliststylepage.cpp:236
-#: ../src/richtext/richtextbulletspage.cpp:173
+#: ../src/richtext/richtextbulletspage.cpp:186
 msgid "*)"
 msgstr "*)"
 
 #: ../src/richtext/richtextliststylepage.cpp:495
-#: ../src/richtext/richtextbulletspage.cpp:287
+#: ../src/richtext/richtextbulletspage.cpp:300
 msgid "+"
 msgstr "+"
 
@@ -880,7 +866,7 @@ msgid ", 64-bit edition"
 msgstr "，64 位元版"
 
 #: ../src/richtext/richtextliststylepage.cpp:493
-#: ../src/richtext/richtextbulletspage.cpp:285
+#: ../src/richtext/richtextbulletspage.cpp:298
 msgid "-"
 msgstr "-"
 
@@ -982,33 +968,33 @@ msgstr ": 不明的編碼"
 msgid "< &Back"
 msgstr "《 返回(&B)"
 
-#: ../src/osx/carbon/fontdlg.cpp:592 ../src/osx/carbon/fontdlg.cpp:798
-#: ../src/osx/carbon/fontdlg.cpp:818
+#: ../src/osx/carbon/fontdlg.cpp:592 ../src/osx/carbon/fontdlg.cpp:799
+#: ../src/osx/carbon/fontdlg.cpp:819
 msgid "<Any Decorative>"
 msgstr "<任何修飾字體>"
 
-#: ../src/osx/carbon/fontdlg.cpp:593 ../src/osx/carbon/fontdlg.cpp:800
-#: ../src/osx/carbon/fontdlg.cpp:820
+#: ../src/osx/carbon/fontdlg.cpp:593 ../src/osx/carbon/fontdlg.cpp:801
+#: ../src/osx/carbon/fontdlg.cpp:821
 msgid "<Any Modern>"
 msgstr "<任何現代字體>"
 
-#: ../src/osx/carbon/fontdlg.cpp:591 ../src/osx/carbon/fontdlg.cpp:796
-#: ../src/osx/carbon/fontdlg.cpp:816
+#: ../src/osx/carbon/fontdlg.cpp:591 ../src/osx/carbon/fontdlg.cpp:797
+#: ../src/osx/carbon/fontdlg.cpp:817
 msgid "<Any Roman>"
 msgstr "<任何羅馬字體>"
 
-#: ../src/osx/carbon/fontdlg.cpp:594 ../src/osx/carbon/fontdlg.cpp:802
-#: ../src/osx/carbon/fontdlg.cpp:822
+#: ../src/osx/carbon/fontdlg.cpp:594 ../src/osx/carbon/fontdlg.cpp:803
+#: ../src/osx/carbon/fontdlg.cpp:823
 msgid "<Any Script>"
 msgstr "<任何手寫字體>"
 
-#: ../src/osx/carbon/fontdlg.cpp:595 ../src/osx/carbon/fontdlg.cpp:807
-#: ../src/osx/carbon/fontdlg.cpp:826
+#: ../src/osx/carbon/fontdlg.cpp:595 ../src/osx/carbon/fontdlg.cpp:808
+#: ../src/osx/carbon/fontdlg.cpp:827
 msgid "<Any Swiss>"
 msgstr "<任何瑞士字體>"
 
-#: ../src/osx/carbon/fontdlg.cpp:596 ../src/osx/carbon/fontdlg.cpp:804
-#: ../src/osx/carbon/fontdlg.cpp:824
+#: ../src/osx/carbon/fontdlg.cpp:596 ../src/osx/carbon/fontdlg.cpp:805
+#: ../src/osx/carbon/fontdlg.cpp:825
 msgid "<Any Teletype>"
 msgstr "<任何打字字體>"
 
@@ -1028,24 +1014,24 @@ msgstr "<磁碟機>"
 msgid "<LINK>"
 msgstr "<連結>"
 
-#: ../src/html/helpwnd.cpp:1280
+#: ../src/html/helpwnd.cpp:1279
 msgid "<b><i>Bold italic face.</i></b><br>"
 msgstr "<b><i>粗斜體</i></b><br>"
 
-#: ../src/html/helpwnd.cpp:1284
+#: ../src/html/helpwnd.cpp:1283
 msgid "<b><i>bold italic <u>underlined</u></i></b><br>"
 msgstr "<b><i>粗斜<u>加底線</u></i></b><br>"
 
-#: ../src/html/helpwnd.cpp:1279
+#: ../src/html/helpwnd.cpp:1278
 msgid "<b>Bold face.</b> "
 msgstr "<b>粗體。</b> "
 
-#: ../src/html/helpwnd.cpp:1278
+#: ../src/html/helpwnd.cpp:1277
 msgid "<i>Italic face.</i> "
 msgstr "<i>斜體。</i> "
 
 #: ../src/richtext/richtextliststylepage.cpp:494
-#: ../src/richtext/richtextbulletspage.cpp:286
+#: ../src/richtext/richtextbulletspage.cpp:299
 msgid ">"
 msgstr ">"
 
@@ -1063,8 +1049,8 @@ msgstr "非空集合必須包含 'element' 節點"
 
 #: ../src/richtext/richtextliststylepage.cpp:304
 #: ../src/richtext/richtextliststylepage.cpp:306
-#: ../src/richtext/richtextbulletspage.cpp:244
-#: ../src/richtext/richtextbulletspage.cpp:246
+#: ../src/richtext/richtextbulletspage.cpp:257
+#: ../src/richtext/richtextbulletspage.cpp:259
 msgid "A standard bullet name."
 msgstr "標準的項目符號名稱。"
 
@@ -1148,7 +1134,7 @@ msgstr "A6 105 x 148 公釐"
 msgid "A6 Rotated 148 x 105 mm"
 msgstr "A6 轉向 148 x 105 公釐"
 
-#: ../src/generic/fontdlgg.cpp:83 ../src/richtext/richtextformatdlg.cpp:547
+#: ../src/generic/fontdlgg.cpp:83 ../src/richtext/richtextformatdlg.cpp:527
 #: ../src/osx/carbon/fontdlg.cpp:323
 msgid "ABCDEFGabcdefg12345"
 msgstr "ABCDEFGabcdefg12345"
@@ -1188,15 +1174,15 @@ msgstr "實際大小`"
 msgid "Add"
 msgstr "加入"
 
-#: ../src/richtext/richtextbuffer.cpp:11219
+#: ../src/richtext/richtextbuffer.cpp:11056
 msgid "Add Column"
 msgstr ""
 
-#: ../src/richtext/richtextbuffer.cpp:11156
+#: ../src/richtext/richtextbuffer.cpp:10993
 msgid "Add Row"
 msgstr ""
 
-#: ../src/html/helpwnd.cpp:440
+#: ../src/html/helpwnd.cpp:439
 msgid "Add current page to bookmarks"
 msgstr "把目前頁面加到書籤中"
 
@@ -1254,11 +1240,11 @@ msgstr "所有"
 msgid "All files (%s)|%s"
 msgstr "所有檔案 (%s)|%s"
 
-#: ../include/wx/defs.h:2908
+#: ../include/wx/defs.h:2933
 msgid "All files (*)|*"
 msgstr "所有檔案 (*)|*"
 
-#: ../include/wx/defs.h:2905
+#: ../include/wx/defs.h:2930
 msgid "All files (*.*)|*.*"
 msgstr "所有檔案 (*.*)|*.*"
 
@@ -1281,11 +1267,6 @@ msgstr "已經撥接 ISP。"
 #: ../src/common/accelcmn.cpp:320 ../src/univ/themes/win32.cpp:3756
 msgid "Alt+"
 msgstr "Alt+"
-
-#: ../src/richtext/richtextborderspage.cpp:580
-#: ../src/richtext/richtextborderspage.cpp:582
-msgid "An optional corner radius for adding rounded corners."
-msgstr ""
 
 #: ../src/common/debugrpt.cpp:581
 msgid "And includes the following files:\n"
@@ -1310,7 +1291,7 @@ msgid "Apply"
 msgstr "套用"
 
 #: ../src/richtext/richtextliststylepage.cpp:482
-#: ../src/richtext/richtextbulletspage.cpp:274
+#: ../src/richtext/richtextbulletspage.cpp:287
 msgid "Arabic"
 msgstr "阿拉伯數字"
 
@@ -1336,8 +1317,8 @@ msgid "Attributes"
 msgstr "屬性"
 
 #: ../src/richtext/richtextliststylepage.cpp:294
-#: ../src/richtext/richtextbulletspage.cpp:232
-#: ../src/richtext/richtextbulletspage.cpp:234
+#: ../src/richtext/richtextbulletspage.cpp:245
+#: ../src/richtext/richtextbulletspage.cpp:247
 msgid "Available fonts."
 msgstr "可用的字型。"
 
@@ -1393,32 +1374,32 @@ msgstr "B6 信封，176 x 125 公釐"
 msgid "BACK"
 msgstr "BACK"
 
-#: ../src/common/imagbmp.cpp:524 ../src/common/imagbmp.cpp:554
-#: ../src/common/imagbmp.cpp:569
+#: ../src/common/imagbmp.cpp:523 ../src/common/imagbmp.cpp:553
+#: ../src/common/imagbmp.cpp:568
 msgid "BMP: Couldn't allocate memory."
 msgstr "BMP: 無法配置記憶體。"
 
-#: ../src/common/imagbmp.cpp:98
+#: ../src/common/imagbmp.cpp:97
 msgid "BMP: Couldn't save invalid image."
 msgstr "BMP: 無法儲存無效的圖像。"
 
-#: ../src/common/imagbmp.cpp:339
+#: ../src/common/imagbmp.cpp:338
 msgid "BMP: Couldn't write RGB color map."
 msgstr "BMP: 無法寫入 RGB 顏色對應表。"
 
-#: ../src/common/imagbmp.cpp:474
+#: ../src/common/imagbmp.cpp:473
 msgid "BMP: Couldn't write data."
 msgstr "BMP: 無法寫入資料。"
 
-#: ../src/common/imagbmp.cpp:240
+#: ../src/common/imagbmp.cpp:239
 msgid "BMP: Couldn't write the file (Bitmap) header."
 msgstr "BMP: 無法寫入檔案標頭(Bitmap)。"
 
-#: ../src/common/imagbmp.cpp:263
+#: ../src/common/imagbmp.cpp:262
 msgid "BMP: Couldn't write the file (BitmapInfo) header."
 msgstr "BMP: 無法寫入檔案標頭(BitmapInfo)。"
 
-#: ../src/common/imagbmp.cpp:134
+#: ../src/common/imagbmp.cpp:133
 msgid "BMP: wxImage doesn't have own wxPalette."
 msgstr "BMP: wxImage 沒有自己的 wxPalette。"
 
@@ -1427,7 +1408,7 @@ msgid "Back"
 msgstr "向後"
 
 #: ../src/richtext/richtextbackgroundpage.cpp:119
-#: ../src/richtext/richtextformatdlg.cpp:395
+#: ../src/richtext/richtextformatdlg.cpp:375
 msgid "Background"
 msgstr "背景"
 
@@ -1452,7 +1433,7 @@ msgid "Before a paragraph:"
 msgstr "段落之前:"
 
 #: ../src/richtext/richtextliststylepage.cpp:489
-#: ../src/richtext/richtextbulletspage.cpp:281
+#: ../src/richtext/richtextbulletspage.cpp:294
 msgid "Bitmap"
 msgstr "點陣圖"
 
@@ -1460,17 +1441,17 @@ msgstr "點陣圖"
 msgid "Bitmap renderer cannot render value; value type: "
 msgstr "點陣圖渲染器無法渲染該值，型態為: "
 
-#: ../src/generic/fontdlgg.cpp:333 ../src/richtext/richtextfontpage.cpp:353
+#: ../src/generic/fontdlgg.cpp:333 ../src/richtext/richtextfontpage.cpp:337
 #: ../src/osx/carbon/fontdlg.cpp:524 ../src/common/stockitem.cpp:143
 msgid "Bold"
 msgstr "粗體"
 
-#: ../src/richtext/richtextborderspage.cpp:232
-#: ../src/richtext/richtextborderspage.cpp:390
+#: ../src/richtext/richtextborderspage.cpp:228
+#: ../src/richtext/richtextborderspage.cpp:386
 msgid "Border"
 msgstr "邊框"
 
-#: ../src/richtext/richtextformatdlg.cpp:389
+#: ../src/richtext/richtextformatdlg.cpp:369
 msgid "Borders"
 msgstr "邊框"
 
@@ -1482,7 +1463,7 @@ msgstr "底端"
 msgid "Bottom margin (mm):"
 msgstr "底邊距(公釐)："
 
-#: ../src/richtext/richtextbuffer.cpp:9176
+#: ../src/richtext/richtextbuffer.cpp:9026
 msgid "Box Properties"
 msgstr "文字方塊性質"
 
@@ -1495,7 +1476,7 @@ msgid "Browse"
 msgstr "瀏覽"
 
 #: ../src/richtext/richtextliststylepage.cpp:245
-#: ../src/richtext/richtextbulletspage.cpp:182
+#: ../src/richtext/richtextbulletspage.cpp:195
 msgid "Bullet &Alignment:"
 msgstr "項目符號對齊(&A):"
 
@@ -1503,7 +1484,7 @@ msgstr "項目符號對齊(&A):"
 msgid "Bullet style"
 msgstr "項目符號樣式"
 
-#: ../src/richtext/richtextformatdlg.cpp:363
+#: ../src/richtext/richtextformatdlg.cpp:343
 msgid "Bullets"
 msgstr "項目符號"
 
@@ -1563,7 +1544,7 @@ msgstr "CLEAR"
 msgid "COMMAND"
 msgstr "COMMAND"
 
-#: ../src/richtext/richtextfontpage.cpp:282
+#: ../src/richtext/richtextfontpage.cpp:291
 msgid "Ca&pitals"
 msgstr "大寫(&P)"
 
@@ -1720,7 +1701,7 @@ msgstr "無法建立 mutex。"
 msgid "Cannot create new column's ID. Probably max. number of columns reached."
 msgstr "無法建立新欄位的 ID 。可能是因為已達到欄位數量的上限。"
 
-#: ../src/common/filefn.cpp:1328
+#: ../src/common/filefn.cpp:1335
 #, c-format
 msgid "Cannot enumerate files '%s'"
 msgstr "無法列舉檔案 '%s'"
@@ -1765,7 +1746,7 @@ msgstr "無法掛斷—沒有連線中的撥號連線。"
 msgid "Cannot initialize OLE"
 msgstr "無法初始化 OLE"
 
-#: ../src/common/socket.cpp:852
+#: ../src/common/socket.cpp:847
 msgid "Cannot initialize sockets"
 msgstr "無法初始化通訊端"
 
@@ -1813,7 +1794,7 @@ msgstr "無法開啟索引檔： %s"
 msgid "Cannot open resources file '%s'."
 msgstr "無法開啟資源檔 '%s'。"
 
-#: ../src/html/helpwnd.cpp:1548
+#: ../src/html/helpwnd.cpp:1537
 msgid "Cannot print empty page."
 msgstr "無法列印空頁面。"
 
@@ -1859,7 +1840,7 @@ msgstr "無法暫停執行緒 %x"
 msgid "Cannot wait for thread termination"
 msgstr "無法等候執行緒終結"
 
-#: ../src/html/helpwnd.cpp:547
+#: ../src/html/helpwnd.cpp:546
 msgid "Case sensitive"
 msgstr "區分大小寫"
 
@@ -1867,7 +1848,7 @@ msgstr "區分大小寫"
 msgid "Categorized Mode"
 msgstr "已分類模式"
 
-#: ../src/richtext/richtextbuffer.cpp:9748
+#: ../src/richtext/richtextbuffer.cpp:9598
 msgid "Cell Properties"
 msgstr "儲存格性質"
 
@@ -1889,7 +1870,7 @@ msgid "Central European (ISO-8859-2)"
 msgstr "中歐語系 (ISO-8859-2)"
 
 #: ../src/richtext/richtextliststylepage.cpp:250
-#: ../src/richtext/richtextbulletspage.cpp:187
+#: ../src/richtext/richtextbulletspage.cpp:200
 msgid "Centre"
 msgstr "置中對齊"
 
@@ -1905,24 +1886,24 @@ msgid "Centred"
 msgstr "中間"
 
 #: ../src/richtext/richtextliststylepage.cpp:280
-#: ../src/richtext/richtextbulletspage.cpp:219
+#: ../src/richtext/richtextbulletspage.cpp:232
 msgid "Ch&oose..."
 msgstr "選擇(&O)…"
 
-#: ../src/richtext/richtextbuffer.cpp:4242
+#: ../src/richtext/richtextbuffer.cpp:4107
 msgid "Change List Style"
 msgstr "變更清單樣式"
 
-#: ../src/richtext/richtextbuffer.cpp:3604
+#: ../src/richtext/richtextbuffer.cpp:3458
 msgid "Change Object Style"
 msgstr "變更物件樣式"
 
-#: ../src/richtext/richtextbuffer.cpp:3870
-#: ../src/richtext/richtextbuffer.cpp:8003
+#: ../src/richtext/richtextbuffer.cpp:3724
+#: ../src/richtext/richtextbuffer.cpp:7853
 msgid "Change Properties"
 msgstr "變更性質"
 
-#: ../src/richtext/richtextbuffer.cpp:3421
+#: ../src/richtext/richtextbuffer.cpp:3275
 msgid "Change Style"
 msgstr "變更樣式"
 
@@ -1937,37 +1918,31 @@ msgstr "字元樣式"
 
 #: ../src/richtext/richtextliststylepage.cpp:224
 #: ../src/richtext/richtextliststylepage.cpp:226
-#: ../src/richtext/richtextbulletspage.cpp:161
-#: ../src/richtext/richtextbulletspage.cpp:163
+#: ../src/richtext/richtextbulletspage.cpp:174
+#: ../src/richtext/richtextbulletspage.cpp:176
 msgid "Check to add a period after the bullet."
 msgstr "勾選以在項目符號後加上半形句點。"
 
 #: ../src/richtext/richtextliststylepage.cpp:238
 #: ../src/richtext/richtextliststylepage.cpp:240
-#: ../src/richtext/richtextbulletspage.cpp:175
-#: ../src/richtext/richtextbulletspage.cpp:177
+#: ../src/richtext/richtextbulletspage.cpp:188
+#: ../src/richtext/richtextbulletspage.cpp:190
 msgid "Check to add a right parenthesis."
 msgstr "勾選以加上右括號。"
 
-#: ../src/richtext/richtextborderspage.cpp:385
-#: ../src/richtext/richtextborderspage.cpp:387
-#: ../src/richtext/richtextborderspage.cpp:554
-#: ../src/richtext/richtextborderspage.cpp:556
+#: ../src/richtext/richtextborderspage.cpp:381
+#: ../src/richtext/richtextborderspage.cpp:383
+#: ../src/richtext/richtextborderspage.cpp:550
+#: ../src/richtext/richtextborderspage.cpp:552
 msgid "Check to edit all borders simultaneously."
 msgstr ""
 
 #: ../src/richtext/richtextliststylepage.cpp:231
 #: ../src/richtext/richtextliststylepage.cpp:233
-#: ../src/richtext/richtextbulletspage.cpp:168
-#: ../src/richtext/richtextbulletspage.cpp:170
+#: ../src/richtext/richtextbulletspage.cpp:181
+#: ../src/richtext/richtextbulletspage.cpp:183
 msgid "Check to enclose the bullet in parentheses."
 msgstr "勾選以將項目符號加上一對括號。"
-
-#: ../src/richtext/richtextfontpage.cpp:315
-#: ../src/richtext/richtextfontpage.cpp:317
-#, fuzzy
-msgid "Check to indicate right-to-left text layout."
-msgstr "點擊以變更文字顏色。"
 
 #: ../src/osx/carbon/fontdlg.cpp:526 ../src/osx/carbon/fontdlg.cpp:528
 msgid "Check to make the font bold."
@@ -1986,46 +1961,41 @@ msgstr "勾選以將字加底線。"
 msgid "Check to restart numbering."
 msgstr "勾選以重新編號。"
 
-#: ../src/richtext/richtextfontpage.cpp:277
-#: ../src/richtext/richtextfontpage.cpp:279
+#: ../src/richtext/richtextfontpage.cpp:286
+#: ../src/richtext/richtextfontpage.cpp:288
 msgid "Check to show a line through the text."
 msgstr "勾選以將字加上刪除線。"
 
-#: ../src/richtext/richtextfontpage.cpp:284
-#: ../src/richtext/richtextfontpage.cpp:286
+#: ../src/richtext/richtextfontpage.cpp:293
+#: ../src/richtext/richtextfontpage.cpp:295
 msgid "Check to show the text in capitals."
 msgstr "勾選以將字變成大寫。"
 
-#: ../src/richtext/richtextfontpage.cpp:291
-#: ../src/richtext/richtextfontpage.cpp:293
+#: ../src/richtext/richtextfontpage.cpp:300
+#: ../src/richtext/richtextfontpage.cpp:302
 #, fuzzy
 msgid "Check to show the text in small capitals."
 msgstr "勾選以將字變成大寫。"
 
-#: ../src/richtext/richtextfontpage.cpp:305
-#: ../src/richtext/richtextfontpage.cpp:307
+#: ../src/richtext/richtextfontpage.cpp:314
+#: ../src/richtext/richtextfontpage.cpp:316
 msgid "Check to show the text in subscript."
 msgstr "勾選以將字下標。"
 
-#: ../src/richtext/richtextfontpage.cpp:298
-#: ../src/richtext/richtextfontpage.cpp:300
+#: ../src/richtext/richtextfontpage.cpp:307
+#: ../src/richtext/richtextfontpage.cpp:309
 msgid "Check to show the text in superscript."
 msgstr "勾選以將字上標。"
-
-#: ../src/richtext/richtextfontpage.cpp:322
-#: ../src/richtext/richtextfontpage.cpp:324
-msgid "Check to suppress hyphenation."
-msgstr ""
 
 #: ../src/msw/dialup.cpp:784
 msgid "Choose ISP to dial"
 msgstr "選擇 ISP 進行撥號"
 
-#: ../src/propgrid/props.cpp:1654
+#: ../src/propgrid/props.cpp:1653
 msgid "Choose a directory:"
 msgstr "選擇目錄"
 
-#: ../src/propgrid/props.cpp:1713
+#: ../src/propgrid/props.cpp:1712
 msgid "Choose a file"
 msgstr "選擇檔案"
 
@@ -2066,8 +2036,8 @@ msgstr "點擊以套用所選樣式。"
 
 #: ../src/richtext/richtextliststylepage.cpp:281
 #: ../src/richtext/richtextliststylepage.cpp:283
-#: ../src/richtext/richtextbulletspage.cpp:220
-#: ../src/richtext/richtextbulletspage.cpp:222
+#: ../src/richtext/richtextbulletspage.cpp:233
+#: ../src/richtext/richtextbulletspage.cpp:235
 msgid "Click to browse for a symbol."
 msgstr "點擊以瀏覽該符號。"
 
@@ -2083,13 +2053,13 @@ msgstr "點擊取消字型選擇。"
 msgid "Click to change the font colour."
 msgstr "點擊變更字型顏色。"
 
-#: ../src/richtext/richtextfontpage.cpp:267
-#: ../src/richtext/richtextfontpage.cpp:269
+#: ../src/richtext/richtextfontpage.cpp:276
+#: ../src/richtext/richtextfontpage.cpp:278
 msgid "Click to change the text background colour."
 msgstr "點擊取消字型選擇。"
 
-#: ../src/richtext/richtextfontpage.cpp:254
-#: ../src/richtext/richtextfontpage.cpp:256
+#: ../src/richtext/richtextfontpage.cpp:263
+#: ../src/richtext/richtextfontpage.cpp:265
 msgid "Click to change the text colour."
 msgstr "點擊以變更文字顏色。"
 
@@ -2132,13 +2102,13 @@ msgstr "點擊以新增清單樣式。"
 msgid "Click to create a new paragraph style."
 msgstr "點擊以新增段落樣式。"
 
-#: ../src/richtext/richtexttabspage.cpp:133
-#: ../src/richtext/richtexttabspage.cpp:135
+#: ../src/richtext/richtexttabspage.cpp:137
+#: ../src/richtext/richtexttabspage.cpp:139
 msgid "Click to create a new tab position."
 msgstr "點擊以新增定位點。"
 
-#: ../src/richtext/richtexttabspage.cpp:145
-#: ../src/richtext/richtexttabspage.cpp:147
+#: ../src/richtext/richtexttabspage.cpp:149
+#: ../src/richtext/richtexttabspage.cpp:151
 msgid "Click to delete all tab positions."
 msgstr "點擊以刪除所有的定位點。"
 
@@ -2147,8 +2117,8 @@ msgstr "點擊以刪除所有的定位點。"
 msgid "Click to delete the selected style."
 msgstr "點擊以刪除所選樣式。"
 
-#: ../src/richtext/richtexttabspage.cpp:139
-#: ../src/richtext/richtexttabspage.cpp:141
+#: ../src/richtext/richtexttabspage.cpp:143
+#: ../src/richtext/richtexttabspage.cpp:145
 msgid "Click to delete the selected tab position."
 msgstr "點擊以刪除所選定位點。"
 
@@ -2186,7 +2156,7 @@ msgstr "關閉視窗"
 msgid "Color"
 msgstr "顏色"
 
-#: ../src/richtext/richtextformatdlg.cpp:781
+#: ../src/richtext/richtextformatdlg.cpp:761
 msgid "Colour"
 msgstr "顏色"
 
@@ -2231,13 +2201,13 @@ msgstr "由於命令列參數 %d 無法被轉換為 Unicode 編碼，其將被�
 msgid "Common dialog failed with error code %0lx."
 msgstr "共同對話視窗錯誤，錯誤碼 %0lx。"
 
-#: ../src/gtk/window.cpp:4345
+#: ../src/gtk/window.cpp:4357
 msgid ""
 "Compositing not supported by this system, please enable it in your Window "
 "Manager."
 msgstr "這個系統不支援複合介面，請在您的視窗管理員中啟用它。"
 
-#: ../src/html/helpwnd.cpp:1565
+#: ../src/html/helpwnd.cpp:1554
 msgid "Compressed HTML Help file (*.chm)|*.chm|"
 msgstr "壓縮超文件說明檔 (*.chm)|*.chm|"
 
@@ -2254,15 +2224,15 @@ msgstr "組態項目名稱不能以 '%c' 開頭。"
 msgid "Confirm"
 msgstr "確認"
 
-#: ../src/msw/mimetype.cpp:715
+#: ../src/msw/mimetype.cpp:744
 msgid "Confirm registry update"
 msgstr "確認登錄變更"
 
-#: ../src/html/htmlwin.cpp:557
+#: ../src/html/htmlwin.cpp:547
 msgid "Connecting..."
 msgstr "連線中…"
 
-#: ../src/html/helpwnd.cpp:483
+#: ../src/html/helpwnd.cpp:482
 msgid "Contents"
 msgstr "目錄"
 
@@ -2275,7 +2245,7 @@ msgstr "無法轉換到字集 '%s'。"
 msgid "Convert"
 msgstr "轉換"
 
-#: ../src/html/htmlwin.cpp:1070
+#: ../src/html/htmlwin.cpp:1060
 #, c-format
 msgid "Copied to clipboard:\"%s\""
 msgstr "複製到剪貼簿：\"%s\""
@@ -2291,15 +2261,6 @@ msgstr "複製"
 #: ../src/common/stockitem.cpp:258
 msgid "Copy selection"
 msgstr "複製選取項目"
-
-#: ../src/richtext/richtextborderspage.cpp:569
-#: ../src/richtext/richtextborderspage.cpp:604
-msgid "Corner"
-msgstr ""
-
-#: ../src/richtext/richtextborderspage.cpp:578
-msgid "Corner &radius:"
-msgstr ""
 
 #: ../src/html/chm.cpp:718
 #, c-format
@@ -2370,7 +2331,7 @@ msgstr "無法設定對齊。"
 msgid "Could not set column width."
 msgstr "無法設定欄位寬度。"
 
-#: ../src/common/filefn.cpp:1554
+#: ../src/common/filefn.cpp:1568
 msgid "Could not set current working directory"
 msgstr "無法設定目前工作目錄"
 
@@ -2558,23 +2519,23 @@ msgstr "DEL"
 msgid "DELETE"
 msgstr "DELETE"
 
-#: ../src/common/imagbmp.cpp:1090
+#: ../src/common/imagbmp.cpp:1096
 msgid "DIB Header: Encoding doesn't match bitdepth."
 msgstr "DIB 標頭：編碼型態與顏色位元數不吻合。"
 
-#: ../src/common/imagbmp.cpp:1038
+#: ../src/common/imagbmp.cpp:1044
 msgid "DIB Header: Image height > 32767 pixels for file."
 msgstr "DIB 標頭：圖像高度大於 32767 個圖素。"
 
-#: ../src/common/imagbmp.cpp:1030
+#: ../src/common/imagbmp.cpp:1036
 msgid "DIB Header: Image width > 32767 pixels for file."
 msgstr "DIB 標頭：圖像寬度大於 32767 個圖素。"
 
-#: ../src/common/imagbmp.cpp:1058
+#: ../src/common/imagbmp.cpp:1064
 msgid "DIB Header: Unknown bitdepth in file."
 msgstr "DIB 標頭：不明的顏色位元數。"
 
-#: ../src/common/imagbmp.cpp:1072
+#: ../src/common/imagbmp.cpp:1078
 msgid "DIB Header: Unknown encoding in file."
 msgstr "DIB 標頭：不明的編碼型態。"
 
@@ -2590,7 +2551,7 @@ msgstr "DL 信封，110 x 220 公釐"
 msgid "DOWN"
 msgstr "DOWN"
 
-#: ../src/richtext/richtextborderspage.cpp:616
+#: ../src/richtext/richtextborderspage.cpp:567
 msgid "Dashed"
 msgstr "虛線"
 
@@ -2631,21 +2592,21 @@ msgstr "預設字型"
 msgid "Default printer"
 msgstr "預設的印表機"
 
-#: ../src/richtext/richtextbuffer.cpp:8095 ../src/common/stockitem.cpp:152
+#: ../src/richtext/richtextbuffer.cpp:7945 ../src/common/stockitem.cpp:152
 #: ../src/stc/stc_i18n.cpp:20
 msgid "Delete"
 msgstr "刪除"
 
-#: ../src/richtext/richtexttabspage.cpp:144
+#: ../src/richtext/richtexttabspage.cpp:148
 msgid "Delete A&ll"
 msgstr "刪除全部(&L)"
 
-#: ../src/richtext/richtextbuffer.cpp:11105
+#: ../src/richtext/richtextbuffer.cpp:10942
 #, fuzzy
 msgid "Delete Column"
 msgstr "刪除選取項目"
 
-#: ../src/richtext/richtextbuffer.cpp:11055
+#: ../src/richtext/richtextbuffer.cpp:10892
 #, fuzzy
 msgid "Delete Row"
 msgstr "刪除"
@@ -2654,7 +2615,7 @@ msgstr "刪除"
 msgid "Delete Style"
 msgstr "刪除樣式"
 
-#: ../src/richtext/richtextctrl.cpp:1306 ../src/richtext/richtextctrl.cpp:1544
+#: ../src/richtext/richtextctrl.cpp:1300 ../src/richtext/richtextctrl.cpp:1538
 msgid "Delete Text"
 msgstr "刪除文字"
 
@@ -2704,7 +2665,7 @@ msgid ""
 "not installed on this machine. Please install it."
 msgstr "由於遠端存取服務（RAS）沒有安裝，撥號功能無法使用。請先安裝它。"
 
-#: ../src/generic/tipdlg.cpp:225
+#: ../src/generic/tipdlg.cpp:230
 msgid "Did you know..."
 msgstr "您知道嗎…"
 
@@ -2717,12 +2678,12 @@ msgstr "發生 DirectFB 錯誤，錯誤碼 %d 。"
 msgid "Directories"
 msgstr "目錄"
 
-#: ../src/common/filefn.cpp:1243
+#: ../src/common/filefn.cpp:1250
 #, c-format
 msgid "Directory '%s' couldn't be created"
 msgstr "目錄 '%s' 無法建立"
 
-#: ../src/common/filefn.cpp:1263
+#: ../src/common/filefn.cpp:1270
 #, c-format
 msgid "Directory '%s' couldn't be deleted"
 msgstr "目錄 '%s' 無法刪除"
@@ -2739,21 +2700,21 @@ msgstr "目錄不存在。"
 msgid "Discard changes and reload the last saved version?"
 msgstr "捨棄變更並重新載入最後一次儲存的版本？"
 
-#: ../src/html/helpwnd.cpp:513
+#: ../src/html/helpwnd.cpp:512
 msgid ""
 "Display all index items that contain given substring. Search is case "
 "insensitive."
 msgstr "顯示包含該字串的所有索引項目。搜尋不分大小寫。"
 
-#: ../src/html/helpwnd.cpp:693
+#: ../src/html/helpwnd.cpp:692
 msgid "Display options dialog"
 msgstr "顯示選項對話方塊"
 
-#: ../src/html/helpwnd.cpp:327
+#: ../src/html/helpwnd.cpp:326
 msgid "Displays help as you browse the books on the left."
 msgstr "當您瀏覽書籍時於左側顯示說明。"
 
-#: ../src/msw/mimetype.cpp:708
+#: ../src/msw/mimetype.cpp:737
 msgid ""
 "Do you want to overwrite the command used to %s files with extension \"%s"
 "\" ?\n"
@@ -2786,11 +2747,11 @@ msgstr "文件撰寫由 "
 msgid "Documentation writers"
 msgstr "文件撰寫者"
 
-#: ../src/common/sizer.cpp:2684
+#: ../src/common/sizer.cpp:2704
 msgid "Don't Save"
 msgstr "不儲存"
 
-#: ../src/msw/frame.cpp:122 ../src/html/htmlwin.cpp:624
+#: ../src/msw/frame.cpp:122 ../src/html/htmlwin.cpp:614
 msgid "Done"
 msgstr "完成"
 
@@ -2798,11 +2759,11 @@ msgstr "完成"
 msgid "Done."
 msgstr "完成。"
 
-#: ../src/richtext/richtextborderspage.cpp:615
+#: ../src/richtext/richtextborderspage.cpp:566
 msgid "Dotted"
 msgstr "點線"
 
-#: ../src/richtext/richtextborderspage.cpp:617
+#: ../src/richtext/richtextborderspage.cpp:568
 msgid "Double"
 msgstr "雙線"
 
@@ -2819,7 +2780,7 @@ msgstr "id 重複：%d"
 msgid "Down"
 msgstr "下"
 
-#: ../src/richtext/richtextctrl.cpp:848
+#: ../src/richtext/richtextctrl.cpp:842
 msgid "Drag"
 msgstr "拖曳"
 
@@ -2960,11 +2921,11 @@ msgstr "關閉 kqueue 實體時發生錯誤"
 msgid "Error creating directory"
 msgstr "建立目錄錯誤"
 
-#: ../src/common/imagbmp.cpp:1101
+#: ../src/common/imagbmp.cpp:1107
 msgid "Error in reading image DIB."
 msgstr "讀取圖像 DIB 時發生錯誤。"
 
-#: ../src/propgrid/propgrid.cpp:6550
+#: ../src/propgrid/propgrid.cpp:6565
 #, c-format
 msgid "Error in resource: %s"
 msgstr "資源錯誤: %s"
@@ -3034,7 +2995,7 @@ msgstr "無法將 '%s' 解開至 '%s' 中。"
 msgid "F"
 msgstr "F"
 
-#: ../src/propgrid/advprops.cpp:641
+#: ../src/propgrid/advprops.cpp:640
 msgid "Face Name"
 msgstr "字體名稱"
 
@@ -3115,7 +3076,7 @@ msgstr "無法複製登錄機值 '%s'"
 msgid "Failed to copy the contents of registry key '%s' to '%s'."
 msgstr "無法複製登錄機碼 '%s' 的內容到 '%s'。"
 
-#: ../src/common/filefn.cpp:1051
+#: ../src/common/filefn.cpp:1058
 #, c-format
 msgid "Failed to copy the file '%s' to '%s'"
 msgstr "無法複製檔案 '%s' 到 '%s'"
@@ -3173,7 +3134,7 @@ msgstr ""
 msgid "Failed to create epoll descriptor"
 msgstr "無法建立 epoll 描述子。"
 
-#: ../src/msw/mimetype.cpp:200
+#: ../src/msw/mimetype.cpp:198
 #, c-format
 msgid "Failed to create registry entry for '%s' files."
 msgstr "無法為 '%s' 檔案建立登錄項目。"
@@ -3187,7 +3148,7 @@ msgstr "無法建立標準的「尋找/置換」對話窗 (錯誤碼 %d)"
 msgid "Failed to create wake up pipe used by event loop."
 msgstr "建立事件迴圈所用的喚醒管線時失敗。"
 
-#: ../src/html/winpars.cpp:730
+#: ../src/html/winpars.cpp:739
 #, c-format
 msgid "Failed to display HTML document in %s encoding"
 msgstr "無法以編碼 %s 顯示 HTML 文件"
@@ -3246,7 +3207,7 @@ msgstr "無法從剪貼簿取得資料"
 msgid "Failed to get the local system time"
 msgstr "無法取得系統的當地時間"
 
-#: ../src/common/filefn.cpp:1445
+#: ../src/common/filefn.cpp:1452
 msgid "Failed to get the working directory"
 msgstr "無法取得工作目錄"
 
@@ -3398,7 +3359,7 @@ msgstr "無法開啟暫存檔。"
 msgid "Failed to open the clipboard."
 msgstr "無法開啟剪貼簿。"
 
-#: ../src/common/translation.cpp:1171
+#: ../src/common/translation.cpp:1170
 #, c-format
 msgid "Failed to parse Plural-Forms: '%s'"
 msgstr "無法解析 Plural-Forms：'%s'"
@@ -3471,7 +3432,7 @@ msgstr "無法移除過時的鎖定檔案 '%s'。"
 msgid "Failed to rename registry value '%s' to '%s'."
 msgstr "無法將登錄值 '%s' 更名為 '%s'。"
 
-#: ../src/common/filefn.cpp:1161
+#: ../src/common/filefn.cpp:1168
 #, c-format
 msgid ""
 "Failed to rename the file '%s' to '%s' because the destination file already "
@@ -3619,7 +3580,7 @@ msgstr "無法寫入鎖定檔案 '%s'"
 msgid "False"
 msgstr "假"
 
-#: ../src/propgrid/advprops.cpp:659
+#: ../src/propgrid/advprops.cpp:658
 msgid "Family"
 msgstr "字族"
 
@@ -3651,17 +3612,17 @@ msgstr ""
 "檔案 '%s' 已存在，\n"
 "是否覆寫？"
 
-#: ../src/common/filefn.cpp:1199
+#: ../src/common/filefn.cpp:1206
 #, c-format
 msgid "File '%s' couldn't be removed"
 msgstr "無法移除檔案『%s』"
 
-#: ../src/common/filefn.cpp:1180
+#: ../src/common/filefn.cpp:1187
 #, c-format
 msgid "File '%s' couldn't be renamed '%s'"
 msgstr "檔案『%s』無法重新命名為『%s』"
 
-#: ../src/richtext/richtextctrl.cpp:2810 ../src/common/textcmn.cpp:935
+#: ../src/richtext/richtextctrl.cpp:2774 ../src/common/textcmn.cpp:935
 msgid "File couldn't be loaded."
 msgstr "檔案無法載入。"
 
@@ -3670,7 +3631,7 @@ msgstr "檔案無法載入。"
 msgid "File dialog failed with error code %0lx."
 msgstr "檔案對話視窗錯誤，錯誤碼 %0lx。"
 
-#: ../src/common/docview.cpp:1778
+#: ../src/common/docview.cpp:1771
 msgid "File error"
 msgstr "檔案錯誤"
 
@@ -3682,7 +3643,7 @@ msgstr "檔案名稱已存在。"
 msgid "Files"
 msgstr "檔案"
 
-#: ../src/common/filefn.cpp:1746
+#: ../src/common/filefn.cpp:1760
 #, c-format
 msgid "Files (%s)"
 msgstr "檔案 (%s)"
@@ -3691,7 +3652,7 @@ msgstr "檔案 (%s)"
 msgid "Filter"
 msgstr "過濾器"
 
-#: ../src/common/stockitem.cpp:158 ../src/html/helpwnd.cpp:501
+#: ../src/common/stockitem.cpp:158 ../src/html/helpwnd.cpp:500
 msgid "Find"
 msgstr "尋找"
 
@@ -3708,11 +3669,11 @@ msgstr "第一頁"
 msgid "Fixed"
 msgstr "定寬字型︰"
 
-#: ../src/html/helpwnd.cpp:1220
+#: ../src/html/helpwnd.cpp:1219
 msgid "Fixed font:"
 msgstr "定寬字型︰"
 
-#: ../src/html/helpwnd.cpp:1283
+#: ../src/html/helpwnd.cpp:1282
 msgid "Fixed size face.<br> <b>bold</b> <i>italic</i> "
 msgstr "定寬大小字體。<br> <b>粗體</b> <i>斜體</i> "
 
@@ -3728,20 +3689,20 @@ msgstr "軟碟"
 msgid "Folio, 8 1/2 x 13 in"
 msgstr "對開紙，8 1/2 x 13 英吋"
 
-#: ../src/richtext/richtextformatdlg.cpp:345 ../src/osx/carbon/fontdlg.cpp:457
+#: ../src/richtext/richtextformatdlg.cpp:325 ../src/osx/carbon/fontdlg.cpp:457
 #: ../src/common/stockitem.cpp:194
 msgid "Font"
 msgstr "字型 "
 
-#: ../src/richtext/richtextfontpage.cpp:221
+#: ../src/richtext/richtextfontpage.cpp:230
 msgid "Font &weight:"
 msgstr "字型粗細(&W)："
 
-#: ../src/html/helpwnd.cpp:1221
+#: ../src/html/helpwnd.cpp:1220
 msgid "Font size:"
 msgstr "字型大小："
 
-#: ../src/richtext/richtextfontpage.cpp:208
+#: ../src/richtext/richtextfontpage.cpp:217
 msgid "Font st&yle:"
 msgstr "字型樣式(&Y)："
 
@@ -3766,7 +3727,7 @@ msgstr "向前"
 msgid "Forward hrefs are not supported"
 msgstr "不支援往前參照的超連結"
 
-#: ../src/html/helpwnd.cpp:889
+#: ../src/html/helpwnd.cpp:888
 #, c-format
 msgid "Found %i matches"
 msgstr "找到 %i 個符合項目"
@@ -3795,7 +3756,7 @@ msgstr "GIF: 記憶體不足。"
 msgid "GIF: unknown error!!!"
 msgstr "GIF: 不明的錯誤！！！"
 
-#: ../src/gtk/window.cpp:4327
+#: ../src/gtk/window.cpp:4339
 msgid ""
 "GTK+ installed on this machine is too old to support screen compositing, "
 "please install GTK+ 2.12 or later."
@@ -3834,15 +3795,15 @@ msgstr "在一個通用處理器上呼叫GetPropertyCollection"
 msgid "GetPropertyCollection called w/o valid collection getter"
 msgstr "呼叫GetPropertyCollection時未帶有效的collection getter"
 
-#: ../src/html/helpwnd.cpp:674
+#: ../src/html/helpwnd.cpp:673
 msgid "Go back"
 msgstr "退回"
 
-#: ../src/html/helpwnd.cpp:675
+#: ../src/html/helpwnd.cpp:674
 msgid "Go forward"
 msgstr "向前"
 
-#: ../src/html/helpwnd.cpp:677
+#: ../src/html/helpwnd.cpp:676
 msgid "Go one level up in document hierarchy"
 msgstr "到上一階文件層級"
 
@@ -3862,7 +3823,7 @@ msgstr "美術設計由 "
 msgid "Greek (ISO-8859-7)"
 msgstr "希臘語 (ISO-8859-7)"
 
-#: ../src/richtext/richtextborderspage.cpp:618
+#: ../src/richtext/richtextborderspage.cpp:569
 msgid "Groove"
 msgstr "溝槽"
 
@@ -3878,16 +3839,16 @@ msgstr "HELP"
 msgid "HOME"
 msgstr "HOME"
 
-#: ../src/html/helpwnd.cpp:1563
+#: ../src/html/helpwnd.cpp:1552
 msgid "HTML Help Project (*.hhp)|*.hhp|"
 msgstr "超文件說明檔專案 (*.hhp)|*.hhp|"
 
-#: ../src/html/htmlwin.cpp:672
+#: ../src/html/htmlwin.cpp:662
 #, c-format
 msgid "HTML anchor %s does not exist."
 msgstr "HTML 錨點 %s 不存在。"
 
-#: ../src/html/helpwnd.cpp:1561
+#: ../src/html/helpwnd.cpp:1550
 msgid "HTML files (*.html;*.htm)|*.html;*.htm|"
 msgstr "超文件檔 (*.html;*.htm)|*.html;*.htm|"
 
@@ -3905,7 +3866,7 @@ msgstr "希伯來語 (ISO-8859-8)"
 msgid "Help"
 msgstr "說明"
 
-#: ../src/html/helpwnd.cpp:1214
+#: ../src/html/helpwnd.cpp:1213
 msgid "Help Browser Options"
 msgstr "說明瀏覽器選項"
 
@@ -3913,15 +3874,15 @@ msgstr "說明瀏覽器選項"
 msgid "Help Index"
 msgstr "說明索引"
 
-#: ../src/html/helpwnd.cpp:1545
+#: ../src/html/helpwnd.cpp:1534
 msgid "Help Printing"
 msgstr "說明列印"
 
-#: ../src/html/helpwnd.cpp:815
+#: ../src/html/helpwnd.cpp:814
 msgid "Help Topics"
 msgstr "輔助主題"
 
-#: ../src/html/helpwnd.cpp:1562
+#: ../src/html/helpwnd.cpp:1551
 msgid "Help books (*.htb)|*.htb|Help books (*.zip)|*.zip|"
 msgstr "說明書 (*.htb)|*.htb|說明書 (*.zip)|*.zip|"
 
@@ -3966,26 +3927,26 @@ msgstr "家目錄"
 msgid "How the object will float relative to the text."
 msgstr "物件與文字之間的相對位置。"
 
-#: ../src/common/imagbmp.cpp:1116
+#: ../src/common/imagbmp.cpp:1122
 msgid "ICO: Error in reading mask DIB."
 msgstr "ICO: 讀取遮罩式 DIB 時發生錯誤。"
 
-#: ../src/common/imagbmp.cpp:1231 ../src/common/imagbmp.cpp:1292
-#: ../src/common/imagbmp.cpp:1303 ../src/common/imagbmp.cpp:1316
-#: ../src/common/imagbmp.cpp:1361 ../src/common/imagbmp.cpp:1373
-#: ../src/common/imagbmp.cpp:1384
+#: ../src/common/imagbmp.cpp:1237 ../src/common/imagbmp.cpp:1298
+#: ../src/common/imagbmp.cpp:1309 ../src/common/imagbmp.cpp:1322
+#: ../src/common/imagbmp.cpp:1367 ../src/common/imagbmp.cpp:1379
+#: ../src/common/imagbmp.cpp:1390
 msgid "ICO: Error writing the image file!"
 msgstr "ICO: 寫入圖像檔時發生錯誤！"
 
-#: ../src/common/imagbmp.cpp:1196
+#: ../src/common/imagbmp.cpp:1202
 msgid "ICO: Image too tall for an icon."
 msgstr "ICO: 圖像太高。"
 
-#: ../src/common/imagbmp.cpp:1204
+#: ../src/common/imagbmp.cpp:1210
 msgid "ICO: Image too wide for an icon."
 msgstr "ICO: 圖像太寬。"
 
-#: ../src/common/imagbmp.cpp:1464
+#: ../src/common/imagbmp.cpp:1470
 msgid "ICO: Invalid icon index."
 msgstr "ICO: 無效的圖示索引。"
 
@@ -4097,22 +4058,22 @@ msgstr ""
 msgid "Impossible to get child process input"
 msgstr "無法取得子程序的輸入"
 
-#: ../src/common/filefn.cpp:1067
+#: ../src/common/filefn.cpp:1074
 #, c-format
 msgid "Impossible to get permissions for file '%s'"
 msgstr "無法取得檔案 '%s' 的存取權限"
 
-#: ../src/common/filefn.cpp:1081
+#: ../src/common/filefn.cpp:1088
 #, c-format
 msgid "Impossible to overwrite the file '%s'"
 msgstr "無法覆寫檔案 '%s'"
 
-#: ../src/common/filefn.cpp:1135
+#: ../src/common/filefn.cpp:1142
 #, c-format
 msgid "Impossible to set permissions for the file '%s'"
 msgstr "無法設定檔案 '%s' 的存取權限"
 
-#: ../src/common/gifdecod.cpp:792
+#: ../src/common/gifdecod.cpp:818
 #, c-format
 msgid "Incorrect GIF frame size (%u, %d) for the frame #%u"
 msgstr "不正確的 GIF 影格大小 (%u, %d) 用於影格 #%u"
@@ -4125,11 +4086,11 @@ msgstr "參數的數量不正確。"
 msgid "Indent"
 msgstr "縮排"
 
-#: ../src/richtext/richtextformatdlg.cpp:351
+#: ../src/richtext/richtextformatdlg.cpp:331
 msgid "Indents && Spacing"
 msgstr "縮排與間距"
 
-#: ../src/common/stockitem.cpp:166 ../src/html/helpwnd.cpp:526
+#: ../src/common/stockitem.cpp:166 ../src/html/helpwnd.cpp:525
 msgid "Index"
 msgstr "索引"
 
@@ -4149,24 +4110,24 @@ msgstr "安裝後續的啟始失效，忽略中。"
 msgid "Insert"
 msgstr "插入"
 
-#: ../src/richtext/richtextbuffer.cpp:7941
+#: ../src/richtext/richtextbuffer.cpp:7791
 #, fuzzy
 msgid "Insert Field"
 msgstr "插入文字"
 
-#: ../src/richtext/richtextbuffer.cpp:7852
-#: ../src/richtext/richtextbuffer.cpp:8805
+#: ../src/richtext/richtextbuffer.cpp:7702
+#: ../src/richtext/richtextbuffer.cpp:8655
 msgid "Insert Image"
 msgstr "插入圖片"
 
-#: ../src/richtext/richtextbuffer.cpp:7899
+#: ../src/richtext/richtextbuffer.cpp:7749
 msgid "Insert Object"
 msgstr "插入物件"
 
-#: ../src/richtext/richtextctrl.cpp:1247 ../src/richtext/richtextctrl.cpp:1454
-#: ../src/richtext/richtextbuffer.cpp:7694
-#: ../src/richtext/richtextbuffer.cpp:7724
-#: ../src/richtext/richtextbuffer.cpp:7768
+#: ../src/richtext/richtextctrl.cpp:1241 ../src/richtext/richtextctrl.cpp:1448
+#: ../src/richtext/richtextbuffer.cpp:7544
+#: ../src/richtext/richtextbuffer.cpp:7574
+#: ../src/richtext/richtextbuffer.cpp:7618
 msgid "Insert Text"
 msgstr "插入文字"
 
@@ -4175,7 +4136,7 @@ msgstr "插入文字"
 msgid "Inserts a page break before the paragraph."
 msgstr "在段落後插入換頁符號"
 
-#: ../src/richtext/richtextborderspage.cpp:620
+#: ../src/richtext/richtextborderspage.cpp:571
 msgid "Inset"
 msgstr "內縮"
 
@@ -4212,7 +4173,7 @@ msgstr ""
 msgid "Invalid lock file '%s'."
 msgstr "無效的鎖定檔案 '%s'。"
 
-#: ../src/common/translation.cpp:1112
+#: ../src/common/translation.cpp:1111
 msgid "Invalid message catalog."
 msgstr "無效的訊息分類。"
 
@@ -4234,7 +4195,7 @@ msgstr "無效的正規運算式 '%s'： %s"
 msgid "Invalid value %ld for a boolean key \"%s\" in config file."
 msgstr "在設定檔中的的值 %ld (對應到布林 \"%s\")無效。"
 
-#: ../src/generic/fontdlgg.cpp:329 ../src/richtext/richtextfontpage.cpp:349
+#: ../src/generic/fontdlgg.cpp:329 ../src/richtext/richtextfontpage.cpp:333
 #: ../src/osx/carbon/fontdlg.cpp:531 ../src/common/stockitem.cpp:168
 msgid "Italic"
 msgstr "斜體"
@@ -4455,9 +4416,9 @@ msgstr "橫板紙，17 x 11 英吋"
 #: ../src/richtext/richtextliststylepage.cpp:249
 #: ../src/richtext/richtextliststylepage.cpp:252
 #: ../src/richtext/richtextliststylepage.cpp:253
-#: ../src/richtext/richtextbulletspage.cpp:186
-#: ../src/richtext/richtextbulletspage.cpp:189
-#: ../src/richtext/richtextbulletspage.cpp:190
+#: ../src/richtext/richtextbulletspage.cpp:199
+#: ../src/richtext/richtextbulletspage.cpp:202
+#: ../src/richtext/richtextbulletspage.cpp:203
 #: ../src/richtext/richtextsizepage.cpp:249
 msgid "Left"
 msgstr "左"
@@ -4535,7 +4496,7 @@ msgstr "列距:"
 msgid "Link contained '//', converted to absolute link."
 msgstr "連結包含 '//'，轉換為絕對連結。"
 
-#: ../src/richtext/richtextformatdlg.cpp:370
+#: ../src/richtext/richtextformatdlg.cpp:350
 msgid "List Style"
 msgstr "清單樣式"
 
@@ -4543,22 +4504,22 @@ msgstr "清單樣式"
 msgid "List styles"
 msgstr "清單樣式"
 
-#: ../src/richtext/richtextfontpage.cpp:197
-#: ../src/richtext/richtextfontpage.cpp:199
+#: ../src/richtext/richtextfontpage.cpp:206
+#: ../src/richtext/richtextfontpage.cpp:208
 msgid "Lists font sizes in points."
 msgstr "清單字型大小。"
 
-#: ../src/richtext/richtextfontpage.cpp:190
-#: ../src/richtext/richtextfontpage.cpp:192
+#: ../src/richtext/richtextfontpage.cpp:199
+#: ../src/richtext/richtextfontpage.cpp:201
 msgid "Lists the available fonts."
 msgstr "列出可用字型。"
 
-#: ../src/common/fldlgcmn.cpp:330
+#: ../src/common/fldlgcmn.cpp:343
 #, c-format
 msgid "Load %s file"
 msgstr "載入檔案 %s "
 
-#: ../src/html/htmlwin.cpp:588
+#: ../src/html/htmlwin.cpp:578
 msgid "Loading : "
 msgstr "載入中："
 
@@ -4578,12 +4539,12 @@ msgid "Log saved to the file '%s'."
 msgstr "儲存日誌到檔案 '%s'。"
 
 #: ../src/richtext/richtextliststylepage.cpp:484
-#: ../src/richtext/richtextbulletspage.cpp:276
+#: ../src/richtext/richtextbulletspage.cpp:289
 msgid "Lower case letters"
 msgstr "小寫字母"
 
 #: ../src/richtext/richtextliststylepage.cpp:486
-#: ../src/richtext/richtextbulletspage.cpp:278
+#: ../src/richtext/richtextbulletspage.cpp:291
 msgid "Lower case roman numerals"
 msgstr "小寫羅馬數字"
 
@@ -4766,12 +4727,12 @@ msgstr "MacTurkish"
 msgid "MacVietnamese"
 msgstr "MacVietnamese"
 
-#: ../src/propgrid/advprops.cpp:2012
+#: ../src/propgrid/advprops.cpp:2013
 msgid "Make a selection:"
 msgstr "選取項目："
 
-#: ../src/richtext/richtextformatdlg.cpp:383
-#: ../src/richtext/richtextmarginspage.cpp:171
+#: ../src/richtext/richtextformatdlg.cpp:363
+#: ../src/richtext/richtextmarginspage.cpp:172
 msgid "Margins"
 msgstr "外邊距"
 
@@ -4868,7 +4829,7 @@ msgstr "將物件移至下個段落。"
 msgid "Moves the object to the previous paragraph."
 msgstr "將物件移至上個段落。"
 
-#: ../src/richtext/richtextbuffer.cpp:9746
+#: ../src/richtext/richtextbuffer.cpp:9596
 msgid "Multiple Cell Properties"
 msgstr "儲存格性質(多個)"
 
@@ -4930,11 +4891,11 @@ msgstr "新增項目"
 msgid "NewName"
 msgstr "新名稱"
 
-#: ../src/generic/tipdlg.cpp:300
+#: ../src/generic/tipdlg.cpp:305
 msgid "Next"
 msgstr "下一個"
 
-#: ../src/common/prntbase.cpp:1537 ../src/html/helpwnd.cpp:679
+#: ../src/common/prntbase.cpp:1537 ../src/html/helpwnd.cpp:678
 msgid "Next page"
 msgstr "下一頁"
 
@@ -5015,7 +4976,7 @@ msgstr "沒有定義類型 %d 的圖像處理常式。"
 msgid "No image handler for type %s defined."
 msgstr "沒有定義類型 %s 的圖像處理常式。"
 
-#: ../src/html/helpwnd.cpp:872
+#: ../src/html/helpwnd.cpp:871
 msgid "No matching page found yet"
 msgstr "尚未找到符合的頁面"
 
@@ -5044,7 +5005,7 @@ msgstr "圖像中沒有未用的顏色。"
 msgid "No valid mappings found in the file \"%s\"."
 msgstr "在檔案「%s」中找不到任何有效映射。"
 
-#: ../src/richtext/richtextborderspage.cpp:613
+#: ../src/richtext/richtextborderspage.cpp:564
 #: ../src/richtext/richtextsizepage.cpp:248
 #: ../src/richtext/richtextsizepage.cpp:252
 msgid "None"
@@ -5058,15 +5019,15 @@ msgstr "北歐語系 (ISO-8859-10)"
 msgid "Normal"
 msgstr "正常"
 
-#: ../src/html/helpwnd.cpp:1277
+#: ../src/html/helpwnd.cpp:1276
 msgid "Normal face<br>and <u>underlined</u>. "
 msgstr "正常字體<br>且<u>加底線</u>。 "
 
-#: ../src/html/helpwnd.cpp:1219
+#: ../src/html/helpwnd.cpp:1218
 msgid "Normal font:"
 msgstr "正常字型："
 
-#: ../src/propgrid/props.cpp:898
+#: ../src/propgrid/props.cpp:897
 #, c-format
 msgid "Not %s"
 msgstr "非 %s"
@@ -5075,7 +5036,7 @@ msgstr "非 %s"
 msgid "Not available"
 msgstr "無法使用"
 
-#: ../src/richtext/richtextfontpage.cpp:356
+#: ../src/richtext/richtextfontpage.cpp:340
 msgid "Not underlined"
 msgstr "未加底線"
 
@@ -5092,7 +5053,7 @@ msgid "Number of columns could not be determined."
 msgstr "無法決定欄位數量。"
 
 #: ../src/richtext/richtextliststylepage.cpp:487
-#: ../src/richtext/richtextbulletspage.cpp:279
+#: ../src/richtext/richtextbulletspage.cpp:292
 msgid "Numbered outline"
 msgstr "大綱編號"
 
@@ -5108,7 +5069,7 @@ msgstr "確認"
 msgid "OLE Automation error in %s: %s"
 msgstr "OLE 自動作業發生錯誤於 %s：%s"
 
-#: ../include/wx/richtext/richtextimagedlg.h:37
+#: ../include/wx/richtext/richtextimagedlg.h:38
 msgid "Object Properties"
 msgstr "物件性質"
 
@@ -5120,11 +5081,11 @@ msgstr "物件實作不支援具名參數。"
 msgid "Objects must have an id attribute"
 msgstr "物件必須有 id 屬性"
 
-#: ../src/common/docview.cpp:1762 ../src/common/docview.cpp:1804
+#: ../src/common/docview.cpp:1755 ../src/common/docview.cpp:1797
 msgid "Open File"
 msgstr "開啟檔案"
 
-#: ../src/html/helpwnd.cpp:685 ../src/html/helpwnd.cpp:1568
+#: ../src/html/helpwnd.cpp:684 ../src/html/helpwnd.cpp:1557
 msgid "Open HTML document"
 msgstr "開啟 HTML 文件"
 
@@ -5147,17 +5108,17 @@ msgstr "OpenGL 函數 \"%s\" 失敗: %s (錯誤碼 %d)"
 msgid "Operation not permitted."
 msgstr "不容許的操作。"
 
-#: ../src/common/cmdline.cpp:894
+#: ../src/common/cmdline.cpp:735
 #, c-format
 msgid "Option '%s' can't be negated"
 msgstr "選項『%s』無法被打消"
 
-#: ../src/common/cmdline.cpp:1058
+#: ../src/common/cmdline.cpp:899
 #, c-format
 msgid "Option '%s' requires a value."
 msgstr "選項 '%s' 必須有值。"
 
-#: ../src/common/cmdline.cpp:1141
+#: ../src/common/cmdline.cpp:982
 #, c-format
 msgid "Option '%s': '%s' cannot be converted to a date."
 msgstr "選項 '%s'：'%s' 無法轉換成日期。"
@@ -5174,12 +5135,12 @@ msgstr "方位"
 msgid "Out of window IDs.  Recommend shutting down application."
 msgstr "Window ID 已用完，建議關閉應用程式。"
 
-#: ../src/richtext/richtextborderspage.cpp:401
-#: ../src/richtext/richtextborderspage.cpp:559
+#: ../src/richtext/richtextborderspage.cpp:397
+#: ../src/richtext/richtextborderspage.cpp:555
 msgid "Outline"
 msgstr "輪廓"
 
-#: ../src/richtext/richtextborderspage.cpp:621
+#: ../src/richtext/richtextborderspage.cpp:572
 msgid "Outset"
 msgstr "外貼"
 
@@ -5352,7 +5313,7 @@ msgstr "中式信封 #9 轉向 324 x 229 公釐"
 msgid "PRINT"
 msgstr "PRINT"
 
-#: ../src/richtext/richtextmarginspage.cpp:285
+#: ../src/richtext/richtextmarginspage.cpp:286
 msgid "Padding"
 msgstr "內邊距"
 
@@ -5397,7 +5358,7 @@ msgstr "傳入已註冊的物件給 SetObject"
 msgid "Passing an unknown object to GetObject"
 msgstr "傳入一個不明物件給 GetObject"
 
-#: ../src/richtext/richtextctrl.cpp:3242 ../src/common/stockitem.cpp:180
+#: ../src/richtext/richtextctrl.cpp:3206 ../src/common/stockitem.cpp:180
 #: ../src/stc/stc_i18n.cpp:19
 msgid "Paste"
 msgstr "貼上"
@@ -5407,7 +5368,7 @@ msgid "Paste selection"
 msgstr "貼上選取項目"
 
 #: ../src/richtext/richtextliststylepage.cpp:222
-#: ../src/richtext/richtextbulletspage.cpp:159
+#: ../src/richtext/richtextbulletspage.cpp:172
 msgid "Peri&od"
 msgstr "週期(&O)"
 
@@ -5415,7 +5376,7 @@ msgstr "週期(&O)"
 msgid "Permissions"
 msgstr "允許"
 
-#: ../src/richtext/richtextbuffer.cpp:12512
+#: ../src/richtext/richtextbuffer.cpp:12271
 msgid "Picture Properties"
 msgstr "圖片性質"
 
@@ -5431,7 +5392,7 @@ msgstr "請選擇一個有效的字型。"
 msgid "Please choose an existing file."
 msgstr "請選擇一個已存在的檔案。"
 
-#: ../src/html/helpwnd.cpp:814
+#: ../src/html/helpwnd.cpp:813
 msgid "Please choose the page to display:"
 msgstr "請選擇慾顯示的頁面:"
 
@@ -5459,7 +5420,7 @@ msgstr "請選取欄位以顯示並定義它們的排序："
 msgid "Please wait while printing..."
 msgstr "列印中，請稍待\n"
 
-#: ../src/propgrid/advprops.cpp:632
+#: ../src/propgrid/advprops.cpp:631
 msgid "Point Size"
 msgstr "字點大小"
 
@@ -5505,11 +5466,11 @@ msgid "Preparing"
 msgstr ""
 
 #: ../src/generic/fontdlgg.cpp:455 ../src/osx/carbon/fontdlg.cpp:560
-#: ../src/html/helpwnd.cpp:1236
+#: ../src/html/helpwnd.cpp:1235
 msgid "Preview:"
 msgstr "預覽︰"
 
-#: ../src/common/prntbase.cpp:1523 ../src/html/helpwnd.cpp:678
+#: ../src/common/prntbase.cpp:1523 ../src/html/helpwnd.cpp:677
 msgid "Previous page"
 msgstr "前一頁"
 
@@ -5519,7 +5480,7 @@ msgstr "前一頁"
 msgid "Print"
 msgstr "列印"
 
-#: ../include/wx/prntbase.h:395 ../src/common/docview.cpp:1257
+#: ../include/wx/prntbase.h:395 ../src/common/docview.cpp:1250
 msgid "Print Preview"
 msgstr "預覽列印"
 
@@ -5545,7 +5506,7 @@ msgstr "彩色列印"
 msgid "Print previe&w..."
 msgstr "預覽列印"
 
-#: ../src/common/docview.cpp:1251
+#: ../src/common/docview.cpp:1244
 msgid "Print preview creation failed."
 msgstr "建立預覽列印失敗。"
 
@@ -5558,7 +5519,7 @@ msgstr "預覽列印"
 msgid "Print spooling"
 msgstr "列印佇列中"
 
-#: ../src/html/helpwnd.cpp:689
+#: ../src/html/helpwnd.cpp:688
 msgid "Print this page"
 msgstr "列印本頁"
 
@@ -5622,7 +5583,7 @@ msgid "Printing..."
 msgstr "列印中…"
 
 #: ../include/wx/richtext/richtextprint.h:109 ../include/wx/prntbase.h:263
-#: ../src/common/docview.cpp:2121
+#: ../src/common/docview.cpp:2114
 msgid "Printout"
 msgstr "列印"
 
@@ -5648,7 +5609,7 @@ msgstr "性質"
 msgid "Property"
 msgstr "性質"
 
-#: ../src/propgrid/propgrid.cpp:3131 ../src/propgrid/propgrid.cpp:3263
+#: ../src/propgrid/propgrid.cpp:3146 ../src/propgrid/propgrid.cpp:3278
 msgid "Property Error"
 msgstr "性質錯誤"
 
@@ -5732,8 +5693,8 @@ msgstr ""
 msgid "Registry value '%s' already exists."
 msgstr "登錄機值 '%s' 已存在。"
 
-#: ../src/richtext/richtextfontpage.cpp:348
-#: ../src/richtext/richtextfontpage.cpp:352
+#: ../src/richtext/richtextfontpage.cpp:332
+#: ../src/richtext/richtextfontpage.cpp:336
 msgid "Regular"
 msgstr "一般"
 
@@ -5754,12 +5715,12 @@ msgstr ""
 msgid "Remove"
 msgstr "移除"
 
-#: ../src/richtext/richtextctrl.cpp:1522
+#: ../src/richtext/richtextctrl.cpp:1516
 #, fuzzy
 msgid "Remove Bullet"
 msgstr "移除"
 
-#: ../src/html/helpwnd.cpp:441
+#: ../src/html/helpwnd.cpp:440
 msgid "Remove current page from bookmarks"
 msgstr "從書籤中移除目前頁面"
 
@@ -5772,7 +5733,7 @@ msgstr "潤算器 \"%s\" %d.%d 版本不完整。而且無法載入。"
 msgid "Rendering failed."
 msgstr "潤算失敗。"
 
-#: ../src/richtext/richtextbuffer.cpp:4415
+#: ../src/richtext/richtextbuffer.cpp:4280
 msgid "Renumber List"
 msgstr "重新編號清單"
 
@@ -5780,7 +5741,7 @@ msgstr "重新編號清單"
 msgid "Rep&lace"
 msgstr "替換(&L)"
 
-#: ../src/richtext/richtextctrl.cpp:3402 ../src/common/stockitem.cpp:188
+#: ../src/richtext/richtextctrl.cpp:3366 ../src/common/stockitem.cpp:188
 msgid "Replace"
 msgstr "置換"
 
@@ -5809,16 +5770,12 @@ msgstr "資源 '%s' 不是有效的訊息分類。"
 msgid "Revert to Saved"
 msgstr "還原為上次儲存的檔案"
 
-#: ../src/richtext/richtextborderspage.cpp:619
+#: ../src/richtext/richtextborderspage.cpp:570
 msgid "Ridge"
 msgstr "背脊"
 
-#: ../src/richtext/richtextfontpage.cpp:313
-msgid "Rig&ht-to-left"
-msgstr ""
-
 #: ../src/richtext/richtextliststylepage.cpp:251
-#: ../src/richtext/richtextbulletspage.cpp:188
+#: ../src/richtext/richtextbulletspage.cpp:201
 #: ../src/richtext/richtextsizepage.cpp:250
 msgid "Right"
 msgstr "右側"
@@ -5839,7 +5796,7 @@ msgid "Roman"
 msgstr "羅馬"
 
 #: ../src/richtext/richtextliststylepage.cpp:299
-#: ../src/richtext/richtextbulletspage.cpp:239
+#: ../src/richtext/richtextbulletspage.cpp:252
 msgid "S&tandard bullet name:"
 msgstr "標準項目符號名稱(&T):"
 
@@ -5871,11 +5828,11 @@ msgstr "SPECIAL"
 msgid "SUBTRACT"
 msgstr "SUBTRACT"
 
-#: ../src/common/stockitem.cpp:190 ../src/common/sizer.cpp:2682
+#: ../src/common/stockitem.cpp:190 ../src/common/sizer.cpp:2702
 msgid "Save"
 msgstr "儲存"
 
-#: ../src/common/fldlgcmn.cpp:332
+#: ../src/common/fldlgcmn.cpp:345
 #, c-format
 msgid "Save %s file"
 msgstr "儲存檔案 %s "
@@ -5908,12 +5865,12 @@ msgstr "將日誌內容存到檔案中"
 msgid "Script"
 msgstr "手寫"
 
-#: ../src/generic/srchctlg.cpp:67 ../src/html/helpwnd.cpp:549
-#: ../src/html/helpwnd.cpp:564
+#: ../src/generic/srchctlg.cpp:67 ../src/html/helpwnd.cpp:548
+#: ../src/html/helpwnd.cpp:563
 msgid "Search"
 msgstr "搜尋"
 
-#: ../src/html/helpwnd.cpp:551
+#: ../src/html/helpwnd.cpp:550
 msgid ""
 "Search contents of help book(s) for all occurrences of the text you typed "
 "above"
@@ -5927,11 +5884,11 @@ msgstr "搜尋方向"
 msgid "Search for:"
 msgstr "搜尋："
 
-#: ../src/html/helpwnd.cpp:1066
+#: ../src/html/helpwnd.cpp:1065
 msgid "Search in all books"
 msgstr "搜尋所有的書籍"
 
-#: ../src/html/helpwnd.cpp:871
+#: ../src/html/helpwnd.cpp:870
 msgid "Searching..."
 msgstr "搜尋中…"
 
@@ -5958,26 +5915,26 @@ msgstr "選擇全部(&A)"
 msgid "Select All"
 msgstr "選擇全部"
 
-#: ../src/common/docview.cpp:1884
+#: ../src/common/docview.cpp:1877
 msgid "Select a document template"
 msgstr "選擇文件範本"
 
-#: ../src/common/docview.cpp:1958
+#: ../src/common/docview.cpp:1951
 msgid "Select a document view"
 msgstr "選擇文件檢視"
 
-#: ../src/richtext/richtextfontpage.cpp:226
-#: ../src/richtext/richtextfontpage.cpp:228
+#: ../src/richtext/richtextfontpage.cpp:235
+#: ../src/richtext/richtextfontpage.cpp:237
 msgid "Select regular or bold."
 msgstr "選擇是否粗體。"
 
-#: ../src/richtext/richtextfontpage.cpp:213
-#: ../src/richtext/richtextfontpage.cpp:215
+#: ../src/richtext/richtextfontpage.cpp:222
+#: ../src/richtext/richtextfontpage.cpp:224
 msgid "Select regular or italic style."
 msgstr "選擇是否斜體。"
 
-#: ../src/richtext/richtextfontpage.cpp:239
-#: ../src/richtext/richtextfontpage.cpp:241
+#: ../src/richtext/richtextfontpage.cpp:248
+#: ../src/richtext/richtextfontpage.cpp:250
 msgid "Select underlining or no underlining."
 msgstr "選擇是否加底線。"
 
@@ -5990,7 +5947,7 @@ msgstr "選取項目"
 msgid "Selects the list level to edit."
 msgstr "選取並編輯該清單層級"
 
-#: ../src/common/cmdline.cpp:1077
+#: ../src/common/cmdline.cpp:918
 #, c-format
 msgid "Separator expected after the option '%s'."
 msgstr "在選項 '%s' 之後應有分隔字元。"
@@ -5999,7 +5956,7 @@ msgstr "在選項 '%s' 之後應有分隔字元。"
 msgid "Services"
 msgstr ""
 
-#: ../src/richtext/richtextbuffer.cpp:10981
+#: ../src/richtext/richtextbuffer.cpp:10818
 msgid "Set Cell Style"
 msgstr "設定儲存格樣式"
 
@@ -6039,11 +5996,11 @@ msgstr "顯示所有 "
 msgid "Show about dialog"
 msgstr "顯示關於對話方塊"
 
-#: ../src/html/helpwnd.cpp:503
+#: ../src/html/helpwnd.cpp:502
 msgid "Show all"
 msgstr "顯示所有"
 
-#: ../src/html/helpwnd.cpp:514
+#: ../src/html/helpwnd.cpp:513
 msgid "Show all items in index"
 msgstr "以索引的方式顯示所有項目"
 
@@ -6051,7 +6008,7 @@ msgstr "以索引的方式顯示所有項目"
 msgid "Show hidden directories"
 msgstr "顯示隱藏目錄"
 
-#: ../src/html/helpwnd.cpp:672
+#: ../src/html/helpwnd.cpp:671
 msgid "Show/hide navigation panel"
 msgstr "顯示/隱藏遊覽面板"
 
@@ -6062,13 +6019,13 @@ msgstr "顯示 Unicode 子集。"
 
 #: ../src/richtext/richtextliststylepage.cpp:472
 #: ../src/richtext/richtextliststylepage.cpp:474
-#: ../src/richtext/richtextbulletspage.cpp:263
-#: ../src/richtext/richtextbulletspage.cpp:265
+#: ../src/richtext/richtextbulletspage.cpp:276
+#: ../src/richtext/richtextbulletspage.cpp:278
 msgid "Shows a preview of the bullet settings."
 msgstr "預覽項目符號設定。"
 
-#: ../src/richtext/richtextfontpage.cpp:330
-#: ../src/richtext/richtextfontpage.cpp:332
+#: ../src/richtext/richtextfontpage.cpp:322
+#: ../src/richtext/richtextfontpage.cpp:324
 msgid "Shows a preview of the font settings."
 msgstr "顯示字型設定預覽。"
 
@@ -6094,7 +6051,7 @@ msgstr "簡單的單色布景主題"
 msgid "Single"
 msgstr "單一"
 
-#: ../src/generic/filectrlg.cpp:460 ../src/richtext/richtextformatdlg.cpp:377
+#: ../src/generic/filectrlg.cpp:460 ../src/richtext/richtextformatdlg.cpp:357
 #: ../src/richtext/richtextsizepage.cpp:299
 msgid "Size"
 msgstr "大小"
@@ -6112,16 +6069,16 @@ msgstr "略過"
 msgid "Slant"
 msgstr "傾斜"
 
-#: ../src/richtext/richtextfontpage.cpp:289
+#: ../src/richtext/richtextfontpage.cpp:298
 #, fuzzy
 msgid "Small C&apitals"
 msgstr "大寫(&P)"
 
-#: ../src/richtext/richtextborderspage.cpp:614
+#: ../src/richtext/richtextborderspage.cpp:565
 msgid "Solid"
 msgstr "單色"
 
-#: ../src/common/docview.cpp:1780
+#: ../src/common/docview.cpp:1773
 msgid "Sorry, could not open this file."
 msgstr "對不起，無法開啟檔案。"
 
@@ -6137,7 +6094,7 @@ msgstr "對不起，記憶體不足無法建立預覽。"
 msgid "Sorry, that name is taken. Please choose another."
 msgstr "抱歉，名字已被使用，請選擇其他名字。"
 
-#: ../src/common/docview.cpp:1803
+#: ../src/common/docview.cpp:1796
 msgid "Sorry, the format for this file is unknown."
 msgstr "對不起，這個檔案格式是不明的。"
 
@@ -6159,7 +6116,7 @@ msgid "Spell Check"
 msgstr "拼字檢查"
 
 #: ../src/richtext/richtextliststylepage.cpp:490
-#: ../src/richtext/richtextbulletspage.cpp:282
+#: ../src/richtext/richtextbulletspage.cpp:295
 msgid "Standard"
 msgstr "標準"
 
@@ -6190,7 +6147,7 @@ msgstr "刪除線"
 msgid "String To Colour : Incorrect colour specification : %s"
 msgstr "顏色名稱：不正確的顏色規格：%s。"
 
-#: ../src/richtext/richtextformatdlg.cpp:339 ../src/propgrid/advprops.cpp:648
+#: ../src/richtext/richtextformatdlg.cpp:319 ../src/propgrid/advprops.cpp:647
 msgid "Style"
 msgstr "樣式"
 
@@ -6202,11 +6159,11 @@ msgstr "樣式組織器"
 msgid "Style:"
 msgstr "樣式："
 
-#: ../src/richtext/richtextfontpage.cpp:303
+#: ../src/richtext/richtextfontpage.cpp:312
 msgid "Subscrip&t"
 msgstr "下標(&T)"
 
-#: ../src/richtext/richtextfontpage.cpp:296
+#: ../src/richtext/richtextfontpage.cpp:305
 msgid "Supe&rscript"
 msgstr "下標"
 
@@ -6218,21 +6175,17 @@ msgstr "SuperA/SuperA/A4 227 x 356 公釐"
 msgid "SuperB/SuperB/A3 305 x 487 mm"
 msgstr "SuperB/SuperB/A3 305 x 487 公釐"
 
-#: ../src/richtext/richtextfontpage.cpp:320
-msgid "Suppress hyphe&nation"
-msgstr ""
-
 #: ../src/generic/fontdlgg.cpp:326
 msgid "Swiss"
 msgstr "瑞士"
 
 #: ../src/richtext/richtextliststylepage.cpp:488
-#: ../src/richtext/richtextbulletspage.cpp:280
+#: ../src/richtext/richtextbulletspage.cpp:293
 msgid "Symbol"
 msgstr "符號"
 
 #: ../src/richtext/richtextliststylepage.cpp:288
-#: ../src/richtext/richtextbulletspage.cpp:227
+#: ../src/richtext/richtextbulletspage.cpp:240
 msgid "Symbol &font:"
 msgstr "符號字型(&F)："
 
@@ -6270,7 +6223,7 @@ msgstr "TIFF: 寫入圖像錯誤。"
 msgid "TIFF: Image size is abnormally big."
 msgstr "TIFF：影像大小過大。"
 
-#: ../src/richtext/richtextbuffer.cpp:11262
+#: ../src/richtext/richtextbuffer.cpp:11099
 msgid "Table Properties"
 msgstr "表格性質"
 
@@ -6282,7 +6235,7 @@ msgstr "小報加長 11.69 x 18 英吋"
 msgid "Tabloid, 11 x 17 in"
 msgstr "小報, 11 x 17 英吋"
 
-#: ../src/richtext/richtextformatdlg.cpp:357
+#: ../src/richtext/richtextformatdlg.cpp:337
 msgid "Tabs"
 msgstr "定位點"
 
@@ -6290,7 +6243,7 @@ msgstr "定位點"
 msgid "Teletype"
 msgstr "電傳打字機"
 
-#: ../src/common/docview.cpp:1885
+#: ../src/common/docview.cpp:1878
 msgid "Templates"
 msgstr "範本"
 
@@ -6312,8 +6265,8 @@ msgstr "FTP伺服器不支援PORT命令。"
 
 #: ../src/richtext/richtextliststylepage.cpp:215
 #: ../src/richtext/richtextliststylepage.cpp:217
-#: ../src/richtext/richtextbulletspage.cpp:151
-#: ../src/richtext/richtextbulletspage.cpp:153
+#: ../src/richtext/richtextbulletspage.cpp:164
+#: ../src/richtext/richtextbulletspage.cpp:166
 msgid "The available bullet styles."
 msgstr "可用的項目符號樣式。"
 
@@ -6327,33 +6280,33 @@ msgstr "可用的樣式。"
 msgid "The background colour."
 msgstr "背景顏色。"
 
-#: ../src/richtext/richtextborderspage.cpp:269
-#: ../src/richtext/richtextborderspage.cpp:271
-#: ../src/richtext/richtextborderspage.cpp:303
-#: ../src/richtext/richtextborderspage.cpp:305
-#: ../src/richtext/richtextborderspage.cpp:337
-#: ../src/richtext/richtextborderspage.cpp:339
-#: ../src/richtext/richtextborderspage.cpp:371
-#: ../src/richtext/richtextborderspage.cpp:373
-#: ../src/richtext/richtextborderspage.cpp:438
-#: ../src/richtext/richtextborderspage.cpp:440
-#: ../src/richtext/richtextborderspage.cpp:472
-#: ../src/richtext/richtextborderspage.cpp:474
-#: ../src/richtext/richtextborderspage.cpp:506
-#: ../src/richtext/richtextborderspage.cpp:508
-#: ../src/richtext/richtextborderspage.cpp:540
-#: ../src/richtext/richtextborderspage.cpp:542
+#: ../src/richtext/richtextborderspage.cpp:265
+#: ../src/richtext/richtextborderspage.cpp:267
+#: ../src/richtext/richtextborderspage.cpp:299
+#: ../src/richtext/richtextborderspage.cpp:301
+#: ../src/richtext/richtextborderspage.cpp:333
+#: ../src/richtext/richtextborderspage.cpp:335
+#: ../src/richtext/richtextborderspage.cpp:367
+#: ../src/richtext/richtextborderspage.cpp:369
+#: ../src/richtext/richtextborderspage.cpp:434
+#: ../src/richtext/richtextborderspage.cpp:436
+#: ../src/richtext/richtextborderspage.cpp:468
+#: ../src/richtext/richtextborderspage.cpp:470
+#: ../src/richtext/richtextborderspage.cpp:502
+#: ../src/richtext/richtextborderspage.cpp:504
+#: ../src/richtext/richtextborderspage.cpp:536
+#: ../src/richtext/richtextborderspage.cpp:538
 #, fuzzy
 msgid "The border line style."
 msgstr "字型樣式。"
 
-#: ../src/richtext/richtextmarginspage.cpp:267
-#: ../src/richtext/richtextmarginspage.cpp:269
+#: ../src/richtext/richtextmarginspage.cpp:268
+#: ../src/richtext/richtextmarginspage.cpp:270
 msgid "The bottom margin size."
 msgstr "下外邊距大小。"
 
-#: ../src/richtext/richtextmarginspage.cpp:381
-#: ../src/richtext/richtextmarginspage.cpp:383
+#: ../src/richtext/richtextmarginspage.cpp:382
+#: ../src/richtext/richtextmarginspage.cpp:384
 msgid "The bottom padding size."
 msgstr "下內邊距。"
 
@@ -6369,10 +6322,10 @@ msgstr "跳格位置。"
 #: ../src/richtext/richtextliststylepage.cpp:256
 #: ../src/richtext/richtextliststylepage.cpp:275
 #: ../src/richtext/richtextliststylepage.cpp:277
-#: ../src/richtext/richtextbulletspage.cpp:191
-#: ../src/richtext/richtextbulletspage.cpp:193
-#: ../src/richtext/richtextbulletspage.cpp:214
-#: ../src/richtext/richtextbulletspage.cpp:216
+#: ../src/richtext/richtextbulletspage.cpp:204
+#: ../src/richtext/richtextbulletspage.cpp:206
+#: ../src/richtext/richtextbulletspage.cpp:227
+#: ../src/richtext/richtextbulletspage.cpp:229
 msgid "The bullet character."
 msgstr "項目符號字元。"
 
@@ -6396,8 +6349,8 @@ msgstr ""
 msgid "The clipboard format '%d' doesn't exist."
 msgstr "剪貼簿格式 '%d' 不存在。"
 
+#: ../src/richtext/richtextstylepage.cpp:128
 #: ../src/richtext/richtextstylepage.cpp:130
-#: ../src/richtext/richtextstylepage.cpp:132
 msgid "The default style for the next paragraph."
 msgstr "下個段落的預設樣式。"
 
@@ -6422,7 +6375,7 @@ msgstr ""
 "\n"
 "無論如何您都要列印此份文件？"
 
-#: ../src/common/docview.cpp:1191
+#: ../src/common/docview.cpp:1184
 #, c-format
 msgid ""
 "The file '%s' doesn't exist and couldn't be opened.\n"
@@ -6464,8 +6417,8 @@ msgstr "字點大小。"
 msgid "The font size in points."
 msgstr "字型大小以點計。"
 
-#: ../src/richtext/richtextfontpage.cpp:181
-#: ../src/richtext/richtextfontpage.cpp:183
+#: ../src/richtext/richtextfontpage.cpp:190
+#: ../src/richtext/richtextfontpage.cpp:192
 #, fuzzy
 msgid "The font size units, points or pixels."
 msgstr "字型大小以點計。"
@@ -6478,7 +6431,7 @@ msgstr "字型樣式。"
 msgid "The font weight."
 msgstr "字型粗細。"
 
-#: ../src/common/docview.cpp:1472
+#: ../src/common/docview.cpp:1465
 #, c-format
 msgid "The format of file '%s' couldn't be determined."
 msgstr "無法確定檔案 '%s' 的格式。"
@@ -6490,13 +6443,13 @@ msgstr "無法確定檔案 '%s' 的格式。"
 msgid "The left indent."
 msgstr "左側縮排。"
 
-#: ../src/richtext/richtextmarginspage.cpp:194
-#: ../src/richtext/richtextmarginspage.cpp:196
+#: ../src/richtext/richtextmarginspage.cpp:195
+#: ../src/richtext/richtextmarginspage.cpp:197
 msgid "The left margin size."
 msgstr "左外邊距大小。"
 
-#: ../src/richtext/richtextmarginspage.cpp:308
-#: ../src/richtext/richtextmarginspage.cpp:310
+#: ../src/richtext/richtextmarginspage.cpp:309
+#: ../src/richtext/richtextmarginspage.cpp:311
 msgid "The left padding size."
 msgstr "左內邊距。"
 
@@ -6515,8 +6468,8 @@ msgstr "跳格位置。"
 msgid "The line spacing."
 msgstr "列距。"
 
-#: ../src/richtext/richtextbulletspage.cpp:255
-#: ../src/richtext/richtextbulletspage.cpp:257
+#: ../src/richtext/richtextbulletspage.cpp:268
+#: ../src/richtext/richtextbulletspage.cpp:270
 msgid "The list item number."
 msgstr "清單項目編號。"
 
@@ -6588,7 +6541,7 @@ msgstr ""
 "報告包含了以下檔案. 如果這些檔案含有私人資訊, \n"
 "請去掉選取相對的檔案, 未選取的檔案就會從報告中刪除.\n"
 
-#: ../src/common/cmdline.cpp:1248
+#: ../src/common/cmdline.cpp:1083
 #, c-format
 msgid "The required parameter '%s' was not specified."
 msgstr "必要的參數 '%s' 沒有指定。"
@@ -6600,13 +6553,13 @@ msgstr "必要的參數 '%s' 沒有指定。"
 msgid "The right indent."
 msgstr "右側縮排。"
 
-#: ../src/richtext/richtextmarginspage.cpp:219
-#: ../src/richtext/richtextmarginspage.cpp:221
+#: ../src/richtext/richtextmarginspage.cpp:220
+#: ../src/richtext/richtextmarginspage.cpp:222
 msgid "The right margin size."
 msgstr "右外邊距大小。"
 
-#: ../src/richtext/richtextmarginspage.cpp:333
-#: ../src/richtext/richtextmarginspage.cpp:335
+#: ../src/richtext/richtextmarginspage.cpp:334
+#: ../src/richtext/richtextmarginspage.cpp:336
 msgid "The right padding size."
 msgstr "右內邊距。"
 
@@ -6631,13 +6584,13 @@ msgstr "段落之後的間距"
 msgid "The spacing before the paragraph."
 msgstr "段落之前的間距"
 
+#: ../src/richtext/richtextstylepage.cpp:108
 #: ../src/richtext/richtextstylepage.cpp:110
-#: ../src/richtext/richtextstylepage.cpp:112
 msgid "The style name."
 msgstr "樣式名稱。"
 
+#: ../src/richtext/richtextstylepage.cpp:118
 #: ../src/richtext/richtextstylepage.cpp:120
-#: ../src/richtext/richtextstylepage.cpp:122
 msgid "The style on which this style is based."
 msgstr "此樣式的基底樣式。"
 
@@ -6650,26 +6603,26 @@ msgstr "樣式預覽。"
 msgid "The system cannot find the file specified."
 msgstr "系統無法找到指定的檔案。"
 
-#: ../src/richtext/richtexttabspage.cpp:114
-#: ../src/richtext/richtexttabspage.cpp:116
+#: ../src/richtext/richtexttabspage.cpp:118
+#: ../src/richtext/richtexttabspage.cpp:120
 msgid "The tab position."
 msgstr "跳格位置。"
 
-#: ../src/richtext/richtexttabspage.cpp:120
+#: ../src/richtext/richtexttabspage.cpp:124
 msgid "The tab positions."
 msgstr "跳格位置。"
 
-#: ../src/richtext/richtextctrl.cpp:2827
+#: ../src/richtext/richtextctrl.cpp:2791
 msgid "The text couldn't be saved."
 msgstr "文字無法儲存。"
 
-#: ../src/richtext/richtextmarginspage.cpp:242
-#: ../src/richtext/richtextmarginspage.cpp:244
+#: ../src/richtext/richtextmarginspage.cpp:243
+#: ../src/richtext/richtextmarginspage.cpp:245
 msgid "The top margin size."
 msgstr "上外邊距大小。"
 
-#: ../src/richtext/richtextmarginspage.cpp:356
-#: ../src/richtext/richtextmarginspage.cpp:358
+#: ../src/richtext/richtextmarginspage.cpp:357
+#: ../src/richtext/richtextmarginspage.cpp:359
 msgid "The top padding size."
 msgstr "上內邊距。"
 
@@ -6681,15 +6634,10 @@ msgstr "上內邊距。"
 msgid "The top position."
 msgstr "跳格位置。"
 
-#: ../src/common/cmdline.cpp:1226
+#: ../src/common/cmdline.cpp:1061
 #, c-format
 msgid "The value for the option '%s' must be specified."
 msgstr "選項 '%s' 的值必須指定。"
-
-#: ../src/richtext/richtextborderspage.cpp:588
-#: ../src/richtext/richtextborderspage.cpp:590
-msgid "The value of the corner radius."
-msgstr ""
 
 #: ../src/msw/dialup.cpp:452
 #, c-format
@@ -6728,7 +6676,7 @@ msgstr "這不是 %s。"
 msgid "This platform does not support background transparency."
 msgstr "這個平臺不支援透明背景。"
 
-#: ../src/gtk/window.cpp:4356
+#: ../src/gtk/window.cpp:4368
 msgid ""
 "This program was compiled with a too old version of GTK+, please rebuild "
 "with GTK+ 2.12 or newer."
@@ -6776,7 +6724,7 @@ msgstr "等待 FTP 伺服器連線時逾時，請嘗試用 passive 模式。"
 msgid "Timer creation failed."
 msgstr "計時器建立失敗。"
 
-#: ../src/generic/tipdlg.cpp:215
+#: ../src/generic/tipdlg.cpp:220
 msgid "Tip of the Day"
 msgstr "每日小祕訣"
 
@@ -6792,7 +6740,7 @@ msgstr "到："
 msgid "Toggle renderer cannot render value; value type: "
 msgstr "切換渲染器無法渲染該值，型態為: "
 
-#: ../src/richtext/richtextbuffer.cpp:8237
+#: ../src/richtext/richtextbuffer.cpp:8087
 msgid "Too many EndStyle calls!"
 msgstr "呼叫 EndStyle 太多次！"
 
@@ -6834,13 +6782,13 @@ msgstr "土耳其語 (ISO-8859-9)"
 msgid "Type"
 msgstr "類型"
 
-#: ../src/richtext/richtextfontpage.cpp:151
-#: ../src/richtext/richtextfontpage.cpp:153
+#: ../src/richtext/richtextfontpage.cpp:160
+#: ../src/richtext/richtextfontpage.cpp:162
 msgid "Type a font name."
 msgstr "輸入字型名稱。"
 
-#: ../src/richtext/richtextfontpage.cpp:166
-#: ../src/richtext/richtextfontpage.cpp:168
+#: ../src/richtext/richtextfontpage.cpp:175
+#: ../src/richtext/richtextfontpage.cpp:177
 msgid "Type a size in points."
 msgstr "輸入大小，單位為點數。"
 
@@ -6944,7 +6892,7 @@ msgstr "無法初始化 Hildon 程式"
 msgid "Unable to open path '%s'"
 msgstr "無法開啟路徑 '%s'"
 
-#: ../src/html/htmlwin.cpp:574
+#: ../src/html/htmlwin.cpp:564
 #, c-format
 msgid "Unable to open requested HTML document: %s"
 msgstr "無法開啟 HTML 文件： %s"
@@ -6986,8 +6934,8 @@ msgstr "取消刪除"
 msgid "Underline"
 msgstr "底線"
 
-#: ../src/richtext/richtextfontpage.cpp:357 ../src/osx/carbon/fontdlg.cpp:540
-#: ../src/propgrid/advprops.cpp:656
+#: ../src/richtext/richtextfontpage.cpp:341 ../src/osx/carbon/fontdlg.cpp:540
+#: ../src/propgrid/advprops.cpp:655
 msgid "Underlined"
 msgstr "加底線"
 
@@ -6999,7 +6947,7 @@ msgstr "回復"
 msgid "Undo last action"
 msgstr "回復最後一個動作"
 
-#: ../src/common/cmdline.cpp:1023
+#: ../src/common/cmdline.cpp:864
 #, c-format
 msgid "Unexpected characters following option '%s'."
 msgstr "選項 '%s' 後有預期外的字元。"
@@ -7009,7 +6957,7 @@ msgstr "選項 '%s' 後有預期外的字元。"
 msgid "Unexpected event for \"%s\": no matching watch descriptor."
 msgstr ""
 
-#: ../src/common/cmdline.cpp:1189
+#: ../src/common/cmdline.cpp:1024
 #, c-format
 msgid "Unexpected parameter '%s'"
 msgstr "意外參數 '%s'"
@@ -7064,23 +7012,23 @@ msgstr "八位元萬國碼(UTF-8)"
 msgid "Unindent"
 msgstr "取消縮排"
 
-#: ../src/richtext/richtextborderspage.cpp:362
-#: ../src/richtext/richtextborderspage.cpp:364
+#: ../src/richtext/richtextborderspage.cpp:358
+#: ../src/richtext/richtextborderspage.cpp:360
 msgid "Units for the bottom border width."
 msgstr "下邊框單位。"
 
-#: ../src/richtext/richtextmarginspage.cpp:277
-#: ../src/richtext/richtextmarginspage.cpp:279
+#: ../src/richtext/richtextmarginspage.cpp:278
+#: ../src/richtext/richtextmarginspage.cpp:280
 msgid "Units for the bottom margin."
 msgstr "下外邊距單位。"
 
-#: ../src/richtext/richtextborderspage.cpp:531
-#: ../src/richtext/richtextborderspage.cpp:533
+#: ../src/richtext/richtextborderspage.cpp:527
+#: ../src/richtext/richtextborderspage.cpp:529
 msgid "Units for the bottom outline width."
 msgstr "下輪廓單位。"
 
-#: ../src/richtext/richtextmarginspage.cpp:391
-#: ../src/richtext/richtextmarginspage.cpp:393
+#: ../src/richtext/richtextmarginspage.cpp:392
+#: ../src/richtext/richtextmarginspage.cpp:394
 msgid "Units for the bottom padding."
 msgstr "下內邊距單位。"
 
@@ -7090,29 +7038,23 @@ msgstr "下內邊距單位。"
 msgid "Units for the bottom position."
 msgstr "下內邊距單位。"
 
-#: ../src/richtext/richtextborderspage.cpp:599
-#: ../src/richtext/richtextborderspage.cpp:601
-#, fuzzy
-msgid "Units for the corner radius."
-msgstr "上內邊距單位。"
-
-#: ../src/richtext/richtextborderspage.cpp:260
-#: ../src/richtext/richtextborderspage.cpp:262
+#: ../src/richtext/richtextborderspage.cpp:256
+#: ../src/richtext/richtextborderspage.cpp:258
 msgid "Units for the left border width."
 msgstr "左邊框單位"
 
-#: ../src/richtext/richtextmarginspage.cpp:204
-#: ../src/richtext/richtextmarginspage.cpp:206
+#: ../src/richtext/richtextmarginspage.cpp:205
+#: ../src/richtext/richtextmarginspage.cpp:207
 msgid "Units for the left margin."
 msgstr "左外邊距單位。"
 
-#: ../src/richtext/richtextborderspage.cpp:429
-#: ../src/richtext/richtextborderspage.cpp:431
+#: ../src/richtext/richtextborderspage.cpp:425
+#: ../src/richtext/richtextborderspage.cpp:427
 msgid "Units for the left outline width."
 msgstr "左輪廓單位。"
 
-#: ../src/richtext/richtextmarginspage.cpp:318
-#: ../src/richtext/richtextmarginspage.cpp:320
+#: ../src/richtext/richtextmarginspage.cpp:319
+#: ../src/richtext/richtextmarginspage.cpp:321
 msgid "Units for the left padding."
 msgstr "左內邊距單位。"
 
@@ -7152,23 +7094,23 @@ msgstr "物件高度單位。"
 msgid "Units for the object width."
 msgstr "物件寬度單位。"
 
-#: ../src/richtext/richtextborderspage.cpp:294
-#: ../src/richtext/richtextborderspage.cpp:296
+#: ../src/richtext/richtextborderspage.cpp:290
+#: ../src/richtext/richtextborderspage.cpp:292
 msgid "Units for the right border width."
 msgstr "右邊框單位"
 
-#: ../src/richtext/richtextmarginspage.cpp:229
-#: ../src/richtext/richtextmarginspage.cpp:231
+#: ../src/richtext/richtextmarginspage.cpp:230
+#: ../src/richtext/richtextmarginspage.cpp:232
 msgid "Units for the right margin."
 msgstr "右外邊距單位。"
 
-#: ../src/richtext/richtextborderspage.cpp:463
-#: ../src/richtext/richtextborderspage.cpp:465
+#: ../src/richtext/richtextborderspage.cpp:459
+#: ../src/richtext/richtextborderspage.cpp:461
 msgid "Units for the right outline width."
 msgstr "右輪廓單位。"
 
-#: ../src/richtext/richtextmarginspage.cpp:343
-#: ../src/richtext/richtextmarginspage.cpp:345
+#: ../src/richtext/richtextmarginspage.cpp:344
+#: ../src/richtext/richtextmarginspage.cpp:346
 msgid "Units for the right padding."
 msgstr "右內邊距單位。"
 
@@ -7178,23 +7120,23 @@ msgstr "右內邊距單位。"
 msgid "Units for the right position."
 msgstr "右內邊距單位。"
 
-#: ../src/richtext/richtextborderspage.cpp:328
-#: ../src/richtext/richtextborderspage.cpp:330
+#: ../src/richtext/richtextborderspage.cpp:324
+#: ../src/richtext/richtextborderspage.cpp:326
 msgid "Units for the top border width."
 msgstr "上邊框單位"
 
-#: ../src/richtext/richtextmarginspage.cpp:252
-#: ../src/richtext/richtextmarginspage.cpp:254
+#: ../src/richtext/richtextmarginspage.cpp:253
+#: ../src/richtext/richtextmarginspage.cpp:255
 msgid "Units for the top margin."
 msgstr "上外邊距單位。"
 
-#: ../src/richtext/richtextborderspage.cpp:497
-#: ../src/richtext/richtextborderspage.cpp:499
+#: ../src/richtext/richtextborderspage.cpp:493
+#: ../src/richtext/richtextborderspage.cpp:495
 msgid "Units for the top outline width."
 msgstr "上輪廓單位。"
 
-#: ../src/richtext/richtextmarginspage.cpp:366
-#: ../src/richtext/richtextmarginspage.cpp:368
+#: ../src/richtext/richtextmarginspage.cpp:367
+#: ../src/richtext/richtextmarginspage.cpp:369
 msgid "Units for the top padding."
 msgstr "上內邊距單位。"
 
@@ -7258,7 +7200,7 @@ msgstr "未知的例外"
 msgid "Unknown image data format."
 msgstr "未知的影像資料格式。"
 
-#: ../src/common/cmdline.cpp:908
+#: ../src/common/cmdline.cpp:749
 #, c-format
 msgid "Unknown long option '%s'"
 msgstr "不明的長選項 '%s'"
@@ -7267,7 +7209,7 @@ msgstr "不明的長選項 '%s'"
 msgid "Unknown name or named argument."
 msgstr "不明的名稱或具名引數。"
 
-#: ../src/common/cmdline.cpp:923 ../src/common/cmdline.cpp:945
+#: ../src/common/cmdline.cpp:764 ../src/common/cmdline.cpp:786
 #, c-format
 msgid "Unknown option '%s'"
 msgstr "不明的選項 '%s'"
@@ -7282,7 +7224,7 @@ msgstr "mime 類型 %s 中有不成對的'{'。"
 msgid "Unnamed command"
 msgstr "未命名的指令"
 
-#: ../src/propgrid/propgrid.cpp:397
+#: ../src/propgrid/propgrid.cpp:398
 msgid "Unspecified"
 msgstr "未指定"
 
@@ -7300,16 +7242,16 @@ msgid "Up"
 msgstr "上"
 
 #: ../src/richtext/richtextliststylepage.cpp:483
-#: ../src/richtext/richtextbulletspage.cpp:275
+#: ../src/richtext/richtextbulletspage.cpp:288
 msgid "Upper case letters"
 msgstr "大寫字母"
 
 #: ../src/richtext/richtextliststylepage.cpp:485
-#: ../src/richtext/richtextbulletspage.cpp:277
+#: ../src/richtext/richtextbulletspage.cpp:290
 msgid "Upper case roman numerals"
 msgstr "大寫羅馬數字"
 
-#: ../src/common/cmdline.cpp:1320
+#: ../src/common/cmdline.cpp:1155
 #, c-format
 msgid "Usage: %s"
 msgstr "使用方式：%s"
@@ -7333,17 +7275,17 @@ msgstr "驗證衝突"
 msgid "Value"
 msgstr "值"
 
-#: ../src/propgrid/props.cpp:385
+#: ../src/propgrid/props.cpp:384
 #, c-format
 msgid "Value must be %s or higher."
 msgstr "值必須大於或等於 %s。"
 
-#: ../src/propgrid/props.cpp:412
+#: ../src/propgrid/props.cpp:411
 #, c-format
 msgid "Value must be %s or less."
 msgstr "值必須小於或等於 %s。"
 
-#: ../src/propgrid/props.cpp:389 ../src/propgrid/props.cpp:416
+#: ../src/propgrid/props.cpp:388 ../src/propgrid/props.cpp:415
 #, c-format
 msgid "Value must be between %s and %s."
 msgstr "值必須介於 %s 和 %s 之間。"
@@ -7365,7 +7307,7 @@ msgstr "按詳細資料檢視檔案"
 msgid "View files as a list view"
 msgstr "按清單檢視檔案"
 
-#: ../src/common/docview.cpp:1959
+#: ../src/common/docview.cpp:1952
 msgid "Views"
 msgstr "檢視"
 
@@ -7390,7 +7332,7 @@ msgstr "等候 epoll 描述子 %d 的輸出入失敗"
 msgid "Warning: "
 msgstr "警告："
 
-#: ../src/propgrid/advprops.cpp:652
+#: ../src/propgrid/advprops.cpp:651
 msgid "Weight"
 msgstr "粗細"
 
@@ -7410,7 +7352,7 @@ msgstr "字型是否加底線。"
 msgid "Whole word"
 msgstr "完整的字"
 
-#: ../src/html/helpwnd.cpp:548
+#: ../src/html/helpwnd.cpp:547
 msgid "Whole words only"
 msgstr "只限完整的字"
 
@@ -7629,7 +7571,7 @@ msgstr "您不能初始化 overlay 兩次"
 msgid "You cannot add a new directory to this section."
 msgstr "您不能在這區段加入新的目錄。"
 
-#: ../src/propgrid/propgrid.cpp:3245
+#: ../src/propgrid/propgrid.cpp:3260
 msgid "You have entered invalid value. Press ESC to cancel editing."
 msgstr "您輸入了無效的值，按 ESC 以取消編輯。"
 
@@ -7769,7 +7711,7 @@ msgstr "含式傳入錯誤的引數"
 msgid "bad signature"
 msgstr "錯誤的簽名"
 
-#: ../src/common/zipstrm.cpp:1678
+#: ../src/common/zipstrm.cpp:1715
 msgid "bad zipfile offset to entry"
 msgstr "zip 檔案中輸入的偏移值錯誤"
 
@@ -7825,7 +7767,7 @@ msgstr "無法確定是否已達檔案 %d 的尾部"
 msgid "can't execute '%s'"
 msgstr "無法執行 '%s'"
 
-#: ../src/common/zipstrm.cpp:1453
+#: ../src/common/zipstrm.cpp:1490
 msgid "can't find central directory in zip"
 msgstr "無法在 zip 檔中找到中心目錄"
 
@@ -7921,23 +7863,22 @@ msgstr "總和檢查碼錯誤"
 msgid "checksum failure reading tar header block"
 msgstr "讀取 tar標頭區塊時發生檢查碼錯誤"
 
-#: ../src/richtext/richtextborderspage.cpp:256
-#: ../src/richtext/richtextborderspage.cpp:290
-#: ../src/richtext/richtextborderspage.cpp:324
-#: ../src/richtext/richtextborderspage.cpp:358
-#: ../src/richtext/richtextborderspage.cpp:425
-#: ../src/richtext/richtextborderspage.cpp:459
-#: ../src/richtext/richtextborderspage.cpp:493
-#: ../src/richtext/richtextborderspage.cpp:527
-#: ../src/richtext/richtextborderspage.cpp:595
-#: ../src/richtext/richtextmarginspage.cpp:201
-#: ../src/richtext/richtextmarginspage.cpp:226
-#: ../src/richtext/richtextmarginspage.cpp:249
-#: ../src/richtext/richtextmarginspage.cpp:274
-#: ../src/richtext/richtextmarginspage.cpp:315
-#: ../src/richtext/richtextmarginspage.cpp:340
-#: ../src/richtext/richtextmarginspage.cpp:363
-#: ../src/richtext/richtextmarginspage.cpp:388
+#: ../src/richtext/richtextborderspage.cpp:252
+#: ../src/richtext/richtextborderspage.cpp:286
+#: ../src/richtext/richtextborderspage.cpp:320
+#: ../src/richtext/richtextborderspage.cpp:354
+#: ../src/richtext/richtextborderspage.cpp:421
+#: ../src/richtext/richtextborderspage.cpp:455
+#: ../src/richtext/richtextborderspage.cpp:489
+#: ../src/richtext/richtextborderspage.cpp:523
+#: ../src/richtext/richtextmarginspage.cpp:202
+#: ../src/richtext/richtextmarginspage.cpp:227
+#: ../src/richtext/richtextmarginspage.cpp:250
+#: ../src/richtext/richtextmarginspage.cpp:275
+#: ../src/richtext/richtextmarginspage.cpp:316
+#: ../src/richtext/richtextmarginspage.cpp:341
+#: ../src/richtext/richtextmarginspage.cpp:364
+#: ../src/richtext/richtextmarginspage.cpp:389
 #: ../src/richtext/richtextsizepage.cpp:339
 #: ../src/richtext/richtextsizepage.cpp:373
 #: ../src/richtext/richtextsizepage.cpp:400
@@ -7963,7 +7904,7 @@ msgstr "無法轉換成八位元編碼"
 msgid "ctrl"
 msgstr "ctrl"
 
-#: ../src/common/cmdline.cpp:1488
+#: ../src/common/cmdline.cpp:1323
 msgid "date"
 msgstr "日期"
 
@@ -7975,7 +7916,7 @@ msgstr "解壓縮失敗"
 msgid "default"
 msgstr "預設值"
 
-#: ../src/common/cmdline.cpp:1484
+#: ../src/common/cmdline.cpp:1319
 msgid "double"
 msgstr "雙倍"
 
@@ -8013,15 +7954,15 @@ msgstr "開啟 '%s' 失敗"
 msgid "error opening file"
 msgstr "檔案開啟失敗"
 
-#: ../src/common/zipstrm.cpp:1539
+#: ../src/common/zipstrm.cpp:1576
 msgid "error reading zip central directory"
 msgstr "讀取 zip 中心目錄發生錯誤"
 
-#: ../src/common/zipstrm.cpp:1630
+#: ../src/common/zipstrm.cpp:1667
 msgid "error reading zip local header"
 msgstr "讀取 zip 本地表頭時發生錯誤"
 
-#: ../src/common/zipstrm.cpp:2291
+#: ../src/common/zipstrm.cpp:2396
 #, c-format
 msgid "error writing zip entry '%s': bad crc or length"
 msgstr "寫入 zip 條目 '%s' 時發生錯誤：不當的 crc 或長度"
@@ -8064,7 +8005,7 @@ msgstr "檔案 '%s' 第 %d 列：忽略對不可變更機碼 '%s' 的值。"
 msgid "file '%s': unexpected character %c at line %d."
 msgstr "檔案 '%s'： 不應有字元 %c 存在於第 %d 列中。"
 
-#: ../src/richtext/richtextbuffer.cpp:8612
+#: ../src/richtext/richtextbuffer.cpp:8462
 msgid "files"
 msgstr "檔案"
 
@@ -8072,7 +8013,7 @@ msgstr "檔案"
 msgid "first"
 msgstr "第一"
 
-#: ../src/html/helpwnd.cpp:1266
+#: ../src/html/helpwnd.cpp:1265
 msgid "font size"
 msgstr "字型大小"
 
@@ -8088,8 +8029,8 @@ msgstr "第四"
 msgid "generate verbose log messages"
 msgstr "產生冗長的記錄訊息"
 
-#: ../src/richtext/richtextbuffer.cpp:12782
-#: ../src/richtext/richtextbuffer.cpp:12892
+#: ../src/richtext/richtextbuffer.cpp:12541
+#: ../src/richtext/richtextbuffer.cpp:12651
 msgid "image"
 msgstr "圖像"
 
@@ -8113,7 +8054,7 @@ msgstr "tar 擴充標頭中有無效的資料"
 msgid "invalid message box return value"
 msgstr "訊息框傳回無效的值"
 
-#: ../src/common/zipstrm.cpp:1408
+#: ../src/common/zipstrm.cpp:1445
 msgid "invalid zip file"
 msgstr "無效的 zip 檔案"
 
@@ -8171,7 +8112,7 @@ msgstr "正常"
 msgid "not implemented"
 msgstr "尚未實作"
 
-#: ../src/common/cmdline.cpp:1480
+#: ../src/common/cmdline.cpp:1315
 msgid "num"
 msgstr "數字"
 
@@ -8187,72 +8128,68 @@ msgstr "記憶體不足"
 msgid "process context description"
 msgstr "程序上下文描述"
 
-#: ../src/richtext/richtextfontpage.cpp:177
-#: ../src/richtext/richtextfontpage.cpp:180
-#: ../src/richtext/richtextborderspage.cpp:257
-#: ../src/richtext/richtextborderspage.cpp:291
-#: ../src/richtext/richtextborderspage.cpp:325
-#: ../src/richtext/richtextborderspage.cpp:359
-#: ../src/richtext/richtextborderspage.cpp:426
-#: ../src/richtext/richtextborderspage.cpp:460
-#: ../src/richtext/richtextborderspage.cpp:494
-#: ../src/richtext/richtextborderspage.cpp:528
-#: ../src/richtext/richtextborderspage.cpp:596
+#: ../src/richtext/richtextfontpage.cpp:186
+#: ../src/richtext/richtextfontpage.cpp:189
+#: ../src/richtext/richtextborderspage.cpp:253
+#: ../src/richtext/richtextborderspage.cpp:287
+#: ../src/richtext/richtextborderspage.cpp:321
+#: ../src/richtext/richtextborderspage.cpp:355
+#: ../src/richtext/richtextborderspage.cpp:422
+#: ../src/richtext/richtextborderspage.cpp:456
+#: ../src/richtext/richtextborderspage.cpp:490
+#: ../src/richtext/richtextborderspage.cpp:524
 msgid "pt"
 msgstr ""
 
-#: ../src/richtext/richtextfontpage.cpp:178
+#: ../src/richtext/richtextfontpage.cpp:187
+#: ../src/richtext/richtextborderspage.cpp:251
+#: ../src/richtext/richtextborderspage.cpp:254
 #: ../src/richtext/richtextborderspage.cpp:255
-#: ../src/richtext/richtextborderspage.cpp:258
-#: ../src/richtext/richtextborderspage.cpp:259
+#: ../src/richtext/richtextborderspage.cpp:285
+#: ../src/richtext/richtextborderspage.cpp:288
 #: ../src/richtext/richtextborderspage.cpp:289
-#: ../src/richtext/richtextborderspage.cpp:292
-#: ../src/richtext/richtextborderspage.cpp:293
+#: ../src/richtext/richtextborderspage.cpp:319
+#: ../src/richtext/richtextborderspage.cpp:322
 #: ../src/richtext/richtextborderspage.cpp:323
-#: ../src/richtext/richtextborderspage.cpp:326
-#: ../src/richtext/richtextborderspage.cpp:327
+#: ../src/richtext/richtextborderspage.cpp:353
+#: ../src/richtext/richtextborderspage.cpp:356
 #: ../src/richtext/richtextborderspage.cpp:357
-#: ../src/richtext/richtextborderspage.cpp:360
-#: ../src/richtext/richtextborderspage.cpp:361
+#: ../src/richtext/richtextborderspage.cpp:420
+#: ../src/richtext/richtextborderspage.cpp:423
 #: ../src/richtext/richtextborderspage.cpp:424
-#: ../src/richtext/richtextborderspage.cpp:427
-#: ../src/richtext/richtextborderspage.cpp:428
+#: ../src/richtext/richtextborderspage.cpp:454
+#: ../src/richtext/richtextborderspage.cpp:457
 #: ../src/richtext/richtextborderspage.cpp:458
-#: ../src/richtext/richtextborderspage.cpp:461
-#: ../src/richtext/richtextborderspage.cpp:462
+#: ../src/richtext/richtextborderspage.cpp:488
+#: ../src/richtext/richtextborderspage.cpp:491
 #: ../src/richtext/richtextborderspage.cpp:492
-#: ../src/richtext/richtextborderspage.cpp:495
-#: ../src/richtext/richtextborderspage.cpp:496
+#: ../src/richtext/richtextborderspage.cpp:522
+#: ../src/richtext/richtextborderspage.cpp:525
 #: ../src/richtext/richtextborderspage.cpp:526
-#: ../src/richtext/richtextborderspage.cpp:529
-#: ../src/richtext/richtextborderspage.cpp:530
-#: ../src/richtext/richtextborderspage.cpp:594
-#: ../src/richtext/richtextborderspage.cpp:597
-#: ../src/richtext/richtextborderspage.cpp:598
-#: ../src/richtext/richtextmarginspage.cpp:200
-#: ../src/richtext/richtextmarginspage.cpp:202
+#: ../src/richtext/richtextmarginspage.cpp:201
 #: ../src/richtext/richtextmarginspage.cpp:203
-#: ../src/richtext/richtextmarginspage.cpp:225
-#: ../src/richtext/richtextmarginspage.cpp:227
+#: ../src/richtext/richtextmarginspage.cpp:204
+#: ../src/richtext/richtextmarginspage.cpp:226
 #: ../src/richtext/richtextmarginspage.cpp:228
-#: ../src/richtext/richtextmarginspage.cpp:248
-#: ../src/richtext/richtextmarginspage.cpp:250
+#: ../src/richtext/richtextmarginspage.cpp:229
+#: ../src/richtext/richtextmarginspage.cpp:249
 #: ../src/richtext/richtextmarginspage.cpp:251
-#: ../src/richtext/richtextmarginspage.cpp:273
-#: ../src/richtext/richtextmarginspage.cpp:275
+#: ../src/richtext/richtextmarginspage.cpp:252
+#: ../src/richtext/richtextmarginspage.cpp:274
 #: ../src/richtext/richtextmarginspage.cpp:276
-#: ../src/richtext/richtextmarginspage.cpp:314
-#: ../src/richtext/richtextmarginspage.cpp:316
+#: ../src/richtext/richtextmarginspage.cpp:277
+#: ../src/richtext/richtextmarginspage.cpp:315
 #: ../src/richtext/richtextmarginspage.cpp:317
-#: ../src/richtext/richtextmarginspage.cpp:339
-#: ../src/richtext/richtextmarginspage.cpp:341
+#: ../src/richtext/richtextmarginspage.cpp:318
+#: ../src/richtext/richtextmarginspage.cpp:340
 #: ../src/richtext/richtextmarginspage.cpp:342
-#: ../src/richtext/richtextmarginspage.cpp:362
-#: ../src/richtext/richtextmarginspage.cpp:364
+#: ../src/richtext/richtextmarginspage.cpp:343
+#: ../src/richtext/richtextmarginspage.cpp:363
 #: ../src/richtext/richtextmarginspage.cpp:365
-#: ../src/richtext/richtextmarginspage.cpp:387
-#: ../src/richtext/richtextmarginspage.cpp:389
+#: ../src/richtext/richtextmarginspage.cpp:366
+#: ../src/richtext/richtextmarginspage.cpp:388
 #: ../src/richtext/richtextmarginspage.cpp:390
+#: ../src/richtext/richtextmarginspage.cpp:391
 #: ../src/richtext/richtextsizepage.cpp:338
 #: ../src/richtext/richtextsizepage.cpp:341
 #: ../src/richtext/richtextsizepage.cpp:342
@@ -8294,12 +8231,12 @@ msgstr "rawctrl"
 msgid "read error"
 msgstr "讀取失敗"
 
-#: ../src/common/zipstrm.cpp:1845
+#: ../src/common/zipstrm.cpp:1882
 #, c-format
 msgid "reading zip stream (entry %s): bad crc"
 msgstr "讀取 zip 串流 (條目 %s): 不良的 crc"
 
-#: ../src/common/zipstrm.cpp:1840
+#: ../src/common/zipstrm.cpp:1877
 #, c-format
 msgid "reading zip stream (entry %s): bad length"
 msgstr "讀取 zip 串流 (條目 %s): 不良的長度"
@@ -8348,31 +8285,31 @@ msgstr "設定顯示模式 (例如 640x480-16)"
 msgid "specify the theme to use"
 msgstr "設定布景主題"
 
-#: ../src/richtext/richtextbuffer.cpp:9133
+#: ../src/richtext/richtextbuffer.cpp:8983
 msgid "standard/circle"
 msgstr "標準/圓形"
 
-#: ../src/richtext/richtextbuffer.cpp:9134
+#: ../src/richtext/richtextbuffer.cpp:8984
 msgid "standard/circle-outline"
 msgstr "標準/圓框"
 
-#: ../src/richtext/richtextbuffer.cpp:9136
+#: ../src/richtext/richtextbuffer.cpp:8986
 msgid "standard/diamond"
 msgstr "標準/菱形"
 
-#: ../src/richtext/richtextbuffer.cpp:9135
+#: ../src/richtext/richtextbuffer.cpp:8985
 msgid "standard/square"
 msgstr "標準/方形"
 
-#: ../src/richtext/richtextbuffer.cpp:9137
+#: ../src/richtext/richtextbuffer.cpp:8987
 msgid "standard/triangle"
 msgstr "標準/三角形"
 
-#: ../src/common/zipstrm.cpp:1745
+#: ../src/common/zipstrm.cpp:1782
 msgid "stored file length not in Zip header"
 msgstr "Zip 檔頭沒有已存檔案的長度資訊"
 
-#: ../src/common/cmdline.cpp:1476
+#: ../src/common/cmdline.cpp:1311
 msgid "str"
 msgstr "字串"
 
@@ -8474,12 +8411,12 @@ msgstr "不明-%d"
 msgid "unnamed"
 msgstr "未命名"
 
-#: ../src/common/docview.cpp:1613
+#: ../src/common/docview.cpp:1606
 #, c-format
 msgid "unnamed%d"
 msgstr "未命名-%d"
 
-#: ../src/common/zipstrm.cpp:1759 ../src/common/zipstrm.cpp:2079
+#: ../src/common/zipstrm.cpp:1796 ../src/common/zipstrm.cpp:2184
 msgid "unsupported Zip compression method"
 msgstr "不支援的 Zip 壓縮方法"
 
@@ -8531,7 +8468,7 @@ msgid "zlib error %d"
 msgstr "zlib 錯誤碼 %d"
 
 #: ../src/richtext/richtextliststylepage.cpp:496
-#: ../src/richtext/richtextbulletspage.cpp:288
+#: ../src/richtext/richtextbulletspage.cpp:301
 msgid "~"
 msgstr "~"
 

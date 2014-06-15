@@ -64,6 +64,12 @@ of MSW, MAC and OS2
     #define USE_WXGTK 0
 #endif
 
+#ifdef __WXPM__
+    #define USE_WXPM 1
+#else
+    #define USE_WXPM 0
+#endif
+
 #define USE_GENERIC_DIALOGS (!USE_WXUNIVERSAL && !USE_DLL)
 
 #define USE_COLOURDLG_GENERIC \
@@ -71,10 +77,10 @@ of MSW, MAC and OS2
 #define USE_DIRDLG_GENERIC \
     ((USE_WXMSW || USE_WXMAC) && USE_GENERIC_DIALOGS && wxUSE_DIRDLG)
 #define USE_FILEDLG_GENERIC \
-    ((((USE_WXMSW || USE_WXMAC || USE_WXGTK) \
+    ((((USE_WXMSW || USE_WXMAC || USE_WXPM || USE_WXGTK) \
                     && USE_GENERIC_DIALOGS) || USE_WXWINCE) && wxUSE_FILEDLG)
 #define USE_FONTDLG_GENERIC \
-    ((USE_WXMSW || USE_WXMACFONTDLG) && USE_GENERIC_DIALOGS && wxUSE_FONTDLG)
+    ((USE_WXMSW || USE_WXMACFONTDLG || USE_WXPM) && USE_GENERIC_DIALOGS && wxUSE_FONTDLG)
 
 // Turn USE_MODAL_PRESENTATION to 0 if there is any reason for not presenting difference
 // between modal and modeless dialogs (ie. not implemented it in your port yet)
@@ -99,7 +105,7 @@ of MSW, MAC and OS2
 class MyAppTraits : public wxGUIAppTraits
 {
 public:
-    virtual wxLog *CreateLogTarget() wxOVERRIDE;
+    virtual wxLog *CreateLogTarget();
 };
 
 #endif // wxUSE_LOG
@@ -110,16 +116,16 @@ class MyApp: public wxApp
 public:
     MyApp() { m_startupProgressStyle = -1; }
 
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 
 #if wxUSE_CMDLINE_PARSER
-    virtual void OnInitCmdLine(wxCmdLineParser& parser) wxOVERRIDE;
-    virtual bool OnCmdLineParsed(wxCmdLineParser& parser) wxOVERRIDE;
+    virtual void OnInitCmdLine(wxCmdLineParser& parser);
+    virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
 #endif // wxUSE_CMDLINE_PARSER
 
 protected:
 #if wxUSE_LOG
-    virtual wxAppTraits *CreateTraits() wxOVERRIDE { return new MyAppTraits; }
+    virtual wxAppTraits *CreateTraits() { return new MyAppTraits; }
 #endif // wxUSE_LOG
 
 private:
@@ -210,8 +216,6 @@ protected:
     virtual void AddAdditionalTextOptions(wxSizer *WXUNUSED(sizer)) { }
     virtual void AddAdditionalFlags(wxSizer *WXUNUSED(sizer)) { }
 
-    void ShowResult(int res);
-
     void OnApply(wxCommandEvent& event);
     void OnClose(wxCommandEvent& event);
     void OnUpdateLabelUI(wxUpdateUIEvent& event);
@@ -260,8 +264,6 @@ private:
     wxCheckBox *m_chkNoDefault,
                *m_chkCentre;
 
-    wxStaticText *m_labelResult;
-
     wxDECLARE_EVENT_TABLE();
     wxDECLARE_NO_COPY_CLASS(TestMessageBoxDialog);
 };
@@ -274,8 +276,8 @@ public:
 
 protected:
     // overrides method in base class
-    virtual void AddAdditionalTextOptions(wxSizer *sizer) wxOVERRIDE;
-    virtual void AddAdditionalFlags(wxSizer *sizer) wxOVERRIDE;
+    virtual void AddAdditionalTextOptions(wxSizer *sizer);
+    virtual void AddAdditionalFlags(wxSizer *sizer);
 
     void OnApply(wxCommandEvent& event);
 

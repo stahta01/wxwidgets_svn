@@ -56,6 +56,10 @@
     #include <hildon/hildon.h>
 #endif // wxUSE_LIBHILDON2
 
+#ifdef __WXGTK3__
+void wxGTKSizeRevalidate(wxWindow*);
+#endif
+
 // ----------------------------------------------------------------------------
 // data
 // ----------------------------------------------------------------------------
@@ -1040,7 +1044,7 @@ bool wxTopLevelWindowGTK::Show( bool show )
         HandleWindowEvent(event);
 
 #ifdef __WXGTK3__
-        GTKSizeRevalidate();
+        wxGTKSizeRevalidate(this);
 #endif
     }
 
@@ -1305,7 +1309,7 @@ void wxTopLevelWindowGTK::GTKUpdateDecorSize(const DecorSize& decorSize)
         HandleWindowEvent(sizeEvent);
 
 #ifdef __WXGTK3__
-        GTKSizeRevalidate();
+        wxGTKSizeRevalidate(this);
 #endif
         gtk_widget_show(m_widget);
 

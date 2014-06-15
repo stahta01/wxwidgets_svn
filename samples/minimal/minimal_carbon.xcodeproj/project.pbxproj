@@ -254,7 +254,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 40E3518610EF31130029DC34 /* wxcarbon.xcconfig */;
 			buildSettings = {
-				OTHER_LDFLAGS = "$(OTHER_LDFLAGS)";
+				OTHER_LDFLAGS = (
+					"$(OTHER_LDFLAGS)",
+					"-lz",
+				);
 				PRODUCT_NAME = minimal_carbon;
 			};
 			name = Debug;
@@ -263,7 +266,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 40E3518610EF31130029DC34 /* wxcarbon.xcconfig */;
 			buildSettings = {
-				OTHER_LDFLAGS = "$(OTHER_LDFLAGS)";
+				OTHER_LDFLAGS = (
+					"$(OTHER_LDFLAGS)",
+					"-lz",
+				);
 				PRODUCT_NAME = minimal_carbon;
 			};
 			name = Release;

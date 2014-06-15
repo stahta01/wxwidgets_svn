@@ -2110,8 +2110,8 @@ wxPaintDCImpl::wxPaintDCImpl( wxDC *owner, wxWindow *win )
 class wxDCModule : public wxModule
 {
 public:
-    bool OnInit() wxOVERRIDE;
-    void OnExit() wxOVERRIDE;
+    bool OnInit();
+    void OnExit();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxDCModule)

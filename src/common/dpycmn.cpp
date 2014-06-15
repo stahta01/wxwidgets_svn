@@ -59,28 +59,28 @@ class WXDLLEXPORT wxDisplayImplSingle : public wxDisplayImpl
 public:
     wxDisplayImplSingle() : wxDisplayImpl(0) { }
 
-    virtual wxRect GetGeometry() const wxOVERRIDE
+    virtual wxRect GetGeometry() const
     {
         wxRect r;
         wxDisplaySize(&r.width, &r.height);
         return r;
     }
 
-    virtual wxRect GetClientArea() const wxOVERRIDE { return wxGetClientDisplayRect(); }
+    virtual wxRect GetClientArea() const { return wxGetClientDisplayRect(); }
 
-    virtual wxString GetName() const wxOVERRIDE { return wxString(); }
+    virtual wxString GetName() const { return wxString(); }
 
 #if wxUSE_DISPLAY
     // no video modes support for us, provide just the stubs
 
-    virtual wxArrayVideoModes GetModes(const wxVideoMode& WXUNUSED(mode)) const wxOVERRIDE
+    virtual wxArrayVideoModes GetModes(const wxVideoMode& WXUNUSED(mode)) const
     {
         return wxArrayVideoModes();
     }
 
-    virtual wxVideoMode GetCurrentMode() const wxOVERRIDE { return wxVideoMode(); }
+    virtual wxVideoMode GetCurrentMode() const { return wxVideoMode(); }
 
-    virtual bool ChangeMode(const wxVideoMode& WXUNUSED(mode)) wxOVERRIDE { return false; }
+    virtual bool ChangeMode(const wxVideoMode& WXUNUSED(mode)) { return false; }
 #endif // wxUSE_DISPLAY
 
 
@@ -94,8 +94,8 @@ public:
 class wxDisplayModule : public wxModule
 {
 public:
-    virtual bool OnInit() wxOVERRIDE { return true; }
-    virtual void OnExit() wxOVERRIDE
+    virtual bool OnInit() { return true; }
+    virtual void OnExit()
     {
         wxDELETE(gs_factory);
     }

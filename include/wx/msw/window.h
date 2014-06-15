@@ -33,6 +33,9 @@ class WXDLLIMPEXP_CORE wxWindowMSW : public wxWindowBase
     friend class wxSpinCtrl;
     friend class wxSlider;
     friend class wxRadioBox;
+#if defined __VISUALC__ && __VISUALC__ <= 1200
+    friend class wxWindowMSW;
+#endif
 public:
     wxWindowMSW() { Init(); }
 
@@ -115,8 +118,6 @@ public:
                                              wxCoord width,
                                              wxCoord widthTotal) const;
 
-    virtual void SetId(wxWindowID winid);
-
 #if wxUSE_DRAG_AND_DROP
     virtual void SetDropTarget( wxDropTarget *dropTarget );
 #endif // wxUSE_DRAG_AND_DROP
@@ -127,7 +128,7 @@ public:
 #ifndef __WXUNIVERSAL__
     // Native resource loading (implemented in src/msw/nativdlg.cpp)
     // FIXME: should they really be all virtual?
-    virtual bool LoadNativeDialog(wxWindow* parent, wxWindowID id);
+    virtual bool LoadNativeDialog(wxWindow* parent, wxWindowID& id);
     virtual bool LoadNativeDialog(wxWindow* parent, const wxString& name);
     wxWindow* GetWindowChild1(wxWindowID id);
     wxWindow* GetWindowChild(wxWindowID id);

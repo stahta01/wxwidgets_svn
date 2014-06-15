@@ -442,7 +442,7 @@ public:
             void FunctionInAWorkerThread(const wxString& str)
             {
                 wxThreadEvent evt;
-                evt.SetString(str);
+                evt->SetString(str);
 
                 // wxThreadEvent::Clone() makes sure that the internal wxString
                 // member is not shared by other wxString instances:
@@ -595,13 +595,11 @@ public:
         -# If the object is disabled (via a call to wxEvtHandler::SetEvtHandlerEnabled)
            the function skips to step (7).
         -# Dynamic event table of the handlers bound using Bind<>() is
-           searched in the most-recently-bound to the most-early-bound order.
-           If a handler is found, it is executed and the function
+           searched. If a handler is found, it is executed and the function
            returns @true unless the handler used wxEvent::Skip() to indicate
            that it didn't handle the event in which case the search continues.
         -# Static events table of the handlers bound using event table
-           macros is searched for this event handler in the order of appearance
-           of event table macros in the source code. If this fails, the base
+           macros is searched for this event handler. If this fails, the base
            class event table is tried, and so on until no more tables
            exist or an appropriate function was found. If a handler is found,
            the same logic as in the previous step applies.
@@ -994,12 +992,6 @@ public:
         This method can only unbind functions, functors or methods which have
         been added using the Bind<>() method. There is no way to unbind
         functions bound using the (static) event tables.
-
-        @note Currently functors are compared by their address which,
-        unfortunately, doesn't work correctly if the same address is reused for
-        two different functor objects. Because of this, using Unbind() is not
-        recommended if there are multiple functors using the same @a eventType
-        and @a id and @a lastId as a wrong one could be unbound.
 
         @param eventType
             The event type associated with this event handler.
@@ -2247,7 +2239,7 @@ public:
     not sent when the window is restored to its original size after it had been
     maximized, only a normal wxSizeEvent is generated in this case.
 
-    Currently this event is only generated in wxMSW, wxGTK and wxOSX/Cocoa
+    Currently this event is only generated in wxMSW, wxGTK, wxOSX/Cocoa and wxOS2
     ports so portable programs should only rely on receiving @c wxEVT_SIZE and
     not necessarily this event when the window is maximized.
 
@@ -4172,7 +4164,7 @@ public:
     Notice that the event is not triggered when the application is iconized
     (minimized) or restored under wxMSW.
 
-    @onlyfor{wxmsw,wxgtk}
+    @onlyfor{wxmsw,wxgtk,wxos2}
 
     @beginEventTable{wxShowEvent}
     @event{EVT_SHOW(func)}

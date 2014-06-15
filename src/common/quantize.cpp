@@ -52,9 +52,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__OS2__)
+#define RGB_RED_OS2   0
+#define RGB_GREEN_OS2 1
+#define RGB_BLUE_OS2  2
+#else
 #define RGB_RED       0
 #define RGB_GREEN     1
 #define RGB_BLUE      2
+#endif
+#define RGB_PIXELSIZE 3
 
 #define MAXJSAMPLE        255
 #define CENTERJSAMPLE     128
@@ -65,7 +72,7 @@
 
 typedef unsigned short UINT16;
 typedef signed short INT16;
-#if !defined(__WXMOTIF__)
+#if !(defined(__WATCOMC__) && (defined(__WXMSW__) || defined(__WXMOTIF__)))
 typedef signed int INT32;
 #endif
 
@@ -159,6 +166,26 @@ struct jpeg_color_quantizer {
  * you'll probably want to tweak the histogram sizes too.
  */
 
+#if defined(__OS2__)
+
+#if RGB_RED_OS2 == 0
+#define C0_SCALE R_SCALE
+#endif
+#if RGB_BLUE_OS2 == 0
+#define C0_SCALE B_SCALE
+#endif
+#if RGB_GREEN_OS2 == 1
+#define C1_SCALE G_SCALE
+#endif
+#if RGB_RED_OS2 == 2
+#define C2_SCALE R_SCALE
+#endif
+#if RGB_BLUE_OS2 == 2
+#define C2_SCALE B_SCALE
+#endif
+
+#else
+
 #if RGB_RED == 0
 #define C0_SCALE R_SCALE
 #endif
@@ -173,6 +200,8 @@ struct jpeg_color_quantizer {
 #endif
 #if RGB_BLUE == 2
 #define C2_SCALE B_SCALE
+#endif
+
 #endif
 
 /*
@@ -541,6 +570,20 @@ median_cut (j_decompress_ptr cinfo, boxptr boxlist, int numboxes,
     /* We want to break any ties in favor of green, then red, blue last.
      * This code does the right thing for R,G,B or B,G,R color orders only.
      */
+#if defined(__VISAGECPP__)
+
+#if RGB_RED_OS2 == 0
+    cmax = c1; n = 1;
+    if (c0 > cmax) { cmax = c0; n = 0; }
+    if (c2 > cmax) { n = 2; }
+#else
+    cmax = c1; n = 1;
+    if (c2 > cmax) { cmax = c2; n = 2; }
+    if (c0 > cmax) { n = 0; }
+#endif
+
+#else
+
 #if RGB_RED == 0
     cmax = c1; n = 1;
     if (c0 > cmax) { cmax = c0; n = 0; }
@@ -551,6 +594,7 @@ median_cut (j_decompress_ptr cinfo, boxptr boxlist, int numboxes,
     if (c0 > cmax) { n = 0; }
 #endif
 
+#endif
     /* Choose split point along selected axis, and update box bounds.
      * Current algorithm: split at halfway point.
      * (Since the box has been shrunk to minimum volume,

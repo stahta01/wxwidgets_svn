@@ -52,12 +52,12 @@
   #endif
 #endif
 
-// Currently gcc doesn't define NMLVFINDITEM, and DMC only defines
+// Currently gcc and watcom don't define NMLVFINDITEM, and DMC only defines
 // it by its old name NM_FINDTIEM.
 //
 #if defined(__VISUALC__) || defined(__BORLANDC__) || defined(NMLVFINDITEM)
     #define HAVE_NMLVFINDITEM 1
-#elif defined(NM_FINDITEM)
+#elif defined(__DMC__) || defined(NM_FINDITEM)
     #define HAVE_NMLVFINDITEM 1
     #define NMLVFINDITEM NM_FINDITEM
 #endif
@@ -269,7 +269,7 @@ bool wxListCtrl::Create(wxWindow *parent,
         return false;
 
     // explicitly say that we want to use Unicode because otherwise we get ANSI
-    // versions of _some_ messages (notably LVN_GETDISPINFOA)
+    // versions of _some_ messages (notably LVN_GETDISPINFOA) in MSLU build
     wxSetCCUnicodeFormat(GetHwnd());
 
     // We must set the default text colour to the system/theme color, otherwise
@@ -727,11 +727,7 @@ bool wxListCtrl::GetItem(wxListItem& info) const
     lvItem.iItem = info.m_itemId;
     lvItem.iSubItem = info.m_col;
 
-    // If no mask is specified, get everything: this is compatible with the
-    // generic version and conforms to the principle of least surprise.
-    const long mask = info.m_mask ? info.m_mask : -1;
-
-    if ( mask & wxLIST_MASK_TEXT )
+    if ( info.m_mask & wxLIST_MASK_TEXT )
     {
         lvItem.mask |= LVIF_TEXT;
         lvItem.pszText = new wxChar[513];
@@ -742,13 +738,13 @@ bool wxListCtrl::GetItem(wxListItem& info) const
         lvItem.pszText = NULL;
     }
 
-    if ( mask & wxLIST_MASK_DATA )
+    if (info.m_mask & wxLIST_MASK_DATA)
         lvItem.mask |= LVIF_PARAM;
 
-    if ( mask & wxLIST_MASK_IMAGE )
+    if (info.m_mask & wxLIST_MASK_IMAGE)
         lvItem.mask |= LVIF_IMAGE;
 
-    if ( mask & wxLIST_MASK_STATE )
+    if ( info.m_mask & wxLIST_MASK_STATE )
     {
         lvItem.mask |= LVIF_STATE;
         wxConvertToMSWFlags(0, info.m_stateMask, lvItem);
@@ -1154,6 +1150,15 @@ wxSize wxListCtrl::GetItemSpacing() const
 
     return wxSize(LOWORD(spacing), HIWORD(spacing));
 }
+
+#if WXWIN_COMPATIBILITY_2_6
+
+int wxListCtrl::GetItemSpacing(bool isSmall) const
+{
+    return ListView_GetItemSpacing(GetHwnd(), (BOOL) isSmall);
+}
+
+#endif // WXWIN_COMPATIBILITY_2_6
 
 void wxListCtrl::SetItemTextColour( long item, const wxColour &col )
 {

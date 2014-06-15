@@ -72,7 +72,7 @@ WXDLLIMPEXP_BASE void wxSetInstance(HINSTANCE hInst);
 // define things missing from some compilers' headers
 // ---------------------------------------------------------------------------
 
-#if defined(__WXWINCE__)
+#if defined(__WXWINCE__) || (defined(__GNUWIN32__) && !wxUSE_NORLANDER_HEADERS)
 #ifndef ZeroMemory
     inline void ZeroMemory(void *buf, size_t len) { memset(buf, 0, len); }
 #endif
@@ -178,6 +178,8 @@ extern LONG APIENTRY _EXPORT
     #define wxGetOSFHandle(fd) ((HANDLE)get_osfhandle(fd))
 #elif defined(__VISUALC__) \
    || defined(__BORLANDC__) \
+   || defined(__DMC__) \
+   || defined(__WATCOMC__) \
    || defined(__MINGW32__)
     #define wxGetOSFHandle(fd) ((HANDLE)_get_osfhandle(fd))
     #define wxOpenOSFHandle(h, flags) (_open_osfhandle(wxPtrToUInt(h), flags))
@@ -185,41 +187,18 @@ extern LONG APIENTRY _EXPORT
 #endif
 
 // close the handle in the class dtor
-template <wxUIntPtr INVALID_VALUE = (wxUIntPtr)INVALID_HANDLE_VALUE>
 class AutoHANDLE
 {
 public:
-    wxEXPLICIT AutoHANDLE(HANDLE handle = InvalidHandle()) : m_handle(handle) { }
+    wxEXPLICIT AutoHANDLE(HANDLE handle) : m_handle(handle) { }
 
-    bool IsOk() const { return m_handle != InvalidHandle(); }
+    bool IsOk() const { return m_handle != INVALID_HANDLE_VALUE; }
     operator HANDLE() const { return m_handle; }
 
-    ~AutoHANDLE() { if ( IsOk() ) DoClose(); }
-
-    void Close()
-    {
-        wxCHECK_RET(IsOk(), wxT("Handle must be valid"));
-
-        DoClose();
-
-        m_handle = InvalidHandle();
-    }
+    ~AutoHANDLE() { if ( IsOk() ) ::CloseHandle(m_handle); }
 
 protected:
-    // We need this helper function because integer INVALID_VALUE is not
-    // implicitly convertible to HANDLE, which is a pointer.
-    static HANDLE InvalidHandle()
-    {
-        return static_cast<HANDLE>(INVALID_VALUE);
-    }
-
-    void DoClose()
-    {
-        if ( !::CloseHandle(m_handle) )
-            wxLogLastError(wxT("CloseHandle"));
-    }
-
-    WXHANDLE m_handle;
+    HANDLE m_handle;
 };
 
 // a template to make initializing Windows styructs less painful: it zeroes all

@@ -18,7 +18,7 @@
 #if wxUSE_FILEDLG
 
 // NOTE : it probably also supports MAC, untested
-#if !defined(__UNIX__) && !defined(__DOS__) && !defined(__WIN32__)
+#if !defined(__UNIX__) && !defined(__DOS__) && !defined(__WIN32__) && !defined(__OS2__)
 #error wxGenericFileDialog currently only supports Unix, win32 and DOS
 #endif
 
@@ -70,6 +70,14 @@
     #endif
 #endif
 
+#ifdef __WINDOWS__
+    #include "wx/msw/mslu.h"
+#endif
+
+#ifdef __WATCOMC__
+    #include <direct.h>
+#endif
+
 #ifndef __WXWINCE__
 #include <time.h>
 #endif
@@ -80,7 +88,7 @@
 
 #if defined(__WXWINCE__)
 #define IsTopMostDir(dir) (dir == wxT("\\") || dir == wxT("/"))
-#elif defined(__DOS__) || defined(__WINDOWS__)
+#elif (defined(__DOS__) || defined(__WINDOWS__) || defined (__OS2__))
 #define IsTopMostDir(dir)   (dir.empty())
 #else
 #define IsTopMostDir(dir)   (dir == wxT("/"))
@@ -109,9 +117,9 @@ BEGIN_EVENT_TABLE(wxGenericFileDialog,wxDialog)
     EVT_FILECTRL_FILEACTIVATED(ID_FILE_CTRL, wxGenericFileDialog::OnFileActivated)
 
     EVT_UPDATE_UI(ID_UP_DIR, wxGenericFileDialog::OnUpdateButtonsUI)
-#if defined(__DOS__) || defined(__WINDOWS__)
+#if defined(__DOS__) || defined(__WINDOWS__) || defined(__OS2__)
     EVT_UPDATE_UI(ID_NEW_DIR, wxGenericFileDialog::OnUpdateButtonsUI)
-#endif // defined(__DOS__) || defined(__WINDOWS__)
+#endif // defined(__DOS__) || defined(__WINDOWS__) || defined(__OS2__)
 END_EVENT_TABLE()
 
 long wxGenericFileDialog::ms_lastViewStyle = wxLC_LIST;

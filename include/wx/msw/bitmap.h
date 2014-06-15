@@ -170,8 +170,8 @@ public:
     // these functions are internal and shouldn't be used, they risk to
     // disappear in the future
     bool HasAlpha() const;
-    void UseAlpha(bool use = true);
-    void ResetAlpha() { UseAlpha(false); }
+    void UseAlpha();
+    void ResetAlpha();
 
     // support for scaled bitmaps
     virtual double GetScaleFactor() const { return 1.0; }
@@ -182,10 +182,6 @@ public:
 
     // implementation only from now on
     // -------------------------------
-
-    // Set alpha flag to true if this is a 32bpp bitmap which has any non-0
-    // values in its alpha channel.
-    void MSWUpdateAlpha();
 
 public:
     void SetHBITMAP(WXHBITMAP bmp) { SetHandle((WXHANDLE)bmp); }

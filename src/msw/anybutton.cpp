@@ -211,8 +211,7 @@ public:
     // we must be constructed with the size of our images as we need to create
     // the image list
     wxXPButtonImageData(wxAnyButton *btn, const wxBitmap& bitmap)
-        : m_iml(bitmap.GetWidth(), bitmap.GetHeight(),
-                !bitmap.HasAlpha() /* use mask only if no alpha */,
+        : m_iml(bitmap.GetWidth(), bitmap.GetHeight(), true /* use mask */,
                 wxAnyButton::State_Max + 1 /* see "pulse" comment below */),
           m_hwndBtn(GetHwndOf(btn))
     {
@@ -1276,13 +1275,7 @@ bool wxAnyButton::MSWOnDraw(WXDRAWITEMSTRUCT *wxdis)
             }
         }
     }
-    else
-    {
-        // clear the background (and erase any previous bitmap)
-        COLORREF colBg = wxColourToRGB(GetBackgroundColour());
-        AutoHBRUSH hbrushBackground(colBg);
-        FillRect(hdc, &rectBtn, hbrushBackground);
-    }
+
 
     // draw the image, if any
     if ( m_imageData )

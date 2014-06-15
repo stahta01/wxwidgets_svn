@@ -20,7 +20,6 @@
 #include "wx/ribbon/art.h"
 #include "wx/ribbon/bar.h"
 #include "wx/dcbuffer.h"
-#include "wx/scopedptr.h"
 
 #ifndef WX_PRECOMP
 #endif
@@ -245,7 +244,7 @@ wxRibbonToolBarToolBase* wxRibbonToolBar::InsertTool(
     wxASSERT(bitmap.IsOk());
 
     // Create the wxRibbonToolBarToolBase with parameters
-    wxScopedPtr<wxRibbonToolBarToolBase> tool(new wxRibbonToolBarToolBase);
+    wxRibbonToolBarToolBase* tool = new wxRibbonToolBarToolBase;
     tool->id = tool_id;
     tool->bitmap = bitmap;
     if(bitmap_disabled.IsOk())
@@ -271,10 +270,8 @@ wxRibbonToolBarToolBase* wxRibbonToolBar::InsertTool(
         size_t tool_count = group->tools.GetCount();
         if(pos <= tool_count)
         {
-            // Give the ownership of the tool to group->tools
-            wxRibbonToolBarToolBase* const p = tool.release();
-            group->tools.Insert(p, pos);
-            return p;
+            group->tools.Insert(tool, pos);
+            return tool;
         }
         pos -= tool_count + 1;
     }

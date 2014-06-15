@@ -117,7 +117,7 @@ public:     // public API
 protected:
     // overridden base class methods
 #if wxUSE_TOOLTIPS
-    virtual void DoSetToolTip(wxToolTip *tip) wxOVERRIDE;
+    virtual void DoSetToolTip(wxToolTip *tip);
 #endif // wxUSE_TOOLTIPS
 
 

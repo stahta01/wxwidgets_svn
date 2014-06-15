@@ -222,6 +222,8 @@ protected:
     #include "wx/gtk1/dnd.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/dnd.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/dnd.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -237,7 +239,7 @@ public:
 
     virtual bool OnDropText(wxCoord x, wxCoord y, const wxString& text) = 0;
 
-    virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) wxOVERRIDE;
+    virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
 
 private:
     wxDECLARE_NO_COPY_CLASS(wxTextDropTarget);
@@ -253,7 +255,7 @@ public:
     virtual bool OnDropFiles(wxCoord x, wxCoord y,
                              const wxArrayString& filenames) = 0;
 
-    virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def) wxOVERRIDE;
+    virtual wxDragResult OnData(wxCoord x, wxCoord y, wxDragResult def);
 
 private:
     wxDECLARE_NO_COPY_CLASS(wxFileDropTarget);

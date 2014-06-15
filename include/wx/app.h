@@ -264,7 +264,7 @@ public:
 
     // Implement the inherited wxEventFilter method but just return -1 from it
     // to indicate that default processing should take place.
-    virtual int FilterEvent(wxEvent& event) wxOVERRIDE;
+    virtual int FilterEvent(wxEvent& event);
 
     // return true if we're running event loop, i.e. if the events can
     // (already) be dispatched
@@ -541,7 +541,7 @@ public:
         // very first initialization function
         //
         // Override: very rarely
-    virtual bool Initialize(int& argc, wxChar **argv) wxOVERRIDE;
+    virtual bool Initialize(int& argc, wxChar **argv);
 
         // a platform-dependent version of OnInit(): the code here is likely to
         // depend on the toolkit. default version does nothing.
@@ -556,15 +556,15 @@ public:
         // of the program really starts here
         //
         // Override: rarely in GUI applications, always in console ones.
-    virtual int OnRun() wxOVERRIDE;
+    virtual int OnRun();
 
         // a matching function for OnInit()
-    virtual int OnExit() wxOVERRIDE;
+    virtual int OnExit();
 
         // very last clean up function
         //
         // Override: very rarely
-    virtual void CleanUp() wxOVERRIDE;
+    virtual void CleanUp();
 
 
     // the worker functions - usually not used directly by the user code
@@ -579,10 +579,10 @@ public:
         // parties
         //
         // it should return true if more idle events are needed, false if not
-    virtual bool ProcessIdle() wxOVERRIDE;
+    virtual bool ProcessIdle();
 
         // override base class version: GUI apps always use an event loop
-    virtual bool UsesEventLoop() const wxOVERRIDE { return true; }
+    virtual bool UsesEventLoop() const { return true; }
 
 
     // top level window functions
@@ -645,8 +645,8 @@ public:
     // ------------------------------------------------------------------------
 
 #if wxUSE_CMDLINE_PARSER
-    virtual bool OnCmdLineParsed(wxCmdLineParser& parser) wxOVERRIDE;
-    virtual void OnInitCmdLine(wxCmdLineParser& parser) wxOVERRIDE;
+    virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
+    virtual void OnInitCmdLine(wxCmdLineParser& parser);
 #endif
 
     // miscellaneous other stuff
@@ -657,9 +657,15 @@ public:
     // deactivated
     virtual void SetActive(bool isActive, wxWindow *lastFocus);
 
+#if WXWIN_COMPATIBILITY_2_6
+    // returns true if the program is successfully initialized
+    wxDEPRECATED_MSG("always returns true now, don't call")
+    bool Initialized();
+#endif // WXWIN_COMPATIBILITY_2_6
+
 protected:
     // override base class method to use GUI traits
-    virtual wxAppTraits *CreateTraits() wxOVERRIDE;
+    virtual wxAppTraits *CreateTraits();
 
 
     // the main top level window (may be NULL)
@@ -688,6 +694,10 @@ protected:
     wxDECLARE_NO_COPY_CLASS(wxAppBase);
 };
 
+#if WXWIN_COMPATIBILITY_2_6
+    inline bool wxAppBase::Initialized() { return true; }
+#endif // WXWIN_COMPATIBILITY_2_6
+
 // ----------------------------------------------------------------------------
 // now include the declaration of the real class
 // ----------------------------------------------------------------------------
@@ -708,6 +718,8 @@ protected:
     #include "wx/osx/app.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/app.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/app.h"
 #endif
 
 #else // !GUI

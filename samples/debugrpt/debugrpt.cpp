@@ -61,7 +61,7 @@ protected:
     // this is called with the contents of the server response: you will
     // probably want to parse the XML document in OnServerReply() instead of
     // just dumping it as I do
-    virtual bool OnServerReply(const wxArrayString& reply) wxOVERRIDE
+    virtual bool OnServerReply(const wxArrayString& reply)
     {
         if ( reply.IsEmpty() )
         {
@@ -187,10 +187,10 @@ public:
     MyApp();
 
     // create our main window here
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 
     // called when a crash occurs in this application
-    virtual void OnFatalException() wxOVERRIDE;
+    virtual void OnFatalException();
 
     // this is where we really generate the debug report
     void GenerateReport(wxDebugReport::Context ctx);

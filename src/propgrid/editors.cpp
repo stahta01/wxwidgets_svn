@@ -80,6 +80,8 @@
 
 #if defined(__WXMSW__)
     // tested
+    #define wxPG_NAT_BUTTON_BORDER_ANY          1
+    #define wxPG_NAT_BUTTON_BORDER_X            1
     #define wxPG_NAT_BUTTON_BORDER_Y            1
 
     #define wxPG_CHECKMARK_XADJ                 1
@@ -98,6 +100,8 @@
     #define wxPG_CHECKMARK_HADJ                 (-2)
     #define wxPG_CHECKMARK_DEFLATE              3
 
+    #define wxPG_NAT_BUTTON_BORDER_ANY      1
+    #define wxPG_NAT_BUTTON_BORDER_X        1
     #define wxPG_NAT_BUTTON_BORDER_Y        1
 
     #define wxPG_TEXTCTRLYADJUST            0
@@ -110,6 +114,8 @@
     #define wxPG_CHECKMARK_HADJ                 -6
     #define wxPG_CHECKMARK_DEFLATE              0
 
+    #define wxPG_NAT_BUTTON_BORDER_ANY      0
+    #define wxPG_NAT_BUTTON_BORDER_X        0
     #define wxPG_NAT_BUTTON_BORDER_Y        0
 
     #define wxPG_TEXTCTRLYADJUST            0
@@ -122,6 +128,8 @@
     #define wxPG_CHECKMARK_HADJ                 0
     #define wxPG_CHECKMARK_DEFLATE              0
 
+    #define wxPG_NAT_BUTTON_BORDER_ANY      0
+    #define wxPG_NAT_BUTTON_BORDER_X        0
     #define wxPG_NAT_BUTTON_BORDER_Y        0
 
     #define wxPG_TEXTCTRLYADJUST            0
@@ -653,7 +661,7 @@ public:
     virtual void OnDrawItem( wxDC& dc,
                              const wxRect& rect,
                              int item,
-                             int flags ) const wxOVERRIDE
+                             int flags ) const
     {
         wxPropertyGrid* pg = GetGrid();
 
@@ -669,7 +677,7 @@ public:
         }
     }
 
-    virtual wxCoord OnMeasureItem( size_t item ) const wxOVERRIDE
+    virtual wxCoord OnMeasureItem( size_t item ) const
     {
         wxPropertyGrid* pg = GetGrid();
         wxRect rect;
@@ -687,7 +695,7 @@ public:
         return pg;
     }
 
-    virtual wxCoord OnMeasureItemWidth( size_t item ) const wxOVERRIDE
+    virtual wxCoord OnMeasureItemWidth( size_t item ) const
     {
         wxPropertyGrid* pg = GetGrid();
         wxRect rect;
@@ -698,7 +706,7 @@ public:
     }
 
     virtual void PositionTextCtrl( int textCtrlXAdjust,
-                                   int WXUNUSED(textCtrlYAdjust) ) wxOVERRIDE
+                                   int WXUNUSED(textCtrlYAdjust) )
     {
         wxPropertyGrid* pg = GetGrid();
     #ifdef wxPG_TEXTCTRLXADJUST
@@ -1446,7 +1454,7 @@ static void DrawSimpleCheckBox( wxDC& dc, const wxRect& rect, int box_hei,
     else
     {
         // Pen for bold rectangle.
-        wxPen linepen(useCol,2,wxPENSTYLE_SOLID);
+        wxPen linepen(useCol,2,wxSOLID);
         linepen.SetJoin(wxJOIN_MITER); // This prevents round edges.
         dc.SetPen(linepen);
         r.x++;
@@ -1540,7 +1548,7 @@ void wxSimpleCheckBox::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
     int state = m_state;
     if ( !(state & wxSCB_STATE_UNSPECIFIED) &&
-         GetFont().GetWeight() == wxFONTWEIGHT_BOLD )
+         GetFont().GetWeight() == wxBOLD )
         state |= wxSCB_STATE_BOLD;
 
     DrawSimpleCheckBox(dc, rect, m_boxHeight, state);
@@ -1640,7 +1648,7 @@ void wxPGCheckBoxEditor::DrawValue( wxDC& dc, const wxRect& rect,
     if ( !property->IsValueUnspecified() )
     {
         state = property->GetChoiceSelection();
-        if ( dc.GetFont().GetWeight() == wxFONTWEIGHT_BOLD )
+        if ( dc.GetFont().GetWeight() == wxBOLD )
             state |= wxSCB_STATE_BOLD;
     }
     else
@@ -2019,7 +2027,7 @@ wxWindow* wxPropertyGrid::GenerateEditorButton( const wxPoint& pos, const wxSize
   #endif
 #endif
 
-    if ( selected->HasFlag(wxPG_PROP_READONLY) && !selected->HasFlag(wxPG_PROP_ACTIVE_BTN) )
+    if ( selected->HasFlag(wxPG_PROP_READONLY) )
         but->Disable();
 
     return but;

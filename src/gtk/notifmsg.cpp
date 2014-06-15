@@ -48,13 +48,13 @@
 class wxLibnotifyModule : public wxModule
 {
 public:
-    virtual bool OnInit() wxOVERRIDE
+    virtual bool OnInit()
     {
         // We're initialized on demand.
         return true;
     }
 
-    virtual void OnExit() wxOVERRIDE
+    virtual void OnExit()
     {
         if ( notify_is_initted() )
             notify_uninit();

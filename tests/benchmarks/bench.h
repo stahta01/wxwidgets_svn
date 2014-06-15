@@ -11,7 +11,6 @@
 #define _WX_TESTS_BENCHMARKS_BENCH_H_
 
 #include "wx/cpp.h"
-#include "wx/crt.h"
 #include "wx/defs.h"
 
 namespace Bench

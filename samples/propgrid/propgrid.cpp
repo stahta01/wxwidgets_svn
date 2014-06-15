@@ -88,11 +88,11 @@ public:
     virtual wxPGWindowList CreateControls( wxPropertyGrid* propGrid,
                                            wxPGProperty* property,
                                            const wxPoint& pos,
-                                           const wxSize& sz ) const wxOVERRIDE;
+                                           const wxSize& sz ) const;
     virtual bool OnEvent( wxPropertyGrid* propGrid,
                           wxPGProperty* property,
                           wxWindow* ctrl,
-                          wxEvent& event ) const wxOVERRIDE;
+                          wxEvent& event ) const;
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxSampleMultiButtonEditor, wxPGTextCtrlEditor)
@@ -172,12 +172,12 @@ public:
     {
     }
 
-    virtual wxObject* Clone() const wxOVERRIDE
+    virtual wxObject* Clone() const
     {
         return new wxInvalidWordValidator(m_invalidWord);
     }
 
-    virtual bool Validate(wxWindow* WXUNUSED(parent)) wxOVERRIDE
+    virtual bool Validate(wxWindow* WXUNUSED(parent))
     {
         wxTextCtrl* tc = wxDynamicCast(GetWindow(), wxTextCtrl);
         wxCHECK_MSG(tc, true, wxT("validator window must be wxTextCtrl"));
@@ -318,7 +318,7 @@ public:
     }
 
     virtual bool DoShowDialog( wxPropertyGrid* WXUNUSED(propGrid),
-                               wxPGProperty* WXUNUSED(property) ) wxOVERRIDE
+                               wxPGProperty* WXUNUSED(property) )
     {
         wxString s = ::wxGetSingleChoice(wxT("Message"),
                                          wxT("Caption"),
@@ -354,13 +354,13 @@ public:
     }
 
     // Set editor to have button
-    virtual const wxPGEditor* DoGetEditorClass() const wxOVERRIDE
+    virtual const wxPGEditor* DoGetEditorClass() const
     {
         return wxPGEditor_TextCtrlAndButton;
     }
 
     // Set what happens on button click
-    virtual wxPGEditorDialogAdapter* GetEditorDialog() const wxOVERRIDE
+    virtual wxPGEditorDialogAdapter* GetEditorDialog() const
     {
         return new wxSingleChoiceDialogAdapter(m_choices);
     }
@@ -680,19 +680,27 @@ void FormMain::OnPropertyGridChange( wxPropertyGridEvent& event )
     if ( value.IsNull() )
         return;
 
+    //
+    // FIXME-VC6: In order to compile on Visual C++ 6.0, wxANY_AS()
+    //            macro is used. Unless you want to support this old
+    //            compiler in your own code, you can use the more
+    //            nicer form value.As<FOO>() instead of
+    //            wxANY_AS(value, FOO).
+    //
+
     // Some settings are disabled outside Windows platform
     if ( name == wxT("X") )
-        SetSize( value.As<int>(), -1, -1, -1, wxSIZE_USE_EXISTING );
+        SetSize( wxANY_AS(value, int), -1, -1, -1, wxSIZE_USE_EXISTING );
     else if ( name == wxT("Y") )
     // wxPGVariantToInt is safe long int value getter
-        SetSize ( -1, value.As<int>(), -1, -1, wxSIZE_USE_EXISTING );
+        SetSize ( -1, wxANY_AS(value, int), -1, -1, wxSIZE_USE_EXISTING );
     else if ( name == wxT("Width") )
-        SetSize ( -1, -1, value.As<int>(), -1, wxSIZE_USE_EXISTING );
+        SetSize ( -1, -1, wxANY_AS(value, int), -1, wxSIZE_USE_EXISTING );
     else if ( name == wxT("Height") )
-        SetSize ( -1, -1, -1, value.As<int>(), wxSIZE_USE_EXISTING );
+        SetSize ( -1, -1, -1, wxANY_AS(value, int), wxSIZE_USE_EXISTING );
     else if ( name == wxT("Label") )
     {
-        SetTitle( value.As<wxString>() );
+        SetTitle( wxANY_AS(value, wxString) );
     }
     else if ( name == wxT("Password") )
     {
@@ -706,7 +714,7 @@ void FormMain::OnPropertyGridChange( wxPropertyGridEvent& event )
     else
     if ( name == wxT("Font") )
     {
-        wxFont font = value.As<wxFont>();
+        wxFont font = wxANY_AS(value, wxFont);
         wxASSERT( font.IsOk() );
 
         m_pPropGridManager->SetFont( font );
@@ -714,22 +722,22 @@ void FormMain::OnPropertyGridChange( wxPropertyGridEvent& event )
     else
     if ( name == wxT("Margin Colour") )
     {
-        wxColourPropertyValue cpv = value.As<wxColourPropertyValue>();
+        wxColourPropertyValue cpv = wxANY_AS(value, wxColourPropertyValue);
         m_pPropGridManager->GetGrid()->SetMarginColour( cpv.m_colour );
     }
     else if ( name == wxT("Cell Colour") )
     {
-        wxColourPropertyValue cpv = value.As<wxColourPropertyValue>();
+        wxColourPropertyValue cpv = wxANY_AS(value, wxColourPropertyValue);
         m_pPropGridManager->GetGrid()->SetCellBackgroundColour( cpv.m_colour );
     }
     else if ( name == wxT("Line Colour") )
     {
-        wxColourPropertyValue cpv = value.As<wxColourPropertyValue>();
+        wxColourPropertyValue cpv = wxANY_AS(value, wxColourPropertyValue);
         m_pPropGridManager->GetGrid()->SetLineColour( cpv.m_colour );
     }
     else if ( name == wxT("Cell Text Colour") )
     {
-        wxColourPropertyValue cpv = value.As<wxColourPropertyValue>();
+        wxColourPropertyValue cpv = wxANY_AS(value, wxColourPropertyValue);
         m_pPropGridManager->GetGrid()->SetCellTextColour( cpv.m_colour );
     }
 }
@@ -1633,11 +1641,17 @@ void FormMain::PopulateWithLibraryConfig ()
     ADD_WX_LIB_CONF( wxUSE_GUI )
 
     ADD_WX_LIB_CONF_GROUP(wxT("Compatibility Settings"))
+#if defined(WXWIN_COMPATIBILITY_2_2)
+    ADD_WX_LIB_CONF( WXWIN_COMPATIBILITY_2_2 )
+#endif
+#if defined(WXWIN_COMPATIBILITY_2_4)
+    ADD_WX_LIB_CONF( WXWIN_COMPATIBILITY_2_4 )
+#endif
+#if defined(WXWIN_COMPATIBILITY_2_6)
+    ADD_WX_LIB_CONF( WXWIN_COMPATIBILITY_2_6 )
+#endif
 #if defined(WXWIN_COMPATIBILITY_2_8)
     ADD_WX_LIB_CONF( WXWIN_COMPATIBILITY_2_8 )
-#endif
-#if defined(WXWIN_COMPATIBILITY_3_0)
-    ADD_WX_LIB_CONF( WXWIN_COMPATIBILITY_3_0 )
 #endif
 #ifdef wxFONT_SIZE_COMPATIBILITY
     ADD_WX_LIB_CONF( wxFONT_SIZE_COMPATIBILITY )
@@ -1659,6 +1673,7 @@ void FormMain::PopulateWithLibraryConfig ()
 
     ADD_WX_LIB_CONF_GROUP(wxT("Unicode Support"))
     ADD_WX_LIB_CONF( wxUSE_UNICODE )
+    ADD_WX_LIB_CONF( wxUSE_UNICODE_MSLU )
 
     ADD_WX_LIB_CONF_GROUP(wxT("Global Features"))
     ADD_WX_LIB_CONF( wxUSE_EXCEPTIONS )
@@ -1736,13 +1751,13 @@ public:
 
     // Return false here to indicate unhandled events should be
     // propagated to manager's parent, as normal.
-    virtual bool IsHandlingAllEvents() const wxOVERRIDE { return false; }
+    virtual bool IsHandlingAllEvents() const { return false; }
 
 protected:
 
     virtual wxPGProperty* DoInsert( wxPGProperty* parent,
                                     int index,
-                                    wxPGProperty* property ) wxOVERRIDE
+                                    wxPGProperty* property )
     {
         return wxPropertyGridPage::DoInsert(parent,index,property);
     }
@@ -3239,7 +3254,7 @@ struct PropertyGridPopup : wxPopupWindow
         Fit();
     }
 
-    void Fit() wxOVERRIDE
+    void Fit()
     {
         ::SetMinSize(m_grid);
         m_sizer->Fit(m_panel);

@@ -254,7 +254,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 407A752213B0E1EB006BC2D5 /* wxcocoa.xcconfig */;
 			buildSettings = {
-				OTHER_LDFLAGS = "$(OTHER_LDFLAGS)";
+				OTHER_LDFLAGS = (
+					"$(OTHER_LDFLAGS)",
+					"-lz",
+				);
 				PRODUCT_NAME = minimal_cocoa;
 			};
 			name = Debug;
@@ -263,7 +266,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 407A752213B0E1EB006BC2D5 /* wxcocoa.xcconfig */;
 			buildSettings = {
-				OTHER_LDFLAGS = "$(OTHER_LDFLAGS)";
+				OTHER_LDFLAGS = (
+					"$(OTHER_LDFLAGS)",
+					"-lz",
+				);
 				PRODUCT_NAME = minimal_cocoa;
 			};
 			name = Release;

@@ -65,7 +65,10 @@
 #include "richtextsizepage.cpp"
 #include "richtextborderspage.cpp"
 #include "richtextbackgroundpage.cpp"
-#include "richtextliststylepage.cpp"
+// Digital Mars can't cope with this much code
+#ifndef __DMC__
+  #include "richtextliststylepage.cpp"
+#endif
 #include "richtextstylepage.cpp"
 #endif
 
@@ -76,8 +79,6 @@
 #endif
 
 bool wxRichTextFormattingDialog::sm_showToolTips = false;
-bool wxRichTextFormattingDialog::sm_restoreLastPage = true;
-int wxRichTextFormattingDialog::sm_lastPage = -1;
 
 IMPLEMENT_CLASS(wxRichTextDialogPage, wxPanel)
 
@@ -99,15 +100,10 @@ void wxRichTextFormattingDialog::Init()
     m_styleSheet = NULL;
     m_object = NULL;
     m_options = 0;
-    m_ignoreUpdates = false;
 }
 
 wxRichTextFormattingDialog::~wxRichTextFormattingDialog()
 {
-    int sel = GetBookCtrl()->GetSelection();
-    if (sel != -1 && sel < (int) m_pageIds.GetCount())
-        sm_lastPage = m_pageIds[sel];
-
     delete m_styleDefinition;
 }
 
@@ -132,16 +128,6 @@ bool wxRichTextFormattingDialog::Create(long flags, wxWindow* parent, const wxSt
 
     LayoutDialog();
 
-    if (sm_restoreLastPage && sm_lastPage != -1)
-    {
-        int idx = m_pageIds.Index(sm_lastPage);
-        if (idx != -1)
-        {
-            m_ignoreUpdates = true;
-            GetBookCtrl()->SetSelection(idx);
-            m_ignoreUpdates = false;
-        }
-    }
     return true;
 }
 
@@ -226,9 +212,6 @@ bool wxRichTextFormattingDialog::UpdateDisplay()
 /// up to date
 void wxRichTextFormattingDialog::OnTabChanged(wxBookCtrlEvent& event)
 {
-    if (m_ignoreUpdates)
-        return;
-
     if (GetBookCtrl() != event.GetEventObject())
     {
         event.Skip();
@@ -360,12 +343,14 @@ wxPanel* wxRichTextFormattingDialogFactory::CreatePage(int page, wxString& title
         title = _("Bullets");
         return page;
     }
+#ifndef __DMC__
     else if (page == wxRICHTEXT_FORMAT_LIST_STYLE)
     {
         wxRichTextListStylePage* page = new wxRichTextListStylePage(dialog->GetBookCtrl(), wxID_ANY);
         title = _("List Style");
         return page;
     }
+#endif
     else if (page == wxRICHTEXT_FORMAT_SIZE)
     {
         wxRichTextSizePage* page = new wxRichTextSizePage(dialog->GetBookCtrl(), wxID_ANY);
@@ -419,7 +404,11 @@ int wxRichTextFormattingDialogFactory::GetPageId(int i) const
 /// Get the number of available page identifiers
 int wxRichTextFormattingDialogFactory::GetPageIdCount() const
 {
+#ifdef __DMC__
+    return 9;
+#else
     return 10;
+#endif
 }
 
 /// Set the sheet style, called at the start of wxRichTextFormattingDialog::Create
@@ -491,8 +480,8 @@ class wxRichTextFormattingDialogModule: public wxModule
 DECLARE_DYNAMIC_CLASS(wxRichTextFormattingDialogModule)
 public:
     wxRichTextFormattingDialogModule() {}
-    bool OnInit() wxOVERRIDE { wxRichTextFormattingDialog::SetFormattingDialogFactory(new wxRichTextFormattingDialogFactory); return true; }
-    void OnExit() wxOVERRIDE { wxRichTextFormattingDialog::SetFormattingDialogFactory(NULL); }
+    bool OnInit() { wxRichTextFormattingDialog::SetFormattingDialogFactory(new wxRichTextFormattingDialogFactory); return true; }
+    void OnExit() { wxRichTextFormattingDialog::SetFormattingDialogFactory(NULL); }
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxRichTextFormattingDialogModule, wxModule)
@@ -628,7 +617,7 @@ void wxRichTextFormattingDialog::SetDimensionValue(wxTextAttrDimension& dim, wxT
         else if (dim.GetUnits() == wxTEXT_ATTR_UNITS_TENTHS_MM)
         {
             unitsIdx = 1; // By default, the 2nd in the list.
-            float value = dim.GetValue() / 100.0f;
+            float value = float(dim.GetValue()) / 100.0;
             valueCtrl->SetValue(wxString::Format(wxT("%.2f"), value));
         }
         else if (dim.GetUnits() == wxTEXT_ATTR_UNITS_PERCENTAGE)
@@ -639,7 +628,7 @@ void wxRichTextFormattingDialog::SetDimensionValue(wxTextAttrDimension& dim, wxT
         else if (dim.GetUnits() == wxTEXT_ATTR_UNITS_HUNDREDTHS_POINT)
         {
             unitsIdx = 3; // By default, the 4th in the list.
-            float value = dim.GetValue() / 100.0f;
+            float value = float(dim.GetValue()) / 100.0;
             valueCtrl->SetValue(wxString::Format(wxT("%.2f"), value));
         }
         else if (dim.GetUnits() == wxTEXT_ATTR_UNITS_POINTS)

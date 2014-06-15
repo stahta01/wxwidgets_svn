@@ -181,7 +181,8 @@ protected:
 // implement individual wxRegion operations, factor out the common code for the
 // ports with Combine() in this class
 #if defined(__WXMSW__) || \
-    ( defined(__WXMAC__) && wxOSX_USE_COCOA_OR_CARBON )
+    ( defined(__WXMAC__) && wxOSX_USE_COCOA_OR_CARBON ) || \
+    defined(__WXPM__)
 
 #define wxHAS_REGION_COMBINE
 
@@ -224,6 +225,8 @@ protected:
     #include "wx/osx/region.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/region.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/region.h"
 #endif
 
 // ----------------------------------------------------------------------------

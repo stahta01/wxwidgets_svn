@@ -85,11 +85,11 @@ public:
     RadioWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
     virtual ~RadioWidgetsPage(){};
 
-    virtual wxControl *GetWidget() const wxOVERRIDE { return m_radio; }
-    virtual void RecreateWidget() wxOVERRIDE { CreateRadio(); }
+    virtual wxControl *GetWidget() const { return m_radio; }
+    virtual void RecreateWidget() { CreateRadio(); }
 
     // lazy creation of the content
-    virtual void CreateContent() wxOVERRIDE;
+    virtual void CreateContent();
 
 protected:
     // event handlers

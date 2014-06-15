@@ -114,7 +114,7 @@ class MyApp : public wxApp
 {
 public:
     // 'Main program' equivalent: the program execution "starts" here
-    virtual bool OnInit() wxOVERRIDE
+    virtual bool OnInit()
     {
         // create the main application window
         new MyFrame("Keyboard wxWidgets App");

@@ -38,12 +38,12 @@ public:
                 const int *attribList = NULL,
                 const wxPalette& palette = wxNullPalette);
 
-    virtual bool SetBackgroundStyle(wxBackgroundStyle style) wxOVERRIDE;
+    virtual bool SetBackgroundStyle(wxBackgroundStyle style);
 
     // implement wxGLCanvasX11 methods
     // --------------------------------
 
-    virtual Window GetXWindow() const wxOVERRIDE;
+    virtual Window GetXWindow() const;
 
 
     // deprecated methods
@@ -90,7 +90,7 @@ public:
 #endif // WXWIN_COMPATIBILITY_2_8
 
     // implementation from now on
-    void OnInternalIdle() wxOVERRIDE;
+    void OnInternalIdle();
 
     bool              m_exposed;
 #ifdef __WXGTK3__

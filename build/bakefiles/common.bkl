@@ -292,12 +292,18 @@
         <if cond="FORMAT!='autoconf' and UNICODE=='1'">_UNICODE</if>
         <if cond="FORMAT!='autoconf' and UNICODE=='0'">wxUSE_UNICODE=0</if>
     </set>
+    <set var="MSLU_DEFINE">
+        <if cond="FORMAT!='autoconf' and MSLU=='1'">wxUSE_UNICODE_MSLU=1</if>
+    </set>
 
     <!-- fill for the specific case of the format/compiler -->
     <set var="WIN32_WINNT">
         <if cond="FORMAT=='dmars' or FORMAT=='dmars_smake'">_WIN32_WINNT=0x0400</if>
     </set>
 
+    <set var="UNICOWS_LIB">
+        <if cond="MSLU=='1'">unicows</if>
+    </set>
     <set var="CAIRO_LIB">
         <if cond="USE_CAIRO=='1'">cairo</if>
     </set>
@@ -523,6 +529,7 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
         <define>$(RTTI_DEFINE)</define>
         <define>$(THREAD_DEFINE)</define>
         <define>$(UNICODE_DEFINE)</define>
+        <define>$(MSLU_DEFINE)</define>
         <include cond="FORMAT!='autoconf'">$(SETUPHDIR)</include>
         <include cond="FORMAT!='autoconf'">$(TOP_SRCDIR)include</include>
         <include cond="FORMAT!='autoconf'">$(CAIRO_INCLUDEDIR)</include>
@@ -551,8 +558,16 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
 
         <ldlibs>$(EXTRALIBS_FOR_BASE)</ldlibs>
 
+        <!-- system libraries on os2: -->
+        <if cond="FORMAT!='autoconf' and PLATFORM_OS2=='1'">
+            <if cond="FORMAT=='watcom'">
+                <sys-lib>upm32</sys-lib>
+            </if>
+        </if>
+
         <!-- system libraries on windows: -->
         <if cond="FORMAT!='autoconf' and PLATFORM_WIN32=='1'">
+            <sys-lib>$(UNICOWS_LIB)</sys-lib>
             <sys-lib>$(CAIRO_LIB)</sys-lib>
             <lib-path>$(CAIRO_LIBDIR)</lib-path>
             <if cond="FORMAT=='borland'">
@@ -593,7 +608,6 @@ $(TAB)$(VC_COMPILER) /EP /nologo "$(DOLLAR)(InputPath)" > "$(SETUPHDIR)\wx\msw\r
 
     <set var="LIB_GTK">
         <if cond="FORMAT!='autoconf' and PLATFORM_WIN32=='1' and TOOLKIT=='GTK' and TOOLKIT_VERSION=='2'">gtk-win32-2.0.lib gdk-win32-2.0.lib pangocairo-1.0.lib gdk_pixbuf-2.0.lib cairo.lib pango-1.0.lib gobject-2.0.lib gthread-2.0.lib glib-2.0.lib</if>
-        <if cond="FORMAT!='autoconf' and PLATFORM_WIN32=='1' and TOOLKIT=='GTK' and TOOLKIT_VERSION=='3'">libgtk-3.dll.a libgdk-3.dll.a pangocairo-1.0.lib gdk_pixbuf-2.0.lib cairo.lib pango-1.0.lib gobject-2.0.lib gthread-2.0.lib glib-2.0.lib</if>
     </set>
 
     <!-- for GUI libs/samples: -->

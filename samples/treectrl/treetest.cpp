@@ -431,7 +431,7 @@ void MyFrame::OnIdle(wxIdleEvent& event)
         wxString status;
         if (idRoot.IsOk())
         {
-            wxTreeItemId idLast = m_treeCtrl->GetLastTreeITem();
+            wxTreeItemId idLast = m_treeCtrl->GetLastChild(idRoot);
             status = wxString::Format(
                 wxT("Root/last item is %svisible/%svisible"),
                 m_treeCtrl->IsVisible(idRoot) ? wxT("") : wxT("not "),
@@ -758,12 +758,7 @@ void MyFrame::OnCollapseAndReset(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnEnsureVisible(wxCommandEvent& WXUNUSED(event))
 {
-    const wxTreeItemId
-        idLast = m_treeCtrl->GetLastTreeITem();
-    if ( idLast.IsOk() )
-        m_treeCtrl->EnsureVisible(idLast);
-    else
-        wxLogMessage("No last item");
+    m_treeCtrl->DoEnsureVisible();
 }
 
 void MyFrame::OnSetFocus(wxCommandEvent& WXUNUSED(event))
@@ -907,7 +902,16 @@ void MyFrame::OnScrollTo(wxCommandEvent& WXUNUSED(event))
 
 void MyFrame::OnSelectLast(wxCommandEvent& WXUNUSED(event))
 {
-    wxTreeItemId item = m_treeCtrl->GetLastTreeITem();
+    // select the very last item of the tree
+    wxTreeItemId item = m_treeCtrl->GetRootItem();
+    for ( ;; )
+    {
+        wxTreeItemId itemChild = m_treeCtrl->GetLastChild(item);
+        if ( !itemChild.IsOk() )
+            break;
+
+        item = itemChild;
+    }
 
     CHECK_ITEM( item );
 
@@ -1163,6 +1167,12 @@ void MyTreeCtrl::AddItemsRecursively(const wxTreeItemId& idParent,
                              wxTreeItemIcon_Expanded);
             }
 
+            // remember the last child for OnEnsureVisible()
+            if ( !hasChildren && n == numChildren - 1 )
+            {
+                m_lastItem = id;
+            }
+
             AddItemsRecursively(id, numChildren, depth - 1, n + 1);
         }
     }
@@ -1199,21 +1209,6 @@ void MyTreeCtrl::AddTestItemsToTree(size_t numChildren,
         SetItemTextColour(id, *wxRED);
         SetItemBackgroundColour(id, *wxLIGHT_GREY);
     }
-}
-
-wxTreeItemId MyTreeCtrl::GetLastTreeITem() const
-{
-    wxTreeItemId item = GetRootItem();
-    for ( ;; )
-    {
-        wxTreeItemId itemChild = GetLastChild(item);
-        if ( !itemChild.IsOk() )
-            break;
-
-        item = itemChild;
-    }
-
-    return item;
 }
 
 void MyTreeCtrl::GetItemsRecursively(const wxTreeItemId& idParent,
@@ -1312,6 +1307,7 @@ void MyTreeCtrl::LogEvent(const wxChar *name, const wxTreeEvent& event)
 void MyTreeCtrl::name(wxTreeEvent& event)                        \
 {                                                                \
     LogEvent(wxT(#name), event);                                  \
+    SetLastItem(wxTreeItemId());                                 \
     event.Skip();                                                \
 }
 

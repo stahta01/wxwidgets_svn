@@ -25,7 +25,6 @@
 #include <string.h>
 #include <vector>
 #include <map>
-#include <algorithm>
 
 // These are all Scintilla headers
 #include "Platform.h"
@@ -44,6 +43,7 @@
 #include "WordList.h"
 #endif
 #include "ContractionState.h"
+#include "SVector.h"
 #include "CellBuffer.h"
 #include "CallTip.h"
 #include "KeyMap.h"
@@ -55,7 +55,6 @@
 #include "ViewStyle.h"
 #include "CharClassify.h"
 #include "Decoration.h"
-#include "CaseFolder.h"
 #include "Document.h"
 #include "Selection.h"
 #include "PositionCache.h"
@@ -68,12 +67,6 @@
 #endif
 #if wxUSE_DRAG_AND_DROP
 #include "wx/timer.h"
-#endif
-
-// Define this if there is a standard clipboard format for rectangular
-// text selection under the current platform.
-#if defined(__WXMSW__) || defined(__WXGTK__)
-    #define wxHAVE_STC_RECT_FORMAT
 #endif
 
 //----------------------------------------------------------------------
@@ -211,13 +204,7 @@ private:
     int sysCaretWidth;
     int sysCaretHeight;
 #endif
-
-#ifdef wxHAVE_STC_RECT_FORMAT
-    // The presence of this format on the clipboard indicates that the text is
-    // a rectangular (and not the default linear) selection.
-    wxDataFormat m_clipRectTextFormat;
-#endif
-
+   
     friend class wxSTCCallTip;
 };
 

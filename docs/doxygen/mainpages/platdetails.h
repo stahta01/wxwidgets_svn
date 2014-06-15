@@ -101,6 +101,16 @@ docs for it are available in @c docs/cocoa in the distribution.
 
 
 
+@section page_port_wxos2 wxOS2
+
+wxOS2 is a port of wxWidgets for the IBM OS/2 Warp3 and Warp4 platforms.
+This port is currently under construction and in beta phase.
+
+For further information, please see the files in @c docs/os2
+in the distribution.
+
+
+
 @section page_port_wxx11 wxX11
 
 wxX11 is a port of wxWidgets using X11 (The X Window System) as the underlying
@@ -132,30 +142,15 @@ distribution.
 
 @section page_port_wxmsw wxMSW
 
-wxMSW is a port of wxWidgets for the Windows platforms (Windows XP and later
-are supported). wxMSW provides native look and feel for each Windows version.
-This port can be compiled with several compilers including Microsoft Studio
-VC++ 2003 or later, Borland 5.5, MinGW32, Cygwin as well as cross-compilation
-with a Linux-hosted MinGW32 tool chain.
+wxMSW is a port of wxWidgets for the Windows platforms including Windows 95,
+98, ME, 2000, NT, XP and Vista in ANSI and Unicode modes (for Windows 9x and ME
+through the MSLU extension library). wxMSW ensures native look and feel for XP
+when using wxWidgets version 2.3.3 or higher. wxMSW can be compiled with a
+great variety of compilers including Microsoft Studio VC++, Borland 5.5,
+MinGW32, Cygwin and Watcom as well as cross-compilation with a Linux-hosted
+MinGW32 tool chain.
 
 For further information, please see the files in docs/msw in the distribution.
-
-@subsection page_port_wxmsw_resources Resources and Application Icon
-
-All applications using wxMSW should have a Windows resource file (@c .rc
-extension) and this file should include @c include/wx/msw/wx.rc file which
-defines resources used by wxWidgets itself.
-
-Among other things, @c wx.rc defines some standard icons, all of which have
-names starting with the "wx" prefix. This normally ensures that any icons
-defined in the application's own resource file come before them in alphabetical
-order which is important because Explorer (Windows shell) selects the first
-icon in alphabetical order to use as the application icon which is displayed
-when viewing its file in the file manager. So if all the icons defined in your
-application start with "x", "y" or "z", they won't be used by Explorer. To
-avoid this, ensure that the icon which is meant to be used as the main
-application icon has a name preceding "wxICON" in alphabetical order.
-
 
 @subsection page_port_wxmsw_themedborders Themed Borders
 

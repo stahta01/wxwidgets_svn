@@ -597,6 +597,9 @@ static void ProcessPlatformProperty(wxXmlNode *node)
 #elif defined(__UNIX__)
                 if (s == wxT("unix")) isok = true;
 #endif
+#ifdef __OS2__
+                if (s == wxT("os2")) isok = true;
+#endif
 
                 if (isok)
                     break;
@@ -1259,6 +1262,8 @@ wxIdRangeManager::~wxIdRangeManager()
         delete *i;
     }
     m_IdRanges.clear();
+
+    delete ms_instance;
 }
 
 void wxIdRangeManager::AddRange(const wxXmlNode* node)
@@ -1383,7 +1388,7 @@ class wxXmlSubclassFactoryCXX : public wxXmlSubclassFactory
 public:
     ~wxXmlSubclassFactoryCXX() {}
 
-    wxObject *Create(const wxString& className) wxOVERRIDE
+    wxObject *Create(const wxString& className)
     {
         wxClassInfo* classInfo = wxClassInfo::FindClass(className);
 
@@ -1557,7 +1562,7 @@ wxString wxXmlResourceHandlerImpl::GetText(const wxString& param, bool translate
                         str2 << wxT('\\');
                         break;
                     }
-                    wxFALLTHROUGH;// else fall-through to default: branch below
+                    // else fall-through to default: branch below
 
                 default:
                     str2 << wxT('\\') << *dt;
@@ -2002,13 +2007,6 @@ bool wxXmlResourceHandlerImpl::IsOfClass(wxXmlNode *node, const wxString& classn
 }
 
 
-bool wxXmlResourceHandlerImpl::IsObjectNode(const wxXmlNode *node) const
-{
-    return node &&
-            node->GetType() == wxXML_ELEMENT_NODE &&
-                (node->GetName() == wxS("object") ||
-                    node->GetName() == wxS("object_ref"));
-}
 
 wxString wxXmlResourceHandlerImpl::GetNodeContent(const wxXmlNode *node)
 {
@@ -2024,21 +2022,6 @@ wxString wxXmlResourceHandlerImpl::GetNodeContent(const wxXmlNode *node)
         n = n->GetNext();
     }
     return wxEmptyString;
-}
-
-wxXmlNode *wxXmlResourceHandlerImpl::GetNodeParent(const wxXmlNode *node) const
-{
-    return node ? node->GetParent() : NULL;
-}
-
-wxXmlNode *wxXmlResourceHandlerImpl::GetNodeNext(const wxXmlNode *node) const
-{
-    return node ? node->GetNext() : NULL;
-}
-
-wxXmlNode *wxXmlResourceHandlerImpl::GetNodeChildren(const wxXmlNode *node) const
-{
-    return node ? node->GetChildren() : NULL;
 }
 
 
@@ -2236,15 +2219,15 @@ wxFont wxXmlResourceHandlerImpl::GetFont(const wxString& param, wxWindow* parent
         isize = GetLong(wxT("size"), -1);
 
     // style
-    wxFontStyle istyle = wxFONTSTYLE_NORMAL;
+    int istyle = wxNORMAL;
     bool hasStyle = HasParam(wxT("style"));
     if (hasStyle)
     {
         wxString style = GetParamValue(wxT("style"));
         if (style == wxT("italic"))
-            istyle = wxFONTSTYLE_ITALIC;
+            istyle = wxITALIC;
         else if (style == wxT("slant"))
-            istyle = wxFONTSTYLE_SLANT;
+            istyle = wxSLANT;
         else if (style != wxT("normal"))
         {
             ReportParamError
@@ -2256,15 +2239,15 @@ wxFont wxXmlResourceHandlerImpl::GetFont(const wxString& param, wxWindow* parent
     }
 
     // weight
-    wxFontWeight iweight = wxFONTWEIGHT_NORMAL;
+    int iweight = wxNORMAL;
     bool hasWeight = HasParam(wxT("weight"));
     if (hasWeight)
     {
         wxString weight = GetParamValue(wxT("weight"));
         if (weight == wxT("bold"))
-            iweight = wxFONTWEIGHT_BOLD;
+            iweight = wxBOLD;
         else if (weight == wxT("light"))
-            iweight = wxFONTWEIGHT_LIGHT;
+            iweight = wxLIGHT;
         else if (weight != wxT("normal"))
         {
             ReportParamError
@@ -2280,17 +2263,17 @@ wxFont wxXmlResourceHandlerImpl::GetFont(const wxString& param, wxWindow* parent
     bool underlined = hasUnderlined ? GetBool(wxT("underlined"), false) : false;
 
     // family and facename
-    wxFontFamily ifamily = wxFONTFAMILY_DEFAULT;
+    int ifamily = wxDEFAULT;
     bool hasFamily = HasParam(wxT("family"));
     if (hasFamily)
     {
         wxString family = GetParamValue(wxT("family"));
-        if (family == wxT("decorative")) ifamily = wxFONTFAMILY_DECORATIVE;
-        else if (family == wxT("roman")) ifamily = wxFONTFAMILY_ROMAN;
-        else if (family == wxT("script")) ifamily = wxFONTFAMILY_SCRIPT;
-        else if (family == wxT("swiss")) ifamily = wxFONTFAMILY_SWISS;
-        else if (family == wxT("modern")) ifamily = wxFONTFAMILY_MODERN;
-        else if (family == wxT("teletype")) ifamily = wxFONTFAMILY_TELETYPE;
+             if (family == wxT("decorative")) ifamily = wxDECORATIVE;
+        else if (family == wxT("roman")) ifamily = wxROMAN;
+        else if (family == wxT("script")) ifamily = wxSCRIPT;
+        else if (family == wxT("swiss")) ifamily = wxSWISS;
+        else if (family == wxT("modern")) ifamily = wxMODERN;
+        else if (family == wxT("teletype")) ifamily = wxTELETYPE;
         else
         {
             ReportParamError
@@ -2435,6 +2418,8 @@ void wxXmlResourceHandlerImpl::SetupWindow(wxWindow *wnd)
         wnd->Enable(false);
     if (GetBool(wxT("focused"), 0) == 1)
         wnd->SetFocus();
+    if (GetBool(wxT("hidden"), 0) == 1)
+        wnd->Show(false);
 #if wxUSE_TOOLTIPS
     if (HasParam(wxT("tooltip")))
         wnd->SetToolTip(GetText(wxT("tooltip")));
@@ -2856,12 +2841,12 @@ class wxXmlResourceModule: public wxModule
 DECLARE_DYNAMIC_CLASS(wxXmlResourceModule)
 public:
     wxXmlResourceModule() {}
-    bool OnInit() wxOVERRIDE
+    bool OnInit()
     {
         wxXmlResource::AddSubclassFactory(new wxXmlSubclassFactoryCXX);
         return true;
     }
-    void OnExit() wxOVERRIDE
+    void OnExit()
     {
         delete wxXmlResource::Set(NULL);
         delete wxIdRangeManager::Set(NULL);

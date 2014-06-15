@@ -313,10 +313,10 @@ public:
     }
 
 private:
-    virtual wxObjectRefData *CreateRefData() const wxOVERRIDE
+    virtual wxObjectRefData *CreateRefData() const
         { return new wxPGCellData(); }
 
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const wxOVERRIDE;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 };
 
 // -----------------------------------------------------------------------
@@ -496,11 +496,7 @@ wxPG_PROP_CLASS_SPECIFIC_2          = 0x00100000,
 
 /** Indicates that the property is being deleted and should be ignored.
 */
-wxPG_PROP_BEING_DELETED             = 0x00200000,
-
-/** Indicates the bit useable by derived properties.
-*/
-wxPG_PROP_CLASS_SPECIFIC_3          = 0x00400000
+wxPG_PROP_BEING_DELETED             = 0x00200000
 
 };
 

@@ -169,7 +169,7 @@ bool wxProcess::Exists(int pid)
         case wxKILL_ERROR:
         case wxKILL_BAD_SIGNAL:
             wxFAIL_MSG( wxT("unexpected wxProcess::Kill() return code") );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxKILL_NO_PROCESS:
             return false;

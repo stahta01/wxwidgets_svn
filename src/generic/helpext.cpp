@@ -34,8 +34,12 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
-#if !defined(__WINDOWS__)
+#if !defined(__WINDOWS__) && !defined(__OS2__)
     #include   <unistd.h>
+#endif
+
+#ifdef __WINDOWS__
+#include "wx/msw/mslu.h"
 #endif
 
 #ifdef __WXMSW__

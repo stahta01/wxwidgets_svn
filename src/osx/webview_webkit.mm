@@ -13,7 +13,8 @@
 
 #include "wx/osx/webview_webkit.h"
 
-#if wxUSE_WEBVIEW && wxUSE_WEBVIEW_WEBKIT && defined(__WXOSX__) 
+#if wxUSE_WEBVIEW && wxUSE_WEBVIEW_WEBKIT && (defined(__WXOSX_COCOA__) \
+                                          ||  defined(__WXOSX_CARBON__))
 
 // For compilers that support precompilation, includes "wx.h".
 #include "wx/wxprec.h"
@@ -27,25 +28,11 @@
 #include "wx/hashmap.h"
 #include "wx/filesys.h"
 
-#if wxOSX_USE_IPHONE
-#include <UIKit/UIWebView.h>
-#else
 #include <WebKit/WebKit.h>
 #include <WebKit/HIWebView.h>
 #include <WebKit/CarbonUtils.h>
-#endif
+
 #include <Foundation/NSURLError.h>
-
-// using native types to get compile errors and warnings
-
-#if wxOSX_USE_COCOA_OR_CARBON
-typedef WebView OSXWebView;
-#elif wxOSX_USE_IPHONE
-typedef UIWebView OSXWebView;
-#else
-#error "unsupport OSX variant"
-#endif
-
 
 #define DEBUG_WEBKIT_SIZING 0
 
@@ -309,7 +296,7 @@ DEFINE_ONE_SHOT_HANDLER_GETTER( wxWebViewWebKitEventHandler )
     wxWebViewWebKit* webKitWindow;
 }
 
-- (id)initWithWxWindow: (wxWebViewWebKit*)inWindow;
+- initWithWxWindow: (wxWebViewWebKit*)inWindow;
 
 @end
 
@@ -318,7 +305,7 @@ DEFINE_ONE_SHOT_HANDLER_GETTER( wxWebViewWebKitEventHandler )
     wxWebViewWebKit* webKitWindow;
 }
 
-- (id)initWithWxWindow: (wxWebViewWebKit*)inWindow;
+- initWithWxWindow: (wxWebViewWebKit*)inWindow;
 
 @end
 
@@ -327,7 +314,7 @@ DEFINE_ONE_SHOT_HANDLER_GETTER( wxWebViewWebKitEventHandler )
     wxWebViewWebKit* webKitWindow;
 }
 
-- (id)initWithWxWindow: (wxWebViewWebKit*)inWindow;
+- initWithWxWindow: (wxWebViewWebKit*)inWindow;
 
 @end
 
@@ -370,12 +357,6 @@ bool wxWebViewWebKit::Create(wxWindow *parent,
                                GetEventTypeCount(eventList), eventList, this,
                               (EventHandlerRef *)&m_webKitCtrlEventHandler);
     SetPeer(peer);
-#elif wxOSX_USE_IPHONE
-    CGRect r = wxOSXGetFrameForControl( this, pos , size ) ;
-    m_webView = [[UIWebView alloc] initWithFrame:r];
-    
-    SetPeer( new wxWidgetIPhoneImpl( this, m_webView ) );
-
 #else
     NSRect r = wxOSXGetFrameForControl( this, pos , size ) ;
     m_webView = [[WebView alloc] initWithFrame:r
@@ -392,9 +373,8 @@ bool wxWebViewWebKit::Create(wxWindow *parent,
     [m_webView setHidden:false];
 
 
+
     // Register event listener interfaces
-#if wxOSX_USE_IPHONE
-#else
     WebViewLoadDelegate* loadDelegate =
             [[WebViewLoadDelegate alloc] initWithWxWindow: this];
 
@@ -410,7 +390,7 @@ bool wxWebViewWebKit::Create(wxWindow *parent,
             [[WebViewUIDelegate alloc] initWithWxWindow: this];
 
     [m_webView setUIDelegate:uiDelegate];
-#endif
+
     //Register our own class for custom scheme handling
     [NSURLProtocol registerClass:[WebViewCustomProtocol class]];
 
@@ -420,8 +400,6 @@ bool wxWebViewWebKit::Create(wxWindow *parent,
 
 wxWebViewWebKit::~wxWebViewWebKit()
 {
-#if wxOSX_USE_IPHONE
-#else
     WebViewLoadDelegate* loadDelegate = [m_webView frameLoadDelegate];
     WebViewPolicyDelegate* policyDelegate = [m_webView policyDelegate];
     WebViewUIDelegate* uiDelegate = [m_webView UIDelegate];
@@ -437,7 +415,6 @@ wxWebViewWebKit::~wxWebViewWebKit()
 
     if (uiDelegate)
         [uiDelegate release];
-#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -465,7 +442,7 @@ void wxWebViewWebKit::GoBack()
     if ( !m_webView )
         return;
 
-    [(OSXWebView*)m_webView goBack];
+    [(WebView*)m_webView goBack];
 }
 
 void wxWebViewWebKit::GoForward()
@@ -473,7 +450,7 @@ void wxWebViewWebKit::GoForward()
     if ( !m_webView )
         return;
 
-    [(OSXWebView*)m_webView goForward];
+    [(WebView*)m_webView goForward];
 }
 
 void wxWebViewWebKit::Reload(wxWebViewReloadFlags flags)
@@ -872,7 +849,7 @@ void wxWebViewWebKit::Cut()
     if ( !m_webView )
         return;
 
-    [(OSXWebView*)m_webView cut:m_webView];
+    [(WebView*)m_webView cut:m_webView];
 }
 
 void wxWebViewWebKit::Copy()
@@ -880,7 +857,7 @@ void wxWebViewWebKit::Copy()
     if ( !m_webView )
         return;
 
-    [(OSXWebView*)m_webView copy:m_webView];
+    [(WebView*)m_webView copy:m_webView];
 }
 
 void wxWebViewWebKit::Paste()
@@ -888,7 +865,7 @@ void wxWebViewWebKit::Paste()
     if ( !m_webView )
         return;
 
-    [(OSXWebView*)m_webView paste:m_webView];
+    [(WebView*)m_webView paste:m_webView];
 }
 
 void wxWebViewWebKit::DeleteSelection()
@@ -896,7 +873,7 @@ void wxWebViewWebKit::DeleteSelection()
     if ( !m_webView )
         return;
 
-    [(OSXWebView*)m_webView deleteSelection];
+    [(WebView*)m_webView deleteSelection];
 }
 
 bool wxWebViewWebKit::HasSelection() const
@@ -1023,9 +1000,6 @@ void wxWebViewWebKit::RegisterHandler(wxSharedPtr<wxWebViewHandler> handler)
 // Listener interfaces
 //------------------------------------------------------------
 
-#if wxOSX_USE_IPHONE
-#else
-
 // NB: I'm still tracking this down, but it appears the Cocoa window
 // still has these events fired on it while the Carbon control is being
 // destroyed. Therefore, we must be careful to check both the existence
@@ -1033,7 +1007,7 @@ void wxWebViewWebKit::RegisterHandler(wxSharedPtr<wxWebViewHandler> handler)
 
 @implementation WebViewLoadDelegate
 
-- (id)initWithWxWindow: (wxWebViewWebKit*)inWindow
+- initWithWxWindow: (wxWebViewWebKit*)inWindow
 {
     [super init];
     webKitWindow = inWindow;    // non retained
@@ -1223,7 +1197,7 @@ wxString nsErrorToWxHtmlError(NSError* error, wxWebViewNavigationError* out)
 
 @implementation WebViewPolicyDelegate
 
-- (id)initWithWxWindow: (wxWebViewWebKit*)inWindow
+- initWithWxWindow: (wxWebViewWebKit*)inWindow
 {
     [super init];
     webKitWindow = inWindow;    // non retained
@@ -1278,8 +1252,6 @@ wxString nsErrorToWxHtmlError(NSError* error, wxWebViewNavigationError* out)
     [listener ignore];
 }
 @end
-
-#endif
 
 @implementation WebViewCustomProtocol
 
@@ -1363,7 +1335,7 @@ wxString nsErrorToWxHtmlError(NSError* error, wxWebViewNavigationError* out)
 
 @implementation WebViewUIDelegate
 
-- (id)initWithWxWindow: (wxWebViewWebKit*)inWindow
+- initWithWxWindow: (wxWebViewWebKit*)inWindow
 {
     [super init];
     webKitWindow = inWindow;    // non retained

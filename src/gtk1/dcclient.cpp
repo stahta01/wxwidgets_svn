@@ -71,6 +71,8 @@ const double RAD2DEG  = 180.0 / M_PI;
 static inline double dmax(double a, double b) { return a > b ? a : b; }
 static inline double dmin(double a, double b) { return a < b ? a : b; }
 
+static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
+
 //-----------------------------------------------------------------------------
 // temporary implementation of the missing GDK function
 //-----------------------------------------------------------------------------
@@ -1475,7 +1477,7 @@ void wxWindowDCImpl::DoDrawRotatedText( const wxString &text, wxCoord x, wxCoord
     dc.SelectObject(wxNullBitmap);
 
     // Calculate the size of the rotated bounding box.
-    double rad = wxDegToRad(angle);
+    double rad = DegToRad(angle);
     double dx = cos(rad),
            dy = sin(rad);
 

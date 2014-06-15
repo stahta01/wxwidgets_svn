@@ -1,8 +1,8 @@
-                wxWidgets 3.1.0 Release Notes
+                wxWidgets 3.0.1 Release Notes
                 =============================
 
-Welcome to the latest development release of wxWidgets, a free and
-open source cross-platform C++ framework for writing advanced GUI
+Welcome to the latest stable release of wxWidgets, a free and open
+source cross-platform C++ framework for writing advanced GUI
 applications using native controls.
 
 
@@ -18,17 +18,17 @@ You can learn more about wxWidgets at
 
 and read its documentation online at
 
-        http://docs.wxwidgets.org/3.1.0/
+        http://docs.wxwidgets.org/3.0.1/
 
 
 wxWidgets sources and binaries for the selected platforms are
 available for download from
 
-        https://sourceforge.net/projects/wxwindows/files/3.1.0/
+        https://sourceforge.net/projects/wxwindows/files/3.0.1/
 
 or
 
-        ftp://ftp.wxwidgets.org/pub/3.1.0/
+        ftp://ftp.wxwidgets.org/pub/3.0.1/
 
 Please see the "Files" section below for the description of various
 files available at these locations.
@@ -38,6 +38,44 @@ files available at these locations.
 Changes in this release
 -----------------------
 
+This is a bug fix release with no significant new features compared to
+3.0.0 and compatible with it at both the API and the ABI level (i.e.
+all applications linked against 3.0.0 DLLs or shared libraries will
+continue to work when using 3.0.1 libraries).
+
+There were more than a hundred bug fixes, please see docs/changes.txt
+for more details. The most important user-visible changes are:
+
+* In all ports:
+ - wxHTML displays tables much faster now.
+ - Double clicking wxGrid columns doesn't make them too small any more.
+ - Fix bugs when dragging columns in wxGrid with hidden columns.
+ - Loading ICO files with PNG data is now supported.
+
+* In wxGTK:
+ - Mouse wheel scrolling in wxListCtrl works again.
+ - wxStaticBoxSizer contents is not truncated any more.
+ - AUI panels may now be re-docked after floating them.
+
+* In wxMSW:
+ - wxBitmapComboBox works again and doesn't just remain blank.
+ - Checkboxes in wxDataViewCtrl work again too now.
+ - wxCheckListBox appears correctly when using large fonts.
+
+* In wxOSX:
+ - Cancelling choice selection in wxDataViewCtrl doesn't crash any more.
+ - ShowModal() doesn't use quite as much CPU now.
+
+There are also many other bug fixes, including many improvements to
+alpha transparency handling in different places (mostly in wxMSW, but
+also in wxGTK) and resource/memory leak fixes in all ports.
+
+Finally, this release includes Visual Studio 2012 and 2013 projects for
+building wxWidgets, in addition to the project files for the previous
+versions already provided in 3.0.0 release.
+
+Please make sure to read the section "Incompatible changes since 2.8"
+in docs/changes.txt if you are upgrading from wxWidgets 2.8 or earlier.
 
 
 Platforms supported
@@ -45,15 +83,17 @@ Platforms supported
 
 wxWidgets currently supports the following primary platforms:
 
-- Windows XP, Vista, 7 and 8 (32/64 bits).
+- Windows 95/98/ME, NT, 2000, XP, Vista, 7 (32/64 bits).
 - Most Unix variants using the GTK+ toolkit (version 2.6 or newer)
-- Mac OS X (10.6 or newer) using Cocoa (32/64 bits) or Carbon (32 only)
+- Mac OS X (10.5 or newer) using Cocoa (32/64 bits) or Carbon (32 only)
 
 There is some support for the following platforms:
 
 - Most Unix variants with X11
 - Most Unix variants with Motif/Lesstif
 - Most Unix variants with GTK+ 1.2
+- OS/2
+- Windows CE (Pocket PC)
 
 Most popular C++ compilers are supported; see the install.txt
 file for each platform (available via docs/html/index.htm) and
@@ -91,7 +131,7 @@ Unless you have downloaded the binaries for your compiler, you
 will need to build wxWidgets before you can test out the samples
 or write your own applications. For installation information,
 please see the install.txt file in the docs subdirectory
-appropriate for the platform you use.
+appropriate for the platform you use, e.g. docs/msw/install.txt.
 
 
 Licence information
@@ -135,19 +175,14 @@ If you use wxXML classes or XRC, see src/expat/COPYING for licence
 details.
 
 
-Documentation
--------------
-
-wxWidgets documentation is available online at
-http://docs.wxwidgets.org/3.1.0/ and can also be downloaded in
-HTML format. To generate documentation in other formats (PDF, CHM,
-...) please use the scripts in docs/doxygen directory.
-
-
 Bug reporting
 -------------
 
 The wxWidgets bug tracker can be browsed at:
+
+    http://trac.wxwidgets.org/report
+
+and new bugs can be opened from
 
     http://trac.wxwidgets.org/newticket
 
@@ -167,11 +202,11 @@ Further information
 If you are looking for support, you can get it from
 
 - wxForum at http://forums.wxwidgets.org/
-- wx-users mailing list (http://www.wxwidgets.org/support/mailing-lists/)
+- wx-users mailing list (http://www.wxwidgets.org/support/maillst2.htm)
 - #wxwidgets IRC channel
 - http://stackoverflow.com/ if you tag your question with "wxwidgets"
 
 
 Have fun!
 
-The wxWidgets Team, November 2013
+The wxWidgets Team, July 2014

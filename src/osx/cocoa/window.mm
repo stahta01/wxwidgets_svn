@@ -455,14 +455,6 @@ void wxWidgetCocoaImpl::SetupKeyEvent(wxKeyEvent &wxevent , NSEvent * nsEvent, N
                 break ;
         }
     }
-    else
-    {
-        long keycode = wxOSXTranslateCocoaKey( nsEvent, wxEVT_CHAR );
-        if ( (keycode > 0 && keycode < WXK_SPACE) || keycode == WXK_DELETE || keycode >= WXK_START )
-        {
-            keyval = keycode;
-        }
-    }
 
     if ( !keyval )
     {
@@ -1402,7 +1394,26 @@ void wxWidgetCocoaImpl::insertText(NSString* text, WXWidget slf, void *_cmd)
         {
             // If we don't have a corresponding key event (e.g. IME-composed
             // characters), send wxEVT_CHAR without sending wxEVT_KEY_DOWN.
-            result = DoHandleCharEvent(NULL,text);
+            for (NSUInteger i = 0; i < [text length]; ++i)
+            {
+                wxKeyEvent wxevent(wxEVT_CHAR);
+                wxevent.m_shiftDown = wxevent.m_controlDown = wxevent.m_altDown = wxevent.m_metaDown = false;
+                wxevent.m_rawCode = 0;
+                wxevent.m_rawFlags = 0;
+                wxevent.SetTimestamp();
+                unichar aunichar = [text characterAtIndex:i];
+#if wxUSE_UNICODE
+                wxevent.m_uniChar = aunichar;
+#endif
+                wxevent.m_keyCode = aunichar < 0x80 ? aunichar : WXK_NONE;
+                wxWindowMac* peer = GetWXPeer();
+                if ( peer )
+                {
+                    wxevent.SetEventObject(peer);
+                    wxevent.SetId(peer->GetId());
+                }
+                result = GetWXPeer()->OSXHandleKeyEvent(wxevent) || result;
+            }
         }
     }
     if ( !result )
@@ -1426,9 +1437,15 @@ void wxWidgetCocoaImpl::doCommandBySelector(void* sel, WXWidget slf, void* _cmd)
         {
             // Generate wxEVT_CHAR if wxEVT_KEY_DOWN is not handled.
 
+            long keycode = wxOSXTranslateCocoaKey( m_lastKeyDownEvent, wxEVT_CHAR );
+
             wxKeyEvent wxevent2(wxevent) ;
             wxevent2.SetEventType(wxEVT_CHAR);
             SetupKeyEvent( wxevent2, m_lastKeyDownEvent );
+            if ( (keycode > 0 && keycode < WXK_SPACE) || keycode == WXK_DELETE || keycode >= WXK_START )
+            {
+                wxevent2.m_keyCode = keycode;
+            }
             GetWXPeer()->OSXHandleKeyEvent(wxevent2);
         }
     }
@@ -1483,9 +1500,15 @@ bool wxWidgetCocoaImpl::acceptsFirstResponder(WXWidget slf, void *_cmd)
 bool wxWidgetCocoaImpl::becomeFirstResponder(WXWidget slf, void *_cmd)
 {
     wxOSX_FocusHandlerPtr superimpl = (wxOSX_FocusHandlerPtr) [[slf superclass] instanceMethodForSelector:(SEL)_cmd];
+    // get the current focus before running becomeFirstResponder
+    NSView* otherView = FindFocus();
+
+    wxWidgetImpl* otherWindow = FindFromWXWidget(otherView);
     BOOL r = superimpl(slf, (SEL)_cmd);
     if ( r )
-        DoNotifyFocusSet();
+    {
+        DoNotifyFocusEvent( true, otherWindow );
+    }
 
     return r;
 }
@@ -1494,13 +1517,23 @@ bool wxWidgetCocoaImpl::resignFirstResponder(WXWidget slf, void *_cmd)
 {
     wxOSX_FocusHandlerPtr superimpl = (wxOSX_FocusHandlerPtr) [[slf superclass] instanceMethodForSelector:(SEL)_cmd];
     BOOL r = superimpl(slf, (SEL)_cmd);
-    
-    // wxNSTextFields and wxNSComboBoxes have an editor as real responder, therefore they get
-    // a resign notification when their editor takes over, don't trigger  event here, the control
-    // gets a controlTextDidEndEditing notification which will send a focus kill.
-    if ( r && !m_hasEditor)
-        DoNotifyFocusLost();
+ 
+    NSResponder * responder = wxNonOwnedWindowCocoaImpl::GetNextFirstResponder();
+    NSView* otherView = wxOSXGetViewFromResponder(responder);
 
+    wxWidgetImpl* otherWindow = FindBestFromWXWidget(otherView);
+    
+    // It doesn't make sense to notify about the loss of focus if it's the same
+    // control in the end, and just a different subview
+    if ( otherWindow == this )
+        return r;
+    
+    // NSTextViews have an editor as true responder, therefore the might get the
+    // resign notification if their editor takes over, don't trigger any event then
+    if ( r && !m_hasEditor)
+    {
+        DoNotifyFocusEvent( false, otherWindow );
+    }
     return r;
 }
 
@@ -2688,45 +2721,16 @@ void wxWidgetCocoaImpl::InstallEventHandler( WXWidget control )
 bool wxWidgetCocoaImpl::DoHandleCharEvent(NSEvent *event, NSString *text)
 {
     bool result = false;
-    wxWindowMac* peer = GetWXPeer();
-    int length = [text length];
-    if ( peer )
+    
+    for (NSUInteger i = 0; i < [text length]; ++i)
     {
-        for (NSUInteger i = 0; i < length; ++i)
-        {
-            wxKeyEvent wxevent(wxEVT_CHAR);
-            
-            // if we have exactly one character resulting from the event, then
-            // set the corresponding modifiers and raw data from the nsevent
-            // otherwise leave these at defaults, as they probably would be incorrect
-            // anyway (IME input)
-            
-            if ( event != nil && length == 1)
-            {
-                SetupKeyEvent(wxevent,event,text);
-            }
-            else
-            {
-                wxevent.m_shiftDown = wxevent.m_controlDown = wxevent.m_altDown = wxevent.m_metaDown = false;
-                wxevent.m_rawCode = 0;
-                wxevent.m_rawFlags = 0;
+        wxKeyEvent wxevent(wxEVT_CHAR);
+        unichar c = [text characterAtIndex:i];
+        SetupKeyEvent( wxevent, event, [NSString stringWithCharacters:&c length:1]);
 
-                unichar aunichar = [text characterAtIndex:i];
-#if wxUSE_UNICODE
-                wxevent.m_uniChar = aunichar;
-#endif
-                wxevent.m_keyCode = aunichar < 0x80 ? aunichar : WXK_NONE;
-                
-                wxevent.SetEventObject(peer);
-                wxevent.SetId(peer->GetId());
-
-                if ( event )
-                    wxevent.SetTimestamp( (int)([event timestamp] * 1000) ) ;
-            }
-            
-            result = peer->OSXHandleKeyEvent(wxevent) || result;
-        }
+        result = GetWXPeer()->OSXHandleKeyEvent(wxevent) || result;
     }
+    
     return result;
 }
 
@@ -2774,30 +2778,6 @@ bool wxWidgetCocoaImpl::DoHandleMouseEvent(NSEvent *event)
     (void)SetupCursor(event);
 
     return result;
-}
-
-void wxWidgetCocoaImpl::DoNotifyFocusSet()
-{
-    NSResponder* responder = wxNonOwnedWindowCocoaImpl::GetFormerFirstResponder();
-    NSView* otherView = wxOSXGetViewFromResponder(responder);
-    wxWidgetImpl* otherWindow = FindFromWXWidget(otherView);
-    
-    // It doesn't make sense to notify about the focus set if it's the same
-    // control in the end, and just a different subview
-    if ( otherWindow != this )
-        DoNotifyFocusEvent(true, otherWindow);
-}
-
-void wxWidgetCocoaImpl::DoNotifyFocusLost()
-{
-    NSResponder * responder = wxNonOwnedWindowCocoaImpl::GetNextFirstResponder();
-    NSView* otherView = wxOSXGetViewFromResponder(responder);
-    wxWidgetImpl* otherWindow = FindBestFromWXWidget(otherView);
-    
-    // It doesn't make sense to notify about the loss of focus if it's the same
-    // control in the end, and just a different subview
-    if ( otherWindow != this )
-        DoNotifyFocusEvent( false, otherWindow );
 }
 
 void wxWidgetCocoaImpl::DoNotifyFocusEvent(bool receivedFocus, wxWidgetImpl* otherWindow)

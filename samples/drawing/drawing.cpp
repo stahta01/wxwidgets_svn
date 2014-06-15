@@ -76,9 +76,9 @@ public:
     // this one is called on application startup and is a good place for the app
     // initialization (doing it here and not in the ctor allows to have an error
     // return: if OnInit() returns false, the application terminates)
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 
-    virtual int OnExit() wxOVERRIDE { DeleteBitmaps(); return 0; }
+    virtual int OnExit() { DeleteBitmaps(); return 0; }
 
 protected:
     void DeleteBitmaps();
@@ -111,7 +111,7 @@ public:
 #if wxUSE_COLOURDLG
     wxColour SelectColour();
 #endif // wxUSE_COLOURDLG
-    void PrepareDC(wxDC& dc) wxOVERRIDE;
+    void PrepareDC(wxDC& dc);
 
     int         m_backgroundMode;
     int         m_textureBackground;
@@ -774,7 +774,7 @@ void MyCanvas::DrawDefault(wxDC& dc)
 void MyCanvas::DrawText(wxDC& dc)
 {
     // set underlined font for testing
-    dc.SetFont( wxFontInfo(12).Family(wxFONTFAMILY_MODERN).Underlined() );
+    dc.SetFont( wxFont(12, wxMODERN, wxNORMAL, wxNORMAL, true) );
     dc.DrawText( wxT("This is text"), 110, 10 );
     dc.DrawRotatedText( wxT("That is text"), 20, 10, -45 );
 
@@ -791,7 +791,7 @@ void MyCanvas::DrawText(wxDC& dc)
         dc.DrawRotatedText(text , 400, 400, n);
     }
 
-    dc.SetFont( wxFontInfo(18).Family(wxFONTFAMILY_SWISS) );
+    dc.SetFont( wxFont( 18, wxSWISS, wxNORMAL, wxNORMAL ) );
 
     dc.DrawText( wxT("This is Swiss 18pt text."), 110, 40 );
 
@@ -827,10 +827,6 @@ void MyCanvas::DrawText(wxDC& dc)
 
     y += height;
     dc.DrawText("And\nmore\ntext on\nmultiple\nlines", 110, y);
-    y += 5*height;
-
-    dc.SetTextForeground(*wxBLUE);
-    dc.DrawRotatedText("Rotated text\ncan have\nmultiple lines\nas well", 110, y, 15);
 }
 
 static const struct
@@ -980,6 +976,8 @@ const int BASE  = 80.0;
 const int BASE2 = BASE/2;
 const int BASE4 = BASE/4;
 
+static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
+
 
 // modeled along Robin Dunn's GraphicsContext.py sample
 
@@ -1073,11 +1071,11 @@ void MyCanvas::DrawGraphics(wxGraphicsContext* gc)
         gc->SetPen(wxPen(wxColour(val.red, val.green, val.blue, 128)));
 
         // use translate to artfully reposition each drawn path
-        gc->Translate(1.5 * BASE2 * cos(wxDegToRad(angle)),
-                     1.5 * BASE2 * sin(wxDegToRad(angle)));
+        gc->Translate(1.5 * BASE2 * cos(DegToRad(angle)),
+                     1.5 * BASE2 * sin(DegToRad(angle)));
 
         // use Rotate to rotate the path
-        gc->Rotate(wxDegToRad(angle));
+        gc->Rotate(DegToRad(angle));
 
         // now draw it
         gc->DrawPath(path);
@@ -1234,7 +1232,7 @@ void MyCanvas::DrawSplines(wxDC& dc)
             letters[m][n].y = center.y + h[ letters[m][n].y ];
         }
 
-        dc.SetPen( wxPen( *wxBLUE, 1, wxPENSTYLE_DOT) );
+        dc.SetPen( wxPen( *wxBLUE, 1, wxDOT) );
         dc.DrawLines(5, letters[m]);
         dc.SetPen( wxPen( *wxBLACK, 4) );
         dc.DrawSpline(5, letters[m]);

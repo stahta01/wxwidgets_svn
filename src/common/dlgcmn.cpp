@@ -81,8 +81,14 @@ wxFLAGS_MEMBER(wxCLIP_CHILDREN)
 wxFLAGS_MEMBER(wxWS_EX_VALIDATE_RECURSIVELY)
 wxFLAGS_MEMBER(wxSTAY_ON_TOP)
 wxFLAGS_MEMBER(wxCAPTION)
+#if WXWIN_COMPATIBILITY_2_6
+wxFLAGS_MEMBER(wxTHICK_FRAME)
+#endif // WXWIN_COMPATIBILITY_2_6
 wxFLAGS_MEMBER(wxSYSTEM_MENU)
 wxFLAGS_MEMBER(wxRESIZE_BORDER)
+#if WXWIN_COMPATIBILITY_2_6
+wxFLAGS_MEMBER(wxRESIZE_BOX)
+#endif // WXWIN_COMPATIBILITY_2_6
 wxFLAGS_MEMBER(wxCLOSE_BOX)
 wxFLAGS_MEMBER(wxMAXIMIZE_BOX)
 wxFLAGS_MEMBER(wxMINIMIZE_BOX)
@@ -160,7 +166,9 @@ wxWindow *wxDialogBase::CheckIfCanBeUsedAsParent(wxWindow *parent) const
         return NULL;
     }
 
-    if ( parent == this )
+    // FIXME-VC6: this compiler requires an explicit const cast or it fails
+    //            with error C2446
+    if ( const_cast<const wxWindow *>(parent) == this )
     {
         // not sure if this can really happen but it doesn't hurt to guard
         // against this clearly invalid situation
@@ -442,7 +450,7 @@ bool wxDialogBase::SendCloseButtonClickEvent()
             if ( EmulateButtonClickIfPresent(wxID_CANCEL) )
                 return true;
             idCancel = GetAffirmativeId();
-            wxFALLTHROUGH;
+            // fall through
 
         default:
             // translate Esc to button press for the button with given id
@@ -667,7 +675,7 @@ bool wxStandardDialogLayoutAdapter::DoLayoutAdaptation(wxDialog* dialog)
                 wxScrolledWindow* scrolledWindow = wxDynamicCast(page, wxScrolledWindow);
                 if (scrolledWindow)
                     windows.Append(scrolledWindow);
-                else if (page->GetSizer())
+                else if (!scrolledWindow && page->GetSizer())
                 {
                     // Create a scrolled window and reparent
                     scrolledWindow = CreateScrolledWindow(page);
@@ -1001,8 +1009,8 @@ class wxDialogLayoutAdapterModule: public wxModule
     DECLARE_DYNAMIC_CLASS(wxDialogLayoutAdapterModule)
 public:
     wxDialogLayoutAdapterModule() {}
-    virtual void OnExit() wxOVERRIDE { delete wxDialogBase::SetLayoutAdapter(NULL); }
-    virtual bool OnInit() wxOVERRIDE { wxDialogBase::SetLayoutAdapter(new wxStandardDialogLayoutAdapter); return true; }
+    virtual void OnExit() { delete wxDialogBase::SetLayoutAdapter(NULL); }
+    virtual bool OnInit() { wxDialogBase::SetLayoutAdapter(new wxStandardDialogLayoutAdapter); return true; }
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxDialogLayoutAdapterModule, wxModule)

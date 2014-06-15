@@ -12,13 +12,6 @@
 */
 enum
 {
-    /**
-        Default state, no special flags.
-
-        @since 3.1.0
-     */
-    wxCONTROL_NONE       = 0x00000000,
-
     /** Control is disabled. */
     wxCONTROL_DISABLED   = 0x00000001,
 

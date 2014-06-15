@@ -305,7 +305,7 @@ public:
         }
     }
 
-    virtual const wxHeaderColumn& GetColumn(unsigned int idx) const wxOVERRIDE
+    virtual const wxHeaderColumn& GetColumn(unsigned int idx) const
     {
         return *m_columns[idx];
     }
@@ -343,7 +343,7 @@ private:
                                   wxPG_SPLITTER_FROM_EVENT);
     }
 
-    virtual bool ProcessEvent( wxEvent& event ) wxOVERRIDE
+    virtual bool ProcessEvent( wxEvent& event )
     {
         if ( event.IsKindOf(wxCLASSINFO(wxHeaderCtrlEvent)) )
         {
@@ -679,17 +679,17 @@ void wxPropertyGridManager::SetExtraStyle( long exStyle )
 
 // -----------------------------------------------------------------------
 
-void wxPropertyGridManager::DoFreeze()
+void wxPropertyGridManager::Freeze()
 {
     m_pPropGrid->Freeze();
-    wxWindow::DoFreeze();
+    wxWindow::Freeze();
 }
 
 // -----------------------------------------------------------------------
 
-void wxPropertyGridManager::DoThaw()
+void wxPropertyGridManager::Thaw()
 {
-    wxWindow::DoThaw();
+    wxWindow::Thaw();
     m_pPropGrid->Thaw();
 }
 
@@ -2086,7 +2086,7 @@ public:
         m_it.Init(manager->GetPage(0), flags);
     }
     virtual ~wxPGVIteratorBase_Manager() { }
-    virtual void Next() wxOVERRIDE
+    virtual void Next()
     {
         m_it.Next();
 

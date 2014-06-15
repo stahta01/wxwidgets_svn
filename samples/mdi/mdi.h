@@ -14,14 +14,14 @@
 class MyApp : public wxApp
 {
 public:
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 };
 
 class MyCanvas : public wxScrolledWindow
 {
 public:
     MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size);
-    virtual void OnDraw(wxDC& dc) wxOVERRIDE;
+    virtual void OnDraw(wxDC& dc);
 
     bool IsDirty() const { return m_dirty; }
 

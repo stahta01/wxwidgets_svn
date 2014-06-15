@@ -445,8 +445,8 @@ void wxModalEventLoop::OSXDoRun()
 
 void wxModalEventLoop::OSXDoStop()
 {
-    [NSApp abortModal];
-}
+        [NSApp abortModal];
+    }
 
 // we need our own version of ProcessIdle here in order to
 // avoid deletion of pending objects, because ProcessIdle is running
@@ -490,7 +490,7 @@ bool wxModalEventLoop::ProcessIdle()
 void wxGUIEventLoop::BeginModalSession( wxWindow* modalWindow )
 {
     WXWindow nsnow = nil;
-
+    
     m_modalNestedLevel++;
     if ( m_modalNestedLevel > 1 )
     {

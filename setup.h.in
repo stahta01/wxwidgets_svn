@@ -142,6 +142,9 @@
 #undef WINVER
 #endif
 
+/* OS/2 with EMX */
+#undef __OS2__
+
 /* --- start common options --- */
 
 #ifndef wxUSE_GUI
@@ -149,9 +152,9 @@
 #endif
 
 
-#define WXWIN_COMPATIBILITY_2_8 0
+#define WXWIN_COMPATIBILITY_2_6 0
 
-#define WXWIN_COMPATIBILITY_3_0 0
+#define WXWIN_COMPATIBILITY_2_8 0
 
 #define wxDIALOG_UNIT_COMPATIBILITY   0
 
@@ -207,7 +210,12 @@
 
 #define wxUSE_STL 0
 
-#define wxUSE_STD_DEFAULT  0
+#if defined(__DMC__) || defined(__WATCOMC__) \
+        || (defined(_MSC_VER) && _MSC_VER < 1200)
+    #define wxUSE_STD_DEFAULT  0
+#else
+    #define wxUSE_STD_DEFAULT  0
+#endif
 
 #define wxUSE_STD_CONTAINERS 0
 
@@ -340,7 +348,15 @@
 
 
 #ifdef _MSC_VER
+#   if _MSC_VER >= 1310
+
+
 #define wxUSE_GRAPHICS_CONTEXT 0
+#   else
+
+
+#       define wxUSE_GRAPHICS_CONTEXT 0
+#   endif
 #else
 
 
@@ -633,6 +649,10 @@
 #define wxUSE_GSTREAMER 0
 
 /* --- start MSW options --- */
+
+#ifndef wxUSE_UNICODE_MSLU
+    #define wxUSE_UNICODE_MSLU 0
+#endif
 
 #define wxUSE_MFC           0
 
@@ -1050,9 +1070,6 @@
 
 /* Define if you have the dlerror function.  */
 #undef HAVE_DLERROR
-
-/* Define if you have the dladdr function.  */
-#undef HAVE_DLADDR
 
 /* Define if you have Posix fnctl() function. */
 #undef HAVE_FCNTL

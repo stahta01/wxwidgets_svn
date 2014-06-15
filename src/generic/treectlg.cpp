@@ -80,7 +80,7 @@ public:
 
     wxTreeRenameTimer( wxGenericTreeCtrl *owner );
 
-    virtual void Notify() wxOVERRIDE;
+    virtual void Notify();
 
 private:
     wxGenericTreeCtrl *m_owner;
@@ -126,7 +126,7 @@ public:
 
     wxTreeFindTimer( wxGenericTreeCtrl *owner ) { m_owner = owner; }
 
-    virtual void Notify() wxOVERRIDE { m_owner->ResetFindState(); }
+    virtual void Notify() { m_owner->ResetFindState(); }
 
 private:
     wxGenericTreeCtrl *m_owner;
@@ -3122,7 +3122,7 @@ void wxGenericTreeCtrl::OnChar( wxKeyEvent &event )
                 ExpandAllChildren(m_current);
                 break;
             }
-            wxFALLTHROUGH;//else: fall through to Collapse() it
+            //else: fall through to Collapse() it
 
         case '-':
         case WXK_SUBTRACT:
@@ -3236,7 +3236,7 @@ void wxGenericTreeCtrl::OnChar( wxKeyEvent &event )
             //else: don't try to expand hidden root item (which can be the
             //      current one when the tree is empty)
 
-            wxFALLTHROUGH;
+            // fall through
 
         case WXK_DOWN:
             {

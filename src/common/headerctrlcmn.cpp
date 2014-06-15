@@ -218,10 +218,15 @@ unsigned int wxHeaderCtrlBase::GetColumnPos(unsigned int idx) const
     wxCHECK_MSG( idx < count, wxNO_COLUMN, "invalid index" );
 
     const wxArrayInt order = GetColumnsOrder();
-    int pos = order.Index(idx);
-    wxCHECK_MSG( pos != wxNOT_FOUND, wxNO_COLUMN, "column unexpectedly not displayed at all" );
+    for ( unsigned n = 0; n < count; n++ )
+    {
+        if ( (unsigned)order[n] == idx )
+            return n;
+    }
 
-    return (unsigned int)pos;
+    wxFAIL_MSG( "column unexpectedly not displayed at all" );
+
+    return wxNO_COLUMN;
 }
 
 /* static */
@@ -229,14 +234,31 @@ void wxHeaderCtrlBase::MoveColumnInOrderArray(wxArrayInt& order,
                                               unsigned int idx,
                                               unsigned int pos)
 {
-    int posOld = order.Index(idx);
-    wxASSERT_MSG( posOld != wxNOT_FOUND, "invalid index" );
+    const unsigned count = order.size();
 
-    if ( pos != (unsigned int)posOld )
+    wxArrayInt orderNew;
+    orderNew.reserve(count);
+    for ( unsigned n = 0; ; n++ )
     {
-        order.RemoveAt(posOld);
-        order.Insert(idx, pos);
+        // NB: order of checks is important for this to work when the new
+        //     column position is the same as the old one
+
+        // insert the column at its new position
+        if ( orderNew.size() == pos )
+            orderNew.push_back(idx);
+
+        if ( n == count )
+            break;
+
+        // delete the column from its old position
+        const unsigned idxOld = order[n];
+        if ( idxOld == idx )
+            continue;
+
+        orderNew.push_back(idxOld);
     }
+
+    order.swap(orderNew);
 }
 
 void

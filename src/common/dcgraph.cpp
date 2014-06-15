@@ -24,7 +24,6 @@
     #include "wx/icon.h"
     #include "wx/dcclient.h"
     #include "wx/dcmemory.h"
-    #include "wx/math.h"
 #endif
 
 //-----------------------------------------------------------------------------
@@ -36,6 +35,11 @@ static const double RAD2DEG = 180.0 / M_PI;
 //-----------------------------------------------------------------------------
 // Local functions
 //-----------------------------------------------------------------------------
+
+static inline double DegToRad(double deg)
+{
+    return (deg * M_PI) / 180.0;
+}
 
 static wxCompositionMode TranslateRasterOp(wxRasterOperationMode function)
 {
@@ -283,9 +287,9 @@ void wxGCDCImpl::DoDrawBitmap( const wxBitmap &bmp, wxCoord x, wxCoord y,
     if ( bmp.GetDepth() == 1 )
     {
         m_graphicContext->SetPen(*wxTRANSPARENT_PEN);
-        m_graphicContext->SetBrush(m_textBackgroundColour);
+        m_graphicContext->SetBrush( wxBrush( m_textBackgroundColour , wxSOLID ) );
         m_graphicContext->DrawRectangle( x, y, w, h );
-        m_graphicContext->SetBrush(m_textForegroundColour);
+        m_graphicContext->SetBrush( wxBrush( m_textForegroundColour , wxSOLID ) );
         m_graphicContext->DrawBitmap( bmp, x, y, w, h );
         m_graphicContext->SetBrush( m_graphicContext->CreateBrush(m_brush));
         m_graphicContext->SetPen( m_graphicContext->CreatePen(m_pen));
@@ -602,14 +606,14 @@ void wxGCDCImpl::DoDrawArc( wxCoord x1, wxCoord y1,
              -atan2(double(y2 - yc), double(x2 - xc)) * RAD2DEG;
     }
 
-    bool fill = m_brush.GetStyle() != wxBRUSHSTYLE_TRANSPARENT;
+    bool fill = m_brush.GetStyle() != wxTRANSPARENT;
 
     wxGraphicsPath path = m_graphicContext->CreatePath();
     if ( fill && ((x1!=x2)||(y1!=y2)) )
         path.MoveToPoint( xc, yc );
     // since these angles (ea,sa) are measured counter-clockwise, we invert them to
     // get clockwise angles
-    path.AddArc( xc, yc , rad, wxDegToRad(-sa), wxDegToRad(-ea), false );
+    path.AddArc( xc, yc , rad , DegToRad(-sa) , DegToRad(-ea), false );
     if ( fill && ((x1!=x2)||(y1!=y2)) )
         path.AddLineToPoint( xc, yc );
     m_graphicContext->DrawPath(path);
@@ -630,22 +634,22 @@ void wxGCDCImpl::DoDrawEllipticArc( wxCoord x, wxCoord y, wxCoord w, wxCoord h,
 
     // since these angles (ea,sa) are measured counter-clockwise, we invert them to
     // get clockwise angles
-    if ( m_brush.GetStyle() != wxBRUSHSTYLE_TRANSPARENT )
+    if ( m_brush.GetStyle() != wxTRANSPARENT )
     {
         wxGraphicsPath path = m_graphicContext->CreatePath();
         path.MoveToPoint( 0, 0 );
-        path.AddArc( 0, 0, h/2.0, wxDegToRad(-sa), wxDegToRad(-ea), sa > ea );
+        path.AddArc( 0, 0, h/2.0 , DegToRad(-sa) , DegToRad(-ea), sa > ea );
         path.AddLineToPoint( 0, 0 );
         m_graphicContext->FillPath( path );
 
         path = m_graphicContext->CreatePath();
-        path.AddArc( 0, 0, h/2.0, wxDegToRad(-sa), wxDegToRad(-ea), sa > ea );
+        path.AddArc( 0, 0, h/2.0 , DegToRad(-sa) , DegToRad(-ea), sa > ea );
         m_graphicContext->StrokePath( path );
     }
     else
     {
         wxGraphicsPath path = m_graphicContext->CreatePath();
-        path.AddArc( 0, 0, h/2.0, wxDegToRad(-sa), wxDegToRad(-ea), sa > ea );
+        path.AddArc( 0, 0, h/2.0 , DegToRad(-sa) , DegToRad(-ea), sa > ea );
         m_graphicContext->DrawPath( path );
     }
 
@@ -743,9 +747,7 @@ void wxGCDCImpl::DoDrawPolygon( int n, const wxPoint points[],
 {
     wxCHECK_RET( IsOk(), wxT("wxGCDC(cg)::DoDrawPolygon - invalid DC") );
 
-    if ( n <= 0 ||
-            (m_brush.GetStyle() == wxBRUSHSTYLE_TRANSPARENT &&
-                m_pen.GetStyle() == wxPENSTYLE_TRANSPARENT) )
+    if ( n <= 0 || (m_brush.GetStyle() == wxTRANSPARENT && m_pen.GetStyle() == wxTRANSPARENT ) )
         return;
     if ( !m_logicalFunctionSupported )
         return;
@@ -989,7 +991,7 @@ void wxGCDCImpl::DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y,
     GetOwner()->GetMultiLineTextExtent(text, &w, &h, &heightLine);
     
     // Compute the shift for the origin of the next line.
-    const double rad = wxDegToRad(angle);
+    const double rad = DegToRad(angle);
     const double dx = heightLine * sin(rad);
     const double dy = heightLine * cos(rad);
     
@@ -1000,9 +1002,9 @@ void wxGCDCImpl::DoDrawRotatedText(const wxString& text, wxCoord x, wxCoord y,
         // Calculate origin for each line to avoid accumulation of
         // rounding errors.
         if ( m_backgroundMode == wxTRANSPARENT )
-            m_graphicContext->DrawText( lines[lineNum], x + wxRound(lineNum*dx), y + wxRound(lineNum*dy), wxDegToRad(angle ));
+            m_graphicContext->DrawText( lines[lineNum], x + wxRound(lineNum*dx), y + wxRound(lineNum*dy), DegToRad(angle ));
         else
-            m_graphicContext->DrawText( lines[lineNum], x + wxRound(lineNum*dx), y + wxRound(lineNum*dy), wxDegToRad(angle ), m_graphicContext->CreateBrush(m_textBackgroundColour) );
+            m_graphicContext->DrawText( lines[lineNum], x + wxRound(lineNum*dx), y + wxRound(lineNum*dy), DegToRad(angle ), m_graphicContext->CreateBrush(m_textBackgroundColour) );
    }
             
     // call the bounding box by adding all four vertices of the rectangle
@@ -1045,7 +1047,7 @@ void wxGCDCImpl::DoDrawText(const wxString& str, wxCoord x, wxCoord y)
     if ( m_backgroundMode == wxTRANSPARENT )
         m_graphicContext->DrawText( str, x ,y);
     else
-        m_graphicContext->DrawText( str, x ,y , m_graphicContext->CreateBrush(m_textBackgroundColour) );
+        m_graphicContext->DrawText( str, x ,y , m_graphicContext->CreateBrush( wxBrush(m_textBackgroundColour,wxSOLID) ) );
 }
 
 bool wxGCDCImpl::CanGetTextExtent() const
@@ -1104,7 +1106,7 @@ bool wxGCDCImpl::DoGetPartialTextExtents(const wxString& text, wxArrayInt& width
 
 wxCoord wxGCDCImpl::GetCharWidth(void) const
 {
-    wxCoord width = 0;
+    wxCoord width;
     DoGetTextExtent( wxT("g") , &width , NULL , NULL , NULL , NULL );
 
     return width;
@@ -1112,7 +1114,7 @@ wxCoord wxGCDCImpl::GetCharWidth(void) const
 
 wxCoord wxGCDCImpl::GetCharHeight(void) const
 {
-    wxCoord height = 0;
+    wxCoord height;
     DoGetTextExtent( wxT("g") , NULL , &height , NULL , NULL , NULL );
 
     return height;

@@ -38,7 +38,6 @@
 #endif //WX_PRECOMP
 
 #include "wx/dynlib.h"
-#include "wx/tooltip.h"
 
 #include "wx/msw/private.h"
 #if defined(__WXWINCE__) && !defined(__HANDHELDPC__)
@@ -61,6 +60,12 @@
 
 #ifndef ICON_SMALL
     #define ICON_SMALL 0
+#endif
+
+// FIXME-VC6: Only VC6 doesn't have this in its standard headers so this
+//            could be removed once support for it is dropped.
+#ifndef WM_UNINITMENUPOPUP
+    #define WM_UNINITMENUPOPUP 0x0125
 #endif
 
 // ----------------------------------------------------------------------------
@@ -426,7 +431,7 @@ WXLRESULT wxTopLevelWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WX
             break;
 
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
-#if wxUSE_MENUS && !defined(__WXUNIVERSAL__)
+#if wxUSE_MENUS
         case WM_INITMENUPOPUP:
             processed = HandleMenuPopup(wxEVT_MENU_OPEN, (WXHMENU)wParam);
             break;
@@ -454,7 +459,7 @@ WXLRESULT wxTopLevelWindowMSW::MSWWindowProc(WXUINT message, WXWPARAM wParam, WX
         case WM_UNINITMENUPOPUP:
             processed = HandleMenuPopup(wxEVT_MENU_CLOSE, (WXHMENU)wParam);
             break;
-#endif // wxUSE_MENUS && !__WXUNIVERSAL__
+#endif // wxUSE_MENUS
 #endif // !__WXMICROWIN__
     }
 
@@ -718,11 +723,6 @@ void wxTopLevelWindowMSW::DoShowWindow(int nShowCmd)
         // makes it not iconized and only minimizing it does make it iconized.
         m_iconized = nShowCmd == SW_MINIMIZE;
     }
-
-#if wxUSE_TOOLTIPS
-    // Don't leave a tooltip hanging around if TLW is hidden now.
-    wxToolTip::UpdateVisibility();
-#endif // wxUSE_TOOLTIPS
 }
 
 void wxTopLevelWindowMSW::ShowWithoutActivating()
@@ -1257,7 +1257,12 @@ bool wxTopLevelWindowMSW::EnableCloseButton(bool enable)
 
 void wxTopLevelWindowMSW::RequestUserAttention(int flags)
 {
-#if defined(FLASHW_STOP) && wxUSE_DYNLIB_CLASS
+    // check if we can use FlashWindowEx(): unfortunately a simple test for
+    // FLASHW_STOP doesn't work because MSVC6 headers do #define it but don't
+    // provide FlashWindowEx() declaration, so try to detect whether we have
+    // real headers for WINVER 0x0500 by checking for existence of a symbol not
+    // declated in MSVC6 header
+#if defined(FLASHW_STOP) && defined(VK_XBUTTON1) && wxUSE_DYNLIB_CLASS
     // available in the headers, check if it is supported by the system
     typedef BOOL (WINAPI *FlashWindowEx_t)(FLASHWINFO *pfwi);
     static FlashWindowEx_t s_pfnFlashWindowEx = NULL;
@@ -1476,7 +1481,7 @@ void wxTopLevelWindowMSW::OnActivate(wxActivateEvent& event)
     }
 }
 
-#if wxUSE_MENUS && !defined(__WXUNIVERSAL__)
+#if wxUSE_MENUS
 
 bool
 wxTopLevelWindowMSW::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU hMenu)
@@ -1583,7 +1588,7 @@ wxMenu* wxTopLevelWindowMSW::MSWFindMenuFromHMENU(WXHMENU WXUNUSED(hMenu))
     return NULL;
 }
 
-#endif // wxUSE_MENUS && !__WXUNIVERSAL__
+#endif // wxUSE_MENUS
 
 
 

@@ -376,7 +376,7 @@ inline int wxNavTypeFromWebNavType(int type){
     wxWebKitCtrl* webKitWindow;
 }
 
-- (id)initWithWxWindow: (wxWebKitCtrl*)inWindow;
+- initWithWxWindow: (wxWebKitCtrl*)inWindow;
 
 @end
 
@@ -385,7 +385,7 @@ inline int wxNavTypeFromWebNavType(int type){
     wxWebKitCtrl* webKitWindow;
 }
 
-- (id)initWithWxWindow: (wxWebKitCtrl*)inWindow;
+- initWithWxWindow: (wxWebKitCtrl*)inWindow;
 
 @end
 
@@ -394,7 +394,7 @@ inline int wxNavTypeFromWebNavType(int type){
     wxWebKitCtrl* webKitWindow;
 }
 
-- (id)initWithWxWindow: (wxWebKitCtrl*)inWindow;
+- initWithWxWindow: (wxWebKitCtrl*)inWindow;
 
 @end
 
@@ -806,7 +806,7 @@ void wxWebKitCtrl::MacVisibilityChanged(){
 
 @implementation MyFrameLoadMonitor
 
-- (id)initWithWxWindow: (wxWebKitCtrl*)inWindow
+- initWithWxWindow: (wxWebKitCtrl*)inWindow
 {
     self = [super init];
     webKitWindow = inWindow;    // non retained
@@ -887,7 +887,7 @@ void wxWebKitCtrl::MacVisibilityChanged(){
 
 @implementation MyPolicyDelegate
 
-- (id)initWithWxWindow: (wxWebKitCtrl*)inWindow
+- initWithWxWindow: (wxWebKitCtrl*)inWindow
 {
     self = [super init];
     webKitWindow = inWindow;    // non retained
@@ -938,7 +938,7 @@ void wxWebKitCtrl::MacVisibilityChanged(){
 
 @implementation MyUIDelegate
 
-- (id)initWithWxWindow: (wxWebKitCtrl*)inWindow
+- initWithWxWindow: (wxWebKitCtrl*)inWindow
 {
     self = [super init];
     webKitWindow = inWindow;    // non retained

@@ -494,7 +494,7 @@ wxString wxExpandEnvVars(const wxString& str)
 
           break;
         }
-        wxFALLTHROUGH;
+        //else: fall through
 
       default:
         strResult += str[n];

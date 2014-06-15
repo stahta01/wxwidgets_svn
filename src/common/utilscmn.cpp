@@ -61,7 +61,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+
+#if !wxONLY_WATCOM_EARLIER_THAN(1,4)
+    #if !(defined(_MSC_VER) && (_MSC_VER > 800))
+        #include <errno.h>
+    #endif
+#endif
 
 #if wxUSE_GUI
     #include "wx/notebook.h"
@@ -380,6 +385,14 @@ bool wxPlatform::Is(int platform)
 #endif
 #ifdef __UNIX__
     if (platform == wxOS_UNIX)
+        return true;
+#endif
+#ifdef __OS2__
+    if (platform == wxOS_OS2)
+        return true;
+#endif
+#ifdef __WXPM__
+    if (platform == wxPORT_PM)
         return true;
 #endif
 #ifdef __WXCOCOA__
@@ -1148,6 +1161,30 @@ bool wxLaunchDefaultBrowser(const wxString& url, int flags)
 // Menu accelerators related functions
 // ----------------------------------------------------------------------------
 
+#if WXWIN_COMPATIBILITY_2_6
+wxChar *wxStripMenuCodes(const wxChar *in, wxChar *out)
+{
+#if wxUSE_MENUS
+    wxString s = wxMenuItem::GetLabelText(in);
+#else
+    wxString str(in);
+    wxString s = wxStripMenuCodes(str);
+#endif // wxUSE_MENUS
+    if ( out )
+    {
+        // go smash their buffer if it's not big enough - I love char * params
+        memcpy(out, s.c_str(), s.length() * sizeof(wxChar));
+    }
+    else
+    {
+        out = new wxChar[s.length() + 1];
+        wxStrcpy(out, s.c_str());
+    }
+
+    return out;
+}
+#endif
+
 wxString wxStripMenuCodes(const wxString& in, int flags)
 {
     wxASSERT_MSG( flags, wxT("this is useless to call without any flags") );
@@ -1385,7 +1422,7 @@ wxVersionInfo wxGetLibraryVersionInfo()
                          wxMINOR_VERSION,
                          wxRELEASE_NUMBER,
                          msg,
-                         wxS("Copyright (c) 1995-2014 wxWidgets team"));
+                         wxS("Copyright (c) 1995-2013 wxWidgets team"));
 }
 
 void wxInfoMessageBox(wxWindow* parent)

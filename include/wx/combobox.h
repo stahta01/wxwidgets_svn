@@ -33,7 +33,7 @@ class WXDLLIMPEXP_CORE wxComboBoxBase : public wxItemContainer,
 {
 public:
     // override these methods to disambiguate between two base classes versions
-    virtual void Clear() wxOVERRIDE
+    virtual void Clear()
     {
         wxTextEntry::Clear();
         wxItemContainer::Clear();
@@ -83,6 +83,8 @@ public:
     #include "wx/osx/combobox.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/combobox.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/combobox.h"
 #endif
 
 #endif // wxUSE_COMBOBOX

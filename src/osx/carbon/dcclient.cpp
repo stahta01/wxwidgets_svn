@@ -81,7 +81,7 @@ wxWindowDCImpl::wxWindowDCImpl( wxDC *owner, wxWindow *window )
     }
     DoSetClippingRegion( 0 , 0 , m_width , m_height ) ;
 
-    SetBackground(wxBrush(window->GetBackgroundColour(),wxBRUSHSTYLE_SOLID));
+    SetBackground(wxBrush(window->GetBackgroundColour(),wxSOLID));
 
     SetFont( window->GetFont() ) ;
 }

@@ -47,7 +47,7 @@ public:
     wxAuiCommandCapture() { m_lastId = 0; }
     int GetCommandId() const { return m_lastId; }
 
-    bool ProcessEvent(wxEvent& evt) wxOVERRIDE
+    bool ProcessEvent(wxEvent& evt)
     {
         if (evt.GetEventType() == wxEVT_MENU)
         {
@@ -156,7 +156,7 @@ wxAuiGenericTabArt::wxAuiGenericTabArt()
 {
     m_normalFont = *wxNORMAL_FONT;
     m_selectedFont = *wxNORMAL_FONT;
-    m_selectedFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_selectedFont.SetWeight(wxBOLD);
     m_measuringFont = m_selectedFont;
 
     m_fixedTabWidth = 100;
@@ -851,7 +851,7 @@ wxAuiSimpleTabArt::wxAuiSimpleTabArt()
 {
     m_normalFont = *wxNORMAL_FONT;
     m_selectedFont = *wxNORMAL_FONT;
-    m_selectedFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_selectedFont.SetWeight(wxBOLD);
     m_measuringFont = m_selectedFont;
 
     m_flags = 0;

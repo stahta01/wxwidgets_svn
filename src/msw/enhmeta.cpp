@@ -120,12 +120,11 @@ void wxEnhMetaFile::Assign(const wxEnhMetaFile& mf)
     }
 }
 
-/* static */
-void wxEnhMetaFile::Free(WXHANDLE handle)
+void wxEnhMetaFile::Free()
 {
-    if ( handle )
+    if ( m_hMF )
     {
-        if ( !::DeleteEnhMetaFile((HENHMETAFILE) handle) )
+        if ( !::DeleteEnhMetaFile(GetEMF()) )
         {
             wxLogLastError(wxT("DeleteEnhMetaFile"));
         }

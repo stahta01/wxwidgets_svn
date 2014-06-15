@@ -47,6 +47,13 @@ bool wxPopupWindow::Create(wxWindow *parent, int flags)
                                 flags | wxPOPUP_WINDOW);
 }
 
+void wxPopupWindow::DoGetPosition(int *x, int *y) const
+{
+    // This method only exists for ABI compatibility but does nothing special
+    // any more, it is removed in 3.1.0 and later.
+    wxPopupWindowBase::DoGetPosition(x, y);
+}
+
 WXDWORD wxPopupWindow::MSWGetStyle(long flags, WXDWORD *exstyle) const
 {
     // we only honour the border flags, the others don't make sense for us

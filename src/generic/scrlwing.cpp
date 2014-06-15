@@ -76,7 +76,7 @@ public:
         m_scrollHelper = scrollHelper;
     }
 
-    virtual bool ProcessEvent(wxEvent& event) wxOVERRIDE;
+    virtual bool ProcessEvent(wxEvent& event);
 
 private:
     wxScrollHelperBase *m_scrollHelper;
@@ -98,7 +98,7 @@ public:
                       wxEventType eventTypeToSend,
                       int pos, int orient);
 
-    virtual void Notify() wxOVERRIDE;
+    virtual void Notify();
 
 private:
     wxWindow *m_win;
@@ -214,6 +214,9 @@ bool wxScrollHelperEvtHandler::ProcessEvent(wxEvent& event)
         return true;
     }
 
+    if ( processed && event.IsCommandEvent())
+        return true;
+
     // For wxEVT_PAINT the user code can either handle this event as usual or
     // override virtual OnDraw(), so if the event hasn't been handled we need
     // to call this virtual function ourselves.
@@ -231,11 +234,6 @@ bool wxScrollHelperEvtHandler::ProcessEvent(wxEvent& event)
         m_scrollHelper->HandleOnPaint((wxPaintEvent &)event);
         return true;
     }
-
-    // If the user code handled this event, it should prevent the default
-    // handling from taking place, so don't do anything else in this case.
-    if ( processed )
-        return true;
 
     if ( evType == wxEVT_CHILD_FOCUS )
     {
@@ -882,7 +880,7 @@ void wxAnyScrollHelperBase::HandleOnChar(wxKeyEvent& event)
 
         case WXK_LEFT:
             newEvent.SetOrientation(wxHORIZONTAL);
-            wxFALLTHROUGH;
+            // fall through
 
         case WXK_UP:
             newEvent.SetEventType(wxEVT_SCROLLWIN_LINEUP);
@@ -890,7 +888,7 @@ void wxAnyScrollHelperBase::HandleOnChar(wxKeyEvent& event)
 
         case WXK_RIGHT:
             newEvent.SetOrientation(wxHORIZONTAL);
-            wxFALLTHROUGH;
+            // fall through
 
         case WXK_DOWN:
             newEvent.SetEventType(wxEVT_SCROLLWIN_LINEDOWN);
@@ -1292,7 +1290,7 @@ wxScrollHelper::DoAdjustScrollbar(int orient,
 
         default:
             wxFAIL_MSG( wxS("unknown scrollbar visibility") );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxSHOW_SB_DEFAULT:
             range = scrollUnits;

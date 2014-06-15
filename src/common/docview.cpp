@@ -1817,7 +1817,7 @@ wxDocTemplate *wxDocManager::SelectDocumentType(wxDocTemplate **templates,
                                                 int noTemplates, bool sort)
 {
     wxArrayString strings;
-    wxScopedArray<wxDocTemplate *> data(noTemplates);
+    wxScopedArray<wxDocTemplate *> data(new wxDocTemplate *[noTemplates]);
     int i;
     int n = 0;
 
@@ -1895,7 +1895,7 @@ wxDocTemplate *wxDocManager::SelectViewType(wxDocTemplate **templates,
                                             int noTemplates, bool sort)
 {
     wxArrayString strings;
-    wxScopedArray<wxDocTemplate *> data(noTemplates);
+    wxScopedArray<wxDocTemplate *> data(new wxDocTemplate *[noTemplates]);
     int i;
     int n = 0;
 

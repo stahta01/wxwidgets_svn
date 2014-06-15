@@ -258,7 +258,7 @@ protected:
     wxDECLARE_NO_COPY_CLASS(wxDirFilterListCtrl);
 };
 
-#if !defined(__WXMSW__) && !defined(__WXMAC__)
+#if !defined(__WXMSW__) && !defined(__WXMAC__) && !defined(__WXPM__)
     #define wxDirCtrl wxGenericDirCtrl
 #endif
 

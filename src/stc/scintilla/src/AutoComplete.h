@@ -16,12 +16,11 @@ namespace Scintilla {
  */
 class AutoComplete {
 	bool active;
-	std::string stopChars;
-	std::string fillUpChars;
+	char stopChars[256];
+	char fillUpChars[256];
 	char separator;
 	char typesep; // Type seperator
 	enum { maxItemLen=1000 };
-	std::vector<int> sortMatrix;
 
 public:
 
@@ -35,13 +34,6 @@ public:
 	bool autoHide;
 	bool dropRestOfWord;
 	unsigned int ignoreCaseBehaviour;
-	int widthLBDefault;
-	int heightLBDefault;
-	/** SC_ORDER_PRESORTED:   Assume the list is presorted; selection will fail if it is not alphabetical<br />
-	 *  SC_ORDER_PERFORMSORT: Sort the list alphabetically; start up performance cost for sorting<br />
-	 *  SC_ORDER_CUSTOM:      Handle non-alphabetical entries; start up performance cost for generating a sorted lookup table
-	 */
-	int autoSort;
 
 	AutoComplete();
 	~AutoComplete();
@@ -71,7 +63,7 @@ public:
 
 	/// The list string contains a sequence of words separated by the separator character
 	void SetList(const char *list);
-
+	
 	/// Return the position of the currently selected list item
 	int GetSelection() const;
 

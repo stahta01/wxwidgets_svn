@@ -56,6 +56,18 @@
 
 const char wxGridNameStr[] = "grid";
 
+#if defined(__WXMOTIF__)
+    #define WXUNUSED_MOTIF(identifier)  WXUNUSED(identifier)
+#else
+    #define WXUNUSED_MOTIF(identifier)  identifier
+#endif
+
+#if defined(__WXGTK__)
+    #define WXUNUSED_GTK(identifier)    WXUNUSED(identifier)
+#else
+    #define WXUNUSED_GTK(identifier)    identifier
+#endif
+
 // Required for wxIs... functions
 #include <ctype.h>
 
@@ -2415,7 +2427,7 @@ void wxGrid::Init()
     m_attrCache.attr = NULL;
 
     m_labelFont = GetFont();
-    m_labelFont.SetWeight( wxFONTWEIGHT_BOLD );
+    m_labelFont.SetWeight( wxBOLD );
 
     m_rowLabelHorizAlign = wxALIGN_CENTRE;
     m_rowLabelVertAlign  = wxALIGN_CENTRE;
@@ -4964,7 +4976,7 @@ void wxGrid::OnKeyDown( wxKeyEvent& event )
                             MoveCursorRight(false);
                             break;
                         }
-                        wxFALLTHROUGH;
+                        //else: fall through
 
                     default:
                         event.Skip();
@@ -5179,7 +5191,7 @@ wxGrid::UpdateBlockBeingSelected(int topRow, int leftCol,
         {
             default:
                 wxFAIL_MSG( "unknown selection mode" );
-                wxFALLTHROUGH;
+                // fall through
 
             case wxGridSelectCells:
                 // arbitrary blocks selection allowed so just use the cell
@@ -7248,9 +7260,9 @@ void wxGrid::SetColLabelAlignment( int horiz, int vert )
 // Note: under MSW, the default column label font must be changed because it
 //       does not support vertical printing
 //
-// Example:
-//      pGrid->SetLabelFont(wxFontInfo(9).Family(wxFONTFAMILY_SWISS));
-//      pGrid->SetColLabelTextOrientation(wxVERTICAL);
+// Example: wxFont font(9, wxSWISS, wxNORMAL, wxBOLD);
+//                      pGrid->SetLabelFont(font);
+//                      pGrid->SetColLabelTextOrientation(wxVERTICAL);
 //
 void wxGrid::SetColLabelTextOrientation( int textOrientation )
 {
@@ -8413,11 +8425,8 @@ wxGrid::AutoSizeColOrRow(int colOrRow, bool setAsMin, wxGridDirection direction)
         wxGridCellRenderer *renderer = attr->GetRenderer(this, row, col);
         if ( renderer )
         {
-            extent = column
-                        ? renderer->GetBestWidth(*this, *attr, dc, row, col,
-                                                 GetRowHeight(row))
-                        : renderer->GetBestHeight(*this, *attr, dc, row, col,
-                                                  GetColWidth(col));
+            wxSize size = renderer->GetBestSize(*this, *attr, dc, row, col);
+            extent = column ? size.x : size.y;
 
             if ( span != CellSpan_None )
             {

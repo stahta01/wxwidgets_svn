@@ -700,8 +700,17 @@ void FileNameTestCase::TestExists()
     CPPUNIT_ASSERT( fn.FileExists() );
     CPPUNIT_ASSERT( !wxFileName::DirExists(fn.GetFullPath()) );
 
+    // FIXME-VC6: This compiler crashes with
+    //
+    //      fatal error C1001: INTERNAL COMPILER ERROR
+    //      (compiler file 'msc1.cpp', line 1794)
+    //
+    // when compiling calls to Exists() with parameter for some reason, just
+    // disable these tests there.
+#ifndef __VISUALC6__
     CPPUNIT_ASSERT( fn.Exists(wxFILE_EXISTS_REGULAR) );
     CPPUNIT_ASSERT( !fn.Exists(wxFILE_EXISTS_DIR) );
+#endif
     CPPUNIT_ASSERT( fn.Exists() );
 
     const wxString& tempdir = wxFileName::GetTempDir();
@@ -714,8 +723,10 @@ void FileNameTestCase::TestExists()
     CPPUNIT_ASSERT( !dirTemp.FileExists() );
     CPPUNIT_ASSERT( dirTemp.DirExists() );
 
+#ifndef __VISUALC6__
     CPPUNIT_ASSERT( dirTemp.Exists(wxFILE_EXISTS_DIR) );
     CPPUNIT_ASSERT( !dirTemp.Exists(wxFILE_EXISTS_REGULAR) );
+#endif
     CPPUNIT_ASSERT( dirTemp.Exists() );
 
 #ifdef __UNIX__
@@ -726,7 +737,7 @@ void FileNameTestCase::TestExists()
 #ifdef __LINUX__
     // These files are only guaranteed to exist under Linux.
     // No need for wxFILE_EXISTS_NO_FOLLOW here; wxFILE_EXISTS_SYMLINK implies it
-    CPPUNIT_ASSERT( wxFileName::Exists("/proc/self", wxFILE_EXISTS_SYMLINK) );
+    CPPUNIT_ASSERT( wxFileName::Exists("/dev/core", wxFILE_EXISTS_SYMLINK) );
     CPPUNIT_ASSERT( wxFileName::Exists("/dev/log", wxFILE_EXISTS_SOCKET) );
 #endif // __LINUX__
 #ifndef __VMS

@@ -30,7 +30,7 @@
 extern WXDLLEXPORT_DATA(const char) wxFileDialogNameStr[] = "filedlg";
 extern WXDLLEXPORT_DATA(const char) wxFileSelectorPromptStr[] = "Select a file";
 extern WXDLLEXPORT_DATA(const char) wxFileSelectorDefaultWildcardStr[] =
-#if defined(__WXMSW__)
+#if defined(__WXMSW__) || defined(__OS2__)
     "*.*"
 #else // Unix/Mac
     "*"
@@ -131,6 +131,19 @@ bool wxFileDialogBase::Create(wxWindow *parent,
 
     return true;
 }
+
+#if WXWIN_COMPATIBILITY_2_6
+long wxFileDialogBase::GetStyle() const
+{
+    return GetWindowStyle();
+}
+
+void wxFileDialogBase::SetStyle(long style)
+{
+    SetWindowStyle(style);
+}
+#endif // WXWIN_COMPATIBILITY_2_6
+
 
 wxString wxFileDialogBase::AppendExtension(const wxString &filePath,
                                            const wxString &extensionList)
@@ -381,5 +394,18 @@ WXDLLEXPORT wxString wxSaveFileSelector(const wxString& what,
 //----------------------------------------------------------------------------
 // wxDirDialogBase
 //----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_6
+long wxDirDialogBase::GetStyle() const
+{
+    return GetWindowStyle();
+}
+
+void wxDirDialogBase::SetStyle(long style)
+{
+    SetWindowStyle(style);
+}
+#endif // WXWIN_COMPATIBILITY_2_6
+
 
 #endif // wxUSE_FILEDLG

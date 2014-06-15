@@ -159,7 +159,7 @@ enum wxStockCursor
 // macros
 // ---------------------------------------------------------------------------
 
-#if defined(__WINDOWS__)
+#if defined(__WINDOWS__) || defined(__WXPM__)
     #define wxHAS_IMAGES_IN_RESOURCES
 #endif
 
@@ -174,6 +174,9 @@ enum wxStockCursor
  */
 
 #ifdef __WINDOWS__
+    // Load from a resource
+    #define wxICON(X) wxIcon(wxT(#X))
+#elif defined(__WXPM__)
     // Load from a resource
     #define wxICON(X) wxIcon(wxT(#X))
 #elif defined(__WXDFB__)
@@ -200,7 +203,7 @@ enum wxStockCursor
    under Unix bitmaps live in XPMs and under Windows they're in ressources.
  */
 
-#if defined(__WINDOWS__)
+#if defined(__WINDOWS__) || defined(__WXPM__)
     #define wxBITMAP(name) wxBitmap(wxT(#name), wxBITMAP_TYPE_BMP_RESOURCE)
 #elif defined(__WXGTK__)   || \
       defined(__WXMOTIF__) || \
@@ -805,6 +808,13 @@ public:
     // return true if the rectangle 'rect' is (not strictly) inside this rect
     bool Contains(const wxRect& rect) const;
 
+#if WXWIN_COMPATIBILITY_2_6
+    // use Contains() instead
+    wxDEPRECATED( bool Inside(int x, int y) const );
+    wxDEPRECATED( bool Inside(const wxPoint& pt) const );
+    wxDEPRECATED( bool Inside(const wxRect& rect) const );
+#endif // WXWIN_COMPATIBILITY_2_6
+
     // return true if the rectangles have a non empty intersection
     bool Intersects(const wxRect& rect) const;
 
@@ -851,6 +861,16 @@ WXDLLIMPEXP_CORE wxRect operator+(const wxRect& r1, const wxRect& r2);
 // intersections of two rectangles
 WXDLLIMPEXP_CORE wxRect operator*(const wxRect& r1, const wxRect& r2);
 
+
+
+
+#if WXWIN_COMPATIBILITY_2_6
+inline bool wxRect::Inside(int cx, int cy) const { return Contains(cx, cy); }
+inline bool wxRect::Inside(const wxPoint& pt) const { return Contains(pt); }
+inline bool wxRect::Inside(const wxRect& rect) const { return Contains(rect); }
+#endif // WXWIN_COMPATIBILITY_2_6
+
+
 // define functions which couldn't be defined above because of declarations
 // order
 inline void wxSize::IncBy(const wxPoint& pt) { IncBy(pt.x, pt.y); }
@@ -885,6 +905,18 @@ public:
 
     // add a new colour to the database
     void AddColour(const wxString& name, const wxColour& colour);
+
+#if WXWIN_COMPATIBILITY_2_6
+    // deprecated, use Find() instead
+    wxDEPRECATED( wxColour *FindColour(const wxString& name) );
+#endif // WXWIN_COMPATIBILITY_2_6
+
+
+#ifdef __WXPM__
+    // PM keeps its own type of colour table
+    long*                           m_palTable;
+    size_t                          m_nSize;
+#endif
 
 private:
     // load the database with the built in colour values when called for the

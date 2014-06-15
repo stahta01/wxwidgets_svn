@@ -161,6 +161,8 @@ public:
             wxPG_TOOLBAR |
             // Include description box.
             wxPG_DESCRIPTION |
+            // Include compactor.
+            wxPG_COMPACTOR |
             // Plus defaults.
             wxPGMAN_DEFAULT_STYLE
            );

@@ -113,6 +113,11 @@ public:
     wxNativeFontInfo(const LOGFONT& lf_) : lf(lf_) { }
 
     LOGFONT      lf;
+#elif defined(__WXPM__)
+    // OS/2 native structures that define a font
+    FATTRS       fa;
+    FONTMETRICS  fm;
+    FACENAMEDESC fn;
 #elif defined(__WXOSX__)
 public:
     wxNativeFontInfo(const wxNativeFontInfo& info) { Init(info); }
@@ -149,7 +154,7 @@ public:
 
     void Free();
     void EnsureValid();
-    
+
     static void UpdateNamesMap(const wxString& familyname, CTFontDescriptorRef descr);
     static void UpdateNamesMap(const wxString& familyname, CTFontRef font);
 

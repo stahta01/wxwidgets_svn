@@ -48,6 +48,8 @@ extern WXDLLIMPEXP_DATA_CORE(const char) wxRadioButtonNameStr[];
     #include "wx/osx/radiobut.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/radiobut.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/radiobut.h"
 #endif
 
 #endif // wxUSE_RADIOBTN

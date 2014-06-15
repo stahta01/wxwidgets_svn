@@ -78,34 +78,34 @@ public:
                                      const wxSize& size,
                                      long style,
                                      const wxValidator& validator,
-                                     const wxString& name) wxOVERRIDE;
+                                     const wxString& name);
 
-    virtual bool Play() wxOVERRIDE;
-    virtual bool Pause() wxOVERRIDE;
-    virtual bool Stop() wxOVERRIDE;
+    virtual bool Play();
+    virtual bool Pause();
+    virtual bool Stop();
 
-    virtual bool Load(const wxString& fileName) wxOVERRIDE;
-    virtual bool Load(const wxURI& location) wxOVERRIDE;
+    virtual bool Load(const wxString& fileName);
+    virtual bool Load(const wxURI& location);
 
-    virtual wxMediaState GetState() wxOVERRIDE;
+    virtual wxMediaState GetState();
 
-    virtual bool SetPosition(wxLongLong where) wxOVERRIDE;
-    virtual wxLongLong GetPosition() wxOVERRIDE;
-    virtual wxLongLong GetDuration() wxOVERRIDE;
+    virtual bool SetPosition(wxLongLong where);
+    virtual wxLongLong GetPosition();
+    virtual wxLongLong GetDuration();
 
-    virtual void Move(int x, int y, int w, int h) wxOVERRIDE;
-    wxSize GetVideoSize() const wxOVERRIDE;
+    virtual void Move(int x, int y, int w, int h);
+    wxSize GetVideoSize() const;
 
-    virtual double GetPlaybackRate() wxOVERRIDE;
-    virtual bool SetPlaybackRate(double dRate) wxOVERRIDE;
+    virtual double GetPlaybackRate();
+    virtual bool SetPlaybackRate(double dRate);
 
-    virtual double GetVolume() wxOVERRIDE;
-    virtual bool SetVolume(double dVolume) wxOVERRIDE;
+    virtual double GetVolume();
+    virtual bool SetVolume(double dVolume);
     
     void Cleanup();
     void FinishLoad();
 
-    virtual bool   ShowPlayerControls(wxMediaCtrlPlayerControls flags) wxOVERRIDE;
+    virtual bool   ShowPlayerControls(wxMediaCtrlPlayerControls flags);
 private:
     void DoShowPlayerControls(wxMediaCtrlPlayerControls flags);
     

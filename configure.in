@@ -14,7 +14,7 @@ dnl ---------------------------------------------------------------------------
 dnl initialization
 dnl ---------------------------------------------------------------------------
 
-AC_INIT([wxWidgets], [3.1.0], [wx-dev@lists.wxwidgets.org])
+AC_INIT([wxWidgets], [3.0.1], [wx-dev@lists.wxwidgets.org])
 
 dnl the file passed to AC_CONFIG_SRCDIR should be specific to our package
 AC_CONFIG_SRCDIR([wx-config.in])
@@ -39,8 +39,8 @@ dnl
 dnl wx_release_number += 1
 
 wx_major_version_number=3
-wx_minor_version_number=1
-wx_release_number=0
+wx_minor_version_number=0
+wx_release_number=1
 wx_subrelease_number=0
 
 WX_RELEASE=$wx_major_version_number.$wx_minor_version_number
@@ -62,6 +62,7 @@ dnl ------------------------------------------------------------------------
 
 dnl OS (assume Unix)
 USE_UNIX=1
+USE_OS2=0
 USE_WIN32=0
 USE_DOS=0
 USE_BEOS=0
@@ -99,7 +100,7 @@ NEEDS_D_REENTRANT_FOR_R_FUNCS=0
 dnl the list of all available toolkits
 dnl
 dnl update NUM_TOOLKITS calculation below when adding a new toolkit here!
-ALL_TOOLKITS="COCOA GTK OSX_CARBON OSX_COCOA OSX_IPHONE MICROWIN MOTIF MSW X11 DFB"
+ALL_TOOLKITS="COCOA GTK OSX_CARBON OSX_COCOA OSX_IPHONE MICROWIN MOTIF MSW PM X11 DFB"
 
 dnl NB: these wxUSE_XXX constants have value of 0 or 1 unlike all the other ones
 dnl     which are either yes or no
@@ -111,6 +112,7 @@ DEFAULT_wxUSE_OSX_IPHONE=0
 DEFAULT_wxUSE_MICROWIN=0
 DEFAULT_wxUSE_MOTIF=0
 DEFAULT_wxUSE_MSW=0
+DEFAULT_wxUSE_PM=0
 DEFAULT_wxUSE_X11=0
 DEFAULT_wxUSE_DFB=0
 
@@ -125,6 +127,7 @@ DEFAULT_DEFAULT_wxUSE_OSX_IPHONE=0
 DEFAULT_DEFAULT_wxUSE_MICROWIN=0
 DEFAULT_DEFAULT_wxUSE_MOTIF=0
 DEFAULT_DEFAULT_wxUSE_MSW=0
+DEFAULT_DEFAULT_wxUSE_PM=0
 DEFAULT_DEFAULT_wxUSE_X11=0
 DEFAULT_DEFAULT_wxUSE_DFB=0
 
@@ -278,6 +281,40 @@ case "${host}" in
     USE_DOS=1
     AC_DEFINE(__DOS__)
     PROGRAM_EXT=".exe"
+  ;;
+
+  *-pc-os2_emx | *-pc-os2-emx )
+    AC_DEFINE(__EMX__)
+    USE_OS2=1
+    AC_DEFINE(__OS2__)
+    PROGRAM_EXT=".exe"
+    DEFAULT_DEFAULT_wxUSE_PM=1
+    dnl "c++" wrapper is not always available, so always use plain gcc.
+    CXX=gcc
+    LDFLAGS="$LDFLAGS -Zcrtdll"
+    dnl
+    dnl Some special code that's automatically added by autoconf-2.57 for OS/2
+    dnl and hopefully also by autoconf-2.58 and newer on all other platforms.
+    dnl For now however, we still need it to make sure the configure script
+    dnl works on OS/2 no matter what platform it is generated on.
+    ac_executable_extensions=".exe"
+    export ac_executable_extensions
+    dnl This strange code is necessary to deal with handling of
+    dnl backslashes by ksh and pdksh's sh variant.
+    ac_save_IFS="$IFS"
+    IFS='\\'
+    ac_TEMP_PATH=
+    for ac_dir in $PATH; do
+      IFS=$ac_save_IFS
+      if test -z "$ac_TEMP_PATH"; then
+        ac_TEMP_PATH="$ac_dir"
+      else
+        ac_TEMP_PATH="$ac_TEMP_PATH/$ac_dir"
+      fi
+    done
+    export PATH="$ac_TEMP_PATH"
+    unset ac_TEMP_PATH
+    DEFAULT_STD_FLAG=no
   ;;
 
   arm-apple-darwin*)
@@ -439,6 +476,7 @@ AC_ARG_WITH(mac,           [  --with-mac              same as --with-osx], [wxUS
 AC_ARG_WITH(old_cocoa,     [  --with-old_cocoa        use old, deprecated, Cocoa port], [wxUSE_OLD_COCOA="$withval" CACHE_OLD_COCOA=1 TOOLKIT_GIVEN=1])
 AC_ARG_WITH(wine,          [  --with-wine             use Wine], [wxUSE_WINE="$withval" CACHE_WINE=1])
 AC_ARG_WITH(msw,           [  --with-msw              use MS-Windows], [wxUSE_MSW="$withval" CACHE_MSW=1 TOOLKIT_GIVEN=1])
+AC_ARG_WITH(pm,            [  --with-pm               use OS/2 Presentation Manager], [wxUSE_PM="$withval" CACHE_PM=1 TOOLKIT_GIVEN=1])
 AC_ARG_WITH(directfb,      [  --with-directfb         use DirectFB], [wxUSE_DFB="$withval" wxUSE_UNIVERSAL="yes" CACHE_DFB=1 TOOLKIT_GIVEN=1])
 AC_ARG_WITH(microwin,      [  --with-microwin         use MicroWindows], [wxUSE_MICROWIN="$withval" CACHE_MICROWIN=1 TOOLKIT_GIVEN=1])
 AC_ARG_WITH(x11,           [  --with-x11              use X11], [wxUSE_X11="$withval" wxUSE_UNIVERSAL="yes" CACHE_X11=1 TOOLKIT_GIVEN=1])
@@ -497,6 +535,12 @@ if test "$wxUSE_GUI" = "yes"; then
     NUM_TOOLKITS=`expr ${wxUSE_OLD_COCOA:-0} + ${wxUSE_GTK:-0} + ${wxUSE_OSX_CARBON:-0} \
                   + ${wxUSE_OSX_COCOA:-0} + ${wxUSE_OSX_IPHONE:-0} + ${wxUSE_DFB:-0} \
                   + ${wxUSE_MICROWIN:-0} + ${wxUSE_MOTIF:-0} + ${wxUSE_MSW:-0} + ${wxUSE_X11:-0}`
+
+    dnl Allow wxUSE_PM only for OS/2 with EMX.
+    case "${host}" in
+      *-pc-os2_emx | *-pc-os2-emx )
+        NUM_TOOLKITS=`expr ${NUM_TOOLKITS} + ${wxUSE_PM:-0}`
+    esac
 
     case "$NUM_TOOLKITS" in
       1)
@@ -650,9 +694,14 @@ WX_ARG_ENABLE(std_iostreams, [  --enable-std_iostreams  use standard C++ stream 
 WX_ARG_ENABLE(std_string,    [  --enable-std_string     use standard C++ string classes], wxUSE_STD_STRING)
 WX_ARG_ENABLE(std_string_conv_in_wxstring, [ --enable-std_string_conv_in_wxstring     provide implicit conversion to std::string in wxString], wxUSE_STD_STRING_CONV_IN_WXSTRING)
 WX_ARG_DISABLE(unicode,      [  --disable-unicode       compile without Unicode support], wxUSE_UNICODE)
+WX_ARG_ENABLE(mslu,          [  --enable-mslu           use MS Layer for Unicode on Windows 9x (Win32 only)], wxUSE_UNICODE_MSLU)
 WX_ARG_ENABLE_PARAM(utf8,    [  --enable-utf8           use UTF-8 representation for strings (Unix only)], wxUSE_UNICODE_UTF8)
 WX_ARG_ENABLE(utf8only,      [  --enable-utf8only       only support UTF-8 locales in UTF-8 build (Unix only)], wxUSE_UNICODE_UTF8_LOCALE)
 WX_ARG_ENABLE(extended_rtti, [  --enable-extended_rtti  use extended RTTI (XTI)], wxUSE_EXTENDED_RTTI)
+if test "$USE_OS2" = 1; then
+    DEFAULT_wxUSE_OMF=no
+    WX_ARG_ENABLE(omf,     [  --enable-omf            use OMF object format], wxUSE_OMF)
+fi
 
 WX_ARG_DISABLE(optimise,   [  --disable-optimise      compile without optimisations], wxUSE_OPTIMISE)
 
@@ -666,8 +715,8 @@ WX_ARG_DISABLE(vararg_macros,[  --disable-vararg_macros don't use vararg macros,
 WX_ARG_ENABLE_PARAM(universal_binary, [[  --enable-universal_binary=archs create universal binary for the specified (or all supported) architectures]], wxUSE_UNIVERSAL_BINARY)
 WX_ARG_ENABLE_PARAM(macosx_arch,      [[  --enable-macosx_arch=ARCH  build for just the specified architecture]], wxUSE_MAC_ARCH)
 
-WX_ARG_ENABLE(compat28,      [  --enable-compat28       enable wxWidgets 2.8 compatibility], WXWIN_COMPATIBILITY_2_8)
-WX_ARG_DISABLE(compat30,     [  --disable-compat30      disable wxWidgets 3.0 compatibility], WXWIN_COMPATIBILITY_3_0)
+WX_ARG_ENABLE(compat26,      [  --enable-compat26       enable wxWidgets 2.6 compatibility], WXWIN_COMPATIBILITY_2_6)
+WX_ARG_DISABLE(compat28,     [  --disable-compat28      disable wxWidgets 2.8 compatibility], WXWIN_COMPATIBILITY_2_8)
 
 WX_ARG_DISABLE(rpath,        [  --disable-rpath         disable use of rpath for uninstalled builds], wxUSE_RPATH)
 
@@ -1397,6 +1446,77 @@ if test "$USE_UNIX" = 1 ; then
     AC_DEFINE(__UNIX__)
 fi
 
+dnl This case is for OS/2 vs. everything else
+case "${host}" in
+  *-pc-os2_emx | *-pc-os2-emx )
+      dnl ---------------------------------------------------------------------
+      dnl When we are using gcc on OS/2, we want to be either using resources
+      dnl (PM) or a more complete POSIX emulation for Motif/GTK+/X11.
+      dnl Moreover we need to link explicitly against either stdcpp.a or
+      dnl stdcxx.a (depending on compiler version), since we are using "gcc",
+      dnl not "g++/c++".
+      dnl ---------------------------------------------------------------------
+      dnl (OS/2-only piece)
+      if test "$wxUSE_MOTIF" = 1 -o "$wxUSE_GTK" = 1 -o "$wxUSE_X11" = 1; then
+          dnl More complete Unix emulation for unix-like ports
+          dnl by linking in POSIX/2's cExt (if available).
+          AC_CHECK_LIB(cExt, drand48, LIBS="$LIBS -lcExt")
+      fi
+      dnl Check for the gcc version (and thereby for the C runtime library).
+      dnl wx_cv_gccversion = EMX2 -> Standard EMX environment
+      dnl wx_cv_gccversion = EMX3 -> EMX with gcc-3.0.3 or gcc-3.2.1
+      dnl wx_cv_gccversion = Innotek5 -> gcc-3.2.2 with Innotek libc5
+      dnl wx_cv_gccversion = Innotek6 -> gcc-3.3.5 with Innotek libc6.
+      AC_CACHE_CHECK([for gcc/libc version], wx_cv_gccversion,[
+          AC_TRY_RUN(
+              dnl Check the gcc version macro.
+              [
+                  #include <stdio.h>
+
+                  int main()
+                  {
+                      FILE *f=fopen("conftestval", "w");
+                      if (!f) exit(1);
+                      fprintf(f,
+                  #if (__GNUC__ < 3)
+                              "EMX2"
+                  #elif (__GNUC__==3) && ((__GNUC_MINOR__ < 2) || ((__GNUC_MINOR__==2) && (__GNUC_PATCHLEVEL__<2)))
+                              "EMX3"
+                  #elif (__GNUC__==3) && (__GNUC_MINOR__==2) && (__GNUC_PATCHLEVEL__==2)
+                              "Innotek5"
+                  #else
+                              "Innotek6"
+                  #endif
+                      );
+                      exit(0);
+                  }
+              ],
+              wx_cv_gccversion=`cat conftestval`,
+              wx_cv_gccversion="EMX2",
+              dnl Compilation error: Assuming standard EMX environment
+              wx_cv_gccversion="EMX2"
+          )
+      ])
+      if test "$wx_cv_gccversion" = "EMX2"; then
+          LIBS="$LIBS -lstdcpp"
+          LDFLAGS="$LDFLAGS -Zsysv-signals"
+      else
+          if test "$wx_cv_gccversion" = "EMX3"; then
+              LIBS="$LIBS -lstdcxx -lgcc"
+              LDFLAGS="$LDFLAGS -Zsysv-signals"
+          else
+              LIBS="$LIBS -lstdc++"
+          fi
+      fi
+      if test "$wxUSE_SHARED" = "yes" -a "$wxUSE_OMF" = "no"; then
+        AC_MSG_WARN([Building DLLs requires OMF mode, enabled])
+        wxUSE_OMF=yes
+        enable_omf=yes
+      fi
+      dnl (end of OS/2-only piece)
+  ;;
+esac
+
 dnl ------------------------------------------------------------------------
 dnl Check for headers
 dnl ------------------------------------------------------------------------
@@ -1409,6 +1529,19 @@ dnl maybe wchar_t is in wcstr.h if we don't have wchar.h?
 if test "$ac_cv_header_wchar_h" != "yes"; then
     AC_CHECK_HEADERS([wcstr.h],,, [AC_INCLUDES_DEFAULT()])
 fi
+
+case "${host}" in
+  *-pc-os2_emx | *-pc-os2-emx )
+      dnl Explicitly link -lintl if langinfo.h is available
+      dnl and intl not yet included in libc
+      if test $ac_cv_header_langinfo_h = "yes" \
+                -a \(   "$wx_cv_gccversion" = "EMX2" \
+                     -o "$wx_cv_gccversion" = "EMX3" \
+                     -o "$wx_cv_gccversion" = "Innotek5" \); then
+          LIBS="$LIBS -lintl"
+      fi
+  ;;
+esac
 
 if test "$USE_UNIX" = 1 ; then
     dnl POSIX needs this for select(), but old systems don't have it
@@ -2183,9 +2316,8 @@ if test "$have_cos" = 1 -a "$have_floor" = 1; then
     AC_MSG_RESULT(yes)
 else
     AC_MSG_RESULT(no)
-    save_LIBS="$LIBS"
     LIBS="$LIBS -lm"
-    dnl use different functions to avoid configure caching
+    # use different functions to avoid configure caching
     have_sin=0
     have_ceil=0
     AC_CHECK_FUNCS(sin, have_sin=1)
@@ -2195,9 +2327,7 @@ else
         AC_MSG_RESULT(yes)
     else
         AC_MSG_RESULT(no)
-        dnl not sure we should warn the user, crash, etc. but don't link with
-        dnl -lm it might result in failure of the subsequent tests too
-        LIBS="$save_LIBS"
+        # not sure we should warn the user, crash, etc.
     fi
 fi
 
@@ -3307,8 +3437,37 @@ libraries returned by 'pkg-config gtk+-2.0 --libs' or 'gtk-config
         GUIDIST=COCOA_DIST
     fi
 
+    if test "$wxUSE_PM" = 1; then
+        TOOLKIT=PM
+        GUIDIST=PM_DIST
+        AC_CACHE_CHECK([for type SPBCDATA],
+            wx_cv_spbcdata,
+            [
+                AC_TRY_COMPILE(
+                    [
+                        #define INCL_PM
+                        #include <os2.h>
+                    ],
+                    [
+                        SPBCDATA test;
+                    ],
+                    wx_cv_spbcdata=yes,
+                    wx_cv_spbcdata=no
+                )
+            ]
+        )
+
+        if test $wx_cv_spbcdata = "yes"; then
+            AC_DEFINE(HAVE_SPBCDATA)
+        fi
+    fi
+
     dnl the name of the directory where the files for this toolkit live
-    TOOLKIT_DIR=`echo ${TOOLKIT} | tr '[[A-Z]]' '[[a-z]]'`
+    if test "$TOOLKIT" = "PM" ; then
+        TOOLKIT_DIR="os2"
+    else
+        TOOLKIT_DIR=`echo ${TOOLKIT} | tr '[[A-Z]]' '[[a-z]]'`
+    fi
 
     if test "$wxUSE_UNIVERSAL" = "yes"; then
         TOOLCHAIN_DEFS="${TOOLCHAIN_DEFS} -D__WXUNIVERSAL__"
@@ -3344,7 +3503,7 @@ dnl ---------------------------------------------------------------------------
 
 dnl do this after test for X11 above so that we have a chance of finding Xlib.h
 if test "$wxUSE_GUI" = "yes"; then
-    if test "$wxUSE_UNIX" = "yes"; then
+    if test "$wxUSE_UNIX" = "yes" -a "$wxUSE_PM" != 1; then
         dnl defines HAVE_X11_XKBLIB_H
         AC_CHECK_HEADERS([X11/Xlib.h],,, [ ])
         AC_CHECK_HEADERS([X11/XKBlib.h],,,
@@ -3699,7 +3858,11 @@ if test "$wxUSE_OSX_CARBON" = 1 -o "$wxUSE_OSX_COCOA" = 1 -o "$wxUSE_OLD_COCOA" 
 else
     WX_LIBRARY_BASENAME_NOGUI="wx_base${WXBASEPORT}${lib_unicode_suffix}${WX_LIB_FLAVOUR}"
 fi
-WX_LIBRARY_BASENAME_GUI="wx_${TOOLKIT_DIR}${TOOLKIT_VERSION}${WIDGET_SET}${lib_unicode_suffix}${WX_LIB_FLAVOUR}"
+if test "${TOOLKIT_DIR}" = "os2"; then
+    WX_LIBRARY_BASENAME_GUI="wx_pm${WIDGET_SET}${lib_unicode_suffix}${WX_LIB_FLAVOUR}"
+else
+    WX_LIBRARY_BASENAME_GUI="wx_${TOOLKIT_DIR}${TOOLKIT_VERSION}${WIDGET_SET}${lib_unicode_suffix}${WX_LIB_FLAVOUR}"
+fi
 
 
 
@@ -4107,31 +4270,31 @@ if test "$ac_cv_func_vsscanf" = "yes"; then
 fi
 AC_LANG_POP()
 
-dnl also look if we have wide char IO functions, notice that [f]putws are
-dnl declared in special widec.h under Solaris
-wchar_headers="#include <stdio.h>
+    dnl also look if we have wide char IO functions, notice that [f]putws are
+    dnl declared in special widec.h under Solaris
+    wchar_headers="#include <stdio.h>
 #include <wchar.h>"
-case "${host}" in
-    *-*-solaris2* )
-        AC_CHECK_HEADERS(widec.h,,, [AC_INCLUDES_DEFAULT()])
-        if test "$ac_cv_header_widec_h" = "yes"; then
-            wchar_headers="$wchar_headers
+    case "${host}" in
+        *-*-solaris2* )
+            AC_CHECK_HEADERS(widec.h,,, [AC_INCLUDES_DEFAULT()])
+            if test "$ac_cv_header_widec_h" = "yes"; then
+                wchar_headers="$wchar_headers
 #include <widec.h>"
-        fi
-esac
+            fi
+    esac
 
-WX_CHECK_FUNCS(putws fputws wprintf vswprintf vswscanf,,,
-               [$wchar_headers])
+    WX_CHECK_FUNCS(putws fputws wprintf vswprintf vswscanf,,,
+                   [$wchar_headers])
 
-dnl MinGW has a vswprintf with a different prototype, and
-dnl a _vsnwprintf with the correct prototype, but AC_CHECK_FUNCS
-dnl finds it even if it is not declared in some versions...
-AC_MSG_CHECKING([for _vsnwprintf])
-AC_TRY_COMPILE([#include <wchar.h>],
-               [&_vsnwprintf;],
-               [AC_MSG_RESULT([yes])
-                AC_DEFINE(HAVE__VSNWPRINTF)],
-               [AC_MSG_RESULT([no])]);
+    dnl MinGW has a vswprintf with a different prototype, and
+    dnl a _vsnwprintf with the correct prototype, but AC_CHECK_FUNCS
+    dnl finds it even if it is not declared in some versions...
+    AC_MSG_CHECKING([for _vsnwprintf])
+    AC_TRY_COMPILE([#include <wchar.h>],
+                   [&_vsnwprintf;],
+                   [AC_MSG_RESULT([yes])
+                    AC_DEFINE(HAVE__VSNWPRINTF)],
+                   [AC_MSG_RESULT([no])]);
 
 if test "$wxUSE_FILE" = "yes"; then
     WX_CHECK_FUNCS(fsync)
@@ -4513,7 +4676,7 @@ dnl                          the next matching "else")
 dnl ---------------------------------------------------------------------------
 
 dnl under MSW (except mingw32) we always have thread support
-if test "$TOOLKIT" != "MSW"; then
+if test "$TOOLKIT" != "MSW" -a "$USE_OS2" != 1; then
 
     dnl the code below:
     dnl
@@ -4978,6 +5141,10 @@ else
                 CFLAGS="$CFLAGS_OLD"
             fi
         ;;
+        *-pc-os2*emx )
+            WXCONFIG_CFLAGS="$WXCONFIG_CFLAGS -Zmt -D__ST_MT_ERRNO__"
+            LDFLAGS="$LDFLAGS -Zmt"
+        ;;
       esac
     fi
 fi
@@ -5156,10 +5323,19 @@ else
         fi
     else
         if test "$GCC" = yes ; then
-            dnl Switch on optimisation but keep strict-aliasing off for
-            dnl now (see -fstrict-aliasing in the gcc manual). When it is
-            dnl switched back on consider using -Wstrict-aliasing=2.
-            OPTIMISE_CFLAGS="-O2 -fno-strict-aliasing"
+            case "${host}" in
+                *-pc-os2_emx | *-pc-os2-emx )
+                    dnl Not all of the supported gcc versions understand
+                    dnl -fstrict-aliasing and none actually needs it (yet).
+                    OPTIMISE_CFLAGS="-O2"
+                ;;
+                *)
+                    dnl Switch on optimisation but keep strict-aliasing off for
+                    dnl now (see -fstrict-aliasing in the gcc manual). When it is
+                    dnl switched back on consider using -Wstrict-aliasing=2.
+                    OPTIMISE_CFLAGS="-O2 -fno-strict-aliasing"
+                ;;
+            esac
         else
             OPTIMISE_CFLAGS="-O"
         fi
@@ -5170,14 +5346,14 @@ dnl ---------------------------------------------------------------------------
 dnl compatibility level
 dnl ---------------------------------------------------------------------------
 
-if test "x$WXWIN_COMPATIBILITY_2_8" = "xyes"; then
-    AC_DEFINE(WXWIN_COMPATIBILITY_2_8)
+if test "x$WXWIN_COMPATIBILITY_2_6" = "xyes"; then
+    AC_DEFINE(WXWIN_COMPATIBILITY_2_6)
 
-    WXWIN_COMPATIBILITY_3_0="yes"
+    WXWIN_COMPATIBILITY_2_8="yes"
 fi
 
-if test "x$WXWIN_COMPATIBILITY_3_0" != "xno"; then
-    AC_DEFINE(WXWIN_COMPATIBILITY_3_0)
+if test "x$WXWIN_COMPATIBILITY_2_8" != "xno"; then
+    AC_DEFINE(WXWIN_COMPATIBILITY_2_8)
 fi
 
 dnl ---------------------------------------------------------------------------
@@ -5213,7 +5389,7 @@ dnl DLL support
 dnl ------------------------------------------------------------------------
 
 dnl under MSW we always have LoadLibrary/GetProcAddress
-if test "$TOOLKIT" != "MSW"; then
+if test "$TOOLKIT" != "MSW" -a "$USE_OS2" != 1; then
 
     HAVE_DL_FUNCS=0
     HAVE_SHL_FUNCS=0
@@ -5258,12 +5434,6 @@ if test "$TOOLKIT" != "MSW"; then
                     AC_DEFINE(HAVE_DLERROR),
                     [
                         AC_CHECK_LIB(dl, dlerror, AC_DEFINE(HAVE_DLERROR))
-                    ]
-                )
-                AC_CHECK_FUNCS(dladdr,
-                    AC_DEFINE(HAVE_DLADDR),
-                    [
-                        AC_CHECK_LIB(dl, dladdr, AC_DEFINE(HAVE_DLADDR))
                     ]
                 )
             fi
@@ -6183,9 +6353,25 @@ dnl ---------------------------------------------------------------------------
 if test "$wxUSE_GUI" = "yes" -a "$wxUSE_JOYSTICK" = "yes"; then
     wxUSE_JOYSTICK=no
 
-    dnl under MSW and OS X we always have joystick support
-    if test "$TOOLKIT" = "MSW" -o "$TOOLKIT" = "OSX_COCOA" -o "$TOOLKIT" = "COCOA"; then
+    dnl under MSW we always have joystick support
+    if test "$TOOLKIT" = "MSW"; then
         wxUSE_JOYSTICK=yes
+
+    dnl mac only available on darwin
+    elif test "$TOOLKIT" = "OSX_COCOA" -o "$TOOLKIT" = "COCOA"; then
+        if test "$USE_DARWIN" = 1; then
+            dnl check for a bug in the headers, some have bad setEventCallout
+            AC_MSG_CHECKING([headers have declarations needed for joystick support])
+            AC_LANG_PUSH(C++)
+            AC_TRY_COMPILE( [ #include <IOKit/hid/IOHIDLib.h> ],
+                            [ IOHIDQueueInterface *qi = NULL;
+                              IOHIDCallbackFunction cb = NULL;
+                              qi->setEventCallout(NULL, cb, NULL, NULL); ],
+                            [ wxUSE_JOYSTICK=yes ]
+                          )
+            AC_LANG_POP()
+            AC_MSG_RESULT($wxUSE_JOYSTICK)
+        fi
 
     dnl joystick support is only for Linux 2.1.x or greater
     else
@@ -6221,6 +6407,22 @@ fi
 
 if test "$wxUSE_UNICODE" = "yes" ; then
   AC_DEFINE(wxUSE_UNICODE)
+
+  if test "$USE_WIN32" != 1; then
+      wxUSE_UNICODE_MSLU=no
+  fi
+
+  if test "$USE_WIN32" = 1 -a "$wxUSE_UNICODE_MSLU" = "yes"; then
+        AC_CHECK_LIB(unicows,main,
+            [
+                AC_DEFINE(wxUSE_UNICODE_MSLU)
+            ],
+            [
+                AC_MSG_WARN([Compiler doesn't support MSLU (libunicows.a), disabled.
+                             Applications will only run on Windows NT/2000/XP!])
+                wxUSE_UNICODE_MSLU=no
+            ])
+    fi
 fi
 
 if test "$wxUSE_UNICODE" = "yes" -a "$wxUSE_UNICODE_UTF8" = "yes"; then
@@ -6294,12 +6496,12 @@ dnl wxMetafile
 dnl ---------------------------------------------------------------------------
 
 if test "$wxUSE_METAFILE" = "yes"; then
-    if test "$wxUSE_MSW" != 1 -a "$wxUSE_MAC" != 1; then
+    if test "$wxUSE_MSW" != 1 -a "$wxUSE_MAC" != 1 -a "$wxUSE_PM" != 1; then
         AC_MSG_WARN([wxMetafile is not available on this system... disabled])
         wxUSE_METAFILE=no
     fi
 elif test "$wxUSE_METAFILE" = "auto"; then
-    if test "$wxUSE_MSW" = 1 -o "$wxUSE_MAC" = 1; then
+    if test "$wxUSE_MSW" = 1 -o "$wxUSE_MAC" = 1 -o "$wxUSE_PM" = 1; then
         wxUSE_METAFILE=yes
     fi
 fi
@@ -6816,10 +7018,14 @@ if test "$wxUSE_POPUPWIN" = "yes"; then
     if test "$wxUSE_OLD_COCOA" = 1 ; then
         AC_MSG_WARN([Popup window not yet supported under Mac OS X... disabled])
     else
-        AC_DEFINE(wxUSE_POPUPWIN)
-        SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS popup"
+        if test "$wxUSE_PM" = 1; then
+            AC_MSG_WARN([wxPopupWindow not yet supported under PM... disabled])
+        else
+            AC_DEFINE(wxUSE_POPUPWIN)
+            SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS popup"
 
-        USES_CONTROLS=1
+            USES_CONTROLS=1
+        fi
     fi
 fi
 
@@ -6838,7 +7044,11 @@ if test "$wxUSE_DIALUP_MANAGER" = "yes"; then
 fi
 
 if test "$wxUSE_TIPWINDOW" = "yes"; then
-    AC_DEFINE(wxUSE_TIPWINDOW)
+    if test "$wxUSE_PM" = 1; then
+        AC_MSG_WARN([wxTipWindow not yet supported under PM... disabled])
+    else
+        AC_DEFINE(wxUSE_TIPWINDOW)
+    fi
 fi
 
 if test "$USES_CONTROLS" = 1; then
@@ -7012,6 +7222,11 @@ if test "$wxUSE_PALETTE" = "yes" ; then
     else
         AC_DEFINE(wxUSE_PALETTE)
     fi
+fi
+
+if test "$wxUSE_UNICODE" = "yes" -a "$wxUSE_UNICODE_MSLU" = "yes" ; then
+  dnl Must be done this late because -lunicows must be before all the other libs
+  LIBS=" -lunicows $LIBS"
 fi
 
 USE_RICHTEXT=0
@@ -7192,7 +7407,7 @@ dnl ---------------------------------------------------------------------------
 dnl options used under wxMSW and wxPM
 dnl ---------------------------------------------------------------------------
 
-if test "$wxUSE_MSW" = 1; then
+if test "$wxUSE_MSW" = 1 -o "$wxUSE_PM" = 1; then
     if test "$wxUSE_OWNER_DRAWN" = "yes"; then
         AC_DEFINE(wxUSE_OWNER_DRAWN)
     fi
@@ -7429,6 +7644,7 @@ dnl ---------------------------------------------------------------------------
 STD_BASE_LIBS="base"
 STD_GUI_LIBS=""
 BUILT_WX_LIBS="base"
+ALL_WX_LIBS="xrc stc gl media qa html adv core xml net base"
 
 if test "$wxUSE_SOCKETS" = "yes" ; then
     STD_BASE_LIBS="net $STD_BASE_LIBS"
@@ -7473,6 +7689,7 @@ if test "$wxUSE_GUI" = "yes"; then
         BUILT_WX_LIBS="stc $BUILT_WX_LIBS"
     fi
     if test "$wxUSE_WEBVIEW" = "yes" ; then
+        STD_GUI_LIBS="webview $STD_GUI_LIBS"
         BUILT_WX_LIBS="webview $BUILT_WX_LIBS"
     fi
     if test "$wxUSE_XRC" = "yes" ; then
@@ -7481,6 +7698,7 @@ if test "$wxUSE_GUI" = "yes"; then
     fi
 fi
 
+AC_SUBST(ALL_WX_LIBS)
 AC_SUBST(BUILT_WX_LIBS)
 AC_SUBST(STD_BASE_LIBS)
 AC_SUBST(STD_GUI_LIBS)
@@ -7565,6 +7783,9 @@ if test "$wxUSE_GUI" = "yes"; then
         if test "$wxUSE_UNIVERSAL" != "yes"; then
             SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS ownerdrw nativdlg dll"
         fi
+    fi
+    if test "$TOOLKIT" = "PM" -a "$wxUSE_UNIVERSAL" != "yes"; then
+        SAMPLES_SUBDIRS="$SAMPLES_SUBDIRS ownerdrw"
     fi
 else
     SAMPLES_SUBDIRS="console"
@@ -7933,7 +8154,16 @@ if test "$wxUSE_MAC" = 1 -o "$wxUSE_OLD_COCOA" = 1; then
 else
     dnl default value is to (silently) do nothing in the makefile
     MACSETFILE="@true"
-    POSTLINK_COMMAND="@true"
+
+    if test "$wxUSE_PM" = 1; then
+        RESCOMP="emxbind"
+        WXCONFIG_RESFLAGS="-ep"
+
+        dnl Is this one really used anywhere for pm?
+        POSTLINK_COMMAND="$RESCOMP $WXCONFIG_RESFLAGS"
+    else
+        POSTLINK_COMMAND="@true"
+    fi
 fi
 
 fi
@@ -7972,6 +8202,29 @@ if test "$DEPS_TRACKING" = 1 -a "$wxUSE_MAC" = 1 ; then
             chmod +x bk-deps
         fi
     fi
+fi
+
+if test "$wxUSE_SHARED" = "yes"; then
+    dnl Need addtional flag on OS/2, so override bakefiles value
+    dnl (there currently is no suitable variable to which the
+    dnl  missing flags could be added, AFAICS. SN, 18.12.2004. )
+    case "${host}" in
+      *-pc-os2_emx | *-pc-os2-emx )
+        SHARED_LD_CC="`pwd`/dllar.sh -name-mangler-script ./dllnames.sh -libf INITINSTANCE -libf TERMINSTANCE -o"
+        SHARED_LD_CXX="`pwd`/dllar.sh -name-mangler-script ./dllnames.sh -libf INITINSTANCE -libf TERMINSTANCE -o"
+        cp -p ${srcdir}/src/os2/dllnames.sh .
+        cp -p ${srcdir}/src/os2/dllar.sh .
+      ;;
+    esac
+fi
+if test "$wxUSE_OMF" = "yes"; then
+    case "${host}" in
+      *-pc-os2_emx | *-pc-os2-emx )
+        LDFLAGS="$LDFLAGS -Zlinker /EXEPACK"
+        LDFLAGS_GUI="-Zlinker /PMTYPE:PM"
+        WXCONFIG_LDFLAGS_GUI="-Zlinker /PMTYPE:PM"
+      ;;
+    esac
 fi
 
 dnl TOOLCHAIN_DEFS should be used for both wx and client code
@@ -8246,8 +8499,8 @@ else
 fi
 
 echo "  What level of wxWidgets compatibility should be enabled?"
-echo "                                       wxWidgets 2.8      ${WXWIN_COMPATIBILITY_2_8:-no}"
-echo "                                       wxWidgets 3.0      ${WXWIN_COMPATIBILITY_3_0:-yes}"
+echo "                                       wxWidgets 2.6      ${WXWIN_COMPATIBILITY_2_6:-no}"
+echo "                                       wxWidgets 2.8      ${WXWIN_COMPATIBILITY_2_8:-yes}"
 
 echo "  Which libraries should wxWidgets use?"
 echo "                                       STL                ${wxUSE_STL}"

@@ -27,6 +27,8 @@
 #include "wx/osx/tooltip.h"
 #elif defined(__WXCOCOA__)
 #include "wx/cocoa/tooltip.h"
+#elif defined(__WXPM__)
+#include "wx/os2/tooltip.h"
 #endif
 
 #endif

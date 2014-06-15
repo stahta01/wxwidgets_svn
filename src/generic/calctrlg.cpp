@@ -916,8 +916,8 @@ void wxGenericCalendarCtrl::OnPaint(wxPaintEvent& WXUNUSED(event))
     if ( HasFlag( wxCAL_SHOW_WEEK_NUMBERS ) && IsExposed( 0, y, m_calendarWeekWidth, m_heightRow * 6 ))
     {
         dc.SetBackgroundMode(wxTRANSPARENT);
-        dc.SetBrush(wxBrush(m_colHeaderBg, wxBRUSHSTYLE_SOLID));
-        dc.SetPen(wxPen(m_colHeaderBg, 1, wxPENSTYLE_SOLID));
+        dc.SetBrush(wxBrush(m_colHeaderBg, wxSOLID));
+        dc.SetPen(wxPen(m_colHeaderBg, 1, wxSOLID));
         dc.DrawRectangle( 0, y, m_calendarWeekWidth, m_heightRow * 6 );
         wxDateTime date = GetStartDate();
         for ( size_t i = 0; i < 6; ++i )
@@ -1378,7 +1378,7 @@ void wxGenericCalendarCtrl::OnClick(wxMouseEvent& event)
 
         default:
             wxFAIL_MSG(wxT("unknown hittest code"));
-            wxFALLTHROUGH;
+            // fall through
 
         case wxCAL_HITTEST_NOWHERE:
             event.Skip();

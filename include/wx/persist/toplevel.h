@@ -46,7 +46,7 @@ public:
     {
     }
 
-    virtual void Save() const wxOVERRIDE
+    virtual void Save() const
     {
         const wxTopLevelWindow * const tlw = Get();
 
@@ -69,7 +69,7 @@ public:
         SaveValue(wxPERSIST_TLW_ICONIZED, tlw->IsIconized());
     }
 
-    virtual bool Restore() wxOVERRIDE
+    virtual bool Restore()
     {
         wxTopLevelWindow * const tlw = Get();
 
@@ -117,7 +117,7 @@ public:
         return hasSize;
     }
 
-    virtual wxString GetKind() const wxOVERRIDE { return wxPERSIST_TLW_KIND; }
+    virtual wxString GetKind() const { return wxPERSIST_TLW_KIND; }
 };
 
 inline wxPersistentObject *wxCreatePersistentObject(wxTopLevelWindow *tlw)

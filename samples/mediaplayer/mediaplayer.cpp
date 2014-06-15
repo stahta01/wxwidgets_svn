@@ -147,14 +147,14 @@ public:
 #endif
 
 #if wxUSE_CMDLINE_PARSER
-    virtual void OnInitCmdLine(wxCmdLineParser& parser) wxOVERRIDE;
-    virtual bool OnCmdLineParsed(wxCmdLineParser& parser) wxOVERRIDE;
+    virtual void OnInitCmdLine(wxCmdLineParser& parser);
+    virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
 
     // Files specified on the command line, if any.
     wxVector<wxString> m_params;
 #endif // wxUSE_CMDLINE_PARSER
 
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 
 protected:
     class wxMediaPlayerFrame* m_frame;
@@ -287,7 +287,7 @@ public:
     wxMediaPlayerTimer(wxMediaPlayerFrame* frame) {m_frame = frame;}
 
     // Called each time the timer's timeout expires
-    void Notify() wxOVERRIDE;
+    void Notify();
 
     wxMediaPlayerFrame* m_frame;       // The wxMediaPlayerFrame
 };
@@ -353,7 +353,7 @@ public:
     wxPlayListDropTarget(wxMediaPlayerListCtrl& list) : m_list(list) {}
     ~wxPlayListDropTarget(){}
         virtual bool OnDropFiles(wxCoord WXUNUSED(x), wxCoord WXUNUSED(y),
-                         const wxArrayString& files) wxOVERRIDE
+                         const wxArrayString& files)
     {
         for (size_t i = 0; i < files.GetCount(); ++i)
         {
@@ -591,7 +591,7 @@ wxMediaPlayerFrame::wxMediaPlayerFrame(const wxString& title)
     //  Then after your class declaration you put
     //  wxBEGIN_EVENT_TABLE(wxMediaPlayerFrame, wxFrame)
     //  EVT_XXX(XXX)...
-    //  wxEND_EVENT_TABLE()
+    // wxEND_EVENT_TABLE()
     //
     //  Where wxMediaPlayerFrame is the class with the DECLARE_MESSAGE_MAP
     //  in it.  EVT_XXX(XXX) are each of your handlers, such

@@ -93,8 +93,8 @@ public:
     StaticWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
     virtual ~StaticWidgetsPage(){};
 
-    virtual wxControl *GetWidget() const wxOVERRIDE { return m_statText; }
-    virtual Widgets GetWidgets() const wxOVERRIDE
+    virtual wxControl *GetWidget() const { return m_statText; }
+    virtual Widgets GetWidgets() const
     {
         Widgets widgets;
         widgets.push_back(m_sizerStatBox->GetStaticBox());
@@ -108,10 +108,10 @@ public:
 
         return widgets;
     }
-    virtual void RecreateWidget() wxOVERRIDE { CreateStatic(); }
+    virtual void RecreateWidget() { CreateStatic(); }
 
     // lazy creation of the content
-    virtual void CreateContent() wxOVERRIDE;
+    virtual void CreateContent();
 
 protected:
     // event handlers

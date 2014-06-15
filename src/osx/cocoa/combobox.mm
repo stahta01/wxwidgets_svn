@@ -90,19 +90,6 @@
     }
 }
 
-- (void)controlTextDidEndEditing:(NSNotification *) aNotification
-{
-    wxUnusedVar(aNotification);
-    wxWidgetCocoaImpl* impl = (wxWidgetCocoaImpl* ) wxWidgetImpl::FindFromWXWidget( self );
-    if ( impl )
-    {
-        wxNSTextFieldControl* timpl = dynamic_cast<wxNSTextFieldControl*>(impl);
-        if ( timpl )
-            timpl->UpdateInternalSelectionFromEditor(fieldEditor);
-        impl->DoNotifyFocusLost();
-    }
-}
-
 - (void)comboBoxWillPopUp:(NSNotification *)notification
 {
     wxUnusedVar(notification);

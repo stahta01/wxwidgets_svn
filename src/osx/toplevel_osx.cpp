@@ -190,11 +190,6 @@ void wxTopLevelWindowMac::ShowWithoutActivating()
     SendSizeEvent();
 }
 
-bool wxTopLevelWindowMac::EnableFullScreenView(bool enable)
-{
-    return m_nowpeer->EnableFullScreenView(enable);
-}
-
 bool wxTopLevelWindowMac::ShowFullScreen(bool show, long style)
 {
     return m_nowpeer->ShowFullScreen(show, style);

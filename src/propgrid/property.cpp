@@ -62,7 +62,7 @@ static void wxPGDrawFocusRect( wxDC& dc, const wxRect& rect )
     //   Also, it seems that this code may not work in future wx versions.
     dc.SetLogicalFunction(wxINVERT);
 
-    wxPen pen(*wxBLACK,1,wxPENSTYLE_DOT);
+    wxPen pen(*wxBLACK,1,wxDOT);
     pen.SetCap(wxCAP_BUTT);
     dc.SetPen(pen);
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -73,7 +73,7 @@ static void wxPGDrawFocusRect( wxDC& dc, const wxRect& rect )
 #else
     dc.SetLogicalFunction(wxINVERT);
 
-    dc.SetPen(wxPen(*wxBLACK,1,wxPENSTYLE_DOT));
+    dc.SetPen(wxPen(*wxBLACK,1,wxDOT));
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
 
     dc.DrawRectangle(rect);
@@ -244,7 +244,7 @@ bool wxPGDefaultRenderer::Render( wxDC& dc, const wxRect& rect,
                                  wxPG_CUSTOM_IMAGE_WIDTH,
                                  rect.height-(wxPG_CUSTOM_IMAGE_SPACINGY*2));
 
-                dc.SetPen( wxPen(propertyGrid->GetCellTextColour(), 1, wxPENSTYLE_SOLID) );
+                dc.SetPen( wxPen(propertyGrid->GetCellTextColour(), 1, wxSOLID) );
 
                 paintdata.m_drawnWidth = imageSize.x;
                 paintdata.m_drawnHeight = imageSize.y;
@@ -508,10 +508,13 @@ void wxPGProperty::InitAfterAdded( wxPropertyGridPageState* pageState,
         wxPGCell& cell = m_cells[i];
         if ( cell.IsInvalid() )
         {
+            const wxPGCell& propDefCell = propgrid->GetPropertyDefaultCell();
+            const wxPGCell& catDefCell = propgrid->GetCategoryDefaultCell();
+
             if ( !HasFlag(wxPG_PROP_CATEGORY) )
-                cell = propgrid->GetPropertyDefaultCell();
+                cell = propDefCell;
             else
-                cell = propgrid->GetCategoryDefaultCell();
+                cell = catDefCell;
         }
     }
 
@@ -1564,10 +1567,14 @@ void wxPGProperty::EnsureCells( unsigned int column )
 
         if ( pg )
         {
+            // Work around possible VC6 bug by using intermediate variables
+            const wxPGCell& propDefCell = pg->GetPropertyDefaultCell();
+            const wxPGCell& catDefCell = pg->GetCategoryDefaultCell();
+
             if ( !HasFlag(wxPG_PROP_CATEGORY) )
-                defaultCell = pg->GetPropertyDefaultCell();
+                defaultCell = propDefCell;
             else
-                defaultCell = pg->GetCategoryDefaultCell();
+                defaultCell = catDefCell;
         }
 
         // TODO: Replace with resize() call
@@ -1763,10 +1770,6 @@ wxVariant wxPGProperty::DoGetAttribute( const wxString& WXUNUSED(name) ) const
 
 wxVariant wxPGProperty::GetAttribute( const wxString& name ) const
 {
-    wxVariant value = DoGetAttribute(name);
-    if ( !value.IsNull() )
-        return value;
-
     return m_attributes.FindValue(name);
 }
 
@@ -2545,7 +2548,7 @@ void wxPGProperty::Empty()
 
 wxPGProperty* wxPGProperty::GetItemAtY( unsigned int y ) const
 {
-    unsigned int nextItem = 0;
+    unsigned int nextItem;
     return GetItemAtY( y, GetGrid()->GetRowHeight(), &nextItem);
 }
 

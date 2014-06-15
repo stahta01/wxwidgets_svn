@@ -34,16 +34,16 @@ public:
 
     virtual ~wxGtkCalendarCtrl() {}
 
-    virtual bool SetDate(const wxDateTime& date) wxOVERRIDE;
-    virtual wxDateTime GetDate() const wxOVERRIDE;
+    virtual bool SetDate(const wxDateTime& date);
+    virtual wxDateTime GetDate() const;
 
     virtual bool SetDateRange(const wxDateTime& lowerdate = wxDefaultDateTime,
-                              const wxDateTime& upperdate = wxDefaultDateTime) wxOVERRIDE;
-    virtual bool GetDateRange(wxDateTime *lowerdate, wxDateTime *upperdate) const wxOVERRIDE;
+                              const wxDateTime& upperdate = wxDefaultDateTime);
+    virtual bool GetDateRange(wxDateTime *lowerdate, wxDateTime *upperdate) const;
 
-    virtual bool EnableMonthChange(bool enable = true) wxOVERRIDE;
+    virtual bool EnableMonthChange(bool enable = true);
 
-    virtual void Mark(size_t day, bool mark) wxOVERRIDE;
+    virtual void Mark(size_t day, bool mark);
 
     // implementation
     // --------------

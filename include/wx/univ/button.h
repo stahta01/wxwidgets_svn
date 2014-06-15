@@ -86,10 +86,10 @@ public:
 
     virtual ~wxButton();
 
-    virtual wxWindow *SetDefault() wxOVERRIDE;
+    virtual wxWindow *SetDefault();
 
-    virtual bool IsPressed() const wxOVERRIDE { return m_isPressed; }
-    virtual bool IsDefault() const wxOVERRIDE { return m_isDefault; }
+    virtual bool IsPressed() const { return m_isPressed; }
+    virtual bool IsDefault() const { return m_isDefault; }
 
     // wxButton actions
     virtual void Toggle();
@@ -99,25 +99,25 @@ public:
 
     virtual bool PerformAction(const wxControlAction& action,
                                long numArg = -1,
-                               const wxString& strArg = wxEmptyString) wxOVERRIDE;
+                               const wxString& strArg = wxEmptyString);
 
-    virtual bool CanBeHighlighted() const wxOVERRIDE { return true; }
+    virtual bool CanBeHighlighted() const { return true; }
 
     static wxInputHandler *GetStdInputHandler(wxInputHandler *handlerDef);
-    virtual wxInputHandler *DoGetStdInputHandler(wxInputHandler *handlerDef) wxOVERRIDE
+    virtual wxInputHandler *DoGetStdInputHandler(wxInputHandler *handlerDef)
     {
         return GetStdInputHandler(handlerDef);
     }
 
 
 protected:
-    virtual wxSize DoGetBestClientSize() const wxOVERRIDE;
+    virtual wxSize DoGetBestClientSize() const;
 
-    virtual bool DoDrawBackground(wxDC& dc) wxOVERRIDE;
-    virtual void DoDraw(wxControlRenderer *renderer) wxOVERRIDE;
+    virtual bool DoDrawBackground(wxDC& dc);
+    virtual void DoDraw(wxControlRenderer *renderer);
 
-    virtual void DoSetBitmap(const wxBitmap& bitmap, State which) wxOVERRIDE;
-    virtual void DoSetBitmapMargins(wxCoord x, wxCoord y) wxOVERRIDE;
+    virtual void DoSetBitmap(const wxBitmap& bitmap, State which);
+    virtual void DoSetBitmapMargins(wxCoord x, wxCoord y);
 
     // common part of all ctors
     void Init();

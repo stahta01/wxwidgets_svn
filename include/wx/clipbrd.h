@@ -117,7 +117,7 @@ public:
     bool SupportsFormat(const wxDataFormat& format) const;
     void AddFormat(const wxDataFormat& format);
 
-    virtual wxEvent *Clone() const wxOVERRIDE
+    virtual wxEvent *Clone() const
     {
         return new wxClipboardEvent(*this);
     }
@@ -163,6 +163,8 @@ typedef void (wxEvtHandler::*wxClipboardEventFunction)(wxClipboardEvent&);
     #include "wx/osx/clipbrd.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/clipbrd.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/clipbrd.h"
 #endif
 
 // ----------------------------------------------------------------------------

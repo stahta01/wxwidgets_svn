@@ -388,7 +388,7 @@ bool wxFTP::SetTransferMode(TransferMode transferMode)
     {
         default:
             wxFAIL_MSG(wxT("unknown FTP transfer mode"));
-            wxFALLTHROUGH;
+            // fall through
 
         case BINARY:
             mode = wxT('I');
@@ -468,7 +468,7 @@ wxString wxFTP::Pwd()
         }
         else
         {
-            for ( ++p; *p; ++p )
+            for ( ++p; (bool)*p; ++p ) // FIXME-DMARS
             {
                 if ( *p == wxT('"') )
                 {

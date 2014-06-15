@@ -80,6 +80,16 @@ public:
     int GetMarginX() const { return DoGetBitmapMargins().x; }
     int GetMarginY() const { return DoGetBitmapMargins().y; }
 
+    // deprecated synonym for SetBitmapLabel()
+#if WXWIN_COMPATIBILITY_2_6
+    wxDEPRECATED_INLINE( void SetLabel(const wxBitmap& bitmap),
+       SetBitmapLabel(bitmap); )
+
+    // prevent virtual function hiding
+    virtual void SetLabel(const wxString& label)
+        { wxWindow::SetLabel(label); }
+#endif // WXWIN_COMPATIBILITY_2_6
+
 protected:
 #ifndef wxHAS_BUTTON_BITMAP
     // function called when any of the bitmaps changes
@@ -125,6 +135,8 @@ protected:
     #include "wx/osx/bmpbuttn.h"
 #elif defined(__WXCOCOA__)
     #include "wx/cocoa/bmpbuttn.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/bmpbuttn.h"
 #endif
 
 #endif // wxUSE_BMPBUTTON

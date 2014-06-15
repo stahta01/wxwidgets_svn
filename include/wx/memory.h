@@ -42,13 +42,18 @@ WXDLLIMPEXP_BASE void wxDebugFree(void * buf, bool isVect = false);
 
 #if defined(__SUNCC__)
     #define wxUSE_ARRAY_MEMORY_OPERATORS 0
+#elif !( defined (__VISUALC__) && (__VISUALC__ <= 1020) )
+    #define wxUSE_ARRAY_MEMORY_OPERATORS 1
 #elif defined (__SGI_CC_)
     // only supported by -n32 compilers
     #ifndef __EDG_ABI_COMPATIBILITY_VERSION
         #define wxUSE_ARRAY_MEMORY_OPERATORS 0
     #endif
-#else
+#elif !( defined (__VISUALC__) && (__VISUALC__ <= 1020) )
     #define wxUSE_ARRAY_MEMORY_OPERATORS 1
+#else
+    // ::operator new[] is a recent C++ feature, so assume it's not supported
+    #define wxUSE_ARRAY_MEMORY_OPERATORS 0
 #endif
 
 // devik 2000-8-29: All new/delete ops are now inline because they can't
@@ -104,7 +109,8 @@ void operator delete[] (void * buf);
 #endif // wxUSE_ARRAY_MEMORY_OPERATORS
 #endif // defined(__WINDOWS__) && (defined(WXUSINGDLL) || defined(WXMAKINGDLL_BASE))
 
-#if defined(__VISUALC__)
+// VC++ 6.0
+#if ( defined(__VISUALC__) && (__VISUALC__ >= 1200) )
 inline void operator delete(void* pData, wxChar* /* fileName */, int /* lineNum */)
 {
     wxDebugFree(pData, false);
@@ -113,7 +119,7 @@ inline void operator delete[](void* pData, wxChar* /* fileName */, int /* lineNu
 {
     wxDebugFree(pData, true);
 }
-#endif // __VISUALC__
+#endif // __VISUALC__>=1200
 #endif // wxUSE_GLOBAL_MEMORY_OPERATORS
 
 //**********************************************************************************

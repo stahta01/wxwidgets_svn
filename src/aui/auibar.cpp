@@ -98,7 +98,7 @@ public:
     ToolbarCommandCapture() { m_lastId = 0; }
     int GetCommandId() const { return m_lastId; }
 
-    bool ProcessEvent(wxEvent& evt) wxOVERRIDE
+    bool ProcessEvent(wxEvent& evt)
     {
         if (evt.GetEventType() == wxEVT_MENU)
         {
@@ -774,7 +774,7 @@ int wxAuiDefaultToolBarArt::ShowDropDown(wxWindow* wnd,
 
 
 
-static wxOrientation GetOrientation(long style)
+static wxOrientation GetOrientation(long& style)
 {
     switch (style & wxAUI_ORIENTATION_MASK)
     {
@@ -784,7 +784,7 @@ static wxOrientation GetOrientation(long style)
             return wxVERTICAL;
         default:
             wxFAIL_MSG("toolbar cannot be locked in both horizontal and vertical orientations (maybe no lock was intended?)");
-            wxFALLTHROUGH;
+            // fall through
         case 0:
             return wxBOTH;
     }

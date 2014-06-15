@@ -12,7 +12,6 @@
 
 #ifndef WX_PRECOMP
 #include "wx/object.h"
-#include "wx/math.h"
 #endif
 
 #if wxOSX_USE_COCOA_OR_CARBON
@@ -192,7 +191,8 @@ WX_NSFont wxFont::OSXCreateNSFont(wxOSXSystemFont font, wxNativeFontInfo* info)
     return nsfont;
 }
 
-static const NSAffineTransformStruct kSlantNSTransformStruct = { 1, 0, static_cast<CGFloat>(tan(wxDegToRad(11))), 1, 0, 0  };
+static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
+static const NSAffineTransformStruct kSlantNSTransformStruct = { 1, 0, static_cast<CGFloat>(tan(DegToRad(11))), 1, 0, 0  };
 
 WX_NSFont wxFont::OSXCreateNSFont(const wxNativeFontInfo* info)
 {
@@ -445,27 +445,6 @@ WX_NSImage  wxOSXGetNSImageFromCGImage( CGImageRef image, double scaleFactor )
     */
     [newImage autorelease];
     return( newImage );
-}
-
-WX_NSImage WXDLLIMPEXP_CORE wxOSXGetNSImageFromIconRef( WXHICON iconref )
-{
-    NSImage  *newImage = [[NSImage alloc] initWithIconRef:iconref];
-    [newImage autorelease];
-    return( newImage );
-}
-
-CGImageRef WXDLLIMPEXP_CORE wxOSXGetCGImageFromNSImage( WX_NSImage nsimage, CGRect* r, CGContextRef cg)
-{
-#if wxOSX_USE_COCOA && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-    if ( UMAGetSystemVersion() >= 0x1060 )
-    {
-        NSRect nsRect = NSRectFromCGRect(*r);
-        return [nsimage CGImageForProposedRect:&nsRect
-                                   context:[NSGraphicsContext graphicsContextWithGraphicsPort:cg flipped:YES]
-                                            hints:nil];
-    }
-#endif
-    return NULL;
 }
 
 CGContextRef WXDLLIMPEXP_CORE wxOSXCreateBitmapContextFromNSImage( WX_NSImage nsimage)
