@@ -109,8 +109,6 @@ public:
     #include "wx/dfb/pen.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/pen.h"
-#elif defined(__WXQT__)
-    #include "wx/qt/pen.h"
 #endif
 
 class WXDLLIMPEXP_CORE wxPenList: public wxGDIObjListBase

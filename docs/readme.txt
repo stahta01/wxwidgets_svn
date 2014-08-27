@@ -54,7 +54,6 @@ There is some support for the following platforms:
 - Most Unix variants with X11
 - Most Unix variants with Motif/Lesstif
 - Most Unix variants with GTK+ 1.2
-- Most Unix variants with Qt 5 or newer
 
 Most popular C++ compilers are supported; see the install.txt
 file for each platform (available via docs/html/index.htm) and
@@ -115,9 +114,9 @@ application binaries. To answer a FAQ, you don't have to
 distribute any source if you wish to write commercial
 applications using wxWidgets.
 
-However, if you distribute wxGTK, wxQt or wxMotif (with Lesstif)
+However, if you distribute wxGTK or wxMotif (with Lesstif)
 version of your application, don't forget that it is linked
-against GTK+, Qt or Lesstif, which are covered by LGPL *without*
+against GTK+ (or Lesstif) which is covered by LGPL *without*
 exception notice and so is bound by its requirements.
 
 If you use TIFF image handler, please see src/tiff/COPYRIGHT
@@ -175,4 +174,4 @@ If you are looking for support, you can get it from
 
 Have fun!
 
-The wxWidgets Team, August 2014
+The wxWidgets Team, November 2013

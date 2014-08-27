@@ -281,9 +281,7 @@ protected:
 private:
     // common part of Create{Linear,Radial}GradientBrush()
     template <typename T>
-    void SetGradientStops(T *brush,
-                          const wxGraphicsGradientStops& stops,
-                          bool reversed = false);
+    void SetGradientStops(T *brush, const wxGraphicsGradientStops& stops);
 
     Brush* m_brush;
     Image* m_brushImage;
@@ -854,8 +852,7 @@ void wxGDIPlusBrushData::Init()
 template <typename T>
 void
 wxGDIPlusBrushData::SetGradientStops(T *brush,
-        const wxGraphicsGradientStops& stops,
-        bool reversed)
+        const wxGraphicsGradientStops& stops)
 {
     const unsigned numStops = stops.GetCount();
     if ( numStops <= 2 )
@@ -868,25 +865,12 @@ wxGDIPlusBrushData::SetGradientStops(T *brush,
     wxVector<Color> colors(numStops);
     wxVector<REAL> positions(numStops);
 
-    if ( reversed )
+    for ( unsigned i = 0; i < numStops; i++ )
     {
-        for ( unsigned i = 0; i < numStops; i++ )
-        {
-            wxGraphicsGradientStop stop = stops.Item(numStops - i - 1);
+        wxGraphicsGradientStop stop = stops.Item(i);
 
-            colors[i] = wxColourToColor(stop.GetColour());
-            positions[i] = 1.0 - stop.GetPosition();
-        }
-    }
-    else
-    {
-        for ( unsigned i = 0; i < numStops; i++ )
-        {
-            wxGraphicsGradientStop stop = stops.Item(i);
-
-            colors[i] = wxColourToColor(stop.GetColour());
-            positions[i] = stop.GetPosition();
-        }
+        colors[i] = wxColourToColor(stop.GetColour());
+        positions[i] = stop.GetPosition();
     }
 
     brush->SetInterpolationColors(&colors[0], &positions[0], numStops);
@@ -925,9 +909,7 @@ wxGDIPlusBrushData::CreateRadialGradientBrush(wxDouble xo, wxDouble yo,
     int count = 1;
     brush->SetSurroundColors(&col, &count);
 
-    // Because the GDI+ API draws radial gradients from outside towards the
-    // center we have to reverse the order of the gradient stops.
-    SetGradientStops(brush, stops, true);
+    SetGradientStops(brush, stops);
 }
 
 //-----------------------------------------------------------------------------

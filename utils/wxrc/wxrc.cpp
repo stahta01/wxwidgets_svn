@@ -495,10 +495,6 @@ static bool NodeContainsFilename(wxXmlNode *node)
            return true;
    }
 
-   // wxAnimationCtrl animations:
-   if ( name == wxS("animation") )
-       return true;
-
    // URLs in wxHtmlWindow:
    if ( name == wxT("url") &&
         parent != NULL &&

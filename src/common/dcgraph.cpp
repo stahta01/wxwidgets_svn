@@ -320,24 +320,21 @@ void wxGCDCImpl::DoDrawIcon( const wxIcon &icon, wxCoord x, wxCoord y )
     CalcBoundingBox(x + w, y + h);
 }
 
-bool wxGCDCImpl::StartDoc( const wxString& message )
+bool wxGCDCImpl::StartDoc( const wxString& WXUNUSED(message) )
 {
-    return m_graphicContext->StartDoc(message);
+    return true;
 }
 
 void wxGCDCImpl::EndDoc()
 {
-    m_graphicContext->EndDoc();
 }
 
 void wxGCDCImpl::StartPage()
 {
-    m_graphicContext->StartPage();
 }
 
 void wxGCDCImpl::EndPage()
 {
-    m_graphicContext->EndPage();
 }
 
 void wxGCDCImpl::Flush()

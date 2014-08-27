@@ -72,13 +72,6 @@ public:
     virtual Window GetXWindow() const = 0;
 
 
-    // GLX-specific methods
-    // --------------------
-
-    // return attribs for glXCreateContextAttribsARB
-    const int *GetGLXContextAttribs() const { return m_glxContextAttribs; }
-
-
     // override some wxWindow methods
     // ------------------------------
 
@@ -112,13 +105,8 @@ public:
                                 GLXFBConfig **pFBC, XVisualInfo **pXVisual);
 
 private:
-    // initializes glxContextAttribs as defined by wxattrs which must be
-    // 0-terminated
-    static void InitGLXContextAttribs(const int *wxattrs, int *glxctxattribs);
-
     // fills in glattrs with attributes defined by wxattrs which must be
     // 0-terminated if it is non-NULL
-    // will ignore any gl context attribs
     //
     // n is the max size of glattrs, false is returned if we overflow it, it
     // should be at least 16 to accommodate the default attributes
@@ -134,10 +122,6 @@ private:
     // the global/default versions of the above
     static GLXFBConfig *ms_glFBCInfo;
     static XVisualInfo *ms_glVisualInfo;
-
-    // max 8 attributes plus terminator
-    // if first is 0, create legacy context
-    int m_glxContextAttribs[9];
 };
 
 // ----------------------------------------------------------------------------

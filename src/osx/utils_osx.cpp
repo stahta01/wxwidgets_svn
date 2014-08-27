@@ -71,21 +71,31 @@ int wxDisplayDepth()
 {
     int theDepth = 0;
     
-    CGDisplayModeRef currentMode = CGDisplayCopyDisplayMode(kCGDirectMainDisplay);
-    CFStringRef encoding = CGDisplayModeCopyPixelEncoding(currentMode);
-    
-    if(CFStringCompare(encoding, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-        theDepth = 32;
-    else if(CFStringCompare(encoding, CFSTR(IO16BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-        theDepth = 16;
-    else if(CFStringCompare(encoding, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-        theDepth = 8;
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+    if ( UMAGetSystemVersion() >= 0x1060 ) 
+    {
+        CGDisplayModeRef currentMode = CGDisplayCopyDisplayMode(kCGDirectMainDisplay);
+        CFStringRef encoding = CGDisplayModeCopyPixelEncoding(currentMode);
+        
+        if(CFStringCompare(encoding, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+            theDepth = 32;
+        else if(CFStringCompare(encoding, CFSTR(IO16BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+            theDepth = 16;
+        else if(CFStringCompare(encoding, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
+            theDepth = 8;
+        else
+            theDepth = 32; // some reasonable default
+
+        CFRelease(encoding);
+        CGDisplayModeRelease(currentMode);
+    }
     else
-        theDepth = 32; // some reasonable default
-
-    CFRelease(encoding);
-    CGDisplayModeRelease(currentMode);
-
+#endif
+    {
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
+        theDepth = (int) CGDisplayBitsPerPixel(CGMainDisplayID());
+#endif
+    }
     return theDepth;
 }
 

@@ -1668,7 +1668,10 @@ void wxGridColLabelWindow::OnPaint( wxPaintEvent& WXUNUSED(event) )
     int x, y;
     m_owner->CalcUnscrolledPosition( 0, 0, &x, &y );
     wxPoint pt = dc.GetDeviceOrigin();
-    dc.SetDeviceOrigin( pt.x-x, pt.y );
+    if (GetLayoutDirection() == wxLayout_RightToLeft)
+        dc.SetDeviceOrigin( pt.x+x, pt.y );
+    else
+        dc.SetDeviceOrigin( pt.x-x, pt.y );
 
     wxArrayInt cols = m_owner->CalcColLabelsExposed( GetUpdateRegion() );
     m_owner->DrawColLabels( dc, cols );
@@ -2258,7 +2261,7 @@ void wxGrid::Create()
     // now that we have the grid window, use its font to compute the default
     // row height
     m_defaultRowHeight = m_gridWin->GetCharHeight();
-#if defined(__WXMOTIF__) || defined(__WXGTK__) || defined(__WXQT__)  // see also text ctrl sizing in ShowCellEditControl()
+#if defined(__WXMOTIF__) || defined(__WXGTK__)  // see also text ctrl sizing in ShowCellEditControl()
     m_defaultRowHeight += 8;
 #else
     m_defaultRowHeight += 4;
@@ -3721,9 +3724,13 @@ void wxGrid::ProcessColLabelMouseEvent( wxMouseEvent& event )
 
                     // and check if we're on the "near" (usually left but right
                     // in RTL case) part of the column
+                    bool onNearPart;
                     const int middle = GetColLeft(colValid) +
                                             GetColWidth(colValid)/2;
-                    const bool onNearPart = (x <= middle);
+                    if ( GetLayoutDirection() == wxLayout_LeftToRight )
+                        onNearPart = (x <= middle);
+                    else // wxLayout_RightToLeft
+                        onNearPart = (x > middle);
 
                     // adjust for the column being dragged itself
                     if ( pos < GetColPos(m_dragRowOrCol) )
@@ -5566,12 +5573,11 @@ void wxGrid::DrawCellHighlight( wxDC& dc, const wxGridCellAttr *attr )
         // size of the rectangle is reduced to compensate for the thickness of
         // the line. If this is too strange on non-wxMSW platforms then
         // please #ifdef this appropriately.
-#ifndef __WXQT__
         rect.x += penWidth / 2;
         rect.y += penWidth / 2;
         rect.width -= penWidth - 1;
         rect.height -= penWidth - 1;
-#endif
+
         // Now draw the rectangle
         // use the cellHighlightColour if the cell is inside a selection, this
         // will ensure the cell is always visible.
@@ -5839,7 +5845,7 @@ wxGrid::DoDrawGridLines(wxDC& dc,
         int i = GetColAt( colPos );
 
         int colRight = GetColRight(i);
-#if defined(__WXGTK__) || defined(__WXQT__)
+#ifdef __WXGTK__
         if (GetLayoutDirection() != wxLayout_RightToLeft)
 #endif
             colRight--;
@@ -6361,7 +6367,6 @@ void wxGrid::ShowCellEditControl()
             if (rect.x < 0)
                 nXMove = rect.x;
 
-#ifndef __WXQT__
             // cell is shifted by one pixel
             // However, don't allow x or y to become negative
             // since the SetSize() method interprets that as
@@ -6370,11 +6375,6 @@ void wxGrid::ShowCellEditControl()
                 rect.x--;
             if (rect.y > 0)
                 rect.y--;
-#else
-            // Substract 1 pixel in every dimension to fit in the cell area.
-            // If not, Qt will draw the control outside the cell.
-            rect.Deflate(1, 1);
-#endif
 
             wxGridCellEditor* editor = attr->GetEditor(this, row, col);
             if ( !editor->IsCreated() )
@@ -6709,14 +6709,12 @@ wxRect wxGrid::CellToRect( int row, int col ) const
         for (i=row; i < row + cell_rows; i++)
             rect.height += GetRowHeight(i);
 
-#ifndef __WXQT__
         // if grid lines are enabled, then the area of the cell is a bit smaller
         if (m_gridLinesEnabled)
         {
             rect.width -= 1;
             rect.height -= 1;
         }
-#endif
     }
 
     return rect;
@@ -7448,7 +7446,7 @@ int wxGrid::GetColSize( int col ) const
 void wxGrid::SetDefaultCellBackgroundColour( const wxColour& col )
 {
     m_defaultCellAttr->SetBackgroundColour(col);
-#if defined(__WXGTK__) || defined(__WXQT__)
+#ifdef __WXGTK__
     m_gridWin->SetBackgroundColour(col);
 #endif
 }

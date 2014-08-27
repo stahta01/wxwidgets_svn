@@ -140,6 +140,9 @@
 
 @interface NSApplication(MissingAppleMenuCall)
 - (void)setAppleMenu:(NSMenu *)menu;
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
+- (void)setHelpMenu:(NSMenu* )menu;
+#endif
 @end
 
 class wxMenuCocoaImpl : public wxMenuImpl

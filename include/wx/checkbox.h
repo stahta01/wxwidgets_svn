@@ -178,8 +178,6 @@ private:
     #include "wx/gtk1/checkbox.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/checkbox.h"
-#elif defined(__WXQT__)
-    #include "wx/qt/checkbox.h"
 #endif
 
 #endif // wxUSE_CHECKBOX

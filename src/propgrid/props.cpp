@@ -1159,8 +1159,6 @@ wxEnumProperty::wxEnumProperty( const wxString& label, const wxString& name,
     wxPGChoices& choices, int value )
     : wxPGProperty(label,name)
 {
-    SetIndex(0);
-
     m_choices.Assign( choices );
 
     if ( GetItemCount() )

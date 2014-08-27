@@ -1041,7 +1041,7 @@ public:
       reverse_iterator_impl operator-=(ptrdiff_t n)
         { m_cur += n; return *this; }
 
-      difference_type operator-(const reverse_iterator_impl& i) const
+      unsigned operator-(const reverse_iterator_impl& i) const
         { return i.m_cur - m_cur; }
 
       bool operator==(const reverse_iterator_impl& ri) const

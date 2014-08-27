@@ -89,8 +89,6 @@ WX_DEFINE_EXPORTED_LIST( wxSizerItemList )
 // ----------------------------------------------------------------------------
 
 // check for flags conflicts
-#if wxDEBUG_LEVEL
-
 static const int SIZER_FLAGS_MASK =
     wxADD_FLAG(wxCENTRE,
     wxADD_FLAG(wxHORIZONTAL,
@@ -111,8 +109,6 @@ static const int SIZER_FLAGS_MASK =
     wxADD_FLAG(wxGROW,
     wxADD_FLAG(wxSHAPED,
     0))))))))))))))))));
-
-#endif // wxDEBUG_LEVEL
 
 #define ASSERT_VALID_SIZER_FLAGS(f)  wxASSERT_VALID_FLAGS(f, SIZER_FLAGS_MASK)
 
