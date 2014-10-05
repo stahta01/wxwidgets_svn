@@ -15,7 +15,6 @@ This page contains a summarized listing of classes, please see the
 @ref group_class page for a full listing by category or the
 <a href="classes.html">full list of classes</a> in alphabetical order.
 
-For a more visual approach, see @ref page_screenshots "the screenshots" page.
 
 
 @section page_class_cat_basicwnd Basic Windows
@@ -169,8 +168,8 @@ Related Overviews: @ref overview_validator
 
 @section page_class_cat_pickers Picker Controls
 
-These controls provide the user with the possibility to choose something (file
-or directory, font or colour, ...) directly from the window containing them.
+A picker control is a control whose appearance and behaviour is highly
+platform-dependent.
 
 @li wxColourPickerCtrl: A control which allows the user to choose a colour
 @li wxDirPickerCtrl: A control which allows the user to choose a directory

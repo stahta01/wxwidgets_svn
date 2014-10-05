@@ -56,16 +56,6 @@
     #include "wx/univ/colschem.h"
 #endif // __WXUNIVERSAL__
 
-#if wxUSE_TASKBARBUTTON
-    #include "wx/msw/taskbarbutton.h"
-    #include "wx/dynlib.h"
-
-    WXUINT wxMsgTaskbarButtonCreated = 0;
-    #define wxTHBN_CLICKED 0x1800
-    #define wxMSGFLT_ADD   0x01
-#endif  // wxUSE_TASKBARBUTTON
-
-
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -106,7 +96,6 @@ void wxFrame::Init()
 {
 #if wxUSE_MENUS
     m_hMenu = NULL;
-    m_menuDepth = 0;
 #endif // wxUSE_MENUS
 
 #if wxUSE_TOOLTIPS
@@ -114,10 +103,6 @@ void wxFrame::Init()
 #endif
 
     m_wasMinimized = false;
-
-#if wxUSE_TASKBARBUTTON
-    m_taskBarButton = NULL;
-#endif
 }
 
 bool wxFrame::Create(wxWindow *parent,
@@ -146,44 +131,14 @@ bool wxFrame::Create(wxWindow *parent,
     SetAcceleratorTable(accel);
 #endif // wxUSE_ACCEL && __POCKETPC__
 
-#if wxUSE_TASKBARBUTTON
-    static bool s_taskbarButtonCreatedMsgRegistered = false;
-    if ( !s_taskbarButtonCreatedMsgRegistered )
-    {
-        s_taskbarButtonCreatedMsgRegistered = true;
-        wxMsgTaskbarButtonCreated =
-            ::RegisterWindowMessage(wxT("TaskbarButtonCreated"));
-
-        // In case the application is run elevated, allow the
-        // TaskbarButtonCreated and WM_COMMAND messages through.
-#if wxUSE_DYNLIB_CLASS
-        typedef BOOL (WINAPI *ChangeWindowMessageFilter_t)(UINT message,
-                                                           DWORD dwFlag);
-        wxDynamicLibrary dllUser32(wxT("user32.dll"));
-
-        ChangeWindowMessageFilter_t pfnChangeWindowMessageFilter = NULL;
-        wxDL_INIT_FUNC(pfn, ChangeWindowMessageFilter, dllUser32);
-        if ( pfnChangeWindowMessageFilter )
-        {
-            pfnChangeWindowMessageFilter(wxMsgTaskbarButtonCreated,
-                                           wxMSGFLT_ADD);
-            pfnChangeWindowMessageFilter(WM_COMMAND, wxMSGFLT_ADD);
-        }
-#else
-        ChangeWindowMessageFilter(wxMsgTaskbarButtonCreated, wxMSGFLT_ADD);
-        ChangeWindowMessageFilter(WM_COMMAND, wxMSGFLT_ADD);
-#endif // wxUSE_DYNLIB_CLASS
-    }
-#endif // wxUSE_TASKBARBUTTON
-
     return true;
 }
 
 wxFrame::~wxFrame()
 {
-#if wxUSE_TASKBARBUTTON
-    delete m_taskBarButton;
-#endif
+    SendDestroyEvent();
+
+    DeleteAllBars();
 }
 
 // ----------------------------------------------------------------------------
@@ -474,59 +429,12 @@ void wxFrame::InternalSetMenuBar()
 
 #endif // wxUSE_MENUS_NATIVE
 
-#if wxUSE_MENUS && !defined(__WXUNIVERSAL__)
-bool wxFrame::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU hMenu)
-{
-    // Unfortunately we need to ignore a message which is sent after
-    // closing the currently active submenu of the menu bar by pressing Escape:
-    // in this case we get WM_UNINITMENUPOPUP, from which we generate
-    // wxEVT_MENU_CLOSE, and _then_ we get WM_MENUSELECT for the top level menu
-    // from which we overwrite the help string just restored by OnMenuClose()
-    // handler in wxFrameBase. To prevent this from happening we discard these
-    // messages but only in the case it's really the top level menu as we still
-    // need to clear the help string when a submenu is selected in a menu.
-    if ( flags == (MF_POPUP | MF_HILITE) && !m_menuDepth )
-        return false;
-
-    return wxWindow::HandleMenuSelect(nItem, flags, hMenu);
-}
-
-bool wxFrame::DoSendMenuOpenCloseEvent(wxEventType evtType, wxMenu* menu, bool popup)
-{
-    // Update the menu depth when dealing with the top level menus.
-    if ( !popup )
-    {
-        if ( evtType == wxEVT_MENU_OPEN )
-        {
-            m_menuDepth++;
-        }
-        else if ( evtType == wxEVT_MENU_CLOSE )
-        {
-            wxASSERT_MSG( m_menuDepth > 0, wxS("No open menus?") );
-
-            m_menuDepth--;
-        }
-        else
-        {
-            wxFAIL_MSG( wxS("Unexpected menu event type") );
-        }
-    }
-
-    return wxWindow::DoSendMenuOpenCloseEvent(evtType, menu, popup);
-}
-
+#if wxUSE_MENUS
 wxMenu* wxFrame::MSWFindMenuFromHMENU(WXHMENU hMenu)
 {
     return GetMenuBar() ? GetMenuBar()->MSWGetMenu(hMenu) : NULL;
 }
-#endif // wxUSE_MENUS && !defined(__WXUNIVERSAL__)
-
-#if wxUSE_TASKBARBUTTON
-wxTaskBarButton* wxFrame::MSWGetTaskBarButton()
-{
-    return m_taskBarButton;
-}
-#endif // wxUSE_TASKBARBUTTON
+#endif // wxUSE_MENUS
 
 // Responds to colour changes, and passes event on to children.
 void wxFrame::OnSysColourChanged(wxSysColourChangedEvent& event)
@@ -920,20 +828,6 @@ bool wxFrame::HandleCommand(WXWORD id, WXWORD cmd, WXHWND control)
     }
 #endif // wxUSE_MENUS
 
-#if wxUSE_TASKBARBUTTON
-    if ( cmd == wxTHBN_CLICKED && m_taskBarButton )
-    {
-        wxTaskBarButtonImpl * const
-            tbButton = reinterpret_cast<wxTaskBarButtonImpl*>(m_taskBarButton);
-        // we use the index as id when adding thumbnail toolbar button.
-        wxThumbBarButton * const
-            thumbBarButton = tbButton->GetThumbBarButtonByIndex(id);
-        wxCommandEvent event(wxEVT_BUTTON, thumbBarButton->GetID());
-        event.SetEventObject(thumbBarButton);
-        return ProcessEvent(event);
-    }
-#endif // wxUSE_TASKBARBUTTON
-
     return wxFrameBase::HandleCommand(id, cmd, control);;
 }
 
@@ -988,19 +882,6 @@ WXLRESULT wxFrame::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lPara
             break;
 #endif // !__WXMICROWIN__
     }
-#if wxUSE_TASKBARBUTTON
-    if ( message == wxMsgTaskbarButtonCreated )
-    {
-        if ( !m_taskBarButton )
-            m_taskBarButton = wxTaskBarButton::New(this);
-        //else: If we get this message again, it may mean that our old taskbar
-        //      button can't be used any more and needs to be recreated. We
-        //      need to check whether this is really the case and sent a
-        //      special event to allow the user code to react to this.
-
-        processed = true;
-    }
-#endif
 
     if ( !processed )
         rc = wxFrameBase::MSWWindowProc(message, wParam, lParam);

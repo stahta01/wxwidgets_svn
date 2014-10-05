@@ -89,8 +89,6 @@ WX_DEFINE_EXPORTED_LIST( wxSizerItemList )
 // ----------------------------------------------------------------------------
 
 // check for flags conflicts
-#if wxDEBUG_LEVEL
-
 static const int SIZER_FLAGS_MASK =
     wxADD_FLAG(wxCENTRE,
     wxADD_FLAG(wxHORIZONTAL,
@@ -111,8 +109,6 @@ static const int SIZER_FLAGS_MASK =
     wxADD_FLAG(wxGROW,
     wxADD_FLAG(wxSHAPED,
     0))))))))))))))))));
-
-#endif // wxDEBUG_LEVEL
 
 #define ASSERT_VALID_SIZER_FLAGS(f)  wxASSERT_VALID_FLAGS(f, SIZER_FLAGS_MASK)
 
@@ -381,7 +377,7 @@ bool wxSizerItem::InformFirstDirection(int direction, int size, int availableOth
         {
             if( !wxIsNullDouble(m_ratio) )
             {
-                wxCHECK_MSG( m_proportion==0, false, wxT("Shaped item, non-zero proportion in wxSizerItem::InformFirstDirection()") );
+                wxCHECK_MSG( (m_proportion==0), false, wxT("Shaped item, non-zero proportion in wxSizerItem::InformFirstDirection()") );
                 if( direction==wxHORIZONTAL && !wxIsNullDouble(m_ratio) )
                 {
                     // Clip size so that we don't take too much
@@ -621,6 +617,19 @@ bool wxSizerItem::IsShown() const
     return false;
 }
 
+#if WXWIN_COMPATIBILITY_2_6
+void wxSizerItem::SetOption( int option )
+{
+    SetProportion( option );
+}
+
+int wxSizerItem::GetOption() const
+{
+    return GetProportion();
+}
+#endif // WXWIN_COMPATIBILITY_2_6
+
+
 //---------------------------------------------------------------------------
 // wxSizer
 //---------------------------------------------------------------------------
@@ -665,6 +674,13 @@ void wxSizer::SetContainingWindow(wxWindow *win)
         }
     }
 }
+
+#if WXWIN_COMPATIBILITY_2_6
+bool wxSizer::Remove( wxWindow *window )
+{
+    return Detach( window );
+}
+#endif // WXWIN_COMPATIBILITY_2_6
 
 bool wxSizer::Remove( wxSizer *sizer )
 {

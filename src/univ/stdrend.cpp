@@ -71,7 +71,8 @@ wxStdRenderer::wxStdRenderer(const wxColourScheme *scheme)
 void
 wxStdRenderer::DrawSolidRect(wxDC& dc, const wxColour& col, const wxRect& rect)
 {
-    dc.SetBrush(col);
+    wxBrush brush(col, wxSOLID);
+    dc.SetBrush(brush);
     dc.SetPen(*wxTRANSPARENT_PEN);
     dc.DrawRectangle(rect);
 }

@@ -19,10 +19,10 @@ class WXDLLIMPEXP_BASE wxConsoleAppTraits : public wxConsoleAppTraitsBase
 {
 public:
 #if wxUSE_CONSOLE_EVENTLOOP
-    virtual wxEventLoopBase *CreateEventLoop() wxOVERRIDE;
+    virtual wxEventLoopBase *CreateEventLoop();
 #endif // wxUSE_CONSOLE_EVENTLOOP
 #if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer) wxOVERRIDE;
+    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer);
 #endif
 };
 
@@ -35,7 +35,7 @@ public:
 // TODO: Should we use XtAddInput() for wxX11 too? Or, vice versa, if there is
 //       no advantage in doing this compared to the generic way currently used
 //       by wxX11, should we continue to use GTK/Motif-specific stuff?
-#if defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXQT__)
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
     #define wxHAS_GUI_FDIOMANAGER
     #define wxHAS_GUI_PROCESS_CALLBACKS
 #endif // ports using wxFDIOManager
@@ -48,20 +48,20 @@ public:
 class WXDLLIMPEXP_CORE wxGUIAppTraits : public wxGUIAppTraitsBase
 {
 public:
-    virtual wxEventLoopBase *CreateEventLoop() wxOVERRIDE;
-    virtual int WaitForChild(wxExecuteData& execData) wxOVERRIDE;
+    virtual wxEventLoopBase *CreateEventLoop();
+    virtual int WaitForChild(wxExecuteData& execData);
 #if wxUSE_TIMER
-    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer) wxOVERRIDE;
+    virtual wxTimerImpl *CreateTimerImpl(wxTimer *timer);
 #endif
 #if wxUSE_THREADS && defined(__WXGTK20__)
     virtual void MutexGuiEnter();
     virtual void MutexGuiLeave();
 #endif
 
-#if defined(__WXMAC__) && wxUSE_STDPATHS
+#if (defined(__WXMAC__) || defined(__WXCOCOA__)) && wxUSE_STDPATHS
     virtual wxStandardPaths& GetStandardPaths();
 #endif
-    virtual wxPortId GetToolkitVersion(int *majVer = NULL, int *minVer = NULL) const wxOVERRIDE;
+    virtual wxPortId GetToolkitVersion(int *majVer = NULL, int *minVer = NULL) const;
 
 #ifdef __WXGTK20__
     virtual wxString GetDesktopEnvironment() const;
@@ -85,9 +85,7 @@ public:
 
 #endif // wxUSE_SOCKETS
 
-#if wxUSE_EVENTLOOP_SOURCE
-    virtual wxEventLoopSourcesManagerBase* GetEventLoopSourcesManager() wxOVERRIDE;
-#endif
+    virtual wxEventLoopSourcesManagerBase* GetEventLoopSourcesManager();
 };
 
 #endif // wxUSE_GUI

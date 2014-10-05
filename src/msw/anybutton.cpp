@@ -1281,13 +1281,7 @@ bool wxAnyButton::MSWOnDraw(WXDRAWITEMSTRUCT *wxdis)
             }
         }
     }
-    else
-    {
-        // clear the background (and erase any previous bitmap)
-        COLORREF colBg = wxColourToRGB(GetBackgroundColour());
-        AutoHBRUSH hbrushBackground(colBg);
-        FillRect(hdc, &rectBtn, hbrushBackground);
-    }
+
 
     // draw the image, if any
     if ( m_imageData )

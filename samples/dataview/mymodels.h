@@ -140,16 +140,16 @@ public:
     // override sorting to always sort branches ascendingly
 
     int Compare( const wxDataViewItem &item1, const wxDataViewItem &item2,
-                 unsigned int column, bool ascending ) const wxOVERRIDE;
+                 unsigned int column, bool ascending ) const;
 
     // implementation of base class virtuals to define model
 
-    virtual unsigned int GetColumnCount() const wxOVERRIDE
+    virtual unsigned int GetColumnCount() const
     {
         return 6;
     }
 
-    virtual wxString GetColumnType( unsigned int col ) const wxOVERRIDE
+    virtual wxString GetColumnType( unsigned int col ) const
     {
         if (col == 2)
             return wxT("long");
@@ -158,17 +158,17 @@ public:
     }
 
     virtual void GetValue( wxVariant &variant,
-                           const wxDataViewItem &item, unsigned int col ) const wxOVERRIDE;
+                           const wxDataViewItem &item, unsigned int col ) const;
     virtual bool SetValue( const wxVariant &variant,
-                           const wxDataViewItem &item, unsigned int col ) wxOVERRIDE;
+                           const wxDataViewItem &item, unsigned int col );
 
     virtual bool IsEnabled( const wxDataViewItem &item,
-                            unsigned int col ) const wxOVERRIDE;
+                            unsigned int col ) const;
 
-    virtual wxDataViewItem GetParent( const wxDataViewItem &item ) const wxOVERRIDE;
-    virtual bool IsContainer( const wxDataViewItem &item ) const wxOVERRIDE;
+    virtual wxDataViewItem GetParent( const wxDataViewItem &item ) const;
+    virtual bool IsContainer( const wxDataViewItem &item ) const;
     virtual unsigned int GetChildren( const wxDataViewItem &parent,
-                                      wxDataViewItemArray &array ) const wxOVERRIDE;
+                                      wxDataViewItemArray &array ) const;
 
 private:
     MyMusicTreeModelNode*   m_root;
@@ -211,12 +211,12 @@ public:
 
     // implementation of base class virtuals to define model
 
-    virtual unsigned int GetColumnCount() const wxOVERRIDE
+    virtual unsigned int GetColumnCount() const
     {
         return Col_Max;
     }
 
-    virtual wxString GetColumnType( unsigned int col ) const wxOVERRIDE
+    virtual wxString GetColumnType( unsigned int col ) const
     {
         if (col == Col_IconText)
             return wxT("wxDataViewIconText");
@@ -225,11 +225,11 @@ public:
     }
 
     virtual void GetValueByRow( wxVariant &variant,
-                                unsigned int row, unsigned int col ) const wxOVERRIDE;
+                                unsigned int row, unsigned int col ) const;
     virtual bool GetAttrByRow( unsigned int row, unsigned int col,
-                               wxDataViewItemAttr &attr ) const wxOVERRIDE;
+                               wxDataViewItemAttr &attr ) const;
     virtual bool SetValueByRow( const wxVariant &variant,
-                                unsigned int row, unsigned int col ) wxOVERRIDE;
+                                unsigned int row, unsigned int col );
 
 private:
     wxArrayString    m_textColValues;
@@ -244,5 +244,5 @@ private:
 class MyListStoreDerivedModel : public wxDataViewListStore
 {
 public:
-    virtual bool IsEnabledByRow(unsigned int row, unsigned int col) const wxOVERRIDE;
+    virtual bool IsEnabledByRow(unsigned int row, unsigned int col) const;
 };

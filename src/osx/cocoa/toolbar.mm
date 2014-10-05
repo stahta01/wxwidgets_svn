@@ -165,7 +165,7 @@ public:
         return wxPoint( m_x, m_y );
     }
 
-    bool Enable( bool enable ) wxOVERRIDE;
+    bool Enable( bool enable );
 
     void UpdateImages();
 
@@ -236,13 +236,13 @@ public:
         return m_index;
     }
 
-    virtual void SetLabel(const wxString& label) wxOVERRIDE
+    virtual void SetLabel(const wxString& label)
     {
         wxToolBarToolBase::SetLabel(label);
         UpdateLabel();
     }
 
-    virtual bool SetShortHelp(const wxString& help) wxOVERRIDE
+    virtual bool SetShortHelp(const wxString& help)
     {
         if ( !wxToolBarToolBase::SetShortHelp(help) )
             return false;
@@ -1290,9 +1290,10 @@ void wxToolBar::SetToolBitmapSize(const wxSize& size)
     {
         int maxs = wxMax( size.x, size.y );
         NSToolbarSizeMode sizeSpec;
-
-        if ( maxs > 24 )
+        if ( maxs > 32 )
             sizeSpec = NSToolbarSizeModeRegular;
+        else if ( maxs > 24 )
+            sizeSpec = NSToolbarSizeModeDefault;
         else
             sizeSpec = NSToolbarSizeModeSmall;
 

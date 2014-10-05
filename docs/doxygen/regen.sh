@@ -163,7 +163,7 @@ if [[ "$1" = "qch" ]]; then
 fi
 
 if [[ "$1" = "docset" ]]; then
-    BASENAME="wxWidgets-3.1"    # was org.wxwidgets.doxygen.docset.wx30
+    BASENAME="wxWidgets-3.0"    # was org.wxwidgets.doxygen.docset.wx30
     DOCSETNAME="$BASENAME.docset"
     ATOM="$BASENAME.atom"
     ATOMDIR="http://docs.wxwidgets.org/docsets"
@@ -182,7 +182,7 @@ if [[ "$1" = "docset" ]]; then
     
     defaults write $DESTINATIONDIR/$DOCSETNAME/Contents/Info CFBundleVersion 1.3
     defaults write $DESTINATIONDIR/$DOCSETNAME/Contents/Info CFBundleShortVersionString 1.3
-    defaults write $DESTINATIONDIR/$DOCSETNAME/Contents/Info CFBundleName "wxWidgets 3.1"
+    defaults write $DESTINATIONDIR/$DOCSETNAME/Contents/Info CFBundleName "wxWidgets 3.0"
     defaults write $DESTINATIONDIR/$DOCSETNAME/Contents/Info DocSetFeedURL $ATOMDIR/$ATOM
     defaults write $DESTINATIONDIR/$DOCSETNAME/Contents/Info DocSetFallbackURL http://docs.wxwidgets.org
     defaults write $DESTINATIONDIR/$DOCSETNAME/Contents/Info DocSetDescription "API reference and conceptual documentation for wxWidgets 3.0"

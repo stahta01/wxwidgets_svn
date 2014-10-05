@@ -41,6 +41,9 @@ wxTextCtrlXmlHandler::wxTextCtrlXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxTE_CENTRE);
     XRC_ADD_STYLE(wxTE_RIGHT);
     XRC_ADD_STYLE(wxTE_DONTWRAP);
+#if WXWIN_COMPATIBILITY_2_6
+    XRC_ADD_STYLE(wxTE_LINEWRAP);
+#endif // WXWIN_COMPATIBILITY_2_6
     XRC_ADD_STYLE(wxTE_CHARWRAP);
     XRC_ADD_STYLE(wxTE_WORDWRAP);
 
@@ -69,9 +72,8 @@ wxObject *wxTextCtrlXmlHandler::DoCreateResource()
     if (HasParam(wxT("maxlength")))
         text->SetMaxLength(GetLong(wxT("maxlength")));
 
-    const wxString hint = GetText(wxS("hint"));
-    if (!hint.empty())
-        text->SetHint(hint);
+    if (HasParam(wxT("hint")))
+        text->SetHint(GetText(wxS("hint")));
 
     return text;
 }

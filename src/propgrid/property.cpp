@@ -62,7 +62,7 @@ static void wxPGDrawFocusRect( wxDC& dc, const wxRect& rect )
     //   Also, it seems that this code may not work in future wx versions.
     dc.SetLogicalFunction(wxINVERT);
 
-    wxPen pen(*wxBLACK,1,wxPENSTYLE_DOT);
+    wxPen pen(*wxBLACK,1,wxDOT);
     pen.SetCap(wxCAP_BUTT);
     dc.SetPen(pen);
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
@@ -73,7 +73,7 @@ static void wxPGDrawFocusRect( wxDC& dc, const wxRect& rect )
 #else
     dc.SetLogicalFunction(wxINVERT);
 
-    dc.SetPen(wxPen(*wxBLACK,1,wxPENSTYLE_DOT));
+    dc.SetPen(wxPen(*wxBLACK,1,wxDOT));
     dc.SetBrush(*wxTRANSPARENT_BRUSH);
 
     dc.DrawRectangle(rect);
@@ -193,10 +193,10 @@ bool wxPGDefaultRenderer::Render( wxDC& dc, const wxRect& rect,
                                   int column, int item, int flags ) const
 {
     const wxPGEditor* editor = NULL;
+    const wxPGCell* cell = NULL;
 
     wxString text;
     bool isUnspecified = property->IsValueUnspecified();
-    int selItem = item;
 
     if ( column == 1 && item == -1 )
     {
@@ -213,20 +213,15 @@ bool wxPGDefaultRenderer::Render( wxDC& dc, const wxRect& rect,
             }
             return false;
         }
-        // We need to know the current selection to override default
-        // cell settings (colours, etc.) with custom cell settings
-        // which can be defined separately for any single choice item.
-        selItem = property->GetChoiceSelection();
     }
 
     int imageWidth = 0;
     int preDrawFlags = flags;
     bool res = false;
-    wxPGCell cell;
 
-    property->GetDisplayInfo(column, selItem, flags, &text, &cell);
+    property->GetDisplayInfo(column, item, flags, &text, &cell);
 
-    imageWidth = PreDrawCell( dc, rect, cell, preDrawFlags );
+    imageWidth = PreDrawCell( dc, rect, *cell, preDrawFlags );
 
     if ( column == 1 )
     {
@@ -249,7 +244,7 @@ bool wxPGDefaultRenderer::Render( wxDC& dc, const wxRect& rect,
                                  wxPG_CUSTOM_IMAGE_WIDTH,
                                  rect.height-(wxPG_CUSTOM_IMAGE_SPACINGY*2));
 
-                dc.SetPen( wxPen(propertyGrid->GetCellTextColour(), 1, wxPENSTYLE_SOLID) );
+                dc.SetPen( wxPen(propertyGrid->GetCellTextColour(), 1, wxSOLID) );
 
                 paintdata.m_drawnWidth = imageSize.x;
                 paintdata.m_drawnHeight = imageSize.y;
@@ -317,7 +312,7 @@ bool wxPGDefaultRenderer::Render( wxDC& dc, const wxRect& rect,
         }
     }
 
-    PostDrawCell(dc, propertyGrid, cell, preDrawFlags);
+    PostDrawCell(dc, propertyGrid, *cell, preDrawFlags);
 
     return res;
 }
@@ -513,10 +508,13 @@ void wxPGProperty::InitAfterAdded( wxPropertyGridPageState* pageState,
         wxPGCell& cell = m_cells[i];
         if ( cell.IsInvalid() )
         {
+            const wxPGCell& propDefCell = propgrid->GetPropertyDefaultCell();
+            const wxPGCell& catDefCell = propgrid->GetCategoryDefaultCell();
+
             if ( !HasFlag(wxPG_PROP_CATEGORY) )
-                cell = propgrid->GetPropertyDefaultCell();
+                cell = propDefCell;
             else
-                cell = propgrid->GetCategoryDefaultCell();
+                cell = catDefCell;
         }
     }
 
@@ -754,54 +752,30 @@ void wxPGProperty::OnValidationFailure( wxVariant& WXUNUSED(pendingValue) )
 {
 }
 
-#ifdef WXWIN_COMPATIBILITY_3_0
 void wxPGProperty::GetDisplayInfo( unsigned int column,
                                    int choiceIndex,
                                    int flags,
                                    wxString* pString,
                                    const wxPGCell** pCell )
 {
-    wxASSERT_MSG(!pCell || !(*pCell),
-          wxT("Cell pointer is a dummy argument and shouldn't be used"));
-    wxUnusedVar(pCell);
-    GetDisplayInfo(column, choiceIndex, flags, pString, (wxPGCell*)NULL);
-}
-#endif // WXWIN_COMPATIBILITY_3_0
-
-void wxPGProperty::GetDisplayInfo( unsigned int column,
-                                   int choiceIndex,
-                                   int flags,
-                                   wxString* pString,
-                                   wxPGCell* pCell )
-{
-    wxCHECK_RET( GetGrid(),
-                 wxT("Cannot obtain display info for detached property") );
-
-    // Get default cell
-    wxPGCell cell = GetCell(column);
+    const wxPGCell* cell = NULL;
 
     if ( !(flags & wxPGCellRenderer::ChoicePopup) )
     {
         // Not painting list of choice popups, so get text from property
         if ( column != 1 || !IsValueUnspecified() || IsCategory() )
         {
-            // Overrride default cell settings with
-            // custom settings defined for choice item.
-            if (column == 1 && !IsValueUnspecified() && choiceIndex != wxNOT_FOUND)
-            {
-                const wxPGChoiceEntry& entry = m_choices[choiceIndex];
-                cell.MergeFrom(entry);
-            }
+            cell = &GetCell(column);
         }
         else
         {
             // Use special unspecified value cell
-            cell.MergeFrom(GetGrid()->GetUnspecifiedValueAppearance());
+            cell = &GetGrid()->GetUnspecifiedValueAppearance();
         }
 
-        if ( cell.HasText() )
+        if ( cell->HasText() )
         {
-            *pString = cell.GetText();
+            *pString = cell->GetText();
         }
         else
         {
@@ -819,24 +793,23 @@ void wxPGProperty::GetDisplayInfo( unsigned int column,
 
         if ( choiceIndex != wxNOT_FOUND )
         {
-            // Overrride default cell settings with
-            // custom settings defined for choice item.
             const wxPGChoiceEntry& entry = m_choices[choiceIndex];
-            cell.MergeFrom(entry);
-
+            if ( entry.GetBitmap().IsOk() ||
+                 entry.GetFgCol().IsOk() ||
+                 entry.GetBgCol().IsOk() )
+                cell = &entry;
             *pString = m_choices.GetLabel(choiceIndex);
         }
     }
 
-    wxASSERT_MSG( cell.GetData(),
+    if ( !cell )
+        cell = &GetCell(column);
+
+    wxASSERT_MSG( cell->GetData(),
                   wxString::Format("Invalid cell for property %s",
                                    GetName().c_str()) );
 
-    // We need to return customized cell object.
-    if (pCell)
-    {
-        *pCell = cell;
-    }
+    *pCell = cell;
 }
 
 /*
@@ -1019,13 +992,8 @@ wxString wxPGProperty::GetValueAsString( int argFlags ) const
         return g_invalidStringContent;
     }
 #endif
+
     wxPropertyGrid* pg = GetGrid();
-    wxASSERT_MSG( pg,
-                  wxT("Cannot get valid value for detached property") );
-    if ( !pg )
-    {
-        return wxEmptyString;
-    }
 
     if ( IsValueUnspecified() )
         return pg->GetUnspecifiedValueText(argFlags);
@@ -1499,8 +1467,6 @@ void wxPGProperty::SetValue( wxVariant value, wxVariant* pList, int flags )
 
 void wxPGProperty::SetValueInEvent( wxVariant value ) const
 {
-    wxCHECK_RET( GetGrid(),
-                 wxT("Cannot store pending value for detached property"));
     GetGrid()->ValueChangeInEvent(value);
 }
 
@@ -1601,14 +1567,21 @@ void wxPGProperty::EnsureCells( unsigned int column )
 
         if ( pg )
         {
+            // Work around possible VC6 bug by using intermediate variables
+            const wxPGCell& propDefCell = pg->GetPropertyDefaultCell();
+            const wxPGCell& catDefCell = pg->GetCategoryDefaultCell();
+
             if ( !HasFlag(wxPG_PROP_CATEGORY) )
-                defaultCell = pg->GetPropertyDefaultCell();
+                defaultCell = propDefCell;
             else
-                defaultCell = pg->GetCategoryDefaultCell();
+                defaultCell = catDefCell;
         }
 
-        // Alloc new default cells.
-        m_cells.resize(column+1, defaultCell);
+        // TODO: Replace with resize() call
+        unsigned int cellCountMax = column+1;
+
+        for ( unsigned int i=m_cells.size(); i<cellCountMax; i++ )
+            m_cells.push_back(defaultCell);
     }
 }
 
@@ -1673,8 +1646,6 @@ const wxPGCell& wxPGProperty::GetCell( unsigned int column ) const
         return m_cells[column];
 
     wxPropertyGrid* pg = GetGrid();
-    wxASSERT_MSG( pg,
-                  wxT("Cannot get cell for detached property") );
 
     if ( IsCategory() )
         return pg->GetCategoryDefaultCell();
@@ -1799,10 +1770,6 @@ wxVariant wxPGProperty::DoGetAttribute( const wxString& WXUNUSED(name) ) const
 
 wxVariant wxPGProperty::GetAttribute( const wxString& name ) const
 {
-    wxVariant value = DoGetAttribute(name);
-    if ( !value.IsNull() )
-        return value;
-
     return m_attributes.FindValue(name);
 }
 
@@ -1921,24 +1888,22 @@ wxValidator* wxPGProperty::DoGetValidator() const
 int wxPGProperty::InsertChoice( const wxString& label, int index, int value )
 {
     wxPropertyGrid* pg = GetGrid();
-    const int sel = GetChoiceSelection();
+    int sel = GetChoiceSelection();
 
-    int newSel = (sel == wxNOT_FOUND) ? 0 : sel;
+    int newSel = sel;
 
-    const int numChoices = m_choices.GetCount();
     if ( index == wxNOT_FOUND )
-        index = numChoices;
+        index = m_choices.GetCount();
 
-    if ( numChoices > 0 && index <= sel )
+    if ( index <= sel )
         newSel++;
 
     m_choices.Insert(label, index, value);
-    // Set new selection if it was modified
-    // or if the first element was added.
-    if ( sel != newSel || numChoices == 0 )
+
+    if ( sel != newSel )
         SetChoiceSelection(newSel);
 
-    if ( pg && this == pg->GetSelection() )
+    if ( this == pg->GetSelection() )
         GetEditorClass()->InsertItem(pg->GetEditorControl(),label,index);
 
     return index;
@@ -1968,7 +1933,7 @@ void wxPGProperty::DeleteChoice( int index )
     if ( sel != newSel )
         SetChoiceSelection(newSel);
 
-    if ( pg && this == pg->GetSelection() )
+    if ( this == pg->GetSelection() )
         GetEditorClass()->DeleteItem(pg->GetEditorControl(), index);
 }
 
@@ -1983,7 +1948,7 @@ int wxPGProperty::GetChoiceSelection() const
 
     if ( valueType == wxPG_VARIANT_TYPE_LONG )
     {
-        index = m_choices.Index(value.GetLong());
+        index = value.GetLong();
     }
     else if ( valueType == wxPG_VARIANT_TYPE_STRING )
     {
@@ -2011,7 +1976,7 @@ void wxPGProperty::SetChoiceSelection( int newValue )
     }
     else  // if ( valueType == wxPG_VARIANT_TYPE_LONG )
     {
-        SetValue( m_choices.GetValue(newValue) );
+        SetValue( (long) newValue );
     }
 }
 
@@ -2124,10 +2089,6 @@ bool wxPGProperty::RecreateEditor()
 
 void wxPGProperty::SetValueImage( wxBitmap& bmp )
 {
-    // We need PG to obtain default image size
-    wxCHECK_RET( GetGrid(),
-                 wxT("Cannot set image for detached property") );
-
     delete m_valueBitmap;
 
     if ( &bmp && bmp.IsOk() )
@@ -2251,10 +2212,7 @@ int wxPGProperty::GetY2( int lh ) const
 
 int wxPGProperty::GetY() const
 {
-    wxPropertyGrid *pg = GetGrid();
-    wxASSERT_MSG( pg,
-        wxT("Cannot obtain coordinates of detached property") );
-    return pg ? GetY2(pg->GetRowHeight()) : 0;
+    return GetY2(GetGrid()->GetRowHeight());
 }
 
 // This is used by Insert etc.
@@ -2590,16 +2548,8 @@ void wxPGProperty::Empty()
 
 wxPGProperty* wxPGProperty::GetItemAtY( unsigned int y ) const
 {
-    wxPropertyGrid *pg = GetGrid();
-    wxASSERT_MSG( pg,
-                  wxT("Cannot obtain property item for detached property") );
-    if( !pg )
-    {
-        return NULL;
-    }
-
-    unsigned int nextItem = 0;
-    return GetItemAtY(y, pg->GetRowHeight(), &nextItem);
+    unsigned int nextItem;
+    return GetItemAtY( y, GetGrid()->GetRowHeight(), &nextItem);
 }
 
 void wxPGProperty::DeleteChildren()
@@ -2769,8 +2719,9 @@ void wxPGProperty::SubPropsChanged( int oldSelInd )
 // wxPGRootProperty
 // -----------------------------------------------------------------------
 
-WX_PG_IMPLEMENT_PROPERTY_CLASS(wxPGRootProperty, wxPGProperty,
-                               none, none, TextCtrl)
+WX_PG_IMPLEMENT_PROPERTY_CLASS_PLAIN(wxPGRootProperty,none,TextCtrl)
+IMPLEMENT_DYNAMIC_CLASS(wxPGRootProperty, wxPGProperty)
+
 
 wxPGRootProperty::wxPGRootProperty( const wxString& name )
     : wxPGProperty()
@@ -2791,8 +2742,8 @@ wxPGRootProperty::~wxPGRootProperty()
 // wxPropertyCategory
 // -----------------------------------------------------------------------
 
-WX_PG_IMPLEMENT_PROPERTY_CLASS(wxPropertyCategory, wxPGProperty,
-                               none, none, TextCtrl)
+WX_PG_IMPLEMENT_PROPERTY_CLASS_PLAIN(wxPropertyCategory,none,TextCtrl)
+IMPLEMENT_DYNAMIC_CLASS(wxPropertyCategory, wxPGProperty)
 
 void wxPropertyCategory::Init()
 {

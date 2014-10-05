@@ -126,8 +126,6 @@ public:
     virtual bool SetHint(const wxString& hint);
 #endif // wxUSE_UXTHEME
 
-    virtual void SetLayoutDirection(wxLayoutDirection dir) wxOVERRIDE;
-
 protected:
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip(wxToolTip *tip);

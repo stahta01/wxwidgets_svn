@@ -16,7 +16,7 @@
 
 #include "wx/dc.h"
 
-#if wxUSE_GRAPHICS_GDIPLUS
+#if wxUSE_GRAPHICS_CONTEXT
 
 #ifndef WX_PRECOMP
     #include "wx/msw/wrapcdlg.h"
@@ -28,7 +28,6 @@
     #include "wx/bitmap.h"
     #include "wx/log.h"
     #include "wx/icon.h"
-    #include "wx/math.h"
     #include "wx/module.h"
     // include all dc types that are used as a param
     #include "wx/dc.h"
@@ -57,11 +56,20 @@ namespace
 {
 
 //-----------------------------------------------------------------------------
+// constants
+//-----------------------------------------------------------------------------
+
+const double RAD2DEG = 180.0 / M_PI;
+
+//-----------------------------------------------------------------------------
 // Local functions
 //-----------------------------------------------------------------------------
 
 inline double dmin(double a, double b) { return a < b ? a : b; }
 inline double dmax(double a, double b) { return a > b ? a : b; }
+
+inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
+inline double RadToDeg(double deg) { return (deg * 180.0) / M_PI; }
 
 // translate a wxColour to a Color
 inline Color wxColourToColor(const wxColour& col)
@@ -581,9 +589,6 @@ public :
     // create a subimage from a native image representation
     virtual wxGraphicsBitmap CreateSubBitmap( const wxGraphicsBitmap &bitmap, wxDouble x, wxDouble y, wxDouble w, wxDouble h  );
 
-    virtual wxString GetName() const wxOVERRIDE;
-    virtual void GetVersion(int *major, int *minor, int *micro) const wxOVERRIDE;
-
 protected :
     bool EnsureIsLoaded();
     void Load();
@@ -782,7 +787,7 @@ wxGDIPlusBrushData::wxGDIPlusBrushData( wxGraphicsRenderer* renderer , const wxB
 : wxGraphicsObjectRefData(renderer)
 {
     Init();
-    if ( brush.GetStyle() == wxBRUSHSTYLE_SOLID)
+    if ( brush.GetStyle() == wxSOLID)
     {
         m_brush = new SolidBrush(wxColourToColor( brush.GetColour()));
     }
@@ -1205,7 +1210,7 @@ void wxGDIPlusPathData::AddArc( wxDouble x, wxDouble y, wxDouble r, double start
 
         }
    }
-   m_path->AddArc((REAL) (x-r),(REAL) (y-r),(REAL) (2*r),(REAL) (2*r),wxRadToDeg(startAngle),wxRadToDeg(sweepAngle));
+   m_path->AddArc((REAL) (x-r),(REAL) (y-r),(REAL) (2*r),(REAL) (2*r),RadToDeg(startAngle),RadToDeg(sweepAngle));
 }
 
 void wxGDIPlusPathData::AddRectangle( wxDouble x, wxDouble y, wxDouble w, wxDouble h )
@@ -1329,7 +1334,7 @@ void wxGDIPlusMatrixData::Scale( wxDouble xScale , wxDouble yScale )
 // add the rotation to this matrix (radians)
 void wxGDIPlusMatrixData::Rotate( wxDouble angle )
 {
-    m_matrix->Rotate( wxRadToDeg(angle) );
+    m_matrix->Rotate( RadToDeg(angle) );
 }
 
 //
@@ -1434,6 +1439,8 @@ void wxGDIPlusContext::Init(Graphics* graphics, int width, int height)
     m_context->SetTextRenderingHint(TextRenderingHintSystemDefault);
     m_context->SetPixelOffsetMode(PixelOffsetModeHalf);
     m_context->SetSmoothingMode(SmoothingModeHighQuality);
+
+    SetInterpolationQuality(wxINTERPOLATION_GOOD);
 
     m_state1 = m_context->Save();
     m_state2 = m_context->Save();
@@ -1562,31 +1569,21 @@ bool wxGDIPlusContext::SetAntialiasMode(wxAntialiasMode antialias)
     if (m_antialias == antialias)
         return true;
 
-    // MinGW currently doesn't provide InterpolationModeInvalid in its headers,
-    // so use our own definition.
-    static const SmoothingMode
-        wxSmoothingModeInvalid = static_cast<SmoothingMode>(-1);
+    m_antialias = antialias;
 
-    SmoothingMode antialiasMode = wxSmoothingModeInvalid;
+    SmoothingMode antialiasMode;
     switch (antialias)
     {
         case wxANTIALIAS_DEFAULT:
             antialiasMode = SmoothingModeHighQuality;
             break;
-
         case wxANTIALIAS_NONE:
             antialiasMode = SmoothingModeNone;
             break;
+        default:
+            return false;
     }
-
-    wxCHECK_MSG( antialiasMode != wxSmoothingModeInvalid, false,
-                 wxS("Unknown antialias mode") );
-
-    if ( m_context->SetSmoothingMode(antialiasMode) != Gdiplus::Ok )
-        return false;
-
-    m_antialias = antialias;
-
+    m_context->SetSmoothingMode(antialiasMode);
     return true;
 }
 
@@ -1595,12 +1592,7 @@ bool wxGDIPlusContext::SetInterpolationQuality(wxInterpolationQuality interpolat
     if (m_interpolation == interpolation)
         return true;
 
-    // MinGW currently doesn't provide InterpolationModeInvalid in its headers,
-    // so use our own definition.
-    static const InterpolationMode
-        wxInterpolationModeInvalid = static_cast<InterpolationMode>(-1);
-
-    InterpolationMode interpolationMode = wxInterpolationModeInvalid;
+    InterpolationMode interpolationMode = InterpolationModeDefault;
     switch (interpolation)
     {
         case wxINTERPOLATION_DEFAULT:
@@ -1622,10 +1614,10 @@ bool wxGDIPlusContext::SetInterpolationQuality(wxInterpolationQuality interpolat
         case wxINTERPOLATION_BEST:
             interpolationMode = InterpolationModeHighQualityBicubic;
             break;
-    }
 
-    wxCHECK_MSG( interpolationMode != wxInterpolationModeInvalid, false,
-                 wxS("Unknown interpolation mode") );
+        default:
+            return false;
+    }
 
     if ( m_context->SetInterpolationMode(interpolationMode) != Gdiplus::Ok )
         return false;
@@ -1674,7 +1666,7 @@ void wxGDIPlusContext::EndLayer()
 
 void wxGDIPlusContext::Rotate( wxDouble angle )
 {
-    m_context->RotateTransform( wxRadToDeg(angle) );
+    m_context->RotateTransform( RadToDeg(angle) );
 }
 
 void wxGDIPlusContext::Translate( wxDouble dx , wxDouble dy )
@@ -1995,14 +1987,9 @@ IMPLEMENT_DYNAMIC_CLASS(wxGDIPlusRenderer,wxGraphicsRenderer)
 
 static wxGDIPlusRenderer gs_GDIPlusRenderer;
 
-wxGraphicsRenderer* wxGraphicsRenderer::GetGDIPlusRenderer()
-{
-    return &gs_GDIPlusRenderer;
-}
-
 wxGraphicsRenderer* wxGraphicsRenderer::GetDefaultRenderer()
 {
-    return wxGraphicsRenderer::GetGDIPlusRenderer();
+    return &gs_GDIPlusRenderer;
 }
 
 bool wxGDIPlusRenderer::EnsureIsLoaded()
@@ -2149,7 +2136,7 @@ wxGraphicsMatrix wxGDIPlusRenderer::CreateMatrix( wxDouble a, wxDouble b, wxDoub
 wxGraphicsPen wxGDIPlusRenderer::CreatePen(const wxPen& pen)
 {
     ENSURE_LOADED_OR_RETURN(wxNullGraphicsPen);
-    if ( !pen.IsOk() || pen.GetStyle() == wxPENSTYLE_TRANSPARENT )
+    if ( !pen.IsOk() || pen.GetStyle() == wxTRANSPARENT )
         return wxNullGraphicsPen;
     else
     {
@@ -2162,7 +2149,7 @@ wxGraphicsPen wxGDIPlusRenderer::CreatePen(const wxPen& pen)
 wxGraphicsBrush wxGDIPlusRenderer::CreateBrush(const wxBrush& brush )
 {
     ENSURE_LOADED_OR_RETURN(wxNullGraphicsBrush);
-    if ( !brush.IsOk() || brush.GetStyle() == wxBRUSHSTYLE_TRANSPARENT )
+    if ( !brush.IsOk() || brush.GetStyle() == wxTRANSPARENT )
         return wxNullGraphicsBrush;
     else
     {
@@ -2313,21 +2300,6 @@ wxGraphicsBitmap wxGDIPlusRenderer::CreateSubBitmap( const wxGraphicsBitmap &bit
         return wxNullGraphicsBitmap;
 }
 
-wxString wxGDIPlusRenderer::GetName() const
-{
-    return "gdiplus";
-}
-
-void wxGDIPlusRenderer::GetVersion(int *major, int *minor, int *micro) const
-{
-    if ( major )
-        *major = wxPlatformInfo::Get().GetOSMajorVersion();
-    if ( minor )
-        *minor = wxPlatformInfo::Get().GetOSMinorVersion();
-    if ( micro )
-        *micro = 0;
-}
-
 // Shutdown GDI+ at app exit, before possible dll unload
 class wxGDIPlusRendererModule : public wxModule
 {
@@ -2396,4 +2368,4 @@ void wxGCDC::ReleaseHDC(WXHDC hdc)
     g->ReleaseHDC((HDC)hdc);
 }
 
-#endif // wxUSE_GRAPHICS_GDIPLUS
+#endif  // wxUSE_GRAPHICS_CONTEXT

@@ -1,8 +1,8 @@
-                wxWidgets 3.1.0 Release Notes
+                wxWidgets 3.0.2 Release Notes
                 =============================
 
-Welcome to the latest development release of wxWidgets, a free and
-open source cross-platform C++ framework for writing advanced GUI
+Welcome to the latest stable release of wxWidgets, a free and open
+source cross-platform C++ framework for writing advanced GUI
 applications using native controls.
 
 
@@ -18,17 +18,17 @@ You can learn more about wxWidgets at
 
 and read its documentation online at
 
-        http://docs.wxwidgets.org/3.1.0/
+        http://docs.wxwidgets.org/3.0.2/
 
 
 wxWidgets sources and binaries for the selected platforms are
 available for download from
 
-        https://sourceforge.net/projects/wxwindows/files/3.1.0/
+        https://sourceforge.net/projects/wxwindows/files/3.0.2/
 
 or
 
-        ftp://ftp.wxwidgets.org/pub/3.1.0/
+        ftp://ftp.wxwidgets.org/pub/3.0.2/
 
 Please see the "Files" section below for the description of various
 files available at these locations.
@@ -38,6 +38,50 @@ files available at these locations.
 Changes in this release
 -----------------------
 
+This is a bug fix release with no significant new features compared to
+the previous 3.0.x releases and compatible with them at both the API
+and the ABI level (i.e. all applications linked against earlier 3.0.x
+DLLs or shared libraries will continue to work when using 3.0.2
+libraries).
+
+Some of the changes:
+
+* In wxGTK:
+ - Fix wxSearchCtrl layout.
+ - Fix mouse handling in wxListCtrl and wxTreeCtrl inside wxNotebook.
+ - Avoid some GTK+ warnings.
+
+* In wxMSW:
+ - Cygwin 1.7 and MinGW 4.8 build fixes.
+ - Fix parallel build in MSVS 2010+ solutions.
+ - Add x64 configurations to MSVS 2005/2008 projects too.
+ - Fix using Esc as accelerator in the menus.
+ - Fix wxRadioBox, wxSlider, wxToggleButton with non-default colours.
+ - RTL support fixes for wxDC and wxGrid.
+
+* In wxOSX:
+ - Avoid compilation warnings when using 10.10 SDK.
+ - Enhancements to retina support.
+
+Despite of the focus on bug fixes, a few new features have
+nevertheless made it into this release as well:
+
+ - Add support for "%V", "%G" and "%g" to wxDateTime::Format().
+ - Added an XRC handler for wxSimplebook.
+ - Allow to specify the "variant" window property in XRC.
+ - Add wxGenericListCtrl::EndEditLabel().
+
+Other changes in this release are described in the file
+docs/changes.txt available online at
+
+    https://sourceforge.net/projects/wxwindows/files/3.0.2/changes.txt
+
+This file also contains information about the changes in 3.0 compared
+to earlier versions of wxWidgets, please read it, and especially its
+"INCOMPATIBLE CHANGES" section, if you are upgrading from wxWidgets
+2.8 or earlier. And for even more details, please see
+
+    http://docs.wxwidgets.org/3.0.0/overview_changes_since28.html
 
 
 Platforms supported
@@ -45,16 +89,17 @@ Platforms supported
 
 wxWidgets currently supports the following primary platforms:
 
-- Windows XP, Vista, 7 and 8 (32/64 bits).
+- Windows 95/98/ME, NT, 2000, XP, Vista, 7 (32/64 bits).
 - Most Unix variants using the GTK+ toolkit (version 2.6 or newer)
-- Mac OS X (10.6 or newer) using Cocoa (32/64 bits) or Carbon (32 only)
+- Mac OS X (10.5 or newer) using Cocoa (32/64 bits) or Carbon (32 only)
 
 There is some support for the following platforms:
 
 - Most Unix variants with X11
 - Most Unix variants with Motif/Lesstif
 - Most Unix variants with GTK+ 1.2
-- Most Unix variants with Qt 5 or newer
+- OS/2
+- Windows CE (Pocket PC)
 
 Most popular C++ compilers are supported; see the install.txt
 file for each platform (available via docs/html/index.htm) and
@@ -92,7 +137,7 @@ Unless you have downloaded the binaries for your compiler, you
 will need to build wxWidgets before you can test out the samples
 or write your own applications. For installation information,
 please see the install.txt file in the docs subdirectory
-appropriate for the platform you use.
+appropriate for the platform you use, e.g. docs/msw/install.txt.
 
 
 Licence information
@@ -115,9 +160,9 @@ application binaries. To answer a FAQ, you don't have to
 distribute any source if you wish to write commercial
 applications using wxWidgets.
 
-However, if you distribute wxGTK, wxQt or wxMotif (with Lesstif)
+However, if you distribute wxGTK or wxMotif (with Lesstif)
 version of your application, don't forget that it is linked
-against GTK+, Qt or Lesstif, which are covered by LGPL *without*
+against GTK+ (or Lesstif) which is covered by LGPL *without*
 exception notice and so is bound by its requirements.
 
 If you use TIFF image handler, please see src/tiff/COPYRIGHT
@@ -136,19 +181,14 @@ If you use wxXML classes or XRC, see src/expat/COPYING for licence
 details.
 
 
-Documentation
--------------
-
-wxWidgets documentation is available online at
-http://docs.wxwidgets.org/3.1.0/ and can also be downloaded in
-HTML format. To generate documentation in other formats (PDF, CHM,
-...) please use the scripts in docs/doxygen directory.
-
-
 Bug reporting
 -------------
 
 The wxWidgets bug tracker can be browsed at:
+
+    http://trac.wxwidgets.org/report
+
+and new bugs can be opened from
 
     http://trac.wxwidgets.org/newticket
 
@@ -168,11 +208,11 @@ Further information
 If you are looking for support, you can get it from
 
 - wxForum at http://forums.wxwidgets.org/
-- wx-users mailing list (http://www.wxwidgets.org/support/mailing-lists/)
+- wx-users mailing list (http://www.wxwidgets.org/support/maillst2.htm)
 - #wxwidgets IRC channel
 - http://stackoverflow.com/ if you tag your question with "wxwidgets"
 
 
 Have fun!
 
-The wxWidgets Team, August 2014
+The wxWidgets Team, October 2014

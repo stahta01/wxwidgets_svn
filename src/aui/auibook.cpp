@@ -1502,20 +1502,20 @@ public:
 protected:
     void DoSetSize(int x, int y,
                    int width, int height,
-                   int WXUNUSED(sizeFlags = wxSIZE_AUTO)) wxOVERRIDE
+                   int WXUNUSED(sizeFlags = wxSIZE_AUTO))
     {
         m_rect = wxRect(x, y, width, height);
         DoSizing();
     }
 
-    void DoGetClientSize(int* x, int* y) const wxOVERRIDE
+    void DoGetClientSize(int* x, int* y) const
     {
         *x = m_rect.width;
         *y = m_rect.height;
     }
 
 public:
-    bool Show( bool WXUNUSED(show = true) ) wxOVERRIDE { return false; }
+    bool Show( bool WXUNUSED(show = true) ) { return false; }
 
     void DoSizing()
     {
@@ -1591,7 +1591,7 @@ public:
     }
 
 protected:
-    void DoGetSize(int* x, int* y) const wxOVERRIDE
+    void DoGetSize(int* x, int* y) const
     {
         if (x)
             *x = m_rect.GetWidth();
@@ -1600,7 +1600,7 @@ protected:
     }
 
 public:
-    void Update() wxOVERRIDE
+    void Update()
     {
         // does nothing
     }
@@ -1696,7 +1696,7 @@ void wxAuiNotebook::InitNotebook(long style)
 
     m_normalFont = *wxNORMAL_FONT;
     m_selectedFont = *wxNORMAL_FONT;
-    m_selectedFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_selectedFont.SetWeight(wxBOLD);
 
     SetArtProvider(new wxAuiDefaultTabArt);
 
@@ -3246,7 +3246,7 @@ bool wxAuiNotebook::SetFont(const wxFont& font)
 
     wxFont normalFont(font);
     wxFont selectedFont(normalFont);
-    selectedFont.SetWeight(wxFONTWEIGHT_BOLD);
+    selectedFont.SetWeight(wxBOLD);
 
     SetNormalFont(normalFont);
     SetSelectedFont(selectedFont);

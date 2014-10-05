@@ -12,6 +12,12 @@
 #include "jinclude.h"
 #include "jpeglib.h"
 
+#if defined(__VISAGECPP__)
+/* Visual Age fixups for multiple declarations */
+#  define null_convert   null_convert2 /* already in jcmaint.c */
+#  define grayscale_convert   grayscale_convert2 /* already in jcmaint.c */
+#endif
+
 /* Private subobject */
 
 typedef struct {
@@ -393,3 +399,12 @@ jinit_color_deconverter (j_decompress_ptr cinfo)
   else
     cinfo->output_components = cinfo->out_color_components;
 }
+
+#if defined(__VISAGECPP__)
+#  ifdef null_convert2
+#   undef null_convert2
+#  endif
+#  ifdef grayscale_convert2
+#   undef grayscale_convert2
+#  endif
+#endif

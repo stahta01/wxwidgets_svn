@@ -609,7 +609,7 @@ bool wxMouseEvent::ButtonDClick(int but) const
     {
         default:
             wxFAIL_MSG(wxT("invalid parameter in wxMouseEvent::ButtonDClick"));
-            wxFALLTHROUGH;
+            // fall through
 
         case wxMOUSE_BTN_ANY:
             return (LeftDClick() || MiddleDClick() || RightDClick() ||
@@ -639,7 +639,7 @@ bool wxMouseEvent::ButtonDown(int but) const
     {
         default:
             wxFAIL_MSG(wxT("invalid parameter in wxMouseEvent::ButtonDown"));
-            wxFALLTHROUGH;
+            // fall through
 
         case wxMOUSE_BTN_ANY:
             return (LeftDown() || MiddleDown() || RightDown() ||
@@ -669,7 +669,7 @@ bool wxMouseEvent::ButtonUp(int but) const
     {
         default:
             wxFAIL_MSG(wxT("invalid parameter in wxMouseEvent::ButtonUp"));
-            wxFALLTHROUGH;
+            // fall through
 
         case wxMOUSE_BTN_ANY:
             return (LeftUp() || MiddleUp() || RightUp() ||
@@ -699,7 +699,7 @@ bool wxMouseEvent::Button(int but) const
     {
         default:
             wxFAIL_MSG(wxT("invalid parameter in wxMouseEvent::Button"));
-            wxFALLTHROUGH;
+            // fall through
 
         case wxMOUSE_BTN_ANY:
             return ButtonUp(wxMOUSE_BTN_ANY) ||
@@ -1615,67 +1615,34 @@ bool wxEvtHandler::SafelyProcessEvent(wxEvent& event)
     }
     catch ( ... )
     {
-        wxEventLoopBase * const loop = wxEventLoopBase::GetActive();
+        // notice that we do it in 2 steps to avoid warnings about possibly
+        // uninitialized loop variable from some versions of g++ which are not
+        // smart enough to figure out that GetActive() doesn't throw and so
+        // that loop will always be initialized
+        wxEventLoopBase *loop = NULL;
         try
         {
+            loop = wxEventLoopBase::GetActive();
+
             if ( !wxTheApp || !wxTheApp->OnExceptionInMainLoop() )
             {
                 if ( loop )
                     loop->Exit();
             }
             //else: continue running current event loop
+
+            return false;
         }
         catch ( ... )
         {
             // OnExceptionInMainLoop() threw, possibly rethrowing the same
-            // exception again. We have to deal with it here because we can't
-            // allow the exception to escape from the handling code, this will
-            // result in a crash at best (e.g. when using wxGTK as C++
-            // exceptions can't propagate through the C GTK+ code and corrupt
-            // the stack) and in something even more weird at worst (like
-            // exceptions completely disappearing into the void under some
-            // 64 bit versions of Windows).
-            if ( loop && !loop->IsYielding() )
+            // exception again: very good, but we still need Exit() to
+            // be called
+            if ( loop )
                 loop->Exit();
-
-            // Give the application one last possibility to store the exception
-            // for rethrowing it later, when we get back to our code.
-            bool stored = false;
-            try
-            {
-                if ( wxTheApp )
-                    stored = wxTheApp->StoreCurrentException();
-            }
-            catch ( ... )
-            {
-                // StoreCurrentException() really shouldn't throw, but if it
-                // did, take it as an indication that it didn't store it.
-            }
-
-            // If it didn't take it, just abort, at least like this we behave
-            // consistently everywhere.
-            if ( !stored )
-            {
-                try
-                {
-                    if ( wxTheApp )
-                        wxTheApp->OnUnhandledException();
-                }
-                catch ( ... )
-                {
-                    // And OnUnhandledException() absolutely shouldn't throw,
-                    // but we still must account for the possibility that it
-                    // did. At least show some information about the exception
-                    // in this case.
-                    wxTheApp->wxAppConsoleBase::OnUnhandledException();
-                }
-
-                wxAbort();
-            }
+            throw;
         }
     }
-
-    return false;
 #endif // wxUSE_EXCEPTIONS
 }
 

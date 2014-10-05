@@ -1017,15 +1017,15 @@ void wxWindowBase::DoSetWindowVariant( wxWindowVariant variant )
             break;
 
         case wxWINDOW_VARIANT_SMALL:
-            size = wxRound(size / 1.2);
+            size = wxRound(size * 3.0 / 4.0);
             break;
 
         case wxWINDOW_VARIANT_MINI:
-            size = wxRound(size / (1.2 * 1.2));
+            size = wxRound(size * 2.0 / 3.0);
             break;
 
         case wxWINDOW_VARIANT_LARGE:
-            size = wxRound(size * 1.2);
+            size = wxRound(size * 5.0 / 4.0);
             break;
 
         default:
@@ -2096,12 +2096,12 @@ bool wxWindowBase::Validate()
         {
         }
 
-        virtual bool OnDo(wxValidator* validator) wxOVERRIDE
+        virtual bool OnDo(wxValidator* validator)
         {
             return validator->Validate(m_win);
         }
 
-        virtual bool OnRecurse(wxWindow* child) wxOVERRIDE
+        virtual bool OnRecurse(wxWindow* child)
         {
             return child->Validate();
         }
@@ -2124,7 +2124,7 @@ bool wxWindowBase::TransferDataToWindow()
         {
         }
 
-        virtual bool OnDo(wxValidator* validator) wxOVERRIDE
+        virtual bool OnDo(wxValidator* validator)
         {
             if ( !validator->TransferToWindow() )
             {
@@ -2139,7 +2139,7 @@ bool wxWindowBase::TransferDataToWindow()
             return true;
         }
 
-        virtual bool OnRecurse(wxWindow* child) wxOVERRIDE
+        virtual bool OnRecurse(wxWindow* child)
         {
             return child->TransferDataToWindow();
         }
@@ -2162,12 +2162,12 @@ bool wxWindowBase::TransferDataFromWindow()
         {
         }
 
-        virtual bool OnDo(wxValidator* validator) wxOVERRIDE
+        virtual bool OnDo(wxValidator* validator)
         {
             return validator->TransferFromWindow();
         }
 
-        virtual bool OnRecurse(wxWindow* child) wxOVERRIDE
+        virtual bool OnRecurse(wxWindow* child)
         {
             return child->TransferDataFromWindow();
         }
@@ -3560,7 +3560,7 @@ public:
     DragAcceptFilesTarget(wxWindowBase *win) : m_win(win) {}
 
     virtual bool OnDropFiles(wxCoord x, wxCoord y,
-                             const wxArrayString& filenames) wxOVERRIDE
+                             const wxArrayString& filenames)
     {
         wxDropFilesEvent event(wxEVT_DROP_FILES,
                                filenames.size(),

@@ -20,10 +20,18 @@
 
 #include <errno.h>
 
+#if defined(__WATCOMC__)
+    #include <nerrno.h>
+#endif
+
 #include <sys/types.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #   include <sys/select.h>
+#endif
+
+#ifdef __EMX__
+    #include <sys/select.h>
 #endif
 
 #ifndef WX_SOCKLEN_T
@@ -170,7 +178,7 @@ void wxSocketImplUnix::OnReadWaiting()
 
             default:
                 wxFAIL_MSG( "unexpected CheckForInput() return value" );
-                wxFALLTHROUGH;
+                // fall through
 
             case -1:
                 if ( GetLastError() == wxSOCKET_WOULDBLOCK )

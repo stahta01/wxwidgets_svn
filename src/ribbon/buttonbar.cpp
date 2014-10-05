@@ -95,14 +95,12 @@ public:
                     *size = wxRIBBON_BUTTONBAR_BUTTON_MEDIUM;
                     break;
                 }
-                wxFALLTHROUGH;
             case wxRIBBON_BUTTONBAR_BUTTON_MEDIUM:
                 if(sizes[wxRIBBON_BUTTONBAR_BUTTON_SMALL].is_supported)
                 {
                     *size = wxRIBBON_BUTTONBAR_BUTTON_SMALL;
                     break;
                 }
-                wxFALLTHROUGH;
             case wxRIBBON_BUTTONBAR_BUTTON_SMALL:
             default:
                 return false;
@@ -517,11 +515,6 @@ bool wxRibbonButtonBar::DeleteButton(int button_id)
         {
             m_layouts_valid = false;
             m_buttons.RemoveAt(i);
-            if (m_hovered_button && m_hovered_button->base == button)
-                m_hovered_button = NULL;
-            if (m_active_button  && m_active_button->base  == button)
-                m_active_button = NULL;
-            delete button;
             Realize();
             Refresh();
             return true;

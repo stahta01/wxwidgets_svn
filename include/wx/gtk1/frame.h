@@ -50,6 +50,8 @@ public:
                 long style = wxDEFAULT_FRAME_STYLE,
                 const wxString& name = wxFrameNameStr);
 
+    virtual ~wxFrame();
+
 #if wxUSE_STATUSBAR
     virtual void PositionStatusBar();
 

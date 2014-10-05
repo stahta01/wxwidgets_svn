@@ -40,7 +40,7 @@
     // comment to use bitmap buttons
     #define wxPG_ICON_WIDTH             9
     // 1 if wxRendererNative should be employed
-    #define wxPG_USE_RENDERER_NATIVE    1
+    #define wxPG_USE_RENDERER_NATIVE    0
 
     // Enable tooltips
     #define wxPG_SUPPORT_TOOLTIPS       1
@@ -188,7 +188,7 @@
 // (for tree buttons)
 //#undef wxPG_ICON_WIDTH
 
-#if WXWIN_COMPATIBILITY_2_8
+#if WXWIN_COMPATIBILITY_2_6 || WXWIN_COMPATIBILITY_2_8
     #define wxPG_COMPATIBILITY_1_4      1
 #else
     #define wxPG_COMPATIBILITY_1_4      0

@@ -374,14 +374,4 @@ void wxBitmapDataObject::DoConvertToPng()
 #endif
 }
 
-// ----------------------------------------------------------------------------
-// wxTextDataObject
-// ----------------------------------------------------------------------------
-
-void
-wxTextDataObject::GetAllFormats(wxDataFormat *formats,
-                                wxDataObjectBase::Direction WXUNUSED(dir)) const
-{
-    *formats++ = GetPreferredFormat();
-}
 #endif // wxUSE_DATAOBJ

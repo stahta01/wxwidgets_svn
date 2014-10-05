@@ -73,7 +73,6 @@ void RadioButtonTestCase::Click()
     EventCounter selected(m_radio, wxEVT_RADIOBUTTON);
 
     wxUIActionSimulator sim;
-    wxYield();
 
     sim.MouseMove(m_radio->GetScreenPosition() + wxPoint(10, 10));
     sim.MouseClick();

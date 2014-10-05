@@ -52,9 +52,9 @@
 #include "wx/filename.h"
 
 #include "wx/propgrid/propgrid.h"
-#include "wx/numformatter.h"
 
-#include <float.h>
+#define wxPG_CUSTOM_IMAGE_WIDTH     20 // for wxColourProperty etc.
+
 
 // -----------------------------------------------------------------------
 // wxStringProperty
@@ -341,8 +341,7 @@ bool wxIntProperty::IntToValue( wxVariant& variant, int value, int WXUNUSED(argF
 // implementations.
 //
 // Note that 'value' is reference on purpose, so we can write
-// back to it when mode is wxPG_PROPERTY_VALIDATION_SATURATE or wxPG_PROPERTY_VALIDATION_WRAP.
-// For argument 'value' of type 'double' there is a specialized function (below).
+// back to it when mode is wxPG_PROPERTY_VALIDATION_SATURATE.
 //
 template<typename T>
 bool NumericValidation( const wxPGProperty* property,
@@ -369,115 +368,6 @@ bool NumericValidation( const wxPGProperty* property,
     {
         variant.Convert(&max);
         maxOk = true;
-    }
-
-    if ( minOk )
-    {
-        if ( value < min )
-        {
-            if ( mode == wxPG_PROPERTY_VALIDATION_ERROR_MESSAGE )
-            {
-                wxString msg;
-                wxString smin = wxString::Format(strFmt, min);
-                wxString smax = wxString::Format(strFmt, max);
-                if ( !maxOk )
-                    msg = wxString::Format(
-                                _("Value must be %s or higher."),
-                                smin.c_str());
-                else
-                    msg = wxString::Format(
-                                _("Value must be between %s and %s."),
-                                smin.c_str(), smax.c_str());
-                pValidationInfo->SetFailureMessage(msg);
-            }
-            else if ( mode == wxPG_PROPERTY_VALIDATION_SATURATE )
-                value = min;
-            else
-                value = max - (min - value);
-            return false;
-        }
-    }
-
-    if ( maxOk )
-    {
-        if ( value > max )
-        {
-            if ( mode == wxPG_PROPERTY_VALIDATION_ERROR_MESSAGE )
-            {
-                wxString msg;
-                wxString smin = wxString::Format(strFmt, min);
-                wxString smax = wxString::Format(strFmt, max);
-                if ( !minOk )
-                    msg = wxString::Format(
-                                _("Value must be %s or less."),
-                                smax.c_str());
-                else
-                    msg = wxString::Format(
-                                _("Value must be between %s and %s."),
-                                smin.c_str(), smax.c_str());
-                pValidationInfo->SetFailureMessage(msg);
-            }
-            else if ( mode == wxPG_PROPERTY_VALIDATION_SATURATE )
-                value = max;
-            else
-                value = min + (value - max);
-            return false;
-        }
-    }
-    return true;
-}
-
-// Template specialization for argument 'value' of type 'double'.
-// It takes into account required precision of the numbers
-// to avoid rounding and conversion errors.
-template<>
-bool NumericValidation( const wxPGProperty* property,
-                        double& value,
-                        wxPGValidationInfo* pValidationInfo,
-                        int mode,
-                        const wxString& strFmt )
-{
-    double min = DBL_MIN;
-    double max = DBL_MAX;
-    wxVariant variant;
-    bool minOk = false;
-    bool maxOk = false;
-
-    variant = property->GetAttribute(wxPGGlobalVars->m_strMin);
-    if ( !variant.IsNull() )
-    {
-        variant.Convert(&min);
-        minOk = true;
-    }
-
-    variant = property->GetAttribute(wxPGGlobalVars->m_strMax);
-    if ( !variant.IsNull() )
-    {
-        variant.Convert(&max);
-        maxOk = true;
-    }
-
-    if ( minOk || maxOk )
-    {
-        // Get required precision.
-        int precision = -1;
-        variant = property->GetAttribute(wxPG_FLOAT_PRECISION);
-        if ( !variant.IsNull() )
-        {
-            precision = variant.GetInteger();
-        }
-
-        // Round current value to the required precision.
-        wxString strVal = wxNumberFormatter::ToString(value, precision, wxNumberFormatter::Style_None);
-        strVal.ToDouble(&value);
-
-        // Round minimal value to the required precision.
-        strVal = wxNumberFormatter::ToString(min, precision, wxNumberFormatter::Style_None);
-        strVal.ToDouble(&min);
-
-        // Round maximal value to the required precision.
-        strVal = wxNumberFormatter::ToString(max, precision, wxNumberFormatter::Style_None);
-        strVal.ToDouble(&max);
     }
 
     if ( minOk )
@@ -787,7 +677,6 @@ wxFloatProperty::wxFloatProperty( const wxString& label,
 
 wxFloatProperty::~wxFloatProperty() { }
 
-#if WXWIN_COMPATIBILITY_3_0
 // This helper method provides standard way for floating point-using
 // properties to convert values to string.
 const wxString& wxPropertyGrid::DoubleToString(wxString& target,
@@ -859,7 +748,6 @@ const wxString& wxPropertyGrid::DoubleToString(wxString& target,
 
     return target;
 }
-#endif // WXWIN_COMPATIBILITY_3_0
 
 wxString wxFloatProperty::ValueToString( wxVariant& value,
                                          int argFlags ) const
@@ -867,9 +755,11 @@ wxString wxFloatProperty::ValueToString( wxVariant& value,
     wxString text;
     if ( !value.IsNull() )
     {
-        text = wxNumberFormatter::ToString(value.GetDouble(), m_precision,
-                                           argFlags & wxPG_FULL_VALUE ? wxNumberFormatter::Style_None
-                                                                      : wxNumberFormatter::Style_NoTrailingZeroes);
+        wxPropertyGrid::DoubleToString(text,
+                                       value,
+                                       m_precision,
+                                       !(argFlags & wxPG_FULL_VALUE),
+                                       NULL);
     }
     return text;
 }
@@ -929,16 +819,6 @@ bool wxFloatProperty::DoSetAttribute( const wxString& name, wxVariant& value )
         return true;
     }
     return false;
-}
-
-wxVariant wxFloatProperty::DoGetAttribute( const wxString& name ) const
-{
-    wxVariant value;
-    if ( name == wxPG_FLOAT_PRECISION )
-    {
-        value = (long)m_precision;
-    }
-    return value;
 }
 
 wxValidator*
@@ -1096,8 +976,9 @@ bool wxBoolProperty::DoSetAttribute( const wxString& name, wxVariant& value )
 // wxEnumProperty
 // -----------------------------------------------------------------------
 
-WX_PG_IMPLEMENT_PROPERTY_CLASS(wxEnumProperty, wxPGProperty,
-                               long, const long*, Choice)
+IMPLEMENT_DYNAMIC_CLASS(wxEnumProperty, wxPGProperty)
+
+WX_PG_IMPLEMENT_PROPERTY_CLASS_PLAIN(wxEnumProperty,long,Choice)
 
 wxEnumProperty::wxEnumProperty( const wxString& label, const wxString& name, const wxChar* const* labels,
     const long* values, int value ) : wxPGProperty(label,name)
@@ -1113,8 +994,7 @@ wxEnumProperty::wxEnumProperty( const wxString& label, const wxString& name, con
     }
 }
 
-wxEnumProperty::wxEnumProperty( const wxString& label, const wxString& name,
-    const char* const* untranslatedLabels,
+wxEnumProperty::wxEnumProperty( const wxString& label, const wxString& name, const wxChar* const* labels,
     const long* values, wxPGChoices* choicesCache, int value )
     : wxPGProperty(label,name)
 {
@@ -1127,13 +1007,9 @@ wxEnumProperty::wxEnumProperty( const wxString& label, const wxString& name,
         m_choices.Assign( *choicesCache );
         m_value = wxPGVariant_Zero;
     }
-    else
+    else if ( labels )
     {
-        for ( int i = 0; *untranslatedLabels; untranslatedLabels++ )
-        {
-            const long val = values ? *values++ : i++;
-            m_choices.Add(wxGetTranslation(*untranslatedLabels), val);
-        }
+        m_choices.Add(labels,values);
 
         if ( GetItemCount() )
             SetValue( (long)value );
@@ -1159,8 +1035,6 @@ wxEnumProperty::wxEnumProperty( const wxString& label, const wxString& name,
     wxPGChoices& choices, int value )
     : wxPGProperty(label,name)
 {
-    SetIndex(0);
-
     m_choices.Assign( choices );
 
     if ( GetItemCount() )
@@ -1172,11 +1046,11 @@ int wxEnumProperty::GetIndexForValue( int value ) const
     if ( !m_choices.IsOk() )
         return -1;
 
-    const int intVal = m_choices.Index(value);
+    int intVal = m_choices.Index(value);
     if ( intVal >= 0 )
         return intVal;
 
-    return -1;
+    return value;
 }
 
 wxEnumProperty::~wxEnumProperty ()
@@ -1371,8 +1245,9 @@ int wxEnumProperty::GetIndex() const
 // wxEditEnumProperty
 // -----------------------------------------------------------------------
 
-WX_PG_IMPLEMENT_PROPERTY_CLASS(wxEditEnumProperty, wxPGProperty,
-                               wxString, const wxString&, ComboBox)
+IMPLEMENT_DYNAMIC_CLASS(wxEditEnumProperty, wxPGProperty)
+
+WX_PG_IMPLEMENT_PROPERTY_CLASS_PLAIN(wxEditEnumProperty,wxString,ComboBox)
 
 wxEditEnumProperty::wxEditEnumProperty( const wxString& label, const wxString& name, const wxChar* const* labels,
     const long* values, const wxString& value )
@@ -1381,7 +1256,7 @@ wxEditEnumProperty::wxEditEnumProperty( const wxString& label, const wxString& n
     SetValue( value );
 }
 
-wxEditEnumProperty::wxEditEnumProperty( const wxString& label, const wxString& name, const char* const* labels,
+wxEditEnumProperty::wxEditEnumProperty( const wxString& label, const wxString& name, const wxChar* const* labels,
     const long* values, wxPGChoices* choicesCache, const wxString& value )
     : wxEnumProperty(label,name,labels,values,choicesCache,0)
 {
@@ -1410,8 +1285,9 @@ wxEditEnumProperty::~wxEditEnumProperty()
 // wxFlagsProperty
 // -----------------------------------------------------------------------
 
-WX_PG_IMPLEMENT_PROPERTY_CLASS(wxFlagsProperty, wxPGProperty,
-                               long, long, TextCtrl)
+IMPLEMENT_DYNAMIC_CLASS(wxFlagsProperty,wxPGProperty)
+
+WX_PG_IMPLEMENT_PROPERTY_CLASS_PLAIN(wxFlagsProperty,long,TextCtrl)
 
 void wxFlagsProperty::Init()
 {
@@ -1763,7 +1639,6 @@ wxDirProperty::wxDirProperty( const wxString& name, const wxString& label, const
   : wxLongStringProperty(name,label,value)
 {
     m_flags |= wxPG_PROP_NO_ESCAPE;
-    m_flags &= ~wxPG_PROP_ACTIVE_BTN; // Property button enabled only in not read-only mode.
 }
 
 wxDirProperty::~wxDirProperty() { }
@@ -2108,7 +1983,6 @@ WX_PG_IMPLEMENT_PROPERTY_CLASS(wxLongStringProperty,wxPGProperty,
 wxLongStringProperty::wxLongStringProperty( const wxString& label, const wxString& name,
     const wxString& value ) : wxPGProperty(label,name)
 {
-    m_flags |= wxPG_PROP_ACTIVE_BTN; // Property button always enabled.
     SetValue(value);
 }
 
@@ -2177,18 +2051,14 @@ bool wxLongStringProperty::DisplayEditorDialog( wxPGProperty* prop, wxPropertyGr
 #endif
     wxBoxSizer* topsizer = new wxBoxSizer( wxVERTICAL );
     wxBoxSizer* rowsizer = new wxBoxSizer( wxHORIZONTAL );
-    long edStyle = wxTE_MULTILINE;
-    if ( prop->HasFlag(wxPG_PROP_READONLY) )
-        edStyle |= wxTE_READONLY;
-    wxTextCtrl* ed = new wxTextCtrl(dlg,wxID_ANY,value,
-        wxDefaultPosition,wxDefaultSize,edStyle);
+    wxTextCtrl* ed = new wxTextCtrl(dlg,11,value,
+        wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE);
 
     rowsizer->Add( ed, 1, wxEXPAND|wxALL, spacing );
     topsizer->Add( rowsizer, 1, wxEXPAND, 0 );
 
     wxStdDialogButtonSizer* buttonSizer = new wxStdDialogButtonSizer();
-    if ( !prop->HasFlag(wxPG_PROP_READONLY) )
-        buttonSizer->AddButton(new wxButton(dlg, wxID_OK));
+    buttonSizer->AddButton(new wxButton(dlg, wxID_OK));
     buttonSizer->AddButton(new wxButton(dlg, wxID_CANCEL));
     buttonSizer->Realize();
     topsizer->Add( buttonSizer, 0,
@@ -2869,7 +2739,7 @@ bool wxPGInDialogValidator::DoValidate( wxPropertyGrid* propGrid,
     if ( !tc )
     {
         {
-            tc = new wxTextCtrl( propGrid, wxID_ANY, wxEmptyString,
+            tc = new wxTextCtrl( propGrid, wxPG_SUBID_TEMP1, wxEmptyString,
                                  wxPoint(30000,30000));
             tc->Hide();
         }

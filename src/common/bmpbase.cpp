@@ -166,8 +166,8 @@ class wxBitmapBaseModule: public wxModule
 DECLARE_DYNAMIC_CLASS(wxBitmapBaseModule)
 public:
     wxBitmapBaseModule() {}
-    bool OnInit() wxOVERRIDE { wxBitmap::InitStandardHandlers(); return true; }
-    void OnExit() wxOVERRIDE { wxBitmap::CleanUpHandlers(); }
+    bool OnInit() { wxBitmap::InitStandardHandlers(); return true; }
+    void OnExit() { wxBitmap::CleanUpHandlers(); }
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxBitmapBaseModule, wxModule)
@@ -178,7 +178,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxBitmapBaseModule, wxModule)
 // wxBitmap common
 // ----------------------------------------------------------------------------
 
-#if !(defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXX11__) || defined(__WXQT__))
+#if !(defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXX11__))
 
 wxBitmap::wxBitmap(const char* const* bits)
 {

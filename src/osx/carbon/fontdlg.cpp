@@ -279,8 +279,8 @@ int wxFontDialog::ShowModal()
 // wxFontDialog stub for mac OS's without a native font dialog
 // ---------------------------------------------------------------------------
 
-static const wxChar *FontFamilyIntToString(wxFontFamily family);
-static wxFontFamily FontFamilyStringToInt(const wxChar *family);
+static const wxChar *FontFamilyIntToString(int family);
+static int FontFamilyStringToInt(const wxChar *family);
 
 
 //-----------------------------------------------------------------------------
@@ -689,9 +689,9 @@ bool wxFontDialog::ShowToolTips()
 
 void wxFontDialog::InitializeFont()
 {
-    wxFontFamily fontFamily = wxFONTFAMILY_SWISS;
-    wxFontWeight fontWeight = wxFONTWEIGHT_NORMAL;
-    wxFontStyle fontStyle = wxFONTSTYLE_NORMAL;
+    int fontFamily = wxSWISS;
+    int fontWeight = wxNORMAL;
+    int fontStyle = wxNORMAL;
     int fontSize = 12;
     bool fontUnderline = false;
     wxString fontName;
@@ -723,8 +723,8 @@ void wxFontDialog::InitializeControls()
     if (m_underlinedCtrl)
         m_underlinedCtrl->SetValue(m_dialogFont.GetUnderlined());
 
-    m_boldCtrl->SetValue(m_dialogFont.GetWeight() == wxFONTWEIGHT_BOLD);
-    m_italicCtrl->SetValue(m_dialogFont.GetStyle() == wxFONTSTYLE_ITALIC);
+    m_boldCtrl->SetValue(m_dialogFont.GetWeight() == wxBOLD);
+    m_italicCtrl->SetValue(m_dialogFont.GetStyle() == wxITALIC);
     m_sizeCtrl->SetValue(m_dialogFont.GetPointSize());
 
     wxString facename = m_dialogFont.GetFaceName();
@@ -755,13 +755,14 @@ void wxFontDialog::ChangeFont()
     int size = m_sizeCtrl->GetValue();
     wxString facename = m_facenameCtrl->GetStringSelection();
 
-    wxFontFamily family = FontFamilyStringToInt(facename);
-    if (family != wxFONTFAMILY_DEFAULT)
+    int family = FontFamilyStringToInt(facename);
+    if (family == -1)
+        family = wxDEFAULT;
+    else
         facename = wxEmptyString;
 
-    m_dialogFont = wxFontInfo(size)
-                    .Family(family).FaceName(facename)
-                    .Italic(italic).Bold(bold).Underlined(underlined);
+    m_dialogFont = wxFont(size, family, italic ? wxITALIC : wxNORMAL, bold ? wxBOLD : wxNORMAL,
+        underlined, facename);
 
     m_fontData.SetChosenFont(m_dialogFont);
 
@@ -788,44 +789,44 @@ void wxFontDialog::OnPanelClose()
 {
 }
 
-const wxChar *FontFamilyIntToString(wxFontFamily family)
+const wxChar *FontFamilyIntToString(int family)
 {
     switch (family)
     {
-        case wxFONTFAMILY_ROMAN:
+        case wxROMAN:
             return _("<Any Roman>");
-        case wxFONTFAMILY_DECORATIVE:
+        case wxDECORATIVE:
             return _("<Any Decorative>");
-        case wxFONTFAMILY_MODERN:
+        case wxMODERN:
             return _("<Any Modern>");
-        case wxFONTFAMILY_SCRIPT:
+        case wxSCRIPT:
             return _("<Any Script>");
-        case wxFONTFAMILY_TELETYPE:
+        case wxTELETYPE:
             return _("<Any Teletype>");
-        case wxFONTFAMILY_SWISS:
+        case wxSWISS:
         default:
             return _("<Any Swiss>");
     }
 }
 
-wxFontFamily FontFamilyStringToInt(const wxChar *family)
+int FontFamilyStringToInt(const wxChar *family)
 {
     if (!family)
-        return wxFONTFAMILY_SWISS;
+        return wxSWISS;
 
     if (wxStrcmp(family, _("<Any Roman>")) == 0)
-        return wxFONTFAMILY_ROMAN;
+        return wxROMAN;
     else if (wxStrcmp(family, _("<Any Decorative>")) == 0)
-        return wxFONTFAMILY_DECORATIVE;
+        return wxDECORATIVE;
     else if (wxStrcmp(family, _("<Any Modern>")) == 0)
-        return wxFONTFAMILY_MODERN;
+        return wxMODERN;
     else if (wxStrcmp(family, _("<Any Script>")) == 0)
-        return wxFONTFAMILY_SCRIPT;
+        return wxSCRIPT;
     else if (wxStrcmp(family, _("<Any Teletype>")) == 0)
-        return wxFONTFAMILY_TELETYPE;
+        return wxTELETYPE;
     else if (wxStrcmp(family, _("<Any Swiss>")) == 0)
-        return wxFONTFAMILY_SWISS;
-    else return wxFONTFAMILY_DEFAULT;
+        return wxSWISS;
+    else return -1;
 }
 
 #endif // !USE_NATIVE_FONT_DIALOG_FOR_MACOSX

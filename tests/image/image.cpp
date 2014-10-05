@@ -985,6 +985,11 @@ static void SetAlpha(wxImage *image)
 
 void ImageTestCase::CompareSavedImage()
 {
+    // FIXME-VC6: Pre-declare the loop variables for compatibility with
+    // pre-standard compilers such as MSVC6 that don't implement proper scope
+    // for the variables declared in the for loops.
+    int i;
+
     wxImage expected24("horse.png");
     CPPUNIT_ASSERT( expected24.IsOk() );
     CPPUNIT_ASSERT( !expected24.HasAlpha() );
@@ -993,7 +998,7 @@ void ImageTestCase::CompareSavedImage()
 
 #if wxUSE_PALETTE
     unsigned char greys[256];
-    for (int i = 0; i < 256; ++i)
+    for (i = 0; i < 256; ++i)
     {
         greys[i] = i;
     }
@@ -1158,7 +1163,8 @@ void ImageTestCase::SaveAnimatedGIF()
 
     wxImageArray images;
     images.Add(image);
-    for (int i = 0; i < 4-1; ++i)
+    int i;
+    for (i = 0; i < 4-1; ++i)
     {
         images.Add( images[i].Rotate90() );
 
@@ -1174,7 +1180,7 @@ void ImageTestCase::SaveAnimatedGIF()
     const int imageCount = handler.GetImageCount(memIn);
     CPPUNIT_ASSERT_EQUAL(4, imageCount);
 
-    for (int i = 0; i < imageCount; ++i)
+    for (i = 0; i < imageCount; ++i)
     {
         wxFileOffset pos = memIn.TellI();
         CPPUNIT_ASSERT( handler.LoadFile(&image, memIn, true, i) );
@@ -1340,14 +1346,7 @@ void ImageTestCase::BMPFlippingAndRLECompression()
 }
 
 
-// The 0 below can be replaced with 1 to generate, instead of comparing with,
-// the test files.
 #define ASSERT_IMAGE_EQUAL_TO_FILE(image, file) \
-    if ( 0 ) \
-    { \
-        CPPUNIT_ASSERT_MESSAGE( "Failed to save " file, image.SaveFile(file) ); \
-    } \
-    else \
     { \
         wxImage imageFromFile(file); \
         CPPUNIT_ASSERT_MESSAGE( "Failed to load " file, imageFromFile.IsOk() ); \

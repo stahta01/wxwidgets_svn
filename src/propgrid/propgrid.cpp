@@ -147,8 +147,8 @@ class wxPGGlobalVarsClassManager : public wxModule
     DECLARE_DYNAMIC_CLASS(wxPGGlobalVarsClassManager)
 public:
     wxPGGlobalVarsClassManager() {}
-    virtual bool OnInit() wxOVERRIDE { wxPGGlobalVars = new wxPGGlobalVarsClass(); return true; }
-    virtual void OnExit() wxOVERRIDE { wxDELETE(wxPGGlobalVars); }
+    virtual bool OnInit() { wxPGGlobalVars = new wxPGGlobalVarsClass(); return true; }
+    virtual void OnExit() { wxDELETE(wxPGGlobalVars); }
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxPGGlobalVarsClassManager, wxModule)
@@ -212,13 +212,15 @@ wxPGGlobalVarsClass::wxPGGlobalVarsClass()
 
 wxPGGlobalVarsClass::~wxPGGlobalVarsClass()
 {
+    size_t i;
+
     delete m_defaultRenderer;
 
     // This will always have one ref
     delete m_fontFamilyChoices;
 
 #if wxUSE_VALIDATORS
-    for ( size_t i = 0; i < m_arrValidators.size(); i++ )
+    for ( i=0; i<m_arrValidators.size(); i++ )
         delete ((wxValidator*)m_arrValidators[i]);
 #endif
 
@@ -372,6 +374,7 @@ void wxPropertyGrid::Init1()
     AddActionTrigger( wxPG_ACTION_PRESS_BUTTON, WXK_F4 );
 
     m_coloursCustomized = 0;
+    m_frozen = 0;
 
     m_doubleBuffer = NULL;
 
@@ -605,10 +608,10 @@ void wxPropertyGrid::SetWindowStyleFlag( long style )
             //
             // Autosort enabled
             //
-            if ( !IsFrozen() )
+            if ( !m_frozen )
                 PrepareAfterItemsAdded();
             else
-                m_pState->m_itemsAdded = true;
+                m_pState->m_itemsAdded = 1;
         }
     #if wxPG_SUPPORT_TOOLTIPS
         if ( !(old_style & wxPG_TOOLTIPS) && (style & wxPG_TOOLTIPS) )
@@ -646,11 +649,24 @@ void wxPropertyGrid::SetWindowStyleFlag( long style )
 
 // -----------------------------------------------------------------------
 
-void wxPropertyGrid::DoThaw()
+void wxPropertyGrid::Freeze()
 {
-    if ( !IsFrozen() )
+    if ( !m_frozen )
     {
-        wxControl::DoThaw();
+        wxControl::Freeze();
+    }
+    m_frozen++;
+}
+
+// -----------------------------------------------------------------------
+
+void wxPropertyGrid::Thaw()
+{
+    m_frozen--;
+
+    if ( !m_frozen )
+    {
+        wxControl::Thaw();
         RecalculateVirtualSize();
         Refresh();
 
@@ -1260,7 +1276,7 @@ void wxPropertyGrid::CalculateFontAndBitmapStuff( int vspacing )
     if ( !(m_windowStyle & wxPG_HIDE_MARGIN) )
         m_marginWidth = m_gutterWidth*2 + m_iconWidth;
 
-    m_captionFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_captionFont.SetWeight(wxBOLD);
     GetTextExtent(wxS("jG"), &x, &y, 0, 0, &m_captionFont);
 
     m_lineHeight = m_fontHeight+(2*m_spacingy)+1;
@@ -1547,7 +1563,7 @@ void wxPropertyGrid::PrepareAfterItemsAdded()
 {
     if ( !m_pState || !m_pState->m_itemsAdded ) return;
 
-    m_pState->m_itemsAdded = false;
+    m_pState->m_itemsAdded = 0;
 
     if ( m_windowStyle & wxPG_AUTO_SORT )
         Sort(wxPG_SORT_TOP_LEVEL_ONLY);
@@ -1905,7 +1921,7 @@ void wxPropertyGrid::DrawItems( wxDC& dc,
                                 unsigned int bottomItemY,
                                 const wxRect* itemsRect )
 {
-    if ( IsFrozen() ||
+    if ( m_frozen ||
          m_height < 1 ||
          bottomItemY < topItemY ||
          !m_pState )
@@ -1955,9 +1971,6 @@ void wxPropertyGrid::DrawItems( wxDC& dc,
             else
             {
                 bufferDC = new wxMemoryDC();
-                // Use the same layout direction as the window DC uses
-                // to ensure that the text is rendered correctly.
-                bufferDC->SetLayoutDirection(dc.GetLayoutDirection());
 
                 // If nothing was changed, then just copy from double-buffer
                 bufferDC->SelectObject( *m_doubleBuffer );
@@ -2016,7 +2029,7 @@ int wxPropertyGrid::DoDrawItems( wxDC& dc,
     if ( !lastItem )
         lastItem = GetLastItem( wxPG_ITERATE_VISIBLE );
 
-    if ( IsFrozen() || m_height < 1 || firstItem == NULL )
+    if ( m_frozen || m_height < 1 || firstItem == NULL )
         return itemsRect->y;
 
     wxCHECK_MSG( !m_pState->m_itemsAdded, itemsRect->y,
@@ -2100,8 +2113,8 @@ int wxPropertyGrid::DoDrawItems( wxDC& dc,
 
     wxBrush marginBrush(m_colMargin);
     wxPen marginPen(m_colMargin);
-    wxBrush capbgbrush(m_colCapBack,wxBRUSHSTYLE_SOLID);
-    wxPen linepen(m_colLine,1,wxPENSTYLE_SOLID);
+    wxBrush capbgbrush(m_colCapBack,wxSOLID);
+    wxPen linepen(m_colLine,1,wxSOLID);
 
     wxColour selBackCol;
     if ( isPgEnabled )
@@ -2110,7 +2123,7 @@ int wxPropertyGrid::DoDrawItems( wxDC& dc,
         selBackCol = m_colMargin;
 
     // pen that has same colour as text
-    wxPen outlinepen(m_colPropFore,1,wxPENSTYLE_SOLID);
+    wxPen outlinepen(m_colPropFore,1,wxSOLID);
 
     //
     // Clear margin with background colour
@@ -2542,7 +2555,7 @@ wxRect wxPropertyGrid::GetPropertyRect( const wxPGProperty* p1, const wxPGProper
 
 void wxPropertyGrid::DrawItems( const wxPGProperty* p1, const wxPGProperty* p2 )
 {
-    if ( IsFrozen() )
+    if ( m_frozen )
         return;
 
     if ( m_pState->m_itemsAdded )
@@ -2580,7 +2593,7 @@ void wxPropertyGrid::RefreshProperty( wxPGProperty* p )
 
 void wxPropertyGrid::DrawItemAndValueRelated( wxPGProperty* p )
 {
-    if ( IsFrozen() )
+    if ( m_frozen )
         return;
 
     // Draw item, children, and parent too, if it is not category
@@ -2606,7 +2619,7 @@ void wxPropertyGrid::DrawItemAndChildren( wxPGProperty* p )
         return;
 
     // do not draw a single item if multiple pending
-    if ( m_pState->m_itemsAdded || IsFrozen() )
+    if ( m_pState->m_itemsAdded || m_frozen )
         return;
 
     // Update child control.
@@ -2650,7 +2663,7 @@ void wxPropertyGrid::Clear()
     RecalculateVirtualSize();
 
     // Need to clear some area at the end
-    if ( !IsFrozen() )
+    if ( !m_frozen )
         RefreshRect(wxRect(0, 0, m_width, m_height));
 }
 
@@ -2679,16 +2692,16 @@ bool wxPropertyGrid::EnableCategories( bool enable )
     if ( !m_pState->EnableCategories(enable) )
         return false;
 
-    if ( !IsFrozen() )
+    if ( !m_frozen )
     {
         if ( m_windowStyle & wxPG_AUTO_SORT )
         {
-            m_pState->m_itemsAdded = true; // force
+            m_pState->m_itemsAdded = 1; // force
             PrepareAfterItemsAdded();
         }
     }
     else
-        m_pState->m_itemsAdded = true;
+        m_pState->m_itemsAdded = 1;
 
     // No need for RecalculateVirtualSize() here - it is already called in
     // wxPropertyGridPageState method above.
@@ -2751,7 +2764,7 @@ void wxPropertyGrid::SwitchState( wxPropertyGridPageState* pNewState )
         // This should refresh as well.
         EnableCategories( orig_mode?false:true );
     }
-    else if ( !IsFrozen() )
+    else if ( !m_frozen )
     {
         // Refresh, if not frozen.
         m_pState->PrepareAfterItemsAdded();
@@ -2764,7 +2777,7 @@ void wxPropertyGrid::SwitchState( wxPropertyGridPageState* pNewState )
         Refresh();
     }
     else
-        m_pState->m_itemsAdded = true;
+        m_pState->m_itemsAdded = 1;
 }
 
 // -----------------------------------------------------------------------
@@ -2971,6 +2984,7 @@ bool wxPropertyGrid::PerformValidation( wxPGProperty* p, wxVariant& pendingValue
 
     //
     // Adapt list to child values, if necessary
+    wxVariant listValue = pendingValue;
     wxVariant* pPendingValue = &pendingValue;
     wxVariant* pList = NULL;
 
@@ -2984,7 +2998,7 @@ bool wxPropertyGrid::PerformValidation( wxPGProperty* p, wxVariant& pendingValue
     wxPGProperty* baseChangedProperty = changedProperty;
     wxVariant bcpPendingList;
 
-    wxVariant listValue = pendingValue;
+    listValue = pendingValue;
     listValue.SetName(p->GetBaseName());
 
     while ( pwc &&
@@ -3325,7 +3339,10 @@ bool wxPropertyGrid::DoPropertyChanged( wxPGProperty* p, unsigned int selFlags )
 
     wxPGProperty* selected = GetSelection();
 
-    m_pState->m_anyModified = true;
+    m_pState->m_anyModified = 1;
+
+    // If property's value is being changed, assume it is valid
+    OnValidationFailureReset(selected);
 
     // Maybe need to update control
     wxASSERT( m_chgInfo_changedProperty != NULL );
@@ -3333,9 +3350,6 @@ bool wxPropertyGrid::DoPropertyChanged( wxPGProperty* p, unsigned int selFlags )
     // These values were calculated in PerformValidation()
     wxPGProperty* changedProperty = m_chgInfo_changedProperty;
     wxVariant value = m_chgInfo_pendingValue;
-
-    // If property's value is being changed, assume it is valid
-    OnValidationFailureReset(selected);
 
     wxPGProperty* topPaintedProperty = changedProperty;
 
@@ -3860,7 +3874,7 @@ public:
     }
 
 private:
-    bool ProcessEvent( wxEvent& event ) wxOVERRIDE
+    bool ProcessEvent( wxEvent& event )
     {
         // Always skip
         event.Skip();
@@ -4016,7 +4030,7 @@ bool wxPropertyGrid::DoSelectProperty( wxPGProperty* p, unsigned int flags )
     wxWindow* primaryCtrl = NULL;
 
     // If we are frozen, then just set the values.
-    if ( IsFrozen() )
+    if ( m_frozen )
     {
         m_iFlags &= ~(wxPG_FL_ABNORMAL_EDITOR);
         m_editorFocused = 0;
@@ -4328,7 +4342,7 @@ bool wxPropertyGrid::UnfocusEditor()
 {
     wxPGProperty* selected = GetSelection();
 
-    if ( !selected || !m_wndEditor || IsFrozen() )
+    if ( !selected || !m_wndEditor || m_frozen )
         return true;
 
     if ( !CommitChangesFromEditor(0) )
@@ -4450,7 +4464,7 @@ bool wxPropertyGrid::DoExpand( wxPGProperty* p, bool sendEvents )
 
 bool wxPropertyGrid::DoHideProperty( wxPGProperty* p, bool hide, int flags )
 {
-    if ( IsFrozen() )
+    if ( m_frozen )
         return m_pState->DoHideProperty(p, hide, flags);
 
     wxArrayPGProperty selection = m_pState->m_selection;  // Must use a copy
@@ -4484,7 +4498,7 @@ void wxPropertyGrid::RecalculateVirtualSize( int forceXPos )
     // Don't check for !HasInternalFlag(wxPG_FL_INITIALIZED) here. Otherwise
     // virtual size calculation may go wrong.
     if ( HasInternalFlag(wxPG_FL_RECALCULATING_VIRTUAL_SIZE) ||
-         IsFrozen() ||
+         m_frozen ||
          !m_pState )
         return;
 
@@ -4601,7 +4615,7 @@ void wxPropertyGrid::OnResize( wxSizeEvent& event )
     m_pState->OnClientWidthChange( width, event.GetSize().x - m_ncWidth, true );
     m_ncWidth = event.GetSize().x;
 
-    if ( !IsFrozen() )
+    if ( !m_frozen )
     {
         if ( m_pState->m_itemsAdded )
             PrepareAfterItemsAdded();
@@ -5531,7 +5545,7 @@ void wxPropertyGrid::HandleKeyEvent( wxKeyEvent &event, bool fromChild )
     // Handles key event when editor control is not focused.
     //
 
-    wxCHECK2(!IsFrozen(), return);
+    wxCHECK2(!m_frozen, return);
 
     // Travelsal between items, collapsing/expanding, etc.
     wxPGProperty* selected = GetSelection();
@@ -5801,37 +5815,23 @@ void wxPropertyGrid::OnIdle( wxIdleEvent& WXUNUSED(event) )
 
     //
     // Resolve pending property removals
-    // In order to determine whether deletion/removal
-    // was done we need to track the size of the list
-    // before and after the operation.
-    // (Note that lists are changed at every operation.)
-    size_t cntAfter = m_deletedProperties.size();
-    while ( cntAfter > 0 )
+    if ( m_deletedProperties.size() > 0 )
     {
-        size_t cntBefore = cntAfter;
-
-        DeleteProperty(m_deletedProperties[0]);
-
-        cntAfter = m_deletedProperties.size();
-        wxASSERT_MSG( cntAfter <= cntBefore,
-            wxT("Increased number of pending items after deletion") );
-        // Break if deletion was not done
-        if ( cntAfter >= cntBefore )
-            break;
+        wxArrayPGProperty& arr = m_deletedProperties;
+        for ( unsigned int i=0; i<arr.size(); i++ )
+        {
+            DeleteProperty(arr[i]);
+        }
+        arr.clear();
     }
-    cntAfter = m_removedProperties.size();
-    while ( cntAfter > 0 )
+    if ( m_removedProperties.size() > 0 )
     {
-        size_t cntBefore = cntAfter;
-
-        RemoveProperty(m_removedProperties[0]);
-
-        cntAfter = m_removedProperties.size();
-        wxASSERT_MSG( cntAfter <= cntBefore,
-            wxT("Increased number of pending items after removal") );
-        // Break if removal was not done
-        if ( cntAfter >= cntBefore )
-            break;
+        wxArrayPGProperty& arr = m_removedProperties;
+        for ( unsigned int i=0; i<arr.size(); i++ )
+        {
+            RemoveProperty(arr[i]);
+        }
+        arr.clear();
     }
 }
 

@@ -735,13 +735,13 @@ class wxFileSystemModule : public wxModule
         {
         }
 
-        virtual bool OnInit() wxOVERRIDE
+        virtual bool OnInit()
         {
             m_handler = new wxLocalFSHandler;
             wxFileSystem::AddHandler(m_handler);
             return true;
         }
-        virtual void OnExit() wxOVERRIDE
+        virtual void OnExit()
         {
             delete wxFileSystem::RemoveHandler(m_handler);
 

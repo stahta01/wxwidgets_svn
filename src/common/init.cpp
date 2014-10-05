@@ -68,7 +68,7 @@ class wxDummyConsoleApp : public wxAppConsole
 public:
     wxDummyConsoleApp() { }
 
-    virtual int OnRun() wxOVERRIDE { wxFAIL_MSG( wxT("unreachable code") ); return 0; }
+    virtual int OnRun() { wxFAIL_MSG( wxT("unreachable code") ); return 0; }
     virtual bool DoYield(bool, long) { return true; }
 
     wxDECLARE_NO_COPY_CLASS(wxDummyConsoleApp);
@@ -472,6 +472,9 @@ int wxEntryReal(int& argc, wxChar **argv)
 
     wxTRY
     {
+#if 0 // defined(__WXOSX__) && wxOSX_USE_COCOA_OR_IPHONE
+        // everything done in OnRun using native callbacks
+#else
         // app initialization
         if ( !wxTheApp->CallOnInit() )
         {
@@ -487,7 +490,7 @@ int wxEntryReal(int& argc, wxChar **argv)
         } callOnExit;
 
         WX_SUPPRESS_UNUSED_WARN(callOnExit);
-
+#endif
         // app execution
         return wxTheApp->OnRun();
     }

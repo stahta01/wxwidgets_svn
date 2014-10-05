@@ -76,7 +76,7 @@ class WXDLLIMPEXP_ADV wxFileTipProvider : public wxTipProvider
 public:
     wxFileTipProvider(const wxString& filename, size_t currentTip);
 
-    virtual wxString GetTip() wxOVERRIDE;
+    virtual wxString GetTip();
 
 private:
     wxTextFile m_textfile;
@@ -159,8 +159,9 @@ wxString wxFileTipProvider::GetTip()
     // Comments start with a # symbol.
     // Loop reading lines until get the first one that isn't a comment.
     // The max number of loop executions is the number of lines in the
-    // textfile so that can't go into an infinite loop in the [oddball]
-    // case of a comment-only tips file.
+    // textfile so that can't go into an eternal loop in the [oddball]
+    // case of a comment-only tips file, or the developer has vetoed
+    // them all via PreprecessTip().
     for ( size_t i=0; i < count; i++ )
     {
         // The current tip may be at the last line of the textfile, (or
@@ -175,6 +176,10 @@ wxString wxFileTipProvider::GetTip()
 
         // Read the tip, and increment the current tip counter.
         tip = m_textfile.GetLine(m_currentTip++);
+
+        // Allow a derived class's overrided virtual to modify the tip
+        // now if so desired.
+        tip = PreprocessTip(tip);
 
         // Break if tip isn't a comment, and isn't an empty string
         // (or only stray space characters).
@@ -241,11 +246,26 @@ wxTipDialog::wxTipDialog(wxWindow *parent,
                             wxDEFAULT_CONTROL_BORDER
                             );
 #if defined(__WXMSW__)
-    m_text->SetFont(wxFont(12, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    m_text->SetFont(wxFont(12, wxSWISS, wxNORMAL, wxNORMAL));
 #endif
+
+//#if defined(__WXPM__)
+    //
+    // The only way to get icons into an OS/2 static bitmap control
+    //
+//    wxBitmap                        vBitmap;
+
+//    vBitmap.SetId(wxICON_TIP); // OS/2 specific bitmap method--OS/2 wxBitmaps all have an ID.
+//                               // and for StatBmp's under OS/2 it MUST be a valid resource ID.
+//
+//    wxStaticBitmap*                 bmp = new wxStaticBitmap(this, wxID_ANY, vBitmap);
+//
+//#else
 
     wxIcon icon = wxArtProvider::GetIcon(wxART_TIP, wxART_CMN_DIALOG);
     wxStaticBitmap *bmp = new wxStaticBitmap(this, wxID_ANY, icon);
+
+//#endif
 
     m_checkbox = new wxCheckBox(this, wxID_ANY, _("&Show tips at startup"));
     m_checkbox->SetValue(showAtStartup);

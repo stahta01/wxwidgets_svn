@@ -163,7 +163,9 @@ public:
     virtual bool IsCustomRenderer() const { return false; }
 
 
-    // Implementation only from now on.
+protected:
+    // Called from {Cancel,Finish}Editing() to cleanup m_editorCtrl
+    void DestroyEditControl();
 
     // Return the alignment of this renderer if it's specified (i.e. has value
     // different from the default wxDVR_DEFAULT_ALIGNMENT) or the alignment of
@@ -173,10 +175,6 @@ public:
     // wxALIGN_XXX flags (although possibly wxALIGN_NOT) and never returns
     // wxDVR_DEFAULT_ALIGNMENT.
     int GetEffectiveAlignment() const;
-
-protected:
-    // Called from {Cancel,Finish}Editing() to cleanup m_editorCtrl
-    void DestroyEditControl();
 
     wxString                m_variantType;
     wxDataViewColumn       *m_owner;
@@ -208,8 +206,6 @@ protected:
         #include "wx/gtk/dvrenderer.h"
     #elif defined(__WXMAC__)
         #include "wx/osx/dvrenderer.h"
-    #elif defined(__WXQT__)
-        #include "wx/qt/dvrenderer.h"
     #else
         #error "unknown native wxDataViewCtrl implementation"
     #endif
@@ -334,8 +330,6 @@ private:
     #include "wx/gtk/dvrenderers.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/dvrenderers.h"
-#elif defined(__WXQT__)
-    #include "wx/qt/dvrenderers.h"
 #else
     #error "unknown native wxDataViewCtrl implementation"
 #endif

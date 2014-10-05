@@ -379,7 +379,7 @@ void wxGridSelection::SelectBlock( int topRow, int leftCol,
     {
         default:
             wxFAIL_MSG( "unknown selection mode" );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxGrid::wxGridSelectCells:
             // nothing to do -- in this mode arbitrary blocks can be selected

@@ -80,7 +80,7 @@ public:
 
     wxTreeRenameTimer( wxGenericTreeCtrl *owner );
 
-    virtual void Notify() wxOVERRIDE;
+    virtual void Notify();
 
 private:
     wxGenericTreeCtrl *m_owner;
@@ -126,7 +126,7 @@ public:
 
     wxTreeFindTimer( wxGenericTreeCtrl *owner ) { m_owner = owner; }
 
-    virtual void Notify() wxOVERRIDE { m_owner->ResetFindState(); }
+    virtual void Notify() { m_owner->ResetFindState(); }
 
 private:
     wxGenericTreeCtrl *m_owner;
@@ -1966,8 +1966,6 @@ void wxGenericTreeCtrl::ClearFocusedItem()
     wxTreeItemId item = GetFocusedItem();
     if ( item.IsOk() )
         SelectItem(item, false);
-
-    m_current = NULL;
 }
 
 void wxGenericTreeCtrl::SetFocusedItem(const wxTreeItemId& item)
@@ -3136,7 +3134,7 @@ void wxGenericTreeCtrl::OnChar( wxKeyEvent &event )
                 ExpandAllChildren(m_current);
                 break;
             }
-            wxFALLTHROUGH;//else: fall through to Collapse() it
+            //else: fall through to Collapse() it
 
         case '-':
         case WXK_SUBTRACT:
@@ -3243,12 +3241,14 @@ void wxGenericTreeCtrl::OnChar( wxKeyEvent &event )
             break;
 
         case WXK_RIGHT:
-            // right arrow just expand the item will be fine
+            // this works the same as the down arrow except that we
+            // also expand the item if it wasn't expanded yet
             if (m_current != GetRootItem().m_pItem || !HasFlag(wxTR_HIDE_ROOT))
                 Expand(m_current);
             //else: don't try to expand hidden root item (which can be the
             //      current one when the tree is empty)
-            break;
+
+            // fall through
 
         case WXK_DOWN:
             {

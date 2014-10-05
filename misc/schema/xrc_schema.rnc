@@ -154,7 +154,6 @@ builtinWindowClasses =
     ( unknown
     | wxAnimationCtrl
     | wxAuiNotebook
-    | wxAuiToolBar
     | wxBannerWindow
     | wxBitmapButton
     | wxBitmapComboBox
@@ -244,7 +243,6 @@ builtinClassesNames =
 
     | "wxAnimationCtrl"
     | "wxAuiNotebook"
-    | "wxAuiToolBar"
     | "wxBannerWindow"
     | "wxBitmapButton"
     | "wxBitmapComboBox"
@@ -328,7 +326,6 @@ builtinNestedClassesNames =
     | "separator"
     | "break"
     | "space"
-    | "label"
     | "tool"
     | "panewindow"
     | "notebookpage"
@@ -405,7 +402,7 @@ stdWindowProperties =
 
 platform =
         attribute platform {
-            xsd:string { pattern = "(win|mac|unix)( *\| *(win|mac|unix))*" }
+            xsd:string { pattern = "(win|mac|unix|os2)( *\| *(win|mac|unix|os2))*" }
         }?
 # shorthand alias for 'platform' for use in properties definitions and
 # elsewhere where 'platform' would be too verbose
@@ -533,38 +530,6 @@ wxAuiNotebook_notebookpage =
         windowNode
     }
 
-
-wxAuiToolBar =
-    element object {
-        attribute class { "wxAuiToolBar" } &
-        stdObjectNodeAttributes &
-        stdWindowProperties &
-        [xrc:p="o"] element bitmapsize        {_, t_size }* &
-        [xrc:p="o"] element margins           {_, t_size }* &
-        [xrc:p="o"] element packing           {_, t_integer }* &
-        [xrc:p="o"] element separation        {_, t_integer }* &
-        [xrc:p="o"] element dontattachtoframe {_, t_bool }* &
-        (
-            windowNode |
-            wxToolBar_tool |
-            wxAuiToolBar_label |
-            element object { attribute class { "separator" }, platform } |
-            element object { attribute class { "space" } &
-                platform &
-                [xrc:p="o"] element width {_, t_integer }* &
-                [xrc:p="o"] element proportion {_, t_integer }*
-            }
-        )*
-    }
-
-wxAuiToolBar_label =
-    element object {
-        attribute class { "label" } &
-            platform &
-            attribute name { t_identifier }? &
-            [xrc:p="important"] element label {_, t_text }* &
-            [xrc:p="o"]         element width {_, t_integer }*
-        }
 
 wxBannerWindow =
     element object {
@@ -1575,7 +1540,7 @@ wxSizer_item =
         [xrc:p="o"] element cellspan {_, t_size }* &
         [xrc:p="o"] element flag     {_,
             xsd:string {
-                pattern = "(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM|wxNORTH|wxSOUTH|wxEAST|wxWEST|wxALL|wxGROW|wxEXPAND|wxSHAPED|wxSTRETCH_NOT|wxALIGN_CENTER|wxALIGN_CENTRE|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTRE_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTRE_VERTICAL|wxRESERVE_SPACE_EVEN_IF_HIDDEN)( *\| *(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM|wxNORTH|wxSOUTH|wxEAST|wxWEST|wxALL|wxGROW|wxEXPAND|wxSHAPED|wxSTRETCH_NOT|wxALIGN_CENTER|wxALIGN_CENTRE|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTRE_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTRE_VERTICAL|wxRESERVE_SPACE_EVEN_IF_HIDDEN))*"
+                pattern = "(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM|wxNORTH|wxSOUTH|wxEAST|wxWEST|wxALL|wxGROW|wxEXPAND|wxSHAPED|wxSTRETCH_NOT|wxALIGN_CENTER|wxALIGN_CENTRE|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTRE_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTRE_VERTICAL)( *\| *(wxLEFT|wxRIGHT|wxTOP|wxBOTTOM|wxNORTH|wxSOUTH|wxEAST|wxWEST|wxALL|wxGROW|wxEXPAND|wxSHAPED|wxSTRETCH_NOT|wxALIGN_CENTER|wxALIGN_CENTRE|wxALIGN_LEFT|wxALIGN_RIGHT|wxALIGN_TOP|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTRE_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALIGN_CENTRE_VERTICAL))*"
             }
         }*
     }

@@ -33,13 +33,13 @@
 
 // A simple wxFontEnumerator which doesn't perform any filtering and
 // just returns all facenames and encodings found in the system
-class wxSimpleFontEnumerator : public wxFontEnumerator
+class WXDLLEXPORT wxSimpleFontEnumerator : public wxFontEnumerator
 {
 public:
     wxSimpleFontEnumerator() { }
 
     // called by EnumerateFacenames
-    virtual bool OnFacename(const wxString& facename) wxOVERRIDE
+    virtual bool OnFacename(const wxString& facename)
     {
         m_arrFacenames.Add(facename);
         return true;
@@ -47,7 +47,7 @@ public:
 
     // called by EnumerateEncodings
     virtual bool OnFontEncoding(const wxString& WXUNUSED(facename),
-                                const wxString& encoding) wxOVERRIDE
+                                const wxString& encoding)
     {
         m_arrEncodings.Add(encoding);
         return true;

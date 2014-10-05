@@ -71,12 +71,12 @@ public:
 
     bool AdjustPagebreak(int* pagebreak,
                          const wxArrayInt& known_pagebreaks,
-                         int pageHeight) const wxOVERRIDE;
+                         int pageHeight) const;
 
     void Draw(wxDC& WXUNUSED(dc),
               int WXUNUSED(x), int WXUNUSED(y),
               int WXUNUSED(view_y1), int WXUNUSED(view_y2),
-              wxHtmlRenderingInfo& WXUNUSED(info)) wxOVERRIDE {}
+              wxHtmlRenderingInfo& WXUNUSED(info)) {}
 
 private:
     wxDECLARE_NO_COPY_CLASS(wxHtmlPageBreakCell);

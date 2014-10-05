@@ -383,8 +383,8 @@ public:
 
 // Attributes
 protected:
-    virtual wxObjectRefData *CreateRefData() const wxOVERRIDE;
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const wxOVERRIDE;
+    virtual wxObjectRefData *CreateRefData() const;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 
     wxString        m_name;
 
@@ -430,7 +430,7 @@ public:
     {
     }
 
-    virtual wxAnyValueType* GetAssociatedType() wxOVERRIDE
+    virtual wxAnyValueType* GetAssociatedType()
     {
         return wxAnyValueTypeImpl<T>::GetInstance();
     }
@@ -457,7 +457,7 @@ bool CLASSNAME::GetAsAny(wxAny* any) const \
 } \
 wxVariantData* CLASSNAME::VariantDataFactory(const wxAny& any) \
 { \
-    return new CLASSNAME(any.As<T>()); \
+    return new CLASSNAME(wxANY_AS(any, T)); \
 } \
 REGISTER_WXANY_CONVERSION(T, CLASSNAME)
 

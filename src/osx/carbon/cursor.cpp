@@ -33,7 +33,7 @@ public:
     wxCursorRefData(const wxCursorRefData& cursor);
     virtual ~wxCursorRefData();
 
-    virtual bool IsOk() const wxOVERRIDE
+    virtual bool IsOk() const
     {
 #if wxOSX_USE_COCOA_OR_CARBON
         if ( m_hCursor != NULL )

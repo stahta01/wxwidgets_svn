@@ -117,11 +117,11 @@ protected:
 
 // wxExpectModal<T> specializations for common dialogs:
 
-template<class T>
-class wxExpectDismissableModal : public wxExpectModalBase<T>
+template<>
+class wxExpectModal<wxMessageDialog> : public wxExpectModalBase<wxMessageDialog>
 {
 public:
-    explicit wxExpectDismissableModal(int id)
+    wxExpectModal(int id)
     {
         switch ( id )
         {
@@ -147,32 +147,12 @@ public:
     }
 
 protected:
-    virtual int OnInvoked(T *WXUNUSED(dlg)) const
+    virtual int OnInvoked(wxMessageDialog *WXUNUSED(dlg)) const
     {
         return m_id;
     }
 
     int m_id;
-};
-
-template<>
-class wxExpectModal<wxMessageDialog>
-    : public wxExpectDismissableModal<wxMessageDialog>
-{
-public:
-    explicit wxExpectModal(int id)
-        : wxExpectDismissableModal<wxMessageDialog>(id)
-    {
-    }
-};
-
-class wxExpectAny : public wxExpectDismissableModal<wxDialog>
-{
-public:
-    explicit wxExpectAny(int id)
-        : wxExpectDismissableModal<wxDialog>(id)
-    {
-    }
 };
 
 #if wxUSE_FILEDLG
@@ -261,8 +241,8 @@ protected:
                 (
                     wxString::Format
                     (
-                        "%s was shown unexpectedly, expected %s.",
-                        DescribeUnexpectedDialog(dlg),
+                        "A %s dialog was shown unexpectedly, expected %s.",
+                        dlg->GetClassInfo()->GetClassName(),
                         expect->GetDescription()
                     )
                 );
@@ -275,41 +255,14 @@ protected:
         (
             wxString::Format
             (
-                "%s was shown unexpectedly.",
-                DescribeUnexpectedDialog(dlg)
+                "A dialog (%s) was shown unexpectedly.",
+                dlg->GetClassInfo()->GetClassName()
             )
         );
         return wxID_NONE;
     }
 
 protected:
-    // This method may be overridden to provide a better description of
-    // (unexpected) dialogs, e.g. add knowledge of custom dialogs used by the
-    // program here.
-    virtual wxString DescribeUnexpectedDialog(wxDialog* dlg) const
-    {
-        // Message boxes are handled specially here just because they are so
-        // ubiquitous.
-        if ( wxMessageDialog *msgdlg = dynamic_cast<wxMessageDialog*>(dlg) )
-        {
-            return wxString::Format
-                   (
-                        "A message box \"%s\"",
-                        msgdlg->GetMessage()
-                   );
-        }
-
-        return wxString::Format
-               (
-                    "A %s with title \"%s\"",
-                    dlg->GetClassInfo()->GetClassName(),
-                    dlg->GetTitle()
-               );
-    }
-
-    // This method may be overridden to change the way test failures are
-    // handled. By default they result in an assertion failure which, of
-    // course, can itself be customized.
     virtual void ReportFailure(const wxString& msg)
     {
         wxFAIL_MSG( msg );
@@ -384,12 +337,6 @@ private:
           method.
  */
 #ifdef HAVE_VARIADIC_MACROS
-
-// See wx/cpp.h for the explanations of this hack.
-#if defined(__GNUC__) && __GNUC__ == 3
-    #pragma GCC system_header
-#endif /* gcc-3.x */
-
 #define wxTEST_DIALOG(codeToRun, ...)                                          \
     {                                                                          \
         wxTEST_DIALOG_HOOK_CLASS wx_hook;                                      \

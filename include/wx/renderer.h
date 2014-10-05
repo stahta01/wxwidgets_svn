@@ -52,7 +52,6 @@ class WXDLLIMPEXP_FWD_CORE wxWindow;
 // control state flags used in wxRenderer and wxColourScheme
 enum
 {
-    wxCONTROL_NONE       = 0x00000000,  // absence of any other flags
     wxCONTROL_DISABLED   = 0x00000001,  // control is disabled
     wxCONTROL_FOCUSED    = 0x00000002,  // currently has keyboard focus
     wxCONTROL_PRESSED    = 0x00000004,  // (button) is pressed
@@ -321,13 +320,6 @@ public:
                                     int flags = 0) = 0;
 #endif // wxHAS_DRAW_TITLE_BAR_BITMAP
 
-    // Draw a gauge with native style like a wxGauge would display
-    virtual void DrawGauge(wxWindow* win,
-                           wxDC& dc,
-                           const wxRect& rect,
-                           int value,
-                           int max,
-                           int flags = 0) = 0;
 
     // geometry functions
     // ------------------
@@ -506,14 +498,6 @@ public:
                                     int flags = 0)
         { m_rendererNative.DrawTitleBarBitmap(win, dc, rect, button, flags); }
 #endif // wxHAS_DRAW_TITLE_BAR_BITMAP
-
-    virtual void DrawGauge(wxWindow* win,
-                           wxDC& dc,
-                           const wxRect& rect,
-                           int value,
-                           int max,
-                           int flags = 0)
-        { m_rendererNative.DrawGauge(win, dc, rect, value, max, flags); }
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win)
         { return m_rendererNative.GetSplitterParams(win); }

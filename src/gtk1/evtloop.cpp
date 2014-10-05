@@ -150,11 +150,28 @@ bool wxGUIEventLoop::Dispatch()
 // wxYield
 //-----------------------------------------------------------------------------
 
-void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
+bool wxGUIEventLoop::YieldFor(long eventsToProcess)
 {
+#if wxUSE_THREADS
+    if ( !wxThread::IsMain() )
+    {
+        // can't call gtk_main_iteration() from other threads like this
+        return true;
+    }
+#endif // wxUSE_THREADS
+
+    m_isInsideYield = true;
+    m_eventsToProcessInsideYield = eventsToProcess;
+
     // We need to remove idle callbacks or the loop will
     // never finish.
     wxTheApp->RemoveIdleTag();
+
+#if wxUSE_LOG
+    // disable log flushing from here because a call to wxYield() shouldn't
+    // normally result in message boxes popping up &c
+    wxLog::Suspend();
+#endif
 
     // TODO: implement event filtering using the eventsToProcess mask
     while (gtk_events_pending())
@@ -168,7 +185,14 @@ void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
     // return value of Processidle().
     ProcessIdle();
 
-    wxEventLoopBase::DoYieldFor(eventsToProcess);
+#if wxUSE_LOG
+    // let the logs be flashed again
+    wxLog::Resume();
+#endif
+
+    m_isInsideYield = false;
+
+    return true;
 }
 
 class wxGUIEventLoopSourcesManager : public wxEventLoopSourcesManagerBase

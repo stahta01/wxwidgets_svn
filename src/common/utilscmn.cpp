@@ -52,7 +52,6 @@
 #include "wx/mimetype.h"
 #include "wx/config.h"
 #include "wx/versioninfo.h"
-#include "wx/math.h"
 
 #if defined(__WXWINCE__) && wxUSE_DATETIME
     #include "wx/datetime.h"
@@ -62,7 +61,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
+
+#if !wxONLY_WATCOM_EARLIER_THAN(1,4)
+    #if !(defined(_MSC_VER) && (_MSC_VER > 800))
+        #include <errno.h>
+    #endif
+#endif
 
 #if wxUSE_GUI
     #include "wx/notebook.h"
@@ -93,9 +97,6 @@
     #include <gtk/gtk.h>    // for GTK_XXX_VERSION constants
 #endif
 
-#if wxUSE_GUI && defined(__WXQT__)
-    #include <QtGlobal>       // for QT_VERSION_STR constants
-#endif
 #if wxUSE_BASE
 
 // ============================================================================
@@ -386,8 +387,16 @@ bool wxPlatform::Is(int platform)
     if (platform == wxOS_UNIX)
         return true;
 #endif
-#ifdef __WXQT__
-    if (platform == wxPORT_QT)
+#ifdef __OS2__
+    if (platform == wxOS_OS2)
+        return true;
+#endif
+#ifdef __WXPM__
+    if (platform == wxPORT_PM)
+        return true;
+#endif
+#ifdef __WXCOCOA__
+    if (platform == wxPORT_MAC)
         return true;
 #endif
 
@@ -975,57 +984,9 @@ void wxQsort(void* pbase, size_t total_elems,
   }
 }
 
-// ----------------------------------------------------------------------------
-// wxGCD
-// Compute the greatest common divisor of two positive integers
-// using binary GCD algorithm.
-// See:
-//     http://en.wikipedia.org/wiki/Binary_GCD_algorithm#Iterative_version_in_C
-// ----------------------------------------------------------------------------
-
-unsigned int wxGCD(unsigned int u, unsigned int v)
-{
-    // GCD(0,v) == v; GCD(u,0) == u, GCD(0,0) == 0
-    if (u == 0)
-        return v;
-    if (v == 0)
-        return u;
-
-    int shift;
-
-    // Let shift := lg K, where K is the greatest power of 2
-    // dividing both u and v.
-    for (shift = 0; ((u | v) & 1) == 0; ++shift)
-    {
-        u >>= 1;
-        v >>= 1;
-    }
-
-    while ((u & 1) == 0)
-        u >>= 1;
-
-    // From here on, u is always odd.
-    do
-    {
-        // remove all factors of 2 in v -- they are not common
-        // note: v is not zero, so while will terminate
-        while ((v & 1) == 0)
-            v >>= 1;
-
-        // Now u and v are both odd. Swap if necessary so u <= v,
-        // then set v = v - u (which is even)
-        if (u > v)
-        {
-            wxSwap(u, v);
-        }
-        v -= u;  // Here v >= u
-    } while (v != 0);
-
-    // restore common factors of 2
-    return u << shift;
-}
-
 #endif // wxUSE_BASE
+
+
 
 // ============================================================================
 // GUI-only functions from now on
@@ -1052,7 +1013,8 @@ bool wxSetDetectableAutoRepeat( bool WXUNUSED(flag) )
 // implemented in a port-specific utils source file:
 bool wxDoLaunchDefaultBrowser(const wxString& url, const wxString& scheme, int flags);
 
-#elif defined(__WXX11__) || defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXOSX__)
+#elif defined(__WXX11__) || defined(__WXGTK__) || defined(__WXMOTIF__) || defined(__WXCOCOA__) || \
+      (defined(__WXOSX__) )
 
 // implemented in a port-specific utils source file:
 bool wxDoLaunchDefaultBrowser(const wxString& url, int flags);
@@ -1198,6 +1160,30 @@ bool wxLaunchDefaultBrowser(const wxString& url, int flags)
 // ----------------------------------------------------------------------------
 // Menu accelerators related functions
 // ----------------------------------------------------------------------------
+
+#if WXWIN_COMPATIBILITY_2_6
+wxChar *wxStripMenuCodes(const wxChar *in, wxChar *out)
+{
+#if wxUSE_MENUS
+    wxString s = wxMenuItem::GetLabelText(in);
+#else
+    wxString str(in);
+    wxString s = wxStripMenuCodes(str);
+#endif // wxUSE_MENUS
+    if ( out )
+    {
+        // go smash their buffer if it's not big enough - I love char * params
+        memcpy(out, s.c_str(), s.length() * sizeof(wxChar));
+    }
+    else
+    {
+        out = new wxChar[s.length() + 1];
+        wxStrcpy(out, s.c_str());
+    }
+
+    return out;
+}
+#endif
 
 wxString wxStripMenuCodes(const wxString& in, int flags)
 {
@@ -1431,17 +1417,12 @@ wxVersionInfo wxGetLibraryVersionInfo()
                             GTK_MICRO_VERSION);
 #endif // __WXGTK__
 
-#ifdef __WXQT__
-    msg += wxString::Format("Compile-time QT version is %s.\n",
-                            QT_VERSION_STR);
-#endif // __WXQT__
-
     return wxVersionInfo(wxS("wxWidgets"),
                          wxMAJOR_VERSION,
                          wxMINOR_VERSION,
                          wxRELEASE_NUMBER,
                          msg,
-                         wxS("Copyright (c) 1995-2014 wxWidgets team"));
+                         wxS("Copyright (c) 1995-2013 wxWidgets team"));
 }
 
 void wxInfoMessageBox(wxWindow* parent)

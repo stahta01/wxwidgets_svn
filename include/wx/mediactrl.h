@@ -106,7 +106,7 @@ public:
     // Allocates a copy of this object.
     // Required for wxEvtHandler::AddPendingEvent
     // ------------------------------------------------------------------------
-    virtual wxEvent *Clone() const wxOVERRIDE
+    virtual wxEvent *Clone() const
     {   return new wxMediaEvent(*this);     }
 
 
@@ -215,14 +215,15 @@ protected:
     static const wxClassInfo* NextBackend(wxClassInfo::const_iterator* it);
 
     void OnMediaFinished(wxMediaEvent& evt);
-    virtual void DoMoveWindow(int x, int y, int w, int h) wxOVERRIDE;
-    wxSize DoGetBestSize() const wxOVERRIDE;
+    virtual void DoMoveWindow(int x, int y, int w, int h);
+    wxSize DoGetBestSize() const;
 
     //FIXME:  This is nasty... find a better way to work around
     //inheritance issues
 #if defined(__WXOSX_CARBON__)
     virtual void MacVisibilityChanged();
-
+#endif
+#if defined(__WXOSX_CARBON__) || defined(__WXCOCOA__)
     friend class wxQTMediaBackend;
 #endif
     class wxMediaBackend* m_imp;

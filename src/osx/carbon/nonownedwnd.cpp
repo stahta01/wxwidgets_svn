@@ -1536,11 +1536,6 @@ bool wxNonOwnedWindowCarbonImpl::IsFullScreen() const
     return m_macFullScreenData != NULL ;
 }
 
-bool wxNonOwnedWindowCarbonImpl::EnableFullScreenView(bool WXUNUSED(enable))
-{
-    return false;
-}
-
 bool wxNonOwnedWindowCarbonImpl::ShowFullScreen(bool show, long style)
 {
     if ( show )

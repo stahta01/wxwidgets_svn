@@ -256,7 +256,7 @@ extern WXDLLIMPEXP_BASE void wxOnAssert(const char *file,
     // If possible, we prefer to define it as a macro rather than as a function
     // to open the debugger at the position where we trapped and not inside the
     // trap function itself which is not very useful.
-    #ifdef __VISUALC__
+    #if wxCHECK_VISUALC_VERSION(7)
         #define wxTrap() __debugbreak()
     #else
         extern WXDLLIMPEXP_BASE void wxTrap();
@@ -404,7 +404,14 @@ extern void WXDLLIMPEXP_BASE wxAbort();
 
  It may be used both within a function and in the global scope.
 */
-#if defined( __VMS )
+#if defined(__WATCOMC__)
+    /* avoid "unused symbol" warning */
+    #define wxCOMPILE_TIME_ASSERT(expr, msg) \
+        class wxMAKE_UNIQUE_ASSERT_NAME { \
+          unsigned int msg: expr; \
+          wxMAKE_UNIQUE_ASSERT_NAME() { wxUnusedVar(msg); } \
+        }
+#elif defined( __VMS )
 namespace wxdebug{
 
 // HP aCC cannot deal with missing names for template value parameters

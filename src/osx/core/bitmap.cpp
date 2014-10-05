@@ -35,6 +35,10 @@ IMPLEMENT_DYNAMIC_CLASS(wxMask, wxObject)
 #include "wx/osx/private.h"
 #endif
 
+#ifndef __WXOSX_IPHONE__
+#include <QuickTime/QuickTime.h>
+#endif
+
 CGColorSpaceRef wxMacGetGenericRGBColorSpace();
 CGDataProviderRef wxMacCGDataProviderCreateWithMemoryBuffer( const wxMemoryBuffer& buf );
 
@@ -62,7 +66,7 @@ public:
 
     virtual ~wxBitmapRefData();
 
-    virtual bool IsOk() const wxOVERRIDE { return m_ok; }
+    virtual bool IsOk() const { return m_ok; }
 
     void Free();
     void SetOk( bool isOk) { m_ok = isOk; }
@@ -1824,7 +1828,7 @@ public:
                           const wxString& name,
                           wxBitmapType type,
                           int desiredWidth,
-                          int desiredHeight) wxOVERRIDE;
+                          int desiredHeight);
 };
 
 IMPLEMENT_ABSTRACT_CLASS(wxBundleResourceHandler, wxBitmapHandler);

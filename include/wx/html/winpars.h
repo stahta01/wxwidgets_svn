@@ -42,11 +42,11 @@ public:
 
     virtual ~wxHtmlWinParser();
 
-    virtual void InitParser(const wxString& source) wxOVERRIDE;
-    virtual void DoneParser() wxOVERRIDE;
-    virtual wxObject* GetProduct() wxOVERRIDE;
+    virtual void InitParser(const wxString& source);
+    virtual void DoneParser();
+    virtual wxObject* GetProduct();
 
-    virtual wxFSFile *OpenURL(wxHtmlURLType type, const wxString& url) const wxOVERRIDE;
+    virtual wxFSFile *OpenURL(wxHtmlURLType type, const wxString& url) const;
 
     // Set's the DC used for parsing. If SetDC() is not called,
     // parsing won't proceed
@@ -66,6 +66,10 @@ public:
 
     // returns interface to the rendering window
     wxHtmlWindowInterface *GetWindowInterface() {return m_windowInterface;}
+#if WXWIN_COMPATIBILITY_2_6
+    // deprecated, use GetWindowInterface()->GetHTMLWindow() instead
+    wxDEPRECATED( wxHtmlWindow *GetWindow() );
+#endif
 
     // Sets fonts to be used when displaying HTML page. (if size null then default sizes used).
     void SetFonts(const wxString& normal_face, const wxString& fixed_face, const int *sizes = NULL);
@@ -163,7 +167,7 @@ public:
     WhitespaceMode GetWhitespaceMode() const { return m_whitespaceMode; }
 
 protected:
-    virtual void AddText(const wxString& txt) wxOVERRIDE;
+    virtual void AddText(const wxString& txt);
 
 private:
     void FlushWordBuf(wxChar *temp, int& len);
@@ -263,7 +267,7 @@ class WXDLLIMPEXP_HTML wxHtmlWinTagHandler : public wxHtmlTagHandler
 public:
     wxHtmlWinTagHandler() : wxHtmlTagHandler() {}
 
-    virtual void SetParser(wxHtmlParser *parser) wxOVERRIDE {wxHtmlTagHandler::SetParser(parser); m_WParser = (wxHtmlWinParser*) parser;}
+    virtual void SetParser(wxHtmlParser *parser) {wxHtmlTagHandler::SetParser(parser); m_WParser = (wxHtmlWinParser*) parser;}
 
 protected:
     wxHtmlWinParser *m_WParser; // same as m_Parser, but overcasted
@@ -293,8 +297,8 @@ class WXDLLIMPEXP_HTML wxHtmlTagsModule : public wxModule
 public:
     wxHtmlTagsModule() : wxModule() {}
 
-    virtual bool OnInit() wxOVERRIDE;
-    virtual void OnExit() wxOVERRIDE;
+    virtual bool OnInit();
+    virtual void OnExit();
 
     // This is called by wxHtmlWinParser.
     // The method must simply call parser->AddTagHandler(new

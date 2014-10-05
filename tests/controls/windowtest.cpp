@@ -95,7 +95,7 @@ void WindowTestCase::tearDown()
 
 void WindowTestCase::ShowHideEvent()
 {
-#if defined(__WXMSW__)
+#if defined(__WXMSW__) || defined (__WXPM__)
     EventCounter show(m_window, wxEVT_SHOW);
 
     CPPUNIT_ASSERT(m_window->IsShown());
@@ -109,7 +109,7 @@ void WindowTestCase::ShowHideEvent()
     CPPUNIT_ASSERT(m_window->IsShown());
 
     CPPUNIT_ASSERT_EQUAL(2, show.GetCount());
-#endif // __WXMSW__
+#endif
 }
 
 void WindowTestCase::KeyEvent()
@@ -122,7 +122,6 @@ void WindowTestCase::KeyEvent()
     wxUIActionSimulator sim;
 
     m_window->SetFocus();
-    wxYield();
 
     sim.Text("text");
     sim.Char(WXK_SHIFT);
@@ -147,7 +146,6 @@ void WindowTestCase::FocusEvent()
 
     wxButton* button = new wxButton(wxTheApp->GetTopWindow(), wxID_ANY);
 
-    wxYield();
     button->SetFocus();
 
     CPPUNIT_ASSERT_EQUAL(1, killfocus.GetCount());

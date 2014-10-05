@@ -59,27 +59,12 @@ distribution.
 
 @section page_port_wxosx wxOSX
 
-@subsection page_port_wxosx_cocoa wxOSX/Cocoa
-
-wxOSX/Cocoa is the currently recommended port of wxWidgets for the Macintosh OS
-platform. It requires OS X 10.7 or later and, unlike wxOSX/Carbon, fully
-supports 64 bit builds.
-
-This is the default port when building wxOSX, but in order to select it
-explicitly you can use
-
-@verbatim configure --with-osx_cocoa @endverbatim
-
-For further information, please see the files in @c docs/osx in the
-distribution.
-
-
 @subsection page_port_wxosx_carbon wxOSX/Carbon
 
-wxOSX/Carbon is an older port of wxWidgets for the Macintosh OS platform. Currently
+wxOSX/Carbon is a port of wxWidgets for the Macintosh OS platform. Currently
 OS X 10.5 or higher are supported. wxOSX/Carbon can be compiled both using
 Apple's command line developer tools as well as Apple's Xcode IDE. wxOSX/Carbon
-supports Intel and PowerPC architectures and can be used to produce
+supports both the Intel and PowerPC architectures and can be used to produce
 "universal binaries" in order create application which can run both
 architecture. Unfortunately, wxOSX/Carbon does not support any 64-bit
 architecture since Apple decided not to port its Carbon API entirely to 64-bit.
@@ -88,13 +73,41 @@ architecture since Apple decided not to port its Carbon API entirely to 64-bit.
 removed entirely in a future OS version. It's recommended you look into
 switching your app over to wxOSX/Cocoa as soon as possible.
 
-To build wxWidgets using wxOSX/Carbon you need to do
+For further information, please see the files in @c docs/osx in the
+distribution.
 
-@verbatim configure --with-osx_carbon @endverbatim
+
+
+@subsection page_port_wxosx_cocoa wxOSX/Cocoa
+
+wxOSX/Cocoa is another port of wxWidgets for the Macintosh OS platform.
+Currently OS X 10.5 or higher are supported.  In contrast to wxOSX/Carbon,
+it uses the Cocoa API  in place of Carbon. Much work has gone into this port
+and many  controls are functional, but the port has not reached the maturity of
+the wxOSX/Carbon port yet. It is possible to use wxOSX/Cocoa on 64-bit
+architectures.
+
+In order to configure wxWidgets to compile wxOSX/Cocoa you will need to type:
+
+@verbatim configure --with-osx_cocoa @endverbatim
 
 For further information, please see the files in @c docs/osx in the
 distribution.
 
+@note There was a previous effort towards a Cocoa port called  wxCocoa, which
+was implemented totally with Cocoa API unlike the OSX/Cocoa port which uses OS
+X C APIs to share code, and while it is no longer being actively  developed,
+docs for it are available in @c docs/cocoa in the distribution.
+
+
+
+@section page_port_wxos2 wxOS2
+
+wxOS2 is a port of wxWidgets for the IBM OS/2 Warp3 and Warp4 platforms.
+This port is currently under construction and in beta phase.
+
+For further information, please see the files in @c docs/os2
+in the distribution.
 
 
 
@@ -129,30 +142,15 @@ distribution.
 
 @section page_port_wxmsw wxMSW
 
-wxMSW is a port of wxWidgets for the Windows platforms (Windows XP and later
-are supported). wxMSW provides native look and feel for each Windows version.
-This port can be compiled with several compilers including Microsoft Studio
-VC++ 2003 or later, Borland 5.5, MinGW32, Cygwin as well as cross-compilation
-with a Linux-hosted MinGW32 tool chain.
+wxMSW is a port of wxWidgets for the Windows platforms including Windows 95,
+98, ME, 2000, NT, XP and Vista in ANSI and Unicode modes (for Windows 9x and ME
+through the MSLU extension library). wxMSW ensures native look and feel for XP
+when using wxWidgets version 2.3.3 or higher. wxMSW can be compiled with a
+great variety of compilers including Microsoft Studio VC++, Borland 5.5,
+MinGW32, Cygwin and Watcom as well as cross-compilation with a Linux-hosted
+MinGW32 tool chain.
 
 For further information, please see the files in docs/msw in the distribution.
-
-@subsection page_port_wxmsw_resources Resources and Application Icon
-
-All applications using wxMSW should have a Windows resource file (@c .rc
-extension) and this file should include @c include/wx/msw/wx.rc file which
-defines resources used by wxWidgets itself.
-
-Among other things, @c wx.rc defines some standard icons, all of which have
-names starting with the "wx" prefix. This normally ensures that any icons
-defined in the application's own resource file come before them in alphabetical
-order which is important because Explorer (Windows shell) selects the first
-icon in alphabetical order to use as the application icon which is displayed
-when viewing its file in the file manager. So if all the icons defined in your
-application start with "x", "y" or "z", they won't be used by Explorer. To
-avoid this, ensure that the icon which is meant to be used as the main
-application icon has a name preceding "wxICON" in alphabetical order.
-
 
 @subsection page_port_wxmsw_themedborders Themed Borders
 

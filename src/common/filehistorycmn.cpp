@@ -137,11 +137,11 @@ void wxFileHistoryBase::AddFileToHistory(const wxString& file)
         const wxFileName fnOld(m_fileHistory[i]);
 
         wxString pathInMenu;
-        if ( (fnOld.GetPath() == fnNew.GetPath()) && fnOld.HasName() )
+        if ( fnOld.GetPath() == fnNew.GetPath() )
         {
             pathInMenu = fnOld.GetFullName();
         }
-        else // file in different directory or it's not a file but a directory
+        else // file in different directory
         {
             // absolute path; could also set relative path
             pathInMenu = m_fileHistory[i];

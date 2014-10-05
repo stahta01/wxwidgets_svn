@@ -45,9 +45,7 @@ enum
     // Editable labels
     wxDIRCTRL_EDIT_LABELS    = 0x0100,
     // Allow multiple selection
-    wxDIRCTRL_MULTIPLE       = 0x0200,
-
-    wxDIRCTRL_DEFAULT_STYLE  = wxDIRCTRL_3D_INTERNAL
+    wxDIRCTRL_MULTIPLE       = 0x0200
 };
 
 //-----------------------------------------------------------------------------
@@ -84,7 +82,7 @@ public:
               const wxString &dir = wxDirDialogDefaultFolderStr,
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize,
-              long style = wxDIRCTRL_DEFAULT_STYLE,
+              long style = wxDIRCTRL_3D_INTERNAL,
               const wxString& filter = wxEmptyString,
               int defaultFilter = 0,
               const wxString& name = wxTreeCtrlNameStr )
@@ -97,7 +95,7 @@ public:
               const wxString &dir = wxDirDialogDefaultFolderStr,
               const wxPoint& pos = wxDefaultPosition,
               const wxSize& size = wxDefaultSize,
-              long style = wxDIRCTRL_DEFAULT_STYLE,
+              long style = wxDIRCTRL_3D_INTERNAL,
               const wxString& filter = wxEmptyString,
               int defaultFilter = 0,
               const wxString& name = wxTreeCtrlNameStr );
@@ -260,7 +258,7 @@ protected:
     wxDECLARE_NO_COPY_CLASS(wxDirFilterListCtrl);
 };
 
-#if !defined(__WXMSW__) && !defined(__WXMAC__)
+#if !defined(__WXMSW__) && !defined(__WXMAC__) && !defined(__WXPM__)
     #define wxDirCtrl wxGenericDirCtrl
 #endif
 

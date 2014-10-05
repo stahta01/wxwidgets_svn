@@ -12,13 +12,6 @@
 */
 enum
 {
-    /**
-        Default state, no special flags.
-
-        @since 3.1.0
-     */
-    wxCONTROL_NONE       = 0x00000000,
-
     /** Control is disabled. */
     wxCONTROL_DISABLED   = 0x00000001,
 
@@ -348,22 +341,6 @@ public:
     */
     virtual void DrawFocusRect(wxWindow* win, wxDC& dc, const wxRect& rect,
                                int flags = 0) = 0;
-
-    /**
-        Draw a progress bar in the specified rectangle.
-
-        The @a value and @a max arguments determine the part of the progress
-        bar that is drawn as being filled in, @a max must be strictly positive
-        and @a value must be between 0 and @a max.
-
-        @since 3.1.0
-     */
-    virtual void DrawGauge(wxWindow* win,
-                           wxDC& dc,
-                           const wxRect& rect,
-                           int value,
-                           int max,
-                           int flags = 0) = 0;
 
     /**
         Draw the header control button (used, for example, by wxListCtrl).

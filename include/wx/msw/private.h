@@ -72,7 +72,7 @@ WXDLLIMPEXP_BASE void wxSetInstance(HINSTANCE hInst);
 // define things missing from some compilers' headers
 // ---------------------------------------------------------------------------
 
-#if defined(__WXWINCE__)
+#if defined(__WXWINCE__) || (defined(__GNUWIN32__) && !wxUSE_NORLANDER_HEADERS)
 #ifndef ZeroMemory
     inline void ZeroMemory(void *buf, size_t len) { memset(buf, 0, len); }
 #endif
@@ -178,6 +178,8 @@ extern LONG APIENTRY _EXPORT
     #define wxGetOSFHandle(fd) ((HANDLE)get_osfhandle(fd))
 #elif defined(__VISUALC__) \
    || defined(__BORLANDC__) \
+   || defined(__DMC__) \
+   || defined(__WATCOMC__) \
    || defined(__MINGW32__)
     #define wxGetOSFHandle(fd) ((HANDLE)_get_osfhandle(fd))
     #define wxOpenOSFHandle(h, flags) (_open_osfhandle(wxPtrToUInt(h), flags))
@@ -185,41 +187,18 @@ extern LONG APIENTRY _EXPORT
 #endif
 
 // close the handle in the class dtor
-template <wxUIntPtr INVALID_VALUE = (wxUIntPtr)INVALID_HANDLE_VALUE>
 class AutoHANDLE
 {
 public:
-    wxEXPLICIT AutoHANDLE(HANDLE handle = InvalidHandle()) : m_handle(handle) { }
+    wxEXPLICIT AutoHANDLE(HANDLE handle) : m_handle(handle) { }
 
-    bool IsOk() const { return m_handle != InvalidHandle(); }
+    bool IsOk() const { return m_handle != INVALID_HANDLE_VALUE; }
     operator HANDLE() const { return m_handle; }
 
-    ~AutoHANDLE() { if ( IsOk() ) DoClose(); }
-
-    void Close()
-    {
-        wxCHECK_RET(IsOk(), wxT("Handle must be valid"));
-
-        DoClose();
-
-        m_handle = InvalidHandle();
-    }
+    ~AutoHANDLE() { if ( IsOk() ) ::CloseHandle(m_handle); }
 
 protected:
-    // We need this helper function because integer INVALID_VALUE is not
-    // implicitly convertible to HANDLE, which is a pointer.
-    static HANDLE InvalidHandle()
-    {
-        return static_cast<HANDLE>(INVALID_VALUE);
-    }
-
-    void DoClose()
-    {
-        if ( !::CloseHandle(m_handle) )
-            wxLogLastError(wxT("CloseHandle"));
-    }
-
-    WXHANDLE m_handle;
+    HANDLE m_handle;
 };
 
 // a template to make initializing Windows styructs less painful: it zeroes all
@@ -920,8 +899,7 @@ inline wxString wxGetFullModuleName()
 //      0x0502      Windows XP SP2, 2003 SP1
 //      0x0600      Windows Vista, 2008
 //      0x0601      Windows 7
-//      0x0602      Windows 8 (currently also returned for 8.1 if program does not have a manifest indicating 8.1 support)
-//      0x0603      Windows 8.1 (currently only returned for 8.1 if program has a manifest indicating 8.1 support)
+//      0x0602      Windows 8 (currently also returned for 8.1)
 //
 // for the other Windows versions 0 is currently returned
 enum wxWinVersion
@@ -951,8 +929,7 @@ enum wxWinVersion
 
     wxWinVersion_7 = 0x601,
 
-    wxWinVersion_8 = 0x602,
-    wxWinVersion_8_1 = 0x603
+    wxWinVersion_8 = 0x602
 };
 
 WXDLLIMPEXP_BASE wxWinVersion wxGetWinVersion();
@@ -1011,79 +988,6 @@ inline bool wxHasWindowExStyle(const wxWindowMSW *win, long style)
 inline long wxSetWindowExStyle(const wxWindowMSW *win, long style)
 {
     return ::SetWindowLong(GetHwndOf(win), GWL_EXSTYLE, style);
-}
-
-// Common helper of wxUpdate{,Edit}LayoutDirection() below: sets or clears the
-// given flag(s) depending on wxLayoutDirection and returns true if the flags
-// really changed.
-inline bool
-wxUpdateExStyleForLayoutDirection(WXHWND hWnd,
-                                  wxLayoutDirection dir,
-                                  LONG_PTR flagsForRTL)
-{
-    wxCHECK_MSG( hWnd, false,
-                 wxS("Can't set layout direction for invalid window") );
-
-    const LONG_PTR styleOld = ::GetWindowLongPtr(hWnd, GWL_EXSTYLE);
-
-    LONG_PTR styleNew = styleOld;
-    switch ( dir )
-    {
-        case wxLayout_LeftToRight:
-            styleNew &= ~flagsForRTL;
-            break;
-
-        case wxLayout_RightToLeft:
-            styleNew |= flagsForRTL;
-            break;
-
-        case wxLayout_Default:
-            wxFAIL_MSG(wxS("Invalid layout direction"));
-    }
-
-    if ( styleNew == styleOld )
-        return false;
-
-    ::SetWindowLongPtr(hWnd, GWL_EXSTYLE, styleNew);
-
-    return true;
-}
-
-// Update layout direction flag for a generic window.
-//
-// See below for the special version that must be used with EDIT controls.
-//
-// Returns true if the layout direction did change.
-inline bool wxUpdateLayoutDirection(WXHWND hWnd, wxLayoutDirection dir)
-{
-    return wxUpdateExStyleForLayoutDirection(hWnd, dir, WS_EX_LAYOUTRTL);
-}
-
-// Update layout direction flag for an EDIT control.
-//
-// Returns true if anything changed or false if the direction flag was already
-// set to the desired direction (which can't be wxLayout_Default).
-inline bool wxUpdateEditLayoutDirection(WXHWND hWnd, wxLayoutDirection dir)
-{
-    return wxUpdateExStyleForLayoutDirection(hWnd, dir,
-                                             WS_EX_RIGHT |
-                                             WS_EX_RTLREADING |
-                                             WS_EX_LEFTSCROLLBAR);
-}
-
-// Companion of the above function checking if an EDIT control uses RTL.
-inline wxLayoutDirection wxGetEditLayoutDirection(WXHWND hWnd)
-{
-    wxCHECK_MSG( hWnd, wxLayout_Default, wxS("invalid window") );
-
-    // While we set 3 style bits above, we're only really interested in one of
-    // them here. In particularly, don't check for WS_EX_RIGHT as it can be set
-    // for a right-aligned control even if it doesn't use RTL. And while we
-    // could test WS_EX_LEFTSCROLLBAR, this doesn't really seem useful.
-    const LONG_PTR style = ::GetWindowLongPtr(hWnd, GWL_EXSTYLE);
-
-    return style & WS_EX_RTLREADING ? wxLayout_RightToLeft
-                                    : wxLayout_LeftToRight;
 }
 
 // ----------------------------------------------------------------------------

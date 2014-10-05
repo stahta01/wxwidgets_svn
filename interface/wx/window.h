@@ -3259,19 +3259,7 @@ public:
     */
     //@{
 
-    /**
-        Return where the given point lies, exactly.
-
-        This method is used to test whether the point lies inside the client
-        window area or on one of its scrollbars.
-
-        The point coordinates are specified in client window coordinates.
-     */
     wxHitTest HitTest(wxCoord x, wxCoord y) const;
-
-    /**
-        @overload
-     */
     wxHitTest HitTest(const wxPoint& pt) const;
 
     /**
@@ -3813,8 +3801,6 @@ wxWindow* wxGetActiveWindow();
 /**
     Returns the first top level parent of the given window, or in other words,
     the frame or dialog containing it, or @NULL.
-
-    Notice that if @a window is itself already a TLW, it is returned directly.
 
     @header{wx/window.h}
 */

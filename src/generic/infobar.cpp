@@ -127,10 +127,13 @@ wxInfoBarGeneric::BarPlacement wxInfoBarGeneric::GetBarPlacement() const
     if ( !sizer )
         return BarPlacement_Unknown;
 
+    // FIXME-VC6: can't compare "const wxInfoBarGeneric *" and "wxWindow *",
+    //            so need this workaround
+    wxWindow * const self = const_cast<wxInfoBarGeneric *>(this);
     const wxSizerItemList& siblings = sizer->GetChildren();
-    if ( siblings.GetFirst()->GetData()->GetWindow() == this )
+    if ( siblings.GetFirst()->GetData()->GetWindow() == self )
         return BarPlacement_Top;
-    else if ( siblings.GetLast()->GetData()->GetWindow() == this )
+    else if ( siblings.GetLast()->GetData()->GetWindow() == self )
         return BarPlacement_Bottom;
     else
         return BarPlacement_Unknown;
@@ -151,7 +154,7 @@ wxShowEffect wxInfoBarGeneric::GetShowEffect() const
 
         default:
             wxFAIL_MSG( "unknown info bar placement" );
-            wxFALLTHROUGH;
+            // fall through
 
         case BarPlacement_Unknown:
             return wxSHOW_EFFECT_NONE;
@@ -173,7 +176,7 @@ wxShowEffect wxInfoBarGeneric::GetHideEffect() const
 
         default:
             wxFAIL_MSG( "unknown info bar placement" );
-            wxFALLTHROUGH;
+            // fall through
 
         case BarPlacement_Unknown:
             return wxSHOW_EFFECT_NONE;
@@ -275,110 +278,6 @@ void wxInfoBarGeneric::AddButton(wxWindowID btnid, const wxString& label)
 #endif // __WXMAC__
 
     sizer->Add(button, wxSizerFlags().Centre().DoubleBorder());
-}
-
-size_t wxInfoBarGeneric::GetButtonCount() const
-{
-    size_t count = 0;
-    wxSizer * const sizer = GetSizer();
-    if ( !sizer )
-        return 0;
-
-    // iterate over the sizer items in reverse order
-    const wxSizerItemList& items = sizer->GetChildren();
-    for ( wxSizerItemList::compatibility_iterator node = items.GetLast();
-          node != items.GetFirst();
-          node = node->GetPrevious() )
-    {
-        const wxSizerItem * const item = node->GetData();
-
-        // if we reached the spacer separating the buttons from the text
-        // break the for-loop.
-        if ( item->IsSpacer() )
-            break;
-
-        // if the standard button is shown, there must be no other ones
-        if ( item->GetWindow() == m_button )
-            return 0;
-
-        ++count;
-    }
-
-    return count;
-}
-
-wxWindowID wxInfoBarGeneric::GetButtonId(size_t idx) const
-{
-    wxCHECK_MSG( idx < GetButtonCount(), wxID_NONE,
-                 "Invalid infobar button position" );
-
-    wxSizer * const sizer = GetSizer();
-    if ( !sizer )
-        return wxID_NONE;
-
-    bool foundSpacer = false;
-
-    size_t count = 0;
-    const wxSizerItemList& items = sizer->GetChildren();
-    for ( wxSizerItemList::compatibility_iterator node = items.GetLast();
-          node != items.GetFirst() || node != items.GetLast();
-          )
-    {
-        const wxSizerItem * const item = node->GetData();
-
-        if ( item->IsSpacer() )
-            foundSpacer = true;
-
-        if ( foundSpacer )
-        {
-            if ( !item->IsSpacer() )
-            {
-                if ( count == idx )
-                {
-                  if ( item->GetWindow() != m_button )
-                    return item->GetWindow()->GetId();
-                }
-
-                ++count;
-            }
-
-            node = node->GetNext();
-        }
-        else
-        {
-            node = node->GetPrevious();
-        }
-    }
-
-    return wxID_NONE;
-}
-
-bool wxInfoBarGeneric::HasButtonId(wxWindowID btnid) const
-{
-    wxSizer * const sizer = GetSizer();
-    if ( !sizer )
-        return false;
-
-    // iterate over the sizer items in reverse order to find the last added
-    // button with this id
-    const wxSizerItemList& items = sizer->GetChildren();
-    for ( wxSizerItemList::compatibility_iterator node = items.GetLast();
-          node != items.GetFirst();
-          node = node->GetPrevious() )
-    {
-        const wxSizerItem * const item = node->GetData();
-
-        // if we reached the spacer separating the buttons from the text
-        // then the wanted ID is not inside.
-        if ( item->IsSpacer() )
-            return false;
-
-        // check if we found our button
-        if ( item->GetWindow()->GetId() == btnid )
-            return true;
-    }
-
-    return false;
 }
 
 void wxInfoBarGeneric::RemoveButton(wxWindowID btnid)

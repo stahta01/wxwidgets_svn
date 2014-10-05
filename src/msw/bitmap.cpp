@@ -68,17 +68,12 @@ public:
 
     virtual void Free();
 
-#if wxUSE_WXDIB
     // Creates a new bitmap (DDB or DIB) from the contents of the given DIB.
     void CopyFromDIB(const wxDIB& dib);
 
+#if wxUSE_WXDIB
     // Takes ownership of the given DIB.
     bool AssignDIB(wxDIB& dib);
-
-    // Also takes ownership of the given DIB, but doesn't change any other
-    // fields (which are supposed to be already set), and just updates
-    // m_hasAlpha because 32 bit DIBs always do have it.
-    void Set32bppHDIB(HBITMAP hdib);
 #endif // wxUSE_WXDIB
 
 
@@ -130,14 +125,13 @@ public:
 private:
     void Init();
 
-#if wxUSE_WXDIB
     // Initialize using the given DIB but use (and take ownership of) the
     // bitmap handle if it is valid, assuming it's a DDB. If it's not valid,
     // use the DIB handle itself taking ownership of it (i.e. wxDIB will become
     // invalid when this function returns even though we take it as const
     // reference because this is how it's passed to us).
     void InitFromDIB(const wxDIB& dib, HBITMAP hbitmap = NULL);
-#endif // wxUSE_WXDIB
+
 
     // optional mask for transparent drawing
     wxMask       *m_bitmapMask;
@@ -233,10 +227,8 @@ wxBitmapRefData::wxBitmapRefData(const wxBitmapRefData& data)
     if (data.m_bitmapMask)
         m_bitmapMask = new wxMask(*data.m_bitmapMask);
 
-#if wxUSE_WXDIB
     wxASSERT_MSG( !data.m_dib,
                     wxT("can't copy bitmap locked for raw access!") );
-#endif // wxUSE_WXDIB
 
     m_hasAlpha = data.m_hasAlpha;
 
@@ -246,28 +238,6 @@ wxBitmapRefData::wxBitmapRefData(const wxBitmapRefData& data)
     {
         wxDIB dib((HBITMAP)(data.m_hBitmap));
         CopyFromDIB(dib);
-        BITMAP bm;
-        if ( ::GetObject(m_hBitmap, sizeof(bm), &bm) != sizeof(bm) )
-        {
-            wxLogLastError(wxT("GetObject(hBitmap@wxBitmapRefData)"));
-        }
-        else if ( m_depth != bm.bmBitsPixel )
-        {
-            // We got DDB with a different colour depth then we wanted, so we
-            // can't use it and need to continue using the DIB instead.
-            wxDIB dibDst(m_width, m_height, m_depth);
-            if ( dibDst.IsOk() )
-            {
-                memcpy(dibDst.GetData(), dib.GetData(),
-                        wxDIB::GetLineSize(m_width, m_depth)*m_height);
-                AssignDIB(dibDst);
-            }
-            else
-            {
-                // Nothing else left to do...
-                m_depth = bm.bmBitsPixel;
-            }
-        }
     }
 #endif // wxUSE_WXDIB
 }
@@ -287,14 +257,10 @@ void wxBitmapRefData::Free()
         {
             wxLogLastError(wxT("DeleteObject(hbitmap)"));
         }
-
-        m_hBitmap = 0;
     }
 
     wxDELETE(m_bitmapMask);
 }
-
-#if wxUSE_WXDIB
 
 void wxBitmapRefData::InitFromDIB(const wxDIB& dib, HBITMAP hbitmap)
 {
@@ -344,6 +310,8 @@ void wxBitmapRefData::CopyFromDIB(const wxDIB& dib)
     InitFromDIB(dib, hbitmap);
 }
 
+#if wxUSE_WXDIB
+
 bool wxBitmapRefData::AssignDIB(wxDIB& dib)
 {
     if ( !dib.IsOk() )
@@ -353,15 +321,6 @@ bool wxBitmapRefData::AssignDIB(wxDIB& dib)
     InitFromDIB(dib);
 
     return true;
-}
-
-void wxBitmapRefData::Set32bppHDIB(HBITMAP hdib)
-{
-    Free();
-
-    m_isDIB = true;
-    m_hasAlpha = true;
-    m_hBitmap = hdib;
 }
 
 #endif // wxUSE_WXDIB
@@ -380,7 +339,6 @@ wxGDIRefData *wxBitmap::CloneGDIRefData(const wxGDIRefData *data) const
     return new wxBitmapRefData(*static_cast<const wxBitmapRefData *>(data));
 }
 
-#if wxUSE_WXDIB
 // Premultiply the values of all RGBA pixels in the given range.
 static void PremultiplyPixels(unsigned char* begin, unsigned char* end)
 {
@@ -434,49 +392,6 @@ static bool CheckAlpha(HBITMAP hbmp, HBITMAP* hdib = NULL)
 
     return false;
 }
-
-// Return HDIB containing premultiplied bitmap data if the original bitmap is
-// not premultiplied, otherwise return NULL.
-//
-// Semantics is a bit weird here again because we want to avoid throwing the
-// wxDIB we create here away if possible.
-//
-// Also notice that this function uses a heuristics for determining whether the
-// original bitmap uses premultiplied alpha or not and can return NULL for some
-// bitmaps not using premultiplied alpha. And while this should be relatively
-// rare in practice, we really ought to allow the user to specify this
-// explicitly.
-static HBITMAP CreatePremultipliedDIBIfNeeded(HBITMAP hbmp)
-{
-    // Check if 32-bit bitmap realy has premultiplied RGB data
-    // and premuliply it if necessary.
-
-    BITMAP bm;
-    if ( !::GetObject(hbmp, sizeof(bm), &bm) || (bm.bmBitsPixel != 32) )
-        return NULL;
-
-    wxDIB dib(hbmp);
-    if ( !dib.IsOk() )
-        return NULL;
-
-    unsigned char* pixels = dib.GetData();
-    unsigned char* const end = pixels + 4*dib.GetWidth()*dib.GetHeight();
-    for ( ; pixels < end; pixels += 4 )
-    {
-        const unsigned char a = pixels[3];
-        if ( a > 0 && (pixels[0] > a || pixels[1] > a || pixels[2] > a) )
-        {
-            // Data is certainly not premultiplied by alpha if any of the
-            // values is smaller than the value of alpha itself.
-            PremultiplyPixels(dib.GetData(), end);
-
-            return dib.Detach();
-        }
-    }
-
-    return NULL;
-}
-#endif // wxUSE_WXDIB
 
 bool wxBitmap::CopyFromIconOrCursor(const wxGDIImage& icon,
                                     wxBitmapTransparency transp)
@@ -535,7 +450,11 @@ bool wxBitmap::CopyFromIconOrCursor(const wxGDIImage& icon,
             {
                 HBITMAP hdib = 0;
                 if ( CheckAlpha(iconInfo.hbmColor, &hdib) )
-                    refData->Set32bppHDIB(hdib);
+                {
+                    refData->m_hasAlpha = true;
+                    ::DeleteObject(refData->m_hBitmap);
+                    refData->m_hBitmap = hdib;
+                }
             }
             break;
 #endif // wxUSE_WXDIB
@@ -1210,19 +1129,7 @@ bool wxBitmap::LoadFile(const wxString& filename, wxBitmapType type)
     {
         m_refData = new wxBitmapRefData;
 
-        if ( !handler->LoadFile(this, filename, type, -1, -1) )
-            return false;
-
-#if wxUSE_WXDIB
-        // wxBitmap must contain premultiplied data, but external files are not
-        // always in this format, so try to detect whether this is the case and
-        // create a premultiplied DIB if it really is.
-        HBITMAP hdib = CreatePremultipliedDIBIfNeeded(GetHbitmap());
-        if ( hdib )
-            static_cast<wxBitmapRefData*>(m_refData)->Set32bppHDIB(hdib);
-#endif // wxUSE_WXDIB
-
-        return true;
+        return handler->LoadFile(this, filename, type, -1, -1);
     }
 #if wxUSE_IMAGE && wxUSE_WXDIB
     else // no bitmap handler found
@@ -1376,10 +1283,16 @@ wxDC *wxBitmap::GetSelectedInto() const
 #endif
 }
 
-void wxBitmap::UseAlpha(bool use)
+void wxBitmap::UseAlpha()
 {
     if ( GetBitmapData() )
-        GetBitmapData()->m_hasAlpha = use;
+        GetBitmapData()->m_hasAlpha = true;
+}
+
+void wxBitmap::ResetAlpha()
+{
+    if ( GetBitmapData() )
+        GetBitmapData()->m_hasAlpha = false;
 }
 
 bool wxBitmap::HasAlpha() const
@@ -1389,12 +1302,8 @@ bool wxBitmap::HasAlpha() const
 
 void wxBitmap::MSWUpdateAlpha()
 {
-#if wxUSE_WXDIB
     if ( CheckAlpha(GetHbitmap()) )
         GetBitmapData()->m_hasAlpha = true;
-#else // !wxUSE_WXDIB
-        GetBitmapData()->m_hasAlpha = false;
-#endif // wxUSE_WXDIB/!wxUSE_WXDIB
 }
 
 // ----------------------------------------------------------------------------
@@ -1534,8 +1443,7 @@ void wxBitmap::UngetRawData(wxPixelDataBase& dataBase)
         wxDIB *dib = GetBitmapData()->m_dib;
         GetBitmapData()->m_dib = NULL;
 
-        GetBitmapData()->Free();
-        GetBitmapData()->CopyFromDIB(*dib);
+        // TODO: convert
 
         delete dib;
     }

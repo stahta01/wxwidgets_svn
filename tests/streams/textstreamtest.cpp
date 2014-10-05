@@ -47,7 +47,7 @@ private:
 
 #if wxUSE_LONGLONG
         CPPUNIT_TEST( TestLongLong );
-        CPPUNIT_TEST( TestULongLong );
+        CPPUNIT_TEST( TestLongLong );
 #endif // wxUSE_LONGLONG
 
 #if wxUSE_UNICODE
@@ -92,7 +92,7 @@ TextStreamTestCase::TextStreamTestCase()
 {
 }
 
-#if defined(__WINDOWS__)
+#if defined(__WINDOWS__) || defined(__WXPM__)
 #   define NEWLINE "\r\n"
 #   define NEWLINELEN 2
 #elif defined(__WXMAC__) && !defined(__DARWIN__)

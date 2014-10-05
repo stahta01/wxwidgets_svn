@@ -33,10 +33,10 @@ public:
     bool operator==(const wxColour& col) const;
     bool operator!=(const wxColour& col) const { return !(*this == col); }
 
-    unsigned char Red() const wxOVERRIDE;
-    unsigned char Green() const wxOVERRIDE;
-    unsigned char Blue() const wxOVERRIDE;
-    unsigned char Alpha() const wxOVERRIDE;
+    unsigned char Red() const;
+    unsigned char Green() const;
+    unsigned char Blue() const;
+    unsigned char Alpha() const;
 
     // Implementation part
 #ifdef __WXGTK3__
@@ -49,9 +49,9 @@ public:
 
 protected:
     virtual void
-    InitRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a) wxOVERRIDE;
+    InitRGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
-    virtual bool FromString(const wxString& str) wxOVERRIDE;
+    virtual bool FromString(const wxString& str);
 
     DECLARE_DYNAMIC_CLASS(wxColour)
 };

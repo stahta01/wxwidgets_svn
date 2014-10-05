@@ -39,16 +39,18 @@ public:
                 long style = wxDEFAULT_FRAME_STYLE,
                 const wxString& name = wxFrameNameStr);
 
+    virtual ~wxFrame();
+
 #if wxUSE_STATUSBAR
-    void SetStatusBar(wxStatusBar *statbar) wxOVERRIDE;
+    void SetStatusBar(wxStatusBar *statbar);
 #endif // wxUSE_STATUSBAR
 
 #if wxUSE_TOOLBAR
-    void SetToolBar(wxToolBar *toolbar) wxOVERRIDE;
+    void SetToolBar(wxToolBar *toolbar);
 #endif // wxUSE_TOOLBAR
 
-    virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL) wxOVERRIDE;
-    wxPoint GetClientAreaOrigin() const wxOVERRIDE { return wxPoint(0, 0); }
+    virtual bool ShowFullScreen(bool show, long style = wxFULLSCREEN_ALL);
+    wxPoint GetClientAreaOrigin() const { return wxPoint(0, 0); }
 
 #if wxUSE_LIBHILDON || wxUSE_LIBHILDON2
     // in Hildon environment all frames are always shown maximized
@@ -58,15 +60,15 @@ public:
     // implementation from now on
     // --------------------------
 
-    virtual bool SendIdleEvents(wxIdleEvent& event) wxOVERRIDE;
+    virtual bool SendIdleEvents(wxIdleEvent& event);
 
 protected:
     // override wxWindow methods to take into account tool/menu/statusbars
-    virtual void DoGetClientSize( int *width, int *height ) const wxOVERRIDE;
+    virtual void DoGetClientSize( int *width, int *height ) const;
 
 #if wxUSE_MENUS_NATIVE
-    virtual void DetachMenuBar() wxOVERRIDE;
-    virtual void AttachMenuBar(wxMenuBar *menubar) wxOVERRIDE;
+    virtual void DetachMenuBar();
+    virtual void AttachMenuBar(wxMenuBar *menubar);
 #endif // wxUSE_MENUS_NATIVE
 
 private:

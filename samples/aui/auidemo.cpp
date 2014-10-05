@@ -42,7 +42,7 @@
 class MyApp : public wxApp
 {
 public:
-    bool OnInit() wxOVERRIDE;
+    bool OnInit();
 };
 
 DECLARE_APP(MyApp)

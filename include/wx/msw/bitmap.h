@@ -97,12 +97,6 @@ public:
         CopyFromIcon(icon, transp);
     }
 
-    // Convert from wxCursor
-    wxEXPLICIT wxBitmap(const wxCursor& cursor)
-    {
-        (void)CopyFromCursor(cursor, wxBitmapTransparency_Auto);
-    }
-
     wxBitmap& operator=(const wxIcon& icon)
     {
         (void)CopyFromIcon(icon);
@@ -110,17 +104,12 @@ public:
         return *this;
     }
 
-#ifdef WXWIN_COMPATIBILITY_3_0
-    // This assignment operator is not portable as it is not implemented in any
-    // other ports.
-    wxDEPRECATED_MSG("Don't assign wxCursor to an existing wxBitmap, create a new wxBitmap from wxCursor instead.")
     wxBitmap& operator=(const wxCursor& cursor)
     {
         (void)CopyFromCursor(cursor);
 
         return *this;
     }
-#endif // WXWIN_COMPATIBILITY_3_0
 
     virtual ~wxBitmap();
 
@@ -181,8 +170,8 @@ public:
     // these functions are internal and shouldn't be used, they risk to
     // disappear in the future
     bool HasAlpha() const;
-    void UseAlpha(bool use = true);
-    void ResetAlpha() { UseAlpha(false); }
+    void UseAlpha();
+    void ResetAlpha();
 
     // support for scaled bitmaps
     virtual double GetScaleFactor() const { return 1.0; }

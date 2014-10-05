@@ -80,6 +80,8 @@
 
 #if defined(__WXMSW__)
     // tested
+    #define wxPG_NAT_BUTTON_BORDER_ANY          1
+    #define wxPG_NAT_BUTTON_BORDER_X            1
     #define wxPG_NAT_BUTTON_BORDER_Y            1
 
     #define wxPG_CHECKMARK_XADJ                 1
@@ -98,6 +100,8 @@
     #define wxPG_CHECKMARK_HADJ                 (-2)
     #define wxPG_CHECKMARK_DEFLATE              3
 
+    #define wxPG_NAT_BUTTON_BORDER_ANY      1
+    #define wxPG_NAT_BUTTON_BORDER_X        1
     #define wxPG_NAT_BUTTON_BORDER_Y        1
 
     #define wxPG_TEXTCTRLYADJUST            0
@@ -110,6 +114,8 @@
     #define wxPG_CHECKMARK_HADJ                 -6
     #define wxPG_CHECKMARK_DEFLATE              0
 
+    #define wxPG_NAT_BUTTON_BORDER_ANY      0
+    #define wxPG_NAT_BUTTON_BORDER_X        0
     #define wxPG_NAT_BUTTON_BORDER_Y        0
 
     #define wxPG_TEXTCTRLYADJUST            0
@@ -122,6 +128,8 @@
     #define wxPG_CHECKMARK_HADJ                 0
     #define wxPG_CHECKMARK_DEFLATE              0
 
+    #define wxPG_NAT_BUTTON_BORDER_ANY      0
+    #define wxPG_NAT_BUTTON_BORDER_X        0
     #define wxPG_NAT_BUTTON_BORDER_Y        0
 
     #define wxPG_TEXTCTRLYADJUST            0
@@ -653,7 +661,7 @@ public:
     virtual void OnDrawItem( wxDC& dc,
                              const wxRect& rect,
                              int item,
-                             int flags ) const wxOVERRIDE
+                             int flags ) const
     {
         wxPropertyGrid* pg = GetGrid();
 
@@ -669,7 +677,7 @@ public:
         }
     }
 
-    virtual wxCoord OnMeasureItem( size_t item ) const wxOVERRIDE
+    virtual wxCoord OnMeasureItem( size_t item ) const
     {
         wxPropertyGrid* pg = GetGrid();
         wxRect rect;
@@ -687,7 +695,7 @@ public:
         return pg;
     }
 
-    virtual wxCoord OnMeasureItemWidth( size_t item ) const wxOVERRIDE
+    virtual wxCoord OnMeasureItemWidth( size_t item ) const
     {
         wxPropertyGrid* pg = GetGrid();
         wxRect rect;
@@ -698,16 +706,16 @@ public:
     }
 
     virtual void PositionTextCtrl( int textCtrlXAdjust,
-                                   int WXUNUSED(textCtrlYAdjust) ) wxOVERRIDE
+                                   int WXUNUSED(textCtrlYAdjust) )
     {
+        wxPropertyGrid* pg = GetGrid();
     #ifdef wxPG_TEXTCTRLXADJUST
         textCtrlXAdjust = wxPG_TEXTCTRLXADJUST -
                           (wxPG_XBEFOREWIDGET+wxPG_CONTROL_MARGIN+1) - 1,
     #endif
         wxOwnerDrawnComboBox::PositionTextCtrl(
             textCtrlXAdjust,
-            0 // Under MSW vertical position is already properly adjusted.
-              // Note: This parameter is not used by other ports.
+            pg->GetSpacingY() + 2
         );
     }
 
@@ -1039,7 +1047,7 @@ wxWindow* wxPGChoiceEditor::CreateControlsBase( wxPropertyGrid* propGrid,
     cb->Hide();
 #endif
     cb->Create(ctrlParent,
-               wxID_ANY,
+               wxPG_SUBID1,
                wxString(),
                po,
                si,
@@ -1228,11 +1236,11 @@ WX_PG_IMPLEMENT_INTERNAL_EDITOR_CLASS(ComboBox,
 void wxPGComboBoxEditor::UpdateControl( wxPGProperty* property, wxWindow* ctrl ) const
 {
     wxOwnerDrawnComboBox* cb = (wxOwnerDrawnComboBox*)ctrl;
-    const int index = property->GetChoiceSelection();
     wxString s = property->GetValueAsString(wxPG_EDITABLE_VALUE);
-    cb->SetSelection(index);
     property->GetGrid()->SetupTextCtrlValue(s);
     cb->SetValue(s);
+
+    // TODO: If string matches any selection, then select that.
 }
 
 
@@ -1406,36 +1414,13 @@ enum
 
 const int wxSCB_SETVALUE_CYCLE = 2;
 
-static void DrawSimpleCheckBox( wxWindow* win, wxDC& dc, const wxRect& rect,
-                                int box_h, int state )
+
+static void DrawSimpleCheckBox( wxDC& dc, const wxRect& rect, int box_hei,
+                                int state )
 {
-#if wxPG_USE_RENDERER_NATIVE
-    // Box rectangle
-    wxRect r(rect.x+wxPG_XBEFORETEXT, rect.y+((rect.height-box_h)/2),
-             box_h, box_h);
-
-    int cbFlags = 0;
-    if ( state & wxSCB_STATE_UNSPECIFIED )
-    {
-        cbFlags |= wxCONTROL_UNDETERMINED;
-    }
-    else if ( state & wxSCB_STATE_CHECKED )
-    {
-        cbFlags |= wxCONTROL_CHECKED;
-    }
-
-    if ( state & wxSCB_STATE_BOLD )
-    {
-        cbFlags |= wxCONTROL_PRESSED;
-    }
-
-    wxRendererNative::Get().DrawCheckBox(win, dc, r, cbFlags);
-#else
-    wxUnusedVar(win);
-
-    // Box rectangle
-    wxRect r(rect.x+wxPG_XBEFORETEXT, rect.y+((rect.height-box_h)/2),
-             box_h, box_h);
+    // Box rectangle.
+    wxRect r(rect.x+wxPG_XBEFORETEXT,rect.y+((rect.height-box_hei)/2),
+             box_hei,box_hei);
     wxColour useCol = dc.GetTextForeground();
 
     if ( state & wxSCB_STATE_UNSPECIFIED )
@@ -1469,7 +1454,7 @@ static void DrawSimpleCheckBox( wxWindow* win, wxDC& dc, const wxRect& rect,
     else
     {
         // Pen for bold rectangle.
-        wxPen linepen(useCol,2,wxPENSTYLE_SOLID);
+        wxPen linepen(useCol,2,wxSOLID);
         linepen.SetJoin(wxJOIN_MITER); // This prevents round edges.
         dc.SetPen(linepen);
         r.x++;
@@ -1482,7 +1467,6 @@ static void DrawSimpleCheckBox( wxWindow* win, wxDC& dc, const wxRect& rect,
 
     dc.DrawRectangle(r);
     dc.SetPen(*wxTRANSPARENT_PEN);
-#endif
 }
 
 //
@@ -1524,14 +1508,11 @@ private:
         Refresh();
         event.Skip();
     }
-    void OnLeftClickActivate( wxCommandEvent& evt );
 
     static wxBitmap* ms_doubleBuffer;
 
     DECLARE_EVENT_TABLE()
 };
-
-wxDEFINE_EVENT( wxEVT_CB_LEFT_CLICK_ACTIVATE, wxCommandEvent );
 
 BEGIN_EVENT_TABLE(wxSimpleCheckBox, wxControl)
     EVT_PAINT(wxSimpleCheckBox::OnPaint)
@@ -1539,7 +1520,6 @@ BEGIN_EVENT_TABLE(wxSimpleCheckBox, wxControl)
     EVT_LEFT_DCLICK(wxSimpleCheckBox::OnLeftClick)
     EVT_KEY_DOWN(wxSimpleCheckBox::OnKeyDown)
     EVT_SIZE(wxSimpleCheckBox::OnResize)
-    EVT_COMMAND(wxID_ANY, wxEVT_CB_LEFT_CLICK_ACTIVATE, wxSimpleCheckBox::OnLeftClickActivate)
 END_EVENT_TABLE()
 
 wxSimpleCheckBox::~wxSimpleCheckBox()
@@ -1551,10 +1531,11 @@ wxBitmap* wxSimpleCheckBox::ms_doubleBuffer = NULL;
 
 void wxSimpleCheckBox::OnPaint( wxPaintEvent& WXUNUSED(event) )
 {
-    wxRect rect(GetClientSize());
+    wxSize clientSize = GetClientSize();
     wxAutoBufferedPaintDC dc(this);
-    dc.Clear();
 
+    dc.Clear();
+    wxRect rect(0,0,clientSize.x,clientSize.y);
     rect.y += 1;
     rect.width += 1;
 
@@ -1567,10 +1548,10 @@ void wxSimpleCheckBox::OnPaint( wxPaintEvent& WXUNUSED(event) )
 
     int state = m_state;
     if ( !(state & wxSCB_STATE_UNSPECIFIED) &&
-         GetFont().GetWeight() == wxFONTWEIGHT_BOLD )
+         GetFont().GetWeight() == wxBOLD )
         state |= wxSCB_STATE_BOLD;
 
-    DrawSimpleCheckBox(this, dc, rect, m_boxHeight, state);
+    DrawSimpleCheckBox(dc, rect, m_boxHeight, state);
 }
 
 void wxSimpleCheckBox::OnLeftClick( wxMouseEvent& event )
@@ -1594,7 +1575,10 @@ void wxSimpleCheckBox::SetValue( int value )
 {
     if ( value == wxSCB_SETVALUE_CYCLE )
     {
-        m_state ^= wxSCB_STATE_CHECKED;
+        if ( m_state & wxSCB_STATE_CHECKED )
+            m_state &= ~wxSCB_STATE_CHECKED;
+        else
+            m_state |= wxSCB_STATE_CHECKED;
     }
     else
     {
@@ -1607,15 +1591,6 @@ void wxSimpleCheckBox::SetValue( int value )
     wxPropertyGrid* propGrid = (wxPropertyGrid*) GetParent();
     wxASSERT( wxDynamicCast(propGrid, wxPropertyGrid) );
     propGrid->HandleCustomEditorEvent(evt);
-}
-
-void wxSimpleCheckBox::OnLeftClickActivate( wxCommandEvent& evt )
-{
-    // Construct mouse pseudo-event for initial mouse click
-    wxMouseEvent mouseEvt(wxEVT_LEFT_DOWN);
-    mouseEvt.m_x = evt.GetInt();
-    mouseEvt.m_y = evt.GetExtraLong();
-    OnLeftClick(mouseEvt);
 }
 
 wxPGWindowList wxPGCheckBoxEditor::CreateControls( wxPropertyGrid* propGrid,
@@ -1632,7 +1607,7 @@ wxPGWindowList wxPGCheckBoxEditor::CreateControls( wxPropertyGrid* propGrid,
     sz.x = propGrid->GetFontHeight() + (wxPG_XBEFOREWIDGET*2) + 4;
 
     wxSimpleCheckBox* cb = new wxSimpleCheckBox(propGrid->GetPanel(),
-                                                wxID_ANY, pt, sz);
+                                                wxPG_SUBID1, pt, sz);
 
     cb->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
 
@@ -1640,15 +1615,22 @@ wxPGWindowList wxPGCheckBoxEditor::CreateControls( wxPropertyGrid* propGrid,
 
     if ( !property->IsValueUnspecified() )
     {
-        if ( propGrid->HasInternalFlag(wxPG_FL_ACTIVATION_BY_CLICK) )
+        // If mouse cursor was on the item, toggle the value now.
+        if ( propGrid->GetInternalFlags() & wxPG_FL_ACTIVATION_BY_CLICK )
         {
-            // Send the event to toggle the value (if mouse cursor is on the item)
             wxPoint point = cb->ScreenToClient(::wxGetMousePosition());
-            wxCommandEvent *evt = new wxCommandEvent(wxEVT_CB_LEFT_CLICK_ACTIVATE, cb->GetId());
-            // Store mouse pointer position
-            evt->SetInt(point.x);
-            evt->SetExtraLong(point.y);
-            wxQueueEvent(cb, evt);
+            if ( point.x <= (wxPG_XBEFORETEXT-2+cb->m_boxHeight) )
+            {
+                if ( cb->m_state & wxSCB_STATE_CHECKED )
+                    cb->m_state &= ~wxSCB_STATE_CHECKED;
+                else
+                    cb->m_state |= wxSCB_STATE_CHECKED;
+
+                // Makes sure wxPG_EVT_CHANGING etc. is sent for this initial
+                // click
+                propGrid->ChangePropertyValue(property,
+                                              wxPGVariant_Bool(cb->m_state));
+            }
         }
     }
 
@@ -1666,7 +1648,7 @@ void wxPGCheckBoxEditor::DrawValue( wxDC& dc, const wxRect& rect,
     if ( !property->IsValueUnspecified() )
     {
         state = property->GetChoiceSelection();
-        if ( dc.GetFont().GetWeight() == wxFONTWEIGHT_BOLD )
+        if ( dc.GetFont().GetWeight() == wxBOLD )
             state |= wxSCB_STATE_BOLD;
     }
     else
@@ -1674,7 +1656,7 @@ void wxPGCheckBoxEditor::DrawValue( wxDC& dc, const wxRect& rect,
         state |= wxSCB_STATE_UNSPECIFIED;
     }
 
-    DrawSimpleCheckBox(property->GetGrid(), dc, rect, dc.GetCharHeight(), state);
+    DrawSimpleCheckBox(dc, rect, dc.GetCharHeight(), state);
 }
 
 void wxPGCheckBoxEditor::UpdateControl( wxPGProperty* property,
@@ -1891,6 +1873,7 @@ wxWindow* wxPropertyGrid::GenerateEditorTextCtrl( const wxPoint& pos,
                                                   int maxLen,
                                                   unsigned int forColumn )
 {
+    wxWindowID id = wxPG_SUBID1;
     wxPGProperty* prop = GetSelection();
     wxASSERT(prop);
 
@@ -1935,7 +1918,7 @@ wxWindow* wxPropertyGrid::GenerateEditorTextCtrl( const wxPoint& pos,
     tc->Hide();
 #endif
     SetupTextCtrlValue(value);
-    tc->Create(ctrlParent,wxID_ANY,value, p, s,tcFlags);
+    tc->Create(ctrlParent,id,value, p, s,tcFlags);
 
 #if defined(__WXMSW__)
     // On Windows, we need to override read-only text ctrl's background
@@ -1993,6 +1976,7 @@ wxWindow* wxPropertyGrid::GenerateEditorTextCtrl( const wxPoint& pos,
 
 wxWindow* wxPropertyGrid::GenerateEditorButton( const wxPoint& pos, const wxSize& sz )
 {
+    wxWindowID id = wxPG_SUBID2;
     wxPGProperty* selected = GetSelection();
     wxASSERT(selected);
 
@@ -2005,7 +1989,7 @@ wxWindow* wxPropertyGrid::GenerateEditorButton( const wxPoint& pos, const wxSize
    wxSize s(25, -1);
 
    wxButton* but = new wxButton();
-   but->Create(GetPanel(),wxID_ANY,wxS("..."),p,s,wxWANTS_CHARS);
+   but->Create(GetPanel(),id,wxS("..."),p,s,wxWANTS_CHARS);
 
    // Now that we know the size, move to the correct position
    p.x = pos.x + sz.x - but->GetSize().x - 2;
@@ -2032,7 +2016,7 @@ wxWindow* wxPropertyGrid::GenerateEditorButton( const wxPoint& pos, const wxSize
   #ifdef __WXMSW__
     but->Hide();
   #endif
-    but->Create(GetPanel(),wxID_ANY,wxS("..."),p,s,wxWANTS_CHARS);
+    but->Create(GetPanel(),id,wxS("..."),p,s,wxWANTS_CHARS);
 
   #ifdef __WXGTK__
     wxFont font = GetFont();
@@ -2043,7 +2027,7 @@ wxWindow* wxPropertyGrid::GenerateEditorButton( const wxPoint& pos, const wxSize
   #endif
 #endif
 
-    if ( selected->HasFlag(wxPG_PROP_READONLY) && !selected->HasFlag(wxPG_PROP_ACTIVE_BTN) )
+    if ( selected->HasFlag(wxPG_PROP_READONLY) )
         but->Disable();
 
     return but;
@@ -2159,7 +2143,7 @@ bool wxPGEditorDialogAdapter::ShowDialog( wxPropertyGrid* propGrid, wxPGProperty
 // -----------------------------------------------------------------------
 
 wxPGMultiButton::wxPGMultiButton( wxPropertyGrid* pg, const wxSize& sz )
-    : wxWindow( pg->GetPanel(), wxID_ANY, wxPoint(-100,-100), wxSize(0, sz.y) ),
+    : wxWindow( pg->GetPanel(), wxPG_SUBID2, wxPoint(-100,-100), wxSize(0, sz.y) ),
       m_fullEditorSize(sz), m_buttonsWidth(0)
 {
     SetBackgroundColour(pg->GetCellBackgroundColour());
@@ -2175,7 +2159,10 @@ int wxPGMultiButton::GenId( int itemid ) const
 {
     if ( itemid < -1 )
     {
-        itemid = wxID_ANY;
+        if ( m_buttons.size() )
+            itemid = GetButton(m_buttons.size()-1)->GetId() + 1;
+        else
+            itemid = wxPG_SUBID2;
     }
     return itemid;
 }

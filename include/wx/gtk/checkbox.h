@@ -35,11 +35,11 @@ public:
                 const wxValidator& validator = wxDefaultValidator,
                 const wxString& name = wxCheckBoxNameStr );
 
-    void SetValue( bool state ) wxOVERRIDE;
-    bool GetValue() const wxOVERRIDE;
+    void SetValue( bool state );
+    bool GetValue() const;
 
-    virtual void SetLabel( const wxString& label ) wxOVERRIDE;
-    virtual bool Enable( bool enable = true ) wxOVERRIDE;
+    virtual void SetLabel( const wxString& label );
+    virtual bool Enable( bool enable = true );
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
@@ -49,11 +49,11 @@ public:
     void GTKEnableEvents();
 
 protected:
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style) wxOVERRIDE;
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const wxOVERRIDE;
+    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
+    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
-    void DoSet3StateValue(wxCheckBoxState state) wxOVERRIDE;
-    wxCheckBoxState DoGet3StateValue() const wxOVERRIDE;
+    void DoSet3StateValue(wxCheckBoxState state);
+    wxCheckBoxState DoGet3StateValue() const;
 
 private:
     typedef wxCheckBoxBase base_type;

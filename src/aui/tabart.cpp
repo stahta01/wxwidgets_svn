@@ -47,7 +47,7 @@ public:
     wxAuiCommandCapture() { m_lastId = 0; }
     int GetCommandId() const { return m_lastId; }
 
-    bool ProcessEvent(wxEvent& evt) wxOVERRIDE
+    bool ProcessEvent(wxEvent& evt)
     {
         if (evt.GetEventType() == wxEVT_MENU)
         {
@@ -156,7 +156,7 @@ wxAuiGenericTabArt::wxAuiGenericTabArt()
 {
     m_normalFont = *wxNORMAL_FONT;
     m_selectedFont = *wxNORMAL_FONT;
-    m_selectedFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_selectedFont.SetWeight(wxBOLD);
     m_measuringFont = m_selectedFont;
 
     m_fixedTabWidth = 100;
@@ -379,7 +379,7 @@ void wxAuiGenericTabArt::DrawTab(wxDC& dc,
     clip_points[5] = wxPoint(tab_x+clip_width+1, tab_y+tab_height-3);
 
     // FIXME: these ports don't provide wxRegion ctor from array of points
-#if !defined(__WXDFB__)
+#if !defined(__WXDFB__) && !defined(__WXCOCOA__)
     // set the clipping region for the tab --
     wxRegion clipping_region(WXSIZEOF(clip_points), clip_points);
     dc.SetClippingRegion(clipping_region);
@@ -851,7 +851,7 @@ wxAuiSimpleTabArt::wxAuiSimpleTabArt()
 {
     m_normalFont = *wxNORMAL_FONT;
     m_selectedFont = *wxNORMAL_FONT;
-    m_selectedFont.SetWeight(wxFONTWEIGHT_BOLD);
+    m_selectedFont.SetWeight(wxBOLD);
     m_measuringFont = m_selectedFont;
 
     m_flags = 0;

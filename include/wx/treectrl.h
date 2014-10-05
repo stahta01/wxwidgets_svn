@@ -391,14 +391,14 @@ public:
     // implementation
     // --------------
 
-    virtual bool ShouldInheritColours() const wxOVERRIDE { return false; }
+    virtual bool ShouldInheritColours() const { return false; }
 
     // hint whether to calculate best size quickly or accurately
     void SetQuickBestSize(bool q) { m_quickBestSize = q; }
     bool GetQuickBestSize() const { return m_quickBestSize; }
 
 protected:
-    virtual wxSize DoGetBestSize() const wxOVERRIDE;
+    virtual wxSize DoGetBestSize() const;
 
     // common part of Get/SetItemState()
     virtual int DoGetItemState(const wxTreeItemId& item) const = 0;
@@ -466,7 +466,9 @@ private:
     #include "wx/generic/treectlg.h"
 #elif defined(__WXMAC__)
     #include "wx/generic/treectlg.h"
-#elif defined(__WXQT__)
+#elif defined(__WXCOCOA__)
+    #include "wx/generic/treectlg.h"
+#elif defined(__WXPM__)
     #include "wx/generic/treectlg.h"
 #endif
 

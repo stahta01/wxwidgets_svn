@@ -66,7 +66,7 @@ public:
         m_orient = orient;
     }
 
-    virtual void Notify() wxOVERRIDE;
+    virtual void Notify();
 
 private:
     wxScrolledWindow *m_win;
@@ -286,7 +286,6 @@ wxHtmlFilter *wxHtmlWindow::m_DefaultFilter = NULL;
 wxHtmlProcessorList *wxHtmlWindow::m_GlobalProcessors = NULL;
 wxCursor *wxHtmlWindow::ms_cursorLink = NULL;
 wxCursor *wxHtmlWindow::ms_cursorText = NULL;
-wxCursor *wxHtmlWindow::ms_cursorDefault = NULL;
 
 void wxHtmlWindow::CleanUpStatics()
 {
@@ -297,7 +296,6 @@ void wxHtmlWindow::CleanUpStatics()
     wxDELETE(m_GlobalProcessors);
     wxDELETE(ms_cursorLink);
     wxDELETE(ms_cursorText);
-    wxDELETE(ms_cursorDefault);
 }
 
 void wxHtmlWindow::Init()
@@ -383,14 +381,6 @@ void wxHtmlWindow::SetRelatedFrame(wxFrame* frame, const wxString& format)
 {
     m_RelatedFrame = frame;
     m_TitleFormat = format;
-
-    // Check if the format provided can actually be used: it's more
-    // user-friendly to do it here and now rather than triggering the same
-    // assert much later when it's really used.
-
-    // If you get an assert here, it means that the title doesn't contain
-    // exactly one "%s" format specifier, which is an error in the caller.
-    wxString::Format(m_TitleFormat, wxString());
 }
 
 
@@ -1804,9 +1794,7 @@ wxCursor wxHtmlWindow::GetDefaultHTMLCursor(HTMLCursor type)
 
         case HTMLCursor_Default:
         default:
-            if ( !ms_cursorDefault )
-                ms_cursorDefault = new wxCursor(wxCURSOR_ARROW);
-            return *ms_cursorDefault;
+            return *wxSTANDARD_CURSOR;
     }
 }
 
@@ -1815,27 +1803,6 @@ wxCursor wxHtmlWindow::GetHTMLCursor(HTMLCursor type) const
     return GetDefaultHTMLCursor(type);
 }
 
-/*static*/
-void wxHtmlWindow::SetDefaultHTMLCursor(HTMLCursor type, const wxCursor& cursor)
-{
-    switch (type)
-    {
-        case HTMLCursor_Link:
-            delete ms_cursorLink;
-            ms_cursorLink = new wxCursor(cursor);
-            return;
-
-        case HTMLCursor_Text:
-            delete ms_cursorText;
-            ms_cursorText = new wxCursor(cursor);
-            return;
-
-        case HTMLCursor_Default:
-        default:
-            delete ms_cursorText;
-            ms_cursorDefault = new wxCursor(cursor);
-    }
-}
 
 //-----------------------------------------------------------------------------
 // wxHtmlWinModule
@@ -1850,8 +1817,8 @@ class wxHtmlWinModule: public wxModule
 DECLARE_DYNAMIC_CLASS(wxHtmlWinModule)
 public:
     wxHtmlWinModule() : wxModule() {}
-    bool OnInit() wxOVERRIDE { return true; }
-    void OnExit() wxOVERRIDE { wxHtmlWindow::CleanUpStatics(); }
+    bool OnInit() { return true; }
+    void OnExit() { wxHtmlWindow::CleanUpStatics(); }
 };
 
 IMPLEMENT_DYNAMIC_CLASS(wxHtmlWinModule, wxModule)

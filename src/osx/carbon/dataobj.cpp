@@ -29,6 +29,10 @@
 
 #include "wx/osx/private.h"
 
+#if wxOSX_USE_COCOA_OR_CARBON
+    #include <QuickTime/QuickTime.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // wxDataFormat
 // ----------------------------------------------------------------------------

@@ -22,7 +22,7 @@ public:
     wxGLContext(wxGLCanvas *win, const wxGLContext *other = NULL);
     virtual ~wxGLContext();
 
-    virtual bool SetCurrent(const wxGLCanvas& win) const wxOVERRIDE;
+    virtual bool SetCurrent(const wxGLCanvas& win) const;
 
 private:
     // attach context to the drawable or unset it (if NULL)
@@ -56,7 +56,7 @@ public:
     // implement wxGLCanvasBase methods
     // --------------------------------
 
-    virtual bool SwapBuffers() wxOVERRIDE;
+    virtual bool SwapBuffers();
 
 
     // X11-specific methods
@@ -72,19 +72,12 @@ public:
     virtual Window GetXWindow() const = 0;
 
 
-    // GLX-specific methods
-    // --------------------
-
-    // return attribs for glXCreateContextAttribsARB
-    const int *GetGLXContextAttribs() const { return m_glxContextAttribs; }
-
-
     // override some wxWindow methods
     // ------------------------------
 
     // return true only if the window is realized: OpenGL context can't be
     // created until we are
-    virtual bool IsShownOnScreen() const wxOVERRIDE;
+    virtual bool IsShownOnScreen() const;
 
 
     // implementation only from now on
@@ -112,13 +105,8 @@ public:
                                 GLXFBConfig **pFBC, XVisualInfo **pXVisual);
 
 private:
-    // initializes glxContextAttribs as defined by wxattrs which must be
-    // 0-terminated
-    static void InitGLXContextAttribs(const int *wxattrs, int *glxctxattribs);
-
     // fills in glattrs with attributes defined by wxattrs which must be
     // 0-terminated if it is non-NULL
-    // will ignore any gl context attribs
     //
     // n is the max size of glattrs, false is returned if we overflow it, it
     // should be at least 16 to accommodate the default attributes
@@ -134,10 +122,6 @@ private:
     // the global/default versions of the above
     static GLXFBConfig *ms_glFBCInfo;
     static XVisualInfo *ms_glVisualInfo;
-
-    // max 8 attributes plus terminator
-    // if first is 0, create legacy context
-    int m_glxContextAttribs[9];
 };
 
 // ----------------------------------------------------------------------------
@@ -153,19 +137,19 @@ public:
     wxGLApp() : wxGLAppBase() { }
 
     // implement wxGLAppBase method
-    virtual bool InitGLVisual(const int *attribList) wxOVERRIDE
+    virtual bool InitGLVisual(const int *attribList)
     {
         return wxGLCanvasX11::InitDefaultVisualInfo(attribList);
     }
 
     // and implement this wxGTK::wxApp method too
-    virtual void *GetXVisualInfo() wxOVERRIDE
+    virtual void *GetXVisualInfo()
     {
         return wxGLCanvasX11::GetDefaultXVisualInfo();
     }
 
     // and override this wxApp method to clean up
-    virtual int OnExit() wxOVERRIDE
+    virtual int OnExit()
     {
         wxGLCanvasX11::FreeDefaultVisualInfo();
 

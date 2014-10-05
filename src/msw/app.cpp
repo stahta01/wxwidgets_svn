@@ -61,6 +61,14 @@
     #include "wx/tooltip.h"
 #endif // wxUSE_TOOLTIPS
 
+// OLE is used for drag-and-drop, clipboard, OLE Automation..., but some
+// compilers don't support it (missing headers, libs, ...)
+#if defined(__GNUWIN32_OLD__) || defined(__SYMANTEC__)
+    #undef wxUSE_OLE
+
+    #define  wxUSE_OLE 0
+#endif // broken compilers
+
 #if defined(__POCKETPC__) || defined(__SMARTPHONE__)
     #include <ole2.h>
     #include <aygshell.h>
@@ -254,9 +262,19 @@ WXDWORD wxGUIAppTraits::WaitForThread(WXHANDLE hThread, int flags)
 
 wxPortId wxGUIAppTraits::GetToolkitVersion(int *majVer, int *minVer) const
 {
+    OSVERSIONINFO info;
+    wxZeroMemory(info);
+
     // on Windows, the toolkit version is the same of the OS version
     // as Windows integrates the OS kernel with the GUI toolkit.
-    wxGetOsVersion(majVer, minVer);
+    info.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    if ( ::GetVersionEx(&info) )
+    {
+        if ( majVer )
+            *majVer = info.dwMajorVersion;
+        if ( minVer )
+            *minVer = info.dwMinorVersion;
+    }
 
 #if defined(__WXHANDHELD__) || defined(__WXWINCE__)
     return wxPORT_WINCE;
@@ -612,9 +630,9 @@ private:
 };
 
 //// Initialize
-bool wxApp::Initialize(int& argc_, wxChar **argv_)
+bool wxApp::Initialize(int& argc, wxChar **argv)
 {
-    if ( !wxAppBase::Initialize(argc_, argv_) )
+    if ( !wxAppBase::Initialize(argc, argv) )
         return false;
 
     // ensure that base cleanup is done if we return too early

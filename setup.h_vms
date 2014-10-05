@@ -3,7 +3,7 @@
  * Template for the set.h file for VMS                                       *
  * Created from setup.h_in                                                   *
  * Author : J.Jansen (joukj@hrem.nano.tudelft.nl)                            *
- * Date : 18 September 2014                                                  *
+ * Date : 21 January 2013                                                    *
  *                                                                           *
  *****************************************************************************/
 
@@ -187,9 +187,9 @@ typedef pid_t GPid;
     #define wxUSE_GUI            1
 #endif
 
-#define WXWIN_COMPATIBILITY_2_8 1
+#define WXWIN_COMPATIBILITY_2_6 1
 
-#define WXWIN_COMPATIBILITY_3_0 1
+#define WXWIN_COMPATIBILITY_2_8 1
 
 #define wxEVENTS_COMPATIBILITY_2_8 1
 
@@ -221,7 +221,7 @@ typedef pid_t GPid;
 #define wxUSE_WCHAR_T 1
 
 
-#define wxUSE_EXCEPTIONS 1
+#define wxUSE_EXCEPTIONS    0
 
 #define wxUSE_EXTENDED_RTTI 0
 
@@ -243,7 +243,7 @@ typedef pid_t GPid;
 
 #define wxUSE_STL 0
 
-#if defined(__DMC__) \
+#if defined(__DMC__) || defined(__WATCOMC__) \
         || (defined(_MSC_VER) && _MSC_VER < 1200)
     #define wxUSE_STD_DEFAULT  0
 #else
@@ -701,12 +701,8 @@ typedef pid_t GPid;
 
 /* --- start MSW options --- */
 
-#define wxUSE_GRAPHICS_GDIPLUS wxUSE_GRAPHICS_CONTEXT
-
-#if defined(_MSC_VER) && _MSC_VER >= 1600
-    #define wxUSE_GRAPHICS_DIRECT2D wxUSE_GRAPHICS_CONTEXT
-#else
-    #define wxUSE_GRAPHICS_DIRECT2D 0
+#ifndef wxUSE_UNICODE_MSLU
+    #define wxUSE_UNICODE_MSLU 0
 #endif
 
 #define wxUSE_MFC           0
@@ -733,13 +729,12 @@ typedef pid_t GPid;
 
 #define wxUSE_TASKBARICON_BALLOONS 0
 
-#define wxUSE_TASKBARBUTTON 0
-
 #define wxUSE_UXTHEME           0
 
 #define wxUSE_INKEDIT  0
 
 #define wxUSE_INICONF 0
+
 
 #define wxUSE_DATEPICKCTRL_GENERIC 0
 
@@ -1181,9 +1176,6 @@ typedef pid_t GPid;
 
 /* Define if you have the dlerror function.  */
 #define HAVE_DLERROR 1
-
-/* Define if you have the dladdr function.  */
-#undef HAVE_DLADDR
 
 /* Define if you have Posix fnctl() function. */
 #define HAVE_FCNTL 1

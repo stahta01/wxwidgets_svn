@@ -140,6 +140,9 @@
 
 @interface NSApplication(MissingAppleMenuCall)
 - (void)setAppleMenu:(NSMenu *)menu;
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_6
+- (void)setHelpMenu:(NSMenu* )menu;
+#endif
 @end
 
 class wxMenuCocoaImpl : public wxMenuImpl
@@ -162,7 +165,7 @@ public :
 
     virtual ~wxMenuCocoaImpl();
 
-    virtual void InsertOrAppend(wxMenuItem *pItem, size_t pos) wxOVERRIDE
+    virtual void InsertOrAppend(wxMenuItem *pItem, size_t pos)
     {
         NSMenuItem* nsmenuitem = (NSMenuItem*) pItem->GetPeer()->GetHMenuItem();
         // make sure a call of SetSubMenu is also reflected (occurring after Create)
@@ -185,12 +188,12 @@ public :
             [m_osxMenu insertItem:nsmenuitem atIndex:pos];
     }
 
-    virtual void Remove( wxMenuItem *pItem ) wxOVERRIDE
+    virtual void Remove( wxMenuItem *pItem )
     {
         [m_osxMenu removeItem:(NSMenuItem*) pItem->GetPeer()->GetHMenuItem()];
     }
 
-    virtual void MakeRoot() wxOVERRIDE
+    virtual void MakeRoot()
     {
         wxMenu* peer = GetWXPeer();
         
@@ -227,13 +230,13 @@ public :
     {
     }
 
-    virtual void SetTitle( const wxString& text ) wxOVERRIDE
+    virtual void SetTitle( const wxString& text )
     {
         wxCFStringRef cfText(text);
         [m_osxMenu setTitle:cfText.AsNSString()];
     }
 
-    virtual void PopUp( wxWindow *win, int x, int y ) wxOVERRIDE
+    virtual void PopUp( wxWindow *win, int x, int y )
     {
         win->ScreenToClient( &x , &y ) ;
         NSView *view = win->GetPeer()->GetWXWidget();
@@ -250,17 +253,8 @@ public :
         [popUpButtonCell performClickWithFrame:frame inView:view];
         [popUpButtonCell release];
     }
-    
-    virtual void GetMenuBarDimensions(int &x, int &y, int &width, int &height) const wxOVERRIDE
-    {
-        NSRect r = [(NSScreen*)[[NSScreen screens] objectAtIndex:0] frame];
-        height = [m_osxMenu menuBarHeight];
-        x = r.origin.x;
-        y = r.origin.y;
-        width = r.size.width;
-    }
-    
-    WXHMENU GetHMenu() wxOVERRIDE { return m_osxMenu; }
+
+    WXHMENU GetHMenu() { return m_osxMenu; }
 
     static wxMenuImpl* Create( wxMenu* peer, const wxString& title );
     static wxMenuImpl* CreateRootMenu( wxMenu* peer );

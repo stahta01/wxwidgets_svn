@@ -45,7 +45,7 @@ public:
                 const wxString &name = wxStaticLineNameStr );
 
 protected:
-    virtual void DoDraw(wxControlRenderer *renderer) wxOVERRIDE;
+    virtual void DoDraw(wxControlRenderer *renderer);
 
 private:
     DECLARE_DYNAMIC_CLASS(wxStaticLine)

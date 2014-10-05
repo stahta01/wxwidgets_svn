@@ -36,6 +36,13 @@
 #include "wx/imaglist.h"
 
 // ----------------------------------------------------------------------------
+// various wxWidgets macros
+// ----------------------------------------------------------------------------
+
+// check that the page index is valid
+#define IS_VALID_PAGE(nPage) ((nPage) < GetPageCount())
+
+// ----------------------------------------------------------------------------
 // event table
 // ----------------------------------------------------------------------------
 
@@ -142,10 +149,6 @@ long wxListbook::GetListCtrlFlags() const
         {
             flags |= wxLC_LIST;
         }
-        
-#ifdef __WXQT__
-        flags |= wxLC_NO_HEADER;
-#endif
     }
 
     // Use single selection in any case.

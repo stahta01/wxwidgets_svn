@@ -389,9 +389,13 @@ bool wxComboBox::MSWShouldPreProcessMessage(WXMSG *pMsg)
 
 WXHWND wxComboBox::GetEditHWNDIfAvailable() const
 {
+    // FIXME-VC6: Only VC6 needs this guard, see WINVER definition in
+    //            include/wx/msw/wrapwin.h
+#if defined(WINVER) && WINVER >= 0x0500
     WinStruct<COMBOBOXINFO> info;
-    if ( ::GetComboBoxInfo(GetHwnd(), &info) )
+    if ( MSWGetComboBoxInfo(&info) )
         return info.hwndItem;
+#endif // WINVER >= 0x0500
 
     if (HasFlag(wxCB_SIMPLE))
     {
@@ -705,40 +709,6 @@ wxWindow *wxComboBox::MSWFindItem(long id, WXHWND hWnd) const
     }
 
     return wxChoice::MSWFindItem(id, hWnd);
-}
-
-void wxComboBox::SetLayoutDirection(wxLayoutDirection dir)
-{
-#ifndef __WXWINCE__
-    // Edit field and drop-down list must be handled explicitly.
-
-    // Edit field is a special EDIT control (e.g. it always returns null
-    // extended style flags), so its layout direction should be set using the
-    // same extended flag as for ordinary window but reset simply with
-    // alignment flags.
-    if ( dir == wxLayout_RightToLeft )
-    {
-        wxUpdateLayoutDirection(GetEditHWND(), dir);
-    }
-    else
-    {
-        LONG_PTR style = ::GetWindowLongPtr(GetEditHWND(), GWL_STYLE);
-        if ( !(style & ES_CENTER) )
-        {
-            style &= ~ES_RIGHT;
-            ::SetWindowLongPtr(GetEditHWND(), GWL_STYLE, style);
-        }
-    }
-
-    // Layout for the drop-down list also must be set explicitly.
-    WinStruct<COMBOBOXINFO> info;
-    if ( ::GetComboBoxInfo(GetHwnd(), &info) )
-    {
-        wxUpdateLayoutDirection(info.hwndList, dir);
-    }
-#endif // !__WXWINCE__
-
-    wxChoice::SetLayoutDirection(dir);
 }
 
 #endif // wxUSE_COMBOBOX

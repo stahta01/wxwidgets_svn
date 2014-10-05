@@ -112,6 +112,7 @@ public:
 #if wxOSX_USE_NATIVE_TOOLBAR
         if ( m_toolbarItemRef )
         {
+            CFIndex count = CFGetRetainCount( m_toolbarItemRef ) ;
             wxTheApp->MacAddToAutorelease(m_toolbarItemRef);
             CFRelease(m_toolbarItemRef);
             m_toolbarItemRef = NULL;
@@ -931,6 +932,7 @@ wxToolBar::~wxToolBar()
         MacUninstallNativeToolbar();
     }
 
+    CFIndex count = CFGetRetainCount( m_macToolbar ) ;
     CFRelease( (HIToolbarRef)m_macToolbar );
     m_macToolbar = NULL;
 #endif // wxOSX_USE_NATIVE_TOOLBAR

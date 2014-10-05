@@ -58,9 +58,9 @@
 #include "wx/osx/printdlg.h"
 #include "wx/osx/private/print.h"
 #include "wx/osx/dcprint.h"
-#elif defined(__WXQT__)
-#include "wx/qt/dcprint.h"
-#include "wx/qt/printdlg.h"
+#elif defined(__WXPM__)
+#include "wx/os2/dcprint.h"
+#include "wx/generic/prntdlgg.h"
 #else
 #include "wx/generic/prntdlgg.h"
 #include "wx/dcps.h"
@@ -104,8 +104,8 @@ wxPrinterBase *wxNativePrintFactory::CreatePrinter( wxPrintDialogData *data )
     return new wxWindowsPrinter( data );
 #elif defined(__WXMAC__)
     return new wxMacPrinter( data );
-#elif defined(__WXQT__)
-    return new wxQtPrinter( data );
+#elif defined(__WXPM__)
+    return new wxOS2Printer( data );
 #else
     return new wxPostScriptPrinter( data );
 #endif
@@ -118,8 +118,8 @@ wxPrintPreviewBase *wxNativePrintFactory::CreatePrintPreview( wxPrintout *previe
     return new wxWindowsPrintPreview( preview, printout, data );
 #elif defined(__WXMAC__)
     return new wxMacPrintPreview( preview, printout, data );
-#elif defined(__WXQT__)
-    return new wxQtPrintPreview( preview, printout, data );
+#elif defined(__WXPM__)
+    return new wxOS2PrintPreview( preview, printout, data );
 #else
     return new wxPostScriptPrintPreview( preview, printout, data );
 #endif
@@ -132,8 +132,8 @@ wxPrintPreviewBase *wxNativePrintFactory::CreatePrintPreview( wxPrintout *previe
     return new wxWindowsPrintPreview( preview, printout, data );
 #elif defined(__WXMAC__)
     return new wxMacPrintPreview( preview, printout, data );
-#elif defined(__WXQT__)
-    return new wxQtPrintPreview( preview, printout, data );
+#elif defined(__WXPM__)
+    return new wxOS2PrintPreview( preview, printout, data );
 #else
     return new wxPostScriptPrintPreview( preview, printout, data );
 #endif
@@ -146,8 +146,6 @@ wxPrintDialogBase *wxNativePrintFactory::CreatePrintDialog( wxWindow *parent,
     return new wxWindowsPrintDialog( parent, data );
 #elif defined(__WXMAC__)
     return new wxMacPrintDialog( parent, data );
-#elif defined(__WXQT__)
-    return new wxQtPrintDialog( parent, data );
 #else
     return new wxGenericPrintDialog( parent, data );
 #endif
@@ -160,8 +158,6 @@ wxPrintDialogBase *wxNativePrintFactory::CreatePrintDialog( wxWindow *parent,
     return new wxWindowsPrintDialog( parent, data );
 #elif defined(__WXMAC__)
     return new wxMacPrintDialog( parent, data );
-#elif defined(__WXQT__)
-    return new wxQtPrintDialog( parent, data );
 #else
     return new wxGenericPrintDialog( parent, data );
 #endif
@@ -174,8 +170,6 @@ wxPageSetupDialogBase *wxNativePrintFactory::CreatePageSetupDialog( wxWindow *pa
     return new wxWindowsPageSetupDialog( parent, data );
 #elif defined(__WXMAC__)
     return new wxMacPageSetupDialog( parent, data );
-#elif defined(__WXQT__)
-    return new wxQtPageSetupDialog( parent, data );
 #else
     return new wxGenericPageSetupDialog( parent, data );
 #endif
@@ -205,10 +199,6 @@ wxDialog *wxNativePrintFactory::CreatePrintSetupDialog( wxWindow *parent,
     wxUnusedVar(data);
     return NULL;
 #elif defined(__WXMAC__)
-    wxUnusedVar(parent);
-    wxUnusedVar(data);
-    return NULL;
-#elif defined(__WXQT__)
     wxUnusedVar(parent);
     wxUnusedVar(data);
     return NULL;
@@ -273,8 +263,6 @@ wxPrintNativeDataBase *wxNativePrintFactory::CreatePrintNativeData()
     return new wxWindowsPrintNativeData;
 #elif defined(__WXMAC__)
     return wxOSXCreatePrintData();
-#elif defined(__WXQT__)
-    return  new wxQtPrintNativeData;
 #else
     return new wxPostScriptPrintNativeData;
 #endif
@@ -299,8 +287,8 @@ class wxPrintFactoryModule: public wxModule
 {
 public:
     wxPrintFactoryModule() {}
-    bool OnInit() wxOVERRIDE { return true; }
-    void OnExit() wxOVERRIDE { wxPrintFactory::SetPrintFactory( NULL ); }
+    bool OnInit() { return true; }
+    void OnExit() { wxPrintFactory::SetPrintFactory( NULL ); }
 
 private:
     DECLARE_DYNAMIC_CLASS(wxPrintFactoryModule)
@@ -558,9 +546,11 @@ void wxPrintAbortDialog::SetProgress(int currentPage, int totalPages,
       text += wxString::Format(_(" (copy %d of %d)"), currentCopy, totalCopies);
   m_progress->SetLabel(text);
 }
+
 void wxPrintAbortDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
 {
     wxCHECK_RET( wxPrinterBase::sm_abortWindow != NULL, "OnCancel called twice" );
+
     wxPrinterBase::sm_abortIt = true;
     wxPrinterBase::sm_abortWindow->Destroy();
     wxPrinterBase::sm_abortWindow = NULL;
@@ -874,10 +864,6 @@ wxPreviewCanvas::wxPreviewCanvas(wxPrintPreviewBase *preview, wxWindow *parent,
                                  const wxPoint& pos, const wxSize& size, long style, const wxString& name):
 wxScrolledWindow(parent, wxID_ANY, pos, size, style | wxFULL_REPAINT_ON_RESIZE, name)
 {
-    // As we rely on getting idle events, do this to ensure that we do receive
-    // them even when using wxIDLE_PROCESS_SPECIFIED global idle mode.
-    SetExtraStyle(wxWS_EX_PROCESS_IDLE);
-
     m_printPreview = preview;
 #ifdef __WXMAC__
     // The app workspace colour is always white, but we should have

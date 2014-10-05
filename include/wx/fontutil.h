@@ -113,6 +113,11 @@ public:
     wxNativeFontInfo(const LOGFONT& lf_) : lf(lf_) { }
 
     LOGFONT      lf;
+#elif defined(__WXPM__)
+    // OS/2 native structures that define a font
+    FATTRS       fa;
+    FONTMETRICS  fm;
+    FACENAMEDESC fn;
 #elif defined(__WXOSX__)
 public:
     wxNativeFontInfo(const wxNativeFontInfo& info) { Init(info); }
@@ -121,14 +126,9 @@ public:
                   wxFontStyle style,
                   wxFontWeight weight,
                   bool underlined,
-                  bool strikethrough,
                   const wxString& faceName,
                   wxFontEncoding encoding)
-    {
-        Init(size, family, style, weight,
-             underlined, strikethrough,
-             faceName, encoding);
-    }
+    { Init(size,family,style,weight,underlined,faceName,encoding); }
 
     ~wxNativeFontInfo() { Free(); }
 
@@ -149,13 +149,12 @@ public:
                   wxFontStyle style,
                   wxFontWeight weight,
                   bool underlined,
-                  bool strikethrough,
                   const wxString& faceName ,
                   wxFontEncoding encoding);
 
     void Free();
     void EnsureValid();
-    
+
     static void UpdateNamesMap(const wxString& familyname, CTFontDescriptorRef descr);
     static void UpdateNamesMap(const wxString& familyname, CTFontRef font);
 
@@ -182,8 +181,6 @@ public:
     wxString      m_faceName;
     wxFontEncoding m_encoding;
 public :
-#elif defined(__WXQT__)
-    QFont m_qtFont;
 #else // other platforms
     //
     //  This is a generic implementation that should work on all ports

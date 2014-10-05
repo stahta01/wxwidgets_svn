@@ -20,8 +20,6 @@
     #include "wx/timer.h"
 #endif
 
-#if wxUSE_FSWATCHER
-
 #include "wx/evtloop.h"
 #include "wx/filename.h"
 #include "wx/filefn.h"
@@ -154,7 +152,8 @@ public:
         // just to be really sure we know what we remove
         CPPUNIT_ASSERT_EQUAL( "fswatcher_test", dir.GetDirs().Last() );
 
-        CPPUNIT_ASSERT( dir.Rmdir(wxPATH_RMDIR_RECURSIVE) );
+        // FIXME-VC6: using non-static Rmdir() results in ICE
+        CPPUNIT_ASSERT( wxFileName::Rmdir(dir.GetFullPath(), wxPATH_RMDIR_RECURSIVE) );
     }
 
     static wxFileName RandomName(const wxFileName& base, int length = 10)
@@ -419,7 +418,9 @@ private:
     CPPUNIT_TEST_SUITE( FileSystemWatcherTestCase );
         CPPUNIT_TEST( TestEventCreate );
         CPPUNIT_TEST( TestEventDelete );
+#if !defined(__VISUALC__) || wxCHECK_VISUALC_VERSION(7)
         CPPUNIT_TEST( TestTrees );
+#endif
 
         // kqueue-based implementation doesn't collapse create/delete pairs in
         // renames and doesn't detect neither modifications nor access to the
@@ -453,7 +454,9 @@ private:
     void TestEventAttribute();
     void TestSingleWatchtypeEvent();
 #endif // wxHAS_INOTIFY
-    void TestTrees();
+#if !defined(__VISUALC__) || wxCHECK_VISUALC_VERSION(7)
+    void TestTrees();   // Visual C++ 6 can't build this
+#endif
     void TestNoEventsAfterRemove();
 
     DECLARE_NO_COPY_CLASS(FileSystemWatcherTestCase)
@@ -715,6 +718,7 @@ void FileSystemWatcherTestCase::TestSingleWatchtypeEvent()
 // TestTrees
 // ----------------------------------------------------------------------------
 
+#if !defined(__VISUALC__) || wxCHECK_VISUALC_VERSION(7)
 void FileSystemWatcherTestCase::TestTrees()
 {
     class TreeTester : public EventHandler
@@ -945,6 +949,7 @@ void FileSystemWatcherTestCase::TestTrees()
     TreeTester tester;
     tester.Run();
 }
+#endif // !defined(__VISUALC__) || wxCHECK_VISUALC_VERSION(7)
 
 
 namespace
@@ -1003,5 +1008,3 @@ void FileSystemWatcherTestCase::TestNoEventsAfterRemove()
     NoEventsAfterRemoveEventTester tester;
     tester.Run();
 }
-
-#endif // wxUSE_FSWATCHER

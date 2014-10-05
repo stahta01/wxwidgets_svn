@@ -1110,7 +1110,7 @@ void wxListHeaderWindow::OnPaint( wxPaintEvent &WXUNUSED(event) )
         {
             default:
                 wxFAIL_MSG( wxT("unknown list item format") );
-                wxFALLTHROUGH;
+                // fall through
 
             case wxLIST_FORMAT_LEFT:
                 xAligned = x;
@@ -2641,7 +2641,7 @@ void wxListMainWindow::MoveToItem(size_t item)
         if (rect.y + rect.height + 5 > view_y + client_h)
             GetListCtrl()->Scroll( -1, (rect.y + rect.height - client_h + hLine) / hLine );
 
-#if defined(__WXMAC__) || defined(__WXUNIVERSAL__)
+#ifdef __WXMAC__
         // At least on Mac the visible lines value will get reset inside of
         // Scroll *before* it actually scrolls the window because of the
         // Update() that happens there, so it will still have the wrong value.
@@ -2649,7 +2649,6 @@ void wxListMainWindow::MoveToItem(size_t item)
         // next paint event.  I would expect this problem to show up in wxGTK
         // too but couldn't duplicate it there.  Perhaps the order of events
         // is different...  --Robin
-        // Same in wxUniv/X11
         ResetVisibleLinesRange();
 #endif
     }
@@ -2692,7 +2691,7 @@ bool wxListMainWindow::ScrollList(int WXUNUSED(dx), int dy)
 
     GetListCtrl()->Scroll(-1, top + dy / hLine);
 
-#if defined(__WXMAC__) || defined(__WXUNIVERSAL__)
+#ifdef __WXMAC__
     // see comment in MoveToItem() for why we do this
     ResetVisibleLinesRange();
 #endif
@@ -4895,6 +4894,13 @@ wxSize wxGenericListCtrl::GetItemSpacing() const
     return wxSize(spacing, spacing);
 }
 
+#if WXWIN_COMPATIBILITY_2_6
+int wxGenericListCtrl::GetItemSpacing( bool isSmall ) const
+{
+    return m_mainWin->GetItemSpacing( isSmall );
+}
+#endif // WXWIN_COMPATIBILITY_2_6
+
 void wxGenericListCtrl::SetItemTextColour( long item, const wxColour &col )
 {
     wxListItem info;
@@ -5070,10 +5076,12 @@ wxTextCtrl *wxGenericListCtrl::EditLabel(long item,
     return m_mainWin->EditLabel( item, textControlClass );
 }
 
+#if wxABI_VERSION >= 30002
 bool wxGenericListCtrl::EndEditLabel(bool cancel)
 {
     return m_mainWin->EndEditLabel(cancel);
 }
+#endif
 
 wxTextCtrl *wxGenericListCtrl::GetEditControl() const
 {
@@ -5215,9 +5223,6 @@ void wxGenericListCtrl::OnInternalIdle()
 
 bool wxGenericListCtrl::SetBackgroundColour( const wxColour &colour )
 {
-    if ( !wxWindow::SetBackgroundColour( colour ) )
-        return false;
-
     if (m_mainWin)
     {
         m_mainWin->SetBackgroundColour( colour );

@@ -417,10 +417,6 @@ void wxApp::OSXOnWillFinishLaunching()
 
 void wxApp::OSXOnDidFinishLaunching()
 {
-    // on cocoa we cannot do this, as it would arrive "AFTER" an OpenFiles event
-#if wxOSX_USE_IPHONE
-    wxTheApp->OnInit();
-#endif
 }
 
 void wxApp::OSXOnWillTerminate()
@@ -1399,11 +1395,11 @@ int wxMacKeyCodeToModifier(wxKeyCode key)
 }
 #endif
 
-#if wxOSX_USE_COCOA
+#if wxOSX_USE_COCOA && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
 
 // defined in utils.mm
 
-#elif wxOSX_USE_CARBON
+#elif wxOSX_USE_COCOA_OR_CARBON
 
 wxMouseState wxGetMouseState()
 {

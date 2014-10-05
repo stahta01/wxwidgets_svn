@@ -167,7 +167,7 @@ public:
     void SetWeekDay(const wxDateTime::WeekDay wd) { m_wday = wd; }
     wxDateTime::WeekDay GetWeekDay() const { return m_wday; }
 
-    virtual wxEvent *Clone() const wxOVERRIDE { return new wxCalendarEvent(*this); }
+    virtual wxEvent *Clone() const { return new wxCalendarEvent(*this); }
 
 private:
     wxDateTime::WeekDay m_wday;
@@ -348,9 +348,6 @@ protected:
     #elif defined(__WXMSW__)
         #define wxHAS_NATIVE_CALENDARCTRL
         #include "wx/msw/calctrl.h"
-    #elif defined(__WXQT__)
-        #define wxHAS_NATIVE_CALENDARCTRL
-        #include "wx/qt/calctrl.h"
     #endif
 #endif // !__WXUNIVERSAL__
 

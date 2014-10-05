@@ -55,7 +55,11 @@
 
 #include "wx/gtk/private/gtk2-compat.h"
 
-GdkWindow* wxGetTopLevelGDK();
+//-----------------------------------------------------------------------------
+// data
+//-----------------------------------------------------------------------------
+
+extern GtkWidget *wxGetRootWindow();
 
 //----------------------------------------------------------------------------
 // misc.
@@ -73,7 +77,7 @@ void wxBell()
 #ifdef GDK_WINDOWING_X11
 void *wxGetDisplay()
 {
-    return GDK_DISPLAY_XDISPLAY(gdk_window_get_display(wxGetTopLevelGDK()));
+    return GDK_DISPLAY_XDISPLAY(gtk_widget_get_display(wxGetRootWindow()));
 }
 #endif
 
@@ -96,7 +100,7 @@ bool wxColourDisplay()
 
 int wxDisplayDepth()
 {
-    return gdk_visual_get_depth(gdk_window_get_visual(wxGetTopLevelGDK()));
+    return gdk_visual_get_depth(gtk_widget_get_visual(wxGetRootWindow()));
 }
 
 wxWindow* wxFindWindowAtPoint(const wxPoint& pt)
@@ -255,7 +259,7 @@ public:
     StackDump(GtkAssertDialog *dlg) { m_dlg=dlg; }
 
 protected:
-    virtual void OnStackFrame(const wxStackFrame& frame) wxOVERRIDE
+    virtual void OnStackFrame(const wxStackFrame& frame)
     {
         wxString fncname = frame.GetName();
 
@@ -338,7 +342,7 @@ bool wxGUIAppTraits::ShowAssertDialog(const wxString& msg)
 
 #endif // __UNIX__
 
-#if defined(__UNIX__)
+#if defined(__UNIX__) || defined(__OS2__)
 
 wxString wxGUIAppTraits::GetDesktopEnvironment() const
 {
@@ -358,7 +362,7 @@ wxString wxGUIAppTraits::GetDesktopEnvironment() const
     return de;
 }
 
-#endif // __UNIX__
+#endif // __UNIX__ || __OS2__
 
 #ifdef __UNIX__
 

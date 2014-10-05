@@ -25,7 +25,8 @@
 #include "wx/hashmap.h"
 #include "wx/hashset.h"
 
-#if defined wxLongLong_t && !defined wxLongLongIsLong
+#if defined wxLongLong_t && !defined wxLongLongIsLong && \
+        (!defined __VISUALC__ || __VISUALC__ > 1100)    // doesn't work on VC5
     #define TEST_LONGLONG
 #endif
 
@@ -466,6 +467,12 @@ void HashesTestCase::UShortHashMapTest() { HashMapTest<myTestHashMap4>();    }
 void HashesTestCase::LLongHashMapTest()  { HashMapTest<myLLongHashMap>();    }
 void HashesTestCase::ULLongHashMapTest() { HashMapTest<myULLongHashMap>();   }
 #endif
+
+#ifdef __VISUALC__
+    #if __VISUALC__ <= 1200
+        #pragma warning(disable:4284) // operator->() returns a non-UDT
+    #endif
+#endif // __VISUALC__
 
 // test compilation of basic set types
 WX_DECLARE_HASH_SET( int*, wxPointerHash, wxPointerEqual, myPtrHashSet );

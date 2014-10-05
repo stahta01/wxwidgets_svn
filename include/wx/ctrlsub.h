@@ -438,7 +438,7 @@ public:
 
     // usually the controls like list/combo boxes have their own background
     // colour
-    virtual bool ShouldInheritColours() const wxOVERRIDE { return false; }
+    virtual bool ShouldInheritColours() const { return false; }
 
 
     // Implementation only from now on.
@@ -462,8 +462,6 @@ private:
     #include "wx/msw/ctrlsub.h"
 #elif defined(__WXMOTIF__)
     #include "wx/motif/ctrlsub.h"
-#elif defined(__WXQT__)
-    #include "wx/qt/ctrlsub.h"
 #else
     class WXDLLIMPEXP_CORE wxControlWithItems : public wxControlWithItemsBase
     {

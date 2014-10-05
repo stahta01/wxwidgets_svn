@@ -38,7 +38,6 @@
     #include "wx/settings.h"
     #include "wx/intl.h"
     #include "wx/log.h"
-    #include "wx/sizer.h"
     #include "wx/toolbar.h"
 #endif
 
@@ -468,17 +467,12 @@ WXHMENU wxMDIParentFrame::MSWGetActiveMenu() const
 
 void wxMDIParentFrame::UpdateClientSize()
 {
-    int width, height;
-    GetClientSize(&width, &height);
+    if ( GetClientWindow() )
+    {
+        int width, height;
+        GetClientSize(&width, &height);
 
-    if ( wxSizer* sizer = GetSizer() )
-    {
-        sizer->SetDimension(0, 0, width, height);
-    }
-    else
-    {
-        if ( GetClientWindow() )
-            GetClientWindow()->SetSize(0, 0, width, height);
+        GetClientWindow()->SetSize(0, 0, width, height);
     }
 }
 
@@ -763,6 +757,7 @@ bool wxMDIParentFrame::MSWTranslateMessage(WXMSG* msg)
 void wxMDIChildFrame::Init()
 {
     m_needsResize = true;
+    m_needsInitialShow = true;
 }
 
 bool wxMDIChildFrame::Create(wxMDIParentFrame *parent,
@@ -886,6 +881,8 @@ wxMDIChildFrame::~wxMDIChildFrame()
 
 bool wxMDIChildFrame::Show(bool show)
 {
+    m_needsInitialShow = false;
+
     if (!wxFrame::Show(show))
         return false;
 
@@ -1018,28 +1015,9 @@ void wxMDIChildFrame::Maximize(bool maximize)
     wxMDIParentFrame * const parent = GetMDIParent();
     if ( parent && parent->GetClientWindow() )
     {
-        if ( !IsShown() )
-        {
-            // Turn off redrawing in the MDI client window because otherwise
-            // maximizing it would also show it and we don't want this for
-            // hidden windows.
-            ::SendMessage(GetWinHwnd(parent->GetClientWindow()), WM_SETREDRAW,
-                          FALSE, 0L);
-        }
-
         ::SendMessage(GetWinHwnd(parent->GetClientWindow()),
                       maximize ? WM_MDIMAXIMIZE : WM_MDIRESTORE,
                       (WPARAM)GetHwnd(), 0);
-
-        if ( !IsShown() )
-        {
-            // Hide back the child window shown by maximizing it.
-            ::ShowWindow(GetHwnd(), SW_HIDE);
-
-            // Turn redrawing in the MDI client back on.
-            ::SendMessage(GetWinHwnd(parent->GetClientWindow()), WM_SETREDRAW,
-                          TRUE, 0L);
-        }
     }
 }
 
@@ -1417,6 +1395,16 @@ void wxMDIClientWindow::DoSetSize(int x, int y, int width, int height, int sizeF
 
 void wxMDIChildFrame::OnIdle(wxIdleEvent& event)
 {
+    // wxMSW prior to 2.5.3 created MDI child frames as visible, which resulted
+    // in flicker e.g. when the frame contained controls with non-trivial
+    // layout. Since 2.5.3, the frame is created hidden as all other top level
+    // windows. In order to maintain backward compatibility, the frame is shown
+    // in OnIdle, unless Show(false) was called by the programmer before.
+    if ( m_needsInitialShow )
+    {
+        Show(true);
+    }
+
     // MDI child frames get their WM_SIZE when they're constructed but at this
     // moment they don't have any children yet so all child windows will be
     // positioned incorrectly when they are added later - to fix this, we

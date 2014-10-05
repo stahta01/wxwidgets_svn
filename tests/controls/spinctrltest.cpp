@@ -125,7 +125,6 @@ void SpinCtrlTestCase::Arrows()
     wxUIActionSimulator sim;
 
     m_spin->SetFocus();
-    wxYield();
 
     sim.Char(WXK_UP);
 
@@ -155,7 +154,6 @@ void SpinCtrlTestCase::Wrap()
     wxUIActionSimulator sim;
 
     m_spin->SetFocus();
-    wxYield();
 
     sim.Char(WXK_DOWN);
 

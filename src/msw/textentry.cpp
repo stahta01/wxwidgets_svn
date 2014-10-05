@@ -45,7 +45,8 @@
 // Classes used by auto-completion implementation.
 // ----------------------------------------------------------------------------
 
-#if wxUSE_OLE
+// standard VC6 SDK (WINVER == 0x0400) does not know about IAutoComplete
+#if wxUSE_OLE && (WINVER >= 0x0500)
     #define HAS_AUTOCOMPLETE
 #endif
 
@@ -54,7 +55,7 @@
 #include "wx/msw/ole/oleutils.h"
 #include <shldisp.h>
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if defined(__MINGW32__) || defined (__WATCOMC__) || defined(__CYGWIN__)
     // needed for IID_IAutoComplete, IID_IAutoComplete2 and ACO_AUTOSUGGEST
     #include <shlguid.h>
 
@@ -356,7 +357,7 @@ IMPLEMENT_IUNKNOWN_METHODS(wxIEnumString)
 
 // This class gathers the all auto-complete-related stuff we use. It is
 // allocated on demand by wxTextEntry when AutoComplete() is called.
-class wxTextAutoCompleteData
+class wxTextAutoCompleteData wxBIND_OR_CONNECT_HACK_ONLY_BASE_CLASS
 {
 public:
     // The constructor associates us with the given text entry.
@@ -437,7 +438,9 @@ public:
             pAutoComplete2->Release();
         }
 
-        m_win->Bind(wxEVT_CHAR_HOOK, &wxTextAutoCompleteData::OnCharHook, this);
+        wxBIND_OR_CONNECT_HACK(m_win, wxEVT_CHAR_HOOK, wxKeyEventHandler,
+                               wxTextAutoCompleteData::OnCharHook,
+                               this);
     }
 
     ~wxTextAutoCompleteData()
@@ -503,8 +506,10 @@ public:
                 // neither as, due to our use of ACO_AUTOAPPEND, we get
                 // EN_CHANGE notifications from the control every time
                 // IAutoComplete auto-appends something to it.
-                m_win->Bind(wxEVT_AFTER_CHAR,
-                            &wxTextAutoCompleteData::OnAfterChar, this);
+                wxBIND_OR_CONNECT_HACK(m_win, wxEVT_AFTER_CHAR,
+                                        wxKeyEventHandler,
+                                        wxTextAutoCompleteData::OnAfterChar,
+                                        this);
             }
 
             UpdateStringsFromCustomCompleter();

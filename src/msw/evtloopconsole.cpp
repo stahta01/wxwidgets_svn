@@ -162,9 +162,4 @@ int wxConsoleEventLoop::DispatchTimeout(unsigned long timeout)
     return !m_shouldExit;
 }
 
-void wxConsoleEventLoop::DoYieldFor(long eventsToProcess)
-{
-    wxEventLoopBase::DoYieldFor(eventsToProcess);
-}
-
 #endif // wxUSE_CONSOLE_EVENTLOOP

@@ -91,12 +91,14 @@ public:
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowMSW)
 #elif defined(__WXGTK__)
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowGTK)
-#elif defined(__WXOSX__)
+#elif defined(__WXOSX_OR_COCOA__)
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowMac)
 #elif defined(__WXDFB__)
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowDFB)
 #elif defined(__WXX11__)
     IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowX11)
+#elif defined(__WXPM__)
+    IMPLEMENT_DYNAMIC_CLASS(wxWindow, wxWindowOS2)
 #endif
 
 BEGIN_EVENT_TABLE(wxWindow, wxWindowNative)

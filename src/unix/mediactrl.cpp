@@ -154,36 +154,36 @@ public:
                                      const wxSize& size,
                                      long style,
                                      const wxValidator& validator,
-                                     const wxString& name) wxOVERRIDE;
+                                     const wxString& name);
 
-    virtual bool Play() wxOVERRIDE;
-    virtual bool Pause() wxOVERRIDE;
-    virtual bool Stop() wxOVERRIDE;
+    virtual bool Play();
+    virtual bool Pause();
+    virtual bool Stop();
 
-    virtual bool Load(const wxString& fileName) wxOVERRIDE;
-    virtual bool Load(const wxURI& location) wxOVERRIDE;
+    virtual bool Load(const wxString& fileName);
+    virtual bool Load(const wxURI& location);
     virtual bool Load(const wxURI& location,
-                      const wxURI& proxy) wxOVERRIDE
+                      const wxURI& proxy)
         { return wxMediaBackendCommonBase::Load(location, proxy); }
 
 
-    virtual wxMediaState GetState() wxOVERRIDE;
+    virtual wxMediaState GetState();
 
-    virtual bool SetPosition(wxLongLong where) wxOVERRIDE;
-    virtual wxLongLong GetPosition() wxOVERRIDE;
-    virtual wxLongLong GetDuration() wxOVERRIDE;
+    virtual bool SetPosition(wxLongLong where);
+    virtual wxLongLong GetPosition();
+    virtual wxLongLong GetDuration();
 
-    virtual void Move(int x, int y, int w, int h) wxOVERRIDE;
-    wxSize GetVideoSize() const wxOVERRIDE;
+    virtual void Move(int x, int y, int w, int h);
+    wxSize GetVideoSize() const;
 
-    virtual double GetPlaybackRate() wxOVERRIDE;
-    virtual bool SetPlaybackRate(double dRate) wxOVERRIDE;
+    virtual double GetPlaybackRate();
+    virtual bool SetPlaybackRate(double dRate);
 
-    virtual wxLongLong GetDownloadProgress() wxOVERRIDE;
-    virtual wxLongLong GetDownloadTotal() wxOVERRIDE;
+    virtual wxLongLong GetDownloadProgress();
+    virtual wxLongLong GetDownloadTotal();
 
-    virtual bool SetVolume(double dVolume) wxOVERRIDE;
-    virtual double GetVolume() wxOVERRIDE;
+    virtual bool SetVolume(double dVolume);
+    virtual double GetVolume();
 
     //------------implementation from now on-----------------------------------
     bool CheckForErrors();
@@ -1470,7 +1470,10 @@ bool wxGStreamerMediaBackend::SetPosition(wxLongLong where)
 
 #   endif // GST_VERSION_MAJOR > 0 || GST_VERSION_MINOR >= 10
 
-    m_llPausedPos = where;
+    {
+        m_llPausedPos = where;
+        return true;
+    }
     return true;
 #endif //== 0.8.0
 }

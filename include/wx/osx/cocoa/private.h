@@ -33,9 +33,7 @@ OSStatus WXDLLIMPEXP_CORE wxMacDrawCGImage(
                                const CGRect *  inBounds,
                                CGImageRef      inImage) ;
 WX_NSImage WXDLLIMPEXP_CORE wxOSXGetNSImageFromCGImage( CGImageRef image, double scale = 1.0 );
-WX_NSImage WXDLLIMPEXP_CORE wxOSXGetNSImageFromIconRef( WXHICON iconref );
 CGImageRef WXDLLIMPEXP_CORE wxOSXCreateCGImageFromNSImage( WX_NSImage nsimage, double *scale = NULL );
-CGImageRef WXDLLIMPEXP_CORE wxOSXGetCGImageFromNSImage( const WX_NSImage nsimage, CGRect* r, CGContextRef cg);
 CGContextRef WXDLLIMPEXP_CORE wxOSXCreateBitmapContextFromNSImage( WX_NSImage nsimage);
 
 wxBitmap WXDLLIMPEXP_CORE wxOSXCreateSystemBitmap(const wxString& id, const wxString &client, const wxSize& size);
@@ -131,8 +129,6 @@ public :
     virtual bool        DoHandleMouseEvent(NSEvent *event);
     virtual bool        DoHandleKeyEvent(NSEvent *event);
     virtual bool        DoHandleCharEvent(NSEvent *event, NSString *text);
-    virtual void        DoNotifyFocusSet();
-    virtual void        DoNotifyFocusLost();
     virtual void        DoNotifyFocusEvent(bool receivedFocus, wxWidgetImpl* otherWindow);
 
     virtual void        SetupKeyEvent(wxKeyEvent &wxevent, NSEvent * nsEvent, NSString* charString = NULL);
@@ -241,8 +237,6 @@ public :
 
     virtual bool IsFullScreen() const;
 
-    bool EnableFullScreenView(bool enable) wxOVERRIDE;
-
     virtual bool ShowFullScreen(bool show, long style);
 
     virtual void ShowWithoutActivating();
@@ -266,7 +260,6 @@ public :
     void            RestoreWindowLevel();
     
     static WX_NSResponder GetNextFirstResponder() ;
-    static WX_NSResponder GetFormerFirstResponder() ;
 protected :
     CGWindowLevel   m_macWindowLevel;
     WXWindow        m_macWindow;
@@ -293,8 +286,6 @@ public:
 };
 
 #ifdef __OBJC__
-
-    typedef NSRect WXRect;
     typedef void (*wxOSX_TextEventHandlerPtr)(NSView* self, SEL _cmd, NSString *event);
     typedef void (*wxOSX_EventHandlerPtr)(NSView* self, SEL _cmd, NSEvent *event);
     typedef BOOL (*wxOSX_PerformKeyEventHandlerPtr)(NSView* self, SEL _cmd, NSEvent *event);
@@ -330,10 +321,8 @@ public:
     @interface wxNSTextFieldEditor : NSTextView
     {
         NSEvent* lastKeyDownEvent;
-        NSTextField* textField;
     }
 
-    - (void) setTextField:(NSTextField*) field;
     @end
 
     @interface wxNSTextField : NSTextField wxOSX_10_6_AND_LATER(<NSTextFieldDelegate>)
@@ -479,7 +468,7 @@ extern ClassicCursor gMacCursors[];
 
 extern NSLayoutManager* gNSLayoutManager;
 
-#endif // wxUSE_GUI
+#endif
 
 #endif
     // _WX_PRIVATE_COCOA_H_

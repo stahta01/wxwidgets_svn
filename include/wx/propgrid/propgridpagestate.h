@@ -470,7 +470,7 @@ public:
         if ( m_vhCalcPending )
         {
             RecalculateVirtualHeight();
-            m_vhCalcPending = false;
+            m_vhCalcPending = 0;
         }
     }
 
@@ -556,11 +556,8 @@ public:
 
     wxPropertyCategory* GetPropertyCategory( const wxPGProperty* p ) const;
 
-#ifdef WXWIN_COMPATIBILITY_3_0
-    wxDEPRECATED_MSG("don't refer directly to wxPropertyGridPageState::GetPropertyByLabel")
     wxPGProperty* GetPropertyByLabel( const wxString& name,
                                       wxPGProperty* parent = NULL ) const;
-#endif // WXWIN_COMPATIBILITY_3_0
 
     wxVariant DoGetPropertyValues( const wxString& listname,
                                    wxPGProperty* baseparent,
@@ -653,7 +650,7 @@ public:
     */
     void VirtualHeightChanged()
     {
-        m_vhCalcPending = true;
+        m_vhCalcPending = 1;
     }
 
     /** Base append. */
@@ -692,10 +689,6 @@ protected:
 
     bool PrepareToAddItem( wxPGProperty* property,
                            wxPGProperty* scheduledParent );
-
-    /** Returns property by its label. */
-    wxPGProperty* BaseGetPropertyByLabel( const wxString& label,
-                                      wxPGProperty* parent = NULL ) const;
 
     /** If visible, then this is pointer to wxPropertyGrid.
         This shall *never* be NULL to indicate that this state is not visible.
@@ -737,7 +730,6 @@ protected:
     /** Indicates total virtual height of visible properties. */
     unsigned int                m_virtualHeight;
 
-#ifdef WXWIN_COMPATIBILITY_3_0
     /** 1 if m_lastCaption is also the bottommost caption. */
     unsigned char               m_lastCaptionBottomnest;
 
@@ -751,21 +743,6 @@ protected:
     unsigned char               m_anyModified;
 
     unsigned char               m_vhCalcPending;
-#else
-    /** True if m_lastCaption is also the bottommost caption. */
-    bool                        m_lastCaptionBottomnest;
-
-    /** True: items appended/inserted, so stuff needs to be done before drawing;
-        If m_virtualHeight == 0, then calcylatey's must be done.
-        Otherwise just sort.
-    */
-    bool                        m_itemsAdded;
-
-    /** True if any value is modified. */
-    bool                        m_anyModified;
-
-    bool                        m_vhCalcPending;
-#endif // WXWIN_COMPATIBILITY_3_0
 
     /** True if splitter has been pre-set by the application. */
     bool                        m_isSplitterPreSet;

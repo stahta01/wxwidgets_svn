@@ -42,7 +42,6 @@
 #include "wx/richtext/richtextimagedlg.h"
 #include "wx/richtext/richtextsizepage.h"
 #include "wx/richtext/richtextxml.h"
-#include "wx/richtext/bitmaps/image_placeholder24x24.xpm"
 
 #include "wx/listimpl.cpp"
 #include "wx/arrimpl.cpp"
@@ -201,7 +200,7 @@ bool wxRichTextFloatCollector::GetFloatingObjects(wxRichTextObjectList& objects)
 
 /*
  * Binary search helper function
- * The argument point is the Y coordinate, and this function
+ * The argument point is the Y coordinate, and this fuction
  * always return the floating rect that contain this coordinate
  * or under this coordinate.
  */
@@ -709,23 +708,11 @@ bool wxRichTextObject::DrawBoxAttributes(wxDC& dc, wxRichTextBuffer* buffer, con
             colour = attr.GetBackgroundColour();
 
         wxPen pen(colour);
-        pen.SetJoin(wxJOIN_MITER);
         wxBrush brush(colour);
 
         dc.SetPen(pen);
         dc.SetBrush(brush);
-
-        if (attr.GetTextBoxAttr().HasCornerRadius() && attr.GetTextBoxAttr().GetCornerRadius().GetValue() > 0)
-        {
-            wxTextAttrDimensionConverter converter(dc, buffer ? buffer->GetScale() : 1.0);
-            int cornerRadius = converter.GetPixels(attr.GetTextBoxAttr().GetCornerRadius());
-            if (cornerRadius > 0)
-            {
-                dc.DrawRoundedRectangle(borderRect, cornerRadius);
-            }
-        }
-        else
-            dc.DrawRectangle(borderRect);
+        dc.DrawRectangle(borderRect);
     }
 
     if (flags & wxRICHTEXT_DRAW_GUIDELINES)
@@ -748,119 +735,46 @@ bool wxRichTextObject::DrawBoxAttributes(wxDC& dc, wxRichTextBuffer* buffer, con
             }
         }
 
-        DrawBorder(dc, buffer, attr, editBorderAttr.GetTextBoxAttr().GetBorder(), borderRect, flags);
+        DrawBorder(dc, buffer, editBorderAttr.GetTextBoxAttr().GetBorder(), borderRect, flags);
     }
 
     if (attr.GetTextBoxAttr().GetBorder().IsValid())
-        DrawBorder(dc, buffer, attr, attr.GetTextBoxAttr().GetBorder(), borderRect);
+        DrawBorder(dc, buffer, attr.GetTextBoxAttr().GetBorder(), borderRect);
 
     if (attr.GetTextBoxAttr().GetOutline().IsValid())
-        DrawBorder(dc, buffer, attr, attr.GetTextBoxAttr().GetOutline(), outlineRect);
+        DrawBorder(dc, buffer, attr.GetTextBoxAttr().GetOutline(), outlineRect);
 
     return true;
 }
 
 // Draw a border
-bool wxRichTextObject::DrawBorder(wxDC& dc, wxRichTextBuffer* buffer, const wxRichTextAttr& attr, const wxTextAttrBorders& borders, const wxRect& rect, int WXUNUSED(flags))
+bool wxRichTextObject::DrawBorder(wxDC& dc, wxRichTextBuffer* buffer, const wxTextAttrBorders& attr, const wxRect& rect, int WXUNUSED(flags))
 {
     int borderLeft = 0, borderRight = 0, borderTop = 0, borderBottom = 0;
     wxTextAttrDimensionConverter converter(dc, buffer ? buffer->GetScale() : 1.0);
 
-    // If we have a corner radius, assume all borders are the same, and draw a rounded outline.
-    if (attr.GetTextBoxAttr().HasCornerRadius() && borders.GetLeft().IsValid() && (borders.GetLeft().GetWidth().GetValue() > 0) && borders.GetLeft().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE)
+    if (attr.GetLeft().IsValid() && attr.GetLeft().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE)
     {
-        int cornerRadius = converter.GetPixels(attr.GetTextBoxAttr().GetCornerRadius());
-        if (cornerRadius > 0)
+        borderLeft = converter.GetPixels(attr.GetLeft().GetWidth());
+        wxColour col(attr.GetLeft().GetColour());
+
+        // If pen width is > 1, resorts to a solid rectangle.
+        if (borderLeft == 1)
         {
-            borderLeft = converter.GetPixels(borders.GetLeft().GetWidth());
-
-            // Compensate for border thickness, since the rectangle borders are centred on the rect
-            wxRect rect2(rect);
-            if (borderLeft > 1)
-            {
-                int inc = (int) ((double(borderLeft) / 2.0) + 0.5);
-                rect2.x += inc;
-                rect2.y += inc;
-                rect2.width -= (2*inc - 1);
-                rect2.height -= (2*inc - 1);
-            }
-
-            wxColour col(borders.GetLeft().GetColour());
-            wxPenStyle penStyle = wxPENSTYLE_SOLID;
-            if (borders.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
-                penStyle = wxPENSTYLE_DOT;
-            else if (borders.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
-                penStyle = wxPENSTYLE_LONG_DASH;
-            wxPen pen(col, borderLeft, penStyle);
-            dc.SetPen(pen);
-            dc.SetBrush(*wxTRANSPARENT_BRUSH);
-            dc.DrawRoundedRectangle(rect, cornerRadius);
-            return true;
-        }
-    }
-
-    // Don't do this, since it can mess up cell drawing in tables when
-    // there are inconsistencies between rectangle and line drawing.
-#if 0
-    // Draw the border in one go if all the borders are the same
-    if (borders.GetLeft().IsValid() && (borders.GetLeft().GetWidth().GetValue() > 0) && borders.GetTop().IsValid() && borders.GetRight().IsValid() &&borders.GetBottom().IsValid() &&
-        (borders.GetLeft() == borders.GetTop()) && (borders.GetLeft() == borders.GetRight()) && (borders.GetLeft() == borders.GetBottom()))
-    {
-        borderLeft = converter.GetPixels(borders.GetLeft().GetWidth());
-
-        // Compensate for border thickness, since the rectangle borders are centred on the rect
-        wxRect rect2(rect);
-        if (borderLeft > 1)
-        {
-            int inc = (int) ((double(borderLeft) / 2.0) + 0.5);
-            rect2.x += inc;
-            rect2.y += inc;
-            rect2.width -= (2*inc - 1);
-            rect2.height -= (2*inc - 1);
-        }
-
-        wxColour col(borders.GetLeft().GetColour());
-        wxPenStyle penStyle = wxPENSTYLE_SOLID;
-        if (borders.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
-            penStyle = wxPENSTYLE_DOT;
-        else if (borders.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
-            penStyle = wxPENSTYLE_LONG_DASH;
-        wxPen pen(col, borderLeft, penStyle);
-        pen.SetJoin(wxJOIN_MITER);
-        dc.SetPen(pen);
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        dc.DrawRectangle(rect);
-        return true;
-    }
-#endif
-
-    if (borders.GetLeft().IsValid() && (borders.GetLeft().GetWidth().GetValue() > 0) && (borders.GetLeft().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE))
-    {
-        borderLeft = converter.GetPixels(borders.GetLeft().GetWidth());
-        wxColour col(borders.GetLeft().GetColour());
-        wxPenStyle penStyle = wxPENSTYLE_SOLID;
-        if (borders.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
-            penStyle = wxPENSTYLE_DOT;
-        else if (borders.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
-            penStyle = wxPENSTYLE_LONG_DASH;
-
-        if (borderLeft == 1 || penStyle != wxPENSTYLE_SOLID)
-        {
-            wxPen pen(col, borderLeft, penStyle);
+            int penStyle = wxSOLID;
+            if (attr.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
+                penStyle = wxDOT;
+            else if (attr.GetLeft().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
+                penStyle = wxLONG_DASH;
+            wxPen pen(col, 1, penStyle);
             dc.SetPen(pen);
 
-            // Note that the last point is not drawn, at least on GTK+ and Windows.
-            // On Mac, we must compensate.
-            int inc = 0;
-#ifdef __WXMAC__
-            inc = 1;
-#endif
-            dc.DrawLine(rect.x, rect.y, rect.x, rect.y + rect.height - inc);
+            // Note that the last point is not drawn.
+            dc.DrawLine(rect.x, rect.y, rect.x, rect.y + rect.height);
         }
-        else
+        else if (borderLeft > 1)
         {
             wxPen pen(col);
-            pen.SetJoin(wxJOIN_MITER);
             wxBrush brush(col);
             dc.SetPen(pen);
             dc.SetBrush(brush);
@@ -868,32 +782,28 @@ bool wxRichTextObject::DrawBorder(wxDC& dc, wxRichTextBuffer* buffer, const wxRi
         }
     }
 
-    if (borders.GetRight().IsValid() && (borders.GetRight().GetWidth().GetValue() > 0) && (borders.GetRight().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE))
+    if (attr.GetRight().IsValid() && attr.GetRight().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE)
     {
-        borderRight = converter.GetPixels(borders.GetRight().GetWidth());
+        borderRight = converter.GetPixels(attr.GetRight().GetWidth());
 
-        wxColour col(borders.GetRight().GetColour());
-        wxPenStyle penStyle = wxPENSTYLE_SOLID;
-        if (borders.GetRight().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
-            penStyle = wxPENSTYLE_DOT;
-        else if (borders.GetRight().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
-            penStyle = wxPENSTYLE_LONG_DASH;
+        wxColour col(attr.GetRight().GetColour());
 
-        if (borderRight == 1 || penStyle != wxPENSTYLE_SOLID)
+        // If pen width is > 1, resorts to a solid rectangle.
+        if (borderRight == 1)
         {
-            wxPen pen(col, borderRight, penStyle);
+            int penStyle = wxSOLID;
+            if (attr.GetRight().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
+                penStyle = wxDOT;
+            else if (attr.GetRight().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
+                penStyle = wxLONG_DASH;
+            wxPen pen(col, 1, penStyle);
             dc.SetPen(pen);
-            // See note above.
-            int inc = 0;
-#ifdef __WXMAC__
-            inc = 1;
-#endif
-            dc.DrawLine(rect.x + rect.width - 1, rect.y, rect.x + rect.width - 1, rect.y + rect.height - inc);
+            // Note that the last point is not drawn.
+            dc.DrawLine(rect.x + rect.width - 1, rect.y, rect.x + rect.width - 1, rect.y + rect.height);
         }
-        else
+        else if (borderRight > 1)
         {
             wxPen pen(col);
-            pen.SetJoin(wxJOIN_MITER);
             wxBrush brush(col);
             dc.SetPen(pen);
             dc.SetBrush(brush);
@@ -901,37 +811,28 @@ bool wxRichTextObject::DrawBorder(wxDC& dc, wxRichTextBuffer* buffer, const wxRi
         }
     }
 
-    if (borders.GetTop().IsValid() && (borders.GetTop().GetWidth().GetValue() > 0) && (borders.GetTop().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE))
+    if (attr.GetTop().IsValid() && attr.GetTop().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE)
     {
-        borderTop = converter.GetPixels(borders.GetTop().GetWidth());
+        borderTop = converter.GetPixels(attr.GetTop().GetWidth());
 
-        wxColour col(borders.GetTop().GetColour());
-        wxPenStyle penStyle = wxPENSTYLE_SOLID;
-        if (borders.GetRight().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
-            penStyle = wxPENSTYLE_DOT;
-        else if (borders.GetRight().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
-            penStyle = wxPENSTYLE_LONG_DASH;
+        wxColour col(attr.GetTop().GetColour());
 
-        if (borderTop == 1 || penStyle != wxPENSTYLE_SOLID)
+        // If pen width is > 1, resorts to a solid rectangle.
+        if (borderTop == 1)
         {
-            wxPenStyle penStyle = wxPENSTYLE_SOLID;
-            if (borders.GetTop().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
-                penStyle = wxPENSTYLE_DOT;
-            else if (borders.GetTop().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
-                penStyle = wxPENSTYLE_LONG_DASH;
-            wxPen pen(col, borderTop, penStyle);
+            int penStyle = wxSOLID;
+            if (attr.GetTop().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
+                penStyle = wxDOT;
+            else if (attr.GetTop().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
+                penStyle = wxLONG_DASH;
+            wxPen pen(col, 1, penStyle);
             dc.SetPen(pen);
-            // See note above.
-            int inc = 0;
-#ifdef __WXMAC__
-            inc = 1;
-#endif
-            dc.DrawLine(rect.x, rect.y, rect.x + rect.width - inc, rect.y);
+            dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y);
+
         }
-        else
+        else if (borderTop > 1)
         {
             wxPen pen(col);
-            pen.SetJoin(wxJOIN_MITER);
             wxBrush brush(col);
             dc.SetPen(pen);
             dc.SetBrush(brush);
@@ -939,31 +840,26 @@ bool wxRichTextObject::DrawBorder(wxDC& dc, wxRichTextBuffer* buffer, const wxRi
         }
     }
 
-    if (borders.GetBottom().IsValid() && (borders.GetBottom().GetWidth().GetValue() > 0) && (borders.GetBottom().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE))
+    if (attr.GetBottom().IsValid() && attr.GetBottom().GetStyle() != wxTEXT_BOX_ATTR_BORDER_NONE)
     {
-        borderBottom = converter.GetPixels(borders.GetBottom().GetWidth());
-        wxColour col(borders.GetBottom().GetColour());
-        wxPenStyle penStyle = wxPENSTYLE_SOLID;
-        if (borders.GetBottom().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
-            penStyle = wxPENSTYLE_DOT;
-        else if (borders.GetBottom().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
-            penStyle = wxPENSTYLE_LONG_DASH;
+        borderBottom = converter.GetPixels(attr.GetBottom().GetWidth());
+        wxColour col(attr.GetBottom().GetColour());
 
-        if (borderBottom == 1 || penStyle != wxPENSTYLE_SOLID)
+        // If pen width is > 1, resorts to a solid rectangle.
+        if (borderBottom == 1)
         {
-            wxPen pen(col, borderBottom, penStyle);
+            int penStyle = wxSOLID;
+            if (attr.GetBottom().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DOTTED)
+                penStyle = wxDOT;
+            else if (attr.GetBottom().GetStyle() == wxTEXT_BOX_ATTR_BORDER_DASHED)
+                penStyle = wxLONG_DASH;
+            wxPen pen(col, 1, penStyle);
             dc.SetPen(pen);
-            // See note above.
-            int inc = 0;
-#ifdef __WXMAC__
-            inc = 1;
-#endif
-            dc.DrawLine(rect.x, rect.y + rect.height - 1, rect.x + rect.width - inc, rect.y + rect.height - 1);
+            dc.DrawLine(rect.x, rect.y + rect.height - 1, rect.x + rect.width, rect.y + rect.height - 1);
         }
-        else
+        else if (borderBottom > 1)
         {
             wxPen pen(col);
-            pen.SetJoin(wxJOIN_MITER);
             wxBrush brush(col);
             dc.SetPen(pen);
             dc.SetBrush(brush);
@@ -1196,9 +1092,7 @@ bool wxRichTextObject::LayoutToBestSize(wxDC& dc, wxRichTextDrawingContext& cont
     int style)
 {
     wxRect availableChildRect = AdjustAvailableSpace(dc, buffer, parentAttr, attr, availableParentSpace, availableContainerSpace);
-#if 0
     wxRect originalAvailableRect = availableChildRect;
-#endif
     Layout(dc, context, availableChildRect, availableContainerSpace, style);
 
     wxSize maxSize = GetMaxSize();
@@ -1207,20 +1101,6 @@ bool wxRichTextObject::LayoutToBestSize(wxDC& dc, wxRichTextDrawingContext& cont
     // on this basis
     if (!attr.GetTextBoxAttr().GetWidth().IsValid() && maxSize.x < availableChildRect.width)
     {
-        if (!attr.HasAlignment() || attr.GetAlignment() == wxTEXT_ALIGNMENT_LEFT)
-        {
-            // Redo the layout with a fixed, minimum size this time.
-            Invalidate(wxRICHTEXT_ALL);
-            wxRichTextAttr newAttr(attr);
-            newAttr.GetTextBoxAttr().GetWidth().SetValue(maxSize.x, wxTEXT_ATTR_UNITS_PIXELS);
-            newAttr.GetTextBoxAttr().GetWidth().SetPosition(wxTEXT_BOX_ATTR_POSITION_ABSOLUTE);
-
-            availableChildRect = AdjustAvailableSpace(dc, buffer, parentAttr, newAttr, availableParentSpace, availableContainerSpace);
-
-            Layout(dc, context, availableChildRect, availableContainerSpace, style);
-        }
-
-#if 0
         // Redo the layout with a fixed, minimum size this time.
         Invalidate(wxRICHTEXT_ALL);
         wxRichTextAttr newAttr(attr);
@@ -1247,7 +1127,6 @@ bool wxRichTextObject::LayoutToBestSize(wxDC& dc, wxRichTextDrawingContext& cont
         }
 
         Layout(dc, context, availableChildRect, availableContainerSpace, style);
-#endif
     }
 
     /*
@@ -1501,7 +1380,7 @@ bool wxRichTextCompositeObject::DeleteRange(const wxRichTextRange& range)
         // now match the ranges.
         // However, so long as deletion is not done on the same object twice this is OK.
         // If you may delete content from the same object twice, recalculate
-        // the ranges between DeleteRange calls by calling CalculateRanges, and
+        // the ranges inbetween DeleteRange calls by calling CalculateRanges, and
         // adjust the range you're deleting accordingly.
 
         if (!obj->GetRange().IsOutside(range))
@@ -1672,7 +1551,7 @@ bool wxRichTextCompositeObject::Defragment(wxRichTextDrawingContext& context, co
             wxRichTextObject* child = node->GetData();
             if (range == wxRICHTEXT_ALL || !child->GetRange().IsOutside(range))
             {
-                if (child->IsEmpty())
+                if (child->IsEmpty() && !child->IsKindOf(CLASSINFO(wxRichTextCell)))
                 {
                     child->Dereference();
                     m_children.Erase(node);
@@ -1813,14 +1692,15 @@ void wxRichTextCompositeObject::Invalidate(const wxRichTextRange& invalidRange)
         }
         else if (child->IsTopLevel())
         {
-            // Not sure why we did this, but it stops updated layout happening for floating objects.
-#if 0
-            if (wxRichTextBuffer::GetFloatingLayoutMode() && child->IsFloating() && GetBuffer()->GetFloatCollector() && GetBuffer()->GetFloatCollector()->HasFloat(child))
+            // JACS: Not sure why we did this, but it stops updated layout happening for floating objects.
+            // DGHART: But we must do it for floating tables, otherwise the cell layout is lost.
+            // JACS: this is probably still wrong. Needs further investigation.
+            if (wxRichTextBuffer::GetFloatingLayoutMode() && child->IsFloating() && wxDynamicCast(child, wxRichTextTable) 
+                                                          && GetBuffer()->GetFloatCollector() && GetBuffer()->GetFloatCollector()->HasFloat(child))
             {
                 // Don't invalidate subhierarchy if we've already been laid out
             }
             else
-#endif
             {
                 if (invalidRange == wxRICHTEXT_NONE)
                     child->Invalidate(wxRICHTEXT_NONE);
@@ -2012,8 +1892,6 @@ void wxRichTextParagraphLayoutBox::MoveAnchoredObjectToParagraph(wxRichTextParag
 /// Draw the item
 bool wxRichTextParagraphLayoutBox::Draw(wxDC& dc, wxRichTextDrawingContext& context, const wxRichTextRange& range, const wxRichTextSelection& selection, const wxRect& rect, int descent, int style)
 {
-    context.SetLayingOut(false);
-
     if (!IsShown())
         return true;
 
@@ -2073,8 +1951,6 @@ bool wxRichTextParagraphLayoutBox::Draw(wxDC& dc, wxRichTextDrawingContext& cont
 /// Lay the item out
 bool wxRichTextParagraphLayoutBox::Layout(wxDC& dc, wxRichTextDrawingContext& context, const wxRect& rect, const wxRect& parentRect, int style)
 {
-    context.SetLayingOut(true);
-
     Move(rect.GetPosition());
 
     if (!IsShown())
@@ -2228,8 +2104,10 @@ bool wxRichTextParagraphLayoutBox::Layout(wxDC& dc, wxRichTextDrawingContext& co
                 maxMaxWidth = wxMax(maxMaxWidth, child->GetMaxSize().x);
 
                 // If we're just formatting the visible part of the buffer,
-                // and we're now past the bottom of the window, start quick layout.
-                if (!hasVerticalAlignment && formatRect && child->GetPosition().y > rect.GetBottom())
+                // and we're now past the bottom of the window, and we don't have any
+                // floating objects (since they may cause wrapping to change for the rest of the
+                // the buffer), start quick layout.
+                if (!hasVerticalAlignment && formatRect && child->GetPosition().y > rect.GetBottom() && GetFloatingObjectCount() == 0)
                     forceQuickLayout = true;
             }
             else
@@ -2239,47 +2117,7 @@ bool wxRichTextParagraphLayoutBox::Layout(wxDC& dc, wxRichTextDrawingContext& co
                 // been laid out and have wrapped line lists associated with them.
                 // TODO: check all paragraphs before the affected range.
 
-                // Lay out paragraphs until they are (and were) not affected
-                // by floating objects from above the paragraphs.
-                if (wxRichTextBuffer::GetFloatingLayoutMode())
-                {
-                    while (node)
-                    {
-                        child = wxDynamicCast(node->GetData(), wxRichTextParagraph);
-                        if (child)
-                        {
-                            int oldImpactedByFloats = child->GetImpactedByFloatingObjects();
-
-                            child->SetImpactedByFloatingObjects(-1);
-
-                            child->LayoutToBestSize(dc, context, GetBuffer(),
-                                attr, child->GetAttributes(), availableSpace, rect, style&~wxRICHTEXT_LAYOUT_SPECIFIED_RECT);
-                            
-                            availableSpace.y += child->GetCachedSize().y;
-                            maxWidth = wxMax(maxWidth, child->GetCachedSize().x);
-                            maxMinWidth = wxMax(maxMinWidth, child->GetMinSize().x);
-                            maxMaxWidth = wxMax(maxMaxWidth, child->GetMaxSize().x);
-
-                            int newImpactedByFloats = child->GetImpactedByFloatingObjects();
-
-                            // We can stop laying out if this paragraph is unaffected by floating
-                            // objects, and was previously too.
-                            if (oldImpactedByFloats == 0 && newImpactedByFloats == 0)
-                            {
-                                node = node->GetNext();
-                                break;
-                            }
-                        }
-                        node = node->GetNext();
-                    }
-                }
-
-                int inc = 0;
-                if (node)
-                {
-                    child = wxDynamicCast(node->GetData(), wxRichTextParagraph);
-                    inc = availableSpace.y - child->GetPosition().y;
-                }
+                int inc = availableSpace.y - child->GetPosition().y;
 
                 while (node)
                 {
@@ -2288,19 +2126,15 @@ bool wxRichTextParagraphLayoutBox::Layout(wxDC& dc, wxRichTextDrawingContext& co
                     {
                         if (child->GetLines().GetCount() == 0)
                         {
-                            child->SetImpactedByFloatingObjects(-1);
-
                             // Lays out the object first with a given amount of space, and then if no width was specified in attr,
                             // lays out the object again using the minimum size
                             child->LayoutToBestSize(dc, context, GetBuffer(),
                                         attr, child->GetAttributes(), availableSpace, rect, style&~wxRICHTEXT_LAYOUT_SPECIFIED_RECT);
+
+                            //child->Layout(dc, availableChildRect, style);
                         }
                         else
-                        {
-                            if (wxRichTextBuffer::GetFloatingLayoutMode() && GetFloatCollector())
-                                GetFloatCollector()->CollectFloat(child);
                             child->Move(wxPoint(child->GetPosition().x, child->GetPosition().y + inc));
-                        }
 
                         availableSpace.y += child->GetCachedSize().y;
                         maxWidth = wxMax(maxWidth, child->GetCachedSize().x);
@@ -4110,9 +3944,20 @@ wxRichTextRange wxRichTextParagraphLayoutBox::GetInvalidRange(bool wholeParagrap
         if (para1)
             range.SetStart(para1->GetRange().GetStart());
 
-        wxRichTextParagraph* para2 = GetParagraphAtPosition(range.GetEnd());
-        if (para2)
-            range.SetEnd(para2->GetRange().GetEnd());
+        // FIXME: be more intelligent about this. Check if we have floating objects
+        // before the end of the range. But it's not clear how we can in general
+        // tell where it's safe to stop laying out.
+        // Anyway, this code is central to efficiency when laying in floating mode.
+        if (!wxRichTextBuffer::GetFloatingLayoutMode())
+        {
+            wxRichTextParagraph* para2 = GetParagraphAtPosition(range.GetEnd());
+            if (para2)
+                range.SetEnd(para2->GetRange().GetEnd());
+        }
+        else
+            // Floating layout means that all children should be laid out,
+            // because we can't tell how the whole buffer will be affected.
+            range.SetEnd(GetOwnRange().GetEnd());
     }
     return range;
 }
@@ -4695,8 +4540,6 @@ wxArrayInt wxRichTextParagraph::sm_defaultTabs;
 wxRichTextParagraph::wxRichTextParagraph(wxRichTextObject* parent, wxRichTextAttr* style):
     wxRichTextCompositeObject(parent)
 {
-    Init();
-
     if (style)
         SetAttributes(*style);
 }
@@ -4704,17 +4547,10 @@ wxRichTextParagraph::wxRichTextParagraph(wxRichTextObject* parent, wxRichTextAtt
 wxRichTextParagraph::wxRichTextParagraph(const wxString& text, wxRichTextObject* parent, wxRichTextAttr* paraStyle, wxRichTextAttr* charStyle):
     wxRichTextCompositeObject(parent)
 {
-    Init();
-
     if (paraStyle)
         SetAttributes(*paraStyle);
 
     AppendChild(new wxRichTextPlainText(text, this, charStyle));
-}
-
-void wxRichTextParagraph::Init()
-{
-    m_impactedByFloatingObjects = -1;
 }
 
 wxRichTextParagraph::~wxRichTextParagraph()
@@ -4911,21 +4747,13 @@ bool wxRichTextParagraph::Layout(wxDC& dc, wxRichTextDrawingContext& context, co
     {
         wxASSERT(collector != NULL);
         if (collector)
-        {
-            if (m_impactedByFloatingObjects == -1)
-            {
-                if (collector->GetLastRectBottom() >= rect.GetTop())
-                     m_impactedByFloatingObjects = 1;
-                else
-                     m_impactedByFloatingObjects = 0;
-            }
-
             LayoutFloat(dc, context, rect, parentRect, style, collector);
-        }
     }
 
     wxRichTextAttr attr = GetCombinedAttributes();
     AdjustAttributes(attr, context);
+
+    // ClearLines();
 
     // Increase the size of the paragraph due to spacing
     int spaceBeforePara = ConvertTenthsMMToPixels(dc, attr.GetParagraphSpacingBefore());
@@ -5167,12 +4995,11 @@ bool wxRichTextParagraph::Layout(wxDC& dc, wxRichTextDrawingContext& context, co
         }
         while (doLoop);
 
-        // 2014-03-08: also need to set object positions
-        //if (child->IsTopLevel())
+        if (child->IsTopLevel())
         {
             // We can move it to the correct position at this point
             // TODO: probably need to add margin
-            child->Move(GetPosition() + wxPoint(currentWidth + startOffset, currentPosition.y));
+            child->Move(GetPosition() + wxPoint(currentWidth + (wxMax(leftIndent, leftIndent + leftSubIndent)), currentPosition.y));
         }
 
         // Cases:
@@ -5237,6 +5064,8 @@ bool wxRichTextParagraph::Layout(wxDC& dc, wxRichTextDrawingContext& context, co
 
             // The descent for the whole line at this point, is the correct max descent
             maxDescent = childDescent;
+            // Maximum ascent
+            maxAscent = actualSize.y-childDescent;
 
             // lineHeight is given by the height for the whole line, since it will
             // take into account ascend/descend.
@@ -5328,7 +5157,7 @@ bool wxRichTextParagraph::Layout(wxDC& dc, wxRichTextDrawingContext& context, co
     //wxASSERT(!(lastCompletedEndPos != -1 && lastCompletedEndPos < GetRange().GetEnd()-1));
 
     // Add the last line - it's the current pos -> last para pos
-    // Subtract -1 because the last position is always the end-paragraph position.
+    // Substract -1 because the last position is always the end-paragraph position.
     if ((lastCompletedEndPos < GetRange().GetEnd()-1) || lineCount == 0)
     {
         int startOffset = (lineCount == 0 ? startPositionFirstLine : startPositionSubsequentLines);
@@ -7765,6 +7594,8 @@ bool wxRichTextParagraphLayoutBox::InsertTextWithUndo(wxRichTextBuffer* buffer, 
         length --;
         action->GetNewParagraphs().SetPartialParagraph(true);
     }
+    else if (!text.empty() && text.Last() == wxT('\n'))
+        length --;
 
     action->SetPosition(pos);
 
@@ -9234,11 +9065,9 @@ bool wxRichTextField::Draw(wxDC& dc, wxRichTextDrawingContext& context, const wx
     if (fieldType && fieldType->Draw(this, dc, context, range, selection, rect, descent, style))
         return true;
 
-    // Fallback so unknown fields don't become invisible.
-    wxString fieldTypeStr(GetFieldType());
-    wxRichTextFieldTypeStandard defaultFieldType;
-    defaultFieldType.SetLabel(wxString::Format(wxT("unknown field %s"), fieldTypeStr.c_str()));
-    return defaultFieldType.Draw(this, dc, context, range, selection, rect, descent, style);
+    // Fallback; but don't draw guidelines.
+    style &= ~wxRICHTEXT_DRAW_GUIDELINES;
+    return wxRichTextParagraphLayoutBox::Draw(dc, context, range, selection, rect, descent, style);
 }
 
 bool wxRichTextField::Layout(wxDC& dc, wxRichTextDrawingContext& context, const wxRect& rect, const wxRect& parentRect, int style)
@@ -9247,11 +9076,8 @@ bool wxRichTextField::Layout(wxDC& dc, wxRichTextDrawingContext& context, const 
     if (fieldType && fieldType->Layout(this, dc, context, rect, parentRect, style))
         return true;
 
-    // Fallback so unknown fields don't become invisible.
-    wxString fieldTypeStr(GetFieldType());
-    wxRichTextFieldTypeStandard defaultFieldType;
-    defaultFieldType.SetLabel(wxString::Format(wxT("unknown field %s"), fieldTypeStr.c_str()));
-    return defaultFieldType.Layout(this, dc, context, rect, parentRect, style);
+    // Fallback
+    return wxRichTextParagraphLayoutBox::Layout(dc, context, rect, parentRect, style);
 }
 
 bool wxRichTextField::GetRangeSize(const wxRichTextRange& range, wxSize& size, int& descent, wxDC& dc, wxRichTextDrawingContext& context, int flags, const wxPoint& position, const wxSize& parentSize, wxArrayInt* partialExtents) const
@@ -9260,11 +9086,7 @@ bool wxRichTextField::GetRangeSize(const wxRichTextRange& range, wxSize& size, i
     if (fieldType)
         return fieldType->GetRangeSize((wxRichTextField*) this, range, size, descent, dc, context, flags, position, parentSize, partialExtents);
 
-    // Fallback so unknown fields don't become invisible.
-    wxString fieldTypeStr(GetFieldType());
-    wxRichTextFieldTypeStandard defaultFieldType;
-    defaultFieldType.SetLabel(wxString::Format(wxT("unknown field %s"), fieldTypeStr.c_str()));
-    return defaultFieldType.GetRangeSize((wxRichTextField*) this, range, size, descent, dc, context, flags, position, parentSize, partialExtents);
+    return wxRichTextParagraphLayoutBox::GetRangeSize(range, size, descent, dc, context, flags, position, parentSize, partialExtents);
 }
 
 /// Calculate range
@@ -9389,7 +9211,7 @@ bool wxRichTextFieldTypeStandard::Draw(wxRichTextField* obj, wxDC& dc, wxRichTex
     {
         int borderSize = 1;
 
-        wxPen borderPen(m_borderColour, 1, wxPENSTYLE_SOLID);
+        wxPen borderPen(m_borderColour, 1, wxSOLID);
         wxBrush backgroundBrush(m_backgroundColour);
         wxColour textColour(m_textColour);
 
@@ -9398,11 +9220,11 @@ bool wxRichTextFieldTypeStandard::Draw(wxRichTextField* obj, wxDC& dc, wxRichTex
             wxColour highlightColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
             wxColour highlightTextColour(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT));
 
-            borderPen = wxPen(highlightTextColour, 1, wxPENSTYLE_SOLID);
+            borderPen = wxPen(highlightTextColour, 1, wxSOLID);
             backgroundBrush = wxBrush(highlightColour);
 
             wxCheckSetBrush(dc, backgroundBrush);
-            wxCheckSetPen(dc, wxPen(highlightColour, 1, wxPENSTYLE_SOLID));
+            wxCheckSetPen(dc, wxPen(highlightColour, 1, wxSOLID));
             dc.DrawRectangle(rect);
         }
 
@@ -9632,7 +9454,7 @@ bool wxRichTextCell::AdjustAttributes(wxRichTextAttr& attr, wxRichTextDrawingCon
 
             // Compute right border
 
-            // We need to explicitly look at the spans, not just whether
+            // We need to explicity look at the spans, not just whether
             // the cell is visible, because that doesn't tell us which
             // cell to look at for border information.
             wxRichTextCell* adjacentCellRight = NULL;
@@ -9819,20 +9641,6 @@ bool wxRichTextCell::EditProperties(wxWindow* parent, wxRichTextBuffer* buffer)
         return false;
 }
 
-void wxRichTextCell::SetColSpan(int span)
-{
-    wxASSERT(span >= 1);
-    if (span >= 1)
-        GetProperties().SetProperty(wxT("colspan"), (long) span);
-}
-
-void wxRichTextCell::SetRowSpan(int span)
-{
-    wxASSERT(span >= 1);
-    if (span >= 1)
-        GetProperties().SetProperty(wxT("rowspan"), (long) span);
-}
-
 // The next 2 methods return span values. Note that the default is 1, not 0
 int wxRichTextCell::GetColSpan() const
 {
@@ -9908,7 +9716,7 @@ bool wxRichTextTable::Draw(wxDC& dc, wxRichTextDrawingContext& context, const wx
                             wxRect contentRect, borderRect, paddingRect, outlineRect;
 
                             cell->GetBoxRects(dc, GetBuffer(), attr, marginRect, borderRect, contentRect, paddingRect, outlineRect);
-                            cell->DrawBorder(dc, GetBuffer(), attr, attr.GetTextBoxAttr().GetBorder(), borderRect);
+                            cell->DrawBorder(dc, GetBuffer(), attr.GetTextBoxAttr().GetBorder(), borderRect);
                         }
                     }
                 }
@@ -10161,11 +9969,6 @@ bool wxRichTextTable::Layout(wxDC& dc, wxRichTextDrawingContext& context, const 
     wxArrayInt minColWidthsNoWrap;
     minColWidthsNoWrap.Add(0, m_colCount);
 
-    // Record the maximum spanning widths
-    wxArrayInt spanningWidths, spanningWidthsSpanLengths;
-    spanningWidths.Add(0, m_colCount);
-    spanningWidthsSpanLengths.Add(0, m_colCount);
-
     wxSize tableSize(tableWidth, 0);
 
     int i, j, k;
@@ -10324,18 +10127,18 @@ bool wxRichTextTable::Layout(wxDC& dc, wxRichTextDrawingContext& context, const 
                             percentageColWidths[i] = percentageCellWidth;
                     }
 
-                    if (cell->GetMinSize().x && cell->GetMinSize().x > minColWidths[i])
+                    if (colSpan == 1 && cell->GetMinSize().x && cell->GetMinSize().x > minColWidths[i])
                         minColWidths[i] = cell->GetMinSize().x;
 
-                    if (cell->GetMaxSize().x && cell->GetMaxSize().x > maxColWidths[i])
+                    if (colSpan == 1 && cell->GetMaxSize().x && cell->GetMaxSize().x > maxColWidths[i])
                         maxColWidths[i] = cell->GetMaxSize().x;
 
-                    if (cell->GetAttributes().GetTextBoxAttr().HasWhitespaceMode() &&
-                        (cell->GetAttributes().GetTextBoxAttr().GetWhitespaceMode() == wxTEXT_BOX_ATTR_WHITESPACE_NO_WRAP))
-                    {
-                        if (cell->GetMaxSize().x > minColWidthsNoWrap[i])
-                            minColWidthsNoWrap[i] = cell->GetMaxSize().x;
-                    }
+                    //if (cell->GetAttributes().GetTextBoxAttr().HasWhitespaceMode() &&
+                    //    (cell->GetAttributes().GetTextBoxAttr().GetWhitespaceMode() == wxTEXT_BOX_ATTR_WHITESPACE_NO_WRAP))
+                    //{
+                    //    if (cell->GetMaxSize().x > minColWidthsNoWrap[i])
+                    //        minColWidthsNoWrap[i] = cell->GetMaxSize().x;
+                    //}
                 }
             }
         }
@@ -10357,7 +10160,11 @@ bool wxRichTextTable::Layout(wxDC& dc, wxRichTextDrawingContext& context, const 
     // (3) Process absolute or proportional widths of spanning columns,
     // now that we know what our fixed column widths are going to be.
     // Spanned cells will try to adjust columns so the span will fit.
-    // Currently fixed columns widths aren't adjusted.
+    // Even existing fixed column widths can be expanded if necessary.
+    // Actually, currently fixed columns widths aren't adjusted; instead,
+    // the algorithm favours earlier rows and adjusts unspecified column widths
+    // the first time only. After that, we can't know whether the column has been
+    // specified explicitly or not. (We could make a note if necessary.)
     for (j = 0; j < m_rowCount; j++)
     {
         int visibleCellCount = 0;
@@ -10397,6 +10204,15 @@ bool wxRichTextTable::Layout(wxDC& dc, wxRichTextDrawingContext& context, const 
                         }
                         else
                         {
+                            // Do we want to do this? It's the only chance we get to
+                            // use the cell's min/max sizes, so we need to work out
+                            // how we're going to balance the unspecified spanning cell
+                            // width with the possibility more-constrained constituent cell widths.
+                            // Say there's a tiny bitmap giving it a max width of 10 pixels. We
+                            // don't want to constraint all the spanned columns to fit into this cell.
+                            // OK, let's say that if any of the constituent columns don't fit,
+                            // then we simply stop constraining the columns; instead, we'll just fit the spanning
+                            // cells to the columns later.
                             cellWidth = cell->GetMinSize().x;
                             
                             if (cell->GetMaxSize().x > cellWidth)
@@ -10409,69 +10225,45 @@ bool wxRichTextTable::Layout(wxDC& dc, wxRichTextDrawingContext& context, const 
 
                         if (spanningWidth > 0)
                         {
-                            if (spanningWidth > spanningWidths[i])
+                            // Now share the spanning width between columns within that span
+                            // TODO: take into account min widths of columns within the span
+                            int spanningWidthLeft = spanningWidth;
+                            int stretchColCount = 0;
+                            for (k = i; k < (i+spans); k++)
                             {
-                                // Remember the largest spanning cell for this column,
-                                // so we can adjust the spanned columns in the next step.
-                                spanningWidths[i] = spanningWidth;
-                                spanningWidthsSpanLengths[i] = spans;
+                                int minColWidth = wxMax(minColWidths[k], minColWidthsNoWrap[k]);
+
+                                if (colWidths[k] > 0) // absolute or proportional width has been specified
+                                    spanningWidthLeft -= colWidths[k];
+                                else if (minColWidth > 0)
+                                    spanningWidthLeft -= minColWidth;
+                                else
+                                    stretchColCount ++;
+                            }
+                            // Now divide what's left between the remaining columns
+                            int colShare = 0;
+                            if (stretchColCount > 0)
+                                colShare = spanningWidthLeft / stretchColCount;
+                            int colShareRemainder = spanningWidthLeft - (colShare * stretchColCount);
+
+                            // If fixed-width columns are currently too big, then we'll later
+                            // stretch the spanned cell to fit.
+
+                            if (spanningWidthLeft > 0)
+                            {
+                                for (k = i; k < (i+spans); k++)
+                                {
+                                    int minColWidth = wxMax(minColWidths[k], minColWidthsNoWrap[k]);
+                                    if (colWidths[k] <= 0 && minColWidth <= 0) // absolute or proportional width has not been specified
+                                    {
+                                        int newWidth = colShare;
+                                        if (k == (i+spans-1))
+                                            newWidth += colShareRemainder; // ensure all pixels are filled
+                                        colWidths[k] = newWidth;
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    // Complete the spanning width calculation, now we have the maximum spanning size
-    // for each spanning cell
-    for (i = 0; i < m_colCount; i++)
-    {
-        int spanningWidth = spanningWidths[i];
-        int spans = spanningWidthsSpanLengths[i];
-        if (spanningWidth > 0)
-        {
-            // Now share the spanning width between columns within that span
-            int spanningWidthLeft = spanningWidth;
-            int stretchColCount = 0;
-            for (k = i; k < (i+spans); k++)
-            {
-                int minColWidth = wxMax(minColWidths[k], minColWidthsNoWrap[k]);
-
-                if (colWidths[k] > 0) // absolute or proportional width has been specified
-                    spanningWidthLeft -= colWidths[k];
-                else if (minColWidth > 0)
-                {
-                    spanningWidthLeft -= minColWidth;
-                    // Allow this to stretch, otherwise we're likely to not allow
-                    // any stretching and the spanned column will end up tiny.
-                    stretchColCount ++;
-                }
-                else
-                    stretchColCount ++;
-            }
-            // Now divide what's left between the remaining columns
-            int colShare = 0;
-            if (stretchColCount > 0)
-                colShare = spanningWidthLeft / stretchColCount;
-            int colShareRemainder = spanningWidthLeft - (colShare * stretchColCount);
-
-            // If fixed-width columns are currently too big, then we'll later
-            // stretch the spanned cell to fit.
-            if (spanningWidthLeft > 0)
-            {
-                for (k = i; k < (i+spans); k++)
-                {
-                    int minColWidth = wxMax(minColWidths[k], minColWidthsNoWrap[k]);
-                    if (colWidths[k] <= 0) // absolute or proportional width has not been specified
-                    {
-                        int newWidth = colShare;
-                        if (minColWidth > 0)
-                            newWidth += minColWidth;
-
-                        if (k == (i+spans-1))
-                            newWidth += colShareRemainder; // ensure all pixels are filled
-                        minColWidths[k] = newWidth;
                     }
                 }
             }
@@ -11415,13 +11207,12 @@ class wxRichTextModule: public wxModule
 DECLARE_DYNAMIC_CLASS(wxRichTextModule)
 public:
     wxRichTextModule() {}
-    bool OnInit() wxOVERRIDE
+    bool OnInit()
     {
         wxRichTextBuffer::SetRenderer(new wxRichTextStdRenderer);
         wxRichTextBuffer::InitStandardHandlers();
         wxRichTextParagraph::InitDefaultTabs();
 
-#if wxUSE_XML
         wxRichTextXMLHandler::RegisterNodeName(wxT("text"), wxT("wxRichTextPlainText"));
         wxRichTextXMLHandler::RegisterNodeName(wxT("symbol"), wxT("wxRichTextPlainText"));
         wxRichTextXMLHandler::RegisterNodeName(wxT("image"), wxT("wxRichTextImage"));
@@ -11431,18 +11222,15 @@ public:
         wxRichTextXMLHandler::RegisterNodeName(wxT("cell"), wxT("wxRichTextCell"));
         wxRichTextXMLHandler::RegisterNodeName(wxT("table"), wxT("wxRichTextTable"));
         wxRichTextXMLHandler::RegisterNodeName(wxT("field"), wxT("wxRichTextField"));
-#endif // wxUSE_XML
 
         return true;
     }
-    void OnExit() wxOVERRIDE
+    void OnExit()
     {
         wxRichTextBuffer::CleanUpHandlers();
         wxRichTextBuffer::CleanUpDrawingHandlers();
         wxRichTextBuffer::CleanUpFieldTypes();
-#if wxUSE_XML
         wxRichTextXMLHandler::ClearNodeToClassMap();
-#endif // wxUSE_XML
         wxRichTextDecimalToRoman(-1);
         wxRichTextParagraph::ClearDefaultTabs();
         wxRichTextCtrl::ClearAvailableFontNames();
@@ -11554,8 +11342,7 @@ wxRichTextParagraphLayoutBox* wxRichTextAction::GetContainer() const
 }
 
 
-void wxRichTextAction::CalculateRefreshOptimizations(wxArrayInt& optimizationLineCharPositions, wxArrayInt& optimizationLineYPositions,
-    wxRect& oldFloatRect)
+void wxRichTextAction::CalculateRefreshOptimizations(wxArrayInt& optimizationLineCharPositions, wxArrayInt& optimizationLineYPositions)
 {
     // Store a list of line start character and y positions so we can figure out which area
     // we need to refresh
@@ -11579,8 +11366,7 @@ void wxRichTextAction::CalculateRefreshOptimizations(wxArrayInt& optimizationLin
         int lastY = firstVisiblePt.y + clientSize.y;
 
         wxRichTextParagraph* para = container->GetParagraphAtPosition(GetRange().GetStart());
-        wxRichTextObjectList::compatibility_iterator firstNode = container->GetChildren().Find(para);
-        wxRichTextObjectList::compatibility_iterator node = firstNode;
+        wxRichTextObjectList::compatibility_iterator node = container->GetChildren().Find(para);
         while (node)
         {
             wxRichTextParagraph* child = (wxRichTextParagraph*) node->GetData();
@@ -11609,26 +11395,6 @@ void wxRichTextAction::CalculateRefreshOptimizations(wxArrayInt& optimizationLin
             if (node)
                 node = node->GetNext();
         }
-        
-        if (wxRichTextBuffer::GetFloatingLayoutMode() && container->GetFloatingObjectCount() > 0)
-        {
-            // We will use a simple criterion - if any of the paragraphs following the
-            // modification point are affected by floats in other paragraphs,
-            // then we will simply update the rest of the screen.
-            wxRichTextObjectList::compatibility_iterator node = firstNode;
-            while (node)
-            {
-                wxRichTextParagraph* child = (wxRichTextParagraph*) node->GetData();
-                if (child->GetRect().GetTop() > lastY)
-                    break;
-                else if (child->GetImpactedByFloatingObjects() == 1)
-                {
-                    oldFloatRect = wxRect(0, 0, clientSize.x, lastY);
-                    break;
-                }
-                node = node->GetNext();
-            }
-        }
     }
 #endif
 }
@@ -11650,10 +11416,9 @@ bool wxRichTextAction::Do()
             // we need to refresh
             wxArrayInt optimizationLineCharPositions;
             wxArrayInt optimizationLineYPositions;
-            wxRect oldFloatRect;
 
 #if wxRICHTEXT_USE_OPTIMIZED_DRAWING
-            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions, oldFloatRect);
+            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions);
 #endif
 
             container->InsertFragment(GetRange().GetStart(), m_newParagraphs);
@@ -11681,7 +11446,7 @@ bool wxRichTextAction::Do()
 
             newCaretPosition = wxMin(newCaretPosition, (container->GetOwnRange().GetEnd()-1));
 
-            UpdateAppearance(newCaretPosition, true /* send update event */, oldFloatRect, & optimizationLineCharPositions, & optimizationLineYPositions, true /* do */);
+            UpdateAppearance(newCaretPosition, true /* send update event */, & optimizationLineCharPositions, & optimizationLineYPositions, true /* do */);
 
             wxRichTextEvent cmdEvent(
                 wxEVT_RICHTEXT_CONTENT_INSERTED,
@@ -11699,10 +11464,9 @@ bool wxRichTextAction::Do()
         {
             wxArrayInt optimizationLineCharPositions;
             wxArrayInt optimizationLineYPositions;
-            wxRect oldFloatRect;
 
 #if wxRICHTEXT_USE_OPTIMIZED_DRAWING
-            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions, oldFloatRect);
+            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions);
 #endif
 
             // Check if the current object focus needs to be changed before deletion of content
@@ -11730,7 +11494,7 @@ bool wxRichTextAction::Do()
             if (caretPos >= container->GetOwnRange().GetEnd())
                 caretPos --;
 
-            UpdateAppearance(caretPos, true /* send update event */, oldFloatRect, & optimizationLineCharPositions, & optimizationLineYPositions, true /* do */);
+            UpdateAppearance(caretPos, true /* send update event */, & optimizationLineCharPositions, & optimizationLineYPositions, true /* do */);
 
             wxRichTextEvent cmdEvent(
                 wxEVT_RICHTEXT_CONTENT_DELETED,
@@ -11880,10 +11644,9 @@ bool wxRichTextAction::Undo()
         {
             wxArrayInt optimizationLineCharPositions;
             wxArrayInt optimizationLineYPositions;
-            wxRect oldFloatRect;
 
 #if wxRICHTEXT_USE_OPTIMIZED_DRAWING
-            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions, oldFloatRect);
+            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions);
 #endif
 
             // Check if the current object focus needs to be changed before deletion of content
@@ -11910,7 +11673,7 @@ bool wxRichTextAction::Undo()
 
             long newCaretPosition = GetPosition() - 1;
 
-            UpdateAppearance(newCaretPosition, true, /* send update event */ oldFloatRect, & optimizationLineCharPositions, & optimizationLineYPositions, false /* undo */);
+            UpdateAppearance(newCaretPosition, true, /* send update event */ & optimizationLineCharPositions, & optimizationLineYPositions, false /* undo */);
 
             wxRichTextEvent cmdEvent(
                 wxEVT_RICHTEXT_CONTENT_DELETED,
@@ -11928,10 +11691,9 @@ bool wxRichTextAction::Undo()
         {
             wxArrayInt optimizationLineCharPositions;
             wxArrayInt optimizationLineYPositions;
-            wxRect oldFloatRect;
 
 #if wxRICHTEXT_USE_OPTIMIZED_DRAWING
-            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions, oldFloatRect);
+            CalculateRefreshOptimizations(optimizationLineCharPositions, optimizationLineYPositions);
 #endif
 
             container->InsertFragment(GetRange().GetStart(), m_oldParagraphs);
@@ -11941,7 +11703,7 @@ bool wxRichTextAction::Undo()
             // Layout() would stop prematurely at the top level.
             container->InvalidateHierarchy(GetRange());
 
-            UpdateAppearance(GetPosition(), true, /* send update event */ oldFloatRect, & optimizationLineCharPositions, & optimizationLineYPositions, false /* undo */);
+            UpdateAppearance(GetPosition(), true, /* send update event */ & optimizationLineCharPositions, & optimizationLineYPositions, false /* undo */);
 
             wxRichTextEvent cmdEvent(
                 wxEVT_RICHTEXT_CONTENT_INSERTED,
@@ -11990,7 +11752,7 @@ bool wxRichTextAction::Undo()
 }
 
 /// Update the control appearance
-void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent, const wxRect& oldFloatRect, wxArrayInt* optimizationLineCharPositions, wxArrayInt* optimizationLineYPositions, bool isDoCmd)
+void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent, wxArrayInt* optimizationLineCharPositions, wxArrayInt* optimizationLineYPositions, bool isDoCmd)
 {
     wxRichTextParagraphLayoutBox* container = GetContainer();
     wxASSERT(container != NULL);
@@ -12010,8 +11772,7 @@ void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent
 
             // Refresh everything if there were floating objects or the container changed size
             // (we can't yet optimize in these cases, since more complex interaction with other content occurs)
-            // Refresh everything if container changed size.
-            if (container->GetParent() && containerRect != container->GetRect())
+            if ((wxRichTextBuffer::GetFloatingLayoutMode() && container->GetFloatingObjectCount() > 0) || (container->GetParent() && containerRect != container->GetRect()))
             {
                 m_ctrl->Refresh(false);
             }
@@ -12025,7 +11786,6 @@ void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent
 
                 wxSize clientSize = m_ctrl->GetUnscaledSize(m_ctrl->GetClientSize());
                 wxPoint firstVisiblePt = m_ctrl->GetUnscaledPoint(m_ctrl->GetFirstVisiblePoint());
-                int lastPossibleY = firstVisiblePt.y + clientSize.y;
 
                 // Start/end positions
                 int firstY = 0;
@@ -12055,9 +11815,7 @@ void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent
                     firstY = para->GetPosition().y - 4;
                 }
 
-                wxRichTextObjectList::compatibility_iterator firstNode = container->GetChildren().Find(para);
-                wxRichTextObjectList::compatibility_iterator node = firstNode;
-                wxRichTextObjectList::compatibility_iterator lastNode = wxRichTextObjectList::compatibility_iterator();
+                wxRichTextObjectList::compatibility_iterator node = container->GetChildren().Find(para);
                 while (node)
                 {
                     wxRichTextParagraph* child = (wxRichTextParagraph*) node->GetData();
@@ -12086,8 +11844,6 @@ void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent
                                 lastY = pt.y + line->GetSize().y;
                             }
 
-                            lastNode = node;
-
                             node2 = wxRichTextLineList::compatibility_iterator();
                             node = wxRichTextObjectList::compatibility_iterator();
 
@@ -12105,8 +11861,6 @@ void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent
                                     foundEnd = true;
 
                                     lastY = pt.y + line->GetSize().y;
-
-                                    lastNode = node;
 
                                     node2 = wxRichTextLineList::compatibility_iterator();
                                     node = wxRichTextObjectList::compatibility_iterator();
@@ -12127,32 +11881,6 @@ void wxRichTextAction::UpdateAppearance(long caretPosition, bool sendUpdateEvent
                 firstY = wxMax(firstVisiblePt.y, firstY);
                 if (!foundEnd)
                     lastY = firstVisiblePt.y + clientSize.y;
-
-                if (wxRichTextBuffer::GetFloatingLayoutMode())
-                {
-                    if (oldFloatRect.GetBottom() > 0)
-                        lastY = wxMax(lastY, oldFloatRect.GetBottom());
-
-                    // Now find the first paragraph that isn't affected by any floating objects,
-                    // which means the reformatting stopped at this point.
-                    if (lastNode && (container->GetFloatingObjectCount() > 0) && (lastY < lastPossibleY))
-                    {
-                        wxRichTextObjectList::compatibility_iterator node = lastNode;
-                        while (node)
-                        {
-                            wxRichTextParagraph* child = (wxRichTextParagraph*) node->GetData();
-                            if (child->GetImpactedByFloatingObjects() == 0)
-                            {
-                                wxRect childRect = child->GetRect();
-                                if (childRect.GetBottom() > lastY)
-                                    lastY = wxMin(childRect.GetBottom(), lastPossibleY);
-                                break;
-                            }
-
-                            node = node->GetNext();
-                        }
-                    }
-                }
 
                 // Convert to device coordinates
                 wxRect rect(m_ctrl->GetPhysicalPoint(m_ctrl->GetScaledPoint(wxPoint(firstVisiblePt.x, firstY))), m_ctrl->GetScaledSize(wxSize(clientSize.x, lastY - firstY)));
@@ -12264,36 +11992,13 @@ wxRichTextImage::~wxRichTextImage()
 void wxRichTextImage::Init()
 {
     m_originalImageSize = wxSize(-1, -1);
-    m_imageState = ImageState_Unloaded;
 }
 
 /// Create a cached image at the required size
-bool wxRichTextImage::LoadImageCache(wxDC& dc, wxRichTextDrawingContext& context, wxSize& retImageSize, bool resetCache, const wxSize& parentSize)
+bool wxRichTextImage::LoadImageCache(wxDC& dc, bool resetCache, const wxSize& parentSize)
 {
     if (!m_imageBlock.IsOk())
-    {
-        m_imageState = ImageState_Bad;
         return false;
-    }
-
-    // Don't repeat unless absolutely necessary
-    if (m_imageCache.IsOk() && !resetCache && !context.GetLayingOut())
-    {
-        retImageSize = wxSize(m_imageCache.GetWidth(), m_imageCache.GetHeight());
-        return true;
-    }
-
-    if (!context.GetImagesEnabled())
-    {
-        if (resetCache || !m_imageCache.IsOk())
-        {
-            wxBitmap bitmap(image_placeholder24x24_xpm);
-            m_imageCache = bitmap;
-            m_imageState = ImageState_Loaded;
-        }
-        retImageSize = wxSize(m_imageCache.GetWidth(), m_imageCache.GetHeight());
-        return true;
-    }
 
     // If we have an original image size, use that to compute the cached bitmap size
     // instead of loading the image each time. This way we can avoid loading
@@ -12303,17 +12008,10 @@ bool wxRichTextImage::LoadImageCache(wxDC& dc, wxRichTextDrawingContext& context
     if (resetCache || m_originalImageSize.GetWidth() <= 0 || m_originalImageSize.GetHeight() <= 0)
     {
         m_imageCache = wxNullBitmap;
-        m_imageState = ImageState_Unloaded;
 
-        if (!m_imageBlock.Load(image) || !image.IsOk())
-        {
-            wxBitmap bitmap(image_placeholder24x24_xpm);
-            m_imageCache = bitmap;
-            m_originalImageSize = wxSize(bitmap.GetWidth(), bitmap.GetHeight());
-            m_imageState = ImageState_Bad;
-            retImageSize = wxSize(m_imageCache.GetWidth(), m_imageCache.GetHeight());
+        m_imageBlock.Load(image);
+        if (!image.IsOk())
             return false;
-        }
 
         m_originalImageSize = wxSize(image.GetWidth(), image.GetHeight());
     }
@@ -12421,48 +12119,18 @@ bool wxRichTextImage::LoadImageCache(wxDC& dc, wxRichTextDrawingContext& context
     width = wxMax(1, width);
     height = wxMax(1, height);
 
-    retImageSize = wxSize(width, height);
-
-    bool changed = false;
-    return LoadAndScaleImageCache(image, retImageSize, context.GetDelayedImageLoading(), changed);
-}
-
-// Do the loading and scaling
-bool wxRichTextImage::LoadAndScaleImageCache(wxImage& image, const wxSize& sz, bool delayLoading, bool& changed)
-{
-    int width = sz.x;
-    int height = sz.y;
-
     if (m_imageCache.IsOk() && m_imageCache.GetWidth() == width && m_imageCache.GetHeight() == height)
     {
         // Do nothing, we didn't need to change the image cache
-        changed = false;
     }
     else
     {
-        changed = true;
-
-        if (delayLoading)
-        {
-            if (m_imageCache.IsOk())
-                m_imageCache = wxNullBitmap;
-            m_imageState = ImageState_Unloaded;
-            return true;
-        }
-
         if (!image.IsOk())
         {
-            if (!m_imageBlock.Load(image) || !image.IsOk())
-            {
-                wxBitmap bitmap(image_placeholder24x24_xpm);
-                m_imageCache = bitmap;
-                m_originalImageSize = wxSize(bitmap.GetWidth(), bitmap.GetHeight());
-                m_imageState = ImageState_Bad;
+            m_imageBlock.Load(image);
+            if (!image.IsOk())
                 return false;
-            }
         }
-
-        m_originalImageSize = wxSize(image.GetWidth(), image.GetHeight());
 
         if (image.GetWidth() == width && image.GetHeight() == height)
             m_imageCache = wxBitmap(image);
@@ -12484,11 +12152,6 @@ bool wxRichTextImage::LoadAndScaleImageCache(wxImage& image, const wxSize& sz, b
         }
     }
 
-    if (m_imageCache.IsOk())
-        m_imageState = ImageState_Loaded;
-    else
-        m_imageState = ImageState_Bad;
-
     return m_imageCache.IsOk();
 }
 
@@ -12497,6 +12160,11 @@ bool wxRichTextImage::Draw(wxDC& dc, wxRichTextDrawingContext& context, const wx
 {
     if (!IsShown())
         return true;
+
+    // Don't need cached size AFAIK
+    // wxSize size = GetCachedSize();
+    if (!LoadImageCache(dc))
+        return false;
 
     wxRichTextAttr attr(GetAttributes());
     AdjustAttributes(attr, context);
@@ -12523,24 +12191,13 @@ bool wxRichTextImage::Draw(wxDC& dc, wxRichTextDrawingContext& context, const wx
     marginRect = wxRect(position, GetCachedSize()); // outer rectangle, will calculate contentRect
     GetBoxRects(dc, GetBuffer(), attr, marginRect, borderRect, contentRect, paddingRect, outlineRect);
 
-    if (m_imageCache.IsOk())
-        dc.DrawBitmap(m_imageCache, contentRect.x, contentRect.y, true);
-    else
-    {
-        dc.SetPen(*wxLIGHT_GREY_PEN);
-        dc.SetBrush(*wxTRANSPARENT_BRUSH);
-        dc.DrawRectangle(contentRect);
-    }
+    dc.DrawBitmap(m_imageCache, contentRect.x, contentRect.y, true);
 
     if (selection.WithinSelection(GetRange().GetStart(), this))
     {
         wxCheckSetBrush(dc, *wxBLACK_BRUSH);
         wxCheckSetPen(dc, *wxBLACK_PEN);
         dc.SetLogicalFunction(wxINVERT);
-#ifdef __WXMAC__
-        if (m_imageCache.IsOk())
-            dc.DrawBitmap(m_imageCache, contentRect.x, contentRect.y, true);
-#endif
         dc.DrawRectangle(contentRect);
         dc.SetLogicalFunction(wxCOPY);
     }
@@ -12549,12 +12206,12 @@ bool wxRichTextImage::Draw(wxDC& dc, wxRichTextDrawingContext& context, const wx
 }
 
 /// Lay the item out
-bool wxRichTextImage::Layout(wxDC& dc, wxRichTextDrawingContext& context, const wxRect& rect, const wxRect& parentRect, int WXUNUSED(style))
+bool wxRichTextImage::Layout(wxDC& dc, wxRichTextDrawingContext& context, const wxRect& rect, const wxRect& WXUNUSED(parentRect), int WXUNUSED(style))
 {
-    wxSize imageSize;
-    if (!LoadImageCache(dc, context, imageSize, false, parentRect.GetSize()))
+    if (!LoadImageCache(dc))
         return false;
 
+    wxSize imageSize(m_imageCache.GetWidth(), m_imageCache.GetHeight());
     wxRect marginRect, borderRect, contentRect, paddingRect, outlineRect;
     contentRect = wxRect(wxPoint(0,0), imageSize);
 
@@ -12580,8 +12237,7 @@ bool wxRichTextImage::GetRangeSize(const wxRichTextRange& range, wxSize& size, i
     if (!range.IsWithin(GetRange()))
         return false;
 
-    wxSize imageSize;
-    if (!((wxRichTextImage*)this)->LoadImageCache(dc, context, imageSize, false, parentSize))
+    if (!((wxRichTextImage*)this)->LoadImageCache(dc, false, parentSize))
     {
         size.x = 0; size.y = 0;
         if (partialExtents)
@@ -12592,6 +12248,7 @@ bool wxRichTextImage::GetRangeSize(const wxRichTextRange& range, wxSize& size, i
     wxRichTextAttr attr(GetAttributes());
     ((wxRichTextObject*)this)->AdjustAttributes(attr, context);
 
+    wxSize imageSize(m_imageCache.GetWidth(), m_imageCache.GetHeight());
     wxRect marginRect, borderRect, contentRect, paddingRect, outlineRect;
     contentRect = wxRect(wxPoint(0,0), imageSize);
     GetBoxRects(dc, GetBuffer(), attr, marginRect, borderRect, contentRect, paddingRect, outlineRect);
@@ -13383,7 +13040,6 @@ void wxTextBoxAttr::Reset()
     m_flags = 0;
     m_floatMode = wxTEXT_BOX_ATTR_FLOAT_NONE;
     m_clearMode = wxTEXT_BOX_ATTR_CLEAR_NONE;
-    m_whitespaceMode = wxTEXT_BOX_ATTR_WHITESPACE_NONE;
     m_collapseMode = wxTEXT_BOX_ATTR_COLLAPSE_NONE;
     m_verticalAlignment = wxTEXT_BOX_ATTR_VERTICAL_ALIGNMENT_NONE;
     m_boxStyleName = wxEmptyString;
@@ -13398,7 +13054,6 @@ void wxTextBoxAttr::Reset()
 
     m_border.Reset();
     m_outline.Reset();
-    m_cornerRadius.Reset();
 }
 
 // Equality test
@@ -13408,10 +13063,8 @@ bool wxTextBoxAttr::operator== (const wxTextBoxAttr& attr) const
         m_flags == attr.m_flags &&
         m_floatMode == attr.m_floatMode &&
         m_clearMode == attr.m_clearMode &&
-        m_whitespaceMode == attr.m_whitespaceMode &&
         m_collapseMode == attr.m_collapseMode &&
         m_verticalAlignment == attr.m_verticalAlignment &&
-        m_cornerRadius == attr.m_cornerRadius &&
 
         m_margins == attr.m_margins &&
         m_padding == attr.m_padding &&
@@ -13436,8 +13089,6 @@ bool wxTextBoxAttr::EqPartial(const wxTextBoxAttr& attr, bool weakTest) const
              (!HasClearMode() && attr.HasClearMode()) ||
              (!HasCollapseBorders() && attr.HasCollapseBorders()) ||
              (!HasVerticalAlignment() && attr.HasVerticalAlignment()) ||
-             (!HasWhitespaceMode() && attr.HasWhitespaceMode()) ||
-             (!HasCornerRadius() && attr.HasCornerRadius()) ||
              (!HasBoxStyleName() && attr.HasBoxStyleName())))
     {
         return false;
@@ -13452,12 +13103,6 @@ bool wxTextBoxAttr::EqPartial(const wxTextBoxAttr& attr, bool weakTest) const
         return false;
 
     if (attr.HasVerticalAlignment() && HasVerticalAlignment() && (attr.GetVerticalAlignment() != GetVerticalAlignment()))
-        return false;
-
-    if (attr.HasWhitespaceMode() && HasWhitespaceMode() && (GetWhitespaceMode() != attr.GetWhitespaceMode()))
-        return false;
-
-    if (attr.HasCornerRadius() && HasCornerRadius() && !(attr.GetCornerRadius() == GetCornerRadius()))
         return false;
 
     if (attr.HasBoxStyleName() && HasBoxStyleName() && (attr.GetBoxStyleName() != GetBoxStyleName()))
@@ -13529,17 +13174,6 @@ bool wxTextBoxAttr::Apply(const wxTextBoxAttr& attr, const wxTextBoxAttr* compar
             SetVerticalAlignment(attr.GetVerticalAlignment());
     }
 
-    if (attr.HasWhitespaceMode())
-    {
-        if (!(compareWith && compareWith->HasWhitespaceMode() && compareWith->GetWhitespaceMode() == attr.GetWhitespaceMode()))
-            SetWhitespaceMode(attr.GetWhitespaceMode());
-    }
-
-    if (attr.HasCornerRadius())
-    {
-        if (!(compareWith && compareWith->HasCornerRadius() && compareWith->GetCornerRadius() == attr.GetCornerRadius()))
-            SetCornerRadius(attr.GetCornerRadius());
-    }
     if (attr.HasBoxStyleName())
     {
         if (!(compareWith && compareWith->HasBoxStyleName() && compareWith->GetBoxStyleName() == attr.GetBoxStyleName()))
@@ -13574,12 +13208,6 @@ bool wxTextBoxAttr::RemoveStyle(const wxTextBoxAttr& attr)
 
     if (attr.HasVerticalAlignment())
         RemoveFlag(wxTEXT_BOX_ATTR_VERTICAL_ALIGNMENT);
-
-    if (attr.HasWhitespaceMode())
-        RemoveFlag(wxTEXT_BOX_ATTR_WHITESPACE);
-
-    if (attr.HasCornerRadius())
-        RemoveFlag(wxTEXT_BOX_ATTR_CORNER_RADIUS);
 
     if (attr.HasBoxStyleName())
     {
@@ -13680,45 +13308,6 @@ void wxTextBoxAttr::CollectCommonAttributes(const wxTextBoxAttr& attr, wxTextBox
     }
     else
         absentAttr.AddFlag(wxTEXT_BOX_ATTR_VERTICAL_ALIGNMENT);
-
-    if (attr.HasWhitespaceMode())
-    {
-        if (!clashingAttr.HasWhitespaceMode() && !absentAttr.HasWhitespaceMode())
-        {
-            if (HasWhitespaceMode())
-            {
-                if (GetWhitespaceMode() != attr.GetWhitespaceMode())
-                {
-                    clashingAttr.AddFlag(wxTEXT_BOX_ATTR_WHITESPACE);
-                    RemoveFlag(wxTEXT_BOX_ATTR_WHITESPACE);
-                }
-            }
-            else
-                SetWhitespaceMode(attr.GetWhitespaceMode());
-        }
-    }
-    else
-        absentAttr.AddFlag(wxTEXT_BOX_ATTR_WHITESPACE);
-
-    if (attr.HasCornerRadius())
-    {
-        if (!clashingAttr.HasCornerRadius() && !absentAttr.HasCornerRadius())
-        {
-            if (HasCornerRadius())
-            {
-                if (!(GetCornerRadius() == attr.GetCornerRadius()))
-                {
-                    clashingAttr.AddFlag(wxTEXT_BOX_ATTR_CORNER_RADIUS);
-                    GetCornerRadius().Reset();
-                    RemoveFlag(wxTEXT_BOX_ATTR_CORNER_RADIUS);
-                }
-            }
-            else
-                SetCornerRadius(attr.GetCornerRadius());
-        }
-    }
-    else
-        absentAttr.AddFlag(wxTEXT_BOX_ATTR_CORNER_RADIUS);
 
     if (attr.HasBoxStyleName())
     {
@@ -14581,26 +14170,6 @@ void wxTextAttrCollectCommonAttributes(wxTextAttr& currentStyle, const wxTextAtt
         currentStyle.RemoveFlag(wxTEXT_ATTR_PAGE_BREAK);
     }
 
-    if ((attr.GetFlags() & wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE) && !wxHasStyle(forbiddenFlags, wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE))
-    {
-        currentStyle.AddFlag(wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE);
-    }
-    else if (!(attr.GetFlags() & wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE) && (currentStyle.GetFlags() & wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE))
-    {
-        clashingAttr.AddFlag(wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE);
-        currentStyle.RemoveFlag(wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE);
-    }
-
-    if ((attr.GetFlags() & wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER) && !wxHasStyle(forbiddenFlags, wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER))
-    {
-        currentStyle.AddFlag(wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER);
-    }
-    else if (!(attr.GetFlags() & wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER) && (currentStyle.GetFlags() & wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER))
-    {
-        clashingAttr.AddFlag(wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER);
-        currentStyle.RemoveFlag(wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER);
-    }
-
     if (attr.HasCharacterStyleName() && !wxHasStyle(forbiddenFlags, wxTEXT_ATTR_CHARACTER_STYLE_NAME))
     {
         if (currentStyle.HasCharacterStyleName())
@@ -15155,11 +14724,7 @@ wxRichTextDrawingContext::wxRichTextDrawingContext(wxRichTextBuffer* buffer)
     Init();
     m_buffer = buffer;
     if (m_buffer && m_buffer->GetRichTextCtrl())
-    {
         EnableVirtualAttributes(m_buffer->GetRichTextCtrl()->GetVirtualAttributesEnabled());
-        m_enableImages = m_buffer->GetRichTextCtrl()->GetImagesEnabled();
-        m_enableDelayedImageLoading = m_buffer->GetRichTextCtrl()->GetDelayedImageLoading();
-    }
 }
 
 bool wxRichTextDrawingContext::HasVirtualAttributes(wxRichTextObject* obj) const

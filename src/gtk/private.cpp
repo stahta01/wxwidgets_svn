@@ -262,12 +262,12 @@ GtkWidget *GetTreeWidget()
 class WidgetsCleanupModule : public wxModule
 {
 public:
-    virtual bool OnInit() wxOVERRIDE
+    virtual bool OnInit()
     {
         return true;
     }
 
-    virtual void OnExit() wxOVERRIDE
+    virtual void OnExit()
     {
         if ( gs_container )
         {

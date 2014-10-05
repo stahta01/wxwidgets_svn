@@ -92,55 +92,55 @@ public:
 
 
     // provide (trivial) implementation of the base class pure virtuals
-    virtual void SetTitle(const wxString& WXUNUSED(title)) wxOVERRIDE
+    virtual void SetTitle(const wxString& WXUNUSED(title))
     {
         wxFAIL_MSG( "not implemented for native windows" );
     }
 
-    virtual wxString GetTitle() const wxOVERRIDE
+    virtual wxString GetTitle() const
     {
         wxFAIL_MSG( "not implemented for native windows" );
 
         return wxString();
     }
 
-    virtual void Maximize(bool WXUNUSED(maximize) = true) wxOVERRIDE
+    virtual void Maximize(bool WXUNUSED(maximize) = true)
     {
         wxFAIL_MSG( "not implemented for native windows" );
     }
 
-    virtual bool IsMaximized() const wxOVERRIDE
+    virtual bool IsMaximized() const
     {
         wxFAIL_MSG( "not implemented for native windows" );
 
         return false;
     }
 
-    virtual void Iconize(bool WXUNUSED(iconize) = true) wxOVERRIDE
+    virtual void Iconize(bool WXUNUSED(iconize) = true)
     {
         wxFAIL_MSG( "not implemented for native windows" );
     }
 
-    virtual bool IsIconized() const wxOVERRIDE
+    virtual bool IsIconized() const
     {
         // this is called by wxGTK implementation so don't assert
         return false;
     }
 
-    virtual void Restore() wxOVERRIDE
+    virtual void Restore()
     {
         wxFAIL_MSG( "not implemented for native windows" );
     }
 
     virtual bool ShowFullScreen(bool WXUNUSED(show),
-                                long WXUNUSED(style) = wxFULLSCREEN_ALL) wxOVERRIDE
+                                long WXUNUSED(style) = wxFULLSCREEN_ALL)
     {
         wxFAIL_MSG( "not implemented for native windows" );
 
         return false;
     }
 
-    virtual bool IsFullScreen() const wxOVERRIDE
+    virtual bool IsFullScreen() const
     {
         wxFAIL_MSG( "not implemented for native windows" );
 

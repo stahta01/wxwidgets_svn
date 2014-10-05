@@ -106,7 +106,7 @@
 
 #include <string.h>
 
-#if !defined(__WXMICROWIN__)
+#if (!defined(__GNUWIN32_OLD__) && !defined(__WXMICROWIN__) /* && !defined(__WXWINCE__) */ ) || defined(__CYGWIN10__)
     #include <shellapi.h>
     #include <mmsystem.h>
 #endif
@@ -550,20 +550,6 @@ bool wxWindowMSW::Create(wxWindow *parent,
     InheritAttributes();
 
     return true;
-}
-
-void wxWindowMSW::SetId(wxWindowID winid)
-{
-    wxWindowBase::SetId(winid);
-
-    // Also update the ID used at the Windows level to avoid nasty surprises
-    // when we can't find the control when handling messages for it after
-    // changing its ID because Windows still uses the old one.
-    if ( GetHwnd() )
-    {
-        if ( !::SetWindowLong(GetHwnd(), GWL_ID, winid) )
-            wxLogLastError(wxT("SetWindowLong(GWL_ID)"));
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1135,8 +1121,31 @@ void wxWindowMSW::SetLayoutDirection(wxLayoutDirection dir)
 #ifdef __WXWINCE__
     wxUnusedVar(dir);
 #else
-    if ( wxUpdateLayoutDirection(GetHwnd(), dir) )
+    wxCHECK_RET( GetHwnd(),
+                 wxT("layout direction must be set after window creation") );
+
+    LONG styleOld = wxGetWindowExStyle(this);
+
+    LONG styleNew = styleOld;
+    switch ( dir )
     {
+        case wxLayout_LeftToRight:
+            styleNew &= ~WS_EX_LAYOUTRTL;
+            break;
+
+        case wxLayout_RightToLeft:
+            styleNew |= WS_EX_LAYOUTRTL;
+            break;
+
+        default:
+            wxFAIL_MSG(wxT("unsupported layout direction"));
+            break;
+    }
+
+    if ( styleNew != styleOld )
+    {
+        wxSetWindowExStyle(this, styleNew);
+
         // Update layout: whether we have children or are drawing something, we
         // need to redo it with the new layout.
         SendSizeEvent();
@@ -2220,10 +2229,18 @@ bool wxWindowMSW::DoPopupMenu(wxMenu *menu, int x, int y)
 #if defined(__WXWINCE__)
     static const UINT flags = 0;
 #else // !__WXWINCE__
-    // using TPM_RECURSE allows us to show a popup menu while another menu
-    // is opened which can be useful and is supported by the other
-    // platforms, so allow it under Windows too
-    UINT flags = TPM_RIGHTBUTTON | TPM_RECURSE;
+    UINT flags = TPM_RIGHTBUTTON;
+    // NT4 doesn't support TPM_RECURSE and simply doesn't show the menu at all
+    // when it's use, I'm not sure about Win95/98 but prefer to err on the safe
+    // side and not to use it there neither -- modify the test if it does work
+    // on these systems
+    if ( wxGetWinVersion() >= wxWinVersion_5 )
+    {
+        // using TPM_RECURSE allows us to show a popup menu while another menu
+        // is opened which can be useful and is supported by the other
+        // platforms, so allow it under Windows too
+        flags |= TPM_RECURSE;
+    }
 #endif // __WXWINCE__/!__WXWINCE__
 
     ::TrackPopupMenu(GetHmenuOf(menu), flags, pt.x, pt.y, 0, GetHwnd(), NULL);
@@ -2241,86 +2258,6 @@ bool wxWindowMSW::DoPopupMenu(wxMenu *menu, int x, int y)
 }
 
 #endif // wxUSE_MENUS_NATIVE
-
-// ---------------------------------------------------------------------------
-// menu events
-// ---------------------------------------------------------------------------
-
-#if wxUSE_MENUS && !defined(__WXUNIVERSAL__)
-
-bool
-wxWindowMSW::HandleMenuSelect(WXWORD nItem, WXWORD flags, WXHMENU hMenu)
-{
-    // Ignore the special messages generated when the menu is closed (this is
-    // the only case when the flags are set to -1), in particular don't clear
-    // the help string in the status bar when this happens as it had just been
-    // restored by the base class code.
-    if ( !hMenu && flags == 0xffff )
-        return false;
-
-    // sign extend to int from unsigned short we get from Windows
-    int item = (signed short)nItem;
-
-    // WM_MENUSELECT is generated for both normal items and menus, including
-    // the top level menus of the menu bar, which can't be represented using
-    // any valid identifier in wxMenuEvent so use an otherwise unused value for
-    // them
-    if ( flags & (MF_POPUP | MF_SEPARATOR) )
-        item = wxID_NONE;
-
-    wxMenuEvent event(wxEVT_MENU_HIGHLIGHT, item);
-    event.SetEventObject(this);
-
-    if ( HandleWindowEvent(event) )
-        return true;
-
-    // by default, i.e. if the event wasn't handled above, clear the status bar
-    // text when an item which can't have any associated help string in wx API
-    // is selected
-    if ( item == wxID_NONE )
-    {
-        wxFrame *frame = wxDynamicCast(wxGetTopLevelParent(this), wxFrame);
-        if ( frame )
-            frame->DoGiveHelp(wxEmptyString, true);
-    }
-
-    return false;
-}
-
-bool
-wxWindowMSW::DoSendMenuOpenCloseEvent(wxEventType evtType, wxMenu* menu, bool popup)
-{
-    wxMenuEvent event(evtType, popup ? wxID_ANY : 0, menu);
-    event.SetEventObject(menu);
-
-    return HandleWindowEvent(event);
-}
-
-bool wxWindowMSW::HandleMenuPopup(wxEventType evtType, WXHMENU hMenu)
-{
-    bool isPopup = false;
-    wxMenu* menu = NULL;
-    if ( wxCurrentPopupMenu && wxCurrentPopupMenu->GetHMenu() == hMenu )
-    {
-        menu = wxCurrentPopupMenu;
-        isPopup = true;
-    }
-    else
-    {
-        menu = MSWFindMenuFromHMENU(hMenu);
-    }
-
-
-    return DoSendMenuOpenCloseEvent(evtType, menu, isPopup);
-}
-
-wxMenu* wxWindowMSW::MSWFindMenuFromHMENU(WXHMENU WXUNUSED(hMenu))
-{
-    // We don't have any menus at this level.
-    return NULL;
-}
-
-#endif // wxUSE_MENUS && !defined(__WXUNIVERSAL__)
 
 // ===========================================================================
 // pre/post message processing
@@ -3110,6 +3047,19 @@ wxWindowMSW::MSWHandleMessage(WXLRESULT *result,
             processed = HandleNotify((int)wParam, lParam, &rc.result);
             break;
 
+        // we only need to reply to WM_NOTIFYFORMAT manually when using MSLU,
+        // otherwise DefWindowProc() does it perfectly fine for us, but MSLU
+        // apparently doesn't always behave properly and needs some help
+#if wxUSE_UNICODE_MSLU && defined(NF_QUERY)
+        case WM_NOTIFYFORMAT:
+            if ( lParam == NF_QUERY )
+            {
+                processed = true;
+                rc.result = NFR_UNICODE;
+            }
+            break;
+#endif // wxUSE_UNICODE_MSLU
+
             // for these messages we must return true if process the message
 #ifdef WM_DRAWITEM
         case WM_DRAWITEM:
@@ -3520,7 +3470,7 @@ wxWindowMSW::MSWHandleMessage(WXLRESULT *result,
             break;
 #endif
 
-#if wxUSE_MENUS && !defined(__WXUNIVERSAL__)
+#if wxUSE_MENUS
         case WM_MENUCHAR:
             // we're only interested in our own menus, not MF_SYSMENU
             if ( HIWORD(wParam) == MF_POPUP )
@@ -3537,24 +3487,27 @@ wxWindowMSW::MSWHandleMessage(WXLRESULT *result,
 
 #if !defined(__WXMICROWIN__) && !defined(__WXWINCE__)
         case WM_INITMENUPOPUP:
-            processed = HandleMenuPopup(wxEVT_MENU_OPEN, (WXHMENU)wParam);
-            break;
-
         case WM_MENUSELECT:
+        case WM_EXITMENULOOP:
+        case WM_UNINITMENUPOPUP:
             {
-                WXWORD item, flags;
-                WXHMENU hmenu;
-                UnpackMenuSelect(wParam, lParam, &item, &flags, &hmenu);
-
-                processed = HandleMenuSelect(item, flags, hmenu);
+                // Contrary to MSDN implications, at least some of these messages are
+                // not actually sent to the TLW for popup menus, but to the owning
+                // window or even its parent window.
+                //
+                // wx-3.1+ handles these messages in wxWindow instead, but binary
+                // compatibility requirements on wx-3.0 make it simpler to just forward
+                // the messages to the wxTLW.
+                wxWindow *tlw = wxGetTopLevelParent(this);
+                if (tlw && tlw != this)
+                {
+                    rc.result = tlw->MSWWindowProc(message, wParam, lParam);
+                    processed = rc.result == 0;
+                }
             }
             break;
-
-        case WM_UNINITMENUPOPUP:
-            processed = HandleMenuPopup(wxEVT_MENU_CLOSE, (WXHMENU)wParam);
-            break;
 #endif // !__WXMICROWIN__
-#endif // wxUSE_MENUS && !defined(__WXUNIVERSAL__)
+#endif // wxUSE_MENUS
 
 #ifndef __WXWINCE__
         case WM_POWERBROADCAST:
@@ -4270,7 +4223,7 @@ bool wxWindowMSW::HandleSetCursor(WXHWND WXUNUSED(hWnd),
     if ( wxIsBusy() )
     {
         wxDialog* const
-            dlg = wxDynamicCast(wxGetTopLevelParent((wxWindow *)this), wxDialog);
+            dlg = wxDynamicCast(wxGetTopLevelParent(this), wxDialog);
         if ( !dlg || !dlg->IsModal() )
             isBusy = true;
     }
@@ -4903,15 +4856,11 @@ bool wxWindowMSW::HandlePaint()
 
     bool processed = HandleWindowEvent(event);
 
-    if ( wxDidCreatePaintDC && !processed )
+    if ( processed && !wxDidCreatePaintDC )
     {
-        // Event handler did paint something as wxPaintDC object was created
-        // but then it must have skipped the event to indicate that default
-        // handling should still take place, so call MSWDefWindowProc() right
-        // now. It's important to do it before EndPaint() call below as that
-        // would validate the window and MSWDefWindowProc(WM_PAINT) wouldn't do
-        // anything if called after it.
-        OnPaint(event);
+        // do call MSWDefWindowProc() to validate the update region to avoid
+        // the problems mentioned above
+        processed = false;
     }
 
     // note that we must generate NC event after the normal one as otherwise
@@ -4927,14 +4876,7 @@ bool wxWindowMSW::HandlePaint()
 
     wxPaintDCImpl::EndPaint((wxWindow *)this);
 
-    // It doesn't matter whether the event was actually processed or not here,
-    // what matters is whether we already painted, and hence validated, the
-    // window or not. If we did, either the event was processed or we called
-    // OnPaint() above, so we should return true. If we did not, even the event
-    // was processed, we must still call MSWDefWindowProc() to ensure that the
-    // window is validated, i.e. to avoid the problem described in the comment
-    // before wxDidCreatePaintDC definition above.
-    return wxDidCreatePaintDC;
+    return processed;
 }
 
 // Can be called from an application's OnPaint handler

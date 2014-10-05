@@ -48,9 +48,8 @@ public:
     virtual void Raise();
     virtual void Lower();
 
-    // SetLabel(), which does nothing in wxWindow
-    virtual void SetLabel(const wxString& label) wxOVERRIDE { m_Label = label; }
-    virtual wxString GetLabel() const wxOVERRIDE            { return m_Label; }
+    virtual void SetLabel(const wxString& label);
+    virtual wxString GetLabel() const;
 
     virtual bool Show( bool show = true );
     virtual bool Enable( bool enable = true );
@@ -178,7 +177,6 @@ protected:
         int incW, int incH);
     virtual void DoCaptureMouse();
     virtual void DoReleaseMouse();
-    virtual void KillFocus();
 
 #if wxUSE_TOOLTIPS
     virtual void DoSetToolTip( wxToolTip *tip );
@@ -187,8 +185,6 @@ protected:
 private:
     // common part of all ctors
     void Init();
-
-    wxString m_Label;
 
     DECLARE_DYNAMIC_CLASS(wxWindowX11)
     wxDECLARE_NO_COPY_CLASS(wxWindowX11);

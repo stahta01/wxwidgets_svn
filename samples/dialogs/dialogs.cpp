@@ -60,8 +60,6 @@
     #include "wx/progdlg.h"
 #endif // wxUSE_PROGRESSDLG
 
-#include "wx/appprogress.h"
-
 #if wxUSE_ABOUTDLG
     #include "wx/aboutdlg.h"
 
@@ -221,8 +219,6 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 #if wxUSE_PROGRESSDLG
     EVT_MENU(DIALOGS_PROGRESS,                      MyFrame::ShowProgress)
 #endif // wxUSE_PROGRESSDLG
-
-    EVT_MENU(DIALOGS_APP_PROGRESS,                  MyFrame::ShowAppProgress)
 
 #if wxUSE_ABOUTDLG
     EVT_MENU(DIALOGS_ABOUTDLG_SIMPLE,               MyFrame::ShowSimpleAboutDialog)
@@ -469,8 +465,6 @@ bool MyApp::OnInit()
     #if wxUSE_PROGRESSDLG
         info_menu->Append(DIALOGS_PROGRESS, wxT("Pro&gress dialog\tCtrl-G"));
     #endif // wxUSE_PROGRESSDLG
-
-        info_menu->Append(DIALOGS_APP_PROGRESS, wxT("&App progress\tShift-Ctrl-G"));
 
     #if wxUSE_BUSYINFO
        info_menu->Append(DIALOGS_BUSYINFO, wxT("&Busy info dialog\tCtrl-B"));
@@ -1450,7 +1444,7 @@ void MyFrame::FileOpen2(wxCommandEvent& WXUNUSED(event) )
                                         wxFileSelectorDefaultWildcardStr,
                                         wxFileSelectorDefaultWildcardStr
                                     ),
-                                    wxFD_OPEN|wxFD_CHANGE_DIR|wxFD_PREVIEW|wxFD_NO_FOLLOW,
+                                    wxFD_OPEN|wxFD_CHANGE_DIR|wxFD_PREVIEW,
                                     this
                                    );
 
@@ -2147,14 +2141,14 @@ void MyFrame::OnModalHook(wxCommandEvent& event)
     class TestModalHook : public wxModalDialogHook
     {
     protected:
-        virtual int Enter(wxDialog* dialog) wxOVERRIDE
+        virtual int Enter(wxDialog* dialog)
         {
             wxLogStatus("Showing %s modal dialog",
                         dialog->GetClassInfo()->GetClassName());
             return wxID_NONE;
         }
 
-        virtual void Exit(wxDialog* dialog) wxOVERRIDE
+        virtual void Exit(wxDialog* dialog)
         {
             wxLogStatus("Leaving %s modal dialog",
                         dialog->GetClassInfo()->GetClassName());
@@ -2274,29 +2268,6 @@ void MyFrame::ShowProgress( wxCommandEvent& WXUNUSED(event) )
 
 #endif // wxUSE_PROGRESSDLG
 
-void MyFrame::ShowAppProgress( wxCommandEvent& WXUNUSED(event) )
-{
-    wxAppProgressIndicator progress(this);
-    if ( !progress.IsAvailable() )
-    {
-        wxLogStatus("Progress indicator not available under this platform.");
-        return;
-    }
-
-    wxLogStatus("Using application progress indicator...");
-
-    const int range = 10;
-    progress.SetRange(range);
-    for ( int i = 0; i < range; i++ )
-    {
-        progress.SetValue(i);
-
-        wxMilliSleep(500);
-    }
-
-    wxLogStatus("Progress finished");
-}
-
 #if wxUSE_ABOUTDLG
 
 static void InitAboutInfoMinimal(wxAboutDialogInfo& info)
@@ -2388,7 +2359,7 @@ public:
     }
 
     // add some custom controls
-    virtual void DoAddCustomControls() wxOVERRIDE
+    virtual void DoAddCustomControls()
     {
         AddControl(new wxStaticLine(this), wxSizerFlags().Expand());
         AddText(wxT("Some custom text"));
@@ -3047,7 +3018,7 @@ bool TestMessageBoxDialog::Create()
     m_textExtMsg = new wxTextCtrl(this, wxID_ANY, "",
                                   wxDefaultPosition, wxDefaultSize,
                                   wxTE_MULTILINE);
-    sizerMsgs->Add(m_textExtMsg, wxSizerFlags().Expand());
+    sizerMsgs->Add(m_textExtMsg, wxSizerFlags(1).Expand());
 
     sizerTop->Add(sizerMsgs, wxSizerFlags(1).Expand().Border());
 
@@ -3070,7 +3041,7 @@ bool TestMessageBoxDialog::Create()
         sizerBtns->Add(m_buttons[n], wxSizerFlags().Centre().Left());
 
         m_labels[n] = new wxTextCtrl(this, wxID_ANY);
-        sizerBtns->Add(m_labels[n], wxSizerFlags().Centre().Expand());
+        sizerBtns->Add(m_labels[n], wxSizerFlags(1).Centre().Expand());
 
         m_labels[n]->Connect(wxEVT_UPDATE_UI,
                              wxUpdateUIEventHandler(
@@ -3079,7 +3050,7 @@ bool TestMessageBoxDialog::Create()
                              this);
     }
 
-    sizerBtnsBox->Add(sizerBtns, wxSizerFlags().Expand());
+    sizerBtnsBox->Add(sizerBtns, wxSizerFlags(1).Expand());
     sizerTop->Add(sizerBtnsBox, wxSizerFlags().Expand().Border());
 
 
@@ -3116,22 +3087,15 @@ bool TestMessageBoxDialog::Create()
                                 TestMessageBoxDialog::OnUpdateNoDefaultUI),
                             NULL,
                             this);
-    sizerFlags->Add(m_chkNoDefault, wxSizerFlags().Border());
+    sizerFlags->Add(m_chkNoDefault, wxSizerFlags(1).Border());
 
     m_chkCentre = new wxCheckBox(this, wxID_ANY, "Centre on &parent");
-    sizerFlags->Add(m_chkCentre, wxSizerFlags().Border());
+    sizerFlags->Add(m_chkCentre, wxSizerFlags(1).Border());
 
     // add any additional flag from subclasses
     AddAdditionalFlags(sizerFlags);
 
     sizerTop->Add(sizerFlags, wxSizerFlags().Expand().Border());
-
-    // add the currently unused zone for displaying the dialog result
-    m_labelResult = new wxStaticText(this, wxID_ANY, "",
-                                     wxDefaultPosition, wxDefaultSize,
-                                     wxST_NO_AUTORESIZE | wxALIGN_CENTRE);
-    m_labelResult->SetForegroundColour(*wxBLUE);
-    sizerTop->Add(m_labelResult, wxSizerFlags().Expand().DoubleBorder());
 
     // finally buttons to show the resulting message box and close this dialog
     sizerTop->Add(CreateStdDialogButtonSizer(wxAPPLY | wxCLOSE),
@@ -3140,8 +3104,6 @@ bool TestMessageBoxDialog::Create()
     SetSizerAndFit(sizerTop);
 
     m_buttons[Btn_Ok]->SetValue(true);
-
-    CentreOnScreen();
 
     return true;
 }
@@ -3262,21 +3224,16 @@ void TestMessageBoxDialog::OnApply(wxCommandEvent& WXUNUSED(event))
     wxMessageDialog dlg(this, GetMessage(), GetBoxTitle(), GetStyle());
     PrepareMessageDialog(dlg);
 
-    ShowResult(dlg.ShowModal());
-}
-
-void TestMessageBoxDialog::ShowResult(int res)
-{
     wxString btnName;
-    switch ( res )
+    switch ( dlg.ShowModal() )
     {
         case wxID_OK:
             btnName = "OK";
             break;
 
         case wxID_CANCEL:
-            btnName = "Cancel";
-            break;
+            // Avoid the extra message box if the dialog was cancelled.
+            return;
 
         case wxID_YES:
             btnName = "Yes";
@@ -3294,9 +3251,7 @@ void TestMessageBoxDialog::ShowResult(int res)
             btnName = "Unknown";
     }
 
-    m_labelResult->SetLabel(
-        wxString::Format("Dialog was closed with the \"%s\" button.", btnName)
-    );
+    wxLogMessage("Dialog was closed with the \"%s\" button.", btnName);
 }
 
 void TestMessageBoxDialog::OnClose(wxCommandEvent& WXUNUSED(event))
@@ -3326,21 +3281,21 @@ void TestRichMessageDialog::AddAdditionalTextOptions(wxSizer *sizer)
                                                      "&Additional Elements");
 
     // add a option to show a check box.
-    wxSizer * const sizerCheckBox = new wxBoxSizer(wxHORIZONTAL);
-    sizerCheckBox->Add(new wxStaticText(this, wxID_ANY, "&Check box:"),
-                       wxSizerFlags().Centre().Border(wxRIGHT));
+    wxFlexGridSizer * const sizerCheckBox = new wxFlexGridSizer(2, 5, 5);
+    sizerCheckBox->AddGrowableCol(1);
+    sizerCheckBox->Add(new wxStaticText(this, wxID_ANY, "&Check box:"));
     m_textCheckBox = new wxTextCtrl(this, wxID_ANY);
-    sizerCheckBox->Add(m_textCheckBox, wxSizerFlags(1).Centre());
-    sizerMsgs->Add(sizerCheckBox, wxSizerFlags().Expand().Border(wxBOTTOM));
+    sizerCheckBox->Add(m_textCheckBox, wxSizerFlags(1).Expand().Border(wxBOTTOM));
+    sizerMsgs->Add(sizerCheckBox, wxSizerFlags(1).Expand());
 
     // add option to show a detailed text.
     sizerMsgs->Add(new wxStaticText(this, wxID_ANY, "&Detailed message:"));
     m_textDetailed = new wxTextCtrl(this, wxID_ANY, "",
                                     wxDefaultPosition, wxDefaultSize,
                                     wxTE_MULTILINE);
-    sizerMsgs->Add(m_textDetailed, wxSizerFlags().Expand());
+    sizerMsgs->Add(m_textDetailed, wxSizerFlags(1).Expand());
 
-    sizer->Add(sizerMsgs, wxSizerFlags().Expand().Border());
+    sizer->Add(sizerMsgs, wxSizerFlags(1).Expand().Border());
 }
 
 void TestRichMessageDialog::AddAdditionalFlags(wxSizer *sizer)
@@ -3349,7 +3304,7 @@ void TestRichMessageDialog::AddAdditionalFlags(wxSizer *sizer)
     // in the dialog.
     m_initialValueCheckBox =
         new wxCheckBox(this, wxID_ANY, "Checkbox initially checked");
-    sizer->Add(m_initialValueCheckBox, wxSizerFlags().Border());
+    sizer->Add(m_initialValueCheckBox, wxSizerFlags(1).Border());
 }
 
 void TestRichMessageDialog::OnApply(wxCommandEvent& WXUNUSED(event))
@@ -3361,7 +3316,7 @@ void TestRichMessageDialog::OnApply(wxCommandEvent& WXUNUSED(event))
                      m_initialValueCheckBox->GetValue());
     dlg.ShowDetailedText(m_textDetailed->GetValue());
 
-    ShowResult(dlg.ShowModal());
+    dlg.ShowModal();
 }
 
 #endif // wxUSE_RICHMSGDLG
@@ -3377,7 +3332,7 @@ class MyLogGui : public wxLogGui
 private:
     virtual void DoShowSingleLogMessage(const wxString& message,
                                         const wxString& title,
-                                        int style) wxOVERRIDE
+                                        int style)
     {
         wxMessageDialog dlg(NULL, message, title,
                             wxOK | wxCANCEL | wxCANCEL_DEFAULT | style);

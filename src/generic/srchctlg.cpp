@@ -116,7 +116,7 @@ protected:
     //
     // This is a bit ugly and it would arguably be better to use whatever size
     // the base class version returns and just centre the text vertically in
-    // the search control but I failed to modify the code in LayoutControls()
+    // the search control but I failed to modify the code in DoLayoutControls()
     // to do this easily and as there is much in that code I don't understand
     // (notably what is the logic for buttons sizing?) I prefer to not touch it
     // at all.
@@ -126,15 +126,7 @@ protected:
         wxSearchTextCtrl* const self = const_cast<wxSearchTextCtrl*>(this);
 
         self->SetWindowStyleFlag((flags & ~wxBORDER_MASK) | wxBORDER_DEFAULT);
-        wxSize size = wxTextCtrl::DoGetBestSize();
-
-        // The calculation for no external borders in wxTextCtrl::DoGetSizeFromTextSize also
-        // removes any padding around the value, which is wrong for this situation. So we
-        // can't use wxBORDER_NONE to calculate a good height, in which case we just have to
-        // assume a border in the code above and then subtract the space that would be taken up
-        // by a themed border (the thin blue border and the white internal border).
-        size.y -= 4;
-
+        const wxSize size = wxTextCtrl::DoGetBestSize();
         self->SetWindowStyleFlag(flags);
 
         return size;
@@ -378,7 +370,7 @@ void wxSearchCtrl::SetMenu( wxMenu* menu )
             m_searchButton->Refresh();
         }
     }
-    LayoutControls();
+    DoLayoutControls();
 }
 
 wxMenu* wxSearchCtrl::GetMenu()
@@ -401,7 +393,7 @@ void wxSearchCtrl::ShowSearchButton( bool show )
         RecalcBitmaps();
     }
 
-    LayoutControls();
+    DoLayoutControls();
 }
 
 bool wxSearchCtrl::IsSearchButtonVisible() const
@@ -419,7 +411,7 @@ void wxSearchCtrl::ShowCancelButton( bool show )
     }
     m_cancelButtonVisible = show;
 
-    LayoutControls();
+    DoLayoutControls();
 }
 
 bool wxSearchCtrl::IsCancelButtonVisible() const
@@ -441,7 +433,7 @@ wxString wxSearchCtrl::GetDescriptiveText() const
 // geometry
 // ----------------------------------------------------------------------------
 
-wxSize wxSearchCtrl::DoGetBestClientSize() const
+wxSize wxSearchCtrl::DoGetBestSize() const
 {
     wxSize sizeText = m_text->GetBestSize();
     wxSize sizeSearch(0,0);
@@ -464,17 +456,23 @@ wxSize wxSearchCtrl::DoGetBestClientSize() const
     // buttons are square and equal to the height of the text control
     int height = sizeText.y;
     return wxSize(sizeSearch.x + searchMargin + sizeText.x + cancelMargin + sizeCancel.x + 2*horizontalBorder,
-                  height);
+                  height) + DoGetBorderSize();
 }
 
 void wxSearchCtrl::DoMoveWindow(int x, int y, int width, int height)
 {
     wxSearchCtrlBase::DoMoveWindow(x, y, width, height);
 
-    LayoutControls();
+    DoLayoutControls();
 }
 
-void wxSearchCtrl::LayoutControls()
+void wxSearchCtrl::LayoutControls(int WXUNUSED(x), int WXUNUSED(y),
+                                  int WXUNUSED(width), int WXUNUSED(height))
+{
+    DoLayoutControls();
+}
+
+void wxSearchCtrl::DoLayoutControls()
 {
     if ( !m_text )
         return;
@@ -523,17 +521,7 @@ void wxSearchCtrl::LayoutControls()
     x += sizeSearch.x;
     x += searchMargin;
 
-#ifdef __WXMSW__
-    // The text control is too high up on Windows; normally a text control looks OK because
-    // of the white border that's part of the theme border. We can also remove a pixel from
-    // the height to fit the text control in, because the padding in EDIT_HEIGHT_FROM_CHAR_HEIGHT
-    // is already generous.
-    int textY = 1;
-#else
-    int textY = 0;
-#endif
-
-    m_text->SetSize(x, textY, textWidth, height-textY);
+    m_text->SetSize(x, 0, textWidth, height);
     x += textWidth;
     x += cancelMargin;
 
@@ -1208,7 +1196,7 @@ void wxSearchCtrl::OnSetFocus( wxFocusEvent& /*event*/ )
 
 void wxSearchCtrl::OnSize( wxSizeEvent& WXUNUSED(event) )
 {
-    LayoutControls();
+    DoLayoutControls();
 }
 
 #if wxUSE_MENUS

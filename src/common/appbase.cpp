@@ -46,31 +46,15 @@
 #include "wx/tokenzr.h"
 #include "wx/thread.h"
 
-#if wxUSE_EXCEPTIONS
-    // Do we have a C++ compiler with enough C++11 support for
-    // std::exception_ptr and functions working with it?
-    #if __cplusplus >= 201103L
-        // Any conforming C++11 compiler should have it.
-        #define HAS_EXCEPTION_PTR
-    #elif wxCHECK_VISUALC_VERSION(11)
-        // VC++ supports it since version 10, even though it doesn't define
-        // __cplusplus to C++11 value, but MSVC 2010 doesn't have a way to test
-        // whether exception_ptr is valid, so we'd need to use a separate bool
-        // flag for it if we wanted to make it work. For now just settle for
-        // only using exception_ptr for VC11 and later.
-        #define HAS_EXCEPTION_PTR
-    #endif
-
-    #ifdef HAS_EXCEPTION_PTR
-        #include <exception>        // for std::current_exception()
-        #include <utility>          // for std::swap()
-    #endif
-
-    #if wxUSE_STL
+#if wxUSE_STL
+    #if wxUSE_EXCEPTIONS
         #include <exception>
         #include <typeinfo>
     #endif
-#endif // wxUSE_EXCEPTIONS
+    #if wxUSE_INTL
+        #include <locale>
+    #endif
+#endif // wxUSE_STL
 
 #if !defined(__WINDOWS__) || defined(__WXMICROWIN__)
   #include  <signal.h>      // for SIGTRAP used by wxTrap()
@@ -281,10 +265,6 @@ void wxAppConsoleBase::OnLaunched()
 
 int wxAppConsoleBase::OnExit()
 {
-    // Delete all pending objects first, they might use wxConfig to save their
-    // state during their destruction.
-    DeletePendingObjects();
-
 #if wxUSE_CONFIG
     // delete the config object if any (don't use Get() here, but Set()
     // because Get() could create a new config object)
@@ -680,50 +660,12 @@ void wxAppConsoleBase::OnUnhandledException()
 bool wxAppConsoleBase::OnExceptionInMainLoop()
 {
     throw;
-}
 
-#ifdef HAS_EXCEPTION_PTR
-static std::exception_ptr gs_storedException;
-
-bool wxAppConsoleBase::StoreCurrentException()
-{
-    if ( gs_storedException )
-    {
-        // We can't store more than one exception currently: while we could
-        // support this by just using a vector<exception_ptr>, it shouldn't be
-        // actually necessary because we should never have more than one active
-        // exception anyhow.
-        return false;
-    }
-
-    gs_storedException = std::current_exception();
-
-    return true;
-}
-
-void wxAppConsoleBase::RethrowStoredException()
-{
-    if ( gs_storedException )
-    {
-        std::exception_ptr storedException;
-        std::swap(storedException, gs_storedException);
-
-        std::rethrow_exception(storedException);
-    }
-}
-
-#else // !HAS_EXCEPTION_PTR
-
-bool wxAppConsoleBase::StoreCurrentException()
-{
+    // some compilers are too stupid to know that we never return after throw
+#if defined(__DMC__) || (defined(_MSC_VER) && _MSC_VER < 1200)
     return false;
+#endif
 }
-
-void wxAppConsoleBase::RethrowStoredException()
-{
-}
-
-#endif // HAS_EXCEPTION_PTR/!HAS_EXCEPTION_PTR
 
 #endif // wxUSE_EXCEPTIONS
 
@@ -996,7 +938,7 @@ wxString wxAppTraitsBase::GetAssertStackTrace()
         const wxString& GetStackTrace() const { return m_stackTrace; }
 
     protected:
-        virtual void OnStackFrame(const wxStackFrame& frame) wxOVERRIDE
+        virtual void OnStackFrame(const wxStackFrame& frame)
         {
             m_stackTrace << wxString::Format
                             (

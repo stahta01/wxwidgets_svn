@@ -35,13 +35,13 @@
 #include "wx/apptrait.h"
 
 #include <gtk/gtk.h>
-#include "wx/gtk/private/gtk2-compat.h"
-
-GdkWindow* wxGetTopLevelGDK();
+#include <glib.h>
 
 // ============================================================================
 // wxEventLoop implementation
 // ============================================================================
+
+extern GtkWidget *wxGetRootWindow();
 
 // ----------------------------------------------------------------------------
 // wxEventLoop running and exiting
@@ -77,13 +77,6 @@ int wxGUIEventLoop::DoRun()
     }
 
     OnExit();
-
-#if wxUSE_EXCEPTIONS
-    // Rethrow any exceptions which could have been produced by the handlers
-    // ran by the event loop.
-    if ( wxTheApp )
-        wxTheApp->RethrowStoredException();
-#endif // wxUSE_EXCEPTIONS
 
     return m_exitcode;
 }
@@ -156,7 +149,7 @@ class wxGUIEventLoopSourcesManager : public wxEventLoopSourcesManagerBase
 {
 public:
     virtual wxEventLoopSource*
-    AddSourceForFD(int fd, wxEventLoopSourceHandler *handler, int flags) wxOVERRIDE
+    AddSourceForFD(int fd, wxEventLoopSourceHandler *handler, int flags)
     {
         wxCHECK_MSG( fd != -1, NULL, "can't monitor invalid fd" );
 
@@ -368,8 +361,25 @@ static void wxgtk_main_do_event(GdkEvent* event, void* data)
 }
 }
 
-void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
+bool wxGUIEventLoop::YieldFor(long eventsToProcess)
 {
+#if wxUSE_THREADS
+    if ( !wxThread::IsMain() )
+    {
+        // can't call gtk_main_iteration() from other threads like this
+        return true;
+    }
+#endif // wxUSE_THREADS
+
+    m_isInsideYield = true;
+    m_eventsToProcessInsideYield = eventsToProcess;
+
+#if wxUSE_LOG
+    // disable log flushing from here because a call to wxYield() shouldn't
+    // normally result in message boxes popping up &c
+    wxLog::Suspend();
+#endif
+
     // temporarily replace the global GDK event handler with our function, which
     // categorizes the events and using m_eventsToProcessInsideYield decides
     // if an event should be processed immediately or not
@@ -383,7 +393,10 @@ void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
         gtk_main_iteration();
     gdk_event_handler_set ((GdkEventFunc)gtk_main_do_event, NULL, NULL);
 
-    wxEventLoopBase::DoYieldFor(eventsToProcess);
+    // Process all pending events too, this is consistent with wxMSW behaviour
+    // and the behaviour of wxGTK itself in the previous versions.
+    if ( wxTheApp )
+        wxTheApp->ProcessPendingEvents();
 
     if (eventsToProcess != wxEVT_CATEGORY_CLIPBOARD)
     {
@@ -400,7 +413,7 @@ void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
     //      then we fall into a never-ending loop...
 
     // put all unprocessed GDK events back in the queue
-    GdkDisplay* disp = gdk_window_get_display(wxGetTopLevelGDK());
+    GdkDisplay* disp = gtk_widget_get_display(wxGetRootWindow());
     for (size_t i=0; i<m_arrGdkEvents.GetCount(); i++)
     {
         GdkEvent* ev = (GdkEvent*)m_arrGdkEvents[i];
@@ -411,4 +424,13 @@ void wxGUIEventLoop::DoYieldFor(long eventsToProcess)
     }
 
     m_arrGdkEvents.Clear();
+
+#if wxUSE_LOG
+    // let the logs be flashed again
+    wxLog::Resume();
+#endif
+
+    m_isInsideYield = false;
+
+    return true;
 }

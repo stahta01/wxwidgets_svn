@@ -24,8 +24,6 @@
 
 #if wxUSE_GUI
 
-typedef CGRect WXRect;
-
 OSStatus WXDLLIMPEXP_CORE wxMacDrawCGImage(
                                CGContextRef    inContext,
                                const CGRect *  inBounds,
@@ -169,8 +167,6 @@ public :
 
     virtual bool IsFullScreen() const;
 
-    virtual bool EnableFullScreenView(bool enable);
-    
     virtual bool ShowFullScreen(bool show, long style);
 
     virtual void RequestUserAttention(int flags);

@@ -136,7 +136,7 @@ public:
     // this one is called on application startup and is a good place for the app
     // initialization (doing it here and not in the ctor allows to have an error
     // return: if OnInit() returns false, the application terminates)
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 };
 
 // Define a new frame type: this is going to be our main frame
@@ -240,7 +240,7 @@ public:
 
 private:
     // implement sink functions
-    virtual void DoLogTextAtLevel(wxLogLevel level, const wxString& msg) wxOVERRIDE
+    virtual void DoLogTextAtLevel(wxLogLevel level, const wxString& msg)
     {
         if ( level == wxLOG_Trace )
         {
@@ -501,7 +501,8 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
         SetClientSize(sizeMin);
     SetMinClientSize(sizeMin);
 
-#if USE_LOG
+#if USE_LOG && !defined(__WXCOCOA__)
+    // wxCocoa's listbox is too flakey to use for logging right now
     // now that everything is created we can redirect the log messages to the
     // listbox
     m_logTarget = new LboxLogger(m_lboxLog, wxLog::GetActiveTarget());
@@ -1052,7 +1053,7 @@ void WidgetsFrame::OnAutoCompleteCustom(wxCommandEvent& WXUNUSED(event))
     class CustomTextCompleter : public wxTextCompleterSimple
     {
     public:
-        virtual void GetCompletions(const wxString& prefix, wxArrayString& res) wxOVERRIDE
+        virtual void GetCompletions(const wxString& prefix, wxArrayString& res)
         {
             // This is used for illustrative purposes only and shows how many
             // completions we return every time when we're called.

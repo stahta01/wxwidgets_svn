@@ -510,16 +510,6 @@ wxFont wxFont::Bold() const
     return font;
 }
 
-wxFont wxFont::GetBaseFont() const
-{
-    wxFont font(*this);
-    font.SetStyle(wxFONTSTYLE_NORMAL);
-    font.SetWeight(wxFONTWEIGHT_NORMAL );
-    font.SetUnderlined(false);
-    font.SetStrikethrough(false);
-    return font;
-}
-
 wxFont& wxFont::MakeItalic()
 {
     SetStyle(wxFONTSTYLE_ITALIC);
@@ -786,7 +776,7 @@ void wxNativeFontInfo::SetEncoding(wxFontEncoding encoding_)
 // format there anyhow (but there is a well-defined standard for X11 fonts used
 // by wxGTK and wxMotif)
 
-#if defined(wxNO_NATIVE_FONTINFO) || defined(__WXMSW__) || defined(__WXOSX__)
+#if defined(wxNO_NATIVE_FONTINFO) || defined(__WXMSW__) || defined (__WXPM__) || defined(__WXOSX__)
 
 wxString wxNativeFontInfo::ToUserString() const
 {
@@ -808,7 +798,7 @@ wxString wxNativeFontInfo::ToUserString() const
     {
         default:
             wxFAIL_MSG( wxT("unknown font weight") );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxFONTWEIGHT_NORMAL:
             break;
@@ -826,7 +816,7 @@ wxString wxNativeFontInfo::ToUserString() const
     {
         default:
             wxFAIL_MSG( wxT("unknown font style") );
-            wxFALLTHROUGH;
+            // fall through
 
         case wxFONTSTYLE_NORMAL:
             break;
@@ -1106,7 +1096,7 @@ bool wxNativeFontInfo::FromUserString(const wxString& s)
     return true;
 }
 
-#endif // generic or wxMSW
+#endif // generic or wxMSW or wxOS2
 
 
 // wxFont <-> wxString utilities, used by wxConfig

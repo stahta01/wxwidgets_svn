@@ -316,8 +316,6 @@ public:
                                 const wxString& text,
                                 int argFlags = 0 ) const;
     virtual bool DoSetAttribute( const wxString& name, wxVariant& value );
-    virtual wxVariant DoGetAttribute( const wxString& name ) const;
-
     virtual bool ValidateValue( wxVariant& value,
                                 wxPGValidationInfo& validationInfo ) const;
 
@@ -399,7 +397,7 @@ public:
     // Special constructor for caching choices (used by derived class)
     wxEnumProperty( const wxString& label,
                     const wxString& name,
-                    const char* const* untranslatedLabels,
+                    const wxChar* const* labels,
                     const long* values,
                     wxPGChoices* choicesCache,
                     int value = 0 );
@@ -502,7 +500,7 @@ public:
     // Special constructor for caching choices (used by derived class)
     wxEditEnumProperty( const wxString& label,
                         const wxString& name,
-                        const char* const* untranslatedLabels,
+                        const wxChar* const* labels,
                         const long* values,
                         wxPGChoices* choicesCache,
                         const wxString& value );
@@ -651,9 +649,6 @@ protected:
 // -----------------------------------------------------------------------
 
 #define wxPG_PROP_NO_ESCAPE     wxPG_PROP_CLASS_SPECIFIC_1
-// Flag used in wxLongStringProperty to mark that edit button
-// should be enabled even in the read-only mode.
-#define wxPG_PROP_ACTIVE_BTN    wxPG_PROP_CLASS_SPECIFIC_3
 
 
 /** @class wxPGLongStringDialogAdapter

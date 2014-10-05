@@ -75,11 +75,11 @@ public:
     CheckBoxWidgetsPage(WidgetsBookCtrl *book, wxImageList *imaglist);
     virtual ~CheckBoxWidgetsPage(){};
 
-    virtual wxControl *GetWidget() const wxOVERRIDE { return m_checkbox; }
-    virtual void RecreateWidget() wxOVERRIDE { CreateCheckbox(); }
+    virtual wxControl *GetWidget() const { return m_checkbox; }
+    virtual void RecreateWidget() { CreateCheckbox(); }
 
     // lazy creation of the content
-    virtual void CreateContent() wxOVERRIDE;
+    virtual void CreateContent();
 
 protected:
     // event handlers

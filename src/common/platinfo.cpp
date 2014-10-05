@@ -66,7 +66,6 @@ static const wxChar* const wxOperatingSystemIdNames[] =
 
     wxT("DOS"),
     wxT("OS/2"),
-
 };
 
 static const wxChar* const wxPortIdNames[] =
@@ -81,7 +80,6 @@ static const wxChar* const wxPortIdNames[] =
     wxT("wxMac"),
     wxT("wxCocoa"),
     wxT("wxWinCE"),
-    wxT("wxQT")
 };
 
 static const wxChar* const wxArchitectureNames[] =

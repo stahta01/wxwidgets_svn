@@ -202,11 +202,6 @@ public :
     wxMenu* GetWXPeer() { return m_peer ; }
 
     virtual void PopUp( wxWindow *win, int x, int y ) = 0;
-    
-    virtual void GetMenuBarDimensions(int &x, int &y, int &width, int &height) const
-    {
-        x = y = width = height = -1;
-    }
 
     static wxMenuImpl* Create( wxMenu* peer, const wxString& title );
     static wxMenuImpl* CreateRootMenu( wxMenu* peer );
@@ -871,8 +866,6 @@ public :
     virtual bool IsFullScreen() const= 0;
 
     virtual void ShowWithoutActivating() { Show(true); }
-
-    virtual bool EnableFullScreenView(bool enable) = 0;
 
     virtual bool ShowFullScreen(bool show, long style)= 0;
 

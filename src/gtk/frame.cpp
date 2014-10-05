@@ -56,6 +56,13 @@ bool wxFrame::Create( wxWindow *parent,
     return wxFrameBase::Create(parent, id, title, pos, sizeOrig, style, name);
 }
 
+wxFrame::~wxFrame()
+{
+    SendDestroyEvent();
+
+    DeleteAllBars();
+}
+
 // ----------------------------------------------------------------------------
 // overridden wxWindow methods
 // ----------------------------------------------------------------------------

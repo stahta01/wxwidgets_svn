@@ -46,7 +46,6 @@
 #include "wx/filename.h"
 #include "wx/tokenzr.h"
 #include "wx/fontmap.h"
-#include "wx/scopedptr.h"
 #include "wx/stdpaths.h"
 #include "wx/private/threadinfo.h"
 
@@ -148,7 +147,7 @@ wxString GetPreferredUILanguage(const wxArrayString& available)
                                                  NULL,
                                                  &bufferSize) )
         {
-            wxScopedArray<WCHAR> langs(bufferSize);
+            wxScopedArray<WCHAR> langs(new WCHAR[bufferSize]);
             if ( (*s_pfnGetUserPreferredUILanguages)(MUI_LANGUAGE_NAME,
                                                      &numLangs,
                                                      langs.get(),
@@ -1202,8 +1201,7 @@ bool wxMsgCatalogFile::FillHash(wxStringToStringHashMap& hash,
 
     // conversion to use to convert catalog strings to the GUI encoding
     wxMBConv *inputConv = NULL;
-
-    wxScopedPtr<wxMBConv> inputConvPtr; // just to delete inputConv if needed
+    wxMBConv *inputConvPtr = NULL; // same as inputConv but safely deleteable
 
     if ( !m_charset.empty() )
     {
@@ -1213,11 +1211,8 @@ bool wxMsgCatalogFile::FillHash(wxStringToStringHashMap& hash,
         if ( encCat != wxLocale::GetSystemEncoding() )
 #endif
         {
+            inputConvPtr =
             inputConv = new wxCSConv(m_charset);
-
-            // As we allocated it ourselves, we need to delete it, so ensure
-            // this happens.
-            inputConvPtr.reset(inputConv);
         }
     }
     else // no need or not possible to convert the encoding
@@ -1235,9 +1230,9 @@ bool wxMsgCatalogFile::FillHash(wxStringToStringHashMap& hash,
     // conversion to apply to msgid strings before looking them up: we only
     // need it if the msgids are neither in 7 bit ASCII nor in the same
     // encoding as the catalog
-    wxScopedPtr<wxCSConv> sourceConv;
-    if ( !msgIdCharset.empty() && (msgIdCharset != m_charset) )
-        sourceConv.reset(new wxCSConv(msgIdCharset));
+    wxCSConv *sourceConv = msgIdCharset.empty() || (msgIdCharset == m_charset)
+                            ? NULL
+                            : new wxCSConv(msgIdCharset);
 #endif // !wxUSE_UNICODE
 
     for (size_t32 i = 0; i < m_numStrings; i++)
@@ -1292,6 +1287,11 @@ bool wxMsgCatalogFile::FillHash(wxStringToStringHashMap& hash,
             ++index;
         }
     }
+
+#if !wxUSE_UNICODE
+    delete sourceConv;
+#endif
+    delete inputConvPtr;
 
     return true;
 }
@@ -2045,12 +2045,12 @@ class wxTranslationsModule: public wxModule
     public:
         wxTranslationsModule() {}
 
-        bool OnInit() wxOVERRIDE
+        bool OnInit()
         {
             return true;
         }
 
-        void OnExit() wxOVERRIDE
+        void OnExit()
         {
             if ( gs_translationsOwned )
                 delete gs_translations;

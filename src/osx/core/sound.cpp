@@ -38,9 +38,9 @@ public:
 
     ~wxOSXAudioToolboxSoundData();
 
-    virtual bool Play(unsigned flags) wxOVERRIDE;
+    virtual bool Play(unsigned flags);
 
-    virtual void DoStop() wxOVERRIDE;
+    virtual void DoStop();
 protected:
     static void CompletionCallback(SystemSoundID  mySSID, void * soundRef);
     void SoundCompleted();
@@ -51,7 +51,7 @@ protected:
 };
 
 wxOSXAudioToolboxSoundData::wxOSXAudioToolboxSoundData(const wxString& fileName) :
-    m_soundID(0)
+    m_soundID(NULL)
 {
     m_sndname = fileName;
     m_playing = false;
@@ -112,13 +112,7 @@ bool wxOSXAudioToolboxSoundData::Play(unsigned flags)
     CFStringNormalize(cfMutableString,kCFStringNormalizationFormD);
     wxCFRef<CFURLRef> url(CFURLCreateWithFileSystemPath(kCFAllocatorDefault, cfMutableString , kCFURLPOSIXPathStyle, false));
 
-    OSStatus err = AudioServicesCreateSystemSoundID(url, &m_soundID);
-    if ( err != 0 )
-    {
-        wxLogError(_("Failed to load sound from \"%s\" (error %d)."), m_sndname, err);
-        return false;
-    }
-
+    AudioServicesCreateSystemSoundID(url, &m_soundID);
     AudioServicesAddSystemSoundCompletion( m_soundID, CFRunLoopGetCurrent(), NULL, wxOSXAudioToolboxSoundData::CompletionCallback, (void *) this );
 
     bool sync = !(flags & wxSOUND_ASYNC);

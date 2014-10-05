@@ -39,6 +39,8 @@
 #include "wx/filename.h"
 #include "wx/metafile.h"
 
+#define TEST_CAIRO_EVERYWHERE 0
+
 // ----------------------------------------------------------------------------
 // resources
 // ----------------------------------------------------------------------------
@@ -74,9 +76,9 @@ public:
     // this one is called on application startup and is a good place for the app
     // initialization (doing it here and not in the ctor allows to have an error
     // return: if OnInit() returns false, the application terminates)
-    virtual bool OnInit() wxOVERRIDE;
+    virtual bool OnInit();
 
-    virtual int OnExit() wxOVERRIDE { DeleteBitmaps(); return 0; }
+    virtual int OnExit() { DeleteBitmaps(); return 0; }
 
 protected:
     void DeleteBitmaps();
@@ -84,7 +86,51 @@ protected:
     bool LoadImages();
 };
 
-class MyFrame;
+class MyCanvas;
+
+// Define a new frame type: this is going to be our main frame
+class MyFrame : public wxFrame
+{
+public:
+    // ctor(s)
+    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
+
+    // event handlers (these functions should _not_ be virtual)
+    void OnQuit(wxCommandEvent& event);
+    void OnAbout(wxCommandEvent& event);
+    void OnClip(wxCommandEvent& event);
+#if wxUSE_GRAPHICS_CONTEXT
+    void OnGraphicContext(wxCommandEvent& event);
+#endif
+    void OnBuffer(wxCommandEvent& event);
+    void OnCopy(wxCommandEvent& event);
+    void OnSave(wxCommandEvent& event);
+    void OnShow(wxCommandEvent &event);
+    void OnOption(wxCommandEvent &event);
+
+#if wxUSE_COLOURDLG
+    wxColour SelectColour();
+#endif // wxUSE_COLOURDLG
+    void PrepareDC(wxDC& dc);
+
+    int         m_backgroundMode;
+    int         m_textureBackground;
+    wxMappingMode m_mapMode;
+    double      m_xUserScale;
+    double      m_yUserScale;
+    int         m_xLogicalOrigin;
+    int         m_yLogicalOrigin;
+    bool        m_xAxisReversed,
+                m_yAxisReversed;
+    wxColour    m_colourForeground,    // these are _text_ colours
+                m_colourBackground;
+    wxBrush     m_backgroundBrush;
+    MyCanvas   *m_canvas;
+
+private:
+    // any class wishing to process wxWidgets events must use this macro
+    wxDECLARE_EVENT_TABLE();
+};
 
 // define a scrollable canvas for drawing onto
 class MyCanvas: public wxScrolledWindow
@@ -102,8 +148,7 @@ public:
     // set or remove the clipping region
     void Clip(bool clip) { m_clip = clip; Refresh(); }
 #if wxUSE_GRAPHICS_CONTEXT
-    void UseGraphicRenderer(wxGraphicsRenderer* renderer)
-        { m_renderer = renderer; Refresh(); }
+    void UseGraphicContext(bool use) { m_useContext = use; Refresh(); }
 #endif
     void UseBuffer(bool use) { m_useBuffer = use; Refresh(); }
 
@@ -146,85 +191,10 @@ private:
     wxPoint      m_anchorpoint;
     wxPoint      m_currentpoint;
 #if wxUSE_GRAPHICS_CONTEXT
-    wxGraphicsRenderer* m_renderer;
+    bool         m_useContext ;
 #endif
     bool         m_useBuffer;
 
-    wxDECLARE_EVENT_TABLE();
-};
-
-
-// Define a new frame type: this is going to be our main frame
-class MyFrame : public wxFrame
-{
-public:
-    // ctor(s)
-    MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size);
-
-    // event handlers (these functions should _not_ be virtual)
-    void OnQuit(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-    void OnClip(wxCommandEvent& event);
-
-#if wxUSE_GRAPHICS_CONTEXT
-    void OnGraphicContextNone(wxCommandEvent& WXUNUSED(event))
-    {
-        m_canvas->UseGraphicRenderer(NULL);
-    }
-
-    void OnGraphicContextDefault(wxCommandEvent& WXUNUSED(event))
-    {
-        m_canvas->UseGraphicRenderer(wxGraphicsRenderer::GetDefaultRenderer());
-    }
-#if wxUSE_CAIRO
-    void OnGraphicContextCairo(wxCommandEvent& WXUNUSED(event))
-    {
-        m_canvas->UseGraphicRenderer(wxGraphicsRenderer::GetCairoRenderer());
-    }
-#endif // wxUSE_CAIRO
-#ifdef __WXMSW__
-#if wxUSE_GRAPHICS_GDIPLUS
-    void OnGraphicContextGDIPlus(wxCommandEvent& WXUNUSED(event))
-    {
-        m_canvas->UseGraphicRenderer(wxGraphicsRenderer::GetGDIPlusRenderer());
-    }
-#endif
-#if wxUSE_GRAPHICS_DIRECT2D
-    void OnGraphicContextDirect2D(wxCommandEvent& WXUNUSED(event))
-    {
-        m_canvas->UseGraphicRenderer(wxGraphicsRenderer::GetDirect2DRenderer());
-    }
-#endif
-#endif // __WXMSW__
-#endif // wxUSE_GRAPHICS_CONTEXT
-
-    void OnBuffer(wxCommandEvent& event);
-    void OnCopy(wxCommandEvent& event);
-    void OnSave(wxCommandEvent& event);
-    void OnShow(wxCommandEvent &event);
-    void OnOption(wxCommandEvent &event);
-
-#if wxUSE_COLOURDLG
-    wxColour SelectColour();
-#endif // wxUSE_COLOURDLG
-    void PrepareDC(wxDC& dc) wxOVERRIDE;
-
-    int         m_backgroundMode;
-    int         m_textureBackground;
-    wxMappingMode m_mapMode;
-    double      m_xUserScale;
-    double      m_yUserScale;
-    int         m_xLogicalOrigin;
-    int         m_yLogicalOrigin;
-    bool        m_xAxisReversed,
-                m_yAxisReversed;
-    wxColour    m_colourForeground,    // these are _text_ colours
-                m_colourBackground;
-    wxBrush     m_backgroundBrush;
-    MyCanvas   *m_canvas;
-
-private:
-    // any class wishing to process wxWidgets events must use this macro
     wxDECLARE_EVENT_TABLE();
 };
 
@@ -258,22 +228,10 @@ enum
     File_ShowGradients,
     MenuShow_Last = File_ShowGradients,
 
-#if wxUSE_GRAPHICS_CONTEXT
-    File_DC,
-    File_GC_Default,
-#if wxUSE_CAIRO
-    File_GC_Cairo,
-#endif // wxUSE_CAIRO
-#ifdef __WXMSW__
-#if wxUSE_GRAPHICS_GDIPLUS
-    File_GC_GDIPlus,
-#endif
-#if wxUSE_GRAPHICS_DIRECT2D
-    File_GC_Direct2D,
-#endif
-#endif // __WXMSW__
-#endif // wxUSE_GRAPHICS_CONTEXT
     File_Clip,
+#if wxUSE_GRAPHICS_CONTEXT
+    File_GraphicContext,
+#endif
     File_Buffer,
     File_Copy,
     File_Save,
@@ -456,7 +414,7 @@ MyCanvas::MyCanvas(MyFrame *parent)
     m_clip = false;
     m_rubberBand = false;
 #if wxUSE_GRAPHICS_CONTEXT
-    m_renderer = NULL;
+    m_useContext = false;
 #endif
     m_useBuffer = false;
 }
@@ -816,7 +774,7 @@ void MyCanvas::DrawDefault(wxDC& dc)
 void MyCanvas::DrawText(wxDC& dc)
 {
     // set underlined font for testing
-    dc.SetFont( wxFontInfo(12).Family(wxFONTFAMILY_MODERN).Underlined() );
+    dc.SetFont( wxFont(12, wxMODERN, wxNORMAL, wxNORMAL, true) );
     dc.DrawText( wxT("This is text"), 110, 10 );
     dc.DrawRotatedText( wxT("That is text"), 20, 10, -45 );
 
@@ -833,7 +791,7 @@ void MyCanvas::DrawText(wxDC& dc)
         dc.DrawRotatedText(text , 400, 400, n);
     }
 
-    dc.SetFont( wxFontInfo(18).Family(wxFONTFAMILY_SWISS) );
+    dc.SetFont( wxFont( 18, wxSWISS, wxNORMAL, wxNORMAL ) );
 
     dc.DrawText( wxT("This is Swiss 18pt text."), 110, 40 );
 
@@ -869,10 +827,6 @@ void MyCanvas::DrawText(wxDC& dc)
 
     y += height;
     dc.DrawText("And\nmore\ntext on\nmultiple\nlines", 110, y);
-    y += 5*height;
-
-    dc.SetTextForeground(*wxBLUE);
-    dc.DrawRotatedText("Rotated text\ncan have\nmultiple lines\nas well", 110, y, 15);
 }
 
 static const struct
@@ -1022,6 +976,8 @@ const int BASE  = 80.0;
 const int BASE2 = BASE/2;
 const int BASE4 = BASE/4;
 
+static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
+
 
 // modeled along Robin Dunn's GraphicsContext.py sample
 
@@ -1115,11 +1071,11 @@ void MyCanvas::DrawGraphics(wxGraphicsContext* gc)
         gc->SetPen(wxPen(wxColour(val.red, val.green, val.blue, 128)));
 
         // use translate to artfully reposition each drawn path
-        gc->Translate(1.5 * BASE2 * cos(wxDegToRad(angle)),
-                     1.5 * BASE2 * sin(wxDegToRad(angle)));
+        gc->Translate(1.5 * BASE2 * cos(DegToRad(angle)),
+                     1.5 * BASE2 * sin(DegToRad(angle)));
 
         // use Rotate to rotate the path
-        gc->Rotate(wxDegToRad(angle));
+        gc->Rotate(DegToRad(angle));
 
         // now draw it
         gc->DrawPath(path);
@@ -1276,7 +1232,7 @@ void MyCanvas::DrawSplines(wxDC& dc)
             letters[m][n].y = center.y + h[ letters[m][n].y ];
         }
 
-        dc.SetPen( wxPen( *wxBLUE, 1, wxPENSTYLE_DOT) );
+        dc.SetPen( wxPen( *wxBLUE, 1, wxDOT) );
         dc.DrawLines(5, letters[m]);
         dc.SetPen( wxPen( *wxBLACK, 4) );
         dc.DrawSpline(5, letters[m]);
@@ -1367,7 +1323,7 @@ void MyCanvas::DrawGradients(wxDC& dc)
     dc.GradientFillLinear(r4, *wxBLACK, *wxGREEN, wxWEST);
 
 #if wxUSE_GRAPHICS_CONTEXT
-    if (m_renderer)
+    if (m_useContext)
     {
         wxGCDC                      &gdc = (wxGCDC&)dc;
         wxGraphicsContext           *gc = gdc.GetGraphicsContext();
@@ -1393,31 +1349,8 @@ void MyCanvas::DrawGradients(wxDC& dc)
         pth.CloseSubpath();
         gc->FillPath(pth);
 
-        wxGraphicsGradientStops simpleStops(*wxRED, *wxBLUE);
-
         gfr.Offset(0, gfr.height + 10);
-        dc.DrawText(wxT("Radial Gradient from Red to Blue without intermediary Stops"),
-            gfr.x, gfr.y);
-        gfr.Offset(0, TEXT_HEIGHT);
-
-        gc->SetBrush(gc->CreateRadialGradientBrush(gfr.x + gfr.width / 2,
-            gfr.y + gfr.height / 2,
-            gfr.x + gfr.width / 2,
-            gfr.y + gfr.height / 2,
-            gfr.width / 2,
-            simpleStops));
-
-        pth = gc->CreatePath();
-        pth.MoveToPoint(gfr.x,gfr.y);
-        pth.AddLineToPoint(gfr.x + gfr.width,gfr.y);
-        pth.AddLineToPoint(gfr.x + gfr.width,gfr.y+gfr.height);
-        pth.AddLineToPoint(gfr.x,gfr.y+gfr.height);
-        pth.CloseSubpath();
-        gc->FillPath(pth);
-
-        gfr.Offset(0, gfr.height + 10);
-        dc.DrawText(wxT("Radial Gradient from Red to Blue with Yellow and Green Stops"),
-            gfr.x, gfr.y);
+        dc.DrawText(wxT("Radial Gradient with Stops"), gfr.x, gfr.y);
         gfr.Offset(0, TEXT_HEIGHT);
 
         gc->SetBrush(gc->CreateRadialGradientBrush(gfr.x + gfr.width / 2,
@@ -1584,34 +1517,38 @@ void MyCanvas::Draw(wxDC& pdc)
 {
 #if wxUSE_GRAPHICS_CONTEXT
     wxGCDC gdc;
-
-    if ( m_renderer )
-    {
-        wxGraphicsContext* context;
-        if ( wxPaintDC *paintdc = wxDynamicCast(&pdc, wxPaintDC) )
-        {
-            context = m_renderer->CreateContext(*paintdc);
-        }
-        else if ( wxMemoryDC *memdc = wxDynamicCast(&pdc, wxMemoryDC) )
-        {
-            context = m_renderer->CreateContext(*memdc);
-        }
-#if wxUSE_METAFILE && defined(wxMETAFILE_IS_ENH)
-        else if ( wxMetafileDC *metadc = wxDynamicCast(&pdc, wxMetafileDC) )
-        {
-            context = m_renderer->CreateContext(*metadc);
-        }
+    wxGraphicsRenderer* const renderer = wxGraphicsRenderer::
+#if TEST_CAIRO_EVERYWHERE
+        GetCairoRenderer()
+#else
+        GetDefaultRenderer()
 #endif
-        else
-        {
-            wxFAIL_MSG( "Unknown wxDC kind" );
-            return;
-        }
+        ;
 
-        gdc.SetGraphicsContext(context);
+    wxGraphicsContext* context;
+    if ( wxPaintDC *paintdc = wxDynamicCast(&pdc, wxPaintDC) )
+    {
+        context = renderer->CreateContext(*paintdc);
+    }
+    else if ( wxMemoryDC *memdc = wxDynamicCast(&pdc, wxMemoryDC) )
+    {
+        context = renderer->CreateContext(*memdc);
+    }
+#if wxUSE_METAFILE && defined(wxMETAFILE_IS_ENH)
+    else if ( wxMetafileDC *metadc = wxDynamicCast(&pdc, wxMetafileDC) )
+    {
+        context = renderer->CreateContext(*metadc);
+    }
+#endif
+    else
+    {
+        wxFAIL_MSG( "Unknown wxDC kind" );
+        return;
     }
 
-    wxDC &dc = m_renderer ? (wxDC&) gdc : (wxDC&) pdc ;
+    gdc.SetGraphicsContext(context);
+
+    wxDC &dc = m_useContext ? (wxDC&) gdc : (wxDC&) pdc ;
 #else
     wxDC &dc = pdc ;
 #endif
@@ -1804,23 +1741,9 @@ wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU      (File_Quit,     MyFrame::OnQuit)
     EVT_MENU      (File_About,    MyFrame::OnAbout)
     EVT_MENU      (File_Clip,     MyFrame::OnClip)
-
 #if wxUSE_GRAPHICS_CONTEXT
-    EVT_MENU      (File_DC,         MyFrame::OnGraphicContextNone)
-    EVT_MENU      (File_GC_Default, MyFrame::OnGraphicContextDefault)
-#if wxUSE_CAIRO
-    EVT_MENU      (File_GC_Cairo, MyFrame::OnGraphicContextCairo)
-#endif // wxUSE_CAIRO
-#ifdef __WXMSW__
-#if wxUSE_GRAPHICS_GDIPLUS
-    EVT_MENU      (File_GC_GDIPlus, MyFrame::OnGraphicContextGDIPlus)
+    EVT_MENU      (File_GraphicContext, MyFrame::OnGraphicContext)
 #endif
-#if wxUSE_GRAPHICS_DIRECT2D
-    EVT_MENU      (File_GC_Direct2D, MyFrame::OnGraphicContextDirect2D)
-#endif
-#endif // __WXMSW__
-#endif // wxUSE_GRAPHICS_CONTEXT
-
     EVT_MENU      (File_Buffer,   MyFrame::OnBuffer)
     EVT_MENU      (File_Copy,     MyFrame::OnCopy)
     EVT_MENU      (File_Save,     MyFrame::OnSave)
@@ -1838,44 +1761,30 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
     // set the frame icon
     SetIcon(wxICON(sample));
 
-    wxMenu *menuScreen = new wxMenu;
-    menuScreen->Append(File_ShowDefault, wxT("&Default screen\tF1"));
-    menuScreen->Append(File_ShowText, wxT("&Text screen\tF2"));
-    menuScreen->Append(File_ShowLines, wxT("&Lines screen\tF3"));
-    menuScreen->Append(File_ShowBrushes, wxT("&Brushes screen\tF4"));
-    menuScreen->Append(File_ShowPolygons, wxT("&Polygons screen\tF5"));
-    menuScreen->Append(File_ShowMask, wxT("&Mask screen\tF6"));
-    menuScreen->Append(File_ShowMaskStretch, wxT("1/&2 scaled mask\tShift-F6"));
-    menuScreen->Append(File_ShowOps, wxT("&Raster operations screen\tF7"));
-    menuScreen->Append(File_ShowRegions, wxT("Re&gions screen\tF8"));
-    menuScreen->Append(File_ShowCircles, wxT("&Circles screen\tF9"));
-#if wxUSE_GRAPHICS_CONTEXT
-    menuScreen->Append(File_ShowAlpha, wxT("&Alpha screen\tF10"));
-#endif
-    menuScreen->Append(File_ShowSplines, wxT("Spl&ines screen\tF11"));
-    menuScreen->Append(File_ShowGradients, wxT("&Gradients screen\tF12"));
-#if wxUSE_GRAPHICS_CONTEXT
-    menuScreen->Append(File_ShowGraphics, wxT("&Graphics screen"));
-#endif
-
     wxMenu *menuFile = new wxMenu;
+    menuFile->Append(File_ShowDefault, wxT("&Default screen\tF1"));
+    menuFile->Append(File_ShowText, wxT("&Text screen\tF2"));
+    menuFile->Append(File_ShowLines, wxT("&Lines screen\tF3"));
+    menuFile->Append(File_ShowBrushes, wxT("&Brushes screen\tF4"));
+    menuFile->Append(File_ShowPolygons, wxT("&Polygons screen\tF5"));
+    menuFile->Append(File_ShowMask, wxT("&Mask screen\tF6"));
+    menuFile->Append(File_ShowMaskStretch, wxT("1/&2 scaled mask\tShift-F6"));
+    menuFile->Append(File_ShowOps, wxT("&Raster operations screen\tF7"));
+    menuFile->Append(File_ShowRegions, wxT("Re&gions screen\tF8"));
+    menuFile->Append(File_ShowCircles, wxT("&Circles screen\tF9"));
 #if wxUSE_GRAPHICS_CONTEXT
-    menuFile->AppendRadioItem(File_DC, "Use wx&DC\tShift-Ctrl-Y");
-    menuFile->AppendRadioItem(File_GC_Default, "Use default wx&GraphicContext\tCtrl-Y");
-#if wxUSE_CAIRO
-    menuFile->AppendRadioItem(File_GC_Cairo, "Use &Cairo\tCtrl-O");
-#endif // wxUSE_CAIRO
-#ifdef __WXMSW__
-#if wxUSE_GRAPHICS_GDIPLUS
-    menuFile->AppendRadioItem(File_GC_GDIPlus, "Use &GDI+\tCtrl-+");
+    menuFile->Append(File_ShowAlpha, wxT("&Alpha screen\tF10"));
 #endif
-#if wxUSE_GRAPHICS_DIRECT2D
-    menuFile->AppendRadioItem(File_GC_Direct2D, "Use &Direct2D\tCtrl-2");
+    menuFile->Append(File_ShowSplines, wxT("Spl&ines screen\tF11"));
+    menuFile->Append(File_ShowGradients, wxT("&Gradients screen\tF12"));
+#if wxUSE_GRAPHICS_CONTEXT
+     menuFile->Append(File_ShowGraphics, wxT("&Graphics screen"));
 #endif
-#endif // __WXMSW__
-#endif // wxUSE_GRAPHICS_CONTEXT
     menuFile->AppendSeparator();
     menuFile->AppendCheckItem(File_Clip, wxT("&Clip\tCtrl-C"), wxT("Clip/unclip drawing"));
+#if wxUSE_GRAPHICS_CONTEXT
+    menuFile->AppendCheckItem(File_GraphicContext, wxT("&Use GraphicContext\tCtrl-Y"), wxT("Use GraphicContext"));
+#endif
     menuFile->AppendCheckItem(File_Buffer, wxT("&Use wx&BufferedPaintDC\tCtrl-Z"), wxT("Buffer painting"));
     menuFile->AppendSeparator();
 #if wxUSE_METAFILE && defined(wxMETAFILE_IS_ENH)
@@ -1926,8 +1835,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
     // now append the freshly created menu to the menu bar...
     wxMenuBar *menuBar = new wxMenuBar;
-    menuBar->Append(menuFile, wxT("&Drawing"));
-    menuBar->Append(menuScreen, wxT("Scree&n"));
+    menuBar->Append(menuFile, wxT("&File"));
     menuBar->Append(menuMapMode, wxT("&Mode"));
     menuBar->Append(menuUserScale, wxT("&Scale"));
     menuBar->Append(menuAxis, wxT("&Axis"));
@@ -1982,6 +1890,13 @@ void MyFrame::OnClip(wxCommandEvent& event)
 {
     m_canvas->Clip(event.IsChecked());
 }
+
+#if wxUSE_GRAPHICS_CONTEXT
+void MyFrame::OnGraphicContext(wxCommandEvent& event)
+{
+    m_canvas->UseGraphicContext(event.IsChecked());
+}
+#endif
 
 void MyFrame::OnBuffer(wxCommandEvent& event)
 {

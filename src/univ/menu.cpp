@@ -1127,11 +1127,6 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
             // for now it has just one element
             item->SetAsRadioGroupStart();
             item->SetRadioGroupEnd(m_startRadioGroup);
-
-            if ( !wxMenuBase::DoAppend(item) )
-                return NULL;
-
-            item->Check(true);
         }
         else // extend the current radio group
         {
@@ -1147,18 +1142,15 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
             {
                 wxFAIL_MSG( wxT("where is the radio group start item?") );
             }
-
-            if ( !wxMenuBase::DoAppend(item) )
-                return NULL;
         }
     }
     else // not a radio item
     {
         EndRadioGroup();
-
-        if ( !wxMenuBase::DoAppend(item) )
-            return NULL;
     }
+
+    if ( !wxMenuBase::DoAppend(item) )
+        return NULL;
 
     OnItemAdded(item);
 
@@ -1167,69 +1159,8 @@ wxMenuItem* wxMenu::DoAppend(wxMenuItem *item)
 
 wxMenuItem* wxMenu::DoInsert(size_t pos, wxMenuItem *item)
 {
-    if ( item->GetKind() == wxITEM_RADIO )
-    {
-        unsigned int start, end;
-        wxMenuItemIter firstRadio;
-
-        if ( m_startRadioGroup == -1 )
-        {
-            // start a new radio group
-            m_startRadioGroup = pos;
-
-            // set this element as the first of radio group
-            item->SetAsRadioGroupStart();
-            item->SetRadioGroupEnd(m_startRadioGroup);
-
-            if ( !wxMenuBase::DoInsert(pos, item) )
-                return NULL;
-
-            item->Check(true);
-        }
-        else // extend the current radio group
-        {
-            // get current first radio item in radio group
-            firstRadio = GetMenuItems().Item(m_startRadioGroup);
-
-            // get current radio group range
-            start = firstRadio->GetData()->GetRadioGroupStart();
-            end = firstRadio->GetData()->GetRadioGroupEnd();
-
-            if ( pos <= start )
-            {
-                // Item is inserted in the begining of the range
-                // we need to update its end item
-                m_startRadioGroup = pos;
-                item->SetAsRadioGroupStart();
-                item->SetRadioGroupEnd(end + 1);
-            }
-            else if ( (pos >= start) && (pos <= end) )
-            {
-                // we need to update its end item
-                item->SetRadioGroupStart(m_startRadioGroup);
-
-                // Item is inserted in the middle of this range or immediately
-                // after it in which case it extends this range so make it span
-                // one more item in any case.
-                if ( firstRadio )
-                {
-                    firstRadio->GetData()->SetRadioGroupEnd(end + 1);
-                }
-                else
-                {
-                    wxFAIL_MSG( wxT("where is the radio group start item?") );
-                }
-            }
-
-            if ( !wxMenuBase::DoInsert(pos, item) )
-                return NULL;
-        }
-    }
-    else
-    {
-        if ( !wxMenuBase::DoInsert(pos, item) )
-            return NULL;
-    }
+    if ( !wxMenuBase::DoInsert(pos, item) )
+        return NULL;
 
     OnItemAdded(item);
 
@@ -1673,16 +1604,6 @@ void wxMenuItem::SetRadioGroupEnd(int end)
     m_radioGroup.end = end;
 }
 
-int wxMenuItem::GetRadioGroupStart()
-{
-    return m_radioGroup.start;
-}
-
-int wxMenuItem::GetRadioGroupEnd()
-{
-    return m_radioGroup.end;
-}
-
 // ----------------------------------------------------------------------------
 // wxMenuBar creation
 // ----------------------------------------------------------------------------
@@ -1770,8 +1691,6 @@ bool wxMenuBar::Insert(size_t pos, wxMenu *menu, const wxString& title)
 {
     if ( !wxMenuBarBase::Insert(pos, menu, title) )
         return false;
-
-    menu->SetTitle( title );
 
     wxMenuInfo *info = new wxMenuInfo(title);
     m_menuInfos.Insert(info, pos);

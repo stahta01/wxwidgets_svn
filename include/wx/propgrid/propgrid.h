@@ -332,6 +332,15 @@ wxPG_EX_TOOLBAR_SEPARATOR               = 0x10000000
 
 // -----------------------------------------------------------------------
 
+//
+// Ids for sub-controls
+// NB: It should not matter what these are.
+#define wxPG_SUBID1                     2
+#define wxPG_SUBID2                     3
+#define wxPG_SUBID_TEMP1                4
+
+// -----------------------------------------------------------------------
+
 /** @class wxPGCommonValue
 
     wxPropertyGrid stores information about common values in these
@@ -825,7 +834,7 @@ public:
 
     /** Deletes all properties.
     */
-    virtual void Clear() wxOVERRIDE;
+    virtual void Clear();
 
     /** Clears action triggers for given action.
         @param action
@@ -1062,12 +1071,13 @@ public:
     wxPropertyGridHitTestResult HitTest( const wxPoint& pt ) const;
 
     /** Returns true if any property has been modified by the user. */
-    bool IsAnyModified() const
-#ifdef WXWIN_COMPATIBILITY_3_0
-         { return m_pState->m_anyModified != (unsigned char)false; }
-#else
-         { return m_pState->m_anyModified; }
-#endif
+    bool IsAnyModified() const { return (m_pState->m_anyModified>0); }
+
+    /**
+        Returns true if updating is frozen (ie Freeze() called but not yet
+        Thaw() ).
+     */
+    bool IsFrozen() const { return (m_frozen>0)?true:false; }
 
     /**
         It is recommended that you call this function any time your code causes
@@ -1086,7 +1096,7 @@ public:
 
     /** Redraws given property.
     */
-    virtual void RefreshProperty( wxPGProperty* p ) wxOVERRIDE;
+    virtual void RefreshProperty( wxPGProperty* p );
 
     /** Registers a new editor class.
         @return
@@ -1549,6 +1559,8 @@ public:
         { return (m_iFlags & flag) ? true : false; }
     void SetInternalFlag( long flag ) { m_iFlags |= flag; }
     void ClearInternalFlag( long flag ) { m_iFlags &= ~(flag); }
+    void IncFrozen() { m_frozen++; }
+    void DecFrozen() { m_frozen--; }
 
     void OnComboItemPaint( const wxPGComboBox* pCb,
                            int item,
@@ -1556,7 +1568,6 @@ public:
                            wxRect& rect,
                            int flags );
 
-#if WXWIN_COMPATIBILITY_3_0
     /** Standardized double-to-string conversion.
     */
     static const wxString& DoubleToString( wxString& target,
@@ -1564,7 +1575,6 @@ public:
                                            int precision,
                                            bool removeZeroes,
                                            wxString* precTemplate = NULL );
-#endif // WXWIN_COMPATIBILITY_3_0
 
     /**
         Call this from wxPGProperty::OnEvent() to cause property value to be
@@ -1688,7 +1698,7 @@ public:
         @param text
             Initial text value of created wxTextCtrl.
     */
-    void SetupTextCtrlValue( const wxString& text ) { m_prevTcValue = text; }
+    void SetupTextCtrlValue( const wxString text ) { m_prevTcValue = text; }
 
     /**
         Unfocuses or closes editor if one was open, but does not deselect
@@ -1696,7 +1706,7 @@ public:
     */
     bool UnfocusEditor();
 
-    virtual void SetWindowStyleFlag( long style ) wxOVERRIDE;
+    virtual void SetWindowStyleFlag( long style );
 
     void DrawItems( const wxPGProperty* p1, const wxPGProperty* p2 );
 
@@ -1759,20 +1769,20 @@ public:
     bool DoSelectProperty( wxPGProperty* p, unsigned int flags = 0 );
 
     // Overridden functions.
-    virtual bool Destroy() wxOVERRIDE;
+    virtual bool Destroy();
     // Returns property at given y coordinate (relative to grid's top left).
     wxPGProperty* GetItemAtY( int y ) const { return DoGetItemAtY(y); }
 
     virtual void Refresh( bool eraseBackground = true,
-                          const wxRect *rect = (const wxRect *) NULL ) wxOVERRIDE;
-    virtual bool SetFont( const wxFont& font ) wxOVERRIDE;
-    virtual void SetExtraStyle( long exStyle ) wxOVERRIDE;
-    virtual bool Reparent( wxWindowBase *newParent ) wxOVERRIDE;
+                          const wxRect *rect = (const wxRect *) NULL );
+    virtual bool SetFont( const wxFont& font );
+    virtual void Freeze();
+    virtual void SetExtraStyle( long exStyle );
+    virtual void Thaw();
+    virtual bool Reparent( wxWindowBase *newParent );
 
 protected:
-    virtual void DoThaw() wxOVERRIDE;
-
-    virtual wxSize DoGetBestSize() const wxOVERRIDE;
+    virtual wxSize DoGetBestSize() const;
 
 #ifndef wxPG_ICON_WIDTH
     wxBitmap            *m_expandbmp, *m_collbmp;
@@ -1921,6 +1931,9 @@ protected:
 
     /** 1 if m_latsCaption is also the bottommost caption. */
     //unsigned char       m_lastCaptionBottomnest;
+
+    /** Set to 1 when graphics frozen. */
+    unsigned char       m_frozen;
 
     unsigned char       m_vspacing;
 
@@ -2388,7 +2401,7 @@ public:
     ~wxPropertyGridEvent();
 
     /** Copyer. */
-    virtual wxEvent* Clone() const wxOVERRIDE;
+    virtual wxEvent* Clone() const;
 
     /**
         Returns the column index associated with this event.

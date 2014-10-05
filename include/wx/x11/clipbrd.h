@@ -68,7 +68,6 @@ public:
 
 private:
     DECLARE_DYNAMIC_CLASS(wxClipboard)
-
 };
 
 #endif // wxUSE_CLIPBOARD

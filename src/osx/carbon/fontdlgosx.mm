@@ -34,6 +34,9 @@
 // ============================================================================
 
 
+#include "wx/cocoa/autorelease.h"
+#include "wx/cocoa/string.h"
+
 #if wxOSX_USE_EXPERIMENTAL_FONTDIALOG
 
 #import <Foundation/Foundation.h>
@@ -143,7 +146,7 @@ int RunMixedFontDialog(wxFontDialog* dialog)
 #endif
     int retval = wxID_CANCEL ;
 
-    wxMacAutoreleasePool pool;
+    wxAutoNSAutoreleasePool pool;
 
     // setting up the ok/cancel buttons
     NSFontPanel* fontPanel = [NSFontPanel sharedFontPanel] ;
@@ -198,14 +201,14 @@ int RunMixedFontDialog(wxFontDialog* dialog)
     if( FPIsFontPanelVisible())
         FPShowHideFontPanel() ;
 #else
-    // we must pick the selection before closing, otherwise a native textcontrol interferes
-    NSFont* theFont = [fontPanel panelConvertFont:[NSFont userFontOfSize:0]];
     [fontPanel close];
 #endif
 
     if ( [accessoryView closedWithOk])
     {
 #if wxOSX_USE_COCOA
+        NSFont* theFont = [fontPanel panelConvertFont:[NSFont userFontOfSize:0]];
+
         fontdata.m_chosenFont = wxFont( theFont );
 
         //Get the shared color panel along with the chosen color and set the chosen color
@@ -399,8 +402,8 @@ bool wxFontDialog::Create(wxWindow *parent)
             [[NSFontManager sharedFontManager] fontWithFamily:
                                                     wxNSStringWithWxString(thewxfont.GetFaceName())
                                             traits:theMask
-                                            weight:thewxfont.GetWeight() == wxFONTWEIGHT_BOLD ? 9 :
-                                                    thewxfont.GetWeight() == wxFONTWEIGHT_LIGHT ? 0 : 5
+                                            weight:thewxfont.GetWeight() == wxBOLD ? 9 :
+                                                    thewxfont.GetWeight() == wxLIGHT ? 0 : 5
                                             size: (float)(thewxfont.GetPointSize())
             ];
 
@@ -527,8 +530,8 @@ int wxFontDialog::ShowModal()
     m_fontData.m_chosenFont.SetFaceName(wxStringWithNSString([theFont familyName]));
     m_fontData.m_chosenFont.SetPointSize(theFontSize);
     m_fontData.m_chosenFont.SetStyle(theTraits & NSItalicFontMask ? wxFONTSTYLE_ITALIC : 0);
-    m_fontData.m_chosenFont.SetWeight(theFontWeight < 5 ? wxFONTWEIGHT_LIGHT :
-                                    theFontWeight >= 9 ? wxFONTWEIGHT_BOLD : wxFONTWEIGHT_NORMAL);
+    m_fontData.m_chosenFont.SetWeight(theFontWeight < 5 ? wxLIGHT :
+                                    theFontWeight >= 9 ? wxBOLD : wxNORMAL);
 
     //Get the shared color panel along with the chosen color and set the chosen color
     NSColor* theColor = [[theColorPanel color] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];

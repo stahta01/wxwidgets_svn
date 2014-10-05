@@ -12,7 +12,6 @@
 
 #ifndef WX_PRECOMP
 #include "wx/object.h"
-#include "wx/math.h"
 #endif
 
 #if wxOSX_USE_COCOA_OR_CARBON
@@ -26,6 +25,10 @@
 #endif
 
 #include "wx/fontutil.h"
+
+#if wxOSX_USE_COCOA
+#include "wx/cocoa/string.h"
+#endif
 
 #ifdef __WXMAC__
 
@@ -130,7 +133,6 @@ void wxFont::SetNativeInfoFromNSFont(WX_NSFont theFont, wxNativeFontInfo* info)
         wxFontStyle fontstyle = wxFONTSTYLE_NORMAL;
         wxFontWeight fontweight = wxFONTWEIGHT_NORMAL;
         bool underlined = false;
-        bool strikethrough = false;
 
         int size = (int) ([theFont pointSize]+0.5);
  
@@ -144,8 +146,8 @@ void wxFont::SetNativeInfoFromNSFont(WX_NSFont theFont, wxNativeFontInfo* info)
         if ( theTraits & NSItalicFontMask )
             fontstyle = wxFONTSTYLE_ITALIC ;
 
-        info->Init(size,fontFamily,fontstyle,fontweight,underlined, strikethrough,
-                   wxCFStringRef::AsString([theFont familyName]), wxFONTENCODING_DEFAULT);
+        info->Init(size,fontFamily,fontstyle,fontweight,underlined,
+            wxStringWithNSString([theFont familyName]), wxFONTENCODING_DEFAULT);
 
     }
 }
@@ -189,7 +191,8 @@ WX_NSFont wxFont::OSXCreateNSFont(wxOSXSystemFont font, wxNativeFontInfo* info)
     return nsfont;
 }
 
-static const NSAffineTransformStruct kSlantNSTransformStruct = { 1, 0, static_cast<CGFloat>(tan(wxDegToRad(11))), 1, 0, 0  };
+static inline double DegToRad(double deg) { return (deg * M_PI) / 180.0; }
+static const NSAffineTransformStruct kSlantNSTransformStruct = { 1, 0, static_cast<CGFloat>(tan(DegToRad(11))), 1, 0, 0  };
 
 WX_NSFont wxFont::OSXCreateNSFont(const wxNativeFontInfo* info)
 {
@@ -311,7 +314,6 @@ WX_UIFont wxFont::OSXCreateUIFont(wxOSXSystemFont font, wxNativeFontInfo* info)
         wxFontStyle fontstyle = wxFONTSTYLE_NORMAL;
         wxFontWeight fontweight = wxFONTWEIGHT_NORMAL;
         bool underlined = false;
-        bool strikethrough = false;
 
         int size = (int) ([uifont pointSize]+0.5);
         /*
@@ -325,9 +327,8 @@ WX_UIFont wxFont::OSXCreateUIFont(wxOSXSystemFont font, wxNativeFontInfo* info)
             fontstyle = wxFONTSTYLE_ITALIC ;
         */
         wxCFStringRef fontname( wxCFRetain([uifont familyName]) );
-        info->Init(size, wxFONTFAMILY_DEFAULT, fontstyle, fontweight,
-                   underlined, strikethrough,
-                   fontname.AsString(), wxFONTENCODING_DEFAULT);
+        info->Init(size,wxFONTFAMILY_DEFAULT,fontstyle,fontweight,underlined,
+            fontname.AsString(), wxFONTENCODING_DEFAULT);
 
     }
     return uifont;
@@ -444,21 +445,6 @@ WX_NSImage  wxOSXGetNSImageFromCGImage( CGImageRef image, double scaleFactor )
     */
     [newImage autorelease];
     return( newImage );
-}
-
-WX_NSImage WXDLLIMPEXP_CORE wxOSXGetNSImageFromIconRef( WXHICON iconref )
-{
-    NSImage  *newImage = [[NSImage alloc] initWithIconRef:iconref];
-    [newImage autorelease];
-    return( newImage );
-}
-
-CGImageRef WXDLLIMPEXP_CORE wxOSXGetCGImageFromNSImage( WX_NSImage nsimage, CGRect* r, CGContextRef cg)
-{
-    NSRect nsRect = NSRectFromCGRect(*r);
-    return [nsimage CGImageForProposedRect:&nsRect
-                               context:[NSGraphicsContext graphicsContextWithGraphicsPort:cg flipped:YES]
-                                        hints:nil];
 }
 
 CGContextRef WXDLLIMPEXP_CORE wxOSXCreateBitmapContextFromNSImage( WX_NSImage nsimage)

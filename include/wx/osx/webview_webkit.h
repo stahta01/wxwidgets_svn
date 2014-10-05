@@ -12,9 +12,10 @@
 #ifndef _WX_WEBKIT_H
 #define _WX_WEBKIT_H
 
-#include "wx/defs.h"
+#include "wx/setup.h"
 
-#if wxUSE_WEBVIEW && wxUSE_WEBVIEW_WEBKIT && defined(__WXOSX__) 
+#if wxUSE_WEBVIEW && wxUSE_WEBVIEW_WEBKIT && (defined(__WXOSX_COCOA__) \
+                                          ||  defined(__WXOSX_CARBON__))
 
 #include "wx/control.h"
 #include "wx/webview.h"
@@ -157,7 +158,7 @@ private:
     wxWindowID m_windowID;
     wxString m_pageTitle;
 
-    OSXWebViewPtr m_webView;
+    wxObjCID m_webView;
 
     // we may use this later to setup our own mouse events,
     // so leave it in for now.

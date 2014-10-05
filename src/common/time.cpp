@@ -40,6 +40,13 @@
     #endif
 #endif
 
+#if defined(__VISAGECPP__) && !defined(HAVE_FTIME)
+    #define HAVE_FTIME
+#  if __IBMCPP__ >= 400
+    #  define ftime(x) _ftime(x)
+#  endif
+#endif
+
 #ifndef __WXWINCE__
 #include <time.h>
 #else
@@ -204,7 +211,7 @@ int wxGetTimeZone()
 
     #if defined(WX_TIMEZONE) // If WX_TIMEZONE was defined by configure, use it.
         return WX_TIMEZONE;
-    #elif defined(__BORLANDC__) || defined(__MINGW32__)
+    #elif defined(__BORLANDC__) || defined(__MINGW32__) || defined(__VISAGECPP__)
         return _timezone;
     #else // unknown platform -- assume it has timezone
         return timezone;
@@ -324,7 +331,7 @@ wxLongLong wxGetUTCTimeMillis()
     // do NOT just shut off these warnings, drop me a line instead at
     // <guille@iies.es>
 
-    #if defined(__VISUALC__)
+    #if defined(__VISUALC__) || defined (__WATCOMC__)
         #pragma message("wxStopWatch will be up to second resolution!")
     #elif defined(__BORLANDC__)
         #pragma message "wxStopWatch will be up to second resolution!"

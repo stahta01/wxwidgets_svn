@@ -31,7 +31,6 @@
 #endif //WX_PRECOMP
 
 #include "wx/dcgraph.h"
-#include "wx/math.h"
 #include "wx/scopeguard.h"
 #include "wx/splitter.h"
 #include "wx/renderer.h"
@@ -99,10 +98,6 @@
     #define WP_CLOSEBUTTON 18
     #define WP_RESTOREBUTTON 21
     #define WP_HELPBUTTON 23
-
-    #define PP_BAR 1
-    #define PP_CHUNK 3
-
 #endif
 
 #if defined(__WXWINCE__)
@@ -208,13 +203,6 @@ public:
                                     wxTitleBarButton button,
                                     int flags = 0);
 
-    virtual void DrawGauge(wxWindow* win,
-                           wxDC& dc,
-                           const wxRect& rect,
-                           int value,
-                           int max,
-                           int flags = 0);
-
     virtual wxSize GetCheckBoxSize(wxWindow *win);
 
     virtual int GetHeaderButtonHeight(wxWindow *win);
@@ -319,14 +307,6 @@ public:
                                     const wxRect& rect,
                                     wxTitleBarButton button,
                                     int flags = 0);
-
-    virtual void DrawGauge(wxWindow* win,
-                           wxDC& dc,
-                           const wxRect& rect,
-                           int value,
-                           int max,
-                           int flags = 0);
-
 
     virtual wxSplitterRenderParams GetSplitterParams(const wxWindow *win);
 
@@ -615,25 +595,6 @@ void wxRendererMSW::DrawTextCtrl(wxWindow* WXUNUSED(win),
     dc.DrawRectangle(rect);
 }
 
-void wxRendererMSW::DrawGauge(wxWindow* win,
-                              wxDC& dc,
-                              const wxRect& rect,
-                              int value,
-                              int max,
-                              int WXUNUSED(flags))
-{
-    // Use text ctrl back as background
-    DrawTextCtrl(win, dc, rect);
-
-    // Calc progress bar size
-    wxRect progRect(rect);
-    progRect.Deflate(2);
-    progRect.width = wxMulDivInt32(progRect.width, value, max);
-
-    dc.SetBrush(wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT));
-    dc.SetPen(*wxTRANSPARENT_PEN);
-    dc.DrawRectangle(progRect);
-}
 
 // ============================================================================
 // wxRendererXP implementation
@@ -925,54 +886,6 @@ void wxRendererXP::DrawTextCtrl(wxWindow* win,
     dc.SetPen( bdr );
     dc.SetBrush( fill );
     dc.DrawRectangle(rect);
-}
-
-void wxRendererXP::DrawGauge(wxWindow* win,
-    wxDC& dc,
-    const wxRect& rect,
-    int value,
-    int max,
-    int flags)
-{
-    wxUxThemeHandle hTheme(win, L"PROGRESS");
-    if ( !hTheme )
-    {
-        m_rendererNative.DrawGauge(win, dc, rect, value, max, flags);
-        return;
-    }
-
-    RECT r;
-    wxCopyRectToRECT(rect, r);
-
-    wxUxThemeEngine::Get()->DrawThemeBackground(
-        hTheme,
-        GetHdcOf(dc.GetTempHDC()),
-        PP_BAR,
-        0,
-        &r,
-        NULL);
-
-    RECT contentRect;
-    wxUxThemeEngine::Get()->GetThemeBackgroundContentRect(
-        hTheme,
-        GetHdcOf(dc.GetTempHDC()),
-        PP_BAR,
-        0,
-        &r,
-        &contentRect);
-
-    contentRect.right = contentRect.left +
-                            wxMulDivInt32(contentRect.right - contentRect.left,
-                                          value,
-                                          max);
-
-    wxUxThemeEngine::Get()->DrawThemeBackground(
-        hTheme,
-        GetHdcOf(dc.GetTempHDC()),
-        PP_CHUNK,
-        0,
-        &contentRect,
-        NULL);
 }
 
 // ----------------------------------------------------------------------------

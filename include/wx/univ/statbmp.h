@@ -52,16 +52,16 @@ public:
                 long style = 0,
                 const wxString& name = wxStaticBitmapNameStr);
 
-    virtual void SetBitmap(const wxBitmap& bitmap) wxOVERRIDE;
-    virtual void SetIcon(const wxIcon& icon) wxOVERRIDE;
-    virtual wxBitmap GetBitmap() const wxOVERRIDE { return m_bitmap; }
+    virtual void SetBitmap(const wxBitmap& bitmap);
+    virtual void SetIcon(const wxIcon& icon);
+    virtual wxBitmap GetBitmap() const { return m_bitmap; }
 
-    wxIcon GetIcon() const wxOVERRIDE;
+    wxIcon GetIcon() const;
 
-    virtual bool HasTransparentBackground() wxOVERRIDE { return true; }
+    virtual bool HasTransparentBackground() { return true; }
 
 protected:
-    virtual void DoDraw(wxControlRenderer *renderer) wxOVERRIDE;
+    virtual void DoDraw(wxControlRenderer *renderer);
 
 private:
     // the bitmap which we show

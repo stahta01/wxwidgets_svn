@@ -13,7 +13,6 @@
 // PLAT_GTK_WIN32 is defined additionally when running PLAT_GTK under Win32
 // PLAT_WIN = Win32 API on Win32 OS
 // PLAT_WX is wxWindows on any supported platform
-// PLAT_TK = Tcl/TK on Linux or Win32
 
 #define PLAT_GTK 0
 #define PLAT_GTK_WIN32 0
@@ -23,8 +22,6 @@
 #define PLAT_WX  0
 #define PLAT_QT 0
 #define PLAT_FOX 0
-#define PLAT_CURSES 0
-#define PLAT_TK 0
 
 #if defined(FOX)
 #undef PLAT_FOX
@@ -34,17 +31,9 @@
 #undef PLAT_WX
 #define PLAT_WX  1
 
-#elif defined(CURSES)
-#undef PLAT_CURSES
-#define PLAT_CURSES 1
-
 #elif defined(SCINTILLA_QT)
 #undef PLAT_QT
 #define PLAT_QT 1
-
-#elif defined(TK)
-#undef PLAT_TK
-#define PLAT_TK 1
 
 #elif defined(GTK)
 #undef PLAT_GTK
@@ -125,19 +114,19 @@ public:
 
 	// Other automatically defined methods (assignment, copy constructor, destructor) are fine
 
-	bool operator==(PRectangle &rc) const {
+	bool operator==(PRectangle &rc) {
 		return (rc.left == left) && (rc.right == right) &&
 			(rc.top == top) && (rc.bottom == bottom);
 	}
-	bool Contains(Point pt) const {
+	bool Contains(Point pt) {
 		return (pt.x >= left) && (pt.x <= right) &&
 			(pt.y >= top) && (pt.y <= bottom);
 	}
-	bool Contains(PRectangle rc) const {
+	bool Contains(PRectangle rc) {
 		return (rc.left >= left) && (rc.right <= right) &&
 			(rc.top >= top) && (rc.bottom <= bottom);
 	}
-	bool Intersects(PRectangle other) const {
+	bool Intersects(PRectangle other) {
 		return (right > other.left) && (left < other.right) &&
 			(bottom > other.top) && (top < other.bottom);
 	}
@@ -147,9 +136,9 @@ public:
 		right += xDelta;
 		bottom += yDelta;
 	}
-	XYPOSITION Width() const { return right - left; }
-	XYPOSITION Height() const { return bottom - top; }
-	bool Empty() const {
+	XYPOSITION Width() { return right - left; }
+	XYPOSITION Height() { return bottom - top; }
+	bool Empty() {
 		return (Height() <= 0) || (Width() <= 0);
 	}
 };
@@ -205,15 +194,15 @@ public:
 		return co;
 	}
 
-	unsigned int GetRed() const {
+	unsigned int GetRed() {
 		return co & 0xff;
 	}
 
-	unsigned int GetGreen() const {
+	unsigned int GetGreen() {
 		return (co >> 8) & 0xff;
 	}
 
-	unsigned int GetBlue() const {
+	unsigned int GetBlue() {
 		return (co >> 16) & 0xff;
 	}
 };
@@ -345,10 +334,22 @@ typedef void (*CallBackAction)(void*);
 class Window {
 protected:
 	WindowID wid;
+#if PLAT_MACOSX
+	void *windowRef;
+	void *control;
+#endif
 public:
 	Window() : wid(0), cursorLast(cursorInvalid) {
+#if PLAT_MACOSX
+	  windowRef = 0;
+	  control = 0;
+#endif
 	}
 	Window(const Window &source) : wid(source.wid), cursorLast(cursorInvalid) {
+#if PLAT_MACOSX
+	  windowRef = 0;
+	  control = 0;
+#endif
 	}
 	virtual ~Window();
 	Window &operator=(WindowID wid_) {
@@ -371,6 +372,10 @@ public:
 	void SetCursor(Cursor curs);
 	void SetTitle(const char *s);
 	PRectangle GetMonitorRect(Point pt);
+#if PLAT_MACOSX
+	void SetWindow(void *ref) { windowRef = ref; }
+	void SetControl(void *_control) { control = _control; }
+#endif
 private:
 	Cursor cursorLast;
 };
@@ -512,7 +517,9 @@ public:
 #endif
 
 #if defined(__GNUC__) && defined(SCINTILLA_QT)
+#pragma GCC diagnostic ignored "-Wmissing-braces"
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wchar-subscripts"
 #endif
 
 #endif

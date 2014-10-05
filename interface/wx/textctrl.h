@@ -132,9 +132,6 @@ enum wxTextAttrFlags
     wxTEXT_ATTR_EFFECTS              = 0x00800000,
     wxTEXT_ATTR_OUTLINE_LEVEL        = 0x01000000,
 
-    wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE = 0x20000000,
-    wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER =  0x40000000,
-
     /**
         Combines the styles @c wxTEXT_ATTR_FONT, @c wxTEXT_ATTR_EFFECTS, @c wxTEXT_ATTR_BACKGROUND_COLOUR,
         @c wxTEXT_ATTR_TEXT_COLOUR, @c wxTEXT_ATTR_CHARACTER_STYLE_NAME, @c wxTEXT_ATTR_URL.
@@ -150,8 +147,7 @@ enum wxTextAttrFlags
     wxTEXT_ATTR_PARAGRAPH = \
         (wxTEXT_ATTR_ALIGNMENT|wxTEXT_ATTR_LEFT_INDENT|wxTEXT_ATTR_RIGHT_INDENT|wxTEXT_ATTR_TABS|\
             wxTEXT_ATTR_PARA_SPACING_BEFORE|wxTEXT_ATTR_PARA_SPACING_AFTER|wxTEXT_ATTR_LINE_SPACING|\
-            wxTEXT_ATTR_BULLET|wxTEXT_ATTR_PARAGRAPH_STYLE_NAME|wxTEXT_ATTR_LIST_STYLE_NAME|wxTEXT_ATTR_OUTLINE_LEVEL|\
-            wxTEXT_ATTR_PAGE_BREAK|wxTEXT_ATTR_AVOID_PAGE_BREAK_BEFORE|wxTEXT_ATTR_AVOID_PAGE_BREAK_AFTER),
+            wxTEXT_ATTR_BULLET|wxTEXT_ATTR_PARAGRAPH_STYLE_NAME|wxTEXT_ATTR_LIST_STYLE_NAME|wxTEXT_ATTR_OUTLINE_LEVEL),
 
     /**
         Combines all previous values.
@@ -205,9 +201,7 @@ enum wxTextAttrEffects
     wxTEXT_ATTR_EFFECT_OUTLINE               = 0x00000040,
     wxTEXT_ATTR_EFFECT_ENGRAVE               = 0x00000080,
     wxTEXT_ATTR_EFFECT_SUPERSCRIPT           = 0x00000100,
-    wxTEXT_ATTR_EFFECT_SUBSCRIPT             = 0x00000200,
-    wxTEXT_ATTR_EFFECT_RTL                   = 0x00000400,
-    wxTEXT_ATTR_EFFECT_SUPPRESS_HYPHENATION  = 0x00001000
+    wxTEXT_ATTR_EFFECT_SUBSCRIPT             = 0x00000200
 };
 
 /**
@@ -1081,7 +1075,7 @@ public:
     stream.flush();
     @endcode
 
-    Note that even if your build of wxWidgets doesn't support this (the symbol
+    Note that even if your compiler doesn't support this (the symbol
     @c wxHAS_TEXT_WINDOW_STREAM has value of 0 then) you can still use
     wxTextCtrl itself in a stream-like manner:
 

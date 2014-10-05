@@ -66,11 +66,8 @@
 // global variables for this module
 // ----------------------------------------------------------------------------
 
-static wxWindowX11* g_captureWindow = NULL;
+static wxWindow* g_captureWindow = NULL;
 static GC g_eraseGC;
-// the window that is about to be focused after curretnly focused
-// one looses focus:
-static wxWindow* gs_toBeFocusedWindow = NULL;
 
 // ----------------------------------------------------------------------------
 // macros
@@ -354,9 +351,6 @@ wxWindowX11::~wxWindowX11()
     if (g_captureWindow == this)
         g_captureWindow = NULL;
 
-    if ( DoFindFocus() == this )
-        KillFocus();
-
     DestroyChildren();
 
     if (m_clientWindow != m_mainWindow)
@@ -394,18 +388,6 @@ void wxWindowX11::SetFocus()
     if (!AcceptsFocus())
         return;
 
-    wxWindow* focusedWindow = DoFindFocus();
-
-    if ( focusedWindow == (wxWindow*)this )
-        return; // nothing to do, focused already
-
-    if ( focusedWindow )
-    {
-        gs_toBeFocusedWindow = (wxWindow*)this;
-        focusedWindow->KillFocus();
-        gs_toBeFocusedWindow = NULL;
-    }
-
 #if 0
     if (GetName() == "scrollBar")
     {
@@ -428,32 +410,6 @@ void wxWindowX11::SetFocus()
     {
         m_needsInputFocus = true;
     }
-
-    // notify the parent keeping track of focus for the kbd navigation
-    // purposes that we got it
-    wxChildFocusEvent eventFocus((wxWindow*)this);
-    HandleWindowEvent(eventFocus);
-
-    wxFocusEvent event(wxEVT_SET_FOCUS, GetId());
-    event.SetEventObject(this);
-    event.SetWindow((wxWindow*)xwindow);
-    HandleWindowEvent(event);
-
-}
-
-// Kill focus
-void wxWindowX11::KillFocus()
-{
-    wxCHECK_RET( DoFindFocus() == this,
-                 "killing focus on window that doesn't have it" );
-
-    if ( m_isBeingDeleted )
-        return; // don't send any events from dtor
-
-    wxFocusEvent event(wxEVT_KILL_FOCUS, GetId());
-    event.SetEventObject(this);
-    event.SetWindow(gs_toBeFocusedWindow);
-    HandleWindowEvent(event);
 }
 
 // Get the window with the focus
@@ -519,6 +475,17 @@ void wxWindowX11::Lower()
 {
     if (m_mainWindow)
         XLowerWindow( wxGlobalDisplay(), (Window) m_mainWindow );
+}
+
+void wxWindowX11::SetLabel(const wxString& WXUNUSED(label))
+{
+    // TODO
+}
+
+wxString wxWindowX11::GetLabel() const
+{
+    // TODO
+    return wxEmptyString;
 }
 
 void wxWindowX11::DoCaptureMouse()
@@ -1612,11 +1579,7 @@ bool wxTranslateKeyEvent(wxKeyEvent& wxevent, wxWindow *win, Window WXUNUSED(win
 
             KeySym keySym;
             (void) XLookupString ((XKeyEvent *) xevent, buf, 20, &keySym, NULL);
-#if wxUSE_UNICODE
-            int id = wxUnicodeCharXToWX(keySym);
-#else
-            int id = wxCharCodeXToWX(keySym);
-#endif
+            int id = wxCharCodeXToWX (keySym);
             // id may be WXK_xxx code - these are outside ASCII range, so we
             // can't just use toupper() on id.
             // Only change this if we want the raw key that was pressed,
@@ -1631,11 +1594,7 @@ bool wxTranslateKeyEvent(wxKeyEvent& wxevent, wxWindow *win, Window WXUNUSED(win
             wxevent.m_altDown = XKeyEventAltIsDown(xevent);
             wxevent.m_metaDown = XKeyEventMetaIsDown(xevent);
             wxevent.SetEventObject(win);
-#if wxUSE_UNICODE
-            wxevent.m_uniChar = id;
-#endif
             wxevent.m_keyCode = id;
-
             wxevent.SetTimestamp(XKeyEventGetTime(xevent));
 
             wxevent.m_x = XKeyEventGetX(xevent);

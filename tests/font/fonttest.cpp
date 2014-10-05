@@ -106,22 +106,11 @@ void FontTestCase::Construct()
                                wxFONTSTYLE_NORMAL,
                                wxFONTWEIGHT_NORMAL).IsOk() );
 
-#if WXWIN_COMPATIBILITY_3_0
-    // Disable the warning about deprecated wxNORMAL as we use it here
-    // intentionally.
-    #ifdef __VISUALC__
-        #pragma warning(push)
-        #pragma warning(disable:4996)
-    #endif
-
+#if FUTURE_WXWIN_COMPATIBILITY_3_0
     // Tests relying on the soon-to-be-deprecated ctor taking ints and not
     // wxFontXXX enum elements.
     CPPUNIT_ASSERT( wxFont(10, wxDEFAULT, wxNORMAL, wxNORMAL).IsOk() );
-
-    #ifdef __VISUALC__
-        #pragma warning(pop)
-    #endif
-#endif // WXWIN_COMPATIBILITY_3_0
+#endif // FUTURE_WXWIN_COMPATIBILITY_3_0
 }
 
 void FontTestCase::GetSet()
@@ -212,13 +201,6 @@ void FontTestCase::GetSet()
         test.SetUnderlined(true);
         CPPUNIT_ASSERT( test.IsOk() );
         CPPUNIT_ASSERT_EQUAL( true, test.GetUnderlined() );
-
-        const wxFont fontBase = test.GetBaseFont();
-        CPPUNIT_ASSERT( fontBase.IsOk() );
-        CPPUNIT_ASSERT( !fontBase.GetUnderlined() );
-        CPPUNIT_ASSERT( !fontBase.GetStrikethrough() );
-        CPPUNIT_ASSERT_EQUAL( wxFONTWEIGHT_NORMAL, fontBase.GetWeight() );
-        CPPUNIT_ASSERT_EQUAL( wxFONTSTYLE_NORMAL, fontBase.GetStyle() );
 
         // test Get/SetStrikethrough()
 

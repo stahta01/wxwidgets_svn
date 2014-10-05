@@ -1563,14 +1563,14 @@ public:
     wxGtkDataViewModelNotifier( wxDataViewModel *wx_model, wxDataViewCtrlInternal *internal );
     ~wxGtkDataViewModelNotifier();
 
-    virtual bool ItemAdded( const wxDataViewItem &parent, const wxDataViewItem &item ) wxOVERRIDE;
-    virtual bool ItemDeleted( const wxDataViewItem &parent, const wxDataViewItem &item ) wxOVERRIDE;
-    virtual bool ItemChanged( const wxDataViewItem &item ) wxOVERRIDE;
-    virtual bool ValueChanged( const wxDataViewItem &item, unsigned int model_column ) wxOVERRIDE;
-    virtual bool Cleared() wxOVERRIDE;
-    virtual void Resort() wxOVERRIDE;
-    virtual bool BeforeReset() wxOVERRIDE;
-    virtual bool AfterReset() wxOVERRIDE;
+    virtual bool ItemAdded( const wxDataViewItem &parent, const wxDataViewItem &item );
+    virtual bool ItemDeleted( const wxDataViewItem &parent, const wxDataViewItem &item );
+    virtual bool ItemChanged( const wxDataViewItem &item );
+    virtual bool ValueChanged( const wxDataViewItem &item, unsigned int model_column );
+    virtual bool Cleared();
+    virtual void Resort();
+    virtual bool BeforeReset();
+    virtual bool AfterReset();
 
     void UpdateLastCount();
 
@@ -3562,6 +3562,8 @@ wxDataViewCtrlInternal::drag_data_received(GtkTreeDragDest *WXUNUSED(drag_dest),
                                            GtkSelectionData *selection_data)
 {
     wxDataViewItem item(GetOwner()->GTKPathToItem(path));
+    if ( !item )
+        return FALSE;
 
     wxDataViewEvent event( wxEVT_DATAVIEW_ITEM_DROP, m_owner->GetId() );
     event.SetEventObject( m_owner );
@@ -3585,6 +3587,8 @@ wxDataViewCtrlInternal::row_drop_possible(GtkTreeDragDest *WXUNUSED(drag_dest),
                                           GtkSelectionData *selection_data)
 {
     wxDataViewItem item(GetOwner()->GTKPathToItem(path));
+    if ( !item )
+        return FALSE;
 
     wxDataViewEvent event( wxEVT_DATAVIEW_ITEM_DROP_POSSIBLE, m_owner->GetId() );
     event.SetEventObject( m_owner );

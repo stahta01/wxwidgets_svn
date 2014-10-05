@@ -47,7 +47,7 @@ public:
     virtual ~wxColourButton();
 
 protected:
-    void UpdateColour() wxOVERRIDE;
+    void UpdateColour();
 
 public:     // used by the GTK callback only
 

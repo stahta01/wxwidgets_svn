@@ -24,6 +24,12 @@
     #pragma hdrstop
 #endif
 
+#ifdef __EMX__
+// The following define is needed by Innotek's libc to
+// make the definition of struct localeconv available.
+#define __INTERNAL_DEFS
+#endif
+
 #if wxUSE_INTL
 
 #ifndef WX_PRECOMP
@@ -381,7 +387,9 @@ bool wxLocale::Init(int language, int flags)
     wxString locale;
 
     // Set the locale:
-#if defined(__UNIX__) && !defined(__WXMAC__)
+#if defined(__OS2__)
+    const char *retloc = wxSetlocale(LC_ALL , wxEmptyString);
+#elif defined(__UNIX__) && !defined(__WXMAC__)
     if (language != wxLANGUAGE_DEFAULT)
         locale = info->CanonicalName;
 
@@ -1713,8 +1721,6 @@ wxString GetDateFormatFromLangInfo(wxLocaleInfo index)
 /* static */
 wxString wxLocale::GetInfo(wxLocaleInfo index, wxLocaleCategory cat)
 {
-// TODO: as of 2014 Android doesn't has complete locale support (use java api)
-#if !(defined(__WXQT__) && defined(__ANDROID__))
     lconv * const lc = localeconv();
     if ( !lc )
         return wxString();
@@ -1756,7 +1762,7 @@ wxString wxLocale::GetInfo(wxLocaleInfo index, wxLocaleCategory cat)
         default:
             wxFAIL_MSG( "unknown wxLocaleInfo value" );
     }
-#endif
+
     return wxString();
 }
 
@@ -1796,12 +1802,12 @@ class wxLocaleModule: public wxModule
     public:
         wxLocaleModule() {}
 
-        bool OnInit() wxOVERRIDE
+        bool OnInit()
         {
             return true;
         }
 
-        void OnExit() wxOVERRIDE
+        void OnExit()
         {
             wxLocale::DestroyLanguagesDB();
         }

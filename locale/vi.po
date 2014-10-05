@@ -1,13 +1,13 @@
-# wxWidgets translation for Vietnamese.
+# wxWidgets trasnlation for Vietnamese.
 # This file is distributed under the same license as the wxWidgets package.
-# First translator Trần Ngọc Quân <vnwildman@gmail.com>, 2008-2014.
+# First translator Trần Ngọc Quân <vnwildman@gmail.com>, 2008-2013.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: wxstd 3.0\n"
+"Project-Id-Version: wxWidgets 3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-21 17:22+0100\n"
-"PO-Revision-Date: 2014-03-30 09:14+0700\n"
+"POT-Creation-Date: 2014-02-21 14:54+0100\n"
+"PO-Revision-Date: 2013-07-10 08:33+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <translation-team-vi@lists.sourceforge.net>\n"
 "Language: vi\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=1;\n"
 "X-Generator: Poedit 1.5.5\n"
 
 #: ../src/common/debugrpt.cpp:591
@@ -51,7 +51,7 @@ msgstr " (lỗi %ld: %s)"
 msgid " (in module \"%s\")"
 msgstr " (trong mô-đun \"%s\")"
 
-#: ../src/common/docview.cpp:1631
+#: ../src/common/docview.cpp:1624
 msgid " - "
 msgstr " - "
 
@@ -101,15 +101,16 @@ msgstr "#9 Envelope, 3 7/8 x 8 7/8 in"
 #: ../src/richtext/richtextsizepage.cpp:591
 #: ../src/richtext/richtextsizepage.cpp:626
 #: ../src/richtext/richtextsizepage.cpp:661
+#, fuzzy
 msgid "%"
-msgstr "%"
+msgstr "%s"
 
-#: ../src/html/helpwnd.cpp:1045
+#: ../src/html/helpwnd.cpp:1044
 #, c-format
 msgid "%d of %lu"
 msgstr "%d của %lu"
 
-#: ../src/html/helpwnd.cpp:1692 ../src/html/helpwnd.cpp:1730
+#: ../src/html/helpwnd.cpp:1681 ../src/html/helpwnd.cpp:1719
 #, c-format
 msgid "%i of %i"
 msgstr "%i của %i"
@@ -119,13 +120,14 @@ msgstr "%i của %i"
 msgid "%ld byte"
 msgid_plural "%ld bytes"
 msgstr[0] "%ld byte"
+msgstr[1] "%ld bytes"
 
-#: ../src/html/helpwnd.cpp:1047
+#: ../src/html/helpwnd.cpp:1046
 #, c-format
 msgid "%lu of %lu"
 msgstr "%lu của %lu"
 
-#: ../src/common/cmdline.cpp:1215
+#: ../src/common/cmdline.cpp:1050
 #, c-format
 msgid "%s (or %s)"
 msgstr "%s (hoặc %s)"
@@ -198,7 +200,7 @@ msgstr "&Tăng dần"
 msgid "&Back"
 msgstr "&Quay lại"
 
-#: ../src/richtext/richtextstylepage.cpp:115
+#: ../src/richtext/richtextstylepage.cpp:113
 msgid "&Based on:"
 msgstr "&Trên cơ sở:"
 
@@ -206,7 +208,7 @@ msgstr "&Trên cơ sở:"
 msgid "&Before a paragraph:"
 msgstr "T&rước một đoạn văn:"
 
-#: ../src/richtext/richtextfontpage.cpp:262
+#: ../src/richtext/richtextfontpage.cpp:271
 msgid "&Bg colour:"
 msgstr "Màu &nền:"
 
@@ -218,21 +220,21 @@ msgstr "Đậ&m"
 msgid "&Bottom"
 msgstr "&Dưới"
 
-#: ../src/richtext/richtextborderspage.cpp:347
-#: ../src/richtext/richtextborderspage.cpp:516
-#: ../src/richtext/richtextmarginspage.cpp:259
-#: ../src/richtext/richtextmarginspage.cpp:373
+#: ../src/richtext/richtextborderspage.cpp:343
+#: ../src/richtext/richtextborderspage.cpp:512
+#: ../src/richtext/richtextmarginspage.cpp:260
+#: ../src/richtext/richtextmarginspage.cpp:374
 #: ../src/richtext/richtextsizepage.cpp:637
 #: ../src/richtext/richtextsizepage.cpp:644
 msgid "&Bottom:"
 msgstr "&Dưới đáy:"
 
-#: ../include/wx/richtext/richtextbuffer.h:3641
+#: ../include/wx/richtext/richtextbuffer.h:3578
 msgid "&Box"
 msgstr "Hộ&p:"
 
 #: ../src/richtext/richtextliststylepage.cpp:210
-#: ../src/richtext/richtextbulletspage.cpp:146
+#: ../src/richtext/richtextbulletspage.cpp:159
 msgid "&Bullet style:"
 msgstr "Kiểu dáng &Bullet:"
 
@@ -250,7 +252,7 @@ msgstr "&Hủy bỏ"
 msgid "&Cascade"
 msgstr "&Kiểu xếp chồng"
 
-#: ../include/wx/richtext/richtextbuffer.h:5717
+#: ../include/wx/richtext/richtextbuffer.h:5639
 msgid "&Cell"
 msgstr "Ô"
 
@@ -272,7 +274,7 @@ msgstr "Đó&ng"
 msgid "&Color"
 msgstr "&Màu"
 
-#: ../src/richtext/richtextfontpage.cpp:249
+#: ../src/richtext/richtextfontpage.cpp:258
 msgid "&Colour:"
 msgstr "&Màu sắc:"
 
@@ -291,13 +293,13 @@ msgstr "&Sao chép URL"
 
 #: ../src/common/headerctrlcmn.cpp:328
 msgid "&Customize..."
-msgstr "&Cá nhân..."
+msgstr "&Cá nhân hóa..."
 
 #: ../src/generic/dbgrptg.cpp:334
 msgid "&Debug report preview:"
 msgstr "Xem thử &báo cáo lỗi:"
 
-#: ../src/richtext/richtexttabspage.cpp:138
+#: ../src/richtext/richtexttabspage.cpp:142
 #: ../src/richtext/richtextctrl.cpp:334 ../src/osx/textctrl_osx.cpp:585
 #: ../src/common/stockitem.cpp:152 ../src/msw/textctrl.cpp:2337
 msgid "&Delete"
@@ -367,7 +369,7 @@ msgstr "Họ &phông chữ:"
 msgid "&Font for Level..."
 msgstr "&Phông chữ cho Mức..."
 
-#: ../src/richtext/richtextfontpage.cpp:147
+#: ../src/richtext/richtextfontpage.cpp:156
 #: ../src/richtext/richtextsymboldlg.cpp:400
 msgid "&Font:"
 msgstr "&Phông chữ:"
@@ -444,11 +446,11 @@ msgid "&Left"
 msgstr "&Bên trái"
 
 #: ../src/richtext/richtextindentspage.cpp:195
-#: ../src/richtext/richtextborderspage.cpp:245
-#: ../src/richtext/richtextborderspage.cpp:414
+#: ../src/richtext/richtextborderspage.cpp:241
+#: ../src/richtext/richtextborderspage.cpp:410
 #: ../src/richtext/richtextliststylepage.cpp:381
-#: ../src/richtext/richtextmarginspage.cpp:186
-#: ../src/richtext/richtextmarginspage.cpp:300
+#: ../src/richtext/richtextmarginspage.cpp:187
+#: ../src/richtext/richtextmarginspage.cpp:301
 #: ../src/richtext/richtextsizepage.cpp:532
 #: ../src/richtext/richtextsizepage.cpp:539
 msgid "&Left:"
@@ -474,7 +476,7 @@ msgstr "&Di chuyển đối tượng tới:"
 msgid "&Network"
 msgstr "Mạ&ng"
 
-#: ../src/richtext/richtexttabspage.cpp:132 ../src/common/stockitem.cpp:176
+#: ../src/richtext/richtexttabspage.cpp:136 ../src/common/stockitem.cpp:176
 msgid "&New"
 msgstr "Tạo &mới"
 
@@ -491,11 +493,11 @@ msgstr "Tiếp &theo >"
 msgid "&Next Paragraph"
 msgstr "Đoạn Tiế&p"
 
-#: ../src/generic/tipdlg.cpp:271
+#: ../src/generic/tipdlg.cpp:276
 msgid "&Next Tip"
 msgstr "Mẹo kế &tiếp"
 
-#: ../src/richtext/richtextstylepage.cpp:125
+#: ../src/richtext/richtextstylepage.cpp:123
 msgid "&Next style:"
 msgstr "Kiểu dáng kế &tiếp:"
 
@@ -507,7 +509,7 @@ msgstr "&Không"
 msgid "&Notes:"
 msgstr "Ghi c&hú:"
 
-#: ../src/richtext/richtextbulletspage.cpp:251
+#: ../src/richtext/richtextbulletspage.cpp:264
 msgid "&Number:"
 msgstr "&Số:"
 
@@ -534,7 +536,7 @@ msgstr "Ngắt T&rang"
 msgid "&Paste"
 msgstr "&Dán"
 
-#: ../include/wx/richtext/richtextbuffer.h:4783
+#: ../include/wx/richtext/richtextbuffer.h:4705
 msgid "&Picture"
 msgstr "&Hình ảnh"
 
@@ -542,7 +544,7 @@ msgstr "&Hình ảnh"
 msgid "&Point size:"
 msgstr "&Kích thước điểm:"
 
-#: ../src/richtext/richtexttabspage.cpp:110
+#: ../src/richtext/richtexttabspage.cpp:114
 msgid "&Position (tenths of a mm):"
 msgstr "&Vị trí (mỗi 10mm):"
 
@@ -567,7 +569,7 @@ msgstr "Đoạn T&rước"
 msgid "&Print..."
 msgstr "&In..."
 
-#: ../src/richtext/richtextctrl.cpp:338 ../src/richtext/richtextctrl.cpp:5090
+#: ../src/richtext/richtextctrl.cpp:338 ../src/richtext/richtextctrl.cpp:5054
 #: ../src/common/stockitem.cpp:184
 msgid "&Properties"
 msgstr "&Thuộc tính"
@@ -608,11 +610,11 @@ msgid "&Right"
 msgstr "&Phải"
 
 #: ../src/richtext/richtextindentspage.cpp:213
-#: ../src/richtext/richtextborderspage.cpp:279
-#: ../src/richtext/richtextborderspage.cpp:448
+#: ../src/richtext/richtextborderspage.cpp:275
+#: ../src/richtext/richtextborderspage.cpp:444
 #: ../src/richtext/richtextliststylepage.cpp:399
-#: ../src/richtext/richtextmarginspage.cpp:211
-#: ../src/richtext/richtextmarginspage.cpp:325
+#: ../src/richtext/richtextmarginspage.cpp:212
+#: ../src/richtext/richtextmarginspage.cpp:326
 #: ../src/richtext/richtextsizepage.cpp:602
 #: ../src/richtext/richtextsizepage.cpp:609
 msgid "&Right:"
@@ -630,7 +632,7 @@ msgstr "&Ghi Lại Bằng Tên Mới"
 msgid "&See details"
 msgstr "&Xem chi tiết"
 
-#: ../src/generic/tipdlg.cpp:265
+#: ../src/generic/tipdlg.cpp:270
 msgid "&Show tips at startup"
 msgstr "&Hiện hướng dẫn nhỏ lúc mới mở"
 
@@ -638,7 +640,7 @@ msgstr "&Hiện hướng dẫn nhỏ lúc mới mở"
 msgid "&Size"
 msgstr "&Kích thước"
 
-#: ../src/richtext/richtextfontpage.cpp:159
+#: ../src/richtext/richtextfontpage.cpp:168
 msgid "&Size:"
 msgstr "&Kích thước:"
 
@@ -659,11 +661,11 @@ msgstr "&Kiểm tra chính tả"
 msgid "&Stop"
 msgstr "&Dừng"
 
-#: ../src/richtext/richtextfontpage.cpp:275 ../src/common/stockitem.cpp:199
+#: ../src/richtext/richtextfontpage.cpp:284 ../src/common/stockitem.cpp:199
 msgid "&Strikethrough"
 msgstr "Gạch giữ&a"
 
-#: ../src/generic/fontdlgg.cpp:382 ../src/richtext/richtextstylepage.cpp:106
+#: ../src/generic/fontdlgg.cpp:382 ../src/richtext/richtextstylepage.cpp:104
 msgid "&Style:"
 msgstr "&Kiểu dáng:"
 
@@ -676,16 +678,16 @@ msgid "&Subset:"
 msgstr "Tập c&on:"
 
 #: ../src/richtext/richtextliststylepage.cpp:268
-#: ../src/richtext/richtextbulletspage.cpp:209
+#: ../src/richtext/richtextbulletspage.cpp:222
 msgid "&Symbol:"
 msgstr "Ký hiệu đặc &biệt:"
 
-#: ../src/richtext/richtextborderspage.cpp:383
-#: ../src/richtext/richtextborderspage.cpp:552
+#: ../src/richtext/richtextborderspage.cpp:379
+#: ../src/richtext/richtextborderspage.cpp:548
 msgid "&Synchronize values"
-msgstr "Đồng &bộ hóa các giá trị"
+msgstr ""
 
-#: ../include/wx/richtext/richtextbuffer.h:5823
+#: ../include/wx/richtext/richtextbuffer.h:5733
 msgid "&Table"
 msgstr "&Bảng"
 
@@ -693,10 +695,10 @@ msgstr "&Bảng"
 msgid "&Top"
 msgstr "&Trên"
 
-#: ../src/richtext/richtextborderspage.cpp:313
-#: ../src/richtext/richtextborderspage.cpp:482
-#: ../src/richtext/richtextmarginspage.cpp:234
-#: ../src/richtext/richtextmarginspage.cpp:348
+#: ../src/richtext/richtextborderspage.cpp:309
+#: ../src/richtext/richtextborderspage.cpp:478
+#: ../src/richtext/richtextmarginspage.cpp:235
+#: ../src/richtext/richtextmarginspage.cpp:349
 #: ../src/richtext/richtextsizepage.cpp:567
 #: ../src/richtext/richtextsizepage.cpp:574
 msgid "&Top:"
@@ -706,7 +708,7 @@ msgstr "&Trên:"
 msgid "&Underline"
 msgstr "&Gạch chân"
 
-#: ../src/richtext/richtextfontpage.cpp:234
+#: ../src/richtext/richtextfontpage.cpp:243
 msgid "&Underlining:"
 msgstr "&Gạch chân:"
 
@@ -756,40 +758,26 @@ msgstr "&Cửa sổ"
 msgid "&Yes"
 msgstr "Đồn&g ý"
 
-#: ../src/common/valtext.cpp:256
-#, c-format
-msgid "'%s' contains illegal characters"
-msgstr "'%s' chứa các ký tự không hợp lệ"
-
-#: ../src/common/valtext.cpp:254
-#, c-format
-msgid "'%s' doesn't consist only of valid characters"
-msgstr "'%s' không gồm có ký tự nào hợp lệ"
-
 #: ../src/common/config.cpp:523 ../src/msw/regconf.cpp:258
 #, c-format
 msgid "'%s' has extra '..', ignored."
 msgstr "'%s' có thêm '..', bỏ qua."
 
-#: ../src/common/cmdline.cpp:1107 ../src/common/cmdline.cpp:1125
+#: ../src/common/valtext.cpp:165 ../src/common/valtext.cpp:167
+#: ../src/common/valtext.cpp:254 ../src/common/valtext.cpp:256
+#, c-format
+msgid "'%s' is invalid"
+msgstr "'%s' không hợp lệ"
+
+#: ../src/common/cmdline.cpp:948 ../src/common/cmdline.cpp:966
 #, c-format
 msgid "'%s' is not a correct numeric value for option '%s'."
 msgstr "'%s' không phải là một giá trị bằng số đúng cho tùy chọn '%s'."
 
-#: ../src/common/translation.cpp:1087
+#: ../src/common/translation.cpp:1086
 #, c-format
 msgid "'%s' is not a valid message catalog."
 msgstr "'%s' không phải là catalog thông điệp hợp lệ."
-
-#: ../src/common/valtext.cpp:165
-#, c-format
-msgid "'%s' is not one of the valid strings"
-msgstr "'%s' không phải là một chuỗi hợp lệ"
-
-#: ../src/common/valtext.cpp:167
-#, c-format
-msgid "'%s' is one of the invalid strings"
-msgstr "'%s' là một trong số những chuỗi không hợp lệ"
 
 #: ../src/common/textbuf.cpp:239
 #, c-format
@@ -822,16 +810,16 @@ msgid "'%s' should only contain digits."
 msgstr "'%s' chỉ có thể chứa các chữ số."
 
 #: ../src/richtext/richtextliststylepage.cpp:229
-#: ../src/richtext/richtextbulletspage.cpp:166
+#: ../src/richtext/richtextbulletspage.cpp:179
 msgid "(*)"
 msgstr "(*)"
 
-#: ../src/html/helpwnd.cpp:977
+#: ../src/html/helpwnd.cpp:976
 msgid "(Help)"
 msgstr "(Trợ giúp)"
 
 #: ../src/richtext/richtextliststylepage.cpp:481
-#: ../src/richtext/richtextbulletspage.cpp:273
+#: ../src/richtext/richtextbulletspage.cpp:286
 msgid "(None)"
 msgstr "(Không)"
 
@@ -839,8 +827,8 @@ msgstr "(Không)"
 msgid "(Normal text)"
 msgstr "(Chữ thường)"
 
-#: ../src/html/helpwnd.cpp:427 ../src/html/helpwnd.cpp:1120
-#: ../src/html/helpwnd.cpp:1756
+#: ../src/html/helpwnd.cpp:426 ../src/html/helpwnd.cpp:1119
+#: ../src/html/helpwnd.cpp:1745
 msgid "(bookmarks)"
 msgstr "(Dấu trang)"
 
@@ -849,10 +837,10 @@ msgstr "(Dấu trang)"
 #: ../src/richtext/richtextindentspage.cpp:287
 #: ../src/richtext/richtextindentspage.cpp:311
 #: ../src/richtext/richtextindentspage.cpp:326
-#: ../src/richtext/richtextformatdlg.cpp:887
-#: ../src/richtext/richtextfontpage.cpp:347
-#: ../src/richtext/richtextfontpage.cpp:351
-#: ../src/richtext/richtextfontpage.cpp:355
+#: ../src/richtext/richtextformatdlg.cpp:867
+#: ../src/richtext/richtextfontpage.cpp:331
+#: ../src/richtext/richtextfontpage.cpp:335
+#: ../src/richtext/richtextfontpage.cpp:339
 #: ../src/richtext/richtextliststylepage.cpp:448
 #: ../src/richtext/richtextliststylepage.cpp:460
 #: ../src/richtext/richtextliststylepage.cpp:461
@@ -860,17 +848,17 @@ msgid "(none)"
 msgstr "(không)"
 
 #: ../src/richtext/richtextliststylepage.cpp:492
-#: ../src/richtext/richtextbulletspage.cpp:284
+#: ../src/richtext/richtextbulletspage.cpp:297
 msgid "*"
 msgstr "*"
 
 #: ../src/richtext/richtextliststylepage.cpp:236
-#: ../src/richtext/richtextbulletspage.cpp:173
+#: ../src/richtext/richtextbulletspage.cpp:186
 msgid "*)"
 msgstr "*)"
 
 #: ../src/richtext/richtextliststylepage.cpp:495
-#: ../src/richtext/richtextbulletspage.cpp:287
+#: ../src/richtext/richtextbulletspage.cpp:300
 msgid "+"
 msgstr "+"
 
@@ -879,7 +867,7 @@ msgid ", 64-bit edition"
 msgstr ", bản 64-bit"
 
 #: ../src/richtext/richtextliststylepage.cpp:493
-#: ../src/richtext/richtextbulletspage.cpp:285
+#: ../src/richtext/richtextbulletspage.cpp:298
 msgid "-"
 msgstr "-"
 
@@ -971,7 +959,7 @@ msgstr ": tập tin không tồn tại!"
 
 #: ../src/common/fontmap.cpp:199
 msgid ": unknown charset"
-msgstr ": không hiểu bộ ký tự"
+msgstr ": không rõ bộ ký tự"
 
 #: ../src/common/fontmap.cpp:413
 msgid ": unknown encoding"
@@ -981,33 +969,33 @@ msgstr ": không hiểu bảng mã"
 msgid "< &Back"
 msgstr "< &Quay lại"
 
-#: ../src/osx/carbon/fontdlg.cpp:592 ../src/osx/carbon/fontdlg.cpp:798
-#: ../src/osx/carbon/fontdlg.cpp:818
+#: ../src/osx/carbon/fontdlg.cpp:592 ../src/osx/carbon/fontdlg.cpp:799
+#: ../src/osx/carbon/fontdlg.cpp:819
 msgid "<Any Decorative>"
 msgstr "<Dạng Chữ Trang Trí bất kỳ>"
 
-#: ../src/osx/carbon/fontdlg.cpp:593 ../src/osx/carbon/fontdlg.cpp:800
-#: ../src/osx/carbon/fontdlg.cpp:820
+#: ../src/osx/carbon/fontdlg.cpp:593 ../src/osx/carbon/fontdlg.cpp:801
+#: ../src/osx/carbon/fontdlg.cpp:821
 msgid "<Any Modern>"
 msgstr "<Dạng Hiện Đại bất kỳ >"
 
-#: ../src/osx/carbon/fontdlg.cpp:591 ../src/osx/carbon/fontdlg.cpp:796
-#: ../src/osx/carbon/fontdlg.cpp:816
+#: ../src/osx/carbon/fontdlg.cpp:591 ../src/osx/carbon/fontdlg.cpp:797
+#: ../src/osx/carbon/fontdlg.cpp:817
 msgid "<Any Roman>"
 msgstr "<Dạng La Mã bất kỳ>"
 
-#: ../src/osx/carbon/fontdlg.cpp:594 ../src/osx/carbon/fontdlg.cpp:802
-#: ../src/osx/carbon/fontdlg.cpp:822
+#: ../src/osx/carbon/fontdlg.cpp:594 ../src/osx/carbon/fontdlg.cpp:803
+#: ../src/osx/carbon/fontdlg.cpp:823
 msgid "<Any Script>"
 msgstr "<Dạng Script bất kỳ>"
 
-#: ../src/osx/carbon/fontdlg.cpp:595 ../src/osx/carbon/fontdlg.cpp:807
-#: ../src/osx/carbon/fontdlg.cpp:826
+#: ../src/osx/carbon/fontdlg.cpp:595 ../src/osx/carbon/fontdlg.cpp:808
+#: ../src/osx/carbon/fontdlg.cpp:827
 msgid "<Any Swiss>"
 msgstr "<Dạng Thụy Sỹ bất kỳ>"
 
-#: ../src/osx/carbon/fontdlg.cpp:596 ../src/osx/carbon/fontdlg.cpp:804
-#: ../src/osx/carbon/fontdlg.cpp:824
+#: ../src/osx/carbon/fontdlg.cpp:596 ../src/osx/carbon/fontdlg.cpp:805
+#: ../src/osx/carbon/fontdlg.cpp:825
 msgid "<Any Teletype>"
 msgstr "<Dạng Teletype bất kỳ>"
 
@@ -1027,24 +1015,24 @@ msgstr "<DRIVE>"
 msgid "<LINK>"
 msgstr "<LINK>"
 
-#: ../src/html/helpwnd.cpp:1280
+#: ../src/html/helpwnd.cpp:1279
 msgid "<b><i>Bold italic face.</i></b><br>"
 msgstr "<b><i>Chữ vừa đậm vừa nghiêng.</i></b><br>"
 
-#: ../src/html/helpwnd.cpp:1284
+#: ../src/html/helpwnd.cpp:1283
 msgid "<b><i>bold italic <u>underlined</u></i></b><br>"
 msgstr "<b><i>đậm và nghiêng <u>có gạch chân</u></i></b><br>"
 
-#: ../src/html/helpwnd.cpp:1279
+#: ../src/html/helpwnd.cpp:1278
 msgid "<b>Bold face.</b> "
 msgstr "<b>Chữ đậm.</b> "
 
-#: ../src/html/helpwnd.cpp:1278
+#: ../src/html/helpwnd.cpp:1277
 msgid "<i>Italic face.</i> "
 msgstr "<i>Chữ nghiêng.</i> "
 
 #: ../src/richtext/richtextliststylepage.cpp:494
-#: ../src/richtext/richtextbulletspage.cpp:286
+#: ../src/richtext/richtextbulletspage.cpp:299
 msgid ">"
 msgstr ">"
 
@@ -1062,8 +1050,8 @@ msgstr "Một tập hợp không trống rỗng phải gồm có những nút 'p
 
 #: ../src/richtext/richtextliststylepage.cpp:304
 #: ../src/richtext/richtextliststylepage.cpp:306
-#: ../src/richtext/richtextbulletspage.cpp:244
-#: ../src/richtext/richtextbulletspage.cpp:246
+#: ../src/richtext/richtextbulletspage.cpp:257
+#: ../src/richtext/richtextbulletspage.cpp:259
 msgid "A standard bullet name."
 msgstr "Một tên bullet tiêu chuẩn."
 
@@ -1147,7 +1135,7 @@ msgstr "A6 105 x 148 mm"
 msgid "A6 Rotated 148 x 105 mm"
 msgstr "A6 Rotated 148 x 105 mm"
 
-#: ../src/generic/fontdlgg.cpp:83 ../src/richtext/richtextformatdlg.cpp:547
+#: ../src/generic/fontdlgg.cpp:83 ../src/richtext/richtextformatdlg.cpp:527
 #: ../src/osx/carbon/fontdlg.cpp:323
 msgid "ABCDEFGabcdefg12345"
 msgstr "ABCDEFGabcdefg12345"
@@ -1171,8 +1159,9 @@ msgid "About %s"
 msgstr "Giới thiệu %s"
 
 #: ../src/osx/menu_osx.cpp:605
+#, fuzzy
 msgid "About..."
-msgstr "Giới thiệu..."
+msgstr "&Thông tin thêm..."
 
 #: ../src/richtext/richtextsizepage.cpp:520
 msgid "Absolute"
@@ -1186,15 +1175,17 @@ msgstr "Kích thước Thật"
 msgid "Add"
 msgstr "Thêm"
 
-#: ../src/richtext/richtextbuffer.cpp:11219
+#: ../src/richtext/richtextbuffer.cpp:11056
+#, fuzzy
 msgid "Add Column"
 msgstr "Thêm cột"
 
-#: ../src/richtext/richtextbuffer.cpp:11156
+#: ../src/richtext/richtextbuffer.cpp:10993
+#, fuzzy
 msgid "Add Row"
 msgstr "Thêm hàng"
 
-#: ../src/html/helpwnd.cpp:440
+#: ../src/html/helpwnd.cpp:439
 msgid "Add current page to bookmarks"
 msgstr "Thêm trang hiện thời vào dấu trang"
 
@@ -1252,11 +1243,11 @@ msgstr "Tất cả"
 msgid "All files (%s)|%s"
 msgstr "Mọi tập tin (%s)|%s"
 
-#: ../include/wx/defs.h:2908
+#: ../include/wx/defs.h:2933
 msgid "All files (*)|*"
 msgstr "Mọi tập tin (*)|*"
 
-#: ../include/wx/defs.h:2905
+#: ../include/wx/defs.h:2930
 msgid "All files (*.*)|*.*"
 msgstr "Mọi tập tin (*.*)|*.*"
 
@@ -1280,11 +1271,6 @@ msgstr "Sẵn sàng quay số tới nhà cung cấp dịch vụ Internet ISP."
 msgid "Alt+"
 msgstr "Alt+"
 
-#: ../src/richtext/richtextborderspage.cpp:580
-#: ../src/richtext/richtextborderspage.cpp:582
-msgid "An optional corner radius for adding rounded corners."
-msgstr "Bán kính góc tự chọn để thêm góc được bo tròn."
-
 #: ../src/common/debugrpt.cpp:581
 msgid "And includes the following files:\n"
 msgstr "Và bao gồm các tập tin sau đây:\n"
@@ -1305,10 +1291,10 @@ msgstr "Ứng dụng"
 
 #: ../src/common/stockitem.cpp:141
 msgid "Apply"
-msgstr "Áp dụng"
+msgstr "Chấp nhận"
 
 #: ../src/richtext/richtextliststylepage.cpp:482
-#: ../src/richtext/richtextbulletspage.cpp:274
+#: ../src/richtext/richtextbulletspage.cpp:287
 msgid "Arabic"
 msgstr "Arabic"
 
@@ -1334,8 +1320,8 @@ msgid "Attributes"
 msgstr "Thuộc tính"
 
 #: ../src/richtext/richtextliststylepage.cpp:294
-#: ../src/richtext/richtextbulletspage.cpp:232
-#: ../src/richtext/richtextbulletspage.cpp:234
+#: ../src/richtext/richtextbulletspage.cpp:245
+#: ../src/richtext/richtextbulletspage.cpp:247
 msgid "Available fonts."
 msgstr "Phông chữ sẵn có."
 
@@ -1391,32 +1377,32 @@ msgstr "B6 Envelope, 176 x 125 mm"
 msgid "BACK"
 msgstr "QUAY LẠI"
 
-#: ../src/common/imagbmp.cpp:524 ../src/common/imagbmp.cpp:554
-#: ../src/common/imagbmp.cpp:569
+#: ../src/common/imagbmp.cpp:523 ../src/common/imagbmp.cpp:553
+#: ../src/common/imagbmp.cpp:568
 msgid "BMP: Couldn't allocate memory."
 msgstr "BMP: Không thể cấp phát bộ nhớ."
 
-#: ../src/common/imagbmp.cpp:98
+#: ../src/common/imagbmp.cpp:97
 msgid "BMP: Couldn't save invalid image."
 msgstr "BMP: Không thể ghi ảnh không hợp lệ."
 
-#: ../src/common/imagbmp.cpp:339
+#: ../src/common/imagbmp.cpp:338
 msgid "BMP: Couldn't write RGB color map."
 msgstr "BMP: Không thể ghi bản đồ màu RGB."
 
-#: ../src/common/imagbmp.cpp:474
+#: ../src/common/imagbmp.cpp:473
 msgid "BMP: Couldn't write data."
 msgstr "BMP: Không thể ghi dữ liệu."
 
-#: ../src/common/imagbmp.cpp:240
+#: ../src/common/imagbmp.cpp:239
 msgid "BMP: Couldn't write the file (Bitmap) header."
 msgstr "BMP: Không thể ghi phần đầu tập tin (Bitmap)."
 
-#: ../src/common/imagbmp.cpp:263
+#: ../src/common/imagbmp.cpp:262
 msgid "BMP: Couldn't write the file (BitmapInfo) header."
 msgstr "BMP: Không thể ghi phần đầu tập tin (BitmapInfo)."
 
-#: ../src/common/imagbmp.cpp:134
+#: ../src/common/imagbmp.cpp:133
 msgid "BMP: wxImage doesn't have own wxPalette."
 msgstr "BMP: wxImage không có quyền sở hữu wxPalette."
 
@@ -1425,7 +1411,7 @@ msgid "Back"
 msgstr "Quay lại"
 
 #: ../src/richtext/richtextbackgroundpage.cpp:119
-#: ../src/richtext/richtextformatdlg.cpp:395
+#: ../src/richtext/richtextformatdlg.cpp:375
 msgid "Background"
 msgstr "Nền"
 
@@ -1450,7 +1436,7 @@ msgid "Before a paragraph:"
 msgstr "Phía trước đoạn văn:"
 
 #: ../src/richtext/richtextliststylepage.cpp:489
-#: ../src/richtext/richtextbulletspage.cpp:281
+#: ../src/richtext/richtextbulletspage.cpp:294
 msgid "Bitmap"
 msgstr "Ảnh mảng bitmap"
 
@@ -1458,17 +1444,17 @@ msgstr "Ảnh mảng bitmap"
 msgid "Bitmap renderer cannot render value; value type: "
 msgstr "Bộ đáp ứng ảnh bitmap không thể trả về giá trị; kiểu giá trị: "
 
-#: ../src/generic/fontdlgg.cpp:333 ../src/richtext/richtextfontpage.cpp:353
+#: ../src/generic/fontdlgg.cpp:333 ../src/richtext/richtextfontpage.cpp:337
 #: ../src/osx/carbon/fontdlg.cpp:524 ../src/common/stockitem.cpp:143
 msgid "Bold"
 msgstr "Đậm"
 
-#: ../src/richtext/richtextborderspage.cpp:232
-#: ../src/richtext/richtextborderspage.cpp:390
+#: ../src/richtext/richtextborderspage.cpp:228
+#: ../src/richtext/richtextborderspage.cpp:386
 msgid "Border"
 msgstr "Viền"
 
-#: ../src/richtext/richtextformatdlg.cpp:389
+#: ../src/richtext/richtextformatdlg.cpp:369
 msgid "Borders"
 msgstr "Viền mép"
 
@@ -1480,7 +1466,7 @@ msgstr "Dưới"
 msgid "Bottom margin (mm):"
 msgstr "Lề dưới chân (mm):"
 
-#: ../src/richtext/richtextbuffer.cpp:9176
+#: ../src/richtext/richtextbuffer.cpp:9026
 msgid "Box Properties"
 msgstr "Các tính chất Hộp"
 
@@ -1493,7 +1479,7 @@ msgid "Browse"
 msgstr "Tìm duyệt"
 
 #: ../src/richtext/richtextliststylepage.cpp:245
-#: ../src/richtext/richtextbulletspage.cpp:182
+#: ../src/richtext/richtextbulletspage.cpp:195
 msgid "Bullet &Alignment:"
 msgstr "&Căn lề Bullet:"
 
@@ -1501,7 +1487,7 @@ msgstr "&Căn lề Bullet:"
 msgid "Bullet style"
 msgstr "Kiểu dáng bullet"
 
-#: ../src/richtext/richtextformatdlg.cpp:363
+#: ../src/richtext/richtextformatdlg.cpp:343
 msgid "Bullets"
 msgstr "Bullets"
 
@@ -1561,7 +1547,7 @@ msgstr "XÓA"
 msgid "COMMAND"
 msgstr "LỆNH"
 
-#: ../src/richtext/richtextfontpage.cpp:282
+#: ../src/richtext/richtextfontpage.cpp:291
 msgid "Ca&pitals"
 msgstr "Chữ viết &hoa"
 
@@ -1725,7 +1711,7 @@ msgstr ""
 "Không thể tạo mới chỉ số ID của cột. Hầu như chắc chắn trị số lớn nhất của "
 "cột đã được dùng."
 
-#: ../src/common/filefn.cpp:1328
+#: ../src/common/filefn.cpp:1335
 #, c-format
 msgid "Cannot enumerate files '%s'"
 msgstr "Không thể liệt kê các tập tin '%s'"
@@ -1770,7 +1756,7 @@ msgstr "Không thể gác máy - không có kết nối quay số nào đang ho�
 msgid "Cannot initialize OLE"
 msgstr "Không thể khởi tạo OLE"
 
-#: ../src/common/socket.cpp:852
+#: ../src/common/socket.cpp:847
 msgid "Cannot initialize sockets"
 msgstr "Không thể khởi tạo socket"
 
@@ -1818,7 +1804,7 @@ msgstr "Không thể mở tập tin chỉ mục: %s"
 msgid "Cannot open resources file '%s'."
 msgstr "Không thể mở tập tin tài nguyên '%s'."
 
-#: ../src/html/helpwnd.cpp:1548
+#: ../src/html/helpwnd.cpp:1537
 msgid "Cannot print empty page."
 msgstr "Không thể in một trang rỗng."
 
@@ -1864,7 +1850,7 @@ msgstr "Không thể đình chỉ tuyến trình %lx"
 msgid "Cannot wait for thread termination"
 msgstr "Không thể chờ tuyến trình thiết bị cuối"
 
-#: ../src/html/helpwnd.cpp:547
+#: ../src/html/helpwnd.cpp:546
 msgid "Case sensitive"
 msgstr "Phân biệt chữ HOA/thường"
 
@@ -1872,7 +1858,7 @@ msgstr "Phân biệt chữ HOA/thường"
 msgid "Categorized Mode"
 msgstr "Chế độ Cá nhân hóa"
 
-#: ../src/richtext/richtextbuffer.cpp:9748
+#: ../src/richtext/richtextbuffer.cpp:9598
 msgid "Cell Properties"
 msgstr "Các thuộc tính của ô"
 
@@ -1894,7 +1880,7 @@ msgid "Central European (ISO-8859-2)"
 msgstr "Central European (ISO-8859-2)"
 
 #: ../src/richtext/richtextliststylepage.cpp:250
-#: ../src/richtext/richtextbulletspage.cpp:187
+#: ../src/richtext/richtextbulletspage.cpp:200
 msgid "Centre"
 msgstr "Chính giữa"
 
@@ -1910,24 +1896,24 @@ msgid "Centred"
 msgstr "Trung tâm"
 
 #: ../src/richtext/richtextliststylepage.cpp:280
-#: ../src/richtext/richtextbulletspage.cpp:219
+#: ../src/richtext/richtextbulletspage.cpp:232
 msgid "Ch&oose..."
 msgstr "&Chọn lựa..."
 
-#: ../src/richtext/richtextbuffer.cpp:4242
+#: ../src/richtext/richtextbuffer.cpp:4107
 msgid "Change List Style"
 msgstr "Thay Đổi Kiểu Dáng List"
 
-#: ../src/richtext/richtextbuffer.cpp:3604
+#: ../src/richtext/richtextbuffer.cpp:3458
 msgid "Change Object Style"
 msgstr "Thay đổi Kiểu dáng Đối tượng"
 
-#: ../src/richtext/richtextbuffer.cpp:3870
-#: ../src/richtext/richtextbuffer.cpp:8003
+#: ../src/richtext/richtextbuffer.cpp:3724
+#: ../src/richtext/richtextbuffer.cpp:7853
 msgid "Change Properties"
 msgstr "Thay đổi các thuộc tính"
 
-#: ../src/richtext/richtextbuffer.cpp:3421
+#: ../src/richtext/richtextbuffer.cpp:3275
 msgid "Change Style"
 msgstr "Thay đổi Kiểu Dáng"
 
@@ -1943,36 +1929,31 @@ msgstr "Kiểu dáng ký tự"
 
 #: ../src/richtext/richtextliststylepage.cpp:224
 #: ../src/richtext/richtextliststylepage.cpp:226
-#: ../src/richtext/richtextbulletspage.cpp:161
-#: ../src/richtext/richtextbulletspage.cpp:163
+#: ../src/richtext/richtextbulletspage.cpp:174
+#: ../src/richtext/richtextbulletspage.cpp:176
 msgid "Check to add a period after the bullet."
 msgstr "Kiểm tra để thêm một dấu chấm sau bullet."
 
 #: ../src/richtext/richtextliststylepage.cpp:238
 #: ../src/richtext/richtextliststylepage.cpp:240
-#: ../src/richtext/richtextbulletspage.cpp:175
-#: ../src/richtext/richtextbulletspage.cpp:177
+#: ../src/richtext/richtextbulletspage.cpp:188
+#: ../src/richtext/richtextbulletspage.cpp:190
 msgid "Check to add a right parenthesis."
 msgstr "Đánh đấu kiểm để thêm dấu mở ngoặc đơn."
 
-#: ../src/richtext/richtextborderspage.cpp:385
-#: ../src/richtext/richtextborderspage.cpp:387
-#: ../src/richtext/richtextborderspage.cpp:554
-#: ../src/richtext/richtextborderspage.cpp:556
+#: ../src/richtext/richtextborderspage.cpp:381
+#: ../src/richtext/richtextborderspage.cpp:383
+#: ../src/richtext/richtextborderspage.cpp:550
+#: ../src/richtext/richtextborderspage.cpp:552
 msgid "Check to edit all borders simultaneously."
-msgstr "Chọn để chỉnh sửa mọi đường viền một cách đồng thời."
+msgstr ""
 
 #: ../src/richtext/richtextliststylepage.cpp:231
 #: ../src/richtext/richtextliststylepage.cpp:233
-#: ../src/richtext/richtextbulletspage.cpp:168
-#: ../src/richtext/richtextbulletspage.cpp:170
+#: ../src/richtext/richtextbulletspage.cpp:181
+#: ../src/richtext/richtextbulletspage.cpp:183
 msgid "Check to enclose the bullet in parentheses."
 msgstr "Kiểm tra để bao bullet bằng dấu ngoặc đơn."
-
-#: ../src/richtext/richtextfontpage.cpp:315
-#: ../src/richtext/richtextfontpage.cpp:317
-msgid "Check to indicate right-to-left text layout."
-msgstr "Bấm chọn để bố trí chữ từ phải sang trái."
 
 #: ../src/osx/carbon/fontdlg.cpp:526 ../src/osx/carbon/fontdlg.cpp:528
 msgid "Check to make the font bold."
@@ -1991,45 +1972,40 @@ msgstr "Đánh đấu kiểm để làm cho phông chữ có gạch chân."
 msgid "Check to restart numbering."
 msgstr "Đánh đấu kiểm để bắt đầu đánh số."
 
-#: ../src/richtext/richtextfontpage.cpp:277
-#: ../src/richtext/richtextfontpage.cpp:279
+#: ../src/richtext/richtextfontpage.cpp:286
+#: ../src/richtext/richtextfontpage.cpp:288
 msgid "Check to show a line through the text."
 msgstr "Đánh dấu kiểm để chữ bị gạch ngang."
 
-#: ../src/richtext/richtextfontpage.cpp:284
-#: ../src/richtext/richtextfontpage.cpp:286
+#: ../src/richtext/richtextfontpage.cpp:293
+#: ../src/richtext/richtextfontpage.cpp:295
 msgid "Check to show the text in capitals."
 msgstr "Đánh dấu kiểm để chữ được viết hoa."
 
-#: ../src/richtext/richtextfontpage.cpp:291
-#: ../src/richtext/richtextfontpage.cpp:293
+#: ../src/richtext/richtextfontpage.cpp:300
+#: ../src/richtext/richtextfontpage.cpp:302
 msgid "Check to show the text in small capitals."
 msgstr "Đánh dấu kiểm để chữ được viết HOA nhưng dạng nhỏ hơn."
 
-#: ../src/richtext/richtextfontpage.cpp:305
-#: ../src/richtext/richtextfontpage.cpp:307
+#: ../src/richtext/richtextfontpage.cpp:314
+#: ../src/richtext/richtextfontpage.cpp:316
 msgid "Check to show the text in subscript."
 msgstr "Đánh dấu kiểm để chữ thụt xuống."
 
-#: ../src/richtext/richtextfontpage.cpp:298
-#: ../src/richtext/richtextfontpage.cpp:300
+#: ../src/richtext/richtextfontpage.cpp:307
+#: ../src/richtext/richtextfontpage.cpp:309
 msgid "Check to show the text in superscript."
 msgstr "Đánh dấu kiểm để chữ đẩy lên."
-
-#: ../src/richtext/richtextfontpage.cpp:322
-#: ../src/richtext/richtextfontpage.cpp:324
-msgid "Check to suppress hyphenation."
-msgstr "Kiểm tra để cấm tách từ."
 
 #: ../src/msw/dialup.cpp:784
 msgid "Choose ISP to dial"
 msgstr "Chọn nhà cung cấp dịch vụ Internet ISP để quay số"
 
-#: ../src/propgrid/props.cpp:1654
+#: ../src/propgrid/props.cpp:1653
 msgid "Choose a directory:"
 msgstr "Chọn thư mục:"
 
-#: ../src/propgrid/props.cpp:1713
+#: ../src/propgrid/props.cpp:1712
 msgid "Choose a file"
 msgstr "Chọn một tập tin"
 
@@ -2070,8 +2046,8 @@ msgstr "Bấm vào để chấp nhận kiểu dáng đã chọn."
 
 #: ../src/richtext/richtextliststylepage.cpp:281
 #: ../src/richtext/richtextliststylepage.cpp:283
-#: ../src/richtext/richtextbulletspage.cpp:220
-#: ../src/richtext/richtextbulletspage.cpp:222
+#: ../src/richtext/richtextbulletspage.cpp:233
+#: ../src/richtext/richtextbulletspage.cpp:235
 msgid "Click to browse for a symbol."
 msgstr "Bấm chọn để tìm duyệt ký tự đặc biệt."
 
@@ -2087,13 +2063,13 @@ msgstr "Bấm vào để hủy việc chọn phông chữ."
 msgid "Click to change the font colour."
 msgstr "Bấm vào để thay đổi màu sắc phông chữ."
 
-#: ../src/richtext/richtextfontpage.cpp:267
-#: ../src/richtext/richtextfontpage.cpp:269
+#: ../src/richtext/richtextfontpage.cpp:276
+#: ../src/richtext/richtextfontpage.cpp:278
 msgid "Click to change the text background colour."
 msgstr "Bấm vào để thay đổi màu nền của chữ."
 
-#: ../src/richtext/richtextfontpage.cpp:254
-#: ../src/richtext/richtextfontpage.cpp:256
+#: ../src/richtext/richtextfontpage.cpp:263
+#: ../src/richtext/richtextfontpage.cpp:265
 msgid "Click to change the text colour."
 msgstr "Bấm vào để thay đổi màu của chữ."
 
@@ -2136,13 +2112,13 @@ msgstr "Bấm vào để tạo kiểu dáng danh sách mới."
 msgid "Click to create a new paragraph style."
 msgstr "Bấm vào để tạo một kiểu dáng đoạn văn mới."
 
-#: ../src/richtext/richtexttabspage.cpp:133
-#: ../src/richtext/richtexttabspage.cpp:135
+#: ../src/richtext/richtexttabspage.cpp:137
+#: ../src/richtext/richtexttabspage.cpp:139
 msgid "Click to create a new tab position."
 msgstr "Bấm vào để tạo một vị trí tab mới."
 
-#: ../src/richtext/richtexttabspage.cpp:145
-#: ../src/richtext/richtexttabspage.cpp:147
+#: ../src/richtext/richtexttabspage.cpp:149
+#: ../src/richtext/richtexttabspage.cpp:151
 msgid "Click to delete all tab positions."
 msgstr "Bấm vào để xóa tất cả vị trí tab."
 
@@ -2151,8 +2127,8 @@ msgstr "Bấm vào để xóa tất cả vị trí tab."
 msgid "Click to delete the selected style."
 msgstr "Bấm vào để xóa kiểu dáng đã chọn."
 
-#: ../src/richtext/richtexttabspage.cpp:139
-#: ../src/richtext/richtexttabspage.cpp:141
+#: ../src/richtext/richtexttabspage.cpp:143
+#: ../src/richtext/richtexttabspage.cpp:145
 msgid "Click to delete the selected tab position."
 msgstr "Bấm vào để xóa các vị trí tab đã chọn."
 
@@ -2190,7 +2166,7 @@ msgstr "Đóng cửa sổ này"
 msgid "Color"
 msgstr "Màu"
 
-#: ../src/richtext/richtextformatdlg.cpp:781
+#: ../src/richtext/richtextformatdlg.cpp:761
 msgid "Colour"
 msgstr "Màu sắc"
 
@@ -2236,7 +2212,7 @@ msgstr ""
 msgid "Common dialog failed with error code %0lx."
 msgstr "Hộp thoại dùng chung gặp lỗi %0lx."
 
-#: ../src/gtk/window.cpp:4345
+#: ../src/gtk/window.cpp:4357
 msgid ""
 "Compositing not supported by this system, please enable it in your Window "
 "Manager."
@@ -2244,7 +2220,7 @@ msgstr ""
 "Sự kết hợp không được hỗ trợ bởi hệ thống này, xin hãy bật nó lên trong "
 "Window Manager."
 
-#: ../src/html/helpwnd.cpp:1565
+#: ../src/html/helpwnd.cpp:1554
 msgid "Compressed HTML Help file (*.chm)|*.chm|"
 msgstr "Nén tập tin Trợ Giúp dạng HTML (*.chm)|*.chm|"
 
@@ -2261,15 +2237,15 @@ msgstr "Tên mục tin cấu hình không thể bắt đầu bằng '%c'."
 msgid "Confirm"
 msgstr "Xác nhận"
 
-#: ../src/msw/mimetype.cpp:715
+#: ../src/msw/mimetype.cpp:744
 msgid "Confirm registry update"
 msgstr "Xác nhận cập nhật đăng ký"
 
-#: ../src/html/htmlwin.cpp:557
+#: ../src/html/htmlwin.cpp:547
 msgid "Connecting..."
 msgstr "Đang kết nối..."
 
-#: ../src/html/helpwnd.cpp:483
+#: ../src/html/helpwnd.cpp:482
 msgid "Contents"
 msgstr "Nội dung"
 
@@ -2282,7 +2258,7 @@ msgstr "Việc chuyển đổi bộ ký tự thành '%s' không làm việc."
 msgid "Convert"
 msgstr "Chuyển đổi"
 
-#: ../src/html/htmlwin.cpp:1070
+#: ../src/html/htmlwin.cpp:1060
 #, c-format
 msgid "Copied to clipboard:\"%s\""
 msgstr "Đã sao chép vào clipboard:\"%s\""
@@ -2298,15 +2274,6 @@ msgstr "Chép"
 #: ../src/common/stockitem.cpp:258
 msgid "Copy selection"
 msgstr "Chép vùng chọn"
-
-#: ../src/richtext/richtextborderspage.cpp:569
-#: ../src/richtext/richtextborderspage.cpp:604
-msgid "Corner"
-msgstr "Góc"
-
-#: ../src/richtext/richtextborderspage.cpp:578
-msgid "Corner &radius:"
-msgstr "Bán &kính góc:"
 
 #: ../src/html/chm.cpp:718
 #, c-format
@@ -2377,7 +2344,7 @@ msgstr "Không thể đặt sự căn chỉnh."
 msgid "Could not set column width."
 msgstr "Không thể đặt độ rộng cột."
 
-#: ../src/common/filefn.cpp:1554
+#: ../src/common/filefn.cpp:1568
 msgid "Could not set current working directory"
 msgstr "Không thể đặt thư mục làm việc hiện hành"
 
@@ -2430,7 +2397,7 @@ msgstr "Không tạo được một timer"
 
 #: ../src/osx/carbon/overlay.cpp:122
 msgid "Couldn't create the overlay window"
-msgstr "Không tạo được cửa sổ xếp chồng"
+msgstr "Không tạo được cửa sổ overlay"
 
 #: ../src/common/translation.cpp:2015
 msgid "Couldn't enumerate translations"
@@ -2564,23 +2531,23 @@ msgstr "DEL"
 msgid "DELETE"
 msgstr "DELETE"
 
-#: ../src/common/imagbmp.cpp:1090
+#: ../src/common/imagbmp.cpp:1096
 msgid "DIB Header: Encoding doesn't match bitdepth."
 msgstr "Phần đầu DIB: Bộ giải mã không khớp với độ sâu bit."
 
-#: ../src/common/imagbmp.cpp:1038
+#: ../src/common/imagbmp.cpp:1044
 msgid "DIB Header: Image height > 32767 pixels for file."
 msgstr "Phần đầu DIB: Độ cao ảnh > 32767 điểm ảnh cho tập tin."
 
-#: ../src/common/imagbmp.cpp:1030
+#: ../src/common/imagbmp.cpp:1036
 msgid "DIB Header: Image width > 32767 pixels for file."
 msgstr "Phần đầu DIB: Độ rộng ảnh > 32767 điểm ảnh cho tập tin."
 
-#: ../src/common/imagbmp.cpp:1058
+#: ../src/common/imagbmp.cpp:1064
 msgid "DIB Header: Unknown bitdepth in file."
 msgstr "Phần đầu DIB: Không rõ độ sâu bit trong tập tin."
 
-#: ../src/common/imagbmp.cpp:1072
+#: ../src/common/imagbmp.cpp:1078
 msgid "DIB Header: Unknown encoding in file."
 msgstr "Phần Đầu DIB: Không hiểu bộ giải mã trong tập tin."
 
@@ -2596,7 +2563,7 @@ msgstr "DL Envelope, 110 x 220 mm"
 msgid "DOWN"
 msgstr "DOWN"
 
-#: ../src/richtext/richtextborderspage.cpp:616
+#: ../src/richtext/richtextborderspage.cpp:567
 msgid "Dashed"
 msgstr "Đã gạch"
 
@@ -2637,20 +2604,22 @@ msgstr "Phông chữ mặc định"
 msgid "Default printer"
 msgstr "Máy in mặc định"
 
-#: ../src/richtext/richtextbuffer.cpp:8095 ../src/common/stockitem.cpp:152
+#: ../src/richtext/richtextbuffer.cpp:7945 ../src/common/stockitem.cpp:152
 #: ../src/stc/stc_i18n.cpp:20
 msgid "Delete"
 msgstr "Xóa bỏ"
 
-#: ../src/richtext/richtexttabspage.cpp:144
+#: ../src/richtext/richtexttabspage.cpp:148
 msgid "Delete A&ll"
 msgstr "Xó&a Tất"
 
-#: ../src/richtext/richtextbuffer.cpp:11105
+#: ../src/richtext/richtextbuffer.cpp:10942
+#, fuzzy
 msgid "Delete Column"
 msgstr "Xóa cột"
 
-#: ../src/richtext/richtextbuffer.cpp:11055
+#: ../src/richtext/richtextbuffer.cpp:10892
+#, fuzzy
 msgid "Delete Row"
 msgstr "Xóa hàng"
 
@@ -2658,7 +2627,7 @@ msgstr "Xóa hàng"
 msgid "Delete Style"
 msgstr "Xóa Kiểu Dáng"
 
-#: ../src/richtext/richtextctrl.cpp:1306 ../src/richtext/richtextctrl.cpp:1544
+#: ../src/richtext/richtextctrl.cpp:1300 ../src/richtext/richtextctrl.cpp:1538
 msgid "Delete Text"
 msgstr "Xóa Chữ"
 
@@ -2709,7 +2678,7 @@ msgstr ""
 "Hàm quay số không sẵn sàng bởi vì dịch vụ truy cập từ xa (RAS) chưa được cài "
 "trong máy này. Xin hãy cài nó vào."
 
-#: ../src/generic/tipdlg.cpp:225
+#: ../src/generic/tipdlg.cpp:230
 msgid "Did you know..."
 msgstr "Bạn có biết..."
 
@@ -2722,12 +2691,12 @@ msgstr "Lỗi DirectFB %d đã xảy ra."
 msgid "Directories"
 msgstr "Thư mục"
 
-#: ../src/common/filefn.cpp:1243
+#: ../src/common/filefn.cpp:1250
 #, c-format
 msgid "Directory '%s' couldn't be created"
 msgstr "Thư mục '%s' không thể được tạo"
 
-#: ../src/common/filefn.cpp:1263
+#: ../src/common/filefn.cpp:1270
 #, c-format
 msgid "Directory '%s' couldn't be deleted"
 msgstr "Thư mục '%s' không thể xóa được"
@@ -2744,7 +2713,7 @@ msgstr "Thư mục chưa tồn tại."
 msgid "Discard changes and reload the last saved version?"
 msgstr "Không dùng những thay đổi này và tải lại dữ liệu đã lưu lần trước?"
 
-#: ../src/html/helpwnd.cpp:513
+#: ../src/html/helpwnd.cpp:512
 msgid ""
 "Display all index items that contain given substring. Search is case "
 "insensitive."
@@ -2752,15 +2721,15 @@ msgstr ""
 "Hiện tất cả chỉ số mục tin mà có chứa chuỗi con định sẵn. Tìm kiếm phân biệt "
 "Hoa/thường."
 
-#: ../src/html/helpwnd.cpp:693
+#: ../src/html/helpwnd.cpp:692
 msgid "Display options dialog"
 msgstr "Hiển thị hộp thoại tùy chọn"
 
-#: ../src/html/helpwnd.cpp:327
+#: ../src/html/helpwnd.cpp:326
 msgid "Displays help as you browse the books on the left."
 msgstr "Hiện phần trợ giúp như là một trình duyệt sách trên phần bên trái."
 
-#: ../src/msw/mimetype.cpp:708
+#: ../src/msw/mimetype.cpp:737
 msgid ""
 "Do you want to overwrite the command used to %s files with extension \"%s"
 "\" ?\n"
@@ -2793,11 +2762,11 @@ msgstr "Viết bởi "
 msgid "Documentation writers"
 msgstr "Những người viết tài liệu"
 
-#: ../src/common/sizer.cpp:2684
+#: ../src/common/sizer.cpp:2704
 msgid "Don't Save"
 msgstr "Không Ghi Lại"
 
-#: ../src/msw/frame.cpp:122 ../src/html/htmlwin.cpp:624
+#: ../src/msw/frame.cpp:122 ../src/html/htmlwin.cpp:614
 msgid "Done"
 msgstr "Hoàn tất"
 
@@ -2805,11 +2774,11 @@ msgstr "Hoàn tất"
 msgid "Done."
 msgstr "Hoàn tất."
 
-#: ../src/richtext/richtextborderspage.cpp:615
+#: ../src/richtext/richtextborderspage.cpp:566
 msgid "Dotted"
 msgstr "Chấm chấm"
 
-#: ../src/richtext/richtextborderspage.cpp:617
+#: ../src/richtext/richtextborderspage.cpp:568
 msgid "Double"
 msgstr "Đôi"
 
@@ -2826,7 +2795,7 @@ msgstr "Chỉ số id người dùng kép: %d"
 msgid "Down"
 msgstr "Xuống"
 
-#: ../src/richtext/richtextctrl.cpp:848
+#: ../src/richtext/richtextctrl.cpp:842
 msgid "Drag"
 msgstr "Kéo"
 
@@ -2968,11 +2937,11 @@ msgstr "Lỗi khi đóng kqueue"
 msgid "Error creating directory"
 msgstr "Lỗi tạo thư mục"
 
-#: ../src/common/imagbmp.cpp:1101
+#: ../src/common/imagbmp.cpp:1107
 msgid "Error in reading image DIB."
 msgstr "Lỗi trong việc đọc ảnh DIB."
 
-#: ../src/propgrid/propgrid.cpp:6550
+#: ../src/propgrid/propgrid.cpp:6565
 #, c-format
 msgid "Error in resource: %s"
 msgstr "Lỗi trong tài nguyên: %s"
@@ -3043,7 +3012,7 @@ msgstr "Rút trích '%s' vào '%s' gặp lỗi."
 msgid "F"
 msgstr "F"
 
-#: ../src/propgrid/advprops.cpp:641
+#: ../src/propgrid/advprops.cpp:640
 msgid "Face Name"
 msgstr "Tên Mặt"
 
@@ -3124,7 +3093,7 @@ msgstr "Sao chép giá trị đăng ký '%s' gặp lỗi"
 msgid "Failed to copy the contents of registry key '%s' to '%s'."
 msgstr "Sao chép nội dung khóa đăng ký '%s' tới '%s' gặp lỗi."
 
-#: ../src/common/filefn.cpp:1051
+#: ../src/common/filefn.cpp:1058
 #, c-format
 msgid "Failed to copy the file '%s' to '%s'"
 msgstr "Sao chép tập tin từ '%s' sang '%s' gặp lỗi"
@@ -3182,7 +3151,7 @@ msgstr ""
 msgid "Failed to create epoll descriptor"
 msgstr "Tạo phần mô tả epoll gặp lỗi"
 
-#: ../src/msw/mimetype.cpp:200
+#: ../src/msw/mimetype.cpp:198
 #, c-format
 msgid "Failed to create registry entry for '%s' files."
 msgstr "Tạo mục đăng ký cho '%s' tập tin gặp lỗi."
@@ -3196,7 +3165,7 @@ msgstr "Tạo hộp thoại tìm/thay thế tiêu chuẩn gặp lỗi (mã lỗi
 msgid "Failed to create wake up pipe used by event loop."
 msgstr "Tạo wake up pipe sử dụng cho vòng lặp sự kiện gặp lỗi."
 
-#: ../src/html/winpars.cpp:730
+#: ../src/html/winpars.cpp:739
 #, c-format
 msgid "Failed to display HTML document in %s encoding"
 msgstr "Hiển thị tài liệu HTML trong bộ mã %s gặp lỗi"
@@ -3255,7 +3224,7 @@ msgstr "Lấy dữ liệu từ clipboard gặp lỗi"
 msgid "Failed to get the local system time"
 msgstr "Lấy thời gian từ hệ thống gặp lỗi"
 
-#: ../src/common/filefn.cpp:1445
+#: ../src/common/filefn.cpp:1452
 msgid "Failed to get the working directory"
 msgstr "Lấy thư mục đang làm việc gặp lỗi"
 
@@ -3409,7 +3378,7 @@ msgstr "Mở tập tin tạm thời gặp lỗi."
 msgid "Failed to open the clipboard."
 msgstr "Mở clipboard gặp lỗi."
 
-#: ../src/common/translation.cpp:1171
+#: ../src/common/translation.cpp:1170
 #, c-format
 msgid "Failed to parse Plural-Forms: '%s'"
 msgstr "Lỗi khi phân tích dạng thức số nhiều: '%s'"
@@ -3482,7 +3451,7 @@ msgstr "Gỡ bỏ tập tin khóa cũ '%s' gặp lỗi."
 msgid "Failed to rename registry value '%s' to '%s'."
 msgstr "Đổi tên giá trị đăng ký '%s' thành '%s' gặp lỗi."
 
-#: ../src/common/filefn.cpp:1161
+#: ../src/common/filefn.cpp:1168
 #, c-format
 msgid ""
 "Failed to rename the file '%s' to '%s' because the destination file already "
@@ -3633,9 +3602,9 @@ msgstr "Ghi vào tập tin khóa '%s' gặp lỗi"
 msgid "False"
 msgstr "Sai"
 
-#: ../src/propgrid/advprops.cpp:659
+#: ../src/propgrid/advprops.cpp:658
 msgid "Family"
-msgstr "Họ"
+msgstr "Họ :"
 
 #: ../src/common/stockitem.cpp:157 ../src/msw/wince/filedlgwce.cpp:121
 msgid "File"
@@ -3665,17 +3634,17 @@ msgstr ""
 "Tập tin '%s' đã tồn tại. \n"
 "Bạn có muốn thay thế nó không?"
 
-#: ../src/common/filefn.cpp:1199
+#: ../src/common/filefn.cpp:1206
 #, c-format
 msgid "File '%s' couldn't be removed"
 msgstr "Tập tin  '%s' gỡ bỏ được"
 
-#: ../src/common/filefn.cpp:1180
+#: ../src/common/filefn.cpp:1187
 #, c-format
 msgid "File '%s' couldn't be renamed '%s'"
 msgstr "Tập tin '%s' không thể bị đổi tên '%s'"
 
-#: ../src/richtext/richtextctrl.cpp:2810 ../src/common/textcmn.cpp:935
+#: ../src/richtext/richtextctrl.cpp:2774 ../src/common/textcmn.cpp:935
 msgid "File couldn't be loaded."
 msgstr "Không thể tải tập tin lên."
 
@@ -3684,7 +3653,7 @@ msgstr "Không thể tải tập tin lên."
 msgid "File dialog failed with error code %0lx."
 msgstr "Hộp thoại chọn tập tin bị lỗi %0lx."
 
-#: ../src/common/docview.cpp:1778
+#: ../src/common/docview.cpp:1771
 msgid "File error"
 msgstr "Lỗi tập tin"
 
@@ -3696,7 +3665,7 @@ msgstr "Tên tập tin đã tồn tại rồi."
 msgid "Files"
 msgstr "Tập tin"
 
-#: ../src/common/filefn.cpp:1746
+#: ../src/common/filefn.cpp:1760
 #, c-format
 msgid "Files (%s)"
 msgstr "Tập tin (%s)"
@@ -3705,7 +3674,7 @@ msgstr "Tập tin (%s)"
 msgid "Filter"
 msgstr "Bộ lọc"
 
-#: ../src/common/stockitem.cpp:158 ../src/html/helpwnd.cpp:501
+#: ../src/common/stockitem.cpp:158 ../src/html/helpwnd.cpp:500
 msgid "Find"
 msgstr "Tìm"
 
@@ -3721,11 +3690,11 @@ msgstr "Trang đầu"
 msgid "Fixed"
 msgstr "Cố định"
 
-#: ../src/html/helpwnd.cpp:1220
+#: ../src/html/helpwnd.cpp:1219
 msgid "Fixed font:"
 msgstr "Phông chữ cố định:"
 
-#: ../src/html/helpwnd.cpp:1283
+#: ../src/html/helpwnd.cpp:1282
 msgid "Fixed size face.<br> <b>bold</b> <i>italic</i> "
 msgstr "Kích thước bình thường.<br> <b>đậm</b> <i>nghiêng</i> "
 
@@ -3741,26 +3710,26 @@ msgstr "Đĩa mềm"
 msgid "Folio, 8 1/2 x 13 in"
 msgstr "Folio, 8 1/2 x 13 in"
 
-#: ../src/richtext/richtextformatdlg.cpp:345 ../src/osx/carbon/fontdlg.cpp:457
+#: ../src/richtext/richtextformatdlg.cpp:325 ../src/osx/carbon/fontdlg.cpp:457
 #: ../src/common/stockitem.cpp:194
 msgid "Font"
 msgstr "Phông chữ"
 
-#: ../src/richtext/richtextfontpage.cpp:221
+#: ../src/richtext/richtextfontpage.cpp:230
 msgid "Font &weight:"
 msgstr "Độ đậm phông &chữ"
 
-#: ../src/html/helpwnd.cpp:1221
+#: ../src/html/helpwnd.cpp:1220
 msgid "Font size:"
 msgstr "Cỡ phông chữ:"
 
-#: ../src/richtext/richtextfontpage.cpp:208
+#: ../src/richtext/richtextfontpage.cpp:217
 msgid "Font st&yle:"
 msgstr "Kiể&u dáng phông chữ:"
 
 #: ../src/osx/carbon/fontdlg.cpp:499
 msgid "Font:"
-msgstr "Phông chữ:"
+msgstr "Phông chữ :"
 
 #: ../src/dfb/fontmgr.cpp:198
 #, c-format
@@ -3769,7 +3738,7 @@ msgstr "Tập tin chỉ số phông chữ %s bị mất khi đang tải lên."
 
 #: ../src/unix/utilsunx.cpp:651
 msgid "Fork failed"
-msgstr "Gặp lỗi khi rẽ nhánh tiến trình"
+msgstr "Lỗi Fork"
 
 #: ../src/common/stockitem.cpp:161
 msgid "Forward"
@@ -3779,7 +3748,7 @@ msgstr "Chuyển tiếp"
 msgid "Forward hrefs are not supported"
 msgstr "Liên kết tiến tới chưa được hỗ trợ"
 
-#: ../src/html/helpwnd.cpp:889
+#: ../src/html/helpwnd.cpp:888
 #, c-format
 msgid "Found %i matches"
 msgstr "Tìm thấy %i cái khớp"
@@ -3808,7 +3777,7 @@ msgstr "GIF: không có đủ bộ nhớ."
 msgid "GIF: unknown error!!!"
 msgstr "GIF: lỗi không rõ!!!"
 
-#: ../src/gtk/window.cpp:4327
+#: ../src/gtk/window.cpp:4339
 msgid ""
 "GTK+ installed on this machine is too old to support screen compositing, "
 "please install GTK+ 2.12 or later."
@@ -3848,15 +3817,15 @@ msgstr "GetPropertyCollection được gọi bởi một bộ truy cập chung"
 msgid "GetPropertyCollection called w/o valid collection getter"
 msgstr "GetPropertyCollection được gọi bởi bộ nhận thu thập w/o hợp lệ"
 
-#: ../src/html/helpwnd.cpp:674
+#: ../src/html/helpwnd.cpp:673
 msgid "Go back"
-msgstr "Đi lùi"
+msgstr "Quay lui một trang"
 
-#: ../src/html/helpwnd.cpp:675
+#: ../src/html/helpwnd.cpp:674
 msgid "Go forward"
-msgstr "Đi tiếp"
+msgstr "Đi tiếp một trang"
 
-#: ../src/html/helpwnd.cpp:677
+#: ../src/html/helpwnd.cpp:676
 msgid "Go one level up in document hierarchy"
 msgstr "Tăng một cấp trong thứ bậc tài liệu"
 
@@ -3876,7 +3845,7 @@ msgstr "Đồ họa bởi "
 msgid "Greek (ISO-8859-7)"
 msgstr "Greek (ISO-8859-7)"
 
-#: ../src/richtext/richtextborderspage.cpp:618
+#: ../src/richtext/richtextborderspage.cpp:569
 msgid "Groove"
 msgstr "Khía"
 
@@ -3892,16 +3861,16 @@ msgstr "TRỢ GIÚP"
 msgid "HOME"
 msgstr "HOME"
 
-#: ../src/html/helpwnd.cpp:1563
+#: ../src/html/helpwnd.cpp:1552
 msgid "HTML Help Project (*.hhp)|*.hhp|"
 msgstr "HTML Đề án Trợ giúp (*.hhp)|*.hhp|"
 
-#: ../src/html/htmlwin.cpp:672
+#: ../src/html/htmlwin.cpp:662
 #, c-format
 msgid "HTML anchor %s does not exist."
 msgstr "Điểm neo HTML %s không tồn tại."
 
-#: ../src/html/helpwnd.cpp:1561
+#: ../src/html/helpwnd.cpp:1550
 msgid "HTML files (*.html;*.htm)|*.html;*.htm|"
 msgstr "Tập tin HTML (*.html;*.htm)|*.html;*.htm|"
 
@@ -3919,23 +3888,23 @@ msgstr "Hebrew (ISO-8859-8)"
 msgid "Help"
 msgstr "Trợ giúp"
 
-#: ../src/html/helpwnd.cpp:1214
+#: ../src/html/helpwnd.cpp:1213
 msgid "Help Browser Options"
 msgstr "Các tùy chọn Duyệt Trợ Giúp"
 
 #: ../src/generic/helpext.cpp:458 ../src/generic/helpext.cpp:459
 msgid "Help Index"
-msgstr "Mục lục Trợ Giúp"
+msgstr "Chỉ Mục Trợ Giúp"
 
-#: ../src/html/helpwnd.cpp:1545
+#: ../src/html/helpwnd.cpp:1534
 msgid "Help Printing"
 msgstr "Trợ Giúp In Ấn"
 
-#: ../src/html/helpwnd.cpp:815
+#: ../src/html/helpwnd.cpp:814
 msgid "Help Topics"
 msgstr "Trợ Giúp Theo Chủ Đề..."
 
-#: ../src/html/helpwnd.cpp:1562
+#: ../src/html/helpwnd.cpp:1551
 msgid "Help books (*.htb)|*.htb|Help books (*.zip)|*.zip|"
 msgstr "Sách trợ giúp (*.htb)|*.htb|Sách trợ giúp (*.zip)|*.zip|"
 
@@ -3980,26 +3949,26 @@ msgstr "Thư mục Home"
 msgid "How the object will float relative to the text."
 msgstr "Để thấy đối tượng sẽ trôi nổi liên quan đến chữ."
 
-#: ../src/common/imagbmp.cpp:1116
+#: ../src/common/imagbmp.cpp:1122
 msgid "ICO: Error in reading mask DIB."
 msgstr "ICO: Lỗi trong việc đọc mặt nạ DIB."
 
-#: ../src/common/imagbmp.cpp:1231 ../src/common/imagbmp.cpp:1292
-#: ../src/common/imagbmp.cpp:1303 ../src/common/imagbmp.cpp:1316
-#: ../src/common/imagbmp.cpp:1361 ../src/common/imagbmp.cpp:1373
-#: ../src/common/imagbmp.cpp:1384
+#: ../src/common/imagbmp.cpp:1237 ../src/common/imagbmp.cpp:1298
+#: ../src/common/imagbmp.cpp:1309 ../src/common/imagbmp.cpp:1322
+#: ../src/common/imagbmp.cpp:1367 ../src/common/imagbmp.cpp:1379
+#: ../src/common/imagbmp.cpp:1390
 msgid "ICO: Error writing the image file!"
 msgstr "ICO: Lỗi khi đang ghi tập tin ảnh!"
 
-#: ../src/common/imagbmp.cpp:1196
+#: ../src/common/imagbmp.cpp:1202
 msgid "ICO: Image too tall for an icon."
 msgstr "ICO: Ảnh quá cao đối với biểu tượng."
 
-#: ../src/common/imagbmp.cpp:1204
+#: ../src/common/imagbmp.cpp:1210
 msgid "ICO: Image too wide for an icon."
 msgstr "ICO: Ảnh quá rộng đối với biểu tượng."
 
-#: ../src/common/imagbmp.cpp:1464
+#: ../src/common/imagbmp.cpp:1470
 msgid "ICO: Invalid icon index."
 msgstr "ICO: Chỉ mục biểu tượng không hợp lệ."
 
@@ -4117,22 +4086,22 @@ msgstr ""
 msgid "Impossible to get child process input"
 msgstr "Không thể lấy đầu vào của tiến trình con"
 
-#: ../src/common/filefn.cpp:1067
+#: ../src/common/filefn.cpp:1074
 #, c-format
 msgid "Impossible to get permissions for file '%s'"
 msgstr "Không thể nào lấy được quyền cho tập tin '%s'"
 
-#: ../src/common/filefn.cpp:1081
+#: ../src/common/filefn.cpp:1088
 #, c-format
 msgid "Impossible to overwrite the file '%s'"
 msgstr "Không thể xảy ra việc ghi đè lên tập tin '%s'"
 
-#: ../src/common/filefn.cpp:1135
+#: ../src/common/filefn.cpp:1142
 #, c-format
 msgid "Impossible to set permissions for the file '%s'"
 msgstr "Không thể nào đặt được quyền cho tập tin '%s'"
 
-#: ../src/common/gifdecod.cpp:792
+#: ../src/common/gifdecod.cpp:818
 #, c-format
 msgid "Incorrect GIF frame size (%u, %d) for the frame #%u"
 msgstr "Frame của ảnh  GIF (%u, %d) cho frame #%u không đúng"
@@ -4145,17 +4114,17 @@ msgstr "Số lượng đối số không đúng."
 msgid "Indent"
 msgstr "Thụt lề"
 
-#: ../src/richtext/richtextformatdlg.cpp:351
+#: ../src/richtext/richtextformatdlg.cpp:331
 msgid "Indents && Spacing"
 msgstr "Thụt lề && Khoảng Trắng"
 
-#: ../src/common/stockitem.cpp:166 ../src/html/helpwnd.cpp:526
+#: ../src/common/stockitem.cpp:166 ../src/html/helpwnd.cpp:525
 msgid "Index"
 msgstr "Chỉ mục"
 
 #: ../src/common/fmapbase.cpp:159
 msgid "Indian (ISO-8859-12)"
-msgstr "Ấn Độ (ISO-8859-12)"
+msgstr "Indian (ISO-8859-12)"
 
 #: ../src/common/stockitem.cpp:167
 msgid "Info"
@@ -4169,23 +4138,23 @@ msgstr "Khởi tạo lỗi trong việc post init, đang bãi bỏ."
 msgid "Insert"
 msgstr "Chèn"
 
-#: ../src/richtext/richtextbuffer.cpp:7941
+#: ../src/richtext/richtextbuffer.cpp:7791
 msgid "Insert Field"
-msgstr "Chèn trường"
+msgstr "Thêm trường"
 
-#: ../src/richtext/richtextbuffer.cpp:7852
-#: ../src/richtext/richtextbuffer.cpp:8805
+#: ../src/richtext/richtextbuffer.cpp:7702
+#: ../src/richtext/richtextbuffer.cpp:8655
 msgid "Insert Image"
 msgstr "Chèn Ảnh"
 
-#: ../src/richtext/richtextbuffer.cpp:7899
+#: ../src/richtext/richtextbuffer.cpp:7749
 msgid "Insert Object"
 msgstr "Chèn Đối tượng"
 
-#: ../src/richtext/richtextctrl.cpp:1247 ../src/richtext/richtextctrl.cpp:1454
-#: ../src/richtext/richtextbuffer.cpp:7694
-#: ../src/richtext/richtextbuffer.cpp:7724
-#: ../src/richtext/richtextbuffer.cpp:7768
+#: ../src/richtext/richtextctrl.cpp:1241 ../src/richtext/richtextctrl.cpp:1448
+#: ../src/richtext/richtextbuffer.cpp:7544
+#: ../src/richtext/richtextbuffer.cpp:7574
+#: ../src/richtext/richtextbuffer.cpp:7618
 msgid "Insert Text"
 msgstr "Chèn Chữ"
 
@@ -4194,7 +4163,7 @@ msgstr "Chèn Chữ"
 msgid "Inserts a page break before the paragraph."
 msgstr "Chèn ngắt trang trước một đoạn văn."
 
-#: ../src/richtext/richtextborderspage.cpp:620
+#: ../src/richtext/richtextborderspage.cpp:571
 msgid "Inset"
 msgstr "Chèn"
 
@@ -4231,7 +4200,7 @@ msgstr "Sự kiện inotify (theo dõi tập tin) dành cho \"%s\" không hợp 
 msgid "Invalid lock file '%s'."
 msgstr "Tập tin khóa '%s' không hợp lệ."
 
-#: ../src/common/translation.cpp:1112
+#: ../src/common/translation.cpp:1111
 msgid "Invalid message catalog."
 msgstr "Catalog không hợp lệ."
 
@@ -4255,14 +4224,14 @@ msgstr ""
 "Giá trị %ld không hợp lệ cho một khoá thuộc kiểu lôgíc \"%s\" trong tập tin "
 "dùng cho cấu hình."
 
-#: ../src/generic/fontdlgg.cpp:329 ../src/richtext/richtextfontpage.cpp:349
+#: ../src/generic/fontdlgg.cpp:329 ../src/richtext/richtextfontpage.cpp:333
 #: ../src/osx/carbon/fontdlg.cpp:531 ../src/common/stockitem.cpp:168
 msgid "Italic"
 msgstr "Nghiêng"
 
 #: ../src/common/paper.cpp:131
 msgid "Italy Envelope, 110 x 230 mm"
-msgstr "Phong bì Ý, 110 x 230 mm"
+msgstr "Italy Envelope, 110 x 230 mm"
 
 #: ../src/common/imagjpeg.cpp:255
 msgid "JPEG: Couldn't load - file is probably corrupted."
@@ -4282,39 +4251,39 @@ msgstr "Japanese Envelope Chou #3"
 
 #: ../src/common/paper.cpp:181
 msgid "Japanese Envelope Chou #3 Rotated"
-msgstr "Phong bì Nhật Bản Chou #3 Rotated"
+msgstr "Japanese Envelope Chou #3 Rotated"
 
 #: ../src/common/paper.cpp:169
 msgid "Japanese Envelope Chou #4"
-msgstr "Phong bì Nhật Bản Chou #4"
+msgstr "Japanese Envelope Chou #4"
 
 #: ../src/common/paper.cpp:182
 msgid "Japanese Envelope Chou #4 Rotated"
-msgstr "Phong bì Nhật Bản Chou #4 Rotated"
+msgstr "Japanese Envelope Chou #4 Rotated"
 
 #: ../src/common/paper.cpp:166
 msgid "Japanese Envelope Kaku #2"
-msgstr "Phong bì Nhật Bản Kaku #2"
+msgstr "Japanese Envelope Kaku #2"
 
 #: ../src/common/paper.cpp:179
 msgid "Japanese Envelope Kaku #2 Rotated"
-msgstr "Phong bì Nhật Bản Kaku #2 Rotated"
+msgstr "Japanese Envelope Kaku #2 Rotated"
 
 #: ../src/common/paper.cpp:167
 msgid "Japanese Envelope Kaku #3"
-msgstr "Phong bì Nhật Bản Kaku #3"
+msgstr "Japanese Envelope Kaku #3"
 
 #: ../src/common/paper.cpp:180
 msgid "Japanese Envelope Kaku #3 Rotated"
-msgstr "Phong bì Nhật Bản Kaku #3 Rotated"
+msgstr "Japanese Envelope Kaku #3 Rotated"
 
 #: ../src/common/paper.cpp:186
 msgid "Japanese Envelope You #4"
-msgstr "Phong bì Nhật Bản You #4"
+msgstr "Japanese Envelope You #4"
 
 #: ../src/common/paper.cpp:187
 msgid "Japanese Envelope You #4 Rotated"
-msgstr "Phong bì Nhật Bản You #4 Rotated"
+msgstr "Japanese Envelope You #4 Rotated"
 
 #: ../src/common/paper.cpp:139
 msgid "Japanese Postcard 100 x 148 mm"
@@ -4468,6 +4437,7 @@ msgstr "Trang cuối"
 msgid "Last repeated message (\"%s\", %lu time) wasn't output"
 msgid_plural "Last repeated message (\"%s\", %lu times) wasn't output"
 msgstr[0] "Thông điệp lặp cuối cùng (\"%s\", %lu lần) đã không được kết xuất"
+msgstr[1] "Thông điệp lặp cuối cùng (\"%s\", %lu lần) đã không được kết xuất"
 
 #: ../src/common/paper.cpp:104
 msgid "Ledger, 17 x 11 in"
@@ -4476,9 +4446,9 @@ msgstr "Ledger, 17 x 11 in"
 #: ../src/richtext/richtextliststylepage.cpp:249
 #: ../src/richtext/richtextliststylepage.cpp:252
 #: ../src/richtext/richtextliststylepage.cpp:253
-#: ../src/richtext/richtextbulletspage.cpp:186
-#: ../src/richtext/richtextbulletspage.cpp:189
-#: ../src/richtext/richtextbulletspage.cpp:190
+#: ../src/richtext/richtextbulletspage.cpp:199
+#: ../src/richtext/richtextbulletspage.cpp:202
+#: ../src/richtext/richtextbulletspage.cpp:203
 #: ../src/richtext/richtextsizepage.cpp:249
 msgid "Left"
 msgstr "Trái"
@@ -4486,7 +4456,7 @@ msgstr "Trái"
 #: ../src/richtext/richtextindentspage.cpp:204
 #: ../src/richtext/richtextliststylepage.cpp:390
 msgid "Left (&first line):"
-msgstr "Bên trái (dòng đầ&u):"
+msgstr "&Bên trái (dòng đầu):"
 
 #: ../src/generic/prntdlgg.cpp:880
 msgid "Left margin (mm):"
@@ -4556,32 +4526,32 @@ msgstr "Khoảng cách dòng:"
 msgid "Link contained '//', converted to absolute link."
 msgstr "Liên kết có chứa '//', đã chuyển đổi sang liên kết đúng đắn."
 
-#: ../src/richtext/richtextformatdlg.cpp:370
+#: ../src/richtext/richtextformatdlg.cpp:350
 msgid "List Style"
-msgstr "Kiểu dáng Danh sách"
+msgstr "Danh Sách Kiểu Dáng"
 
 #: ../src/richtext/richtextstyles.cpp:1060
 msgid "List styles"
-msgstr "Kiểu dáng của danh sách"
+msgstr "Danh sách kiểu dáng"
 
-#: ../src/richtext/richtextfontpage.cpp:197
-#: ../src/richtext/richtextfontpage.cpp:199
+#: ../src/richtext/richtextfontpage.cpp:206
+#: ../src/richtext/richtextfontpage.cpp:208
 msgid "Lists font sizes in points."
 msgstr ""
 "Danh sách kích thước phông chữ bằng đơn vị point (72 point xấp xỉ bằng một "
 "inch)."
 
-#: ../src/richtext/richtextfontpage.cpp:190
-#: ../src/richtext/richtextfontpage.cpp:192
+#: ../src/richtext/richtextfontpage.cpp:199
+#: ../src/richtext/richtextfontpage.cpp:201
 msgid "Lists the available fonts."
 msgstr "Danh sách phông chữ sẵn có."
 
-#: ../src/common/fldlgcmn.cpp:330
+#: ../src/common/fldlgcmn.cpp:343
 #, c-format
 msgid "Load %s file"
 msgstr "Tải %s tập tin"
 
-#: ../src/html/htmlwin.cpp:588
+#: ../src/html/htmlwin.cpp:578
 msgid "Loading : "
 msgstr "Đang tải :"
 
@@ -4601,12 +4571,12 @@ msgid "Log saved to the file '%s'."
 msgstr "Ghi nhật ký thông tin vào tập tin '%s'."
 
 #: ../src/richtext/richtextliststylepage.cpp:484
-#: ../src/richtext/richtextbulletspage.cpp:276
+#: ../src/richtext/richtextbulletspage.cpp:289
 msgid "Lower case letters"
 msgstr "Chữ thường"
 
 #: ../src/richtext/richtextliststylepage.cpp:486
-#: ../src/richtext/richtextbulletspage.cpp:278
+#: ../src/richtext/richtextbulletspage.cpp:291
 msgid "Lower case roman numerals"
 msgstr "Chữ số La Mã thường"
 
@@ -4632,7 +4602,7 @@ msgstr "Tối đ&a"
 
 #: ../src/common/fmapbase.cpp:203
 msgid "MacArabic"
-msgstr "MacArabic"
+msgstr "Arabic"
 
 #: ../src/common/fmapbase.cpp:222
 msgid "MacArmenian"
@@ -4790,18 +4760,18 @@ msgstr "MacTurkish"
 msgid "MacVietnamese"
 msgstr "MacVietnamese"
 
-#: ../src/propgrid/advprops.cpp:2012
+#: ../src/propgrid/advprops.cpp:2013
 msgid "Make a selection:"
 msgstr "Làm với vùng chọn:"
 
-#: ../src/richtext/richtextformatdlg.cpp:383
-#: ../src/richtext/richtextmarginspage.cpp:171
+#: ../src/richtext/richtextformatdlg.cpp:363
+#: ../src/richtext/richtextmarginspage.cpp:172
 msgid "Margins"
 msgstr "Lề"
 
 #: ../src/generic/fdrepdlg.cpp:147
 msgid "Match case"
-msgstr "Phân biệt HOA/thường"
+msgstr "Phân biệt chữ hoa/thường"
 
 #: ../src/richtext/richtextsizepage.cpp:463
 msgid "Max height:"
@@ -4894,7 +4864,7 @@ msgstr "Di chuyển đối tượng đến đoạn tiếp theo."
 msgid "Moves the object to the previous paragraph."
 msgstr "Di chuyển đối tượng đến đoạn trước đây."
 
-#: ../src/richtext/richtextbuffer.cpp:9746
+#: ../src/richtext/richtextbuffer.cpp:9596
 msgid "Multiple Cell Properties"
 msgstr "Thuộc tính Đa Ô"
 
@@ -4956,11 +4926,11 @@ msgstr "Mục tin mới"
 msgid "NewName"
 msgstr "TênMới"
 
-#: ../src/generic/tipdlg.cpp:300
+#: ../src/generic/tipdlg.cpp:305
 msgid "Next"
 msgstr "Tiếp theo"
 
-#: ../src/common/prntbase.cpp:1537 ../src/html/helpwnd.cpp:679
+#: ../src/common/prntbase.cpp:1537 ../src/html/helpwnd.cpp:678
 msgid "Next page"
 msgstr "Trang tiếp theo"
 
@@ -5042,7 +5012,7 @@ msgstr "Không có bộ điều khiển ảnh cho kiểu %d được định ngh
 msgid "No image handler for type %s defined."
 msgstr "Không có bộ điều khiển ảnh cho kiểu %s được định nghĩa."
 
-#: ../src/html/helpwnd.cpp:872
+#: ../src/html/helpwnd.cpp:871
 msgid "No matching page found yet"
 msgstr "Không tìm thấy trang phù hợp"
 
@@ -5073,7 +5043,7 @@ msgstr "Không có màu không dùng trong ảnh."
 msgid "No valid mappings found in the file \"%s\"."
 msgstr "Không có ánh xạ hợp lệ nào được tìm thấy trong tập tin \"%s\"."
 
-#: ../src/richtext/richtextborderspage.cpp:613
+#: ../src/richtext/richtextborderspage.cpp:564
 #: ../src/richtext/richtextsizepage.cpp:248
 #: ../src/richtext/richtextsizepage.cpp:252
 msgid "None"
@@ -5087,15 +5057,15 @@ msgstr "Nordic (ISO-8859-10)"
 msgid "Normal"
 msgstr "Bình thường"
 
-#: ../src/html/helpwnd.cpp:1277
+#: ../src/html/helpwnd.cpp:1276
 msgid "Normal face<br>and <u>underlined</u>. "
 msgstr "Bình thường<br>và <u>gạch chân</u>. "
 
-#: ../src/html/helpwnd.cpp:1219
+#: ../src/html/helpwnd.cpp:1218
 msgid "Normal font:"
 msgstr "Phông chữ thường:"
 
-#: ../src/propgrid/props.cpp:898
+#: ../src/propgrid/props.cpp:897
 #, c-format
 msgid "Not %s"
 msgstr "Không %s"
@@ -5104,7 +5074,7 @@ msgstr "Không %s"
 msgid "Not available"
 msgstr "Không sẵn sàng"
 
-#: ../src/richtext/richtextfontpage.cpp:356
+#: ../src/richtext/richtextfontpage.cpp:340
 msgid "Not underlined"
 msgstr "Không gạch chân"
 
@@ -5118,10 +5088,10 @@ msgstr "Chú ý"
 
 #: ../src/osx/carbon/dataview.cpp:900
 msgid "Number of columns could not be determined."
-msgstr "Không thể dò tìm số cột."
+msgstr "Số cột không thể định rõ."
 
 #: ../src/richtext/richtextliststylepage.cpp:487
-#: ../src/richtext/richtextbulletspage.cpp:279
+#: ../src/richtext/richtextbulletspage.cpp:292
 msgid "Numbered outline"
 msgstr "Số đường bao"
 
@@ -5137,7 +5107,7 @@ msgstr "Đồng ý"
 msgid "OLE Automation error in %s: %s"
 msgstr "Lỗi hoạt hình OLE trong %s: %s"
 
-#: ../include/wx/richtext/richtextimagedlg.h:37
+#: ../include/wx/richtext/richtextimagedlg.h:38
 msgid "Object Properties"
 msgstr "Thuộc tính Đối tượng"
 
@@ -5149,11 +5119,11 @@ msgstr "Phần thực thi đối tượng không hỗ trợ các đối số có
 msgid "Objects must have an id attribute"
 msgstr "Đối tượng phải có giá trị thuộc tính id"
 
-#: ../src/common/docview.cpp:1762 ../src/common/docview.cpp:1804
+#: ../src/common/docview.cpp:1755 ../src/common/docview.cpp:1797
 msgid "Open File"
 msgstr "Mở tập tin"
 
-#: ../src/html/helpwnd.cpp:685 ../src/html/helpwnd.cpp:1568
+#: ../src/html/helpwnd.cpp:684 ../src/html/helpwnd.cpp:1557
 msgid "Open HTML document"
 msgstr "Mở tài liệu định dạng HTML"
 
@@ -5176,17 +5146,17 @@ msgstr "Hàm \"%s\" của OpenGL bị lỗi: %s (lỗi %d)"
 msgid "Operation not permitted."
 msgstr "Thao tác không được phép."
 
-#: ../src/common/cmdline.cpp:894
+#: ../src/common/cmdline.cpp:735
 #, c-format
 msgid "Option '%s' can't be negated"
 msgstr "Tuỳ chọn '%s' không thể bị phủ định"
 
-#: ../src/common/cmdline.cpp:1058
+#: ../src/common/cmdline.cpp:899
 #, c-format
 msgid "Option '%s' requires a value."
 msgstr "Tùy chọn '%s' yêu cầu một giá trị."
 
-#: ../src/common/cmdline.cpp:1141
+#: ../src/common/cmdline.cpp:982
 #, c-format
 msgid "Option '%s': '%s' cannot be converted to a date."
 msgstr "Tùy chọn '%s': '%s' không thể chuyển thành dạng ngày tháng."
@@ -5203,12 +5173,12 @@ msgstr "Hướng"
 msgid "Out of window IDs.  Recommend shutting down application."
 msgstr "Thiếu chỉ số cửa sổ IDs. Đề nghị đóng ứng dụng."
 
-#: ../src/richtext/richtextborderspage.cpp:401
-#: ../src/richtext/richtextborderspage.cpp:559
+#: ../src/richtext/richtextborderspage.cpp:397
+#: ../src/richtext/richtextborderspage.cpp:555
 msgid "Outline"
 msgstr "Viền ngoài"
 
-#: ../src/richtext/richtextborderspage.cpp:621
+#: ../src/richtext/richtextborderspage.cpp:572
 msgid "Outset"
 msgstr "Bắt đầu"
 
@@ -5381,7 +5351,7 @@ msgstr "PRC Envelope #9 Rotated 324 x 229 mm"
 msgid "PRINT"
 msgstr "IN"
 
-#: ../src/richtext/richtextmarginspage.cpp:285
+#: ../src/richtext/richtextmarginspage.cpp:286
 msgid "Padding"
 msgstr "Đệm"
 
@@ -5397,15 +5367,15 @@ msgstr "Trang %d của %d"
 
 #: ../src/gtk/print.cpp:774
 msgid "Page Setup"
-msgstr "Cài đặt giấy"
+msgstr "Thiết lập trang"
 
 #: ../src/generic/prntdlgg.cpp:828 ../src/common/prntbase.cpp:467
 msgid "Page setup"
-msgstr "Cài đặt giấy"
+msgstr "Thiết lập trang"
 
 #: ../src/generic/prntdlgg.cpp:216
 msgid "Pages"
-msgstr "Giấy"
+msgstr "Trang"
 
 #: ../src/generic/prntdlgg.cpp:602 ../src/generic/prntdlgg.cpp:801
 #: ../src/generic/prntdlgg.cpp:842 ../src/generic/prntdlgg.cpp:855
@@ -5425,7 +5395,7 @@ msgstr "Chuyển qua một đối tượng đã được đăng ký rồi để 
 msgid "Passing an unknown object to GetObject"
 msgstr "Chuyển một đối tượng không hợp lệ cho SetObject"
 
-#: ../src/richtext/richtextctrl.cpp:3242 ../src/common/stockitem.cpp:180
+#: ../src/richtext/richtextctrl.cpp:3206 ../src/common/stockitem.cpp:180
 #: ../src/stc/stc_i18n.cpp:19
 msgid "Paste"
 msgstr "Dán"
@@ -5435,7 +5405,7 @@ msgid "Paste selection"
 msgstr "Dán vùng chọn"
 
 #: ../src/richtext/richtextliststylepage.cpp:222
-#: ../src/richtext/richtextbulletspage.cpp:159
+#: ../src/richtext/richtextbulletspage.cpp:172
 msgid "Peri&od"
 msgstr "Dấu chấ&m"
 
@@ -5443,7 +5413,7 @@ msgstr "Dấu chấ&m"
 msgid "Permissions"
 msgstr "Các quyền"
 
-#: ../src/richtext/richtextbuffer.cpp:12512
+#: ../src/richtext/richtextbuffer.cpp:12271
 msgid "Picture Properties"
 msgstr "Các thuộc tính Hình ảnh"
 
@@ -5459,7 +5429,7 @@ msgstr "Hãy chọn một phông chữ hợp lệ."
 msgid "Please choose an existing file."
 msgstr "Xin hãy chọn một tập tin đã tồn tại."
 
-#: ../src/html/helpwnd.cpp:814
+#: ../src/html/helpwnd.cpp:813
 msgid "Please choose the page to display:"
 msgstr "Xin hãy chọn trang bạn muốn hiển thị:"
 
@@ -5486,7 +5456,7 @@ msgstr "Xin hãy chọn các cột sẽ hiển thị và xác định thứ tự
 msgid "Please wait while printing..."
 msgstr "Xin hãy đợi khi đang in..."
 
-#: ../src/propgrid/advprops.cpp:632
+#: ../src/propgrid/advprops.cpp:631
 msgid "Point Size"
 msgstr "&Kích thước Phông chữ:"
 
@@ -5533,11 +5503,11 @@ msgid "Preparing"
 msgstr "Đang chuẩn bị"
 
 #: ../src/generic/fontdlgg.cpp:455 ../src/osx/carbon/fontdlg.cpp:560
-#: ../src/html/helpwnd.cpp:1236
+#: ../src/html/helpwnd.cpp:1235
 msgid "Preview:"
 msgstr "Xem trước:"
 
-#: ../src/common/prntbase.cpp:1523 ../src/html/helpwnd.cpp:678
+#: ../src/common/prntbase.cpp:1523 ../src/html/helpwnd.cpp:677
 msgid "Previous page"
 msgstr "Trang trước"
 
@@ -5547,7 +5517,7 @@ msgstr "Trang trước"
 msgid "Print"
 msgstr "In"
 
-#: ../include/wx/prntbase.h:395 ../src/common/docview.cpp:1257
+#: ../include/wx/prntbase.h:395 ../src/common/docview.cpp:1250
 msgid "Print Preview"
 msgstr "Mô Phỏng Bản In"
 
@@ -5572,19 +5542,19 @@ msgstr "In màu"
 msgid "Print previe&w..."
 msgstr "&Mô phỏng bản in..."
 
-#: ../src/common/docview.cpp:1251
+#: ../src/common/docview.cpp:1244
 msgid "Print preview creation failed."
 msgstr "Tạo bản xem thử khi in gặp lỗi."
 
 #: ../src/common/stockitem.cpp:182
 msgid "Print preview..."
-msgstr "Xem thử bản in..."
+msgstr "Mô phỏng bản in..."
 
 #: ../src/generic/prntdlgg.cpp:630
 msgid "Print spooling"
 msgstr "In vào bộ nhớ"
 
-#: ../src/html/helpwnd.cpp:689
+#: ../src/html/helpwnd.cpp:688
 msgid "Print this page"
 msgstr "In ra trang này"
 
@@ -5648,7 +5618,7 @@ msgid "Printing..."
 msgstr "Đang in..."
 
 #: ../include/wx/richtext/richtextprint.h:109 ../include/wx/prntbase.h:263
-#: ../src/common/docview.cpp:2121
+#: ../src/common/docview.cpp:2114
 msgid "Printout"
 msgstr "Dữ liệu in"
 
@@ -5674,7 +5644,7 @@ msgstr "Thuộc tính"
 msgid "Property"
 msgstr "Thuộc tính"
 
-#: ../src/propgrid/propgrid.cpp:3131 ../src/propgrid/propgrid.cpp:3263
+#: ../src/propgrid/propgrid.cpp:3146 ../src/propgrid/propgrid.cpp:3278
 msgid "Property Error"
 msgstr "Lỗi Thuộc tính"
 
@@ -5758,8 +5728,8 @@ msgstr ""
 msgid "Registry value '%s' already exists."
 msgstr "Giá trị đăng ký '%s' đã tồn tại rồi."
 
-#: ../src/richtext/richtextfontpage.cpp:348
-#: ../src/richtext/richtextfontpage.cpp:352
+#: ../src/richtext/richtextfontpage.cpp:332
+#: ../src/richtext/richtextfontpage.cpp:336
 msgid "Regular"
 msgstr "Thông thường"
 
@@ -5779,11 +5749,11 @@ msgstr "Thời gian còn lại:"
 msgid "Remove"
 msgstr "Gỡ bỏ"
 
-#: ../src/richtext/richtextctrl.cpp:1522
+#: ../src/richtext/richtextctrl.cpp:1516
 msgid "Remove Bullet"
 msgstr "Gỡ bỏ Bullet"
 
-#: ../src/html/helpwnd.cpp:441
+#: ../src/html/helpwnd.cpp:440
 msgid "Remove current page from bookmarks"
 msgstr "Gỡ bỏ trang hiện hành từ dấu trang"
 
@@ -5798,7 +5768,7 @@ msgstr ""
 msgid "Rendering failed."
 msgstr "Rendering gặp lỗi."
 
-#: ../src/richtext/richtextbuffer.cpp:4415
+#: ../src/richtext/richtextbuffer.cpp:4280
 msgid "Renumber List"
 msgstr "Đánh số lại List"
 
@@ -5806,7 +5776,7 @@ msgstr "Đánh số lại List"
 msgid "Rep&lace"
 msgstr "Tha&y thế"
 
-#: ../src/richtext/richtextctrl.cpp:3402 ../src/common/stockitem.cpp:188
+#: ../src/richtext/richtextctrl.cpp:3366 ../src/common/stockitem.cpp:188
 msgid "Replace"
 msgstr "Thay thế"
 
@@ -5835,16 +5805,12 @@ msgstr "Tài nguyên '%s' không đúng định dạng."
 msgid "Revert to Saved"
 msgstr "Hoàn nguyên để Ghi Lại"
 
-#: ../src/richtext/richtextborderspage.cpp:619
+#: ../src/richtext/richtextborderspage.cpp:570
 msgid "Ridge"
 msgstr "Nhấp nhô"
 
-#: ../src/richtext/richtextfontpage.cpp:313
-msgid "Rig&ht-to-left"
-msgstr "P&hải-sang-trái"
-
 #: ../src/richtext/richtextliststylepage.cpp:251
-#: ../src/richtext/richtextbulletspage.cpp:188
+#: ../src/richtext/richtextbulletspage.cpp:201
 #: ../src/richtext/richtextsizepage.cpp:250
 msgid "Right"
 msgstr "Phải"
@@ -5865,7 +5831,7 @@ msgid "Roman"
 msgstr "Roman"
 
 #: ../src/richtext/richtextliststylepage.cpp:299
-#: ../src/richtext/richtextbulletspage.cpp:239
+#: ../src/richtext/richtextbulletspage.cpp:252
 msgid "S&tandard bullet name:"
 msgstr "&Tên bullet tiêu chuẩn:"
 
@@ -5897,11 +5863,11 @@ msgstr "SPECIAL"
 msgid "SUBTRACT"
 msgstr "SUBTRACT"
 
-#: ../src/common/stockitem.cpp:190 ../src/common/sizer.cpp:2682
+#: ../src/common/stockitem.cpp:190 ../src/common/sizer.cpp:2702
 msgid "Save"
 msgstr "Ghi lại"
 
-#: ../src/common/fldlgcmn.cpp:332
+#: ../src/common/fldlgcmn.cpp:345
 #, c-format
 msgid "Save %s file"
 msgstr "Ghi lại %s tập tin"
@@ -5934,12 +5900,12 @@ msgstr "Ghi lại nội dung nhật ký vào tập tin"
 msgid "Script"
 msgstr "Script"
 
-#: ../src/generic/srchctlg.cpp:67 ../src/html/helpwnd.cpp:549
-#: ../src/html/helpwnd.cpp:564
+#: ../src/generic/srchctlg.cpp:67 ../src/html/helpwnd.cpp:548
+#: ../src/html/helpwnd.cpp:563
 msgid "Search"
 msgstr "Tìm kiếm"
 
-#: ../src/html/helpwnd.cpp:551
+#: ../src/html/helpwnd.cpp:550
 msgid ""
 "Search contents of help book(s) for all occurrences of the text you typed "
 "above"
@@ -5955,11 +5921,11 @@ msgstr "Hướng tìm kiếm"
 msgid "Search for:"
 msgstr "Tìm kiếm cho:"
 
-#: ../src/html/helpwnd.cpp:1066
+#: ../src/html/helpwnd.cpp:1065
 msgid "Search in all books"
 msgstr "Tìm trong tất cả các sách"
 
-#: ../src/html/helpwnd.cpp:871
+#: ../src/html/helpwnd.cpp:870
 msgid "Searching..."
 msgstr "Đang tìm kiếm..."
 
@@ -5970,14 +5936,14 @@ msgstr "Vùng chọn"
 #: ../src/common/ffile.cpp:220
 #, c-format
 msgid "Seek error on file '%s'"
-msgstr "Lỗi khi di chuyển vị trí đọc trên tập tin '%s'"
+msgstr "Tìm kiếm lỗi trong tập tin '%s'"
 
 #: ../src/common/ffile.cpp:210
 #, c-format
 msgid "Seek error on file '%s' (large files not supported by stdio)"
 msgstr ""
-"Lỗi khi di chuyển vị trí đọc trên tập tin '%s' (tập tin có kích thước lớn "
-"không được hỗ trợ bởi stdio)"
+"Tìm kiếm trên tập tin '%s' gặp lỗi (tập tin có kích thước lớn không được hỗ "
+"trợ bởi stdio)"
 
 #: ../src/richtext/richtextctrl.cpp:336 ../src/osx/textctrl_osx.cpp:587
 #: ../src/common/stockitem.cpp:192 ../src/msw/textctrl.cpp:2339
@@ -5988,26 +5954,26 @@ msgstr "Chọn &Hết"
 msgid "Select All"
 msgstr "Chọn Hết"
 
-#: ../src/common/docview.cpp:1884
+#: ../src/common/docview.cpp:1877
 msgid "Select a document template"
 msgstr "Chọn một tài liệu tạm thời"
 
-#: ../src/common/docview.cpp:1958
+#: ../src/common/docview.cpp:1951
 msgid "Select a document view"
 msgstr "Chọn một bộ hiển thị tài liệu"
 
-#: ../src/richtext/richtextfontpage.cpp:226
-#: ../src/richtext/richtextfontpage.cpp:228
+#: ../src/richtext/richtextfontpage.cpp:235
+#: ../src/richtext/richtextfontpage.cpp:237
 msgid "Select regular or bold."
 msgstr "Chọn kiểu thường hay đậm."
 
-#: ../src/richtext/richtextfontpage.cpp:213
-#: ../src/richtext/richtextfontpage.cpp:215
+#: ../src/richtext/richtextfontpage.cpp:222
+#: ../src/richtext/richtextfontpage.cpp:224
 msgid "Select regular or italic style."
 msgstr "Chọn kiểu dáng thông thường hay nghiêng."
 
-#: ../src/richtext/richtextfontpage.cpp:239
-#: ../src/richtext/richtextfontpage.cpp:241
+#: ../src/richtext/richtextfontpage.cpp:248
+#: ../src/richtext/richtextfontpage.cpp:250
 msgid "Select underlining or no underlining."
 msgstr "Chọn có gạch dưới hay không có gạch dưới."
 
@@ -6020,16 +5986,16 @@ msgstr "Vùng chọn"
 msgid "Selects the list level to edit."
 msgstr "Chọn mức danh sách muốn chỉnh sửa."
 
-#: ../src/common/cmdline.cpp:1077
+#: ../src/common/cmdline.cpp:918
 #, c-format
 msgid "Separator expected after the option '%s'."
-msgstr "Cần dấu phân cách sau tùy chọn '%s'."
+msgstr "Mong đợi dấu phân cách sau tùy chọn '%s'."
 
 #: ../src/osx/menu_osx.cpp:618
 msgid "Services"
-msgstr "Dịch vụ"
+msgstr ""
 
-#: ../src/richtext/richtextbuffer.cpp:10981
+#: ../src/richtext/richtextbuffer.cpp:10818
 msgid "Set Cell Style"
 msgstr "Đặt Kiểu Dáng Ô"
 
@@ -6072,11 +6038,11 @@ msgstr "Hiện tất"
 msgid "Show about dialog"
 msgstr "Hiển thị hộp thoại thông tin thêm"
 
-#: ../src/html/helpwnd.cpp:503
+#: ../src/html/helpwnd.cpp:502
 msgid "Show all"
 msgstr "Hiện tất"
 
-#: ../src/html/helpwnd.cpp:514
+#: ../src/html/helpwnd.cpp:513
 msgid "Show all items in index"
 msgstr "Hiển thị tất cả các mục tin trong mục lục"
 
@@ -6084,7 +6050,7 @@ msgstr "Hiển thị tất cả các mục tin trong mục lục"
 msgid "Show hidden directories"
 msgstr "Hiện thư mục ẩn"
 
-#: ../src/html/helpwnd.cpp:672
+#: ../src/html/helpwnd.cpp:671
 msgid "Show/hide navigation panel"
 msgstr "Hiện/ẩn bản điều hướng"
 
@@ -6095,13 +6061,13 @@ msgstr "Hiển thị tập con của bộ mã Unicode."
 
 #: ../src/richtext/richtextliststylepage.cpp:472
 #: ../src/richtext/richtextliststylepage.cpp:474
-#: ../src/richtext/richtextbulletspage.cpp:263
-#: ../src/richtext/richtextbulletspage.cpp:265
+#: ../src/richtext/richtextbulletspage.cpp:276
+#: ../src/richtext/richtextbulletspage.cpp:278
 msgid "Shows a preview of the bullet settings."
 msgstr "Xem thử các cài đặt về bullet."
 
-#: ../src/richtext/richtextfontpage.cpp:330
-#: ../src/richtext/richtextfontpage.cpp:332
+#: ../src/richtext/richtextfontpage.cpp:322
+#: ../src/richtext/richtextfontpage.cpp:324
 msgid "Shows a preview of the font settings."
 msgstr "Xem thử các cài đặt về phông chữ."
 
@@ -6127,7 +6093,7 @@ msgstr "Theme màu đơn sắc đơn giản"
 msgid "Single"
 msgstr "Đơn"
 
-#: ../src/generic/filectrlg.cpp:460 ../src/richtext/richtextformatdlg.cpp:377
+#: ../src/generic/filectrlg.cpp:460 ../src/richtext/richtextformatdlg.cpp:357
 #: ../src/richtext/richtextsizepage.cpp:299
 msgid "Size"
 msgstr "Kích thước"
@@ -6145,15 +6111,15 @@ msgstr "Bỏ qua"
 msgid "Slant"
 msgstr "Nghiêng"
 
-#: ../src/richtext/richtextfontpage.cpp:289
+#: ../src/richtext/richtextfontpage.cpp:298
 msgid "Small C&apitals"
-msgstr "Chữ viết &Hoa nhỏ"
+msgstr "Chữ viết &HOA nhỏ"
 
-#: ../src/richtext/richtextborderspage.cpp:614
+#: ../src/richtext/richtextborderspage.cpp:565
 msgid "Solid"
 msgstr "Đặc"
 
-#: ../src/common/docview.cpp:1780
+#: ../src/common/docview.cpp:1773
 msgid "Sorry, could not open this file."
 msgstr "Xin lỗi, không thể mở tập tin này."
 
@@ -6169,7 +6135,7 @@ msgstr "Rất tiếc, không đủ bộ nhớ để tạo lập việc xem thử
 msgid "Sorry, that name is taken. Please choose another."
 msgstr "Rất tiếc, tên đó đã được dùng. Xin hãy chọn một cái khác."
 
-#: ../src/common/docview.cpp:1803
+#: ../src/common/docview.cpp:1796
 msgid "Sorry, the format for this file is unknown."
 msgstr "Rất tiếc, định dạng tập tin này không hiểu."
 
@@ -6191,7 +6157,7 @@ msgid "Spell Check"
 msgstr "Kiểm tra chính tả"
 
 #: ../src/richtext/richtextliststylepage.cpp:490
-#: ../src/richtext/richtextbulletspage.cpp:282
+#: ../src/richtext/richtextbulletspage.cpp:295
 msgid "Standard"
 msgstr "Tiêu chuẩn"
 
@@ -6221,7 +6187,7 @@ msgstr "Gạch giữa"
 msgid "String To Colour : Incorrect colour specification : %s"
 msgstr "Màu từ Xâu chữ : Đặc tả màu không chính xác : %s"
 
-#: ../src/richtext/richtextformatdlg.cpp:339 ../src/propgrid/advprops.cpp:648
+#: ../src/richtext/richtextformatdlg.cpp:319 ../src/propgrid/advprops.cpp:647
 msgid "Style"
 msgstr "Kiểu dáng"
 
@@ -6233,11 +6199,11 @@ msgstr "Kiểu dáng Bộ Tổ Chức"
 msgid "Style:"
 msgstr "Kiểu dáng"
 
-#: ../src/richtext/richtextfontpage.cpp:303
+#: ../src/richtext/richtextfontpage.cpp:312
 msgid "Subscrip&t"
 msgstr "Chỉ số dưới &dòng"
 
-#: ../src/richtext/richtextfontpage.cpp:296
+#: ../src/richtext/richtextfontpage.cpp:305
 msgid "Supe&rscript"
 msgstr "Chỉ số t&rên dòng"
 
@@ -6249,21 +6215,17 @@ msgstr "SuperA/SuperA/A4 227 x 356 mm"
 msgid "SuperB/SuperB/A3 305 x 487 mm"
 msgstr "SuperB/SuperB/A3 305 x 487 mm"
 
-#: ../src/richtext/richtextfontpage.cpp:320
-msgid "Suppress hyphe&nation"
-msgstr "Cấm tá&ch từ"
-
 #: ../src/generic/fontdlgg.cpp:326
 msgid "Swiss"
 msgstr "Swiss"
 
 #: ../src/richtext/richtextliststylepage.cpp:488
-#: ../src/richtext/richtextbulletspage.cpp:280
+#: ../src/richtext/richtextbulletspage.cpp:293
 msgid "Symbol"
 msgstr "Ký hiệu"
 
 #: ../src/richtext/richtextliststylepage.cpp:288
-#: ../src/richtext/richtextbulletspage.cpp:227
+#: ../src/richtext/richtextbulletspage.cpp:240
 msgid "Symbol &font:"
 msgstr "&Phông chữ ký tự đặc biệt:"
 
@@ -6300,7 +6262,7 @@ msgstr "TIFF: Gặp lỗi khi ghi tập tin ảnh."
 msgid "TIFF: Image size is abnormally big."
 msgstr "TIFF: Kích cỡ ảnh thường lớn."
 
-#: ../src/richtext/richtextbuffer.cpp:11262
+#: ../src/richtext/richtextbuffer.cpp:11099
 msgid "Table Properties"
 msgstr "Các thuộc tính Bảng"
 
@@ -6312,7 +6274,7 @@ msgstr "Tabloid Extra 11.69 x 18 in"
 msgid "Tabloid, 11 x 17 in"
 msgstr "Tabloid, 11 x 17 in"
 
-#: ../src/richtext/richtextformatdlg.cpp:357
+#: ../src/richtext/richtextformatdlg.cpp:337
 msgid "Tabs"
 msgstr "Tabs"
 
@@ -6320,7 +6282,7 @@ msgstr "Tabs"
 msgid "Teletype"
 msgstr "Dạng Teletype"
 
-#: ../src/common/docview.cpp:1885
+#: ../src/common/docview.cpp:1878
 msgid "Templates"
 msgstr "Biểu mẫu"
 
@@ -6342,8 +6304,8 @@ msgstr "Máy chủ FTP không hỗ trợ lệnh PORT."
 
 #: ../src/richtext/richtextliststylepage.cpp:215
 #: ../src/richtext/richtextliststylepage.cpp:217
-#: ../src/richtext/richtextbulletspage.cpp:151
-#: ../src/richtext/richtextbulletspage.cpp:153
+#: ../src/richtext/richtextbulletspage.cpp:164
+#: ../src/richtext/richtextbulletspage.cpp:166
 msgid "The available bullet styles."
 msgstr "Các kiểu dáng bullet sẵn có."
 
@@ -6357,32 +6319,33 @@ msgstr "Các kiểu dáng sẵn có."
 msgid "The background colour."
 msgstr "Màu nền."
 
-#: ../src/richtext/richtextborderspage.cpp:269
-#: ../src/richtext/richtextborderspage.cpp:271
-#: ../src/richtext/richtextborderspage.cpp:303
-#: ../src/richtext/richtextborderspage.cpp:305
-#: ../src/richtext/richtextborderspage.cpp:337
-#: ../src/richtext/richtextborderspage.cpp:339
-#: ../src/richtext/richtextborderspage.cpp:371
-#: ../src/richtext/richtextborderspage.cpp:373
-#: ../src/richtext/richtextborderspage.cpp:438
-#: ../src/richtext/richtextborderspage.cpp:440
-#: ../src/richtext/richtextborderspage.cpp:472
-#: ../src/richtext/richtextborderspage.cpp:474
-#: ../src/richtext/richtextborderspage.cpp:506
-#: ../src/richtext/richtextborderspage.cpp:508
-#: ../src/richtext/richtextborderspage.cpp:540
-#: ../src/richtext/richtextborderspage.cpp:542
+#: ../src/richtext/richtextborderspage.cpp:265
+#: ../src/richtext/richtextborderspage.cpp:267
+#: ../src/richtext/richtextborderspage.cpp:299
+#: ../src/richtext/richtextborderspage.cpp:301
+#: ../src/richtext/richtextborderspage.cpp:333
+#: ../src/richtext/richtextborderspage.cpp:335
+#: ../src/richtext/richtextborderspage.cpp:367
+#: ../src/richtext/richtextborderspage.cpp:369
+#: ../src/richtext/richtextborderspage.cpp:434
+#: ../src/richtext/richtextborderspage.cpp:436
+#: ../src/richtext/richtextborderspage.cpp:468
+#: ../src/richtext/richtextborderspage.cpp:470
+#: ../src/richtext/richtextborderspage.cpp:502
+#: ../src/richtext/richtextborderspage.cpp:504
+#: ../src/richtext/richtextborderspage.cpp:536
+#: ../src/richtext/richtextborderspage.cpp:538
+#, fuzzy
 msgid "The border line style."
-msgstr "Kiểu đường viền."
+msgstr "Kiểu phông chữ."
 
-#: ../src/richtext/richtextmarginspage.cpp:267
-#: ../src/richtext/richtextmarginspage.cpp:269
+#: ../src/richtext/richtextmarginspage.cpp:268
+#: ../src/richtext/richtextmarginspage.cpp:270
 msgid "The bottom margin size."
 msgstr "Kích thước lề dưới đáy."
 
-#: ../src/richtext/richtextmarginspage.cpp:381
-#: ../src/richtext/richtextmarginspage.cpp:383
+#: ../src/richtext/richtextmarginspage.cpp:382
+#: ../src/richtext/richtextmarginspage.cpp:384
 msgid "The bottom padding size."
 msgstr "Kích thước đệm dưới đáy."
 
@@ -6397,10 +6360,10 @@ msgstr "Vị trí đáy."
 #: ../src/richtext/richtextliststylepage.cpp:256
 #: ../src/richtext/richtextliststylepage.cpp:275
 #: ../src/richtext/richtextliststylepage.cpp:277
-#: ../src/richtext/richtextbulletspage.cpp:191
-#: ../src/richtext/richtextbulletspage.cpp:193
-#: ../src/richtext/richtextbulletspage.cpp:214
-#: ../src/richtext/richtextbulletspage.cpp:216
+#: ../src/richtext/richtextbulletspage.cpp:204
+#: ../src/richtext/richtextbulletspage.cpp:206
+#: ../src/richtext/richtextbulletspage.cpp:227
+#: ../src/richtext/richtextbulletspage.cpp:229
 msgid "The bullet character."
 msgstr "Ký tự dùng với bullet."
 
@@ -6425,8 +6388,8 @@ msgstr ""
 msgid "The clipboard format '%d' doesn't exist."
 msgstr "Định dạng clipboard '%d' chưa tồn tại."
 
+#: ../src/richtext/richtextstylepage.cpp:128
 #: ../src/richtext/richtextstylepage.cpp:130
-#: ../src/richtext/richtextstylepage.cpp:132
 msgid "The default style for the next paragraph."
 msgstr "Kiểu dáng mặc định cho đoạn tiếp theo."
 
@@ -6452,7 +6415,7 @@ msgstr ""
 "\n"
 "Bạn có thực sự muốn in nó không?"
 
-#: ../src/common/docview.cpp:1191
+#: ../src/common/docview.cpp:1184
 #, c-format
 msgid ""
 "The file '%s' doesn't exist and couldn't be opened.\n"
@@ -6494,8 +6457,8 @@ msgstr "Cỡ phông chữ theo đơn vị point."
 msgid "The font size in points."
 msgstr "Cỡ phông chữ theo đơn vị point."
 
-#: ../src/richtext/richtextfontpage.cpp:181
-#: ../src/richtext/richtextfontpage.cpp:183
+#: ../src/richtext/richtextfontpage.cpp:190
+#: ../src/richtext/richtextfontpage.cpp:192
 msgid "The font size units, points or pixels."
 msgstr "Các đơn vị cỡ chữ, point hay pixel."
 
@@ -6507,7 +6470,7 @@ msgstr "Kiểu phông chữ."
 msgid "The font weight."
 msgstr "Độ đậm phông chữ."
 
-#: ../src/common/docview.cpp:1472
+#: ../src/common/docview.cpp:1465
 #, c-format
 msgid "The format of file '%s' couldn't be determined."
 msgstr "Định dạng của tập tin '%s' không phân tách đúng định dạng."
@@ -6519,13 +6482,13 @@ msgstr "Định dạng của tập tin '%s' không phân tách đúng định d�
 msgid "The left indent."
 msgstr "Thụt lề trái."
 
-#: ../src/richtext/richtextmarginspage.cpp:194
-#: ../src/richtext/richtextmarginspage.cpp:196
+#: ../src/richtext/richtextmarginspage.cpp:195
+#: ../src/richtext/richtextmarginspage.cpp:197
 msgid "The left margin size."
 msgstr "Kích thước lề trái."
 
-#: ../src/richtext/richtextmarginspage.cpp:308
-#: ../src/richtext/richtextmarginspage.cpp:310
+#: ../src/richtext/richtextmarginspage.cpp:309
+#: ../src/richtext/richtextmarginspage.cpp:311
 msgid "The left padding size."
 msgstr "Kích thước đệm bên trái."
 
@@ -6543,8 +6506,8 @@ msgstr "Vị trí trái."
 msgid "The line spacing."
 msgstr "Chỉnh khoảng cách dòng."
 
-#: ../src/richtext/richtextbulletspage.cpp:255
-#: ../src/richtext/richtextbulletspage.cpp:257
+#: ../src/richtext/richtextbulletspage.cpp:268
+#: ../src/richtext/richtextbulletspage.cpp:270
 msgid "The list item number."
 msgstr "Số mẩu tin của danh sách."
 
@@ -6591,7 +6554,8 @@ msgstr "Mức đường bao."
 #, c-format
 msgid "The previous message repeated %lu time."
 msgid_plural "The previous message repeated %lu times."
-msgstr[0] "Thông điệp kế trước lặp lại %lu lần."
+msgstr[0] "Thông điệp liền trước lặp lại %lu lần."
+msgstr[1] "Thông điệp liền trước lặp lại %lu lần."
 
 #: ../src/common/log.cpp:274
 msgid "The previous message repeated once."
@@ -6616,7 +6580,7 @@ msgstr ""
 "thông tin cá nhân,\n"
 "xin hãy bỏ dấu kiểm và chúng sẽ được gỡ bỏ khỏi báo cáo.\n"
 
-#: ../src/common/cmdline.cpp:1248
+#: ../src/common/cmdline.cpp:1083
 #, c-format
 msgid "The required parameter '%s' was not specified."
 msgstr "Tham số yêu cầu '%s' đã không được định rõ."
@@ -6628,13 +6592,13 @@ msgstr "Tham số yêu cầu '%s' đã không được định rõ."
 msgid "The right indent."
 msgstr "Thụt lề phải."
 
-#: ../src/richtext/richtextmarginspage.cpp:219
-#: ../src/richtext/richtextmarginspage.cpp:221
+#: ../src/richtext/richtextmarginspage.cpp:220
+#: ../src/richtext/richtextmarginspage.cpp:222
 msgid "The right margin size."
 msgstr "Kích thước lề phải."
 
-#: ../src/richtext/richtextmarginspage.cpp:333
-#: ../src/richtext/richtextmarginspage.cpp:335
+#: ../src/richtext/richtextmarginspage.cpp:334
+#: ../src/richtext/richtextmarginspage.cpp:336
 msgid "The right padding size."
 msgstr "Kích thứoc đệm bên phải."
 
@@ -6658,13 +6622,13 @@ msgstr "Khoảng trắng sau một đoạn văn."
 msgid "The spacing before the paragraph."
 msgstr "Khoảng trắng trước một đoạn văn."
 
+#: ../src/richtext/richtextstylepage.cpp:108
 #: ../src/richtext/richtextstylepage.cpp:110
-#: ../src/richtext/richtextstylepage.cpp:112
 msgid "The style name."
 msgstr "Tên kiểu dáng."
 
+#: ../src/richtext/richtextstylepage.cpp:118
 #: ../src/richtext/richtextstylepage.cpp:120
-#: ../src/richtext/richtextstylepage.cpp:122
 msgid "The style on which this style is based."
 msgstr "Kiểu dáng lấy chính kiểu dáng này làm cơ sở."
 
@@ -6677,26 +6641,26 @@ msgstr "Xem thử kiểu dáng."
 msgid "The system cannot find the file specified."
 msgstr "Hệ thống không tìm thấy tập tin đã chỉ ra."
 
-#: ../src/richtext/richtexttabspage.cpp:114
-#: ../src/richtext/richtexttabspage.cpp:116
+#: ../src/richtext/richtexttabspage.cpp:118
+#: ../src/richtext/richtexttabspage.cpp:120
 msgid "The tab position."
 msgstr "Vị trí tab."
 
-#: ../src/richtext/richtexttabspage.cpp:120
+#: ../src/richtext/richtexttabspage.cpp:124
 msgid "The tab positions."
 msgstr "Vị trí tab."
 
-#: ../src/richtext/richtextctrl.cpp:2827
+#: ../src/richtext/richtextctrl.cpp:2791
 msgid "The text couldn't be saved."
 msgstr "Dữ liệu dạng chữ không thể được ghi lại."
 
-#: ../src/richtext/richtextmarginspage.cpp:242
-#: ../src/richtext/richtextmarginspage.cpp:244
+#: ../src/richtext/richtextmarginspage.cpp:243
+#: ../src/richtext/richtextmarginspage.cpp:245
 msgid "The top margin size."
 msgstr "Kích thước lề trên."
 
-#: ../src/richtext/richtextmarginspage.cpp:356
-#: ../src/richtext/richtextmarginspage.cpp:358
+#: ../src/richtext/richtextmarginspage.cpp:357
+#: ../src/richtext/richtextmarginspage.cpp:359
 msgid "The top padding size."
 msgstr "Kích thước đệm trên."
 
@@ -6707,15 +6671,10 @@ msgstr "Kích thước đệm trên."
 msgid "The top position."
 msgstr "Vị trí trên cùng."
 
-#: ../src/common/cmdline.cpp:1226
+#: ../src/common/cmdline.cpp:1061
 #, c-format
 msgid "The value for the option '%s' must be specified."
 msgstr "Giá trị cho tùy chọn '%s' phải được định rõ."
-
-#: ../src/richtext/richtextborderspage.cpp:588
-#: ../src/richtext/richtextborderspage.cpp:590
-msgid "The value of the corner radius."
-msgstr "Giá trị cho bán kính góc."
 
 #: ../src/msw/dialup.cpp:452
 #, c-format
@@ -6758,7 +6717,7 @@ msgstr "Cái này không phải là một %s."
 msgid "This platform does not support background transparency."
 msgstr "Hệ thống này không hỗ trợ làm trong suốt nền"
 
-#: ../src/gtk/window.cpp:4356
+#: ../src/gtk/window.cpp:4368
 msgid ""
 "This program was compiled with a too old version of GTK+, please rebuild "
 "with GTK+ 2.12 or newer."
@@ -6815,7 +6774,7 @@ msgstr ""
 msgid "Timer creation failed."
 msgstr "Tạo lập bộ định thời Timer gặp lỗi."
 
-#: ../src/generic/tipdlg.cpp:215
+#: ../src/generic/tipdlg.cpp:220
 msgid "Tip of the Day"
 msgstr "Mẹo Nhỏ"
 
@@ -6831,7 +6790,7 @@ msgstr "Đến:"
 msgid "Toggle renderer cannot render value; value type: "
 msgstr "Toggle renderer không trả về giá trị; giá trị kiểu: "
 
-#: ../src/richtext/richtextbuffer.cpp:8237
+#: ../src/richtext/richtextbuffer.cpp:8087
 msgid "Too many EndStyle calls!"
 msgstr "Quá nhiều cú gọi EndStyle!"
 
@@ -6873,13 +6832,13 @@ msgstr "Thổ Nhĩ Kỳ (ISO-8859-9)"
 msgid "Type"
 msgstr "Kiểu"
 
-#: ../src/richtext/richtextfontpage.cpp:151
-#: ../src/richtext/richtextfontpage.cpp:153
+#: ../src/richtext/richtextfontpage.cpp:160
+#: ../src/richtext/richtextfontpage.cpp:162
 msgid "Type a font name."
 msgstr "Gõ một tên phông chữ."
 
-#: ../src/richtext/richtextfontpage.cpp:166
-#: ../src/richtext/richtextfontpage.cpp:168
+#: ../src/richtext/richtextfontpage.cpp:175
+#: ../src/richtext/richtextfontpage.cpp:177
 msgid "Type a size in points."
 msgstr "Kích thước phông chữ theo points."
 
@@ -6986,7 +6945,7 @@ msgstr "Không thể khởi tạo chương trình Hildon"
 msgid "Unable to open path '%s'"
 msgstr "Không thể mở đường dẫn '%s'"
 
-#: ../src/html/htmlwin.cpp:574
+#: ../src/html/htmlwin.cpp:564
 #, c-format
 msgid "Unable to open requested HTML document: %s"
 msgstr "Không thể mở tài liệu HTML đã yêu cầu: %s"
@@ -7028,8 +6987,8 @@ msgstr "Không thể xóa"
 msgid "Underline"
 msgstr "Gạch dưới"
 
-#: ../src/richtext/richtextfontpage.cpp:357 ../src/osx/carbon/fontdlg.cpp:540
-#: ../src/propgrid/advprops.cpp:656
+#: ../src/richtext/richtextfontpage.cpp:341 ../src/osx/carbon/fontdlg.cpp:540
+#: ../src/propgrid/advprops.cpp:655
 msgid "Underlined"
 msgstr "Bị gạch dưới"
 
@@ -7041,10 +7000,10 @@ msgstr "Undo"
 msgid "Undo last action"
 msgstr "Undo thao tác cuối cùng"
 
-#: ../src/common/cmdline.cpp:1023
+#: ../src/common/cmdline.cpp:864
 #, c-format
 msgid "Unexpected characters following option '%s'."
-msgstr "Không cần ký tự đi sau tùy chọn '%s'."
+msgstr "Không mong đợi ký tự đi sau tùy chọn '%s'."
 
 #: ../src/unix/fswatcher_inotify.cpp:262
 #, c-format
@@ -7053,10 +7012,10 @@ msgstr ""
 "Gặp sự kiện bất ngờ dành cho \"%s\": không có bộ mô tả theo dõi nào tương "
 "ứng với nó."
 
-#: ../src/common/cmdline.cpp:1189
+#: ../src/common/cmdline.cpp:1024
 #, c-format
 msgid "Unexpected parameter '%s'"
-msgstr "Tham số không cần thiết '%s'"
+msgstr "Tham số không mong đợi '%s'"
 
 #: ../include/wx/msw/private/fswatcher.h:148
 msgid "Unexpectedly new I/O completion port was created"
@@ -7108,23 +7067,23 @@ msgstr "Unicode 8 bit (UTF-8)"
 msgid "Unindent"
 msgstr "Không thụt lề"
 
-#: ../src/richtext/richtextborderspage.cpp:362
-#: ../src/richtext/richtextborderspage.cpp:364
+#: ../src/richtext/richtextborderspage.cpp:358
+#: ../src/richtext/richtextborderspage.cpp:360
 msgid "Units for the bottom border width."
 msgstr "Đơn vị cho độ rộng biên đáy."
 
-#: ../src/richtext/richtextmarginspage.cpp:277
-#: ../src/richtext/richtextmarginspage.cpp:279
+#: ../src/richtext/richtextmarginspage.cpp:278
+#: ../src/richtext/richtextmarginspage.cpp:280
 msgid "Units for the bottom margin."
 msgstr "Đơn vị cho lề đáy."
 
-#: ../src/richtext/richtextborderspage.cpp:531
-#: ../src/richtext/richtextborderspage.cpp:533
+#: ../src/richtext/richtextborderspage.cpp:527
+#: ../src/richtext/richtextborderspage.cpp:529
 msgid "Units for the bottom outline width."
 msgstr "Đơn vị cho độ rộng viền đáy"
 
-#: ../src/richtext/richtextmarginspage.cpp:391
-#: ../src/richtext/richtextmarginspage.cpp:393
+#: ../src/richtext/richtextmarginspage.cpp:392
+#: ../src/richtext/richtextmarginspage.cpp:394
 msgid "Units for the bottom padding."
 msgstr "Đơn vị cho đệm đáy."
 
@@ -7133,28 +7092,23 @@ msgstr "Đơn vị cho đệm đáy."
 msgid "Units for the bottom position."
 msgstr "Đơn vị cho vị trí đáy."
 
-#: ../src/richtext/richtextborderspage.cpp:599
-#: ../src/richtext/richtextborderspage.cpp:601
-msgid "Units for the corner radius."
-msgstr "Đơn vị cho bo tròn góc."
-
-#: ../src/richtext/richtextborderspage.cpp:260
-#: ../src/richtext/richtextborderspage.cpp:262
+#: ../src/richtext/richtextborderspage.cpp:256
+#: ../src/richtext/richtextborderspage.cpp:258
 msgid "Units for the left border width."
 msgstr "Đơn vị cho độ rộng biên trái."
 
-#: ../src/richtext/richtextmarginspage.cpp:204
-#: ../src/richtext/richtextmarginspage.cpp:206
+#: ../src/richtext/richtextmarginspage.cpp:205
+#: ../src/richtext/richtextmarginspage.cpp:207
 msgid "Units for the left margin."
 msgstr "Đơn vị cho lề trái."
 
-#: ../src/richtext/richtextborderspage.cpp:429
-#: ../src/richtext/richtextborderspage.cpp:431
+#: ../src/richtext/richtextborderspage.cpp:425
+#: ../src/richtext/richtextborderspage.cpp:427
 msgid "Units for the left outline width."
 msgstr "Đơn vị cho độ rộng viền trái"
 
-#: ../src/richtext/richtextmarginspage.cpp:318
-#: ../src/richtext/richtextmarginspage.cpp:320
+#: ../src/richtext/richtextmarginspage.cpp:319
+#: ../src/richtext/richtextmarginspage.cpp:321
 msgid "Units for the left padding."
 msgstr "Đơn vị cho đệm trái."
 
@@ -7193,23 +7147,23 @@ msgstr "Đơn vị cho độ cao đối tượng."
 msgid "Units for the object width."
 msgstr "Đơn vị cho độ rộng đối tượng."
 
-#: ../src/richtext/richtextborderspage.cpp:294
-#: ../src/richtext/richtextborderspage.cpp:296
+#: ../src/richtext/richtextborderspage.cpp:290
+#: ../src/richtext/richtextborderspage.cpp:292
 msgid "Units for the right border width."
 msgstr "Đơn vị cho độ rộng biên phải."
 
-#: ../src/richtext/richtextmarginspage.cpp:229
-#: ../src/richtext/richtextmarginspage.cpp:231
+#: ../src/richtext/richtextmarginspage.cpp:230
+#: ../src/richtext/richtextmarginspage.cpp:232
 msgid "Units for the right margin."
 msgstr "Đơn vị cho lề phải."
 
-#: ../src/richtext/richtextborderspage.cpp:463
-#: ../src/richtext/richtextborderspage.cpp:465
+#: ../src/richtext/richtextborderspage.cpp:459
+#: ../src/richtext/richtextborderspage.cpp:461
 msgid "Units for the right outline width."
 msgstr "Đơn vị cho độ rộng viền phải."
 
-#: ../src/richtext/richtextmarginspage.cpp:343
-#: ../src/richtext/richtextmarginspage.cpp:345
+#: ../src/richtext/richtextmarginspage.cpp:344
+#: ../src/richtext/richtextmarginspage.cpp:346
 msgid "Units for the right padding."
 msgstr "Đơn vị cho đệm phải."
 
@@ -7218,23 +7172,23 @@ msgstr "Đơn vị cho đệm phải."
 msgid "Units for the right position."
 msgstr "Đơn vị cho vị trí phải."
 
-#: ../src/richtext/richtextborderspage.cpp:328
-#: ../src/richtext/richtextborderspage.cpp:330
+#: ../src/richtext/richtextborderspage.cpp:324
+#: ../src/richtext/richtextborderspage.cpp:326
 msgid "Units for the top border width."
 msgstr "Đơn vị cho độ rộng biên trên."
 
-#: ../src/richtext/richtextmarginspage.cpp:252
-#: ../src/richtext/richtextmarginspage.cpp:254
+#: ../src/richtext/richtextmarginspage.cpp:253
+#: ../src/richtext/richtextmarginspage.cpp:255
 msgid "Units for the top margin."
 msgstr "Đơn vị cho lề trên."
 
-#: ../src/richtext/richtextborderspage.cpp:497
-#: ../src/richtext/richtextborderspage.cpp:499
+#: ../src/richtext/richtextborderspage.cpp:493
+#: ../src/richtext/richtextborderspage.cpp:495
 msgid "Units for the top outline width."
 msgstr "Đơn vị cho độ rộng viền trên."
 
-#: ../src/richtext/richtextmarginspage.cpp:366
-#: ../src/richtext/richtextmarginspage.cpp:368
+#: ../src/richtext/richtextmarginspage.cpp:367
+#: ../src/richtext/richtextmarginspage.cpp:369
 msgid "Units for the top padding."
 msgstr "Đơn vị cho đệm trên."
 
@@ -7297,7 +7251,7 @@ msgstr "Không hiểu ngoại lệ"
 msgid "Unknown image data format."
 msgstr "Không hiểu định dạng dữ liệu ảnh"
 
-#: ../src/common/cmdline.cpp:908
+#: ../src/common/cmdline.cpp:749
 #, c-format
 msgid "Unknown long option '%s'"
 msgstr "Không rõ tùy chọn dài '%s'"
@@ -7306,7 +7260,7 @@ msgstr "Không rõ tùy chọn dài '%s'"
 msgid "Unknown name or named argument."
 msgstr "Không hiểu tên hay tham số tên."
 
-#: ../src/common/cmdline.cpp:923 ../src/common/cmdline.cpp:945
+#: ../src/common/cmdline.cpp:764 ../src/common/cmdline.cpp:786
 #, c-format
 msgid "Unknown option '%s'"
 msgstr "Không biết tùy chọn %s"
@@ -7321,7 +7275,7 @@ msgstr "Không khớp '{' trong một mục từ cho kiểu diễn tả %s."
 msgid "Unnamed command"
 msgstr "Câu lệnh vô danh"
 
-#: ../src/propgrid/propgrid.cpp:397
+#: ../src/propgrid/propgrid.cpp:398
 msgid "Unspecified"
 msgstr "Chưa định danh"
 
@@ -7339,16 +7293,16 @@ msgid "Up"
 msgstr "Lên"
 
 #: ../src/richtext/richtextliststylepage.cpp:483
-#: ../src/richtext/richtextbulletspage.cpp:275
+#: ../src/richtext/richtextbulletspage.cpp:288
 msgid "Upper case letters"
 msgstr "Chuyển thành chữ hoa"
 
 #: ../src/richtext/richtextliststylepage.cpp:485
-#: ../src/richtext/richtextbulletspage.cpp:277
+#: ../src/richtext/richtextbulletspage.cpp:290
 msgid "Upper case roman numerals"
 msgstr "Đổi thành chữ số La Mã in hoa"
 
-#: ../src/common/cmdline.cpp:1320
+#: ../src/common/cmdline.cpp:1155
 #, c-format
 msgid "Usage: %s"
 msgstr "Cách dùng: %s"
@@ -7372,17 +7326,17 @@ msgstr "Bộ xác định tính hợp lệ bị xung đột"
 msgid "Value"
 msgstr "Giá trị"
 
-#: ../src/propgrid/props.cpp:385
+#: ../src/propgrid/props.cpp:384
 #, c-format
 msgid "Value must be %s or higher."
 msgstr "Giá trị phải là %s hay lớn hơn."
 
-#: ../src/propgrid/props.cpp:412
+#: ../src/propgrid/props.cpp:411
 #, c-format
 msgid "Value must be %s or less."
 msgstr "Giá trị phải là %s hay nhỏ hơn."
 
-#: ../src/propgrid/props.cpp:389 ../src/propgrid/props.cpp:416
+#: ../src/propgrid/props.cpp:388 ../src/propgrid/props.cpp:415
 #, c-format
 msgid "Value must be between %s and %s."
 msgstr "Giá trị phải nằm giữa %s và %s."
@@ -7404,7 +7358,7 @@ msgstr "Hiển thị tập tin dạng chi tiết"
 msgid "View files as a list view"
 msgstr "Hiển thị tập tin bằng kiểu danh sách liệt kê"
 
-#: ../src/common/docview.cpp:1959
+#: ../src/common/docview.cpp:1952
 msgid "Views"
 msgstr "Trình bày"
 
@@ -7429,7 +7383,7 @@ msgstr "Đợi IO trên phần mô tả epoll %d gặp lỗi"
 msgid "Warning: "
 msgstr "Cảnh báo: "
 
-#: ../src/propgrid/advprops.cpp:652
+#: ../src/propgrid/advprops.cpp:651
 msgid "Weight"
 msgstr "Độ rộng"
 
@@ -7449,7 +7403,7 @@ msgstr "Không biết phông chữ có gạch chân hay không."
 msgid "Whole word"
 msgstr "Toàn bộ từ"
 
-#: ../src/html/helpwnd.cpp:548
+#: ../src/html/helpwnd.cpp:547
 msgid "Whole words only"
 msgstr "Chỉ khi khớp cả từ"
 
@@ -7470,12 +7424,14 @@ msgid "Windows 7"
 msgstr "Windows 7"
 
 #: ../src/msw/utils.cpp:1308
+#, fuzzy
 msgid "Windows 8"
-msgstr "Windows 8"
+msgstr "Windows 98"
 
 #: ../src/msw/utils.cpp:1314
+#, fuzzy
 msgid "Windows 8.1"
-msgstr "Windows 8.1"
+msgstr "Windows 98"
 
 #: ../src/msw/utils.cpp:1234
 msgid "Windows 95"
@@ -7569,12 +7525,14 @@ msgid "Windows Server 2008 R2"
 msgstr "Windows Server 2008 R2"
 
 #: ../src/msw/utils.cpp:1307
+#, fuzzy
 msgid "Windows Server 2012"
-msgstr "Windows Server 2012"
+msgstr "Windows Server 2003"
 
 #: ../src/msw/utils.cpp:1313
+#, fuzzy
 msgid "Windows Server 2012 R2"
-msgstr "Windows Server 2012 R2"
+msgstr "Windows Server 2008 R2"
 
 #: ../src/common/fmapbase.cpp:166
 msgid "Windows Thai (CP 874)"
@@ -7586,7 +7544,7 @@ msgstr "Windows Thổ Nhĩ Kỳ (CP 1254)"
 
 #: ../src/common/fmapbase.cpp:179
 msgid "Windows Vietnamese (CP 1258)"
-msgstr "Windows Tiếng Việt (CP 1258)"
+msgstr "Windows Vietnamese (CP 1258)"
 
 #: ../src/msw/utils.cpp:1296
 msgid "Windows Vista"
@@ -7662,7 +7620,7 @@ msgstr "Bạn không thể khởi tạo overlay lần nữa"
 msgid "You cannot add a new directory to this section."
 msgstr "Bạn không thể thêm một thư mục mới vào section này."
 
-#: ../src/propgrid/propgrid.cpp:3245
+#: ../src/propgrid/propgrid.cpp:3260
 msgid "You have entered invalid value. Press ESC to cancel editing."
 msgstr ""
 "Bạn đã nhập vào giá trị không hợp lệ. Hãy bấm phím ESC để huỷ bỏ việc chỉnh "
@@ -7804,7 +7762,7 @@ msgstr "tham số sai tới hàm thư viện"
 msgid "bad signature"
 msgstr "chữ ký sai"
 
-#: ../src/common/zipstrm.cpp:1678
+#: ../src/common/zipstrm.cpp:1715
 msgid "bad zipfile offset to entry"
 msgstr "đoạn offset tập tin zipfile hỏng được ghi vào"
 
@@ -7860,7 +7818,7 @@ msgstr "không thể kết thúc nếu kết thúc tập tin nằm trên phần 
 msgid "can't execute '%s'"
 msgstr "không thể thực hiện '%s'"
 
-#: ../src/common/zipstrm.cpp:1453
+#: ../src/common/zipstrm.cpp:1490
 msgid "can't find central directory in zip"
 msgstr "không thể tìm thấy thư mục trung tâm trong zip"
 
@@ -7957,23 +7915,22 @@ msgstr "tổng kiểm tra sai"
 msgid "checksum failure reading tar header block"
 msgstr "tổng kiểm tra việc đọc khối đầu gói tar bị thất bại"
 
-#: ../src/richtext/richtextborderspage.cpp:256
-#: ../src/richtext/richtextborderspage.cpp:290
-#: ../src/richtext/richtextborderspage.cpp:324
-#: ../src/richtext/richtextborderspage.cpp:358
-#: ../src/richtext/richtextborderspage.cpp:425
-#: ../src/richtext/richtextborderspage.cpp:459
-#: ../src/richtext/richtextborderspage.cpp:493
-#: ../src/richtext/richtextborderspage.cpp:527
-#: ../src/richtext/richtextborderspage.cpp:595
-#: ../src/richtext/richtextmarginspage.cpp:201
-#: ../src/richtext/richtextmarginspage.cpp:226
-#: ../src/richtext/richtextmarginspage.cpp:249
-#: ../src/richtext/richtextmarginspage.cpp:274
-#: ../src/richtext/richtextmarginspage.cpp:315
-#: ../src/richtext/richtextmarginspage.cpp:340
-#: ../src/richtext/richtextmarginspage.cpp:363
-#: ../src/richtext/richtextmarginspage.cpp:388
+#: ../src/richtext/richtextborderspage.cpp:252
+#: ../src/richtext/richtextborderspage.cpp:286
+#: ../src/richtext/richtextborderspage.cpp:320
+#: ../src/richtext/richtextborderspage.cpp:354
+#: ../src/richtext/richtextborderspage.cpp:421
+#: ../src/richtext/richtextborderspage.cpp:455
+#: ../src/richtext/richtextborderspage.cpp:489
+#: ../src/richtext/richtextborderspage.cpp:523
+#: ../src/richtext/richtextmarginspage.cpp:202
+#: ../src/richtext/richtextmarginspage.cpp:227
+#: ../src/richtext/richtextmarginspage.cpp:250
+#: ../src/richtext/richtextmarginspage.cpp:275
+#: ../src/richtext/richtextmarginspage.cpp:316
+#: ../src/richtext/richtextmarginspage.cpp:341
+#: ../src/richtext/richtextmarginspage.cpp:364
+#: ../src/richtext/richtextmarginspage.cpp:389
 #: ../src/richtext/richtextsizepage.cpp:339
 #: ../src/richtext/richtextsizepage.cpp:373
 #: ../src/richtext/richtextsizepage.cpp:400
@@ -7999,7 +7956,7 @@ msgstr "chuyển đổi sang bộ mã 8-bit gặp lỗi"
 msgid "ctrl"
 msgstr "ctrl"
 
-#: ../src/common/cmdline.cpp:1488
+#: ../src/common/cmdline.cpp:1323
 msgid "date"
 msgstr "ngày tháng"
 
@@ -8011,7 +7968,7 @@ msgstr "lỗi giải nén"
 msgid "default"
 msgstr "mặc định"
 
-#: ../src/common/cmdline.cpp:1484
+#: ../src/common/cmdline.cpp:1319
 msgid "double"
 msgstr "kép"
 
@@ -8049,15 +8006,15 @@ msgstr "lỗi khi mở '%s'"
 msgid "error opening file"
 msgstr "lỗi khi mở tập tin"
 
-#: ../src/common/zipstrm.cpp:1539
+#: ../src/common/zipstrm.cpp:1576
 msgid "error reading zip central directory"
 msgstr "lỗi đọc thư mục trung tâm zip"
 
-#: ../src/common/zipstrm.cpp:1630
+#: ../src/common/zipstrm.cpp:1667
 msgid "error reading zip local header"
 msgstr "lỗi đọc phần đầu nội bộ của zip"
 
-#: ../src/common/zipstrm.cpp:2291
+#: ../src/common/zipstrm.cpp:2396
 #, c-format
 msgid "error writing zip entry '%s': bad crc or length"
 msgstr "lỗi ghi mục tin zip '%s': kiểm tra crc hay độ dài hỏng"
@@ -8083,7 +8040,7 @@ msgstr "tập tin '%s', dòng %d: '%s' được bỏ qua trước phần đầu 
 #: ../src/common/fileconf.cpp:639
 #, c-format
 msgid "file '%s', line %d: '=' expected."
-msgstr "tập tin '%s', dòng %d: cần '='."
+msgstr "tập tin '%s', dòng %d: '=' mong đợi."
 
 #: ../src/common/fileconf.cpp:662
 #, c-format
@@ -8100,7 +8057,7 @@ msgstr "tập tin '%s', dòng %d: giá trị khóa bất biến '%s' bị bỏ q
 msgid "file '%s': unexpected character %c at line %d."
 msgstr "tập tin '%s': không mong ký tự %c tại dòng %d."
 
-#: ../src/richtext/richtextbuffer.cpp:8612
+#: ../src/richtext/richtextbuffer.cpp:8462
 msgid "files"
 msgstr "tập tin"
 
@@ -8108,7 +8065,7 @@ msgstr "tập tin"
 msgid "first"
 msgstr "đầu tiên"
 
-#: ../src/html/helpwnd.cpp:1266
+#: ../src/html/helpwnd.cpp:1265
 msgid "font size"
 msgstr "cỡ phông chữ"
 
@@ -8124,8 +8081,8 @@ msgstr "thứ tư"
 msgid "generate verbose log messages"
 msgstr "tạo ra nhật ký thông tin đầy đủ"
 
-#: ../src/richtext/richtextbuffer.cpp:12782
-#: ../src/richtext/richtextbuffer.cpp:12892
+#: ../src/richtext/richtextbuffer.cpp:12541
+#: ../src/richtext/richtextbuffer.cpp:12651
 msgid "image"
 msgstr "hình ảnh"
 
@@ -8149,7 +8106,7 @@ msgstr "dữ liệu trong phần đầu mở rộng của gói tar không hợp 
 msgid "invalid message box return value"
 msgstr "hộp thoại thông điệp trả về giá trị không hợp lệ"
 
-#: ../src/common/zipstrm.cpp:1408
+#: ../src/common/zipstrm.cpp:1445
 msgid "invalid zip file"
 msgstr "tập tin zip không hợp lệ"
 
@@ -8201,13 +8158,13 @@ msgstr "buổi trưa"
 
 #: ../src/richtext/richtextstyles.cpp:779
 msgid "normal"
-msgstr "thường"
+msgstr "thông thường"
 
 #: ../src/gtk/print.cpp:1218 ../src/gtk/print.cpp:1323
 msgid "not implemented"
-msgstr "chưa được viết mã thực thi."
+msgstr "chưa thi hành đầy đủ."
 
-#: ../src/common/cmdline.cpp:1480
+#: ../src/common/cmdline.cpp:1315
 msgid "num"
 msgstr "số"
 
@@ -8223,72 +8180,68 @@ msgstr "hết bộ nhớ"
 msgid "process context description"
 msgstr "mô tả ngữ cảnh tiến trình"
 
-#: ../src/richtext/richtextfontpage.cpp:177
-#: ../src/richtext/richtextfontpage.cpp:180
-#: ../src/richtext/richtextborderspage.cpp:257
-#: ../src/richtext/richtextborderspage.cpp:291
-#: ../src/richtext/richtextborderspage.cpp:325
-#: ../src/richtext/richtextborderspage.cpp:359
-#: ../src/richtext/richtextborderspage.cpp:426
-#: ../src/richtext/richtextborderspage.cpp:460
-#: ../src/richtext/richtextborderspage.cpp:494
-#: ../src/richtext/richtextborderspage.cpp:528
-#: ../src/richtext/richtextborderspage.cpp:596
+#: ../src/richtext/richtextfontpage.cpp:186
+#: ../src/richtext/richtextfontpage.cpp:189
+#: ../src/richtext/richtextborderspage.cpp:253
+#: ../src/richtext/richtextborderspage.cpp:287
+#: ../src/richtext/richtextborderspage.cpp:321
+#: ../src/richtext/richtextborderspage.cpp:355
+#: ../src/richtext/richtextborderspage.cpp:422
+#: ../src/richtext/richtextborderspage.cpp:456
+#: ../src/richtext/richtextborderspage.cpp:490
+#: ../src/richtext/richtextborderspage.cpp:524
 msgid "pt"
 msgstr "pt"
 
-#: ../src/richtext/richtextfontpage.cpp:178
+#: ../src/richtext/richtextfontpage.cpp:187
+#: ../src/richtext/richtextborderspage.cpp:251
+#: ../src/richtext/richtextborderspage.cpp:254
 #: ../src/richtext/richtextborderspage.cpp:255
-#: ../src/richtext/richtextborderspage.cpp:258
-#: ../src/richtext/richtextborderspage.cpp:259
+#: ../src/richtext/richtextborderspage.cpp:285
+#: ../src/richtext/richtextborderspage.cpp:288
 #: ../src/richtext/richtextborderspage.cpp:289
-#: ../src/richtext/richtextborderspage.cpp:292
-#: ../src/richtext/richtextborderspage.cpp:293
+#: ../src/richtext/richtextborderspage.cpp:319
+#: ../src/richtext/richtextborderspage.cpp:322
 #: ../src/richtext/richtextborderspage.cpp:323
-#: ../src/richtext/richtextborderspage.cpp:326
-#: ../src/richtext/richtextborderspage.cpp:327
+#: ../src/richtext/richtextborderspage.cpp:353
+#: ../src/richtext/richtextborderspage.cpp:356
 #: ../src/richtext/richtextborderspage.cpp:357
-#: ../src/richtext/richtextborderspage.cpp:360
-#: ../src/richtext/richtextborderspage.cpp:361
+#: ../src/richtext/richtextborderspage.cpp:420
+#: ../src/richtext/richtextborderspage.cpp:423
 #: ../src/richtext/richtextborderspage.cpp:424
-#: ../src/richtext/richtextborderspage.cpp:427
-#: ../src/richtext/richtextborderspage.cpp:428
+#: ../src/richtext/richtextborderspage.cpp:454
+#: ../src/richtext/richtextborderspage.cpp:457
 #: ../src/richtext/richtextborderspage.cpp:458
-#: ../src/richtext/richtextborderspage.cpp:461
-#: ../src/richtext/richtextborderspage.cpp:462
+#: ../src/richtext/richtextborderspage.cpp:488
+#: ../src/richtext/richtextborderspage.cpp:491
 #: ../src/richtext/richtextborderspage.cpp:492
-#: ../src/richtext/richtextborderspage.cpp:495
-#: ../src/richtext/richtextborderspage.cpp:496
+#: ../src/richtext/richtextborderspage.cpp:522
+#: ../src/richtext/richtextborderspage.cpp:525
 #: ../src/richtext/richtextborderspage.cpp:526
-#: ../src/richtext/richtextborderspage.cpp:529
-#: ../src/richtext/richtextborderspage.cpp:530
-#: ../src/richtext/richtextborderspage.cpp:594
-#: ../src/richtext/richtextborderspage.cpp:597
-#: ../src/richtext/richtextborderspage.cpp:598
-#: ../src/richtext/richtextmarginspage.cpp:200
-#: ../src/richtext/richtextmarginspage.cpp:202
+#: ../src/richtext/richtextmarginspage.cpp:201
 #: ../src/richtext/richtextmarginspage.cpp:203
-#: ../src/richtext/richtextmarginspage.cpp:225
-#: ../src/richtext/richtextmarginspage.cpp:227
+#: ../src/richtext/richtextmarginspage.cpp:204
+#: ../src/richtext/richtextmarginspage.cpp:226
 #: ../src/richtext/richtextmarginspage.cpp:228
-#: ../src/richtext/richtextmarginspage.cpp:248
-#: ../src/richtext/richtextmarginspage.cpp:250
+#: ../src/richtext/richtextmarginspage.cpp:229
+#: ../src/richtext/richtextmarginspage.cpp:249
 #: ../src/richtext/richtextmarginspage.cpp:251
-#: ../src/richtext/richtextmarginspage.cpp:273
-#: ../src/richtext/richtextmarginspage.cpp:275
+#: ../src/richtext/richtextmarginspage.cpp:252
+#: ../src/richtext/richtextmarginspage.cpp:274
 #: ../src/richtext/richtextmarginspage.cpp:276
-#: ../src/richtext/richtextmarginspage.cpp:314
-#: ../src/richtext/richtextmarginspage.cpp:316
+#: ../src/richtext/richtextmarginspage.cpp:277
+#: ../src/richtext/richtextmarginspage.cpp:315
 #: ../src/richtext/richtextmarginspage.cpp:317
-#: ../src/richtext/richtextmarginspage.cpp:339
-#: ../src/richtext/richtextmarginspage.cpp:341
+#: ../src/richtext/richtextmarginspage.cpp:318
+#: ../src/richtext/richtextmarginspage.cpp:340
 #: ../src/richtext/richtextmarginspage.cpp:342
-#: ../src/richtext/richtextmarginspage.cpp:362
-#: ../src/richtext/richtextmarginspage.cpp:364
+#: ../src/richtext/richtextmarginspage.cpp:343
+#: ../src/richtext/richtextmarginspage.cpp:363
 #: ../src/richtext/richtextmarginspage.cpp:365
-#: ../src/richtext/richtextmarginspage.cpp:387
-#: ../src/richtext/richtextmarginspage.cpp:389
+#: ../src/richtext/richtextmarginspage.cpp:366
+#: ../src/richtext/richtextmarginspage.cpp:388
 #: ../src/richtext/richtextmarginspage.cpp:390
+#: ../src/richtext/richtextmarginspage.cpp:391
 #: ../src/richtext/richtextsizepage.cpp:338
 #: ../src/richtext/richtextsizepage.cpp:341
 #: ../src/richtext/richtextsizepage.cpp:342
@@ -8330,12 +8283,12 @@ msgstr "rawctrl"
 msgid "read error"
 msgstr "lỗi đọc"
 
-#: ../src/common/zipstrm.cpp:1845
+#: ../src/common/zipstrm.cpp:1882
 #, c-format
 msgid "reading zip stream (entry %s): bad crc"
 msgstr "đang đọc dòng dữ liệu zip (mục vào %s): kiểm tra độ dư vòng(crc) hỏng"
 
-#: ../src/common/zipstrm.cpp:1840
+#: ../src/common/zipstrm.cpp:1877
 #, c-format
 msgid "reading zip stream (entry %s): bad length"
 msgstr "đang đọc dòng dữ liệu zip (mục vào %s): chiều dài lỗi"
@@ -8350,7 +8303,7 @@ msgstr "giây"
 
 #: ../src/html/chm.cpp:337
 msgid "seek error"
-msgstr "lỗi di chuyển vị trí đọc"
+msgstr "lỗi đặt vị trí"
 
 #: ../src/common/datetimefmt.cpp:1935
 msgid "seventeenth"
@@ -8384,31 +8337,31 @@ msgstr "định rõ chế độ hiển thị sử dụng (ví dụ 640x480-16)"
 msgid "specify the theme to use"
 msgstr "định rõ theme cần dùng"
 
-#: ../src/richtext/richtextbuffer.cpp:9133
+#: ../src/richtext/richtextbuffer.cpp:8983
 msgid "standard/circle"
 msgstr "Tiêu chuẩn/ hình tròn"
 
-#: ../src/richtext/richtextbuffer.cpp:9134
+#: ../src/richtext/richtextbuffer.cpp:8984
 msgid "standard/circle-outline"
 msgstr "tiêu-chuẩn/viền-tròn"
 
-#: ../src/richtext/richtextbuffer.cpp:9136
+#: ../src/richtext/richtextbuffer.cpp:8986
 msgid "standard/diamond"
 msgstr "Tiêu chuẩn/Thoi"
 
-#: ../src/richtext/richtextbuffer.cpp:9135
+#: ../src/richtext/richtextbuffer.cpp:8985
 msgid "standard/square"
 msgstr "Tiêu chuẩn/vuông"
 
-#: ../src/richtext/richtextbuffer.cpp:9137
+#: ../src/richtext/richtextbuffer.cpp:8987
 msgid "standard/triangle"
 msgstr "Tiêu chuẩn/chữ nhật"
 
-#: ../src/common/zipstrm.cpp:1745
+#: ../src/common/zipstrm.cpp:1782
 msgid "stored file length not in Zip header"
 msgstr "phần lưu giữ độ dài tập tin không ở trong phần đầu của Zip"
 
-#: ../src/common/cmdline.cpp:1476
+#: ../src/common/cmdline.cpp:1311
 msgid "str"
 msgstr "str"
 
@@ -8452,7 +8405,7 @@ msgstr "dấu gạch ngược bị bỏ qua trong '%s'"
 
 #: ../src/gtk/aboutdlg.cpp:218
 msgid "translator-credits"
-msgstr "công-trạng-dịch-thuật"
+msgstr "người dịch-chứng chỉ"
 
 #: ../src/common/datetimefmt.cpp:1930
 msgid "twelfth"
@@ -8469,7 +8422,7 @@ msgstr "gạch chân"
 #: ../src/common/fileconf.cpp:2014
 #, c-format
 msgid "unexpected \" at position %d in '%s'."
-msgstr "không cần \" tại vị trí %d trong '%s'."
+msgstr "không mong đợi \" tại vị trí %d trong '%s' ."
 
 #: ../src/common/tarstrm.cpp:1045
 msgid "unexpected end of file"
@@ -8496,23 +8449,23 @@ msgstr "chưa biết lỗi (mã sai %08x)."
 
 #: ../src/msw/wince/filefnwce.cpp:172
 msgid "unknown seek origin"
-msgstr "không hiểu vị trí đọc ban đầu"
+msgstr "không hiểu tìm kiếm nguồn gốc"
 
 #: ../src/common/fmapbase.cpp:834
 #, c-format
 msgid "unknown-%d"
-msgstr "không_hiểu-%d"
+msgstr "không hiểu-%d"
 
 #: ../src/common/docview.cpp:507
 msgid "unnamed"
 msgstr "không_tên"
 
-#: ../src/common/docview.cpp:1613
+#: ../src/common/docview.cpp:1606
 #, c-format
 msgid "unnamed%d"
 msgstr "Không_tên%d"
 
-#: ../src/common/zipstrm.cpp:1759 ../src/common/zipstrm.cpp:2079
+#: ../src/common/zipstrm.cpp:1796 ../src/common/zipstrm.cpp:2184
 msgid "unsupported Zip compression method"
 msgstr "không hỗ trợ phương thức nén Zip"
 
@@ -8565,7 +8518,7 @@ msgid "zlib error %d"
 msgstr "lỗi zlib %d"
 
 #: ../src/richtext/richtextliststylepage.cpp:496
-#: ../src/richtext/richtextbulletspage.cpp:288
+#: ../src/richtext/richtextbulletspage.cpp:301
 msgid "~"
 msgstr "~"
 

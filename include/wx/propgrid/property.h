@@ -313,10 +313,10 @@ public:
     }
 
 private:
-    virtual wxObjectRefData *CreateRefData() const wxOVERRIDE
+    virtual wxObjectRefData *CreateRefData() const
         { return new wxPGCellData(); }
 
-    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const wxOVERRIDE;
+    virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
 };
 
 // -----------------------------------------------------------------------
@@ -496,11 +496,7 @@ wxPG_PROP_CLASS_SPECIFIC_2          = 0x00100000,
 
 /** Indicates that the property is being deleted and should be ignored.
 */
-wxPG_PROP_BEING_DELETED             = 0x00200000,
-
-/** Indicates the bit useable by derived properties.
-*/
-wxPG_PROP_CLASS_SPECIFIC_3          = 0x00400000
+wxPG_PROP_BEING_DELETED             = 0x00200000
 
 };
 
@@ -2298,20 +2294,11 @@ public:
     wxPGProperty* GetPropertyByName( const wxString& name ) const;
 
     // Returns various display-related information for given column
-#ifdef WXWIN_COMPATIBILITY_3_0
-    wxDEPRECATED_MSG("don't use GetDisplayInfo function with argument of 'const wxPGCell**' type. Use 'wxPGCell*' argument instead")
     void GetDisplayInfo( unsigned int column,
                          int choiceIndex,
                          int flags,
                          wxString* pString,
                          const wxPGCell** pCell );
-#endif //  WXWIN_COMPATIBILITY_3_0
-    // This function can return modfied (customized) cell object.
-    void GetDisplayInfo( unsigned int column,
-                         int choiceIndex,
-                         int flags,
-                         wxString* pString,
-                         wxPGCell* pCell );
 
     static wxString*            sm_wxPG_LABEL;
 

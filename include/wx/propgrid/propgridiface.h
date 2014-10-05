@@ -1070,7 +1070,14 @@ public:
     */
     void SetPropertyReadOnly( wxPGPropArg id,
                               bool set = true,
-                              int flags = wxPG_RECURSE );
+                              int flags = wxPG_RECURSE )
+    {
+        wxPG_PROP_ARG_CALL_PROLOG()
+        if ( flags & wxPG_RECURSE )
+            p->SetFlagRecursively(wxPG_PROP_READONLY, set);
+        else
+            p->ChangeFlag(wxPG_PROP_READONLY, set);
+    }
 
     /** Sets property's value to unspecified.
         If it has children (it may be category), then the same thing is done to

@@ -62,7 +62,6 @@
 #endif
 
 #include "wx/odcombo.h"
-#include "wx/numformatter.h"
 
 // -----------------------------------------------------------------------
 
@@ -271,7 +270,7 @@ wxPGWindowList wxPGSpinCtrlEditor::CreateControls( wxPropertyGrid* propgrid, wxP
 #ifdef __WXMSW__
     wnd2->Hide();
 #endif
-    wnd2->Create( propgrid->GetPanel(), wxID_ANY, butPos, butSz, wxSP_VERTICAL );
+    wnd2->Create( propgrid->GetPanel(), wxPG_SUBID2, butPos, butSz, wxSP_VERTICAL );
 
     wnd2->SetRange( INT_MIN, INT_MAX );
     wnd2->SetValue( 0 );
@@ -340,13 +339,13 @@ bool wxPGSpinCtrlEditor::OnEvent( wxPropertyGrid* propgrid, wxPGProperty* proper
 
         int mode = wxPG_PROPERTY_VALIDATION_SATURATE;
 
-        if ( property->GetAttributeAsLong(wxPG_ATTR_SPINCTRL_WRAP, 0) )
+        if ( property->GetAttributeAsLong(wxT("Wrap"), 0) )
             mode = wxPG_PROPERTY_VALIDATION_WRAP;
 
         if ( property->GetValueType() == wxT("double") )
         {
             double v_d;
-            double step = property->GetAttributeAsDouble(wxPG_ATTR_SPINCTRL_STEP, 1.0);
+            double step = property->GetAttributeAsDouble(wxT("Step"), 1.0);
 
             // Try double
             if ( s.ToDouble(&v_d) )
@@ -362,14 +361,7 @@ bool wxPGSpinCtrlEditor::OnEvent( wxPropertyGrid* propgrid, wxPGProperty* proper
                 // Min/Max check
                 wxFloatProperty::DoValidation(property, v_d, NULL, mode);
 
-                int precision = -1;
-                wxVariant v = property->GetAttribute(wxPG_FLOAT_PRECISION);
-                if ( !v.IsNull() )
-                {
-                    precision = v.GetInteger();
-                }
-
-                s = wxNumberFormatter::ToString(v_d, precision, wxNumberFormatter::Style_NoTrailingZeroes);
+                wxPropertyGrid::DoubleToString(s, v_d, 6, true, NULL);
             }
             else
             {
@@ -379,7 +371,7 @@ bool wxPGSpinCtrlEditor::OnEvent( wxPropertyGrid* propgrid, wxPGProperty* proper
         else
         {
             wxLongLong_t v_ll;
-            wxLongLong_t step = property->GetAttributeAsLong(wxPG_ATTR_SPINCTRL_STEP, 1);
+            wxLongLong_t step = property->GetAttributeAsLong(wxT("Step"), 1);
 
             // Try (long) long
             if ( s.ToLongLong(&v_ll, 10) )
@@ -436,16 +428,16 @@ class wxPGDatePickerCtrlEditor : public wxPGEditor
 public:
     virtual ~wxPGDatePickerCtrlEditor();
 
-    wxString GetName() const wxOVERRIDE;
+    wxString GetName() const;
     virtual wxPGWindowList CreateControls(wxPropertyGrid* propgrid,
                                           wxPGProperty* property,
                                           const wxPoint& pos,
-                                          const wxSize& size) const wxOVERRIDE;
-    virtual void UpdateControl( wxPGProperty* property, wxWindow* wnd ) const wxOVERRIDE;
+                                          const wxSize& size) const;
+    virtual void UpdateControl( wxPGProperty* property, wxWindow* wnd ) const;
     virtual bool OnEvent( wxPropertyGrid* propgrid, wxPGProperty* property,
-        wxWindow* wnd, wxEvent& event ) const wxOVERRIDE;
-    virtual bool GetValueFromControl( wxVariant& variant, wxPGProperty* property, wxWindow* wnd ) const wxOVERRIDE;
-    virtual void SetValueToUnspecified( wxPGProperty* WXUNUSED(property), wxWindow* wnd ) const wxOVERRIDE;
+        wxWindow* wnd, wxEvent& event ) const;
+    virtual bool GetValueFromControl( wxVariant& variant, wxPGProperty* property, wxWindow* wnd ) const;
+    virtual void SetValueToUnspecified( wxPGProperty* WXUNUSED(property), wxWindow* wnd ) const;
 };
 
 
@@ -487,7 +479,7 @@ wxPGWindowList wxPGDatePickerCtrlEditor::CreateControls( wxPropertyGrid* propgri
         dateValue = value.GetDateTime();
 
     ctrl->Create(propgrid->GetPanel(),
-                 wxID_ANY,
+                 wxPG_SUBID1,
                  dateValue,
                  pos,
                  useSz,
@@ -590,9 +582,9 @@ static const wxChar* const gs_fp_es_style_labels[] = {
 };
 
 static const long gs_fp_es_style_values[] = {
-    wxFONTSTYLE_NORMAL,
-    wxFONTSTYLE_SLANT,
-    wxFONTSTYLE_ITALIC
+    wxNORMAL,
+    wxSLANT,
+    wxITALIC
 };
 
 static const wxChar* const gs_fp_es_weight_labels[] = {
@@ -603,9 +595,9 @@ static const wxChar* const gs_fp_es_weight_labels[] = {
 };
 
 static const long gs_fp_es_weight_values[] = {
-    wxFONTWEIGHT_NORMAL,
-    wxFONTWEIGHT_LIGHT,
-    wxFONTWEIGHT_BOLD
+    wxNORMAL,
+    wxLIGHT,
+    wxBOLD
 };
 
 // Class body is in advprops.h
@@ -759,7 +751,7 @@ wxVariant wxFontProperty::ChildChanged( wxVariant& thisValue,
              st != wxFONTSTYLE_SLANT &&
              st != wxFONTSTYLE_ITALIC )
              st = wxFONTWEIGHT_NORMAL;
-        font.SetStyle( static_cast<wxFontStyle>(st) );
+        font.SetStyle( st );
     }
     else if ( ind == 3 )
     {
@@ -768,7 +760,7 @@ wxVariant wxFontProperty::ChildChanged( wxVariant& thisValue,
              wt != wxFONTWEIGHT_LIGHT &&
              wt != wxFONTWEIGHT_BOLD )
              wt = wxFONTWEIGHT_NORMAL;
-        font.SetWeight( static_cast<wxFontWeight>(wt) );
+        font.SetWeight( wt );
     }
     else if ( ind == 4 )
     {
@@ -777,10 +769,10 @@ wxVariant wxFontProperty::ChildChanged( wxVariant& thisValue,
     else if ( ind == 5 )
     {
         int fam = childValue.GetLong();
-        if ( fam < wxFONTFAMILY_DEFAULT ||
-             fam > wxFONTFAMILY_TELETYPE )
-             fam = wxFONTFAMILY_DEFAULT;
-        font.SetFamily( static_cast<wxFontFamily>(fam) );
+        if ( fam < wxDEFAULT ||
+             fam > wxTELETYPE )
+             fam = wxDEFAULT;
+        font.SetFamily( fam );
     }
 
     wxVariant newVariant;
@@ -813,7 +805,9 @@ void wxFontProperty::OnCustomPaint(wxDC& dc,
         dc.DrawRectangle( rect );
 
         wxFont oldFont = dc.GetFont();
-        dc.SetFont(wxFontInfo(oldFont.GetPointSize().Bold().FaceName(drawFace));
+        wxFont drawFont(oldFont.GetPointSize(),
+                        wxDEFAULT,wxNORMAL,wxBOLD,false,drawFace);
+        dc.SetFont(drawFont);
 
         dc.SetTextForeground( wxSystemSettings::GetColour(wxSYS_COLOUR_BTNTEXT) );
         dc.DrawText( wxT("Aa"), rect.x+2, rect.y+1 );
@@ -840,33 +834,33 @@ void wxFontProperty::OnCustomPaint(wxDC& dc,
 #include "wx/colordlg.h"
 
 //#define wx_cp_es_syscolours_len 25
-static const char* const gs_cp_es_syscolour_labels[] = {
-    wxTRANSLATE("AppWorkspace"),
-    wxTRANSLATE("ActiveBorder"),
-    wxTRANSLATE("ActiveCaption"),
-    wxTRANSLATE("ButtonFace"),
-    wxTRANSLATE("ButtonHighlight"),
-    wxTRANSLATE("ButtonShadow"),
-    wxTRANSLATE("ButtonText"),
-    wxTRANSLATE("CaptionText"),
-    wxTRANSLATE("ControlDark"),
-    wxTRANSLATE("ControlLight"),
-    wxTRANSLATE("Desktop"),
-    wxTRANSLATE("GrayText"),
-    wxTRANSLATE("Highlight"),
-    wxTRANSLATE("HighlightText"),
-    wxTRANSLATE("InactiveBorder"),
-    wxTRANSLATE("InactiveCaption"),
-    wxTRANSLATE("InactiveCaptionText"),
-    wxTRANSLATE("Menu"),
-    wxTRANSLATE("Scrollbar"),
-    wxTRANSLATE("Tooltip"),
-    wxTRANSLATE("TooltipText"),
-    wxTRANSLATE("Window"),
-    wxTRANSLATE("WindowFrame"),
-    wxTRANSLATE("WindowText"),
-    wxTRANSLATE("Custom"),
-    NULL
+static const wxChar* const gs_cp_es_syscolour_labels[] = {
+    wxT("AppWorkspace"),
+    wxT("ActiveBorder"),
+    wxT("ActiveCaption"),
+    wxT("ButtonFace"),
+    wxT("ButtonHighlight"),
+    wxT("ButtonShadow"),
+    wxT("ButtonText"),
+    wxT("CaptionText"),
+    wxT("ControlDark"),
+    wxT("ControlLight"),
+    wxT("Desktop"),
+    wxT("GrayText"),
+    wxT("Highlight"),
+    wxT("HighlightText"),
+    wxT("InactiveBorder"),
+    wxT("InactiveCaption"),
+    wxT("InactiveCaptionText"),
+    wxT("Menu"),
+    wxT("Scrollbar"),
+    wxT("Tooltip"),
+    wxT("TooltipText"),
+    wxT("Window"),
+    wxT("WindowFrame"),
+    wxT("WindowText"),
+    wxT("Custom"),
+    (const wxChar*) NULL
 };
 
 static const long gs_cp_es_syscolour_values[] = {
@@ -943,7 +937,7 @@ wxSystemColourProperty::wxSystemColourProperty( const wxString& label, const wxS
 
 
 wxSystemColourProperty::wxSystemColourProperty( const wxString& label, const wxString& name,
-    const char* const* labels, const long* values, wxPGChoices* choicesCache,
+    const wxChar* const* labels, const long* values, wxPGChoices* choicesCache,
     const wxColourPropertyValue& value )
     : wxEnumProperty( label, name, labels, values, choicesCache )
 {
@@ -955,7 +949,7 @@ wxSystemColourProperty::wxSystemColourProperty( const wxString& label, const wxS
 
 
 wxSystemColourProperty::wxSystemColourProperty( const wxString& label, const wxString& name,
-    const char* const* labels, const long* values, wxPGChoices* choicesCache,
+    const wxChar* const* labels, const long* values, wxPGChoices* choicesCache,
     const wxColour& value )
     : wxEnumProperty( label, name, labels, values, choicesCache )
 {
@@ -1047,13 +1041,15 @@ wxVariant wxSystemColourProperty::DoTranslateVal( wxColourPropertyValue& v ) con
 
 int wxSystemColourProperty::ColToInd( const wxColour& colour ) const
 {
-    const unsigned int i_max = m_choices.GetCount();
-    for ( unsigned int i=0; i<i_max; i++ )
+    size_t i;
+    size_t i_max = m_choices.GetCount();
+
+    if ( !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
+        i_max -= 1;
+
+    for ( i=0; i<i_max; i++ )
     {
-        const int ind = m_choices[i].GetValue();
-        // Skip custom colour
-        if (ind == wxPG_COLOUR_CUSTOM)
-            continue;
+        int ind = m_choices[i].GetValue();
 
         if ( colour == GetColour(ind) )
         {
@@ -1213,7 +1209,7 @@ wxSize wxSystemColourProperty::OnMeasureImage( int ) const
 
 int wxSystemColourProperty::GetCustomColourIndex() const
 {
-    return m_choices.Index(wxPG_COLOUR_CUSTOM);
+    return m_choices.GetCount() - 1;
 }
 
 
@@ -1226,7 +1222,7 @@ bool wxSystemColourProperty::QueryColourFromUser( wxVariant& variant ) const
     wxASSERT( propgrid );
 
     // Must only occur when user triggers event
-    if ( !propgrid->HasInternalFlag(wxPG_FL_IN_HANDLECUSTOMEDITOREVENT) )
+    if ( !(propgrid->GetInternalFlags() & wxPG_FL_IN_HANDLECUSTOMEDITOREVENT) )
         return res;
 
     wxColourPropertyValue val = GetVal();
@@ -1263,9 +1259,9 @@ bool wxSystemColourProperty::QueryColourFromUser( wxVariant& variant ) const
 bool wxSystemColourProperty::IntToValue( wxVariant& variant, int number, int argFlags ) const
 {
     int index = number;
-    const int type = m_choices.GetValue(index);
+    int type = m_choices.GetValue(index);
 
-    if ( type == wxPG_COLOUR_CUSTOM )
+    if ( m_choices.GetLabel(index) == _("Custom") )
     {
          if ( !(argFlags & wxPG_PROPERTY_SPECIFIC) )
             return QueryColourFromUser(variant);
@@ -1402,21 +1398,15 @@ void wxSystemColourProperty::OnCustomPaint( wxDC& dc, const wxRect& rect,
 
 bool wxSystemColourProperty::StringToValue( wxVariant& value, const wxString& text, int argFlags ) const
 {
-    const int custIndex = GetCustomColourIndex();
-    wxString custColName;
-    if (custIndex != wxNOT_FOUND)
-        custColName = m_choices.GetLabel(custIndex);
-
+    wxString custColName(m_choices.GetLabel(GetCustomColourIndex()));
     wxString colStr(text);
     colStr.Trim(true);
     colStr.Trim(false);
 
-    const bool isCustomColour = (colStr == custColName);
-
     wxColour customColour;
     bool conversionSuccess = false;
 
-    if ( !isCustomColour )
+    if ( colStr != custColName )
     {
         if ( colStr.Find(wxS("(")) == 0 )
         {
@@ -1448,7 +1438,7 @@ bool wxSystemColourProperty::StringToValue( wxVariant& value, const wxString& te
 
     if ( !conversionSuccess && m_choices.GetCount() &&
          !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) &&
-         isCustomColour )
+         colStr == custColName )
     {
         if ( !(argFlags & wxPG_EDITABLE_VALUE ))
         {
@@ -1458,14 +1448,17 @@ bool wxSystemColourProperty::StringToValue( wxVariant& value, const wxString& te
             return false;
         }
 
+        if ( (argFlags & wxPG_PROPERTY_SPECIFIC) )
+        {
+            // Query for value from the event handler.
+            // User will be asked for custom color later on in OnEvent().
+            ResetNextIndex();
+            return false;
+        }
         if ( !QueryColourFromUser(value) )
         {
             ResetNextIndex();
-            if ( !(argFlags & wxPG_PROPERTY_SPECIFIC) )
-                return false;
-            // If query for value comes from the event handler
-            // use current pending value to be processed later on in OnEvent().
-            SetValueInEvent(value);
+            return false;
         }
     }
     else
@@ -1521,7 +1514,7 @@ bool wxSystemColourProperty::DoSetAttribute( const wxString& name, wxVariant& va
         if ( ival && (m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
         {
             // Show custom choice
-            m_choices.Add(_("Custom"), wxPG_COLOUR_CUSTOM);
+            m_choices.Insert(wxT("Custom"), GetCustomColourIndex(), wxPG_COLOUR_CUSTOM);
             m_flags &= ~(wxPG_PROP_HIDE_CUSTOM_COLOUR);
         }
         else if ( !ival && !(m_flags & wxPG_PROP_HIDE_CUSTOM_COLOUR) )
@@ -1540,70 +1533,30 @@ bool wxSystemColourProperty::DoSetAttribute( const wxString& name, wxVariant& va
 // wxColourProperty
 // -----------------------------------------------------------------------
 
-static const char* const gs_cp_es_normcolour_labels[] = {
-    wxTRANSLATE("Black"),
-    wxTRANSLATE("Maroon"),
-    wxTRANSLATE("Navy"),
-    wxTRANSLATE("Purple"),
-    wxTRANSLATE("Teal"),
-    wxTRANSLATE("Gray"),
-    wxTRANSLATE("Green"),
-    wxTRANSLATE("Olive"),
-    wxTRANSLATE("Brown"),
-    wxTRANSLATE("Blue"),
-    wxTRANSLATE("Fuchsia"),
-    wxTRANSLATE("Red"),
-    wxTRANSLATE("Orange"),
-    wxTRANSLATE("Silver"),
-    wxTRANSLATE("Lime"),
-    wxTRANSLATE("Aqua"),
-    wxTRANSLATE("Yellow"),
-    wxTRANSLATE("White"),
-    wxTRANSLATE("Custom"),
-    NULL
-};
-
-static const long gs_cp_es_normcolour_values[] = {
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    wxPG_COLOUR_CUSTOM
+static const wxChar* const gs_cp_es_normcolour_labels[] = {
+    wxT("Black"),
+    wxT("Red"),
+    wxT("Green"),
+    wxT("Blue"),
+    wxT("Cyan"),
+    wxT("Magenta"),
+    wxT("Yellow"),
+    wxT("White"),
+    wxT("Grey"),
+    wxT("Custom"),
+    (const wxChar*) NULL
 };
 
 static const unsigned long gs_cp_es_normcolour_colours[] = {
     wxPG_COLOUR(0,0,0),
-    wxPG_COLOUR(128,0,0),
-    wxPG_COLOUR(0,0,128),
-    wxPG_COLOUR(128,0,128),
-    wxPG_COLOUR(0,128,128),
-    wxPG_COLOUR(128,128,128),
-    wxPG_COLOUR(0,128,0),
-    wxPG_COLOUR(128,128,0),
-    wxPG_COLOUR(166,124,81),
-    wxPG_COLOUR(0,0,255),
-    wxPG_COLOUR(255,0,255),
     wxPG_COLOUR(255,0,0),
-    wxPG_COLOUR(247,148,28),
-    wxPG_COLOUR(192,192,192),
     wxPG_COLOUR(0,255,0),
+    wxPG_COLOUR(0,0,255),
     wxPG_COLOUR(0,255,255),
+    wxPG_COLOUR(255,0,255),
     wxPG_COLOUR(255,255,0),
     wxPG_COLOUR(255,255,255),
+    wxPG_COLOUR(128,128,128),
     wxPG_COLOUR(0,0,0)
 };
 
@@ -1616,31 +1569,9 @@ wxColourProperty::wxColourProperty( const wxString& label,
                       const wxString& name,
                       const wxColour& value )
     : wxSystemColourProperty(label, name, gs_cp_es_normcolour_labels,
-                             gs_cp_es_normcolour_values,
+                             NULL,
                              &gs_wxColourProperty_choicesCache, value )
 {
-    wxASSERT_MSG( wxTheColourDatabase, wxT("No colour database") );
-    if ( wxTheColourDatabase )
-    {
-        // Extend colour database with PG-specific colours.
-        const char* const* colourLabels = gs_cp_es_normcolour_labels;
-        for ( int i = 0; *colourLabels; colourLabels++, i++ )
-        {
-            // Don't take into account user-defined custom colour.
-            if (gs_cp_es_normcolour_values[i] != wxPG_COLOUR_CUSTOM)
-            {
-                wxColour clr = wxTheColourDatabase->Find(*colourLabels);
-                // Use standard wx colour value if its label was found,
-                // otherwise register custom PG colour.
-                if ( !clr.IsOk() )
-                {
-                    clr.Set(gs_cp_es_normcolour_colours[i]);
-                    wxTheColourDatabase->AddColour(*colourLabels, clr);
-                }
-            }
-        }
-    }
-
     Init( value );
 
     m_flags |= wxPG_PROP_TRANSLATE_CUSTOM;
@@ -1677,7 +1608,7 @@ wxString wxColourProperty::ValueToString( wxVariant& value,
 
 wxColour wxColourProperty::GetColour( int index ) const
 {
-    return wxColour(gs_cp_es_normcolour_labels[m_choices.GetValue(index)]);
+    return gs_cp_es_normcolour_colours[m_choices.GetValue(index)];
 }
 
 wxVariant wxColourProperty::DoTranslateVal( wxColourPropertyValue& v ) const
@@ -1691,43 +1622,41 @@ wxVariant wxColourProperty::DoTranslateVal( wxColourPropertyValue& v ) const
 // wxCursorProperty
 // -----------------------------------------------------------------------
 
-#if wxPG_CAN_DRAW_CURSOR
 #define wxPG_CURSOR_IMAGE_WIDTH     32
-#endif
 
 #define NUM_CURSORS 28
 
 //#define wx_cp_es_syscursors_len 28
-static const char* const gs_cp_es_syscursors_labels[NUM_CURSORS+1] = {
-    wxTRANSLATE("Default"),
-    wxTRANSLATE("Arrow"),
-    wxTRANSLATE("Right Arrow"),
-    wxTRANSLATE("Blank"),
-    wxTRANSLATE("Bullseye"),
-    wxTRANSLATE("Character"),
-    wxTRANSLATE("Cross"),
-    wxTRANSLATE("Hand"),
-    wxTRANSLATE("I-Beam"),
-    wxTRANSLATE("Left Button"),
-    wxTRANSLATE("Magnifier"),
-    wxTRANSLATE("Middle Button"),
-    wxTRANSLATE("No Entry"),
-    wxTRANSLATE("Paint Brush"),
-    wxTRANSLATE("Pencil"),
-    wxTRANSLATE("Point Left"),
-    wxTRANSLATE("Point Right"),
-    wxTRANSLATE("Question Arrow"),
-    wxTRANSLATE("Right Button"),
-    wxTRANSLATE("Sizing NE-SW"),
-    wxTRANSLATE("Sizing N-S"),
-    wxTRANSLATE("Sizing NW-SE"),
-    wxTRANSLATE("Sizing W-E"),
-    wxTRANSLATE("Sizing"),
-    wxTRANSLATE("Spraycan"),
-    wxTRANSLATE("Wait"),
-    wxTRANSLATE("Watch"),
-    wxTRANSLATE("Wait Arrow"),
-    NULL
+static const wxChar* const gs_cp_es_syscursors_labels[NUM_CURSORS+1] = {
+    wxT("Default"),
+    wxT("Arrow"),
+    wxT("Right Arrow"),
+    wxT("Blank"),
+    wxT("Bullseye"),
+    wxT("Character"),
+    wxT("Cross"),
+    wxT("Hand"),
+    wxT("I-Beam"),
+    wxT("Left Button"),
+    wxT("Magnifier"),
+    wxT("Middle Button"),
+    wxT("No Entry"),
+    wxT("Paint Brush"),
+    wxT("Pencil"),
+    wxT("Point Left"),
+    wxT("Point Right"),
+    wxT("Question Arrow"),
+    wxT("Right Button"),
+    wxT("Sizing NE-SW"),
+    wxT("Sizing N-S"),
+    wxT("Sizing NW-SE"),
+    wxT("Sizing W-E"),
+    wxT("Sizing"),
+    wxT("Spraycan"),
+    wxT("Wait"),
+    wxT("Watch"),
+    wxT("Wait Arrow"),
+    (const wxChar*) NULL
 };
 
 static const long gs_cp_es_syscursors_values[NUM_CURSORS] = {
@@ -1763,15 +1692,12 @@ static const long gs_cp_es_syscursors_values[NUM_CURSORS] = {
 
 IMPLEMENT_DYNAMIC_CLASS(wxCursorProperty, wxEnumProperty)
 
-static wxPGChoices gs_wxCursorProperty_choicesCache;
-
 wxCursorProperty::wxCursorProperty( const wxString& label, const wxString& name,
     int value )
     : wxEnumProperty( label,
                       name,
                       gs_cp_es_syscursors_labels,
                       gs_cp_es_syscursors_values,
-                      &gs_wxCursorProperty_choicesCache,
                       value )
 {
     m_flags |= wxPG_PROP_STATIC_CHOICES; // Cursor selection cannot be changed.

@@ -48,6 +48,8 @@
 
 #elif defined(__WINDOWS__) && defined(__WXWINCE__)
     #include  "wx/msw/missing.h"
+#elif (defined(__OS2__))
+    #include <io.h>
 #elif (defined(__UNIX__) || defined(__GNUWIN32__))
     #include  <unistd.h>
     #include  <time.h>
@@ -56,7 +58,9 @@
         #include "wx/msw/wrapwin.h"
     #endif
 #elif defined(__DOS__)
-    #if defined(__DJGPP__)
+    #if defined(__WATCOMC__)
+       #include <io.h>
+    #elif defined(__DJGPP__)
        #include <io.h>
        #include <unistd.h>
        #include <stdio.h>
@@ -114,8 +118,16 @@
     #define   O_BINARY    (0)
 #endif  //__UNIX__
 
+#ifdef __WINDOWS__
+    #include "wx/msw/mslu.h"
+#endif
+
 #ifdef __WXWINCE__
     #include "wx/msw/private.h"
+#endif
+
+#ifndef MAX_PATH
+    #define MAX_PATH 512
 #endif
 
 // ============================================================================
@@ -139,7 +151,7 @@ bool wxFile::Access(const wxString& name, OpenMode mode)
     {
         default:
             wxFAIL_MSG(wxT("bad wxFile::Access mode parameter."));
-            wxFALLTHROUGH;
+            // fall through
 
         case read:
             how = R_OK;
@@ -224,7 +236,6 @@ bool wxFile::Open(const wxString& fileName, OpenMode mode, int accessMode)
             }
             //else: fall through as write_append is the same as write if the
             //      file doesn't exist
-            wxFALLTHROUGH;
 
         case write:
             flags |= O_WRONLY | O_CREAT | O_TRUNC;
@@ -314,9 +325,6 @@ bool wxFile::ReadAll(wxString *str, const wxMBConv& conv)
 // read
 ssize_t wxFile::Read(void *pBuf, size_t nCount)
 {
-    if ( !nCount )
-        return 0;
-
     wxCHECK( (pBuf != NULL) && IsOpened(), 0 );
 
     ssize_t iRc = wxRead(m_fd, pBuf, nCount);
@@ -333,9 +341,6 @@ ssize_t wxFile::Read(void *pBuf, size_t nCount)
 // write
 size_t wxFile::Write(const void *pBuf, size_t nCount)
 {
-    if ( !nCount )
-        return 0;
-
     wxCHECK( (pBuf != NULL) && IsOpened(), 0 );
 
     ssize_t iRc = wxWrite(m_fd, pBuf, nCount);
@@ -410,7 +415,7 @@ wxFileOffset wxFile::Seek(wxFileOffset ofs, wxSeekMode mode)
     switch ( mode ) {
         default:
             wxFAIL_MSG(wxT("unknown seek origin"));
-            wxFALLTHROUGH;
+
         case wxFromStart:
             origin = SEEK_SET;
             break;
@@ -578,7 +583,9 @@ bool wxTempFile::Open(const wxString& strName)
 
     if ( chmod( (const char*) m_strTemp.fn_str(), mode) == -1 )
     {
+#ifndef __OS2__
         wxLogSysError(_("Failed to set temporary file permissions"));
+#endif
     }
 #endif // Unix
 

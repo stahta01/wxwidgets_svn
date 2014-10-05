@@ -55,13 +55,13 @@ class wxMacCarbonPrinterDC : public wxNativePrinterDC
 public :
     wxMacCarbonPrinterDC( wxPrintData* data ) ;
     virtual ~wxMacCarbonPrinterDC() ;
-    virtual bool StartDoc(  wxPrinterDC* dc , const wxString& message ) wxOVERRIDE ;
-    virtual void EndDoc( wxPrinterDC* dc ) wxOVERRIDE ;
-    virtual void StartPage( wxPrinterDC* dc ) wxOVERRIDE ;
-    virtual void EndPage( wxPrinterDC* dc ) wxOVERRIDE ;
-    virtual wxUint32 GetStatus() const wxOVERRIDE { return m_err ; }
-    virtual void GetSize( int *w , int *h) const wxOVERRIDE ;
-    virtual wxSize GetPPI() const wxOVERRIDE ;
+    virtual bool StartDoc(  wxPrinterDC* dc , const wxString& message ) ;
+    virtual void EndDoc( wxPrinterDC* dc ) ;
+    virtual void StartPage( wxPrinterDC* dc ) ;
+    virtual void EndPage( wxPrinterDC* dc ) ;
+    virtual wxUint32 GetStatus() const { return m_err ; }
+    virtual void GetSize( int *w , int *h) const ;
+    virtual wxSize GetPPI() const ;
 private :
     wxCoord m_maxX ;
     wxCoord m_maxY ;
@@ -141,24 +141,17 @@ bool wxMacCarbonPrinterDC::StartDoc(  wxPrinterDC* dc , const wxString& message 
     PMResolution res;
     PMPrinter printer;
 
-    bool useDefaultResolution = true;
     m_err = PMSessionGetCurrentPrinter(native->GetPrintSession(), &printer);
     if (m_err == noErr)
     {
         m_err = PMPrinterGetOutputResolution( printer, native->GetPrintSettings(), &res) ;
-        if (m_err == noErr)
-            useDefaultResolution = true;
+        if ( m_err == -9589 /* kPMKeyNotFound */ )
+        {
+            m_err = noErr ;
+            res.hRes = res.vRes = 300;
+        }
     }
     
-    // Ignore errors which may occur while retrieving the resolution and just
-    // use the default one.
-    if ( useDefaultResolution )
-    {
-        res.hRes =
-        res.vRes = 300;
-        m_err = noErr ;
-    }
-
     m_maxX = wxCoord((double)m_maxX * res.hRes / 72.0);
     m_maxY = wxCoord((double)m_maxY * res.vRes / 72.0);
 
@@ -189,7 +182,7 @@ void wxMacCarbonPrinterDC::StartPage( wxPrinterDC* dc )
                  native->GetPageFormat(),
                  NULL);
 
-    CGContextRef pageContext = NULL ;
+    CGContextRef pageContext;
 
     if ( m_err == noErr )
     {

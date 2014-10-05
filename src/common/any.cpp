@@ -190,7 +190,7 @@ bool wxConvertAnyToVariant(const wxAny& any, wxVariant* variant)
             // Ok, one last chance: while unlikely, it is possible that the
             // wxAny actually contains wxVariant.
             if ( wxANY_CHECK_TYPE(any, wxVariant) )
-                *variant = any.As<wxVariant>();
+                *variant = wxANY_AS(any, wxVariant);
             return false;
         }
 
@@ -216,11 +216,11 @@ public:
     wxAnyValueTypeGlobalsManager() : wxModule() { }
     virtual ~wxAnyValueTypeGlobalsManager() { }
 
-    virtual bool OnInit() wxOVERRIDE
+    virtual bool OnInit()
     {
         return true;
     }
-    virtual void OnExit() wxOVERRIDE
+    virtual void OnExit()
     {
         wxDELETE(g_wxAnyValueTypeGlobals);
     }
@@ -319,7 +319,13 @@ bool wxAnyValueTypeImplUint::ConvertValue(const wxAnyValueBuffer& src,
     }
     else if ( wxANY_VALUE_TYPE_CHECK_TYPE(dstType, double) )
     {
+#ifndef __VISUALC6__
         double value2 = static_cast<double>(value);
+#else
+        // VC6 doesn't implement conversion from unsigned __int64 to double
+        wxAnyBaseIntType value0 = static_cast<wxAnyBaseIntType>(value);
+        double value2 = static_cast<double>(value0);
+#endif
         wxAnyValueTypeImplDouble::SetValue(value2, dst);
     }
     else if ( wxANY_VALUE_TYPE_CHECK_TYPE(dstType, bool) )
@@ -489,13 +495,13 @@ class wxAnyValueTypeImpl<wxAnyNullValue> : public wxAnyValueType
     WX_DECLARE_ANY_VALUE_TYPE(wxAnyValueTypeImpl<wxAnyNullValue>)
 public:
     // Dummy implementations
-    virtual void DeleteValue(wxAnyValueBuffer& buf) const wxOVERRIDE
+    virtual void DeleteValue(wxAnyValueBuffer& buf) const
     {
         wxUnusedVar(buf);
     }
 
     virtual void CopyBuffer(const wxAnyValueBuffer& src,
-                            wxAnyValueBuffer& dst) const wxOVERRIDE
+                            wxAnyValueBuffer& dst) const
     {
         wxUnusedVar(src);
         wxUnusedVar(dst);
@@ -503,7 +509,7 @@ public:
 
     virtual bool ConvertValue(const wxAnyValueBuffer& src,
                               wxAnyValueType* dstType,
-                              wxAnyValueBuffer& dst) const wxOVERRIDE
+                              wxAnyValueBuffer& dst) const
     {
         wxUnusedVar(src);
         wxUnusedVar(dstType);

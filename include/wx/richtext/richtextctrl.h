@@ -17,7 +17,7 @@
 
 #include "wx/scrolwin.h"
 #include "wx/caret.h"
-#include "wx/timer.h"
+
 #include "wx/textctrl.h"
 
 #if wxUSE_DRAG_AND_DROP
@@ -79,8 +79,6 @@ class WXDLLIMPEXP_FWD_RICHTEXT wxRichTextStyleDefinition;
 #define wxRICHTEXT_DEFAULT_DELAYED_LAYOUT_THRESHOLD 20000
 // Milliseconds before layout occurs after resize
 #define wxRICHTEXT_DEFAULT_LAYOUT_INTERVAL 50
-// Milliseconds before delayed image processing occurs
-#define wxRICHTEXT_DEFAULT_DELAYED_IMAGE_PROCESSING_INTERVAL 200
 
 /* Identifiers
  */
@@ -905,7 +903,7 @@ public:
     /**
         Finds the container at the given point, which is in screen coordinates.
     */
-    wxRichTextParagraphLayoutBox* FindContainerAtPoint(const wxPoint& pt, long& position, int& hit, wxRichTextObject* hitObj, int flags = 0);
+    wxRichTextParagraphLayoutBox* FindContainerAtPoint(const wxPoint pt, long& position, int& hit, wxRichTextObject* hitObj, int flags = 0);
     //@}
 
 #if wxUSE_DRAG_AND_DROP
@@ -1419,11 +1417,6 @@ public:
     virtual bool LayoutContent(bool onlyVisibleRect = false);
 
     /**
-        Implements layout. An application may override this to perform operations before or after layout.
-    */
-    virtual void DoLayoutBuffer(wxRichTextBuffer& buffer, wxDC& dc, wxRichTextDrawingContext& context, const wxRect& rect, const wxRect& parentRect, int flags);
-
-    /**
         Move the caret to the given character position.
 
         Please note that this does not update the current editing style
@@ -1933,7 +1926,7 @@ public:
     /**
         A helper function setting up scrollbars, for example after a resize.
     */
-    virtual void SetupScrollbars(bool atTop = false, bool fromOnPaint = false);
+    virtual void SetupScrollbars(bool atTop = false);
 
     /**
         Helper function implementing keyboard navigation.
@@ -1978,16 +1971,6 @@ public:
     virtual bool ExtendSelection(long oldPosition, long newPosition, int flags);
 
     /**
-        Extends a table selection in the given direction.
-    */
-    virtual bool ExtendCellSelection(wxRichTextTable* table, int noRowSteps, int noColSteps);
-
-    /**
-        Starts selecting table cells.
-    */
-    virtual bool StartCellSelection(wxRichTextTable* table, wxRichTextParagraphLayoutBox* newCell);
-
-    /**
         Scrolls @a position into view. This function takes a caret position.
     */
     virtual bool ScrollIntoView(long position, int keyCode);
@@ -1996,12 +1979,6 @@ public:
         Refreshes the area affected by a selection change.
     */
     bool RefreshForSelectionChange(const wxRichTextSelection& oldSelection, const wxRichTextSelection& newSelection);
-
-    /**
-        Overrides standard refresh in order to provoke delayed image loading.
-    */
-    virtual void Refresh( bool eraseBackground = true,
-                       const wxRect *rect = (const wxRect *) NULL );
 
     /**
         Sets the caret position.
@@ -2145,50 +2122,6 @@ public:
     */
     wxPoint GetFirstVisiblePoint() const;
 
-    /**
-        Enable or disable images
-    */
-
-    void EnableImages(bool b) { m_enableImages = b; }
-
-    /**
-        Returns @true if images are enabled.
-    */
-
-    bool GetImagesEnabled() const { return m_enableImages; }
-
-    /**
-        Enable or disable delayed image loading
-    */
-
-    void EnableDelayedImageLoading(bool b) { m_enableDelayedImageLoading = b; }
-
-    /**
-        Returns @true if delayed image loading is enabled.
-    */
-
-    bool GetDelayedImageLoading() const { return m_enableDelayedImageLoading; }
-
-    /**
-        Gets the flag indicating that delayed image processing is required.
-    */
-    bool GetDelayedImageProcessingRequired() const { return m_delayedImageProcessingRequired; }
-
-    /**
-        Sets the flag indicating that delayed image processing is required.
-    */
-    void SetDelayedImageProcessingRequired(bool b) { m_delayedImageProcessingRequired = b; }
-
-    /**
-        Returns the last time delayed image processing was performed.
-    */
-    wxLongLong GetDelayedImageProcessingTime() const { return m_delayedImageProcessingTime; }
-
-    /**
-        Sets the last time delayed image processing was performed.
-    */
-    void SetDelayedImageProcessingTime(wxLongLong t) { m_delayedImageProcessingTime = t; }
-
 #ifdef DOXYGEN
     /**
         Returns the content of the entire control as a string.
@@ -2263,22 +2196,6 @@ public:
 
     // implement wxTextEntry methods
     virtual wxString DoGetValue() const;
-
-    /**
-        Do delayed image loading and garbage-collect other images
-    */
-    bool ProcessDelayedImageLoading(bool refresh);
-    bool ProcessDelayedImageLoading(const wxRect& screenRect, wxRichTextParagraphLayoutBox* box, int& loadCount);
-
-    /**
-        Request delayed image processing.
-    */
-    void RequestDelayedImageProcessing();
-
-    /**
-        Respond to timer events.
-    */
-    void OnTimer(wxTimerEvent& event);
 
 protected:
     // implement the wxTextEntry pure virtual method
@@ -2399,20 +2316,6 @@ protected:
 
     /// An overall scale factor
     double                  m_scale;
-
-    /// Variables for scrollbar hysteresis detection
-    wxSize                  m_lastWindowSize;
-    int                     m_setupScrollbarsCount;
-    int                     m_setupScrollbarsCountInOnSize;
-
-    /// Whether images are enabled for this control
-    bool                    m_enableImages;
-
-    /// Whether delayed image loading is enabled for this control
-    bool                    m_enableDelayedImageLoading;
-    bool                    m_delayedImageProcessingRequired;
-    wxLongLong              m_delayedImageProcessingTime;
-    wxTimer                 m_delayedImageProcessingTimer;
 };
 
 #if wxUSE_DRAG_AND_DROP

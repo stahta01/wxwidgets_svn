@@ -56,6 +56,18 @@
 
 const char wxGridNameStr[] = "grid";
 
+#if defined(__WXMOTIF__)
+    #define WXUNUSED_MOTIF(identifier)  WXUNUSED(identifier)
+#else
+    #define WXUNUSED_MOTIF(identifier)  identifier
+#endif
+
+#if defined(__WXGTK__)
+    #define WXUNUSED_GTK(identifier)    WXUNUSED(identifier)
+#else
+    #define WXUNUSED_GTK(identifier)    identifier
+#endif
+
 // Required for wxIs... functions
 #include <ctype.h>
 
@@ -2258,7 +2270,7 @@ void wxGrid::Create()
     // now that we have the grid window, use its font to compute the default
     // row height
     m_defaultRowHeight = m_gridWin->GetCharHeight();
-#if defined(__WXMOTIF__) || defined(__WXGTK__) || defined(__WXQT__)  // see also text ctrl sizing in ShowCellEditControl()
+#if defined(__WXMOTIF__) || defined(__WXGTK__)  // see also text ctrl sizing in ShowCellEditControl()
     m_defaultRowHeight += 8;
 #else
     m_defaultRowHeight += 4;
@@ -2415,7 +2427,7 @@ void wxGrid::Init()
     m_attrCache.attr = NULL;
 
     m_labelFont = GetFont();
-    m_labelFont.SetWeight( wxFONTWEIGHT_BOLD );
+    m_labelFont.SetWeight( wxBOLD );
 
     m_rowLabelHorizAlign = wxALIGN_CENTRE;
     m_rowLabelVertAlign  = wxALIGN_CENTRE;
@@ -4960,7 +4972,7 @@ void wxGrid::OnKeyDown( wxKeyEvent& event )
                             MoveCursorRight(false);
                             break;
                         }
-                        wxFALLTHROUGH;
+                        //else: fall through
 
                     default:
                         event.Skip();
@@ -5175,7 +5187,7 @@ wxGrid::UpdateBlockBeingSelected(int topRow, int leftCol,
         {
             default:
                 wxFAIL_MSG( "unknown selection mode" );
-                wxFALLTHROUGH;
+                // fall through
 
             case wxGridSelectCells:
                 // arbitrary blocks selection allowed so just use the cell
@@ -5566,12 +5578,11 @@ void wxGrid::DrawCellHighlight( wxDC& dc, const wxGridCellAttr *attr )
         // size of the rectangle is reduced to compensate for the thickness of
         // the line. If this is too strange on non-wxMSW platforms then
         // please #ifdef this appropriately.
-#ifndef __WXQT__
         rect.x += penWidth / 2;
         rect.y += penWidth / 2;
         rect.width -= penWidth - 1;
         rect.height -= penWidth - 1;
-#endif
+
         // Now draw the rectangle
         // use the cellHighlightColour if the cell is inside a selection, this
         // will ensure the cell is always visible.
@@ -5839,7 +5850,7 @@ wxGrid::DoDrawGridLines(wxDC& dc,
         int i = GetColAt( colPos );
 
         int colRight = GetColRight(i);
-#if defined(__WXGTK__) || defined(__WXQT__)
+#ifdef __WXGTK__
         if (GetLayoutDirection() != wxLayout_RightToLeft)
 #endif
             colRight--;
@@ -6361,7 +6372,6 @@ void wxGrid::ShowCellEditControl()
             if (rect.x < 0)
                 nXMove = rect.x;
 
-#ifndef __WXQT__
             // cell is shifted by one pixel
             // However, don't allow x or y to become negative
             // since the SetSize() method interprets that as
@@ -6370,11 +6380,6 @@ void wxGrid::ShowCellEditControl()
                 rect.x--;
             if (rect.y > 0)
                 rect.y--;
-#else
-            // Substract 1 pixel in every dimension to fit in the cell area.
-            // If not, Qt will draw the control outside the cell.
-            rect.Deflate(1, 1);
-#endif
 
             wxGridCellEditor* editor = attr->GetEditor(this, row, col);
             if ( !editor->IsCreated() )
@@ -6709,14 +6714,12 @@ wxRect wxGrid::CellToRect( int row, int col ) const
         for (i=row; i < row + cell_rows; i++)
             rect.height += GetRowHeight(i);
 
-#ifndef __WXQT__
         // if grid lines are enabled, then the area of the cell is a bit smaller
         if (m_gridLinesEnabled)
         {
             rect.width -= 1;
             rect.height -= 1;
         }
-#endif
     }
 
     return rect;
@@ -7253,9 +7256,9 @@ void wxGrid::SetColLabelAlignment( int horiz, int vert )
 // Note: under MSW, the default column label font must be changed because it
 //       does not support vertical printing
 //
-// Example:
-//      pGrid->SetLabelFont(wxFontInfo(9).Family(wxFONTFAMILY_SWISS));
-//      pGrid->SetColLabelTextOrientation(wxVERTICAL);
+// Example: wxFont font(9, wxSWISS, wxNORMAL, wxBOLD);
+//                      pGrid->SetLabelFont(font);
+//                      pGrid->SetColLabelTextOrientation(wxVERTICAL);
 //
 void wxGrid::SetColLabelTextOrientation( int textOrientation )
 {
@@ -7448,7 +7451,7 @@ int wxGrid::GetColSize( int col ) const
 void wxGrid::SetDefaultCellBackgroundColour( const wxColour& col )
 {
     m_defaultCellAttr->SetBackgroundColour(col);
-#if defined(__WXGTK__) || defined(__WXQT__)
+#ifdef __WXGTK__
     m_gridWin->SetBackgroundColour(col);
 #endif
 }
@@ -8418,11 +8421,8 @@ wxGrid::AutoSizeColOrRow(int colOrRow, bool setAsMin, wxGridDirection direction)
         wxGridCellRenderer *renderer = attr->GetRenderer(this, row, col);
         if ( renderer )
         {
-            extent = column
-                        ? renderer->GetBestWidth(*this, *attr, dc, row, col,
-                                                 GetRowHeight(row))
-                        : renderer->GetBestHeight(*this, *attr, dc, row, col,
-                                                  GetColWidth(col));
+            wxSize size = renderer->GetBestSize(*this, *attr, dc, row, col);
+            extent = column ? size.x : size.y;
 
             if ( span != CellSpan_None )
             {

@@ -59,8 +59,6 @@ using namespace std;
 // wxGraphicsPath implementation
 //-----------------------------------------------------------------------------
 
-#include <cairo.h>
-#ifdef __WXMSW__
 // TODO remove this dependency (gdiplus needs the macros)
 
 #ifndef max
@@ -71,6 +69,8 @@ using namespace std;
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 #endif
 
+#include <cairo.h>
+#ifdef __WXMSW__
 #include <cairo-win32.h>
 // Notice that the order is important: cairo-win32.h includes windows.h which
 // pollutes the global name space with macros so include our own header which
@@ -84,11 +84,6 @@ using namespace std;
 #ifndef __WXGTK3__
 #include "wx/gtk/dc.h"
 #endif
-#endif
-
-#ifdef __WXQT__
-#include <QtGui/QPainter>
-#include "wx/qt/dc.h"
 #endif
 
 #ifdef __WXMAC__
@@ -478,12 +473,6 @@ protected:
     virtual void DoDrawText( const wxString &str, wxDouble x, wxDouble y );
 
     void Init(cairo_t *context);
-
-#ifdef __WXQT__
-    QPainter* m_qtPainter;
-    QImage* m_qtImage;
-    cairo_surface_t* m_qtSurface;
-#endif
 
 private:
     cairo_t* m_context;
@@ -1323,7 +1312,7 @@ void wxCairoBitmapData::InitSurface(cairo_format_t format, int stride)
 }
 
 wxCairoBitmapData::wxCairoBitmapData( wxGraphicsRenderer* renderer, cairo_surface_t* bitmap ) :
-    wxGraphicsBitmapData(renderer)
+    wxGraphicsBitmapData( renderer )
 {
     m_surface = bitmap;
     m_pattern = cairo_pattern_create_for_surface(m_surface);
@@ -1333,12 +1322,8 @@ wxCairoBitmapData::wxCairoBitmapData( wxGraphicsRenderer* renderer, cairo_surfac
     m_buffer = NULL;
 }
 
-wxCairoBitmapData::wxCairoBitmapData( wxGraphicsRenderer* renderer, const wxBitmap& bmp )
-    : wxGraphicsBitmapData(renderer)
+wxCairoBitmapData::wxCairoBitmapData( wxGraphicsRenderer* renderer, const wxBitmap& bmp ) : wxGraphicsBitmapData( renderer )
 {
-    m_surface = NULL;
-    m_pattern = NULL;
-    m_buffer = NULL;
     wxCHECK_RET( bmp.IsOk(), wxT("Invalid bitmap in wxCairoContext::DrawBitmap"));
 
 #ifdef wxHAS_RAW_BITMAP
@@ -1748,28 +1733,11 @@ wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, const wxWindowDC& 
 #endif
 #endif
 
-#ifdef __WXX11__
-    cairo_t* cr = static_cast<cairo_t*>(dc.GetImpl()->GetCairoContext());
-    if ( cr )
-        Init(cairo_reference(cr));
-#elif defined(__WXMAC__)
+#ifdef __WXMAC__
     CGContextRef cgcontext = (CGContextRef)dc.GetWindow()->MacGetCGContextRef();
     cairo_surface_t* surface = cairo_quartz_surface_create_for_cg_context(cgcontext, width, height);
     Init( cairo_create( surface ) );
     cairo_surface_destroy( surface );
-#endif
-
-#ifdef __WXQT__
-    m_qtPainter = (QPainter*) dc.GetHandle();
-    // create a internal buffer (fallback if cairo_qt_surface is missing)
-    m_qtImage = new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
-    // clear the buffer to be painted over the current contents
-    m_qtImage->fill(Qt::transparent);
-    m_qtSurface = cairo_image_surface_create_for_data(m_qtImage->bits(),
-                                                      CAIRO_FORMAT_ARGB32,
-                                                      width, height,
-                                                      m_qtImage->bytesPerLine());
-    Init( cairo_create( m_qtSurface ) );
 #endif
 }
 
@@ -1840,30 +1808,11 @@ wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, const wxMemoryDC& 
 #endif
 #endif
 
-#ifdef __WXX11__
-    cairo_t* cr = static_cast<cairo_t*>(dc.GetImpl()->GetCairoContext());
-    if ( cr )
-        Init(cairo_reference(cr));
-#endif
-
 #ifdef __WXMAC__
     CGContextRef cgcontext = (CGContextRef)dc.GetWindow()->MacGetCGContextRef();
     cairo_surface_t* surface = cairo_quartz_surface_create_for_cg_context(cgcontext, width, height);
     Init( cairo_create( surface ) );
     cairo_surface_destroy( surface );
-#endif
-
-#ifdef __WXQT__
-    m_qtPainter = NULL;
-    // create a internal buffer (fallback if cairo_qt_surface is missing)
-    m_qtImage = new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
-    // clear the buffer to be painted over the current contents
-    m_qtImage->fill(Qt::transparent);
-    m_qtSurface = cairo_image_surface_create_for_data(m_qtImage->bits(),
-                                                      CAIRO_FORMAT_ARGB32,
-                                                      width, height,
-                                                      m_qtImage->bytesPerLine());
-    Init( cairo_create( m_qtSurface ) );
 #endif
 }
 
@@ -1937,9 +1886,6 @@ wxCairoContext::wxCairoContext( wxGraphicsRenderer* renderer, wxWindow *window)
     Init(cairo_create(m_mswSurface));
 #endif
 
-#ifdef __WXQT__
-    // direct m_qtSurface is not being used yet (this needs cairo qt surface)
-#endif
 }
 
 wxCairoContext::wxCairoContext(wxGraphicsRenderer* renderer) :
@@ -1960,17 +1906,6 @@ wxCairoContext::~wxCairoContext()
     if ( m_mswSurface )
         cairo_surface_destroy(m_mswSurface);
 #endif
-#ifdef __WXQT__
-    if ( m_qtPainter != NULL )
-    {
-        // draw the internal buffered image to the widget
-        cairo_surface_flush(m_qtSurface);
-        m_qtPainter->drawImage( 0,0, *m_qtImage );
-        delete m_qtImage;
-        cairo_surface_destroy( m_qtSurface );
-    }
-#endif
-
 }
 
 void wxCairoContext::Init(cairo_t *context)
@@ -2473,9 +2408,6 @@ public :
     // create a subimage from a native image representation
     virtual wxGraphicsBitmap CreateSubBitmap( const wxGraphicsBitmap &bitmap, wxDouble x, wxDouble y, wxDouble w, wxDouble h  );
 
-    virtual wxString GetName() const wxOVERRIDE;
-    virtual void GetVersion(int *major, int *minor, int *micro) const wxOVERRIDE;
-
     DECLARE_DYNAMIC_CLASS_NO_COPY(wxCairoRenderer)
 } ;
 
@@ -2729,20 +2661,6 @@ wxCairoRenderer::CreateSubBitmap(const wxGraphicsBitmap& WXUNUSED(bitmap),
     wxGraphicsBitmap p;
     wxFAIL_MSG("wxCairoRenderer::CreateSubBitmap is not implemented.");
     return p;
-}
-
-wxString wxCairoRenderer::GetName() const
-{
-    return "cairo";
-}
-
-void wxCairoRenderer::GetVersion(int *major, int *minor, int *micro) const
-{
-    int dummy;
-    sscanf(cairo_version_string(), "%d.%d.%d",
-           major ? major : &dummy,
-           minor ? minor : &dummy,
-           micro ? micro : &dummy);
 }
 
 wxGraphicsRenderer* wxGraphicsRenderer::GetCairoRenderer()

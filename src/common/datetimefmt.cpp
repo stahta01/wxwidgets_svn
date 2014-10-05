@@ -271,6 +271,30 @@ GetWeekDayFromName(wxString::const_iterator& p,
     return wd;
 }
 
+// return the year of the Monday of the week containing the given date
+int
+GetWeekBasedYear(const wxDateTime& dt)
+{
+    const wxDateTime::Tm tm = dt.GetTm();
+
+    int year = tm.year;
+
+    // The week-based year can only be different from the normal year for few
+    // days in the beginning and the end of the year.
+    if ( tm.yday > 361 )
+    {
+        if ( dt.GetWeekOfYear() == 1 )
+            year++;
+    }
+    else if ( tm.yday < 5 )
+    {
+        if ( dt.GetWeekOfYear() == 53 )
+            year--;
+    }
+
+    return year;
+}
+
 // parses string starting at given iterator using the specified format and,
 // optionally, a fall back format (and optionally another one... but it stops
 // there, really)
@@ -282,7 +306,10 @@ wxDateTime
 ParseFormatAt(wxString::const_iterator& p,
               const wxString::const_iterator& end,
               const wxString& fmt,
-              const wxString& fmtAlt = wxString())
+              // FIXME-VC6: using wxString() instead of wxEmptyString in the
+              //            line below results in error C2062: type 'class
+              //            wxString (__cdecl *)(void)' unexpected
+              const wxString& fmtAlt = wxEmptyString)
 {
     const wxString str(p, end);
     wxString::const_iterator endParse;
@@ -369,7 +396,7 @@ wxString wxDateTime::Format(const wxString& formatp, const TimeZone& tz) const
         {
             time += (int)tz.GetOffset();
 
-#if defined(__VMS__) // time is unsigned so avoid warning
+#if defined(__VMS__) || defined(__WATCOMC__) // time is unsigned so avoid warning
             int time2 = (int) time;
             if ( time2 >= 0 )
 #else
@@ -599,11 +626,11 @@ wxString wxDateTime::Format(const wxString& formatp, const TimeZone& tz) const
                     break;
 
                 case wxT('g'):      // 2-digit week-based year
-                    res += wxString::Format(fmt, GetWeekBasedYear() % 100);
+                    res += wxString::Format(fmt, GetWeekBasedYear(*this) % 100);
                     break;
 
                 case wxT('G'):       // week-based year with century
-                    res += wxString::Format(fmt, GetWeekBasedYear());
+                    res += wxString::Format(fmt, GetWeekBasedYear(*this));
                     break;
 
                 case wxT('H'):       // hour in 24h format (00-23)
@@ -740,7 +767,7 @@ wxString wxDateTime::Format(const wxString& formatp, const TimeZone& tz) const
                     // no, it wasn't the width
                     wxFAIL_MSG(wxT("unknown format specifier"));
 
-                    wxFALLTHROUGH;
+                    // fall through and just copy it nevertheless
 
                 case wxT('%'):       // a percent sign
                     res += *p;
@@ -1523,7 +1550,7 @@ wxDateTime::ParseFormat(const wxString& date,
             case 0:             // the end of string
                 wxFAIL_MSG(wxT("unexpected format end"));
 
-                wxFALLTHROUGH;
+                // fall through
 
             default:            // not a known format spec
                 return false;
@@ -2126,7 +2153,8 @@ wxDateTime::ParseTime(const wxString& time, wxString::const_iterator *end)
         const wxString timeString = wxGetTranslation(stdTimes[n].name);
         if ( timeString.CmpNoCase(wxString(time, timeString.length())) == 0 )
         {
-            Set(stdTimes[n].hour, 0, 0);
+            // casts required by DigitalMars
+            Set(stdTimes[n].hour, wxDateTime_t(0), wxDateTime_t(0));
 
             if ( end )
                 *end = time.begin() + timeString.length();
@@ -2289,7 +2317,7 @@ wxString wxTimeSpan::Format(const wxString& format) const
             {
                 default:
                     wxFAIL_MSG( wxT("invalid format character") );
-                    wxFALLTHROUGH;
+                    // fall through
 
                 case wxT('%'):
                     str += ch;

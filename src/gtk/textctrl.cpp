@@ -1650,7 +1650,8 @@ GdkWindow *wxTextCtrl::GTKGetWindow(wxArrayGdkWindows& WXUNUSED(windows)) const
     else
     {
 #ifdef __WXGTK3__
-        return GTKFindWindow(m_text);
+        GdkWindow* wxGTKFindWindow(GtkWidget* widget);
+        return wxGTKFindWindow(m_text);
 #else
         return gtk_entry_get_text_window(GTK_ENTRY(m_text));
 #endif

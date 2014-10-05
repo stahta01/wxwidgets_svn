@@ -55,7 +55,6 @@
 #include "wx/fontenum.h"
 #include "wx/artprov.h"
 #include "wx/spinctrl.h"
-#include "wx/wupdlock.h"
 
 // what is considered "small index"?
 #define INDEX_IS_SMALL 1000
@@ -77,6 +76,11 @@ const wxCoord CONTENT_TREE_INDEX_MIN_WIDTH = 150;
 class wxHtmlHelpTreeItemData : public wxTreeItemData
 {
     public:
+#if defined(__VISAGECPP__)
+//  VA needs a default ctor for some reason....
+        wxHtmlHelpTreeItemData() : wxTreeItemData()
+            { m_Id = 0; }
+#endif
         wxHtmlHelpTreeItemData(int id) : wxTreeItemData()
             { m_Id = id;}
 
@@ -115,7 +119,7 @@ public:
         SetStandardFonts();
     }
 
-    virtual bool LoadPage(const wxString& location) wxOVERRIDE
+    virtual bool LoadPage(const wxString& location)
     {
         if ( !wxHtmlWindow::LoadPage(location) )
             return false;
@@ -398,6 +402,9 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
     if ( helpStyle & wxHF_CONTENTS )
     {
         wxWindow *dummy = new wxPanel(m_NavigNotebook, wxID_HTML_INDEXPAGE);
+#ifdef __WXMAC__
+        dummy->SetWindowVariant(wxWINDOW_VARIANT_NORMAL);
+#endif
         wxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 
         topsizer->Add(0, 10);
@@ -480,6 +487,9 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
     if ( helpStyle & wxHF_INDEX )
     {
         wxWindow *dummy = new wxPanel(m_NavigNotebook, wxID_HTML_INDEXPAGE);
+#ifdef __WXMAC__
+        dummy->SetWindowVariant(wxWINDOW_VARIANT_NORMAL);
+#endif
         wxSizer *topsizer = new wxBoxSizer(wxVERTICAL);
 
         dummy->SetSizer(topsizer);
@@ -520,6 +530,9 @@ bool wxHtmlHelpWindow::Create(wxWindow* parent, wxWindowID id,
     if ( helpStyle & wxHF_SEARCH )
     {
         wxWindow *dummy = new wxPanel(m_NavigNotebook, wxID_HTML_INDEXPAGE);
+#ifdef __WXMAC__
+        dummy->SetWindowVariant(wxWINDOW_VARIANT_NORMAL);
+#endif
         wxSizer *sizer = new wxBoxSizer(wxVERTICAL);
 
         dummy->SetSizer(sizer);
@@ -904,7 +917,7 @@ bool wxHtmlHelpWindow::KeywordSearch(const wxString& keyword,
         {
             default:
                 wxFAIL_MSG( wxT("unknown help search mode") );
-                wxFALLTHROUGH;
+                // fall back
 
             case wxHELP_SEARCH_ALL:
             {
@@ -1316,37 +1329,27 @@ void wxHtmlHelpWindow::OptionsDialog()
     //     are so that we can pass them to the dialog:
     if (m_NormalFace.empty())
     {
-        wxFont fnt(m_FontSize,
-                   wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+        wxFont fnt(m_FontSize, wxSWISS, wxNORMAL, wxNORMAL, false);
         m_NormalFace = fnt.GetFaceName();
     }
     if (m_FixedFace.empty())
     {
-        wxFont fnt(m_FontSize,
-                   wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+        wxFont fnt(m_FontSize, wxMODERN, wxNORMAL, wxNORMAL, false);
         m_FixedFace = fnt.GetFaceName();
     }
 
-    // Lock updates to the choice controls before inserting potentially many
-    // items into them until the end of this block.
-    {
-        wxWindowUpdateLocker lockNormalFont(dlg.NormalFont);
-        wxWindowUpdateLocker lockFixedFont(dlg.FixedFont);
-
-        for (i = 0; i < m_NormalFonts->GetCount(); i++)
-            dlg.NormalFont->Append((*m_NormalFonts)[i]);
-        for (i = 0; i < m_FixedFonts->GetCount(); i++)
-            dlg.FixedFont->Append((*m_FixedFonts)[i]);
-        if (!m_NormalFace.empty())
-            dlg.NormalFont->SetStringSelection(m_NormalFace);
-        else
-            dlg.NormalFont->SetSelection(0);
-        if (!m_FixedFace.empty())
-            dlg.FixedFont->SetStringSelection(m_FixedFace);
-        else
-            dlg.FixedFont->SetSelection(0);
-    }
-
+    for (i = 0; i < m_NormalFonts->GetCount(); i++)
+        dlg.NormalFont->Append((*m_NormalFonts)[i]);
+    for (i = 0; i < m_FixedFonts->GetCount(); i++)
+        dlg.FixedFont->Append((*m_FixedFonts)[i]);
+    if (!m_NormalFace.empty())
+        dlg.NormalFont->SetStringSelection(m_NormalFace);
+    else
+        dlg.NormalFont->SetSelection(0);
+    if (!m_FixedFace.empty())
+        dlg.FixedFont->SetStringSelection(m_FixedFace);
+    else
+        dlg.FixedFont->SetSelection(0);
     dlg.FontSize->SetValue(m_FontSize);
     dlg.UpdateTestWin();
 

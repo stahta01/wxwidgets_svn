@@ -285,8 +285,12 @@ public:
     /**
         Ensure that the item with the given index is currently shown.
 
-        This method scrolls the listbox only if necessary and doesn't do
-        anything if this item is already shown, unlike SetFirstItem().
+        Scroll the listbox if necessary.
+
+        This method is currently only implemented in wxGTK and wxOSX and does
+        nothing in other ports.
+
+        @see SetFirstItem()
      */
     virtual void EnsureVisible(int n);
 

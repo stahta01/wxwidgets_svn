@@ -125,7 +125,7 @@ bool wxChoice::Create( wxWindow *parent, wxWindowID id,
     {
         // if our m_strings != NULL, Append() will check for it and insert
         // items in the correct order
-        m_strings = new wxSortedArrayString(wxDictionaryStringSortAscending);
+        m_strings = new wxSortedArrayString;
     }
 
     // begin with no selection

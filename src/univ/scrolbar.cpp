@@ -1002,9 +1002,7 @@ bool wxStdScrollBarInputHandler::HandleMouse(wxInputConsumer *consumer,
             {
                 m_btnCapture = btn;
                 m_winCapture = consumer->GetInputWindow();
-
-                if ( !m_winCapture->HasCapture() )
-                    m_winCapture->CaptureMouse();
+                m_winCapture->CaptureMouse();
 
                 // generate the command
                 bool hasAction = true;
@@ -1067,8 +1065,7 @@ bool wxStdScrollBarInputHandler::HandleMouse(wxInputConsumer *consumer,
         {
             if ( m_winCapture )
             {
-                if ( m_winCapture->HasCapture() )
-                    StopScrolling(scrollbar);
+                StopScrolling(scrollbar);
 
                 // if we were dragging the thumb, send the last event
                 if ( m_htLast == wxHT_SCROLLBAR_THUMB )

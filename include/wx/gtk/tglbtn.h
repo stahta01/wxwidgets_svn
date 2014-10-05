@@ -45,11 +45,11 @@ public:
                 const wxString& name = wxCheckBoxNameStr);
 
     // Get/set the value
-    void SetValue(bool state) wxOVERRIDE;
-    bool GetValue() const wxOVERRIDE;
+    void SetValue(bool state);
+    bool GetValue() const;
 
     // Set the label
-    void SetLabel(const wxString& label) wxOVERRIDE;
+    void SetLabel(const wxString& label);
 
     static wxVisualAttributes
     GetClassDefaultAttributes(wxWindowVariant variant = wxWINDOW_VARIANT_NORMAL);
@@ -58,11 +58,11 @@ protected:
     void GTKDisableEvents();
     void GTKEnableEvents();
 
-    virtual wxSize DoGetBestSize() const wxOVERRIDE;
-    virtual void DoApplyWidgetStyle(GtkRcStyle *style) wxOVERRIDE;
+    virtual wxSize DoGetBestSize() const;
+    virtual void DoApplyWidgetStyle(GtkRcStyle *style);
 
 #if wxUSE_MARKUP
-    virtual bool DoSetLabelMarkup(const wxString& markup) wxOVERRIDE;
+    virtual bool DoSetLabelMarkup(const wxString& markup);
 #endif // wxUSE_MARKUP
 
 private:
@@ -108,7 +108,7 @@ public:
     wxDEPRECATED_INLINE( void SetLabel(const wxBitmap& bitmap),
        SetBitmapLabel(bitmap); )
     // prevent virtual function hiding
-    virtual void SetLabel(const wxString& label) wxOVERRIDE { wxToggleButton::SetLabel(label); }
+    virtual void SetLabel(const wxString& label) { wxToggleButton::SetLabel(label); }
 
 private:
     typedef wxToggleButtonBase base_type;

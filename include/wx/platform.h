@@ -32,9 +32,6 @@
 #    ifndef MAC_OS_X_VERSION_10_8
 #       define MAC_OS_X_VERSION_10_8 1080
 #    endif
-#    ifndef MAC_OS_X_VERSION_10_9
-#       define MAC_OS_X_VERSION_10_9 1090
-#    endif
 #    include "wx/osx/config_xcode.h"
 #    ifndef __WXOSX__
 #        define __WXOSX__ 1
@@ -295,8 +292,12 @@
 #    ifndef __DOS__
 #        define __DOS__
 #    endif
-    /* define it if it hadn't been done by configure yet */
+    /* size_t is the same as unsigned int for Watcom 11 compiler, */
+    /* so define it if it hadn't been done by configure yet */
 #    if !defined(wxSIZE_T_IS_UINT) && !defined(wxSIZE_T_IS_ULONG)
+#        ifdef __WATCOMC__
+#            define wxSIZE_T_IS_UINT
+#        endif
 #        ifdef __DJGPP__
 #            define wxSIZE_T_IS_ULONG
 #        endif
@@ -310,7 +311,7 @@
 #elif defined(__UNIX__) || defined(__unix) || defined(__unix__) || \
       defined(____SVR4____) || defined(__LINUX__) || defined(__sgi) || \
       defined(__hpux) || defined(sun) || defined(__SUN__) || defined(_AIX) || \
-      defined(__VMS) || defined(__BEOS__) || defined(__MACH__)
+      defined(__EMX__) || defined(__VMS) || defined(__BEOS__) || defined(__MACH__)
 
 #    define __UNIX_LIKE__
 
@@ -330,6 +331,9 @@
 #       endif
 #    endif  /* SGI */
 
+#    ifdef __EMX__
+#        define OS2EMX_PLAIN_CHAR
+#    endif
 #    if defined(__INNOTEK_LIBC__)
         /* Ensure visibility of strnlen declaration */
 #        define _GNU_SOURCE
@@ -364,6 +368,29 @@
 #            define wxSIZE_T_IS_ULONG
 #        endif
 #    endif
+
+/*
+   OS: OS/2
+ */
+#elif defined(__OS2__)
+
+    /* wxOS2 vs. non wxOS2 ports on OS2 platform */
+#    if !defined(__WXMOTIF__) && !defined(__WXGTK__) && !defined(__WXX11__)
+#        ifndef __WXPM__
+#            define __WXPM__
+#        endif
+#    endif
+
+#    if defined(__IBMCPP__)
+#        define __VISAGEAVER__ __IBMCPP__
+#    endif
+
+    /* Place other OS/2 compiler environment defines here */
+#    if defined(__VISAGECPP__)
+        /* VisualAge is the only thing that understands _Optlink */
+#        define LINKAGEMODE _Optlink
+#    endif
+#    define wxSIZE_T_IS_UINT
 
 /*
    OS: Windows
@@ -420,8 +447,10 @@
     _UNICODE macros as it includes _mingw.h which relies on them being set.
  */
 #if ( defined( __GNUWIN32__ ) || defined( __MINGW32__ ) || \
-    ( defined( __CYGWIN__ ) && defined( __WINDOWS__ ) ) ) && \
+    ( defined( __CYGWIN__ ) && defined( __WINDOWS__ ) ) || \
+      wxCHECK_WATCOM_VERSION(1,0) ) && \
     !defined(__DOS__) && \
+    !defined(__WXPM__) && \
     !defined(__WXMOTIF__) && \
     !defined(__WXX11__)
 #    include "wx/msw/gccpriv.h"
@@ -530,18 +559,31 @@
 #        ifndef MAC_OS_X_VERSION_10_8
 #           define MAC_OS_X_VERSION_10_8 1080
 #        endif
-#        ifndef MAC_OS_X_VERSION_10_9
-#           define MAC_OS_X_VERSION_10_9 1090
-#        endif
 #    else
 #        error "only mach-o configurations are supported"
 #    endif
 #endif
 
 /*
-    This is obsolete and kept for backwards compatibility only.
+    __WXOSX_OR_COCOA__ is a common define to wxOSX (Carbon or Cocoa) and wxCocoa ports under OS X.
+
+    DO NOT use this define in base library code.  Although wxMac has its own
+    private base library (and thus __WXOSX_OR_COCOA__,__WXMAC__ and related defines are
+    valid there), wxCocoa shares its library with other ports like wxGTK and wxX11.
+
+    To keep wx authors from screwing this up, only enable __WXOSX_OR_COCOA__ for wxCocoa when
+    not compiling the base library.  We determine this by first checking if
+    wxUSE_BASE is not defined.  If it is not defined, then we're not buildling
+    the base library, and possibly not building wx at all (but actually building
+    user code that's using wx). If it is defined then we must check to make sure
+    it is not true.  If it is true, we're building base.
+
+    If you want it in the common darwin base library then use __DARWIN__.  You
+    can use any Darwin-available libraries like CoreFoundation but please avoid
+    using OS X libraries like Carbon or CoreServices.
+
  */
-#if defined(__WXOSX__)
+#if defined(__WXOSX__) || (defined(__WXCOCOA__) && (!defined(wxUSE_BASE) || !wxUSE_BASE))
 #   define __WXOSX_OR_COCOA__ 1
 #endif
 
@@ -561,6 +603,9 @@
 #if defined(_MSC_VER) && (_MSC_VER >= 1310)
 #    undef wxUSE_IOSTREAMH
 #    define wxUSE_IOSTREAMH 0
+#elif defined(__DMC__) || defined(__WATCOMC__)
+#    undef wxUSE_IOSTREAMH
+#    define wxUSE_IOSTREAMH 1
 #elif defined(__MINGW32__)
 #    undef wxUSE_IOSTREAMH
 #    define wxUSE_IOSTREAMH 0

@@ -22,7 +22,6 @@
 #include "wx/propdlg.h"
 #include "wx/bookctrl.h"
 #include "wx/withimages.h"
-#include "wx/colourdata.h"
 
 #if wxUSE_HTML
 #include "wx/htmllbox.h"
@@ -242,20 +241,6 @@ public:
     /// Find a page by class
     wxWindow* FindPage(wxClassInfo* info) const;
 
-    /// Whether to restore the last-selected page.
-    static bool GetRestoreLastPage() { return sm_restoreLastPage; }
-    static void SetRestoreLastPage(bool b) { sm_restoreLastPage = b; }
-
-    /// The page identifier of the last page selected (not the control id)
-    static int GetLastPage() { return sm_lastPage; }
-    static void SetLastPage(int lastPage) { sm_lastPage = lastPage; }
-
-    /// Sets the custom colour data for use by the colour dialog.
-    static void SetColourData(const wxColourData& colourData) { sm_colourData = colourData; }
-
-    /// Returns the custom colour data for use by the colour dialog.
-    static wxColourData GetColourData() { return sm_colourData; }
-
 protected:
 
     wxRichTextAttr                              m_attributes;
@@ -264,14 +249,9 @@ protected:
     wxRichTextObject*                           m_object;
     wxArrayInt                                  m_pageIds; // mapping of book control indexes to page ids
     int                                         m_options; // UI options
-    bool                                        m_ignoreUpdates;
-    static wxColourData                         sm_colourData;
 
     static wxRichTextFormattingDialogFactory*   ms_FormattingDialogFactory;
     static bool                                 sm_showToolTips;
-
-    static bool                                 sm_restoreLastPage;
-    static int                                  sm_lastPage;
 
 DECLARE_EVENT_TABLE()
 };

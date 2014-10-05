@@ -54,6 +54,7 @@
 
 #include "wx/msw/private.h"
 #include "wx/msw/winundef.h"
+#include "wx/msw/mslu.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -63,12 +64,24 @@
 #endif
 
 #if wxUSE_RICHEDIT
+
+// old mingw32 has richedit stuff directly in windows.h and doesn't have
+// richedit.h at all
+#if !defined(__GNUWIN32_OLD__) || defined(__CYGWIN10__)
     #include <richedit.h>
     #include <richole.h>
-    #include "wx/msw/ole/oleutils.h"
+#endif
+
+#include "wx/msw/ole/oleutils.h"
+
 #endif // wxUSE_RICHEDIT
 
 #include "wx/msw/missing.h"
+
+// FIXME-VC6: This seems to be only missing from VC6 headers.
+#ifndef SPI_GETCARETWIDTH
+    #define SPI_GETCARETWIDTH 0x2006
+#endif
 
 #if wxUSE_DRAG_AND_DROP && wxUSE_RICHEDIT
 
@@ -156,7 +169,7 @@ class wxTextCtrlOleCallback : public IRichEditOleCallback
 {
 public:
     wxTextCtrlOleCallback(wxTextCtrl *text) : m_textCtrl(text), m_menu(NULL) {}
-    virtual ~wxTextCtrlOleCallback() { DeleteContextMenuObject(); }
+    ~wxTextCtrlOleCallback() { DeleteContextMenuObject(); }
 
     STDMETHODIMP ContextSensitiveHelp(BOOL WXUNUSED(enterMode)) { return E_NOTIMPL; }
     STDMETHODIMP DeleteObject(LPOLEOBJECT WXUNUSED(oleobj)) { return E_NOTIMPL; }
@@ -986,7 +999,7 @@ void wxTextCtrl::DoSetValue(const wxString& value, int flags)
     }
 }
 
-#if wxUSE_RICHEDIT && !wxUSE_UNICODE
+#if wxUSE_RICHEDIT && (!wxUSE_UNICODE || wxUSE_UNICODE_MSLU)
 
 // TODO: using memcpy() would improve performance a lot for big amounts of text
 
@@ -1048,11 +1061,20 @@ wxRichEditStreamOut(DWORD_PTR dwCookie, BYTE *buf, LONG cb, LONG *pcb)
 }
 
 
+#if wxUSE_UNICODE_MSLU
+    #define UNUSED_IF_MSLU(param)
+#else
+    #define UNUSED_IF_MSLU(param) param
+#endif
+
 bool
 wxTextCtrl::StreamIn(const wxString& value,
-                     wxFontEncoding encoding,
+                     wxFontEncoding UNUSED_IF_MSLU(encoding),
                      bool selectionOnly)
 {
+#if wxUSE_UNICODE_MSLU
+    const wchar_t *wpc = value.c_str();
+#else // !wxUSE_UNICODE_MSLU
     wxCSConv conv(encoding);
 
     const size_t len = conv.MB2WC(NULL, value.mb_str(), value.length());
@@ -1064,6 +1086,7 @@ wxTextCtrl::StreamIn(const wxString& value,
     wchar_t *wpc = wchBuf.data();
 
     conv.MB2WC(wpc, value.mb_str(), len + 1);
+#endif // wxUSE_UNICODE_MSLU
 
     // finally, stream it in the control
     EDITSTREAM eds;
@@ -1093,6 +1116,8 @@ wxTextCtrl::StreamIn(const wxString& value,
 
     return true;
 }
+
+#if !wxUSE_UNICODE_MSLU
 
 wxString
 wxTextCtrl::StreamOut(wxFontEncoding encoding, bool selectionOnly) const
@@ -1145,6 +1170,8 @@ wxTextCtrl::StreamOut(wxFontEncoding encoding, bool selectionOnly) const
     return out;
 }
 
+#endif // !wxUSE_UNICODE_MSLU
+
 #endif // wxUSE_RICHEDIT
 
 void wxTextCtrl::WriteText(const wxString& value)
@@ -1173,6 +1200,15 @@ void wxTextCtrl::DoWriteText(const wxString& value, int flags)
             GetSelection(&start, &end);
             SetStyle(start, end, m_defaultStyle);
         }
+
+#if wxUSE_UNICODE_MSLU
+        // RichEdit doesn't have Unicode version of EM_REPLACESEL on Win9x,
+        // but EM_STREAMIN works
+        if ( wxUsingUnicowsDll() && GetRichVersion() > 1 )
+        {
+           done = StreamIn(valueDos, wxFONTENCODING_SYSTEM, selectionOnly);
+        }
+#endif // wxUSE_UNICODE_MSLU
 
 #if !wxUSE_UNICODE
         // next check if the text we're inserting must be shown in a non
@@ -1438,6 +1474,16 @@ void wxTextCtrl::DoSetSelection(long from, long to, int flags)
         }
 #endif // wxUSE_RICHEDIT
     }
+}
+
+// ----------------------------------------------------------------------------
+// Working with files
+// ----------------------------------------------------------------------------
+
+bool wxTextCtrl::DoLoadFile(const wxString& file, int fileType)
+{
+    // This method is kept for ABI compatibility only.
+    return wxTextCtrlBase::DoLoadFile(file, fileType);
 }
 
 // ----------------------------------------------------------------------------
@@ -1792,41 +1838,6 @@ void wxTextCtrl::SetMaxLength(unsigned long len)
         wxTextEntry::SetMaxLength(len);
     }
 }
-
-#ifndef __WXWINCE__
-
-// ----------------------------------------------------------------------------
-// RTL support
-// ----------------------------------------------------------------------------
-
-void wxTextCtrl::SetLayoutDirection(wxLayoutDirection dir)
-{
-    // We only need to handle this specifically for plain EDIT controls, rich
-    // edit ones behave like any other window.
-    if ( IsRich() )
-    {
-        wxTextCtrlBase::SetLayoutDirection(dir);
-    }
-    else
-    {
-        if ( wxUpdateEditLayoutDirection(GetHwnd(), dir) )
-        {
-            // Update text layout by forcing the control to redo it, a simple
-            // Refresh() is not enough.
-            SendSizeEvent();
-            Refresh();
-        }
-    }
-}
-
-wxLayoutDirection wxTextCtrl::GetLayoutDirection() const
-{
-    // Just as above, we need to handle plain EDIT controls specially.
-    return IsRich() ? wxTextCtrlBase::GetLayoutDirection()
-                    : wxGetEditLayoutDirection(GetHwnd());
-}
-
-#endif // !__WXWINCE__
 
 // ----------------------------------------------------------------------------
 // Undo/redo
@@ -2611,11 +2622,6 @@ bool wxTextCtrl::SetForegroundColour(const wxColour& colour)
 
 bool wxTextCtrl::SetFont(const wxFont& font)
 {
-    // Native text control sends EN_CHANGE when the font changes, producing
-    // a wxEVT_TEXT event as if the user changed the value. This is not
-    // the case, so supress the event.
-    wxEventBlocker block(this, wxEVT_TEXT);
-
     if ( !wxTextCtrlBase::SetFont(font) )
         return false;
 

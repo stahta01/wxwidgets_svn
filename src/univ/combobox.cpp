@@ -270,12 +270,17 @@ wxComboBox::~wxComboBox()
 // wxComboBox methods forwarded to wxTextCtrl
 // ----------------------------------------------------------------------------
 
+wxString wxComboBox::DoGetValue() const
+{
+    return GetTextCtrl() ? GetTextCtrl()->GetValue() : m_valueString;
+}
+
 void wxComboBox::SetValue(const wxString& value)
 {
-    if ( HasFlag(wxCB_READONLY) )
-        SetStringSelection(value);
-    else
+    if ( GetTextCtrl() )
         GetTextCtrl()->SetValue(value);
+    else
+        m_valueString = value;
 }
 
 void wxComboBox::WriteText(const wxString& value)

@@ -80,19 +80,19 @@ public:
 
 #if wxUSE_VALIDATORS
     // Override the base functions to allow a validator to be assigned to this page.
-    virtual bool TransferDataToWindow() wxOVERRIDE
+    virtual bool TransferDataToWindow()
     {
         return GetValidator() ? GetValidator()->TransferToWindow()
                               : wxPanel::TransferDataToWindow();
     }
 
-    virtual bool TransferDataFromWindow() wxOVERRIDE
+    virtual bool TransferDataFromWindow()
     {
         return GetValidator() ? GetValidator()->TransferFromWindow()
                               : wxPanel::TransferDataFromWindow();
     }
 
-    virtual bool Validate() wxOVERRIDE
+    virtual bool Validate()
     {
         return GetValidator() ? GetValidator()->Validate(this)
                               : wxPanel::Validate();
@@ -165,8 +165,8 @@ public:
     }
 
     // base class pure virtuals
-    virtual wxWizardPage *GetPrev() const wxOVERRIDE;
-    virtual wxWizardPage *GetNext() const wxOVERRIDE;
+    virtual wxWizardPage *GetPrev() const;
+    virtual wxWizardPage *GetNext() const;
 
 private:
     // common part of ctors:
@@ -246,9 +246,9 @@ public:
     /// Override these functions to stop InitDialog from calling TransferDataToWindow
     /// for _all_ pages when the wizard starts. Instead 'ShowPage' will call
     /// TransferDataToWindow for the first page only.
-    bool TransferDataToWindow() wxOVERRIDE { return true; }
-    bool TransferDataFromWindow() wxOVERRIDE { return true; }
-    bool Validate() wxOVERRIDE { return true; }
+    bool TransferDataToWindow() { return true; }
+    bool TransferDataFromWindow() { return true; }
+    bool Validate() { return true; }
 
 private:
     wxDECLARE_NO_COPY_CLASS(wxWizardBase);
@@ -279,7 +279,7 @@ public:
 
     wxWizardPage*   GetPage() const { return m_page; }
 
-    virtual wxEvent *Clone() const wxOVERRIDE { return new wxWizardEvent(*this); }
+    virtual wxEvent *Clone() const { return new wxWizardEvent(*this); }
 
 private:
     bool m_direction;

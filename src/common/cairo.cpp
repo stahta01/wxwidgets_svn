@@ -228,6 +228,15 @@
        (cairo_surface_t *surface), (surface), -1) \
     wxCAIRO_PLATFORM_METHODS(m)
 
+    
+#if wxUSE_PANGO
+#define wxFOR_ALL_PANGO_CAIRO_VOIDMETHODS(m) \
+    m( pango_cairo_update_layout, \
+        (cairo_t *cr, PangoLayout *layout), (cr, layout) ) \
+    m( pango_cairo_show_layout, \
+        (cairo_t *cr, PangoLayout *layout), (cr, layout) )
+#endif
+
 #define wxCAIRO_DECLARE_TYPE(rettype, name, args, argnames, defret) \
    typedef rettype (*wxCAIRO_METHOD_TYPE(name)) args ; \
    wxCAIRO_METHOD_TYPE(name) wxDL_METHOD_NAME(name);
@@ -253,6 +262,8 @@ private:
 
     wxCairo();
     ~wxCairo();
+
+    bool IsOk();
 
     wxDynamicLibrary m_libCairo;
     wxDynamicLibrary m_libPangoCairo;
@@ -343,7 +354,7 @@ wxCairo::~wxCairo()
     if ( !ms_lib )
     {
         ms_lib = new wxCairo();
-        if ( !ms_lib->m_ok )
+        if ( !ms_lib->IsOk() )
         {
             delete ms_lib;
             ms_lib = NULL;
@@ -362,6 +373,11 @@ wxCairo::~wxCairo()
     }
 }
 
+bool wxCairo::IsOk()
+{
+    return m_ok;
+}
+
 // ============================================================================
 // implementation of the functions themselves
 // ============================================================================
@@ -371,7 +387,6 @@ bool wxCairoInit()
     return wxCairo::Initialize();
 }
 
-#ifndef __WXGTK__
 extern "C"
 {
 
@@ -388,12 +403,12 @@ extern "C"
 // we currently link directly to Cairo on GTK since it is usually available there,
 // so don't use our cairo_xyz wrapper functions until the decision is made to
 // always load Cairo dynamically there.
-
+#ifndef __WXGTK__
 wxFOR_ALL_CAIRO_VOIDMETHODS(wxIMPL_CAIRO_VOIDFUNC)
 wxFOR_ALL_CAIRO_METHODS(wxIMPL_CAIRO_FUNC)
+#endif
 
 } // extern "C"
-#endif // !__WXGTK__
 
 //----------------------------------------------------------------------------
 // wxCairoModule
@@ -403,8 +418,8 @@ class wxCairoModule : public wxModule
 {
 public:
     wxCairoModule() { }
-    virtual bool OnInit() wxOVERRIDE;
-    virtual void OnExit() wxOVERRIDE;
+    virtual bool OnInit();
+    virtual void OnExit();
 
 private:
     DECLARE_DYNAMIC_CLASS(wxCairoModule)

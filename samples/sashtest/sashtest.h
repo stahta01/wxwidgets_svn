@@ -14,14 +14,14 @@
 class MyApp: public wxApp
 {
   public:
-    bool OnInit(void) wxOVERRIDE;
+    bool OnInit(void);
 };
 
 class MyCanvas: public wxScrolledWindow
 {
   public:
     MyCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size);
-    virtual void OnDraw(wxDC& dc) wxOVERRIDE;
+    virtual void OnDraw(wxDC& dc);
     void OnEvent(wxMouseEvent& event);
 
     wxDECLARE_EVENT_TABLE();

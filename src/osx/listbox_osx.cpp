@@ -83,7 +83,7 @@ bool wxListBox::Create(
         return false;
 
     if ( IsSorted() )
-        m_strings.sorted = new wxSortedArrayString(wxDictionaryStringSortAscending);
+        m_strings.sorted = new wxSortedArrayString;
     else
         m_strings.unsorted = new wxArrayString;
 
@@ -191,9 +191,6 @@ void wxListBox::DoSetSelection(int n, bool select)
     m_blockEvents = false;
 
     UpdateOldSelections();
-
-    if (select)
-        EnsureVisible(n);
 }
 
 bool wxListBox::IsSelected(int n) const

@@ -341,7 +341,6 @@ wxBalloonNotifMsgImpl::DoShow(const wxString& title,
         // first place.
         delete ms_icon;
         ms_icon = NULL;
-        ms_refCountIcon = 0;
 
         return false;
     }

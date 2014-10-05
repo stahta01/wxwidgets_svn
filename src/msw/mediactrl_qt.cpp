@@ -101,7 +101,7 @@ typedef struct ComponentInstanceRecord * ComponentInstance;
 #define MovieController ComponentInstance
 
 #ifndef URLDataHandlerSubType
-#if defined(__MINGW32__)
+#if defined(__WATCOMC__) || defined(__MINGW32__)
 // use magic numbers for compilers which complain about multicharacter integers
 const OSType URLDataHandlerSubType     = 1970433056;
 const OSType VisualMediaCharacteristic = 1702454643;
@@ -690,7 +690,7 @@ bool wxQTMediaBackend::Load(const wxString& fileName)
     if (m_movie)
         Cleanup();
 
-    short movieResFile wxDUMMY_INITIALIZE(0);
+    short movieResFile = 0; //= 0 because of annoying VC6 warning
     FSSpec sfFile;
 
     OSErr err = m_lib.NativePathNameToFSSpec(
@@ -838,7 +838,7 @@ void wxQTMediaBackend::FinishLoad()
 
     // get the real size of the movie
     Rect outRect;
-    memset(&outRect, 0, sizeof(Rect));
+    memset(&outRect, 0, sizeof(Rect)); // suppress annoying VC6 warning
     m_lib.GetMovieNaturalBoundsRect (m_movie, &outRect);
     wxASSERT(m_lib.GetMoviesError() == noErr);
 

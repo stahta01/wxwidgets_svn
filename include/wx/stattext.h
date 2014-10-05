@@ -39,8 +39,8 @@ public:
     void Wrap(int width);
 
     // overridden base virtuals
-    virtual bool AcceptsFocus() const wxOVERRIDE { return false; }
-    virtual bool HasTransparentBackground() wxOVERRIDE { return true; }
+    virtual bool AcceptsFocus() const { return false; }
+    virtual bool HasTransparentBackground() { return true; }
 
     bool IsEllipsized() const
     {
@@ -52,7 +52,7 @@ public:
 protected:      // functions required for wxST_ELLIPSIZE_* support
 
     // choose the default border for this window
-    virtual wxBorder GetDefaultBorder() const wxOVERRIDE { return wxBORDER_NONE; }
+    virtual wxBorder GetDefaultBorder() const { return wxBORDER_NONE; }
 
     // Calls Ellipsize() on the real label if necessary. Unlike GetLabelText(),
     // keeps the mnemonics instead of removing them.
@@ -97,8 +97,10 @@ private:
     #include "wx/gtk1/stattext.h"
 #elif defined(__WXMAC__)
     #include "wx/osx/stattext.h"
-#elif defined(__WXQT__)
-    #include "wx/qt/stattext.h"
+#elif defined(__WXCOCOA__)
+    #include "wx/cocoa/stattext.h"
+#elif defined(__WXPM__)
+    #include "wx/os2/stattext.h"
 #endif
 
 #endif // !wxNO_PORT_STATTEXT_INCLUDE

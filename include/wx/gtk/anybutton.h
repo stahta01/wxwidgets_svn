@@ -23,7 +23,7 @@ public:
         m_isPressed = false;
     }
 
-    virtual bool Enable( bool enable = true ) wxOVERRIDE;
+    virtual bool Enable( bool enable = true );
 
     // implementation
     // --------------
@@ -39,11 +39,11 @@ public:
     void GTKReleased();
 
 protected:
-    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const wxOVERRIDE;
+    virtual GdkWindow *GTKGetWindow(wxArrayGdkWindows& windows) const;
 
-    virtual wxBitmap DoGetBitmap(State which) const wxOVERRIDE;
-    virtual void DoSetBitmap(const wxBitmap& bitmap, State which) wxOVERRIDE;
-    virtual void DoSetBitmapPosition(wxDirection dir) wxOVERRIDE;
+    virtual wxBitmap DoGetBitmap(State which) const;
+    virtual void DoSetBitmap(const wxBitmap& bitmap, State which);
+    virtual void DoSetBitmapPosition(wxDirection dir);
 
 private:
     typedef wxAnyButtonBase base_type;

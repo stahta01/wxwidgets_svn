@@ -239,7 +239,7 @@ SetBezelStyleFromBorderFlags(NSButton *v,
                 break;
 
             case wxBORDER_SIMPLE:
-                bezel = NSSmallSquareBezelStyle;
+                bezel = NSShadowlessSquareBezelStyle;
                 break;
 
             case wxBORDER_SUNKEN:
@@ -249,14 +249,14 @@ SetBezelStyleFromBorderFlags(NSButton *v,
 
             default:
                 wxFAIL_MSG( "Unknown border style" );
-                wxFALLTHROUGH;
+                // fall through
 
             case 0:
             case wxBORDER_STATIC:
             case wxBORDER_RAISED:
             case wxBORDER_THEME:
                 bezel = isSimpleText ? NSRoundedBezelStyle
-                                     : NSSmallSquareBezelStyle;
+                                     : NSRegularSquareBezelStyle;
                 break;
         }
 
@@ -482,7 +482,7 @@ public :
     {
     }
 
-    virtual void controlAction(WXWidget slf, void* _cmd, void *sender) wxOVERRIDE
+    virtual void controlAction(WXWidget slf, void* _cmd, void *sender)
     {
         wxDisclosureNSButton* db = (wxDisclosureNSButton*)m_osxView;
         [db toggle];
